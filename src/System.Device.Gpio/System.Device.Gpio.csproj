@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>This experimental package allows projects to access GPIO pins for the BCM2835 as used on Raspberry Pi.</Description>
+    <Copyright>Microsoft Corporation, All rights reserved.</Copyright>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageTags>.NET Core GPIO Pins BCM2835 Raspberry Pi IoT</PackageTags>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Documentation\GPIORef.cs" />
+    <Compile Remove="Documentation\GPIOSamples.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Documentation\GPIORef.cs" />
+    <None Include="Documentation\GPIOSamples.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="winmd\**" />
+    <EmbeddedResource Remove="winmd\**" />
+    <None Remove="winmd\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Windows.Devices">
+      <HintPath>winmd\Windows.Devices.winmd</HintPath>
+      <IsWinMDFile>true</IsWinMDFile>
+    </Reference>
+    <Reference Include="Windows.Foundation">
+      <HintPath>winmd\Windows.Foundation.winmd</HintPath>
+      <IsWinMDFile>true</IsWinMDFile>
+    </Reference>
+  </ItemGroup>
+</Project>
