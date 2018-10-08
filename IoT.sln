@@ -5,6 +5,18 @@ VisualStudioVersion = 15.0.28113.53
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Device.Gpio", "src\System.Device.Gpio\System.Device.Gpio.csproj", "{7B6459D2-12FB-404A-8A0E-7EFBF9B6A01F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "led-blink", "samples\led-blink\led-blink.csproj", "{E83B20B8-B024-4A10-9315-A23B4C58BFFF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "led-more-blinking-lights", "samples\led-more-blinking-lights\led-more-blinking-lights.csproj", "{53B48D1D-B33E-438A-ACC8-4D0883A76F5C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "trimpot", "samples\trimpot\trimpot.csproj", "{9588B74A-CC0E-4203-8DE4-3ADCB0F7DACA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{216F0CA6-B99D-49AA-814E-2A1B5D7DC4C6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3E92214F-4190-4154-A0DA-CFDCE396DBEA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "System.Device.Gpio", "System.Device.Gpio", "{7AC384A7-051B-4D84-9780-BB1409B74DBA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +27,28 @@ Global
 		{7B6459D2-12FB-404A-8A0E-7EFBF9B6A01F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B6459D2-12FB-404A-8A0E-7EFBF9B6A01F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B6459D2-12FB-404A-8A0E-7EFBF9B6A01F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E83B20B8-B024-4A10-9315-A23B4C58BFFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E83B20B8-B024-4A10-9315-A23B4C58BFFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E83B20B8-B024-4A10-9315-A23B4C58BFFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E83B20B8-B024-4A10-9315-A23B4C58BFFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53B48D1D-B33E-438A-ACC8-4D0883A76F5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53B48D1D-B33E-438A-ACC8-4D0883A76F5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53B48D1D-B33E-438A-ACC8-4D0883A76F5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53B48D1D-B33E-438A-ACC8-4D0883A76F5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9588B74A-CC0E-4203-8DE4-3ADCB0F7DACA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9588B74A-CC0E-4203-8DE4-3ADCB0F7DACA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9588B74A-CC0E-4203-8DE4-3ADCB0F7DACA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9588B74A-CC0E-4203-8DE4-3ADCB0F7DACA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7B6459D2-12FB-404A-8A0E-7EFBF9B6A01F} = {7AC384A7-051B-4D84-9780-BB1409B74DBA}
+		{E83B20B8-B024-4A10-9315-A23B4C58BFFF} = {216F0CA6-B99D-49AA-814E-2A1B5D7DC4C6}
+		{53B48D1D-B33E-438A-ACC8-4D0883A76F5C} = {216F0CA6-B99D-49AA-814E-2A1B5D7DC4C6}
+		{9588B74A-CC0E-4203-8DE4-3ADCB0F7DACA} = {216F0CA6-B99D-49AA-814E-2A1B5D7DC4C6}
+		{7AC384A7-051B-4D84-9780-BB1409B74DBA} = {3E92214F-4190-4154-A0DA-CFDCE396DBEA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4843B4E1-7FE9-4733-8250-275DB7641858}
