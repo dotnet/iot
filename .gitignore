@@ -25,8 +25,9 @@ bld/
 [Oo]bj/
 [Ll]og/
 
-# .Net CLI restore location
+# .Net CLI restore location and packages
 .dotnet/
+.packages/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
