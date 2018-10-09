@@ -55,7 +55,7 @@ public class Volume
             return (true, sleep);
         }
 
-        var factor = 5 - tenth;
+        double factor = 5 - tenth;
         factor = factor * 2;
         factor = Math.Abs(factor);
 
@@ -63,13 +63,11 @@ public class Volume
 
         if (tenth < 5)
         {
-            newValue = sleep * factor;
+            factor = 1 / factor;
         }
-        else 
-        {
-            newValue = sleep / factor;
-        }
-
+        
+        newValue = (int)(sleep / factor);
+  
         if (newValue >=10 && newValue <=1000)
         {
             return (true,newValue);
