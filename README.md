@@ -15,6 +15,7 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 * [x] Support protocols, phase 1: GPIO, SPI, and I2C.
 * [ ] Support protocols, phase 2: serial port.
 * [ ] Support protocols, phase 3: PWM.
+* [ ] Support protocols, phase 4: I2S.
 * [x] Support Linux.
 * [ ] Support Windows 10 IoT Core.
 * [ ] Provide dockerfiles for all samples
@@ -24,6 +25,8 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 * [ ] Support ARM64
 * [ ] Stabilize System.Device.* API
 * [ ] Publish System.Device.* API to NuGet.org
+* [ ] Provide device bindings for LED matrices
+* [ ] Provide device bindings for LCD panels
 
 ## Install .NET Core
 
@@ -38,7 +41,7 @@ Please contribute. We are primarily interested in the following:
 * Implementations for additional boards
 * [.NET device bindings](src/devices) for a wide variety of sensors, chips, displays and other components.
 * Links to blog posts or tweets that showcase .NET Core being used for great IoT scenarios (file an issue).
-* Request a device binding that you need for your project (file an issue).
+* Request a device binding or protocol that you need for your project (file an issue).
 
 ## License
 
