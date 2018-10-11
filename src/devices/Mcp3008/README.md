@@ -1,4 +1,4 @@
-# Using MCP3008
+# Using MCP3008 (10-bit Analog to Digital Converter)
 
 Some devices like the Rasperry Pi cannot read analog values directly so rely on  [analog to digital converters](https://en.wikipedia.org/wiki/Analog-to-digital_converter), like the [MCP3008 ADC](https://www.adafruit.com/product/856). The MCP3008 supports the SPI interface. The 10-bit chip can be accessed as an [SPI device](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface) or manually via raw GPIO pins.
 
