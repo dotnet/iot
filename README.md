@@ -22,7 +22,7 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 * [ ] Support x64
 * [x] Support ARM32
 * [ ] Support ARM64
-* [ ] Stabalize System.Device.* API
+* [ ] Stabilize System.Device.* API
 * [ ] Publish System.Device.* API to NuGet.org
 
 ## Install .NET Core
@@ -38,6 +38,7 @@ Please contribute. We are primarily interested in the following:
 * Implementations for additional boards
 * [.NET device bindings](src/devices) for a wide variety of sensors, chips, displays and other components.
 * Links to blog posts or tweets that showcase .NET Core being used for great IoT scenarios (file an issue).
+* Request a device binding that you need for your project (file an issue).
 
 ## License
 
