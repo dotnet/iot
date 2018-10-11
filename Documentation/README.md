@@ -7,6 +7,7 @@ See the following resources to get started.
 * [.NET Core documentation](https://docs.microsoft.com/dotnet/)
 * [Install .NET Core on Raspberry Pi](https://github.com/dotnet/core/blob/master/samples/RaspberryPiInstructions.md)
 * [.NET Core ARM64 Status](https://github.com/dotnet/announcements/issues/82)
+* [.NET Core Docker Samples](https://github.com/dotnet/dotnet-docker/tree/master/samples)
 
 ## Raspberry Pi
 
