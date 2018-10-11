@@ -6,7 +6,7 @@ This repository contains the [System.Device.Gpio](https://dotnet.myget.org/feed/
 
 It also contains a growing set of community-maintained [device bindings](src/devices/README.md) for IoT components.
 
-Note: System.Device.Gpio is in early preview. It is not yet supported and will continue to change.
+Note: System.Device.Gpio is in early preview. It is not yet supported and will continue to change. It is currently published to myget (requires use of [nuget.config](samples/nuget.config)).
 
 ## Roadmap
 
