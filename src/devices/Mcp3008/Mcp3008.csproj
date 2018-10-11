@@ -1,16 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Devices.Gpio" Version="0.1.0-preview2-181011-1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\devices\Mcp3008\Mcp3008.csproj" />
   </ItemGroup>
 
 </Project>
