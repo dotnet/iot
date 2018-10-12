@@ -12,19 +12,19 @@ Note: System.Device.Gpio is in early preview. It is not yet supported and will c
 
 We have the following deliverables on our intermediate-term roadmap (not in order of completion):
 
-* [x] Support protocols, phase 1: GPIO, SPI, and I2C.
-* [ ] Support protocols, phase 2: serial port.
-* [ ] Support protocols, phase 3: PWM.
-* [ ] Support protocols, phase 4: I2S.
+* [x] Support protocols: GPIO, SPI, and I2C.
+* [ ] Support protocols: PWM.
+* [ ] Support protocols: serial port.
+* [ ] Support protocols: I2S.
 * [x] Support Linux.
 * [ ] Support Windows 10 IoT Core.
+* [ ] Stabilize System.Device.* API
+* [ ] Publish System.Device.* API to NuGet.org
 * [ ] Provide dockerfiles for all samples
 * [ ] Publish Docker images for a subset of samples
 * [ ] Support x64
 * [x] Support ARM32
 * [ ] Support ARM64
-* [ ] Stabilize System.Device.* API
-* [ ] Publish System.Device.* API to NuGet.org
 * [ ] Provide device bindings for LED matrices
 * [ ] Provide device bindings for LCD panels
 
