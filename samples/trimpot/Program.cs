@@ -2,6 +2,7 @@
 using System.Devices.Gpio;
 using System.Devices.Spi;
 using System.Threading;
+using Iot.Device;
 
 namespace trimpot
 {

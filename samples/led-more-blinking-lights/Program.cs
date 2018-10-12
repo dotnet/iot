@@ -15,6 +15,8 @@ namespace led_more_blinking_lights
             var pinTwo = 21;
             var pinThree = 20;
             var pinFour = 26;
+            var buttonSleep = 50;
+            var volumeSleep = 50;
 
             // volume support
             var initialSleep = 100;
@@ -93,7 +95,7 @@ namespace led_more_blinking_lights
                         if (update)
                         {
                             sleep = value;
-                            Thread.Sleep(50);
+                            Thread.Sleep(volumeSleep);
                         }
                     }
                 }
@@ -104,7 +106,7 @@ namespace led_more_blinking_lights
                     ledOne.Write(PinValue.High);
                     ledTwo.Write(PinValue.High);
                     ledThree.Write(PinValue.High);
-                    Thread.Sleep(50);
+                    Thread.Sleep(buttonSleep);
                 }
 
                 Console.WriteLine($"Sleep: {sleep}");
