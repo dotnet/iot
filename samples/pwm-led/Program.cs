@@ -12,7 +12,7 @@ namespace pwm_led
             // GPIO pin 18 maps to chip 0 channel 0 on the Raspberry pi
             int pwmChannel = 0;
             int pwmChip = 0;
-            int pwmPeriod = (int)((1f/800f)*100000000); // Setting the period to 800 Mhgz
+            int pwmPeriod = (int)((1f/800f)*1_000_000_000); // Setting the period to 800 MHz
             int pwm80PercentFrequency = (int)(pwmPeriod*0.8f); // Frequency at 80%
             int pwm40PercentFrequency = (int)(pwmPeriod*0.4f); // Frequency at 40%
 
