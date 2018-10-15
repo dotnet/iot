@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Device.Gpio;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -200,6 +201,12 @@ namespace System.Devices.Gpio
         {
             ValidatePinNumber(gpioPinNumber);
             Initialize();
+        }
+
+        protected internal override void OpenPWMPin(int chip, int channel)
+        {
+            // ToDo: Add validation for chip and channel.
+            // ToDo: Add initialization setup required for PWM if it is not done already.
         }
 
         protected internal override void ClosePin(int gpioPinNumber)
@@ -950,6 +957,16 @@ namespace System.Devices.Gpio
             {
                 throw new ArgumentOutOfRangeException(nameof(gpioPinNumber));
             }
+        }
+
+        protected internal override void ClosePWMPin(int chip, int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected internal override void PWMWrite(int chip, int channel, PWMMode mode, int period, int dutyCycle)
+        {
+            throw new NotImplementedException();
         }
 
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]

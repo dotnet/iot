@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Device.Gpio;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -93,9 +94,11 @@ namespace System.Devices.Gpio
         #endregion
 
         private const string GpioPath = "/sys/class/gpio";
+        private const string PWMPath = "/sys/class/pwm";
 
         private readonly int _pinCount;
         private readonly IList<int> _exportedPins;
+        private readonly IList<Tuple<int,int>> _exportedPWMChannels;
 
         private int _pollFileDescriptor = -1;
         private IDictionary<int, int> _pinValueFileDescriptors;
@@ -116,6 +119,7 @@ namespace System.Devices.Gpio
         {
             _pinCount = pinCount;
             _exportedPins = new List<int>();
+            _exportedPWMChannels = new List<Tuple<int,int>>();
             _pinsToDetectEvents = new List<int>();
             _debounceTimeouts = new Dictionary<int, TimeSpan>();
             _lastEvents = new Dictionary<int, DateTime>();
@@ -143,6 +147,11 @@ namespace System.Devices.Gpio
             {
                 int gpioPinNumber = _exportedPins[0];
                 UnexportPin(gpioPinNumber);
+            }
+
+            while (_exportedPWMChannels.Count > 0)
+            {
+                UnexportPWMPin(_exportedPWMChannels[0].Item1, _exportedPWMChannels[1].Item2);
             }
         }
 
@@ -184,6 +193,12 @@ namespace System.Devices.Gpio
             ExportPin(gpioPinNumber);
         }
 
+        protected internal override void OpenPWMPin(int chip, int channel)
+        {
+            ValidatePWMChannel(chip, channel);
+            ExportPWMChannel(chip, channel);
+        }
+
         protected internal override void ClosePin(int gpioPinNumber)
         {
             ValidatePinNumber(gpioPinNumber);
@@ -192,6 +207,12 @@ namespace System.Devices.Gpio
             _debounceTimeouts.Remove(gpioPinNumber);
             _lastEvents.Remove(gpioPinNumber);
             UnexportPin(gpioPinNumber);
+        }
+
+        protected internal override void ClosePWMPin(int chip, int channel)
+        {
+            ValidatePWMChannel(chip, channel);
+            UnexportPWMPin(chip, channel);
         }
 
         protected internal override PinMode GetPinMode(int gpioPinNumber)
@@ -232,6 +253,28 @@ namespace System.Devices.Gpio
             string valuePath = $"{GpioPath}/gpio{gpioPinNumber}/value";
             string stringValue = PinValueToStringValue(value);
             File.WriteAllText(valuePath, stringValue);
+        }
+
+        protected internal override void PWMWrite(int chip, int channel, PWMMode mode, int period, int dutyCycle)
+        {
+            if (mode == PWMMode.Serial) // Unix driver only supports balanced pwm mode.
+            {
+                throw new NotSupportedException("The selected PWMMode is not supported by this driver. Please select the Balanced mode.");
+            }
+            if (dutyCycle > period) // Duty cycle must always be equal to or less than period.
+            {
+                throw new ArgumentException("Duty cycle must be less than period.");
+            }
+            ValidatePWMChannel(chip, channel); // Ensure that the chip is valid and that it supports the channel
+
+            string periodPath = Path.Combine(PWMPath, $"pwmchip{chip}", $"pwm{channel}", "period");
+            File.WriteAllText(periodPath, Convert.ToString(period)); // Set the period. Must happen first in case duty_cycle is higher than current period.
+            
+            string dutyCyclePath = Path.Combine(PWMPath, $"pwmchip{chip}", $"pwm{channel}", "duty_cycle");
+            File.WriteAllText(dutyCyclePath, Convert.ToString(dutyCycle)); // Set the duty cycle.
+            
+            string enablePath = Path.Combine(PWMPath, $"pwmchip{chip}", $"pwm{channel}", "enable");
+            File.WriteAllText(enablePath, "1"); // Enable PWM.
         }
 
         protected internal override void SetDebounce(int gpioPinNumber, TimeSpan timeout)
@@ -523,6 +566,34 @@ namespace System.Devices.Gpio
 
         #region Private Methods
 
+        private void ValidatePWMChip(int chipNumber)
+        {
+            string chipPath = Path.Combine(PWMPath, $"pwmchip{chipNumber}");
+            if (!Directory.Exists(chipPath))
+            {
+                throw new ArgumentException($"The chip number {chipNumber} is invalid or is not enabled.");
+            }
+        }
+
+        private void ValidatePWMChannel(int chipNumber, int channel)
+        {
+            ValidatePWMChip(chipNumber);
+            string chipPath = Path.Combine(PWMPath, $"pwmchip{chipNumber}");
+            string supportedChannels = File.ReadAllText(Path.Combine(chipPath, "npwm"));
+            int numSupportedChannels;
+            if (int.TryParse(supportedChannels, out numSupportedChannels))
+            {
+                if (chipNumber < 0 || chipNumber >= numSupportedChannels)
+                {
+                    throw new ArgumentException($"The pwm chip {chipNumber} does not support the channel {channel}");
+                }
+            }
+            else
+            {
+                throw new GpioException($"Unable to parse the number of supported channels at {Path.Combine(chipPath, "npwm")}");
+            }
+        }
+
         private void ExportPin(int gpioPinNumber)
         {
             string pinPath = $"{GpioPath}/gpio{gpioPinNumber}";
@@ -535,6 +606,18 @@ namespace System.Devices.Gpio
             _exportedPins.Add(gpioPinNumber);
         }
 
+        private void ExportPWMChannel(int chip, int channel)
+        {
+            string channelPath = Path.Combine(PWMPath, $"pwmchip{chip}", $"pwm{channel}");
+            
+            if (!Directory.Exists(channelPath))
+            {
+                File.WriteAllText(Path.Combine(PWMPath, $"pwmchip{chip}", "export"), Convert.ToString(channel));
+            }
+
+            _exportedPWMChannels.Add(new Tuple<int,int>(chip, channel));
+        }
+
         private void UnexportPin(int gpioPinNumber)
         {
             string pinPath = $"{GpioPath}/gpio{gpioPinNumber}";
@@ -545,6 +628,17 @@ namespace System.Devices.Gpio
             }
 
             _exportedPins.Remove(gpioPinNumber);
+        }
+
+        private void UnexportPWMPin(int chip, int channel)
+        {
+            string channelPath = Path.Combine(PWMPath, $"pwmchip{chip}", $"pwm{channel}");
+
+            if (Directory.Exists(channelPath))
+            {
+                File.WriteAllText(Path.Combine(PWMPath, $"pwmchip{chip}", "unexport"), Convert.ToString(channel));
+            }
+            _exportedPWMChannels.Remove(new Tuple<int, int>(chip, channel));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

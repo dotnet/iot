@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Device.Gpio;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -137,6 +138,11 @@ namespace System.Devices.Gpio
             }
         }
 
+        protected internal override void OpenPWMPin(int chip, int channel)
+        {
+            // Add validation and required code to open the pin
+        }
+
         protected internal override void Output(int gpioPinNumber, PinValue value)
         {
             VerifyPinIsInValidRange(gpioPinNumber, nameof(gpioPinNumber));
@@ -207,6 +213,16 @@ namespace System.Devices.Gpio
             pin.ValueChanged -= handler;
 
             return result;
+        }
+
+        protected internal override void ClosePWMPin(int chip, int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected internal override void PWMWrite(int chip, int channel, PWMMode mode, int period, int dutyCycle)
+        {
+            throw new NotImplementedException();
         }
 
         #region Private Implementation

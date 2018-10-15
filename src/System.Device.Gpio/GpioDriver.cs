@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Device.Gpio;
+
 namespace System.Devices.Gpio
 {
     public abstract class GpioDriver : IDisposable
@@ -16,13 +18,19 @@ namespace System.Devices.Gpio
 
         protected internal abstract void OpenPin(int gpioPinNumber);
 
+        protected internal abstract void OpenPWMPin(int chip, int channel);
+
         protected internal abstract void ClosePin(int gpioPinNumber);
+
+        protected internal abstract void ClosePWMPin(int chip, int channel);
 
         protected internal abstract void SetPinMode(int gpioPinNumber, PinMode mode);
 
         protected internal abstract PinMode GetPinMode(int gpioPinNumber);
 
         protected internal abstract void Output(int gpioPinNumber, PinValue value);
+
+        protected internal abstract void PWMWrite(int chip, int channel, PWMMode mode, int period, int dutyCycle);
 
         protected internal abstract PinValue Input(int gpioPinNumber);
 
