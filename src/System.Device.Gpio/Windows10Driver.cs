@@ -11,7 +11,7 @@ using System.Threading;
 using GpioPinValueChangedHandler = global::Windows.Foundation.TypedEventHandler<global::Windows.Devices.Gpio.GpioPin, global::Windows.Devices.Gpio.GpioPinValueChangedEventArgs>;
 using WinGpio = global::Windows.Devices.Gpio;
 
-namespace System.Devices.Gpio
+namespace System.Device.Gpio
 {
     public class Windows10Driver : GpioDriver
     {

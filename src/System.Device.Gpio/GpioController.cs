@@ -7,7 +7,7 @@ using System.Device.Gpio;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace System.Devices.Gpio
+namespace System.Device.Gpio
 {
     public class GpioController : IDisposable
     {

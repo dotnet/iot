@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace System.Devices.Gpio
+namespace System.Device.Gpio
 {
     public unsafe class RaspberryPiDriver : GpioDriver
     {
