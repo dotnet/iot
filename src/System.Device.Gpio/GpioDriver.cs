@@ -4,7 +4,7 @@
 
 using System.Device.Gpio;
 
-namespace System.Devices.Gpio
+namespace System.Device.Gpio
 {
     public abstract class GpioDriver : IDisposable
     {

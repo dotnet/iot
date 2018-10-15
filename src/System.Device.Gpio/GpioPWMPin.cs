@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Devices.Gpio;
 using System.Text;
 
 namespace System.Device.Gpio

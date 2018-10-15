@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.Gpio;
-using System.Devices.Gpio;
 using System.Threading;
 
 namespace pwm_led

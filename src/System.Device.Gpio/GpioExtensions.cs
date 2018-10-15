@@ -4,7 +4,7 @@
 
 using System.Runtime.CompilerServices;
 
-namespace System.Devices.Gpio
+namespace System.Device.Gpio
 {
     public static class GpioExtensions
     {

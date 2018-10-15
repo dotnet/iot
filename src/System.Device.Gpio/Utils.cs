@@ -5,7 +5,7 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace System.Devices.Gpio
+namespace System.Device.Gpio
 {
     internal static class Utils
     {
