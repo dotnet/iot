@@ -4,9 +4,18 @@
 
 namespace System.Device.Gpio
 {
+    /// <summary>
+    /// Represents a value for a pin.
+    /// </summary>
     public enum PinValue
     {
+        /// <summary>
+        /// Low value meaning no current.
+        /// </summary>
         Low = 0,
+        /// <summary>
+        /// High value maning current.
+        /// </summary>
         High = 1
     }
 }
