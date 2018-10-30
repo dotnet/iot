@@ -4,11 +4,16 @@
 
 namespace System.Device.Gpio
 {
-    public enum PinMode
+    public class GpioException : Exception
     {
-        Input,
-        Output,
-        InputPullDown,
-        InputPullUp
+        public GpioException() : base()
+        {
+
+        }
+
+        public GpioException(string message) : base(message)
+        {
+
+        }
     }
 }

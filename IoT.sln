@@ -17,8 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3E92214F-419
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "System.Device.Gpio", "System.Device.Gpio", "{7AC384A7-051B-4D84-9780-BB1409B74DBA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pwm-led", "samples\pwm-led\pwm-led.csproj", "{E84D3BE3-4885-4A4C-8368-6C627A164D60}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,10 +39,6 @@ Global
 		{9588B74A-CC0E-4203-8DE4-3ADCB0F7DACA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9588B74A-CC0E-4203-8DE4-3ADCB0F7DACA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9588B74A-CC0E-4203-8DE4-3ADCB0F7DACA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E84D3BE3-4885-4A4C-8368-6C627A164D60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E84D3BE3-4885-4A4C-8368-6C627A164D60}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E84D3BE3-4885-4A4C-8368-6C627A164D60}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E84D3BE3-4885-4A4C-8368-6C627A164D60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,7 +49,6 @@ Global
 		{53B48D1D-B33E-438A-ACC8-4D0883A76F5C} = {216F0CA6-B99D-49AA-814E-2A1B5D7DC4C6}
 		{9588B74A-CC0E-4203-8DE4-3ADCB0F7DACA} = {216F0CA6-B99D-49AA-814E-2A1B5D7DC4C6}
 		{7AC384A7-051B-4D84-9780-BB1409B74DBA} = {3E92214F-4190-4154-A0DA-CFDCE396DBEA}
-		{E84D3BE3-4885-4A4C-8368-6C627A164D60} = {216F0CA6-B99D-49AA-814E-2A1B5D7DC4C6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4843B4E1-7FE9-4733-8250-275DB7641858}
