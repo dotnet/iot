@@ -25,8 +25,6 @@ namespace System.Device.Gpio
         }
         private GpioDriver _driver;
         private HashSet<int> _openPins;
-        private static GpioController _controllerInstance = null;
-        private static readonly object _lock = new object();
         private const string _cpuInfoPath = "/proc/cpuinfo";
         private const string _raspberryPiHardware = "BCM2835";
         private const string _hummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
@@ -59,11 +57,7 @@ namespace System.Device.Gpio
         /// <returns>A GpioController instance</returns>
         public static GpioController GetController()
         {
-            if (_controllerInstance == null)
-            {
-                return GetController(PinNumberingScheme.Logical);
-            }
-            return _controllerInstance;
+            return GetController(PinNumberingScheme.Logical);
         }
 
         /// <summary>
@@ -73,40 +67,29 @@ namespace System.Device.Gpio
         /// <returns>A GpioController instance</returns>
         public static GpioController GetController(PinNumberingScheme numberingScheme)
         {
-            if (_controllerInstance == null)
+            GpioDriver driver;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                GpioDriver driver;
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                driver = new Windows10Driver();
+            }
+            else
+            {
+                BoardType boardType = GetBoardHardware();
+                switch (boardType)
                 {
-                    driver = new Windows10Driver();
-                }
-                else
-                {
-                    BoardType boardType = GetBoardHardware();
-                    switch (boardType)
-                    {
-                        case BoardType.RaspberryPi3:
-                            driver = new RaspberryPi3Driver();
-                            break;
-                        case BoardType.Hummingboard:
-                            driver = new HummingboardDriver();
-                            break;
-                        case BoardType.Unknown:
-                        default:
-                            driver = new UnixDriver();
-                            break;
-                    }
-                }
-                if (_controllerInstance == null)
-                {
-                    return GetController(driver, numberingScheme);
+                    case BoardType.RaspberryPi3:
+                        driver = new RaspberryPi3Driver();
+                        break;
+                    case BoardType.Hummingboard:
+                        driver = new HummingboardDriver();
+                        break;
+                    case BoardType.Unknown:
+                    default:
+                        driver = new UnixDriver();
+                        break;
                 }
             }
-            if (numberingScheme != _controllerInstance.NumberingScheme)
-            {
-                throw new GpioException("There is a controller instance that uses a different numbering scheme already opened.");
-            }
-            return _controllerInstance;
+            return GetController(driver, numberingScheme);
         }
 
         /// <summary>
@@ -117,26 +100,7 @@ namespace System.Device.Gpio
         /// <returns>A GpioController instance</returns>
         public static GpioController GetController(GpioDriver driver, PinNumberingScheme numberingScheme)
         {
-            if (_controllerInstance == null)
-            {
-                lock (_lock)
-                {
-                    if (_controllerInstance == null)
-                    {
-                        _controllerInstance = new GpioController(driver, numberingScheme);
-                    }
-                }
-            }
-            // Check if the singleton instance matches the parameters that where passed in.
-            if (driver.GetType() != _controllerInstance._driver.GetType())
-            {
-                throw new GpioException("There is a controller instance that uses a different driver already opened..");
-            }
-            if (numberingScheme != _controllerInstance.NumberingScheme)
-            {
-                throw new GpioException("There is a controller instance that uses a different numbering scheme already opened.");
-            }
-            return _controllerInstance;
+            return new GpioController(driver, numberingScheme);
         }
 
         /// <summary>
