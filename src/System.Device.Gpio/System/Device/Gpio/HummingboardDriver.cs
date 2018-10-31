@@ -8,51 +8,51 @@ using System.Text;
 
 namespace System.Device.Gpio
 {
-    public class HummingboardDriver : GpioDriver
+    internal class HummingboardDriver : IGpioDriver
     {
-        protected internal override int PinCount => throw new NotImplementedException();
+        public int PinCount => throw new NotImplementedException();
 
-        public override void Dispose()
+        public void ClosePin(int pinNumber)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override void ClosePin(int pinNumber)
+        public int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
+        public void Dispose()
         {
             throw new NotImplementedException();
         }
 
-        protected internal override bool isPinModeSupported(int pinNumber, PinMode mode)
+        public bool isPinModeSupported(int pinNumber, PinMode mode)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override void OpenPin(int pinNumber)
+        public void OpenPin(int pinNumber)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override PinValue Read(int pinNumber)
+        public PinValue Read(int pinNumber)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override void SetPinMode(int pinNumber, PinMode mode)
+        public void SetPinMode(int pinNumber, PinMode mode)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, int timeout)
+        public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, int timeout)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override void Write(int pinNumber, PinValue value)
+        public void Write(int pinNumber, PinValue value)
         {
             throw new NotImplementedException();
         }

@@ -23,7 +23,7 @@ namespace System.Device.Gpio
             Hummingboard,
             Unknown
         }
-        private GpioDriver _driver;
+        private IGpioDriver _driver;
         private HashSet<int> _openPins;
         private const string _cpuInfoPath = "/proc/cpuinfo";
         private const string _raspberryPiHardware = "BCM2835";
@@ -44,7 +44,7 @@ namespace System.Device.Gpio
         /// </summary>
         /// <param name="driver">The driver to be used for pin operations.</param>
         /// <param name="numberingScheme">The numbering scheme used to identify pins on the board.</param>
-        private GpioController(GpioDriver driver, PinNumberingScheme numberingScheme)
+        private GpioController(IGpioDriver driver, PinNumberingScheme numberingScheme)
         {
             _driver = driver;
             NumberingScheme = numberingScheme;
@@ -67,7 +67,7 @@ namespace System.Device.Gpio
         /// <returns>A GpioController instance</returns>
         public static GpioController GetController(PinNumberingScheme numberingScheme)
         {
-            GpioDriver driver;
+            IGpioDriver driver;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 driver = new Windows10Driver();
@@ -98,7 +98,7 @@ namespace System.Device.Gpio
         /// <param name="driver">The driver to be used for pin operations.</param>
         /// <param name="numberingScheme">The numbering scheme used to identify pins on the board.</param>
         /// <returns>A GpioController instance</returns>
-        public static GpioController GetController(GpioDriver driver, PinNumberingScheme numberingScheme)
+        public static GpioController GetController(IGpioDriver driver, PinNumberingScheme numberingScheme)
         {
             return new GpioController(driver, numberingScheme);
         }
