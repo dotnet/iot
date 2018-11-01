@@ -20,6 +20,7 @@ namespace System.Device.Gpio
         public void OpenPin(int pinNumber)
         {
             string pinPath = $"{_gpioBasePath}/gpio{pinNumber}";
+            // If the directory exists, this becomes a no-op since the pin might have been opened already by the some controller or somebody else.
             if (!Directory.Exists(pinPath))
             {
                 try
@@ -37,6 +38,7 @@ namespace System.Device.Gpio
         public void ClosePin(int pinNumber)
         {
             string pinPath = $"{_gpioBasePath}/gpio{pinNumber}";
+            // If the directory doesn't exist, this becomes a no-op since the pin was closed already.
             if (Directory.Exists(pinPath))
             {
                 try
@@ -105,6 +107,10 @@ namespace System.Device.Gpio
                     throw new GpioException("Reading a pin value requires root permissions.");
                 }
             }
+            else
+            {
+                throw new GpioException("There was an attempt to read from a pin that is not yet opened.");
+            }
             return result;
         }
 
@@ -142,6 +148,10 @@ namespace System.Device.Gpio
                 {
                     throw new GpioException("Reading a pin value requires root permissions.");
                 }
+            }
+            else
+            {
+                throw new GpioException("There was an attempt to write to a pin that is not yet opened.");
             }
         }
 
