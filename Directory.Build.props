@@ -3,6 +3,8 @@
   <PropertyGroup>
     <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
     <Language>C#</Language>
+    <TargetsWindows Condition="'$(RuntimeIdentifier)' == 'win'">true</TargetsWindows>
+    <TargetsLinux Condition="'$(RuntimeIdentifier)' == 'linux'">true</TargetsLinux>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
