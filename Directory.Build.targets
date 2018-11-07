@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+  <PropertyGroup Condition="'$(RuntimeIdentifiers)' != '' And '$(RuntimeIdentifier)' == ''">
+  	<IsCrossTargetingRIDs>true</IsCrossTargetingRIDs>
+  </PropertyGroup>
+  <Choose>
+      <When Condition="'$(IsCrossTargetingRIDs)' == 'true'">
+         <PropertyGroup>
+            <CrossTargetingRIDTargetsPath>$(MSBuildThisFileDirectory)eng\CrosstargetingRIDs.targets</CrossTargetingRIDTargetsPath>
+          </PropertyGroup>
+      </When>
+   </Choose>
+   <Import Project="$(CrossTargetingRIDTargetsPath)" Condition="Exists('$(CrossTargetingRIDTargetsPath)')" />
 </Project>

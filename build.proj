@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Directory.Build.props" />
+
+  <PropertyGroup>
+    <BuildRestore Condition="'$(BuildRestore)'==''">true</BuildRestore>
+    <ProductBuild Condition="'$(ProductBuild)'==''">true</ProductBuild>
+    <SampleBuild Condition="'$(SampleBuild)'==''">true</SampleBuild>
+    <BuildTests Condition="'$(BuildTests)'==''">false</BuildTests>
+    <BuildPackages Condition="'$(BuildPackages)'==''">true</BuildPackages>
+
+    <BuildDependsOn Condition="'$(BuildRestore)'=='true'">$(BuildDependsOn);Restore</BuildDependsOn>
+    <BuildDependsOn Condition="'$(ProductBuild)'=='true'">$(BuildDependsOn);BuildProduct</BuildDependsOn>
+    <BuildDependsOn Condition="'$(SampleBuild)'=='true'">$(BuildDependsOn);BuildSamples</BuildDependsOn>
+    <BuildDependsOn Condition="'$(BuildTests)'=='true'">$(BuildDependsOn);Test</BuildDependsOn>
+    <BuildDependsOn Condition="'$(BuildPackages)'=='true'">$(BuildDependsOn);Pack</BuildDependsOn>
+  </PropertyGroup>
+
+  <Import Project="Directory.Build.targets" />
+
+  <Target Name="BuildProduct">
+    <ItemGroup>
+      <_BuildProductProjects Include="$(MSBuildThisFileDirectory)src\System.Device.Gpio\System.Device.Gpio.csproj" />
+      <_BuildProductProjects Include="$(MSBuildThisFileDirectory)src\devices\Mcp3008\Mcp3008.csproj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_BuildProductProjects)" />
+  </Target>
+
+  <Target Name="BuildSamples">
+    <ItemGroup>
+      <_BuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\led-blink\led-blink.csproj" />
+      <_BuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\led-more-blinking-lights\led-more-blinking-lights.csproj" />
+      <_BuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\trimpot\trimpot.csproj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_BuildSampleProjects)" />
+  </Target>
+
+  <Target Name="Restore">
+    <ItemGroup>
+      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)src\System.Device.Gpio\System.Device.Gpio.csproj" />
+      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)src\devices\Mcp3008\Mcp3008.csproj" />
+      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)samples\led-blink\led-blink.csproj" />
+      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)samples\led-more-blinking-lights\led-more-blinking-lights.csproj" />
+      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)samples\trimpot\trimpot.csproj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_ProjectsToRestore)" Targets="Restore" />
+  </Target>
+
+  <Target Name="Test" />
+
+  <Target Name="Pack" />
+
+  <Target Name="Build" DependsOnTargets="$(BuildDependsOn)" />
+
+  <Target Name="Clean">
+    <RemoveDir Directories="$(ArtifactsObjDir)" />
+    <RemoveDir Directories="$(ArtifactsBinDir)" />
+    <RemoveDir Directories="$(ArtifactsPackagesDir)" />
+  </Target>
+
+  <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
+</Project>

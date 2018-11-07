@@ -3,6 +3,7 @@
     <Description>This experimental package allows projects to access GPIO pins for the BCM2835 as used on Raspberry Pi.</Description>
     <Copyright>Microsoft Corporation, All rights reserved.</Copyright>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RuntimeIdentifiers>win;linux-x64</RuntimeIdentifiers>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageTags>.NET Core GPIO Pins BCM2835 Raspberry Pi IoT</PackageTags>
     <LangVersion>7.3</LangVersion>
@@ -12,7 +13,7 @@
     <EmbeddedResource Remove="winmd\**" />
     <None Remove="winmd\**" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Reference Include="Windows.Devices">
       <HintPath>winmd\Windows.Devices.winmd</HintPath>
       <IsWinMDFile>true</IsWinMDFile>
