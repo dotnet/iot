@@ -51,7 +51,13 @@
 
   <Target Name="Test" />
 
-  <Target Name="Pack" />
+  <Target Name="Pack">
+    <ItemGroup>
+      <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\System.Device.Gpio\System.Device.Gpio.csproj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_ProjectsToPackage)" Targets="Pack" />
+  </Target>
 
   <Target Name="Build" DependsOnTargets="$(BuildDependsOn)" />
 

@@ -1,15 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+
+  <!-- Crosstargeting for RIDs -->
   <PropertyGroup Condition="'$(RuntimeIdentifiers)' != '' And '$(RuntimeIdentifier)' == ''">
-  	<IsCrossTargetingRIDs>true</IsCrossTargetingRIDs>
+    <IsCrossTargetingRIDs>true</IsCrossTargetingRIDs>
   </PropertyGroup>
   <Choose>
-      <When Condition="'$(IsCrossTargetingRIDs)' == 'true'">
-         <PropertyGroup>
-            <CrossTargetingRIDTargetsPath>$(MSBuildThisFileDirectory)eng\CrosstargetingRIDs.targets</CrossTargetingRIDTargetsPath>
-          </PropertyGroup>
-      </When>
-   </Choose>
-   <Import Project="$(CrossTargetingRIDTargetsPath)" Condition="Exists('$(CrossTargetingRIDTargetsPath)')" />
+    <When Condition="'$(IsCrossTargetingRIDs)' == 'true'">
+       <PropertyGroup>
+          <CrossTargetingRIDTargetsPath>$(MSBuildThisFileDirectory)eng\CrosstargetingRIDs.targets</CrossTargetingRIDTargetsPath>
+        </PropertyGroup>
+    </When>
+  </Choose>
+  <Import Project="$(CrossTargetingRIDTargetsPath)" Condition="Exists('$(CrossTargetingRIDTargetsPath)')" />
+
+  <!-- Packaging Targets -->
+  <PropertyGroup>
+    <IncludeRIDSpecificBuildOutput Condition="'$(IncludeRIDSpecificBuildOutput)' == '' And '$(RuntimeIdentifiers)' != ''">true</IncludeRIDSpecificBuildOutput>
+    <TargetsForTfmSpecificContentInPackage Condition="'$(IncludeRIDSpecificBuildOutput)' == 'true'">$(TargetsForTfmSpecificContentInPackage);_WalkEachRIDForBuildOutput;_GetReferenceAssemblyForPackage</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_RuntimeIdentifiers Include="$(RuntimeIdentifiers)" />
+  </ItemGroup>
+
+  <Target Name="_WalkEachRIDForBuildOutput">
+    <MSBuild
+      Condition="'$(IncludeRIDSpecificBuildOutput)' == 'true'"
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="_GetBuildOutputWithRID"
+      Properties="RuntimeIdentifier=%(_RuntimeIdentifiers.Identity)">
+
+    <Output
+      TaskParameter="TargetOutputs"
+      ItemName="TfmSpecificPackageFile" />
+    </MSBuild>
+  </Target>
+
+  <Target Name="_GetReferenceAssemblyForPackage">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutputPath)ref/$(MSBuildProjectName).dll">
+        <PackagePath>ref/$(TargetFramework)</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_GetBuildOutputWithRID" Returns="@(RIDSpecificPackageFile)">
+  <ItemGroup>
+    <RIDSpecificPackageFile Include="$(TargetPath)">
+      <PackagePath>runtimes/$(RuntimeIdentifier)/lib/$(TargetFramework)</PackagePath>
+    </RIDSpecificPackageFile>
+  </ItemGroup>
+  </Target>
+
+  <!-- Ensure ref assembly folder exists before calling the compiler -->
+  <Target Name="EnsureReferenceAssemblyFolderExists" BeforeTargets="CoreCompile" Condition="'@(IntermediateRefAssembly)' != ''">
+    <MakeDir Directories="%(IntermediateRefAssembly.RootDir)%(IntermediateRefAssembly.Directory)" />
+  </Target>
 </Project>

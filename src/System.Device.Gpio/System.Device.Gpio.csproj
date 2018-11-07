@@ -5,10 +5,13 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RuntimeIdentifiers>win;linux-x64</RuntimeIdentifiers>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
     <PackageTags>.NET Core GPIO Pins BCM2835 Raspberry Pi IoT</PackageTags>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <IntermediateRefAssembly Include="$(OutputPath)..\ref\$(MSBuildProjectName).dll" />
     <Compile Remove="winmd\**" />
     <EmbeddedResource Remove="winmd\**" />
     <None Remove="winmd\**" />
