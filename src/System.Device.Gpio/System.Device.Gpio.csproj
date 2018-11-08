@@ -12,9 +12,9 @@
     <Compile Remove="winmd\**" />
     <EmbeddedResource Remove="winmd\**" />
     <None Remove="winmd\**" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.1" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.1" />
     <Reference Include="Windows.Devices">
       <HintPath>winmd\Windows.Devices.winmd</HintPath>
       <IsWinMDFile>true</IsWinMDFile>
