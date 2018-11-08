@@ -20,8 +20,7 @@
 
   <Target Name="BuildProduct">
     <ItemGroup>
-      <_BuildProductProjects Include="$(MSBuildThisFileDirectory)src\System.Device.Gpio\System.Device.Gpio.csproj" />
-      <_BuildProductProjects Include="$(MSBuildThisFileDirectory)src\devices\Mcp3008\Mcp3008.csproj" />
+      <_BuildProductProjects Include="$(MSBuildThisFileDirectory)src\**\*.csproj" />
     </ItemGroup>
 
     <MSBuild Projects="@(_BuildProductProjects)" />
@@ -29,9 +28,8 @@
 
   <Target Name="BuildSamples">
     <ItemGroup>
-      <_BuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\led-blink\led-blink.csproj" />
-      <_BuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\led-more-blinking-lights\led-more-blinking-lights.csproj" />
-      <_BuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\trimpot\trimpot.csproj" />
+      <_ExcludeBuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\pwm-led\pwm-led.csproj" />
+      <_BuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\**\*.csproj" Exclude="@(_ExcludeBuildSampleProjects)" />
     </ItemGroup>
 
     <MSBuild Projects="@(_BuildSampleProjects)" />
@@ -39,11 +37,7 @@
 
   <Target Name="Restore">
     <ItemGroup>
-      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)src\System.Device.Gpio\System.Device.Gpio.csproj" />
-      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)src\devices\Mcp3008\Mcp3008.csproj" />
-      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)samples\led-blink\led-blink.csproj" />
-      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)samples\led-more-blinking-lights\led-more-blinking-lights.csproj" />
-      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)samples\trimpot\trimpot.csproj" />
+      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)**\*.csproj" />
     </ItemGroup>
 
     <MSBuild Projects="@(_ProjectsToRestore)" Targets="Restore" />
@@ -53,7 +47,7 @@
 
   <Target Name="Pack">
     <ItemGroup>
-      <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\System.Device.Gpio\System.Device.Gpio.csproj" />
+      <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\**\*.csproj" />
     </ItemGroup>
 
     <MSBuild Projects="@(_ProjectsToPackage)" Targets="Pack" />

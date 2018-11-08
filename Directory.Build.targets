@@ -40,7 +40,7 @@
 
   <Target Name="_GetReferenceAssemblyForPackage">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(OutputPath)ref/$(MSBuildProjectName).dll">
+      <TfmSpecificPackageFile Include="$(OutputPath)$(MSBuildProjectName).dll">
         <PackagePath>ref/$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
@@ -52,10 +52,5 @@
       <PackagePath>runtimes/$(RuntimeIdentifier)/lib/$(TargetFramework)</PackagePath>
     </RIDSpecificPackageFile>
   </ItemGroup>
-  </Target>
-
-  <!-- Ensure ref assembly folder exists before calling the compiler -->
-  <Target Name="EnsureReferenceAssemblyFolderExists" BeforeTargets="CoreCompile" Condition="'@(IntermediateRefAssembly)' != ''">
-    <MakeDir Directories="%(IntermediateRefAssembly.RootDir)%(IntermediateRefAssembly.Directory)" />
   </Target>
 </Project>
