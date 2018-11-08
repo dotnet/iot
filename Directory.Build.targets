@@ -40,7 +40,7 @@
 
   <Target Name="_GetReferenceAssemblyForPackage">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(OutputPath)$(MSBuildProjectName).dll">
+      <TfmSpecificPackageFile Include="$(TargetRefPath)">
         <PackagePath>ref/$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>

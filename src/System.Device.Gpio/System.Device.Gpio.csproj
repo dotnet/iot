@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RuntimeIdentifiers>win;linux-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win;linux</RuntimeIdentifiers>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- Only produce reference assembly in one of our inner builds -->
     <ProduceReferenceAssembly Condition="'$(TargetsWindows)' == 'true'">true</ProduceReferenceAssembly>
