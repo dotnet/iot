@@ -3,21 +3,22 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace System.Device.Gpio
 {
-    internal class UnixDriver : IGpioDriver
+    internal class UnixDriver : GpioDriver
     {
         private const string _gpioBasePath = "/sys/class/gpio";
         private List<int> _exportedPins = new List<int>();
 
-        public int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
+        protected internal override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
 
-        public int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new PlatformNotSupportedException("This driver is generic so it can not perform conversions between pin numbering schemes.");
+        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new PlatformNotSupportedException("This driver is generic so it can not perform conversions between pin numbering schemes.");
 
-        public void OpenPin(int pinNumber)
+        protected internal override void OpenPin(int pinNumber)
         {
             string pinPath = $"{_gpioBasePath}/gpio{pinNumber}";
             // If the directory exists, this becomes a no-op since the pin might have been opened already by the some controller or somebody else.
@@ -35,7 +36,7 @@ namespace System.Device.Gpio
             }
         }
 
-        public void ClosePin(int pinNumber)
+        protected internal override void ClosePin(int pinNumber)
         {
             string pinPath = $"{_gpioBasePath}/gpio{pinNumber}";
             // If the directory doesn't exist, this becomes a no-op since the pin was closed already.
@@ -53,7 +54,7 @@ namespace System.Device.Gpio
             }
         }
 
-        public void SetPinMode(int pinNumber, PinMode mode)
+        protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
             if (mode == PinMode.InputPullDown || mode == PinMode.InputPullUp)
             {
@@ -91,7 +92,7 @@ namespace System.Device.Gpio
             throw new GpioException($"{mode.ToString()} is not supported by this driver.");
         }
 
-        public PinValue Read(int pinNumber)
+        protected internal override PinValue Read(int pinNumber)
         {
             PinValue result = default(PinValue);
             string valuePath = $"{_gpioBasePath}/gpio{pinNumber}/value";
@@ -134,7 +135,7 @@ namespace System.Device.Gpio
             return result;
         }
 
-        public void Write(int pinNumber, PinValue value)
+        protected internal override void Write(int pinNumber, PinValue value)
         {
             string valuePath = $"{_gpioBasePath}/gpio{pinNumber}/value";
             if (File.Exists(valuePath))
@@ -172,7 +173,7 @@ namespace System.Device.Gpio
             return result;
         }
 
-        public bool isPinModeSupported(int pinNumber, PinMode mode)
+        protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
             // Unix driver does not support pull up or pull down resistors.
             if (mode == PinMode.InputPullDown || mode == PinMode.InputPullUp)
@@ -180,17 +181,32 @@ namespace System.Device.Gpio
             return true;
         }
 
-        public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, int timeout)
+        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, int timeout)
         {
             throw new NotImplementedException();
         }
 
-        public void Dispose()
+        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, int timeout)
+        {
+            return new ValueTask<WaitForEventResult>(Task.Run(() => WaitForEvent(pinNumber, eventType, timeout)));
+        }
+
+        public override void Dispose()
         {
             while (_exportedPins.Count > 0)
             {
                 ClosePin(_exportedPins.FirstOrDefault());
             }
+        }
+
+        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
+        {
+            throw new NotImplementedException();
         }
     }
 }

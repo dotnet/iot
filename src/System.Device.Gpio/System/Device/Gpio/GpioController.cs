@@ -4,8 +4,10 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace System.Device.Gpio
 {
@@ -23,7 +25,7 @@ namespace System.Device.Gpio
             Hummingboard,
             Unknown
         }
-        private IGpioDriver _driver;
+        private GpioDriver _driver;
         private HashSet<int> _openPins;
         private const string _cpuInfoPath = "/proc/cpuinfo";
         private const string _raspberryPiHardware = "BCM2835";
@@ -44,7 +46,7 @@ namespace System.Device.Gpio
         /// </summary>
         /// <param name="driver">The driver to be used for pin operations.</param>
         /// <param name="numberingScheme">The numbering scheme used to identify pins on the board.</param>
-        private GpioController(IGpioDriver driver, PinNumberingScheme numberingScheme)
+        private GpioController(GpioDriver driver, PinNumberingScheme numberingScheme)
         {
             _driver = driver;
             NumberingScheme = numberingScheme;
@@ -67,7 +69,7 @@ namespace System.Device.Gpio
         /// <returns>A GpioController instance</returns>
         public static GpioController GetController(PinNumberingScheme numberingScheme)
         {
-            IGpioDriver driver;
+            GpioDriver driver;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 driver = new Windows10Driver();
@@ -98,7 +100,7 @@ namespace System.Device.Gpio
         /// <param name="driver">The driver to be used for pin operations.</param>
         /// <param name="numberingScheme">The numbering scheme used to identify pins on the board.</param>
         /// <returns>A GpioController instance</returns>
-        public static GpioController GetController(IGpioDriver driver, PinNumberingScheme numberingScheme)
+        public static GpioController GetController(GpioDriver driver, PinNumberingScheme numberingScheme)
         {
             return new GpioController(driver, numberingScheme);
         }
@@ -160,7 +162,7 @@ namespace System.Device.Gpio
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         public void OpenPin(int pinNumber)
         {
-            int logicalPinNumber = (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+            int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (_openPins.Contains(logicalPinNumber))
             {
                 throw new GpioException("The selected pin is already open.");
@@ -186,7 +188,7 @@ namespace System.Device.Gpio
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         public void ClosePin(int pinNumber)
         {
-            int logicalPinNumber = (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+            int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new GpioException("Can not close a pin that is not yet opened.");
@@ -201,12 +203,12 @@ namespace System.Device.Gpio
         /// <param name="mode">The mode to be set.</param>
         public void SetPinMode(int pinNumber, PinMode mode)
         {
-            int logicalPinNumber = (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+            int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new GpioException("Can not set a mode to a pin that is not yet opened.");
             }
-            if (!isPinModeSupported(pinNumber, mode))
+            if (!IsPinModeSupported(pinNumber, mode))
             {
                 throw new GpioException("The pin does not support the mode selected.");
             }
@@ -220,7 +222,7 @@ namespace System.Device.Gpio
         /// <returns>The Pin value of the pin.</returns>
         public PinValue Read(int pinNumber)
         {
-            int logicalPinNumber = (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+            int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new GpioException("Can not read from a pin that is not yet opened.");
@@ -235,7 +237,7 @@ namespace System.Device.Gpio
         /// <param name="value">The value to be written.</param>
         public void Write(int pinNumber, PinValue value)
         {
-            int logicalPinNumber = (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+            int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new GpioException("Can not write to a pin that is not yet opened.");
@@ -252,7 +254,7 @@ namespace System.Device.Gpio
         /// <returns>A structure that contains the result of the waiting operation.</returns>
         public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, int timeout)
         {
-            int logicalPinNumber = (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+            int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new GpioException("Can not wait for events from a pin that is not yet opened.");
@@ -261,13 +263,67 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
+        /// Async call to wait for a period of time to see if an event is received.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        /// <param name="eventType">The event types to listen for.</param>
+        /// <param name="timeout">The time to wait for the event.</param>
+        /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
+        public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, int timeout)
+        {
+            int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
+            if (!_openPins.Contains(logicalPinNumber))
+            {
+                throw new GpioException("Can not wait for events from a pin that is not yet opened.");
+            }
+            return _driver.WaitForEventAsync(logicalPinNumber, eventType, timeout);
+        }
+
+        /// <summary>
+        /// Adds a callback that will be invoked when pinNumber has an event of type eventType
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        /// <param name="eventType">The event types to listen for.</param>
+        /// <param name="callback">The callback method that will be invoked.</param>
+        public void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
+        {
+            int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
+            if (!_openPins.Contains(logicalPinNumber))
+            {
+                throw new GpioException("Can not add callback for a pin that is not yet opened.");
+            }
+            _driver.AddCallbackForPinValueChangedEvent(logicalPinNumber, eventType, callback);
+        }
+
+        /// <summary>
+        /// Removes a callback that was being invoked for pin at pinNumber.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        /// <param name="callback">The callback method that will be invoked.</param>
+        public void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
+        {
+            int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
+            if (!_openPins.Contains(logicalPinNumber))
+            {
+                throw new GpioException("Can not add callback for a pin that is not yet opened.");
+            }
+            _driver.RemoveCallbackForPinValueChangedEvent(logicalPinNumber, callback);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int ConvertToLogicalPinNumber(int pinNumber)
+        {
+            return (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+        }
+
+        /// <summary>
         /// Checks if a specific pin is open.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <returns>True if the pin is open. False otherwise.</returns>
-        public bool isPinOpen(int pinNumber)
+        public bool IsPinOpen(int pinNumber)
         {
-            int logicalPinNumber = (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+            int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             return _openPins.Contains(logicalPinNumber);
         }
 
@@ -277,10 +333,10 @@ namespace System.Device.Gpio
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <param name="mode">The mode to check</param>
         /// <returns>True if the mode is supported by the pin. False otherwise.</returns>
-        public bool isPinModeSupported(int pinNumber, PinMode mode)
+        public bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
-            int logicalPinNumber = (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : ConvertPinNumberToLogicalNumberingScheme(pinNumber);
-            return _driver.isPinModeSupported(logicalPinNumber, mode);
+            int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
+            return _driver.IsPinModeSupported(logicalPinNumber, mode);
         }
 
         private void Dispose(bool disposing)
