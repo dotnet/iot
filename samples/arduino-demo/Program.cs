@@ -10,7 +10,7 @@ namespace arduino_demo
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("simpleterm <portName> [<baudRate>=9600]");
+                Console.WriteLine("arduino-demo <portName> [<baudRate>=9600]");
                 return;
             }
 
