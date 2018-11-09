@@ -29,6 +29,7 @@
   <Target Name="BuildSamples">
     <ItemGroup>
       <_ExcludeBuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\pwm-led\pwm-led.csproj" />
+      <_ExcludeBuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\arduino-demo\arduino-demo.csproj" />
       <_BuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\**\*.csproj" Exclude="@(_ExcludeBuildSampleProjects)" />
     </ItemGroup>
 
