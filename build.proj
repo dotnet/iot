@@ -38,7 +38,8 @@
 
   <Target Name="Restore">
     <ItemGroup>
-      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)**\*.csproj" />
+      <_ExcludeProjectsToRestore Include="$(MSBuildThisFileDirectory)samples\arduino-demo\arduino-demo.csproj" />
+      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)**\*.csproj" Exclude="@(_ExcludeProjectsToRestore)" />
     </ItemGroup>
 
     <MSBuild Projects="@(_ProjectsToRestore)" Targets="Restore" />
