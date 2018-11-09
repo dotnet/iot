@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <RootNamespace>arduino_demo</RootNamespace>
+    <!-- this can also be passed from the command line (i.e. dotnet publish -r linux-arm) -->
+    <RuntimeIdentifier>linux-arm</RuntimeIdentifier>
+    <!--
+        To use the latest version of core-setup we can pass the version manually:
+        <RuntimeFrameworkVersion>4.6.0-preview.18559.1</RuntimeFrameworkVersion>
+        Latest version can be found here:
+           https://dotnet.myget.org/feed/dotnet-core/package/nuget/Microsoft.NETCore.App
+        Currently this is not needed because we consume private corefx.
+        Once this gets public the following line and package reference to Microsoft.Private.CoreFx.NETCoreApp
+        can be removed.
+    -->
+    <PackageConflictPreferredPackages>Microsoft.Private.CoreFx.NETCoreApp;runtime.$(RuntimeIdentifier).Microsoft.Private.CoreFx.NETCoreApp;$(PackageConflictPreferredPackages)</PackageConflictPreferredPackages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Latest version can be found here: https://dotnet.myget.org/feed/dotnet-core/package/nuget/Microsoft.Private.CoreFx.NETCoreApp -->
+    <PackageReference Include="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-preview.18559.1" />
+    <!-- Latest version can be found here: https://dotnet.myget.org/feed/dotnet-core/package/nuget/System.IO.Ports -->
+    <PackageReference Include="System.IO.Ports" Version="4.6.0-preview.18558.3" />
+  </ItemGroup>
+
+</Project>
