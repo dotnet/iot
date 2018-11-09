@@ -3,6 +3,10 @@ variables:
   _HelixType: build/product
   _HelixSource: pr/dotnet/arcade-minimalci-sample/$(Build.SourceBranch)
   _enableTelemetry: true
+  ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'official')) }}:
+    OfficialBuildId: $(Build.BuildNumber)
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+    DOTNET_MULTILEVEL_LOOKUP: 0
 
 resources:
   containers:
@@ -31,6 +35,8 @@ phases:
           _BuildConfig: Debug
         release_configuration:
           _BuildConfig: Release
+    ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'official')) }}:
+      enableMicrobuild: true
     steps:
     - script: eng\common\cibuild.cmd
         -configuration $(_BuildConfig)
@@ -38,8 +44,20 @@ phases:
       name: Build
       displayName: Build
       condition: succeeded()
+    - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'official')) }}:
+      - task: PublishBuildArtifacts@1
+        displayName: Publish Windows package assets
+        inputs:
+          pathToPublish: $(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)/Shipping
+          artifactName: BuiltPackageOutputs
+          artifactType: container
+        condition: eq(variables['_BuildConfig'], 'Release')
     variables:
       _HelixBuildConfig: $(_BuildConfig)
+      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'official')) }}:
+        _TeamName: DotNetCore
+        _SignType: real
+
 
 - template: /eng/common/templates/phases/base.yml
   parameters:
@@ -87,3 +105,33 @@ phases:
       condition: succeeded()
     variables:
       _HelixBuildConfig: $(_BuildConfig)
+
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'official')) }}:
+  - template: /eng/common/templates/phases/base.yml
+    parameters:
+      dependsOn:
+        - Windows_NT
+        - OSX
+        - Linux
+      agentOs: Windows_NT
+      name: PublishToMyGet
+      enableTelemetry: $(_enableTelemetry)
+      queue:
+        name: dotnet-internal-temp  
+      steps:
+      - task: DownloadBuildArtifacts@0
+        displayName: Download Built Packages
+        inputs:
+          artifactName: BuiltPackageOutputs
+          downloadPath: $(Build.SourcesDirectory)/artifacts/packages/pushToMyGet
+      - task: AzureKeyVault@1
+        displayName: Downloading MyGet Secret
+        inputs:
+          azureSubscription: 'DotNet-Engineering-Services_KeyVault'
+          KeyVaultName: EngKeyVault
+          SecretsFilter: 'dotnet-myget-org-api-key'
+      - script: powershell -ExecutionPolicy ByPass -NoProfile -command "& """$(Build.SourcesDirectory)\eng\common\Build.ps1""" -restore" &&
+          for /f %%x in ('dir /s /b $(Build.SourcesDirectory)\artifacts\packages\pushToMyGet\*.nupkg') do $(Build.SourcesDirectory)\.dotnet\dotnet.exe nuget push %%x -k $(dotnet-myget-org-api-key) -s https://dotnet.myget.org/F/dotnet-core/
+        name: PublishPackages
+        displayName: Publishing Packages to MyGet
+        condition: succeeded()

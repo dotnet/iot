@@ -1,3 +1,3 @@
 @echo off
-powershell -ExecutionPolicy ByPass -NoProfile -command "& """%~dp0Build.ps1""" -restore -build -test -pack -publish %*"
+powershell -ExecutionPolicy ByPass -NoProfile -command "& """%~dp0Build.ps1""" -restore -build -test -sign -pack -publish %*"
 exit /b %ErrorLevel%
