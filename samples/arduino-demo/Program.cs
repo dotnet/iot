@@ -14,6 +14,7 @@ namespace arduino_demo
                 return;
             }
 
+            // to get port name you can use SerialPort.GetPortNames()
             string portName = args[0];
             int baudRate = args.Length >= 2 ? int.Parse(args[1]) : 9600;
 
