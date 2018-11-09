@@ -29,6 +29,7 @@
   <Target Name="BuildSamples">
     <ItemGroup>
       <_ExcludeBuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\pwm-led\pwm-led.csproj" />
+      <_ExcludeBuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\arduino-demo\arduino-demo.csproj" />
       <_BuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\**\*.csproj" Exclude="@(_ExcludeBuildSampleProjects)" />
     </ItemGroup>
 
@@ -37,7 +38,8 @@
 
   <Target Name="Restore">
     <ItemGroup>
-      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)**\*.csproj" />
+      <_ExcludeProjectsToRestore Include="$(MSBuildThisFileDirectory)samples\arduino-demo\arduino-demo.csproj" />
+      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)**\*.csproj" Exclude="@(_ExcludeProjectsToRestore)" />
     </ItemGroup>
 
     <MSBuild Projects="@(_ProjectsToRestore)" Targets="Restore" />
