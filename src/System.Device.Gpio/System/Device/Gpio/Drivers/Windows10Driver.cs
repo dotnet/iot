@@ -15,13 +15,13 @@ namespace System.Device.Gpio.Drivers
     public class Windows10Driver : GpioDriver
     {
         #region Fields
-        private static readonly WinGpio.GpioController _winGpioController = WinGpio.GpioController.GetDefault();
+        private static readonly WinGpio.GpioController s_winGpioController = WinGpio.GpioController.GetDefault();
         private readonly Dictionary<int, DevicePin> _openPins = new Dictionary<int, DevicePin>();
         #endregion Fields
 
         #region GpioDrive Overrides
 
-        protected internal override int PinCount => _winGpioController.PinCount;
+        protected internal override int PinCount => s_winGpioController.PinCount;
 
         protected override void Dispose(bool disposing)
         {
@@ -57,7 +57,7 @@ namespace System.Device.Gpio.Drivers
                 throw new ArgumentOutOfRangeException(nameof(pinNumber));
             }
 
-            WinGpio.GpioPin windowsPin = _winGpioController.OpenPin(pinNumber, WinGpio.GpioSharingMode.Exclusive);
+            WinGpio.GpioPin windowsPin = s_winGpioController.OpenPin(pinNumber, WinGpio.GpioSharingMode.Exclusive);
             _openPins[pinNumber] = new DevicePin(this, windowsPin);
         }
 
@@ -170,7 +170,7 @@ namespace System.Device.Gpio.Drivers
 
         private class DevicePin : IDisposable
         {
-            private const int _reasonableDebouceTimeoutMillseconds = 100;
+            private const int ReasonableDebouceTimeoutMillseconds = 100;
 
             private WeakReference<Windows10Driver> _driver;
             private WinGpio.GpioPin _pin;
@@ -185,7 +185,7 @@ namespace System.Device.Gpio.Drivers
                 _pinNumber = _pin.PinNumber;
 
                 // Set a reasonable default for DebounceTimeout (until .NET Core API adds a DebouceTimeout property)
-                _pin.DebounceTimeout = TimeSpan.FromMilliseconds(_reasonableDebouceTimeoutMillseconds);
+                _pin.DebounceTimeout = TimeSpan.FromMilliseconds(ReasonableDebouceTimeoutMillseconds);
             }
 
             ~DevicePin()
