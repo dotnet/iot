@@ -5,9 +5,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace System.Device.Gpio
+namespace System.Device.Gpio.Drivers
 {
     internal class UnixDriver : GpioDriver
     {
@@ -29,9 +30,10 @@ namespace System.Device.Gpio
                     File.WriteAllText(Path.Combine(_gpioBasePath, "export"), pinNumber.ToString());
                     _exportedPins.Add(pinNumber);
                 }
-                catch (UnauthorizedAccessException)
+                catch (UnauthorizedAccessException e)
                 {
-                    throw new GpioException("Opening pins requires root permissions.");
+                    // Wrapping the exception in order to get a better message
+                    throw new UnauthorizedAccessException("Opening pins requires root permissions.", e);
                 }
             }
         }
@@ -47,9 +49,9 @@ namespace System.Device.Gpio
                     File.WriteAllText(Path.Combine(_gpioBasePath, "unexport"), pinNumber.ToString());
                     _exportedPins.Remove(pinNumber);
                 }
-                catch (UnauthorizedAccessException)
+                catch (UnauthorizedAccessException e)
                 {
-                    throw new GpioException("Closing pins requires root permissions.");
+                    throw new UnauthorizedAccessException("Closing pins requires root permissions.", e);
                 }
             }
         }
@@ -58,7 +60,7 @@ namespace System.Device.Gpio
         {
             if (mode == PinMode.InputPullDown || mode == PinMode.InputPullUp)
             {
-                throw new GpioException("This driver is generic so it does not support Input Pull Down or Input Pull Up modes.");
+                throw new PlatformNotSupportedException("This driver is generic so it does not support Input Pull Down or Input Pull Up modes.");
             }
             string directionPath = $"{_gpioBasePath}/gpio{pinNumber}/direction";
             string sysfsMode = ConvertPinModeToSysFsMode(mode);
@@ -68,14 +70,14 @@ namespace System.Device.Gpio
                 {
                     File.WriteAllText(directionPath, sysfsMode);
                 }
-                catch (UnauthorizedAccessException)
+                catch (UnauthorizedAccessException e)
                 {
-                    throw new GpioException("Setting a mode to a pin requires root permissions.");
+                    throw new UnauthorizedAccessException("Setting a mode to a pin requires root permissions.", e);
                 }
             }
             else
             {
-                throw new GpioException("There was an attempt to set a mode to a pin that is not yet open.");
+                throw new InvalidOperationException("There was an attempt to set a mode to a pin that is not yet open.");
             }
         }
 
@@ -89,7 +91,7 @@ namespace System.Device.Gpio
             {
                 return "out";
             }
-            throw new GpioException($"{mode.ToString()} is not supported by this driver.");
+            throw new PlatformNotSupportedException($"{mode.ToString()} is not supported by this driver.");
         }
 
         protected internal override PinValue Read(int pinNumber)
@@ -103,14 +105,14 @@ namespace System.Device.Gpio
                     string valueContents = File.ReadAllText(valuePath);
                     result = ConvertSysFsValueToPinValue(valueContents);
                 }
-                catch (UnauthorizedAccessException)
+                catch (UnauthorizedAccessException e)
                 {
-                    throw new GpioException("Reading a pin value requires root permissions.");
+                    throw new UnauthorizedAccessException("Reading a pin value requires root permissions.", e);
                 }
             }
             else
             {
-                throw new GpioException("There was an attempt to read from a pin that is not yet opened.");
+                throw new InvalidOperationException("There was an attempt to read from a pin that is not yet opened.");
             }
             return result;
         }
@@ -145,14 +147,14 @@ namespace System.Device.Gpio
                     string sysFsValue = ConvertPinValueToSysFs(value);
                     File.WriteAllText(valuePath, sysFsValue);
                 }
-                catch (UnauthorizedAccessException)
+                catch (UnauthorizedAccessException e)
                 {
-                    throw new GpioException("Reading a pin value requires root permissions.");
+                    throw new UnauthorizedAccessException("Reading a pin value requires root permissions.", e);
                 }
             }
             else
             {
-                throw new GpioException("There was an attempt to write to a pin that is not yet opened.");
+                throw new InvalidOperationException("There was an attempt to write to a pin that is not yet opened.");
             }
         }
 
@@ -181,22 +183,18 @@ namespace System.Device.Gpio
             return true;
         }
 
-        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, int timeout)
+        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, int timeout)
-        {
-            return new ValueTask<WaitForEventResult>(Task.Run(() => WaitForEvent(pinNumber, eventType, timeout)));
-        }
-
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
             while (_exportedPins.Count > 0)
             {
                 ClosePin(_exportedPins.FirstOrDefault());
             }
+            base.Dispose(disposing);
         }
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)

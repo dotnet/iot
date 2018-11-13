@@ -2,15 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace System.Device.Gpio
+namespace System.Device.Gpio.Drivers
 {
-    internal class RaspberryPi3Driver : GpioDriver
+    public class LinuxHummingboardDriver : GpioDriver
     {
         protected internal override int PinCount => throw new NotImplementedException();
 
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
             throw new NotImplementedException();
         }
@@ -55,12 +56,12 @@ namespace System.Device.Gpio
             throw new NotImplementedException();
         }
 
-        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, int timeout)
+        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, int timeout)
+        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
