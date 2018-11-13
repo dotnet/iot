@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Device.Gpio.Drivers;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Device.Gpio
@@ -16,15 +18,6 @@ namespace System.Device.Gpio
     /// </summary>
     public sealed class GpioController : IDisposable
     {
-        /// <summary>
-        /// Private enum describing the type of board the program is running on.
-        /// </summary>
-        private enum BoardType
-        {
-            RaspberryPi3,
-            Hummingboard,
-            Unknown
-        }
         private GpioDriver _driver;
         private HashSet<int> _openPins;
         private const string _cpuInfoPath = "/proc/cpuinfo";
@@ -37,16 +30,28 @@ namespace System.Device.Gpio
         public PinNumberingScheme NumberingScheme { get; }
 
         /// <summary>
-        /// Hiding the controller to implement the factory creation pattern.
+        /// Default controller. Will use the logical pin numbering scheme as default.
         /// </summary>
-        private GpioController() { }
+        public GpioController() 
+            : this(PinNumberingScheme.Logical)
+        {
+        }
 
         /// <summary>
-        /// Constructor that takes in a driver and a numbering scheme. Hidden in order to implement the factory pattern.
+        /// Controller that takes in a numbering scheme. Will default to use the driver that best applies given the platform the program is running on.
         /// </summary>
-        /// <param name="driver">The driver to be used for pin operations.</param>
-        /// <param name="numberingScheme">The numbering scheme used to identify pins on the board.</param>
-        private GpioController(GpioDriver driver, PinNumberingScheme numberingScheme)
+        /// <param name="pinNumberingScheme">The numbering scheme used to represent pins on the board.</param>
+        public GpioController(PinNumberingScheme pinNumberingScheme)
+            : this(pinNumberingScheme, GetBestDriverForBoard())
+        {
+        }
+
+        /// <summary>
+        /// Controller that takes in a numbering scheme and a driver.
+        /// </summary>
+        /// <param name="numberingScheme">The numbering scheme used to represent pins on the board.</param>
+        /// <param name="driver">The driver that will be in charge of performing all of the pin operations.</param>
+        public GpioController(PinNumberingScheme numberingScheme, GpioDriver driver)
         {
             _driver = driver;
             NumberingScheme = numberingScheme;
@@ -54,63 +59,15 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
-        /// Default factory method. It will default to the Logical numbering scheme and it will predict which driver is the best for the board you are running in.
+        /// Private method that tries to get the best applicable driver for the board you are running in.
         /// </summary>
-        /// <returns>A GpioController instance</returns>
-        public static GpioController GetController()
+        /// <returns>A driver which works on the current running board.</returns>
+        private static GpioDriver GetBestDriverForBoard()
         {
-            return GetController(PinNumberingScheme.Logical);
-        }
-
-        /// <summary>
-        /// Factory method that takes in a numbering scheme. It will predict which driver is the best for the board you are running in.
-        /// </summary>
-        /// <param name="numberingScheme">The numbering scheme used to identify pins on the board.</param>
-        /// <returns>A GpioController instance</returns>
-        public static GpioController GetController(PinNumberingScheme numberingScheme)
-        {
-            GpioDriver driver;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                driver = new Windows10Driver();
+                return new Windows10Driver();
             }
-            else
-            {
-                BoardType boardType = GetBoardHardware();
-                switch (boardType)
-                {
-                    case BoardType.RaspberryPi3:
-                        driver = new RaspberryPi3Driver();
-                        break;
-                    case BoardType.Hummingboard:
-                        driver = new HummingboardDriver();
-                        break;
-                    case BoardType.Unknown:
-                    default:
-                        driver = new UnixDriver();
-                        break;
-                }
-            }
-            return GetController(driver, numberingScheme);
-        }
-
-        /// <summary>
-        /// Factory method that takes in a numbering scheme and the driver to be used.
-        /// </summary>
-        /// <param name="driver">The driver to be used for pin operations.</param>
-        /// <param name="numberingScheme">The numbering scheme used to identify pins on the board.</param>
-        /// <returns>A GpioController instance</returns>
-        public static GpioController GetController(GpioDriver driver, PinNumberingScheme numberingScheme)
-        {
-            return new GpioController(driver, numberingScheme);
-        }
-
-        /// <summary>
-        /// Private method that parses /proc/cpuinfo file to try to check the board you are running in.
-        /// </summary>
-        /// <returns>The board type in which the program is running in.</returns>
-        private static BoardType GetBoardHardware()
-        {
             string[] cpuInfoLines = File.ReadAllLines(_cpuInfoPath);
             Regex regex = new Regex(@"Hardware\s*:\s*(.*)");
             foreach (string cpuInfoLine in cpuInfoLines)
@@ -122,17 +79,17 @@ namespace System.Device.Gpio
                     {
                         if (match.Groups[1].Value == _raspberryPiHardware)
                         {
-                            return BoardType.RaspberryPi3;
+                            return new LinuxRaspberryPi3Driver();
                         }
                         if (match.Groups[1].Value == _hummingBoardHardware)
                         {
-                            return BoardType.Hummingboard;
+                            return new LinuxHummingboardDriver();
                         }
-                        return BoardType.Unknown;
+                        return new UnixDriver();
                     }
                 }
             }
-            return BoardType.Unknown;
+            return new UnixDriver();
         }
 
         /// <summary>
@@ -165,7 +122,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (_openPins.Contains(logicalPinNumber))
             {
-                throw new GpioException("The selected pin is already open.");
+                throw new InvalidOperationException("The selected pin is already open.");
             }
             _driver.OpenPin(logicalPinNumber);
             _openPins.Add(logicalPinNumber);
@@ -191,7 +148,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new GpioException("Can not close a pin that is not yet opened.");
+                throw new InvalidOperationException("Can not close a pin that is not yet opened.");
             }
             _driver.ClosePin(pinNumber);
         }
@@ -206,11 +163,11 @@ namespace System.Device.Gpio
             int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new GpioException("Can not set a mode to a pin that is not yet opened.");
+                throw new InvalidOperationException("Can not set a mode to a pin that is not yet opened.");
             }
             if (!IsPinModeSupported(pinNumber, mode))
             {
-                throw new GpioException("The pin does not support the mode selected.");
+                throw new InvalidOperationException("The pin does not support the mode selected.");
             }
             _driver.SetPinMode(pinNumber, mode);
         }
@@ -225,7 +182,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new GpioException("Can not read from a pin that is not yet opened.");
+                throw new InvalidOperationException("Can not read from a pin that is not yet opened.");
             }
             return _driver.Read(pinNumber);
         }
@@ -240,7 +197,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new GpioException("Can not write to a pin that is not yet opened.");
+                throw new InvalidOperationException("Can not write to a pin that is not yet opened.");
             }
             _driver.Write(pinNumber, value);
         }
@@ -252,14 +209,27 @@ namespace System.Device.Gpio
         /// <param name="eventType">The event types to listen for.</param>
         /// <param name="timeout">The time to wait for the event.</param>
         /// <returns>A structure that contains the result of the waiting operation.</returns>
-        public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, int timeout)
+        public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, TimeSpan timeout)
+        {
+            CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
+            return WaitForEvent(pinNumber, eventType, tokenSource.Token);
+        }
+
+        /// <summary>
+        /// Blocks execution until cancalletion is requested or until an event of type eventType is received.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        /// <param name="eventType">The event types to listen for.</param>
+        /// <param name="cancellationToken">The cancellation token of when should the operation stop waiting for an event.</param>
+        /// <returns>A structure that contains the result of the waiting operation.</returns>
+        public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
         {
             int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new GpioException("Can not wait for events from a pin that is not yet opened.");
+                throw new InvalidOperationException("Can not wait for events from a pin that is not yet opened.");
             }
-            return _driver.WaitForEvent(logicalPinNumber, eventType, timeout);
+            return _driver.WaitForEvent(logicalPinNumber, eventType, cancellationToken);
         }
 
         /// <summary>
@@ -269,14 +239,27 @@ namespace System.Device.Gpio
         /// <param name="eventType">The event types to listen for.</param>
         /// <param name="timeout">The time to wait for the event.</param>
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
-        public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, int timeout)
+        public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, TimeSpan timeout)
+        {
+            CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
+            return WaitForEventAsync(pinNumber, eventType, tokenSource.Token);
+        }
+
+        /// <summary>
+        /// Async call to wait till canceled to see if an event is received. 
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        /// <param name="eventType">The event types to listen for.</param>
+        /// <param name="token">The cancellation token of when should the operation stop waiting for an event.</param>
+        /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
+        public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, CancellationToken token)
         {
             int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new GpioException("Can not wait for events from a pin that is not yet opened.");
+                throw new InvalidOperationException("Can not wait for events from a pin that is not yet opened.");
             }
-            return _driver.WaitForEventAsync(logicalPinNumber, eventType, timeout);
+            return _driver.WaitForEventAsync(logicalPinNumber, eventType, token);
         }
 
         /// <summary>
@@ -285,12 +268,12 @@ namespace System.Device.Gpio
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <param name="eventType">The event types to listen for.</param>
         /// <param name="callback">The callback method that will be invoked.</param>
-        public void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
+        public void RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
             int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new GpioException("Can not add callback for a pin that is not yet opened.");
+                throw new InvalidOperationException("Can not add callback for a pin that is not yet opened.");
             }
             _driver.AddCallbackForPinValueChangedEvent(logicalPinNumber, eventType, callback);
         }
@@ -300,12 +283,12 @@ namespace System.Device.Gpio
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <param name="callback">The callback method that will be invoked.</param>
-        public void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
+        public void UnregisterCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new GpioException("Can not add callback for a pin that is not yet opened.");
+                throw new InvalidOperationException("Can not add callback for a pin that is not yet opened.");
             }
             _driver.RemoveCallbackForPinValueChangedEvent(logicalPinNumber, callback);
         }
@@ -351,11 +334,6 @@ namespace System.Device.Gpio
         public void Dispose()
         {
             Dispose(true);
-        }
-
-        ~GpioController()
-        {
-            Dispose(false);
         }
     }
 }
