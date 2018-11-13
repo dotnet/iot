@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace System.Device.Gpio.Drivers
 {
-    internal class UnixDriver : GpioDriver
+    public class UnixDriver : GpioDriver
     {
         private const string _gpioBasePath = "/sys/class/gpio";
         private List<int> _exportedPins = new List<int>();
@@ -91,7 +91,7 @@ namespace System.Device.Gpio.Drivers
             {
                 return "out";
             }
-            throw new PlatformNotSupportedException($"{mode.ToString()} is not supported by this driver.");
+            throw new PlatformNotSupportedException($"{mode} is not supported by this driver.");
         }
 
         protected internal override PinValue Read(int pinNumber)
