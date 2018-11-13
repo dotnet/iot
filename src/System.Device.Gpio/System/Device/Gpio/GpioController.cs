@@ -16,7 +16,7 @@ namespace System.Device.Gpio
     /// <summary>
     /// Main class to interact with when trying to control Gpio pins.
     /// </summary>
-    public sealed class GpioController : IDisposable
+    public sealed partial class GpioController : IDisposable
     {
         private GpioDriver _driver;
         private HashSet<int> _openPins;
@@ -38,15 +38,6 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
-        /// Controller that takes in a numbering scheme. Will default to use the driver that best applies given the platform the program is running on.
-        /// </summary>
-        /// <param name="pinNumberingScheme">The numbering scheme used to represent pins on the board.</param>
-        public GpioController(PinNumberingScheme pinNumberingScheme)
-            : this(pinNumberingScheme, GetBestDriverForBoard())
-        {
-        }
-
-        /// <summary>
         /// Controller that takes in a numbering scheme and a driver.
         /// </summary>
         /// <param name="numberingScheme">The numbering scheme used to represent pins on the board.</param>
@@ -56,40 +47,6 @@ namespace System.Device.Gpio
             _driver = driver;
             NumberingScheme = numberingScheme;
             _openPins = new HashSet<int>();
-        }
-
-        /// <summary>
-        /// Private method that tries to get the best applicable driver for the board you are running in.
-        /// </summary>
-        /// <returns>A driver which works on the current running board.</returns>
-        private static GpioDriver GetBestDriverForBoard()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return new Windows10Driver();
-            }
-            string[] cpuInfoLines = File.ReadAllLines(_cpuInfoPath);
-            Regex regex = new Regex(@"Hardware\s*:\s*(.*)");
-            foreach (string cpuInfoLine in cpuInfoLines)
-            {
-                Match match = regex.Match(cpuInfoLine);
-                if (match.Success)
-                {
-                    if (match.Groups.Count > 1)
-                    {
-                        if (match.Groups[1].Value == _raspberryPiHardware)
-                        {
-                            return new LinuxRaspberryPi3Driver();
-                        }
-                        if (match.Groups[1].Value == _hummingBoardHardware)
-                        {
-                            return new LinuxHummingboardDriver();
-                        }
-                        return new UnixDriver();
-                    }
-                }
-            }
-            return new UnixDriver();
         }
 
         /// <summary>
