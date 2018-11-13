@@ -116,29 +116,104 @@ namespace System.Device.Gpio.Drivers
 
             public WaitForEventResult WaitForEvent(PinEventTypes eventType, CancellationToken cancellationToken)
             {
-                ManualResetEventSlim waitEvent = new ManualResetEventSlim();
-
-                void handler(WinGpio.GpioPin s, WinGpio.GpioPinValueChangedEventArgs a)
+                using (ManualResetEvent completionEvent = new ManualResetEvent(false))
                 {
-                    if (a.Edge == WinGpio.GpioPinEdge.FallingEdge && eventType.HasFlag(PinEventTypes.Falling) ||
-                        a.Edge == WinGpio.GpioPinEdge.RisingEdge && eventType.HasFlag(PinEventTypes.Rising))
+                    void handler(WinGpio.GpioPin s, WinGpio.GpioPinValueChangedEventArgs a)
                     {
-                        waitEvent.Set();
+                        if (a.Edge == WinGpio.GpioPinEdge.FallingEdge && eventType.HasFlag(PinEventTypes.Falling) ||
+                            a.Edge == WinGpio.GpioPinEdge.RisingEdge && eventType.HasFlag(PinEventTypes.Rising))
+                        {
+                            completionEvent.Set();
+                        }
                     }
+
+                    WaitHandle[] waitHandles =
+                    {
+                        completionEvent,
+                        cancellationToken.WaitHandle
+                    };
+
+                    _pin.ValueChanged += handler;
+                    bool eventOccurred = 0 == WaitHandle.WaitAny(waitHandles);
+                    _pin.ValueChanged -= handler;
+
+                    return new WaitForEventResult
+                    {
+                        EventType = eventType,
+                        TimedOut = !eventOccurred
+                    };
                 }
-
-                _pin.ValueChanged += handler;
-                bool eventOccurred = false; // waitEvent.Wait(timeout);
-                _pin.ValueChanged -= handler;
-
-                return new WaitForEventResult
-                {
-                    EventType = eventType,
-                    TimedOut = !eventOccurred
-                };
             }
 
             public void Write(PinValue value) => _pin.Write(PinValueToGpioPinValue(value));
+
+            #region Enumeration conversion methods
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static WinGpio.GpioPinDriveMode PinModeToGpioDriveMode(PinMode mode)
+            {
+                switch (mode)
+                {
+                    case PinMode.Input:
+                        return WinGpio.GpioPinDriveMode.Input;
+                    case PinMode.Output:
+                        return WinGpio.GpioPinDriveMode.Output;
+                    case PinMode.InputPullDown:
+                        return WinGpio.GpioPinDriveMode.InputPullDown;
+                    case PinMode.InputPullUp:
+                        return WinGpio.GpioPinDriveMode.InputPullUp;
+                    default:
+                        throw new NotSupportedException($"GPIO pin mode not supported: {mode}");
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static PinMode GpioDriveModeToPinMode(WinGpio.GpioPinDriveMode mode)
+            {
+                switch (mode)
+                {
+                    case WinGpio.GpioPinDriveMode.Input:
+                        return PinMode.Input;
+                    case WinGpio.GpioPinDriveMode.Output:
+                        return PinMode.Output;
+                    case WinGpio.GpioPinDriveMode.InputPullDown:
+                        return PinMode.InputPullDown;
+                    case WinGpio.GpioPinDriveMode.InputPullUp:
+                        return PinMode.InputPullUp;
+                    default:
+                        throw new NotSupportedException($"GPIO pin mode not supported: {mode}");
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static PinValue GpioPinValueToPinValue(WinGpio.GpioPinValue value)
+            {
+                switch (value)
+                {
+                    case WinGpio.GpioPinValue.Low:
+                        return PinValue.Low;
+                    case WinGpio.GpioPinValue.High:
+                        return PinValue.High;
+                    default:
+                        throw new NotSupportedException($"GPIO pin value not supported: {value}");
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static WinGpio.GpioPinValue PinValueToGpioPinValue(PinValue value)
+            {
+                switch (value)
+                {
+                    case PinValue.Low:
+                        return WinGpio.GpioPinValue.Low;
+                    case PinValue.High:
+                        return WinGpio.GpioPinValue.High;
+                    default:
+                        throw new NotSupportedException($"GPIO pin value not supported: {value}");
+                }
+            }
+
+            #endregion Enumeration conversion methods
         }
     }
 }

@@ -88,82 +88,10 @@ namespace System.Device.Gpio.Drivers
         {
             if (!_openPins.TryGetValue(pinNumber, out DevicePin devicePin))
             {
-                throw new ArgumentException($"Specified GPIO pin is not open: {pinNumber}", argumentName);
+                throw new InvalidOperationException($"Specified GPIO pin is not open: {pinNumber}");
             }
 
             return devicePin;
-        }
-
-        private void VerifyPinIsClosed(int pinNumber, string argumentName)
-        {
-            if (_openPins.ContainsKey(pinNumber))
-            {
-                throw new ArgumentException($"Specified GPIO pin is already open: {pinNumber}", argumentName);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static WinGpio.GpioPinDriveMode PinModeToGpioDriveMode(PinMode mode)
-        {
-            switch (mode)
-            {
-                case PinMode.Input:
-                    return WinGpio.GpioPinDriveMode.Input;
-                case PinMode.Output:
-                    return WinGpio.GpioPinDriveMode.Output;
-                case PinMode.InputPullDown:
-                    return WinGpio.GpioPinDriveMode.InputPullDown;
-                case PinMode.InputPullUp:
-                    return WinGpio.GpioPinDriveMode.InputPullUp;
-                default:
-                    throw new NotSupportedException($"GPIO pin mode not supported: {mode}");
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static PinMode GpioDriveModeToPinMode(WinGpio.GpioPinDriveMode mode)
-        {
-            switch (mode)
-            {
-                case WinGpio.GpioPinDriveMode.Input:
-                    return PinMode.Input;
-                case WinGpio.GpioPinDriveMode.Output:
-                    return PinMode.Output;
-                case WinGpio.GpioPinDriveMode.InputPullDown:
-                    return PinMode.InputPullDown;
-                case WinGpio.GpioPinDriveMode.InputPullUp:
-                    return PinMode.InputPullUp;
-                default:
-                    throw new NotSupportedException($"GPIO pin mode not supported: {mode}");
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static PinValue GpioPinValueToPinValue(WinGpio.GpioPinValue value)
-        {
-            switch (value)
-            {
-                case WinGpio.GpioPinValue.Low:
-                    return PinValue.Low;
-                case WinGpio.GpioPinValue.High:
-                    return PinValue.High;
-                default:
-                    throw new NotSupportedException($"GPIO pin value not supported: {value}");
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static WinGpio.GpioPinValue PinValueToGpioPinValue(PinValue value)
-        {
-            switch (value)
-            {
-                case PinValue.Low:
-                    return WinGpio.GpioPinValue.Low;
-                case PinValue.High:
-                    return WinGpio.GpioPinValue.High;
-                default:
-                    throw new NotSupportedException($"GPIO pin value not supported: {value}");
-            }
         }
 
         #endregion Private Implementation
