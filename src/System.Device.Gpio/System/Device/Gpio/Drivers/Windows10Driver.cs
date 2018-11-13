@@ -8,8 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using WinGpio = global::Windows.Devices.Gpio;
 
-namespace System.Device.Gpio
-
 namespace System.Device.Gpio.Drivers
 {
     public class Windows10Driver : GpioDriver
@@ -69,11 +67,8 @@ namespace System.Device.Gpio.Drivers
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
             => VerifyPinIsOpen(pinNumber, nameof(pinNumber)).SetPinMode(mode);
 
-        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, int timeoutMilliseconds)
-            => VerifyPinIsOpen(pinNumber, nameof(pinNumber)).WaitForEvent(eventType, timeoutMilliseconds);
-
-        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, int timeoutMilliseconds)
-            => VerifyPinIsOpen(pinNumber, nameof(pinNumber)).WaitForEventAsync(eventType, timeoutMilliseconds);
+        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
+            => VerifyPinIsOpen(pinNumber, nameof(pinNumber)).WaitForEvent(eventType, cancellationToken);
 
         protected internal override void Write(int pinNumber, PinValue value)
             => VerifyPinIsOpen(pinNumber, nameof(pinNumber)).Write(value);
@@ -270,7 +265,7 @@ namespace System.Device.Gpio.Drivers
 
             public void SetPinMode(PinMode mode) => _pin.SetDriveMode(PinModeToGpioDriveMode(mode));
 
-            public WaitForEventResult WaitForEvent(PinEventTypes eventType, int timeout)
+            public WaitForEventResult WaitForEvent(PinEventTypes eventType, CancellationToken cancellationToken)
             {
                 ManualResetEventSlim waitEvent = new ManualResetEventSlim();
 
@@ -284,7 +279,7 @@ namespace System.Device.Gpio.Drivers
                 }
 
                 _pin.ValueChanged += handler;
-                bool eventOccurred = waitEvent.Wait(timeout);
+                bool eventOccurred = false; // waitEvent.Wait(timeout);
                 _pin.ValueChanged -= handler;
 
                 return new WaitForEventResult
@@ -292,11 +287,6 @@ namespace System.Device.Gpio.Drivers
                     EventType = eventType,
                     TimedOut = !eventOccurred
                 };
-            }
-
-            public ValueTask<WaitForEventResult> WaitForEventAsync(PinEventTypes eventType, int timeout)
-            {
-                return new ValueTask<WaitForEventResult>(Task<WaitForEventResult>.Run(() => WaitForEvent(eventType, timeout)));
             }
 
             public void Write(PinValue value) => _pin.Write(PinValueToGpioPinValue(value));

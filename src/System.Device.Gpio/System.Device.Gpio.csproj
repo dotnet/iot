@@ -13,6 +13,7 @@
     <EmbeddedResource Remove="winmd\**" />
     <None Remove="winmd\**" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.1" />
+    <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsLinux)' == 'true'">
     <!--Excluding Windows implementations-->
@@ -21,7 +22,8 @@
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <!--Excluding Linux implementations-->
     <Compile Remove="**\*.Linux.cs" />
-    <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Windows.Devices">
       <HintPath>winmd\Windows.Devices.winmd</HintPath>
       <IsWinMDFile>true</IsWinMDFile>
