@@ -2,10 +2,13 @@
 
 $ci = if (Test-Path variable:ci) { $ci } else { $false }
 $configuration = if (Test-Path variable:configuration) { $configuration } else { "Debug" }
-$nodereuse = if (Test-Path variable:nodereuse) { $nodereuse } else { $true }
+$nodereuse = if (Test-Path variable:nodereuse) { $nodereuse } else { !$ci }
 $prepareMachine = if (Test-Path variable:prepareMachine) { $prepareMachine } else { $false }
 $restore = if (Test-Path variable:restore) { $restore } else { $true }
+$verbosity = if (Test-Path variable:verbosity) { $verbosity } else { "minimal" }
 $warnaserror = if (Test-Path variable:warnaserror) { $warnaserror } else { $true }
+$msbuildEngine = if (Test-Path variable:msbuildEngine) { $msbuildEngine } else { $null }
+$useInstalledDotNetCli = if (Test-Path variable:useInstalledDotNetCli) { $useInstalledDotNetCli } else { $true }
 
 set-strictmode -version 2.0
 $ErrorActionPreference = "Stop"
@@ -17,7 +20,7 @@ function Create-Directory([string[]] $path) {
   }
 }
 
-function InitializeDotNetCli {
+function InitializeDotNetCli([bool]$install) {
   # Don't resolve runtime, shared framework, or SDK from other locations to ensure build determinism
   $env:DOTNET_MULTILEVEL_LOOKUP=0
 
@@ -29,16 +32,28 @@ function InitializeDotNetCli {
     $env:DOTNET_INSTALL_DIR = $env:DotNetCoreSdkDir
   }
 
+  # Find the first path on %PATH% that contains the dotnet.exe
+  if ($useInstalledDotNetCli -and ($env:DOTNET_INSTALL_DIR -eq $null)) {
+    $env:DOTNET_INSTALL_DIR = ${env:PATH}.Split(';') | where { ($_ -ne "") -and (Test-Path (Join-Path $_ "dotnet.exe")) }
+  }
+
+  $dotnetSdkVersion = $GlobalJson.tools.dotnet
+
   # Use dotnet installation specified in DOTNET_INSTALL_DIR if it contains the required SDK version,
   # otherwise install the dotnet CLI and SDK to repo local .dotnet directory to avoid potential permission issues.
-  if (($env:DOTNET_INSTALL_DIR -ne $null) -and (Test-Path(Join-Path $env:DOTNET_INSTALL_DIR "sdk\$($GlobalJson.tools.dotnet)"))) {
+  if (($env:DOTNET_INSTALL_DIR -ne $null) -and (Test-Path(Join-Path $env:DOTNET_INSTALL_DIR "sdk\$dotnetSdkVersion"))) {
     $dotnetRoot = $env:DOTNET_INSTALL_DIR
   } else {
     $dotnetRoot = Join-Path $RepoRoot ".dotnet"
     $env:DOTNET_INSTALL_DIR = $dotnetRoot
 
-    if ($restore) {
-      InstallDotNetSdk $dotnetRoot $GlobalJson.tools.dotnet
+    if (-not (Test-Path(Join-Path $env:DOTNET_INSTALL_DIR "sdk\$dotnetSdkVersion"))) {
+      if ($install) {
+        InstallDotNetSdk $dotnetRoot $dotnetSdkVersion
+      } else {
+        Write-Host "Unable to find dotnet with SDK version '$dotnetSdkVersion'" -ForegroundColor Red
+        ExitWithExitCode 1
+      }
     }
   }
 
@@ -57,7 +72,6 @@ function GetDotNetInstallScript([string] $dotnetRoot) {
 
 function InstallDotNetSdk([string] $dotnetRoot, [string] $version) {
   $installScript = GetDotNetInstallScript $dotnetRoot
-
   & $installScript -Version $version -InstallDir $dotnetRoot
   if ($lastExitCode -ne 0) {
     Write-Host "Failed to install dotnet cli (exit code '$lastExitCode')." -ForegroundColor Red
@@ -66,23 +80,36 @@ function InstallDotNetSdk([string] $dotnetRoot, [string] $version) {
 }
 
 function InitializeVisualStudioBuild {
-  $inVSEnvironment = !($env:VS150COMNTOOLS -eq $null) -and (Test-Path $env:VS150COMNTOOLS)
-
-  if ($inVSEnvironment) {
-    $vsInstallDir = Join-Path $env:VS150COMNTOOLS "..\.."
-  } else {
-    $vsInstallDir = LocateVisualStudio
-
-    $env:VS150COMNTOOLS = Join-Path $vsInstallDir "Common7\Tools\"
-    $env:VSSDK150Install = Join-Path $vsInstallDir "VSSDK\"
-    $env:VSSDKInstall = Join-Path $vsInstallDir "VSSDK\"
+  $vsToolsPath = $env:VS150COMNTOOLS
+  if ($vsToolsPath -eq $null) { 
+    $vsToolsPath = $env:VS160COMNTOOLS
   }
 
-  return $vsInstallDir;
+  if (($vsToolsPath -ne $null) -and (Test-Path $vsToolsPath)) {
+    $vsInstallDir = [System.IO.Path]::GetFullPath((Join-Path $vsToolsPath "..\.."))
+  } else {
+    $vsInfo = LocateVisualStudio
+
+    $vsInstallDir = $vsInfo.installationPath
+    $vsSdkInstallDir = Join-Path $vsInstallDir "VSSDK\"
+    $vsVersion = $vsInfo.installationVersion.Split('.')[0] + "0"
+
+    Set-Item "env:VS$($vsVersion)COMNTOOLS" (Join-Path $vsInstallDir "Common7\Tools\")    
+    Set-Item "env:VSSDK$($vsVersion)Install" $vsSdkInstallDir
+    $env:VSSDKInstall = $vsSdkInstallDir
+  }
+
+  return $vsInstallDir
 }
 
 function LocateVisualStudio {
   $vswhereVersion = $GlobalJson.tools.vswhere
+
+  if (!$vsWhereVersion) {
+    Write-Host "vswhere version must be specified in /global.json." -ForegroundColor Red
+    ExitWithExitCode 1
+  }
+
   $toolsRoot = Join-Path $RepoRoot ".tools"
   $vsWhereDir = Join-Path $toolsRoot "vswhere\$vswhereVersion"
   $vsWhereExe = Join-Path $vsWhereDir "vswhere.exe"
@@ -93,37 +120,70 @@ function LocateVisualStudio {
     Invoke-WebRequest "https://github.com/Microsoft/vswhere/releases/download/$vswhereVersion/vswhere.exe" -OutFile $vswhereExe
   }
 
-  $vsInstallDir = & $vsWhereExe -latest -prerelease -property installationPath -requires Microsoft.Component.MSBuild -requires Microsoft.VisualStudio.Component.VSSDK -requires Microsoft.Net.Component.4.6.TargetingPack -requires Microsoft.VisualStudio.Component.Roslyn.Compiler -requires Microsoft.VisualStudio.Component.VSSDK
+  $vsInfo = & $vsWhereExe `
+    -latest `
+    -prerelease `
+    -format json `
+    -requires Microsoft.Component.MSBuild `
+    -requires Microsoft.VisualStudio.Component.VSSDK `
+    -requires Microsoft.VisualStudio.Component.Roslyn.Compiler | ConvertFrom-Json
 
   if ($lastExitCode -ne 0) {
     Write-Host "Failed to locate Visual Studio (exit code '$lastExitCode')." -ForegroundColor Red
     ExitWithExitCode $lastExitCode
   }
 
-  return $vsInstallDir
+  # use first matching instance
+  return $vsInfo[0]
+}
+
+function ConfigureTools { 
+  # Include custom tools configuration
+  $script = Join-Path $EngRoot "configure-toolset.ps1"
+
+  if (Test-Path $script) {
+    . $script
+  }
 }
 
 function InitializeTools() {
+  ConfigureTools
+
   $tools = $GlobalJson.tools
 
+  # Initialize dotnet cli if listed in 'tools'
+  $dotnetRoot = $null
   if ((Get-Member -InputObject $tools -Name "dotnet") -ne $null) {
-    $dotnetRoot = InitializeDotNetCli
+    $dotnetRoot = InitializeDotNetCli -install:$restore
+  }
 
-    # by default build with dotnet cli:
+  if (-not $msbuildEngine) {
+    # Presence of vswhere.version indicates the repo needs to build using VS msbuild.
+    if ((Get-Member -InputObject $tools -Name "vswhere") -ne $null) {
+      $msbuildEngine = "vs"
+    } elseif ($dotnetRoot -ne $null) {
+      $msbuildEngine = "dotnet"
+    } else {
+      Write-Host "-msbuildEngine must be specified, or /global.json must specify 'tools.dotnet' or 'tools.vswhere'." -ForegroundColor Red
+      ExitWithExitCode 1
+    }
+  }
+
+  if ($msbuildEngine -eq "dotnet") {
+    if (!$dotnetRoot) {
+      Write-Host "/global.json must specify 'tools.dotnet'." -ForegroundColor Red
+      ExitWithExitCode 1
+    }
+
     $script:buildDriver = Join-Path $dotnetRoot "dotnet.exe"
     $script:buildArgs = "msbuild"
-  }
-
-  if ((Get-Member -InputObject $tools -Name "vswhere") -ne $null) {
+  } elseif ($msbuildEngine -eq "vs") {
     $vsInstallDir = InitializeVisualStudioBuild
 
-    # Presence of vswhere.version indicates the repo needs to build using VS msbuild:
     $script:buildDriver = Join-Path $vsInstallDir "MSBuild\15.0\Bin\msbuild.exe"
-    if ($ci) { $nodereuse = $false }
-  }
-
-  if ($buildDriver -eq $null) {
-    Write-Host "/global.json must either specify 'tools.dotnet' or 'tools.vswhere'." -ForegroundColor Red
+    $script:buildArgs = ""
+  } else {
+    Write-Host "Unexpected value of -msbuildEngine: '$msbuildEngine'." -ForegroundColor Red
     ExitWithExitCode 1
   }
 
@@ -132,7 +192,8 @@ function InitializeTools() {
 }
 
 function InitializeToolset([string] $buildDriver, [string]$buildArgs) {
-  $toolsetLocationFile = Join-Path $ToolsetDir "$ToolsetVersion.txt"
+  $toolsetVersion = $GlobalJson.'msbuild-sdks'.'Microsoft.DotNet.Arcade.Sdk'
+  $toolsetLocationFile = Join-Path $ToolsetDir "$toolsetVersion.txt"
 
   if (Test-Path $toolsetLocationFile) {
     $path = Get-Content $toolsetLocationFile -TotalCount 1
@@ -143,7 +204,7 @@ function InitializeToolset([string] $buildDriver, [string]$buildArgs) {
   }
 
   if (-not $restore) {
-    Write-Host  "Toolset version $ToolsetVersion has not been restored."
+    Write-Host  "Toolset version $toolsetVersion has not been restored."
     ExitWithExitCode 1
   }
 
@@ -171,7 +232,7 @@ function InitializeCustomToolset {
     return
   }
 
-  $script = Join-Path $EngRoot "RestoreToolset.ps1"
+  $script = Join-Path $EngRoot "restore-toolset.ps1"
 
   if (Test-Path $script) {
     . $script
@@ -193,65 +254,30 @@ function Stop-Processes() {
 }
 
 function MsBuild() {
-  $msbuildArgs = "$buildArgs /m /nologo /clp:Summary /v:$verbosity"
-  $extraArgs = "$args"
-
-  if ($warnaserror) {
-    $msbuildArgs += " /warnaserror"
-  }
-
-  $msbuildArgs += " /nr:$nodereuse"
-
-  Write-Host "`"$buildDriver`" $msbuildArgs $extraArgs"
-  Invoke-Expression "& `"$buildDriver`" $msbuildArgs $extraArgs"
-
-  return $lastExitCode
+  $warnaserrorSwitch = if ($warnaserror) { "/warnaserror" } else { "" }
+  & $buildDriver $buildArgs $warnaserrorSwitch /m /nologo /clp:Summary /v:$verbosity /nr:$nodereuse $args
 }
 
-function InstallDarcCli {
-  $DarcCliPackageName = "microsoft.dotnet.darc"
-  $ToolList = Invoke-Expression "$buildDriver tool list -g"
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+$EngRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+$ArtifactsDir = Join-Path $RepoRoot "artifacts"
+$ToolsetDir = Join-Path $ArtifactsDir "toolset"
+$LogDir = Join-Path (Join-Path $ArtifactsDir "log") $configuration
+$TempDir = Join-Path (Join-Path $ArtifactsDir "tmp") $configuration
+$GlobalJson = Get-Content -Raw -Path (Join-Path $RepoRoot "global.json") | ConvertFrom-Json
 
-  if ($ToolList -like "*$DarcCliPackageName*") {
-    Invoke-Expression "$buildDriver tool uninstall $DarcCliPackageName -g"
-  }
-
-  Write-Host "Installing Darc CLI version $toolsetVersion..."
-  Write-Host "You may need to restart your command window if this is the first dotnet tool you have installed."
-  Invoke-Expression "$buildDriver tool install $DarcCliPackageName --version $toolsetVersion -v $verbosity -g"
+if ($env:NUGET_PACKAGES -eq $null) {
+  # Use local cache on CI to ensure deterministic build,
+  # use global cache in dev builds to avoid cost of downloading packages.
+  $env:NUGET_PACKAGES = if ($ci) { Join-Path $RepoRoot ".packages" }
+                        else { Join-Path $env:UserProfile ".nuget\packages" }
 }
 
-try {
-  $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-  $EngRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-  $ArtifactsDir = Join-Path $RepoRoot "artifacts"
-  $ToolsetDir = Join-Path $ArtifactsDir "toolset"
-  $LogDir = Join-Path (Join-Path $ArtifactsDir "log") $configuration
-  $TempDir = Join-Path (Join-Path $ArtifactsDir "tmp") $configuration
-  $GlobalJson = Get-Content -Raw -Path (Join-Path $RepoRoot "global.json") | ConvertFrom-Json
-  $ToolsetVersion = $GlobalJson.'msbuild-sdks'.'Microsoft.DotNet.Arcade.Sdk'
+Create-Directory $ToolsetDir
+Create-Directory $LogDir
 
-  if ($env:NUGET_PACKAGES -eq $null) {
-    # Use local cache on CI to ensure deterministic build,
-    # use global cache in dev builds to avoid cost of downloading packages.
-    $env:NUGET_PACKAGES = if ($ci) { Join-Path $RepoRoot ".packages" }
-                          else { Join-Path $env:UserProfile ".nuget\packages" }
-  }
-
-  Create-Directory $ToolsetDir
-  Create-Directory $LogDir
-
-  if ($ci) {
-    Create-Directory $TempDir
-    $env:TEMP = $TempDir
-    $env:TMP = $TempDir
-  }
-
-  InitializeTools
-}
-catch {
-  Write-Host $_
-  Write-Host $_.Exception
-  Write-Host $_.ScriptStackTrace
-  ExitWithExitCode 1
+if ($ci) {
+  Create-Directory $TempDir
+  $env:TEMP = $TempDir
+  $env:TMP = $TempDir
 }
