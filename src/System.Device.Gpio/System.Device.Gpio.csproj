@@ -22,8 +22,6 @@
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <!--Excluding Linux implementations-->
     <Compile Remove="**\*.Linux.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="Windows.Devices">
       <HintPath>winmd\Windows.Devices.winmd</HintPath>
       <IsWinMDFile>true</IsWinMDFile>
