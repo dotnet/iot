@@ -14,7 +14,7 @@ namespace System.Device.Gpio.Drivers
     {
         #region Fields
         private static readonly WinGpio.GpioController s_winGpioController = WinGpio.GpioController.GetDefault();
-        private readonly Dictionary<int, DevicePin> _openPins = new Dictionary<int, DevicePin>();
+        private readonly Dictionary<int, Windows10DriverPin> _openPins = new Dictionary<int, Windows10DriverPin>();
         #endregion Fields
 
         #region GpioDrive Overrides
@@ -23,7 +23,7 @@ namespace System.Device.Gpio.Drivers
 
         protected override void Dispose(bool disposing)
         {
-            foreach (DevicePin devicePin in _openPins.Values)
+            foreach (Windows10DriverPin devicePin in _openPins.Values)
             {
                 devicePin.Dispose();
             }
@@ -36,7 +36,7 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void ClosePin(int pinNumber)
         {
-            if (_openPins.TryGetValue(pinNumber, out DevicePin pin))
+            if (_openPins.TryGetValue(pinNumber, out Windows10DriverPin pin))
             {
                 pin.ClosePin();
                 _openPins.Remove(pinNumber);
@@ -63,7 +63,7 @@ namespace System.Device.Gpio.Drivers
             }
 
             WinGpio.GpioPin windowsPin = s_winGpioController.OpenPin(pinNumber, WinGpio.GpioSharingMode.Exclusive);
-            _openPins[pinNumber] = new DevicePin(this, windowsPin);
+            _openPins[pinNumber] = new Windows10DriverPin(this, windowsPin);
         }
 
         protected internal override PinValue Read(int pinNumber) => VerifyPinIsOpen(pinNumber, nameof(pinNumber)).Read();
@@ -84,9 +84,9 @@ namespace System.Device.Gpio.Drivers
 
         #region Private Implementation
 
-        private DevicePin VerifyPinIsOpen(int pinNumber, string argumentName)
+        private Windows10DriverPin VerifyPinIsOpen(int pinNumber, string argumentName)
         {
-            if (!_openPins.TryGetValue(pinNumber, out DevicePin devicePin))
+            if (!_openPins.TryGetValue(pinNumber, out Windows10DriverPin devicePin))
             {
                 throw new InvalidOperationException($"Specified GPIO pin is not open: {pinNumber}");
             }

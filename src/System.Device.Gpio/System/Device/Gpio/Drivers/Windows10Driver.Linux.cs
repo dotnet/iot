@@ -8,6 +8,11 @@ namespace System.Device.Gpio.Drivers
 {
     public class Windows10Driver : GpioDriver
     {
+        public Windows10Driver()
+        {
+            throw new PlatformNotSupportedException();
+        }
+
         protected internal override int PinCount => throw new PlatformNotSupportedException();
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)

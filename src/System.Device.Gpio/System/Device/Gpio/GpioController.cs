@@ -32,7 +32,7 @@ namespace System.Device.Gpio
         /// <summary>
         /// Default controller. Will use the logical pin numbering scheme as default.
         /// </summary>
-        public GpioController() 
+        public GpioController()
             : this(PinNumberingScheme.Logical)
         {
         }
@@ -203,7 +203,7 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
-        /// Async call to wait till canceled to see if an event is received. 
+        /// Async call to wait till canceled to see if an event is received.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <param name="eventType">The event types to listen for.</param>
