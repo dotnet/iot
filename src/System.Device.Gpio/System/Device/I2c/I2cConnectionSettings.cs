@@ -16,7 +16,7 @@ namespace System.Device.I2c
         /// </summary>
         /// <param name="busId">The bus in which the device will be connected to.</param>
         /// <param name="deviceAddress">The I2c address of the device.</param>
-        public I2cConnectionSettings(uint busId, uint deviceAddress)
+        public I2cConnectionSettings(int busId, int deviceAddress)
         {
             BusId = busId;
             DeviceAddress = deviceAddress;
@@ -25,10 +25,10 @@ namespace System.Device.I2c
         /// <summary>
         /// The bus in which the device will be connected to.
         /// </summary>
-        public uint BusId { get; }
+        public int BusId { get; }
         /// <summary>
         /// The I2c address of the device.
         /// </summary>
-        public uint DeviceAddress { get; }
+        public int DeviceAddress { get; }
     }
 }

@@ -4,7 +4,7 @@
 
 namespace System.Device.I2c
 {
-    public class UnixI2cDevice : II2cDevice
+    public class UnixI2cDevice : I2cDevice
     {
         private I2cConnectionSettings _settings;
         private const string _defaultDevicePath = "/dev/i2c";
@@ -19,69 +19,36 @@ namespace System.Device.I2c
 
         public string DevicePath { get; set; }
 
+        public override I2cConnectionSettings ConnectionSettings => throw new NotImplementedException();
+
         private unsafe void Initialize()
         {
             throw new NotImplementedException();
         }
 
-        public void Dispose()
+        public override byte ReadByte(int address)
         {
             throw new NotImplementedException();
         }
 
-        public I2cConnectionSettings GetConnectionSettings()
+        public override void Read(int address, Span<byte> buffer)
         {
             throw new NotImplementedException();
         }
 
-        public void Read(byte[] buffer, int index, int count)
+        public override void WriteByte(int address, byte data)
         {
             throw new NotImplementedException();
         }
 
-        public byte ReadByte()
+        public override void Write(int address, Span<byte> data)
         {
             throw new NotImplementedException();
         }
 
-        public ushort ReadUInt16()
+        public override void Dispose(bool disposing)
         {
-            throw new NotImplementedException();
-        }
-
-        public uint ReadUInt32()
-        {
-            throw new NotImplementedException();
-        }
-
-        public ulong ReadUInt64()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Write(byte[] buffer, int index, int count)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WriteByte(byte value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WriteUInt16(ushort value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WriteUInt32(uint value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WriteUInt64(ulong value)
-        {
-            throw new NotImplementedException();
+            base.Dispose(disposing);
         }
     }
 }
