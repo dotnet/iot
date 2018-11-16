@@ -19,12 +19,9 @@ namespace System.Device.I2c
 
         public string DevicePath { get; set; }
 
-        private unsafe void Initialize()
-        {
-            throw new NotImplementedException();
-        }
+        public override I2cConnectionSettings ConnectionSettings => throw new NotImplementedException();
 
-        public override I2cConnectionSettings GetConnectionSettings()
+        private unsafe void Initialize()
         {
             throw new NotImplementedException();
         }

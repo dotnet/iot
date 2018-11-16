@@ -6,7 +6,7 @@ namespace System.Device.Spi
 {
     public abstract class SpiDevice : IDisposable
     {
-        public abstract SpiConnectionSettings GetConnectionSettings();
+        public abstract SpiConnectionSettings ConnectionSettings { get; }
         public abstract byte ReadByte(int address);
         public abstract void Read(int address, Span<byte> buffer);
         public abstract void WriteByte(int address, byte data);

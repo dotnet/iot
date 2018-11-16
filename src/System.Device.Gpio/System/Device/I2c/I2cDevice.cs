@@ -6,7 +6,7 @@ namespace System.Device.I2c
 {
     public abstract class I2cDevice : IDisposable
     {
-        public abstract I2cConnectionSettings GetConnectionSettings();
+        public abstract I2cConnectionSettings ConnectionSettings { get; }
         public abstract byte ReadByte(int address);
         public abstract void Read(int address, Span<byte> buffer);
         public abstract void WriteByte(int address, byte data);

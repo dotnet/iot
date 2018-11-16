@@ -19,12 +19,9 @@ namespace System.Device.Spi
 
         public string DevicePath { get; set; }
 
-        private unsafe void Initialize()
-        {
-            throw new NotImplementedException();
-        }
+        public override SpiConnectionSettings ConnectionSettings => throw new NotImplementedException();
 
-        public override SpiConnectionSettings GetConnectionSettings()
+        private unsafe void Initialize()
         {
             throw new NotImplementedException();
         }
