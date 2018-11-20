@@ -36,11 +36,11 @@ namespace System.Device.Gpio
                     {
                         if (match.Groups[1].Value == _raspberryPiHardware)
                         {
-                            return new LinuxRaspberryPi3Driver();
+                            return new RaspberryPi3Driver();
                         }
                         if (match.Groups[1].Value == _hummingBoardHardware)
                         {
-                            return new LinuxHummingboardDriver();
+                            return new HummingboardDriver();
                         }
                         return new UnixDriver();
                     }

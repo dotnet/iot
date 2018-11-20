@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace System.Device.Gpio.Drivers
 {
-    public class LinuxHummingboardDriver : GpioDriver
+    public partial class RaspberryPi3Driver : GpioDriver
     {
         protected internal override int PinCount => throw new NotImplementedException();
 
@@ -22,11 +22,6 @@ namespace System.Device.Gpio.Drivers
         }
 
         protected internal override void ClosePin(int pinNumber)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
             throw new NotImplementedException();
         }

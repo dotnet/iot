@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace System.Device.Gpio.Drivers
 {
-    public class Windows10Driver : GpioDriver
+    public partial class Windows10Driver : GpioDriver
     {
         public Windows10Driver()
         {
