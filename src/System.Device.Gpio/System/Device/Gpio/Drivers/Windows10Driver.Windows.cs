@@ -10,7 +10,7 @@ using WinGpio = global::Windows.Devices.Gpio;
 
 namespace System.Device.Gpio.Drivers
 {
-    public partial class Windows10Driver : GpioDriver
+    public class Windows10Driver : GpioDriver
     {
         #region Fields
         private static readonly WinGpio.GpioController s_winGpioController = WinGpio.GpioController.GetDefault();

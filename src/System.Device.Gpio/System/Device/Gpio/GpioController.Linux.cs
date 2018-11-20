@@ -10,6 +10,10 @@ namespace System.Device.Gpio
 {
     public sealed partial class GpioController
     {
+        private const string CpuInfoPath = "/proc/cpuinfo";
+        private const string RaspberryPiHardware = "BCM2835";
+        private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
+
         /// <summary>
         /// Controller that takes in a numbering scheme. Will default to use the driver that best applies given the platform the program is running on.
         /// </summary>
@@ -25,7 +29,7 @@ namespace System.Device.Gpio
         /// <returns>A driver which works on the current running board.</returns>
         private static GpioDriver GetBestDriverForBoard()
         {
-            string[] cpuInfoLines = File.ReadAllLines(_cpuInfoPath);
+            string[] cpuInfoLines = File.ReadAllLines(CpuInfoPath);
             Regex regex = new Regex(@"Hardware\s*:\s*(.*)");
             foreach (string cpuInfoLine in cpuInfoLines)
             {
@@ -34,11 +38,11 @@ namespace System.Device.Gpio
                 {
                     if (match.Groups.Count > 1)
                     {
-                        if (match.Groups[1].Value == _raspberryPiHardware)
+                        if (match.Groups[1].Value == RaspberryPiHardware)
                         {
                             return new RaspberryPi3Driver();
                         }
-                        if (match.Groups[1].Value == _hummingBoardHardware)
+                        if (match.Groups[1].Value == HummingBoardHardware)
                         {
                             return new HummingboardDriver();
                         }
