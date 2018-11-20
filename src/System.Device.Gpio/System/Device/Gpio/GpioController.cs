@@ -20,9 +20,6 @@ namespace System.Device.Gpio
     {
         private GpioDriver _driver;
         private HashSet<int> _openPins;
-        private const string _cpuInfoPath = "/proc/cpuinfo";
-        private const string _raspberryPiHardware = "BCM2835";
-        private const string _hummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
 
         /// <summary>
         /// The numbering scheme used to identify pins on the board.
