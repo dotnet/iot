@@ -163,7 +163,7 @@ namespace System.Device.Gpio.Drivers
                 case PinMode.InputPullUp:
                     return WinGpio.GpioPinDriveMode.InputPullUp;
                 default:
-                    throw new NotSupportedException($"GPIO pin mode not supported: {mode}");
+                    throw new ArgumentException($"GPIO pin mode not supported: {mode}", nameof(mode));
             }
         }
 
@@ -181,7 +181,7 @@ namespace System.Device.Gpio.Drivers
                 case WinGpio.GpioPinDriveMode.InputPullUp:
                     return PinMode.InputPullUp;
                 default:
-                    throw new NotSupportedException($"GPIO pin mode not supported: {mode}");
+                    throw new ArgumentException($"GPIO pin mode not supported: {mode}", nameof(mode));
             }
         }
 
@@ -195,7 +195,7 @@ namespace System.Device.Gpio.Drivers
                 case WinGpio.GpioPinValue.High:
                     return PinValue.High;
                 default:
-                    throw new NotSupportedException($"GPIO pin value not supported: {value}");
+                    throw new ArgumentException($"GPIO pin value not supported: {value}", nameof(value));
             }
         }
 
@@ -209,21 +209,21 @@ namespace System.Device.Gpio.Drivers
                 case PinValue.High:
                     return WinGpio.GpioPinValue.High;
                 default:
-                    throw new NotSupportedException($"GPIO pin value not supported: {value}");
+                    throw new ArgumentException($"GPIO pin value not supported: {value}", nameof(value));
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static PinEventTypes GpioEdgeToPinEventType(WinGpio.GpioPinEdge value)
+        private static PinEventTypes GpioEdgeToPinEventType(WinGpio.GpioPinEdge edge)
         {
-            switch (value)
+            switch (edge)
             {
                 case WinGpio.GpioPinEdge.FallingEdge:
                     return PinEventTypes.Falling;
                 case WinGpio.GpioPinEdge.RisingEdge:
                     return PinEventTypes.Rising;
                 default:
-                    throw new NotSupportedException($"GPIO pin edge value not supported: {value}");
+                    throw new ArgumentException($"GPIO pin edge value not supported: {edge}", nameof(edge));
             }
         }
 

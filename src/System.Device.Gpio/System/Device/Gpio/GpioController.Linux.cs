@@ -44,7 +44,7 @@ namespace System.Device.Gpio
                         }
                         if (match.Groups[1].Value == HummingBoardHardware)
                         {
-                            return new HummingboardDriver();
+                            return new HummingBoardDriver();
                         }
                         return new UnixDriver();
                     }
