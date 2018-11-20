@@ -107,7 +107,7 @@ namespace System.Device.Gpio
             {
                 throw new InvalidOperationException("Can not close a pin that is not yet opened.");
             }
-            _driver.ClosePin(pinNumber);
+            _driver.ClosePin(logicalPinNumber);
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace System.Device.Gpio
             {
                 throw new InvalidOperationException("The pin does not support the mode selected.");
             }
-            _driver.SetPinMode(pinNumber, mode);
+            _driver.SetPinMode(logicalPinNumber, mode);
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace System.Device.Gpio
             {
                 throw new InvalidOperationException("Can not read from a pin that is not yet opened.");
             }
-            return _driver.Read(pinNumber);
+            return _driver.Read(logicalPinNumber);
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace System.Device.Gpio
             {
                 throw new InvalidOperationException("Can not write to a pin that is not yet opened.");
             }
-            _driver.Write(pinNumber, value);
+            _driver.Write(logicalPinNumber, value);
         }
 
         /// <summary>
