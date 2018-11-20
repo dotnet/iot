@@ -4,7 +4,7 @@
 
 namespace System.Device.Gpio.Drivers
 {
-    public partial class HummingboardDriver  // Different base classes declared in HummingboardDriver.Linux.cs and HummingboardDriver.Windows.cs
+    public partial class HummingBoardDriver  // Different base classes declared in HummingboardDriver.Linux.cs and HummingboardDriver.Windows.cs
     {
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
