@@ -4,7 +4,7 @@
     <RuntimeIdentifiers>win;linux</RuntimeIdentifiers>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- Only produce reference assembly in one of our inner builds -->
-    <ProduceReferenceAssembly Condition="'$(TargetsWindows)' == 'true'">true</ProduceReferenceAssembly>
+    <ProduceReferenceAssembly Condition="'$(TargetsLinux)' == 'true'">true</ProduceReferenceAssembly>
     <TargetRefPath>$(OutputPath)$(TargetFramework)\$(MSBuildProjectName).dll</TargetRefPath>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
