@@ -6,7 +6,7 @@ using CommandLine;
 
 namespace GpioRunner
 {
-    [Verb("button-wait", HelpText = "Uses WaitForEvenAsync to detect button presses, optionally showing the state on an LED.")]
+    [Verb("button-wait", HelpText = "Uses WaitForEventAsync to detect button presses, optionally showing the state on an LED.")]
     public class ButtonWaitCommand : GpioDriverCommand, ICommandVerbAsync
     {
         public async Task<int> ExecuteAsync()
