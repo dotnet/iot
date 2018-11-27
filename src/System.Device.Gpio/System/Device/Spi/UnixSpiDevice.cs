@@ -26,22 +26,22 @@ namespace System.Device.Spi
             throw new NotImplementedException();
         }
 
-        public override byte ReadByte(int address)
+        public override byte ReadByte()
         {
             throw new NotImplementedException();
         }
 
-        public override void Read(int address, Span<byte> buffer)
+        public override void Read(Span<byte> buffer)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteByte(int address, byte data)
+        public override void WriteByte(byte data)
         {
             throw new NotImplementedException();
         }
 
-        public override void Write(int address, Span<byte> data)
+        public override void Write(Span<byte> data)
         {
             throw new NotImplementedException();
         }
