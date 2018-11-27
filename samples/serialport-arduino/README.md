@@ -2,7 +2,7 @@
 
 https://www.youtube.com/watch?v=5UokJM3LIfs
 
-<img src="setup-close.png" width="400px" />
+<img src="setup-close.jpg" width="400px" />
 
 ## Overview
 
