@@ -1,13 +1,8 @@
 # Controlling Arduino with .NET using Raspberry Pi
 
-## Video
+https://www.youtube.com/watch?v=5UokJM3LIfs
 
-[![Alt text](https://img.youtube.com/vi/5UokJM3LIfs/0.jpg)](https://www.youtube.com/watch?v=5UokJM3LIfs)
-
-## Pictures
-
-![Serial Port - Arduino](setup-close.png)
-![Serial Port - Arduino](setup-full.jpg)
+<img src="setup-close.png" width="400px" />
 
 ## Overview
 
@@ -28,7 +23,7 @@ Note: If you're planning to connect UART with i.e. RS232 you will need converter
 
 [Fritzing Diagram](arduino-pi-sp.fzz) - `Arduino Playground Express` part is missing by default in Fritzing - it can be downloaded [here](https://github.com/adafruit/Fritzing-Library/blob/master/parts/Adafruit%20Circuit%20Playground%20Express.fzpz)
 
-![Arduino - RPi - UART](arduino-pi-sp_bb.png)
+<img src="arduino-pi-sp_bb.png" width="300px" />
 
 ## Communication protocol
 
@@ -99,3 +94,5 @@ Please refer to Arduino tutorials on how to use Arduino sketch files and how to 
 The example was built using [Arduino IDE](https://www.arduino.cc/en/Main/Software).
 
 [See Arduino sketch file](uart-demo.ino)
+
+<img src="setup-full.jpg" width="400px" />
