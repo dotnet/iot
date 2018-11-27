@@ -10,13 +10,12 @@ namespace System.Device.Spi
     public class Windows10SpiDevice : SpiDevice
     {
         private SpiConnectionSettings _settings;
-        private WinSpi.SpiConnectionSettings _winSettings;
         private WinSpi.SpiDevice _winDevice;
 
         public Windows10SpiDevice(SpiConnectionSettings settings)
         {
             _settings = settings;
-            _winSettings = new WinSpi.SpiConnectionSettings(_settings.ChipSelectLine)
+            var winSettings = new WinSpi.SpiConnectionSettings(_settings.ChipSelectLine)
             {
                 Mode = ToWinMode(settings.Mode),
                 DataBitLength = settings.DataBitLength,
@@ -26,7 +25,7 @@ namespace System.Device.Spi
             string deviceSelector = WinSpi.SpiDevice.GetDeviceSelector($"SPI{settings.BusId}");
 
             DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).GetResults();
-            _winDevice = WinSpi.SpiDevice.FromIdAsync(deviceInformationCollection[0].Id, _winSettings).GetResults();
+            _winDevice = WinSpi.SpiDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).GetResults();
         }
 
         public override SpiConnectionSettings ConnectionSettings => _settings;
