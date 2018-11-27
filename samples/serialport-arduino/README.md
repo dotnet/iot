@@ -1,5 +1,9 @@
 # Controlling Arduino with .NET using Raspberry Pi
 
+[![Alt text](https://img.youtube.com/vi/5UokJM3LIfs/0.jpg)](https://www.youtube.com/watch?v=5UokJM3LIfs)
+![Serial Port - Arduino](setup-close.png)
+![Serial Port - Arduino](setup-full.jpg)
+
 ## Overview
 
 This sample shows how to control Arduino with .NET using serial port.
