@@ -15,6 +15,7 @@ namespace System.Device.Gpio.Drivers
         private int _pollFileDescriptor = -1;
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
+        private static CancellationTokenSource s_EventThreadCancellationTokenSource = new CancellationTokenSource();
         private List<int> _exportedPins = new List<int>();
         private Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
         private int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
@@ -50,6 +51,7 @@ namespace System.Device.Gpio.Drivers
             {
                 try
                 {
+                    SetPinEventsToDetect(pinNumber, PinEventTypes.None);
                     File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinNumber.ToString());
                     _exportedPins.Remove(pinNumber);
                 }
@@ -370,6 +372,20 @@ namespace System.Device.Gpio.Drivers
 
         protected override void Dispose(bool disposing)
         {
+            _pinsToDetectEventsCount = 0;
+            if (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
+            {
+                s_EventThreadCancellationTokenSource.Cancel();
+                while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
+                {
+                    Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
+                }
+            }
+            foreach (UnixDriverDevicePin devicePin in _devicePins.Values)
+            {
+                devicePin.Dispose();
+            }
+            _devicePins.Clear();
             if (_pollFileDescriptor != -1)
             {
                 Interop.close(_pollFileDescriptor);
@@ -379,12 +395,6 @@ namespace System.Device.Gpio.Drivers
             {
                 ClosePin(_exportedPins.FirstOrDefault());
             }
-            foreach (KeyValuePair<int, UnixDriverDevicePin> devicePin in _devicePins)
-            {
-                SetPinEventsToDetect(devicePin.Key, PinEventTypes.None);
-                devicePin.Value.Dispose();
-            }
-            _devicePins.Clear();
             base.Dispose(disposing);
         }
 
@@ -424,7 +434,7 @@ namespace System.Device.Gpio.Drivers
 
             while (_pinsToDetectEventsCount > 0)
             {
-                bool eventDetected = WasEventDetected(_pollFileDescriptor, -1,  out int pinNumber, new CancellationToken());
+                bool eventDetected = WasEventDetected(_pollFileDescriptor, -1,  out int pinNumber, s_EventThreadCancellationTokenSource.Token);
                 if (eventDetected)
                 {
                     PinEventTypes eventType = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
