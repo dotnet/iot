@@ -9,7 +9,7 @@ namespace System.Device.Spi
 {
     public class Windows10SpiDevice : SpiDevice
     {
-        private SpiConnectionSettings _settings;
+        private readonly SpiConnectionSettings _settings;
         private WinSpi.SpiDevice _winDevice;
 
         public Windows10SpiDevice(SpiConnectionSettings settings)
