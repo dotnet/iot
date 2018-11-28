@@ -13,80 +13,14 @@ namespace System.Device.Gpio.Drivers
 {
     public class UnixDriver : GpioDriver
     {
-        #region PInvokes
-        [DllImport("libc", SetLastError = true)]
-        private static extern int epoll_create(int size);
-        [DllImport("libc", SetLastError = true)]
-        private static extern int epoll_ctl(int epfd, PollOperations op, int fd, ref epoll_event events);
-        [DllImport("libc", SetLastError = true)]
-        private static extern int epoll_wait(int epfd, out epoll_event events, int maxevents, int timeout);
-        [DllImport("libc", SetLastError = true)]
-        private static extern int close(int fd);
-        [DllImport("libc", SetLastError = true)]
-        private static extern int open([MarshalAs(UnmanagedType.LPStr)] string pathname, FileOpenFlags flags);
-        [DllImport("libc", SetLastError = true)]
-        private static extern int lseek(int fd, int offset, SeekFlags whence);
-        [DllImport("libc", SetLastError = true)]
-        private static extern int read(int fd, IntPtr buf, int count);
-        #endregion //PInvokes
-
-        #region Private types
-        [Flags]
-        private enum FileOpenFlags
-        {
-            O_RDONLY = 0x00,
-            O_NONBLOCK = 0x800,
-            O_RDWR = 0x02,
-            O_SYNC = 0x101000
-        }
-
-        private enum SeekFlags
-        {
-            SEEK_SET = 0
-        }
-
-        private enum PollOperations
-        {
-            EPOLL_CTL_ADD = 1,
-            EPOLL_CTL_DEL = 2
-        }
-
-        private enum PollEvents : uint
-        {
-            EPOLLIN = 0x01,
-            EPOLLET = 0x80000000,
-            EPOLLPRI = 0x02
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        private struct epoll_data
-        {
-            [FieldOffset(0)]
-            public IntPtr ptr;
-            [FieldOffset(0)]
-            public int fd;
-            [FieldOffset(0)]
-            public uint u32;
-            [FieldOffset(0)]
-            public ulong u64;
-            [FieldOffset(0)]
-            public int pinNumber;
-        }
-
-        private struct epoll_event
-        {
-            public PollEvents events;
-            public epoll_data data;
-        }
-        #endregion // Private Types
-
-        private const string _gpioBasePath = "/sys/class/gpio";
+        private const string GpioBasePath = "/sys/class/gpio";
         private int _pollFileDescriptor = -1;
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
         private List<int> _exportedPins = new List<int>();
         private Dictionary<int, int> _pinValueFileDescriptors = new Dictionary<int, int>();
         private Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
+        private int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
 
         protected internal override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
 
@@ -94,13 +28,13 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void OpenPin(int pinNumber)
         {
-            string pinPath = $"{_gpioBasePath}/gpio{pinNumber}";
+            string pinPath = $"{GpioBasePath}/gpio{pinNumber}";
             // If the directory exists, this becomes a no-op since the pin might have been opened already by the some controller or somebody else.
             if (!Directory.Exists(pinPath))
             {
                 try
                 {
-                    File.WriteAllText(Path.Combine(_gpioBasePath, "export"), pinNumber.ToString());
+                    File.WriteAllText(Path.Combine(GpioBasePath, "export"), pinNumber.ToString());
                     _exportedPins.Add(pinNumber);
                 }
                 catch (UnauthorizedAccessException e)
@@ -113,13 +47,13 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void ClosePin(int pinNumber)
         {
-            string pinPath = $"{_gpioBasePath}/gpio{pinNumber}";
+            string pinPath = $"{GpioBasePath}/gpio{pinNumber}";
             // If the directory doesn't exist, this becomes a no-op since the pin was closed already.
             if (Directory.Exists(pinPath))
             {
                 try
                 {
-                    File.WriteAllText(Path.Combine(_gpioBasePath, "unexport"), pinNumber.ToString());
+                    File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinNumber.ToString());
                     _exportedPins.Remove(pinNumber);
                 }
                 catch (UnauthorizedAccessException e)
@@ -135,7 +69,7 @@ namespace System.Device.Gpio.Drivers
             {
                 throw new PlatformNotSupportedException("This driver is generic so it does not support Input Pull Down or Input Pull Up modes.");
             }
-            string directionPath = $"{_gpioBasePath}/gpio{pinNumber}/direction";
+            string directionPath = $"{GpioBasePath}/gpio{pinNumber}/direction";
             string sysfsMode = ConvertPinModeToSysFsMode(mode);
             if (File.Exists(directionPath))
             {
@@ -170,7 +104,7 @@ namespace System.Device.Gpio.Drivers
         protected internal override PinValue Read(int pinNumber)
         {
             PinValue result = default(PinValue);
-            string valuePath = $"{_gpioBasePath}/gpio{pinNumber}/value";
+            string valuePath = $"{GpioBasePath}/gpio{pinNumber}/value";
             if (File.Exists(valuePath))
             {
                 try
@@ -212,7 +146,7 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void Write(int pinNumber, PinValue value)
         {
-            string valuePath = $"{_gpioBasePath}/gpio{pinNumber}/value";
+            string valuePath = $"{GpioBasePath}/gpio{pinNumber}/value";
             if (File.Exists(valuePath))
             {
                 try
@@ -274,14 +208,14 @@ namespace System.Device.Gpio.Drivers
 
         private void SetPinEventsToDetect(int pinNumber, PinEventTypes eventType)
         {
-            string edgePath = Path.Combine(_gpioBasePath, $"gpio{pinNumber}", "edge");
+            string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber}", "edge");
             string stringValue = PinEventTypeToStringValue(eventType);
             File.WriteAllText(edgePath, stringValue);
         }
 
         private PinEventTypes GetPinEventsToDetect(int pinNumber)
         {
-            string edgePath = Path.Combine(_gpioBasePath, $"gpio{pinNumber}", "edge");
+            string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber}", "edge");
             string stringValue = File.ReadAllText(edgePath);
             return StringValueToPinEventType(stringValue);
 
@@ -329,7 +263,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (pollFileDescriptor == -1)
             {
-                pollFileDescriptor = epoll_create(1);
+                pollFileDescriptor = Interop.epoll_create(1);
                 if (pollFileDescriptor < 0)
                 {
                     throw new IOException("Error while trying to initialize pin interrupts.");
@@ -341,8 +275,8 @@ namespace System.Device.Gpio.Drivers
 
             if (!success)
             {
-                string valuePath = Path.Combine(_gpioBasePath, $"gpio{pinNumber}", "value");
-                fd = open(valuePath, FileOpenFlags.O_RDONLY | FileOpenFlags.O_NONBLOCK);
+                string valuePath = Path.Combine(GpioBasePath, $"gpio{pinNumber}", "value");
+                fd = Interop.open(valuePath, FileOpenFlags.O_RDONLY | FileOpenFlags.O_NONBLOCK);
                 if (fd < 0)
                 {
                     throw new IOException("Error while trying to initialize pin interrupts.");
@@ -360,14 +294,14 @@ namespace System.Device.Gpio.Drivers
                 }
             };
 
-            int result = epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, fd, ref epollEvent);
+            int result = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, fd, ref epollEvent);
             if (result == -1)
             {
                 throw new IOException("Error while trying to initialize pin interrupts.");
             }
 
             // Ignore first time because it will always return the current state.
-            epoll_wait(pollFileDescriptor, out _, 1, 0);
+            Interop.epoll_wait(pollFileDescriptor, out _, 1, 0);
         }
 
         private unsafe bool WasEventDetected(int pollFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
@@ -379,7 +313,7 @@ namespace System.Device.Gpio.Drivers
             while (!cancellationToken.IsCancellationRequested)
             {
                 // poll every 1 millisecond
-                int waitResult = epoll_wait(pollFileDescriptor, out epoll_event events, 1, Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds));
+                int waitResult = Interop.epoll_wait(pollFileDescriptor, out epoll_event events, 1, _pollingTimeoutInMilliseconds);
                 if (waitResult == -1)
                 {
                     throw new IOException("Error while trying to initialize pin interrupts.");
@@ -389,8 +323,8 @@ namespace System.Device.Gpio.Drivers
                     pinNumber = events.data.pinNumber;
                     int fd = _pinValueFileDescriptors[pinNumber];
 
-                    lseek(fd, 0, SeekFlags.SEEK_SET);
-                    int readResult = read(fd, bufPtr, 1);
+                    Interop.lseek(fd, 0, SeekFlags.SEEK_SET);
+                    int readResult = Interop.read(fd, bufPtr, 1);
 
                     if (readResult != 1)
                     {
@@ -398,7 +332,7 @@ namespace System.Device.Gpio.Drivers
                     }
                     return true;
                 }
-                Thread.Sleep(TimeSpan.FromMilliseconds(1));
+                Thread.Sleep(_pollingTimeoutInMilliseconds);
             }
             return false;
         }
@@ -412,7 +346,7 @@ namespace System.Device.Gpio.Drivers
                 events = PollEvents.EPOLLIN | PollEvents.EPOLLET | PollEvents.EPOLLPRI
             };
 
-            int result = epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_DEL, fd, ref epollEvent);
+            int result = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_DEL, fd, ref epollEvent);
             if (result == -1)
             {
                 throw new IOException("Error while trying to initialize pin interrupts.");
@@ -420,12 +354,12 @@ namespace System.Device.Gpio.Drivers
 
             if (closePinValueFileDescriptor)
             {
-                close(fd);
+                Interop.close(fd);
                 _pinValueFileDescriptors.Remove(pinNumber);
             }
             if (closePollFileDescriptor)
             {
-                close(pollFileDescriptor);
+                Interop.close(pollFileDescriptor);
                 pollFileDescriptor = -1;
             }
         }
@@ -434,7 +368,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (_pollFileDescriptor != -1)
             {
-                close(_pollFileDescriptor);
+                Interop.close(_pollFileDescriptor);
                 _pollFileDescriptor = -1;
             }
             while (_exportedPins.Count > 0)
@@ -443,7 +377,7 @@ namespace System.Device.Gpio.Drivers
             }
             foreach (int fd in _pinValueFileDescriptors.Values)
             {
-                close(fd);
+                Interop.close(fd);
             }
             _pinValueFileDescriptors.Clear();
             base.Dispose(disposing);
