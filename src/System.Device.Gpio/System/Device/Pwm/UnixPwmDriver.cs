@@ -4,29 +4,24 @@
 
 namespace System.Device.Pwm
 {
-    internal class UnixPwmDriver : IPwmDriver
+    internal class UnixPwmDriver : PwmDriver
     {
-        public void CloseChannel(int pwmChannel)
+        protected internal override void CloseChannel(int pwmChannel)
         {
             throw new NotImplementedException();
         }
 
-        public void Dispose()
+        protected internal override void OpenChannel(int pwmChannel)
         {
             throw new NotImplementedException();
         }
 
-        public void OpenChannel(int pwmChannel)
+        protected internal override void StartWriting(int pwmChannel, double frequency, double dutyCycle)
         {
             throw new NotImplementedException();
         }
 
-        public void Start(int pwmChannel, double frequency, double dutyCycle)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Stop(int pwmChannel)
+        protected internal override void StopWriting(int pwmChannel)
         {
             throw new NotImplementedException();
         }

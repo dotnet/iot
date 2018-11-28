@@ -6,14 +6,12 @@ namespace System.Device.Pwm
 {
     public sealed class PwmController : IDisposable
     {
-        private PwmController() { }
-
-        public static PwmController GetController()
+        public PwmController()
         {
             throw new NotImplementedException();
         }
 
-        public static PwmController GetController(IPwmDriver driver)
+        public PwmController(PwmDriver driver)
         {
             throw new NotImplementedException();
         }
@@ -33,23 +31,24 @@ namespace System.Device.Pwm
             throw new NotImplementedException();
         }
 
-        public void Start(int pwmChannel, double frequency, double dutyCycle)
+        public void StartWriting(int pwmChannel, double frequency, double dutyCycle)
         {
             throw new NotImplementedException();
         }
 
-        public void Stop(int pwmChannel)
+        public void StopWriting(int pwmChannel)
         {
             throw new NotImplementedException();
         }
 
-        public static bool IsPwmEnabled()
+        public void Dispose()
         {
-            throw new NotImplementedException();
+
         }
 
-        ~PwmController() { }
+        private void Dispose(bool disposing)
+        {
 
-        public void Dispose() { }
+        }
     }
 }
