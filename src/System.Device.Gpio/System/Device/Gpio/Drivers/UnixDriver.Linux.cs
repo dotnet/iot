@@ -18,7 +18,6 @@ namespace System.Device.Gpio.Drivers
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
         private List<int> _exportedPins = new List<int>();
-        private Dictionary<int, int> _pinValueFileDescriptors = new Dictionary<int, int>();
         private Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
         private int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
 
@@ -193,12 +192,13 @@ namespace System.Device.Gpio.Drivers
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
         {
             int pollFileDescriptor = -1;
+            int valueFileDescriptor = -1;
             SetPinEventsToDetect(pinNumber, eventType);
-            AddPinToPoll(pinNumber, ref pollFileDescriptor, out bool closePinValueFileDescriptor);
+            AddPinToPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, out bool closePinValueFileDescriptor);
 
-            bool eventDetected = WasEventDetected(pollFileDescriptor, out _, cancellationToken);
+            bool eventDetected = WasEventDetected(pollFileDescriptor, valueFileDescriptor, out _, cancellationToken);
 
-            RemovePinFromPoll(pinNumber, ref pollFileDescriptor, closePinValueFileDescriptor, closePollFileDescriptor: true);
+            RemovePinFromPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, closePinValueFileDescriptor, closePollFileDescriptor: true);
             return new WaitForEventResult
             {
                 TimedOut = !eventDetected,
@@ -259,7 +259,7 @@ namespace System.Device.Gpio.Drivers
             throw new ArgumentException("Invalid Pin Event Type", nameof(kind));
         }
 
-        private void AddPinToPoll(int pinNumber, ref int pollFileDescriptor, out bool closePinValueFileDescriptor)
+        private void AddPinToPoll(int pinNumber, ref int valueFileDescriptor, ref int pollFileDescriptor, out bool closePinValueFileDescriptor)
         {
             if (pollFileDescriptor == -1)
             {
@@ -271,17 +271,15 @@ namespace System.Device.Gpio.Drivers
             }
 
             closePinValueFileDescriptor = false;
-            bool success = _pinValueFileDescriptors.TryGetValue(pinNumber, out int fd);
 
-            if (!success)
+            if (valueFileDescriptor == -1)
             {
                 string valuePath = Path.Combine(GpioBasePath, $"gpio{pinNumber}", "value");
-                fd = Interop.open(valuePath, FileOpenFlags.O_RDONLY | FileOpenFlags.O_NONBLOCK);
-                if (fd < 0)
+                valueFileDescriptor = Interop.open(valuePath, FileOpenFlags.O_RDONLY | FileOpenFlags.O_NONBLOCK);
+                if (valueFileDescriptor < 0)
                 {
                     throw new IOException("Error while trying to initialize pin interrupts.");
                 }
-                _pinValueFileDescriptors[pinNumber] = fd;
                 closePinValueFileDescriptor = true;
             }
 
@@ -294,7 +292,7 @@ namespace System.Device.Gpio.Drivers
                 }
             };
 
-            int result = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, fd, ref epollEvent);
+            int result = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, valueFileDescriptor, ref epollEvent);
             if (result == -1)
             {
                 throw new IOException("Error while trying to initialize pin interrupts.");
@@ -304,7 +302,7 @@ namespace System.Device.Gpio.Drivers
             Interop.epoll_wait(pollFileDescriptor, out _, 1, 0);
         }
 
-        private unsafe bool WasEventDetected(int pollFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
+        private unsafe bool WasEventDetected(int pollFileDescriptor, int valueFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
         {
             char buf;
             IntPtr bufPtr = new IntPtr(&buf);
@@ -321,10 +319,15 @@ namespace System.Device.Gpio.Drivers
                 if (waitResult > 0)
                 {
                     pinNumber = events.data.pinNumber;
-                    int fd = _pinValueFileDescriptors[pinNumber];
 
-                    Interop.lseek(fd, 0, SeekFlags.SEEK_SET);
-                    int readResult = Interop.read(fd, bufPtr, 1);
+                    // valueFileDescriptor will be -1 when using the callback eventing. For WaitForEvent, the value will be set.
+                    if (valueFileDescriptor == -1)
+                    {
+                        valueFileDescriptor = _devicePins[pinNumber].FileDescriptor;
+                    }
+
+                    Interop.lseek(valueFileDescriptor, 0, SeekFlags.SEEK_SET);
+                    int readResult = Interop.read(valueFileDescriptor, bufPtr, 1);
 
                     if (readResult != 1)
                     {
@@ -337,16 +340,14 @@ namespace System.Device.Gpio.Drivers
             return false;
         }
 
-        private void RemovePinFromPoll(int pinNumber, ref int pollFileDescriptor, bool closePinValueFileDescriptor, bool closePollFileDescriptor)
+        private void RemovePinFromPoll(int pinNumber, ref int valueFileDescriptor, ref int pollFileDescriptor, bool closePinValueFileDescriptor, bool closePollFileDescriptor)
         {
-            int fd = _pinValueFileDescriptors[pinNumber];
-
             epoll_event epollEvent = new epoll_event
             {
                 events = PollEvents.EPOLLIN | PollEvents.EPOLLET | PollEvents.EPOLLPRI
             };
 
-            int result = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_DEL, fd, ref epollEvent);
+            int result = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_DEL, valueFileDescriptor, ref epollEvent);
             if (result == -1)
             {
                 throw new IOException("Error while trying to initialize pin interrupts.");
@@ -354,8 +355,8 @@ namespace System.Device.Gpio.Drivers
 
             if (closePinValueFileDescriptor)
             {
-                Interop.close(fd);
-                _pinValueFileDescriptors.Remove(pinNumber);
+                Interop.close(valueFileDescriptor);
+                valueFileDescriptor = -1;
             }
             if (closePollFileDescriptor)
             {
@@ -375,11 +376,11 @@ namespace System.Device.Gpio.Drivers
             {
                 ClosePin(_exportedPins.FirstOrDefault());
             }
-            foreach (int fd in _pinValueFileDescriptors.Values)
+            foreach (UnixDriverDevicePin devicePin in _devicePins.Values)
             {
-                Interop.close(fd);
+                devicePin.Dispose();
             }
-            _pinValueFileDescriptors.Clear();
+            _devicePins.Clear();
             base.Dispose(disposing);
         }
 
@@ -389,7 +390,7 @@ namespace System.Device.Gpio.Drivers
             {
                 _devicePins.Add(pinNumber, new UnixDriverDevicePin());
                 _pinsToDetectEventsCount++;
-                AddPinToPoll(pinNumber, ref _pollFileDescriptor, out _);
+                AddPinToPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, out _);
             }
             if (eventType.HasFlag(PinEventTypes.Rising))
                 _devicePins[pinNumber].ValueRising += callback;
@@ -419,7 +420,7 @@ namespace System.Device.Gpio.Drivers
 
             while (_pinsToDetectEventsCount > 0)
             {
-                bool eventDetected = WasEventDetected(_pollFileDescriptor, out int pinNumber, new CancellationToken());
+                bool eventDetected = WasEventDetected(_pollFileDescriptor, -1,  out int pinNumber, new CancellationToken());
                 if (eventDetected)
                 {
                     var args = new PinValueChangedEventArgs(GetPinEventsToDetect(pinNumber), pinNumber);
@@ -437,11 +438,12 @@ namespace System.Device.Gpio.Drivers
             _devicePins[pinNumber].ValueRising -= callback;
             if (_devicePins[pinNumber].IsCallbackListEmpty())
             {
-                _devicePins.Remove(pinNumber);
                 _pinsToDetectEventsCount--;
 
                 bool closePollFileDescriptor = (_pinsToDetectEventsCount == 0);
-                RemovePinFromPoll(pinNumber, ref _pollFileDescriptor, true, closePollFileDescriptor);
+                RemovePinFromPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, true, closePollFileDescriptor);
+                _devicePins[pinNumber].Dispose();
+                _devicePins.Remove(pinNumber);
             }
         }
     }

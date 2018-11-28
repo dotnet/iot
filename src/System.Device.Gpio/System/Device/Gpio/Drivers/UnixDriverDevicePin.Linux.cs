@@ -4,10 +4,17 @@
 
 namespace System.Device.Gpio.Drivers
 {
-    internal sealed class UnixDriverDevicePin
+    internal sealed class UnixDriverDevicePin : IDisposable
     {
+        public UnixDriverDevicePin()
+        {
+            FileDescriptor = -1;
+        }
+
         public event PinChangeEventHandler ValueRising;
         public event PinChangeEventHandler ValueFalling;
+
+        public int FileDescriptor;
 
         public void OnPinValueChanged(PinValueChangedEventArgs args)
         {
@@ -30,6 +37,16 @@ namespace System.Device.Gpio.Drivers
                 return ValueRising.GetInvocationList().Length == 0;
             }
             return ValueFalling.GetInvocationList().Length == 0 && ValueRising.GetInvocationList().Length == 0;
+        }
+
+        public void Dispose()
+        {
+            if (FileDescriptor != -1)
+            {
+                Interop.close(FileDescriptor);
+            }
+            ValueRising = null;
+            ValueFalling = null;
         }
     }
 }
