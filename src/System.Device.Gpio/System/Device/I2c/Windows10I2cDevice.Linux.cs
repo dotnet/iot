@@ -6,7 +6,8 @@ namespace System.Device.I2c
 {
     public class Windows10I2cDevice : I2cDevice
     {
-        public Windows10I2cDevice(I2cConnectionSettings settings) => throw new PlatformNotSupportedException();
+        public Windows10I2cDevice(I2cConnectionSettings settings) =>
+            throw new PlatformNotSupportedException($"The {GetType().Name} class is not available on Linux.");
 
         public override I2cConnectionSettings ConnectionSettings => throw new PlatformNotSupportedException();
 

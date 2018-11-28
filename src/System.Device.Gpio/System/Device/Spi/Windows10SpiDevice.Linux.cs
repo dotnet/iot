@@ -6,7 +6,8 @@ namespace System.Device.Spi
 {
     public class Windows10SpiDevice : SpiDevice
     {
-        public Windows10SpiDevice(SpiConnectionSettings settings) => throw new PlatformNotSupportedException();
+        public Windows10SpiDevice(SpiConnectionSettings settings) =>
+            throw new PlatformNotSupportedException($"The {GetType().Name} class is not available on Linux.");
 
         public override SpiConnectionSettings ConnectionSettings => throw new PlatformNotSupportedException();
 
