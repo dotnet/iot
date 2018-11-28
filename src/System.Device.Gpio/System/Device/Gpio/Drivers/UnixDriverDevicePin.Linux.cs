@@ -26,10 +26,12 @@ namespace System.Device.Gpio.Drivers
 
         public bool IsCallbackListEmpty()
         {
-            if (ValueRising == null && ValueFalling == null)
-                return true;
             if (ValueRising == null)
             {
+                if (ValueFalling == null)
+                {
+                    return true;
+                }
                 return ValueFalling.GetInvocationList().Length == 0;
             }
             if (ValueFalling == null)

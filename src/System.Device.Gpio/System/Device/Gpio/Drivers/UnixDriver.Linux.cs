@@ -326,9 +326,13 @@ namespace System.Device.Gpio.Drivers
                         valueFileDescriptor = _devicePins[pinNumber].FileDescriptor;
                     }
 
-                    Interop.lseek(valueFileDescriptor, 0, SeekFlags.SEEK_SET);
-                    int readResult = Interop.read(valueFileDescriptor, bufPtr, 1);
+                    int lseekResult = Interop.lseek(valueFileDescriptor, 0, SeekFlags.SEEK_SET);
+                    if (lseekResult == -1)
+                    {
+                        throw new IOException("Error while trying to initialize pin interrupts.");
+                    }
 
+                    int readResult = Interop.read(valueFileDescriptor, bufPtr, 1);
                     if (readResult != 1)
                     {
                         throw new IOException("Error while trying to initialize pin interrupts.");
