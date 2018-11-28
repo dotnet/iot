@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,8 +13,80 @@ namespace System.Device.Gpio.Drivers
 {
     public class UnixDriver : GpioDriver
     {
+        #region PInvokes
+        [DllImport("libc", SetLastError = true)]
+        private static extern int epoll_create(int size);
+        [DllImport("libc", SetLastError = true)]
+        private static extern int epoll_ctl(int epfd, PollOperations op, int fd, ref epoll_event events);
+        [DllImport("libc", SetLastError = true)]
+        private static extern int epoll_wait(int epfd, out epoll_event events, int maxevents, int timeout);
+        [DllImport("libc", SetLastError = true)]
+        private static extern int close(int fd);
+        [DllImport("libc", SetLastError = true)]
+        private static extern int open([MarshalAs(UnmanagedType.LPStr)] string pathname, FileOpenFlags flags);
+        [DllImport("libc", SetLastError = true)]
+        private static extern int lseek(int fd, int offset, SeekFlags whence);
+        [DllImport("libc", SetLastError = true)]
+        private static extern int read(int fd, IntPtr buf, int count);
+        #endregion //PInvokes
+
+        #region Private types
+        [Flags]
+        private enum FileOpenFlags
+        {
+            O_RDONLY = 0x00,
+            O_NONBLOCK = 0x800,
+            O_RDWR = 0x02,
+            O_SYNC = 0x101000
+        }
+
+        private enum SeekFlags
+        {
+            SEEK_SET = 0
+        }
+
+        private enum PollOperations
+        {
+            EPOLL_CTL_ADD = 1,
+            EPOLL_CTL_DEL = 2
+        }
+
+        private enum PollEvents : uint
+        {
+            EPOLLIN = 0x01,
+            EPOLLET = 0x80000000,
+            EPOLLPRI = 0x02
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        private struct epoll_data
+        {
+            [FieldOffset(0)]
+            public IntPtr ptr;
+            [FieldOffset(0)]
+            public int fd;
+            [FieldOffset(0)]
+            public uint u32;
+            [FieldOffset(0)]
+            public ulong u64;
+            [FieldOffset(0)]
+            public int pinNumber;
+        }
+
+        private struct epoll_event
+        {
+            public PollEvents events;
+            public epoll_data data;
+        }
+        #endregion // Private Types
+
         private const string _gpioBasePath = "/sys/class/gpio";
+        private int _pollFileDescriptor = -1;
+        private Thread _eventDetectionThread;
+        private int _pinsToDetectEventsCount;
         private List<int> _exportedPins = new List<int>();
+        private Dictionary<int, int> _pinValueFileDescriptors = new Dictionary<int, int>();
+        private Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
 
         protected internal override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
 
@@ -185,26 +258,257 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            int pollFileDescriptor = -1;
+            SetPinEventsToDetect(pinNumber, eventType);
+            AddPinToPoll(pinNumber, ref pollFileDescriptor, out bool closePinValueFileDescriptor);
+
+            bool eventDetected = WasEventDetected(pollFileDescriptor, out _, cancellationToken);
+
+            RemovePinFromPoll(pinNumber, ref pollFileDescriptor, closePinValueFileDescriptor, closePollFileDescriptor: true);
+            return new WaitForEventResult
+            {
+                TimedOut = !eventDetected,
+                EventType = eventType
+            };
+        }
+
+        private void SetPinEventsToDetect(int pinNumber, PinEventTypes eventType)
+        {
+            string edgePath = Path.Combine(_gpioBasePath, $"gpio{pinNumber}", "edge");
+            string stringValue = PinEventTypeToStringValue(eventType);
+            File.WriteAllText(edgePath, stringValue);
+        }
+
+        private PinEventTypes GetPinEventsToDetect(int pinNumber)
+        {
+            string edgePath = Path.Combine(_gpioBasePath, $"gpio{pinNumber}", "edge");
+            string stringValue = File.ReadAllText(edgePath);
+            return StringValueToPinEventType(stringValue);
+
+        }
+
+        private PinEventTypes StringValueToPinEventType(string value)
+        {
+            switch (value)
+            {
+                case "none":
+                    return PinEventTypes.None;
+                case "both":
+                    return PinEventTypes.Falling | PinEventTypes.Rising;
+                case "rising":
+                    return PinEventTypes.Rising;
+                case "falling":
+                    return PinEventTypes.Falling;
+                default:
+                    throw new ArgumentException("Invalid pin event value", value);
+            }
+        }
+
+        private string PinEventTypeToStringValue(PinEventTypes kind)
+        {
+            if (kind == PinEventTypes.None)
+            {
+                return "none";
+            }
+            if (kind.HasFlag(PinEventTypes.Falling) && kind.HasFlag(PinEventTypes.Rising))
+            {
+                return "both";
+            }
+            if (kind == PinEventTypes.Rising)
+            {
+                return "rising";
+            }
+            if (kind == PinEventTypes.Falling)
+            {
+                return "falling";
+            }
+            throw new ArgumentException("Invalid Pin Event Type", nameof(kind));
+        }
+
+        private void AddPinToPoll(int pinNumber, ref int pollFileDescriptor, out bool closePinValueFileDescriptor)
+        {
+            if (pollFileDescriptor == -1)
+            {
+                pollFileDescriptor = epoll_create(1);
+                if (pollFileDescriptor < 0)
+                {
+                    throw new IOException("Error while trying to initialize pin interrupts.");
+                }
+            }
+
+            closePinValueFileDescriptor = false;
+            bool success = _pinValueFileDescriptors.TryGetValue(pinNumber, out int fd);
+
+            if (!success)
+            {
+                string valuePath = Path.Combine(_gpioBasePath, $"gpio{pinNumber}", "value");
+                fd = open(valuePath, FileOpenFlags.O_RDONLY | FileOpenFlags.O_NONBLOCK);
+                if (fd < 0)
+                {
+                    throw new IOException("Error while trying to initialize pin interrupts.");
+                }
+                _pinValueFileDescriptors[pinNumber] = fd;
+                closePinValueFileDescriptor = true;
+            }
+
+            epoll_event epollEvent = new epoll_event
+            {
+                events = PollEvents.EPOLLIN | PollEvents.EPOLLET | PollEvents.EPOLLPRI,
+                data = new epoll_data()
+                {
+                    pinNumber = pinNumber
+                }
+            };
+
+            int result = epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, fd, ref epollEvent);
+            if (result == -1)
+            {
+                throw new IOException("Error while trying to initialize pin interrupts.");
+            }
+
+            // Ignore first time because it will always return the current state.
+            epoll_wait(pollFileDescriptor, out _, 1, 0);
+        }
+
+        private unsafe bool WasEventDetected(int pollFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
+        {
+            char buf;
+            IntPtr bufPtr = new IntPtr(&buf);
+            pinNumber = -1;
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                // poll every 1 millisecond
+                int waitResult = epoll_wait(pollFileDescriptor, out epoll_event events, 1, Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds));
+                if (waitResult == -1)
+                {
+                    throw new IOException("Error while trying to initialize pin interrupts.");
+                }
+                if (waitResult > 0)
+                {
+                    pinNumber = events.data.pinNumber;
+                    int fd = _pinValueFileDescriptors[pinNumber];
+
+                    lseek(fd, 0, SeekFlags.SEEK_SET);
+                    int readResult = read(fd, bufPtr, 1);
+
+                    if (readResult != 1)
+                    {
+                        throw new IOException("Error while trying to initialize pin interrupts.");
+                    }
+                    return true;
+                }
+                Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            }
+            return false;
+        }
+
+        private void RemovePinFromPoll(int pinNumber, ref int pollFileDescriptor, bool closePinValueFileDescriptor, bool closePollFileDescriptor)
+        {
+            int fd = _pinValueFileDescriptors[pinNumber];
+
+            epoll_event epollEvent = new epoll_event
+            {
+                events = PollEvents.EPOLLIN | PollEvents.EPOLLET | PollEvents.EPOLLPRI
+            };
+
+            int result = epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_DEL, fd, ref epollEvent);
+            if (result == -1)
+            {
+                throw new IOException("Error while trying to initialize pin interrupts.");
+            }
+
+            if (closePinValueFileDescriptor)
+            {
+                close(fd);
+                _pinValueFileDescriptors.Remove(pinNumber);
+            }
+            if (closePollFileDescriptor)
+            {
+                close(pollFileDescriptor);
+                pollFileDescriptor = -1;
+            }
         }
 
         protected override void Dispose(bool disposing)
         {
+            if (_pollFileDescriptor != -1)
+            {
+                close(_pollFileDescriptor);
+                _pollFileDescriptor = -1;
+            }
             while (_exportedPins.Count > 0)
             {
                 ClosePin(_exportedPins.FirstOrDefault());
             }
+            foreach (int fd in _pinValueFileDescriptors.Values)
+            {
+                close(fd);
+            }
+            _pinValueFileDescriptors.Clear();
             base.Dispose(disposing);
         }
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
-            throw new NotImplementedException();
+            if (!_devicePins.ContainsKey(pinNumber))
+            {
+                _devicePins.Add(pinNumber, new UnixDriverDevicePin());
+                _pinsToDetectEventsCount++;
+                AddPinToPoll(pinNumber, ref _pollFileDescriptor, out _);
+            }
+            if (eventType.HasFlag(PinEventTypes.Rising))
+                _devicePins[pinNumber].ValueRising += callback;
+            if (eventType.HasFlag(PinEventTypes.Falling))
+                _devicePins[pinNumber].ValueFalling += callback;
+            SetPinEventsToDetect(pinNumber, (GetPinEventsToDetect(pinNumber) | eventType));
+            InitializeEventDetectionThread();
+        }
+
+        private void InitializeEventDetectionThread()
+        {
+            if (_eventDetectionThread == null)
+            {
+                _eventDetectionThread = new Thread(DetectEvents)
+                {
+                    IsBackground = true
+                };
+
+                _eventDetectionThread.Start();
+            }
+        }
+
+        private unsafe void DetectEvents()
+        {
+            char buf;
+            IntPtr bufPtr = new IntPtr(&buf);
+
+            while (_pinsToDetectEventsCount > 0)
+            {
+                bool eventDetected = WasEventDetected(_pollFileDescriptor, out int pinNumber, new CancellationToken());
+                if (eventDetected)
+                {
+                    var args = new PinValueChangedEventArgs(GetPinEventsToDetect(pinNumber), pinNumber);
+                    _devicePins[pinNumber]?.OnPinValueChanged(args);
+                }
+            }
+            _eventDetectionThread = null;
         }
 
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
-            throw new NotImplementedException();
+            if (!_devicePins.ContainsKey(pinNumber))
+                throw new InvalidOperationException("Attempted to remove a callback for a pin that is not listening for events.");
+            _devicePins[pinNumber].ValueFalling -= callback;
+            _devicePins[pinNumber].ValueRising -= callback;
+            if (_devicePins[pinNumber].IsCallbackListEmpty())
+            {
+                _devicePins.Remove(pinNumber);
+                _pinsToDetectEventsCount--;
+
+                bool closePollFileDescriptor = (_pinsToDetectEventsCount == 0);
+                RemovePinFromPoll(pinNumber, ref _pollFileDescriptor, true, closePollFileDescriptor);
+            }
         }
     }
 }
