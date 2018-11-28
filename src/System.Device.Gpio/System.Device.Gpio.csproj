@@ -13,6 +13,7 @@
     <EmbeddedResource Remove="winmd\**" />
     <None Remove="winmd\**" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="4.5.0" /> <!-- This is Windows specific -->
+    <PackageReference Include="System.Runtime.WindowsRuntime" Version="4.3.0" /> <!-- This is Windows specific -->
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.1" />
     <PackageReference Include="System.Memory" Version="4.5.1" />
     <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" /> <!-- This is Windows specific -->
@@ -24,12 +25,16 @@
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <!--Excluding Linux implementations-->
     <Compile Remove="**\*.Linux.cs" />
-    <Reference Include="Windows.Devices">
-      <HintPath>winmd\Windows.Devices.winmd</HintPath>
+    <Reference Include="Windows.Devices.DevicesLowLevelContract">
+      <HintPath>winmd\Windows.Devices.DevicesLowLevelContract.winmd</HintPath>
       <IsWinMDFile>true</IsWinMDFile>
     </Reference>
-    <Reference Include="Windows.Foundation">
-      <HintPath>winmd\Windows.Foundation.winmd</HintPath>
+    <Reference Include="Windows.Foundation.FoundationContract">
+      <HintPath>winmd\Windows.Foundation.FoundationContract.winmd</HintPath>
+      <IsWinMDFile>true</IsWinMDFile>
+    </Reference>
+    <Reference Include="Windows.Foundation.UniversalApiContract">
+      <HintPath>winmd\Windows.Foundation.UniversalApiContract.winmd</HintPath>
       <IsWinMDFile>true</IsWinMDFile>
     </Reference>
   </ItemGroup>
