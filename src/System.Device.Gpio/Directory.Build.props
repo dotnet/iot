@@ -8,6 +8,12 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <PackageTags>.NET Core GPIO Pins BCM2835 Raspberry Pi IoT</PackageTags>
   </PropertyGroup>
+  
+  <!--Project Configurations properties for VS-->
+  <PropertyGroup>
+    <RuntimeIdentifier Condition="'$(Configuration)' == 'Windows-Debug'">win</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(Configuration)' == 'Linux-Debug'">linux</RuntimeIdentifier>
+  </PropertyGroup>
 
   <Import Project="..\..\Directory.Build.props" />
 </Project>
