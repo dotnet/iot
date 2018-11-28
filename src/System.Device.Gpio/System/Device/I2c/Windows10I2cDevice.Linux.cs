@@ -2,14 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Device.Spi
+namespace System.Device.I2c
 {
-    public class Windows10SpiDevice : SpiDevice
+    public class Windows10I2cDevice : I2cDevice
     {
-        public Windows10SpiDevice(SpiConnectionSettings settings) =>
+        public Windows10I2cDevice(I2cConnectionSettings settings) =>
             throw new PlatformNotSupportedException($"The {GetType().Name} class is not available on Linux.");
 
-        public override SpiConnectionSettings ConnectionSettings => throw new PlatformNotSupportedException();
+        public override I2cConnectionSettings ConnectionSettings => throw new PlatformNotSupportedException();
 
         public override byte ReadByte() => throw new PlatformNotSupportedException();
 
