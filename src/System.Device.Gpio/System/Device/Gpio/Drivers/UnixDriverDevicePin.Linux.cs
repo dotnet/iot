@@ -16,29 +16,17 @@ namespace System.Device.Gpio.Drivers
 
         public int FileDescriptor;
 
-        public void OnPinValueChanged(PinValueChangedEventArgs args)
+        public void OnPinValueChanged(PinValueChangedEventArgs args, PinEventTypes detectionOfEventTypes)
         {
-            if (args.ChangeType.HasFlag(PinEventTypes.Rising))
+            if (detectionOfEventTypes.HasFlag(PinEventTypes.Rising) && args.ChangeType == PinEventTypes.Rising)
                 ValueRising?.Invoke(this, args);
-            if (args.ChangeType.HasFlag(PinEventTypes.Falling))
+            if (detectionOfEventTypes.HasFlag(PinEventTypes.Falling) && args.ChangeType == PinEventTypes.Falling)
                 ValueFalling?.Invoke(this, args);
         }
 
         public bool IsCallbackListEmpty()
         {
-            if (ValueRising == null)
-            {
-                if (ValueFalling == null)
-                {
-                    return true;
-                }
-                return ValueFalling.GetInvocationList().Length == 0;
-            }
-            if (ValueFalling == null)
-            {
-                return ValueRising.GetInvocationList().Length == 0;
-            }
-            return ValueFalling.GetInvocationList().Length == 0 && ValueRising.GetInvocationList().Length == 0;
+            return ValueRising == null && ValueFalling == null;
         }
 
         public void Dispose()
@@ -46,6 +34,7 @@ namespace System.Device.Gpio.Drivers
             if (FileDescriptor != -1)
             {
                 Interop.close(FileDescriptor);
+                FileDescriptor = -1;
             }
             ValueRising = null;
             ValueFalling = null;

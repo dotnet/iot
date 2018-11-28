@@ -5,9 +5,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.Device.Gpio.Drivers
 {
@@ -223,6 +221,7 @@ namespace System.Device.Gpio.Drivers
 
         private PinEventTypes StringValueToPinEventType(string value)
         {
+            value = value.Trim();
             switch (value)
             {
                 case "none":
@@ -380,9 +379,10 @@ namespace System.Device.Gpio.Drivers
             {
                 ClosePin(_exportedPins.FirstOrDefault());
             }
-            foreach (UnixDriverDevicePin devicePin in _devicePins.Values)
+            foreach (KeyValuePair<int, UnixDriverDevicePin> devicePin in _devicePins)
             {
-                devicePin.Dispose();
+                SetPinEventsToDetect(devicePin.Key, PinEventTypes.None);
+                devicePin.Value.Dispose();
             }
             _devicePins.Clear();
             base.Dispose(disposing);
@@ -427,8 +427,9 @@ namespace System.Device.Gpio.Drivers
                 bool eventDetected = WasEventDetected(_pollFileDescriptor, -1,  out int pinNumber, new CancellationToken());
                 if (eventDetected)
                 {
-                    var args = new PinValueChangedEventArgs(GetPinEventsToDetect(pinNumber), pinNumber);
-                    _devicePins[pinNumber]?.OnPinValueChanged(args);
+                    PinEventTypes eventType = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                    var args = new PinValueChangedEventArgs(eventType, pinNumber);
+                    _devicePins[pinNumber]?.OnPinValueChanged(args, GetPinEventsToDetect(pinNumber));
                 }
             }
             _eventDetectionThread = null;
