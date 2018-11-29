@@ -23,7 +23,7 @@ namespace System.Device.I2c.Drivers
 
         public string DevicePath { get; set; }
 
-        public override I2cConnectionSettings ConnectionSettings => throw new NotImplementedException();
+        public override I2cConnectionSettings ConnectionSettings => _settings;
 
         private unsafe void Initialize()
         {

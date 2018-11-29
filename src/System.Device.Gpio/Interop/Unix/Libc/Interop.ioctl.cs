@@ -51,6 +51,7 @@ internal enum I2cMessageFlags : ushort
     I2C_M_RD = 0x0001
 }
 
+[StructLayout(LayoutKind.Sequential)]
 internal unsafe struct i2c_rdwr_ioctl_data
 {
     public i2c_msg* msgs;
