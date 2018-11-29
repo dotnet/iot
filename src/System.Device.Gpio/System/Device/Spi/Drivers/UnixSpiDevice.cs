@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Device.Spi.Devices
+namespace System.Device.Spi.Drivers
 {
     public class UnixSpiDevice : SpiDevice
     {
