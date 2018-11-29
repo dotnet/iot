@@ -2,16 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Device.I2c
+namespace System.Device.Spi.Devices
 {
-    public class UnixI2cDevice : I2cDevice
+    public class UnixSpiDevice : SpiDevice
     {
-        private I2cConnectionSettings _settings;
-        private const string _defaultDevicePath = "/dev/i2c";
+        private const string _defaultDevicePath = "/dev/spidev";
+        private SpiConnectionSettings _settings;
 
-        private UnixI2cDevice() { }
+        private UnixSpiDevice() { }
 
-        public UnixI2cDevice(I2cConnectionSettings settings)
+        public UnixSpiDevice(SpiConnectionSettings settings)
         {
             _settings = settings;
             DevicePath = _defaultDevicePath;
@@ -19,7 +19,7 @@ namespace System.Device.I2c
 
         public string DevicePath { get; set; }
 
-        public override I2cConnectionSettings ConnectionSettings => throw new NotImplementedException();
+        public override SpiConnectionSettings ConnectionSettings => throw new NotImplementedException();
 
         private unsafe void Initialize()
         {
