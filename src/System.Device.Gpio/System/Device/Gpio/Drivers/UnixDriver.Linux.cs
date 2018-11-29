@@ -339,7 +339,6 @@ namespace System.Device.Gpio.Drivers
                     }
                     return true;
                 }
-                Thread.Sleep(_pollingTimeoutInMilliseconds);
             }
             return false;
         }
@@ -428,9 +427,6 @@ namespace System.Device.Gpio.Drivers
 
         private unsafe void DetectEvents()
         {
-            char buf;
-            IntPtr bufPtr = new IntPtr(&buf);
-
             while (_pinsToDetectEventsCount > 0)
             {
                 bool eventDetected = WasEventDetected(_pollFileDescriptor, -1,  out int pinNumber, s_EventThreadCancellationTokenSource.Token);
