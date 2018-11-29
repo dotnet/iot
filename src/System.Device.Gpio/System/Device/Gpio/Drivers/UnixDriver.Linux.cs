@@ -218,7 +218,6 @@ namespace System.Device.Gpio.Drivers
             string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber}", "edge");
             string stringValue = File.ReadAllText(edgePath);
             return StringValueToPinEventType(stringValue);
-
         }
 
         private PinEventTypes StringValueToPinEventType(string value)
