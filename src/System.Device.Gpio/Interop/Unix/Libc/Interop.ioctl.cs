@@ -32,3 +32,27 @@ internal enum I2cSettings : uint
     /// <summary>Smbus transfer</summary>
     I2C_SMBUS = 0x0720
 }
+
+[StructLayout(LayoutKind.Sequential)]
+internal unsafe struct i2c_msg
+{
+    public ushort addr;
+    public I2cMessageFlags flags;
+    public ushort len;
+    public byte* buf;
+}
+
+[Flags]
+internal enum I2cMessageFlags : ushort
+{
+    /// <summary>Write data to slave</summary>
+    I2C_M_WR = 0x0000,
+    /// <summary>Read data from slave</summary>
+    I2C_M_RD = 0x0001
+}
+
+internal unsafe struct i2c_rdwr_ioctl_data
+{
+    public i2c_msg* msgs;
+    public uint nmsgs;
+};

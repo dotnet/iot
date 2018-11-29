@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace System.Device.I2c.Drivers
 {
@@ -12,6 +13,7 @@ namespace System.Device.I2c.Drivers
         private const string DefaultDevicePath = "/dev/i2c";
         private int _deviceFileDescriptor = -1;
         private I2cFunctionalityFlags _functionalities;
+        private static readonly object s_InitializationLock = new object();
 
         public UnixI2cDevice(I2cConnectionSettings settings)
         {
@@ -31,20 +33,26 @@ namespace System.Device.I2c.Drivers
             }
 
             string deviceFileName = $"{DevicePath}-{_settings.BusId}";
-            _deviceFileDescriptor = Interop.open(deviceFileName, FileOpenFlags.O_RDWR);
-
-            if (_deviceFileDescriptor < 0)
+            lock (s_InitializationLock)
             {
-                throw new IOException($"Cannot open I2c device file '{deviceFileName}'");
-            }
+                if (_deviceFileDescriptor >= 0)
+                {
+                    return;
+                }
+                _deviceFileDescriptor = Interop.open(deviceFileName, FileOpenFlags.O_RDWR);
 
-            fixed (I2cFunctionalityFlags* functionalitiesPtr = &_functionalities)
-            {
-                int result = Interop.ioctl(_deviceFileDescriptor, (uint)I2cSettings.I2C_FUNCS, new IntPtr(functionalitiesPtr));
+                if (_deviceFileDescriptor < 0)
+                {
+                    throw new IOException($"Cannot open I2c device file '{deviceFileName}'");
+                }
+
+                I2cFunctionalityFlags tempFlags;
+                int result = Interop.ioctl(_deviceFileDescriptor, (uint)I2cSettings.I2C_FUNCS, new IntPtr(&tempFlags));
                 if (result < 0)
                 {
                     _functionalities = 0;
                 }
+                _functionalities = tempFlags;
             }
         }
 
@@ -52,7 +60,7 @@ namespace System.Device.I2c.Drivers
         {
             if (_functionalities.HasFlag(I2cFunctionalityFlags.I2C_FUNC_I2C))
             {
-                RdWrInterfaceTransfer(writeBuffer, readBuffer, writeBufferLength, readBufferLength);
+                ReadWriteInterfaceTransfer(writeBuffer, readBuffer, writeBufferLength, readBufferLength);
             }
             else
             {
@@ -60,21 +68,11 @@ namespace System.Device.I2c.Drivers
             }
         }
 
-        private unsafe void RdWrInterfaceTransfer(byte* writeBuffer, byte* readBuffer, int writeBufferLength, int readBufferLength)
+        private unsafe void ReadWriteInterfaceTransfer(byte* writeBuffer, byte* readBuffer, int writeBufferLength, int readBufferLength)
         {
+            // Allocating space for 2 messages in case we want to read and write on the same call.
+            i2c_msg* messagesPtr = stackalloc i2c_msg[2];
             int messageCount = 0;
-
-            if (writeBuffer != null)
-            {
-                messageCount++;
-            }
-            if (readBuffer != null)
-            {
-                messageCount++;
-            }
-
-            i2c_msg* messagesPtr = stackalloc i2c_msg[messageCount];
-            messageCount = 0;
 
             if (writeBuffer != null)
             {
@@ -186,27 +184,4 @@ namespace System.Device.I2c.Drivers
             base.Dispose(disposing);
         }
     }
-
-    internal unsafe struct i2c_msg
-    {
-        public ushort addr;
-        public I2cMessageFlags flags;
-        public ushort len;
-        public byte* buf;
-    }
-
-    [Flags]
-    internal enum I2cMessageFlags : ushort
-    {
-        /// <summary>Write data to slave</summary>
-        I2C_M_WR = 0x0000,
-        /// <summary>Read data from slave</summary>
-        I2C_M_RD = 0x0001
-    }
-
-    internal unsafe struct i2c_rdwr_ioctl_data
-    {
-        public i2c_msg* msgs;
-        public uint nmsgs;
-    };
 }
