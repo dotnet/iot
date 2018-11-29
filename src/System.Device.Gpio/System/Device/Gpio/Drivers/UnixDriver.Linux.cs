@@ -198,7 +198,7 @@ namespace System.Device.Gpio.Drivers
 
             bool eventDetected = WasEventDetected(pollFileDescriptor, valueFileDescriptor, out _, cancellationToken);
 
-            RemovePinFromPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, closePinValueFileDescriptor, closePollFileDescriptor: true);
+            RemovePinFromPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, closePinValueFileDescriptor, closePollFileDescriptor: true, cancelEventDetectionThread: false);
             return new WaitForEventResult
             {
                 TimedOut = !eventDetected,
@@ -345,7 +345,7 @@ namespace System.Device.Gpio.Drivers
             return false;
         }
 
-        private void RemovePinFromPoll(int pinNumber, ref int valueFileDescriptor, ref int pollFileDescriptor, bool closePinValueFileDescriptor, bool closePollFileDescriptor)
+        private void RemovePinFromPoll(int pinNumber, ref int valueFileDescriptor, ref int pollFileDescriptor, bool closePinValueFileDescriptor, bool closePollFileDescriptor, bool cancelEventDetectionThread)
         {
             epoll_event epollEvent = new epoll_event
             {
@@ -365,6 +365,15 @@ namespace System.Device.Gpio.Drivers
             }
             if (closePollFileDescriptor)
             {
+                if (cancelEventDetectionThread)
+                {
+                    s_EventThreadCancellationTokenSource.Cancel();
+                    while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
+                    {
+                        Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
+                    }
+                }
+                
                 Interop.close(pollFileDescriptor);
                 pollFileDescriptor = -1;
             }
@@ -456,7 +465,7 @@ namespace System.Device.Gpio.Drivers
                 _pinsToDetectEventsCount--;
 
                 bool closePollFileDescriptor = (_pinsToDetectEventsCount == 0);
-                RemovePinFromPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, true, closePollFileDescriptor);
+                RemovePinFromPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, true, closePollFileDescriptor, true);
                 _devicePins[pinNumber].Dispose();
                 _devicePins.Remove(pinNumber);
             }
