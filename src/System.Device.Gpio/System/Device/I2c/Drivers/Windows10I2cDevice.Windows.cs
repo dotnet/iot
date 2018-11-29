@@ -5,7 +5,7 @@
 using Windows.Devices.Enumeration;
 using WinI2c = Windows.Devices.I2c;
 
-namespace System.Device.I2c.Devices
+namespace System.Device.I2c.Drivers
 {
     public class Windows10I2cDevice : I2cDevice
     {

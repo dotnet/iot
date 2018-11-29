@@ -5,7 +5,7 @@
 using Windows.Devices.Enumeration;
 using WinSpi = Windows.Devices.Spi;
 
-namespace System.Device.Spi.Devices
+namespace System.Device.Spi.Drivers
 {
     public class Windows10SpiDevice : SpiDevice
     {
