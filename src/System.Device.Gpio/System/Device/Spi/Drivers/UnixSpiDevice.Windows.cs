@@ -2,14 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-namespace System.Device.I2c.Drivers
+namespace System.Device.Spi.Drivers
 {
-    public class UnixI2cDevice : I2cDevice
+    public class UnixSpiDevice : SpiDevice
     {
-        public UnixI2cDevice(I2cConnectionSettings settings) => throw new PlatformNotSupportedException($"The {GetType().Name} class is not available on Windows.");
+        public UnixSpiDevice(SpiConnectionSettings settings) => throw new PlatformNotSupportedException($"The {GetType().Name} class is not available on Windows.");
 
-        public override I2cConnectionSettings ConnectionSettings => throw new PlatformNotSupportedException();
+        public override SpiConnectionSettings ConnectionSettings => throw new PlatformNotSupportedException();
 
         public override void Read(Span<byte> buffer) => throw new PlatformNotSupportedException();
 

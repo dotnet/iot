@@ -57,3 +57,52 @@ internal unsafe struct i2c_rdwr_ioctl_data
     public i2c_msg* msgs;
     public uint nmsgs;
 };
+
+[Flags]
+internal enum UnixSpiMode : byte
+{
+    None = 0x00,
+    SPI_CPHA = 0x01,
+    SPI_CPOL = 0x02,
+    SPI_CS_HIGH = 0x04,
+    SPI_LSB_FIRST = 0x08,
+    SPI_3WIRE = 0x10,
+    SPI_LOOP = 0x20,
+    SPI_NO_CS = 0x40,
+    SPI_READY = 0x80,
+    SPI_MODE_0 = None,
+    SPI_MODE_1 = SPI_CPHA,
+    SPI_MODE_2 = SPI_CPOL,
+    SPI_MODE_3 = SPI_CPOL | SPI_CPHA
+}
+
+internal enum SpiSettings : uint
+{
+    /// <summary> Set SPI mode</summary>
+    SPI_IOC_WR_MODE = 0x40016b01,
+    /// <summary> Get SPI mode</summary>
+    SPI_IOC_RD_MODE = 0x80016b01,
+    /// <summary> Set bits per word</summary>
+    SPI_IOC_WR_BITS_PER_WORD = 0x40016b03,
+    /// <summary> Get bits per word</summary>
+    SPI_IOC_RD_BITS_PER_WORD = 0x80016b03,
+    /// <summary> Set max speed (Hz)</summary>
+    SPI_IOC_WR_MAX_SPEED_HZ = 0x40046b04,
+    /// <summary>Get max speed (Hz)</summary>
+    SPI_IOC_RD_MAX_SPEED_HZ = 0x80046b04
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct spi_ioc_transfer
+{
+    public ulong tx_buf;
+    public ulong rx_buf;
+    public uint len;
+    public uint speed_hz;
+    public ushort delay_usecs;
+    public byte bits_per_word;
+    public byte cs_change;
+    public byte tx_nbits;
+    public byte rx_nbits;
+    public ushort pad;
+};
