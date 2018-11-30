@@ -8,6 +8,8 @@ namespace System.Device.Spi.Drivers
     {
         public UnixSpiDevice(SpiConnectionSettings settings) => throw new PlatformNotSupportedException($"The {GetType().Name} class is not available on Windows.");
 
+        public string DevicePath { get; set; }
+
         public override SpiConnectionSettings ConnectionSettings => throw new PlatformNotSupportedException();
 
         public override void Read(Span<byte> buffer) => throw new PlatformNotSupportedException();

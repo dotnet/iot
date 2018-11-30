@@ -9,6 +9,8 @@ namespace System.Device.I2c.Drivers
     {
         public UnixI2cDevice(I2cConnectionSettings settings) => throw new PlatformNotSupportedException($"The {GetType().Name} class is not available on Windows.");
 
+        public string DevicePath { get; set; }
+
         public override I2cConnectionSettings ConnectionSettings => throw new PlatformNotSupportedException();
 
         public override void Read(Span<byte> buffer) => throw new PlatformNotSupportedException();
