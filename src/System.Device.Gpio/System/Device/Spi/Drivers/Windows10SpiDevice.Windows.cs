@@ -2,7 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
+using System.Threading;
 using Windows.Devices.Enumeration;
+using Windows.Foundation;
 using WinSpi = Windows.Devices.Spi;
 
 namespace System.Device.Spi.Drivers
@@ -22,10 +25,16 @@ namespace System.Device.Spi.Drivers
                 ClockFrequency = settings.ClockFrequency,
             };
 
-            string deviceSelector = WinSpi.SpiDevice.GetDeviceSelector($"SPI{settings.BusId}");
+            string busFriendlyName = $"SPI{settings.BusId}";
+            string deviceSelector = WinSpi.SpiDevice.GetDeviceSelector(busFriendlyName);
 
-            DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).GetResults();
-            _winDevice = WinSpi.SpiDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).GetResults();
+            DeviceInformationCollection deviceInformationCollection = Interop.WaitForCompletion(DeviceInformation.FindAllAsync(deviceSelector));
+            if (deviceInformationCollection.Count == 0)
+            {
+                throw new ArgumentException($"No SPI device exists for BusId {settings.BusId}", $"{nameof(settings)}.{nameof(settings.BusId)}");
+            }
+
+            _winDevice = Interop.WaitForCompletion(WinSpi.SpiDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings));
         }
 
         public override SpiConnectionSettings ConnectionSettings => _settings;
@@ -62,6 +71,7 @@ namespace System.Device.Spi.Drivers
             base.Dispose(disposing);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static WinSpi.SpiMode ToWinMode(SpiMode mode)
         {
             switch (mode)

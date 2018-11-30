@@ -17,7 +17,15 @@ namespace System.Device.Gpio.Drivers
         private readonly Dictionary<int, Windows10DriverPin> _openPins = new Dictionary<int, Windows10DriverPin>();
         #endregion Fields
 
-        #region GpioDrive Overrides
+        public Windows10Driver()
+        {
+            if (s_winGpioController == null)
+            {
+                throw new PlatformNotSupportedException("No GPIO controllers exist on this system.");
+            }
+        }
+
+        #region GpioDriver Overrides
 
         protected internal override int PinCount => s_winGpioController.PinCount;
 
@@ -80,7 +88,7 @@ namespace System.Device.Gpio.Drivers
         protected internal override void Write(int pinNumber, PinValue value)
             => LookupOpenPin(pinNumber).Write(value);
 
-        #endregion GpioDrive Overrides
+        #endregion GpioDriver Overrides
 
         #region Private Implementation
 

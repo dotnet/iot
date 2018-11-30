@@ -22,6 +22,7 @@
   <ItemGroup Condition="'$(TargetsLinux)' == 'true'">
     <!--Excluding Windows implementations-->
     <Compile Remove="**\*.Windows.cs" />
+    <Compile Remove="Interop\Windows\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <!--Excluding Linux implementations-->

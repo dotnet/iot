@@ -26,6 +26,7 @@ namespace System.Device.I2c
         /// The bus in which the device will be connected to.
         /// </summary>
         public int BusId { get; }
+
         /// <summary>
         /// The I2c address of the device.
         /// </summary>
