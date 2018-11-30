@@ -3,11 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Device.Gpio.Drivers;
-using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -105,6 +102,7 @@ namespace System.Device.Gpio
                 throw new InvalidOperationException("Can not close a pin that is not yet opened.");
             }
             _driver.ClosePin(logicalPinNumber);
+            _openPins.Remove(pinNumber);
         }
 
         /// <summary>
@@ -278,9 +276,11 @@ namespace System.Device.Gpio
 
         private void Dispose(bool disposing)
         {
-            foreach (int pin in _openPins)
+            while (_openPins.Count > 0)
             {
+                int pin = _openPins.FirstOrDefault();
                 _driver.ClosePin(pin);
+                _openPins.Remove(pin);
             }
             _driver.Dispose();
         }

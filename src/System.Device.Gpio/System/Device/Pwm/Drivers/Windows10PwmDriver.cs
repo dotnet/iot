@@ -4,7 +4,7 @@
 
 namespace System.Device.Pwm.Drivers
 {
-    public class UnixPwmDriver : PwmDriver
+    public class Windows10PwmDriver : PwmDriver
     {
         protected internal override void ChangeDutyCycle(int pwmChip, int pwmChannel, double dutyCycle)
         {

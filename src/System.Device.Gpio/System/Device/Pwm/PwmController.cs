@@ -2,53 +2,85 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.Linq;
+
 namespace System.Device.Pwm
 {
-    public sealed class PwmController : IDisposable
+    public sealed partial class PwmController : IDisposable
     {
-        public PwmController()
-        {
-            throw new NotImplementedException();
-        }
+        private PwmDriver _driver;
+        private HashSet<ValueTuple<int, int>> _openChannels;
 
         public PwmController(PwmDriver driver)
         {
-            throw new NotImplementedException();
+            _driver = driver;
+            _openChannels = new HashSet<ValueTuple<int, int>>();
         }
 
-        public void OpenChannel(int pwmChannel)
+        public void OpenChannel(int pwmChip, int pwmChannel)
         {
-            throw new NotImplementedException();
+            if (_openChannels.Contains((pwmChip, pwmChannel)))
+            {
+                throw new InvalidOperationException("The selected pwm channel is already open.");
+            }
+
+            _driver.OpenChannel(pwmChip, pwmChannel);
+            _openChannels.Add((pwmChip, pwmChannel));
         }
 
-        public void CloseChannel(int pwmChannel)
+        public void CloseChannel(int pwmChip, int pwmChannel)
         {
-            throw new NotImplementedException();
+            if (!_openChannels.Contains((pwmChip, pwmChannel)))
+            {
+                throw new InvalidOperationException("Can not close a pwm channel that is not yet opened.");
+            }
+
+            _driver.CloseChannel(pwmChip, pwmChannel);
+            _openChannels.Remove((pwmChip, pwmChannel));
         }
 
-        public void ChangeDutyCycle(int pwmChannel, double dutyCycle)
+        public void ChangeDutyCycle(int pwmChip, int pwmChannel, double dutyCycle)
         {
-            throw new NotImplementedException();
+            if (!_openChannels.Contains((pwmChip, pwmChannel)))
+            {
+                throw new InvalidOperationException("Can not change dutycycle to a pwm channel that is not yet opened.");
+            }
+            _driver.ChangeDutyCycle(pwmChip, pwmChannel, dutyCycle);
         }
 
-        public void StartWriting(int pwmChannel, double frequency, double dutyCycle)
+        public void StartWriting(int pwmChip, int pwmChannel, double frequency, double dutyCycle)
         {
-            throw new NotImplementedException();
+            if (!_openChannels.Contains((pwmChip, pwmChannel)))
+            {
+                throw new InvalidOperationException("Can not start writing to a pwm channel that is not yet opened.");
+            }
+            _driver.StartWriting(pwmChip, pwmChannel, frequency, dutyCycle);
         }
 
-        public void StopWriting(int pwmChannel)
+        public void StopWriting(int pwmChip, int pwmChannel)
         {
-            throw new NotImplementedException();
+            if (!_openChannels.Contains((pwmChip, pwmChannel)))
+            {
+                throw new InvalidOperationException("Can not stop writing to a pwm channel that is not yet opened.");
+            }
+            _driver.StopWriting(pwmChip, pwmChannel);
         }
 
         public void Dispose()
         {
-
+            Dispose(true);
         }
 
         private void Dispose(bool disposing)
         {
-
+            while (_openChannels.Count > 0)
+            {
+                ValueTuple<int, int> channel = _openChannels.FirstOrDefault();
+                _driver.CloseChannel(channel.Item1, channel.Item2);
+                _openChannels.Remove(channel);
+            }
+            _driver.Dispose();
         }
     }
 }
