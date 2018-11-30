@@ -3,17 +3,25 @@ using System.Device.Gpio;
 using System.Threading;
 using System.Threading.Tasks;
 using CommandLine;
+using DeviceApiTester.Infrastructure;
 
-namespace GpioRunner
+namespace DeviceApiTester.Commands.Gpio
 {
-    [Verb("button-wait", HelpText = "Uses WaitForEventAsync to detect button presses, optionally showing the state on an LED.")]
-    public class ButtonWaitCommand : GpioDriverCommand, ICommandVerbAsync
+    [Verb("gpio-button-wait", HelpText = "Uses WaitForEventAsync to detect button presses, optionally showing the state on an LED.")]
+    public class ButtonWait : GpioCommand, ICommandVerbAsync
     {
+        /// <summary>Executes the command asynchronously.</summary>
+        /// <returns>The command's exit code.</returns>
+        /// <remarks>
+        ///     NOTE: This test app uses the base class's <see cref="CreateGpioController"/> method to create a device.<br/>
+        ///     Real-world usage would simply create an instance of <see cref="GpioController"/>:
+        ///     <code>using (var gpio = new GpioController())</code>
+        /// </remarks>
         public async Task<int> ExecuteAsync()
         {
             Console.WriteLine($"ButtonPin={ButtonPin}, LedPin={LedPin}, Scheme={Scheme}, PressedValue={PressedValue}, OnValue={OnValue}, Driver={Driver}");
 
-            using (var gpio = CreateController())
+            using (var gpio = CreateGpioController())
             {
                 Console.WriteLine($"Listening for button presses on GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin {ButtonPin} . . .");
 
@@ -21,6 +29,7 @@ namespace GpioRunner
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
                 {
+                    e.Cancel = true;
                     cancellationTokenSource.Cancel();
                     Console.CancelKeyPress -= Console_CancelKeyPress;
                 }

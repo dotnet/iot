@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace GpioRunner
+namespace DeviceApiTester.Infrastructure
 {
     public interface ICommandVerbAsync
     {
