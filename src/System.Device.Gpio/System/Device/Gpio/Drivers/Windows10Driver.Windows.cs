@@ -21,7 +21,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (s_winGpioController == null)
             {
-                throw new PlatformNotSupportedException("No GPIO controllers exist on this system.");
+                throw new NotSupportedException("No GPIO controllers exist on this system.");
             }
         }
 
@@ -35,6 +35,8 @@ namespace System.Device.Gpio.Drivers
             {
                 devicePin.Dispose();
             }
+
+            _openPins.Clear();
 
             base.Dispose(disposing);
         }
@@ -92,7 +94,6 @@ namespace System.Device.Gpio.Drivers
 
         #region Private Implementation
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Windows10DriverPin LookupOpenPin(int pinNumber) => _openPins[pinNumber];
 
         #endregion Private Implementation

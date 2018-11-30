@@ -1,26 +1,22 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Threading;
 using Windows.Foundation;
 
-internal partial class Interop
+internal static partial class Interop
 {
-    public static TResult WaitForCompletion<TResult>(IAsyncOperation<TResult> operation)
+    public static TResult WaitForCompletion<TResult>(this IAsyncOperation<TResult> operation)
     {
         using (var waitEvent = new ManualResetEvent(false))
         {
-            void FromIdAsyncCompleted(IAsyncOperation<TResult> asyncInfo, AsyncStatus asyncStatus)
-            {
-                waitEvent.Set();
-            }
+            operation.Completed += (i, s) => waitEvent.Set();
 
-            operation.Completed += FromIdAsyncCompleted;
             if (operation.Status == AsyncStatus.Started)
             {
                 waitEvent.WaitOne();
-            }
-            if (operation.Completed != null)
-            {
-                operation.Completed -= FromIdAsyncCompleted;
             }
 
             switch (operation.Status)

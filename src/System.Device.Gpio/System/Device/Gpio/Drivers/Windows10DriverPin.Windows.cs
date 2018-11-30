@@ -93,13 +93,10 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ClosePin() => Dispose();
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsPinModeSupported(PinMode mode) => _pin.IsDriveModeSupported(PinModeToGpioDriveMode(mode));
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public PinValue Read() => GpioPinValueToPinValue(_pin.Read());
 
         public void RemoveCallbackForPinValueChangedEvent(PinChangeEventHandler callback)
@@ -113,7 +110,6 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetPinMode(PinMode mode) => _pin.SetDriveMode(PinModeToGpioDriveMode(mode));
 
         public WaitForEventResult WaitForEvent(PinEventTypes eventType, CancellationToken cancellationToken)
@@ -149,12 +145,10 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(PinValue value) => _pin.Write(PinValueToGpioPinValue(value));
 
         #region Enumeration conversion methods
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static WinGpio.GpioPinDriveMode PinModeToGpioDriveMode(PinMode mode)
         {
             switch (mode)
@@ -172,7 +166,6 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static PinMode GpioDriveModeToPinMode(WinGpio.GpioPinDriveMode mode)
         {
             switch (mode)
@@ -190,7 +183,6 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static PinValue GpioPinValueToPinValue(WinGpio.GpioPinValue value)
         {
             switch (value)
@@ -204,7 +196,6 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static WinGpio.GpioPinValue PinValueToGpioPinValue(PinValue value)
         {
             switch (value)
@@ -218,7 +209,6 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static PinEventTypes GpioEdgeToPinEventType(WinGpio.GpioPinEdge edge)
         {
             switch (edge)
