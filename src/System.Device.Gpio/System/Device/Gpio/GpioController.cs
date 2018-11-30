@@ -247,7 +247,6 @@ namespace System.Device.Gpio
             _driver.RemoveCallbackForPinValueChangedEvent(logicalPinNumber, callback);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int ConvertToLogicalPinNumber(int pinNumber)
         {
             return (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : ConvertPinNumberToLogicalNumberingScheme(pinNumber);

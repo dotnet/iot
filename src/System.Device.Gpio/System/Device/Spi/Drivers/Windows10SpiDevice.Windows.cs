@@ -22,10 +22,16 @@ namespace System.Device.Spi.Drivers
                 ClockFrequency = settings.ClockFrequency,
             };
 
-            string deviceSelector = WinSpi.SpiDevice.GetDeviceSelector($"SPI{settings.BusId}");
+            string busFriendlyName = $"SPI{settings.BusId}";
+            string deviceSelector = WinSpi.SpiDevice.GetDeviceSelector(busFriendlyName);
 
-            DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).GetResults();
-            _winDevice = WinSpi.SpiDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).GetResults();
+            DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
+            if (deviceInformationCollection.Count == 0)
+            {
+                throw new ArgumentException($"No SPI device exists for BusId {settings.BusId}", $"{nameof(settings)}.{nameof(settings.BusId)}");
+            }
+
+            _winDevice = WinSpi.SpiDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).WaitForCompletion();
         }
 
         public override SpiConnectionSettings ConnectionSettings => _settings;

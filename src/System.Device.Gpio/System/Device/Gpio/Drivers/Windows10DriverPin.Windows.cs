@@ -149,7 +149,6 @@ namespace System.Device.Gpio.Drivers
 
         #region Enumeration conversion methods
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static WinGpio.GpioPinDriveMode PinModeToGpioDriveMode(PinMode mode)
         {
             switch (mode)
@@ -167,7 +166,6 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static PinMode GpioDriveModeToPinMode(WinGpio.GpioPinDriveMode mode)
         {
             switch (mode)
@@ -185,7 +183,6 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static PinValue GpioPinValueToPinValue(WinGpio.GpioPinValue value)
         {
             switch (value)
@@ -199,7 +196,6 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static WinGpio.GpioPinValue PinValueToGpioPinValue(PinValue value)
         {
             switch (value)
@@ -213,7 +209,6 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static PinEventTypes GpioEdgeToPinEventType(WinGpio.GpioPinEdge edge)
         {
             switch (edge)

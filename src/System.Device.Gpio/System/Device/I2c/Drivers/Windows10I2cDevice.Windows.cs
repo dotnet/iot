@@ -17,10 +17,20 @@ namespace System.Device.I2c.Drivers
             _settings = settings;
             var winSettings = new WinI2c.I2cConnectionSettings(settings.DeviceAddress);
 
-            string deviceSelector = WinI2c.I2cDevice.GetDeviceSelector($"I2C{settings.BusId}");
+            string busFriendlyName = $"I2C{settings.BusId}";
+            string deviceSelector = WinI2c.I2cDevice.GetDeviceSelector(busFriendlyName);
 
-            DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).GetResults();
-            _winDevice = WinI2c.I2cDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).GetResults();
+            DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
+            if (deviceInformationCollection.Count == 0)
+            {
+                throw new ArgumentException($"No I2C device exists for BusId {settings.BusId}", $"{nameof(settings)}.{nameof(settings.BusId)}");
+            }
+
+            _winDevice = WinI2c.I2cDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).WaitForCompletion();
+            if (_winDevice == null)
+            {
+                throw new PlatformNotSupportedException($"I2C devices are not supported.");
+            }
         }
 
         public override I2cConnectionSettings ConnectionSettings => _settings;
