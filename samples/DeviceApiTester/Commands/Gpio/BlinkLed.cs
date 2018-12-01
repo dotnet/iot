@@ -1,18 +1,30 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Device.Gpio;
 using System.Threading.Tasks;
 using CommandLine;
+using DeviceApiTester.Infrastructure;
 
-namespace GpioRunner
+namespace DeviceApiTester.Commands.Gpio
 {
-    [Verb("blink-led", HelpText = "Blinks an LED connected to a specified GPIO pin.")]
-    public class BlinkLedCommand : GpioDriverCommand, ICommandVerbAsync
+    [Verb("gpio-blink-led", HelpText = "Blinks an LED connected to a specified GPIO pin.")]
+    public class BlinkLed : GpioCommand, ICommandVerbAsync
     {
+        /// <summary>Executes the command asynchronously.</summary>
+        /// <returns>The command's exit code.</returns>
+        /// <remarks>
+        ///     NOTE: This test app uses the base class's <see cref="CreateGpioController"/> method to create a device.<br/>
+        ///     Real-world usage would simply create an instance of <see cref="GpioController"/>:
+        ///     <code>using (var gpio = new GpioController())</code>
+        /// </remarks>
         public async Task<int> ExecuteAsync()
         {
             Console.WriteLine($"LedPin={LedPin}, Scheme={Scheme}, Count={Count}, TimeOn={TimeOn} ms, TimeOff={TimeOff} ms, Driver={Driver}");
 
-            using (var gpio = CreateController())
+            using (var gpio = CreateGpioController())
             {
                 gpio.OpenPin(LedPin, PinMode.Output);
                 gpio.Write(LedPin, OffValue);

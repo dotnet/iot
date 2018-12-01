@@ -1,29 +1,36 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Device.Gpio;
 using System.Threading;
 using System.Threading.Tasks;
 using CommandLine;
+using DeviceApiTester.Infrastructure;
 
-namespace GpioRunner
+namespace DeviceApiTester.Commands.Gpio
 {
-    [Verb("button-event", HelpText = "Uses event callback to detect button presses, optionally showing the state on an LED.")]
-    public class ButtonEventCommand : GpioDriverCommand, ICommandVerbAsync
+    [Verb("gpio-button-event", HelpText = "Uses event callback to detect button presses, optionally showing the state on an LED.")]
+    public class ButtonEvent : GpioCommand, ICommandVerbAsync
     {
+        /// <summary>Executes the command asynchronously.</summary>
+        /// <returns>The command's exit code.</returns>
+        /// <remarks>
+        ///     NOTE: This test app uses the base class's <see cref="CreateGpioController"/> method to create a device.<br/>
+        ///     Real-world usage would simply create an instance of <see cref="GpioController"/>:
+        ///     <code>using (var gpio = new GpioController())</code>
+        /// </remarks>
         public Task<int> ExecuteAsync()
         {
             Console.WriteLine($"ButtonPin={ButtonPin}, Scheme={Scheme}, PressedValue={PressedValue}, Driver={Driver}");
 
-            using (var gpio = CreateController())
+            using (var gpio = CreateGpioController())
+            using (var cancelEvent = new ManualResetEvent(false))
             {
                 Console.WriteLine($"Listening for button presses on GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin {ButtonPin} . . .");
 
-                // This example runs until Ctrl+C (or Ctrl+Break) is pressed, so declare and register a local function handler
-                ManualResetEvent cancelEvent = new ManualResetEvent(false);
-                void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
-                {
-                    cancelEvent.Set();
-                    Console.CancelKeyPress -= Console_CancelKeyPress;
-                }
+                // This example runs until Ctrl+C (or Ctrl+Break) is pressed, so register a local function handler
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
                 // Open the GPIO pin to which the button is connected
@@ -78,9 +85,17 @@ namespace GpioRunner
 
                 Console.WriteLine("Operation cancelled. Exiting.");
                 Console.OpenStandardOutput().Flush();
-            }
 
-            return Task<int>.FromResult(0);
+                return Task<int>.FromResult(0);
+
+                // Local function
+                void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+                {
+                    e.Cancel = true;
+                    cancelEvent.Set();
+                    Console.CancelKeyPress -= Console_CancelKeyPress;
+                }
+            }
         }
 
         [Option('b', "button-pin", HelpText = "The GPIO pin to which the button is connected, numbered based on the --scheme argument", Required = true)]
