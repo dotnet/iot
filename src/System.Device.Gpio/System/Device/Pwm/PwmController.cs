@@ -10,12 +10,12 @@ namespace System.Device.Pwm
     public sealed partial class PwmController : IDisposable
     {
         private PwmDriver _driver;
-        private HashSet<ValueTuple<int, int>> _openChannels;
+        private HashSet<(int, int)> _openChannels;
 
         public PwmController(PwmDriver driver)
         {
             _driver = driver;
-            _openChannels = new HashSet<ValueTuple<int, int>>();
+            _openChannels = new HashSet<(int, int)>();
         }
 
         public void OpenChannel(int pwmChip, int pwmChannel)
@@ -40,22 +40,30 @@ namespace System.Device.Pwm
             _openChannels.Remove((pwmChip, pwmChannel));
         }
 
-        public void ChangeDutyCycle(int pwmChip, int pwmChannel, double dutyCycle)
+        public void ChangeDutyCycle(int pwmChip, int pwmChannel, double dutyCyclePercentage)
         {
             if (!_openChannels.Contains((pwmChip, pwmChannel)))
             {
                 throw new InvalidOperationException("Can not change dutycycle to a pwm channel that is not yet opened.");
             }
-            _driver.ChangeDutyCycle(pwmChip, pwmChannel, dutyCycle);
+            if (dutyCyclePercentage < 0.0 || dutyCyclePercentage > 100.0)
+            {
+                throw new ArgumentException("Duty cycle must be a percentage in the range of 0.0 - 100.0", nameof(dutyCyclePercentage));
+            }
+            _driver.ChangeDutyCycle(pwmChip, pwmChannel, dutyCyclePercentage);
         }
 
-        public void StartWriting(int pwmChip, int pwmChannel, double frequency, double dutyCycle)
+        public void StartWriting(int pwmChip, int pwmChannel, double frequencyInHertz, double dutyCyclePercentage)
         {
             if (!_openChannels.Contains((pwmChip, pwmChannel)))
             {
                 throw new InvalidOperationException("Can not start writing to a pwm channel that is not yet opened.");
             }
-            _driver.StartWriting(pwmChip, pwmChannel, frequency, dutyCycle);
+            if (dutyCyclePercentage < 0.0 || dutyCyclePercentage > 100.0)
+            {
+                throw new ArgumentException("Duty cycle must be a percentage in the range of 0.0 - 100.0", nameof(dutyCyclePercentage));
+            }
+            _driver.StartWriting(pwmChip, pwmChannel, frequencyInHertz, dutyCyclePercentage);
         }
 
         public void StopWriting(int pwmChip, int pwmChannel)
@@ -76,7 +84,7 @@ namespace System.Device.Pwm
         {
             while (_openChannels.Count > 0)
             {
-                ValueTuple<int, int> channel = _openChannels.FirstOrDefault();
+                (int, int) channel = _openChannels.FirstOrDefault();
                 _driver.CloseChannel(channel.Item1, channel.Item2);
                 _openChannels.Remove(channel);
             }

@@ -6,7 +6,7 @@ namespace System.Device.Pwm.Drivers
 {
     public class Windows10PwmDriver : PwmDriver
     {
-        protected internal override void ChangeDutyCycle(int pwmChip, int pwmChannel, double dutyCycle)
+        protected internal override void ChangeDutyCycle(int pwmChip, int pwmChannel, double dutyCycleInNanoSeconds)
         {
             throw new NotImplementedException();
         }
@@ -21,7 +21,7 @@ namespace System.Device.Pwm.Drivers
             throw new NotImplementedException();
         }
 
-        protected internal override void StartWriting(int pwmChip, int pwmChannel, double frequency, double dutyCycle)
+        protected internal override void StartWriting(int pwmChip, int pwmChannel, double frequencyInHertz, double dutyCycleInNanoSeconds)
         {
             throw new NotImplementedException();
         }
