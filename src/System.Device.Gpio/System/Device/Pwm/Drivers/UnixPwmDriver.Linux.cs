@@ -4,12 +4,16 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace System.Device.Pwm.Drivers
 {
     public class UnixPwmDriver : PwmDriver
     {
         private const string PwmPath = "/sys/class/pwm";
+        /// <summary>
+        /// Collection that holds the exported channels and the period in nanoseconds.
+        /// </summary>
         private Dictionary<(int, int), int> _exportedChannels = new Dictionary<(int, int), int>();
 
         protected internal override void ChangeDutyCycle(int pwmChip, int pwmChannel, double dutyCyclePercentage)
@@ -89,6 +93,16 @@ namespace System.Device.Pwm.Drivers
             {
                 throw new IOException($"Unable to parse the number of supported channels at {Path.Combine(chipPath, "npwm")}");
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            while (_exportedChannels.Count > 0)
+            {
+                (int, int) channel = _exportedChannels.FirstOrDefault().Key;
+                CloseChannel(channel.Item1, channel.Item2);
+            }
+            base.Dispose(disposing);
         }
     }
 }

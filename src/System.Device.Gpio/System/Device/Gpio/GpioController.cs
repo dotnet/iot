@@ -275,12 +275,11 @@ namespace System.Device.Gpio
 
         private void Dispose(bool disposing)
         {
-            while (_openPins.Count > 0)
+            foreach(int pin in _openPins)
             {
-                int pin = _openPins.FirstOrDefault();
                 _driver.ClosePin(pin);
-                _openPins.Remove(pin);
             }
+            _openPins.Clear();
             _driver.Dispose();
         }
 
