@@ -10,6 +10,9 @@ namespace System.Device.Pwm
     public sealed partial class PwmController : IDisposable
     {
         private PwmDriver _driver;
+        /// <summary>
+        /// This collection will hold all of the channels that are currently opened by this controller.
+        /// </summary>
         private HashSet<(int, int)> _openChannels;
 
         public PwmController(PwmDriver driver)
@@ -82,12 +85,11 @@ namespace System.Device.Pwm
 
         private void Dispose(bool disposing)
         {
-            while (_openChannels.Count > 0)
+            foreach((int, int) channel in _openChannels)
             {
-                (int, int) channel = _openChannels.FirstOrDefault();
                 _driver.CloseChannel(channel.Item1, channel.Item2);
-                _openChannels.Remove(channel);
             }
+            _openChannels.Clear();
             _driver.Dispose();
         }
     }
