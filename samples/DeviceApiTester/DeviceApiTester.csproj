@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RuntimeIdentifiers>win</RuntimeIdentifiers>
-    <Configurations>Debug;Release;Windows-Debug;Linux-Debug</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <Copyright>The .NET Foundation</Copyright>
     <Company>The .NET Foundation</Company>
   </PropertyGroup>

@@ -26,17 +26,11 @@ namespace DeviceApiTester.Commands.Gpio
             Console.WriteLine($"ButtonPin={ButtonPin}, LedPin={LedPin}, Scheme={Scheme}, PressedValue={PressedValue}, OnValue={OnValue}, Driver={Driver}");
 
             using (var gpio = CreateGpioController())
+            using (var cancellationTokenSource = new CancellationTokenSource())
             {
                 Console.WriteLine($"Listening for button presses on GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin {ButtonPin} . . .");
 
-                // This example runs until Ctrl+C (or Ctrl+Break) is pressed, so declare and register a local function handler
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
-                {
-                    e.Cancel = true;
-                    cancellationTokenSource.Cancel();
-                    Console.CancelKeyPress -= Console_CancelKeyPress;
-                }
+                // This example runs until Ctrl+C (or Ctrl+Break) is pressed, so register a local function handler
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
                 // Open the GPIO pin connected to the button
@@ -86,9 +80,17 @@ namespace DeviceApiTester.Commands.Gpio
 
                 Console.WriteLine("Operation cancelled. Exiting.");
                 Console.OpenStandardOutput().Flush();
-            }
 
-            return 0;
+                return 0;
+
+                // Local function
+                void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+                {
+                    e.Cancel = true;
+                    cancellationTokenSource.Cancel();
+                    Console.CancelKeyPress -= Console_CancelKeyPress;
+                }
+            }
         }
 
         [Option('b', "button-pin", HelpText = "The GPIO pin to which the button is connected, numbered based on the --scheme argument", Required = true)]
