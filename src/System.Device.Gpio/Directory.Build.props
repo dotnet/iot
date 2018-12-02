@@ -3,10 +3,10 @@
   <PropertyGroup>
     <MajorVersion>0</MajorVersion>
     <MinorVersion>1</MinorVersion>
-    <Description>This experimental package allows projects to access GPIO pins for the BCM2835 as used on Raspberry Pi.</Description>
+    <Description>This preview package allows projects to access GPIO, SPI, I2C, and PWM devices connected to an IoT board.</Description>
     <Copyright>Microsoft Corporation, All rights reserved.</Copyright>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <PackageTags>.NET Core GPIO Pins BCM2835 Raspberry Pi IoT</PackageTags>
+    <PackageTags>.NET Core GPIO Pins SPI I2C PWM BCM2835 RPi IoT</PackageTags>
   </PropertyGroup>
   
   <!--Project Configurations properties for VS-->
