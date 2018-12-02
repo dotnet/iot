@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
-	<PropertyGroup>
-		<NoWarn>$(NoWarn);CS8321</NoWarn>
-		<DeterministicSourcePaths>false</DeterministicSourcePaths>
-		<IsPackable>false</IsPackable>
-	</PropertyGroup>
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CS8321</NoWarn>
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
 </Project>
