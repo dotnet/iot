@@ -17,7 +17,7 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 * [ ] Support protocols: serial port.
 * [ ] Support protocols: I2S.
 * [x] Support Linux.
-* [ ] Support Windows 10 IoT Core.
+* [x] Support Windows 10 IoT Core.
 * [ ] Stabilize System.Device.* API
 * [ ] Publish System.Device.* API to NuGet.org
 * [ ] Provide dockerfiles for all samples

@@ -5,12 +5,14 @@
   <PropertyGroup>
     <BuildRestore Condition="'$(BuildRestore)'==''">true</BuildRestore>
     <ProductBuild Condition="'$(ProductBuild)'==''">true</ProductBuild>
+    <ToolsBuild Condition="'$(ToolsBuild)'==''">true</ToolsBuild>
     <SampleBuild Condition="'$(SampleBuild)'==''">true</SampleBuild>
     <BuildTests Condition="'$(BuildTests)'==''">false</BuildTests>
     <BuildPackages Condition="'$(BuildPackages)'==''">true</BuildPackages>
 
     <BuildDependsOn Condition="'$(BuildRestore)'=='true'">$(BuildDependsOn);Restore</BuildDependsOn>
     <BuildDependsOn Condition="'$(ProductBuild)'=='true'">$(BuildDependsOn);BuildProduct</BuildDependsOn>
+    <BuildDependsOn Condition="'$(ToolsBuild)'=='true'">$(BuildDependsOn);BuildTools</BuildDependsOn>
     <BuildDependsOn Condition="'$(SampleBuild)'=='true'">$(BuildDependsOn);BuildSamples</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildTests)'=='true'">$(BuildDependsOn);Test</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildPackages)'=='true'">$(BuildDependsOn);Pack</BuildDependsOn>
@@ -24,6 +26,14 @@
     </ItemGroup>
 
     <MSBuild Projects="@(_BuildProductProjects)" />
+  </Target>
+
+  <Target Name="BuildTools">
+    <ItemGroup>
+      <_BuildToolProjects Include="$(MSBuildThisFileDirectory)tools\**\*.csproj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_BuildToolProjects)" />
   </Target>
 
   <Target Name="BuildSamples">
