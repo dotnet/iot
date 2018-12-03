@@ -63,13 +63,13 @@ namespace System.Device.Pwm.Drivers
             string dutyCyclePath = Path.Combine(PwmPath, $"pwmchip{pwmChip}", $"pwm{pwmChannel}", "duty_cycle");
             File.WriteAllText(dutyCyclePath, Convert.ToString(dutyCycleInNanoSeconds));
 
-            string enablePath = Path.Combine(PwmPath, $"pwmchip{pwmChip}", $"pwm{pwmChannel}", "period");
+            string enablePath = Path.Combine(PwmPath, $"pwmchip{pwmChip}", $"pwm{pwmChannel}", "enable");
             File.WriteAllText(enablePath, "1"); // Enable PWM
         }
 
         protected internal override void StopWriting(int pwmChip, int pwmChannel)
         {
-            string enablePath = Path.Combine(PwmPath, $"pwmchip{pwmChip}", $"pwm{pwmChannel}", "period");
+            string enablePath = Path.Combine(PwmPath, $"pwmchip{pwmChip}", $"pwm{pwmChannel}", "enable");
             File.WriteAllText(enablePath, "0"); // Disable PWM
         }
 
