@@ -22,5 +22,10 @@ namespace System.Device.Gpio.Drivers
 
             throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {this.GetType().Name} device", nameof(pinNumber));
         }
+
+        protected internal override PinMode GetPinMode(int pinNumber)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

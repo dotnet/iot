@@ -56,6 +56,9 @@ namespace System.Device.Gpio.Drivers
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
             => throw new PlatformNotSupportedException($"The {GetType().Name} driver does not support physical (board) numbering, since it's generic.");
 
+        protected internal override PinMode GetPinMode(int pinNumber)
+            => LookupOpenPin(pinNumber).GetPinMode();
+
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
             => LookupOpenPin(pinNumber).IsPinModeSupported(mode);
 

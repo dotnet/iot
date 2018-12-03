@@ -6,6 +6,19 @@ namespace System.Device.Gpio.Drivers
 {
     public partial class RaspberryPi3Driver  // Different base classes declared in RaspberryPi3Driver.Linux.cs and RaspberryPi3Driver.Windows.cs
     {
+        /// <summary>
+        /// Raspberry Pi 3 has 24 Gpio Pins.
+        /// </summary>
+        protected internal override int PinCount => 24;
+
+        private void ValidatePinNumber(int pinNumber)
+        {
+            if (pinNumber < 0 || pinNumber > 27)
+            {
+                throw new ArgumentException("The specified pin number is invalid.", nameof(pinNumber));
+            }
+        }
+
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
             switch (pinNumber)
