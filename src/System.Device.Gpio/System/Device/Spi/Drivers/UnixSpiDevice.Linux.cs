@@ -127,6 +127,21 @@ namespace System.Device.Spi.Drivers
                 Transfer(dataPtr, null, data.Length);
             }
         }
+        public override unsafe void TransferFullDuplex(Span<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            Initialize();
+
+            if (writeBuffer.Length != readBuffer.Length)
+            {
+                throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length");
+            }
+
+            fixed (byte* writeBufferPtr = writeBuffer)
+            fixed (byte* readBufferPtr = readBuffer)
+            {
+                Transfer(writeBufferPtr, readBufferPtr, writeBuffer.Length);
+            }
+        }
 
         private unsafe void Transfer(byte* writeBufferPtr, byte* readBufferPtr, int buffersLength)
         {

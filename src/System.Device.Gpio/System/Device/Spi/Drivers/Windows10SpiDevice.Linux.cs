@@ -18,5 +18,7 @@ namespace System.Device.Spi.Drivers
         public override void WriteByte(byte data) => throw new PlatformNotSupportedException();
 
         public override void Write(Span<byte> data) => throw new PlatformNotSupportedException();
+
+        public override void TransferFullDuplex(Span<byte> writeBuffer, Span<byte> readBuffer) => throw new PlatformNotSupportedException();
     }
 }

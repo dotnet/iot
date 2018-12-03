@@ -11,6 +11,7 @@ namespace System.Device.Spi
         public abstract void Read(Span<byte> buffer);
         public abstract void WriteByte(byte data);
         public abstract void Write(Span<byte> data);
+        public abstract void TransferFullDuplex(Span<byte> writeBuffer, Span<byte> readBuffer);
         public void Dispose()
         {
             Dispose(true);
