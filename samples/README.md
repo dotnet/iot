@@ -12,7 +12,7 @@ The following samples demonstrate various scenarios:
 
 ## Libraries
 
-These samples use the [System.Device.Gpio](https://dotnet.myget.org/feed/dotnet-corefxlab/package/nuget/System.Devices.Gpio) library. It will be supported on Linux and Windows IoT Core. At present, the library works on Linux. The library is currently in early preview, based on [source in dotnet/corefxlab](https://github.com/dotnet/corefxlab/tree/master/src/System.Devices.Gpio).
+These samples use the [System.Device.Gpio](https://dotnet.myget.org/feed/dotnet-core/package/nuget/System.Device.Gpio) library. It will be supported on Linux and Windows IoT Core. At present, the library works on Linux. The library is currently in early preview, based on [source in dotnet/iot](https://github.com/dotnet/iot/tree/master/src/System.Device.Gpio).
 
 There are many libraries that are important beyond GPIO, I2C and related fundamental protocols. We are working on a plan where the .NET Team and the community can work together to build up a shared repository of implementations.
 

@@ -3,10 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Devices.Spi;
+using System.Device.Spi;
+using System.Device.Spi.Drivers;
 using Iot.Device;
 
-public class Volume
+public class Volume : IDisposable
 {
 
     public static Volume EnableVolume()
@@ -35,6 +36,14 @@ public class Volume
         value = value / 10.24;
         value = Math.Round(value);
         return (int)value;
+    }
+
+    public void Dispose()
+    {
+        if (_mcp3008 != null)
+        {
+            _mcp3008.Dispose();
+        }
     }
 
     private void Init()
