@@ -60,6 +60,16 @@ namespace System.Device.Spi.Drivers
             _winDevice.Write(data.ToArray());
         }
 
+        public override void TransferFullDuplex(Span<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            if (writeBuffer.Length != readBuffer.Length)
+            {
+                throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length");
+            }
+            byte[] byteArray = new byte[readBuffer.Length];
+            _winDevice.TransferFullDuplex(writeBuffer.ToArray(), byteArray);
+        }
+
         public override void Dispose(bool disposing)
         {
             _winDevice?.Dispose();
