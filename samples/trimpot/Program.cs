@@ -3,8 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Devices.Gpio;
-using System.Devices.Spi;
+using System.Device.Gpio;
+using System.Device.Spi;
+using System.Device.Spi.Drivers;
 using System.Threading;
 using Iot.Device;
 
@@ -37,24 +38,25 @@ namespace trimpot
             // the GPIO (via bit banging) implementation
             Mcp3008 GetMCP3008WithGPIO()
             {
-                GpioController controller = new GpioController(PinNumberingScheme.Gpio);
-                var mcp3008 = new Mcp3008(controller, 18, 23, 24, 25);
+                var mcp3008 = new Mcp3008(18, 23, 24, 25);
                 return mcp3008;
             }
 
+            Mcp3008 mcp = GetMCP3008WithSPI();
+            // Uncomment next line to use Gpio instead.
+            //Mcp3008 mcp = GetMCP3008WithGPIO();
+
             // Using SPI implementation
-            var mcp = GetMCP3008WithSPI();
-
-            // Using GPIO implementation
-            // var mcp = GetMCP3008WithGPIO();
-
-            while (true)
+            using (mcp)
             {
-                double value = mcp.Read(0);
-                value = value / 10.24;
-                value = Math.Round(value);
-                Console.WriteLine(value);
-                Thread.Sleep(500);
+                while (true)
+                {
+                    double value = mcp.Read(0);
+                    value = value / 10.24;
+                    value = Math.Round(value);
+                    Console.WriteLine(value);
+                    Thread.Sleep(500);
+                }
             }
         }
     }

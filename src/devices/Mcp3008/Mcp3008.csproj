@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Devices.Gpio" Version="0.1.0-preview2-181011-1" />
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
   </ItemGroup>
 
 </Project>

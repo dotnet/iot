@@ -1,6 +1,6 @@
 # Blink an LED with .NET Core on a Raspberry Pi
 
-This [sample](Program.cs) demonstrates blinking an LED at a given interval. It repeatedly toggles a GPIO pin on and off, which powers the LED. This sample also demonstrates the most basic usage of the [.NET Core GPIO library](https://dotnet.myget.org/feed/dotnet-corefxlab/package/nuget/System.Devices.Gpio).
+This [sample](Program.cs) demonstrates blinking an LED at a given interval. It repeatedly toggles a GPIO pin on and off, which powers the LED. This sample also demonstrates the most basic usage of the [.NET Core GPIO library](https://dotnet.myget.org/feed/dotnet-core/package/nuget/System.Device.Gpio).
 
 ## Run the sample
 

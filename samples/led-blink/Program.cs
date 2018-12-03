@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Devices.Gpio;
+using System.Device.Gpio;
 using System.Threading;
 
 namespace led_blink
@@ -13,31 +13,30 @@ namespace led_blink
         static void Main(string[] args)
         {
             var pin = 17;
-            var lightTime = 1000;
-            var dimTime = 200;
+            var lightTimeInMilliseconds = 1000;
+            var dimTimeInMilliseconds = 200;
             
             Console.WriteLine($"Let's blink an LED!");
-            GpioController controller = new GpioController(PinNumberingScheme.Gpio);
-            GpioPin ledPin = controller.OpenPin(pin, PinMode.Output);
-            Console.WriteLine($"GPIO pin enabled for use: {pin}");
-
-            Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs eventArgs) =>
+            using (GpioController controller = new GpioController())
             {
-                controller.ClosePin(pin);
-            };
+                controller.OpenPin(pin, PinMode.Output);
+                Console.WriteLine($"GPIO pin enabled for use: {pin}");
 
+                Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs eventArgs) =>
+                {
+                    controller.Dispose();
+                };
 
-            while (true)
-            {
-                Console.WriteLine($"Light for {lightTime}ms");
-                ledPin.Write(PinValue.High);
-                Thread.Sleep(lightTime);
-                Console.WriteLine($"Dim for {dimTime}ms");
-                ledPin.Write(PinValue.Low);
-                Thread.Sleep(dimTime);
+                while (true)
+                {
+                    Console.WriteLine($"Light for {lightTimeInMilliseconds}ms");
+                    controller.Write(pin, PinValue.High);
+                    Thread.Sleep(lightTimeInMilliseconds);
+                    Console.WriteLine($"Dim for {dimTimeInMilliseconds}ms");
+                    controller.Write(pin, PinValue.Low);
+                    Thread.Sleep(dimTimeInMilliseconds);
+                }
             }
-
-
         }
     }
 }

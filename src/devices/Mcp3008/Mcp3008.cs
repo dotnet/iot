@@ -3,42 +3,67 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Devices.Gpio;
-using System.Devices.Spi;
+using System.Device.Gpio;
+using System.Device.Spi;
 
 namespace Iot.Device
 {
-public class Mcp3008
+    public class Mcp3008 : IDisposable
     {
 
         private SpiDevice _spiDevice;
-        private GpioPin _CLK;
-        private GpioPin _MISO;
-        private GpioPin _MOSI;
-        private GpioPin _CS;
+        private GpioController _controller;
+        private CommunicationProtocol _protocol;
+        private int _CLK;
+        private int _MISO;
+        private int _MOSI;
+        private int _CS;
+
+        private enum CommunicationProtocol
+        {
+            Gpio,
+            Spi
+        }
 
 
         public Mcp3008(SpiDevice spiDevice)
         {
             _spiDevice = spiDevice;
+            _protocol = CommunicationProtocol.Spi;
         }
 
-        public Mcp3008(GpioController controller, int CLK, int MISO, int MOSI, int CS)
+        public Mcp3008(int CLK, int MISO, int MOSI, int CS)
         {
-            _CLK = controller.OpenPin(CLK, PinMode.Output);
-            _MISO = controller.OpenPin(MISO, PinMode.Input);
-            _MOSI = controller.OpenPin(MOSI, PinMode.Output);
-            _CS = controller.OpenPin(CS, PinMode.Output);
+            _controller = new GpioController();
+            _CLK = CLK;
+            _MISO = MISO;
+            _MOSI = MOSI;
+            _CS = CS;
+
+            _controller.OpenPin(_CLK, PinMode.Output);
+            _controller.OpenPin(_MISO, PinMode.Input);
+            _controller.OpenPin(_MOSI, PinMode.Output);
+            _controller.OpenPin(_CS, PinMode.Output);
+            _protocol = CommunicationProtocol.Gpio;
+        }
+
+        public void Dispose()
+        {
+            if (_controller != null)
+            {
+                _controller.Dispose();
+                _controller = null;
+            }
         }
 
         public int Read(int adc_channel)
         {
-            if (adc_channel < 0 && adc_channel > 7)
+            if (adc_channel < 0 || adc_channel > 7)
             {
                 throw new ArgumentException("ADC channel must be within 0-7 range.");
             }
 
-            if (_spiDevice != null)
+            if (_protocol == CommunicationProtocol.Spi)
             {
                 return ReadSpi(adc_channel);
             }
@@ -56,9 +81,9 @@ public class Mcp3008
                 var commandout = 0;
                 var trim_pot = 0;
 
-                _CS.Write(PinValue.High);
-                _CLK.Write(PinValue.Low);
-                _CS.Write(PinValue.Low);
+                _controller.Write(_CS, PinValue.High);
+                _controller.Write(_CLK, PinValue.Low);
+                _controller.Write(_CS, PinValue.Low);
 
                 commandout |= 0x18;
                 commandout <<= 3;
@@ -67,31 +92,31 @@ public class Mcp3008
                 {
                     if ((commandout & 0x80) > 0)
                     {
-                        _MOSI.Write(PinValue.High);
+                        _controller.Write(_MOSI, PinValue.High);
                     }
                     else
                     {
-                        _MOSI.Write(PinValue.Low);
+                        _controller.Write(_MOSI, PinValue.Low);
                     }
 
                     commandout <<= 1;
-                    _CLK.Write(PinValue.High);
-                    _CLK.Write(PinValue.Low);
+                    _controller.Write(_CLK, PinValue.High);
+                    _controller.Write(_CLK, PinValue.Low);
                 }
 
                 for (var i = 0; i < 12; i++)
                 {
-                    _CLK.Write(PinValue.High);
-                    _CLK.Write(PinValue.Low);
+                    _controller.Write(_CLK, PinValue.High);
+                    _controller.Write(_CLK, PinValue.Low);
                     trim_pot <<= 1;
 
-                    if (_MISO.Read() == PinValue.High)
+                    if (_controller.Read(_MISO) == PinValue.High)
                     {
                         trim_pot |= 0x1;
                     }
                 }
 
-                _CS.Write(PinValue.High);
+                _controller.Write(_CS, PinValue.High);
 
                 trim_pot >>= 1;
                 return trim_pot;
