@@ -100,6 +100,20 @@ namespace System.Device.Gpio.Drivers
             throw new PlatformNotSupportedException($"{mode} is not supported by this driver.");
         }
 
+        private PinMode ConvertSysFsModeToPinMode(string sysfsMode)
+        {
+            sysfsMode = sysfsMode.Trim();
+            if (sysfsMode == "in")
+            {
+                return PinMode.Input;
+            }
+            if (sysfsMode == "out")
+            {
+                return PinMode.Output;
+            }
+            throw new ArgumentException($"Unable to parse {sysfsMode} as a PinMode.");
+        }
+
         protected internal override PinValue Read(int pinNumber)
         {
             PinValue result = default(PinValue);
@@ -463,6 +477,27 @@ namespace System.Device.Gpio.Drivers
                 RemovePinFromPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, true, closePollFileDescriptor, true);
                 _devicePins[pinNumber].Dispose();
                 _devicePins.Remove(pinNumber);
+            }
+        }
+
+        protected internal override PinMode GetPinMode(int pinNumber)
+        {
+            string directionPath = $"{GpioBasePath}/gpio{pinNumber}/direction";
+            if (File.Exists(directionPath))
+            {
+                try
+                {
+                    string sysfsMode = File.ReadAllText(directionPath);
+                    return ConvertSysFsModeToPinMode(sysfsMode);
+                }
+                catch (UnauthorizedAccessException e)
+                {
+                    throw new UnauthorizedAccessException("Getting a mode to a pin requires root permissions.", e);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("There was an attempt to get a mode to a pin that is not yet open.");
             }
         }
     }

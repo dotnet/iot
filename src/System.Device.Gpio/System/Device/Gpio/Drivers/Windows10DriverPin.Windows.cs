@@ -112,6 +112,8 @@ namespace System.Device.Gpio.Drivers
 
         public void SetPinMode(PinMode mode) => _pin.SetDriveMode(PinModeToGpioDriveMode(mode));
 
+        public PinMode GetPinMode() => GpioDriveModeToPinMode(_pin.GetDriveMode());
+
         public WaitForEventResult WaitForEvent(PinEventTypes eventType, CancellationToken cancellationToken)
         {
             using (ManualResetEvent completionEvent = new ManualResetEvent(false))

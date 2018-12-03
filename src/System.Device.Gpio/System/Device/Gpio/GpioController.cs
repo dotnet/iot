@@ -124,6 +124,16 @@ namespace System.Device.Gpio
             _driver.SetPinMode(logicalPinNumber, mode);
         }
 
+        public PinMode GetPinMode(int pinNumber)
+        {
+            int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
+            if (!_openPins.Contains(logicalPinNumber))
+            {
+                throw new InvalidOperationException("Can not set a mode to a pin that is not yet opened.");
+            }
+            return _driver.GetPinMode(logicalPinNumber);
+        }
+
         /// <summary>
         /// Reads the current value of a pin
         /// </summary>
@@ -135,6 +145,10 @@ namespace System.Device.Gpio
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException("Can not read from a pin that is not yet opened.");
+            }
+            if (_driver.GetPinMode(pinNumber) == PinMode.Output)
+            {
+                throw new InvalidOperationException("Can not read from a pin that is set to Output mode.");
             }
             return _driver.Read(logicalPinNumber);
         }
@@ -150,6 +164,10 @@ namespace System.Device.Gpio
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException("Can not write to a pin that is not yet opened.");
+            }
+            if (_driver.GetPinMode(pinNumber) != PinMode.Output)
+            {
+                throw new InvalidOperationException("Can not write to a pin that is not set to Output mode.");
             }
             _driver.Write(logicalPinNumber, value);
         }

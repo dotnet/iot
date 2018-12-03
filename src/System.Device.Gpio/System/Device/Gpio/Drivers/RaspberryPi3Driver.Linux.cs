@@ -33,13 +33,28 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        private PinMode GetModeForUnixDriver(PinMode mode)
+        {
+            switch (mode)
+            {
+                case PinMode.Input:
+                case PinMode.InputPullUp:
+                case PinMode.InputPullDown:
+                    return PinMode.Input;
+                case PinMode.Output:
+                    return PinMode.Output;
+                default:
+                    throw new InvalidOperationException($"Can not parse pin mode {_sysFSModes}");
+            }
+        }
+
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
             ValidatePinNumber(pinNumber);
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
-            _sysFSDriver.SetPinMode(pinNumber, _sysFSModes[pinNumber]);
+            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
             _sysFSDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventType, callback);
         }
@@ -47,6 +62,12 @@ namespace System.Device.Gpio.Drivers
         protected internal override void ClosePin(int pinNumber)
         {
             ValidatePinNumber(pinNumber);
+
+            if (_sysFSModes.ContainsKey(pinNumber) && _sysFSModes[pinNumber] == PinMode.Output)
+            {
+                Write(pinNumber, PinValue.Low);
+                SetPinMode(pinNumber, PinMode.Input);
+            }
         }
 
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
@@ -67,6 +88,7 @@ namespace System.Device.Gpio.Drivers
         {
             ValidatePinNumber(pinNumber);
             Initialize();
+            SetPinMode(pinNumber, PinMode.Input);
         }
 
         protected internal unsafe override PinValue Read(int pinNumber)
@@ -88,7 +110,7 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
-            _sysFSDriver.SetPinMode(pinNumber, _sysFSModes[pinNumber]);
+            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
             _sysFSDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
         }
@@ -115,27 +137,13 @@ namespace System.Device.Gpio.Drivers
             register |= (mode == PinMode.Output ? 1u : 0u) << shift;
             *registerPointer = register;
             
-            PinMode sysFSPinMode;
-            switch (mode)
-            {
-                case PinMode.Input:
-                case PinMode.InputPullDown:
-                case PinMode.InputPullUp:
-                    sysFSPinMode = PinMode.Input;
-                    break;
-                case PinMode.Output:
-                    sysFSPinMode = PinMode.Output;
-                    break;
-                default:
-                    throw new ArgumentException("Invalid PinMode");
-            }
             if (_sysFSModes.ContainsKey(pinNumber))
             {
-                _sysFSModes[pinNumber] = sysFSPinMode;
+                _sysFSModes[pinNumber] = mode;
             }
             else
             {
-                _sysFSModes.Add(pinNumber, sysFSPinMode);
+                _sysFSModes.Add(pinNumber, mode);
             }
 
             if (mode != PinMode.Output)
@@ -208,7 +216,7 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
-            _sysFSDriver.SetPinMode(pinNumber, _sysFSModes[pinNumber]);
+            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
             return _sysFSDriver.WaitForEvent(pinNumber, eventType, cancellationToken);
         }
@@ -219,7 +227,7 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
-            _sysFSDriver.SetPinMode(pinNumber, _sysFSModes[pinNumber]);
+            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
             return _sysFSDriver.WaitForEventAsync(pinNumber, eventType, cancellationToken);
         }
@@ -285,6 +293,17 @@ namespace System.Device.Gpio.Drivers
                 Interop.close(fileDescriptor);
                 _registerViewPointer = (RegisterView*)mapPointer;
             }
+        }
+
+        protected internal override PinMode GetPinMode(int pinNumber)
+        {
+            ValidatePinNumber(pinNumber);
+
+            if (!_sysFSModes.ContainsKey(pinNumber))
+            {
+                throw new InvalidOperationException("Can not get a pin mode of a pin that is not opened.");
+            }
+            return _sysFSModes[pinNumber];
         }
     }
 }

@@ -30,6 +30,11 @@ namespace System.Device.Gpio.Drivers
             throw new PlatformNotSupportedException();
         }
 
+        protected internal override PinMode GetPinMode(int pinNumber)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
             throw new PlatformNotSupportedException();
