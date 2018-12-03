@@ -33,6 +33,11 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 * [Official releases](https://www.microsoft.com/net/download)
 * [Daily builds](https://github.com/dotnet/core/blob/master/daily-builds.md)
 
+## Community 
+
+This project has adopted the code of conduct defined by the [Contributor Covenant](https://contributor-covenant.org/)
+to clarify expected behavior in our community. For more information, see the [.NET Foundation Code of Conduct](https://www.dotnetfoundation.org/code-of-conduct).
+
 ## Contributing
 
 Please contribute. We are primarily interested in the following:
