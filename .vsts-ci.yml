@@ -3,7 +3,7 @@ variables:
   _HelixType: build/product
   _HelixSource: pr/dotnet/arcade-minimalci-sample/$(Build.SourceBranch)
   _enableTelemetry: true
-  ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'official')) }}:
+  ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     OfficialBuildId: $(Build.BuildNumber)
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
     DOTNET_MULTILEVEL_LOOKUP: 0
@@ -16,9 +16,8 @@ resources:
 trigger:
 - master
 
-# To be added in the future when VSTS supports this feature
-# pr:
-# - master
+pr:
+- master
 
 # Three phases for each of the three OSes we want to run on
 phases:
@@ -28,14 +27,17 @@ phases:
     name: Windows_NT
     enableTelemetry: $(_enableTelemetry)
     queue:
-      name: dotnet-internal-temp
+      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+        name: dotnet-internal-temp
+      ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+        name: dotnet-external-temp
       parallel: 99
       matrix:
         debug_configuration:
           _BuildConfig: Debug
         release_configuration:
           _BuildConfig: Release
-    ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'official')) }}:
+    ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
       enableMicrobuild: true
     steps:
     - script: eng\common\cibuild.cmd
@@ -44,7 +46,7 @@ phases:
       name: Build
       displayName: Build
       condition: succeeded()
-    - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'official')) }}:
+    - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
       - task: PublishBuildArtifacts@1
         displayName: Publish Windows package assets
         inputs:
@@ -54,7 +56,7 @@ phases:
         condition: eq(variables['_BuildConfig'], 'Release')
     variables:
       _HelixBuildConfig: $(_BuildConfig)
-      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'official')) }}:
+      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
         _TeamName: DotNetCore
         _SignType: real
 
@@ -106,7 +108,7 @@ phases:
     variables:
       _HelixBuildConfig: $(_BuildConfig)
 
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'official')) }}:
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/phases/base.yml
     parameters:
       dependsOn:
@@ -117,7 +119,10 @@ phases:
       name: PublishToMyGet
       enableTelemetry: $(_enableTelemetry)
       queue:
-        name: dotnet-internal-temp  
+        ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+          name: dotnet-internal-temp
+        ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+          name: dotnet-external-temp 
       steps:
       - task: DownloadBuildArtifacts@0
         displayName: Download Built Packages
