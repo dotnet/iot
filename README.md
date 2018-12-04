@@ -31,10 +31,19 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 * [ ] Provide C# device bindings and canvas support for [LED matrices](https://www.adafruit.com/product/607)
 * [ ] Provide C# device bindings for LCD panels
 
-## Install .NET Core
+## How to Install and Get Started
 
-* [Official releases](https://www.microsoft.com/net/download)
-* [Daily builds](https://github.com/dotnet/core/blob/master/daily-builds.md)
+You can install the latest daily pre-release build of the .NET Core System.Device.Gpio nuget package from the [dotnet.myget.org feed](https://dotnet.myget.org/feed/dotnet-core/package/nuget/System.Device.Gpio).
+
+#### NuGet.exe
+~~~~
+nuget install System.Device.Gpio -PreRelease -Source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
+~~~~
+
+#### .NET CLI
+~~~~
+dotnet add package System.Device.Gpio --source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
+~~~~
 
 ## Community 
 
