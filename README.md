@@ -14,7 +14,7 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 
 * [x] Support protocols: GPIO, SPI, and I2C.
 * [x] Support protocols: PWM.
-* [ ] Support protocols: serial port.
+* [x] Support protocols: serial port.
 * [ ] Support protocols: I2S.
 * [x] Support Linux.
 * [x] Support Windows 10 IoT Core.
