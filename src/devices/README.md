@@ -22,7 +22,7 @@ Bindings must:
 
 * include a .NET Core project file for the main library.
 * include a descriptive README, with a fritzing diagram.
-* include a buildable sample (layout will be described bellow).
+* include a buildable sample (layout will be described below).
 * use the System.Device API.
 * (*Optional*) Include a unit test project that **DOES NOT** require hardware for testing. We will be running these tests as part of our CI and we won't have sensors plugged in to the microcontrollers, which is why test projects should only contain unit tests for small components in your binding.
 
