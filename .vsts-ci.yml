@@ -28,7 +28,10 @@ phases:
     name: Windows_NT
     enableTelemetry: $(_enableTelemetry)
     queue:
-      name: dotnet-internal-temp
+      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'official')) }}:
+        name: dotnet-internal-temp
+      ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'github')) }}:
+        name: dotnet-external-temp
       parallel: 99
       matrix:
         debug_configuration:
@@ -117,7 +120,10 @@ phases:
       name: PublishToMyGet
       enableTelemetry: $(_enableTelemetry)
       queue:
-        name: dotnet-internal-temp  
+        ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'official')) }}:
+          name: dotnet-internal-temp
+        ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest'), contains(variables['Build.DefinitionName'], 'github')) }}:
+          name: dotnet-external-temp 
       steps:
       - task: DownloadBuildArtifacts@0
         displayName: Download Built Packages
