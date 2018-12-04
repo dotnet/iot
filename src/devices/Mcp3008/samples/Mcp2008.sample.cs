@@ -3,19 +3,17 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device.Gpio;
 using System.Device.Spi;
 using System.Device.Spi.Drivers;
 using System.Threading;
-using Iot.Device;
 
-namespace trimpot
+namespace Iot.Device.Samples
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello Trimpot!");
+            Console.WriteLine("Hello Mcp3008!");
 
             // This sample implements two different ways of accessing the MCP3008.
             // The SPI option is enabled in the sample by default, but you can switch

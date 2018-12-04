@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\devices\Mcp3008\Mcp3008.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Mcp3008.csproj" />
   </ItemGroup>
 
 </Project>

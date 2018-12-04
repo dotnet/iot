@@ -2,10 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems> <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <Compile Include="Mcp3008.cs" />
+    <None Include="README.md" />
   </ItemGroup>
 
 </Project>

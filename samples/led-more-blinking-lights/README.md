@@ -1,6 +1,6 @@
 # More blinking lights, with hardware controls
 
-This [sample](Program.cs) demonstrates blinking multiple LED on different schedules and controlling the LEDs from hardware controls. The sample builds on the [Blink an LED](../led-blink/README.md) and [Trimpot](../trimpot/README.md) samples.
+This [sample](Program.cs) demonstrates blinking multiple LED on different schedules and controlling the LEDs from hardware controls. The sample builds on the [Blink an LED](../led-blink/README.md) and [Mcp3008](../../src/devices/Mcp3008/samples/README.md) samples.
 
 ## Code
 
