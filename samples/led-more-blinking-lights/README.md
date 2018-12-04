@@ -13,7 +13,7 @@ This sample demonstrates how to use five different elements together, three LEDs
 
 The following [fritzing diagram](rpi-more-blinking-lights.fzz) demonstrates how you should wire your device in order to run the [program](Program.cs). It uses several pins on the Raspberry Pi.
 
-![Rasperry Pi Breadboard diagram](rpi-more-blinking-lights_bb.png)
+![Raspberry Pi Breadboard diagram](rpi-more-blinking-lights_bb.png)
 
 ## Hardware elements
 

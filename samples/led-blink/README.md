@@ -51,7 +51,7 @@ while (true)
 
 The following [fritzing diagram](rpi-led.fzz) demonstrates how you should wire your device in order to run the [program](Program.cs). It uses the GND and GPIO 17 pins on the Raspberry Pi.
 
-![Rasperry Pi Breadboard diagram](rpi-led_bb.png)
+![Raspberry Pi Breadboard diagram](rpi-led_bb.png)
 
 ## Hardware elements
 

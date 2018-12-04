@@ -2,7 +2,7 @@
 
 You can use .NET Core to read analog values from a [potentiometer](https://en.wikipedia.org/wiki/Trimmer_(electronics)), like a [volume control](https://www.adafruit.com/product/356).
 
-The Rasperry Pi cannot read analog values directly so relies on an analog to digital converter, like the [MCP3008 ADC](https://www.adafruit.com/product/856). The MCP3008 supports the SPI interface. The 10-bit chip can be accessed as an SPI device or manually via raw GPIO pins. Both options are demonstrated.
+The Raspberry Pi cannot read analog values directly so relies on an analog to digital converter, like the [MCP3008 ADC](https://www.adafruit.com/product/856). The MCP3008 supports the SPI interface. The 10-bit chip can be accessed as an SPI device or manually via raw GPIO pins. Both options are demonstrated.
 
 ## Accessing the MCP3008 via SPI
 
