@@ -42,10 +42,13 @@ namespace System.Device.Gpio
                         {
                             return new RaspberryPi3Driver();
                         }
+                        /* Commenting out as HummingBoard driver is not implemented yet, will be added back after implementation 
+                         * https://github.com/dotnet/iot/issues/76                
                         if (match.Groups[1].Value == HummingBoardHardware)
                         {
                             return new HummingBoardDriver();
-                        }
+                        } 
+                         */
                         return new UnixDriver();
                     }
                 }
