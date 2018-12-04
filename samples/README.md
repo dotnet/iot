@@ -20,7 +20,7 @@ There are many libraries that are important beyond GPIO, I2C and related fundame
 
 The samples expect the device pins to be connected in particular way to function, typically on a breadboard. Each example includes a [Fritzing](http://fritzing.org/home/) diagram of the required breadboard layout, such as the following one (taken from the [More blinking lights](led-more-blinking-lights/README.md) sample).
 
-![Rasperry Pi Breadboard diagram](led-more-blinking-lights/rpi-more-blinking-lights_bb.png)
+![Raspberry Pi Breadboard diagram](led-more-blinking-lights/rpi-more-blinking-lights_bb.png)
 
 ## Requirements
 
