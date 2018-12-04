@@ -13,4 +13,4 @@ RUN dotnet publish -c release -o out
 FROM microsoft/dotnet:2.1-runtime-stretch-slim-arm32v7 AS runtime
 WORKDIR /app
 COPY --from=build /app/out ./
-ENTRYPOINT ["dotnet", "led-blink.dll"]
+ENTRYPOINT ["dotnet", "led-more-blinking-lights.dll"]
