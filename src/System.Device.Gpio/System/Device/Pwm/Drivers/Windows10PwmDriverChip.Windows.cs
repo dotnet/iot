@@ -3,37 +3,38 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using Windows.Devices.Enumeration;
 using WinPwm = Windows.Devices.Pwm;
 
 namespace System.Device.Pwm.Drivers
 {
     public class Windows10PwmDriverChip : IDisposable
     {
-        private int _referenceCount = 1;
         private WinPwm.PwmController _winController;
         private readonly Dictionary<int, Windows10PwmDriverChannel> _channelMap = new Dictionary<int, Windows10PwmDriverChannel>();
 
-        public Windows10PwmDriverChip(WinPwm.PwmController winController)
+        public Windows10PwmDriverChip(int chipIndex)
         {
-            _winController = winController;
+            // Open the Windows PWM controller for the specified PWM chip
+            string controllerFriendlyName = $"PWM{chipIndex}";
+            string deviceSelector = WinPwm.PwmController.GetDeviceSelector(controllerFriendlyName);
+
+            DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
+            if (deviceInformationCollection.Count == 0)
+            {
+                throw new ArgumentException($"No PWM device exists for PWM chip at index {chipIndex}", $"{nameof(chipIndex)}");
+            }
+
+            string deviceId = deviceInformationCollection[0].Id;
+            _winController = WinPwm.PwmController.FromIdAsync(deviceId).WaitForCompletion();
         }
 
         public void OpenChannel(int channelIndex)
         {
             if (!_channelMap.TryGetValue(channelIndex, out Windows10PwmDriverChannel channel))
             {
-                WinPwm.PwmPin winPin = _winController.OpenPin(channelIndex);
-                if (winPin == null)
-                {
-                    throw new ArgumentOutOfRangeException($"The PWM chip is unable to open a channel at index {channelIndex}.", nameof(channelIndex));
-                }
-
-                channel = new Windows10PwmDriverChannel(winPin);
+                channel = new Windows10PwmDriverChannel(_winController, channelIndex);
                 _channelMap.Add(channelIndex, channel);
-            }
-            else
-            {
-                channel.OpenChannel();
             }
         }
 
@@ -42,27 +43,15 @@ namespace System.Device.Pwm.Drivers
         /// </summary>
         /// <param name="channelIndex">The PWM channel to close.</param>
         /// <returns><see langword="true" /> if the chip has no more open channels open upon exiting; <see langword="false" /> otherwise.</returns>
-        /// <exception cref="NotImplementedException"></exception>
-        /// TODO Edit XML Comment Template for CloseChannel
         public bool CloseChannel(int channelIndex)
         {
             // This assumes that PwmController has ensured that the channel is already open
             Windows10PwmDriverChannel channel = _channelMap[channelIndex];
 
-            if (channel.CloseChannel())
-            {
-                if (--_referenceCount == 0)
-                {
-                    _channelMap.Remove(channelIndex);
-                    if (_channelMap.Count == 0)
-                    {
-                        this.Dispose();
-                        return true;
-                    }
-                }
-            }
+            channel.Dispose();
+            _channelMap.Remove(channelIndex);
 
-            return false;
+            return _channelMap.Count == 0;
         }
 
         public void ChangeDutyCycle(int channelIndex, double dutyCyclePercentage)
@@ -91,12 +80,11 @@ namespace System.Device.Pwm.Drivers
 
         public void Dispose()
         {
-            _referenceCount = 0;
             _winController = null;
 
             foreach (Windows10PwmDriverChannel channel in _channelMap.Values)
             {
-                channel.CloseChannel();
+                channel.Dispose();
             }
             _channelMap.Clear();
         }

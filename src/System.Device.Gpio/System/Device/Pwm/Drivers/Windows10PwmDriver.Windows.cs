@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using Windows.Devices.Enumeration;
-using WinPwm = Windows.Devices.Pwm;
 
 namespace System.Device.Pwm.Drivers
 {
@@ -16,20 +14,7 @@ namespace System.Device.Pwm.Drivers
         {
             if (!_chipMap.TryGetValue(chipIndex, out Windows10PwmDriverChip chip))
             {
-                // Open the Windows PWM controller for the specified PWM chip
-                string controllerFriendlyName = $"PWM{chipIndex}";
-                string deviceSelector = WinPwm.PwmController.GetDeviceSelector(controllerFriendlyName);
-
-                DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
-                if (deviceInformationCollection.Count == 0)
-                {
-                    throw new ArgumentException($"No PWM device exists for PWM chip {chipIndex}", $"{nameof(chipIndex)}");
-                }
-
-                string deviceId = deviceInformationCollection[0].Id;
-                WinPwm.PwmController winController = WinPwm.PwmController.FromIdAsync(deviceId).WaitForCompletion();
-
-                chip = new Windows10PwmDriverChip(winController);
+                chip = new Windows10PwmDriverChip(chipIndex);
                 _chipMap[chipIndex] = chip;
             }
 
