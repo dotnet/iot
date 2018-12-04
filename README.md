@@ -12,12 +12,14 @@ Note: System.Device.Gpio is in early preview. It is not yet supported and will c
 
 We have the following deliverables on our intermediate-term roadmap (not in order of completion):
 
-* [x] Support protocols: GPIO, SPI, and I2C.
-* [x] Support protocols: PWM.
-* [x] Support protocols: serial port.
-* [ ] Support protocols: I2S.
-* [x] Support Linux.
-* [x] Support Windows 10 IoT Core.
+* [x] Support General-purpose input/output protocols: GPIO, SPI, I2C, and PWM
+* [ ] Support common serial protocols: RS-485 Serial Port, CAN bus, Modbus
+* [ ] Support digital audio bus protocols: I2S
+* [x] Support Raspberry Pi 3 on Linux and Windows 10 IoT Core RS5
+* [ ] Support Hummingboard Edge on Linux and Windows 10 IoT Core RS5
+* [ ] Support BeagleBoard Black on Linux and Windows 10 IoT Core RS5
+* [x] Support sysfs (/sys/class/gpio) for Generic/Portable Device Driver on Linux Kernel 3.6+
+* [ ] Support libgpiod (/dev/gpiochipX) for Generic/Portable Device Driver on Linux Kernel 4.8+
 * [ ] Stabilize System.Device.* API
 * [ ] Publish System.Device.* API to NuGet.org
 * [x] Provide dockerfiles for all samples
@@ -25,8 +27,9 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 * [ ] Support x64
 * [x] Support ARM32
 * [ ] Support ARM64
-* [ ] Provide device bindings for LED matrices
-* [ ] Provide device bindings for LCD panels
+* [ ] Provide C# device bindings for common sensors and microcontrollers such as those bundled with the [Microsoft IoT Starter Pack](https://www.adafruit.com/product/2733)
+* [ ] Provide C# device bindings and canvas support for [LED matrices](https://www.adafruit.com/product/607)
+* [ ] Provide C# device bindings for LCD panels
 
 ## Install .NET Core
 
