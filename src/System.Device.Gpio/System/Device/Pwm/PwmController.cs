@@ -13,7 +13,7 @@ namespace System.Device.Pwm
         /// <summary>
         /// This collection will hold all of the channels that are currently opened by this controller.
         /// </summary>
-        private HashSet<(int, int)> _openChannels;
+        private readonly HashSet<(int, int)> _openChannels;
 
         public PwmController(PwmDriver driver)
         {
@@ -43,6 +43,14 @@ namespace System.Device.Pwm
             _openChannels.Remove((pwmChip, pwmChannel));
         }
 
+        /// <summary>
+        /// Changes the duty cycle.
+        /// </summary>
+        /// <param name="pwmChip">The PWM chip.</param>
+        /// <param name="pwmChannel">The PWM channel.</param>
+        /// <param name="dutyCyclePercentage">The duty cycle percentage, from 0.0 to 100.</param>
+        /// <exception cref="InvalidOperationException">Can not change dutycycle to a pwm channel that is not yet opened.</exception>
+        /// <exception cref="ArgumentException">Duty cycle must be a percentage in the range of 0.0 - 100.0 - dutyCyclePercentage</exception>
         public void ChangeDutyCycle(int pwmChip, int pwmChannel, double dutyCyclePercentage)
         {
             if (!_openChannels.Contains((pwmChip, pwmChannel)))
@@ -56,6 +64,16 @@ namespace System.Device.Pwm
             _driver.ChangeDutyCycle(pwmChip, pwmChannel, dutyCyclePercentage);
         }
 
+        /// <summary>
+        /// Starts the writing.
+        /// </summary>
+        /// <param name="pwmChip">The PWM chip.</param>
+        /// <param name="pwmChannel">The PWM channel.</param>
+        /// <param name="frequencyInHertz">The frequency in hertz.</param>
+        /// <param name="dutyCyclePercentage">The duty cycle percentage.</param>
+        /// <exception cref="InvalidOperationException">Can not start writing to a pwm channel that is not yet opened.</exception>
+        /// <exception cref="ArgumentException">Duty cycle must be a percentage in the range of 0.0 - 100.0 - dutyCyclePercentage</exception>
+        /// TODO Edit XML Comment Template for StartWriting
         public void StartWriting(int pwmChip, int pwmChannel, double frequencyInHertz, double dutyCyclePercentage)
         {
             if (!_openChannels.Contains((pwmChip, pwmChannel)))
