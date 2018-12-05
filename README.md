@@ -61,9 +61,11 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 * [ ] Support x64
 * [x] Support ARM32
 * [ ] Support ARM64
-* [ ] Provide C# device bindings for common sensors and microcontrollers such as those bundled with the [Microsoft IoT Starter Pack](https://www.adafruit.com/product/2733)
-* [ ] Provide C# device bindings and canvas support for [LED matrices](https://www.adafruit.com/product/607)
-* [ ] Provide C# device bindings for LCD panels
+* [ ] Support Device Bindings for common sensors and microcontrollers such as those bundled with the [Microsoft IoT Starter Pack](https://www.adafruit.com/product/2733)
+* [ ] Support Device Bindings and Canvas Widgets for LCDS, multi-panel [LED matrices](https://www.adafruit.com/product/607), and Displays
+* [ ] Support Device Bindings for servo and stepper motors, motor controllers, and drives
+* [ ] Stabilize IoT.Device.* APIs for Device Bindings
+* [ ] Publish IoT.Device.* Device Bindings to NuGet.org
 
 ## License
 
