@@ -46,21 +46,10 @@ To setup such app from the scratch (assumes your folder name is `arduino-demo` a
 
 ```
 dotnet new console
-dotnet add package System.IO.Ports
+dotnet add package System.IO.Ports -v 4.6.0-preview.18571.3
 ```
 
-ensure you got following nuget.config:
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <packageSources>
-    <add key="dotnet-core" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
-  </packageSources>
-</configuration>
-```
-
-add runtime identifier in the property group to make it easier to publish:
+add runtime identifier in the property group to make it easier to publish (you can also provide it during publishing: `dotnet publish -r linux-arm`):
 
 ```xml
 <RuntimeIdentifier>linux-arm</RuntimeIdentifier>
@@ -78,12 +67,6 @@ To run your app simply call it while in that directory
 ```
 ./arduino-demo /dev/ttyS0
 ```
-
-Note: this version might be out of date and not contain recent fixes - please see dogfooding instructions to test latest version of System.IO.Ports
-
-### To dogfood latest bits
-
-[See example csproj file](arduino-demo.csproj) and edit versions accordingly (currently contains latest as of writing this demo). It contains comments explaining how to edit it and find latest versions.
 
 ## Arduino example app
 
