@@ -13,13 +13,23 @@ namespace DeviceApiTester.Commands.Pwm
         [Option('d', "driver", HelpText = "The PwmDriver to use: { Windows | Unix }", Required = false, Default = PwmDriverType.Windows)]
         public PwmDriverType Driver { get; set; }
 
+        [Option("pwm-chip", HelpText = "The PWM chip (controller) to use", Required = false, Default = 0)]
+        public int PwmChip { get; set; }
+
+        [Option("pwm-channel", HelpText = "The PWM channel (pin) to use", Required = false, Default = 0)]
+        public int PwmChannel { get; set; }
+
+        [Option('c', "dutycycle", HelpText = "The duty cycle for PWM output from 1-100", Required = false, Default = 50)]
+        public int DutyCycle { get; set; }
+
+        [Option('f', "frequency", HelpText = "The frequency in hertz", Required = false, Default = 400.0)]
+        public double Frequency { get; set; }
+
         protected PwmController CreatePwmController()
         {
             PwmDriver pwmDriver = DriverFactory.CreateFromEnum<PwmDriver, PwmDriverType>(this.Driver);
 
-            return pwmDriver != null
-                ? new PwmController(pwmDriver)
-                : new PwmController(pwmDriver);
+            return new PwmController(pwmDriver);
         }
     }
 }
