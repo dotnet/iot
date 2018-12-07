@@ -24,11 +24,11 @@ namespace DeviceApiTester.Commands.Pwm
         {
             using (var pwm = CreatePwmController())
             {
-                Console.WriteLine("Enabling PWM output with chip {0} / channel {1}, {2}% duty cycle @ {3}hz for {4} seconds ", PwmChip, PwmChip, DutyCycle, Frequency, Seconds);
+                Console.WriteLine($"Enabling PWM output with chip {PwmChip} / channel {PwmChannel}, {DutyCycle}% duty cycle @ {Frequency}hz for {Seconds} seconds ");
 
                 pwm.OpenChannel(PwmChip, PwmChannel);
                 pwm.StartWriting(PwmChip, PwmChannel, Frequency, DutyCycle);
-                await Task.Delay(Seconds * 1000);
+                await Task.Delay(TimeSpan.FromSeconds(Seconds));
                 pwm.StopWriting(PwmChip, PwmChannel);
             }
 

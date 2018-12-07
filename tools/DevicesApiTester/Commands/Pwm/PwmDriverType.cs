@@ -9,6 +9,9 @@ namespace DeviceApiTester.Commands.Pwm
 {
     public enum PwmDriverType
     {
+        [ImplementationType(null)]
+        Default,
+
         [ImplementationType(typeof(Windows10PwmDriver))]
         Windows,
 
