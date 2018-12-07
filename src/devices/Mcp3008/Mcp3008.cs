@@ -10,14 +10,13 @@ namespace Iot.Device
 {
     public class Mcp3008 : IDisposable
     {
-
-        private SpiDevice _spiDevice;
+        private readonly SpiDevice _spiDevice;
         private GpioController _controller;
-        private CommunicationProtocol _protocol;
-        private int _CLK;
-        private int _MISO;
-        private int _MOSI;
-        private int _CS;
+        private readonly CommunicationProtocol _protocol;
+        private readonly int _clk;
+        private readonly int _miso;
+        private readonly int _mosi;
+        private readonly int _cs;
 
         private enum CommunicationProtocol
         {
@@ -25,6 +24,11 @@ namespace Iot.Device
             Spi
         }
 
+        public enum InputConfiguration
+        {
+            Differential = 0,
+            SingleEnded = 1
+        }
 
         public Mcp3008(SpiDevice spiDevice)
         {
@@ -32,18 +36,18 @@ namespace Iot.Device
             _protocol = CommunicationProtocol.Spi;
         }
 
-        public Mcp3008(int CLK, int MISO, int MOSI, int CS)
+        public Mcp3008(int clk, int miso, int mosi, int cs)
         {
             _controller = new GpioController();
-            _CLK = CLK;
-            _MISO = MISO;
-            _MOSI = MOSI;
-            _CS = CS;
+            _clk = clk;
+            _miso = miso;
+            _mosi = mosi;
+            _cs = cs;
 
-            _controller.OpenPin(_CLK, PinMode.Output);
-            _controller.OpenPin(_MISO, PinMode.Input);
-            _controller.OpenPin(_MOSI, PinMode.Output);
-            _controller.OpenPin(_CS, PinMode.Output);
+            _controller.OpenPin(_clk, PinMode.Output);
+            _controller.OpenPin(_miso, PinMode.Input);
+            _controller.OpenPin(_mosi, PinMode.Output);
+            _controller.OpenPin(_cs, PinMode.Output);
             _protocol = CommunicationProtocol.Gpio;
         }
 
@@ -56,88 +60,102 @@ namespace Iot.Device
             }
         }
 
-        public int Read(int adc_channel)
+        public int Read(int channel, InputConfiguration inputConfiguration = InputConfiguration.SingleEnded)
         {
-            if (adc_channel < 0 || adc_channel > 7)
+            if (channel < 0 || channel > 7)
             {
                 throw new ArgumentException("ADC channel must be within 0-7 range.");
             }
 
             if (_protocol == CommunicationProtocol.Spi)
             {
-                return ReadSpi(adc_channel);
+                return ReadSpi(channel, inputConfiguration);
             }
             else
             {
-                return ReadGpio(adc_channel);
+                return ReadGpio(channel, inputConfiguration);
             }
         }
 
+        private static byte GetConfigurationBits(int channel,InputConfiguration inputConfiguration = InputConfiguration.SingleEnded)
+        {
+            int configurationBits;
+
+            if (inputConfiguration == InputConfiguration.SingleEnded)
+            {
+                configurationBits = 0b00011000 | channel;
+            }
+            else
+            {
+                configurationBits = 0b00010000 | channel;
+            }
+
+            configurationBits = configurationBits << 3;
+            return (byte)configurationBits;
+        }
+
         // port of https://gist.github.com/ladyada/3151375
-        private int ReadGpio(int adc_channel)
+        private int ReadGpio(int channel, InputConfiguration inputConfiguration)
         {
             while (true)
             {
-                var commandout = 0;
-                var trim_pot = 0;
+                var result = 0;
+                byte command = GetConfigurationBits(channel, inputConfiguration);
 
-                _controller.Write(_CS, PinValue.High);
-                _controller.Write(_CLK, PinValue.Low);
-                _controller.Write(_CS, PinValue.Low);
-
-                commandout |= 0x18;
-                commandout <<= 3;
+                _controller.Write(_cs, PinValue.High);
+                _controller.Write(_clk, PinValue.Low);
+                _controller.Write(_cs, PinValue.Low);
 
                 for (var i = 0; i < 5; i++)
                 {
-                    if ((commandout & 0x80) > 0)
+                    if ((command & 0x80) > 0)
                     {
-                        _controller.Write(_MOSI, PinValue.High);
+                        _controller.Write(_mosi, PinValue.High);
                     }
                     else
                     {
-                        _controller.Write(_MOSI, PinValue.Low);
+                        _controller.Write(_mosi, PinValue.Low);
                     }
 
-                    commandout <<= 1;
-                    _controller.Write(_CLK, PinValue.High);
-                    _controller.Write(_CLK, PinValue.Low);
+                    command <<= 1;
+                    _controller.Write(_clk, PinValue.High);
+                    _controller.Write(_clk, PinValue.Low);
                 }
 
                 for (var i = 0; i < 12; i++)
                 {
-                    _controller.Write(_CLK, PinValue.High);
-                    _controller.Write(_CLK, PinValue.Low);
-                    trim_pot <<= 1;
+                    _controller.Write(_clk, PinValue.High);
+                    _controller.Write(_clk, PinValue.Low);
+                    result <<= 1;
 
-                    if (_controller.Read(_MISO) == PinValue.High)
+                    if (_controller.Read(_miso) == PinValue.High)
                     {
-                        trim_pot |= 0x1;
+                        result |= 0x1;
                     }
                 }
 
-                _controller.Write(_CS, PinValue.High);
+                _controller.Write(_cs, PinValue.High);
 
-                trim_pot >>= 1;
-                return trim_pot;
+                result >>= 1;
+                return result;
             }
         }
 
         // ported code from:
         // https://github.com/adafruit/Adafruit_Python_MCP3008/blob/master/Adafruit_MCP3008/MCP3008.py
-        private int ReadSpi(int adc_channel)
+        private int ReadSpi(int channel, InputConfiguration inputConfiguration)
         {
-            int command = 0b11 << 6;                  //Start bit, single channel read
-            command |= (adc_channel & 0x07) << 3;  // Channel number (in 3 bits)
-            var input = new Byte[] { (Byte)command, 0, 0 };
-            var output = new Byte[3];
+            byte configurationBits = GetConfigurationBits(channel, inputConfiguration);
+            byte[] input = new byte[] { configurationBits, 0, 0 };
+            byte[] output = new byte[3];
+
             _spiDevice.TransferFullDuplex(input, output);
 
-            var result = (output[0] & 0x01) << 9;
-            result |= (output[1] & 0xFF) << 1;
-            result |= (output[2] & 0x80) >> 7;
+            int result = (output[0] & 0b00000001) << 9;
+            result |= (output[1] & 0b11111111) << 1;
+            result |= (output[2] & 0b10000000) >> 7;
             result = result & 0x3FF;
             return result;
         }
-    }    
+    }
 }
