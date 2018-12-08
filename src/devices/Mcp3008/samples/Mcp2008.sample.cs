@@ -45,9 +45,9 @@ namespace Iot.Device.Samples
                 return mcp3008;
             }
 
-            var mcp = GetMcp3008WithSpi();
+            Mcp3008 mcp = GetMcp3008WithSpi();
             // Uncomment next line to use GPIO instead.
-            // var mcp = GetMcp3008WithGpio();
+            // Mcp3008 mcp = GetMcp3008WithGpio();
 
             using (mcp)
             {

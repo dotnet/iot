@@ -77,36 +77,31 @@ namespace Iot.Device
             }
         }
 
-        private static byte GetConfigurationBits(int channel,InputConfiguration inputConfiguration = InputConfiguration.SingleEnded)
+        private static byte GetConfigurationBits(int channel, InputConfiguration inputConfiguration)
         {
-            int configurationBits;
+            int configurationBits = (0x18 | channel) << 3;
 
-            if (inputConfiguration == InputConfiguration.SingleEnded)
+            if (inputConfiguration == InputConfiguration.Differential)
             {
-                configurationBits = 0b00011000 | channel;
-            }
-            else
-            {
-                configurationBits = 0b00010000 | channel;
+                configurationBits &= 0xBF;  // Clear mode bit.
             }
 
-            configurationBits = configurationBits << 3;
             return (byte)configurationBits;
         }
 
-        // port of https://gist.github.com/ladyada/3151375
+        // Ported: https://gist.github.com/ladyada/3151375
         private int ReadGpio(int channel, InputConfiguration inputConfiguration)
         {
             while (true)
             {
-                var result = 0;
+                int result = 0;
                 byte command = GetConfigurationBits(channel, inputConfiguration);
 
                 _controller.Write(_cs, PinValue.High);
                 _controller.Write(_clk, PinValue.Low);
                 _controller.Write(_cs, PinValue.Low);
 
-                for (var i = 0; i < 5; i++)
+                for (int cnt = 0; cnt < 5; cnt++)
                 {
                     if ((command & 0x80) > 0)
                     {
@@ -122,7 +117,7 @@ namespace Iot.Device
                     _controller.Write(_clk, PinValue.Low);
                 }
 
-                for (var i = 0; i < 12; i++)
+                for (int cnt = 0; cnt < 12; cnt++)
                 {
                     _controller.Write(_clk, PinValue.High);
                     _controller.Write(_clk, PinValue.Low);
@@ -141,8 +136,7 @@ namespace Iot.Device
             }
         }
 
-        // ported code from:
-        // https://github.com/adafruit/Adafruit_Python_MCP3008/blob/master/Adafruit_MCP3008/MCP3008.py
+        // Ported: https://github.com/adafruit/Adafruit_Python_MCP3008/blob/master/Adafruit_MCP3008/MCP3008.py
         private int ReadSpi(int channel, InputConfiguration inputConfiguration)
         {
             byte configurationBits = GetConfigurationBits(channel, inputConfiguration);
@@ -151,9 +145,9 @@ namespace Iot.Device
 
             _spiDevice.TransferFullDuplex(input, output);
 
-            int result = (output[0] & 0b00000001) << 9;
-            result |= (output[1] & 0b11111111) << 1;
-            result |= (output[2] & 0b10000000) >> 7;
+            int result = (output[0] & 0x01) << 9;
+            result |= (output[1] & 0xFF) << 1;
+            result |= (output[2] & 0x80) >> 7;
             result = result & 0x3FF;
             return result;
         }
