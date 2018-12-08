@@ -16,7 +16,7 @@ namespace DeviceApiTester.Commands.I2c
         [Option('b', "bus-id", HelpText = "The bus id the I2C device to connect to", Required = true)]
         public int BusId { get; set; }
 
-        [Option('a', "device-address", HelpText = "The device address for the connection to the I2C device", Required = true)]
+        [Option('a', "device-address", HelpText = "The device address (in decimal format) for the connection to the I2C device", Required = true)]
         public int DeviceAddress { get; set; }
 
         protected I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings)
