@@ -10,11 +10,11 @@ namespace System.Device.Gpio
     public enum PinValue
     {
         /// <summary>
-        /// Low value meaning no current.
+        /// The value of the pin is low.
         /// </summary>
         Low = 0,
         /// <summary>
-        /// High value maning current.
+        /// The value of the pin is high.
         /// </summary>
         High = 1
     }
