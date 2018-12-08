@@ -79,11 +79,11 @@ namespace Iot.Device
 
         private static byte GetConfigurationBits(int channel, InputConfiguration inputConfiguration)
         {
-            int configurationBits = (0x18 | channel) << 3;
+            int configurationBits = (0b0001_1000 | channel) << 3;
 
             if (inputConfiguration == InputConfiguration.Differential)
             {
-                configurationBits &= 0xBF;  // Clear mode bit.
+                configurationBits &= 0b1011_1111;  // Clear mode bit.
             }
 
             return (byte)configurationBits;
@@ -103,7 +103,7 @@ namespace Iot.Device
 
                 for (int cnt = 0; cnt < 5; cnt++)
                 {
-                    if ((command & 0x80) > 0)
+                    if ((command & 0b1000_0000) > 0)
                     {
                         _controller.Write(_mosi, PinValue.High);
                     }
@@ -125,7 +125,7 @@ namespace Iot.Device
 
                     if (_controller.Read(_miso) == PinValue.High)
                     {
-                        result |= 0x1;
+                        result |= 0b0000_0001;
                     }
                 }
 
@@ -140,15 +140,15 @@ namespace Iot.Device
         private int ReadSpi(int channel, InputConfiguration inputConfiguration)
         {
             byte configurationBits = GetConfigurationBits(channel, inputConfiguration);
-            byte[] input = new byte[] { configurationBits, 0, 0 };
-            byte[] output = new byte[3];
+            byte[] writeBuffer = new byte[] { configurationBits, 0, 0 };
+            byte[] readBuffer = new byte[3];
 
-            _spiDevice.TransferFullDuplex(input, output);
+            _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
 
-            int result = (output[0] & 0x01) << 9;
-            result |= (output[1] & 0xFF) << 1;
-            result |= (output[2] & 0x80) >> 7;
-            result = result & 0x3FF;
+            int result = (readBuffer[0] & 0b0000_0001) << 9;
+            result |= (readBuffer[1] & 0b1111_1111) << 1;
+            result |= (readBuffer[2] & 0b1000_0000) >> 7;
+            result = result & 0b0011_1111_1111;
             return result;
         }
     }
