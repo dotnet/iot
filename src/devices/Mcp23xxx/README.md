@@ -21,7 +21,7 @@ The number of ports vary between Mcp23xxx devices depending if it is 8-bit (1 po
 To allow this binding to work across the device family, you must use the provided arguments when using Reading/Writing methods.
 
 #### Example for 16-bit device
-The MCP23X17 has registers defaulted to Bank 1, which groups port registers by type.  It is recommended to use the optional parameters for port and bank when addressing the correct register.
+The MCP23X17 has registers defaulted to Bank 1, which group port registers by type.  It is recommended to use the optional arguments for port and bank when addressing the correct register.
 
 ``` csharp
 // Read Port B's Input Polarity Port Register (IPOL) from device 3.
