@@ -5,40 +5,40 @@
 namespace System.Device.Spi
 {
     /// <summary>
-    /// Class that holds the connection settings of a device on a Spi bus.
+    /// The connection settings of a device on a SPI bus.
     /// </summary>
     public sealed class SpiConnectionSettings
     {
         private const SpiMode _defaultSpiMode = SpiMode.Mode0;
-        private const int _defaultDataBitLenght = 8; // 1 byte.
+        private const int _defaultDataBitLength = 8; // 1 byte
         private const int _defaultClockFrequency = 500_000; // 500 KHz
 
         private SpiConnectionSettings() { }
 
         /// <summary>
-        /// Default constructor. Takes the bus id and the chip select line for that bus.
+        /// Initializes new instance of SpiConnectionSettings.
         /// </summary>
-        /// <param name="busId">The bus id the device is connected to.</param>
-        /// <param name="chipSelectLine">The chip select line used on that bus id.</param>
+        /// <param name="busId">The bus ID the device is connected to.</param>
+        /// <param name="chipSelectLine">The chip select line used on bus.</param>
         public SpiConnectionSettings(int busId, int chipSelectLine)
         {
             BusId = busId;
             ChipSelectLine = chipSelectLine;
             Mode = _defaultSpiMode;
-            DataBitLength = _defaultDataBitLenght;
+            DataBitLength = _defaultDataBitLength;
             ClockFrequency = _defaultClockFrequency;
         }
 
         /// <summary>
-        /// The Spi mode being used.
+        /// The SPI mode being used.
         /// </summary>
         public SpiMode Mode { get; set; }
         /// <summary>
-        /// The bus id the device is connected to.
+        /// The bus ID the device is connected to.
         /// </summary>
         public int BusId { get; set; }
         /// <summary>
-        /// The chip select line used on that bus id.
+        /// The chip select line used on bus.
         /// </summary>
         public int ChipSelectLine { get; set; }
         /// <summary>

@@ -5,26 +5,26 @@
 namespace System.Device.Spi
 {
     /// <summary>
-    /// Enum with the different modes supported by SPI.
-    /// CPOL - Clock polarity: defines if each cycle consists of a pulse of 1, or 0.
-    /// CPHA - Clock phase: timing of the data bits relative to the clock pulses.
+    /// Defines how data is synchronized between devices on a SPI bus.
+    /// Clock Polarity (CPOL) determines if clock signal is low or high when in idle state.
+    /// Clock Phase (CPHA) determines when data is sampled relative to the clock signal.
     /// </summary>
     public enum SpiMode
     {
         /// <summary>
-        /// CPOL 0, CPHA 0
+        /// CPOL 0, CPHA 0. Polarity is idled low and data is sampled on rising edge of the clock signal.
         /// </summary>
         Mode0,
         /// <summary>
-        /// CPOL 0, CPHA 1
+        /// CPOL 0, CPHA 1. Polarity is idled low and data is sampled on falling edge of the clock signal.
         /// </summary>
         Mode1,
         /// <summary>
-        /// CPOL 1, CPHA 0
+        /// CPOL 1, CPHA 0. Polarity is idled high and data is sampled on falling edge of the clock signal.
         /// </summary>
         Mode2,
         /// <summary>
-        /// CPOL 1, CPHA 1
+        /// CPOL 1, CPHA 1. Polarity is idled high and data is sampled on rising edge of the clock signal.
         /// </summary>
         Mode3
     }
