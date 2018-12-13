@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using Windows.Devices.Enumeration;
 using WinPwm = Windows.Devices.Pwm;
+using Windows.Security.ExchangeActiveSyncProvisioning;
 
 namespace System.Device.Pwm.Drivers
 {
@@ -22,7 +23,18 @@ namespace System.Device.Pwm.Drivers
             DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
             if (deviceInformationCollection.Count == 0)
             {
-                throw new ArgumentException($"No PWM device exists for PWM chip at index {chipIndex}", $"{nameof(chipIndex)}");
+                // On Hummingboard, fallback to check for generic PWM controller (friendlyname is not currently used)
+                var deviceInfo = new EasClientDeviceInformation();
+                if (deviceInfo.SystemProductName.IndexOf("Hummingboard", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    deviceSelector = WinPwm.PwmController.GetDeviceSelector();
+                    deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
+                }
+
+                if (deviceInformationCollection.Count == 0)
+                {
+                    throw new ArgumentException($"No PWM device exists for PWM chip at index {chipIndex}", $"{nameof(chipIndex)}");
+                }
             }
 
             string deviceId = deviceInformationCollection[0].Id;
