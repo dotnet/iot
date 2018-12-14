@@ -19,7 +19,7 @@ namespace System.Device.Spi
         /// Initializes new instance of SpiConnectionSettings.
         /// </summary>
         /// <param name="busId">The bus ID the device is connected to.</param>
-        /// <param name="chipSelectLine">The chip select line used on bus.</param>
+        /// <param name="chipSelectLine">The chip select line used on the bus.</param>
         public SpiConnectionSettings(int busId, int chipSelectLine)
         {
             BusId = busId;
@@ -38,7 +38,7 @@ namespace System.Device.Spi
         /// </summary>
         public int BusId { get; set; }
         /// <summary>
-        /// The chip select line used on bus.
+        /// The chip select line used on the bus.
         /// </summary>
         public int ChipSelectLine { get; set; }
         /// <summary>
