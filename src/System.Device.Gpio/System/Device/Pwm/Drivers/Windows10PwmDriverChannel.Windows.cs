@@ -26,8 +26,8 @@ namespace System.Device.Pwm.Drivers
 
         public void Start(double dutyCyclePercentage)
         {
-            this.ChangeDutyCycle(dutyCyclePercentage);
             _winPin?.Start();
+            this.ChangeDutyCycle(dutyCyclePercentage);
         }
 
         public void Stop()
