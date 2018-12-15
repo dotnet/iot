@@ -1,6 +1,10 @@
 # Resources
 See the following resources to get started.
 
+## System.Device.* API
+
+* [DevicesApiTester CLI](https://github.com/dotnet/iot/tree/master/tools/DevicesApiTester) - Helpful utility, based on System.Device.* APIs, that include various commands for testing connected development boards and external hardware.
+
 ## .NET Core
 * [.NET Core Documentation](https://docs.microsoft.com/dotnet/)
 * [.NET Core ARM64 Status](https://github.com/dotnet/announcements/issues/82)
