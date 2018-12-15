@@ -63,6 +63,16 @@ See the following resources to get started.
 * [Docker Access to Raspberry Pi GPIO Pins](https://stackoverflow.com/questions/30059784/docker-access-to-raspberry-pi-gpio-pins)
 
 ## Maker Resources
+
+### Prototyping
+* [Collin's Lab: Breadboards & Perfboards](https://www.youtube.com/watch?v=w0c3t0fJhXU)
+* [How to Use a Breadboard](https://www.youtube.com/watch?v=6WReFkfrUIk)
+
+### Social
+* [Fritzing](http://fritzing.org/home/)
+* [hackster.io](https://www.hackster.io/)
+
+### Vendors
 * [Adafruit](https://www.adafruit.com/)
 * [CanaKit](https://www.canakit.com/)
 * [Digikey](https://www.digikey.com/)
