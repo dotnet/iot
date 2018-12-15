@@ -2,25 +2,20 @@
 See the following resources to get started.
 
 ## .NET Core
-
 * [.NET Core Documentation](https://docs.microsoft.com/dotnet/)
 * [.NET Core ARM64 Status](https://github.com/dotnet/announcements/issues/82)
 * [.NET Core Docker Samples](https://github.com/dotnet/dotnet-docker/tree/master/samples)
 
 ## Interface Knowledge Base
-
-### General Purpose Input/Output (GPIO)
-
+### General-Purpose Input/Output (GPIO)
 * [GPIO Wiki](https://en.wikipedia.org/wiki/General-purpose_input/output)
 * [Digital I/O Fundamentals](http://www.ni.com/white-paper/3405/en/#toc1)
 
 ### Serial Peripheral Interface (SPI)
-
 * [SPI Wiki](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface)
 * [SPI Tutorial](https://learn.sparkfun.com/tutorials/serial-peripheral-interface-spi/all)
 
 ### Inter-Integrated Circuit (I2C)
-
 * [I2C Wiki](https://en.wikipedia.org/wiki/I%C2%B2C)
 * [I2C Tutorial](https://learn.sparkfun.com/tutorials/i2c/all)
 
@@ -29,9 +24,11 @@ See the following resources to get started.
 #### General
 * [BeagleBoard Website](https://beagleboard.org/bone)
 * [BeagleBoard Wiki](https://en.wikipedia.org/wiki/BeagleBoard)
-##### Products
+
+#### Products
 * [BeagleBone Black (BBB)](https://beagleboard.org/black)
 * [BeagleBone Green (BBG)](https://beagleboard.org/green)
+
 #### How-Tos
 * [Example of .NET Core on a BBB](https://github.com/Redouane64/beaglebone-dotnet/tree/master/Examples/LEDBlink)
 
@@ -39,7 +36,7 @@ See the following resources to get started.
 #### General
 * [SolidRun Website](https://www.solid-run.com/)
 
-##### Products
+#### Products
 * [HummingBoard](https://www.solid-run.com/nxp-family/hummingboard/)
 
 #### How-Tos
@@ -51,7 +48,7 @@ See the following resources to get started.
 * [Raspberry Pi GPIO Pinout](https://learn.sparkfun.com/tutorials/raspberry-gpio/gpio-pinout)
 * [Raspberry Pi GPIO Tutorial](https://learn.sparkfun.com/tutorials/raspberry-gpio/all)
 
-##### Products
+#### Products
 * [Raspberry Pi 3 Model B+](https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/)
 
 #### How-Tos
