@@ -57,3 +57,11 @@ See the following resources to get started.
 * [Enable I2C on Raspberry Pi](https://www.raspberrypi-spy.co.uk/2014/11/enabling-the-i2c-interface-on-the-raspberry-pi/)
 * [Enable Headless Raspberry Pi](https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0)
 * [Docker Access to Raspberry Pi GPIO Pins](https://stackoverflow.com/questions/30059784/docker-access-to-raspberry-pi-gpio-pins)
+
+## Maker Resources
+* [Adafruit](https://www.adafruit.com/)
+* [CanaKit](https://www.canakit.com/)
+* [Digikey](https://www.digikey.com/)
+* [Jameco Electronics](https://www.jameco.com)
+* [Sparkfun Electronics](https://www.sparkfun.com)
+* [SunFounder](https://www.sunfounder.com/)
