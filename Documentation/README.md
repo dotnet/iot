@@ -1,4 +1,5 @@
 # Resources
+See the following resources to get started.
 
 ## .NET Core
 
