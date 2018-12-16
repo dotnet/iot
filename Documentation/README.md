@@ -81,6 +81,7 @@ See the following resources to get started.
 ### Social
 * [Fritzing](http://fritzing.org/home/)
 * [hackster.io](https://www.hackster.io/)
+* [instructables](https://www.instructables.com/)
 
 ### Vendors
 * [Adafruit](https://www.adafruit.com/)
