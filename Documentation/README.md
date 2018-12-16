@@ -30,12 +30,12 @@ See the following resources to get started.
 * [BeagleBoard Website](https://beagleboard.org/bone)
 * [BeagleBoard Wiki](https://en.wikipedia.org/wiki/BeagleBoard)
 
+#### How-Tos
+* [Example of .NET Core on a BBB](https://github.com/Redouane64/beaglebone-dotnet/tree/master/Examples/LEDBlink)
+
 #### Products
 * [BeagleBone Black (BBB)](https://beagleboard.org/black)
 * [BeagleBone Green (BBG)](https://beagleboard.org/green)
-
-#### How-Tos
-* [Example of .NET Core on a BBB](https://github.com/Redouane64/beaglebone-dotnet/tree/master/Examples/LEDBlink)
 
 ### HummingBoard
 #### General
@@ -44,7 +44,12 @@ See the following resources to get started.
 #### Products
 * [HummingBoard](https://www.solid-run.com/nxp-family/hummingboard/)
 
-#### How-Tos
+### Pine64
+#### General
+* [Pine64 Website](https://www.pine64.org/)
+
+#### Products
+* [PINE A64-LTS](https://www.pine64.org/?page_id=46823)
 
 ### Raspberry Pi
 #### General
@@ -53,15 +58,15 @@ See the following resources to get started.
 * [Raspberry Pi GPIO Pinout](https://learn.sparkfun.com/tutorials/raspberry-gpio/gpio-pinout)
 * [Raspberry Pi GPIO Tutorial](https://learn.sparkfun.com/tutorials/raspberry-gpio/all)
 
-#### Products
-* [Raspberry Pi 3 Model B+](https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/)
-
 #### How-Tos
 * [Install .NET Core on Raspberry Pi](https://github.com/dotnet/core/blob/master/samples/RaspberryPiInstructions.md)
 * [Enable SPI on Raspberry Pi](https://www.raspberrypi-spy.co.uk/2014/08/enabling-the-spi-interface-on-the-raspberry-pi/)
 * [Enable I2C on Raspberry Pi](https://www.raspberrypi-spy.co.uk/2014/11/enabling-the-i2c-interface-on-the-raspberry-pi/)
 * [Enable Headless Raspberry Pi](https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0)
 * [Docker Access to Raspberry Pi GPIO Pins](https://stackoverflow.com/questions/30059784/docker-access-to-raspberry-pi-gpio-pins)
+
+#### Products
+* [Raspberry Pi 3 Model B+](https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/)
 
 ## Maker Resources
 
