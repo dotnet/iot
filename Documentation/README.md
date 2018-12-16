@@ -75,13 +75,17 @@ See the following resources to get started.
 ## Maker Resources
 
 ### Prototyping
+#### How-Tos
 * [Collin's Lab: Breadboards & Perfboards](https://www.youtube.com/watch?v=w0c3t0fJhXU)
 * [How to Use a Breadboard](https://www.youtube.com/watch?v=6WReFkfrUIk)
+
+#### Software
 * [Autodesk EAGLE PCB Designing Software](https://www.autodesk.com/products/eagle/free-download)
+* [FreeCAD](https://www.freecadweb.org/downloads.php)
+* [Fritzing](http://fritzing.org/home/)
 * [KiCad EDA](http://kicad-pcb.org/)
 
 ### Social
-* [Fritzing](http://fritzing.org/home/)
 * [Hackaday.io](https://hackaday.io/)
 * [hackster.io](https://www.hackster.io/)
 * [instructables](https://www.instructables.com/)
