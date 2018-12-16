@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Bmp280.cs" />
+    <Compile Include="Bmp280CalibrationData.cs" />
+    <Compile Include="IBmp280.cs" />
+      <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+      <None Include="README.md" />
+    </ItemGroup>
+  
+</Project>
