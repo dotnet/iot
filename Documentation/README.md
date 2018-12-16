@@ -1,8 +1,9 @@
 # Resources
 See the following resources to get started.
 
-## System.Device.* API
+## System.Device.* APIs
 
+* [Device Bindings](https://github.com/dotnet/iot/tree/master/src/devices) - Includes a collection of APIs representing a range of sensors, displays, human interface devices based on System.Device.* APIs.
 * [DevicesApiTester CLI](https://github.com/dotnet/iot/tree/master/tools/DevicesApiTester) - Helpful utility, based on System.Device.* APIs, that include various commands for testing connected development boards and external hardware.
 
 ## .NET Core
