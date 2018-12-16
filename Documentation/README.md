@@ -67,6 +67,7 @@ See the following resources to get started.
 * [Enable I2C on Raspberry Pi](https://www.raspberrypi-spy.co.uk/2014/11/enabling-the-i2c-interface-on-the-raspberry-pi/)
 * [Enable Headless Raspberry Pi](https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0)
 * [Docker Access to Raspberry Pi GPIO Pins](https://stackoverflow.com/questions/30059784/docker-access-to-raspberry-pi-gpio-pins)
+* [Design a Raspberry Pi Hat in 10 Minutes](https://www.youtube.com/watch?v=1P7GOLFCCgs)
 
 #### Products
 * [Raspberry Pi 3 Model B+](https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/)
@@ -81,6 +82,7 @@ See the following resources to get started.
 
 ### Social
 * [Fritzing](http://fritzing.org/home/)
+* [Hackaday.io](https://hackaday.io/)
 * [hackster.io](https://www.hackster.io/)
 * [instructables](https://www.instructables.com/)
 
