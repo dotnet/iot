@@ -77,6 +77,7 @@ See the following resources to get started.
 * [Collin's Lab: Breadboards & Perfboards](https://www.youtube.com/watch?v=w0c3t0fJhXU)
 * [How to Use a Breadboard](https://www.youtube.com/watch?v=6WReFkfrUIk)
 * [Autodesk EAGLE PCB Designing Software](https://www.autodesk.com/products/eagle/free-download)
+* [KiCad EDA](http://kicad-pcb.org/)
 
 ### Social
 * [Fritzing](http://fritzing.org/home/)
