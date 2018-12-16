@@ -28,6 +28,7 @@ See the following resources to get started.
 ### BeagleBoard
 #### General
 * [BeagleBoard Website](https://beagleboard.org/bone)
+* [BeagleBoard GitHub Website](https://github.com/beagleboard)
 * [BeagleBoard Wiki](https://en.wikipedia.org/wiki/BeagleBoard)
 
 #### How-Tos
@@ -40,6 +41,7 @@ See the following resources to get started.
 ### HummingBoard
 #### General
 * [SolidRun Website](https://www.solid-run.com/)
+* [SolidRun GitHub Website](https://github.com/SolidRun)
 
 #### Products
 * [HummingBoard](https://www.solid-run.com/nxp-family/hummingboard/)
@@ -54,6 +56,7 @@ See the following resources to get started.
 ### Raspberry Pi
 #### General
 * [Raspberry Pi Website](https://www.raspberrypi.org/)
+* [Raspberry Pi GitHub Website](https://github.com/raspberrypi)
 * [Raspberry Pi Wiki](https://en.wikipedia.org/wiki/Raspberry_Pi)
 * [Raspberry Pi GPIO Pinout](https://learn.sparkfun.com/tutorials/raspberry-gpio/gpio-pinout)
 * [Raspberry Pi GPIO Tutorial](https://learn.sparkfun.com/tutorials/raspberry-gpio/all)
