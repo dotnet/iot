@@ -3,7 +3,7 @@ See the following resources to get started.
 
 ## System.Device.* APIs
 
-* [Device Bindings](https://github.com/dotnet/iot/tree/master/src/devices) - Includes a collection of APIs representing a range of sensors, displays, human interface devices based on System.Device.* APIs.
+* [Device Bindings](https://github.com/dotnet/iot/tree/master/src/devices) - Includes a collection of APIs representing a range of sensors, displays and human interface devices based on System.Device.* APIs.
 * [DevicesApiTester CLI](https://github.com/dotnet/iot/tree/master/tools/DevicesApiTester) - Helpful utility, based on System.Device.* APIs, that include various commands for testing connected development boards and external hardware.
 
 ## .NET Core
@@ -16,13 +16,13 @@ See the following resources to get started.
 * [GPIO Wiki](https://en.wikipedia.org/wiki/General-purpose_input/output)
 * [Digital I/O Fundamentals](http://www.ni.com/white-paper/3405/en/#toc1)
 
-### Serial Peripheral Interface (SPI)
-* [SPI Wiki](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface)
-* [SPI Tutorial](https://learn.sparkfun.com/tutorials/serial-peripheral-interface-spi/all)
-
 ### Inter-Integrated Circuit (I2C)
 * [I2C Wiki](https://en.wikipedia.org/wiki/I%C2%B2C)
 * [I2C Tutorial](https://learn.sparkfun.com/tutorials/i2c/all)
+
+### Serial Peripheral Interface (SPI)
+* [SPI Wiki](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface)
+* [SPI Tutorial](https://learn.sparkfun.com/tutorials/serial-peripheral-interface-spi/all)
 
 ## Development Boards
 ### BeagleBoard
