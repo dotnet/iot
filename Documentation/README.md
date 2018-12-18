@@ -26,7 +26,7 @@ See the following resources to get started.
 * [SPI Tutorial](https://learn.sparkfun.com/tutorials/serial-peripheral-interface-spi/all)
 
 ## Development Boards
-**NOTE**: It has been verified that .NET Core will work on the following development boards.  However, there has only been limited testing so far.  It is recommended you experiment with the Rasberry Pi 3 and HummingBoard for now.
+**NOTE**: It has been verified that .NET Core will work on the following development boards.  However, there has only been limited testing so far.  It is recommended you experiment with the Raspberry Pi 3 and HummingBoard for now.
 
 ### Raspberry Pi
 #### General
