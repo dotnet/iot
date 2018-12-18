@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device
+namespace Iot.Device.Bmp280
 {
-    internal class Bmp280CalibrationData
+    internal class CalibrationData
     {
         public uint DigT1 { get; set; }
         public int DigT2 { get; set; }

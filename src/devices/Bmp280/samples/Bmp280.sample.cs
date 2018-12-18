@@ -2,15 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device;
 using System;
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
 using System.Threading;
 using System.Threading.Tasks;
-using Bmp280 = Iot.Device.Bmp280;
+using Iot.Device.Bmp280;
 
-namespace Iot.Devices.Samples
+namespace Iot.Device.Samples
 {
     class Program
     {
@@ -27,18 +26,18 @@ namespace Iot.Devices.Samples
 
             var i2cSettings = new I2cConnectionSettings(busId, bmp280Address);
             var i2cDevice = new UnixI2cDevice(i2cSettings);
-            var i2CBmp280 = new Bmp280(i2cDevice);
+            var i2CBmp280 = new Bmp280.Bmp280(i2cDevice);
 
             using (i2CBmp280)
             {
                 while (true)
                 {
                     ////set mode forced so device sleeps after read
-                    i2CBmp280.SetModeForced();
+                    i2CBmp280.SetPowerMode(PowerMode.Forced);
 
                     //set samplings
-                    i2CBmp280.SetTemperatureSampling(Bmp280.Sampling.UltraLowPower);
-                    i2CBmp280.SetPressureSampling(Bmp280.Sampling.UltraLowPower);
+                    i2CBmp280.SetTemperatureSampling(Sampling.UltraLowPower);
+                    i2CBmp280.SetPressureSampling(Sampling.UltraLowPower);
 
                     //read values
                     double tempValue = await i2CBmp280.ReadTemperatureAsync();
@@ -50,13 +49,13 @@ namespace Iot.Devices.Samples
                     Thread.Sleep(1000);
 
                     //set higher sampling
-                    i2CBmp280.SetTemperatureSampling(Bmp280.Sampling.LowPower);
+                    i2CBmp280.SetTemperatureSampling(Sampling.LowPower);
                     Console.WriteLine(i2CBmp280.ReadTemperatureSampling());
-                    i2CBmp280.SetPressureSampling(Bmp280.Sampling.UltraHighResolution);
+                    i2CBmp280.SetPressureSampling(Sampling.UltraHighResolution);
                     Console.WriteLine(i2CBmp280.ReadPressureSampling());
 
                     //set mode forced and read again
-                    i2CBmp280.SetModeForced();
+                    i2CBmp280.SetPowerMode(PowerMode.Forced);
 
                     //read values
                     tempValue = await i2CBmp280.ReadTemperatureAsync();
@@ -68,9 +67,9 @@ namespace Iot.Devices.Samples
                     Thread.Sleep(5000);
 
                     //set sampling to higher
-                    i2CBmp280.SetTemperatureSampling(Bmp280.Sampling.UltraHighResolution);
+                    i2CBmp280.SetTemperatureSampling(Sampling.UltraHighResolution);
                     Console.WriteLine(i2CBmp280.ReadTemperatureSampling());
-                    i2CBmp280.SetPressureSampling(Bmp280.Sampling.UltraLowPower);
+                    i2CBmp280.SetPressureSampling(Sampling.UltraLowPower);
                     Console.WriteLine(i2CBmp280.ReadPressureSampling());
                 }
             }
