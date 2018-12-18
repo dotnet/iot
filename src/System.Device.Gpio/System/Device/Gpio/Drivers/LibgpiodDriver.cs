@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -12,16 +16,19 @@ namespace System.Device.Gpio.Drivers
         private const string GpioGet = "gpioget";
         private const string GpioChip0 = "gpiochip0 ";
         private const string GpioSet = "gpioset";
-        public int _waitMilliSeconds { get; set;}
-        private Dictionary<int, PinMode> _pinNumperToPinModes;
-        private Dictionary<int, Process> _pinNumperToProcess;
-        protected internal override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
-
-        public LibgpiodDriver() {
-            _pinNumperToPinModes = new Dictionary<int, PinMode>();
-            _pinNumperToProcess = new Dictionary<int, Process>();
-            _waitMilliSeconds = (int)TimeSpan.FromSeconds(1).TotalMilliseconds;
+        public int TimeoutMilliSeconds { get; set; } = (int)TimeSpan.FromSeconds(1).TotalMilliseconds;
+        private class MutableTuple<Item1, Item2>
+        {
+            public Item1 Value1 { get; set; }
+            public Item2 Value2 { get; set; }
+            public MutableTuple(Item1 item1, Item2 item2) {
+                Value1 = item1;
+                Value2 = item2;
+            }
         }
+        private Dictionary<int, MutableTuple<PinMode, Process>> _pinNumberToPinModeAndProcess = new Dictionary<int, MutableTuple<PinMode, Process>>();
+        protected internal override int PinCount => throw new NotImplementedException();
+
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
             throw new NotImplementedException();
@@ -29,29 +36,35 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void ClosePin(int pinNumber)
         {
-            // do nothing_pinNumperToProcess
+            MutableTuple<PinMode, Process> pinModeAndProcess;
+            if (_pinNumberToPinModeAndProcess.TryGetValue(pinNumber, out pinModeAndProcess)) 
+            {
+                Process existingProcess = pinModeAndProcess.Value2;
+                if (existingProcess != null) {
+                    existingProcess.Kill();
+                    existingProcess.WaitForExit(1);
+                    pinModeAndProcess.Value2 = null;
+                }
+                _pinNumberToPinModeAndProcess.Remove(pinNumber);
+            }
         }
 
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new PlatformNotSupportedException("This driver is generic so it can not perform conversions between pin numbering schemes.");
 
         protected internal override PinMode GetPinMode(int pinNumber)
         {
-            if (_pinNumperToPinModes.ContainsKey(pinNumber))
+            MutableTuple<PinMode, Process> pinModeAndProcess;
+            if (_pinNumberToPinModeAndProcess.TryGetValue(pinNumber, out pinModeAndProcess))
              {
-                return _pinNumperToPinModes[pinNumber];
+                return pinModeAndProcess.Value1;
             }
-            else
-            {
-                throw new InvalidOperationException("There was an attempt to get a mode to a pin that is not yet open.");
-            }
+            return PinMode.Input;
         }
 
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
-            // Libgpiod driver does not support pull up or pull down resistors.
-            if (mode == PinMode.InputPullDown || mode == PinMode.InputPullUp)
-                return false;
-            return true;
+            // Libgpiod command line tools does not support pull up or pull down resistors.
+            return mode != PinMode.InputPullDown && mode != PinMode.InputPullUp;
         }
 
         protected internal override void OpenPin(int pinNumber)
@@ -62,43 +75,22 @@ namespace System.Device.Gpio.Drivers
         protected internal override PinValue Read(int pinNumber)
         {
             PinValue result = default(PinValue);
-            try
+            Process gpioGetCommand = new Process();
+            gpioGetCommand.StartInfo.FileName = GpioGet;
+            gpioGetCommand.StartInfo.Arguments = $"{GpioChip0} {pinNumber}";
+            gpioGetCommand.StartInfo.RedirectStandardOutput = true;
+            gpioGetCommand.Start();
+            if (WaitForProcessToExit(gpioGetCommand, $"{GpioGet} {GpioChip0} {pinNumber}", TimeoutMilliSeconds))
             {
-                Process myProc = new Process();
-                myProc.StartInfo.FileName = GpioGet;
-                myProc.StartInfo.Arguments = $" {GpioChip0} {pinNumber}";
-                myProc.StartInfo.RedirectStandardOutput = true;
-                myProc.Start();
-                if (HandlProcessExit(myProc, $"{GpioGet} {GpioChip0} {pinNumber}", _waitMilliSeconds))
-                {
-                    string valueContents = myProc.StandardOutput.ReadToEnd();
-                    result = ConvertSysFsValueToPinValue(valueContents);
-                }
-            }
-            catch (UnauthorizedAccessException e)
-            {
-                throw new UnauthorizedAccessException("Reading a pin value requires root permissions.", e);
+                string valueContents = gpioGetCommand.StandardOutput.ReadToEnd();
+                result = ConvertMachineValueToPinValue(valueContents);
             }
             return result;
         }
-        private PinValue ConvertSysFsValueToPinValue(string value)
+
+        private PinValue ConvertMachineValueToPinValue(string value)
         {
-            PinValue result;
-            value = value.Trim();
-
-            switch (value)
-            {
-                case "0":
-                    result = PinValue.Low;
-                    break;
-                case "1":
-                    result = PinValue.High;
-                    break;
-                default:
-                    throw new ArgumentException($"Invalid Gpio pin value {value}");
-            }
-
-            return result;
+            return value != null && value.IndexOf('1') != -1 ? PinValue.High : PinValue.Low;
         }
 
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
@@ -112,39 +104,59 @@ namespace System.Device.Gpio.Drivers
             {
                 throw new PlatformNotSupportedException("This driver is generic so it does not support Input Pull Down or Input Pull Up modes.");
             }
-            _pinNumperToPinModes[pinNumber] = mode;
+            MutableTuple<PinMode, Process> pinModeAndProcess;
+            if (_pinNumberToPinModeAndProcess.TryGetValue(pinNumber, out pinModeAndProcess))
+            {
+                pinModeAndProcess.Value1 = mode;
+            }
+            else
+            {
+                _pinNumberToPinModeAndProcess.Add(pinNumber, new MutableTuple<PinMode, Process>(mode, null));
+            }
         }
 
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();  // TODO
+            throw new NotImplementedException();  
         }
 
         protected internal override void Write(int pinNumber, PinValue value)
         {
-            string stringValue = ConvertPinValueToSysFs(value);
+            string stringValue = ConvertPinValueToMachineValue(value);
+            // --mode=signal would tell the process set the value and wait for SIGINT or SIGTERM 
             string command = $"--mode=signal {GpioChip0} {pinNumber}={stringValue}";
+
             try
             {
-                Process myProc;
+                MutableTuple<PinMode, Process> pinModeAndProcess;
+                Process gpioSetCommand;
                 if (PinValue.Low == value)
                 {
-                    if (_pinNumperToProcess.ContainsKey(pinNumber))
+                    if (_pinNumberToPinModeAndProcess.TryGetValue(pinNumber, out pinModeAndProcess))
                     {
-                        myProc = _pinNumperToProcess[pinNumber];
-                        myProc.Kill();
-                        myProc.WaitForExit((int)TimeSpan.FromMilliseconds(1).TotalMilliseconds);
-                        HandlProcessExit(myProc, $"{GpioSet} {command}", 1);
-                        _pinNumperToProcess.Remove(pinNumber);
+                        gpioSetCommand = pinModeAndProcess.Value2;
+                        if (gpioSetCommand != null)
+                        {
+                            gpioSetCommand.Kill();
+                            gpioSetCommand.WaitForExit(1);
+                            pinModeAndProcess.Value2 = null;
+                        }
                     }
                 }
                 else
                 {
-                    myProc = new Process();
-                    myProc.StartInfo.FileName = GpioSet;
-                    myProc.StartInfo.Arguments = command;
-                    myProc.Start();
-                    _pinNumperToProcess[pinNumber] = myProc;
+                    gpioSetCommand = new Process();
+                    gpioSetCommand.StartInfo.FileName = GpioSet;
+                    gpioSetCommand.StartInfo.Arguments = command;
+                    gpioSetCommand.Start();
+                    if (_pinNumberToPinModeAndProcess.TryGetValue(pinNumber, out pinModeAndProcess))
+                    {
+                        pinModeAndProcess.Value2= gpioSetCommand;
+                    }
+                    else
+                    {
+                        _pinNumberToPinModeAndProcess[pinNumber]= new MutableTuple<PinMode, Process>(PinMode.Output, gpioSetCommand);
+                    }
                 }
             }
             catch (UnauthorizedAccessException e)
@@ -153,12 +165,12 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        private static bool HandlProcessExit(Process myProc, string command, int waitMilliseconds)
+        private static bool WaitForProcessToExit(Process process, string command, int waitMilliseconds)
         {
-            myProc.WaitForExit(waitMilliseconds);
-            if (myProc.HasExited)
+            process.WaitForExit(waitMilliseconds);
+            if (process.HasExited)
             {
-                if (myProc.ExitCode != 0)
+                if (process.ExitCode != 0)
                 {
                     throw new Exception($"Unknown error occured while running command: {command}");
                 }
@@ -170,21 +182,21 @@ namespace System.Device.Gpio.Drivers
             return true;
         }
 
-        private string ConvertPinValueToSysFs(PinValue value)
+        private string ConvertPinValueToMachineValue(PinValue value)
         {
-            string result = string.Empty;
-            switch (value)
+            return (value == PinValue.High) ? "1" : "0";
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            foreach (MutableTuple<PinMode, Process> pair in _pinNumberToPinModeAndProcess.Values)
             {
-                case PinValue.High:
-                    result = "1";
-                    break;
-                case PinValue.Low:
-                    result = "0";
-                    break;
-                default:
-                    throw new ArgumentException($"Invalid pin value {value}");
+                if (pair.Value2 != null)
+                {
+                    pair.Value2.Dispose();
+                }
             }
-            return result;
+            base.Dispose(disposing);
         }
     }
 }
