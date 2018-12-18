@@ -5,8 +5,10 @@
 using Iot.Device;
 using System;
 using System.Device.I2c;
+using System.Device.I2c.Drivers;
 using System.Threading;
 using System.Threading.Tasks;
+using Bmp280 = Iot.Device.Bmp280;
 
 namespace Iot.Devices.Samples
 {
@@ -24,7 +26,8 @@ namespace Iot.Devices.Samples
             const double defaultSeaLevelPressure = 1033.00;
 
             var i2cSettings = new I2cConnectionSettings(busId, bmp280Address);
-            var i2CBmp280 = new Bmp280(i2cSettings);
+            var i2cDevice = new UnixI2cDevice(i2cSettings);
+            var i2CBmp280 = new Bmp280(i2cDevice);
 
             using (i2CBmp280)
             {
@@ -71,7 +74,6 @@ namespace Iot.Devices.Samples
                     Console.WriteLine(i2CBmp280.ReadPressureSampling());
                 }
             }
-
         }
     }
 }
