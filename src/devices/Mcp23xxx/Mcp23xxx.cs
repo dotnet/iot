@@ -10,15 +10,12 @@ namespace Iot.Device.Mcp23xxx
 {
     public class Mcp23xxx : IDisposable
     {
-        private GpioController _controller;
         private readonly SpiDevice _spiDevice;
 
         private enum CommunicationProtocol
         {
             I2c,
-            I2cGpio,
-            Spi,
-            SpiGpio
+            Spi
         }
 
         public Mcp23xxx(SpiDevice spiDevice)
@@ -28,11 +25,6 @@ namespace Iot.Device.Mcp23xxx
 
         public void Dispose()
         {
-            if (_controller != null)
-            {
-                _controller.Dispose();
-                _controller = null;
-            }
         }
 
         public byte Read(int deviceAddress, Register.Address registerAddress, Port port = Port.PortA, Bank bank = Bank.Bank1)
