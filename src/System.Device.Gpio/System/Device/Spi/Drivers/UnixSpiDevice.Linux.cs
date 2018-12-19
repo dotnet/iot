@@ -11,7 +11,7 @@ namespace System.Device.Spi.Drivers
         private const string Default_Device_Path = "/dev/spidev";
         private const uint SPI_IOC_MESSAGE_1 = 0x40206b00;
         private int _deviceFileDescriptor = -1;
-        private SpiConnectionSettings _settings;
+        private readonly SpiConnectionSettings _settings;
         private static readonly object s_InitializationLock = new object();
 
         public UnixSpiDevice(SpiConnectionSettings settings)
