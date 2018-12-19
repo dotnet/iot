@@ -50,30 +50,7 @@ namespace Iot.Device.Bmp280
             _initialized = true;
 
             //Read the coefficients table
-            ReadCoefficients();
-        }
-
-        /// <summary>
-        ///  Reads the factory-set coefficients 
-        /// </summary>
-        private void ReadCoefficients()
-        {
-            // Read temperature calibration data
-            _calibrationData.DigT1 = Read16BitsFromRegister((byte)Registers.REGISTER_DIG_T1);
-            _calibrationData.DigT2 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_T2);
-            _calibrationData.DigT3 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_T3);
-
-            // Read pressure calibration data
-            _calibrationData.DigP1 = Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P1);
-            _calibrationData.DigP2 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P2);
-            _calibrationData.DigP3 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P3);
-            _calibrationData.DigP4 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P4);
-            _calibrationData.DigP5 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P5);
-            _calibrationData.DigP6 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P6);
-            _calibrationData.DigP7 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P7);
-            _calibrationData.DigP8 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P8);
-            _calibrationData.DigP9 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P9);
-
+            _calibrationData.ReadFromDevice(this);
         }
 
         /// <summary>
@@ -388,7 +365,7 @@ namespace Iot.Device.Bmp280
         /// <returns>
         ///  Value from register
         /// </returns>
-        private ushort Read16BitsFromRegister(byte register)
+        internal ushort Read16BitsFromRegister(byte register)
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {
