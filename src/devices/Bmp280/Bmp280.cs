@@ -59,20 +59,20 @@ namespace Iot.Device.Bmp280
         private void ReadCoefficients()
         {
             // Read temperature calibration data
-            _calibrationData.DigT1 = Read16FromRegister((byte)Registers.REGISTER_DIG_T1);
-            _calibrationData.DigT2 = (short)Read16FromRegister((byte)Registers.REGISTER_DIG_T2);
-            _calibrationData.DigT3 = (short)Read16FromRegister((byte)Registers.REGISTER_DIG_T3);
+            _calibrationData.DigT1 = Read16BitsFromRegister((byte)Registers.REGISTER_DIG_T1);
+            _calibrationData.DigT2 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_T2);
+            _calibrationData.DigT3 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_T3);
 
             // Read pressure calibration data
-            _calibrationData.DigP1 = Read16FromRegister((byte)Registers.REGISTER_DIG_P1);
-            _calibrationData.DigP2 = (short)Read16FromRegister((byte)Registers.REGISTER_DIG_P2);
-            _calibrationData.DigP3 = (short)Read16FromRegister((byte)Registers.REGISTER_DIG_P3);
-            _calibrationData.DigP4 = (short)Read16FromRegister((byte)Registers.REGISTER_DIG_P4);
-            _calibrationData.DigP5 = (short)Read16FromRegister((byte)Registers.REGISTER_DIG_P5);
-            _calibrationData.DigP6 = (short)Read16FromRegister((byte)Registers.REGISTER_DIG_P6);
-            _calibrationData.DigP7 = (short)Read16FromRegister((byte)Registers.REGISTER_DIG_P7);
-            _calibrationData.DigP8 = (short)Read16FromRegister((byte)Registers.REGISTER_DIG_P8);
-            _calibrationData.DigP9 = (short)Read16FromRegister((byte)Registers.REGISTER_DIG_P9);
+            _calibrationData.DigP1 = Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P1);
+            _calibrationData.DigP2 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P2);
+            _calibrationData.DigP3 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P3);
+            _calibrationData.DigP4 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P4);
+            _calibrationData.DigP5 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P5);
+            _calibrationData.DigP6 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P6);
+            _calibrationData.DigP7 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P7);
+            _calibrationData.DigP8 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P8);
+            _calibrationData.DigP9 = (short)Read16BitsFromRegister((byte)Registers.REGISTER_DIG_P9);
 
         }
 
@@ -82,7 +82,7 @@ namespace Iot.Device.Bmp280
         /// <param name="powerMode"></param>
         public void SetPowerMode(PowerMode powerMode)
         {
-            byte status = Read8FromRegister((byte)Registers.REGISTER_CONTROL);
+            byte status = Read8BitsFromRegister((byte)Registers.REGISTER_CONTROL);
             //clear last two bits
             status = (byte)(status & 0b1111_1100);
             status = (byte)(status | (byte)powerMode);
@@ -96,7 +96,7 @@ namespace Iot.Device.Bmp280
         /// <returns></returns>
         public PowerMode ReadPowerMode()
         {
-            byte status = Read8FromRegister((byte)Registers.REGISTER_CONTROL);
+            byte status = Read8BitsFromRegister((byte)Registers.REGISTER_CONTROL);
             status = (byte)(status & 0b000_00011);
             if (status == (byte)PowerMode.Normal)
             {
@@ -118,7 +118,7 @@ namespace Iot.Device.Bmp280
         /// <param name="sampling"></param>
         public void SetTemperatureSampling(Sampling sampling)
         {
-            byte status = Read8FromRegister((byte)Registers.REGISTER_CONTROL);
+            byte status = Read8BitsFromRegister((byte)Registers.REGISTER_CONTROL);
             status = (byte)(status & 0b0001_1111);
             status = (byte)(status | (byte)sampling << 5);
             _i2cDevice.Write(new[] { (byte)Registers.REGISTER_CONTROL, status });
@@ -130,7 +130,7 @@ namespace Iot.Device.Bmp280
         /// <returns></returns>
         public Sampling ReadTemperatureSampling()
         {
-            byte status = Read8FromRegister((byte)Registers.REGISTER_CONTROL);
+            byte status = Read8BitsFromRegister((byte)Registers.REGISTER_CONTROL);
             status = (byte)((status & 0b1110_0000) >> 5);
             return ByteToSampling(status);
         }
@@ -151,7 +151,7 @@ namespace Iot.Device.Bmp280
         /// <returns></returns>
         public Sampling ReadPressureSampling()
         {
-            byte status = Read8FromRegister((byte)Registers.REGISTER_CONTROL);
+            byte status = Read8BitsFromRegister((byte)Registers.REGISTER_CONTROL);
             status = (byte)((status & 0b0001_1100) >> 2);
             return ByteToSampling(status);
         }
@@ -162,7 +162,7 @@ namespace Iot.Device.Bmp280
         /// <param name="sampling"></param>
         public void SetPressureSampling(Sampling sampling)
         {
-            byte status = Read8FromRegister((byte)Registers.REGISTER_CONTROL);
+            byte status = Read8BitsFromRegister((byte)Registers.REGISTER_CONTROL);
             status = (byte)(status & 0b1110_0011);
             status = (byte)(status | (byte)sampling << 2);
             _i2cDevice.Write(new[] { (byte)Registers.REGISTER_CONTROL, status });
@@ -188,9 +188,9 @@ namespace Iot.Device.Bmp280
             }
 
             //Read the MSB, LSB and bits 7:4 (XLSB) of the temperature from the BMP280 registers
-            byte tmsb = Read8FromRegister((byte)Registers.REGISTER_TEMPDATA_MSB);
-            byte tlsb = Read8FromRegister((byte)Registers.REGISTER_TEMPDATA_LSB);
-            byte txlsb = Read8FromRegister((byte)Registers.REGISTER_TEMPDATA_XLSB); // bits 7:4
+            byte tmsb = Read8BitsFromRegister((byte)Registers.REGISTER_TEMPDATA_MSB);
+            byte tlsb = Read8BitsFromRegister((byte)Registers.REGISTER_TEMPDATA_LSB);
+            byte txlsb = Read8BitsFromRegister((byte)Registers.REGISTER_TEMPDATA_XLSB); // bits 7:4
 
             //Combine the values into a 32-bit integer
             int t = (tmsb << 12) + (tlsb << 4) + (txlsb >> 4);
@@ -261,9 +261,9 @@ namespace Iot.Device.Bmp280
             }
 
             //Read the MSB, LSB and bits 7:4 (XLSB) of the pressure from the BMP280 registers
-            byte tmsb = Read8FromRegister((byte)Registers.REGISTER_PRESSUREDATA_MSB);
-            byte tlsb = Read8FromRegister((byte)Registers.REGISTER_PRESSUREDATA_LSB);
-            byte txlsb = Read8FromRegister((byte)Registers.REGISTER_PRESSUREDATA_XLSB); // bits 7:4
+            byte tmsb = Read8BitsFromRegister((byte)Registers.REGISTER_PRESSUREDATA_MSB);
+            byte tlsb = Read8BitsFromRegister((byte)Registers.REGISTER_PRESSUREDATA_LSB);
+            byte txlsb = Read8BitsFromRegister((byte)Registers.REGISTER_PRESSUREDATA_XLSB); // bits 7:4
 
             //Combine the values into a 32-bit integer
             int t = (tmsb << 12) + (tlsb << 4) + (txlsb >> 4);
@@ -365,7 +365,7 @@ namespace Iot.Device.Bmp280
         /// <returns>
         ///  Value from register
         /// </returns>
-        private byte Read8FromRegister(byte register)
+        private byte Read8BitsFromRegister(byte register)
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {
@@ -388,7 +388,7 @@ namespace Iot.Device.Bmp280
         /// <returns>
         ///  Value from register
         /// </returns>
-        private ushort Read16FromRegister(byte register)
+        private ushort Read16BitsFromRegister(byte register)
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {
@@ -414,7 +414,7 @@ namespace Iot.Device.Bmp280
         /// <returns>
         ///  Value from register
         /// </returns>
-        private uint Read24FromRegister(byte register)
+        private uint Read24BitsFromRegister(byte register)
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {
