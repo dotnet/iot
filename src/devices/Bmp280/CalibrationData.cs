@@ -6,18 +6,18 @@ namespace Iot.Device.Bmp280
 {
     internal class CalibrationData
     {
-        public uint DigT1 { get; set; }
-        public int DigT2 { get; set; }
-        public int DigT3 { get; set; }
+        public ushort DigT1 { get; set; }
+        public short DigT2 { get; set; }
+        public short DigT3 { get; set; }
 
-        public uint DigP1 { get; set; }
-        public int DigP2 { get; set; }
-        public int DigP3 { get; set; }
-        public int DigP4 { get; set; }
-        public int DigP5 { get; set; }
-        public int DigP6 { get; set; }
-        public int DigP7 { get; set; }
-        public int DigP8 { get; set; }
-        public int DigP9 { get; set; }
+        public ushort DigP1 { get; set; }
+        public short DigP2 { get; set; }
+        public short DigP3 { get; set; }
+        public short DigP4 { get; set; }
+        public short DigP5 { get; set; }
+        public short DigP6 { get; set; }
+        public short DigP7 { get; set; }
+        public short DigP8 { get; set; }
+        public short DigP9 { get; set; }
     }
 }
