@@ -40,7 +40,7 @@ namespace Iot.Device.Bmp280
 
         private void Begin()
         {
-            _i2cDevice.WriteByte((byte)Registers.REGISTER_CHIPID);
+            _i2cDevice.WriteByte((byte)Register.CHIPID);
             byte readSignature = _i2cDevice.ReadByte();
 
             if (readSignature != Signature)
@@ -59,11 +59,11 @@ namespace Iot.Device.Bmp280
         /// <param name="powerMode"></param>
         public void SetPowerMode(PowerMode powerMode)
         {
-            byte status = Read8BitsFromRegister((byte)Registers.REGISTER_CONTROL);
+            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
             //clear last two bits
             status = (byte)(status & 0b1111_1100);
             status = (byte)(status | (byte)powerMode);
-            _i2cDevice.Write(new[] { (byte)Registers.REGISTER_CONTROL, status });
+            _i2cDevice.Write(new[] { (byte)Register.CONTROL, status });
 
         }
 
@@ -73,7 +73,7 @@ namespace Iot.Device.Bmp280
         /// <returns></returns>
         public PowerMode ReadPowerMode()
         {
-            byte status = Read8BitsFromRegister((byte)Registers.REGISTER_CONTROL);
+            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
             status = (byte)(status & 0b000_00011);
             if (status == (byte)PowerMode.Normal)
             {
@@ -95,10 +95,10 @@ namespace Iot.Device.Bmp280
         /// <param name="sampling"></param>
         public void SetTemperatureSampling(Sampling sampling)
         {
-            byte status = Read8BitsFromRegister((byte)Registers.REGISTER_CONTROL);
+            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
             status = (byte)(status & 0b0001_1111);
             status = (byte)(status | (byte)sampling << 5);
-            _i2cDevice.Write(new[] { (byte)Registers.REGISTER_CONTROL, status });
+            _i2cDevice.Write(new[] { (byte)Register.CONTROL, status });
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Iot.Device.Bmp280
         /// <returns></returns>
         public Sampling ReadTemperatureSampling()
         {
-            byte status = Read8BitsFromRegister((byte)Registers.REGISTER_CONTROL);
+            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
             status = (byte)((status & 0b1110_0000) >> 5);
             return ByteToSampling(status);
         }
@@ -128,7 +128,7 @@ namespace Iot.Device.Bmp280
         /// <returns></returns>
         public Sampling ReadPressureSampling()
         {
-            byte status = Read8BitsFromRegister((byte)Registers.REGISTER_CONTROL);
+            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
             status = (byte)((status & 0b0001_1100) >> 2);
             return ByteToSampling(status);
         }
@@ -139,10 +139,10 @@ namespace Iot.Device.Bmp280
         /// <param name="sampling"></param>
         public void SetPressureSampling(Sampling sampling)
         {
-            byte status = Read8BitsFromRegister((byte)Registers.REGISTER_CONTROL);
+            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
             status = (byte)(status & 0b1110_0011);
             status = (byte)(status | (byte)sampling << 2);
-            _i2cDevice.Write(new[] { (byte)Registers.REGISTER_CONTROL, status });
+            _i2cDevice.Write(new[] { (byte)Register.CONTROL, status });
         }
 
         /// <summary>
@@ -165,12 +165,12 @@ namespace Iot.Device.Bmp280
             }
 
             //Read the MSB, LSB and bits 7:4 (XLSB) of the temperature from the BMP280 registers
-            byte tmsb = Read8BitsFromRegister((byte)Registers.REGISTER_TEMPDATA_MSB);
-            byte tlsb = Read8BitsFromRegister((byte)Registers.REGISTER_TEMPDATA_LSB);
-            byte txlsb = Read8BitsFromRegister((byte)Registers.REGISTER_TEMPDATA_XLSB); // bits 7:4
+            byte msb = Read8BitsFromRegister((byte)Register.TEMPDATA_MSB);
+            byte lsb = Read8BitsFromRegister((byte)Register.TEMPDATA_LSB);
+            byte xlsb = Read8BitsFromRegister((byte)Register.TEMPDATA_XLSB); // bits 7:4
 
             //Combine the values into a 32-bit integer
-            int t = (tmsb << 12) + (tlsb << 4) + (txlsb >> 4);
+            int t = (msb << 12) + (lsb << 4) + (xlsb >> 4);
 
             //Convert the raw value to the temperature in degC
             double temp = CompensateTemperature(t);
@@ -238,12 +238,12 @@ namespace Iot.Device.Bmp280
             }
 
             //Read the MSB, LSB and bits 7:4 (XLSB) of the pressure from the BMP280 registers
-            byte tmsb = Read8BitsFromRegister((byte)Registers.REGISTER_PRESSUREDATA_MSB);
-            byte tlsb = Read8BitsFromRegister((byte)Registers.REGISTER_PRESSUREDATA_LSB);
-            byte txlsb = Read8BitsFromRegister((byte)Registers.REGISTER_PRESSUREDATA_XLSB); // bits 7:4
+            byte msb = Read8BitsFromRegister((byte)Register.PRESSUREDATA_MSB);
+            byte lsb = Read8BitsFromRegister((byte)Register.PRESSUREDATA_LSB);
+            byte xlsb = Read8BitsFromRegister((byte)Register.PRESSUREDATA_XLSB); // bits 7:4
 
             //Combine the values into a 32-bit integer
-            int t = (tmsb << 12) + (tlsb << 4) + (txlsb >> 4);
+            int t = (msb << 12) + (lsb << 4) + (xlsb >> 4);
 
             //Convert the raw value to the pressure in Pa
             long pres = CompensatePressure(t);
@@ -369,12 +369,12 @@ namespace Iot.Device.Bmp280
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {
-                byte[] readBuffer = { 0x00, 0x00 };
+                Span<byte> bytes = stackalloc byte[2];
 
                 _i2cDevice.WriteByte(register);
-                _i2cDevice.Read(readBuffer);
+                _i2cDevice.Read(bytes);
 
-                return BinaryPrimitives.ReadUInt16LittleEndian(readBuffer);
+                return BinaryPrimitives.ReadUInt16LittleEndian(bytes);
             }
             else
             {
@@ -395,12 +395,12 @@ namespace Iot.Device.Bmp280
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {
-                byte[] readBuffer = { 0x00, 0x00, 0x00 };
+                Span<byte> bytes = stackalloc byte[4];
 
                 _i2cDevice.WriteByte(register);
-                _i2cDevice.Read(readBuffer);
+                _i2cDevice.Read(bytes.Slice(1));
 
-                return BinaryPrimitives.ReadUInt32LittleEndian(readBuffer);
+                return BinaryPrimitives.ReadUInt32LittleEndian(bytes);
             }
             else
             {
