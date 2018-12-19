@@ -2,18 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-//ported from https://github.com/adafruit/Adafruit_BMP280_Library/blob/master/Adafruit_BMP280.cpp
-//formulas and code examples can also be found in the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
+//Ported from https://github.com/adafruit/Adafruit_BMP280_Library/blob/master/Adafruit_BMP280.cpp
+//Formulas and code examples can also be found in the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
 
 using System;
 using System.Device.I2c;
 using System.Threading.Tasks;
+using System.Buffers.Binary;
 
 namespace Iot.Device.Bmp280
 {
     public class Bmp280 : IDisposable
     {
-
         private const byte Signature = 0x58;
 
         private I2cDevice _i2cDevice;
@@ -89,7 +89,7 @@ namespace Iot.Device.Bmp280
             _i2cDevice.Write(new[] { (byte)Registers.REGISTER_CONTROL, status });
 
         }
-        
+
         /// <summary>
         /// Reads the current power mode the device is running in
         /// </summary>
@@ -137,21 +137,12 @@ namespace Iot.Device.Bmp280
 
         private Sampling ByteToSampling(byte value)
         {
-            switch (value)
+            //Values >=5 equals UltraHighResolution
+            if (value >= 5)
             {
-                case (byte)Sampling.Skipped:
-                    return Sampling.Skipped;
-                case (byte)Sampling.UltraLowPower:
-                    return Sampling.UltraLowPower;
-                case (byte)Sampling.LowPower:
-                    return Sampling.LowPower;
-                case (byte)Sampling.Standard:
-                    return Sampling.Standard;
-                case (byte)Sampling.HighResolution:
-                    return Sampling.HighResolution;
-                default:
-                    return Sampling.UltraHighResolution;
+                return Sampling.UltraHighResolution;
             }
+            return (Sampling)value;
         }
 
         /// <summary>
@@ -212,10 +203,13 @@ namespace Iot.Device.Bmp280
         }
 
         /// <summary>
-        /// Recommended sleep timings from the datasheet
+        /// Recommended wait timings from the datasheet
         /// </summary>
-        /// <param name="sampleMode"></param>
-        /// <returns></returns>
+        /// <param name="sampleMode">
+        /// </param>
+        /// <returns>
+        /// The time it takes for the chip to read data in milliseconds rounded up
+        /// </returns>
         private int GetMeasurementTimeForForcedMode(Sampling sampleMode)
         {
             if (sampleMode == Sampling.UltraLowPower)
@@ -318,6 +312,7 @@ namespace Iot.Device.Bmp280
         /// </returns>
         private double CompensateTemperature(int adcTemperature)
         {
+            //Formula from the datasheet
             //The temperature is calculated using the compensation formula in the BMP280 datasheet
             double var1 = ((adcTemperature / 16384.0) - (_calibrationData.DigT1 / 1024.0)) * _calibrationData.DigT2;
             double var2 = ((adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0)) * _calibrationData.DigT3;
@@ -340,6 +335,7 @@ namespace Iot.Device.Bmp280
         /// </returns>
         private long CompensatePressure(int adcPressure)
         {
+            //Formula from the datasheet
             //The pressure is calculated using the compensation formula in the BMP280 datasheet
             long var1 = _temperatureFine - 128000;
             long var2 = var1 * var1 * (long)_calibrationData.DigP6;
@@ -400,11 +396,8 @@ namespace Iot.Device.Bmp280
 
                 _i2cDevice.WriteByte(register);
                 _i2cDevice.Read(readBuffer);
-                int h = readBuffer[1] << 8;
-                int l = readBuffer[0];
-                ushort value = (ushort)(h + l);
 
-                return value;
+                return BinaryPrimitives.ReadUInt16LittleEndian(readBuffer);
             }
             else
             {
@@ -429,13 +422,8 @@ namespace Iot.Device.Bmp280
 
                 _i2cDevice.WriteByte(register);
                 _i2cDevice.Read(readBuffer);
-                uint value = readBuffer[2];
-                value <<= 8;
-                value = readBuffer[1];
-                value <<= 8;
-                value = readBuffer[0];
 
-                return value;
+                return BinaryPrimitives.ReadUInt32LittleEndian(readBuffer);
             }
             else
             {
