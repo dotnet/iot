@@ -122,46 +122,39 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void Write(int pinNumber, PinValue value)
         {
-            string stringValue = ConvertPinValueToMachineValue(value);
-            // --mode=signal would tell the process set the value and wait for SIGINT or SIGTERM 
-            string command = $"--mode=signal {GpioChip0} {pinNumber}={stringValue}";
+                // --mode=signal would tell the process set the value and wait for SIGINT or SIGTERM which needed when setting HIGH value 
+            string command = value == PinValue.High ? $"--mode=signal {GpioChip0} {pinNumber}=1" : $"{GpioChip0} {pinNumber}=0";
 
-            try
+            Process gpioSetCommand = new Process();
+            gpioSetCommand.StartInfo.FileName = GpioSet;
+            gpioSetCommand.StartInfo.Arguments = command;
+
+            MutableTuple<PinMode, Process> pinModeAndProcess;
+            if (_pinNumberToPinModeAndProcess.TryGetValue(pinNumber, out pinModeAndProcess))
             {
-                MutableTuple<PinMode, Process> pinModeAndProcess;
-                Process gpioSetCommand;
-                if (PinValue.Low == value)
+                Process oldProcess = pinModeAndProcess.Value2;
+                if (oldProcess != null)
                 {
-                    if (_pinNumberToPinModeAndProcess.TryGetValue(pinNumber, out pinModeAndProcess))
-                    {
-                        gpioSetCommand = pinModeAndProcess.Value2;
-                        if (gpioSetCommand != null)
-                        {
-                            gpioSetCommand.Kill();
-                            gpioSetCommand.WaitForExit(1);
-                            pinModeAndProcess.Value2 = null;
-                        }
-                    }
+                    oldProcess.Kill();
+                    oldProcess.WaitForExit(1);
+                }
+                gpioSetCommand.Start(); // we need to start the pocess after killing any existing one for the given pin
+                if (PinValue.Low == value) {
+                    pinModeAndProcess.Value2 = null;
                 }
                 else
                 {
-                    gpioSetCommand = new Process();
-                    gpioSetCommand.StartInfo.FileName = GpioSet;
-                    gpioSetCommand.StartInfo.Arguments = command;
-                    gpioSetCommand.Start();
-                    if (_pinNumberToPinModeAndProcess.TryGetValue(pinNumber, out pinModeAndProcess))
-                    {
-                        pinModeAndProcess.Value2= gpioSetCommand;
-                    }
-                    else
-                    {
-                        _pinNumberToPinModeAndProcess[pinNumber]= new MutableTuple<PinMode, Process>(PinMode.Output, gpioSetCommand);
-                    }
+                    pinModeAndProcess.Value2 = gpioSetCommand;
                 }
             }
-            catch (UnauthorizedAccessException e)
+            else 
             {
-                    throw new UnauthorizedAccessException("Reading a pin value requires root permissions.", e);
+                gpioSetCommand.Start();
+                if (PinValue.High == value)
+                {
+                    _pinNumberToPinModeAndProcess.Add(pinNumber, new MutableTuple<PinMode, Process>(PinMode.Output, gpioSetCommand));
+                }
+                
             }
         }
 
