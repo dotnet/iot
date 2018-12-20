@@ -13,10 +13,15 @@ namespace System.Device.Gpio.Drivers
 {
     public class LibgpiodDriver : GpioDriver
     {
+
         private const string GpioGet = "gpioget";
-        private const string GpioChip0 = "gpiochip0 ";
+
+        private const string GpioChip0 = "gpiochip0";
+
         private const string GpioSet = "gpioset";
+
         public int TimeoutMilliSeconds { get; set; } = (int)TimeSpan.FromSeconds(1).TotalMilliseconds;
+
         private class MutableTuple<Item1, Item2>
         {
             public Item1 Value1 { get; set; }
@@ -26,7 +31,9 @@ namespace System.Device.Gpio.Drivers
                 Value2 = item2;
             }
         }
+
         private Dictionary<int, MutableTuple<PinMode, Process>> _pinNumberToPinModeAndProcess = new Dictionary<int, MutableTuple<PinMode, Process>>();
+
         protected internal override int PinCount => throw new NotImplementedException();
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
@@ -49,7 +56,8 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new PlatformNotSupportedException("This driver is generic so it can not perform conversions between pin numbering schemes.");
+        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new 
+            PlatformNotSupportedException("This driver is generic so it cannot perform conversions between pin numbering schemes.");
 
         protected internal override PinMode GetPinMode(int pinNumber)
         {
@@ -63,7 +71,7 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
-            // Libgpiod command line tools does not support pull up or pull down resistors.
+            // Libgpiod command line tools do not support pull up or pull down resistors.
             return mode != PinMode.InputPullDown && mode != PinMode.InputPullUp;
         }
 
@@ -75,22 +83,19 @@ namespace System.Device.Gpio.Drivers
         protected internal override PinValue Read(int pinNumber)
         {
             PinValue result = default(PinValue);
-            Process gpioGetCommand = new Process();
-            gpioGetCommand.StartInfo.FileName = GpioGet;
-            gpioGetCommand.StartInfo.Arguments = $"{GpioChip0} {pinNumber}";
-            gpioGetCommand.StartInfo.RedirectStandardOutput = true;
-            gpioGetCommand.Start();
-            if (WaitForProcessToExit(gpioGetCommand, $"{GpioGet} {GpioChip0} {pinNumber}", TimeoutMilliSeconds))
+            using (Process gpioGetCommand = new Process())
             {
-                string valueContents = gpioGetCommand.StandardOutput.ReadToEnd();
-                result = ConvertMachineValueToPinValue(valueContents);
+                gpioGetCommand.StartInfo.FileName = GpioGet;
+                gpioGetCommand.StartInfo.Arguments = $"{GpioChip0} {pinNumber}";
+                gpioGetCommand.StartInfo.RedirectStandardOutput = true;
+                gpioGetCommand.Start();
+                if (WaitForProcessToExit(gpioGetCommand, $"{GpioGet} {GpioChip0} {pinNumber}", TimeoutMilliSeconds))
+                {
+                    string value = gpioGetCommand.StandardOutput.ReadToEnd();
+                    result = value != null && value.IndexOf('1') != -1 ? PinValue.High : PinValue.Low; ;
+                }
             }
             return result;
-        }
-
-        private PinValue ConvertMachineValueToPinValue(string value)
-        {
-            return value != null && value.IndexOf('1') != -1 ? PinValue.High : PinValue.Low;
         }
 
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
@@ -122,8 +127,8 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void Write(int pinNumber, PinValue value)
         {
-                // --mode=signal would tell the process set the value and wait for SIGINT or SIGTERM which needed when setting HIGH value 
-            string command = value == PinValue.High ? $"--mode=signal {GpioChip0} {pinNumber}=1" : $"{GpioChip0} {pinNumber}=0";
+            // --mode=signal would tell the process set the value and wait for SIGINT or SIGTERM which needed when setting HIGH value 
+            string command = (value == PinValue.High) ? $"--mode=signal {GpioChip0} {pinNumber}=1" : $"{GpioChip0} {pinNumber}=0";
 
             Process gpioSetCommand = new Process();
             gpioSetCommand.StartInfo.FileName = GpioSet;
@@ -138,7 +143,7 @@ namespace System.Device.Gpio.Drivers
                     oldProcess.Kill();
                     oldProcess.WaitForExit(1);
                 }
-                gpioSetCommand.Start(); // we need to start the pocess after killing any existing one for the given pin
+                gpioSetCommand.Start(); // we need to start the process after killing any existing one for the given pin
                 if (PinValue.Low == value) {
                     pinModeAndProcess.Value2 = null;
                 }
@@ -165,19 +170,14 @@ namespace System.Device.Gpio.Drivers
             {
                 if (process.ExitCode != 0)
                 {
-                    throw new Exception($"Unknown error occured while running command: {command}");
+                    throw new InvalidOperationException($"Unknown error occured while running command: {command}");
                 }
             }
             else
             {
-                throw new Exception($"Unable to finish process, timed out while running command: {command}");
+                throw new InvalidOperationException($"Unable to finish process, timed out while running command: {command}");
             }
             return true;
-        }
-
-        private string ConvertPinValueToMachineValue(PinValue value)
-        {
-            return (value == PinValue.High) ? "1" : "0";
         }
 
         protected override void Dispose(bool disposing)
