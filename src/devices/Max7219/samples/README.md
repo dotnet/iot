@@ -30,25 +30,51 @@ The following pin layout can be used (also shown in a [fritzing diagram](Schema.
 
 ## Writing to the Matrix
 
-In the following example, the same value is set on each digit. 
-The value is shifted to the next bit at each pass.
+Write a smiley to devices buffer.
 
 ```csharp
-for (var value = 1; value < 0x100; value <<= 1)
+var smiley = new byte[] { 
+    0b00111100, 
+    0b01000010, 
+    0b10100101, 
+    0b10000001, 
+    0b10100101, 
+    0b10011001, 
+    0b01000010, 
+    0b00111100 
+    };
+for (var i = 0; i < devices.CascadedDevices; i++)
 {
-    for (var i = 0; i < devices.CascadedDevices; i++)
+    for (var digit = 0; digit < 8; digit++)
     {
-        for (var digit = 0; digit < 8; digit++)
-        {
-            devices[i, digit] = (byte)value;
-        }
+        devices[i, digit] = smiley[digit];
     }
-    devices.Flush();
-    Thread.Sleep(100);
 }
-devices.ClearAll();
 
 ```
+
+Flush the smiley to the devices using a different rotation each iteration.
+
+```csharp
+foreach (RotationType rotation in Enum.GetValues(typeof(RotationType)))
+{
+    devices.Rotation = rotation;
+    devices.Flush();
+    Thread.Sleep(1000);
+}
+```
+
+Write "Hello World from MAX7219!" to the Matrix using different fonts each iteration.
+
+```csharp
+devices.Init();
+devices.Rotation = RotationType.Left;
+var writer = new MatrixTextWriter(devices, Fonts.CP437);
+foreach (var font in new[]{Fonts.CP437, Fonts.LCD_FONT, Fonts.SINCLAIR_FONT, Fonts.TINY_FONT, Fonts.UKR_FONT}) {
+    writer.Font = font;
+    writer.ShowMessage("Hello World from MAX7219!", alwaysScroll: true);
+}
+```                
 
 ## How to Cross Compile and Run this sample
 
@@ -67,5 +93,5 @@ This example can also be cross-compiled on another machine and then executed on 
 
         ssh pi@192.168.1.192
         cd /home/pi/max-sample/
-        ./max-sample
+        ./Max7219.sample
 

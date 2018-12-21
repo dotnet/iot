@@ -9,8 +9,23 @@ using System.Threading;
 
 namespace Iot.Device.Samples
 {
+    using Iot.Device.Max7219;
+
     class Program
     {
+        static RotationType? ReadRotation(char c)
+        {
+            switch (c)
+            {
+                case 'l': return RotationType.Left;
+                case 'r': return RotationType.Right;
+                case 'n': return RotationType.None;
+                case 'h': return RotationType.Half;
+                default: return null;
+            }
+        }
+        
+
         static void Main(string[] args)
         {
             Console.WriteLine("Hello Max7219!");
@@ -21,36 +36,59 @@ namespace Iot.Device.Samples
                 Mode = SpiMode.Mode0
             };
             var spi = new UnixSpiDevice(connectionSettings);
-            var devices = new Max7219(spi, cascadedDevices: 4);
-            using (devices)
+            using (var devices = new Max7219(spi, cascadedDevices: 4))
             {
+                //initialize the devices
+                devices.Init();
+
+                // send a display test to the devices: All leds should be lighted
                 Console.WriteLine("Display-Test");
-                devices.SetRegister(Max7219.Register.DISPLAYTEST, 1);
+                devices.SetRegister(Register.DISPLAYTEST, 1);
                 Thread.Sleep(1000);
+
+                // reinitialize the devices
                 Console.WriteLine("Init");
                 devices.Init();
-                foreach (Max7219.RotationType rotation in Enum.GetValues(typeof(Max7219.RotationType)))
+
+                // write a smiley to devices buffer
+                var smiley = new byte[] { 
+                    0b00111100, 
+                    0b01000010, 
+                    0b10100101, 
+                    0b10000001, 
+                    0b10100101, 
+                    0b10011001, 
+                    0b01000010, 
+                    0b00111100 
+                    };
+                for (var i = 0; i < devices.CascadedDevices; i++)
                 {
-                    Thread.Sleep(500);
-                    devices.Rotation = rotation;
-                    Console.WriteLine($"Rotation {devices.Rotation}");
-                    for (var loop = 0; loop < 2; loop++)
+                    for (var digit = 0; digit < 8; digit++)
                     {
-                        for (var value = 1; value < 0x100; value <<= 1)
-                        {
-                            for (var i = 0; i < devices.CascadedDevices; i++)
-                            {
-                                for (var digit = 0; digit < 8; digit++)
-                                {
-                                    devices[i, digit] = (byte)value;
-                                }
-                            }
-                            devices.Flush();
-                            Thread.Sleep(100);
-                        }
-                        devices.ClearAll();
+                        devices[i, digit] = smiley[digit];
                     }
                 }
+
+                // flush the smiley to the devices using a different rotation each iteration.
+                foreach (RotationType rotation in Enum.GetValues(typeof(RotationType)))
+                {
+                    Console.WriteLine($"Send Smiley using rotation {devices.Rotation}.");
+                    devices.Rotation = rotation;
+                    devices.Flush();
+                    Thread.Sleep(1000);
+                }
+
+
+                //reinitialize device and show message using the matrix text writer
+                devices.Init();
+                devices.Rotation = RotationType.Left;
+                var writer = new MatrixTextWriter(devices, Fonts.CP437);
+                foreach (var font in new[]{Fonts.CP437, Fonts.LCD_FONT, Fonts.SINCLAIR_FONT, Fonts.TINY_FONT, Fonts.UKR_FONT}) {
+                    writer.Font = font;
+                    writer.ShowMessage("Hello World from MAX7219!", alwaysScroll: true);
+                }
+
+
             }
         }
     }

@@ -1,20 +1,20 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
+
 using System;
-using System.Device.Gpio;
 using System.Device.Spi;
 
-namespace Iot.Device
+namespace Iot.Device.Max7219
 {
-    public class Max7219 : IDisposable
+    public partial class Max7219 : IDisposable
     {
         private SpiDevice _spiDevice;
 
         /// <summary>
         /// Number of digits Register per Module
         /// </summary>
-        const int NumDigits = 8;
+        public const int NumDigits = 8;
 
         /// <summary>
         /// Internal buffer used to write to the devices.
@@ -38,7 +38,7 @@ namespace Iot.Device
         public RotationType Rotation { get; set; }
 
         /// <summary>
-        /// Creates a Max7219 Device given a <see paramref="spiDevice"> to communicate over and the
+        /// Creates a Max7219 Device given a <see paramref="spiDevice" /> to communicate over and the
         /// number of devices that are cascaded.
         /// </summary>
         public Max7219(SpiDevice spiDevice, int cascadedDevices = 1, RotationType rotation = RotationType.None)
@@ -60,7 +60,7 @@ namespace Iot.Device
             SetRegister(Register.DECODEMODE, 0); // use matrix (not digits)
             SetRegister(Register.DISPLAYTEST, 0); // no display test
             SetRegister(Register.SHUTDOWN, 1); // not shutdown mode
-            Brightness(5); //intensity, range: 0..15
+            Brightness(4); //intensity, range: 0..15
             ClearAll();
         }
 
@@ -119,12 +119,41 @@ namespace Iot.Device
             }
         }
 
+        /// <summary>
+        /// Gets or Sets the value to the digit value for a given absolute index
+        /// </summary>
+        public byte this[int index]
+        {
+            get
+            {
+                ValidateIndex(index, out var deviceId, out var digit);
+                return _buffer[deviceId, digit];
+            }
+            set
+            {
+                ValidateIndex(index, out var deviceId, out var digit);
+                _buffer[deviceId, digit] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the total number of digits (cascaded devices * num digits)
+        /// </summary>
+        public int Length => CascadedDevices * NumDigits;
+
         private void ValidatePosition(int deviceId, int digit)
         {
             if (deviceId < 0 || deviceId >= CascadedDevices)
-                throw new ArgumentOutOfRangeException("deviceId", $"Invalid device Id: {deviceId}");
+                throw new ArgumentOutOfRangeException(nameof(deviceId), $"Invalid device Id: {deviceId}");
             if (digit < 0 || digit >= NumDigits)
-                throw new ArgumentOutOfRangeException("digit", $"Invalid digit: {digit}");
+                throw new ArgumentOutOfRangeException(nameof(digit), $"Invalid digit: {digit}");
+        }
+
+        private void ValidateIndex(int index, out int deviceId, out int digit)
+        {
+            if (index < 0 || index > Length)
+                throw new ArgumentOutOfRangeException(nameof(index), $"Invalid index {index}");
+            deviceId = Math.DivRem(index, NumDigits, out digit);
         }
 
         /// <summary>
@@ -158,7 +187,7 @@ namespace Iot.Device
             for (int digit = 0; digit < NumDigits; digit++)
             {
                 var i = 0;
-                for (byte deviceId = 0; deviceId < CascadedDevices; deviceId++)
+                for (var deviceId = CascadedDevices-1; deviceId >= 0; deviceId--)
                 {
                     _writeBuffer[i++] = (byte)((int)Register.DIGIT0 + digit);
                     _writeBuffer[i++] = buffer[deviceId, digit];
@@ -177,7 +206,7 @@ namespace Iot.Device
             for (int digit = 0; digit < NumDigits; digit++)
             {
                 var i = 0;
-                for (byte deviceId = 0; deviceId < CascadedDevices; deviceId++)
+                for (var deviceId = CascadedDevices - 1; deviceId >= 0; deviceId--)
                 {
                     _writeBuffer[i++] = (byte)((int)Register.DIGIT0 + digit);
                     byte b = buffer[deviceId, 7 - digit];
@@ -201,9 +230,9 @@ namespace Iot.Device
             {
                 var mask = 0x01 << digit;
                 var i = 0;
-                for (byte deviceId = 0; deviceId < CascadedDevices; deviceId++)
+                for (var deviceId = CascadedDevices - 1; deviceId >= 0; deviceId--)
                 {
-                    _writeBuffer[i++] = (byte)((int)Register.DIGIT0 + (7 - digit));
+                    _writeBuffer[i++] = (byte)((int)Register.DIGIT0 + digit);
                     byte value = 0;
                     byte targetBit = 0x80;
                     for (int bitDigit = 0; bitDigit < NumDigits; bitDigit++, targetBit >>= 1)
@@ -228,9 +257,9 @@ namespace Iot.Device
             {
                 var mask = 0x80 >> digit;
                 var i = 0;
-                for (byte deviceId = 0; deviceId < CascadedDevices; deviceId++)
+                for (var deviceId = CascadedDevices - 1; deviceId >= 0; deviceId--)
                 {
-                    _writeBuffer[i++] = (byte)((int)Register.DIGIT0 + (7 - digit));
+                    _writeBuffer[i++] = (byte)((int)Register.DIGIT0 + digit);
                     byte value = 0;
                     byte targetBit = 0x01;
                     for (int bitDigit = 0; bitDigit < NumDigits; bitDigit++, targetBit <<= 1)
@@ -251,7 +280,7 @@ namespace Iot.Device
         private void ValidateBuffer(byte[,] buffer)
         {
             if (buffer.Rank != 2)
-                throw new ArgumentException(nameof(buffer), "buffer must be two dimensional.");
+                throw new ArgumentException(nameof(buffer), $"buffer must be two dimensional.");
             if (buffer.GetUpperBound(0) != CascadedDevices - 1)
                 throw new ArgumentException(nameof(buffer), $"buffer upper bound ({buffer.GetUpperBound(0)}) for dimension 0 must be {CascadedDevices - 1}.");
             if (buffer.GetUpperBound(1) != NumDigits - 1)
@@ -261,7 +290,7 @@ namespace Iot.Device
         /// <summary>
         /// Clears the buffer from the given start to end (exclusive) and flushes
         /// </summary>
-        public void Clear(int start, int end)
+        public void Clear(int start, int end, bool flush = true)
         {
             if (end < 0 || end > CascadedDevices)
                 throw new ArgumentOutOfRangeException(nameof(end));
@@ -274,15 +303,16 @@ namespace Iot.Device
                     this[deviceId, digit] = 0;
                 }
             }
-            Flush();
+            if (flush)
+                Flush();
         }
 
         /// <summary>
         /// Clears the buffer from the given start to end and flushes
         /// </summary>
-        public void ClearAll()
+        public void ClearAll(bool flush = true)
         {
-            Clear(0, CascadedDevices);
+            Clear(0, CascadedDevices, flush);
         }
 
         public void Dispose()
@@ -292,32 +322,6 @@ namespace Iot.Device
                 _spiDevice.Dispose();
                 _spiDevice = null;
             }
-        }
-
-        public enum Register : byte
-        {
-            NOOP = 0x0,
-            DIGIT0 = 0x1,
-            DIGIT1 = 0x2,
-            DIGIT2 = 0x3,
-            DIGIT3 = 0x4,
-            DIGIT4 = 0x5,
-            DIGIT5 = 0x6,
-            DIGIT6 = 0x7,
-            DIGIT7 = 0x8,
-            DECODEMODE = 0x9,
-            INTENSITY = 0xA,
-            SCANLIMIT = 0xB,
-            SHUTDOWN = 0xC,
-            DISPLAYTEST = 0xF
-        }
-
-        public enum RotationType
-        {
-            None,
-            Right, // Rotate 90 degrees to the right
-            Half, // Roate 180 degrees
-            Left, // Rotate 90 degrees to the left
         }
     }
 }
