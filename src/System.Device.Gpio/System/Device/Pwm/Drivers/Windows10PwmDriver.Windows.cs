@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using Windows.Security.ExchangeActiveSyncProvisioning;
 
 namespace System.Device.Pwm.Drivers
 {
@@ -14,7 +15,15 @@ namespace System.Device.Pwm.Drivers
         {
             if (!_chipMap.TryGetValue(chipIndex, out Windows10PwmDriverChip chip))
             {
-                chip = new Windows10PwmDriverChip(chipIndex);
+                // On Hummingboard, fallback to check for generic PWM controller (friendlyname is not currently used)
+                bool useDefaultChip = false;
+                var deviceInfo = new EasClientDeviceInformation();
+                if (deviceInfo.SystemProductName.IndexOf("Hummingboard", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    useDefaultChip = true;
+                }
+
+                chip = new Windows10PwmDriverChip(chipIndex, useDefaultChip);
                 _chipMap[chipIndex] = chip;
             }
 
