@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace System.Device.Gpio.Drivers
 {
-    public class LibgpiodDriver : GpioDriver
+    public class LibgpiodCltDriver : GpioDriver
     {
 
         private const string GpioGet = "gpioget";
@@ -36,10 +36,8 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override int PinCount => throw new NotImplementedException();
 
-        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
-        {
-            throw new NotImplementedException();
-        }
+        protected internal override void AddCallbackForPinValueChangedEvent (int pinNumber, PinEventTypes eventType, 
+            PinChangeEventHandler callback) => throw new NotImplementedException();
 
         protected internal override void ClosePin(int pinNumber)
         {
@@ -49,7 +47,7 @@ namespace System.Device.Gpio.Drivers
                 Process existingProcess = pinModeAndProcess.Value2;
                 if (existingProcess != null) {
                     existingProcess.Kill();
-                    existingProcess.WaitForExit(1);
+                    existingProcess.WaitForExit();
                     pinModeAndProcess.Value2 = null;
                 }
                 _pinNumberToPinModeAndProcess.Remove(pinNumber);
@@ -89,11 +87,9 @@ namespace System.Device.Gpio.Drivers
                 gpioGetCommand.StartInfo.Arguments = $"{GpioChip0} {pinNumber}";
                 gpioGetCommand.StartInfo.RedirectStandardOutput = true;
                 gpioGetCommand.Start();
-                if (WaitForProcessToExit(gpioGetCommand, $"{GpioGet} {GpioChip0} {pinNumber}", TimeoutMilliSeconds))
-                {
-                    string value = gpioGetCommand.StandardOutput.ReadToEnd();
-                    result = value != null && value.IndexOf('1') != -1 ? PinValue.High : PinValue.Low; ;
-                }
+                string value = gpioGetCommand.StandardOutput.ReadToEnd();
+                WaitForProcessToExit(gpioGetCommand, $"{GpioGet} {GpioChip0} {pinNumber}", TimeoutMilliSeconds);
+                result = value != null && value.IndexOf('1') != -1 ? PinValue.High : PinValue.Low;
             }
             return result;
         }
@@ -141,7 +137,7 @@ namespace System.Device.Gpio.Drivers
                 if (oldProcess != null)
                 {
                     oldProcess.Kill();
-                    oldProcess.WaitForExit(1);
+                    oldProcess.WaitForExit();
                 }
                 gpioSetCommand.Start(); // we need to start the process after killing any existing one for the given pin
                 if (PinValue.Low == value) {
@@ -163,7 +159,7 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        private static bool WaitForProcessToExit(Process process, string command, int waitMilliseconds)
+        private static void WaitForProcessToExit(Process process, string command, int waitMilliseconds)
         {
             process.WaitForExit(waitMilliseconds);
             if (process.HasExited)
@@ -177,7 +173,6 @@ namespace System.Device.Gpio.Drivers
             {
                 throw new InvalidOperationException($"Unable to finish process, timed out while running command: {command}");
             }
-            return true;
         }
 
         protected override void Dispose(bool disposing)
