@@ -1,4 +1,4 @@
-# Publishing Profile Overview
+# How to Prepare a Publishing Profile
 
 In order to deploy applications to a development board (e.g. Raspberry Pi, HummingBoard, etc.), you need to setup a Publishing Profile.  Below provides a few steps to quickly get started wihin your projects.
 
