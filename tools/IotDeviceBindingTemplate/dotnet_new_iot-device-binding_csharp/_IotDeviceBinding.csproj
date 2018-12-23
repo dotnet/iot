@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove=".template.config\**" />
+    <Compile Remove="samples\**" />
+    <Compile Remove="tests\**" />
+    <EmbeddedResource Remove=".template.config\**" />
+    <EmbeddedResource Remove="samples\**" />
+    <EmbeddedResource Remove="tests\**" />
+    <None Remove=".template.config\**" />
+    <None Remove="samples\**" />
+    <None Remove="tests\**" />
+  </ItemGroup>
+
+</Project>

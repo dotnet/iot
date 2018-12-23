@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "IoT Device Binding",
+  "classifications": [ "IoT", "Console", "Library", "Test" ],
+  "identity": "DotNet.IotDeviceBinding.CSharp",
+  "name": ".NET Core IoT Device Binding Project",
+  "shortName": "iot-device-binding",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "_IotDeviceBinding",
+  "preferNameDirectory": true
+}
