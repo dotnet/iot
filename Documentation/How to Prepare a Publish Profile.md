@@ -1,6 +1,6 @@
-# How to Prepare a Publishing Profile
+# How to Prepare a Publish Profile
 
-In order to deploy applications to a development board (e.g. Raspberry Pi, HummingBoard, etc.), you need to setup a Publishing Profile.  Below provides a few steps to quickly get started wihin your projects.
+In order to deploy applications to a development board (e.g. Raspberry Pi, HummingBoard, etc.), you need to setup a Publish Profile.  Below provides a few steps to quickly get started wihin your projects.
 
 1. Once you have an application setup in Visual Studio, right-click the project in the Solution Explorer and select Publish...
 
