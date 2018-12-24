@@ -3,19 +3,22 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
 using System.Device.Spi;
 using System.Device.Spi.Drivers;
-using System.Threading;
 
-namespace Iot.Device._IotDeviceBinding.Samples
+namespace Iot.Device._DeviceBinding
 {
-    class Program
+    public class _DeviceBinding : IDisposable
     {
-        static void Main(string[] args)
+        public _DeviceBinding()
         {
-            Console.WriteLine("Hello _IotDeviceBinding Sample!");
+        }
+
+        public void Dispose()
+        {
         }
     }
 }
