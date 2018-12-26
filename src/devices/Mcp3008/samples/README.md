@@ -8,7 +8,7 @@ The Raspberry Pi cannot read analog values directly so relies on an analog to di
 
 The Raspberry Pi has support for SPI. You need to [enable the SPI interface on the Raspberry Pi](https://www.raspberrypi-spy.co.uk/2014/08/enabling-the-spi-interface-on-the-raspberry-pi/) since it is not enabled by default.
 
-You can use the following code to [access the MCP3008 via SPI](Mcp3008.sample.cs#L17-L22):
+You can use the following code to [access the MCP3008 via SPI](Mcp3008.Sample.cs#L17-L22):
 
 ```csharp
 var connection = new SpiConnectionSettings(0,0);
@@ -36,7 +36,7 @@ The following pin layout can be used (also shown in a [fritzing diagram](rpi-tri
 
 You can also access the MCP3008 via GPIO pins, implementing SPI manually. This method is referred to as [bit-banging](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface#Example_of_bit-banging_the_master_protocol).
 
-You can use the following code to [access the MCP3008 via GPIO](Mcp3008.sample.cs#L29-L30):
+You can use the following code to [access the MCP3008 via GPIO](Mcp3008.Sample.cs#L29-L30):
 
 ```csharp
 GpioController controller = new GpioController(PinNumberingScheme.Gpio);
