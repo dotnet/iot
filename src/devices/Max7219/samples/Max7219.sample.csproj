@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Max7219.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)/../Max7219.csproj" />
   </ItemGroup>
 
 </Project>

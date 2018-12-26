@@ -6,8 +6,8 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ## Binding Index
 
-* [Mcp3008](Mcp3008/README.md)
 * [Max7219](Max7219/README.md)
+* [Mcp3008](Mcp3008/README.md)
 
 ## Binding Distribution
 

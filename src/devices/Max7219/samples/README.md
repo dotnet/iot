@@ -1,6 +1,6 @@
 # Write to a 8x8 Dot Matrix Module
 
-You can use .NET Core to drive MAX7219 based DOt Matrix Modules.
+You can use .NET Core to drive MAX7219 based Dot Matrix Modules.
 
 These Modules can be cascaded to get a bigger matrix.
 

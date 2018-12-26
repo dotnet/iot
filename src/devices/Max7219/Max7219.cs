@@ -17,7 +17,7 @@ namespace Iot.Device.Max7219
         public const int NumDigits = 8;
 
         /// <summary>
-        /// Internal buffer used to write to the devices.
+        /// internal buffer used to write to registers for all devices.
         /// </summary>
         private readonly byte[] _writeBuffer;
 
