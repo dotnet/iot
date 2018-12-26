@@ -22,13 +22,13 @@ namespace DeviceApiTester.Infrastructure
             }
 
             int dataLength = data.Length;
-            int lineCount = dataLength / perLine;
+            int lineCount = (int)Math.Ceiling((double)dataLength / perLine);
 
             const string groupDelimeter = " ";
 
             var sb = new StringBuilder(
                 dataLength * 2                                     // 2 characters per byte
-                + dataLength / perGroup * groupDelimeter.Length    // gropu delimiter string
+                + dataLength / perGroup * groupDelimeter.Length    // group delimiter string
                 + lineCount * Environment.NewLine.Length           // 1 new-line string between each line
                 + perLine);                                        // some extra calculation padding
 
@@ -52,6 +52,5 @@ namespace DeviceApiTester.Infrastructure
 
             return sb.ToString();
         }
-
     }
 }
