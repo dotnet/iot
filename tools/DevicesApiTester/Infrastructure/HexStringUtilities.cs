@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Globalization;
-using System.Linq;
 using System.Text;
 
 namespace DeviceApiTester.Infrastructure
@@ -53,20 +51,6 @@ namespace DeviceApiTester.Infrastructure
             }
 
             return sb.ToString();
-        }
-
-        public static byte[] HexStringToByteArray(string hexString)
-        {
-            if (string.IsNullOrEmpty(hexString))
-            {
-                return Array.Empty<byte>();
-            }
-
-            // Referenced: https://stackoverflow.com/questions/321370/how-can-i-convert-a-hex-string-to-a-byte-array
-            return Enumerable.Range(0, hexString.Length)
-                .Where(x => x % 2 == 0)
-                .Select(x => (byte)int.Parse(hexString.AsSpan().Slice(x, 2), NumberStyles.HexNumber))
-                .ToArray();
         }
     }
 }

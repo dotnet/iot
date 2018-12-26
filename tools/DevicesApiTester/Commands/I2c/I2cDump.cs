@@ -48,7 +48,7 @@ namespace DeviceApiTester.Commands.I2c
         {
             StringBuilder stringBuilder = new StringBuilder();
 
-            stringBuilder.Append("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f");
+            stringBuilder.Append("    00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
             stringBuilder.Append(Environment.NewLine);
 
             var connectionSettings = new I2cConnectionSettings(BusId, DeviceAddress);
@@ -56,7 +56,7 @@ namespace DeviceApiTester.Commands.I2c
             {
                 for (int startingRowAddress = 0; startingRowAddress < 255; startingRowAddress += 16)
                 {
-                    stringBuilder.Append($"{startingRowAddress:x2}: ");  // Beginning of row.
+                    stringBuilder.Append($"{startingRowAddress:X2}: ");  // Beginning of row.
 
                     for (int rowAddress = 0; rowAddress < 16; rowAddress++)
                     {
@@ -71,7 +71,7 @@ namespace DeviceApiTester.Commands.I2c
 
                         i2cDevice.WriteByte((byte)registerAddress);
                         byte data = i2cDevice.ReadByte();
-                        stringBuilder.Append($"{data:x2} ");
+                        stringBuilder.Append($"{data:X2} ");
                     }
 
                     stringBuilder.Append(Environment.NewLine);

@@ -45,12 +45,12 @@ namespace DeviceApiTester.Commands.I2c
         {
             StringBuilder stringBuilder = new StringBuilder();
 
-            stringBuilder.Append("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f");
+            stringBuilder.Append("    00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
             stringBuilder.Append(Environment.NewLine);
 
             for (int startingRowAddress = 0; startingRowAddress < 128; startingRowAddress += 16)
             {
-                stringBuilder.Append($"{startingRowAddress:x2}: ");  // Beginning of row.
+                stringBuilder.Append($"{startingRowAddress:X2}: ");  // Beginning of row.
 
                 for (int rowAddress = 0; rowAddress < 16; rowAddress++)
                 {
@@ -69,7 +69,7 @@ namespace DeviceApiTester.Commands.I2c
                         try
                         {
                             i2cDevice.ReadByte();  // Only checking if device is present.
-                            stringBuilder.Append($"{deviceAddress:x2} ");
+                            stringBuilder.Append($"{deviceAddress:X2} ");
                         }
                         catch
                         {

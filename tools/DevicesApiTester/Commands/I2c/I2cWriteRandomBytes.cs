@@ -9,7 +9,7 @@ using DeviceApiTester.Infrastructure;
 
 namespace DeviceApiTester.Commands.I2c
 {
-    [Verb("i2c-write-random-bytes", HelpText = "Writes random bytes to a specified I2C device.")]
+    [Verb("i2c-write-random-bytes", HelpText = "Writes random bytes to a specified I2C channel.")]
     public class I2cWriteRandomBytes : I2cCommand, ICommandVerb
     {
         [Option('a', "device-address", HelpText = "The bus address of the device.", Required = true)]
