@@ -70,7 +70,15 @@ namespace Iot.Device.Ssd1306
             }
 
             writeBuffer[0] = controlByte;
-            _i2cDevice.Write(writeBuffer);
+
+            if (_connectionType == ConnectionType.I2c)
+            {
+                _i2cDevice.Write(writeBuffer);
+            }
+            else
+            {
+                _spiDevice.Write(writeBuffer);
+            }
         }
 
         public void SetLowerColumnStartAddressForPageAddressingMode(byte lowerColumnStartAddress = 0x00)
