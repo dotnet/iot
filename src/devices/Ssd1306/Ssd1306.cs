@@ -16,15 +16,18 @@ namespace Iot.Device.Ssd1306
     {
         private readonly I2cDevice _i2cDevice;
         private readonly SpiDevice _spiDevice;
+        private readonly ConnectionType _connectionType;
 
         public Ssd1306(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;
+            _connectionType = ConnectionType.I2c;
         }
 
         public Ssd1306(SpiDevice spiDevice)
         {
             _spiDevice = spiDevice;
+            _connectionType = ConnectionType.Spi;
         }
 
         public void Dispose()
@@ -44,7 +47,15 @@ namespace Iot.Device.Ssd1306
             }
 
             writeBuffer[0] = controlByte;
-            _i2cDevice.Write(writeBuffer);
+
+            if (_connectionType == ConnectionType.I2c)
+            {
+                _i2cDevice.Write(writeBuffer);
+            }
+            else
+            {
+                _spiDevice.Write(writeBuffer);
+            }
         }
 
         public void SendData(byte[] data, bool continuation = false)
