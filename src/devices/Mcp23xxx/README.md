@@ -1,10 +1,10 @@
 ﻿# Microchip Mcp23xxx
 
 ## Summary
-The `Mcp23xxx` device family provides 8/16-bit, general purpose parallel I/O expansion for I2C or SPI applications.  These devices include a range of addressing schemes and I/O configurations including pull-up resistors, polarity inverting, and interrupts.
+The MCP23XXX device family provides 8/16-bit, general purpose parallel I/O expansion for I2C or SPI applications.  These devices include a range of addressing schemes and I/O configurations including pull-up resistors, polarity inverting, and interrupts.
 
 ## Device Family
-`Mcp23xxx` devices contain different markings to distinguish features like interfacing, packaging, and temperature ratings.  For example, MCP23017 contains an I2C interface and MCP23S17 contains a SPI interface.  Please review specific datasheet for more information.
+MCP23XXX devices contain different markings to distinguish features like interfacing, packaging, and temperature ratings.  For example, MCP23017 contains an I2C interface and MCP23S17 contains a SPI interface.  Please review specific datasheet for more information.
 
 **MCP23X08**: http://ww1.microchip.com/downloads/en/DeviceDoc/21919e.pdf  
 **MCP23X09**: http://ww1.microchip.com/downloads/en/DeviceDoc/20002121C.pdf  
@@ -40,7 +40,7 @@ var mcp23Sxx = new Mcp23Sxx(0x20, spiDevice);
 ```
   
 ### Register Banking
-The number of ports vary between `Mcp23xxx` devices depending if it is 8-bit (1 port) or 16-bit (2 ports) expander.  The internal circuitry has a banking concept to group by port registers or by register type.  This enables different configurations for reading/writing schemes.  
+The number of ports vary between MCP23XXX devices depending if it is 8-bit (1 port) or 16-bit (2 ports) expander.  The internal circuitry has a banking concept to group by port registers or by register type.  This enables different configurations for reading/writing schemes.  
 
 To allow this binding to work across the device family, you must use the provided arguments when using Reading/Writing methods.
 
@@ -65,7 +65,7 @@ byte data = mcp23xxx.Read(Register.Address.GPPU, Port.PortA, Bank.Bank1);
 ```
 
 ### Controller Pins
-The `Mcp23xxx` has overloaded pin options when instantiating the device.  This includes a reset line, which is an output pin of the controller to the `Mcp23xxx` RST input pin.  The other pins are interrupt options, which are inputs to the controller from the `Mcp23xxx` INTA/INTB output pins.  They are optional arguments.  Assign as `null` for the pins you don't use.
+The `Mcp23xxx` has overloaded pin options when instantiating the device.  This includes a reset line, which is an output pin of the controller to the MCP23XXX RST input pin.  The other pins are interrupt options, which are inputs to the controller from the MCP23XXX INTA/INTB output pins.  They are optional arguments.  Assign as `null` for the pins you don't use.
 
 ```csharp
 // Pin 10: Reset; Output to Mcp23xxx
@@ -74,7 +74,7 @@ The `Mcp23xxx` has overloaded pin options when instantiating the device.  This i
 var mcp23Sxx = new Mcp23Sxx(0x20, spiDevice, 10, 25, 17);
 ```
 
-The `Mcp23xxx` will be in the reset/disabled state by default if you use the reset pin.  You must call the `Enable()` method to activate the device.
+The MCP23XXX will be in the reset/disabled state by default if you use the reset pin.  You must call the `Enable()` method to activate the device.
 
 ```csharp
 var mcp23Sxx = new Mcp23Sxx(0x20, spiDevice, 10, 25, 17);
