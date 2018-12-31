@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace System.Device.Gpio.Drivers
 {
-    public unsafe partial class RaspberryPi3Driver : GpioDriver
+    public unsafe partial class RaspberryPi3GpioDriver : GpioDriver
     {
         private RegisterView* _registerViewPointer = null;
         private const int GpioRegisterOffset = 0x00;
         private static readonly object s_InitializationLock = new object();
         private static readonly object s_SysFsInitializationLock = new object();
         private const string GpioMemoryFilePath = "/dev/gpiomem";
-        private UnixDriver _sysFSDriver = null;
+        private UnixGpioDriver _sysFSDriver = null;
         private IDictionary<int, PinMode> _sysFSModes = new Dictionary<int, PinMode>();
 
         protected override void Dispose(bool disposing)
@@ -33,7 +33,7 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        private PinMode GetModeForUnixDriver(PinMode mode)
+        private PinMode GetModeForUnixGpioDriver(PinMode mode)
         {
             switch (mode)
             {
@@ -54,7 +54,7 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
-            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
+            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixGpioDriver(_sysFSModes[pinNumber]));
 
             _sysFSDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventType, callback);
         }
@@ -110,7 +110,7 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
-            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
+            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixGpioDriver(_sysFSModes[pinNumber]));
 
             _sysFSDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
         }
@@ -216,7 +216,7 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
-            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
+            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixGpioDriver(_sysFSModes[pinNumber]));
 
             return _sysFSDriver.WaitForEvent(pinNumber, eventType, cancellationToken);
         }
@@ -227,7 +227,7 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
-            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
+            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixGpioDriver(_sysFSModes[pinNumber]));
 
             return _sysFSDriver.WaitForEventAsync(pinNumber, eventType, cancellationToken);
         }
@@ -260,7 +260,7 @@ namespace System.Device.Gpio.Drivers
                 {
                     return;
                 }
-                _sysFSDriver = new UnixDriver();
+                _sysFSDriver = new UnixGpioDriver();
             }
         }
 

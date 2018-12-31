@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace System.Device.Gpio.Drivers
 {
-    public class UnixDriver : GpioDriver
+    public class UnixGpioDriver : GpioDriver
     {
         private const string GpioBasePath = "/sys/class/gpio";
         private int _pollFileDescriptor = -1;
@@ -17,7 +17,7 @@ namespace System.Device.Gpio.Drivers
         private int _pinsToDetectEventsCount;
         private static CancellationTokenSource s_EventThreadCancellationTokenSource = new CancellationTokenSource();
         private List<int> _exportedPins = new List<int>();
-        private Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
+        private Dictionary<int, UnixGpioDriverDevicePin> _devicePins = new Dictionary<int, UnixGpioDriverDevicePin>();
         private int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
 
         protected internal override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
@@ -402,7 +402,7 @@ namespace System.Device.Gpio.Drivers
                     Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
                 }
             }
-            foreach (UnixDriverDevicePin devicePin in _devicePins.Values)
+            foreach (UnixGpioDriverDevicePin devicePin in _devicePins.Values)
             {
                 devicePin.Dispose();
             }
@@ -423,7 +423,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (!_devicePins.ContainsKey(pinNumber))
             {
-                _devicePins.Add(pinNumber, new UnixDriverDevicePin());
+                _devicePins.Add(pinNumber, new UnixGpioDriverDevicePin());
                 _pinsToDetectEventsCount++;
                 AddPinToPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, out _);
             }

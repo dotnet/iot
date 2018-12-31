@@ -10,19 +10,19 @@ using WinGpio = global::Windows.Devices.Gpio;
 
 namespace System.Device.Gpio.Drivers
 {
-    internal class Windows10DriverPin : IDisposable
+    internal class Windows10GpioDriverPin : IDisposable
     {
         private const int ReasonableDebounceTimeoutMillseconds = 50;
 
-        private WeakReference<Windows10Driver> _driver;
+        private WeakReference<Windows10GpioDriver> _driver;
         private WinGpio.GpioPin _pin;
         private readonly int _pinNumber;
         private PinChangeEventHandler _risingCallbacks;
         private PinChangeEventHandler _fallingCallbacks;
 
-        public Windows10DriverPin(Windows10Driver driver, WinGpio.GpioPin pin)
+        public Windows10GpioDriverPin(Windows10GpioDriver driver, WinGpio.GpioPin pin)
         {
-            _driver = new WeakReference<Windows10Driver>(driver);
+            _driver = new WeakReference<Windows10GpioDriver>(driver);
             _pin = pin;
             _pinNumber = _pin.PinNumber;
 
@@ -30,7 +30,7 @@ namespace System.Device.Gpio.Drivers
             _pin.DebounceTimeout = TimeSpan.FromMilliseconds(ReasonableDebounceTimeoutMillseconds);
         }
 
-        ~Windows10DriverPin()
+        ~Windows10GpioDriverPin()
         {
             Dispose();
         }
@@ -76,7 +76,7 @@ namespace System.Device.Gpio.Drivers
 
         private void Pin_ValueChanged(WinGpio.GpioPin sender, WinGpio.GpioPinValueChangedEventArgs args)
         {
-            if (!_driver.TryGetTarget(out Windows10Driver driver))
+            if (!_driver.TryGetTarget(out Windows10GpioDriver driver))
             {
                 return;
             }

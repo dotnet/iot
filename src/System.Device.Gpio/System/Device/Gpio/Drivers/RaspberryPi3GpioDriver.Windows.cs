@@ -4,7 +4,7 @@
 
 namespace System.Device.Gpio.Drivers
 {
-    public partial class HummingBoardDriver : Windows10Driver
+    public partial class RaspberryPi3GpioDriver : Windows10GpioDriver
     {
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace System.Device.Gpio.Drivers
 {
-    public partial class HummingBoardDriver : GpioDriver
+    public partial class HummingBoardGpioDriver : GpioDriver
     {
         protected internal override int PinCount => throw new NotImplementedException();
 

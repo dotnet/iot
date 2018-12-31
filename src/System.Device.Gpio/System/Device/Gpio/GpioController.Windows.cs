@@ -40,16 +40,16 @@ namespace System.Device.Gpio
             if (baseBoardProduct == RaspberryPi3Product || baseBoardProduct.StartsWith($"{RaspberryPi3Product} ") ||
                 baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))
             {
-                return new RaspberryPi3Driver();
+                return new RaspberryPi3GpioDriver();
             }
 
             if (baseBoardProduct == HummingBoardProduct || baseBoardProduct.StartsWith($"{HummingBoardProduct} "))
             {
-                return new HummingBoardDriver();
+                return new HummingBoardGpioDriver();
             }
 
             // Default for Windows IoT Core on a non-specific device
-            return new Windows10Driver();
+            return new Windows10GpioDriver();
         }
     }
 }

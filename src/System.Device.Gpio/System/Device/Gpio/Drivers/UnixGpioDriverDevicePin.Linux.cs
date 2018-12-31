@@ -4,9 +4,9 @@
 
 namespace System.Device.Gpio.Drivers
 {
-    internal sealed class UnixDriverDevicePin : IDisposable
+    internal sealed class UnixGpioDriverDevicePin : IDisposable
     {
-        public UnixDriverDevicePin()
+        public UnixGpioDriverDevicePin()
         {
             FileDescriptor = -1;
         }

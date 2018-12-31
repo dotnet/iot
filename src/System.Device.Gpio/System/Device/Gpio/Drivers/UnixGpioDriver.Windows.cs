@@ -3,17 +3,23 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Device.Gpio.Drivers
 {
-    public class Windows10Driver : GpioDriver
+    public class UnixGpioDriver : GpioDriver
     {
-        public Windows10Driver()
+        public UnixGpioDriver()
         {
             throw new PlatformNotSupportedException();
         }
 
         protected internal override int PinCount => throw new PlatformNotSupportedException();
+
+        protected override void Dispose(bool disposing)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
@@ -61,6 +67,11 @@ namespace System.Device.Gpio.Drivers
         }
 
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
         {
             throw new PlatformNotSupportedException();
         }
