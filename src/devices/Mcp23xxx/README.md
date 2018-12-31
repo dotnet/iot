@@ -15,7 +15,7 @@ The `Mcp23xxx` device family provides 8/16-bit, general purpose parallel I/O exp
 
 ## Binding Notes
 
-The `Mcp23xxx` is an abstract class that has an implementation for both I2C (`Mcp230xx`) and SPI (`Mcp23Sxx`) interfaces.  You can create either one by passing in the respective I2C driver.
+This binding includes an `Mcp23xxx` abstract class and implementations for both I2C (`Mcp230xx`) and SPI (`Mcp23Sxx`) interfaces.  You can create either one by passing in the respective communication driver.
 
 #### Mcp230xx I2C
 ```csharp
@@ -40,7 +40,7 @@ var mcp23Sxx = new Mcp23Sxx(0x20, spiDevice);
 ```
   
 ### Register Banking
-The number of ports vary between `Mcp23xxx` devices depending if it is 8-bit (1 port) or 16-bit (2 ports).  The internal circuitry has a banking concept to group by port registers or by register type.  This enables different configurations for reading/writing schemes.  
+The number of ports vary between `Mcp23xxx` devices depending if it is 8-bit (1 port) or 16-bit (2 ports) expander.  The internal circuitry has a banking concept to group by port registers or by register type.  This enables different configurations for reading/writing schemes.  
 
 To allow this binding to work across the device family, you must use the provided arguments when using Reading/Writing methods.
 
@@ -65,7 +65,7 @@ byte data = mcp23xxx.Read(Register.Address.GPPU, Port.PortA, Bank.Bank1);
 ```
 
 ### Controller Pins
-The `Mcp23xxx` has overloaded pin options when instantiating the device.  This includes a reset line, which is an output pin of the controller to the `Mcp23xxx` RST input pin.  The other pins are interrupt options, which are inputs to the controller from the `Mcp23xxx` INTA/INTB output pins.  They are optional parameters.  Assign as `null` for the pins you don't need.
+The `Mcp23xxx` has overloaded pin options when instantiating the device.  This includes a reset line, which is an output pin of the controller to the `Mcp23xxx` RST input pin.  The other pins are interrupt options, which are inputs to the controller from the `Mcp23xxx` INTA/INTB output pins.  They are optional arguments.  Assign as `null` for the pins you don't use.
 
 ```csharp
 // Pin 10: Reset; Output to Mcp23xxx
@@ -94,3 +94,4 @@ PinValue valueB = mcp23Sxx.ReadIntB();
 
 ## References 
 https://www.adafruit.com/product/732  
+https://learn.adafruit.com/using-mcp23008-mcp23017-with-circuitpython/overview
