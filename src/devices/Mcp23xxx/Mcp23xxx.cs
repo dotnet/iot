@@ -4,75 +4,137 @@
 
 using System;
 using System.Device.Gpio;
-using System.Device.Spi;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public class Mcp23xxx : IDisposable
+    // IGpioControllerProvider.  TODO: https://github.com/dotnet/iot/issues/125
+    public abstract class Mcp23xxx : IDisposable
     {
-        private readonly SpiDevice _spiDevice;
+        protected int DeviceAddress { get; }
+        private GpioController _masterGpioController;
+        private readonly int? _reset;
+        private readonly int? _intA;
+        private readonly int? _intB;
 
-        private enum CommunicationProtocol
+        public Mcp23xxx(int deviceAddress, int? reset = null, int? intA = null, int? intB = null)
         {
-            I2c,
-            Spi
+            ValidateDeviceAddress(deviceAddress);
+
+            DeviceAddress = deviceAddress;
+            _reset = reset;
+            _intA = intA;
+            _intB = intB;
+
+            InitializeMasterGpioController();
         }
 
-        public Mcp23xxx(SpiDevice spiDevice)
+        private void ValidateDeviceAddress(int deviceAddress)
         {
-            _spiDevice = spiDevice;
+            if (deviceAddress < 0x20 || deviceAddress > 0x27)
+            {
+                throw new ArgumentOutOfRangeException(nameof(deviceAddress), deviceAddress, "The Mcp23xxx address must be a value of 32 (0x20) - 39 (0x27).");
+            }
         }
 
-        public void Dispose()
+        private void InitializeMasterGpioController()
         {
+            // Only need master controller if there are external pins provided.
+            if (_reset == null && _intA == null && _intB == null)
+            {
+                return;
+            }
+
+            _masterGpioController = new GpioController();
+
+            if (_intA != null)
+            {
+                _masterGpioController.OpenPin((int)_intA, PinMode.Input);
+            }
+
+            if (_intB != null)
+            {
+                _masterGpioController.OpenPin((int)_intB, PinMode.Input);
+            }
+
+            if (_reset != null)
+            {
+                _masterGpioController.OpenPin((int)_reset, PinMode.Output);
+                Disable();
+            }
         }
 
-        public byte Read(int deviceAddress, Register.Address registerAddress, Port port = Port.PortA, Bank bank = Bank.Bank1)
-        {
-            byte opCode = OpCode.GetOpCode(deviceAddress, true);
-            byte mappedAddress = Register.GetMappedAddress(registerAddress, port, bank);
-            byte[] writeBuffer = new byte[] { opCode, mappedAddress, 0 };
-            byte[] readBuffer = new byte[3];
+        public abstract byte Read(Register.Address registerAddress, Port port = Port.PortA, Bank bank = Bank.Bank1);
+        public abstract byte[] Read(Register.Address startingRegisterAddress, byte byteCount, Port port = Port.PortA, Bank bank = Bank.Bank1);
+        public abstract void Write(Register.Address registerAddress, byte data, Port port = Port.PortA, Bank bank = Bank.Bank1);
+        public abstract void Write(Register.Address startingRegisterAddress, byte[] data, Port port = Port.PortA, Bank bank = Bank.Bank1);
 
-            _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
-            return readBuffer[2];
+        public virtual void Dispose()
+        {
+            if (_masterGpioController != null)
+            {
+                _masterGpioController.Dispose();
+                _masterGpioController = null;
+            }
         }
 
-        public byte[] Read(int deviceAddress, Register.Address startingRegisterAddress, byte byteCount, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        public void Disable()
         {
-            byte opCode = OpCode.GetOpCode(deviceAddress, true);
-            byte mappedAddress = Register.GetMappedAddress(startingRegisterAddress, port, bank);
+            if (_masterGpioController == null)
+            {
+                throw new Exception("Master controller has not been initialized.");
+            }
 
-            byteCount += 2;  // Include OpCode and Register Address.
-            byte[] writeBuffer = new byte[byteCount];
-            writeBuffer[0] = opCode;
-            writeBuffer[1] = (byte)startingRegisterAddress;
-            byte[] readBuffer = new byte[byteCount];
+            if (_reset == null)
+            {
+                throw new Exception("Reset pin has not been initialized.");
+            }
 
-            _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
-            return readBuffer.AsSpan().Slice(2).ToArray();  // First 2 bytes are from sending OpCode and Register Address.
+            _masterGpioController.Write((int)_reset, PinValue.Low);
         }
 
-        public void Write(int deviceAddress, Register.Address registerAddress, byte data, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        public void Enable()
         {
-            byte opCode = OpCode.GetOpCode(deviceAddress, false);
-            byte mappedAddress = Register.GetMappedAddress(registerAddress, port, bank);
-            byte[] writeBuffer = new byte[] { opCode, mappedAddress, data };
+            if (_masterGpioController == null)
+            {
+                throw new Exception("Master controller has not been initialized.");
+            }
 
-            _spiDevice.Write(writeBuffer);
+            if (_reset == null)
+            {
+                throw new Exception("Reset pin has not been initialized.");
+            }
+
+            _masterGpioController.Write((int)_reset, PinValue.High);
         }
 
-        public void Write(int deviceAddress, Register.Address startingRegisterAddress, byte[] data, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        public PinValue ReadIntA()
         {
-            byte opCode = OpCode.GetOpCode(deviceAddress, false);
-            byte mappedAddress = Register.GetMappedAddress(startingRegisterAddress, port, bank);
+            if (_masterGpioController == null)
+            {
+                throw new Exception("Master controller has not been initialized.");
+            }
 
-            byte[] writeBuffer = new byte[data.Length + 2]; // Include OpCode and Register Address.
-            writeBuffer[0] = opCode;
-            writeBuffer[1] = (byte)startingRegisterAddress;
-            data.CopyTo(writeBuffer, 2);
+            if (_reset == null)
+            {
+                throw new Exception("INTA pin has not been initialized.");
+            }
 
-            _spiDevice.Write(writeBuffer);
+            return _masterGpioController.Read((int)_intA);
+        }
+
+        public PinValue ReadIntB()
+        {
+            if (_masterGpioController == null)
+            {
+                throw new Exception("Master controller has not been initialized.");
+            }
+
+            if (_reset == null)
+            {
+                throw new Exception("INTB pin has not been initialized.");
+            }
+
+            return _masterGpioController.Read((int)_intB);
         }
     }
 }

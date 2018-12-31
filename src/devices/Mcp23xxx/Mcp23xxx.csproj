@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <Compile Include="Bank.cs" />
+    <Compile Include="Mcp23Sxx.cs" />
+    <Compile Include="Mcp230xx.cs" />
     <Compile Include="Mcp23xxx.cs" />
     <Compile Include="OpCode.cs" />
     <Compile Include="Port.cs" />
