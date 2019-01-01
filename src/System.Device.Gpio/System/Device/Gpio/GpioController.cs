@@ -172,18 +172,23 @@ namespace System.Device.Gpio
             _driver.Write(logicalPinNumber, value);
         }
 
-        public void Toggle(int pinNumber, ref PinValue currentValue)
+        /// <summary>
+        /// Writes the opposite value to a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        /// <param name="value">The current value of pin to be toggled.</param>
+        public void Toggle(int pinNumber, ref PinValue value)
         {
-            if (currentValue == PinValue.Low)
+            if (value == PinValue.Low)
             {
-                currentValue = PinValue.High;
+                value = PinValue.High;
             }
             else
             {
-                currentValue = PinValue.Low;
+                value = PinValue.Low;
             }
 
-            Write(pinNumber, currentValue);
+            Write(pinNumber, value);
         }
 
         /// <summary>
