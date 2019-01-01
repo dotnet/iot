@@ -172,6 +172,20 @@ namespace System.Device.Gpio
             _driver.Write(logicalPinNumber, value);
         }
 
+        public void Toggle(int pinNumber, ref PinValue currentValue)
+        {
+            if (currentValue == PinValue.Low)
+            {
+                currentValue = PinValue.High;
+            }
+            else
+            {
+                currentValue = PinValue.Low;
+            }
+
+            Write(pinNumber, currentValue);
+        }
+
         /// <summary>
         /// Blocks execution for a period of time(timeout) or until an event of type eventType is received.
         /// </summary>
