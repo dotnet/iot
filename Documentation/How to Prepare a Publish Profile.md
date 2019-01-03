@@ -13,10 +13,14 @@ In order to deploy applications to a development board (e.g. Raspberry Pi, Hummi
 5. You can configure the profile's settings by clicking Configure... in the Publish Window.  A Profile Settings dialog prompt includes a few options.  
   
     **Notes**  
-    * Currently, the Target Runtime doesn't offer a selection for Linux ARM.  You will need to manually open the profile's XML and change the RuntimeIdentifier element to **linux-arm** shown below:
+    * Currently, the Target Runtime doesn't offer a selection for Linux ARM or Windows ARM.  You will need to manually open the profile's XML and change the RuntimeIdentifier element to **linux-arm** or **win-arm** shown below:
 
         ```
         <RuntimeIdentifier>linux-arm</RuntimeIdentifier>
+        or..
+        <RuntimeIdentifier>win-arm</RuntimeIdentifier>
+        or both..
+        <RuntimeIdentifiers>linux-arm;win-arm</RuntimeIdentifiers>
         ```  
   
     * Deployment Mode Options:
