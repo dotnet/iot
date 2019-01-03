@@ -6,7 +6,7 @@ using System.Device.I2c;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public class Mcp230xx : Mcp23xxx
+    public abstract class Mcp230xx : Mcp23xxx
     {
         private readonly I2cDevice _i2cDevice;
 

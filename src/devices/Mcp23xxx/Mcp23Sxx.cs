@@ -7,7 +7,7 @@ using System.Device.Spi;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public class Mcp23Sxx : Mcp23xxx
+    public abstract class Mcp23Sxx : Mcp23xxx
     {
         private readonly SpiDevice _spiDevice;
         

@@ -7,7 +7,25 @@ using System.Device.Gpio;
 
 namespace Iot.Device.Mcp23xxx
 {
-    // IGpioControllerProvider.  TODO: https://github.com/dotnet/iot/issues/125
+    // TODO: https://github.com/dotnet/iot/issues/125
+    // Implement IGpioControllerProvider.
+    // The thinking is to implement this interface where it can provide a GpioController
+    // that looks like a regular controller, but controls the bindings I/O via I2C/SPI drivers.
+    //
+    // For example...
+    // var connectionSettings = new SpiConnectionSettings(0, 0);
+    // var spiDevice = new UnixSpiDevice(connectionSettings);
+    // var mcp23Sxx = new Mcp23Sxx(0, spiDevice);
+    // GpioController mcp23SxxController = mcp23Sxx.GetDefaultGpioController();
+    // 
+    // Now when you call the GpioController methods, the master controller will send the respective SPI commands
+    // to the binding behind the scenes to update its I/O.
+    //
+    // The code below would interact with the MCP23XXX related registers (IODIR, GPIO, etc.)
+    // to configure the pin as an input and read the the value.
+    // mcp23SxxController.SetPinMode(1, PinMode.Input);
+    // PinValue pin1Value = mcp23SxxController.Read(1);
+
     public abstract class Mcp23xxx : IDisposable
     {
         protected int DeviceAddress { get; }
@@ -62,6 +80,8 @@ namespace Iot.Device.Mcp23xxx
                 Disable();
             }
         }
+
+        public abstract int PinCount { get; }
 
         public abstract byte Read(Register.Address registerAddress, Port port = Port.PortA, Bank bank = Bank.Bank1);
         public abstract byte[] Read(Register.Address startingRegisterAddress, byte byteCount, Port port = Port.PortA, Bank bank = Bank.Bank1);
