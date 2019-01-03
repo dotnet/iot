@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
-    [DllImport("libgpiod", SetLastError = true)]
+    [DllImport(library, SetLastError = true)]
     internal static extern int gpiod_ctxless_event_loop(string device, uint offset, 
         bool active_low, string consumer, ref timespec timeout, 
         [MarshalAs(UnmanagedType.FunctionPtr)]gpiod_ctxless_event_poll_cb poll_cb, 
@@ -18,7 +18,6 @@ internal partial class Interop
 struct gpiod_ctxless_event_poll_fd
 {
     int fd;
-    /**< File descriptor number. */
     bool eventOccured;
 }
 

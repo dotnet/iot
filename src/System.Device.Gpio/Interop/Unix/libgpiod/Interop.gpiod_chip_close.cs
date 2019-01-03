@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
-    [DllImport("libgpiod", SetLastError = true)]
+    private const string library = "libgpiod";
+    [DllImport(library, SetLastError = true)]
     internal static extern void gpiod_chip_close(IntPtr chip);
 }

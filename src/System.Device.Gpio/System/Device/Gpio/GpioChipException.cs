@@ -8,7 +8,7 @@ using System.Text;
 
 namespace System.Device.Gpio
 {
-    class GpioChipException : Exception
+    public class GpioChipException : Exception
     {
         public GpioChipException() { }
 

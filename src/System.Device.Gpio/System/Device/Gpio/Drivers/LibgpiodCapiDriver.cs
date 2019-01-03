@@ -12,7 +12,7 @@ namespace System.Device.Gpio.Drivers
 {
     public class LibgpiodCapiDriver : GpioDriver
     {
-        private const string _basePath = "/dev/";
+        private const string BasePath = "/dev/";
 
         public string GpioChip { get; set; } = "gpiochip0";
 
@@ -28,7 +28,7 @@ namespace System.Device.Gpio.Drivers
         {
             get
             {
-                return (int)Interop.gpiod_chip_num_lines(_chip);
+                return Interop.gpiod_chip_num_lines(_chip);
             }
         }
 
@@ -40,14 +40,15 @@ namespace System.Device.Gpio.Drivers
 
         public LibgpiodCapiDriver(string chip)
         {
-            GpioChip = chip;
+            if (chip != null)
+                GpioChip = chip;
             OpenChip();
             _pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
         }
 
         private void OpenChip()
         {
-            _chip = Interop.gpiod_chip_open($"{_basePath}{GpioChip}");
+            _chip = Interop.gpiod_chip_open($"{BasePath}{GpioChip}");
             if (_chip == null)
             {
                 throw new GpioChipException($"Chip: {GpioChip} not available, error code: {Marshal.GetLastWin32Error()}");
@@ -65,7 +66,7 @@ namespace System.Device.Gpio.Drivers
                 {
                     eventSuccess = Interop.gpiod_line_request_rising_edge_events(pin, $"Listen {pinNumber} for rising edge event");
                 }
-                if (eventType == PinEventTypes.Falling)
+                else if (eventType == PinEventTypes.Falling)
                 {
                     eventSuccess = Interop.gpiod_line_request_falling_edge_events(pin, $"Listen {pinNumber} for falling edge event");
                 }
@@ -110,14 +111,14 @@ namespace System.Device.Gpio.Drivers
                 waitResult = Interop.gpiod_line_event_wait(eventHandler.PinHandle, ref _defaultTimeOut);
                 if (waitResult == -1)
                 {
-                    throw new GpioChipException("Error while trying to initialize pin interrupts.");
+                    throw new GpioChipException($"Error while waiting for event, error code: {Marshal.GetLastWin32Error()}");
                 }
                 if (waitResult == 1)
                 {
                     int readResult = Interop.gpiod_line_event_read(eventHandler.PinHandle, out gpiod_line_event eventOccured);
                     if (readResult == -1)
                     {
-                        throw new GpioChipException("Error while trying to read pin event result.");
+                        throw new GpioChipException($"Error while trying to read pin event result, error code: {Marshal.GetLastWin32Error()}");
                     }
                     PinEventTypes eventType = (eventOccured.event_type == event_type.GPIOD_LINE_EVENT_RISING_EDGE) ? PinEventTypes.Rising : PinEventTypes.Falling;
                     var args = new PinValueChangedEventArgs(eventType, eventHandler.PinNumber);
@@ -168,6 +169,10 @@ namespace System.Device.Gpio.Drivers
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
             {
                 int value = Interop.gpiod_line_get_value(pin);
+                if (value == -1)
+                {
+                    throw new GpioChipException($"Error while reading value from pin number: {pinNumber}, error: {Marshal.GetLastWin32Error()}");
+                }
                 return (value == 1) ? PinValue.High : PinValue.Low;
             }
             return PinValue.Low;
@@ -193,23 +198,27 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
+            int success = -1;
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
             {
                 if (mode == PinMode.Input)
                 {
-                    Interop.gpiod_line_request_input(pin, pinNumber.ToString());
+                    success = Interop.gpiod_line_request_input(pin, pinNumber.ToString());
                 }
                 else
                 {
-                    Interop.gpiod_line_request_output(pin, pinNumber.ToString(), 0);
+                    success = Interop.gpiod_line_request_output(pin, pinNumber.ToString(), 0);
                 }
+            }
+            if (success == -1) {
+                throw new GpioChipException($"Error setting pin mode, pin:{pinNumber}, error: {Marshal.GetLastWin32Error()}");
             }
         }
 
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
         {
             bool timedOut = false;
-            int eventRegistered = Interop.gpiod_ctxless_event_loop($"{_basePath}{GpioChip}", (uint)pinNumber, false, $"pin{pinNumber} listener", ref _defaultTimeOut, null,
+            int eventRegistered = Interop.gpiod_ctxless_event_loop($"{BasePath}{GpioChip}", (uint)pinNumber, false, $"pin{pinNumber} listener", ref _defaultTimeOut, null,
                 (int e, uint p, ref timespec t, IntPtr d) =>
                 {
                     if (cancellationToken.IsCancellationRequested)
@@ -238,8 +247,10 @@ namespace System.Device.Gpio.Drivers
         {
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
             {
-                int machineValue = value == PinValue.High ? 1 : 0;
-                Interop.gpiod_line_set_value(pin, machineValue);  //  TODO check return values for error
+                //if (
+                Interop.gpiod_line_set_value(pin, (value == PinValue.High) ? 1 : 0); //== -1) {
+                  //  throw new GpioChipException("Error writing pin value");
+                //}
             }
         }
         protected override void Dispose(bool disposing)
