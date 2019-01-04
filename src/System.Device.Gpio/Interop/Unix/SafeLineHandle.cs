@@ -3,17 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace System.Device.Gpio
 {
-    class SafeChipHandle : SafeHandle
+    internal class SafeLineHandle : SafeHandle
     {
-        internal SafeChipHandle() : base(IntPtr.Zero, true) { }
+        internal SafeLineHandle() : base(IntPtr.Zero, false) { }
 
         override protected bool ReleaseHandle()
         {
-            Interop.gpiod_chip_close(handle);
             return true;
         }
 

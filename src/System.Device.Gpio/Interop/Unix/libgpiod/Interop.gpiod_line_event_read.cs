@@ -8,18 +8,12 @@ using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
-    [DllImport(library, SetLastError = true)]
-    internal static extern int gpiod_line_event_read(SafeLineHandle line, out gpiod_line_event consumer);
+    [DllImport(LibgpiodLibrary, SetLastError = true)]
+    internal static extern int gpiod_line_event_read(SafeLineHandle line, out gpiod_line_event eventInfo);
 }
 
 internal struct gpiod_line_event
 {
-    timespec ts;
-    public event_type event_type;
-}
-
-internal enum event_type
-{
-    GPIOD_LINE_EVENT_RISING_EDGE = 1,
-    GPIOD_LINE_EVENT_FALLING_EDGE
+    internal timespec ts;
+    internal int event_type;
 }

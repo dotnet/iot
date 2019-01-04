@@ -8,6 +8,6 @@ using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
-    [DllImport(library, SetLastError = true)]
+    [DllImport(LibgpiodLibrary, SetLastError = true)]
     internal static extern int gpiod_line_get_value(SafeLineHandle line);
 }

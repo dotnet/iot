@@ -8,16 +8,17 @@ using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
-    [DllImport(library, SetLastError = true)]
+    [DllImport(LibgpiodLibrary, SetLastError = true)]
     internal static extern int gpiod_line_event_wait(SafeLineHandle line, ref timespec timeout);
 }
+
 [StructLayout(LayoutKind.Sequential)]
 internal struct timespec
 {
-    public IntPtr tv_sec;
-    public long tv_nsec;
+    internal IntPtr tv_sec;
+    internal IntPtr tv_nsec;
 
-    public timespec(IntPtr seconds, long nanoSeconds) {
+    internal timespec(IntPtr seconds, IntPtr nanoSeconds) {
         tv_sec = seconds;
         tv_nsec = nanoSeconds;
     }

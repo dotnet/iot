@@ -23,9 +23,9 @@ namespace System.Device.Gpio.Drivers
 
         public LibgpiodDriverEventHandler() { }
 
-        public LibgpiodDriverEventHandler(int pinNumber, CancellationTokenSource cancellsationTokenSource) {
+        public LibgpiodDriverEventHandler(int pinNumber, CancellationTokenSource cancellationTokenSource) {
             PinNumber = pinNumber;
-            CancellationTokenSource = cancellsationTokenSource;
+            CancellationTokenSource = cancellationTokenSource;
         }
 
         public void OnPinValueChanged(PinValueChangedEventArgs args, PinEventTypes detectionOfEventTypes)

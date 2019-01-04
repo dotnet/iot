@@ -8,6 +8,6 @@ using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
-    [DllImport(library, SetLastError = true)]
-    internal static extern int gpiod_line_request_falling_edge_events(SafeLineHandle line, string consumer);
+    [DllImport(LibgpiodLibrary, SetLastError = true)]
+    internal static extern int gpiod_line_request_both_edges_events(SafeLineHandle line, string consumer);
 }
