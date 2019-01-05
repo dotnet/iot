@@ -5,24 +5,24 @@
 namespace System.Device.Gpio
 {
     /// <summary>
-    /// Pin modes supported by the controllers/drivers
+    /// Pin modes supported by the GPIO controllers and drivers.
     /// </summary>
     public enum PinMode
     {
         /// <summary>
-        /// Input mode. Used for reading values from a pin.
+        /// Input mode used for reading values from a pin.
         /// </summary>
         Input,
         /// <summary>
-        /// Output mode. Used for writing values from a pin.
+        /// Output mode used for writing values to a pin.
         /// </summary>
         Output,
         /// <summary>
-        /// Input mode using a pull down resistor.
+        /// Input mode using a pull-down resistor.
         /// </summary>
         InputPullDown,
         /// <summary>
-        /// Input mode using a pull up resistor.
+        /// Input mode using a pull-up resistor.
         /// </summary>
         InputPullUp
     }
