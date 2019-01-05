@@ -9,7 +9,7 @@ using DeviceApiTester.Infrastructure;
 
 namespace DeviceApiTester.Commands.I2c
 {
-    [Verb("i2c-read-bytes", HelpText = "Reads bytes from a specified I2C channel.")]
+    [Verb("i2c-read-bytes", HelpText = "Reads bytes from a specified I2C device.")]
     public class I2cReadBytes : I2cCommand, ICommandVerb
     {
         [Option('a', "device-address", HelpText = "The bus address of the device.", Required = true)]
