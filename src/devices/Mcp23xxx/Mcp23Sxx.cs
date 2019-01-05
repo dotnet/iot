@@ -10,9 +10,17 @@ namespace Iot.Device.Mcp23xxx
     public abstract class Mcp23Sxx : Mcp23xxx
     {
         private readonly SpiDevice _spiDevice;
-        
-        public Mcp23Sxx(int deviceAddress, SpiDevice spiDevice, int? reset = null, int? intA = null, int? intB = null)
-            : base(deviceAddress, reset, intA, intB)
+
+        /// <summary>
+        /// A general purpose parallel I/O expansion for SPI applications.
+        /// </summary>
+        /// <param name="deviceAddress">The device address for the connection on the SPI bus.</param>
+        /// <param name="spiDevice">SPI device used for communication.</param>
+        /// <param name="reset">Output pin number that is connected to the hardware reset.</param>
+        /// <param name="interruptA">Input pin number that is connected to the interrupt for Port A (INTA).</param>
+        /// <param name="interruptB">Input pin number that is connected to the interrupt for Port B (INTB).</param>
+        public Mcp23Sxx(int deviceAddress, SpiDevice spiDevice, int? reset = null, int? interruptA = null, int? interruptB = null)
+            : base(deviceAddress, reset, interruptA, interruptB)
         {
             _spiDevice = spiDevice;
         }

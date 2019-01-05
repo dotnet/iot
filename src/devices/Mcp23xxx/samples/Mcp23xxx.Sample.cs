@@ -19,10 +19,8 @@ namespace Iot.Device.Mcp23xxx.Samples
         {
             Console.WriteLine("Hello Mcp23xxx!");
 
-            Mcp23xxx mcp23xxx;
-            //mcp23xxx = GetMcp23Sxx(Mcp23SxxDevice.Mcp23S08); // SPI
-            mcp23xxx = GetMcp230xx(Mcp230xxDevice.Mcp23017); // I2C
-
+            var mcp23xxx = GetMcp23xxxDevice(Mcp23xxxDevice.Mcp23017);
+            
             // Uncomment sample to run.
             // ReadSwitchesWriteLeds(mcp23xxx);
             ReadAllRegisters(mcp23xxx);
@@ -30,72 +28,63 @@ namespace Iot.Device.Mcp23xxx.Samples
             // WriteSequentialBytes(mcp23xxx);
         }
 
-        private enum Mcp230xxDevice
+        private enum Mcp23xxxDevice
         {
+            // I2C.
             Mcp23008,
             Mcp23009,
             Mcp23017,
-            Mcp23018
-        }
-
-        private enum Mcp23SxxDevice
-        {
+            Mcp23018,
+            // SPI.
             Mcp23S08,
             Mcp23S09,
             Mcp23S17,
             Mcp23S18
         }
 
-        private static Mcp230xx GetMcp230xx(Mcp230xxDevice mcp230xxDevice)
+        private static Mcp23xxx GetMcp23xxxDevice(Mcp23xxxDevice mcp23xxxDevice)
         {
-            Console.WriteLine("Using I2C protocol");
+            var i2cConnectionSettings = new I2cConnectionSettings(1, s_deviceAddress);
+            var i2cDevice = new UnixI2cDevice(i2cConnectionSettings);
 
-            var connectionSettings = new I2cConnectionSettings(1, s_deviceAddress);
-            var i2cDevice = new UnixI2cDevice(connectionSettings);
-
-            switch (mcp230xxDevice)
+            // I2C.
+            switch (mcp23xxxDevice)
             {
-                case Mcp230xxDevice.Mcp23008:
+                case Mcp23xxxDevice.Mcp23008:
                     return new Mcp23008(i2cDevice);
-                case Mcp230xxDevice.Mcp23009:
+                case Mcp23xxxDevice.Mcp23009:
                     return new Mcp23009(i2cDevice);
-                case Mcp230xxDevice.Mcp23017:
+                case Mcp23xxxDevice.Mcp23017:
                     return new Mcp23017(i2cDevice);
-                case Mcp230xxDevice.Mcp23018:
+                case Mcp23xxxDevice.Mcp23018:
                     return new Mcp23018(i2cDevice);
-                default:
-                    throw new Exception($"Invalid Mcp230xxDevice: {nameof(mcp230xxDevice)}");
             }
-        }
 
-        private static Mcp23Sxx GetMcp23Sxx(Mcp23SxxDevice mcp23SxxDevice)
-        {
-            Console.WriteLine("Using SPI protocol");
-
-            var connectionSettings = new SpiConnectionSettings(0, 0)
+            var spiConnectionSettings = new SpiConnectionSettings(0, 0)
             {
                 ClockFrequency = 1000000,
                 Mode = SpiMode.Mode0
             };
 
-            var spiDevice = new UnixSpiDevice(connectionSettings);
+            var spiDevice = new UnixSpiDevice(spiConnectionSettings);
 
-            switch (mcp23SxxDevice)
+            // SPI.
+            switch (mcp23xxxDevice)
             {
-                case Mcp23SxxDevice.Mcp23S08:
+                case Mcp23xxxDevice.Mcp23S08:
                     return new Mcp23S08(s_deviceAddress, spiDevice);
-                case Mcp23SxxDevice.Mcp23S09:
+                case Mcp23xxxDevice.Mcp23S09:
                     return new Mcp23S09(s_deviceAddress, spiDevice);
-                case Mcp23SxxDevice.Mcp23S17:
+                case Mcp23xxxDevice.Mcp23S17:
                     return new Mcp23S17(s_deviceAddress, spiDevice);
-                case Mcp23SxxDevice.Mcp23S18:
+                case Mcp23xxxDevice.Mcp23S18:
                     return new Mcp23S18(s_deviceAddress, spiDevice);
-                default:
-                    throw new Exception($"Invalid Mcp230xxDevice: {nameof(mcp23SxxDevice)}");
             }
+
+            throw new Exception($"Invalid Mcp23xxxDevice: {nameof(mcp23xxxDevice)}");
         }
 
-        private static void ReadSwitchesWriteLeds(Mcp23Sxx mcp23xxx)
+        private static void ReadSwitchesWriteLeds(Mcp23xxx mcp23xxx)
         {
             Console.WriteLine("Read Switches & Write LEDs");
 

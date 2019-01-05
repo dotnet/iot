@@ -10,8 +10,15 @@ namespace Iot.Device.Mcp23xxx
     {
         private readonly I2cDevice _i2cDevice;
 
-        public Mcp230xx(I2cDevice i2cDevice, int? reset = null, int? intA = null, int? intB = null)
-            : base(i2cDevice.ConnectionSettings.DeviceAddress, reset, intA, intB)
+        /// <summary>
+        /// A general purpose parallel I/O expansion for I2C applications.
+        /// </summary>
+        /// <param name="i2cDevice">I2C device used for communication.</param>
+        /// <param name="reset">Output pin number that is connected to the hardware reset.</param>
+        /// <param name="interruptA">Input pin number that is connected to the interrupt for Port A (INTA).</param>
+        /// <param name="interruptB">Input pin number that is connected to the interrupt for Port B (INTB).</param>
+        public Mcp230xx(I2cDevice i2cDevice, int? reset = null, int? interruptA = null, int? interruptB = null)
+            : base(i2cDevice.ConnectionSettings.DeviceAddress, reset, interruptA, interruptB)
         {
             _i2cDevice = i2cDevice;
         }

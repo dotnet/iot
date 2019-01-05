@@ -22,7 +22,7 @@ This binding includes an `Mcp23xxx` abstract class and implementations for both 
  // 0x20 is the device address in this example.
 var connectionSettings = new I2cConnectionSettings(1, 0x20);
 var i2cDevice = new UnixI2cDevice(connectionSettings);
-var mcp23Sxx = new Mcp230xx(i2cDevice);
+var mcp23S17 = new Mcp23017(i2cDevice);
 ```
 
 #### Mcp23Sxx SPI
@@ -36,7 +36,7 @@ var connectionSettings = new SpiConnectionSettings(0, 0)
 var spiDevice = new UnixSpiDevice(connectionSettings);
 
 // 0x20 is the device address in this example.
-var mcp23Sxx = new Mcp23Sxx(0x20, spiDevice);
+var mcp23S17 = new Mcp23S17(0x20, spiDevice);
 ```
   
 ### Register Banking
@@ -49,19 +49,17 @@ The MCP23X17 has registers defaulted to Bank 1, which group port registers by ty
 
 ``` csharp
 // Read Port B's Input Polarity Port Register (IPOL).
-byte data = mcp23xxx.Read(Register.Address.IPOL, Port.PortB, Bank.Bank0);
+byte data = mcp23S17.Read(Register.Address.IPOL, Port.PortB, Bank.Bank0);
 
 // If the device is configured for Bank 1, you can ignore the optional argument.
-byte data = mcp23xxx.Read(Register.Address.IPOL, Port.PortB);
+byte data = mcp23S17.Read(Register.Address.IPOL, Port.PortB);
 ```
 #### Example for 8-bit device
-The MCP23X08 only contains 1 port so you must use Bank 1 when addressing the correct register.  In this case, the optional arguments can be ignored.
+The MCP23X08 only contains 1 port so there is not choice for port and bank when addressing the register.
 
 ``` csharp
 // Read port A's GPIO Pull-Up Resistor Register (GPPU).
-byte data = mcp23xxx.Read(Register.Address.GPPU);
-// or..
-byte data = mcp23xxx.Read(Register.Address.GPPU, Port.PortA, Bank.Bank1);
+byte data = mcp23S08.Read(Register.Address.GPPU);
 ```
 
 ### Controller Pins
@@ -71,25 +69,25 @@ The `Mcp23xxx` has overloaded pin options when instantiating the device.  This i
 // Pin 10: Reset; Output to Mcp23xxx
 // Pin 25: INTA;  Input from Mcp23xxx
 // Pin 17: INTB;  Input from Mcp23xxx
-var mcp23Sxx = new Mcp23Sxx(0x20, spiDevice, 10, 25, 17);
+var mcp23S17 = new Mcp23S17(0x20, spiDevice, 10, 25, 17);
 ```
 
 The MCP23XXX will be in the reset/disabled state by default if you use the reset pin.  You must call the `Enable()` method to activate the device.
 
 ```csharp
-var mcp23Sxx = new Mcp23Sxx(0x20, spiDevice, 10, 25, 17);
-mcp23Sxx.Enable();
+var mcp23S17 = new Mcp23S17(0x20, spiDevice, 10, 25, 17);
+mcp23S17.Enable();
 // Can now communicate with device.
 
 // Turn off again if needed.
-mcp23Sxx.Disable();
+mcp23S17.Disable();
 ```
 
 **TODO**: Interrupt pins can only be read for now.  Events are coming in a future PR.
 ```csharp
-var mcp23Sxx = new Mcp23Sxx(0x20, spiDevice, 10, 25, 17);
-PinValue valueA = mcp23Sxx.ReadIntA();
-PinValue valueB = mcp23Sxx.ReadIntB();
+var mcp23S17 = new Mcp23S17(0x20, spiDevice, 10, 25, 17);
+PinValue interruptA = mcp23S17.ReadInterruptA();
+PinValue interruptB = mcp23S17.ReadInterruptB();
 ```
 
 ## References 

@@ -31,17 +31,24 @@ namespace Iot.Device.Mcp23xxx
         protected int DeviceAddress { get; }
         private GpioController _masterGpioController;
         private readonly int? _reset;
-        private readonly int? _intA;
-        private readonly int? _intB;
+        private readonly int? _interruptA;
+        private readonly int? _interruptB;
 
-        public Mcp23xxx(int deviceAddress, int? reset = null, int? intA = null, int? intB = null)
+        /// <summary>
+        /// A general purpose parallel I/O expansion for I2C or SPI applications.
+        /// </summary>
+        /// <param name="deviceAddress">The device address for the connection on the I2C or SPI bus.</param>
+        /// <param name="reset">Output pin number that is connected to the hardware reset.</param>
+        /// <param name="interruptA">Input pin number that is connected to the interrupt for Port A (INTA).</param>
+        /// <param name="interruptB">Input pin number that is connected to the interrupt for Port B (INTB).</param>
+        public Mcp23xxx(int deviceAddress, int? reset = null, int? interruptA = null, int? interruptB = null)
         {
             ValidateDeviceAddress(deviceAddress);
 
             DeviceAddress = deviceAddress;
             _reset = reset;
-            _intA = intA;
-            _intB = intB;
+            _interruptA = interruptA;
+            _interruptB = interruptB;
 
             InitializeMasterGpioController();
         }
@@ -57,27 +64,25 @@ namespace Iot.Device.Mcp23xxx
         private void InitializeMasterGpioController()
         {
             // Only need master controller if there are external pins provided.
-            if (_reset == null && _intA == null && _intB == null)
+            if (_reset != null || _interruptA != null || _interruptB != null)
             {
-                return;
-            }
+                _masterGpioController = new GpioController();
 
-            _masterGpioController = new GpioController();
+                if (_interruptA != null)
+                {
+                    _masterGpioController.OpenPin((int)_interruptA, PinMode.Input);
+                }
 
-            if (_intA != null)
-            {
-                _masterGpioController.OpenPin((int)_intA, PinMode.Input);
-            }
+                if (_interruptB != null)
+                {
+                    _masterGpioController.OpenPin((int)_interruptB, PinMode.Input);
+                }
 
-            if (_intB != null)
-            {
-                _masterGpioController.OpenPin((int)_intB, PinMode.Input);
-            }
-
-            if (_reset != null)
-            {
-                _masterGpioController.OpenPin((int)_reset, PinMode.Output);
-                Disable();
+                if (_reset != null)
+                {
+                    _masterGpioController.OpenPin((int)_reset, PinMode.Output);
+                    Disable();
+                }
             }
         }
 
@@ -127,7 +132,11 @@ namespace Iot.Device.Mcp23xxx
             _masterGpioController.Write((int)_reset, PinValue.High);
         }
 
-        public PinValue ReadIntA()
+        /// <summary>
+        /// Read the pin value of interrupt for Port A (INTA).
+        /// </summary>
+        /// <returns>Pin value of interrupt for Port A (INTA).</returns>
+        public PinValue ReadInterruptA()
         {
             if (_masterGpioController == null)
             {
@@ -139,10 +148,14 @@ namespace Iot.Device.Mcp23xxx
                 throw new Exception("INTA pin has not been initialized.");
             }
 
-            return _masterGpioController.Read((int)_intA);
+            return _masterGpioController.Read((int)_interruptA);
         }
 
-        public PinValue ReadIntB()
+        /// <summary>
+        /// Read the pin value of interrupt for Port B (INTB).
+        /// </summary>
+        /// <returns>Pin value of interrupt for Port B (INTB).</returns>
+        public PinValue ReadInterruptB()
         {
             if (_masterGpioController == null)
             {
@@ -154,7 +167,7 @@ namespace Iot.Device.Mcp23xxx
                 throw new Exception("INTB pin has not been initialized.");
             }
 
-            return _masterGpioController.Read((int)_intB);
+            return _masterGpioController.Read((int)_interruptB);
         }
     }
 }
