@@ -4,7 +4,7 @@
 
 namespace Iot.Device.Mcp23xxx
 {
-    public class OpCode
+    public static class OpCode
     {
         public static byte GetOpCode(int deviceAddress, bool isReadCommand)
         {
