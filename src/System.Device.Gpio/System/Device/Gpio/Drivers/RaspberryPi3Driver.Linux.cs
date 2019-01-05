@@ -301,7 +301,7 @@ namespace System.Device.Gpio.Drivers
 
             if (!_sysFSModes.ContainsKey(pinNumber))
             {
-                throw new InvalidOperationException("Can not get a pin mode of a pin that is not opened.");
+                throw new InvalidOperationException("Can not get a pin mode of a pin that is not open.");
             }
             return _sysFSModes[pinNumber];
         }

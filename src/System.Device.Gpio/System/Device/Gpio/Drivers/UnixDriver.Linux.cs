@@ -15,10 +15,10 @@ namespace System.Device.Gpio.Drivers
         private int _pollFileDescriptor = -1;
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
-        private static CancellationTokenSource s_EventThreadCancellationTokenSource = new CancellationTokenSource();
-        private List<int> _exportedPins = new List<int>();
-        private Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
-        private int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
+        private readonly static CancellationTokenSource s_EventThreadCancellationTokenSource = new CancellationTokenSource();
+        private readonly List<int> _exportedPins = new List<int>();
+        private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
+        private readonly int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
 
         protected internal override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
 
@@ -83,7 +83,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to set a mode to a pin that is not yet open.");
+                throw new InvalidOperationException("There was an attempt to set a mode to a pin that is not open.");
             }
         }
 
@@ -132,7 +132,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to read from a pin that is not yet opened.");
+                throw new InvalidOperationException("There was an attempt to read from a pin that is not yet open.");
             }
             return result;
         }
@@ -174,7 +174,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to write to a pin that is not yet opened.");
+                throw new InvalidOperationException("There was an attempt to write to a pin that is not yet open.");
             }
         }
 
