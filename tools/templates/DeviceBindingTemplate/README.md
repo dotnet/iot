@@ -13,7 +13,7 @@ dotnet new -i C:\[PATH]\iot\tools\templates\DeviceBindingTemplate\dotnet_new_dev
 The template can be uninstalled by using the following command where `PATH` is the directory path the template was stored.
 
 ```console
-dotnet new -u C:\[PATH]\iot\tools\templates\DeviceBindingTemplate\dotnet_new_device-binding
+dotnet new -u C:\[PATH]\iot\tools\templates\DeviceBindingTemplate\dotnet_new_device-binding_csharp
 ```
 
 ## Example Device Binding
