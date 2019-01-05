@@ -132,7 +132,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to read from a pin that is not yet open.");
+                throw new InvalidOperationException("There was an attempt to read from a pin that is not open.");
             }
             return result;
         }
@@ -174,7 +174,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to write to a pin that is not yet open.");
+                throw new InvalidOperationException("There was an attempt to write to a pin that is not open.");
             }
         }
 
@@ -497,7 +497,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to get a mode to a pin that is not yet open.");
+                throw new InvalidOperationException("There was an attempt to get a mode to a pin that is not open.");
             }
         }
     }
