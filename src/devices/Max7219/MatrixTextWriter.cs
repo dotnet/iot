@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
@@ -112,18 +113,17 @@ namespace Iot.Device.Max7219
         /// </summary>
         public void ShowMessage(string text, int delayInMilliseconds = 50, bool alwaysScroll = false)
         {
-            var displayLength = Max7219.NumDigits * _device.CascadedDevices;
-            var src = text.Select(chr => Font[chr]);
-            var srcLength = src.Sum(x => x.Length) + text.Length - 1;
+            IEnumerable<byte[]> textCharBytes = text.Select(chr => Font[chr]);
+            int textBytesLength = textCharBytes.Sum(x => x.Length) + text.Length - 1;
 
-            bool scroll = alwaysScroll || srcLength > displayLength;
+            bool scroll = alwaysScroll || textBytesLength > _device.Length;
             if (scroll)
             {
                 var pos = _device.Length - 1;
                 _device.ClearAll(false);
-                foreach (var arr in src)
+                foreach (byte[] arr in textCharBytes)
                 {
-                    foreach (var b in arr)
+                    foreach (byte b in arr)
                     {
                         ScrollLeft(b, true);
                         Thread.Sleep(delayInMilliseconds);
@@ -142,12 +142,12 @@ namespace Iot.Device.Max7219
             else
             {
                 //calculate margin to display text centered
-                var margin = (displayLength - srcLength) / 2;
+                var margin = (_device.Length - textBytesLength) / 2;
                 _device.ClearAll(false);
                 var pos = margin;
-                foreach (var arr in src)
+                foreach (byte[] arr in textCharBytes)
                 {
-                    foreach (var b in arr)
+                    foreach (byte b in arr)
                     {
                         _device[pos++] = b;
                     }

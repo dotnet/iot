@@ -43,6 +43,8 @@ namespace Iot.Device.Max7219
         /// </summary>
         public Max7219(SpiDevice spiDevice, int cascadedDevices = 1, RotationType rotation = RotationType.None)
         {
+            if (spiDevice == null)
+                throw new ArgumentNullException(nameof(spiDevice));
             _spiDevice = spiDevice;
             CascadedDevices = cascadedDevices;
             Rotation = rotation;
@@ -151,7 +153,7 @@ namespace Iot.Device.Max7219
 
         private void ValidateIndex(int index, out int deviceId, out int digit)
         {
-            if (index < 0 || index > Length)
+            if (index < 0 || index > Length)
                 throw new ArgumentOutOfRangeException(nameof(index), $"Invalid index {index}");
             deviceId = Math.DivRem(index, NumDigits, out digit);
         }
@@ -187,7 +189,7 @@ namespace Iot.Device.Max7219
             for (int digit = 0; digit < NumDigits; digit++)
             {
                 var i = 0;
-                for (var deviceId = CascadedDevices-1; deviceId >= 0; deviceId--)
+                for (var deviceId = CascadedDevices - 1; deviceId >= 0; deviceId--)
                 {
                     _writeBuffer[i++] = (byte)((int)Register.DIGIT0 + digit);
                     _writeBuffer[i++] = buffer[deviceId, digit];
