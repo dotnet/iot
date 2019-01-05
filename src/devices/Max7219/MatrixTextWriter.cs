@@ -10,7 +10,7 @@ namespace Iot.Device.Max7219
 {
 
     /// <summary>
-    /// Matrix text writer.
+    /// Matrix text writer can be used to write 
     /// </summary>
     public class MatrixTextWriter
     {
@@ -18,6 +18,10 @@ namespace Iot.Device.Max7219
 
         public MatrixTextWriter(Max7219 device, Font font)
         {
+            if (device == null)
+                throw new ArgumentNullException(nameof(device));
+            if (font == null)
+                throw new ArgumentNullException(nameof(font));
             _device = device;
             Font = font;
         }
@@ -29,7 +33,7 @@ namespace Iot.Device.Max7219
         /// </summary>
         public void WriteLetter(int deviceId, char chr, bool flush = true)
         {
-            var bitmap = Font.GetItem(chr);
+            var bitmap = Font[chr];
             var end = Math.Min(bitmap.Length, Max7219.NumDigits);
             for (int col = 0; col < end; col++)
             {
@@ -44,7 +48,7 @@ namespace Iot.Device.Max7219
         /// <summary>
         ///  Scrolls the underlying buffer (for all cascaded devices) up one pixel
         /// </summary>
-        public void ScrollUp(bool flush)
+        public void ScrollUp(bool flush = true)
         {
             for (var i = 0; i < _device.Length; i++)
                 _device[i] = (byte)(_device[i] >> 1);
@@ -57,7 +61,7 @@ namespace Iot.Device.Max7219
         /// <summary>
         /// Scrolls the underlying buffer (for all cascaded devices) down one pixel
         /// </summary>
-        public void ScrollDown(bool flush)
+        public void ScrollDown(bool flush = true)
         {
             for (var i = 0; i < _device.Length; i++)
             {
@@ -72,7 +76,7 @@ namespace Iot.Device.Max7219
         /// <summary>
         /// Scrolls the underlying buffer (for all cascaded devices) to the left
         /// </summary>
-        public void ScrollLeft(byte value, bool flush)
+        public void ScrollLeft(byte value, bool flush = true)
         {
             for (var i = 1; i < _device.Length; i++)
             {
@@ -88,7 +92,7 @@ namespace Iot.Device.Max7219
         /// <summary>
         /// Scrolls the underlying buffer (for all cascaded devices) to the right
         /// </summary>
-        public void ScrollRight(byte value, bool flush)
+        public void ScrollRight(byte value, bool flush = true)
         {
             for (var i = _device.Length - 1; i > 0; i--)
             {
@@ -106,16 +110,15 @@ namespace Iot.Device.Max7219
         /// If it's longer then the total width (or <see paramref="alwaysScroll"/> == true), 
         /// it transitions the text message across the devices from right-to-left.
         /// </summary>
-        public void ShowMessage(string text, float delay = 0.05f, bool alwaysScroll = false)
+        public void ShowMessage(string text, int delayInMilliseconds = 50, bool alwaysScroll = false)
         {
             var displayLength = Max7219.NumDigits * _device.CascadedDevices;
-            var src = text.Select(Font.GetItem);
+            var src = text.Select(chr => Font[chr]);
             var srcLength = src.Sum(x => x.Length) + text.Length - 1;
 
             bool scroll = alwaysScroll || srcLength > displayLength;
             if (scroll)
             {
-                var d = TimeSpan.FromSeconds(delay);
                 var pos = _device.Length - 1;
                 _device.ClearAll(false);
                 foreach (var arr in src)
@@ -123,17 +126,17 @@ namespace Iot.Device.Max7219
                     foreach (var b in arr)
                     {
                         ScrollLeft(b, true);
-                        Thread.Sleep(d);
+                        Thread.Sleep(delayInMilliseconds);
 
                     }
                     ScrollLeft(0, true);
-                    Thread.Sleep(d);
+                    Thread.Sleep(delayInMilliseconds);
 
                 }
                 for (; pos > 0; pos--)
                 {
                     ScrollLeft(0, true);
-                    Thread.Sleep(d);
+                    Thread.Sleep(delayInMilliseconds);
                 }
             }
             else

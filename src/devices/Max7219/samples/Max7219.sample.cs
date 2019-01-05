@@ -82,8 +82,8 @@ namespace Iot.Device.Samples
                 //reinitialize device and show message using the matrix text writer
                 devices.Init();
                 devices.Rotation = RotationType.Left;
-                var writer = new MatrixTextWriter(devices, Fonts.CP437);
-                foreach (var font in new[]{Fonts.CP437, Fonts.LCD_FONT, Fonts.SINCLAIR_FONT, Fonts.TINY_FONT, Fonts.UKR_FONT}) {
+                var writer = new MatrixTextWriter(devices, Font.Default);
+                foreach (var font in new[]{Font.CP437, Font.LCD, Font.Sinclair, Font.Tiny, Font.CyrillicUkrainian}) {
                     writer.Font = font;
                     writer.ShowMessage("Hello World from MAX7219!", alwaysScroll: true);
                 }
