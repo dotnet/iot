@@ -9,7 +9,7 @@ namespace System.Device.Gpio.Drivers
         /// <summary>
         /// Raspberry Pi 3 has 24 Gpio Pins.
         /// </summary>
-        protected internal override int PinCount => 24;
+        protected internal override int PinCount => 26;
 
         private void ValidatePinNumber(int pinNumber)
         {
@@ -26,6 +26,8 @@ namespace System.Device.Gpio.Drivers
                 case 3: return 2;
                 case 5: return 3;
                 case 7: return 4;
+                case 8: return 14;
+                case 10: return 15;
                 case 11: return 17;
                 case 12: return 18;
                 case 13: return 27;
