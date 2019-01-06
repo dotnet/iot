@@ -15,7 +15,7 @@ namespace System.Device.Gpio.Drivers
         private int _pollFileDescriptor = -1;
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
-        private readonly static CancellationTokenSource s_EventThreadCancellationTokenSource = new CancellationTokenSource();
+        private readonly static CancellationTokenSource s_eventThreadCancellationTokenSource = new CancellationTokenSource();
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
         private readonly int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
@@ -379,7 +379,7 @@ namespace System.Device.Gpio.Drivers
             {
                 if (cancelEventDetectionThread)
                 {
-                    s_EventThreadCancellationTokenSource.Cancel();
+                    s_eventThreadCancellationTokenSource.Cancel();
                     while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                     {
                         Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
@@ -396,7 +396,7 @@ namespace System.Device.Gpio.Drivers
             _pinsToDetectEventsCount = 0;
             if (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
             {
-                s_EventThreadCancellationTokenSource.Cancel();
+                s_eventThreadCancellationTokenSource.Cancel();
                 while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                 {
                     Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
@@ -452,7 +452,7 @@ namespace System.Device.Gpio.Drivers
         {
             while (_pinsToDetectEventsCount > 0)
             {
-                bool eventDetected = WasEventDetected(_pollFileDescriptor, -1,  out int pinNumber, s_EventThreadCancellationTokenSource.Token);
+                bool eventDetected = WasEventDetected(_pollFileDescriptor, -1,  out int pinNumber, s_eventThreadCancellationTokenSource.Token);
                 if (eventDetected)
                 {
                     PinEventTypes eventType = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
