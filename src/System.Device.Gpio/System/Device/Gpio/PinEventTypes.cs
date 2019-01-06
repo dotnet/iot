@@ -5,7 +5,7 @@
 namespace System.Device.Gpio
 {
     /// <summary>
-    /// Different event types that can be triggered by the GPIO.
+    /// Event types that can be triggered by the GPIO.
     /// </summary>
     [Flags]
     public enum PinEventTypes

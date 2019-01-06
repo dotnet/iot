@@ -10,19 +10,19 @@ namespace System.Device.Gpio
     public enum PinMode
     {
         /// <summary>
-        /// Input mode used for reading values from a pin.
+        /// Input used for reading values from a pin.
         /// </summary>
         Input,
         /// <summary>
-        /// Output mode used for writing values to a pin.
+        /// Output used for writing values to a pin.
         /// </summary>
         Output,
         /// <summary>
-        /// Input mode using a pull-down resistor.
+        /// Input using a pull-down resistor.
         /// </summary>
         InputPullDown,
         /// <summary>
-        /// Input mode using a pull-up resistor.
+        /// Input using a pull-up resistor.
         /// </summary>
         InputPullUp
     }
