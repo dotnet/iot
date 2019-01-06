@@ -30,7 +30,7 @@ namespace System.Device.Gpio
         /// Initializes new instance of GpioController that will use the specified numbering scheme and driver.
         /// </summary>
         /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
-        /// <param name="driver">The driver that manages all of the pin operations for the GPIO controller.</param>
+        /// <param name="driver">The driver that manages all of the pin operations for the controller.</param>
         public GpioController(PinNumberingScheme numberingScheme, GpioDriver driver)
         {
             _driver = driver;
@@ -272,7 +272,7 @@ namespace System.Device.Gpio
         /// Checks if a specific pin is open.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <returns>The status if the pin is open (True) or closed (False).</returns>
+        /// <returns>The status if the pin is open or closed.</returns>
         public bool IsPinOpen(int pinNumber)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
@@ -284,7 +284,7 @@ namespace System.Device.Gpio
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <param name="mode">The mode to check.</param>
-        /// <returns>The status if the pin supports the mode (True) or not (False).</returns>
+        /// <returns>The status if the pin supports the mode.</returns>
         public bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
