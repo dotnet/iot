@@ -140,6 +140,29 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
+        /// Checks if a specific pin is open.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        /// <returns>The status if the pin is open or closed.</returns>
+        public bool IsPinOpen(int pinNumber)
+        {
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            return _openPins.Contains(logicalPinNumber);
+        }
+
+        /// <summary>
+        /// Checks if a pin supports a specific mode.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        /// <param name="mode">The mode to check.</param>
+        /// <returns>The status if the pin supports the mode.</returns>
+        public bool IsPinModeSupported(int pinNumber, PinMode mode)
+        {
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            return _driver.IsPinModeSupported(logicalPinNumber, mode);
+        }
+
+        /// <summary>
         /// Reads the current value of a pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
@@ -266,29 +289,6 @@ namespace System.Device.Gpio
                 throw new InvalidOperationException("Can not add callback for a pin that is not open.");
             }
             _driver.RemoveCallbackForPinValueChangedEvent(logicalPinNumber, callback);
-        }
-
-        /// <summary>
-        /// Checks if a specific pin is open.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <returns>The status if the pin is open or closed.</returns>
-        public bool IsPinOpen(int pinNumber)
-        {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-            return _openPins.Contains(logicalPinNumber);
-        }
-
-        /// <summary>
-        /// Checks if a pin supports a specific mode.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="mode">The mode to check.</param>
-        /// <returns>The status if the pin supports the mode.</returns>
-        public bool IsPinModeSupported(int pinNumber, PinMode mode)
-        {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-            return _driver.IsPinModeSupported(logicalPinNumber, mode);
         }
 
         private void Dispose(bool disposing)
