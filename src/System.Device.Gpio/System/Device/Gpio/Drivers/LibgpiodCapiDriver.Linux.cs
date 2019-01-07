@@ -75,6 +75,10 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
+            if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
+            {
+                Interop.gpiod_line_release(pin);
+            }
             if (!_pinNumberToEventHandler.TryGetValue(pinNumber, out LibgpiodDriverEventHandler eventHandler))
             {
                 eventHandler = new LibgpiodDriverEventHandler(pinNumber, new CancellationTokenSource());
@@ -209,12 +213,16 @@ namespace System.Device.Gpio.Drivers
             }
             if (success == -1) {
                 throw new GpioChipException($"Error setting pin mode, pin:{pinNumber}, error: {Marshal.GetLastWin32Error()}");
-            }
+            } 
         }
 
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
         {
             bool timedOut = false;
+            if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
+            {
+                Interop.gpiod_line_release(pin);
+            }
             int eventRegistered = Interop.gpiod_ctxless_event_loop($"{BasePath}{GpioChip}", (uint)pinNumber, false, $"pin{pinNumber} listener", ref _defaultTimeOut, null,
                 (int e, uint p, ref timespec t, IntPtr d) =>
                 {

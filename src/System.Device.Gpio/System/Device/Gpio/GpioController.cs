@@ -195,10 +195,10 @@ namespace System.Device.Gpio
         public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
         {
             int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
-//            if (!_openPins.Contains(logicalPinNumber))
-  //          {
-    //            throw new InvalidOperationException("Can not wait for events from a pin that is not yet opened.");
-      //      }
+            if (!_openPins.Contains(logicalPinNumber))
+            {
+                throw new InvalidOperationException("Can not wait for events from a pin that is not yet opened.");
+            }
             return _driver.WaitForEvent(logicalPinNumber, eventType, cancellationToken);
         }
 
@@ -241,10 +241,10 @@ namespace System.Device.Gpio
         public void RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
             int logicalPinNumber = ConvertToLogicalPinNumber(pinNumber);
-//            if (!_openPins.Contains(logicalPinNumber))
-  //          {
-    //            throw new InvalidOperationException("Can not add callback for a pin that is not yet opened.");
-      //      }
+            if (!_openPins.Contains(logicalPinNumber))
+            {
+                throw new InvalidOperationException("Can not add callback for a pin that is not yet opened.");
+            }
             _driver.AddCallbackForPinValueChangedEvent(logicalPinNumber, eventType, callback);
         }
 
