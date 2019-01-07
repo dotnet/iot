@@ -12,11 +12,13 @@ namespace System.Device.Spi
         public abstract void WriteByte(byte data);
         public abstract void Write(Span<byte> data);
         public abstract void TransferFullDuplex(Span<byte> writeBuffer, Span<byte> readBuffer);
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         public virtual void Dispose(bool disposing)
         {
             //Nothing to do in base class.

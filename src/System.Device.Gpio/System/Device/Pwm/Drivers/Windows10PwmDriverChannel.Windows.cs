@@ -28,6 +28,8 @@ namespace System.Device.Pwm.Drivers
         {
             this.ChangeDutyCycle(dutyCyclePercentage);
             _winPin?.Start();
+            // This extra call is required to generate PWM output - remove when the underlying issue is fixed. See issue #109
+            this.ChangeDutyCycle(dutyCyclePercentage);
         }
 
         public void Stop()
