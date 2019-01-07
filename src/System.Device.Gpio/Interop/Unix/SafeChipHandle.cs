@@ -11,18 +11,12 @@ namespace System.Device.Gpio
     {
         internal SafeChipHandle() : base(IntPtr.Zero, true) { }
 
-        override protected bool ReleaseHandle()
+        protected override bool ReleaseHandle()
         {
             Interop.gpiod_chip_close(handle);
             return true;
         }
 
-        public override bool IsInvalid
-        {
-            get
-            {
-                return handle == IntPtr.Zero || handle == new IntPtr(-1);
-            }
-        }
+        public override bool IsInvalid => handle == IntPtr.Zero || handle == new IntPtr(-1);
     }
 }

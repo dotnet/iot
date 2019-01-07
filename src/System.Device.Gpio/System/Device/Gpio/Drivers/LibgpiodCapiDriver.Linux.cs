@@ -24,13 +24,7 @@ namespace System.Device.Gpio.Drivers
 
         private Dictionary<int, LibgpiodDriverEventHandler> _pinNumberToEventHandler = new Dictionary<int, LibgpiodDriverEventHandler>();
 
-        protected internal override int PinCount
-        {
-            get
-            {
-                return Interop.gpiod_chip_num_lines(_chip);
-            }
-        }
+        protected internal override int PinCount => Interop.gpiod_chip_num_lines(_chip);
 
         public LibgpiodCapiDriver()
         {
@@ -63,9 +57,13 @@ namespace System.Device.Gpio.Drivers
             {
                 eventDescriptor.PinHandle = pin;
                 if (eventType == PinEventTypes.Rising || eventType == PinEventTypes.Falling)
+                {
                     eventSuccess = Interop.gpiod_line_request_both_edges_events(pin, $"Listen {pinNumber} for falling edge event");
+                }
                 else
+                {
                     throw new GpioChipException("Invalid or not supported event type requested");
+                }
             }
             if (eventSuccess < 0)
             {
@@ -76,9 +74,7 @@ namespace System.Device.Gpio.Drivers
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
-            {
                 Interop.gpiod_line_release(pin);
-            }
             if (!_pinNumberToEventHandler.TryGetValue(pinNumber, out LibgpiodDriverEventHandler eventHandler))
             {
                 eventHandler = new LibgpiodDriverEventHandler(pinNumber, new CancellationTokenSource());
@@ -86,10 +82,14 @@ namespace System.Device.Gpio.Drivers
                 RequestEvent(pinNumber, eventHandler, eventType);
                 InitializeEventDetectionThread(eventHandler);
             }
-            if (eventType.HasFlag(PinEventTypes.Rising))
+            if (eventType == PinEventTypes.Rising)
+            {
                 eventHandler.ValueRising += callback;
-            if (eventType.HasFlag(PinEventTypes.Falling))
+            }
+            else if (eventType == PinEventTypes.Falling)
+            {
                 eventHandler.ValueFalling += callback;
+            }
         }
 
         private void InitializeEventDetectionThread(LibgpiodDriverEventHandler eventHandler)
@@ -194,7 +194,9 @@ namespace System.Device.Gpio.Drivers
                 }
             }
             else
+            {
                 throw new InvalidOperationException("Attempted to remove a callback for a pin that is not listening for events.");
+            }
         }
 
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
@@ -231,7 +233,9 @@ namespace System.Device.Gpio.Drivers
                         timedOut = true;
                         return 1;
                     }
-                    if (e == (int)eventType + 1)
+                // the order of rising event for the enum passed to the callback (e) is 2, which is 1 in our PinEventTypes, 
+                // so was need to plus 1 to our event order  
+                    if (e == (int)eventType + 1) 
                     {
                         return 1;
                     }

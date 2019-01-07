@@ -13,17 +13,12 @@ namespace System.Device.Gpio
     {
         internal SafeLineHandle() : base(IntPtr.Zero, false) { }
 
-        override protected bool ReleaseHandle()
+        protected override bool ReleaseHandle()
         {
             return true;
         }
 
-        public override bool IsInvalid
-        {
-            get
-            {
-                return handle == IntPtr.Zero || handle == new IntPtr(-1);
-            }
-        }
+        public override bool IsInvalid => handle == IntPtr.Zero || handle == new IntPtr(-1);
+
     }
 }
