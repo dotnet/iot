@@ -10,19 +10,22 @@ namespace System.Device.Pwm.Drivers
     internal class Windows10PwmDriver : PwmDriver
     {
         private readonly Dictionary<int, Windows10PwmDriverChip> _chipMap = new Dictionary<int, Windows10PwmDriverChip>();
+        private bool useDefaultChip;
+
+        public Windows10PwmDriver()
+        {
+            // On Hummingboard, fallback to check for generic PWM controller (friendlyname is not currently used)
+            var deviceInfo = new EasClientDeviceInformation();
+            if (deviceInfo.SystemProductName.IndexOf("Hummingboard", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                useDefaultChip = true;
+            }
+        }
 
         protected internal override void OpenChannel(int chipIndex, int channelIndex)
         {
             if (!_chipMap.TryGetValue(chipIndex, out Windows10PwmDriverChip chip))
             {
-                // On Hummingboard, fallback to check for generic PWM controller (friendlyname is not currently used)
-                bool useDefaultChip = false;
-                var deviceInfo = new EasClientDeviceInformation();
-                if (deviceInfo.SystemProductName.IndexOf("Hummingboard", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    useDefaultChip = true;
-                }
-
                 chip = new Windows10PwmDriverChip(chipIndex, useDefaultChip);
                 _chipMap[chipIndex] = chip;
             }
