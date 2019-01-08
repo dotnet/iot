@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace System.Device.Gpio.Drivers
 {
@@ -74,14 +75,14 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
-            if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
-                Interop.gpiod_line_release(pin);
             if (!_pinNumberToEventHandler.TryGetValue(pinNumber, out LibgpiodDriverEventHandler eventHandler))
             {
+                if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
+                    Interop.gpiod_line_release(pin);
                 eventHandler = new LibgpiodDriverEventHandler(pinNumber, new CancellationTokenSource());
                 _pinNumberToEventHandler.Add(pinNumber, eventHandler);
                 RequestEvent(pinNumber, eventHandler, eventType);
-                InitializeEventDetectionThread(eventHandler);
+                InitializeEventDetectionTask(eventHandler);
             }
             if (eventType == PinEventTypes.Rising)
             {
@@ -93,40 +94,31 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        private void InitializeEventDetectionThread(LibgpiodDriverEventHandler eventHandler)
+        private void InitializeEventDetectionTask(LibgpiodDriverEventHandler eventHandler)
         {
-            Thread pinListeningThread = new Thread(DetectLineEvent)
+            Task pinListeningThread = Task.Run(() =>
             {
-                IsBackground = true
-            };
-
-            pinListeningThread.Start(eventHandler);
-        }
-
-        private void DetectLineEvent(object obj)
-        {
-            LibgpiodDriverEventHandler eventHandler = (LibgpiodDriverEventHandler)obj;
-            int waitResult = -2;
-            while (!eventHandler.CancellationTokenSource.IsCancellationRequested)
-            {
-                waitResult = Interop.gpiod_line_event_wait(eventHandler.PinHandle, ref _defaultTimeOut);
-                if (waitResult == -1)
+                int waitResult = -2;
+                while (!eventHandler.CancellationTokenSource.IsCancellationRequested)
                 {
-                    throw new IOException($"Error while waiting for event, error code: {Marshal.GetLastWin32Error()}");
-                }
-                if (waitResult == 1)
-                {
-                    int readResult = Interop.gpiod_line_event_read(eventHandler.PinHandle, out gpiod_line_event eventInfo);
-                    if (readResult == -1)
+                    waitResult = Interop.gpiod_line_event_wait(eventHandler.PinHandle, ref _defaultTimeOut);
+                    if (waitResult == -1)
                     {
-                        throw new IOException($"Error while trying to read pin event result, error code: {Marshal.GetLastWin32Error()}");
+                        throw new IOException($"Error while waiting for event, error code: {Marshal.GetLastWin32Error()}");
                     }
-                    PinEventTypes eventType = (eventInfo.event_type == 1) ? PinEventTypes.Rising : PinEventTypes.Falling;
-                    var args = new PinValueChangedEventArgs(eventType, eventHandler.PinNumber);
-                    eventHandler?.OnPinValueChanged(args, eventType);
+                    if (waitResult == 1)
+                    {
+                        int readResult = Interop.gpiod_line_event_read(eventHandler.PinHandle, out gpiod_line_event eventInfo);
+                        if (readResult == -1)
+                        {
+                            throw new IOException($"Error while trying to read pin event result, error code: {Marshal.GetLastWin32Error()}");
+                        }
+                        PinEventTypes eventType = (eventInfo.event_type == 1) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                        var args = new PinValueChangedEventArgs(eventType, eventHandler.PinNumber);
+                        eventHandler?.OnPinValueChanged(args, eventType);
+                    }
                 }
-            }
-            Console.WriteLine("Thread finished");
+            });
         }
 
         protected internal override void ClosePin(int pinNumber)
