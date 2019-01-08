@@ -7,9 +7,9 @@ namespace System.Device.Gpio.Drivers
     public partial class RaspberryPi3Driver  // Different base classes declared in RaspberryPi3Driver.Linux.cs and RaspberryPi3Driver.Windows.cs
     {
         /// <summary>
-        /// Raspberry Pi 3 has 26 Gpio Pins.
+        /// Raspberry Pi 3 has 28 GPIO pins.
         /// </summary>
-        protected internal override int PinCount => 26;
+        protected internal override int PinCount => 28;
 
         private void ValidatePinNumber(int pinNumber)
         {
@@ -40,6 +40,8 @@ namespace System.Device.Gpio.Drivers
                 case 23: return 11;
                 case 24: return 8;
                 case 26: return 7;
+                case 27: return 0;
+                case 28: return 1;
                 case 29: return 5;
                 case 31: return 6;
                 case 32: return 12;
@@ -51,7 +53,7 @@ namespace System.Device.Gpio.Drivers
                 case 40: return 21;
             }
 
-            throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {this.GetType().Name} device", nameof(pinNumber));
+            throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {this.GetType().Name} device.", nameof(pinNumber));
         }
     }
 }
