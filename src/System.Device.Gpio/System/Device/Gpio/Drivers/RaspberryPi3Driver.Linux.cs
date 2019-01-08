@@ -13,11 +13,11 @@ namespace System.Device.Gpio.Drivers
     {
         private RegisterView* _registerViewPointer = null;
         private const int GpioRegisterOffset = 0x00;
-        private static readonly object s_InitializationLock = new object();
-        private static readonly object s_SysFsInitializationLock = new object();
+        private static readonly object s_initializationLock = new object();
+        private static readonly object s_sysFsInitializationLock = new object();
         private const string GpioMemoryFilePath = "/dev/gpiomem";
         private UnixDriver _sysFSDriver = null;
-        private IDictionary<int, PinMode> _sysFSModes = new Dictionary<int, PinMode>();
+        private readonly IDictionary<int, PinMode> _sysFSModes = new Dictionary<int, PinMode>();
 
         protected override void Dispose(bool disposing)
         {
@@ -254,7 +254,7 @@ namespace System.Device.Gpio.Drivers
             {
                 return;
             }
-            lock (s_SysFsInitializationLock)
+            lock (s_sysFsInitializationLock)
             {
                 if (_sysFSDriver != null)
                 {
@@ -271,7 +271,7 @@ namespace System.Device.Gpio.Drivers
                 return;
             }
 
-            lock (s_InitializationLock)
+            lock (s_initializationLock)
             {
                 if (_registerViewPointer != null)
                 {
@@ -301,7 +301,7 @@ namespace System.Device.Gpio.Drivers
 
             if (!_sysFSModes.ContainsKey(pinNumber))
             {
-                throw new InvalidOperationException("Can not get a pin mode of a pin that is not opened.");
+                throw new InvalidOperationException("Can not get a pin mode of a pin that is not open.");
             }
             return _sysFSModes[pinNumber];
         }

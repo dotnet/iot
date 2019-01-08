@@ -5,16 +5,16 @@
 namespace System.Device.Gpio
 {
     /// <summary>
-    /// Different numbering schemes supported by the controllers/drivers
+    /// Different numbering schemes supported by GPIO controllers and drivers.
     /// </summary>
     public enum PinNumberingScheme
     {
         /// <summary>
-        /// This is the logical representation of the GPIOs. Refer to the microcontroller's datasheet to find this information.
+        /// The logical representation of the GPIOs. Refer to the microcontroller's datasheet to find this information.
         /// </summary>
         Logical,
         /// <summary>
-        /// This is the physical pin numbering. For most boards pin 1 is the pin at the top left corner.
+        /// The physical pin numbering that is usually accessible by the board headers.
         /// </summary>
         Board
     }
