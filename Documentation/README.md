@@ -6,6 +6,7 @@ See the following resources to get started.
 * [Install .NET Core on Raspberry Pi](https://github.com/dotnet/core/blob/master/samples/RaspberryPiInstructions.md)
 * [.NET Core ARM64 Status](https://github.com/dotnet/announcements/issues/82)
 * [.NET Core Docker Samples](https://github.com/dotnet/dotnet-docker/tree/master/samples)
+* [How to Prepare a Publish Profile](How-to-Deploy-an-IoT-App.md)
 
 ## System.Device.* APIs
 
