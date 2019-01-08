@@ -8,6 +8,12 @@ using System.Runtime.InteropServices;
 internal partial class Interop
 {
     private const string LibgpiodLibrary = "libgpiod";
+
+    /// <summary>
+    ///     Close a GPIO chip handle and release all allocated resources.
+    ///     <see href="https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/tree/include/gpiod.h#n443">here</see>.
+    /// </summary>
+    /// <param name="chip">The GPIO chip pointer</param>
     [DllImport(LibgpiodLibrary)]
     internal static extern void gpiod_chip_close(IntPtr chip);
 }

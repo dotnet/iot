@@ -30,9 +30,9 @@ namespace System.Device.Gpio.Drivers
 
         public void OnPinValueChanged(PinValueChangedEventArgs args, PinEventTypes detectionOfEventTypes)
         {
-            if (detectionOfEventTypes.HasFlag(PinEventTypes.Rising) && args.ChangeType == PinEventTypes.Rising)
+            if (detectionOfEventTypes == PinEventTypes.Rising && args.ChangeType == PinEventTypes.Rising)
                 ValueRising?.Invoke(this, args);
-            if (detectionOfEventTypes.HasFlag(PinEventTypes.Falling) && args.ChangeType == PinEventTypes.Falling)
+            if (detectionOfEventTypes == PinEventTypes.Falling && args.ChangeType == PinEventTypes.Falling)
                 ValueFalling?.Invoke(this, args);
         }
 

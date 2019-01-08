@@ -8,6 +8,12 @@ using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
+    /// <summary>
+    ///     Get the number of GPIO lines exposed by this chip.
+    ///     <see href="https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/tree/include/gpiod.h#n464">here</see>.
+    /// </summary>
+    /// <param name="chip">The GPIO chip handle.</param>
+    /// <returns>Number of GPIO lines.</returns>
     [DllImport(LibgpiodLibrary)]
     internal static extern int gpiod_chip_num_lines(SafeChipHandle chip);
 }
