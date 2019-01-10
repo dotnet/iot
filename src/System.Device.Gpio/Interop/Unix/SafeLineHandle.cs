@@ -16,6 +16,5 @@ namespace System.Device.Gpio
         protected override bool ReleaseHandle() => true;
 
         public override bool IsInvalid => handle == IntPtr.Zero || handle == new IntPtr(-1);
-
     }
 }

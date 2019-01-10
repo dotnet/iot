@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace System.Device.Gpio.Drivers
 {
-    internal sealed class LibgpiodDriverEventHandler : IDisposable
+    internal sealed class LibGpiodDriverEventHandler : IDisposable
     {
         public event PinChangeEventHandler ValueRising;
 
@@ -21,9 +21,9 @@ namespace System.Device.Gpio.Drivers
 
         public CancellationTokenSource CancellationTokenSource;
 
-        public LibgpiodDriverEventHandler() { }
+        public LibGpiodDriverEventHandler() { }
 
-        public LibgpiodDriverEventHandler(int pinNumber, CancellationTokenSource cancellationTokenSource) {
+        public LibGpiodDriverEventHandler(int pinNumber, CancellationTokenSource cancellationTokenSource) {
             PinNumber = pinNumber;
             CancellationTokenSource = cancellationTokenSource;
         }

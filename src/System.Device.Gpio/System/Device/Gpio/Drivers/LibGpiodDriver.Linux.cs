@@ -12,11 +12,9 @@ using System.Threading.Tasks;
 
 namespace System.Device.Gpio.Drivers
 {
-    public class LibgpiodCapiDriver : GpioDriver
+    public class LibGpiodDriver : UnixDriver
     {
-        private const string BasePath = "/dev/";
-
-        public string GpioChip { get; set; } = "gpiochip0";
+        private string _deviceName = "gpiochip0";
 
         private SafeChipHandle _chip;
 
@@ -24,34 +22,34 @@ namespace System.Device.Gpio.Drivers
 
         private timespec _defaultTimeOut = new timespec(IntPtr.Zero, new IntPtr(1_000_000)); // one millisecond
 
-        private Dictionary<int, LibgpiodDriverEventHandler> _pinNumberToEventHandler = new Dictionary<int, LibgpiodDriverEventHandler>();
+        private Dictionary<int, LibGpiodDriverEventHandler> _pinNumberToEventHandler = new Dictionary<int, LibGpiodDriverEventHandler>();
 
         protected internal override int PinCount => Interop.gpiod_chip_num_lines(_chip);
 
-        public LibgpiodCapiDriver()
+        public LibGpiodDriver()
         {
-            OpenChip();
-            _pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
-        }
-
-        public LibgpiodCapiDriver(string chip)
-        {
-            if (chip != null)
-                GpioChip = chip;
             OpenChip();
             _pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
         }
 
         private void OpenChip()
         {
-            _chip = Interop.gpiod_chip_open($"{BasePath}{GpioChip}");
+            SafeChipIteratorHandle iterator = Interop.gpiod_chip_iter_new();
+            if (iterator == null)
+            {
+                throw new IOException($"No any chip available, error code: {Marshal.GetLastWin32Error()}");
+            }
+            _chip = Interop.gpiod_chip_iter_next(iterator);
             if (_chip == null)
             {
-                throw new IOException($"Chip: {GpioChip} not available, error code: {Marshal.GetLastWin32Error()}");
+                throw new IOException($"No chip found, error code: {Marshal.GetLastWin32Error()}");
             }
+            _deviceName = Marshal.PtrToStringAnsi(Interop.gpiod_chip_name(_chip));
+            // Freeing other chips opened
+            Interop.gpiod_chip_iter_free_noclose(iterator);
         }
 
-        private void RequestEvent(int pinNumber, LibgpiodDriverEventHandler eventDescriptor, PinEventTypes eventType)
+        private void RequestEvent(int pinNumber, LibGpiodDriverEventHandler eventDescriptor, PinEventTypes eventType)
         {
             int eventSuccess = -1;
             SafeLineHandle pin = Interop.gpiod_chip_get_line(_chip, pinNumber);
@@ -75,11 +73,11 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
-            if (!_pinNumberToEventHandler.TryGetValue(pinNumber, out LibgpiodDriverEventHandler eventHandler))
+            if (!_pinNumberToEventHandler.TryGetValue(pinNumber, out LibGpiodDriverEventHandler eventHandler))
             {
                 if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
                     Interop.gpiod_line_release(pin);
-                eventHandler = new LibgpiodDriverEventHandler(pinNumber, new CancellationTokenSource());
+                eventHandler = new LibGpiodDriverEventHandler(pinNumber, new CancellationTokenSource());
                 _pinNumberToEventHandler.Add(pinNumber, eventHandler);
                 RequestEvent(pinNumber, eventHandler, eventType);
                 InitializeEventDetectionTask(eventHandler);
@@ -94,7 +92,7 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        private void InitializeEventDetectionTask(LibgpiodDriverEventHandler eventHandler)
+        private void InitializeEventDetectionTask(LibGpiodDriverEventHandler eventHandler)
         {
             Task pinListeningThread = Task.Run(() =>
             {
@@ -118,6 +116,7 @@ namespace System.Device.Gpio.Drivers
                         eventHandler?.OnPinValueChanged(args, eventType);
                     }
                 }
+                Console.WriteLine("Event Finished: "+waitResult);
             });
         }
 
@@ -174,7 +173,7 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
-            if (_pinNumberToEventHandler.TryGetValue(pinNumber, out LibgpiodDriverEventHandler eventHandler))
+            if (_pinNumberToEventHandler.TryGetValue(pinNumber, out LibGpiodDriverEventHandler eventHandler))
             {
                 eventHandler.ValueFalling -= callback;
                 eventHandler.ValueRising -= callback;
@@ -218,7 +217,7 @@ namespace System.Device.Gpio.Drivers
             {
                 Interop.gpiod_line_release(pin);
             }
-            int eventRegistered = Interop.gpiod_ctxless_event_loop($"{BasePath}{GpioChip}", (uint)pinNumber, false, $"pin{pinNumber} listener", ref _defaultTimeOut, null,
+            int eventRegistered = Interop.gpiod_ctxless_event_loop(_deviceName, (uint)pinNumber, false, $"pin{pinNumber} listener", ref _defaultTimeOut, null,
                 (int e, uint p, ref timespec t, IntPtr d) =>
                 {
                     if (cancellationToken.IsCancellationRequested)
@@ -261,7 +260,7 @@ namespace System.Device.Gpio.Drivers
                     Interop.gpiod_line_release(handle);
                 }
             }
-            foreach (LibgpiodDriverEventHandler devicePin in _pinNumberToEventHandler.Values)
+            foreach (LibGpiodDriverEventHandler devicePin in _pinNumberToEventHandler.Values)
             {
                 devicePin.Dispose();
             }
