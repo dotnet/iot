@@ -46,13 +46,7 @@ namespace System.Device.Gpio
         /// <summary>
         /// Returns the number of pins provided by the controller.
         /// </summary>
-        public int PinCount
-        {
-            get
-            {
-                return _driver.PinCount;
-            }
-        }
+        public int PinCount => _driver.PinCount;
 
         /// <summary>
         /// Gets the logical pin number in the controller's numbering scheme.
@@ -102,7 +96,7 @@ namespace System.Device.Gpio
                 throw new InvalidOperationException("Can not close a pin that is not open.");
             }
             _driver.ClosePin(logicalPinNumber);
-            _openPins.Remove(pinNumber);
+            _openPins.Remove(logicalPinNumber);
         }
 
         /// <summary>
@@ -117,7 +111,7 @@ namespace System.Device.Gpio
             {
                 throw new InvalidOperationException("Can not set a mode to a pin that is not open.");
             }
-            if (!IsPinModeSupported(pinNumber, mode))
+            if (!_driver.IsPinModeSupported(logicalPinNumber, mode))
             {
                 throw new InvalidOperationException("The pin does not support the selected mode.");
             }
@@ -174,7 +168,7 @@ namespace System.Device.Gpio
             {
                 throw new InvalidOperationException("Can not read from a pin that is not open.");
             }
-            if (_driver.GetPinMode(pinNumber) == PinMode.Output)
+            if (_driver.GetPinMode(logicalPinNumber) == PinMode.Output)
             {
                 throw new InvalidOperationException("Can not read from a pin that is set to Output mode.");
             }
@@ -193,7 +187,7 @@ namespace System.Device.Gpio
             {
                 throw new InvalidOperationException("Can not write to a pin that is not open.");
             }
-            if (_driver.GetPinMode(pinNumber) != PinMode.Output)
+            if (_driver.GetPinMode(logicalPinNumber) != PinMode.Output)
             {
                 throw new InvalidOperationException("Can not write to a pin that is not set to Output mode.");
             }
