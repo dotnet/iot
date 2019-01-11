@@ -78,7 +78,10 @@ namespace System.Device.Gpio.Drivers
                 if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
                     Interop.gpiod_line_release(pin);
                 eventHandler = new LibGpiodDriverEventHandler(pinNumber, new CancellationTokenSource());
-                _pinNumberToEventHandler.Add(pinNumber, eventHandler);
+                lock (_pinNumberToEventHandler)
+                {
+                    _pinNumberToEventHandler.Add(pinNumber, eventHandler);
+                }
                 RequestEvent(pinNumber, eventHandler, eventType);
                 InitializeEventDetectionTask(eventHandler);
             }
@@ -116,7 +119,6 @@ namespace System.Device.Gpio.Drivers
                         eventHandler?.OnPinValueChanged(args, eventType);
                     }
                 }
-                Console.WriteLine("Event Finished: "+waitResult);
             });
         }
 
@@ -182,7 +184,10 @@ namespace System.Device.Gpio.Drivers
                     eventHandler.CancellationTokenSource.Cancel();
                     Interop.gpiod_line_release(eventHandler.PinHandle);
                     eventHandler.Dispose();
-                    _pinNumberToEventHandler.Remove(pinNumber);
+                    lock (_pinNumberToEventHandler)
+                    {
+                        _pinNumberToEventHandler.Remove(pinNumber);
+                    }
                 }
             }
             else
@@ -251,6 +256,7 @@ namespace System.Device.Gpio.Drivers
                 Interop.gpiod_line_set_value(pin, (value == PinValue.High) ? 1 : 0);
             }
         }
+
         protected override void Dispose(bool disposing)
         {
             foreach (SafeLineHandle handle in _pinNumberToSafeLineHandle.Values)
