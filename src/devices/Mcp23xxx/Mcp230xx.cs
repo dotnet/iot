@@ -23,12 +23,6 @@ namespace Iot.Device.Mcp23xxx
             _i2cDevice = i2cDevice;
         }
 
-        public override byte Read(Register.Address registerAddress, Port port = Port.PortA, Bank bank = Bank.Bank1)
-        {
-            byte[] data = Read(registerAddress, 1, port, bank);
-            return data[0];
-        }
-
         public override byte[] Read(Register.Address startingRegisterAddress, byte byteCount, Port port = Port.PortA, Bank bank = Bank.Bank1)
         {
             Write(startingRegisterAddress, new byte[] { }, port, bank); // Set address to register first.
@@ -36,11 +30,6 @@ namespace Iot.Device.Mcp23xxx
             byte[] readBuffer = new byte[byteCount];
             _i2cDevice.Read(readBuffer);
             return readBuffer;
-        }
-
-        public override void Write(Register.Address registerAddress, byte data, Port port = Port.PortA, Bank bank = Bank.Bank1)
-        {
-            Write(registerAddress, new byte[] { data }, port, bank);
         }
 
         public override void Write(Register.Address startingRegisterAddress, byte[] data, Port port = Port.PortA, Bank bank = Bank.Bank1)

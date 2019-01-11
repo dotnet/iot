@@ -19,13 +19,15 @@ namespace Iot.Device.Mcp23xxx.Samples
         {
             Console.WriteLine("Hello Mcp23xxx!");
 
-            var mcp23xxx = GetMcp23xxxDevice(Mcp23xxxDevice.Mcp23017);
-            
-            // Uncomment sample to run.
-            // ReadSwitchesWriteLeds(mcp23xxx);
-            ReadAllRegisters(mcp23xxx);
-            // WriteIndividualByte(mcp23xxx);
-            // WriteSequentialBytes(mcp23xxx);
+            using (var mcp23xxx = GetMcp23xxxDevice(Mcp23xxxDevice.Mcp23017))
+            {
+                // Uncomment sample to run.
+                // ReadSwitchesWriteLeds(mcp23xxx);
+                // ReadAllRegisters(mcp23xxx);
+                // WriteIndividualByte(mcp23xxx);
+                // WriteSequentialBytes(mcp23xxx);
+                ReadBits(mcp23xxx);
+            }
         }
 
         private enum Mcp23xxxDevice
@@ -184,6 +186,20 @@ namespace Iot.Device.Mcp23xxx.Samples
 
                 Console.WriteLine("After Writing Again");
                 SequentialRead(mcp23xxx);
+            }
+        }
+
+        private static void ReadBits(Mcp23xxx mcp23xxx)
+        {
+            Console.WriteLine("Read Bits");
+
+            using (mcp23xxx)
+            {
+                for (int bitNumber = 0; bitNumber < 8; bitNumber++)
+                {
+                    bool bit = mcp23xxx.ReadBit(Register.Address.GPIO, bitNumber, Port.PortA, Bank.Bank0);
+                    Console.WriteLine($"{bitNumber}: {bit}");
+                }
             }
         }
     }

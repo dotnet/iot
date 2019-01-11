@@ -25,12 +25,6 @@ namespace Iot.Device.Mcp23xxx
             _spiDevice = spiDevice;
         }
 
-        public override byte Read(Register.Address registerAddress, Port port = Port.PortA, Bank bank = Bank.Bank1)
-        {
-            byte[] readBuffer = Read(registerAddress, 1, port, bank);
-            return readBuffer[0];
-        }
-
         public override byte[] Read(Register.Address startingRegisterAddress, byte byteCount, Port port = Port.PortA, Bank bank = Bank.Bank1)
         {
             byteCount += 2;  // Include OpCode and Register Address.
@@ -41,11 +35,6 @@ namespace Iot.Device.Mcp23xxx
 
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
             return readBuffer.AsSpan().Slice(2).ToArray();  // First 2 bytes are from sending OpCode and Register Address.
-        }
-
-        public override void Write(Register.Address registerAddress, byte data, Port port = Port.PortA, Bank bank = Bank.Bank1)
-        {
-            Write(registerAddress, new byte[] { data }, port, bank);
         }
 
         public override void Write(Register.Address startingRegisterAddress, byte[] data, Port port = Port.PortA, Bank bank = Bank.Bank1)

@@ -7,25 +7,6 @@ using System.Device.Gpio;
 
 namespace Iot.Device.Mcp23xxx
 {
-    // TODO: https://github.com/dotnet/iot/issues/125
-    // Implement IGpioControllerProvider.
-    // The thinking is to implement this interface where it can provide a GpioController
-    // that looks like a regular controller, but controls the bindings I/O via I2C/SPI drivers.
-    //
-    // For example...
-    // var connectionSettings = new SpiConnectionSettings(0, 0);
-    // var spiDevice = new UnixSpiDevice(connectionSettings);
-    // var mcp23Sxx = new Mcp23Sxx(0, spiDevice);
-    // GpioController mcp23SxxController = mcp23Sxx.GetDefaultGpioController();
-    // 
-    // Now when you call the GpioController methods, the master controller will send the respective SPI commands
-    // to the binding behind the scenes to update its I/O.
-    //
-    // The code below would interact with the MCP23XXX related registers (IODIR, GPIO, etc.)
-    // to configure the pin as an input and read the the value.
-    // mcp23SxxController.SetPinMode(1, PinMode.Input);
-    // PinValue pin1Value = mcp23SxxController.Read(1);
-
     public abstract class Mcp23xxx : IDisposable
     {
         protected int DeviceAddress { get; }
@@ -51,6 +32,32 @@ namespace Iot.Device.Mcp23xxx
             _interruptB = interruptB;
 
             InitializeMasterGpioController();
+        }
+
+        internal static void ValidateBitNumber(int bitNumber)
+        {
+            if (bitNumber < 0 || bitNumber > 7)
+            {
+                throw new IndexOutOfRangeException("Invalid bit index.");
+            }
+        }
+
+        internal static void ClearBit(ref byte data, int bitNumber)
+        {
+            ValidateBitNumber(bitNumber);
+            data &= (byte)~(1 << bitNumber);
+        }
+
+        internal void SetBit(ref byte data, int bitNumber)
+        {
+            ValidateBitNumber(bitNumber);
+            data |= (byte)(1 << bitNumber);
+        }
+
+        internal static bool GetBit(byte data, int bitNumber)
+        {
+            ValidateBitNumber(bitNumber);
+            return ((data >> bitNumber) & 1) == 1;
         }
 
         private void ValidateDeviceAddress(int deviceAddress)
@@ -88,9 +95,7 @@ namespace Iot.Device.Mcp23xxx
 
         public abstract int PinCount { get; }
 
-        public abstract byte Read(Register.Address registerAddress, Port port = Port.PortA, Bank bank = Bank.Bank1);
         public abstract byte[] Read(Register.Address startingRegisterAddress, byte byteCount, Port port = Port.PortA, Bank bank = Bank.Bank1);
-        public abstract void Write(Register.Address registerAddress, byte data, Port port = Port.PortA, Bank bank = Bank.Bank1);
         public abstract void Write(Register.Address startingRegisterAddress, byte[] data, Port port = Port.PortA, Bank bank = Bank.Bank1);
 
         public virtual void Dispose()
@@ -132,6 +137,19 @@ namespace Iot.Device.Mcp23xxx
             _masterGpioController.Write((int)_reset, PinValue.High);
         }
 
+        public byte Read(Register.Address registerAddress, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        {
+            byte[] data = Read(registerAddress, 1, port, bank);
+            return data[0];
+        }
+
+        public bool ReadBit(Register.Address registerAddress, int bitNumber, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        {
+            ValidateBitNumber(bitNumber);
+            byte data = Read(registerAddress, port, bank);
+            return GetBit(data, bitNumber);
+        }
+
         /// <summary>
         /// Read the pin value of interrupt for Port A (INTA).
         /// </summary>
@@ -168,6 +186,28 @@ namespace Iot.Device.Mcp23xxx
             }
 
             return _masterGpioController.Read((int)_interruptB);
+        }
+
+        public void Write(Register.Address registerAddress, byte data, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        {
+            Write(registerAddress, new byte[] { data }, port, bank);
+        }
+
+        public void WriteBit(Register.Address registerAddress, int bitNumber, bool bit, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        {
+            ValidateBitNumber(bitNumber);
+            byte data = Read(registerAddress, port, bank);
+
+            if (bit)
+            {
+                SetBit(ref data, bitNumber);
+            }
+            else
+            {
+                ClearBit(ref data, bitNumber);
+            }
+
+            Write(registerAddress, data, port, bank);
         }
     }
 }
