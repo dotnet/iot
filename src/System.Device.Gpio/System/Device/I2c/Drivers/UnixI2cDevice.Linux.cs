@@ -7,22 +7,37 @@ using System.Runtime.InteropServices;
 
 namespace System.Device.I2c.Drivers
 {
+    /// <summary>
+    /// Represents an I2C communication channel running on Unix.
+    /// </summary>
     public class UnixI2cDevice : I2cDevice
     {
-        private I2cConnectionSettings _settings;
+        private readonly I2cConnectionSettings _settings;
         private const string DefaultDevicePath = "/dev/i2c";
         private int _deviceFileDescriptor = -1;
         private I2cFunctionalityFlags _functionalities;
-        private static readonly object s_InitializationLock = new object();
+        private static readonly object s_initializationLock = new object();
 
+        /// <summary>
+        /// Initializes new instance of UnixI2cDevice that will use the specified settings to communicate with the I2C device.
+        /// </summary>
+        /// <param name="settings">
+        /// The connection settings of a device on an I2C bus.
+        /// </param>
         public UnixI2cDevice(I2cConnectionSettings settings)
         {
             _settings = settings;
             DevicePath = DefaultDevicePath;
         }
 
+        /// <summary>
+        /// Path to I2C resources located on the platform.
+        /// </summary>
         public string DevicePath { get; set; }
 
+        /// <summary>
+        /// The connection settings of a device on an I2C bus.
+        /// </summary>
         public override I2cConnectionSettings ConnectionSettings => _settings;
 
         private unsafe void Initialize()
@@ -33,7 +48,7 @@ namespace System.Device.I2c.Drivers
             }
 
             string deviceFileName = $"{DevicePath}-{_settings.BusId}";
-            lock (s_InitializationLock)
+            lock (s_initializationLock)
             {
                 if (_deviceFileDescriptor >= 0)
                 {
@@ -43,7 +58,7 @@ namespace System.Device.I2c.Drivers
 
                 if (_deviceFileDescriptor < 0)
                 {
-                    throw new IOException($"Cannot open I2c device file '{deviceFileName}'");
+                    throw new IOException($"Cannot open I2C device file '{deviceFileName}'.");
                 }
 
                 I2cFunctionalityFlags tempFlags;
@@ -96,16 +111,16 @@ namespace System.Device.I2c.Drivers
                 };
             }
 
-            var tr = new i2c_rdwr_ioctl_data()
+            var msgset = new i2c_rdwr_ioctl_data()
             {
                 msgs = messagesPtr,
                 nmsgs = (uint)messageCount
             };
 
-            int result = Interop.ioctl(_deviceFileDescriptor, (uint)I2cSettings.I2C_RDWR, new IntPtr(&tr));
+            int result = Interop.ioctl(_deviceFileDescriptor, (uint)I2cSettings.I2C_RDWR, new IntPtr(&msgset));
             if (result < 0)
             {
-                throw new IOException("Error when attempting to perform the I2c data transfer.");
+                throw new IOException("Error performing I2C data transfer.");
             }
         }
 
@@ -114,7 +129,7 @@ namespace System.Device.I2c.Drivers
             int result = Interop.ioctl(_deviceFileDescriptor, (uint)I2cSettings.I2C_SLAVE_FORCE, (ulong)_settings.DeviceAddress);
             if (result < 0)
             {
-                throw new IOException("Error performing I2c data transfer");
+                throw new IOException("Error performing I2C data transfer.");
             }
 
             if (writeBuffer != null)
@@ -122,7 +137,7 @@ namespace System.Device.I2c.Drivers
                 result = Interop.write(_deviceFileDescriptor, new IntPtr(writeBuffer), writeBufferLength);
                 if (result < 0)
                 {
-                    throw new IOException("Error performing I2c data transfer");
+                    throw new IOException("Error performing I2C data transfer.");
                 }
             }
 
@@ -131,11 +146,15 @@ namespace System.Device.I2c.Drivers
                 result = Interop.read(_deviceFileDescriptor, new IntPtr(readBuffer), readBufferLength);
                 if (result < 0)
                 {
-                    throw new IOException("Error performing I2c data transfer");
+                    throw new IOException("Error performing I2C data transfer.");
                 }
             }
         }
 
+        /// <summary>
+        /// Reads a byte from the I2C device.        
+        /// </summary>
+        /// <returns>A byte read from the I2C device.</returns>
         public override unsafe byte ReadByte()
         {
             Initialize();
@@ -146,6 +165,13 @@ namespace System.Device.I2c.Drivers
             return result;
         }
 
+        /// <summary>
+        /// Reads data from the I2C device.
+        /// </summary>
+        /// <param name="buffer">
+        /// The buffer to read the data from the I2C device.
+        /// The length of the buffer determines how much data to read from the I2C device.
+        /// </param>
         public override unsafe void Read(Span<byte> buffer)
         {
             Initialize();
@@ -156,6 +182,10 @@ namespace System.Device.I2c.Drivers
             }
         }
 
+        /// <summary>
+        /// Writes a byte to the I2C device.
+        /// </summary>
+        /// <param name="data">The byte to be written to the I2C device.</param>
         public override unsafe void WriteByte(byte data)
         {
             Initialize();
@@ -164,13 +194,20 @@ namespace System.Device.I2c.Drivers
             Transfer(&data, null, length, 0);
         }
 
-        public override unsafe void Write(Span<byte> data)
+        /// <summary>
+        /// Writes data to the I2C device.
+        /// </summary>
+        /// <param name="buffer">
+        /// The buffer that contains the data to be written to the I2C device.
+        /// The data should not include the I2C device address.
+        /// </param>
+        public override unsafe void Write(Span<byte> buffer)
         {
             Initialize();
 
-            fixed (byte* dataPointer = data)
+            fixed (byte* bufferPointer = buffer)
             {
-                Transfer(dataPointer, null, data.Length, 0);
+                Transfer(bufferPointer, null, buffer.Length, 0);
             }
         }
 
