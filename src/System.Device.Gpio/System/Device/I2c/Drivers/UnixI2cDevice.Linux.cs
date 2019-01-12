@@ -58,7 +58,7 @@ namespace System.Device.I2c.Drivers
 
                 if (_deviceFileDescriptor < 0)
                 {
-                    throw new IOException($"Cannot open I2C device file '{deviceFileName}'.");
+                    throw new IOException($"Can not open I2C device file '{deviceFileName}'.");
                 }
 
                 I2cFunctionalityFlags tempFlags;
