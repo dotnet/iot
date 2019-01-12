@@ -26,7 +26,8 @@ namespace Iot.Device.Mcp23xxx.Samples
                 // ReadAllRegisters(mcp23xxx);
                 // WriteIndividualByte(mcp23xxx);
                 // WriteSequentialBytes(mcp23xxx);
-                ReadBits(mcp23xxx);
+                // ReadBits(mcp23xxx);
+                WriteBits(mcp23xxx);
             }
         }
 
@@ -199,6 +200,28 @@ namespace Iot.Device.Mcp23xxx.Samples
                 {
                     bool bit = mcp23xxx.ReadBit(Register.Address.GPIO, bitNumber, Port.PortA, Bank.Bank0);
                     Console.WriteLine($"{bitNumber}: {bit}");
+                }
+            }
+        }
+
+        private static void WriteBits(Mcp23xxx mcp23xxx)
+        {
+            Console.WriteLine("Write Bits");
+
+            // Make port output and set all pins.
+            mcp23xxx.Write(Register.Address.IODIR, 0x00, Port.PortB, Bank.Bank0);
+            mcp23xxx.Write(Register.Address.GPIO, 0xFF, Port.PortB, Bank.Bank0);
+
+            using (mcp23xxx)
+            {
+                for (int bitNumber = 0; bitNumber < 8; bitNumber++)
+                {
+                    mcp23xxx.WriteBit(Register.Address.GPIO, bitNumber, false, Port.PortB, Bank.Bank0);
+                    Console.WriteLine($"Bit {bitNumber} low");
+                    Thread.Sleep(500);
+                    mcp23xxx.WriteBit(Register.Address.GPIO, bitNumber, true, Port.PortB, Bank.Bank0);
+                    Console.WriteLine($"Bit {bitNumber} high");
+                    Thread.Sleep(500);
                 }
             }
         }
