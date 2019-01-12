@@ -12,11 +12,9 @@ namespace System.Device.Gpio.Drivers
 {
     public class Windows10Driver : GpioDriver
     {
-        #region Fields
         private static readonly WinGpio.GpioController s_winGpioController = WinGpio.GpioController.GetDefault();
         private readonly Dictionary<int, Windows10DriverPin> _openPins = new Dictionary<int, Windows10DriverPin>();
-        #endregion Fields
-
+        
         public Windows10Driver()
         {
             if (s_winGpioController == null)
@@ -24,8 +22,6 @@ namespace System.Device.Gpio.Drivers
                 throw new NotSupportedException("No GPIO controllers exist on this system.");
             }
         }
-
-        #region GpioDriver Overrides
 
         protected internal override int PinCount => s_winGpioController.PinCount;
 
@@ -56,11 +52,9 @@ namespace System.Device.Gpio.Drivers
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
             => throw new PlatformNotSupportedException($"The {GetType().Name} driver does not support physical (board) numbering, since it's generic.");
 
-        protected internal override PinMode GetPinMode(int pinNumber)
-            => LookupOpenPin(pinNumber).GetPinMode();
+        protected internal override PinMode GetPinMode(int pinNumber) => LookupOpenPin(pinNumber).GetPinMode();
 
-        protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
-            => LookupOpenPin(pinNumber).IsPinModeSupported(mode);
+        protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode) => LookupOpenPin(pinNumber).IsPinModeSupported(mode);
 
         protected internal override void OpenPin(int pinNumber)
         {
@@ -84,21 +78,13 @@ namespace System.Device.Gpio.Drivers
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
             => LookupOpenPin(pinNumber).RemoveCallbackForPinValueChangedEvent(callback);
 
-        protected internal override void SetPinMode(int pinNumber, PinMode mode)
-            => LookupOpenPin(pinNumber).SetPinMode(mode);
+        protected internal override void SetPinMode(int pinNumber, PinMode mode) => LookupOpenPin(pinNumber).SetPinMode(mode);
 
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
             => LookupOpenPin(pinNumber).WaitForEvent(eventType, cancellationToken);
 
-        protected internal override void Write(int pinNumber, PinValue value)
-            => LookupOpenPin(pinNumber).Write(value);
-
-        #endregion GpioDriver Overrides
-
-        #region Private Implementation
+        protected internal override void Write(int pinNumber, PinValue value) => LookupOpenPin(pinNumber).Write(value);
 
         private Windows10DriverPin LookupOpenPin(int pinNumber) => _openPins[pinNumber];
-
-        #endregion Private Implementation
     }
 }
