@@ -20,6 +20,6 @@ namespace System.Device.Spi.Drivers
 
         public override void Write(Span<byte> data) => throw new PlatformNotSupportedException();
 
-        public override void WriteByte(byte data) => throw new PlatformNotSupportedException();
+        public override void WriteByte(byte buffer) => throw new PlatformNotSupportedException();
     }
 }
