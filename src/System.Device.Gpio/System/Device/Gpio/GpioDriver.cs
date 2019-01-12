@@ -15,9 +15,9 @@ namespace System.Device.Gpio
         protected internal abstract void ClosePin(int pinNumber);
         protected internal abstract void SetPinMode(int pinNumber, PinMode mode);
         protected internal abstract PinMode GetPinMode(int pinNumber);
+        protected internal abstract bool IsPinModeSupported(int pinNumber, PinMode mode);
         protected internal abstract PinValue Read(int pinNumber);
         protected internal abstract void Write(int pinNumber, PinValue value);
-        protected internal abstract bool IsPinModeSupported(int pinNumber, PinMode mode);
         protected internal abstract WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken);
         protected internal virtual ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
         {

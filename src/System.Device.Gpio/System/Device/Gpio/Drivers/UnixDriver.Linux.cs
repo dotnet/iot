@@ -15,10 +15,10 @@ namespace System.Device.Gpio.Drivers
         private int _pollFileDescriptor = -1;
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
-        private static CancellationTokenSource s_EventThreadCancellationTokenSource = new CancellationTokenSource();
-        private List<int> _exportedPins = new List<int>();
-        private Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
-        private int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
+        private readonly static CancellationTokenSource s_eventThreadCancellationTokenSource = new CancellationTokenSource();
+        private readonly List<int> _exportedPins = new List<int>();
+        private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
+        private readonly int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
 
         protected internal override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
 
@@ -83,7 +83,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to set a mode to a pin that is not yet open.");
+                throw new InvalidOperationException("There was an attempt to set a mode to a pin that is not open.");
             }
         }
 
@@ -132,7 +132,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to read from a pin that is not yet opened.");
+                throw new InvalidOperationException("There was an attempt to read from a pin that is not open.");
             }
             return result;
         }
@@ -174,7 +174,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to write to a pin that is not yet opened.");
+                throw new InvalidOperationException("There was an attempt to write to a pin that is not open.");
             }
         }
 
@@ -379,7 +379,7 @@ namespace System.Device.Gpio.Drivers
             {
                 if (cancelEventDetectionThread)
                 {
-                    s_EventThreadCancellationTokenSource.Cancel();
+                    s_eventThreadCancellationTokenSource.Cancel();
                     while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                     {
                         Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
@@ -396,7 +396,7 @@ namespace System.Device.Gpio.Drivers
             _pinsToDetectEventsCount = 0;
             if (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
             {
-                s_EventThreadCancellationTokenSource.Cancel();
+                s_eventThreadCancellationTokenSource.Cancel();
                 while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                 {
                     Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
@@ -452,7 +452,7 @@ namespace System.Device.Gpio.Drivers
         {
             while (_pinsToDetectEventsCount > 0)
             {
-                bool eventDetected = WasEventDetected(_pollFileDescriptor, -1,  out int pinNumber, s_EventThreadCancellationTokenSource.Token);
+                bool eventDetected = WasEventDetected(_pollFileDescriptor, -1,  out int pinNumber, s_eventThreadCancellationTokenSource.Token);
                 if (eventDetected)
                 {
                     PinEventTypes eventType = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
@@ -497,7 +497,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to get a mode to a pin that is not yet open.");
+                throw new InvalidOperationException("There was an attempt to get a mode to a pin that is not open.");
             }
         }
     }
