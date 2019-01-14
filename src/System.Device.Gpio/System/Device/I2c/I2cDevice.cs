@@ -15,7 +15,7 @@ namespace System.Device.I2c
         public abstract I2cConnectionSettings ConnectionSettings { get; }
 
         /// <summary>
-        /// Reads a byte from the I2C device.        
+        /// Reads a byte from the I2C device.
         /// </summary>
         /// <returns>A byte read from the I2C device.</returns>
         public abstract byte ReadByte();
@@ -38,11 +38,11 @@ namespace System.Device.I2c
         /// <summary>
         /// Writes data to the I2C device.
         /// </summary>
-        /// <param name="buffer">
+        /// <param name="data">
         /// The buffer that contains the data to be written to the I2C device.
         /// The data should not include the I2C device address.
         /// </param>
-        public abstract void Write(Span<byte> buffer);
+        public abstract void Write(Span<byte> data);
 
         public void Dispose()
         {

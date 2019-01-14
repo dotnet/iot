@@ -197,17 +197,17 @@ namespace System.Device.I2c.Drivers
         /// <summary>
         /// Writes data to the I2C device.
         /// </summary>
-        /// <param name="buffer">
+        /// <param name="data">
         /// The buffer that contains the data to be written to the I2C device.
         /// The data should not include the I2C device address.
         /// </param>
-        public override unsafe void Write(Span<byte> buffer)
+        public override unsafe void Write(Span<byte> data)
         {
             Initialize();
 
-            fixed (byte* bufferPointer = buffer)
+            fixed (byte* dataPointer = data)
             {
-                Transfer(bufferPointer, null, buffer.Length, 0);
+                Transfer(dataPointer, null, data.Length, 0);
             }
         }
 
