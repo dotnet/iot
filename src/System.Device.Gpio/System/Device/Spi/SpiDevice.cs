@@ -15,7 +15,7 @@ namespace System.Device.Spi
         public abstract SpiConnectionSettings ConnectionSettings { get; }
 
         /// <summary>
-        /// Reads a byte from the SPI device.        
+        /// Reads a byte from the SPI device.
         /// </summary>
         /// <returns>A byte read from the SPI device.</returns>
         public abstract byte ReadByte();
@@ -38,10 +38,10 @@ namespace System.Device.Spi
         /// <summary>
         /// Writes data to the SPI device.
         /// </summary>
-        /// <param name="buffer">
+        /// <param name="data">
         /// The buffer that contains the data to be written to the SPI device.
         /// </param>
-        public abstract void Write(Span<byte> buffer);
+        public abstract void Write(Span<byte> data);
 
         /// <summary>
         /// Writes and reads data from the SPI device.

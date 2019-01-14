@@ -105,7 +105,7 @@ namespace System.Device.Spi.Drivers
         }
 
         /// <summary>
-        /// Reads a byte from the SPI device.        
+        /// Reads a byte from the SPI device.
         /// </summary>
         /// <returns>A byte read from the SPI device.</returns>
         public override unsafe byte ReadByte()
@@ -151,16 +151,16 @@ namespace System.Device.Spi.Drivers
         /// <summary>
         /// Writes data to the SPI device.
         /// </summary>
-        /// <param name="buffer">
+        /// <param name="data">
         /// The buffer that contains the data to be written to the SPI device.
         /// </param>
-        public override unsafe void Write(Span<byte> buffer)
+        public override unsafe void Write(Span<byte> data)
         {
             Initialize();
 
-            fixed (byte* bufferPtr = buffer)
+            fixed (byte* dataPtr = data)
             {
-                Transfer(bufferPtr, null, buffer.Length);
+                Transfer(dataPtr, null, data.Length);
             }
         }
 

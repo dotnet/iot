@@ -49,7 +49,7 @@ namespace System.Device.Spi.Drivers
         public override SpiConnectionSettings ConnectionSettings => _settings;
 
         /// <summary>
-        /// Reads a byte from the SPI device.        
+        /// Reads a byte from the SPI device.
         /// </summary>
         /// <returns>A byte read from the SPI device.</returns>
         public override byte ReadByte()
@@ -85,12 +85,12 @@ namespace System.Device.Spi.Drivers
         /// <summary>
         /// Writes data to the SPI device.
         /// </summary>
-        /// <param name="buffer">
+        /// <param name="data">
         /// The buffer that contains the data to be written to the SPI device.
         /// </param>
-        public override void Write(Span<byte> buffer)
+        public override void Write(Span<byte> data)
         {
-            _winDevice.Write(buffer.ToArray());
+            _winDevice.Write(data.ToArray());
         }
 
         /// <summary>
