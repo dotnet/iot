@@ -5,7 +5,7 @@
 namespace System.Device.I2c
 {
     /// <summary>
-    /// The connection settings of a device on a I2C bus.
+    /// The connection settings of a device on an I2C bus.
     /// </summary>
     public sealed class I2cConnectionSettings
     {
@@ -14,8 +14,8 @@ namespace System.Device.I2c
         /// <summary>
         /// Initializes new instance of I2cConnectionSettings.
         /// </summary>
-        /// <param name="busId">The bus ID the device is connected to.</param>
-        /// <param name="deviceAddress">The bus address of the device.</param>
+        /// <param name="busId">The bus ID the I2C device is connected to.</param>
+        /// <param name="deviceAddress">The bus address of the I2C device.</param>
         public I2cConnectionSettings(int busId, int deviceAddress)
         {
             BusId = busId;
@@ -23,12 +23,12 @@ namespace System.Device.I2c
         }
 
         /// <summary>
-        /// The bus ID the device is connected to.
+        /// The bus ID the I2C device is connected to.
         /// </summary>
         public int BusId { get; }
 
         /// <summary>
-        /// The bus address of the device.
+        /// The bus address of the I2C device.
         /// </summary>
         public int DeviceAddress { get; }
     }
