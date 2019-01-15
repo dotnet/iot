@@ -11,6 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Si7021_I2c_Read_Temp_Humidity.fzz" />
+    <None Remove="Si7021_I2c_Read_Temp_Humidity.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Si7021.csproj" />
   </ItemGroup>
 

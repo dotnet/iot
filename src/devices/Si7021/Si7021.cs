@@ -9,8 +9,8 @@ namespace Iot.Device
 {
     public class Si7021 : IDisposable
     {
-        const byte si7021_cmd_read_temperature = 0xE3;
-        const byte si7021_cmd_read_humidity = 0xE5;
+        const byte Si7021_read_temperature_command = 0xE3;
+        const byte Si7021_read_humidity_command = 0xE5;
         private I2cDevice _i2cDevice;
 
         public Si7021(I2cDevice i2cDevice)
@@ -22,20 +22,20 @@ namespace Iot.Device
         {
         }
 
-        public double ReadTempFahrenheit()
+        public double ReadTemperatureInFahrenheit()
         {
-            double temp_celcius = ReadTempCelcius();
-            double temp_fahrenheit = (ReadTempCelcius() * (9 / 5)) + 32;
+            double temp_celcius = ReadTemperatureInCelcius();
+            double temp_fahrenheit = (temp_celcius * (9 / 5)) + 32;
             
             return temp_fahrenheit;
         }
         
-        public double ReadTempCelcius()
+        public double ReadTemperatureInCelcius()
         {
             byte[] buffer = new byte[2];
 
             // Send temperature command, read back two bytes
-            _i2cDevice.WriteByte(si7021_cmd_read_temperature);
+            _i2cDevice.WriteByte(Si7021_read_temperature_command);
             _i2cDevice.Read(buffer.AsSpan());
             
             // Calculate temperature
@@ -50,7 +50,7 @@ namespace Iot.Device
             byte[] buffer = new byte[2];
             
             // Send humidity read command, read back two bytes
-            _i2cDevice.WriteByte(si7021_cmd_read_humidity);
+            _i2cDevice.WriteByte(Si7021_read_humidity_command);
             _i2cDevice.Read(buffer.AsSpan());
             
             // Calculate humidity
