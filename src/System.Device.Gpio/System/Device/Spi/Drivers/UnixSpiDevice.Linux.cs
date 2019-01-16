@@ -6,22 +6,37 @@ using System.IO;
 
 namespace System.Device.Spi.Drivers
 {
+    /// <summary>
+    /// Represents an SPI communication channel running on Unix.
+    /// </summary>
     public class UnixSpiDevice : SpiDevice
     {
-        private const string Default_Device_Path = "/dev/spidev";
+        private const string DefaultDevicePath = "/dev/spidev";
         private const uint SPI_IOC_MESSAGE_1 = 0x40206b00;
         private int _deviceFileDescriptor = -1;
         private readonly SpiConnectionSettings _settings;
-        private static readonly object s_InitializationLock = new object();
+        private static readonly object s_initializationLock = new object();
 
+        /// <summary>
+        /// Initializes new instance of UnixSpiDevice that will use the specified settings to communicate with the SPI device.
+        /// </summary>
+        /// <param name="settings">
+        /// The connection settings of a device on a SPI bus.
+        /// </param>
         public UnixSpiDevice(SpiConnectionSettings settings)
         {
             _settings = settings;
-            DevicePath = Default_Device_Path;
+            DevicePath = DefaultDevicePath;
         }
 
+        /// <summary>
+        /// Path to SPI resources located on the platform.
+        /// </summary>
         public string DevicePath { get; set; }
 
+        /// <summary>
+        /// The connection settings of a device on a SPI bus.
+        /// </summary>
         public override SpiConnectionSettings ConnectionSettings => _settings;
 
         private unsafe void Initialize()
@@ -30,7 +45,7 @@ namespace System.Device.Spi.Drivers
             {
                 return;
             }
-            lock (s_InitializationLock)
+            lock (s_initializationLock)
             {
                 string deviceFileName = $"{DevicePath}{_settings.BusId}.{_settings.ChipSelectLine}";
                 if (_deviceFileDescriptor >= 0)
@@ -40,7 +55,7 @@ namespace System.Device.Spi.Drivers
                 _deviceFileDescriptor = Interop.open(deviceFileName, FileOpenFlags.O_RDWR);
                 if (_deviceFileDescriptor < 0)
                 {
-                    throw new IOException($"Cannot open Spi device file '{deviceFileName}'");
+                    throw new IOException($"Can not open SPI device file '{deviceFileName}'.");
                 }
 
                 UnixSpiMode mode = SpiModeToUnixSpiMode(_settings.Mode);
@@ -49,7 +64,7 @@ namespace System.Device.Spi.Drivers
                 int result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MODE, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Cannot set Spi mode to {_settings.Mode}");
+                    throw new IOException($"Can not set SPI mode to {_settings.Mode}.");
                 }
 
                 byte dataLengthInBits = (byte)_settings.DataBitLength;
@@ -58,7 +73,7 @@ namespace System.Device.Spi.Drivers
                 result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_BITS_PER_WORD, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Cannot set Spi data bit length to {_settings.DataBitLength}");
+                    throw new IOException($"Can not set SPI data bit length to {_settings.DataBitLength}.");
                 }
 
                 int clockFrequency = _settings.ClockFrequency;
@@ -67,7 +82,7 @@ namespace System.Device.Spi.Drivers
                 result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MAX_SPEED_HZ, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Cannot set Spi clock frequency to {_settings.ClockFrequency}");
+                    throw new IOException($"Can not set SPI clock frequency to {_settings.ClockFrequency}.");
                 }
             }
         }
@@ -85,10 +100,14 @@ namespace System.Device.Spi.Drivers
                 case SpiMode.Mode3:
                     return UnixSpiMode.SPI_MODE_3;
                 default:
-                    throw new ArgumentException("Invalid SpiMode", nameof(mode));
+                    throw new ArgumentException("Invalid SPI mode.", nameof(mode));
             }
         }
 
+        /// <summary>
+        /// Reads a byte from the SPI device.
+        /// </summary>
+        /// <returns>A byte read from the SPI device.</returns>
         public override unsafe byte ReadByte()
         {
             Initialize();
@@ -100,6 +119,13 @@ namespace System.Device.Spi.Drivers
             return result;
         }
 
+        /// <summary>
+        /// Reads data from the SPI device.
+        /// </summary>
+        /// <param name="buffer">
+        /// The buffer to read the data from the SPI device.
+        /// The length of the buffer determines how much data to read from the SPI device.
+        /// </param>
         public override unsafe void Read(Span<byte> buffer)
         {
             Initialize();
@@ -110,6 +136,10 @@ namespace System.Device.Spi.Drivers
             }
         }
 
+        /// <summary>
+        /// Writes a byte to the SPI device.
+        /// </summary>
+        /// <param name="data">The byte to be written to the SPI device.</param>
         public override unsafe void WriteByte(byte data)
         {
             Initialize();
@@ -118,6 +148,12 @@ namespace System.Device.Spi.Drivers
             Transfer(&data, null, length);
         }
 
+        /// <summary>
+        /// Writes data to the SPI device.
+        /// </summary>
+        /// <param name="data">
+        /// The buffer that contains the data to be written to the SPI device.
+        /// </param>
         public override unsafe void Write(Span<byte> data)
         {
             Initialize();
@@ -127,19 +163,27 @@ namespace System.Device.Spi.Drivers
                 Transfer(dataPtr, null, data.Length);
             }
         }
+
+        /// <summary>
+        /// Writes and reads data from the SPI device.
+        /// </summary>
+        /// <param name="writeBuffer">The buffer that contains the data to be written to the SPI device.</param>
+        /// <param name="readBuffer">The buffer to read the data from the SPI device.</param>
         public override unsafe void TransferFullDuplex(Span<byte> writeBuffer, Span<byte> readBuffer)
         {
             Initialize();
 
             if (writeBuffer.Length != readBuffer.Length)
             {
-                throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length");
+                throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length.");
             }
 
             fixed (byte* writeBufferPtr = writeBuffer)
-            fixed (byte* readBufferPtr = readBuffer)
             {
-                Transfer(writeBufferPtr, readBufferPtr, writeBuffer.Length);
+                fixed (byte* readBufferPtr = readBuffer)
+                {
+                    Transfer(writeBufferPtr, readBufferPtr, writeBuffer.Length);
+                }
             }
         }
 
@@ -158,7 +202,7 @@ namespace System.Device.Spi.Drivers
             int result = Interop.ioctl(_deviceFileDescriptor, SPI_IOC_MESSAGE_1, new IntPtr(&tr));
             if (result < 1)
             {
-                throw new IOException("Error while performing the Spi data transfer.");
+                throw new IOException("Error performing SPI data transfer.");
             }
         }
 
