@@ -44,7 +44,7 @@ namespace System.Device.Gpio
         public PinNumberingScheme NumberingScheme { get; }
 
         /// <summary>
-        /// Returns the number of pins provided by the controller.
+        /// The number of pins provided by the controller.
         /// </summary>
         public int PinCount => _driver.PinCount;
 
@@ -122,7 +122,7 @@ namespace System.Device.Gpio
         /// Gets the mode of a pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <returns></returns>
+        /// <returns>The mode of the pin.</returns>
         public PinMode GetPinMode(int pinNumber)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);

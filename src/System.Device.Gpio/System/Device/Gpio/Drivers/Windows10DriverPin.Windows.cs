@@ -13,7 +13,6 @@ namespace System.Device.Gpio.Drivers
     internal class Windows10DriverPin : IDisposable
     {
         private const int ReasonableDebounceTimeoutMillseconds = 50;
-
         private WeakReference<Windows10Driver> _driver;
         private WinGpio.GpioPin _pin;
         private readonly int _pinNumber;

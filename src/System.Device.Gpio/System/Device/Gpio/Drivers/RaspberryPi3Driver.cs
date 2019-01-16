@@ -4,6 +4,9 @@
 
 namespace System.Device.Gpio.Drivers
 {
+    /// <summary>
+    /// A GPIO driver for the Raspberry Pi 3.
+    /// </summary>
     public partial class RaspberryPi3Driver  // Different base classes declared in RaspberryPi3Driver.Linux.cs and RaspberryPi3Driver.Windows.cs
     {
         /// <summary>
@@ -19,41 +22,74 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <summary>
+        /// Converts a board pin number to the driver's logical numbering scheme.
+        /// </summary>
+        /// <param name="pinNumber">The board pin number to convert.</param>
+        /// <returns>The pin number in the driver's logical numbering scheme.</returns>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
             switch (pinNumber)
             {
-                case 3: return 2;
-                case 5: return 3;
-                case 7: return 4;
-                case 8: return 14;
-                case 10: return 15;
-                case 11: return 17;
-                case 12: return 18;
-                case 13: return 27;
-                case 15: return 22;
-                case 16: return 23;
-                case 18: return 24;
-                case 19: return 10;
-                case 21: return 9;
-                case 22: return 25;
-                case 23: return 11;
-                case 24: return 8;
-                case 26: return 7;
-                case 27: return 0;
-                case 28: return 1;
-                case 29: return 5;
-                case 31: return 6;
-                case 32: return 12;
-                case 33: return 13;
-                case 35: return 19;
-                case 36: return 16;
-                case 37: return 26;
-                case 38: return 20;
-                case 40: return 21;
+                case 3:
+                    return 2;
+                case 5:
+                    return 3;
+                case 7:
+                    return 4;
+                case 8:
+                    return 14;
+                case 10:
+                    return 15;
+                case 11:
+                    return 17;
+                case 12:
+                    return 18;
+                case 13:
+                    return 27;
+                case 15:
+                    return 22;
+                case 16:
+                    return 23;
+                case 18:
+                    return 24;
+                case 19:
+                    return 10;
+                case 21:
+                    return 9;
+                case 22:
+                    return 25;
+                case 23:
+                    return 11;
+                case 24:
+                    return 8;
+                case 26:
+                    return 7;
+                case 27:
+                    return 0;
+                case 28:
+                    return 1;
+                case 29:
+                    return 5;
+                case 31:
+                    return 6;
+                case 32:
+                    return 12;
+                case 33:
+                    return 13;
+                case 35:
+                    return 19;
+                case 36:
+                    return 16;
+                case 37:
+                    return 26;
+                case 38:
+                    return 20;
+                case 40:
+                    return 21;
             }
 
-            throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {this.GetType().Name} device.", nameof(pinNumber));
+            throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber));
         }
     }
 }
