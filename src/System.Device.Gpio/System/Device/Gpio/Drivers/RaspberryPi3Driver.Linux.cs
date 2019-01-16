@@ -296,10 +296,10 @@ namespace System.Device.Gpio.Drivers
         /// Blocks execution until an event of type eventType is received or a cancellation is requested.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="eventType">The event type to listen for.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
         /// <returns>A structure that contains the result of the waiting operation.</returns>
-        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
+        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             ValidatePinNumber(pinNumber);
             InitializeSysFS();
@@ -307,17 +307,17 @@ namespace System.Device.Gpio.Drivers
             _sysFSDriver.OpenPin(pinNumber);
             _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
-            return _sysFSDriver.WaitForEvent(pinNumber, eventType, cancellationToken);
+            return _sysFSDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
         }
 
         /// <summary>
         /// Async call until an event of type eventType is received or a cancellation is requested.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="eventType">The event type to listen for.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="token">The cancellation token of when the operation should stop waiting for an event.</param>
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
-        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
+        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             ValidatePinNumber(pinNumber);
             InitializeSysFS();
@@ -325,9 +325,15 @@ namespace System.Device.Gpio.Drivers
             _sysFSDriver.OpenPin(pinNumber);
             _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
-            return _sysFSDriver.WaitForEventAsync(pinNumber, eventType, cancellationToken);
+            return _sysFSDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
         }
 
+        /// <summary>
+        /// Adds a handler for a pin value changed event.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
             ValidatePinNumber(pinNumber);
@@ -339,6 +345,11 @@ namespace System.Device.Gpio.Drivers
             _sysFSDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventType, callback);
         }
 
+        /// <summary>
+        /// Removes a handler for a pin value changed event.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             ValidatePinNumber(pinNumber);

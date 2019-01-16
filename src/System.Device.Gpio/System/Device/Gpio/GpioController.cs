@@ -198,76 +198,76 @@ namespace System.Device.Gpio
         /// Blocks execution until an event of type eventType is received or a period of time has expired.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="eventType">The event type to listen for.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="timeout">The time to wait for the event.</param>
         /// <returns>A structure that contains the result of the waiting operation.</returns>
-        public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, TimeSpan timeout)
+        public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
         {
             CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
-            return WaitForEvent(pinNumber, eventType, tokenSource.Token);
+            return WaitForEvent(pinNumber, eventTypes, tokenSource.Token);
         }
 
         /// <summary>
         /// Blocks execution until an event of type eventType is received or a cancellation is requested.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="eventType">The event type to listen for.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
         /// <returns>A structure that contains the result of the waiting operation.</returns>
-        public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
+        public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException("Can not wait for events from a pin that is not open.");
             }
-            return _driver.WaitForEvent(logicalPinNumber, eventType, cancellationToken);
+            return _driver.WaitForEvent(logicalPinNumber, eventTypes, cancellationToken);
         }
 
         /// <summary>
         /// Async call to wait until an event of type eventType is received or a period of time has expired.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="eventType">The event type to listen for.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="timeout">The time to wait for the event.</param>
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation.</returns>
-        public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, TimeSpan timeout)
+        public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
         {
             CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
-            return WaitForEventAsync(pinNumber, eventType, tokenSource.Token);
+            return WaitForEventAsync(pinNumber, eventTypes, tokenSource.Token);
         }
 
         /// <summary>
         /// Async call until an event of type eventType is received or a cancellation is requested.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="eventType">The event type to listen for.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="token">The cancellation token of when the operation should stop waiting for an event.</param>
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
-        public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, CancellationToken token)
+        public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken token)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException("Can not wait for events from a pin that is not open.");
             }
-            return _driver.WaitForEventAsync(logicalPinNumber, eventType, token);
+            return _driver.WaitForEventAsync(logicalPinNumber, eventTypes, token);
         }
 
         /// <summary>
         /// Adds a callback that will be invoked when pinNumber has an event of type eventType.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="eventType">The event type to listen for.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="callback">The callback method that will be invoked.</param>
-        public void RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
+        public void RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException("Can not add callback for a pin that is not open.");
             }
-            _driver.AddCallbackForPinValueChangedEvent(logicalPinNumber, eventType, callback);
+            _driver.AddCallbackForPinValueChangedEvent(logicalPinNumber, eventTypes, callback);
         }
 
         /// <summary>

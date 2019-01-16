@@ -474,14 +474,14 @@ namespace System.Device.Gpio.Drivers
         /// Blocks execution until an event of type eventType is received or a cancellation is requested.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="eventType">The event type to listen for.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
         /// <returns>A structure that contains the result of the waiting operation.</returns>
-        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
+        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             int pollFileDescriptor = -1;
             int valueFileDescriptor = -1;
-            SetPinEventsToDetect(pinNumber, eventType);
+            SetPinEventsToDetect(pinNumber, eventTypes);
             AddPinToPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, out bool closePinValueFileDescriptor);
 
             bool eventDetected = WasEventDetected(pollFileDescriptor, valueFileDescriptor, out _, cancellationToken);
@@ -490,10 +490,16 @@ namespace System.Device.Gpio.Drivers
             return new WaitForEventResult
             {
                 TimedOut = !eventDetected,
-                EventType = eventType
+                EventType = eventTypes
             };
         }
 
+        /// <summary>
+        /// Adds a handler for a pin value changed event.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
             if (!_devicePins.ContainsKey(pinNumber))
@@ -514,6 +520,11 @@ namespace System.Device.Gpio.Drivers
             InitializeEventDetectionThread();
         }
 
+        /// <summary>
+        /// Removes a handler for a pin value changed event.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             if (!_devicePins.ContainsKey(pinNumber))

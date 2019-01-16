@@ -73,25 +73,36 @@ namespace System.Device.Gpio
         /// Blocks execution until an event of type eventType is received or a cancellation is requested.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="eventType">The event type to listen for.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
         /// <returns>A structure that contains the result of the waiting operation.</returns>
-        protected internal abstract WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken);
+        protected internal abstract WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken);
 
         /// <summary>
         /// Async call until an event of type eventType is received or a cancellation is requested.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="eventType">The event type to listen for.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="token">The cancellation token of when the operation should stop waiting for an event.</param>
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
-        protected internal virtual ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
+        protected internal virtual ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
-            return new ValueTask<WaitForEventResult>(Task.Run(() => WaitForEvent(pinNumber, eventType, cancellationToken)));
+            return new ValueTask<WaitForEventResult>(Task.Run(() => WaitForEvent(pinNumber, eventTypes, cancellationToken)));
         }
 
-        protected internal abstract void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback);
+        /// <summary>
+        /// Adds a handler for a pin value changed event.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        protected internal abstract void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback);
 
+        /// <summary>
+        /// Removes a handler for a pin value changed event.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected internal abstract void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback);
 
         public void Dispose()
