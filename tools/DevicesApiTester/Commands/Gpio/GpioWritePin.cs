@@ -23,16 +23,16 @@ namespace DeviceApiTester.Commands.Gpio
         /// <remarks>
         ///     NOTE: This test app uses the base class's <see cref="CreateGpioController"/> method to create a device.<br/>
         ///     Real-world usage would simply create an instance of <see cref="GpioController"/>:
-        ///     <code>using (var gpio = new GpioController())</code>
+        ///     <code>using (var controller = new GpioController())</code>
         /// </remarks>
         public int Execute()
         {
             Console.WriteLine($"Driver={Driver}, Scheme={Scheme}, Pin={Pin}, Value={Value}");
 
-            using (GpioController gpio = CreateGpioController())
+            using (GpioController controller = CreateGpioController())
             {
-                gpio.OpenPin(Pin, PinMode.Output);
-                gpio.Write(Pin, Value);
+                controller.OpenPin(Pin, PinMode.Output);
+                controller.Write(Pin, Value);
 
                 // Used to check state.
                 Console.WriteLine("Press any key to exit.");

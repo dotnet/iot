@@ -31,7 +31,7 @@ namespace DeviceApiTester.Commands.Gpio
         /// <remarks>
         ///     NOTE: This test app uses the base class's <see cref="CreateGpioController"/> method to create a device.<br/>
         ///     Real-world usage would simply create an instance of <see cref="GpioController"/>:
-        ///     <code>using (var gpio = new GpioController())</code>
+        ///     <code>using (var controller = new GpioController())</code>
         /// </remarks>
         public Task<int> ExecuteAsync()
         {
@@ -44,61 +44,61 @@ namespace DeviceApiTester.Commands.Gpio
                 Console.WriteLine($"Driver={Driver}, Scheme={Scheme}, ButtonPin={ButtonPin}, PressedValue={PressedValue}, OnValue={OnValue}");
             }
 
-            using (GpioController gpio = CreateGpioController())
+            using (GpioController controller = CreateGpioController())
             {
                 using (var cancelEvent = new ManualResetEvent(false))
                 {
+                    int count = 0;
                     Console.WriteLine($"Listening for button presses on GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin {ButtonPin} . . .");
 
                     // This example runs until Ctrl+C (or Ctrl+Break) is pressed, so register a local function handler.
                     Console.CancelKeyPress += Console_CancelKeyPress;
-                    gpio.OpenPin(ButtonPin);
+                    controller.OpenPin(ButtonPin);
 
                     // Set the mode based on if input pull-up resistors are supported.
-                    PinMode inputMode = gpio.IsPinModeSupported(ButtonPin, PinMode.InputPullUp) ? PinMode.InputPullUp : PinMode.Input;
-                    gpio.SetPinMode(ButtonPin, inputMode);
+                    PinMode inputMode = controller.IsPinModeSupported(ButtonPin, PinMode.InputPullUp) ? PinMode.InputPullUp : PinMode.Input;
+                    controller.SetPinMode(ButtonPin, inputMode);
 
                     // Open the GPIO pin connected to the LED if one was specified.
                     if (LedPin != null)
                     {
-                        gpio.OpenPin(LedPin.Value, PinMode.Output);
-                        gpio.Write(LedPin.Value, OffValue);
+                        controller.OpenPin(LedPin.Value, PinMode.Output);
+                        controller.Write(LedPin.Value, OffValue);
                     }
 
+                    // Set the event handler for changes to the pin value.
+                    PinEventTypes bothPinEventTypes = PinEventTypes.Falling | PinEventTypes.Rising;
+                    controller.RegisterCallbackForPinValueChangedEvent(ButtonPin, bothPinEventTypes, valueChangeHandler);
+
+                    // Wait for the cancel (Ctrl+C) console event.
+                    cancelEvent.WaitOne();
+
+                    controller.ClosePin(ButtonPin);
+                    if (LedPin != null)
+                    {
+                        controller.ClosePin(LedPin.Value);
+                    }
+
+                    // Unregister the event handler for changes to the pin value
+                    controller.UnregisterCallbackForPinValueChangedEvent(ButtonPin, valueChangeHandler);
+
+                    Console.WriteLine("Operation cancelled. Exiting.");
+                    Console.OpenStandardOutput().Flush();
+
+                    return Task.FromResult(0);
+
                     // Declare a local function to handle the pin value changed events.
-                    int count = 0;
                     void valueChangeHandler(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
                     {
                         if (LedPin != null)
                         {
                             PinValue ledValue = pinValueChangedEventArgs.ChangeType == PressedValue ? OnValue : OffValue;
-                            gpio.Write(LedPin.Value, ledValue);
+                            controller.Write(LedPin.Value, ledValue);
                         }
 
                         var pressedOrReleased = pinValueChangedEventArgs.ChangeType == PressedValue ? "pressed" : "released";
                         Console.WriteLine($"[{count++}] Button {pressedOrReleased}: logicalPinNumber={pinValueChangedEventArgs.PinNumber}, ChangeType={pinValueChangedEventArgs.ChangeType}");
                     }
-
-                    // Set the event handler for changes to the pin value.
-                    PinEventTypes bothPinEventTypes = PinEventTypes.Falling | PinEventTypes.Rising;
-                    gpio.RegisterCallbackForPinValueChangedEvent(ButtonPin, bothPinEventTypes, valueChangeHandler);
-
-                    // Wait for the cancel (Ctrl+C) console event.
-                    cancelEvent.WaitOne();
-
-                    gpio.ClosePin(ButtonPin);
-                    if (LedPin != null)
-                    {
-                        gpio.ClosePin(LedPin.Value);
-                    }
-
-                    // Unregister the event handler for changes to the pin value
-                    gpio.UnregisterCallbackForPinValueChangedEvent(ButtonPin, valueChangeHandler);
-
-                    Console.WriteLine("Operation cancelled. Exiting.");
-                    Console.OpenStandardOutput().Flush();
-
-                    return Task<int>.FromResult(0);
 
                     // Local function
                     void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)

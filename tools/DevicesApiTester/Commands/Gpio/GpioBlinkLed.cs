@@ -33,7 +33,7 @@ namespace DeviceApiTester.Commands.Gpio
         /// <remarks>
         ///     NOTE: This test app uses the base class's <see cref="CreateGpioController"/> method to create a device.<br/>
         ///     Real-world usage would simply create an instance of <see cref="GpioController"/>:
-        ///     <code>using (var gpio = new GpioController())</code>
+        ///     <code>using (var controller = new GpioController())</code>
         /// </remarks>
         public async Task<int> ExecuteAsync()
         {
