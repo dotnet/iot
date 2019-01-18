@@ -56,7 +56,7 @@ internal unsafe struct i2c_rdwr_ioctl_data
 {
     public i2c_msg* msgs;
     public uint nmsgs;
-};
+}
 
 [Flags]
 internal enum UnixSpiMode : byte
