@@ -79,6 +79,7 @@ See the following resources to get started.
 
 ### Prototyping
 #### How-Tos
+* [Blinking LED Blog Post by Scott Hanselman](https://www.hanselman.com/blog/InstallingTheNETCore2xSDKOnARaspberryPiAndBlinkingAnLEDWithSystemDeviceGpio.aspx)
 * [Collin's Lab: Breadboards & Perfboards](https://www.youtube.com/watch?v=w0c3t0fJhXU)
 * [How to Use a Breadboard](https://www.youtube.com/watch?v=6WReFkfrUIk)
 
