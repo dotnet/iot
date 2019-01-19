@@ -9,22 +9,19 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace System.Device.Gpio.Drivers
 {
     public class LibGpiodDriver : UnixDriver
     {
-        private string _deviceName = "gpiochip0";
-
         private SafeChipHandle _chip;
 
         private Dictionary<int, SafeLineHandle> _pinNumberToSafeLineHandle;
 
-        private timespec _defaultTimeOut = new timespec(IntPtr.Zero, new IntPtr(1_000_000)); // one millisecond
+        private ConcurrentDictionary<int, LibGpiodDriverEventHandler> _pinNumberToEventHandler = new ConcurrentDictionary<int, LibGpiodDriverEventHandler>();
 
-        private Dictionary<int, LibGpiodDriverEventHandler> _pinNumberToEventHandler = new Dictionary<int, LibGpiodDriverEventHandler>();
-
-        protected internal override int PinCount => Interop.gpiod_chip_num_lines(_chip);
+        protected internal override int PinCount => Interop.GetNumberOfLines(_chip);
 
         public LibGpiodDriver()
         {
@@ -34,31 +31,29 @@ namespace System.Device.Gpio.Drivers
 
         private void OpenChip()
         {
-            SafeChipIteratorHandle iterator = Interop.gpiod_chip_iter_new();
+            SafeChipIteratorHandle iterator = Interop.GetChipIterator();
             if (iterator == null)
             {
                 throw new IOException($"No any chip available, error code: {Marshal.GetLastWin32Error()}");
             }
-            _chip = Interop.gpiod_chip_iter_next(iterator);
+            _chip = Interop.GetNextChipFromChipIterator(iterator);
             if (_chip == null)
             {
                 throw new IOException($"No chip found, error code: {Marshal.GetLastWin32Error()}");
             }
-            _deviceName = Marshal.PtrToStringAnsi(Interop.gpiod_chip_name(_chip));
             // Freeing other chips opened
-            Interop.gpiod_chip_iter_free_noclose(iterator);
+            Interop.FreeChipIteratorNoCloseCurrentChip(iterator);
         }
 
-        private void RequestEvent(int pinNumber, LibGpiodDriverEventHandler eventDescriptor, PinEventTypes eventType)
+        private SafeLineHandle RequestEvent(int pinNumber, PinEventTypes eventType)
         {
             int eventSuccess = -1;
-            SafeLineHandle pin = Interop.gpiod_chip_get_line(_chip, pinNumber);
+            SafeLineHandle pin = Interop.GetChipLineByOffset(_chip, pinNumber);
             if (pin != null)
             {
-                eventDescriptor.PinHandle = pin;
                 if (eventType == PinEventTypes.Rising || eventType == PinEventTypes.Falling)
                 {
-                    eventSuccess = Interop.gpiod_line_request_both_edges_events(pin, $"Listen {pinNumber} for falling edge event");
+                    eventSuccess = Interop.RequestBothEdgeEventForLine(pin, $"Listen {pinNumber} for falling edge event");
                 }
                 else
                 {
@@ -69,6 +64,7 @@ namespace System.Device.Gpio.Drivers
             {
                 throw new IOException($"Error while requesting event listener for pin {pinNumber}, error code: {Marshal.GetLastWin32Error()}");
             }
+            return pin;
         }
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
@@ -76,13 +72,10 @@ namespace System.Device.Gpio.Drivers
             if (!_pinNumberToEventHandler.TryGetValue(pinNumber, out LibGpiodDriverEventHandler eventHandler))
             {
                 if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
-                    Interop.gpiod_line_release(pin);
+                    Interop.ReleaseGpiodLine(pin);
                 eventHandler = new LibGpiodDriverEventHandler(pinNumber, new CancellationTokenSource());
-                lock (_pinNumberToEventHandler)
-                {
-                    _pinNumberToEventHandler.Add(pinNumber, eventHandler);
-                }
-                RequestEvent(pinNumber, eventHandler, eventType);
+                _pinNumberToEventHandler.TryAdd(pinNumber, eventHandler);
+                eventHandler.PinHandle = RequestEvent(pinNumber, eventType);
                 InitializeEventDetectionTask(eventHandler);
             }
             if (eventType == PinEventTypes.Rising)
@@ -102,19 +95,19 @@ namespace System.Device.Gpio.Drivers
                 int waitResult = -2;
                 while (!eventHandler.CancellationTokenSource.IsCancellationRequested)
                 {
-                    waitResult = Interop.gpiod_line_event_wait(eventHandler.PinHandle, ref _defaultTimeOut);
+                    waitResult = Interop.WaitForEventOnLine(eventHandler.PinHandle);
                     if (waitResult == -1)
                     {
                         throw new IOException($"Error while waiting for event, error code: {Marshal.GetLastWin32Error()}");
                     }
                     if (waitResult == 1)
                     {
-                        int readResult = Interop.gpiod_line_event_read(eventHandler.PinHandle, out gpiod_line_event eventInfo);
+                        int readResult = Interop.ReadEventForLine(eventHandler.PinHandle);
                         if (readResult == -1)
                         {
                             throw new IOException($"Error while trying to read pin event result, error code: {Marshal.GetLastWin32Error()}");
                         }
-                        PinEventTypes eventType = (eventInfo.event_type == 1) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                        PinEventTypes eventType = (readResult == 1) ? PinEventTypes.Rising : PinEventTypes.Falling;
                         var args = new PinValueChangedEventArgs(eventType, eventHandler.PinNumber);
                         eventHandler?.OnPinValueChanged(args, eventType);
                     }
@@ -126,7 +119,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
             {
-                Interop.gpiod_line_release(pin);
+                Interop.ReleaseGpiodLine(pin);
                 _pinNumberToSafeLineHandle.Remove(pinNumber);
             }
         }
@@ -138,7 +131,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
             {
-                return (Interop.gpiod_line_direction(pin) == 1) ? PinMode.Input : PinMode.Output;
+                return (Interop.GetLineDirection(pin) == 1) ? PinMode.Input : PinMode.Output;
             }
             return PinMode.Input;
         }
@@ -151,7 +144,7 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void OpenPin(int pinNumber)
         {
-            SafeLineHandle pin = Interop.gpiod_chip_get_line(_chip, pinNumber);
+            SafeLineHandle pin = Interop.GetChipLineByOffset(_chip, pinNumber);
             if (pin == null)
             {
                 throw new IOException($"Pin number {pinNumber} not available for chip: {_chip} error: {Marshal.GetLastWin32Error()}");
@@ -163,7 +156,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
             {
-                int value = Interop.gpiod_line_get_value(pin);
+                int value = Interop.GetGpiodLineValue(pin);
                 if (value == -1)
                 {
                     throw new IOException($"Error while reading value from pin number: {pinNumber}, error: {Marshal.GetLastWin32Error()}");
@@ -182,13 +175,10 @@ namespace System.Device.Gpio.Drivers
                 if (eventHandler.IsCallbackListEmpty())
                 {
                     eventHandler.CancellationTokenSource.Cancel();
-                    Interop.gpiod_line_release(eventHandler.PinHandle);
+                    Interop.ReleaseGpiodLine(eventHandler.PinHandle);
                     eventHandler.Dispose();
-                    lock (_pinNumberToEventHandler)
-                    {
-                        _pinNumberToEventHandler.Remove(pinNumber);
-                    }
-                }
+                    _pinNumberToEventHandler.TryRemove(pinNumber, out eventHandler);
+                 }
             }
             else
             {
@@ -203,11 +193,11 @@ namespace System.Device.Gpio.Drivers
             {
                 if (mode == PinMode.Input)
                 {
-                    success = Interop.gpiod_line_request_input(pin, pinNumber.ToString());
+                    success = Interop.RequestLineInput(pin, pinNumber.ToString());
                 }
                 else
                 {
-                    success = Interop.gpiod_line_request_output(pin, pinNumber.ToString(), 0);
+                    success = Interop.RequestLineOutput(pin, pinNumber.ToString());
                 }
             }
             if (success == -1) {
@@ -216,44 +206,51 @@ namespace System.Device.Gpio.Drivers
         }
 
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
-        {
-            bool timedOut = false;
+        {          
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
             {
-                Interop.gpiod_line_release(pin);
+                Interop.ReleaseGpiodLine(pin);
             }
-            int eventRegistered = Interop.gpiod_ctxless_event_loop(_deviceName, (uint)pinNumber, false, $"pin{pinNumber} listener", ref _defaultTimeOut, null,
-                (int e, uint p, ref timespec t, IntPtr d) =>
-                {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        timedOut = true;
-                        return 1;
-                    }
-                    // the order of rising event for the enum passed to the callback (e) is 2, which is 1 in our PinEventTypes, 
-                    // so was need to plus 1 to our event order  
-                    if (e == (int)eventType + 1) 
-                    {
-                        return 1;
-                    }
-                    return 0;
-                }, IntPtr.Zero);
-            if (eventRegistered == 0)
+            pin = RequestEvent(pinNumber, eventType);
+            bool eventOccured = WaitForEvent(cancellationToken, pin, eventType);
+            return new WaitForEventResult
             {
-                return new WaitForEventResult
+                TimedOut = eventOccured,
+                EventType = eventType
+            };
+        }
+
+        private bool WaitForEvent(CancellationToken cancellationToken, SafeLineHandle pin, PinEventTypes eventType)
+        {
+            int waitResult = -2;
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                waitResult = Interop.WaitForEventOnLine(pin);
+                if (waitResult == -1)
                 {
-                    TimedOut = timedOut,
-                    EventType = eventType
-                };
+                    throw new IOException($"Error while waiting for event, error code: {Marshal.GetLastWin32Error()}");
+                }
+                if (waitResult == 1)
+                {
+                    int readResult = Interop.ReadEventForLine(pin);
+                    if (readResult == -1)
+                    {
+                        throw new IOException($"Error while trying to read pin event result, error code: {Marshal.GetLastWin32Error()}");
+                    }
+                    if (readResult == (int)eventType)
+                    {
+                        return true;
+                    }
+                }
             }
-            throw new IOException($"Failed to regsiter event {eventType} to pin {pinNumber} error: {Marshal.GetLastWin32Error()}");
+            return false;
         }
 
         protected internal override void Write(int pinNumber, PinValue value)
         {
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pin))
             {
-                Interop.gpiod_line_set_value(pin, (value == PinValue.High) ? 1 : 0);
+                Interop.SetGpiodLineValue(pin, (value == PinValue.High) ? 1 : 0);
             }
         }
 
@@ -263,7 +260,7 @@ namespace System.Device.Gpio.Drivers
             {
                 if (handle != null)
                 {
-                    Interop.gpiod_line_release(handle);
+                    Interop.ReleaseGpiodLine(handle);
                 }
             }
             foreach (LibGpiodDriverEventHandler devicePin in _pinNumberToEventHandler.Values)

@@ -45,7 +45,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (PinHandle != null)
             {
-                Interop.gpiod_line_release(PinHandle);
+                Interop.ReleaseGpiodLine(PinHandle);
                 PinHandle.Dispose();
             }
             ValueRising = null;

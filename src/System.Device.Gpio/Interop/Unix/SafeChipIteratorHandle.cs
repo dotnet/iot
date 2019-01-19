@@ -11,7 +11,7 @@ namespace System.Device.Gpio
 
         protected override bool ReleaseHandle()
         {
-            Interop.gpiod_chip_iter_free(handle);
+            Interop.FreeChipIterator(handle);
             return true;
         }
 

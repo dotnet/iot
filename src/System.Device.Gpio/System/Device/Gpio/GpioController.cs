@@ -146,7 +146,7 @@ namespace System.Device.Gpio
             {
                 throw new InvalidOperationException("Can not read from a pin that is not yet opened.");
             }
-            if (_driver.GetPinMode(pinNumber) == PinMode.Output)
+            if (_driver.GetPinMode(logicalPinNumber) == PinMode.Output)
             {
                 throw new InvalidOperationException("Can not read from a pin that is set to Output mode.");
             }
@@ -165,7 +165,7 @@ namespace System.Device.Gpio
             {
                 throw new InvalidOperationException("Can not write to a pin that is not yet opened.");
             }
-            if (_driver.GetPinMode(pinNumber) != PinMode.Output)
+            if (_driver.GetPinMode(logicalPinNumber) != PinMode.Output)
             {
                 throw new InvalidOperationException("Can not write to a pin that is not set to Output mode.");
             }

@@ -40,7 +40,6 @@ namespace System.Device.Gpio
                     {
                         if (match.Groups[1].Value == RaspberryPiHardware)
                         {
-                            Console.WriteLine("raspberry driver");
                             return new RaspberryPi3Driver();
                         }
                         // Commenting out as HummingBoard driver is not implemented yet, will be added back after implementation 
