@@ -4,7 +4,7 @@ Device bindings for the HC-SR04 sonar distance sensor. Work in progress.
 
 ## Summary
 
-Provide a brief description on what the component is and its functonality.
+Calculates the distance from an object by using the HC-SR04 distance sensor.
 
 ## Binding Notes
 
@@ -12,4 +12,4 @@ Provide any specifics related to binding API.  This could include how to configu
 
 ## References
 
-Provide any references to other tutorials, blogs and hardware related to the component that could help others get started.
+* [HC-SR04 data sheet](https://components101.com/sites/default/files/component_datasheet/HCSR04%20Datasheet.pdf)
