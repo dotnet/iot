@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Timers;
+using System.Diagnostics;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
@@ -12,18 +12,20 @@ using System.Device.Spi.Drivers;
 
 namespace Iot.Device.HCSR04
 {
-    public class HCSR04 : IDisposable
+    public class Sonar : IDisposable
     {
         private readonly int _echo;
         private readonly int _trigger;
         private readonly GpioController _controller;
 
-        public HCSR04(int triggerPin, int echoPin)
+        public Sonar(int triggerPin, int echoPin)
         {
             _echo = echoPin;
             _trigger = triggerPin;
             _controller = new GpioController();
 
+            _controller.OpenPin(_echo);
+            _controller.OpenPin(_trigger);
             _controller.SetPinMode(_echo, PinMode.Input);
             _controller.SetPinMode(_trigger, PinMode.Output);
         }
@@ -34,27 +36,35 @@ namespace Iot.Device.HCSR04
         public double GetDistance()
         {
             // Trigger input for 10uS to start ranging
+            _controller.Write(_trigger, PinValue.Low);
+            System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
             _controller.Write(_trigger, PinValue.High);
-            System.Threading.Thread.Sleep(0.01);
+            System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(0.01));
             _controller.Write(_trigger, PinValue.Low);
 
             // Start timers
-            Timer stopTime = new Timer(); stopTime.Start();
-            Timer startTime = new Timer(); startTime.Start();
+            Stopwatch stopTime = new Stopwatch(); stopTime.Start();
+            Stopwatch startTime = new Stopwatch(); startTime.Start();
 
             while(_controller.Read(_echo) == PinValue.Low)
+            {
                 startTime.Start();
+            }
+
+            startTime.Stop();
 
             while(_controller.Read(_echo) == PinValue.High)
+            {
                 stopTime.Start();
+            }
 
-            TimeSpan elapsed = stopTime - startTime;
+            startTime.Stop();
+            
+            TimeSpan elapsed = stopTime.Elapsed - startTime.Elapsed;
 
             // Calculate distance
             // distance = (high level time×velocity of sound (340M/S) / 2
-            double distance = (elapsed.Seconds * 34300) / 2;
-
-            return distance;
+            return (double)(elapsed.Seconds * 34300) / 2;
         }
 
         public void Dispose()
