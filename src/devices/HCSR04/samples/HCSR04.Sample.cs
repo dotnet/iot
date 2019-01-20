@@ -9,6 +9,7 @@ using System.Device.I2c.Drivers;
 using System.Device.Spi;
 using System.Device.Spi.Drivers;
 using System.Threading;
+using Iot.Device.HCSR04;
 
 namespace Iot.Device.HCSR04.Samples
 {
@@ -17,6 +18,17 @@ namespace Iot.Device.HCSR04.Samples
         static void Main(string[] args)
         {
             Console.WriteLine("Hello HCSR04 Sample!");
+
+
+            using(var sonar = new HCSR04(4, 17))
+            {
+                while(true)
+                {
+                    System.Console.WriteLine(sonar.GetDistance());;
+                    System.Threading.Thread.Sleep(100);
+                }
+
+            }
         }
     }
 }
