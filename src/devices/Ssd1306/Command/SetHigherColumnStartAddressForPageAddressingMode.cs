@@ -2,19 +2,33 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 namespace Iot.Device.Ssd1306.Command
 {
     public class SetHigherColumnStartAddressForPageAddressingMode : ICommand
     {
+        /// <summary>
+        /// This command specifies the higher nibble of the 8-bit column start address for the display
+        /// data RAM under Page Addressing Mode. The column address will be incremented by each data access.
+        /// This command is only for page addressing mode.
+        /// </summary>
+        /// <param name="higherColumnStartAddress">Higher column start address with a range of 0-15.</param>
         public SetHigherColumnStartAddressForPageAddressingMode(byte higherColumnStartAddress = 0x00)
         {
-            // TODO: Validate value. 0x00 - 0x0F;
+            if (higherColumnStartAddress > 0x0F)
+            {
+                throw new ArgumentException("The higher column start address is invalid.", nameof(higherColumnStartAddress));
+            }
 
             HigherColumnStartAddress = higherColumnStartAddress;
         }
 
         public byte Value => (byte)(0x10 | HigherColumnStartAddress);
 
+        /// <summary>
+        /// Higher column start address with a range of 0-15.
+        /// </summary>
         public byte HigherColumnStartAddress { get; }
 
         public byte[] GetBytes()

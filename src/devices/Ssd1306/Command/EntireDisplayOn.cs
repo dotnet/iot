@@ -6,14 +6,21 @@ namespace Iot.Device.Ssd1306.Command
 {
     public class EntireDisplayOn : ICommand
     {
-        public EntireDisplayOn(bool entireDisplay = false)
+        /// <summary>
+        /// This command turns the entire display on or off.
+        /// </summary>
+        /// <param name="entireDisplay">Resume to RAM content display when FALSE and turns entire dislay on when TRUE.</param>
+        public EntireDisplayOn(bool entireDisplay)
         {
             EntireDisplay = entireDisplay;
         }
-
+        
         public byte Value => (byte)(EntireDisplay ? 0xA5 : 0xA4);
 
-        public bool EntireDisplay { get; set; }
+        /// <summary>
+        /// Resume to RAM content display when FALSE and turns entire dislay on when TRUE.
+        /// </summary>
+        public bool EntireDisplay { get; }
 
         public byte[] GetBytes()
         {

@@ -4,7 +4,6 @@
 
 namespace Iot.Device.Ssd1306
 {
-    // See https://github.com/dotnet/iot/issues/89
     public enum ConnectionType
     {
         I2c,

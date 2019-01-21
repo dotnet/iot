@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Iot.Device.Ssd1306.Command;
+using System;
 using Xunit;
 using static Iot.Device.Ssd1306.Command.ContinuousVerticalAndHorizontalScrollSetup;
 
@@ -22,7 +23,6 @@ namespace Iot.Device.Mcp23xxx.Tests
         [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page5, FrameFrequencyType.Frames5, PageAddress.Page0, 0x00, new byte[] { 0x29, 0x00, 0x05, 0x00, 0x00, 0x00 })]
         [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page6, FrameFrequencyType.Frames5, PageAddress.Page0, 0x00, new byte[] { 0x29, 0x00, 0x06, 0x00, 0x00, 0x00 })]
         [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page7, FrameFrequencyType.Frames5, PageAddress.Page0, 0x00, new byte[] { 0x29, 0x00, 0x07, 0x00, 0x00, 0x00 })]
-        [InlineData(VerticalHorizontalScrollType.Right, (PageAddress)0x08, FrameFrequencyType.Frames5, PageAddress.Page0, 0x00, new byte[] { 0x29, 0x00, 0x08, 0x00, 0x00, 0x00 })]
         // FrameFrequencyType
         [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames64, PageAddress.Page0, 0x00, new byte[] { 0x29, 0x00, 0x00, 0x01, 0x00, 0x00 })]
         [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames128, PageAddress.Page0, 0x00, new byte[] { 0x29, 0x00, 0x00, 0x02, 0x00, 0x00 })]
@@ -39,9 +39,8 @@ namespace Iot.Device.Mcp23xxx.Tests
         [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames5, PageAddress.Page5, 0x00, new byte[] { 0x29, 0x00, 0x00, 0x00, 0x05, 0x00 })]
         [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames5, PageAddress.Page6, 0x00, new byte[] { 0x29, 0x00, 0x00, 0x00, 0x06, 0x00 })]
         [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames5, PageAddress.Page7, 0x00, new byte[] { 0x29, 0x00, 0x00, 0x00, 0x07, 0x00 })]
-        [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames5, (PageAddress)0x08, 0x00, new byte[] { 0x29, 0x00, 0x00, 0x00, 0x08, 0x00 })]
         // VerticalScrollingOffset
-        [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames5, PageAddress.Page0, 0xFF, new byte[] { 0x29, 0x00, 0x00, 0x00, 0x00, 0xFF })]
+        [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames5, PageAddress.Page0, 0x3F, new byte[] { 0x29, 0x00, 0x00, 0x00, 0x00, 0x3F })]
         public void Get_Bytes(
             VerticalHorizontalScrollType scrollType,
             PageAddress startPageAddress,
@@ -58,6 +57,37 @@ namespace Iot.Device.Mcp23xxx.Tests
                 verticalScrollingOffset);
             byte[] actualBytes = continuousVerticalAndHorizontalScrollSetup.GetBytes();
             Assert.Equal(expectedBytes, actualBytes);
+        }
+
+        [Theory]
+        // HorizontalScrollType
+        [InlineData((VerticalHorizontalScrollType)0x03, PageAddress.Page0, FrameFrequencyType.Frames5, PageAddress.Page7, 0x01)]
+        // StartPageAddress
+        [InlineData(VerticalHorizontalScrollType.Right, (PageAddress)0x08, FrameFrequencyType.Frames5, PageAddress.Page7, 0x01)]
+        // FrameFrequencyType
+        [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, (FrameFrequencyType)0x08, PageAddress.Page7, 0x01)]
+        // EndPageAddress
+        [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames5, (PageAddress)0x08, 0x01)]
+        // VerticalScrollingOffset
+        [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames5, PageAddress.Page7, 0xFF)]
+        // HorizontalScrollType, StartPageAddress, FrameFrequencyType EndPageAddress, VerticalScrollingOffset
+        [InlineData((VerticalHorizontalScrollType)0x03, (PageAddress)0x08, (FrameFrequencyType)0x08, (PageAddress)0x08, 0x40)]
+        public void Invalid_HorizontalScrollSetup(
+            VerticalHorizontalScrollType scrollType,
+            PageAddress startPageAddress,
+            FrameFrequencyType frameFrequencyType,
+            PageAddress endPageAddress,
+            byte verticalScrollingOffset)
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                ContinuousVerticalAndHorizontalScrollSetup continuousVerticalAndHorizontalScrollSetup = new ContinuousVerticalAndHorizontalScrollSetup(
+                scrollType,
+                startPageAddress,
+                frameFrequencyType,
+                endPageAddress,
+                verticalScrollingOffset);
+            });
         }
     }
 }

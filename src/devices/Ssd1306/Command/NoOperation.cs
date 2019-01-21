@@ -6,6 +6,13 @@ namespace Iot.Device.Ssd1306.Command
 {
     public class NoOperation : ICommand
     {
+        /// <summary>
+        /// This command is a no operation command.
+        /// </summary>
+        public NoOperation()
+        {
+        }
+
         public byte Value => 0xE3;
 
         public byte[] GetBytes()

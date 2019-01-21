@@ -6,6 +6,13 @@ namespace Iot.Device.Ssd1306.Command
 {
     public class SetDisplayOn : ICommand
     {
+        /// <summary>
+        /// This command turns the OLED panel display on. 
+        /// </summary>
+        public SetDisplayOn()
+        {
+        }
+
         public byte Value => 0xAF;
 
         public byte[] GetBytes()

@@ -6,6 +6,13 @@ namespace Iot.Device.Ssd1306.Command
 {
     public class SetNormalDisplay : ICommand
     {
+        /// <summary>
+        /// This command sets the display to be normal.  Displays a RAM data of 1 indicates an ON pixel.
+        /// </summary>
+        public SetNormalDisplay()
+        {
+        }
+
         public byte Value => 0xA6;
 
         public byte[] GetBytes()

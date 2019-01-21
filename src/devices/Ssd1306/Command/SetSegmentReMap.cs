@@ -6,14 +6,25 @@ namespace Iot.Device.Ssd1306.Command
 {
     public class SetSegmentReMap : ICommand
     {
-        public SetSegmentReMap(bool columnAddress0 = true)
+        /// <summary>
+        /// This command changes the mapping between the display data column address and the segment driver.
+        /// It allows flexibility in OLED module design. This command only affects subsequent data input.
+        /// Data already stored in GDDRAM will have no changes.
+        /// </summary>
+        /// <param name="columnAddress127">Column address 0 is mapped to SEG0 when FALSE.
+        /// Column address 127 is mapped to SEG0 when TRUE.</param>
+        public SetSegmentReMap(bool columnAddress127 = false)
         {
-            ColumnAddress0 = columnAddress0;
+            ColumnAddress127 = columnAddress127;
         }
 
-        public byte Value => (byte)(ColumnAddress0 ? 0xA0 : 0xA1);
+        public byte Value => (byte)(ColumnAddress127 ? 0xA1 : 0xA0);
 
-        public bool ColumnAddress0 { get; set; }
+        /// <summary>
+        /// Column Address 127.  Column address 127 is mapped to SEG0 when FALSE.
+        /// Column address 127 is mapped to SEG0 when TRUE.
+        /// </summary>
+        public bool ColumnAddress127 { get; set; }
 
         public byte[] GetBytes()
         {

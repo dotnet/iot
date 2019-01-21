@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Iot.Device.Ssd1306.Command;
+using System;
 using Xunit;
 
 namespace Iot.Device.Mcp23xxx.Tests
@@ -10,14 +11,24 @@ namespace Iot.Device.Mcp23xxx.Tests
     public class SetMultiplexRatioTests
     {
         [Theory]
-        [InlineData(0x00, new byte[] { 0xA8, 0x00 })]
+        [InlineData(0x0F, new byte[] { 0xA8, 0x0F })]
         [InlineData(0x3F, new byte[] { 0xA8, 0x3F })]
-        [InlineData(0x40, new byte[] { 0xA8, 0x40 })]
         public void Get_Bytes(byte multiplexRatio, byte[] expectedBytes)
         {
             SetMultiplexRatio setMultiplexRatio = new SetMultiplexRatio(multiplexRatio);
             byte[] actualBytes = setMultiplexRatio.GetBytes();
             Assert.Equal(expectedBytes, actualBytes);
+        }
+
+        [Theory]
+        [InlineData(0x0E)]
+        [InlineData(0x40)]
+        public void Invalid_MultiplexRatio(byte multiplexRatio)
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                SetMultiplexRatio setMultiplexRatio = new SetMultiplexRatio(multiplexRatio);
+            });
         }
     }
 }

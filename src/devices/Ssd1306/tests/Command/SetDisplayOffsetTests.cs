@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Iot.Device.Ssd1306.Command;
+using System;
 using Xunit;
 
 namespace Iot.Device.Mcp23xxx.Tests
@@ -11,12 +12,22 @@ namespace Iot.Device.Mcp23xxx.Tests
     {
         [Theory]
         [InlineData(0x00, new byte[] { 0xD3, 0x00 })]
-        [InlineData(0xFF, new byte[] { 0xD3, 0xFF })]
         public void Get_Bytes(byte displayOffset, byte[] expectedBytes)
         {
             SetDisplayOffset setDisplayOffset = new SetDisplayOffset(displayOffset);
             byte[] actualBytes = setDisplayOffset.GetBytes();
             Assert.Equal(expectedBytes, actualBytes);
+        }
+
+        [Theory]
+        [InlineData(0x40)]
+        [InlineData(0xFF)]
+        public void Invalid_DisplayOffset(byte displayOffset)
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                SetDisplayOffset setDisplayOffset = new SetDisplayOffset(displayOffset);
+            });
         }
     }
 }

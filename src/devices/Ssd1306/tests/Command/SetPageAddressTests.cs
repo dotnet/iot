@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Iot.Device.Ssd1306.Command;
+using System;
 using Xunit;
 
 namespace Iot.Device.Mcp23xxx.Tests
@@ -19,7 +20,6 @@ namespace Iot.Device.Mcp23xxx.Tests
         [InlineData(PageAddress.Page5, PageAddress.Page0, new byte[] { 0x22, 0x05, 0x00 })]
         [InlineData(PageAddress.Page6, PageAddress.Page0, new byte[] { 0x22, 0x06, 0x00 })]
         [InlineData(PageAddress.Page7, PageAddress.Page0, new byte[] { 0x22, 0x07, 0x00 })]
-        [InlineData((PageAddress)0x08, PageAddress.Page0, new byte[] { 0x22, 0x08, 0x00 })]
         // EndAddress
         [InlineData(PageAddress.Page0, PageAddress.Page1, new byte[] { 0x22, 0x00, 0x01 })]
         [InlineData(PageAddress.Page0, PageAddress.Page2, new byte[] { 0x22, 0x00, 0x02 })]
@@ -28,12 +28,29 @@ namespace Iot.Device.Mcp23xxx.Tests
         [InlineData(PageAddress.Page0, PageAddress.Page5, new byte[] { 0x22, 0x00, 0x05 })]
         [InlineData(PageAddress.Page0, PageAddress.Page6, new byte[] { 0x22, 0x00, 0x06 })]
         [InlineData(PageAddress.Page0, PageAddress.Page7, new byte[] { 0x22, 0x00, 0x07 })]
-        [InlineData(PageAddress.Page0, (PageAddress)0x08, new byte[] { 0x22, 0x00, 0x08 })]
         public void Get_Bytes(PageAddress startAddress, PageAddress endAddress, byte[] expectedBytes)
         {
             SetPageAddress setPageAddress = new SetPageAddress(startAddress, endAddress);
             byte[] actualBytes = setPageAddress.GetBytes();
             Assert.Equal(expectedBytes, actualBytes);
+        }
+
+        [Theory]
+        // StartAddress invalid
+        [InlineData((PageAddress)0x08, (PageAddress)0x00)]
+        [InlineData((PageAddress)0xFF, (PageAddress)0x00)]
+        // EndAddress invalid
+        [InlineData((PageAddress)0x00, (PageAddress)0x08)]
+        [InlineData((PageAddress)0x00, (PageAddress)0xFF)]
+        // StartAddress and EndAddress invalid
+        [InlineData((PageAddress)0x08, (PageAddress)0x08)]
+        [InlineData((PageAddress)0xFF, (PageAddress)0xFF)]
+        public void Invalid_Addresses(PageAddress startAddress, PageAddress endAddress)
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                SetPageAddress setPageAddress = new SetPageAddress(startAddress, endAddress);
+            });
         }
     }
 }

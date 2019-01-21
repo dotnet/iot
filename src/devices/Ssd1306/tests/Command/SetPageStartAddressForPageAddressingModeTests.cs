@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Iot.Device.Ssd1306.Command;
+using System;
 using Xunit;
 
 namespace Iot.Device.Mcp23xxx.Tests
@@ -18,12 +19,22 @@ namespace Iot.Device.Mcp23xxx.Tests
         [InlineData(PageAddress.Page5, new byte[] { 0xB5 })]
         [InlineData(PageAddress.Page6, new byte[] { 0xB6 })]
         [InlineData(PageAddress.Page7, new byte[] { 0xB7 })]
-        [InlineData((PageAddress)0x08, new byte[] { 0xB8 })]
         public void Get_Bytes(PageAddress startAddress, byte[] expectedBytes)
         {
             SetPageStartAddressForPageAddressingMode setPageStartAddressForPageAddressingMode = new SetPageStartAddressForPageAddressingMode(startAddress);
             byte[] actualBytes = setPageStartAddressForPageAddressingMode.GetBytes();
             Assert.Equal(expectedBytes, actualBytes);
+        }
+
+        [Theory]
+        [InlineData((PageAddress)0x08)]
+        [InlineData((PageAddress)0xFF)]
+        public void Invalid_StartAddress(PageAddress startAddress)
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                SetPageStartAddressForPageAddressingMode setPageStartAddressForPageAddressingMode = new SetPageStartAddressForPageAddressingMode(startAddress);
+            });
         }
     }
 }

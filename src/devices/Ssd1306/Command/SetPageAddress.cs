@@ -2,13 +2,34 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 namespace Iot.Device.Ssd1306.Command
 {
     public class SetPageAddress : ICommand
     {
+        /// <summary>
+        /// This triple byte command specifies page start address and end address of the display data RAM.
+        /// This command also sets the page address pointer to page start address. This pointer is used to
+        /// define the current read/write page address in graphic display data RAM. If vertical address
+        /// increment mode is enabled by command 20h, after finishing read/write one page data, it is
+        /// incremented automatically to the next page address. Whenever the page address pointer finishes
+        /// accessing the end page address, it is reset back to start page address.
+        /// This command is only for horizontal or vertical addressing modes.
+        /// </summary>
+        /// <param name="startAddress">Page start address with a range of 0-7.</param>
+        /// <param name="endAddress">Page end address with a range of 0-7.</param>
         public SetPageAddress(PageAddress startAddress = PageAddress.Page0, PageAddress endAddress = PageAddress.Page7)
         {
-            // TODO: Validate values. 0x00 - 0x07.
+            if ((byte)startAddress > 0x07)
+            {
+                throw new ArgumentException("The page start address is invalid.", nameof(startAddress));
+            }
+
+            if ((byte)endAddress > 0x07)
+            {
+                throw new ArgumentException("The page end address is invalid.", nameof(endAddress));
+            }
 
             StartAddress = startAddress;
             EndAddress = endAddress;
@@ -16,8 +37,14 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte Value => 0x22;
 
+        /// <summary>
+        /// Page start address with a range of 0-7.
+        /// </summary>
         public PageAddress StartAddress { get; set; }
 
+        /// <summary>
+        /// Page end address with a range of 0-7.
+        /// </summary>
         public PageAddress EndAddress { get; set; }
 
         public byte[] GetBytes()

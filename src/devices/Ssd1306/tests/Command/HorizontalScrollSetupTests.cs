@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Iot.Device.Ssd1306.Command;
+using System;
 using Xunit;
 using static Iot.Device.Ssd1306.Command.HorizontalScrollSetup;
 
@@ -47,6 +48,29 @@ namespace Iot.Device.Mcp23xxx.Tests
                 endPageAddress);
             byte[] actualBytes = horizontalScrollSetup.GetBytes();
             Assert.Equal(expectedBytes, actualBytes);
+        }
+
+        [Theory]
+        // HorizontalScrollType
+        [InlineData((HorizontalScrollType)0x03, PageAddress.Page0, FrameFrequencyType.Frames5, PageAddress.Page7)]
+        // StartPageAddress
+        [InlineData(HorizontalScrollType.Right, (PageAddress)0x08, FrameFrequencyType.Frames5, PageAddress.Page7)]
+        // FrameFrequencyType
+        [InlineData(HorizontalScrollType.Right, PageAddress.Page0, (FrameFrequencyType)0x08, PageAddress.Page7)]
+        // EndPageAddress
+        [InlineData(HorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames5, (PageAddress)0x08)]
+        // HorizontalScrollType, StartPageAddress, FrameFrequencyType EndPageAddress
+        [InlineData((HorizontalScrollType)0x03, (PageAddress)0x08, (FrameFrequencyType)0x08, (PageAddress)0x08)]
+        public void Invalid_HorizontalScrollSetup(HorizontalScrollType scrollType, PageAddress startPageAddress, FrameFrequencyType frameFrequencyType, PageAddress endPageAddress)
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                HorizontalScrollSetup horizontalScrollSetup = new HorizontalScrollSetup(
+                scrollType,
+                startPageAddress,
+                frameFrequencyType,
+                endPageAddress);
+            });
         }
     }
 }
