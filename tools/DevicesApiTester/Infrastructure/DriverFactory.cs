@@ -14,12 +14,12 @@ namespace DeviceApiTester.Infrastructure
         {
             try
             {
-                var creatorAttribute = typeof(EnumType)
+                ImplementationTypeAttribute creatorAttribute = typeof(EnumType)
                     .GetMember(driver.ToString())?[0]
                     .GetCustomAttributes(typeof(ImplementationTypeAttribute), false)
                     .OfType<ImplementationTypeAttribute>()
                     .FirstOrDefault()
-                    ?? throw new InvalidOperationException($"The {typeof(EnumType).Name}.{driver} enum value is not attributed with an {nameof(ImplementationTypeAttribute)}");
+                    ?? throw new InvalidOperationException($"The {typeof(EnumType).Name}.{driver} enum value is not attributed with an {nameof(ImplementationTypeAttribute)}.");
 
                 return creatorAttribute.ImplementationType == null
                     ? null
