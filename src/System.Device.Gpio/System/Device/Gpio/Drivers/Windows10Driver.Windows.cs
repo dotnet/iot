@@ -34,12 +34,39 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         protected internal override int PinCount => s_winGpioController.PinCount;
 
+        protected override void Dispose(bool disposing)
+        {
+            foreach (Windows10DriverPin devicePin in _openPins.Values)
+            {
+                devicePin.Dispose();
+            }
+
+            _openPins.Clear();
+
+            base.Dispose(disposing);
+        }
+
         /// <summary>
-        /// Lookups an open pin in the driver.
+        /// Adds a handler for a pin value changed event.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <returns>The open pin in the driver.</returns>
-        private Windows10DriverPin LookupOpenPin(int pinNumber) => _openPins[pinNumber];
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
+            => LookupOpenPin(pinNumber).AddCallbackForPinValueChangedEvent(eventTypes, callback);
+
+        /// <summary>
+        /// Closes an open pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        protected internal override void ClosePin(int pinNumber)
+        {
+            if (_openPins.TryGetValue(pinNumber, out Windows10DriverPin pin))
+            {
+                pin.ClosePin();
+                _openPins.Remove(pinNumber);
+            }
+        }
 
         /// <summary>
         /// Converts a board pin number to the driver's logical numbering scheme.
@@ -48,6 +75,21 @@ namespace System.Device.Gpio.Drivers
         /// <returns>The pin number in the driver's logical numbering scheme.</returns>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
             => throw new PlatformNotSupportedException($"The {GetType().Name} driver does not support physical (board) numbering, since it's generic.");
+
+        /// <summary>
+        /// Gets the mode of a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <returns>The mode of the pin.</returns>
+        protected internal override PinMode GetPinMode(int pinNumber) => LookupOpenPin(pinNumber).GetPinMode();
+
+        /// <summary>
+        /// Checks if a pin supports a specific mode.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="mode">The mode to check.</param>
+        /// <returns>The status if the pin supports the mode.</returns>
+        protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode) => LookupOpenPin(pinNumber).IsPinModeSupported(mode);
 
         /// <summary>
         /// Opens a pin in order for it to be ready to use.
@@ -71,41 +113,6 @@ namespace System.Device.Gpio.Drivers
         }
 
         /// <summary>
-        /// Closes an open pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        protected internal override void ClosePin(int pinNumber)
-        {
-            if (_openPins.TryGetValue(pinNumber, out Windows10DriverPin pin))
-            {
-                pin.ClosePin();
-                _openPins.Remove(pinNumber);
-            }
-        }
-
-        /// <summary>
-        /// Sets the mode to a pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="mode">The mode to be set.</param>
-        protected internal override void SetPinMode(int pinNumber, PinMode mode) => LookupOpenPin(pinNumber).SetPinMode(mode);
-
-        /// <summary>
-        /// Gets the mode of a pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <returns>The mode of the pin.</returns>
-        protected internal override PinMode GetPinMode(int pinNumber) => LookupOpenPin(pinNumber).GetPinMode();
-
-        /// <summary>
-        /// Checks if a pin supports a specific mode.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="mode">The mode to check.</param>
-        /// <returns>The status if the pin supports the mode.</returns>
-        protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode) => LookupOpenPin(pinNumber).IsPinModeSupported(mode);
-
-        /// <summary>
         /// Reads the current value of a pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
@@ -113,11 +120,19 @@ namespace System.Device.Gpio.Drivers
         protected internal override PinValue Read(int pinNumber) => LookupOpenPin(pinNumber).Read();
 
         /// <summary>
-        /// Writes a value to a pin.
+        /// Removes a handler for a pin value changed event.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="value">The value to be written to the pin.</param>
-        protected internal override void Write(int pinNumber, PinValue value) => LookupOpenPin(pinNumber).Write(value);
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
+            => LookupOpenPin(pinNumber).RemoveCallbackForPinValueChangedEvent(callback);
+
+        /// <summary>
+        /// Sets the mode to a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="mode">The mode to be set.</param>
+        protected internal override void SetPinMode(int pinNumber, PinMode mode) => LookupOpenPin(pinNumber).SetPinMode(mode);
 
         /// <summary>
         /// Blocks execution until an event of type eventType is received or a cancellation is requested.
@@ -130,32 +145,17 @@ namespace System.Device.Gpio.Drivers
             => LookupOpenPin(pinNumber).WaitForEvent(eventTypes, cancellationToken);
 
         /// <summary>
-        /// Adds a handler for a pin value changed event.
+        /// Writes a value to a pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="eventTypes">The event types to wait for.</param>
-        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
-        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
-            => LookupOpenPin(pinNumber).AddCallbackForPinValueChangedEvent(eventTypes, callback);
+        /// <param name="value">The value to be written to the pin.</param>
+        protected internal override void Write(int pinNumber, PinValue value) => LookupOpenPin(pinNumber).Write(value);
 
         /// <summary>
-        /// Removes a handler for a pin value changed event.
+        /// Lookups an open pin in the driver.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
-        protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
-            => LookupOpenPin(pinNumber).RemoveCallbackForPinValueChangedEvent(callback);
-
-        protected override void Dispose(bool disposing)
-        {
-            foreach (Windows10DriverPin devicePin in _openPins.Values)
-            {
-                devicePin.Dispose();
-            }
-
-            _openPins.Clear();
-
-            base.Dispose(disposing);
-        }
+        /// <returns>The open pin in the driver.</returns>
+        private Windows10DriverPin LookupOpenPin(int pinNumber) => _openPins[pinNumber];
     }
 }

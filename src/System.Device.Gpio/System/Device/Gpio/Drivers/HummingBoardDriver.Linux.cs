@@ -14,11 +14,18 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         protected internal override int PinCount => throw new NotImplementedException();
 
+        protected override void Dispose(bool disposing)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
-        /// Opens a pin in order for it to be ready to use.
+        /// Adds a handler for a pin value changed event.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        protected internal override void OpenPin(int pinNumber)
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
             throw new NotImplementedException();
         }
@@ -28,16 +35,6 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void ClosePin(int pinNumber)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the mode to a pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="mode">The mode to be set.</param>
-        protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
             throw new NotImplementedException();
         }
@@ -54,6 +51,15 @@ namespace System.Device.Gpio.Drivers
         }
 
         /// <summary>
+        /// Opens a pin in order for it to be ready to use.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        protected internal override void OpenPin(int pinNumber)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Reads the current value of a pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
@@ -64,11 +70,21 @@ namespace System.Device.Gpio.Drivers
         }
 
         /// <summary>
-        /// Writes a value to a pin.
+        /// Removes a handler for a pin value changed event.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="value">The value to be written to the pin.</param>
-        protected internal override void Write(int pinNumber, PinValue value)
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the mode to a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="mode">The mode to be set.</param>
+        protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
             throw new NotImplementedException();
         }
@@ -98,27 +114,11 @@ namespace System.Device.Gpio.Drivers
         }
 
         /// <summary>
-        /// Adds a handler for a pin value changed event.
+        /// Writes a value to a pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="eventTypes">The event types to wait for.</param>
-        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
-        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Removes a handler for a pin value changed event.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
-        protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override void Dispose(bool disposing)
+        /// <param name="value">The value to be written to the pin.</param>
+        protected internal override void Write(int pinNumber, PinValue value)
         {
             throw new NotImplementedException();
         }
