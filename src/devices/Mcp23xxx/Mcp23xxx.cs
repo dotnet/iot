@@ -4,75 +4,210 @@
 
 using System;
 using System.Device.Gpio;
-using System.Device.Spi;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public class Mcp23xxx : IDisposable
+    public abstract class Mcp23xxx : IDisposable
     {
-        private readonly SpiDevice _spiDevice;
+        protected int DeviceAddress { get; }
+        private GpioController _masterGpioController;
+        private readonly int? _reset;
+        private readonly int? _interruptA;
+        private readonly int? _interruptB;
 
-        private enum CommunicationProtocol
+        /// <summary>
+        /// A general purpose parallel I/O expansion for I2C or SPI applications.
+        /// </summary>
+        /// <param name="deviceAddress">The device address for the connection on the I2C or SPI bus.</param>
+        /// <param name="reset">Output pin number that is connected to the hardware reset.</param>
+        /// <param name="interruptA">Input pin number that is connected to the interrupt for Port A (INTA).</param>
+        /// <param name="interruptB">Input pin number that is connected to the interrupt for Port B (INTB).</param>
+        public Mcp23xxx(int deviceAddress, int? reset = null, int? interruptA = null, int? interruptB = null)
         {
-            I2c,
-            Spi
+            ValidateDeviceAddress(deviceAddress);
+
+            DeviceAddress = deviceAddress;
+            _reset = reset;
+            _interruptA = interruptA;
+            _interruptB = interruptB;
+
+            InitializeMasterGpioController();
         }
 
-        public Mcp23xxx(SpiDevice spiDevice)
+        internal static void ValidateBitNumber(int bitNumber)
         {
-            _spiDevice = spiDevice;
+            if (bitNumber < 0 || bitNumber > 7)
+            {
+                throw new IndexOutOfRangeException("Invalid bit index.");
+            }
         }
 
-        public void Dispose()
+        internal static void ClearBit(ref byte data, int bitNumber)
         {
+            ValidateBitNumber(bitNumber);
+            data &= (byte)~(1 << bitNumber);
         }
 
-        public byte Read(int deviceAddress, Register.Address registerAddress, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        internal void SetBit(ref byte data, int bitNumber)
         {
-            byte opCode = OpCode.GetOpCode(deviceAddress, true);
-            byte mappedAddress = Register.GetMappedAddress(registerAddress, port, bank);
-            byte[] writeBuffer = new byte[] { opCode, mappedAddress, 0 };
-            byte[] readBuffer = new byte[3];
-
-            _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
-            return readBuffer[2];
+            ValidateBitNumber(bitNumber);
+            data |= (byte)(1 << bitNumber);
         }
 
-        public byte[] Read(int deviceAddress, Register.Address startingRegisterAddress, byte byteCount, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        internal static bool GetBit(byte data, int bitNumber)
         {
-            byte opCode = OpCode.GetOpCode(deviceAddress, true);
-            byte mappedAddress = Register.GetMappedAddress(startingRegisterAddress, port, bank);
-
-            byteCount += 2;  // Include OpCode and Register Address.
-            byte[] writeBuffer = new byte[byteCount];
-            writeBuffer[0] = opCode;
-            writeBuffer[1] = (byte)startingRegisterAddress;
-            byte[] readBuffer = new byte[byteCount];
-
-            _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
-            return readBuffer.AsSpan().Slice(2).ToArray();  // First 2 bytes are from sending OpCode and Register Address.
+            ValidateBitNumber(bitNumber);
+            return ((data >> bitNumber) & 1) == 1;
         }
 
-        public void Write(int deviceAddress, Register.Address registerAddress, byte data, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        private void ValidateDeviceAddress(int deviceAddress)
         {
-            byte opCode = OpCode.GetOpCode(deviceAddress, false);
-            byte mappedAddress = Register.GetMappedAddress(registerAddress, port, bank);
-            byte[] writeBuffer = new byte[] { opCode, mappedAddress, data };
-
-            _spiDevice.Write(writeBuffer);
+            if (deviceAddress < 0x20 || deviceAddress > 0x27)
+            {
+                throw new ArgumentOutOfRangeException(nameof(deviceAddress), deviceAddress, "The Mcp23xxx address must be a value of 32 (0x20) - 39 (0x27).");
+            }
         }
 
-        public void Write(int deviceAddress, Register.Address startingRegisterAddress, byte[] data, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        private void InitializeMasterGpioController()
         {
-            byte opCode = OpCode.GetOpCode(deviceAddress, false);
-            byte mappedAddress = Register.GetMappedAddress(startingRegisterAddress, port, bank);
+            // Only need master controller if there are external pins provided.
+            if (_reset != null || _interruptA != null || _interruptB != null)
+            {
+                _masterGpioController = new GpioController();
 
-            byte[] writeBuffer = new byte[data.Length + 2]; // Include OpCode and Register Address.
-            writeBuffer[0] = opCode;
-            writeBuffer[1] = (byte)startingRegisterAddress;
-            data.CopyTo(writeBuffer, 2);
+                if (_interruptA != null)
+                {
+                    _masterGpioController.OpenPin((int)_interruptA, PinMode.Input);
+                }
 
-            _spiDevice.Write(writeBuffer);
+                if (_interruptB != null)
+                {
+                    _masterGpioController.OpenPin((int)_interruptB, PinMode.Input);
+                }
+
+                if (_reset != null)
+                {
+                    _masterGpioController.OpenPin((int)_reset, PinMode.Output);
+                    Disable();
+                }
+            }
+        }
+
+        public abstract int PinCount { get; }
+
+        public abstract byte[] Read(Register.Address startingRegisterAddress, byte byteCount, Port port = Port.PortA, Bank bank = Bank.Bank1);
+        public abstract void Write(Register.Address startingRegisterAddress, byte[] data, Port port = Port.PortA, Bank bank = Bank.Bank1);
+
+        public virtual void Dispose()
+        {
+            if (_masterGpioController != null)
+            {
+                _masterGpioController.Dispose();
+                _masterGpioController = null;
+            }
+        }
+
+        public void Disable()
+        {
+            if (_masterGpioController == null)
+            {
+                throw new Exception("Master controller has not been initialized.");
+            }
+
+            if (_reset == null)
+            {
+                throw new Exception("Reset pin has not been initialized.");
+            }
+
+            _masterGpioController.Write((int)_reset, PinValue.Low);
+        }
+
+        public void Enable()
+        {
+            if (_masterGpioController == null)
+            {
+                throw new Exception("Master controller has not been initialized.");
+            }
+
+            if (_reset == null)
+            {
+                throw new Exception("Reset pin has not been initialized.");
+            }
+
+            _masterGpioController.Write((int)_reset, PinValue.High);
+        }
+
+        public byte Read(Register.Address registerAddress, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        {
+            byte[] data = Read(registerAddress, 1, port, bank);
+            return data[0];
+        }
+
+        public bool ReadBit(Register.Address registerAddress, int bitNumber, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        {
+            ValidateBitNumber(bitNumber);
+            byte data = Read(registerAddress, port, bank);
+            return GetBit(data, bitNumber);
+        }
+
+        /// <summary>
+        /// Read the pin value of interrupt for Port A (INTA).
+        /// </summary>
+        /// <returns>Pin value of interrupt for Port A (INTA).</returns>
+        public PinValue ReadInterruptA()
+        {
+            if (_masterGpioController == null)
+            {
+                throw new Exception("Master controller has not been initialized.");
+            }
+
+            if (_reset == null)
+            {
+                throw new Exception("INTA pin has not been initialized.");
+            }
+
+            return _masterGpioController.Read((int)_interruptA);
+        }
+
+        /// <summary>
+        /// Read the pin value of interrupt for Port B (INTB).
+        /// </summary>
+        /// <returns>Pin value of interrupt for Port B (INTB).</returns>
+        public PinValue ReadInterruptB()
+        {
+            if (_masterGpioController == null)
+            {
+                throw new Exception("Master controller has not been initialized.");
+            }
+
+            if (_reset == null)
+            {
+                throw new Exception("INTB pin has not been initialized.");
+            }
+
+            return _masterGpioController.Read((int)_interruptB);
+        }
+
+        public void Write(Register.Address registerAddress, byte data, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        {
+            Write(registerAddress, new byte[] { data }, port, bank);
+        }
+
+        public void WriteBit(Register.Address registerAddress, int bitNumber, bool bit, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        {
+            ValidateBitNumber(bitNumber);
+            byte data = Read(registerAddress, port, bank);
+
+            if (bit)
+            {
+                SetBit(ref data, bitNumber);
+            }
+            else
+            {
+                ClearBit(ref data, bitNumber);
+            }
+
+            Write(registerAddress, data, port, bank);
         }
     }
 }
