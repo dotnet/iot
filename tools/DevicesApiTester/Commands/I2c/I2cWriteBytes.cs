@@ -18,7 +18,7 @@ namespace DeviceApiTester.Commands.I2c
         [Option('h', "hex-string", HelpText = "The hexadecimal string to convert and write.  Each byte in string must be represented by two hexadecimal characters.", Required = true)]
         public string HexString { get; set; }
 
-        /// <summary>Executes the command.</summary>
+        /// <summary> Executes the command.</summary>
         /// <returns>The command's exit code.</returns>
         /// <remarks>
         ///     NOTE: This test app uses the base class's <see cref="CreateI2cDevice"/> method to create a device.<br/>
