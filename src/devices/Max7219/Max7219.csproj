@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems> <!--Disabling default items so samples source won't get build by the main library-->
+    <RootNamespace>Iot.Device.Max7219</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <Compile Include="Max7219.cs" />
+    <Compile Include="MatrixGraphics.cs" />
+    <Compile Include="IFont.cs" />
+    <None Include="README.md" />
+    <Compile Include="Register.cs" />
+    <Compile Include="RotationType.cs" />
+    <Compile Include="Fonts.cs" />
+    <Compile Include="FixedSizeFont.cs" />
+  </ItemGroup>
+
+</Project>
