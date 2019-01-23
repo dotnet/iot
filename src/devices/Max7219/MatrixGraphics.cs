@@ -11,13 +11,13 @@ namespace Iot.Device.Max7219
 {
 
     /// <summary>
-    /// Matrix text writer can be used to write 
+    /// Graphical functions for a MAX7219 device
     /// </summary>
-    public class MatrixTextWriter
+    public class MatrixGraphics
     {
         readonly Max7219 _device;
 
-        public MatrixTextWriter(Max7219 device, Font font)
+        public MatrixGraphics(Max7219 device, Font font)
         {
             if (device == null)
                 throw new ArgumentNullException(nameof(device));

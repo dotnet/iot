@@ -79,15 +79,14 @@ namespace Iot.Device.Samples
                 }
 
 
-                //reinitialize device and show message using the matrix text writer
+                //reinitialize device and show message using the matrix graphics
                 devices.Init();
                 devices.Rotation = RotationType.Left;
-                var writer = new MatrixTextWriter(devices, Font.Default);
+                var graphics = new MatrixGraphics(devices, Font.Default);
                 foreach (var font in new[]{Font.CP437, Font.LCD, Font.Sinclair, Font.Tiny, Font.CyrillicUkrainian}) {
-                    writer.Font = font;
-                    writer.ShowMessage("Hello World from MAX7219!", alwaysScroll: true);
+                    graphics.Font = font;
+                    graphics.ShowMessage("Hello World from MAX7219!", alwaysScroll: true);
                 }
-
 
             }
         }
