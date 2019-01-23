@@ -33,6 +33,11 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <summary>
+        /// Gets the mode of a pin for Unix.
+        /// </summary>
+        /// <param name="mode">The mode of a pin to get.</param>
+        /// <returns>The mode of a pin for Unix.</returns>
         private PinMode GetModeForUnixDriver(PinMode mode)
         {
             switch (mode)
@@ -48,6 +53,12 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <summary>
+        /// Adds a handler for a pin value changed event.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
             ValidatePinNumber(pinNumber);
@@ -59,6 +70,10 @@ namespace System.Device.Gpio.Drivers
             _sysFSDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventType, callback);
         }
 
+        /// <summary>
+        /// Closes an open pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void ClosePin(int pinNumber)
         {
             ValidatePinNumber(pinNumber);
@@ -70,9 +85,15 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <summary>
+        /// Checks if a pin supports a specific mode.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="mode">The mode to check.</param>
+        /// <returns>The status if the pin supports the mode.</returns>
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
-            switch(mode)
+            switch (mode)
             {
                 case PinMode.Input:
                 case PinMode.InputPullDown:
@@ -84,6 +105,10 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <summary>
+        /// Opens a pin in order for it to be ready to use.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void OpenPin(int pinNumber)
         {
             ValidatePinNumber(pinNumber);
@@ -91,6 +116,11 @@ namespace System.Device.Gpio.Drivers
             SetPinMode(pinNumber, PinMode.Input);
         }
 
+        /// <summary>
+        /// Reads the current value of a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <returns>The value of the pin.</returns>
         protected internal unsafe override PinValue Read(int pinNumber)
         {
             ValidatePinNumber(pinNumber);
@@ -104,6 +134,11 @@ namespace System.Device.Gpio.Drivers
             return Convert.ToBoolean((register >> (pinNumber % 32)) & 1) ? PinValue.High : PinValue.Low;
         }
 
+        /// <summary>
+        /// Removes a handler for a pin value changed event.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             ValidatePinNumber(pinNumber);
@@ -115,6 +150,11 @@ namespace System.Device.Gpio.Drivers
             _sysFSDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
         }
 
+        /// <summary>
+        /// Sets the mode to a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="mode">The mode to be set.</param>
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
             ValidatePinNumber(pinNumber);
@@ -136,7 +176,7 @@ namespace System.Device.Gpio.Drivers
             // Set the 3 bits to the desired mode for that pin.
             register |= (mode == PinMode.Output ? 1u : 0u) << shift;
             *registerPointer = register;
-            
+
             if (_sysFSModes.ContainsKey(pinNumber))
             {
                 _sysFSModes[pinNumber] = mode;
@@ -152,10 +192,15 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <summary>
+        /// Sets the resistor pull up/down mode for an input pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="mode">The mode of a pin to set the resistor pull up/down mode.</param>
         private void SetInputPullMode(int pinNumber, PinMode mode)
         {
             byte modeToPullMode;
-            switch(mode)
+            switch (mode)
             {
                 case PinMode.Input:
                     modeToPullMode = 0;
@@ -210,7 +255,14 @@ namespace System.Device.Gpio.Drivers
             *gppudclkPointer = 0;
         }
 
-        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
+        /// <summary>
+        /// Blocks execution until an event of type eventType is received or a cancellation is requested.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
+        /// <returns>A structure that contains the result of the waiting operation.</returns>
+        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             ValidatePinNumber(pinNumber);
             InitializeSysFS();
@@ -218,10 +270,17 @@ namespace System.Device.Gpio.Drivers
             _sysFSDriver.OpenPin(pinNumber);
             _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
-            return _sysFSDriver.WaitForEvent(pinNumber, eventType, cancellationToken);
+            return _sysFSDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
         }
 
-        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
+        /// <summary>
+        /// Async call until an event of type eventType is received or a cancellation is requested.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="token">The cancellation token of when the operation should stop waiting for an event.</param>
+        /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
+        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             ValidatePinNumber(pinNumber);
             InitializeSysFS();
@@ -229,9 +288,14 @@ namespace System.Device.Gpio.Drivers
             _sysFSDriver.OpenPin(pinNumber);
             _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
-            return _sysFSDriver.WaitForEventAsync(pinNumber, eventType, cancellationToken);
+            return _sysFSDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
         }
 
+        /// <summary>
+        /// Writes a value to a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="value">The value to be written to the pin.</param>
         protected internal override void Write(int pinNumber, PinValue value)
         {
             ValidatePinNumber(pinNumber);
@@ -247,7 +311,7 @@ namespace System.Device.Gpio.Drivers
             register = 1U << (pinNumber % 32);
             *registerPointer = register;
         }
-        
+
         private void InitializeSysFS()
         {
             if (_sysFSDriver != null)
@@ -295,6 +359,11 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <summary>
+        /// Gets the mode of a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <returns>The mode of the pin.</returns>
         protected internal override PinMode GetPinMode(int pinNumber)
         {
             ValidatePinNumber(pinNumber);

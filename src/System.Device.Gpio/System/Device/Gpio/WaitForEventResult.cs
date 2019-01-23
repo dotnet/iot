@@ -10,7 +10,7 @@ namespace System.Device.Gpio
     public struct WaitForEventResult
     {
         /// <summary>
-        /// The event type to wait for.
+        /// The event types to wait for.
         /// </summary>
         public PinEventTypes EventType;
         /// <summary>

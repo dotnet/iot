@@ -4,6 +4,9 @@
 
 namespace System.Device.Gpio.Drivers
 {
+    /// <summary>
+    /// A GPIO driver for the Raspberry Pi 3.
+    /// </summary>
     public partial class RaspberryPi3Driver  // Different base classes declared in RaspberryPi3Driver.Linux.cs and RaspberryPi3Driver.Windows.cs
     {
         /// <summary>
@@ -19,6 +22,11 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <summary>
+        /// Converts a board pin number to the driver's logical numbering scheme.
+        /// </summary>
+        /// <param name="pinNumber">The board pin number to convert.</param>
+        /// <returns>The pin number in the driver's logical numbering scheme.</returns>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
             switch (pinNumber)
@@ -53,7 +61,7 @@ namespace System.Device.Gpio.Drivers
                 case 40: return 21;
             }
 
-            throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {this.GetType().Name} device.", nameof(pinNumber));
+            throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber));
         }
     }
 }
