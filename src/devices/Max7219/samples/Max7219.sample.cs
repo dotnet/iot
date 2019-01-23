@@ -82,8 +82,8 @@ namespace Iot.Device.Samples
                 //reinitialize device and show message using the matrix graphics
                 devices.Init();
                 devices.Rotation = RotationType.Left;
-                var graphics = new MatrixGraphics(devices, Font.Default);
-                foreach (var font in new[]{Font.CP437, Font.LCD, Font.Sinclair, Font.Tiny, Font.CyrillicUkrainian}) {
+                var graphics = new MatrixGraphics(devices, Fonts.Default);
+                foreach (var font in new[]{Fonts.CP437, Fonts.LCD, Fonts.Sinclair, Fonts.Tiny, Fonts.CyrillicUkrainian}) {
                     graphics.Font = font;
                     graphics.ShowMessage("Hello World from MAX7219!", alwaysScroll: true);
                 }

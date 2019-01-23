@@ -17,7 +17,7 @@ namespace Iot.Device.Max7219
     {
         readonly Max7219 _device;
 
-        public MatrixGraphics(Max7219 device, Font font)
+        public MatrixGraphics(Max7219 device, IFont font)
         {
             if (device == null)
                 throw new ArgumentNullException(nameof(device));
@@ -27,18 +27,18 @@ namespace Iot.Device.Max7219
             Font = font;
         }
 
-        public Font Font { get; set; }
+        public IFont Font { get; set; }
 
         /// <summary>
         /// Writes a char to the given device with the specified font.
         /// </summary>
         public void WriteLetter(int deviceId, char chr, bool flush = true)
         {
-            var bitmap = Font[chr];
-            var end = Math.Min(bitmap.Length, Max7219.NumDigits);
+            var charBytes = Font[chr];
+            var end = Math.Min(charBytes.Count, Max7219.NumDigits);
             for (int col = 0; col < end; col++)
             {
-                _device[deviceId, col] = bitmap[col];
+                _device[deviceId, col] = charBytes[col];
             }
             if (flush)
             {
@@ -113,15 +113,15 @@ namespace Iot.Device.Max7219
         /// </summary>
         public void ShowMessage(string text, int delayInMilliseconds = 50, bool alwaysScroll = false)
         {
-            IEnumerable<byte[]> textCharBytes = text.Select(chr => Font[chr]);
-            int textBytesLength = textCharBytes.Sum(x => x.Length) + text.Length - 1;
+            IEnumerable<IReadOnlyList<byte>> textCharBytes = text.Select(chr => Font[chr]);
+            int textBytesLength = textCharBytes.Sum(x => x.Count) + text.Length - 1;
 
             bool scroll = alwaysScroll || textBytesLength > _device.Length;
             if (scroll)
             {
                 var pos = _device.Length - 1;
                 _device.ClearAll(false);
-                foreach (byte[] arr in textCharBytes)
+                foreach (var arr in textCharBytes)
                 {
                     foreach (byte b in arr)
                     {
@@ -145,7 +145,7 @@ namespace Iot.Device.Max7219
                 var margin = (_device.Length - textBytesLength) / 2;
                 _device.ClearAll(false);
                 var pos = margin;
-                foreach (byte[] arr in textCharBytes)
+                foreach (var arr in textCharBytes)
                 {
                     foreach (byte b in arr)
                     {
