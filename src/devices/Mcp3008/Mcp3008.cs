@@ -6,7 +6,7 @@ using System;
 using System.Device.Gpio;
 using System.Device.Spi;
 
-namespace Iot.Device
+namespace Iot.Device.Mcp3008
 {
     public class Mcp3008 : IDisposable
     {
