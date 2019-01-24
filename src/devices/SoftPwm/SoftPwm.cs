@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,60 +14,60 @@ using System.Threading;
 
 namespace System.Device.Pwm.Drivers
 {
-    public class SoftPwm: PwmDriver
+    public class SoftPwm : PwmDriver
     {
         // use to determine the freqncy of the PWM
         // PulseFrequency = total frenquency
         // curent pulse width = when the signal is hi
-        private double currentPulseWidth;
-        private double pulseFrequency;
+        private double _currentPulseWidth;
+        private double _pulseFrequency;
         // Use to determine the length of the pulse
         // 100 % = full output. 0%= nothing as output
-        private double percentage;
+        private double _percentage;
         // Use to determine if we are using a high precision timer or not
-        private bool precisionPWM = false;
+        private bool _precisionPWM = false;
 
-        private bool isRunning;
-        private bool istopped = true;
-        private int servoPin = -1;
+        private bool _isRunning;
+        private bool _istopped = true;
+        private int _servoPin = -1;
 
-        private Stopwatch stopwatch = Stopwatch.StartNew();
+        private Stopwatch _stopwatch = Stopwatch.StartNew();
 
-        private Thread runningThread;
-        private GpioController controller;
+        private Thread _runningThread;
+        private GpioController _controller;
         private bool runThread = true;
 
         private void RunSoftPWM()
         {
-            if(precisionPWM)
+            if (_precisionPWM)
                 Thread.CurrentThread.Priority = ThreadPriority.Highest;
             while (runThread)
             {
                 //Write the pin high for the appropriate length of time
-                if (isRunning)
+                if (_isRunning)
                 {
-                    if (currentPulseWidth != 0)
+                    if (_currentPulseWidth != 0)
                     {
-                        controller.Write(servoPin, PinValue.High);
+                        _controller.Write(_servoPin, PinValue.High);
                     }
                     //Use the wait helper method to wait for the length of the pulse
-                    if (precisionPWM)
-                        Wait(currentPulseWidth);
+                    if (_precisionPWM)
+                        Wait(_currentPulseWidth);
                     else
-                        Task.Delay(TimeSpan.FromMilliseconds(currentPulseWidth)).Wait();
+                        Task.Delay(TimeSpan.FromMilliseconds(_currentPulseWidth)).Wait();
                     //The pulse if over and so set the pin to low and then wait until it's time for the next pulse
-                    controller.Write(servoPin, PinValue.Low);
-                    if (precisionPWM)
-                        Wait(pulseFrequency - currentPulseWidth);
+                    _controller.Write(_servoPin, PinValue.Low);
+                    if (_precisionPWM)
+                        Wait(_pulseFrequency - _currentPulseWidth);
                     else
-                        Task.Delay(TimeSpan.FromMilliseconds(pulseFrequency - currentPulseWidth)).Wait();
+                        Task.Delay(TimeSpan.FromMilliseconds(_pulseFrequency - _currentPulseWidth)).Wait();
                 }
                 else
                 {
-                    if (!istopped)
+                    if (!_istopped)
                     {
-                        controller.Write(servoPin, PinValue.Low);
-                        istopped = true;
+                        _controller.Write(_servoPin, PinValue.Low);
+                        _istopped = true;
                     }
                 }
             }
@@ -74,11 +78,11 @@ namespace System.Device.Pwm.Drivers
         //in a loop until that threshold is hit. This allows for very precise timing.
         private void Wait(double milliseconds)
         {
-            long initialTick = stopwatch.ElapsedTicks;
-            long initialElapsed = stopwatch.ElapsedMilliseconds;
+            long initialTick = _stopwatch.ElapsedTicks;
+            long initialElapsed = _stopwatch.ElapsedMilliseconds;
             double desiredTicks = milliseconds / 1000.0 * Stopwatch.Frequency;
             double finalTick = initialTick + desiredTicks;
-            while (stopwatch.ElapsedTicks < finalTick)
+            while (_stopwatch.ElapsedTicks < finalTick)
             {
                 //nothing than waiting
             }
@@ -87,8 +91,8 @@ namespace System.Device.Pwm.Drivers
 
         public SoftPwm()
         {
-            controller = new GpioController();
-            if (controller == null)
+            _controller = new GpioController();
+            if (_controller == null)
             {
                 Debug.WriteLine("GPIO does not exist on the current system.");
                 return;
@@ -97,17 +101,17 @@ namespace System.Device.Pwm.Drivers
 
         public SoftPwm(bool preceisionTimer) : this()
         {
-            precisionPWM = preceisionTimer;
+            _precisionPWM = preceisionTimer;
         }
 
         private void UpdateRange()
         {
-            currentPulseWidth = percentage * pulseFrequency / 100;
+            _currentPulseWidth = _percentage * _pulseFrequency / 100;
         }
 
         private void ValidatePWMChannel(int pinNumber)
         {
-            if(servoPin != pinNumber)
+            if (_servoPin != pinNumber)
             {
                 throw new ArgumentException($"Soft PWM on pin {pinNumber} not initialized");
             }
@@ -115,45 +119,45 @@ namespace System.Device.Pwm.Drivers
 
         protected override void OpenChannel(int pinNumber, int pwmChannel)
         {
-            servoPin = pinNumber;
-            controller.OpenPin(servoPin);
-            controller.SetPinMode(servoPin, PinMode.Output);
-            runningThread = new Thread(RunSoftPWM);
-            runningThread.Start();
+            _servoPin = pinNumber;
+            _controller.OpenPin(_servoPin);
+            _controller.SetPinMode(_servoPin, PinMode.Output);
+            _runningThread = new Thread(RunSoftPWM);
+            _runningThread.Start();
 
         }
 
         protected override void CloseChannel(int pinNumber, int pwmChannel)
         {
             ValidatePWMChannel(pinNumber);
-            controller.ClosePin(servoPin);
-            servoPin = -1;
-            isRunning = false;
+            _controller.ClosePin(_servoPin);
+            _servoPin = -1;
+            _isRunning = false;
         }
 
         protected override void ChangeDutyCycle(int pinNumber, int pwmChannel, double dutyCycleInPercentage)
         {
-            ValidatePWMChannel(pinNumber);        
-            percentage = dutyCycleInPercentage;
-            UpdateRange();    
+            ValidatePWMChannel(pinNumber);
+            _percentage = dutyCycleInPercentage;
+            UpdateRange();
         }
 
         protected override void StartWriting(int pinNumber, int pwmChannel, double frequencyInHertz, double dutyCycleInPercentage)
         {
             ValidatePWMChannel(pinNumber);
             if (frequencyInHertz > 0)
-                pulseFrequency = 1 / frequencyInHertz * 1000.0;
+                _pulseFrequency = 1 / frequencyInHertz * 1000.0;
             else
-                pulseFrequency = 0.0;
-            percentage = dutyCycleInPercentage;
+                _pulseFrequency = 0.0;
+            _percentage = dutyCycleInPercentage;
             UpdateRange();
-            isRunning = true;
+            _isRunning = true;
         }
 
         protected override void StopWriting(int pinNumber, int pwmChannel)
         {
-            ValidatePWMChannel(pinNumber); 
-            isRunning = false;
+            ValidatePWMChannel(pinNumber);
+            _isRunning = false;
         }
     }
 }

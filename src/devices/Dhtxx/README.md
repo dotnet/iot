@@ -30,31 +30,32 @@ This value is used to wait the right amount of time between to reading in a for 
 
 Usage is straight forward and you will find more explanations in the [example](./samples/README.md).
 
+You first need to create a sensor. First parameter is the GPIO pin you want to use and second the DHT type.
+
 ```csharp
-using System;
-using Iot.Device.DHTxx;
-using System.Diagnostics;
-using System.Device.Gpio;
-class Program
-{   
-    static void Main(string[] args)
-    {
-        Console.WriteLine("Hello DHT!");
-        DHTSensor dht = new DHTSensor(26, DhtType.Dht22);
-        while(true)
-        {
-            bool readret = dht.ReadData();
-            if (readret)
-                Console.WriteLine($"Temperature: {dht.Temperature} °C, Humidity: {dht.Humidity} %");
-            else
-                Console.WriteLine("Error reading the sensor");
-            System.Threading.Thread.Sleep(1000);
-        }
-        
-    }
-}
+DHTSensor dht = new DHTSensor(26, DhtType.Dht22); 
 ```
 
-Once the sensor is created, you need to read first, make sure the read is successful and then you can get the Temperature and Humidity.
+You have 2 ways to read the temperature and humidity.
 
+First one, once the sensor is created, you need to read first, make sure the read is successful and then you can get the Temperature and Humidity.
 
+```csharp       
+bool readret = dht.ReadData();
+if (readret)
+    Console.WriteLine($"Temperature: {dht.TemperatureInCelsius.ToString("0.00")} °C, Humidity: {dht.Humidity.ToString("0.00")} %");
+else
+    Console.WriteLine("Error reading the sensor");
+```
+Second way, is to use the ```TryGetTemperatureInCelsiusHumidity``` and the other ```TryGet``` functions. They will return true if the read has been successful and then as an output the temperature, either in Celsius or Ferenheit and/or humidity
+
+```csharp
+double Temp;
+double Hum;
+if (dht.TryGetTemperatureInCelsiusHumidity(out Temp, out Hum))
+    Console.WriteLine($"Temperature: {Temp.ToString("0.00")} °C, Humidity: {Hum.ToString("0.00")} %");
+else
+    Console.WriteLine("Error reading the sensor");
+```
+
+Note that functions to read the temperature exist both in Celsius and Farentheit. 

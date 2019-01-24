@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.Device.Pwm;
 using System.Device.Pwm.Drivers;
@@ -13,18 +17,16 @@ class Program
 
         var PwmController = new PwmController(new SoftPwm());
         PwmController.OpenChannel(17, 0);
-        PwmController.StartWriting(17,0, 200, 0);
-        //PWM(17, 1000, 50, true);
-        //pwm.Start();
-        
-        while(true)
+        PwmController.StartWriting(17, 0, 200, 0);
+
+        while (true)
         {
-            for(int i = 0; i< 100; i++)
+            for (int i = 0; i < 100; i++)
             {
-                PwmController.ChangeDutyCycle(17, 0, i);       
+                PwmController.ChangeDutyCycle(17, 0, i);
                 Thread.Sleep(100);
             }
         }
-        
+
     }
 }

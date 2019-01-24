@@ -18,19 +18,27 @@ To initialize the sensor, you need to select a pin and the type of sensor, eithe
 DHTSensor dht = new DHTSensor(26, DhtType.Dht22);
 ```
 
-To get a temperature or a humidity value, you first need to read the sensor.
+You have 2 ways to get the temperature and humidity.
+
+With the first method, you need to read the sensor and then get the temperature and/or humidity:
 
 ```csharp
 bool readret = dht.ReadData();
-```
-
-Then you can read the temperature and humidity:
-
-```csharp
 if (readret)
 {
     var temp = dht.Temperature;
     var hum = dht.Humidity;
+}
+```
+
+The second way, use the ```TryGet```functions. they'll return ```true``` if a read has been successful and output the temperature and/or humidity.
+
+```csharp
+double Temp;
+double Humidity;
+if (dht.TryGetTemperatureHumidity(out Temp, out Humidity))
+{
+    // We have Temp and Humidity and can do something
 }
 ```
 
@@ -50,16 +58,26 @@ class Program
     {
         Console.WriteLine("Hello DHT!");
         DHTSensor dht = new DHTSensor(26, DhtType.Dht22);
-        while(true)
+        while (true)
         {
+            // You have 2 ways to read the data, both are equivalent
+            // First way to read the data
             bool readret = dht.ReadData();
             if (readret)
-                Console.WriteLine($"Temperature: {dht.Temperature.ToString("0.00")} °C, Humidity: {dht.Humidity.ToString("0.00")} %");
+                Console.WriteLine($"Temperature: {dht.TemperatureInCelsius.ToString("0.00")} °C, Humidity: {dht.Humidity.ToString("0.00")} %");
+            else
+                Console.WriteLine("Error reading the sensor");
+            Thread.Sleep(1000);
+            
+            // Second way to read the data
+            double Temp;
+            double Hum;
+            if (dht.TryGetTemperatureInCelsiusHumidity(out Temp, out Hum))
+                Console.WriteLine($"Temperature: {Temp.ToString("0.00")} °C, Humidity: {Hum.ToString("0.00")} %");
             else
                 Console.WriteLine("Error reading the sensor");
             Thread.Sleep(1000);
         }
-        
     }
 }
 ```

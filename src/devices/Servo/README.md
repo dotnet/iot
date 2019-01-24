@@ -29,19 +29,19 @@ ServoMotor servoHard = new ServoMotor(0, 0, new ServoMotorDefinition(540, 2470))
 
 The ```ServoMotorDefinition``` is needed to pass the specific Servomotor settings.
 
-- ```MinimumDuration```: minimum pulse duration expressed microseconds for the servomotor.
-- ```MaximumDuration```: maximum pulse duration expressed microseconds for the servomotor.
-- ```Period```: Period length expressed microseconds. By default, for servomotors, this is 20000 which is 50Hz. It is not recommended to change it but for specific application and specific servomotors, you may need to adjust it.
+- ```MinimumDurationMicroseconds```: minimum pulse duration expressed in microseconds for the servomotor.
+- ```MaximumDurationMicroseconds```: maximum pulse duration expressed in microseconds for the servomotor.
+- ```PeriodMicroseconds```: Period length expressed in microseconds. By default, for servomotors, this is 20000 which is 50Hz. It is not recommended to change it but for specific application and specific servomotors, you may need to adjust it.
 - ```MaximumAngle```: maximum angle for the servomotor in °, default is 360°. 0° will always be the minimum angle and will correspond to the minimum pulse. MaximumAngle will always correspond to the maximum pulse.
 
 Those settings are known for each servomotor.
 For example, the [Hitec HS-300BB](https://servodatabase.com/servo/hitec/hs-300bb) servo has the following specifications:
-- MinimumDuration = 900
-- MaximumDuration = 2100
-- Period = 20000
+- MinimumDurationMicroseconds = 900
+- MaximumDurationMicroseconds = 2100
+- PeriodMicroseconds = 20000
 - MaximumAngle = 180
 
-Tip: setting a maximum angle to 100 will act like a percentage. Setting the ```Angle``` property to 50 will rotate the servo motor half of his capacity.
+**Tip:** setting a maximum angle to 100 will act like a percentage. Setting the ```Angle``` property to 50 will rotate the servo motor half of his capacity.
 
 ### Moving a Servomotor
 
