@@ -43,19 +43,19 @@ namespace System.Device.Pwm.Drivers
                 Thread.CurrentThread.Priority = ThreadPriority.Highest;
             while (runThread)
             {
-                //Write the pin high for the appropriate length of time
+                // Write the pin high for the appropriate length of time
                 if (_isRunning)
                 {
                     if (_currentPulseWidth != 0)
                     {
                         _controller.Write(_servoPin, PinValue.High);
                     }
-                    //Use the wait helper method to wait for the length of the pulse
+                    // Use the wait helper method to wait for the length of the pulse
                     if (_precisionPWM)
                         Wait(_currentPulseWidth);
                     else
                         Task.Delay(TimeSpan.FromMilliseconds(_currentPulseWidth)).Wait();
-                    //The pulse if over and so set the pin to low and then wait until it's time for the next pulse
+                    // The pulse if over and so set the pin to low and then wait until it's time for the next pulse
                     _controller.Write(_servoPin, PinValue.Low);
                     if (_precisionPWM)
                         Wait(_pulseFrequency - _currentPulseWidth);
@@ -73,9 +73,9 @@ namespace System.Device.Pwm.Drivers
             }
         }
 
-        //A synchronous wait is used to avoid yielding the thread 
-        //This method calculates the number of CPU ticks will elapse in the specified time and spins
-        //in a loop until that threshold is hit. This allows for very precise timing.
+        // A synchronous wait is used to avoid yielding the thread 
+        // This method calculates the number of CPU ticks will elapse in the specified time and spins
+        // in a loop until that threshold is hit. This allows for very precise timing.
         private void Wait(double milliseconds)
         {
             long initialTick = _stopwatch.ElapsedTicks;

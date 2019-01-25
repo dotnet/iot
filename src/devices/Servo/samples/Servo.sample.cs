@@ -7,6 +7,7 @@ using Iot.Device.Servo;
 using System.Diagnostics;
 using System.Device.Gpio;
 using System.Threading;
+
 class Program
 {
 
@@ -15,7 +16,7 @@ class Program
         Console.WriteLine("Hello Servo!");
 
         // example of software PWM piloted Servo on GPIO 21
-        ServoMotor servo = new ServoMotor(21, -1, new ServoMotorDefinition(540, 2470));
+        ServoMotor servo = new ServoMotor(21, -1, new ServoMotorDefinition(540, 2470, 20000, 100));
         // example of hardware PWM piloted Servo on chip 0 channel 0
         // ServoMotor servo = new ServoMotor(0, 0, new ServoMotorDefinition(540, 2470));
         if (servo.IsRunningHardwarePwm)
@@ -27,9 +28,8 @@ class Program
         {
             servo.Angle = 0;
             Thread.Sleep(1000);
-            servo.Angle = 360;
+            servo.Angle = 100;
             Thread.Sleep(1000);
         }
-
     }
 }

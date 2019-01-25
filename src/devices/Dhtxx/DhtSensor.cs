@@ -10,17 +10,18 @@ namespace Iot.Device.DHTxx
 {
     public class DHTSensor : IDisposable
     {
-        private byte[] _dht11_val = new byte[5];
+        private const int MAX_TIME = 85;
+        private const uint MAX_WAIT = 255;
+        private byte[] _dht11Val = new byte[5];
         private int _pin;
         private DhtType _dhtType;
-        const int MAX_TIME = 85;
-        const uint MAX_WAIT = 255;
+
         private GpioController _controller = new GpioController();
 
         private Stopwatch _stopwatch = new Stopwatch();
 
         /// <summary>
-        /// Wait asyncrhonous way for a specific number of milliseconds
+        /// Wait for a specific number of milliseconds
         /// 
         /// </summary>
         /// <param name="milliseconds">Number of milliseconds to wait</param>
@@ -42,7 +43,7 @@ namespace Iot.Device.DHTxx
         /// <summary>
         /// How last read went, <c>true</c> for success, <c>false</c> for failure
         /// </summary>
-        public bool LastReadSuccessful { get; internal set; }
+        public bool IsLastReadSuccessful { get; internal set; }
 
         /// <summary>
         /// Get the last read temperature in Celsius
@@ -50,16 +51,7 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public double TemperatureInCelsius
-        {
-            get
-            {
-                if (_dhtType == DhtType.Dht11)
-                    return GetTempDht11();
-                else
-                    return GetTempDht22();
-            }
-        }
+        public double Temperature => (_dhtType == DhtType.Dht11) ? GetTempDht11() : GetTempDht22();
 
         /// <summary>
         /// Get the last read temperature in Farenheit
@@ -67,17 +59,7 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public double TemperatureInFarenheit
-        {
-            get
-            {
-                // °F = 9/5 °C + 32
-                if (LastReadSuccessful)
-                    return (9.0 / 5.0 * TemperatureInCelsius + 32);
-                else
-                    return Double.MaxValue;
-            }
-        }
+        public double TemperatureInFarenheit => IsLastReadSuccessful ? (9.0 / 5.0 * Temperature + 32) : Double.MaxValue;
 
         /// <summary>
         /// Get the temperature in Celsius
@@ -87,10 +69,10 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public bool TryGetTemperatureInCelsius(out double temperatureInCelsius)
+        public bool TryGetTemperature(out double temperatureInCelsius)
         {
             var ret = ReadData();
-            temperatureInCelsius = TemperatureInCelsius;
+            temperatureInCelsius = Temperature;
             return ret;
         }
 
@@ -110,34 +92,25 @@ namespace Iot.Device.DHTxx
         }
 
         /// <summary>
-        /// Get the last read humidity
+        /// Get the last read of relative humidity in percentage
         /// </summary>
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public double Humidity
-        {
-            get
-            {
-                if (_dhtType == DhtType.Dht11)
-                    return GetHumidityDht11();
-                else
-                    return GetHumidityDht22();
-            }
-        }
+        public double Humidity => (_dhtType == DhtType.Dht11) ? GetHumidityDht11() : GetHumidityDht22();
 
         /// <summary>
         /// Get the relative humidity in the air
         /// </summary>
-        /// <param name="humidity">The percentage of humidity in the air</param>
+        /// <param name="relativeHumidity">The percentage of relative humidity in the air</param>
         /// <returns>Returns <c>true</c> if the read is successful</returns>
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public bool TryGetHumidity(out double humidity)
+        public bool TryGetHumidity(out double relativeHumidity)
         {
             var ret = ReadData();
-            humidity = Humidity;
+            relativeHumidity = Humidity;
             return ret;
         }
 
@@ -145,16 +118,16 @@ namespace Iot.Device.DHTxx
         /// Get the temperature in Celsius and the relative humidity in the air
         /// </summary>
         /// <param name="temperatureInCelsius">The temperature in Celsius</param>
-        /// <param name="humidity">The percentage of humidity in the air</param>
+        /// <param name="relativeHumidity">The percentage of relative humidity in the air</param>
         /// <returns>Returns <c>true</c> if the read is successful</returns>
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public bool TryGetTemperatureInCelsiusHumidity(out double temperatureInCelsius, out double humidity)
+        public bool TryGetTemperatureAndHumidity(out double temperatureInCelsius, out double relativeHumidity)
         {
             var ret = ReadData();
-            temperatureInCelsius = TemperatureInCelsius;
-            humidity = Humidity;
+            temperatureInCelsius = Temperature;
+            relativeHumidity = Humidity;
             return ret;
         }
 
@@ -162,16 +135,16 @@ namespace Iot.Device.DHTxx
         /// Get the temperature in Farenheit and the relative humidity in the air
         /// </summary>
         /// <param name="temperatureInFarenheit">The temperature in Farenheit</param>
-        /// <param name="humidity">The percentage of humidity in the air</param>
+        /// <param name="relativeHumidity">The percentage of relative humidity in the air</param>
         /// <returns>Returns <c>true</c> if the read is successful</returns>
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public bool TryGetTemperatureInFarenheitHumidity(out double temperatureInFarenheit, out double humidity)
+        public bool TryGetTemperatureInFarenheitAndHumidity(out double temperatureInFarenheit, out double relativeHumidity)
         {
             var ret = ReadData();
             temperatureInFarenheit = TemperatureInFarenheit;
-            humidity = Humidity;
+            relativeHumidity = Humidity;
             return ret;
         }
 
@@ -195,7 +168,6 @@ namespace Iot.Device.DHTxx
         /// </returns>
         public bool ReadData()
         {
-
             // Set the max value for waiting micro second
             // 27 = debug
             // 99 = release
@@ -208,7 +180,7 @@ namespace Iot.Device.DHTxx
             uint counter = 0;
             byte j = 0, i;
             for (i = 0; i < 5; i++)
-                _dht11_val[i] = 0;
+                _dht11Val[i] = 0;
 
             // write on the pin
             _controller.SetPinMode(_pin, PinMode.Output);
@@ -219,19 +191,21 @@ namespace Iot.Device.DHTxx
             // Wait about 40 microseconds
             Wait(0.03);
             _controller.SetPinMode(_pin, PinMode.Input);
+
             for (i = 0; i < MAX_TIME; i++)
             {
                 counter = 0;
                 while (_controller.Read(_pin) == lststate)
                 {
                     counter++;
-                    // This wait about 1 micro second
+                    // This wait about 1 microsecond
                     // No other way to do it for such a precision
                     for (byte wt = 0; wt < waitMS; wt++)
                         ;
                     if (counter == MAX_WAIT)
                         break;
                 }
+
                 lststate = _controller.Read(_pin);
                 if (counter == MAX_WAIT)
                     break;
@@ -239,65 +213,45 @@ namespace Iot.Device.DHTxx
                 // top 3 transistions are ignored   
                 if ((i >= 4) && (i % 2 == 0))
                 {
-                    _dht11_val[j / 8] <<= 1;
+                    _dht11Val[j / 8] <<= 1;
                     if (counter > 16)
-                        _dht11_val[j / 8] |= 1;
+                        _dht11Val[j / 8] |= 1;
                     j++;
                 }
             }
+
             _stopwatch.Stop();
-
-            if ((j >= 40) && (_dht11_val[4] == ((_dht11_val[0] + _dht11_val[1] + _dht11_val[2] + _dht11_val[3]) & 0xFF)))
+            if ((j >= 40) && (_dht11Val[4] == ((_dht11Val[0] + _dht11Val[1] + _dht11Val[2] + _dht11Val[3]) & 0xFF)))
             {
-                if ((_dht11_val[0] == 0) && (_dht11_val[2] == 0))
-                    LastReadSuccessful = false;
-                else
-                    LastReadSuccessful = true;
-
+                IsLastReadSuccessful = (_dht11Val[0] != 0) || (_dht11Val[2] != 0);
             }
             else
-                LastReadSuccessful = false;
+            {
+                IsLastReadSuccessful = false;
+            }
 
-            return LastReadSuccessful;
+            return IsLastReadSuccessful;
         }
 
         // Convertion for DHT11
-        private double GetTempDht11()
-        {
-            if (LastReadSuccessful)
-                return (double)(_dht11_val[2] + _dht11_val[3] / 10);
-            else
-                return (double.MaxValue);
-        }
+        private double GetTempDht11() => IsLastReadSuccessful ? (double)(_dht11Val[2] + _dht11Val[3] / 10) : double.MaxValue;
 
-        private double GetHumidityDht11()
-        {
-            if (LastReadSuccessful)
-                return (double)(_dht11_val[0] + _dht11_val[1] / 10);
-            else
-                return (double.MaxValue);
-        }
+        private double GetHumidityDht11() => IsLastReadSuccessful ? (double)(_dht11Val[0] + _dht11Val[1] / 10) : double.MaxValue;
 
         // convertion for DHT22
         private double GetTempDht22()
         {
-            if (LastReadSuccessful)
+            if (IsLastReadSuccessful)
             {
-                var temp = (((_dht11_val[2] & 0x7F) << 8) | _dht11_val[3]) * 0.1F;
+                var temp = (((_dht11Val[2] & 0x7F) << 8) | _dht11Val[3]) * 0.1F;
                 // if MSB = 1 we have negative temperature
-                return ((_dht11_val[2] & 0x80) == 0 ? temp : -temp);
+                return ((_dht11Val[2] & 0x80) == 0 ? temp : -temp);
             }
             else
                 return (double.MaxValue);
         }
 
-        private double GetHumidityDht22()
-        {
-            if (LastReadSuccessful)
-                return (double)((_dht11_val[0] << 8) | _dht11_val[1]) * 0.1F;
-            else
-                return (double.MaxValue);
-        }
+        private double GetHumidityDht22() => IsLastReadSuccessful ? (double)((_dht11Val[0] << 8) | _dht11Val[1]) * 0.1F : double.MaxValue;
 
         public void Dispose()
         {

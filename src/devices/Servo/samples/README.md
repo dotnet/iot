@@ -29,7 +29,9 @@ To turn your servomotor, just setup an angle:
 servo.Angle = 120;
 ```
 
-Here is a full example. In this example, the servomotor from its 2 extrems positions every second:
+Here is a full example. In this example, the servomotor from its 2 extrems positions every second. 
+
+Note that we setup a maximum angle of 100. So setting the angle to 100 will move the servo to its maximum turned position. And setting it to 0 will turn it to its minimum rotation one.
 
 ```csharp
 using System;
@@ -37,6 +39,7 @@ using Iot.Device.Servo;
 using System.Diagnostics;
 using System.Device.Gpio;
 using System.Threading;
+
 class Program
 {
 
@@ -45,18 +48,19 @@ class Program
         Console.WriteLine("Hello Servo!");
 
         // example of software PWM piloted Servo on GPIO 21
-        ServoMotor servo = new ServoMotor(21, -1, new ServoMotorDefinition(540, 2470));
+        ServoMotor servo = new ServoMotor(21, -1, new ServoMotorDefinition(540, 2470, 20000, 100));
         // example of hardware PWM piloted Servo on chip 0 channel 0
-        // ServoMotor servo = new ServoMotor(0, 0, new ServoMotorDefinition(540, 2470));
+        // ServoMotor servo = new ServoMotor(0, 0, new ServoMotorDefinition(540, 2470, 20000, 100));
         if (servo.IsRunningHardwarePwm)
             Console.WriteLine("We are running on hardware PWM");
         else
             Console.WriteLine("We are running on software PWM");
+
         while (true)
         {
             servo.Angle = 0;
             Thread.Sleep(1000);
-            servo.Angle = 360;
+            servo.Angle = 100;
             Thread.Sleep(1000);
         }
     }

@@ -12,7 +12,7 @@ var PwmController = new PwmController(new SoftPwm());
 
 By default SoftPwm is using a low priority clock to emulate the PWM. It is ok if you have leds and other non time sensitive elements attached.
 
-**Important:** if you have closk sensitive elements attached to this software PWM, you need to use a high precision timer. In order to make it happen, you need to select it at creation time by passing ```true``` in the constructor:
+**Important:** if you have clock sensitive elements attached to this software PWM, you need to use a high precision timer. In order to make it happen, you need to select it at creation time by passing ```true``` in the constructor:
 
 ```csharp
 var PwmController = new PwmController(new SoftPwm(true));
@@ -48,7 +48,7 @@ PwmController.StartWriting(17,0, 50, 50);
 
 Usage is the same as the PwmController. You first need to open the Channel before starting the PWM.
 
-This exmaple shows how to change the duty cycle of the PWM, previously open on GPIO 17. Duty cycle is changed for 25% with immediate effect if the PWM is already started.
+This example shows how to change the duty cycle of the PWM, previously open on GPIO 17. Duty cycle is changed for 25% with immediate effect if the PWM is already started.
 
 ```csharp
 PwmController.ChangeDutyCycle(17, 0, 25);
@@ -79,4 +79,5 @@ Closing the PWM will as well release the thread used for the PWM clock.
 ## Performance Considerations
 
 The high precision software PWM is resource intensive and is using a high priority thread. You may have resources issues if you are using multiple high precision software PWM. Always prefer hardware PWM to software PWM when you can have access. 
+
 

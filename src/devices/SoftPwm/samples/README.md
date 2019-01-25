@@ -14,7 +14,7 @@ To initialize the software, you need to add ```using System.Device.Pwm.Drivers;`
 var PwmController = new PwmController(new SoftPwm());
 ```
 
-You then need to open the PWM and start it. Please note that the first parameter is the GPIO you are using, in our case, 17. The second parameter is always ignored. It is used only for hardware PWM. The following code will open the software PWM and start it with a 200Hz frequency and a duty cycle of 0%.
+You then need to open the PWM and start it. Please note that the first parameter is the GPIO you are using, in our case, 17. The second parameter is always ignored. It is used only for hardware PWM. The following code will open the software PWM and start it with a 200Hz frequency and a duty cycle of 0. Duty cycle is value between 0.0 and 100.0. 100.0 represents 100%. 
 
 ```csharp
 PwmController.OpenChannel(17, 0);
@@ -42,8 +42,10 @@ using System.Device.Pwm.Drivers;
 using System.Diagnostics;
 using System.Device.Gpio;
 using System.Threading;
+
 class Program
 {
+
     static void Main(string[] args)
     {
         Console.WriteLine("Hello PWM!");
@@ -57,12 +59,13 @@ class Program
                 PwmController.ChangeDutyCycle(17, 0, i);       
                 Thread.Sleep(100);
             }
-        }
-        
+        }        
     }
 }
 ```
 
 ## Other Example 
 
-You will find another example of SoftPwm in the [Servo Motor class](./src/devices/Servo)
+You will find another example of SoftPwm in the [Servo Motor class](/src/devices/Servo/samples/README.md). This Servomotor sample uses a precision timer.
+
+

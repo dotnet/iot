@@ -23,6 +23,7 @@ namespace Iot.Device.Servo
         private double _pulseFrequency = 20.0;
         private double _angle;
         double _currentPulseWidth = 0;
+        
         /// <summary>
         /// Are we running on hardware or software PWM? True for hardware, false for sofware
         /// </summary>
@@ -62,18 +63,11 @@ namespace Iot.Device.Servo
                 IsRunningHardwarePwm = true;
 
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is ArgumentException || ex is IOException)
             {
-                if ((ex is ArgumentException) || (ex is IOException))
-                {
-                    _pwmController = new PwmController(new SoftPwm(true));
-                    _pwmController.OpenChannel(pinNumber, pwmChannel);
-                    IsRunningHardwarePwm = false;
-                }
-                else
-                {
-                    throw ex;
-                }
+                _pwmController = new PwmController(new SoftPwm(true));
+                _pwmController.OpenChannel(pinNumber, pwmChannel);
+                IsRunningHardwarePwm = false;
             }
 
             _pwmController.StartWriting(_servoPin, pwmChannel, 1000 / _pulseFrequency, (1 - (_pulseFrequency - _currentPulseWidth) / _pulseFrequency) * 100);
@@ -89,6 +83,7 @@ namespace Iot.Device.Servo
             _currentPulseWidth = durationMicroSec / 1000.0;
             _pwmController.ChangeDutyCycle(_servoPin, _pwmChannel, (1 - (_pulseFrequency - _currentPulseWidth) / _pulseFrequency) * 100);
         }
+
         /// <summary>
         /// Rotate the servomotor with a specific pulse in microseconds
         /// </summary>
@@ -102,6 +97,7 @@ namespace Iot.Device.Servo
             _currentPulseWidth = durationMicroSec / 1000.0;
             _pwmController.ChangeDutyCycle(_servoPin, _pwmChannel, (1 - (_pulseFrequency - _currentPulseWidth) / _pulseFrequency) * 100);
         }
+
         /// <summary>
         /// Is it moving? Return true if the servomotor is currently moving.
         /// </summary>
@@ -123,13 +119,7 @@ namespace Iot.Device.Servo
             }
             set
             {
-                double newAngle;
-                if (value > _definition.MaximumAngle)
-                    newAngle = _definition.MaximumAngle;
-                else if (value < 0)
-                    newAngle = 0;
-                else
-                    newAngle = value;
+                double newAngle = Math.Clamp(value, 0, _definition.MaximumAngle);
                 if (newAngle != Angle)
                 {
                     _angle = newAngle;
@@ -137,7 +127,6 @@ namespace Iot.Device.Servo
                 }
             }
         }
-
 
         /// <summary>
         /// Rotate the motor to current <see cref="Angle"/>.

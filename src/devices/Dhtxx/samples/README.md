@@ -36,13 +36,13 @@ The second way, use the ```TryGet```functions. they'll return ```true``` if a re
 ```csharp
 double Temp;
 double Humidity;
-if (dht.TryGetTemperatureHumidity(out Temp, out Humidity))
+if (dht.TryGetTemperatureAndHumidity(out Temp, out Humidity))
 {
     // We have Temp and Humidity and can do something
 }
 ```
 
-Note: temperature is in Celsius and humidity is in relative percentage air humidity. So 100% will gives you a fully saturated air.
+Note: temperature is in Celsius and humidity is in relative percentage air humidity. Humidity is a value between 0.0 and 100.0. 100.0 represents 100% humidity in the air.
 
 Here is a full example:
 
@@ -64,7 +64,7 @@ class Program
             // First way to read the data
             bool readret = dht.ReadData();
             if (readret)
-                Console.WriteLine($"Temperature: {dht.TemperatureInCelsius.ToString("0.00")} °C, Humidity: {dht.Humidity.ToString("0.00")} %");
+                Console.WriteLine($"Temperature: {dht.Temperature.ToString("0.00")} °C, Humidity: {dht.Humidity.ToString("0.00")} %");
             else
                 Console.WriteLine("Error reading the sensor");
             Thread.Sleep(1000);
@@ -72,7 +72,7 @@ class Program
             // Second way to read the data
             double Temp;
             double Hum;
-            if (dht.TryGetTemperatureInCelsiusHumidity(out Temp, out Hum))
+            if (dht.TryGetTemperatureAndHumidity(out Temp, out Hum))
                 Console.WriteLine($"Temperature: {Temp.ToString("0.00")} °C, Humidity: {Hum.ToString("0.00")} %");
             else
                 Console.WriteLine("Error reading the sensor");

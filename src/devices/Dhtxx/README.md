@@ -6,7 +6,7 @@ The DHT temperature and humidity sensors are very popular. Most used sensors are
 
 ## Device Family
 
-Devide Familly contains DHT11 and DHT22 which are very popular.
+Device Family contains DHT11 and DHT22 which are very popular.
 
 **DHT11** [datasheet in chineese](https://cdn-shop.adafruit.com/datasheets/DHT11-chinese.pdf)
 **DHT22** [datasheet](https://cdn-shop.adafruit.com/datasheets/DHT22.pdf)
@@ -24,7 +24,12 @@ byte waitMS = 99;
 #endif
 ```
 
-This value is used to wait the right amount of time between to reading in a for loop. 
+This value is used to wait 1 microsecond in a for simple loop. This value is platform dependent.
+
+```csharp
+for (byte wt = 0; wt < waitMS; wt++)
+    ;
+```
 
 ## Usage
 
@@ -36,26 +41,27 @@ You first need to create a sensor. First parameter is the GPIO pin you want to u
 DHTSensor dht = new DHTSensor(26, DhtType.Dht22); 
 ```
 
-You have 2 ways to read the temperature and humidity.
+You have 2 ways to read the temperature and humidity. Humidity is a value between 0.0 and 100.0. 100.0 represents 100% humidity in the air.
 
 First one, once the sensor is created, you need to read first, make sure the read is successful and then you can get the Temperature and Humidity.
 
 ```csharp       
 bool readret = dht.ReadData();
 if (readret)
-    Console.WriteLine($"Temperature: {dht.TemperatureInCelsius.ToString("0.00")} °C, Humidity: {dht.Humidity.ToString("0.00")} %");
+    Console.WriteLine($"Temperature: {dht.Temperature.ToString("0.00")} °C, Humidity: {dht.Humidity.ToString("0.00")} %");
 else
     Console.WriteLine("Error reading the sensor");
 ```
-Second way, is to use the ```TryGetTemperatureInCelsiusHumidity``` and the other ```TryGet``` functions. They will return true if the read has been successful and then as an output the temperature, either in Celsius or Ferenheit and/or humidity
+Second way, is to use the ```TryGetTemperatureAndHumidity``` and the other ```TryGet``` functions. They will return true if the read has been successful and then as an output the temperature, either in Celsius or Fahrenheit and/or relative air humidity.
 
 ```csharp
 double Temp;
 double Hum;
-if (dht.TryGetTemperatureInCelsiusHumidity(out Temp, out Hum))
+if (dht.TryGetTemperatureAndHumidity(out Temp, out Hum))
     Console.WriteLine($"Temperature: {Temp.ToString("0.00")} °C, Humidity: {Hum.ToString("0.00")} %");
 else
     Console.WriteLine("Error reading the sensor");
 ```
 
-Note that functions to read the temperature exist both in Celsius and Farentheit. 
+Note that functions to read the temperature exist both in Celsius and Fahrenheit. 
+
