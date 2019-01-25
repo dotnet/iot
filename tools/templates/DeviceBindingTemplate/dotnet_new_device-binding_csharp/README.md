@@ -1,4 +1,4 @@
-﻿# [Component Name Here]
+﻿# _DeviceBinding
 
 ## Summary
 Provide a brief description on what the component is and its functonality.

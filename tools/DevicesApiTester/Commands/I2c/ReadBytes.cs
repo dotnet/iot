@@ -30,8 +30,7 @@ namespace DeviceApiTester.Commands.I2c
                 // Read bytes of data
                 var buffer = new byte[ByteCount];
                 i2c.Read(buffer.AsSpan());
-
-                Console.WriteLine($"Bytes read:{Environment.NewLine}{HexStringUtilities.FormatByteData(buffer)}");
+                Console.WriteLine($"Bytes read:{Environment.NewLine}{BitConverter.ToString(buffer)}");
             }
 
             return 0;

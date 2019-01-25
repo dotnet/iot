@@ -5,9 +5,9 @@
 namespace System.Device.Gpio
 {
     /// <summary>
-    /// Delegate that defines the structure for callbacks when an event happens.
+    /// Delegate that defines the structure for callbacks when a pin value changed event occurs.
     /// </summary>
     /// <param name="sender">The sender of the event.</param>
-    /// <param name="pinValueChangedEventArgs">The pinValue changed args from the event.</param>
+    /// <param name="pinValueChangedEventArgs">The pin value changed arguments from the event.</param>
     public delegate void PinChangeEventHandler(object sender, PinValueChangedEventArgs pinValueChangedEventArgs);
 }

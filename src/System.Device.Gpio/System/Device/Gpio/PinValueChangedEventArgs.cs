@@ -10,7 +10,7 @@ namespace System.Device.Gpio
     public class PinValueChangedEventArgs : EventArgs
     {
         /// <summary>
-        /// Constructor
+        /// Initializes new instance of PinValueChangedEventArgs.
         /// </summary>
         /// <param name="changeType">The change type that triggered the event.</param>
         /// <param name="pinNumber">The pin number that triggered the event.</param>

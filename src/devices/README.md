@@ -7,7 +7,10 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ## Binding Index
 
 * [Bmp280](Bmp280/README.md)
+* [Max7219](Max7219/README.md)
 * [Mcp3008](Mcp3008/README.md)
+* [Mcp23xxx](Mcp23xxx/README.md)
+* [Si7021](Si7021/README.md)
 
 ## Binding Distribution
 
@@ -17,7 +20,7 @@ We may publish NuGet packages of device bindings at a later date.
 
 ## Contributing a binding
 
-Anyone can contribute a binding. Please do! Bindings should follow the model that is used for the [Mcp23xxx](Mcp23xxx/README.md) or [Mcp3008](Mcp3008/README.md) implementations.  There is a [Binding Markdown template](Device%20Binding%20Template.md) that can help you get started, as well.
+Anyone can contribute a binding. Please do! Bindings should follow the model that is used for the [Mcp23xxx](Mcp23xxx/README.md) or [Mcp3008](Mcp3008/README.md) implementations.  There is a [Device Binding Template](../../tools/templates/DeviceBindingTemplate/README.md) that can help you get started, as well.
 
 Bindings must:
 

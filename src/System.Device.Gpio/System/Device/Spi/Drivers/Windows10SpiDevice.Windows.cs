@@ -7,11 +7,20 @@ using WinSpi = Windows.Devices.Spi;
 
 namespace System.Device.Spi.Drivers
 {
+    /// <summary>
+    /// Represents an SPI communication channel running on Windows 10 IoT.
+    /// </summary>
     public class Windows10SpiDevice : SpiDevice
     {
         private readonly SpiConnectionSettings _settings;
         private WinSpi.SpiDevice _winDevice;
 
+        /// <summary>
+        /// Initializes new instance of Windows10SpiDevice that will use the specified settings to communicate with the SPI device.
+        /// </summary>
+        /// <param name="settings">
+        /// The connection settings of a device on a SPI bus.
+        /// </param>
         public Windows10SpiDevice(SpiConnectionSettings settings)
         {
             _settings = settings;
@@ -28,14 +37,21 @@ namespace System.Device.Spi.Drivers
             DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
             if (deviceInformationCollection.Count == 0)
             {
-                throw new ArgumentException($"No SPI device exists for BusId {settings.BusId}", $"{nameof(settings)}.{nameof(settings.BusId)}");
+                throw new ArgumentException($"No SPI device exists for bus ID {settings.BusId}.", $"{nameof(settings)}.{nameof(settings.BusId)}");
             }
 
             _winDevice = WinSpi.SpiDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).WaitForCompletion();
         }
 
+        /// <summary>
+        /// The connection settings of a device on a SPI bus.
+        /// </summary>
         public override SpiConnectionSettings ConnectionSettings => _settings;
 
+        /// <summary>
+        /// Reads a byte from the SPI device.
+        /// </summary>
+        /// <returns>A byte read from the SPI device.</returns>
         public override byte ReadByte()
         {
             byte[] buffer = new byte[1];
@@ -43,6 +59,13 @@ namespace System.Device.Spi.Drivers
             return buffer[0];
         }
 
+        /// <summary>
+        /// Reads data from the SPI device.
+        /// </summary>
+        /// <param name="buffer">
+        /// The buffer to read the data from the SPI device.
+        /// The length of the buffer determines how much data to read from the SPI device.
+        /// </param>
         public override void Read(Span<byte> buffer)
         {
             byte[] byteArray = new byte[buffer.Length];
@@ -50,21 +73,36 @@ namespace System.Device.Spi.Drivers
             new Span<byte>(byteArray).CopyTo(buffer);
         }
 
+        /// <summary>
+        /// Writes a byte to the SPI device.
+        /// </summary>
+        /// <param name="data">The byte to be written to the SPI device.</param>
         public override void WriteByte(byte data)
         {
             _winDevice.Write(new[] { data });
         }
 
+        /// <summary>
+        /// Writes data to the SPI device.
+        /// </summary>
+        /// <param name="data">
+        /// The buffer that contains the data to be written to the SPI device.
+        /// </param>
         public override void Write(Span<byte> data)
         {
             _winDevice.Write(data.ToArray());
         }
 
+        /// <summary>
+        /// Writes and reads data from the SPI device.
+        /// </summary>
+        /// <param name="writeBuffer">The buffer that contains the data to be written to the SPI device.</param>
+        /// <param name="readBuffer">The buffer to read the data from the SPI device.</param>
         public override void TransferFullDuplex(Span<byte> writeBuffer, Span<byte> readBuffer)
         {
             if (writeBuffer.Length != readBuffer.Length)
             {
-                throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length");
+                throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length.");
             }
             byte[] byteArray = new byte[readBuffer.Length];
             _winDevice.TransferFullDuplex(writeBuffer.ToArray(), byteArray);
@@ -91,7 +129,7 @@ namespace System.Device.Spi.Drivers
                 case SpiMode.Mode3:
                     return WinSpi.SpiMode.Mode3;
                 default:
-                    throw new ArgumentException($"SPI mode not supported: {mode}", nameof(mode));
+                    throw new ArgumentException($"SPI mode {mode} not supported.", nameof(mode));
             }
         }
     }

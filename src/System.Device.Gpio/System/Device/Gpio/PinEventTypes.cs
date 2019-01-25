@@ -5,21 +5,21 @@
 namespace System.Device.Gpio
 {
     /// <summary>
-    /// Different event types that can be triggered by the GPIO.
+    /// Event types that can be triggered by the GPIO.
     /// </summary>
     [Flags]
     public enum PinEventTypes
     {
         /// <summary>
-        /// None
+        /// None.
         /// </summary>
         None = 0,
         /// <summary>
-        /// Triggered when pin value goes from 0 to 1
+        /// Triggered when pin value goes from low to high.
         /// </summary>
         Rising = 1,
         /// <summary>
-        /// Triggered when a pin value goes from 1 to 0
+        /// Triggered when a pin value goes from high to low.
         /// </summary>
         Falling = 2
     }

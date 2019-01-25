@@ -5,16 +5,16 @@
 namespace System.Device.Gpio
 {
     /// <summary>
-    /// Resulting object after waiting for an event to happen.
+    /// Resulting object after waiting for an event to occur.
     /// </summary>
     public struct WaitForEventResult
     {
         /// <summary>
-        /// The event type to wait for.
+        /// The event types to wait for.
         /// </summary>
         public PinEventTypes EventType;
         /// <summary>
-        /// True if waiting for the event timed out. False if an event was triggered before the time out expired.
+        /// True if waiting for the event timed out. False if an event was triggered before the timeout expired.
         /// </summary>
         public bool TimedOut;
     }

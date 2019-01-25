@@ -6,11 +6,17 @@ See the following resources to get started.
 * [Install .NET Core on Raspberry Pi](https://github.com/dotnet/core/blob/master/samples/RaspberryPiInstructions.md)
 * [.NET Core ARM64 Status](https://github.com/dotnet/announcements/issues/82)
 * [.NET Core Docker Samples](https://github.com/dotnet/dotnet-docker/tree/master/samples)
+* [How to Prepare a Publish Profile](How-to-Deploy-an-IoT-App.md)
 
 ## System.Device.* APIs
 
 * [Device Bindings](https://github.com/dotnet/iot/tree/master/src/devices) - Includes a collection of APIs representing a range of sensors, displays and human interface devices based on System.Device.* APIs.
 * [DevicesApiTester CLI](https://github.com/dotnet/iot/tree/master/tools/DevicesApiTester) - Helpful utility, based on System.Device.* APIs, that include various commands for testing connected development boards and external hardware.
+
+### Design Reviews
+* [.NET Design Reviews: GPIO (10/2/2018)](https://youtu.be/OK0jDe8wtyg)
+* [.NET Design Reviews: GPIO (10/19/2018)](https://youtu.be/wtkPtOpI3CA)
+* [.NET Design Reviews: GPIO (11/2/2018)](https://youtu.be/UZc3sbJ0-PI)
 
 ## Interface Knowledge Base
 ### General-Purpose Input/Output (GPIO)
@@ -78,6 +84,7 @@ See the following resources to get started.
 
 ### Prototyping
 #### How-Tos
+* [Blinking LED Blog Post by Scott Hanselman](https://www.hanselman.com/blog/InstallingTheNETCore2xSDKOnARaspberryPiAndBlinkingAnLEDWithSystemDeviceGpio.aspx)
 * [Collin's Lab: Breadboards & Perfboards](https://www.youtube.com/watch?v=w0c3t0fJhXU)
 * [How to Use a Breadboard](https://www.youtube.com/watch?v=6WReFkfrUIk)
 

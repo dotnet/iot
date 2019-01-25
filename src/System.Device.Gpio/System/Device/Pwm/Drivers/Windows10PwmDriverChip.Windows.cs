@@ -13,11 +13,11 @@ namespace System.Device.Pwm.Drivers
         private WinPwm.PwmController _winController;
         private readonly Dictionary<int, Windows10PwmDriverChannel> _channelMap = new Dictionary<int, Windows10PwmDriverChannel>();
 
-        public Windows10PwmDriverChip(int chipIndex)
+        public Windows10PwmDriverChip(int chipIndex, bool useDefaultChip)
         {
             // Open the Windows PWM controller for the specified PWM chip
             string controllerFriendlyName = $"PWM{chipIndex}";
-            string deviceSelector = WinPwm.PwmController.GetDeviceSelector(controllerFriendlyName);
+            string deviceSelector = useDefaultChip ? WinPwm.PwmController.GetDeviceSelector() : WinPwm.PwmController.GetDeviceSelector(controllerFriendlyName);
 
             DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
             if (deviceInformationCollection.Count == 0)
