@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Devices.Gpio" Version="0.1.0-preview2-181222-2" />
+    <PackageReference Include="System.Devices.Gpio" Version="0.1.0-prerelease*" />
   </ItemGroup>
 
 </Project>
