@@ -18,6 +18,7 @@ namespace Iot.Device.HCSR04
         private readonly int _echo;
         private readonly int _trigger;
         private GpioController _controller;
+        private Stopwatch _timer = new Stopwatch();
 
         public Sonar(int triggerPin, int echoPin)
         {
@@ -27,6 +28,8 @@ namespace Iot.Device.HCSR04
 
             _controller.OpenPin(_echo, PinMode.Input);
             _controller.OpenPin(_trigger, PinMode.Output);
+
+             _controller.Write(_trigger, PinValue.Low);
         }
 
         /// <summary>
@@ -34,35 +37,30 @@ namespace Iot.Device.HCSR04
         /// </summary>
         public double GetDistance()
         {
+            _timer.Reset();
+
             // Trigger input for 10uS to start ranging
             // ref https://components101.com/sites/default/files/component_datasheet/HCSR04%20Datasheet.pdf
-            _controller.Write(_trigger, PinValue.Low);
-            Thread.Sleep(TimeSpan.FromMilliseconds(1));
             _controller.Write(_trigger, PinValue.High);
             Thread.Sleep(TimeSpan.FromMilliseconds(0.01));
             _controller.Write(_trigger, PinValue.Low);
-
-            // Start timers
-            Stopwatch stopTime = new Stopwatch(); stopTime.Start();
-            Stopwatch startTime = new Stopwatch(); startTime.Start();
-
+            
+            _timer.Start();
+            
             while(_controller.Read(_echo) == PinValue.Low)
             {
-                startTime.Start();
             }
-
-            startTime.Stop();
 
             while(_controller.Read(_echo) == PinValue.High)
             {
-                stopTime.Start();
             }
 
-            startTime.Stop();
+            _timer.Stop();
+            
+            TimeSpan elapsed = _timer.Elapsed;
 
-            TimeSpan elapsed = stopTime.Elapsed - startTime.Elapsed;
-
-            return (double)(elapsed.Seconds * 34300) / 2;
+            // distance = (time / 2) × velocity of sound (34300 cm/s)
+            return (double)(elapsed.TotalMilliseconds * 34.3) / 2 - 8;
         }
 
         public void Dispose()

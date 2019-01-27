@@ -19,17 +19,13 @@ namespace Iot.Device.HCSR04.Samples
         {
             Console.WriteLine("Hello HCSR04 Sample!");
 
-
             using(var sonar = new Iot.Device.HCSR04.Sonar(4, 17))
             {
-                System.Console.WriteLine("Hello");
                 while(true)
                 {
-                    System.Console.WriteLine("Value = ");
-                    System.Console.WriteLine(sonar.GetDistance());;
+                    Console.WriteLine($"Value = {sonar.GetDistance()}");
                     System.Threading.Thread.Sleep(100);
                 }
-
             }
         }
     }
