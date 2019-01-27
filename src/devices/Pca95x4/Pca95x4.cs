@@ -35,7 +35,7 @@ namespace Iot.Device.Pca95x4
         {
             if (bitNumber < 0 || bitNumber > 7)
             {
-                throw new IndexOutOfRangeException($"Invalid bit index {bitNumber}.");
+                throw new IndexOutOfRangeException($"Invalid bit number {bitNumber}.");
             }
         }
 
