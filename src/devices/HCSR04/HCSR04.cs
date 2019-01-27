@@ -9,6 +9,7 @@ using System.Device.I2c;
 using System.Device.I2c.Drivers;
 using System.Device.Spi;
 using System.Device.Spi.Drivers;
+using System.Threading;
 
 namespace Iot.Device.HCSR04
 {
@@ -16,7 +17,7 @@ namespace Iot.Device.HCSR04
     {
         private readonly int _echo;
         private readonly int _trigger;
-        private readonly GpioController _controller;
+        private GpioController _controller;
 
         public Sonar(int triggerPin, int echoPin)
         {
@@ -34,10 +35,11 @@ namespace Iot.Device.HCSR04
         public double GetDistance()
         {
             // Trigger input for 10uS to start ranging
+            // ref https://components101.com/sites/default/files/component_datasheet/HCSR04%20Datasheet.pdf
             _controller.Write(_trigger, PinValue.Low);
-            System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            Thread.Sleep(TimeSpan.FromMilliseconds(1));
             _controller.Write(_trigger, PinValue.High);
-            System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(0.01));
+            Thread.Sleep(TimeSpan.FromMilliseconds(0.01));
             _controller.Write(_trigger, PinValue.Low);
 
             // Start timers
@@ -60,8 +62,6 @@ namespace Iot.Device.HCSR04
 
             TimeSpan elapsed = stopTime.Elapsed - startTime.Elapsed;
 
-            // Calculate distance
-            // distance = (high level time×velocity of sound (340M/S) / 2
             return (double)(elapsed.Seconds * 34300) / 2;
         }
 
@@ -70,6 +70,7 @@ namespace Iot.Device.HCSR04
             if(_controller != null)
             {
                 _controller.Dispose();
+                _controller = null;
             }
         }
     }
