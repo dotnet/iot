@@ -20,6 +20,11 @@ namespace Iot.Device.HCSR04
         private GpioController _controller;
         private Stopwatch _timer = new Stopwatch();
 
+        /// <summary>
+        /// Creates a new instance of the HC-SCR04 sonar.
+        /// </summary>
+        /// <param name="triggerPin">Trigger pulse input.</param>
+        /// <param name="echoPin">Trigger pulse output.</param>
         public Sonar(int triggerPin, int echoPin)
         {
             _echo = echoPin;
