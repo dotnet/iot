@@ -1,6 +1,6 @@
 ﻿# HC-SR04
 
-Device bindings for the HC-SR04 sonar distance sensor. Work in progress.
+Device bindings for the HC-SR04 sonar distance sensor.
 
 ## Summary
 
