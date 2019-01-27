@@ -133,7 +133,7 @@ namespace Iot.Device.Pca95x4
         /// Writes a byte to a register.
         /// </summary>
         /// <param name="register">The register to write.</param>
-        /// <param name="data">The data to write.</param>
+        /// <param name="data">The data to write to the register.</param>
         public void Write(Register register, byte data)
         {
             Write(register, new byte[] { data });
@@ -144,7 +144,7 @@ namespace Iot.Device.Pca95x4
         /// All data will be written to selected register as Pca95x4 does not auto-increment addressing.
         /// </summary>
         /// <param name="register">The register to write.</param>
-        /// <param name="data">The data to write to register.</param>
+        /// <param name="data">The data to write to the register.</param>
         public void Write(Register register, byte[] data)
         {
             byte[] writeBuffer = new byte[data.Length + 1]; // Include Register Address.
@@ -176,9 +176,9 @@ namespace Iot.Device.Pca95x4
         }
 
         /// <summary>
-        /// Invert Input Register polarity.
+        /// Inverts Input Register polarity.
         /// </summary>
-        /// <param name="invert">Determine if Inputer Register polarity is inverted.</param>
+        /// <param name="invert">Determines if Inputer Register polarity is inverted.</param>
         public void InvertInputRegisterPolarity(bool invert)
         {
             byte data = invert ? (byte)0xFF : (byte)0x00;
@@ -186,10 +186,10 @@ namespace Iot.Device.Pca95x4
         }
 
         /// <summary>
-        /// Invert Input Register bit polarity.
+        /// Inverts Input Register bit polarity.
         /// </summary>
         /// <param name="bitNumber">The Input Register bit number to invert.</param>
-        /// <param name="invert">Determine if the Input Register bit polarity is inverted.</param>
+        /// <param name="invert">Determines if the Input Register bit polarity is inverted.</param>
         public void InvertInputRegisterBitPolarity(int bitNumber, bool invert)
         {
             WriteBit(Register.PolarityInversion, bitNumber, invert);
