@@ -59,15 +59,11 @@ namespace Iot.Device.Pca95x4
 
         private void InitializeMasterGpioController()
         {
-            // Only need master controller if there are external pins provided.
+            // Only need master controller if there is external pin provided.
             if (_interrupt != null)
             {
                 _masterGpioController = new GpioController();
-
-                if (_interrupt != null)
-                {
-                    _masterGpioController.OpenPin((int)_interrupt, PinMode.Input);
-                }
+                _masterGpioController.OpenPin((int)_interrupt, PinMode.Input);
             }
         }
 
