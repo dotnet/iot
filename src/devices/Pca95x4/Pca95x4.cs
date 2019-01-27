@@ -31,7 +31,7 @@ namespace Iot.Device.Pca95x4
             InitializeMasterGpioController();
         }
 
-        internal static void ValidateBitNumber(int bitNumber)
+        private static void ValidateBitNumber(int bitNumber)
         {
             if (bitNumber < 0 || bitNumber > 7)
             {
@@ -39,19 +39,19 @@ namespace Iot.Device.Pca95x4
             }
         }
 
-        internal static void ClearBit(ref byte data, int bitNumber)
+        private static void ClearBit(ref byte data, int bitNumber)
         {
             ValidateBitNumber(bitNumber);
             data &= (byte)~(1 << bitNumber);
         }
 
-        internal void SetBit(ref byte data, int bitNumber)
+        private void SetBit(ref byte data, int bitNumber)
         {
             ValidateBitNumber(bitNumber);
             data |= (byte)(1 << bitNumber);
         }
 
-        internal static bool GetBit(byte data, int bitNumber)
+        private static bool GetBit(byte data, int bitNumber)
         {
             ValidateBitNumber(bitNumber);
             return ((data >> bitNumber) & 1) == 1;
