@@ -38,7 +38,7 @@ namespace Iot.Device.Mcp23xxx
         {
             if (bitNumber < 0 || bitNumber > 7)
             {
-                throw new IndexOutOfRangeException("Invalid bit index.");
+                throw new IndexOutOfRangeException($"Invalid bit number {bitNumber}.");
             }
         }
 
