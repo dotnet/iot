@@ -2,4 +2,8 @@
 
 This simple example shows how to use the HC-SR04 device binding with dotnet/iot.
 
-__NOTE:__ It has only been tested on RPi3
+## Breadboard layout
+
+The following fritz diagram depicts how you should wire your RPi in order to run the program.
+
+![Fritz diagram](raspberry_hc-sr04.png)
