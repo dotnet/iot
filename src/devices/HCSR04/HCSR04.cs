@@ -24,10 +24,8 @@ namespace Iot.Device.HCSR04
             _trigger = triggerPin;
             _controller = new GpioController();
 
-            _controller.OpenPin(_echo);
-            _controller.OpenPin(_trigger);
-            _controller.SetPinMode(_echo, PinMode.Input);
-            _controller.SetPinMode(_trigger, PinMode.Output);
+            _controller.OpenPin(_echo, PinMode.Input);
+            _controller.OpenPin(_trigger, PinMode.Output);
         }
 
         /// <summary>
@@ -59,7 +57,7 @@ namespace Iot.Device.HCSR04
             }
 
             startTime.Stop();
-            
+
             TimeSpan elapsed = stopTime.Elapsed - startTime.Elapsed;
 
             // Calculate distance
