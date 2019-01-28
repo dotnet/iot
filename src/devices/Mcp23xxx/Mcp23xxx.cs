@@ -185,6 +185,7 @@ namespace Iot.Device.Mcp23xxx
         /// <returns>The value of the register bit read.</returns>
         public bool ReadBit(Register.Address registerAddress, int bitNumber, Port port = Port.PortA, Bank bank = Bank.Bank1)
         {
+            ValidateBitNumber(bitNumber);
             byte data = Read(registerAddress, port, bank);
             return GetBit(data, bitNumber);
         }
@@ -249,6 +250,7 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="bank">The bank type that determines how the register is mapped.</param>
         public void WriteBit(Register.Address registerAddress, int bitNumber, bool bit, Port port = Port.PortA, Bank bank = Bank.Bank1)
         {
+            ValidateBitNumber(bitNumber);
             byte data = Read(registerAddress, port, bank);
 
             if (bit)
