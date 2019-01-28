@@ -19,7 +19,7 @@ namespace Iot.Device.Samples
 
             var i2cSettings = new I2cConnectionSettings(BusId, Si7021Address);
             var i2cDevice = new Windows10I2cDevice(i2cSettings);
-            var i2CSi7021 = new Si7021(i2cDevice);
+            var i2CSi7021 = new Si7021.Si7021(i2cDevice);
 
             using (i2CSi7021)
             {
