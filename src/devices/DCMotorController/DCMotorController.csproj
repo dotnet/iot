@@ -8,7 +8,7 @@
   <ItemGroup>
     <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
     <ProjectReference Include="..\SoftPwm\SoftPwm.csproj" />
-    <Compile Include="MotorController.cs" />
+    <Compile Include="DCMotorController.cs" />
     <None Include="README.md" />
   </ItemGroup>
 
