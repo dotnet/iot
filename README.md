@@ -56,8 +56,8 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 * [ ] Support BeagleBoard Black on Linux and Windows 10 IoT Core RS5
 * [x] Support sysfs (/sys/class/gpio) for Generic/Portable Device Driver on Linux Kernel 3.6+
 * [ ] Support libgpiod (/dev/gpiochipX) for Generic/Portable Device Driver on Linux Kernel 4.8+
-* [ ] Stabilize System.Device.* API
-* [ ] Publish System.Device.* API to NuGet.org
+* [ ] Stabilize System.Device.Gpio API
+* [x] Publish System.Device.Gpio to NuGet.org
 * [x] Provide dockerfiles for all samples
 * [ ] Publish Docker images for a subset of samples
 * [ ] Support x64
@@ -66,8 +66,8 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 * [ ] Support Device Bindings for common sensors and microcontrollers such as those bundled with the [Microsoft IoT Starter Pack](https://www.adafruit.com/product/2733)
 * [ ] Support Device Bindings and Canvas Widgets for LCDS, multi-panel [LED matrices](https://www.adafruit.com/product/607), and Displays
 * [ ] Support Device Bindings for servo and stepper motors, motor controllers, and drives
-* [ ] Stabilize IoT.Device.* APIs for Device Bindings
-* [ ] Publish IoT.Device.* Device Bindings to NuGet.org
+* [ ] Stabilize IoT.Device.Bindings APIs for Device Bindings
+* [x] Publish IoT.Device.Bindings to NuGet.org
 
 ## License
 
