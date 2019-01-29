@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Devices.Gpio" Version="0.1.0-prerelease*" />
     <ProjectReference Include="../HCSR501.csproj" />
   </ItemGroup>
 
