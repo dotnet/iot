@@ -57,7 +57,7 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 * [x] Support sysfs (/sys/class/gpio) for Generic/Portable Device Driver on Linux Kernel 3.6+
 * [ ] Support libgpiod (/dev/gpiochipX) for Generic/Portable Device Driver on Linux Kernel 4.8+
 * [ ] Stabilize System.Device.Gpio API
-* [x] Publish System.Device.Gpio to NuGet.org
+* [x] Publish [System.Device.Gpio to NuGet.org](https://www.nuget.org/packages/System.Device.Gpio)
 * [x] Provide dockerfiles for all samples
 * [ ] Publish Docker images for a subset of samples
 * [ ] Support x64
@@ -67,7 +67,7 @@ We have the following deliverables on our intermediate-term roadmap (not in orde
 * [ ] Support Device Bindings and Canvas Widgets for LCDS, multi-panel [LED matrices](https://www.adafruit.com/product/607), and Displays
 * [ ] Support Device Bindings for servo and stepper motors, motor controllers, and drives
 * [ ] Stabilize IoT.Device.Bindings APIs for Device Bindings
-* [x] Publish IoT.Device.Bindings to NuGet.org
+* [x] Publish [IoT.Device.Bindings to NuGet.org](https://www.nuget.org/packages/Iot.Device.Bindings)
 
 ## License
 

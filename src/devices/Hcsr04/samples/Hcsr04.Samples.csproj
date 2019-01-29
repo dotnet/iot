@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../HCSR04.csproj" />
+    <ProjectReference Include="../Hcsr04.csproj" />
     <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
   </ItemGroup>
 
