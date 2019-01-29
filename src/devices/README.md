@@ -16,7 +16,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ## Binding Distribution
 
-Binding distribution is primarily via the [Iot.Device.Bindings NuGet package](https://www.nuget.org/packages/Iot.Device.Bindings/0.1.0-prerelease.19078.2) that ships via NuGet (for preview and RTM releases) and MyGet (for daily builds with latest bindings). The MyGet package should be updated with every official build, which means that it will take at most 1 day for a binding to be includded in the package once it has been merged to the master branch.
+Binding distribution is primarily via the Iot.Device.Bindings NuGet package that ships via [NuGet](https://www.nuget.org/packages/Iot.Device.Bindings) (for preview and RTM releases) and [MyGet](https://dotnet.myget.org/feed/dotnet-core/package/nuget/Iot.Device.Bindings) (for daily builds with latest bindings). The MyGet package should be updated with every official build, which means that it will take at most 1 day for a binding to be includded in the package once it has been merged to the master branch.
 
 ## Contributing a binding
 
