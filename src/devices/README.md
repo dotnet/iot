@@ -16,9 +16,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ## Binding Distribution
 
-We are currently encouraging source distribution of device bindings. The [Mcp3008 sample](Mcp3008/samples/README.md) references the [Mcp3008 library](Mcp3008/Mcp3008.csproj) within this repo. You can clone this repo and use the sample project reference model to a device binding or copy bindings directly into your project.
-
-We have now published to NuGet a preview version of our IoT device bindings: [Iot.Device.Bindings NuGet package](https://www.nuget.org/packages/Iot.Device.Bindings/0.1.0-prerelease.19078.2).
+Binding distribution is primarily via the [Iot.Device.Bindings NuGet package](https://www.nuget.org/packages/Iot.Device.Bindings/0.1.0-prerelease.19078.2) that ships via NuGet (for preview and RTM releases) and MyGet (for daily builds with latest bindings). The MyGet package should be updated with every official build, which means that it will take at most 1 day for a binding to be includded in the package once it has been merged to the master branch.
 
 ## Contributing a binding
 
