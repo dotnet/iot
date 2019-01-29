@@ -11,7 +11,7 @@ using System.Device.Spi;
 using System.Device.Spi.Drivers;
 using System.Threading;
 
-namespace Iot.Device.HCSR04
+namespace Iot.Device.Hcsr04
 {
     public class Sonar : IDisposable
     {

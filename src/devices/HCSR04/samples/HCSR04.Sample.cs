@@ -9,17 +9,17 @@ using System.Device.I2c.Drivers;
 using System.Device.Spi;
 using System.Device.Spi.Drivers;
 using System.Threading;
-using Iot.Device.HCSR04;
+using Iot.Device.Hcsr04;
 
-namespace Iot.Device.HCSR04.Samples
+namespace Iot.Device.Hcsr04.Samples
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello HCSR04 Sample!");
+            Console.WriteLine("Hello Hcsr04 Sample!");
 
-            using(var sonar = new Iot.Device.HCSR04.Sonar(4, 17))
+            using(var sonar = new Iot.Device.Hcsr04.Sonar(4, 17))
             {
                 while(true)
                 {
