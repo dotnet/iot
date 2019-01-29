@@ -7,56 +7,87 @@ using Windows.Security.ExchangeActiveSyncProvisioning;
 
 namespace System.Device.Pwm.Drivers
 {
+    /// <summary>
+    /// A PWM driver for Windows 10 IoT.
+    /// </summary>
     internal class Windows10PwmDriver : PwmDriver
     {
         private readonly Dictionary<int, Windows10PwmDriverChip> _chipMap = new Dictionary<int, Windows10PwmDriverChip>();
-        private bool useDefaultChip;
+        private readonly bool _useDefaultChip;
 
         public Windows10PwmDriver()
         {
-            // On Hummingboard, fallback to check for generic PWM controller (friendlyname is not currently used)
+            // On Hummingboard, fallback to check for generic PWM controller (friendly name is not currently used).
             var deviceInfo = new EasClientDeviceInformation();
             if (deviceInfo.SystemProductName.IndexOf("Hummingboard", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                useDefaultChip = true;
+                _useDefaultChip = true;
             }
         }
 
-        protected internal override void OpenChannel(int chipIndex, int channelIndex)
+        /// <summary>
+        /// Opens a channel in order for it to be ready to use.
+        /// </summary>
+        /// <param name="pwmChip">The PWM chip.</param>
+        /// <param name="pwmChannel">The PWM channel.</param>
+        protected internal override void OpenChannel(int pwmChip, int pwmChannel)
         {
-            if (!_chipMap.TryGetValue(chipIndex, out Windows10PwmDriverChip chip))
+            if (!_chipMap.TryGetValue(pwmChip, out Windows10PwmDriverChip chip))
             {
-                chip = new Windows10PwmDriverChip(chipIndex, useDefaultChip);
-                _chipMap[chipIndex] = chip;
+                chip = new Windows10PwmDriverChip(pwmChip, _useDefaultChip);
+                _chipMap[pwmChip] = chip;
             }
 
-            chip.OpenChannel(channelIndex);
+            chip.OpenChannel(pwmChannel);
         }
 
-        protected internal override void CloseChannel(int chipIndex, int channelIndex)
+        /// <summary>
+        /// Closes an open channel.
+        /// </summary>
+        /// <param name="pwmChip">The PWM chip.</param>
+        /// <param name="pwmChannel">The PWM channel.</param>
+        protected internal override void CloseChannel(int pwmChip, int pwmChannel)
         {
-            // This assumes that PwmController has ensured that the chip is already open
-            Windows10PwmDriverChip chip = _chipMap[chipIndex];
+            // This assumes that PwmController has ensured that the chip is already open.
+            Windows10PwmDriverChip chip = _chipMap[pwmChip];
 
-            if (chip.CloseChannel(channelIndex))
+            if (chip.CloseChannel(pwmChannel))
             {
-                _chipMap.Remove(channelIndex);
+                _chipMap.Remove(pwmChannel);
             }
         }
 
-        protected internal override void ChangeDutyCycle(int chipIndex, int channelIndex, double dutyCyclePercentage)
+        /// <summary>
+        /// Changes the duty cycle for an open channel.
+        /// </summary>
+        /// <param name="pwmChip">The PWM chip.</param>
+        /// <param name="pwmChannel">The PWM channel.</param>
+        /// <param name="dutyCyclePercentage">The duty cycle percentage to change.</param>
+        protected internal override void ChangeDutyCycle(int pwmChip, int pwmChannel, double dutyCyclePercentage)
         {
-            this.LookupOpenChip(chipIndex).ChangeDutyCycle(channelIndex, dutyCyclePercentage);
+            LookupOpenChip(pwmChip).ChangeDutyCycle(pwmChannel, dutyCyclePercentage);
         }
 
-        protected internal override void StartWriting(int chipIndex, int channelIndex, double frequencyInHertz, double dutyCyclePercentage)
+        /// <summary>
+        /// Starts writing to an open channel.
+        /// </summary>
+        /// <param name="pwmChip">The PWM chip.</param>
+        /// <param name="pwmChannel">The PWM channel.</param>
+        /// <param name="frequencyInHertz">The frequency in hertz.</param>
+        /// <param name="dutyCyclePercentage"></param>
+        protected internal override void StartWriting(int pwmChip, int pwmChannel, double frequencyInHertz, double dutyCyclePercentage)
         {
-            this.LookupOpenChip(chipIndex).Start(channelIndex, frequencyInHertz, dutyCyclePercentage);
+            LookupOpenChip(pwmChip).Start(pwmChannel, frequencyInHertz, dutyCyclePercentage);
         }
 
-        protected internal override void StopWriting(int chipIndex, int channelIndex)
+        /// <summary>
+        /// Stops writing to an open channel.
+        /// </summary>
+        /// <param name="pwmChip">The PWM chip.</param>
+        /// <param name="pwmChannel">The PWM channel.</param>
+        protected internal override void StopWriting(int pwmChip, int pwmChannel)
         {
-            this.LookupOpenChip(chipIndex).Stop(channelIndex);
+            LookupOpenChip(pwmChip).Stop(pwmChannel);
         }
 
         protected override void Dispose(bool disposing)
@@ -70,11 +101,10 @@ namespace System.Device.Pwm.Drivers
             base.Dispose(disposing);
         }
 
-        private Windows10PwmDriverChip LookupOpenChip(int chipIndex)
+        private Windows10PwmDriverChip LookupOpenChip(int pwmChip)
         {
-            // This assumes that PwmController has ensured that the chip is already open
-            return _chipMap[chipIndex];
+            // This assumes that PwmController has ensured that the chip is already open.
+            return _chipMap[pwmChip];
         }
-
     }
 }
