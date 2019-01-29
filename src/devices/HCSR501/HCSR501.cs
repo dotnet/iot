@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Devices.Gpio;
-using System.Text;
 
-namespace PIR
+namespace Iot.Device.HCSR501
 {
     public class HCSR501ValueChangedEventArgs : EventArgs
     {
@@ -17,7 +15,7 @@ namespace PIR
     public class HCSR501 : IDisposable
     {
         private GpioPin sensor;
-        private readonly int pinOut;
+        private readonly int _pinOut;
 
         /// <summary>
         /// Constructor
@@ -25,7 +23,7 @@ namespace PIR
         /// <param name="pin">OUT Pin</param>
         public HCSR501(int pin)
         {
-            pinOut = pin;
+            _pinOut = pin;
         }
 
         /// <summary>
@@ -35,7 +33,7 @@ namespace PIR
         {
             GpioController controller = new GpioController(PinNumberingScheme.Gpio);
 
-            sensor = controller.OpenPin(pinOut, PinMode.Input);
+            sensor = controller.OpenPin(_pinOut, PinMode.Input);
 
             sensor.ValueChanged += Sensor_ValueChanged;
         }
