@@ -56,7 +56,6 @@ namespace Iot.Device.Mcp23xxx
 
         private static bool GetBit(byte data, int bitNumber)
         {
-            ValidateBitNumber(bitNumber);
             return ((data >> bitNumber) & 1) == 1;
         }
 
