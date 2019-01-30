@@ -7,7 +7,7 @@ HC-SR501 is used to detect motion based on the infrared heat in the surrounding 
 ## Usage
 * First, you need to create a HCSR501 object. After that you should call Initialize() to initialize.
     ```C#
-    HCSR501 sensor = new HCSR501(17);
+    Hcsr501 sensor = new Hcsr501(hcsr501Pin, PinNumberingScheme.Logical);
     sensor.Initialize();
     ```
 
