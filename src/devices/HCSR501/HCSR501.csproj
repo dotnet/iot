@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Devices.Gpio" Version="0.1.0-prerelease*" />
-    <Compile Include="HCSR501.cs" />
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease.19078.2" />
+    <Compile Include="Hcsr501.cs" />
   </ItemGroup>
 
 </Project>

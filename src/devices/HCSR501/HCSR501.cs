@@ -1,29 +1,36 @@
-﻿using System;
-using System.Devices.Gpio;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.HCSR501
+using System;
+using System.Device.Gpio;
+
+namespace Iot.Device.Hcsr501
 {
-    public class HCSR501ValueChangedEventArgs : EventArgs
+    public class Hcsr501ValueChangedEventArgs : EventArgs
     {
         public readonly PinValue PinValue;
-        public HCSR501ValueChangedEventArgs(PinValue value)
+        public Hcsr501ValueChangedEventArgs(PinValue value)
         {
             PinValue = value;
         }
     }
 
-    public class HCSR501 : IDisposable
+    public class Hcsr501 : IDisposable
     {
-        private GpioPin sensor;
+        private GpioController _controller;
         private readonly int _pinOut;
+        private readonly PinNumberingScheme _pinNumberingScheme;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="pin">OUT Pin</param>
-        public HCSR501(int pin)
+        /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
+        public Hcsr501(int pin, PinNumberingScheme pinNumberingScheme)
         {
             _pinOut = pin;
+            _pinNumberingScheme = pinNumberingScheme;
         }
 
         /// <summary>
@@ -31,20 +38,20 @@ namespace Iot.Device.HCSR501
         /// </summary>
         public void Initialize()
         {
-            GpioController controller = new GpioController(PinNumberingScheme.Gpio);
+            _controller = new GpioController(_pinNumberingScheme);
 
-            sensor = controller.OpenPin(_pinOut, PinMode.Input);
+            _controller.OpenPin(_pinOut, PinMode.Input);
 
-            sensor.ValueChanged += Sensor_ValueChanged;
+            _controller.RegisterCallbackForPinValueChangedEvent(_pinOut, PinEventTypes.None, Sensor_ValueChanged);
         }
 
         /// <summary>
         /// Read from the sensor
         /// </summary>
-        /// <returns>Is Detected</returns>
+        /// <returns>If a motion is detected, return true.</returns>
         public bool Read()
         {
-            if (sensor.Read() == PinValue.High)
+            if (_controller.Read(_pinOut) == PinValue.High)
             {
                 return true;
             }
@@ -55,12 +62,12 @@ namespace Iot.Device.HCSR501
         }
 
         /// <summary>
-        /// Get the sensor raw GpioPin
+        /// Get the sensor GpioController
         /// </summary>
-        /// <returns>GpioPin</returns>
-        public GpioPin GetRaw()
+        /// <returns>GpioController</returns>
+        public GpioController GetDevice()
         {
-            return sensor;
+            return _controller;
         }
 
         /// <summary>
@@ -68,19 +75,19 @@ namespace Iot.Device.HCSR501
         /// </summary>
         public void Dispose()
         {
-            sensor.Dispose();
+            _controller.Dispose();
         }
 
-        public delegate void HCSR501ValueChangedHandle(object sender, HCSR501ValueChangedEventArgs e);
+        public delegate void Hcsr501ValueChangedHandle(object sender, Hcsr501ValueChangedEventArgs e);
 
         /// <summary>
         /// Triggering when HC-SR501 value changes
         /// </summary>
-        public event HCSR501ValueChangedHandle HCSR501ValueChanged;
+        public event Hcsr501ValueChangedHandle Hcsr501ValueChanged;
 
         private void Sensor_ValueChanged(object sender, PinValueChangedEventArgs e)
         {
-            HCSR501ValueChanged(sender, new HCSR501ValueChangedEventArgs(sensor.Read()));
+            Hcsr501ValueChanged(sender, new Hcsr501ValueChangedEventArgs(_controller.Read(_pinOut)));
         }
     }
 }
