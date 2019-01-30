@@ -9,6 +9,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Bmp280](Bmp280/README.md)
 * [Mcp3008](Mcp3008/README.md)
 * [Mcp23xxx](Mcp23xxx/README.md)
+* [Pca95x4](Pca95x4/README.md)
 * [Si7021](Si7021/README.md)
 
 ## Binding Distribution
