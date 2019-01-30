@@ -56,6 +56,11 @@ namespace Iot.Device.Mcp23xxx
             return Read(startingRegisterAddress, byteCount, Port.PortA, Bank.Bank1);
         }
 
+        /// <summary>
+        /// Sets a mode to a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number.</param>
+        /// <param name="mode">The mode to be set.</param>
         public void SetPinMode(int pinNumber, PinMode mode)
         {
             ValidateMode(mode);
@@ -74,6 +79,11 @@ namespace Iot.Device.Mcp23xxx
             Write(Register.Address.IODIR, _iodir);
         }
 
+        /// <summary>
+        /// Reads the value of a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number.</param>
+        /// <returns>High or low pin value.</returns>
         public PinValue ReadPin(int pinNumber)
         {
             ValidatePin(pinNumber);
@@ -82,6 +92,11 @@ namespace Iot.Device.Mcp23xxx
             return ((_gpio & (1 << (pinNumber % 8))) > 0) ? PinValue.High : PinValue.Low;
         }
 
+        /// <summary>
+        /// Writes a value to a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number.</param>
+        /// <param name="value">The value to be written.</param>
         public void WritePin(int pinNumber, PinValue value)
         {
             ValidatePin(pinNumber);
