@@ -13,7 +13,7 @@ namespace Iot.Device.Pca95x4
     /// </summary>
     public class Pca95x4 : IDisposable
     {
-        private readonly I2cDevice _i2cDevice;
+        private I2cDevice _i2cDevice;
         private GpioController _masterGpioController;
         private readonly int? _interrupt;
 
@@ -74,24 +74,9 @@ namespace Iot.Device.Pca95x4
         /// <returns>The data read from the register.</returns>
         public byte Read(Register register)
         {
-            byte[] data = Read(register, 1);
-            return data[0];
-        }
-
-        /// <summary>
-        /// Reads a number of bytes from a register. 
-        /// All data returned is from the selected register as Pca95x4 does not auto-increment addressing.
-        /// </summary>
-        /// <param name="register">The register to read.</param>
-        /// <param name="byteCount"></param>
-        /// <returns>The data read from the register.</returns>
-        public byte[] Read(Register register, byte byteCount)
-        {
-            Write(register, new byte[] { }); // Set address to register first.
-
-            byte[] readBuffer = new byte[byteCount];
-            _i2cDevice.Read(readBuffer);
-            return readBuffer;
+            _i2cDevice.WriteByte((byte)register); // Set address to register first.
+            byte data = _i2cDevice.ReadByte();
+            return data;
         }
 
         /// <summary>
@@ -132,20 +117,7 @@ namespace Iot.Device.Pca95x4
         /// <param name="data">The data to write to the register.</param>
         public void Write(Register register, byte data)
         {
-            Write(register, new byte[] { data });
-        }
-
-        /// <summary>
-        /// Writes a number of bytes to a register.
-        /// All data will be written to selected register as Pca95x4 does not auto-increment addressing.
-        /// </summary>
-        /// <param name="register">The register to write.</param>
-        /// <param name="data">The data to write to the register.</param>
-        public void Write(Register register, byte[] data)
-        {
-            byte[] writeBuffer = new byte[data.Length + 1]; // Include Register Address.
-            writeBuffer[0] = (byte)register;
-            data.CopyTo(writeBuffer, 1);
+            byte[] writeBuffer = new byte[] { (byte)register, data };
             _i2cDevice.Write(writeBuffer);
         }
 
@@ -194,6 +166,9 @@ namespace Iot.Device.Pca95x4
         public void Dispose()
         {
             _i2cDevice?.Dispose();
+            _i2cDevice = null;
+            _masterGpioController?.Dispose();
+            _masterGpioController = null;
         }
     }
 }
