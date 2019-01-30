@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Mcp23xxx
 {
+    /// <summary>
+    /// The I/O port used with registers.
+    /// </summary>
     public enum Port
     {
         PortA,
