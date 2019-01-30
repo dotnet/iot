@@ -7,15 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-  	<Compile Include="Commands.cs" />
-  	<Compile Include="Flags.cs" />
-  	<Compile Include="Lcm1602a1.cs" />
+    <Compile Include="Commands.cs" />
+    <Compile Include="Flags.cs" />
+    <Compile Include="Lcm1602a1.cs" />
   </ItemGroup>
 
   <ItemGroup>
-  	<PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
     <ProjectReference Include="$(MSBuildThisFileDirectory)../Mcp23xxx/Mcp23xxx.csproj" />
-  	<None Include="README.md" />
+    <None Include="README.md" />
   </ItemGroup>
 
 </Project>
