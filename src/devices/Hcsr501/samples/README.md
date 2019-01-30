@@ -55,4 +55,4 @@ LED
     ```
 
 ## Result
-![](https://raw.githubusercontent.com/ZhangGaoxing/dotnet-core-iot-demo/master/src/PIR/02_Image/res.gif)
+![](res.gif)
