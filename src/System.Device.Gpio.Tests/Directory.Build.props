@@ -1,0 +1,9 @@
+<Project>
+  <!--Project Configurations properties for VS-->
+  <PropertyGroup>
+    <RuntimeIdentifier Condition="'$(Configuration)' == 'Windows-Debug'">win-arm</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(Configuration)' == 'Linux-Debug'">linux-arm</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <Import Project="..\..\Directory.Build.props" />
+</Project>

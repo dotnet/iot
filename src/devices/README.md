@@ -7,16 +7,17 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ## Binding Index
 
 * [Bmp280](Bmp280/README.md)
-* [Mcp3008](Mcp3008/README.md)
+* [Dhtxx](Dhtxx/README.md)
+* [Hcsr04](Hcsr04/README.md)
+* [Max7219](Max7219/README.md)
 * [Mcp23xxx](Mcp23xxx/README.md)
+* [Mcp3008](Mcp3008/README.md)
 * [Pca95x4](Pca95x4/README.md)
 * [Si7021](Si7021/README.md)
 
 ## Binding Distribution
 
-We are currently encouraging source distribution of device bindings. The [Mcp3008 sample](Mcp3008/samples/README.md) references the [Mcp3008 library](Mcp3008/Mcp3008.csproj) within this repo. You can clone this repo and use the sample project reference model to a device binding or copy bindings directly into your project.
-
-We may publish NuGet packages of device bindings at a later date.
+Binding distribution is primarily via the Iot.Device.Bindings NuGet package that ships via [NuGet](https://www.nuget.org/packages/Iot.Device.Bindings) (for preview and RTM releases) and [MyGet](https://dotnet.myget.org/feed/dotnet-core/package/nuget/Iot.Device.Bindings) (for daily builds with latest bindings). The MyGet package should be updated with every official build, which means that it will take at most 1 day for a binding to be includded in the package once it has been merged to the master branch.
 
 ## Contributing a binding
 

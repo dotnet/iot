@@ -72,6 +72,13 @@ namespace Iot.Device.Mcp23xxx
             OLAT = 0b0000_1010
         }
 
+        /// <summary>
+        /// Gets the mapped address for a register.
+        /// </summary>
+        /// <param name="address">The register address.</param>
+        /// <param name="port">The I/O port used with the register.</param>
+        /// <param name="bank">The bank type that determines how the register is mapped.</param>
+        /// <returns></returns>
         public static byte GetMappedAddress(Address address, Port port = Port.PortA, Bank bank = Bank.Bank1)
         {
             byte mappedAddress;

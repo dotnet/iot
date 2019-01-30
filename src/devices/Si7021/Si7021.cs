@@ -5,7 +5,7 @@
 using System;
 using System.Device.I2c;
 
-namespace Iot.Device
+namespace Iot.Device.Si7021
 {
     public class Si7021 : IDisposable
     {
