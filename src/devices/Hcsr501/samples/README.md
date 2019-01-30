@@ -21,14 +21,15 @@ LED
 ## Code
 * First, you need to create a HCSR501 object. After that you should call Initialize() to initialize.
     ```C#
-    HCSR501 sensor = new HCSR501(17);
+    Hcsr501 sensor = Hcsr501(17, PinNumberingScheme.Logical);
     sensor.Initialize();
     ```
 
 * Second, initialize LED.
     ```C#
-    GpioController controller = new GpioController(PinNumberingScheme.Gpio);
-    led = controller.OpenPin(27, PinMode.Output);
+    GpioController ledController = new GpioController(PinNumberingScheme.Logical);
+    // open PIN 27 for led
+    ledController.OpenPin(27, PinMode.Output);
     ```
 
 * Finially, in the loop, read the sensor data.
@@ -38,13 +39,13 @@ LED
         if (sensor.Read() == true)
         {
             // turn the led on when the sensor detected infrared heat
-            led.Write(PinValue.High);
+            ledController.Write(27, PinValue.High);
             Console.WriteLine("Detected! Turn the LED on.");
         }
         else
         {
             // turn the led off when the sensor undetected infrared heat
-            led.Write(PinValue.Low);
+            ledController.Write(27, PinValue.Low);
             Console.WriteLine("Undetected! Turn the LED off.");
         }
 
