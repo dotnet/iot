@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease.19080.1" />
+    <PackageReference Include="System.Devices.Gpio" Version="0.1.0-preview2-181222-2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Bmp180">
+      <HintPath>..\bin\Debug\netcoreapp2.1\Bmp180.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
