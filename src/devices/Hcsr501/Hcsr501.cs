@@ -75,7 +75,11 @@ namespace Iot.Device.Hcsr501
         /// </summary>
         public void Dispose()
         {
-            _controller.Dispose();
+            if(_controller != null)
+            {
+                _controller.Dispose();
+                _controller = null;
+            }
         }
 
         public delegate void Hcsr501ValueChangedHandle(object sender, Hcsr501ValueChangedEventArgs e);
