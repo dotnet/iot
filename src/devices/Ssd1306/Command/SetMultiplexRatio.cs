@@ -9,7 +9,7 @@ namespace Iot.Device.Ssd1306.Command
     public class SetMultiplexRatio : ICommand
     {
         /// <summary>
-        /// This command switches the default 63 multiplex mode to any multiplex ratio, ranging from 16 to 63.
+        /// This command switches the default 63 multiplex mode to any multiplex ratio, ranging from 15 to 63.
         /// The output pads COM0-COM63 will be switched to the corresponding COM signal.
         /// </summary>
         /// <param name="multiplexRatio">Multiplex ratio with a range of 15-63.</param>
