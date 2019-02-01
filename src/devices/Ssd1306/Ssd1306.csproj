@@ -38,7 +38,6 @@
     <Compile Include="Command\SetSegmentReMap.cs" />
     <Compile Include="Command\SetVcomhDeselectLevel.cs" />
     <Compile Include="Command\SetVerticalScrollArea.cs" />
-    <Compile Include="ConnectionType.cs" />
     <Compile Include="Ssd1306.cs" />
   </ItemGroup>
 
