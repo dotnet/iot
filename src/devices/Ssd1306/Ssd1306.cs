@@ -19,17 +19,15 @@ namespace Iot.Device.Ssd1306
 
         public void SendCommand(ICommand command, bool continuation = false)
         {
-            byte controlByte = 0x00;
             byte[] commandBytes = command.GetBytes();
             byte[] writeBuffer = new byte[commandBytes.Length + 1];
             commandBytes.CopyTo(writeBuffer, 1);
 
             if (continuation)
             {
-                controlByte |= 0x80;
+                writeBuffer[0] = 0x80;  // Update Control byte.
             }
 
-            writeBuffer[0] = controlByte;
             _i2cDevice.Write(writeBuffer);
         }
 
