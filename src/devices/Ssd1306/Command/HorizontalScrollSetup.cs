@@ -82,7 +82,7 @@ namespace Iot.Device.Ssd1306.Command
             EndPageAddress = endPageAddress;
         }
 
-        public byte Value => (byte)ScrollType;
+        public byte Id => (byte)ScrollType;
 
         /// <summary>
         /// Horizontal scroll type.
@@ -106,7 +106,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value, 0x00, (byte)StartPageAddress, (byte)FrameFrequencyType, (byte)EndPageAddress, 0x00, 0xFF };
+            return new byte[] { Id, 0x00, (byte)StartPageAddress, (byte)FrameFrequencyType, (byte)EndPageAddress, 0x00, 0xFF };
         }
 
         public enum HorizontalScrollType

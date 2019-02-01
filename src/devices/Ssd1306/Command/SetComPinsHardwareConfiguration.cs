@@ -17,7 +17,7 @@ namespace Iot.Device.Ssd1306.Command
             EnableLeftRightRemap = enableLeftRightRemap;
         }
 
-        public byte Value => 0xDA;
+        public byte Id => 0xDA;
 
         /// <summary>
         /// Alternative COM pin configuration.
@@ -43,7 +43,7 @@ namespace Iot.Device.Ssd1306.Command
                 comPinsHardwareConfiguration |= 0x20;
             }
 
-            return new byte[] { Value, comPinsHardwareConfiguration };
+            return new byte[] { Id, comPinsHardwareConfiguration };
         }
     }
 }

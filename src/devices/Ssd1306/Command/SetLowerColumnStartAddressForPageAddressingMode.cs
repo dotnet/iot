@@ -24,7 +24,7 @@ namespace Iot.Device.Ssd1306.Command
             LowerColumnStartAddress = lowerColumnStartAddress;
         }
 
-        public byte Value => LowerColumnStartAddress;
+        public byte Id => LowerColumnStartAddress;
 
         /// <summary>
         /// Lower column start address with a range of 0-15.
@@ -33,7 +33,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value };
+            return new byte[] { Id };
         }
     }
 }

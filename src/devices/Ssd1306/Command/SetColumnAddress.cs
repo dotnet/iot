@@ -35,7 +35,7 @@ namespace Iot.Device.Ssd1306.Command
             EndAddress = endAddress;
         }
 
-        public byte Value => 0x21;
+        public byte Id => 0x21;
 
         /// <summary>
         /// Column start address with a range of 0-127.
@@ -49,7 +49,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value, StartAddress, EndAddress };
+            return new byte[] { Id, StartAddress, EndAddress };
         }
     }
 }

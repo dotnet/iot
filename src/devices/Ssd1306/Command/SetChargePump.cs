@@ -11,7 +11,7 @@ namespace Iot.Device.Ssd1306.Command
             EnableChargePump = enableChargePump;
         }
 
-        public byte Value => 0x8D;
+        public byte Id => 0x8D;
 
         public bool EnableChargePump { get; }
 
@@ -24,7 +24,7 @@ namespace Iot.Device.Ssd1306.Command
                 enableChargePump = 0x14;
             }
 
-            return new byte[] { Value, enableChargePump };
+            return new byte[] { Id, enableChargePump };
         }
     }
 }

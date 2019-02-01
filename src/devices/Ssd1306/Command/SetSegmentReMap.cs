@@ -18,7 +18,7 @@ namespace Iot.Device.Ssd1306.Command
             ColumnAddress127 = columnAddress127;
         }
 
-        public byte Value => (byte)(ColumnAddress127 ? 0xA1 : 0xA0);
+        public byte Id => (byte)(ColumnAddress127 ? 0xA1 : 0xA0);
 
         /// <summary>
         /// Column Address 127.  Column address 127 is mapped to SEG0 when FALSE.
@@ -28,7 +28,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value };
+            return new byte[] { Id };
         }
     }
 }

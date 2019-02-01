@@ -35,7 +35,7 @@ namespace Iot.Device.Ssd1306.Command
             EndAddress = endAddress;
         }
 
-        public byte Value => 0x22;
+        public byte Id => 0x22;
 
         /// <summary>
         /// Page start address with a range of 0-7.
@@ -49,7 +49,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value, (byte)StartAddress, (byte)EndAddress };
+            return new byte[] { Id, (byte)StartAddress, (byte)EndAddress };
         }
     }
 }

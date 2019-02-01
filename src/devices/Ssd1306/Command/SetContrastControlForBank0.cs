@@ -17,7 +17,7 @@ namespace Iot.Device.Ssd1306.Command
             ContrastSetting = contrastSetting;
         }
 
-        public byte Value => 0x81;
+        public byte Id => 0x81;
 
         /// <summary>
         /// Contrast setting.
@@ -26,7 +26,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value, ContrastSetting };
+            return new byte[] { Id, ContrastSetting };
         }
     }
 }

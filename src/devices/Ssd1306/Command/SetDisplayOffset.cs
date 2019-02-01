@@ -23,7 +23,7 @@ namespace Iot.Device.Ssd1306.Command
             DisplayOffset = displayOffset;
         }
 
-        public byte Value => 0xD3;
+        public byte Id => 0xD3;
 
         /// <summary>
         /// Display offset with a range of 0-63.
@@ -32,7 +32,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value, DisplayOffset };
+            return new byte[] { Id, DisplayOffset };
         }
     }
 }

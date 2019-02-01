@@ -30,7 +30,7 @@ namespace Iot.Device.Ssd1306.Command
             OscillatorFrequency = oscillatorFrequency;
         }
 
-        public byte Value => 0xD5;
+        public byte Id => 0xD5;
 
         /// <summary>
         /// Display clock divide ratio with a range of 0-15.
@@ -45,7 +45,7 @@ namespace Iot.Device.Ssd1306.Command
         public byte[] GetBytes()
         {
             byte displayClockDivideRatioOscillatorFrequency = (byte)((OscillatorFrequency << 4) | DisplayClockDivideRatio);
-            return new byte[] { Value, displayClockDivideRatioOscillatorFrequency };
+            return new byte[] { Id, displayClockDivideRatioOscillatorFrequency };
         }
     }
 }

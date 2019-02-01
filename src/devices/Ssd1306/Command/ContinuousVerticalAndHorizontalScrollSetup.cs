@@ -91,7 +91,7 @@ namespace Iot.Device.Ssd1306.Command
             VerticalScrollingOffset = verticalScrollingOffset;
         }
 
-        public byte Value => (byte)ScrollType;
+        public byte Id => (byte)ScrollType;
 
         /// <summary>
         /// Vertical/Horizontal scroll type.
@@ -120,7 +120,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value, 0x00, (byte)StartPageAddress, (byte)FrameFrequencyType, (byte)EndPageAddress, VerticalScrollingOffset };
+            return new byte[] { Id, 0x00, (byte)StartPageAddress, (byte)FrameFrequencyType, (byte)EndPageAddress, VerticalScrollingOffset };
         }
 
         public enum VerticalHorizontalScrollType

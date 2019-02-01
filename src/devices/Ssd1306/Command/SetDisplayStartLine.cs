@@ -24,7 +24,7 @@ namespace Iot.Device.Ssd1306.Command
             DisplayStartLine = displayStartLine;
         }
 
-        public byte Value => (byte)(0x40 + DisplayStartLine);
+        public byte Id => (byte)(0x40 + DisplayStartLine);
 
         /// <summary>
         /// Display start line with a range of 0-63.
@@ -33,7 +33,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value };
+            return new byte[] { Id };
         }
     }
 }

@@ -30,7 +30,7 @@ namespace Iot.Device.Ssd1306.Command
             Phase2Period = phase2Period;
         }
 
-        public byte Value => 0xD9;
+        public byte Id => 0xD9;
 
         /// <summary>
         /// Phase 1 period with a range of 1-15.
@@ -45,7 +45,7 @@ namespace Iot.Device.Ssd1306.Command
         public byte[] GetBytes()
         {
             byte phasePeriod = (byte)((Phase2Period << 4) | Phase1Period);
-            return new byte[] { Value, phasePeriod };
+            return new byte[] { Id, phasePeriod };
         }
     }
 }

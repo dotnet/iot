@@ -21,13 +21,13 @@ namespace Iot.Device.Ssd1306.Command
             NormalMode = normalMode;
         }
 
-        public byte Value => (byte)(NormalMode ? 0xC0 : 0xC8);
+        public byte Id => (byte)(NormalMode ? 0xC0 : 0xC8);
 
         public bool NormalMode { get; set; }
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value };
+            return new byte[] { Id };
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Iot.Device.Ssd1306.Command
             MultiplexRatio = multiplexRatio;
         }
 
-        public byte Value => 0xA8;
+        public byte Id => 0xA8;
 
         /// <summary>
         /// Multiplex ratio with a range of 15-63.
@@ -32,7 +32,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value, MultiplexRatio };
+            return new byte[] { Id, MultiplexRatio };
         }
     }
 }

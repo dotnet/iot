@@ -15,7 +15,7 @@ namespace Iot.Device.Ssd1306.Command
             EntireDisplay = entireDisplay;
         }
         
-        public byte Value => (byte)(EntireDisplay ? 0xA5 : 0xA4);
+        public byte Id => (byte)(EntireDisplay ? 0xA5 : 0xA4);
 
         /// <summary>
         /// Resume to RAM content display when FALSE and turns entire dislay on when TRUE.
@@ -24,7 +24,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value };
+            return new byte[] { Id };
         }
     }
 }

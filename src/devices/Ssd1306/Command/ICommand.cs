@@ -6,7 +6,7 @@ namespace Iot.Device.Ssd1306.Command
 {
     public interface ICommand
     {
-        byte Value { get; }
+        byte Id { get; }
 
         byte[] GetBytes();
     }

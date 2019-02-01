@@ -28,7 +28,7 @@ namespace Iot.Device.Ssd1306.Command
             Level = level;
         }
 
-        public byte Value => 0xDB;
+        public byte Id => 0xDB;
 
         /// <summary>
         /// Vcomh deselect level.
@@ -37,7 +37,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value, (byte)Level };
+            return new byte[] { Id, (byte)Level };
         }
 
         public enum DeselectLevel

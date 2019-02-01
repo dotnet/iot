@@ -22,7 +22,7 @@ namespace Iot.Device.Ssd1306.Command
             MemoryAddressingMode = memoryAddressingMode;
         }
 
-        public byte Value => 0x20;
+        public byte Id => 0x20;
 
         /// <summary>
         /// Memory addressing mode.
@@ -31,7 +31,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value, (byte)MemoryAddressingMode };
+            return new byte[] { Id, (byte)MemoryAddressingMode };
         }
 
         public enum AddressingMode

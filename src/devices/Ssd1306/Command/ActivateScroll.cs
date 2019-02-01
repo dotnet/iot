@@ -16,11 +16,11 @@ namespace Iot.Device.Ssd1306.Command
         {
         }
 
-        public byte Value => 0x2F;
+        public byte Id => 0x2F;
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value };
+            return new byte[] { Id };
         }
     }
 }

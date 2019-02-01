@@ -31,7 +31,7 @@ namespace Iot.Device.Ssd1306.Command
             ScrollAreaRows = scrollAreaRows;
         }
 
-        public byte Value => 0xA3;
+        public byte Id => 0xA3;
 
         /// <summary>
         /// Top fixed area rows with a range of 0-63.
@@ -45,7 +45,7 @@ namespace Iot.Device.Ssd1306.Command
 
         public byte[] GetBytes()
         {
-            return new byte[] { Value, TopFixedAreaRows, ScrollAreaRows };
+            return new byte[] { Id, TopFixedAreaRows, ScrollAreaRows };
         }
     }
 }
