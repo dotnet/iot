@@ -1,13 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>    
+    <EnableDefaultItems>false</EnableDefaultItems>
     <LangVersion>lastest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease.19072.1" />
+    <Compile include="Bmp180.cs" />
+    <Compile include="CalibrationData.cs" />
+    <Compile include="Register.cs" />
+    <Compile include="Sampling.cs" />
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease.*" />
+    <None Include="README.md"/>
   </ItemGroup>
 
 </Project>
