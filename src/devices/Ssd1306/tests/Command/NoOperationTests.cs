@@ -9,13 +9,12 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class NoOperationTests
     {
-        [Theory]
-        [InlineData(new byte[] { 0xE3 })]
-        public void Get_Bytes(byte[] expectedBytes)
+        [Fact]
+        public void Get_Bytes()
         {
             NoOperation noOperation = new NoOperation();
             byte[] actualBytes = noOperation.GetBytes();
-            Assert.Equal(expectedBytes, actualBytes);
+            Assert.Equal(new byte[] { 0xE3 }, actualBytes);
         }
     }
 }

@@ -9,13 +9,12 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class ActivateScrollTests
     {
-        [Theory]
-        [InlineData(new byte[] { 0x2F })]
-        public void Get_Bytes(byte[] expectedBytes)
+        [Fact]
+        public void Get_Bytes()
         {
             ActivateScroll activateScroll = new ActivateScroll();
             byte[] actualBytes = activateScroll.GetBytes();
-            Assert.Equal(expectedBytes, actualBytes);
+            Assert.Equal(new byte[] { 0x2F }, actualBytes);
         }
     }
 }

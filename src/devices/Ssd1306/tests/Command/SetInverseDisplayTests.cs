@@ -9,13 +9,12 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetInverseDisplayTests
     {
-        [Theory]
-        [InlineData(new byte[] { 0xA7 })]
-        public void Get_Bytes(byte[] expectedBytes)
+        [Fact]
+        public void Get_Bytes()
         {
             SetInverseDisplay setInverseDisplay = new SetInverseDisplay();
             byte[] actualBytes = setInverseDisplay.GetBytes();
-            Assert.Equal(expectedBytes, actualBytes);
+            Assert.Equal(new byte[] { 0xA7 }, actualBytes);
         }
     }
 }

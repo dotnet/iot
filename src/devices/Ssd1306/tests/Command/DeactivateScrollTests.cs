@@ -9,13 +9,12 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class DeactivateScrollTests
     {
-        [Theory]
-        [InlineData(new byte[] { 0x2E })]
-        public void Get_Bytes(byte[] expectedBytes)
+        [Fact]
+        public void Get_Bytes()
         {
             DeactivateScroll deactivateScroll = new DeactivateScroll();
             byte[] actualBytes = deactivateScroll.GetBytes();
-            Assert.Equal(expectedBytes, actualBytes);
+            Assert.Equal(new byte[] { 0x2E }, actualBytes);
         }
     }
 }

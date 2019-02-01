@@ -9,13 +9,12 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetDisplayOffTests
     {
-        [Theory]
-        [InlineData(new byte[] { 0xAE })]
-        public void Get_Bytes(byte[] expectedBytes)
+        [Fact]
+        public void Get_Bytes()
         {
             SetDisplayOff setDisplayOff = new SetDisplayOff();
             byte[] actualBytes = setDisplayOff.GetBytes();
-            Assert.Equal(expectedBytes, actualBytes);
+            Assert.Equal(new byte[] { 0xAE }, actualBytes);
         }
     }
 }

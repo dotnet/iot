@@ -9,13 +9,12 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetNormalDisplayTests
     {
-        [Theory]
-        [InlineData(new byte[] { 0xA6 })]
-        public void Get_Bytes(byte[] expectedBytes)
+        [Fact]
+        public void Get_Bytes()
         {
             SetNormalDisplay setNormalDisplay = new SetNormalDisplay();
             byte[] actualBytes = setNormalDisplay.GetBytes();
-            Assert.Equal(expectedBytes, actualBytes);
+            Assert.Equal(new byte[] { 0xA6 }, actualBytes);
         }
     }
 }
