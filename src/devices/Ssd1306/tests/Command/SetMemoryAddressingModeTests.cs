@@ -22,16 +22,5 @@ namespace Iot.Device.Mcp23xxx.Tests
             byte[] actualBytes = setMemoryAddressingMode.GetBytes();
             Assert.Equal(expectedBytes, actualBytes);
         }
-
-        [Theory]
-        [InlineData((AddressingMode)0x03)]
-        [InlineData((AddressingMode)0xF3)]
-        public void Invalid_MemoryAddressingMode(AddressingMode memoryAddressingMode)
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                SetMemoryAddressingMode setMemoryAddressingMode = new SetMemoryAddressingMode(memoryAddressingMode);
-            });
-        }
     }
 }

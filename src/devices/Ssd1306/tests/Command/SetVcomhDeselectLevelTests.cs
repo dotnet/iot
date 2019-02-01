@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Iot.Device.Ssd1306.Command;
-using System;
 using Xunit;
 using static Iot.Device.Ssd1306.Command.SetVcomhDeselectLevel;
 
@@ -21,17 +20,6 @@ namespace Iot.Device.Mcp23xxx.Tests
             SetVcomhDeselectLevel setVcomhDeselectLevel = new SetVcomhDeselectLevel(level);
             byte[] actualBytes = setVcomhDeselectLevel.GetBytes();
             Assert.Equal(expectedBytes, actualBytes);
-        }
-
-        [Theory]
-        [InlineData((DeselectLevel)0x01)]
-        [InlineData((DeselectLevel)0x41)]
-        public void Invalid_VcomhDeselectLevel(DeselectLevel level)
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                SetVcomhDeselectLevel setVcomhDeselectLevel = new SetVcomhDeselectLevel(level);
-            });
         }
     }
 }

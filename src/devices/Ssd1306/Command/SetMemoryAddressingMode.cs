@@ -14,11 +14,6 @@ namespace Iot.Device.Ssd1306.Command
         /// <param name="memoryAddressingMode">Memory addressing mode.</param>
         public SetMemoryAddressingMode(AddressingMode memoryAddressingMode = AddressingMode.Page)
         {
-            if (((byte)memoryAddressingMode & 0x03) > 0x02)
-            {
-                throw new ArgumentException("The memory addressing mode is invalid.", nameof(memoryAddressingMode));
-            }
-
             MemoryAddressingMode = memoryAddressingMode;
         }
 

@@ -12,13 +12,8 @@ namespace Iot.Device.Ssd1306.Command
         /// This command positions the page start address from 0 to 7 in GDDRAM under Page Addressing Mode.
         /// </summary>
         /// <param name="startAddress">Page start address with a range of 0-7.</param>
-        public SetPageStartAddressForPageAddressingMode(PageAddress startAddress = 0x00)
+        public SetPageStartAddressForPageAddressingMode(PageAddress startAddress = PageAddress.Page0)
         {
-            if ((byte)startAddress > 0x07)
-            {
-                throw new ArgumentException("The page start address is invalid.", nameof(startAddress));
-            }
-
             StartAddress = startAddress;
         }
 

@@ -14,17 +14,6 @@ namespace Iot.Device.Ssd1306.Command
         /// <param name="level">Vcomh deselect level.</param>
         public SetVcomhDeselectLevel(DeselectLevel level = DeselectLevel.Vcc0_77)
         {
-            switch (level)
-            {
-                case DeselectLevel.Vcc0_65:
-                case DeselectLevel.Vcc0_77:
-                case DeselectLevel.Vcc0_83:
-                case DeselectLevel.Vcc1_00:
-                    break;
-                default:
-                    throw new ArgumentException("The Vcomh deselect level is invalid.", nameof(level));
-            }
-
             Level = level;
         }
 

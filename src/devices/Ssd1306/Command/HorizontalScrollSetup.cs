@@ -22,60 +22,6 @@ namespace Iot.Device.Ssd1306.Command
             FrameFrequencyType frameFrequencyType,
             PageAddress endPageAddress)
         {
-            switch (scrollType)
-            {
-                case HorizontalScrollType.Right:
-                case HorizontalScrollType.Left:
-                    break;
-                default:
-                    throw new ArgumentException("The horizontal scroll type is invalid.", nameof(scrollType));
-            }
-
-            switch (startPageAddress)
-            {
-                case PageAddress.Page0:
-                case PageAddress.Page1:
-                case PageAddress.Page2:
-                case PageAddress.Page3:
-                case PageAddress.Page4:
-                case PageAddress.Page5:
-                case PageAddress.Page6:
-                case PageAddress.Page7:
-                    break;
-                default:
-                    throw new ArgumentException("The start page address is invalid.", nameof(startPageAddress));
-            }
-
-            switch (frameFrequencyType)
-            {
-                case FrameFrequencyType.Frames5:
-                case FrameFrequencyType.Frames64:
-                case FrameFrequencyType.Frames128:
-                case FrameFrequencyType.Frames256:
-                case FrameFrequencyType.Frames3:
-                case FrameFrequencyType.Frames4:
-                case FrameFrequencyType.Frames25:
-                case FrameFrequencyType.Frames2:
-                    break;
-                default:
-                    throw new ArgumentException("The frame frequency type is invalid.", nameof(frameFrequencyType));
-            }
-
-            switch (endPageAddress)
-            {
-                case PageAddress.Page0:
-                case PageAddress.Page1:
-                case PageAddress.Page2:
-                case PageAddress.Page3:
-                case PageAddress.Page4:
-                case PageAddress.Page5:
-                case PageAddress.Page6:
-                case PageAddress.Page7:
-                    break;
-                default:
-                    throw new ArgumentException("The end page address is invalid.", nameof(endPageAddress));
-            }
-
             ScrollType = scrollType;
             StartPageAddress = startPageAddress;
             FrameFrequencyType = frameFrequencyType;

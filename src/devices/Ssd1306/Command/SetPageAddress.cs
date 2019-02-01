@@ -21,16 +21,6 @@ namespace Iot.Device.Ssd1306.Command
         /// <param name="endAddress">Page end address with a range of 0-7.</param>
         public SetPageAddress(PageAddress startAddress = PageAddress.Page0, PageAddress endAddress = PageAddress.Page7)
         {
-            if ((byte)startAddress > 0x07)
-            {
-                throw new ArgumentException("The page start address is invalid.", nameof(startAddress));
-            }
-
-            if ((byte)endAddress > 0x07)
-            {
-                throw new ArgumentException("The page end address is invalid.", nameof(endAddress));
-            }
-
             StartAddress = startAddress;
             EndAddress = endAddress;
         }

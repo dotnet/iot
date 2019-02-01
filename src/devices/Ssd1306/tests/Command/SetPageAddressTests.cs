@@ -34,23 +34,5 @@ namespace Iot.Device.Mcp23xxx.Tests
             byte[] actualBytes = setPageAddress.GetBytes();
             Assert.Equal(expectedBytes, actualBytes);
         }
-
-        [Theory]
-        // StartAddress invalid
-        [InlineData((PageAddress)0x08, (PageAddress)0x00)]
-        [InlineData((PageAddress)0xFF, (PageAddress)0x00)]
-        // EndAddress invalid
-        [InlineData((PageAddress)0x00, (PageAddress)0x08)]
-        [InlineData((PageAddress)0x00, (PageAddress)0xFF)]
-        // StartAddress and EndAddress invalid
-        [InlineData((PageAddress)0x08, (PageAddress)0x08)]
-        [InlineData((PageAddress)0xFF, (PageAddress)0xFF)]
-        public void Invalid_Addresses(PageAddress startAddress, PageAddress endAddress)
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                SetPageAddress setPageAddress = new SetPageAddress(startAddress, endAddress);
-            });
-        }
     }
 }

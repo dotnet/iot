@@ -25,16 +25,5 @@ namespace Iot.Device.Mcp23xxx.Tests
             byte[] actualBytes = setPageStartAddressForPageAddressingMode.GetBytes();
             Assert.Equal(expectedBytes, actualBytes);
         }
-
-        [Theory]
-        [InlineData((PageAddress)0x08)]
-        [InlineData((PageAddress)0xFF)]
-        public void Invalid_StartAddress(PageAddress startAddress)
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                SetPageStartAddressForPageAddressingMode setPageStartAddressForPageAddressingMode = new SetPageStartAddressForPageAddressingMode(startAddress);
-            });
-        }
     }
 }

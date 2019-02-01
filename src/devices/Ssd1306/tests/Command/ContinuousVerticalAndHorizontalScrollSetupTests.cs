@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Iot.Device.Ssd1306.Command;
-using System;
 using Xunit;
 using static Iot.Device.Ssd1306.Command.ContinuousVerticalAndHorizontalScrollSetup;
 
@@ -57,37 +56,6 @@ namespace Iot.Device.Mcp23xxx.Tests
                 verticalScrollingOffset);
             byte[] actualBytes = continuousVerticalAndHorizontalScrollSetup.GetBytes();
             Assert.Equal(expectedBytes, actualBytes);
-        }
-
-        [Theory]
-        // HorizontalScrollType
-        [InlineData((VerticalHorizontalScrollType)0x03, PageAddress.Page0, FrameFrequencyType.Frames5, PageAddress.Page7, 0x01)]
-        // StartPageAddress
-        [InlineData(VerticalHorizontalScrollType.Right, (PageAddress)0x08, FrameFrequencyType.Frames5, PageAddress.Page7, 0x01)]
-        // FrameFrequencyType
-        [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, (FrameFrequencyType)0x08, PageAddress.Page7, 0x01)]
-        // EndPageAddress
-        [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames5, (PageAddress)0x08, 0x01)]
-        // VerticalScrollingOffset
-        [InlineData(VerticalHorizontalScrollType.Right, PageAddress.Page0, FrameFrequencyType.Frames5, PageAddress.Page7, 0xFF)]
-        // HorizontalScrollType, StartPageAddress, FrameFrequencyType EndPageAddress, VerticalScrollingOffset
-        [InlineData((VerticalHorizontalScrollType)0x03, (PageAddress)0x08, (FrameFrequencyType)0x08, (PageAddress)0x08, 0x40)]
-        public void Invalid_HorizontalScrollSetup(
-            VerticalHorizontalScrollType scrollType,
-            PageAddress startPageAddress,
-            FrameFrequencyType frameFrequencyType,
-            PageAddress endPageAddress,
-            byte verticalScrollingOffset)
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                ContinuousVerticalAndHorizontalScrollSetup continuousVerticalAndHorizontalScrollSetup = new ContinuousVerticalAndHorizontalScrollSetup(
-                scrollType,
-                startPageAddress,
-                frameFrequencyType,
-                endPageAddress,
-                verticalScrollingOffset);
-            });
         }
     }
 }
