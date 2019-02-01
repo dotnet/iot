@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <Compile Include="Acceleration.cs" />
+    <Compile Include="GravityRange.cs" />
+    <Compile Include="Adxl345.cs" />
+  </ItemGroup>
+
+  <ItemGroup> 
+    <None Remove="README.md" />
+    <None Remove="sensor.jpg" />
+  </ItemGroup>
+
+</Project>
