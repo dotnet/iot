@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <Compile Include="AddressSetting.cs" />
+    <Compile Include="ComparatorLatching.cs" />
+    <Compile Include="ComparatorMode.cs" />
+    <Compile Include="ComparatorPolarity.cs" />
+    <Compile Include="ComparatorQueue.cs" />
+    <Compile Include="DataRate.cs" />
+    <Compile Include="DeviceMode.cs" />
+    <Compile Include="InputMultiplexeConfig.cs" />
+    <Compile Include="PgaConfig.cs" />
+    <Compile Include="Ads1115.cs" />
+  </ItemGroup>
+
+  <ItemGroup> 
+    <None Remove="README.md" />
+    <None Remove="sensor.jpg" />
+  </ItemGroup>
+
+</Project>
