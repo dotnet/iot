@@ -7,11 +7,12 @@
 ## Circuit
 ![](ADXL345_circuit_bb.png)
 
-Ds3231
-* SCL - SCL
-* SDA - SDA
-* VCC - 5V
-* GND - GND
+* VCC - 3.3 V
+* GND -  GND
+* CS - CS0(Pin24)
+* SDO - SPI0 MISO(Pin21)
+* SDA - SPI0 MOSI (Pin19)
+* SCL - SPI0 SCLK(Pin23)
 
 ## Code
 * First, you need to create a ADXL345 object. After that you should call Initialize() to initialize.
