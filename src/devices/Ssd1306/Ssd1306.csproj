@@ -7,37 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Command\ActivateScroll.cs" />
-    <Compile Include="Command\ContinuousVerticalAndHorizontalScrollSetup.cs" />
-    <Compile Include="Command\DeactivateScroll.cs" />
-    <Compile Include="Command\EntireDisplayOn.cs" />
-    <Compile Include="Command\FrameFrequencyType.cs" />
-    <Compile Include="Command\HorizontalScrollSetup.cs" />
-    <Compile Include="Command\ICommand.cs" />
-    <Compile Include="Command\NoOperation.cs" />
-    <Compile Include="Command\PageAddress.cs" />
-    <Compile Include="Command\SetChargePump.cs" />
-    <Compile Include="Command\SetColumnAddress.cs" />
-    <Compile Include="Command\SetComOutputScanDirection.cs" />
-    <Compile Include="Command\SetComPinsHardwareConfiguration.cs" />
-    <Compile Include="Command\SetContrastControlForBank0.cs" />
-    <Compile Include="Command\SetDisplayClockDivideRatioOscillatorFrequency.cs" />
-    <Compile Include="Command\SetDisplayOff.cs" />
-    <Compile Include="Command\SetDisplayOffset.cs" />
-    <Compile Include="Command\SetDisplayOn.cs" />
-    <Compile Include="Command\SetDisplayStartLine.cs" />
-    <Compile Include="Command\SetHigherColumnStartAddressForPageAddressingMode.cs" />
-    <Compile Include="Command\SetInverseDisplay.cs" />
-    <Compile Include="Command\SetLowerColumnStartAddressForPageAddressingMode.cs" />
-    <Compile Include="Command\SetMemoryAddressingMode.cs" />
-    <Compile Include="Command\SetMultiplexRatio.cs" />
-    <Compile Include="Command\SetNormalDisplay.cs" />
-    <Compile Include="Command\SetPageAddress.cs" />
-    <Compile Include="Command\SetPageStartAddressForPageAddressingMode.cs" />
-    <Compile Include="Command\SetPreChargePeriod.cs" />
-    <Compile Include="Command\SetSegmentReMap.cs" />
-    <Compile Include="Command\SetVcomhDeselectLevel.cs" />
-    <Compile Include="Command\SetVerticalScrollArea.cs" />
+    <Compile Include="Command\*.cs" />
     <Compile Include="Ssd1306.cs" />
   </ItemGroup>
 
