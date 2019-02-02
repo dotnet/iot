@@ -8,41 +8,51 @@ using System.Device.I2c;
 
 namespace Iot.Device.Ssd1306
 {
+    /// <summary>
+    /// A single-chip CMOS OLED/PLED driver with controller for organic/polymer
+    /// light emitting diode dot-matrix graphic display system. 
+    /// </summary>
     public class Ssd1306 : IDisposable
     {
         private I2cDevice _i2cDevice;
 
+        /// <summary>
+        /// Initializes new instance of Ssd1306 device that will communicate using I2C bus.
+        /// A single-chip CMOS OLED/PLED driver with controller for organic/polymer
+        /// light emitting diode dot-matrix graphic display system. 
+        /// </summary>
+        /// <param name="i2cDevice">>The I2C device used for communication.</param>
         public Ssd1306(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;
         }
 
-        public void SendCommand(ICommand command, bool continuation = false)
+        /// <summary>
+        /// Send a command to the display controller.
+        /// </summary>
+        /// <param name="command">The command to send to the display controller.</param>
+        public void SendCommand(ICommand command)
         {
             byte[] commandBytes = command.GetBytes();
             byte[] writeBuffer = new byte[commandBytes.Length + 1];
-            commandBytes.CopyTo(writeBuffer, 1);
+            commandBytes.CopyTo(writeBuffer, 1);  // Control byte is 0x00 for first byte.
 
-            if (continuation)
-            {
-                writeBuffer[0] = 0x80;  // Update Control byte.
-            }
+            // Be aware there is a Continuation Bit in the Control byte and can be used
+            // to state (logic LOW) if there is only data bytes to follow.
+            // This binding separates commands and data by using SendCommand and SendData.
 
             _i2cDevice.Write(writeBuffer);
         }
 
-        public void SendData(byte[] data, bool continuation = false)
+        /// <summary>
+        /// Send data to the display controller.
+        /// </summary>
+        /// <param name="data">The data to send to the display controller.</param>
+        public void SendData(byte[] data)
         {
-            byte controlByte = 0x40;
             byte[] writeBuffer = new byte[data.Length + 1];
             data.CopyTo(writeBuffer, 1);
-
-            if (continuation)
-            {
-                controlByte |= 0x80;
-            }
-
-            writeBuffer[0] = controlByte;
+            writeBuffer[0] = 0x40; // Control byte.
             _i2cDevice.Write(writeBuffer);
         }
 
