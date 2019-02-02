@@ -19,24 +19,26 @@ LED
 * GND - GND
 
 ## Code
-* First, you need to create a HCSR501 object. After that you should call Initialize() to initialize.
-    ```C#
-    Hcsr501 sensor = Hcsr501(17, PinNumberingScheme.Logical);
-    sensor.Initialize();
-    ```
-
-* Second, initialize LED.
+* First, initialize LED.
     ```C#
     GpioController ledController = new GpioController(PinNumberingScheme.Logical);
     // open PIN 27 for led
     ledController.OpenPin(27, PinMode.Output);
     ```
 
-* Finially, in the loop, read the sensor data.
+* Second, you need to create a HC-SR501 object.
+    ```C#
+    using(Hcsr501 sensor = Hcsr501(17, PinNumberingScheme.Logical))
+    {
+
+    }
+    ```
+
+* Finially, in the loop, use property IsMotionDetected to detect motion.
     ```C#
     while (true)
     {
-        if (sensor.Read() == true)
+        if (sensor.IsMotionDetected == true)
         {
             // turn the led on when the sensor detected infrared heat
             ledController.Write(27, PinValue.High);

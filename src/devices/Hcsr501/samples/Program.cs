@@ -12,7 +12,9 @@ namespace Hcsr501.Samples
 {
     class Program
     {
+        // HC-SR501 OUT Pin
         static int hcsr501Pin = 17;
+        // LED Pin
         static int ledPin = 27;
 
         static void Main(string[] args)
@@ -23,27 +25,27 @@ namespace Hcsr501.Samples
             ledController.OpenPin(ledPin, PinMode.Output);
 
             // initialize PIR sensor
-            Iot.Device.Hcsr501.Hcsr501 sensor = new Iot.Device.Hcsr501.Hcsr501(hcsr501Pin, PinNumberingScheme.Logical);
-            sensor.Initialize();
-
-            // loop
-            while (true)
+            using(Iot.Device.Hcsr501.Hcsr501 sensor = new Iot.Device.Hcsr501.Hcsr501(hcsr501Pin, PinNumberingScheme.Logical))
             {
-                if (sensor.Read() == true)
+                // loop
+                while (true)
                 {
-                    // turn the led on when the sensor detected infrared heat
-                    ledController.Write(ledPin, PinValue.High);
-                    Console.WriteLine("Detected! Turn the LED on.");
-                }
-                else
-                {
-                    // turn the led off when the sensor undetected infrared heat
-                    ledController.Write(ledPin ,PinValue.Low);
-                    Console.WriteLine("Undetected! Turn the LED off.");
-                }
+                    if (sensor.IsMotionDetected == true)
+                    {
+                        // turn the led on when the sensor detected infrared heat
+                        ledController.Write(ledPin, PinValue.High);
+                        Console.WriteLine("Detected! Turn the LED on.");
+                    }
+                    else
+                    {
+                        // turn the led off when the sensor undetected infrared heat
+                        ledController.Write(ledPin, PinValue.Low);
+                        Console.WriteLine("Undetected! Turn the LED off.");
+                    }
 
-                // wait for a second
-                Thread.Sleep(1000);
+                    // wait for a second
+                    Thread.Sleep(1000);
+                }
             }
         }
     }

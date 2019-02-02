@@ -16,59 +16,32 @@ namespace Iot.Device.Hcsr501
         }
     }
 
+    /// <summary>
+    /// PIR Sensor HC-SR501
+    /// </summary>
     public class Hcsr501 : IDisposable
     {
         private GpioController _controller;
-        private readonly int _pinOut;
-        private readonly PinNumberingScheme _pinNumberingScheme;
+        private readonly int _outPin;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="pin">OUT Pin</param>
+        /// <param name="outPin">OUT Pin</param>
         /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
-        public Hcsr501(int pin, PinNumberingScheme pinNumberingScheme)
+        public Hcsr501(int outPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
         {
-            _pinOut = pin;
-            _pinNumberingScheme = pinNumberingScheme;
+            _outPin = outPin;
+
+            _controller = new GpioController(pinNumberingScheme);
+            _controller.OpenPin(outPin, PinMode.Input);
+            _controller.RegisterCallbackForPinValueChangedEvent(outPin, PinEventTypes.None, Sensor_ValueChanged);
         }
 
         /// <summary>
-        /// Initialize the sensor
+        /// If a motion is detected, return true.
         /// </summary>
-        public void Initialize()
-        {
-            _controller = new GpioController(_pinNumberingScheme);
-
-            _controller.OpenPin(_pinOut, PinMode.Input);
-
-            _controller.RegisterCallbackForPinValueChangedEvent(_pinOut, PinEventTypes.None, Sensor_ValueChanged);
-        }
-
-        /// <summary>
-        /// Read from the sensor
-        /// </summary>
-        /// <returns>If a motion is detected, return true.</returns>
-        public bool Read()
-        {
-            if (_controller.Read(_pinOut) == PinValue.High)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Get the sensor GpioController
-        /// </summary>
-        /// <returns>GpioController</returns>
-        public GpioController GetDevice()
-        {
-            return _controller;
-        }
+        public bool IsMotionDetected => _controller.Read(_outPin) == PinValue.High;
 
         /// <summary>
         /// Cleanup
@@ -91,7 +64,7 @@ namespace Iot.Device.Hcsr501
 
         private void Sensor_ValueChanged(object sender, PinValueChangedEventArgs e)
         {
-            Hcsr501ValueChanged(sender, new Hcsr501ValueChangedEventArgs(_controller.Read(_pinOut)));
+            Hcsr501ValueChanged(sender, new Hcsr501ValueChangedEventArgs(_controller.Read(_outPin)));
         }
     }
 }
