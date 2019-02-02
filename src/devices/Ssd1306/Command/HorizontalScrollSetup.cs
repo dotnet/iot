@@ -26,6 +26,9 @@ namespace Iot.Device.Ssd1306.Command
             EndPageAddress = endPageAddress;
         }
 
+        /// <summary>
+        /// The value that represents the command.
+        /// </summary>
         public byte Id => (byte)ScrollType;
 
         /// <summary>
@@ -48,6 +51,10 @@ namespace Iot.Device.Ssd1306.Command
         /// </summary>
         public PageAddress EndPageAddress { get; }
 
+        /// <summary>
+        /// Gets the bytes that represent the command.
+        /// </summary>
+        /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
             return new byte[] { Id, 0x00, (byte)StartPageAddress, (byte)FrameFrequencyType, (byte)EndPageAddress, 0x00, 0xFF };
@@ -55,7 +62,13 @@ namespace Iot.Device.Ssd1306.Command
 
         public enum HorizontalScrollType
         {
+            /// <summary>
+            /// Right horizontal scroll.
+            /// </summary>
             Right = 0x26,
+            /// <summary>
+            /// Left horizontal scroll.
+            /// </summary>
             Left = 0x27
         }
     }

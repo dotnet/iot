@@ -23,6 +23,9 @@ namespace Iot.Device.Ssd1306.Command
             DisplayOffset = displayOffset;
         }
 
+        /// <summary>
+        /// The value that represents the command.
+        /// </summary>
         public byte Id => 0xD3;
 
         /// <summary>
@@ -30,6 +33,10 @@ namespace Iot.Device.Ssd1306.Command
         /// </summary>
         public byte DisplayOffset { get; }
 
+        /// <summary>
+        /// Gets the bytes that represent the command.
+        /// </summary>
+        /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
             return new byte[] { Id, DisplayOffset };

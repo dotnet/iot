@@ -37,6 +37,9 @@ namespace Iot.Device.Ssd1306.Command
             VerticalScrollingOffset = verticalScrollingOffset;
         }
 
+        /// <summary>
+        /// The value that represents the command.
+        /// </summary>
         public byte Id => (byte)ScrollType;
 
         /// <summary>
@@ -64,6 +67,10 @@ namespace Iot.Device.Ssd1306.Command
         /// </summary>
         public byte VerticalScrollingOffset { get; }
 
+        /// <summary>
+        /// Gets the bytes that represent the command.
+        /// </summary>
+        /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
             return new byte[] { Id, 0x00, (byte)StartPageAddress, (byte)FrameFrequencyType, (byte)EndPageAddress, VerticalScrollingOffset };
@@ -71,7 +78,13 @@ namespace Iot.Device.Ssd1306.Command
 
         public enum VerticalHorizontalScrollType
         {
+            /// <summary>
+            /// Vertical and right horizontal scroll.
+            /// </summary>
             Right = 0x29,
+            /// <summary>
+            /// Vertical and left horizontal scroll.
+            /// </summary>
             Left = 0x2A
         }
     }

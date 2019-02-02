@@ -21,10 +21,21 @@ namespace Iot.Device.Ssd1306.Command
             NormalMode = normalMode;
         }
 
+        /// <summary>
+        /// The value that represents the command.
+        /// </summary>
         public byte Id => (byte)(NormalMode ? 0xC0 : 0xC8);
 
+        /// <summary>
+        /// Scan from COM0 to COM[N –1] when TRUE.
+        /// Scan from COM[N - 1] to COM0 when FALSE.
+        /// </summary>
         public bool NormalMode { get; set; }
 
+        /// <summary>
+        /// Gets the bytes that represent the command.
+        /// </summary>
+        /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
             return new byte[] { Id };

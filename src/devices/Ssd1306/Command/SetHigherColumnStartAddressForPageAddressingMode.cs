@@ -24,6 +24,9 @@ namespace Iot.Device.Ssd1306.Command
             HigherColumnStartAddress = higherColumnStartAddress;
         }
 
+        /// <summary>
+        /// The value that represents the command.
+        /// </summary>
         public byte Id => (byte)(0x10 | HigherColumnStartAddress);
 
         /// <summary>
@@ -31,6 +34,10 @@ namespace Iot.Device.Ssd1306.Command
         /// </summary>
         public byte HigherColumnStartAddress { get; }
 
+        /// <summary>
+        /// Gets the bytes that represent the command.
+        /// </summary>
+        /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
             return new byte[] { Id };

@@ -18,6 +18,9 @@ namespace Iot.Device.Ssd1306.Command
             ColumnAddress127 = columnAddress127;
         }
 
+        /// <summary>
+        /// The value that represents the command.
+        /// </summary>
         public byte Id => (byte)(ColumnAddress127 ? 0xA1 : 0xA0);
 
         /// <summary>
@@ -26,6 +29,10 @@ namespace Iot.Device.Ssd1306.Command
         /// </summary>
         public bool ColumnAddress127 { get; set; }
 
+        /// <summary>
+        /// Gets the bytes that represent the command.
+        /// </summary>
+        /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
             return new byte[] { Id };

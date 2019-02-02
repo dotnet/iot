@@ -30,6 +30,9 @@ namespace Iot.Device.Ssd1306.Command
             OscillatorFrequency = oscillatorFrequency;
         }
 
+        /// <summary>
+        /// The value that represents the command.
+        /// </summary>
         public byte Id => 0xD5;
 
         /// <summary>
@@ -42,6 +45,10 @@ namespace Iot.Device.Ssd1306.Command
         /// </summary>
         public byte OscillatorFrequency { get; }
 
+        /// <summary>
+        /// Gets the bytes that represent the command.
+        /// </summary>
+        /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
             byte displayClockDivideRatioOscillatorFrequency = (byte)((OscillatorFrequency << 4) | DisplayClockDivideRatio);

@@ -24,6 +24,9 @@ namespace Iot.Device.Ssd1306.Command
             DisplayStartLine = displayStartLine;
         }
 
+        /// <summary>
+        /// The value that represents the command.
+        /// </summary>
         public byte Id => (byte)(0x40 + DisplayStartLine);
 
         /// <summary>
@@ -31,6 +34,10 @@ namespace Iot.Device.Ssd1306.Command
         /// </summary>
         public byte DisplayStartLine { get; }
 
+        /// <summary>
+        /// Gets the bytes that represent the command.
+        /// </summary>
+        /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
             return new byte[] { Id };

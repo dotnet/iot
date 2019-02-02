@@ -15,6 +15,9 @@ namespace Iot.Device.Ssd1306.Command
             StartAddress = startAddress;
         }
 
+        /// <summary>
+        /// The value that represents the command.
+        /// </summary>
         public byte Id => (byte)(0xB0 + StartAddress);
 
         /// <summary>
@@ -22,6 +25,10 @@ namespace Iot.Device.Ssd1306.Command
         /// </summary>
         public PageAddress StartAddress { get; }
 
+        /// <summary>
+        /// Gets the bytes that represent the command.
+        /// </summary>
+        /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
             return new byte[] { Id };

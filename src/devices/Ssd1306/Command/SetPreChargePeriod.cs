@@ -30,6 +30,9 @@ namespace Iot.Device.Ssd1306.Command
             Phase2Period = phase2Period;
         }
 
+        /// <summary>
+        /// The value that represents the command.
+        /// </summary>
         public byte Id => 0xD9;
 
         /// <summary>
@@ -42,6 +45,10 @@ namespace Iot.Device.Ssd1306.Command
         /// </summary>
         public byte Phase2Period { get; }
 
+        /// <summary>
+        /// Gets the bytes that represent the command.
+        /// </summary>
+        /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
             byte phasePeriod = (byte)((Phase2Period << 4) | Phase1Period);

@@ -14,7 +14,10 @@ namespace Iot.Device.Ssd1306.Command
         {
             EntireDisplay = entireDisplay;
         }
-        
+
+        /// <summary>
+        /// The value that represents the command.
+        /// </summary>
         public byte Id => (byte)(EntireDisplay ? 0xA5 : 0xA4);
 
         /// <summary>
@@ -22,6 +25,10 @@ namespace Iot.Device.Ssd1306.Command
         /// </summary>
         public bool EntireDisplay { get; }
 
+        /// <summary>
+        /// Gets the bytes that represent the command.
+        /// </summary>
+        /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
             return new byte[] { Id };

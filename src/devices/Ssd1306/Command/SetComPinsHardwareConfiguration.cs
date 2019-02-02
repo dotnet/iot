@@ -17,6 +17,9 @@ namespace Iot.Device.Ssd1306.Command
             EnableLeftRightRemap = enableLeftRightRemap;
         }
 
+        /// <summary>
+        /// The value that represents the command.
+        /// </summary>
         public byte Id => 0xDA;
 
         /// <summary>
@@ -29,6 +32,10 @@ namespace Iot.Device.Ssd1306.Command
         /// </summary>
         public bool EnableLeftRightRemap { get; }
 
+        /// <summary>
+        /// Gets the bytes that represent the command.
+        /// </summary>
+        /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
             byte comPinsHardwareConfiguration = 0x02;
