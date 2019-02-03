@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Runtime.InteropServices;
+using System.Numerics;
 using System.Threading;
 using Iot.Device.Adxl345;
 
@@ -13,26 +13,25 @@ namespace Adxl345.Samples
     {
         static void Main(string[] args)
         {
-            // the program runs on Linux
             // SPI bus 0
             // CS Pin connect to CS0(Pin24)
-            // set gravity range ±4G
-            Iot.Device.Adxl345.Adxl345 sensor = new Iot.Device.Adxl345.Adxl345(OSPlatform.Linux, 0, 0, GravityRange.Four);
-            sensor.Initialize();
-
-            // loop
-            while (true)
+            // set gravity measurement range ±4G
+            using (Iot.Device.Adxl345.Adxl345 sensor = new Iot.Device.Adxl345.Adxl345(0, 0, GravityRange.Range2))
             {
-                // read data
-                Acceleration data = sensor.ReadAcceleration();
+                // loop
+                while (true)
+                {
+                    // read data
+                    Vector3 data = sensor.Acceleration;
 
-                Console.WriteLine($"X: {data.X.ToString("0.00")} g");
-                Console.WriteLine($"Y: {data.Y.ToString("0.00")} g");
-                Console.WriteLine($"Z: {data.Z.ToString("0.00")} g");
-                Console.WriteLine();
+                    Console.WriteLine($"X: {data.X.ToString("0.00")} g");
+                    Console.WriteLine($"Y: {data.Y.ToString("0.00")} g");
+                    Console.WriteLine($"Z: {data.Z.ToString("0.00")} g");
+                    Console.WriteLine();
 
-                // wait for 500ms
-                Thread.Sleep(500);
+                    // wait for 500ms
+                    Thread.Sleep(500);
+                }
             }
         }
     }
