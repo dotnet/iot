@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <Compile Include="BrickPi3.cs" />
-    <Compile Include="SpiExceptions.cs" />
+    <Compile Include="SPIExceptions.cs" />
     <Folder Include="Models\" />
     <Compile Include="Models\BrickPiInfo.cs" />
     <Compile Include="Models\BrickPiVoltage.cs" />
