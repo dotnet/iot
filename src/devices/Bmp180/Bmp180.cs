@@ -33,11 +33,10 @@ namespace Iot.Device.Bmp180
         }
 
         private void Begin()
-        {
-            _initialized = true;
-
+        {            
             //Read the coefficients table
             _calibrationData.ReadFromDevice(this);
+            _initialized = true;
         }
 
         /// <summary>
