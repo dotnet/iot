@@ -9,7 +9,7 @@ namespace Iot.Device.Hcsr501
 {
     public class Hcsr501ValueChangedEventArgs : EventArgs
     {
-        public readonly PinValue PinValue;
+        public PinValue PinValue { get; private set; };
         public Hcsr501ValueChangedEventArgs(PinValue value)
         {
             PinValue = value;

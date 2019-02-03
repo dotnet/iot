@@ -9,35 +9,31 @@
 ## Circuit
 ![](circuit_bb.png)
 
-HC-SR501
+### HC-SR501
+
+![](Hcsr501Setting.png)
+
 * VCC - 5V
 * GND - GND
 * OUT - GPIO 17
 
-LED
+### LED
 * VCC & 220 Ω resistor - GPIO 27
 * GND - GND
 
 ## Code
-* First, initialize LED.
-    ```C#
-    GpioController ledController = new GpioController(PinNumberingScheme.Logical);
-    // open PIN 27 for led
-    ledController.OpenPin(27, PinMode.Output);
-    ```
+```C#
+GpioController ledController = new GpioController(PinNumberingScheme.Logical);
+// open PIN 27 for led
+ledController.OpenPin(27, PinMode.Output);
 
-* Second, you need to create a HC-SR501 object.
-    ```C#
-    using(Hcsr501 sensor = Hcsr501(17, PinNumberingScheme.Logical))
-    {
-
-    }
-    ```
-
-* Finially, in the loop, use property IsMotionDetected to detect motion.
-    ```C#
+using(Hcsr501 sensor = Hcsr501(17, PinNumberingScheme.Logical))
+{
+    // loop
     while (true)
     {
+        // Adjusting the detection distance and time by rotating the potentiometer on the sensor
+        // For more information, you can see the picture above or the datasheet in src/devices/Hcsr501/README.md
         if (sensor.IsMotionDetected == true)
         {
             // turn the led on when the sensor detected infrared heat
@@ -54,7 +50,10 @@ LED
         // wait for a second
         Thread.Sleep(1000);
     }
-    ```
+}
+```
+
+
 
 ## Result
 ![](res.gif)

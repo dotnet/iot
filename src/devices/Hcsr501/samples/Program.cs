@@ -30,6 +30,7 @@ namespace Hcsr501.Samples
                 // loop
                 while (true)
                 {
+                    // adjusting the detection distance and time by rotating the potentiometer on the sensor
                     if (sensor.IsMotionDetected == true)
                     {
                         // turn the led on when the sensor detected infrared heat
