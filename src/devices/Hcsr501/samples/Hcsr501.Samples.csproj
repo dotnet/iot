@@ -10,6 +10,7 @@
     <None Remove="circuit_bb.png" />
     <None Remove="README.md" />
     <None Remove="res.gif" />
+    <None Remove="Hcsr501Setting.png" />
   </ItemGroup>
 
   <ItemGroup>
