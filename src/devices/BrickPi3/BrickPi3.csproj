@@ -29,13 +29,13 @@
     <Compile Include="Sensors\EV3GyroSensor.cs" />
     <Compile Include="Sensors\EV3IRSensor.cs" />
     <Compile Include="Sensors\EV3TouchSensor.cs" />
-    <Compile Include="Sensors\EV3UltrasonicSensor.cs" />
+    <Compile Include="Sensors\EV3UltraSonicSensor.cs" />
     <Compile Include="Sensors\ISensor.cs" />
     <Compile Include="Sensors\NXTColorSensor.cs" />
     <Compile Include="Sensors\NXTLightSensor.cs" />
     <Compile Include="Sensors\NXTSoundSensor.cs" />
     <Compile Include="Sensors\NXTTouchSensor.cs" />
-    <Compile Include="Sensors\NXTUltrasonicSensor.cs" />
+    <Compile Include="Sensors\NXTUltraSonicSensor.cs" />
   </ItemGroup>
 
 </Project>
