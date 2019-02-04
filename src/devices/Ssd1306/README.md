@@ -10,7 +10,15 @@ The SSD1306 is a single-chip CMOS OLED/PLED driver with controller for organic/p
 [Adafruit PiOLED - 128x32 Monochrome OLED Add-on for Raspberry Pi](https://www.adafruit.com/product/3527) [SunFounder 0.96" Inch Blue I2C IIC Serial 128x64 OLED LCD LED SSD1306 Modul](https://www.amazon.com/SunFounder-SSD1306-Arduino-Raspberry-Display/dp/B014KUB1SA)
 
 ## Binding Notes
+
 This binding currently only supports commands and raw data.  Eventually, the plan is to create a graphics library that can send text and images to the device.
+
+### Connection Type
+
+The following connection types are supported by this binding.
+
+- [X] I2C
+- [ ] SPI
 
 ## References 
 [Adafruit Python SSD1306](https://github.com/adafruit/Adafruit_Python_SSD1306)  
