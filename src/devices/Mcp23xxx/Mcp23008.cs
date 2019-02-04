@@ -10,8 +10,7 @@ namespace Iot.Device.Mcp23xxx
 {
     public class Mcp23008 : Mcp230xx
     {
-        private byte _iodir;
-        private byte _gpio;
+        private byte _ioDirection;
 
         /// <summary>
         /// Initializes new instance of Mcp23008 device.
@@ -24,10 +23,15 @@ namespace Iot.Device.Mcp23xxx
         public Mcp23008(I2cDevice i2cDevice, int? reset = null, int? interruptA = null, int? interruptB = null)
             : base(i2cDevice, reset, interruptA, interruptB)
         {
-            _iodir = 0xFF;
-            _gpio = 0x00;
-            Write(Register.Address.IODIR, _iodir);
-            Write(Register.Address.GPIO, _gpio);
+            // Set all of the pins to input
+            _ioDirection = 0xFF;
+            Write(Register.Address.IODIR, _ioDirection);
+
+            // Ensure the pins are no pulled up
+            Write(Register.Address.GPPU, 0x00);
+
+            // Set all GPIO pin levels low
+            Write(Register.Address.GPIO, 0x00);
         }
 
         /// <summary>
@@ -65,18 +69,11 @@ namespace Iot.Device.Mcp23xxx
         {
             ValidateMode(mode);
             ValidatePin(pinNumber);
-
-            switch (mode)
-            {
-                case PinMode.Input:
-                    _iodir |= (byte)(1 << (pinNumber % 8));
-                    break;
-                case PinMode.Output:
-                    _iodir &= (byte)(~(1 << (pinNumber % 8)));
-                    break;
-            }
-
-            Write(Register.Address.IODIR, _iodir);
+            _ioDirection = ChangePin(
+                Register.Address.IODIR,
+                pinNumber,
+                mode == PinMode.Input ? PinValue.High : PinValue.Low,
+                Read(Register.Address.IODIR));
         }
 
         /// <summary>
@@ -88,8 +85,8 @@ namespace Iot.Device.Mcp23xxx
         {
             ValidatePin(pinNumber);
 
-            _gpio = Read(Register.Address.GPIO);
-            return ((_gpio & (1 << (pinNumber % 8))) > 0) ? PinValue.High : PinValue.Low;
+            byte data = Read(Register.Address.GPIO);
+            return ((data & (1 << (pinNumber % 8))) > 0) ? PinValue.High : PinValue.Low;
         }
 
         /// <summary>
@@ -100,17 +97,23 @@ namespace Iot.Device.Mcp23xxx
         public void WritePin(int pinNumber, PinValue value)
         {
             ValidatePin(pinNumber);
+            ChangePin(Register.Address.GPIO, pinNumber, value, Read(Register.Address.OLAT));
+        }
 
+        private byte ChangePin(Register.Address register, int pinNumber, PinValue value, byte current)
+        {
             switch (value)
             {
                 case PinValue.High:
-                    _gpio |= (byte)(1 << (pinNumber % 8));
+                    current |= (byte)(1 << pinNumber);
                     break;
                 case PinValue.Low:
-                    _gpio &= (byte)(~(1 << (pinNumber % 8)));
+                    current &= (byte)~(1 << pinNumber);
                     break;
             }
-            Write(Register.Address.GPIO, _gpio);
+
+            Write(register, current);
+            return current;
         }
 
         private static void ValidateMode(PinMode mode)
@@ -127,26 +130,6 @@ namespace Iot.Device.Mcp23xxx
             {
                 throw new ArgumentOutOfRangeException($"{pinNumber} is not a valid pin on the Mcp controller.");
             }
-        }
-
-        /// <summary>
-        ///  Writes a byte to a register.
-        /// </summary>
-        /// <param name="registerAddress">The register address to write.</param>
-        /// <param name="data">The data to write to the register.</param>
-        public void Write(Register.Address registerAddress, byte data)
-        {
-            Write(registerAddress, data, Port.PortA, Bank.Bank1);
-        }
-
-        /// <summary>
-        /// Writes a number of bytes to registers.
-        /// </summary>
-        /// <param name="startingRegisterAddress">The starting register address to write.</param>
-        /// <param name="data">The data to write to registers.</param>
-        public void Write(Register.Address startingRegisterAddress, byte[] data)
-        {
-            Write(startingRegisterAddress, data, Port.PortA, Bank.Bank1);
         }
     }
 }

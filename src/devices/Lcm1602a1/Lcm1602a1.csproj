@@ -7,9 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Commands.cs" />
     <Compile Include="Flags.cs" />
-    <Compile Include="Lcm1602a1.cs" />
+    <Compile Include="GpioControllerAdapter.cs" />
+    <Compile Include="IGpioController.cs" />
+    <Compile Include="HD44780.cs" />
+    <Compile Include="Mcp23008Adapter.cs" />
   </ItemGroup>
 
   <ItemGroup>
