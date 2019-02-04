@@ -25,11 +25,11 @@ namespace Iot.Device.CharacterLcd
     /// </remarks>
     public class Hd44780 : IDisposable
     {
-        private const byte ClearDisplayCommand = 0b0001;
-        private const byte ReturnHomeCommand   = 0b0010;
+        private const byte ClearDisplayCommand = 0b_0001;
+        private const byte ReturnHomeCommand   = 0b_0010;
 
-        private const byte SetCGRamAddressCommand = 0b0100_0000;
-        private const byte SetDDRamAddressCommand = 0b1000_0000;
+        private const byte SetCGRamAddressCommand = 0b_0100_0000;
+        private const byte SetDDRamAddressCommand = 0b_1000_0000;
 
         /// <summary>
         /// Register select pin. Low is for writing to the instruction

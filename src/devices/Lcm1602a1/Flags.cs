@@ -16,7 +16,7 @@ namespace Iot.Device.CharacterLcd
         /// or right if <see cref="Increment"/> is disabled.
         /// </summary>
         /// <remarks>The "S" option from the datasheet.</remarks>
-        DisplayShift = 0b0001,
+        DisplayShift = 0b_0001,
 
         /// <summary>
         /// Set to increment the CGRAM/DDRAM address by 1 when a character code is
@@ -24,12 +24,12 @@ namespace Iot.Device.CharacterLcd
         /// decrements and moves the cursor to the left.
         /// </summary>
         /// <remarks>The "I/D" option from the datasheet.</remarks>
-        Increment = 0b0010,
+        Increment = 0b_0010,
 
         /// <summary>
         /// The flag for entry mode- must be set.
         /// </summary>
-        Command = 0b0100,
+        Command = 0b_0100,
     }
 
     [Flags]
@@ -39,24 +39,24 @@ namespace Iot.Device.CharacterLcd
         /// Set for enabling cursor blinking.
         /// </summary>
         /// <remarks>The "B" option from the datasheet.</remarks>
-        BlinkOn = 0b0001,
+        BlinkOn = 0b_0001,
 
         /// <summary>
         /// Set for enabling the cursor.
         /// </summary>
         /// <remarks>The "C" option from the datasheet.</remarks>
-        CursorOn = 0b0010,
+        CursorOn = 0b_0010,
 
         /// <summary>
         /// Set for enabling the entire display.
         /// </summary>
         /// <remarks>The "D" option from the datasheet.</remarks>
-        DisplayOn = 0b0100,
+        DisplayOn = 0b_0100,
 
         /// <summary>
         /// The flag for display control- must be set.
         /// </summary>
-        Command = 0b1000
+        Command = 0b_1000
     }
 
     [Flags]
@@ -66,18 +66,18 @@ namespace Iot.Device.CharacterLcd
         /// When set shifts right, otherwise shifts left.
         /// </summary>
         /// <remarks>The "R/L" option from the datasheet.</remarks>
-        Right = 0b0000_0100,
+        Right = 0b_0000_0100,
 
         /// <summary>
         /// When set shifts the display when data is entered, otherwise shifts the cursor.
         /// </summary>
         /// <remarks>The "S/C" option from the datasheet.</remarks>
-        Display = 0b0000_1000,
+        Display = 0b_0000_1000,
 
         /// <summary>
         /// The flag for display and cursor shift- must be set.
         /// </summary>
-        Command = 0b0001_0000
+        Command = 0b_0001_0000
     }
 
     [Flags]
@@ -93,24 +93,24 @@ namespace Iot.Device.CharacterLcd
         /// is enabled three lines are taken from what would drive the top
         /// of the second line of characters. The same font is used
         /// </remarks>
-        Font5x10 = 0b000_0100,
+        Font5x10 = 0b_0000_0100,
 
         /// <summary>
         /// If set display is two line, otherwise display is one line.
         /// </summary>
         /// <remarks>The "N" option from the datasheet.</remarks>
-        TwoLine = 0b000_1000,
+        TwoLine = 0b_0000_1000,
 
         /// <summary>
         /// If set display uses all eight data pins, otherwise display uses
         /// four data pins.
         /// </summary>
         /// <remarks>The "DL" option from the datasheet.</remarks>
-        EightBit = 0b001_0000,
+        EightBit = 0b_0001_0000,
 
         /// <summary>
         /// The flag for setting display function- must be set.
         /// </summary>
-        Command = 0b010_0000
+        Command = 0b_0010_0000
     }
 }

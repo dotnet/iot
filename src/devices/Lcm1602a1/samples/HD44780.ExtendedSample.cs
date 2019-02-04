@@ -33,8 +33,6 @@ namespace Iot.Device.CharacterLcd.Samples
                 Console.WriteLine("Initialized");
                 Console.ReadLine();
 
-                lcd.TimingMultiplier = 0.5;
-
                 TestPrompt("SetCursor", lcd, SetCursorTest);
                 TestPrompt("Underline", lcd, l => l.UnderlineCursorVisible = true);
                 lcd.UnderlineCursorVisible = false;
@@ -227,108 +225,108 @@ namespace Iot.Device.CharacterLcd.Samples
         {
             // Walk 1
             lcd.CreateCustomCharacter(0,
-                0b00110,
-                0b00110,
-                0b01100,
-                0b10111,
-                0b00100,
-                0b01110,
-                0b01010,
-                0b10001);
+                0b_00110,
+                0b_00110,
+                0b_01100,
+                0b_10111,
+                0b_00100,
+                0b_01110,
+                0b_01010,
+                0b_10001);
             // Walk 2
             lcd.CreateCustomCharacter(1,
-                0b00110,
-                0b00110,
-                0b01100,
-                0b01100,
-                0b00110,
-                0b00110,
-                0b01010,
-                0b01010);
+                0b_00110,
+                0b_00110,
+                0b_01100,
+                0b_01100,
+                0b_00110,
+                0b_00110,
+                0b_01010,
+                0b_01010);
         }
 
         static void CreateTensCharacters(Hd44780 lcd)
         {
             // 10
             lcd.CreateCustomCharacter(0,
-                0b10000,
-                0b10000,
-                0b10000,
-                0b10000,
-                0b10111,
-                0b00101,
-                0b00101,
-                0b00111);
+                0b_10000,
+                0b_10000,
+                0b_10000,
+                0b_10000,
+                0b_10111,
+                0b_00101,
+                0b_00101,
+                0b_00111);
             // 20
             lcd.CreateCustomCharacter(1,
-                0b11100,
-                0b00100,
-                0b11100,
-                0b10000,
-                0b11111,
-                0b00101,
-                0b00101,
-                0b00111);
+                0b_11100,
+                0b_00100,
+                0b_11100,
+                0b_10000,
+                0b_11111,
+                0b_00101,
+                0b_00101,
+                0b_00111);
             // 30
             lcd.CreateCustomCharacter(2,
-                0b11100,
-                0b00100,
-                0b11100,
-                0b00100,
-                0b11111,
-                0b00101,
-                0b00101,
-                0b00111);
+                0b_11100,
+                0b_00100,
+                0b_11100,
+                0b_00100,
+                0b_11111,
+                0b_00101,
+                0b_00101,
+                0b_00111);
             // 40
             lcd.CreateCustomCharacter(3,
-                0b10100,
-                0b10100,
-                0b11100,
-                0b00100,
-                0b00111,
-                0b00101,
-                0b00101,
-                0b00111);
+                0b_10100,
+                0b_10100,
+                0b_11100,
+                0b_00100,
+                0b_00111,
+                0b_00101,
+                0b_00101,
+                0b_00111);
             // 50
             lcd.CreateCustomCharacter(4,
-                0b11100,
-                0b10000,
-                0b11100,
-                0b00100,
-                0b11111,
-                0b00101,
-                0b00101,
-                0b00111);
+                0b_11100,
+                0b_10000,
+                0b_11100,
+                0b_00100,
+                0b_11111,
+                0b_00101,
+                0b_00101,
+                0b_00111);
             // 60
             lcd.CreateCustomCharacter(5,
-                0b11100,
-                0b10000,
-                0b11100,
-                0b10100,
-                0b11111,
-                0b00101,
-                0b00101,
-                0b00111);
+                0b_11100,
+                0b_10000,
+                0b_11100,
+                0b_10100,
+                0b_11111,
+                0b_00101,
+                0b_00101,
+                0b_00111);
             // 70
             lcd.CreateCustomCharacter(6,
-                0b11100,
-                0b00100,
-                0b01000,
-                0b01000,
-                0b01111,
-                0b00101,
-                0b00101,
-                0b00111);
+                0b_11100,
+                0b_00100,
+                0b_01000,
+                0b_01000,
+                0b_01111,
+                0b_00101,
+                0b_00101,
+                0b_00111);
             // 80
             lcd.CreateCustomCharacter(7,
-                0b11100,
-                0b10100,
-                0b11100,
-                0b10100,
-                0b11111,
-                0b00101,
-                0b00101,
-                0b00111);
+                0b_11100,
+                0b_10100,
+                0b_11100,
+                0b_10100,
+                0b_11111,
+                0b_00101,
+                0b_00101,
+                0b_00111);
         }
     }
 }
