@@ -60,7 +60,6 @@ phases:
         _TeamName: DotNetCore
         _SignType: real
 
-
 - template: /eng/common/templates/phases/base.yml
   parameters:
     agentOs: OSX
@@ -87,6 +86,29 @@ phases:
 - template: /eng/common/templates/phases/base.yml
   parameters:
     agentOs: Linux
+    name: Linux_libgpiod
+    enableTelemetry: $(_enableTelemetry)
+    queue:
+      name: Hosted Ubuntu 1604
+    steps:
+    - script: src/Native/copyLibgpiod.sh
+      name: CopyLibgpiod
+      displayName: Copy Libgpiod dependency from container
+      condition: succeeded()
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Libgpiod lib assets
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/artifacts/libgpiod/
+        artifactName: Libgpiod
+        artifactType: container
+    variables:
+      _HelixBuildConfig: $(_BuildConfig)
+
+- template: /eng/common/templates/phases/base.yml
+  parameters:
+    dependsOn:
+    - Linux_libgpiod
+    agentOs: Linux
     name: Linux
     enableTelemetry: $(_enableTelemetry)
     queue:
@@ -99,9 +121,19 @@ phases:
         release_configuration:
           _BuildConfig: Release
     steps:
-    - script: eng/common/cibuild.sh
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Libgpiod assets
+      inputs:
+        artifactName: Libgpiod
+        downloadPath: $(Build.SourcesDirectory)/artifacts/
+    - script: src/Native/moveLibgpiod.sh
+      name: MoveLibgpiod
+      displayName: Move Libgpiod into crossrootfs
+      condition: succeeded()
+    - script: ROOTFS_DIR=/crossrootfs/arm eng/common/cibuild.sh
         --configuration $(_BuildConfig)
         --prepareMachine
+        /p:BuildNative=true
       name: Build
       displayName: Build
       condition: succeeded()
