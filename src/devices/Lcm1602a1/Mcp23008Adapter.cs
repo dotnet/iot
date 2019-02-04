@@ -5,7 +5,7 @@
 using System.Device.Gpio;
 using Iot.Device.Mcp23xxx;
 
-namespace Iot.Device.CharacterLCD
+namespace Iot.Device.CharacterLcd
 {
     public class Mcp23008Adapter : IGpioController
     {

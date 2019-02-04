@@ -5,7 +5,7 @@
 using System;
 using System.Device.Gpio;
 
-namespace Iot.Device.CharacterLCD
+namespace Iot.Device.CharacterLcd
 {
     // Can we move this upstream and actually derive from this? Should I2C/SPI derive from GpioDriver instead?
     // Having an interface would allow for easier unit testing...

@@ -4,7 +4,7 @@
 
 using System.Drawing;
 
-namespace Iot.Device.CharacterLCD
+namespace Iot.Device.CharacterLcd
 {
     /// <summary>
     /// 16x2 HD44780 compatible character LCD display.

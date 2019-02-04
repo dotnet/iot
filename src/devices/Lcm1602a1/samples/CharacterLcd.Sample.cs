@@ -6,7 +6,7 @@ using System.Device.I2c;
 using System.Device.I2c.Drivers;
 using Iot.Device.Mcp23xxx;
 
-namespace Iot.Device.CharacterLCD.Samples
+namespace Iot.Device.CharacterLcd.Samples
 {
     class Program
     {

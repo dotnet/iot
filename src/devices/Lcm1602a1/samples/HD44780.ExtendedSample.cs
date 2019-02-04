@@ -8,7 +8,7 @@ using System.Drawing;
 using System.Text;
 using System.Timers;
 
-namespace Iot.Device.CharacterLCD.Samples
+namespace Iot.Device.CharacterLcd.Samples
 {
     public class ExtendedSample
     {

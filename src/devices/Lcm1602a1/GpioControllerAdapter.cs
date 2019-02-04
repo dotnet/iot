@@ -4,7 +4,7 @@
 
 using System.Device.Gpio;
 
-namespace Iot.Device.CharacterLCD
+namespace Iot.Device.CharacterLcd
 {
     public class GpioControllerAdapter : IGpioController
     {

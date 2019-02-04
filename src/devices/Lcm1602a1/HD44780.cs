@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 
-namespace Iot.Device.CharacterLCD
+namespace Iot.Device.CharacterLcd
 {
     /// <summary>
     /// Supports LCD character displays compatible with the HD44780 LCD controller/driver.
