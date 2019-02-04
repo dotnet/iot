@@ -21,9 +21,8 @@
     <Compile Include="Models\SpiMessages.cs" />
     <Folder Include="Extensions\" />
     <Compile Include="Extensions\EnumExtension.cs" />
-    <Folder Include="Movement\" />
     <Compile Include="Movement\Motor.cs" />
-    <Compile Include="Movement\Vehicule.cs" />
+    <Compile Include="Movement\Vehicle.cs" />
     <Folder Include="Sensors\" />
     <Compile Include="Sensors\EV3ColorSensor.cs" />
     <Compile Include="Sensors\EV3GyroSensor.cs" />

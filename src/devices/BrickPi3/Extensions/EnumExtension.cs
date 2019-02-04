@@ -11,7 +11,6 @@ namespace Iot.Device.BrickPi3.Extensions
 	/// </summary>
 	internal static class EnumExtensions
 	{
-
 	    public static T Next<T>(this T src) where T : struct
 	    {
 	        if (!typeof(T).IsEnum) throw new ArgumentException($"Argumnent {typeof(T).FullName} is not an Enum");

@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 namespace BrickPiHardwareTest
 {
 
-    partial class Program : IDisposable
+    partial class Program
     {
 
         const string MotorTest = "-motor";
-        const string VehiculeTest = "-vehicule";
+        const string VehiculeTest = "-vehicle";
         const string MultiSensorTest = "-multi";
         const string NoBasicTest = "-nobrick";
         const string ColorTest = "-color";
@@ -27,8 +27,6 @@ namespace BrickPiHardwareTest
         static void Main(string[] args)
         {
             Console.WriteLine("Hello BrickPi3!");
-            // Initialize the brick
-            _brick.InitSPI();
 
             if (args.Length == 0)
             {
@@ -37,7 +35,7 @@ namespace BrickPiHardwareTest
                 Console.WriteLine(@"where -arg1, arg2, etc are one of the following:");
                 Console.WriteLine($"{NoBasicTest}: don't run the basic BrickPi tests.");
                 Console.WriteLine($"{MotorTest}: run basic motor tests, motors need to be on port A and D.");
-                Console.WriteLine($"{VehiculeTest}: run a vehicule test, motors need to be on port A and D.");
+                Console.WriteLine($"{VehiculeTest}: run a vehicle test, motors need to be on port A and D.");
                 Console.WriteLine($"{MultiSensorTest}: run a multi sensor test");
                 Console.WriteLine(@"   EV3TouchSensor on port 1");
                 Console.WriteLine(@"   NXTTouchSensor on port 2");
@@ -120,10 +118,6 @@ namespace BrickPiHardwareTest
             {
                 Console.WriteLine($"Exception: {ex.Message}");
             }
-
-            // In case you don't have a dispose function, don't forget to reset the brick before closing the application
-            // Motors and sensor will continue to work if you forget to reset the brick
-            // _brick.ResetAll();
         }
 
         static private void TestMotorPosition()
@@ -342,11 +336,6 @@ namespace BrickPiHardwareTest
 
             _brick.SetMotorPower((byte)MotorPort.PortD, (byte)MotorSpeed.Float);
             Console.WriteLine("End of test on Motor D");
-        }
-
-        public void Dispose()
-        {
-            _brick.ResetAll();
         }
     }
 }

@@ -10,7 +10,7 @@ If you are using another board with compatible pins with the Raspberry Pi, you w
 
 ![image how it works](../BrickPi3-How-it-Works.jpg)
 
-More inrofmation on [Dexter Industries website](https://www.dexterindustries.com/BrickPi/brickpi3-technical-design-details/).
+More information on [Dexter Industries website](https://www.dexterindustries.com/BrickPi/brickpi3-technical-design-details/).
 
 # Code
 
@@ -23,7 +23,7 @@ Refer to the code to understand on which port you'll need to plug motors and sen
 where -arg1, arg2, etc are one of the following:
 -nobrick: don't run the basic BrickPi tests.
 -motor: run basic motor tests, motors need to be on port A and D.
--vehicule: run a vehicule test, motors need to be on port A and D.
+-vehicle: run a vehicle test, motors need to be on port A and D.
 -multi: run a multi sensor test
    EV3TouchSensor on port 1
    NXTTouchSensor on port 2
@@ -44,11 +44,9 @@ where -arg1, arg2, etc are one of the following:
 -irsensor: run EV3 IR sensor test on port 4
 ```
 
-You always have to create a brick and initialize it. Then you can run your code. In this example, reading a Touch sensor. And at the end, reset the brick.
-
+You always have to create a brick and initialize it. Then you can run your code. In this example, reading a Touch sensor.
 ```csharp
 Brick _brick = new Brick();
-_brick.InitSPI();
 Console.WriteLine("Running 100 reads on EV3 touch sensor on port 1.");
 EV3TouchSensor touch = new EV3TouchSensor(_brick, BrickPortSensor.PortS1);
 // Alternative to test NXT touch sensor
@@ -59,5 +57,4 @@ while (count < 100)
     Console.WriteLine($"NXT Touch, IsPRessed: {touch.IsPressed()}, ReadAsString: {touch.ReadAsString()}, Selected mode: {touch.SelectedMode()}");
     Task.Delay(300).Wait(); ;
 }
-_brick.ResetAll();
 ```

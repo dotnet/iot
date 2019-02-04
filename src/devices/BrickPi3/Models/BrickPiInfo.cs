@@ -6,7 +6,6 @@ using System.Collections.Generic;
 
 namespace Iot.Device.BrickPi3.Models
 {
-
     /// <summary>
     /// Class containing the board information
     /// </summary>

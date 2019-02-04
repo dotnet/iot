@@ -7,6 +7,7 @@ using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
 using System.Threading;
+using static Iot.Device.BrickPi3.SpiExceptions;
 
 namespace Iot.Device.BrickPi3.Sensors
 
@@ -200,7 +201,7 @@ namespace Iot.Device.BrickPi3.Sensors
                         break;
                 }
             }
-            catch (Exception)
+            catch (Exception ex) when (ex is IOError || ex is SensorError)
             { }
         }
 
@@ -260,7 +261,7 @@ namespace Iot.Device.BrickPi3.Sensors
                     var ret = _brick.GetSensor((byte)Port);
                     return (ret[0] + (ret[1] >> 8) + (ret[2] >> 16) + ret[3] >> 24) / 255 / 3;
                 }
-                catch (Exception)
+                catch (Exception ex) when (ex is IOError || ex is SensorError)
                 {
                     return 0;
                 }
@@ -326,7 +327,7 @@ namespace Iot.Device.BrickPi3.Sensors
                 {
                     color = (Color)_brick.GetSensor((byte)Port)[0];
                 }
-                catch (Exception)
+                catch (Exception ex) when (ex is IOError || ex is SensorError)
                 {
                     color = Color.None;
                 }

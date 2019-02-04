@@ -7,6 +7,7 @@ using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
 using System.Threading;
+using static Iot.Device.BrickPi3.SpiExceptions;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
@@ -172,6 +173,7 @@ namespace Iot.Device.BrickPi3.Sensors
         public string ValueAsString
         {
             get { return ReadAsString(); }
+
             internal set
             {
                 if (_valueAsString != value)
@@ -194,6 +196,7 @@ namespace Iot.Device.BrickPi3.Sensors
         public ColorSensorMode ColorMode
         {
             get { return _colorMode; }
+
             set
             {
                 if (value != _colorMode)
@@ -219,7 +222,8 @@ namespace Iot.Device.BrickPi3.Sensors
                 for (int i = 0; i < _rawValues.Length; i++)
                     _rawValues[i] = ret[i];
             }
-            catch (Exception) { }
+            catch (Exception ex) when (ex is IOError || ex is SensorError)
+            { }
         }
 
         public int ReadRaw()
@@ -280,7 +284,7 @@ namespace Iot.Device.BrickPi3.Sensors
                 {
                     return _brick.GetSensor((byte)Port)[0];
                 }
-                catch (Exception)
+                catch (Exception ex) when (ex is IOError || ex is SensorError)
                 {
                     return -1;
                 }
@@ -328,7 +332,7 @@ namespace Iot.Device.BrickPi3.Sensors
                 {
                     color = (Color)_brick.GetSensor((byte)Port)[0];
                 }
-                catch (Exception)
+                catch (Exception ex) when (ex is IOError || ex is SensorError)
                 {
                     color = Color.None;
                 }

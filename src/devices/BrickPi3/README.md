@@ -29,7 +29,7 @@ The device supported is the BrickPi3 [Dexter Industries](https://www.dexterindus
 
 ![image how it works](BrickPi3-How-it-Works.jpg)
 
-More inrofmation on [Dexter Industries website](https://www.dexterindustries.com/BrickPi/brickpi3-technical-design-details/).
+More information on [Dexter Industries website](https://www.dexterindustries.com/BrickPi/brickpi3-technical-design-details/).
 
 ## Make sure you have a BrickPi3
 
@@ -46,17 +46,21 @@ For I2C sensors, the code has been tested very little. Color sensors may return 
 
 The main [BrickPi3.samples](./samples) contains a series of test showing how to use every elements of the driver.
 
-Create a ```Brick``` class and initialize it thru the ```InitSPI()``` function. It is recommended to reinitialize everything when you're done with the ```ResetAll``` function. If you don't motors and sensors will continue to run.
+Create a ```Brick``` class.
 
 ```csharp
 Brick brick = new Brick();
-brick.InitSPI();
 // Do whatever you want, read sensors, set motors, etc
-// once finished, call the reset function
-brick.ResetAll();
+// once finished, and class will be disposed, all motors will be floated and sensors reinitialized
 ```
 
 If you have multiple BrickPi3 and want to change the address of a specific BrickPi3, use the ```SetAddress``` function. Be aware that once changed in the firmware it stays. By default the address 1.
+
+Once you've done that, create, you can create a new brick by passing this address to the constructor. In this example, it will create a BrickPi3 with address 2.
+
+```csharp
+Brick brick = new Brick(2);
+```
 
 ### Accessing BrickPi3 information
 
@@ -228,18 +232,17 @@ Motors can be adjusted the KP and KD settings of the motor. If you set KP higher
 
 ## How to use the high level classes
 
-There are high level classes to handle directly objects like NXT Touch sensors or EV3 Color sensor. There is as well a Motor  and a Vehicule class to make it easier to pilot and control the motors rather then thru the low level driver.
+There are high level classes to handle directly objects like NXT Touch sensors or EV3 Color sensor. There is as well a Motor  and a Vehicle class to make it easier to pilot and control the motors rather than thru the low level driver.
 
 ### Using the Sensor classes
 
-Using the sensor classes is straight forward. Just reference a class and initialized it. Access properties and function. The ReadRaw(), ReadAsString() functions are common to all sensors, Value and ValueAsString properties as well. 
+Using the sensor classes is straight forward. Just reference a class and initialized it. Access properties and function. The ```ReadRaw()```, ```ReadAsString()``` functions are common to all sensors, ```Value``` and ```ValueAsString``` properties as well. 
 A changed property event on the properties is raised with a minimum period you can determined when creating the class (or later).
 
 Example creating a NXT Touch Sensor on port S2:
 
 ```csharp
 Brick brick = new Brick();
-brick.InitSPI();
 
 NXTTouchSensor touch = new NXTTouchSensor(brick, BrickPortSensor.PortS2);
 Console.WriteLine($"NXT Touch, Raw: {touch.ReadRaw()}, ReadASString: {touch.ReadAsString()}, IsPressed: {touch.IsPressed()}, NumberNodes: {touch.NumberOfModes()}, SensorName: {touch.GetSensorName()}");
@@ -257,13 +260,12 @@ All sensors will return a ```int.MaxValue``` in case of error when reading the d
 
 ### Using Motors
 
-Motors are as well really easy to use. You have functions Start(), Stop(), SetSpeed(speed) and GetSpeed() which as you can expect will start, stop, change the speed and give you the current speed. A speed property is available as well and will change the speed. 
+Motors are as well really easy to use. You have functions ```Start()```, ```Stop()```, ```SetSpeed(speed) ``` and ```GetSpeed()``` which as you can expect will start, stop, change the speed and give you the current speed. A speed property is available as well and will change the speed. 
 
-Lego motors have an encoder which gives you the position in 0.5 degree precision. You can get access thru function GetTachoCount(). As the numbers can get big quite fast, you can reset this counter by using SetTachoCount(newnumber). A TachoCount property is available as well. This property like for sensors can raise an event on a minimum time base you can setup.
+Lego motors have an encoder which gives you the position in 0.5 degree precision. You can get access thru function ```GetTachoCount()```. As the numbers can get big quite fast, you can reset this counter by using ```SetTachoCount(newnumber) ```. A ```TachoCount``` property is available as well. This property like for sensors can raise an event on a minimum time base you can setup.
 
 ```csharp
 Brick brick = new Brick();
-brick.InitSPI();
 
 Motor motor = new Motor(brick, BrickPortMotor.PORT_D);
 motor.SetSpeed(100); //speed goes from -100 to +100, others will float the motor
@@ -277,11 +279,11 @@ motor.SetPolarity(Polarity.OppositeDirection); // change the direction
 motor.Stop();
 ```
 
-Here is an example of the Vehicule class: 
+Here is an example of the ```Vehicle``` class: 
 
 ```csharp
-Console.WriteLine("Vehicule drive test using Motor A for left, Motor D for right, not inverted direction");
-Vehicule veh = new Vehicule(brick, BrickPortMotor.PortA, BrickPortMotor.PortD);
+Console.WriteLine("Vehicle drive test using Motor A for left, Motor D for right, not inverted direction");
+Vehicle veh = new Vehicle(brick, BrickPortMotor.PortA, BrickPortMotor.PortD);
 veh.DirectionOpposite = true;
 Console.WriteLine("Driving backward");
 veh.Backward(30, 5000);
@@ -297,7 +299,7 @@ Console.WriteLine("Turning right");
 veh.TurnRight(30, 180);
 ```
 
-The Vehicule class offers functions with timeout allowing to drive for a certain amount of time. All timing are in milliseconds. Turning functions offers as well a degree mode which allows to turn by a certain degree rather than a specific time.
+The ```Vehicle``` class offers functions with timeout allowing to drive for a certain amount of time. All timing are in milliseconds. Turning functions offers as well a degree mode which allows to turn by a certain degree rather than a specific time.
 
 ## Using GrovePi port
 

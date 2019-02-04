@@ -7,6 +7,7 @@ using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
 using System.Threading;
+using static Iot.Device.BrickPi3.SpiExceptions;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
@@ -209,7 +210,7 @@ namespace Iot.Device.BrickPi3.Sensors
                         return ret[0];
                 }
             }
-            catch (Exception)
+            catch (Exception ex) when (ex is IOError || ex is SensorError)
             { }
 
             return int.MaxValue;

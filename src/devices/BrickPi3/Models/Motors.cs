@@ -4,7 +4,6 @@
 
 namespace Iot.Device.BrickPi3.Models
 {
-
     /// <summary>
     /// Port used to select the ports for motors
     /// </summary>
@@ -76,5 +75,4 @@ namespace Iot.Device.BrickPi3.Models
         // Actually any value great than 100 will float motors
         Float = 128
     }
-
 }

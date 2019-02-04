@@ -127,7 +127,7 @@ namespace BrickPiHardwareTest
         static private void TestVehicule()
         {
             Console.WriteLine("Vehicule drive test using Motor A for left, Motor D for right, not inverted direction");
-            Vehicule veh = new Vehicule(_brick, BrickPortMotor.PortA, BrickPortMotor.PortD);
+            Vehicle veh = new Vehicle(_brick, BrickPortMotor.PortA, BrickPortMotor.PortD);
             veh.DirectionOpposite = true;
             Console.WriteLine("Driving backward");
             veh.Backward(30, 5000);
