@@ -4,7 +4,6 @@
 
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
-using System.Drawing;
 using Iot.Device.Mcp23xxx;
 
 namespace Iot.Device.CharacterLCD.Samples
@@ -17,10 +16,8 @@ namespace Iot.Device.CharacterLCD.Samples
         /// <param name="args">Should be empty</param>
         static void Main(string[] args)
         {
-            int[] dataPins = { 3, 4, 5, 6 };
-            int registerSelectPin = 1;
-            int enablePin = 2;
-            using (HD44780 lcd = new HD44780(registerSelectPin, enablePin, dataPins, new Size(16, 2)))
+            // Sets up a 16x2 character LCD with a hardwired or no backlight.
+            using (Lcd1602 lcd = new Lcd1602(registerSelect: 1, enable: 2, data: new int[] { 3, 4, 5, 6 }))
             {
                 lcd.Clear();
                 lcd.Write("Hello World");
@@ -40,7 +37,7 @@ namespace Iot.Device.CharacterLCD.Samples
             int enablePin = 2;
             int backlight = 7;
             using (mcpDevice)
-            using (HD44780 lcd = new HD44780(registerSelectPin, enablePin, dataPins, new Size(16, 2), backlight, controller: new Mcp23008Adapter(mcpDevice)))
+            using (Lcd1602 lcd = new Lcd1602(registerSelectPin, enablePin, dataPins, backlight, controller: new Mcp23008Adapter(mcpDevice)))
             {
                 lcd.Clear();
 

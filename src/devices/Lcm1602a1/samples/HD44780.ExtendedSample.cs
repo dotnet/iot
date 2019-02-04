@@ -24,9 +24,9 @@ namespace Iot.Device.CharacterLCD.Samples
 #if USEI2C
             var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x21));
             var controller = new Mcp23008Adapter(new Mcp23008(i2cDevice));
-            var lcd = new HD44780(registerSelect: 1, enable: 2, data: new int[] { 3, 4, 5, 6 }, size: new Size(16, 2), backlight: 7, controller: controller);
+            var lcd = new Hd44780(registerSelect: 1, enable: 2, data: new int[] { 3, 4, 5, 6 }, size: new Size(16, 2), backlight: 7, controller: controller);
 #else
-            HD44780 lcd = new HD44780(12, 26, new int[] { 16, 17, 18, 19, 20, 21, 22, 23 }, new Size(20, 4), readWrite: 13);
+            Hd44780 lcd = new Hd44780(12, 26, new int[] { 16, 17, 18, 19, 20, 21, 22, 23 }, new Size(20, 4), readWrite: 13);
 #endif
             using (lcd)
             {
@@ -94,7 +94,7 @@ namespace Iot.Device.CharacterLCD.Samples
             }
         }
 
-        static void CharacterSet(HD44780 lcd)
+        static void CharacterSet(Hd44780 lcd)
         {
             StringBuilder sb = new StringBuilder(256);
 
@@ -120,15 +120,15 @@ namespace Iot.Device.CharacterLCD.Samples
             }
         }
 
-        static void AutoShift(HD44780 lcd)
+        static void AutoShift(Hd44780 lcd)
         {
-            lcd.Autoshift = true;
+            lcd.AutoShift = true;
             Size size = lcd.Size;
             lcd.Write(Eighty.Substring(0, size.Width + size.Width / 2));
-            lcd.Autoshift = false;
+            lcd.AutoShift = false;
         }
 
-        static void ShiftTest(HD44780 lcd, Action<HD44780> action)
+        static void ShiftTest(Hd44780 lcd, Action<Hd44780> action)
         {
             Size size = lcd.Size;
             for (int i = 0; i <= size.Width; i++)
@@ -138,21 +138,21 @@ namespace Iot.Device.CharacterLCD.Samples
             }
         }
 
-        static void ShiftDisplayTest(HD44780 lcd, Action<HD44780> action)
+        static void ShiftDisplayTest(Hd44780 lcd, Action<Hd44780> action)
         {
             Size size = lcd.Size;
             lcd.Write(Eighty.Substring(0, size.Height * size.Width));
             ShiftTest(lcd, action);
         }
 
-        static void ShiftCursorTest(HD44780 lcd, Action<HD44780> action)
+        static void ShiftCursorTest(Hd44780 lcd, Action<Hd44780> action)
         {
             lcd.BlinkingCursorVisible = true;
             ShiftTest(lcd, action);
             lcd.BlinkingCursorVisible = false;
         }
 
-        static void WriteFromEnd(HD44780 lcd, string value)
+        static void WriteFromEnd(Hd44780 lcd, string value)
         {
             lcd.Increment = false;
             lcd.SetCursorPosition(lcd.Size.Width - 1, lcd.Size.Height - 1);
@@ -160,7 +160,7 @@ namespace Iot.Device.CharacterLCD.Samples
             lcd.Increment = true;
         }
 
-        static void WalkerTest(HD44780 lcd)
+        static void WalkerTest(Hd44780 lcd)
         {
             CreateWalkCharacters(lcd);
             string walkOne = new string('\x8', lcd.Size.Width);
@@ -176,7 +176,7 @@ namespace Iot.Device.CharacterLCD.Samples
             }
         }
 
-        static void SetCursorTest(HD44780 lcd)
+        static void SetCursorTest(Hd44780 lcd)
         {
             Size size = lcd.Size;
             int number = 0;
@@ -189,7 +189,7 @@ namespace Iot.Device.CharacterLCD.Samples
             }
         }
 
-        static void PerfTests(HD44780 lcd)
+        static void PerfTests(Hd44780 lcd)
         {
             string stars = new string('*', 80);
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -207,7 +207,7 @@ namespace Iot.Device.CharacterLCD.Samples
             Console.WriteLine(result);
         }
 
-        static void TestPrompt(string test, HD44780 lcd, Action<HD44780> action)
+        static void TestPrompt(string test, Hd44780 lcd, Action<Hd44780> action)
         {
             string prompt = $"Test {test}:";
             lcd.Clear();
@@ -223,7 +223,7 @@ namespace Iot.Device.CharacterLCD.Samples
             lcd.Clear();
         }
 
-        static void CreateWalkCharacters(HD44780 lcd)
+        static void CreateWalkCharacters(Hd44780 lcd)
         {
             // Walk 1
             lcd.CreateCustomCharacter(0,
@@ -247,7 +247,7 @@ namespace Iot.Device.CharacterLCD.Samples
                 0b01010);
         }
 
-        static void CreateTensCharacters(HD44780 lcd)
+        static void CreateTensCharacters(Hd44780 lcd)
         {
             // 10
             lcd.CreateCustomCharacter(0,

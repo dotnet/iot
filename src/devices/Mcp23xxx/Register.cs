@@ -6,7 +6,7 @@ namespace Iot.Device.Mcp23xxx
 {
     public class Register
     {
-        public enum Address
+        public enum Address : byte
         {
             /// <summary>
             /// Controls the direction of the data I/O.
@@ -113,6 +113,7 @@ namespace Iot.Device.Mcp23xxx
 
         private static byte GetMappedAddressBank0PortA(Address address)
         {
+            
             byte mappedAddress = 0;
 
             switch (address)

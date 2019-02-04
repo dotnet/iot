@@ -2,13 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Device.I2c;
 
 namespace Iot.Device.Mcp23xxx
 {
     public abstract class Mcp230xx : Mcp23xxx
     {
-        private readonly I2cDevice _i2cDevice;
+        protected readonly I2cDevice _i2cDevice;
 
         /// <summary>
         /// A general purpose parallel I/O expansion for I2C applications.

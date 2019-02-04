@@ -4,10 +4,8 @@
 
 using System;
 using System.Device.Gpio;
-using System.Device.Gpio.Drivers;
 using System.Diagnostics;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Iot.Device.CharacterLCD
@@ -25,7 +23,7 @@ namespace Iot.Device.CharacterLCD
     /// 
     /// This implementation was drawn from numerous datasheets and libraries such as Adafruit_Python_CharLCD.
     /// </remarks>
-    public class HD44780 : IDisposable
+    public class Hd44780 : IDisposable
     {
         private const byte ClearDisplayCommand = 0b0001;
         private const byte ReturnHomeCommand   = 0b0010;
@@ -65,6 +63,11 @@ namespace Iot.Device.CharacterLCD
         private byte _lastByte;
         private bool _useLastByte;
 
+        // We need to add PWM support to make this useful (to drive the VO pin).
+        // For now we'll just stash the value and use it to decide the initial
+        // backlight state.
+        private float _backlightBrightness;
+
         /// <summary>
         /// Logical size, in characters, of the LCD.
         /// </summary>
@@ -79,9 +82,8 @@ namespace Iot.Device.CharacterLCD
         /// time in other code between pulsing in new data, which gives quite a bit of
         /// headroom over the by-the-book waits.
         /// 
-        /// At a certain point the benefit is shadowed by time spent on other code. When
-        /// hooked up via 4 data lines there is more room for improvement. In tests on
-        /// one 20x4 LCD times were improved up to a 0.5 modifier.
+        /// This is more useful if you have a slow GpioAdapter as time spent in the
+        /// adapter may eat into the need to wait as long for a command to complete.
         /// 
         /// There is a busy signal that can be checked that could make this moot, but
         /// currently we are unable to check the signal fast enough to make gains (or
@@ -99,15 +101,17 @@ namespace Iot.Device.CharacterLCD
         /// <param name="data">Collection of pins holding the data that will be printed on the screen.</param>
         /// <param name="size">The logical size of the LCD.</param>
         /// <param name="backlight">The optional pin that controls the backlight of the display.</param>
+        /// <param name="backlightBrightness">The brightness of the backlight. 0.0 for off, 1.0 for on.</param>
         /// <param name="readWrite">The optional pin that controls the read and write switch.</param>
         /// <param name="controller">The controller to use with the LCD. If not specified, uses the platform default.</param>
-        public HD44780(int registerSelect, int enable, int[] data, Size size, int backlight = -1, int readWrite = -1, IGpioController controller = null)
+        public Hd44780(int registerSelect, int enable, int[] data, Size size, int backlight = -1, float backlightBrightness = 1.0f, int readWrite = -1, IGpioController controller = null)
         {
             _rwPin = readWrite;
             _rsPin = registerSelect;
             _enablePin = enable;
             _dataPins = data;
             _backlight = backlight;
+            _backlightBrightness = backlightBrightness;
 
             Size = size;
 
@@ -122,10 +126,7 @@ namespace Iot.Device.CharacterLCD
                 throw new ArgumentException($"The length of the array given to parameter {nameof(data)} must be 4 or 8");
             }
 
-            _controller = controller ?? new GpioControllerAdapter(RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
-                ? new GpioController(PinNumberingScheme.Logical, new UnixDriver()) :
-                new GpioController(PinNumberingScheme.Logical, new Windows10Driver()));
-
+            _controller = controller ?? new GpioControllerAdapter(new GpioController(PinNumberingScheme.Logical));
             Initialize(size.Height);
         }
 
@@ -197,6 +198,7 @@ namespace Iot.Device.CharacterLCD
             _displayControl |= DisplayControl.DisplayOn;
             _displayMode |= DisplayEntryMode.Increment;
 
+            // Prep the pins
             _controller.OpenPin(_rsPin, PinMode.Output);
 
             if (_rwPin != -1)
@@ -206,7 +208,11 @@ namespace Iot.Device.CharacterLCD
             if (_backlight != -1)
             {
                 _controller.OpenPin(_backlight, PinMode.Output);
-                _controller.Write(_backlight, PinValue.High);
+                if (_backlightBrightness > 0)
+                {
+                    // Turn on the backlight
+                    _controller.Write(_backlight, PinValue.High);
+                }
             }
             _controller.OpenPin(_enablePin, PinMode.Output);
 
@@ -342,9 +348,9 @@ namespace Iot.Device.CharacterLCD
         }
 
         /// <summary>
-        /// 
+        /// When enabled the display will shift rather than the cursor.
         /// </summary>
-        public bool Autoshift
+        public bool AutoShift
         {
             get => (_displayMode & DisplayEntryMode.DisplayShift) > 0;
             set => Send((byte)(value ? _displayMode |= DisplayEntryMode.DisplayShift
@@ -519,18 +525,7 @@ namespace Iot.Device.CharacterLCD
             _controller.Write(_enablePin, PinValue.Low);
         }
 
-        public void DelayNanoseconds(int nanoseconds)
-        {
-            _stopwatch.Restart();
-            SpinWait spinWait = new SpinWait();
-            long v = (nanoseconds * Stopwatch.Frequency) / 1_000_000_000;
-            while (_stopwatch.ElapsedTicks < v)
-            {
-                spinWait.SpinOnce();
-            }
-        }
-
-        public void DelayMicroseconds(int microseconds, bool checkBusy = true)
+        private void DelayMicroseconds(int microseconds, bool checkBusy = true)
         {
             _stopwatch.Restart();
 
