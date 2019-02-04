@@ -1,19 +1,19 @@
-# LCD Display LCM1602C
+# Character LCD Display
 
 ## Summary
-This device binding is really intended to work for the [TC1602A](https://cdn-shop.adafruit.com/datasheets/TC1602A-01T.pdf) display, but it will work for similar CharLCD displays which use a HD44780 controller. These LCD devices are relatively easy to work with, with the downside of using many Gpio pins. Most of these code was ported and adapted from [Adafruit](https://github.com/adafruit/Adafruit_Python_CharLCD/blob/master/Adafruit_CharLCD/Adafruit_CharLCD.py)
+This device binding is meant to work with character LCD displays which use a HD44780 compatible controller. Almost all character LCDs fall into this category. Simple wrappers for 16x2 and 20x4 variants are included.
 
 ## Device Family
-This binding has only been tested with the LCM1602A1 display on the CrowPi, but it should be compatible with any similar display which uses a [HD44780](https://www.sparkfun.com/datasheets/LCD/HD44780.pdf) controller.
+This binding has been tested with a variety of 16x2 and 20x4 displays both in 4bit and 8bit mode and via i2C adapters (such as on the CrowPi). It should work with any character LCD with a 5x8 size character. Common names are 1602LCD and 2004LCD.
 
 ## Binding Notes
 These devices are controlled purely by GPIO. There are two different types of GPIO pins that are used, the control pins, and the data pins. The data pins are the ones that will send out the text that should be printed out on the LCD screen. This binding supports two different configurations for the data pins: using 4 data pins, and using 8 data pins. When using only 4 data pins, we will require two send two messages to the controller, each sending half of the byte that should be printed.
 
 Here is a Hello World example of how to consume this binding:
 ```c#
-using (var lcd = new Lcm1602a1(18, 5, new int[]{6, 16, 20, 21})) //using 4 data pins
+using (var lcd = new Lcd1602(18, 5, new int[]{6, 16, 20, 21})) //using 4 data pins
 {
-    lcd.Print("Hello World!");
+    lcd.Write("Hello World!");
 }
 ```
 
