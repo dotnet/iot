@@ -15,7 +15,7 @@ Ds3231
 
 ## Code
 ```C#
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Iot.Device.Ds3231.Ds3231.Address);
+I2cConnectionSettings settings = new I2cConnectionSettings(1, Iot.Device.Ds3231.Ds3231.I2cAddress);
 // get I2cDevice (in Linux)
 UnixI2cDevice device = new UnixI2cDevice(settings);
 

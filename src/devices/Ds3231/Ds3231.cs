@@ -15,18 +15,7 @@ namespace Iot.Device.Ds3231
         /// <summary>
         /// DS3231 I2C Address
         /// </summary>
-        public const byte Address = 0x68;
-        #region Address
-        private const byte RTC_SEC_REG_ADDR = 0x00;
-        private const byte RTC_MIN_REG_ADDR = 0x01;
-        private const byte RTC_HOUR_REG_ADDR = 0x02;
-        private const byte RTC_DAY_REG_ADDR = 0x03;
-        private const byte RTC_DATE_REG_ADDR = 0x04;
-        private const byte RTC_MONTH_REG_ADDR = 0x05;
-        private const byte RTC_YEAR_REG_ADDR = 0x06;
-        private const byte RTC_TEMP_MSB_REG_ADDR = 0x11;
-        private const byte RTC_TEMP_LSB_REG_ADDR = 0x12;
-        #endregion
+        public const byte I2cAddress = 0x68;
 
         private I2cDevice _sensor = null;
 
@@ -41,7 +30,7 @@ namespace Iot.Device.Ds3231
         public double Temperature => ReadTemperature();
 
         /// <summary>
-        /// Constructor
+        /// Realtime Clock DS3231
         /// </summary>
         /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
         public Ds3231(I2cDevice sensor)
@@ -57,7 +46,7 @@ namespace Iot.Device.Ds3231
         {
             Span<byte> rawData = stackalloc byte[7];
 
-            _sensor.Write(new byte[] { RTC_SEC_REG_ADDR });
+            _sensor.Write(new [] { (byte)Register.RTC_SEC_REG_ADDR });
             _sensor.Read(rawData);
 
             Ds3231Data data = new Ds3231Data();
@@ -85,7 +74,7 @@ namespace Iot.Device.Ds3231
         {
             Span<byte> setData = stackalloc byte[8];
 
-            setData[0] = RTC_SEC_REG_ADDR;
+            setData[0] = (byte)Register.RTC_SEC_REG_ADDR;
 
             setData[1] = Int2Bcd(time.Second);
             setData[2] = Int2Bcd(time.Minute);
@@ -114,7 +103,7 @@ namespace Iot.Device.Ds3231
         {
             Span<byte> data = stackalloc byte[2];
 
-            _sensor.Write(new byte[] { RTC_TEMP_MSB_REG_ADDR });
+            _sensor.Write(new [] { (byte)Register.RTC_TEMP_MSB_REG_ADDR });
             _sensor.Read(data);
 
             // datasheet Temperature part

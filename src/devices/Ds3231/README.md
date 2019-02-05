@@ -6,7 +6,7 @@ DS3231 is a low-cost, extremely accurate I2C realtime clock (RTC) with an integr
 
 ## Usage
 ```C#
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Iot.Device.Ds3231.Ds3231.Address);
+I2cConnectionSettings settings = new I2cConnectionSettings(1, Iot.Device.Ds3231.Ds3231.I2cAddress);
 // get I2cDevice (in Linux)
 UnixI2cDevice device = new UnixI2cDevice(settings);
 // get I2cDevice (in Win10)
