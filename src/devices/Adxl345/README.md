@@ -8,8 +8,8 @@ ADXL345 is a small, thin, low power, 3-axis accelerometer with high resolution (
 ```C#
 SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
 {
-    ClockFrequency = Adxl345.ClockFrequency,
-    Mode = Adxl345.Mode
+    ClockFrequency = Adxl345.SpiClockFrequency,
+    Mode = Adxl345.SpiMode
 };
 
 // get SpiDevice(In Linux)
