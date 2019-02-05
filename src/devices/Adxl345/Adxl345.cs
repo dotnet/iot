@@ -4,8 +4,6 @@
 
 using System;
 using System.Device.Spi;
-using System.Runtime.InteropServices;
-using System.Device.Spi.Drivers;
 using System.Numerics;
 
 namespace Iot.Device.Adxl345
@@ -22,7 +20,7 @@ namespace Iot.Device.Adxl345
         private readonly byte _gravityRangeByte;                             
         private readonly int _range;
 
-        private const int RESOLUTION = 1024;
+        private const int Resolution = 1024;        // All g ranges resolution
 
         #region Addr
         private const byte ADDRESS_POWER_CTL = 0x2D;        // Address of the Power Control register              
@@ -35,48 +33,15 @@ namespace Iot.Device.Adxl345
         private const byte ACCEL_SPI_MB_BIT = 0x40;         // Bit used to indicate multi-byte SPI transactions    
         #endregion
 
+        #region SpiSetting
+        public const int ClockFrequency = 5000000;
+        public const SpiMode Mode = SpiMode.Mode3;
+        #endregion
+
         /// <summary>
         /// Read Acceleration from ADXL345
         /// </summary>
         public Vector3 Acceleration => ReadAcceleration();
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="busId">SPI Bus ID</param>
-        /// <param name="chipSelect">CS Pin</param>
-        /// <param name="gravityRange">Gravity Measurement Range</param>
-        public Adxl345(int busId, int chipSelect, GravityRange gravityRange)
-        {
-            if (gravityRange == GravityRange.Range1)
-            {
-                _range = 4;
-            }
-            else if (gravityRange == GravityRange.Range2)
-            {
-                _range = 8;
-            }
-            else if (gravityRange == GravityRange.Range3)
-            {
-                _range = 16;
-            }
-            else if (gravityRange == GravityRange.Range4)
-            {
-                _range = 32;
-            }
-            _gravityRangeByte = (byte)gravityRange;
-
-            _busId = busId;
-            _chipSelect = chipSelect;
-            var settings = new SpiConnectionSettings(_busId, _chipSelect)
-            {
-                ClockFrequency = 5000000,
-                Mode = SpiMode.Mode3
-            };
-            _sensor = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? (SpiDevice)new UnixSpiDevice(settings) : new Windows10SpiDevice(settings);
-
-            Initialize();
-        }
 
         /// <summary>
         /// Constructor
@@ -111,7 +76,7 @@ namespace Iot.Device.Adxl345
         /// <summary>
         /// Initialize ADXL345
         /// </summary>
-        internal void Initialize()
+        private void Initialize()
         {
             Span<byte> dataFormat = stackalloc byte[] { ADDRESS_DATA_FORMAT, _gravityRangeByte };
             Span<byte> powerControl = stackalloc byte[] { ADDRESS_POWER_CTL, 0x08 };
@@ -124,9 +89,9 @@ namespace Iot.Device.Adxl345
         /// Read data from ADXL345
         /// </summary>
         /// <returns>Acceleration</returns>
-        internal Vector3 ReadAcceleration()
+        private Vector3 ReadAcceleration()
         {
-            int units = RESOLUTION / _range;
+            int units = Resolution / _range;
 
             byte[] readBuf = new byte[6 + 1];
             byte[] regAddrBuf = new byte[1 + 6];
@@ -147,15 +112,6 @@ namespace Iot.Device.Adxl345
             };
 
             return accel;
-        }
-
-        /// <summary>
-        /// Get ADX1345 Device
-        /// </summary>
-        /// <returns>SpiDevice</returns>
-        public SpiDevice GetDevice()
-        {
-            return _sensor;
         }
 
         /// <summary>

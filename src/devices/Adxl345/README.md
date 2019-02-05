@@ -6,29 +6,26 @@ ADXL345 is a small, thin, low power, 3-axis accelerometer with high resolution (
 
 ## Usage
 ```C#
-// SPI bus 0
-// CS Pin connect to CS0(Pin24)
+SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
+{
+    ClockFrequency = Adxl345.ClockFrequency,
+    Mode = Adxl345.Mode
+};
+
+// get SpiDevice(In Linux)
+UnixSpiDevice device = new UnixSpiDevice(settings);
+
+// get SpiDevice(In Win10)
+// Windows10SpiDevice device = new Windows10SpiDevice(settings);
+
+// pass in a SpiDevice
 // set gravity measurement range ±4G
-using (Adxl345 sensor = new Adxl345(0, 0, GravityRange.Range2))
+using (Adxl345 sensor = new Adxl345(device, GravityRange.Range2))
 {
     // read acceleration
     Vector3 data = sensor.Acceleration;
 
-    //TODO
-}
-```
-
-or
-
-```C#
-// Pass in a SpiDevice, like UnixSpiDevice or Windows10SpiDevice
-// set gravity measurement range ±4G
-using (Adxl345 sensor = new Adxl345(SpiDevice, GravityRange.Range2))
-{
-    // read acceleration
-    Vector3 data = sensor.Acceleration;
-
-    //TODO
+    //use sensor
 }
 ```
 

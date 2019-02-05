@@ -5,6 +5,8 @@
 using System;
 using System.Numerics;
 using System.Threading;
+using System.Device.Spi;
+using System.Device.Spi.Drivers;
 using Iot.Device.Adxl345;
 
 namespace Adxl345.Samples
@@ -13,10 +15,20 @@ namespace Adxl345.Samples
     {
         static void Main(string[] args)
         {
-            // SPI bus 0
-            // CS Pin connect to CS0(Pin24)
+            SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
+            {
+                ClockFrequency = Iot.Device.Adxl345.Adxl345.ClockFrequency,
+                Mode = Iot.Device.Adxl345.Adxl345.Mode
+            };
+            // Get SpiDevice(In Linux)
+            UnixSpiDevice device = new UnixSpiDevice(settings);
+            
+            // Get SpiDevice(In Win10)
+            // Windows10SpiDevice device = new Windows10SpiDevice(settings);
+
+            // pass in a SpiDevice
             // set gravity measurement range ±4G
-            using (Iot.Device.Adxl345.Adxl345 sensor = new Iot.Device.Adxl345.Adxl345(0, 0, GravityRange.Range2))
+            using (Iot.Device.Adxl345.Adxl345 sensor = new Iot.Device.Adxl345.Adxl345(device, GravityRange.Range2))
             {
                 // loop
                 while (true)
