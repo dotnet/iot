@@ -32,7 +32,14 @@ namespace Iot.Device.Adxl345
         #endregion
 
         #region SpiSetting
+        /// <summary>
+        /// ADXL345 SPI ClockFrequency
+        /// </summary>
         public const int ClockFrequency = 5000000;
+
+        /// <summary>
+        /// ADXL345 SpiMode
+        /// </summary>
         public const SpiMode Mode = SpiMode.Mode3;
         #endregion
 
