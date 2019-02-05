@@ -1,6 +1,5 @@
 ﻿# Using Fsr408 (Force sensitive resistor)
 
-## Summary
 Force sensitive resistors change its resistivity depening on how much its pressed. This feature allows you to detect physical pressure, squeezing and weight. This sample demonstrates use of FSR Interlink 402 model, other types of FSR sensors usage will be pretty identical.
 
 
@@ -8,10 +7,7 @@ Force sensitive resistors change its resistivity depening on how much its presse
 
 ## Binding Notes
 
-As FSR generates analog signal depending on pressure, for controllers not having analog input we will need to use ADC converter
-You can use ADC device for reading in your project to access analog devices. [Reading Analog Input from a Potentiometer](samples/README.md) demonstrates a concrete example using this class.
-
-
+As FSR generates analog signal depending on pressure, you will need a controller with analog input, for controllers not having analog input you can use ADC converter or even use collecting capasitor and measure its fill up time. From my experience if you need more accurate measurement you better use analog reading device. If you only need to check/measure if it is pressed or not using capacitor can work, but for measuring how much it is pressed capacitor was not accurate and had lots of noise.
 
 
 ## References 

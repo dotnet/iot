@@ -4,10 +4,7 @@
 
 using System;
 using System.Device.Gpio;
-using System.Device.I2c;
-using System.Device.I2c.Drivers;
-using System.Device.Spi;
-using System.Device.Spi.Drivers;
+using System.Diagnostics;
 
 namespace Iot.Device.Fsr408
 {
@@ -16,7 +13,7 @@ namespace Iot.Device.Fsr408
         private GpioController _controller;
         private int _pinNumber = 18;
 
-        public Mcp3008 AdcConverter { get; set; }
+        public Mcp3008.Mcp3008 AdcConverter { get; set; }
         public int Resistance { get; set; } = 10000; // 10k ohm
         public int PowerSupplied { get; set; } = 5000;  // 5 mV
 
@@ -47,22 +44,23 @@ namespace Iot.Device.Fsr408
 
         public int ReadCapacitorChargingDuration()
         {
-            int count = 0;
+            
             // set pin to low
             _controller.SetPinMode(_pinNumber, PinMode.Output);
             _controller.Write(_pinNumber, PinValue.Low);
 
             // Prepare pin for input and ...
             _controller.SetPinMode(_pinNumber, PinMode.Input);
+            Stopwatch timeElapsed = Stopwatch.StartNew();
             while (_controller.Read(_pinNumber) == PinValue.Low)
             { // count until read high
-                count++;
-                if (count == 30000)
+                
+                if (timeElapsed.ElapsedMilliseconds == 30000)
                 {   // if count goes too high it means FSR resustance is highest which means no pressure, don't need to count more  
                     break;
                 }
             }
-            return count;
+            return (int)timeElapsed.ElapsedMilliseconds;
         }
 
         public int ReadVotlageUsingMcp3008()
