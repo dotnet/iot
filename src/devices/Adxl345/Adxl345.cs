@@ -14,9 +14,7 @@ namespace Iot.Device.Adxl345
     public class Adxl345 : IDisposable
     {
         private SpiDevice _sensor = null;
-
-        private readonly int _busId;
-        private readonly int _chipSelect;                                
+                              
         private readonly byte _gravityRangeByte;                             
         private readonly int _range;
 
