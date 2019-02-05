@@ -12,29 +12,10 @@
 
   <ItemGroup>
     <Compile Include="BrickPi3.cs" />
-    <Compile Include="SPIExceptions.cs" />
-    <Folder Include="Models\" />
-    <Compile Include="Models\BrickPiInfo.cs" />
-    <Compile Include="Models\BrickPiVoltage.cs" />
-    <Compile Include="Models\Motors.cs" />
-    <Compile Include="Models\Sensors.cs" />
-    <Compile Include="Models\SpiMessages.cs" />
-    <Folder Include="Extensions\" />
-    <Compile Include="Extensions\EnumExtension.cs" />
-    <Compile Include="Movement\Motor.cs" />
-    <Compile Include="Movement\Vehicle.cs" />
-    <Folder Include="Sensors\" />
-    <Compile Include="Sensors\EV3ColorSensor.cs" />
-    <Compile Include="Sensors\EV3GyroSensor.cs" />
-    <Compile Include="Sensors\EV3IRSensor.cs" />
-    <Compile Include="Sensors\EV3TouchSensor.cs" />
-    <Compile Include="Sensors\EV3UltraSonicSensor.cs" />
-    <Compile Include="Sensors\ISensor.cs" />
-    <Compile Include="Sensors\NXTColorSensor.cs" />
-    <Compile Include="Sensors\NXTLightSensor.cs" />
-    <Compile Include="Sensors\NXTSoundSensor.cs" />
-    <Compile Include="Sensors\NXTTouchSensor.cs" />
-    <Compile Include="Sensors\NXTUltraSonicSensor.cs" />
+    <Compile Include="Models\*.cs" />
+    <Compile Include="Extensions\*.cs" />
+    <Compile Include="Movement\*.cs" />
+    <Compile Include="Sensors\*.cs" />
   </ItemGroup>
 
 </Project>

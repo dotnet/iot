@@ -4,7 +4,6 @@
 
 namespace Iot.Device.BrickPi3.Models
 {
-
     /// <summary>
     /// Sensor ports 1, 2, 3 and 4
     /// </summary>

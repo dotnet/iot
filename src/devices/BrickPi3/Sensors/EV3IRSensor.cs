@@ -6,12 +6,11 @@ using Iot.Device.BrickPi3.Extensions;
 using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Threading;
-using static Iot.Device.BrickPi3.SpiExceptions;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
-
     /// <summary>
     /// IR channels
     /// </summary>
@@ -284,7 +283,7 @@ namespace Iot.Device.BrickPi3.Sensors
                 }
                 return value;
             }
-            catch (Exception ex) when (ex is IOError || ex is SensorError)
+            catch (Exception ex) when (ex is IOException)
             {
                 return int.MaxValue;
             }
@@ -317,7 +316,7 @@ namespace Iot.Device.BrickPi3.Sensors
                 var ret = _brick.GetSensor((byte)Port);
                 return ret[(int)Channel];
             }
-            catch (Exception ex) when (ex is IOError || ex is SensorError)
+            catch (Exception ex) when (ex is IOException)
             {
                 return byte.MaxValue;
             }
@@ -341,7 +340,7 @@ namespace Iot.Device.BrickPi3.Sensors
                     Mode = oldmode;
                 return (ret[(int)(Channel) * 2] + ret[(int)(Channel) * 2 + 1] >> 8);
             }
-            catch (Exception ex) when (ex is IOError || ex is SensorError)
+            catch (Exception ex) when (ex is IOException)
             {
                 if (Mode != oldmode)
                     Mode = oldmode;

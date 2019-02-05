@@ -6,12 +6,11 @@ using Iot.Device.BrickPi3.Extensions;
 using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Threading;
-using static Iot.Device.BrickPi3.SpiExceptions;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
-
     /// <summary>
 	/// Sensor mode when using a Sonar sensor
 	/// </summary>
@@ -197,7 +196,7 @@ namespace Iot.Device.BrickPi3.Sensors
             {
                 return _brick.GetSensor((byte)Port)[0];
             }
-            catch (Exception ex) when (ex is IOError || ex is SensorError)
+            catch (Exception ex) when (ex is IOException)
             {
                 return int.MaxValue;
             }

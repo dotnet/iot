@@ -4,7 +4,6 @@
 
 namespace Iot.Device.BrickPi3.Models
 {
-
     /// <summary>
     /// Information on brick voltage
     /// </summary>

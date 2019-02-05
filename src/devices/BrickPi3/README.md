@@ -58,6 +58,8 @@ If you have multiple BrickPi3 and want to change the address of a specific Brick
 
 Once you've done that, create, you can create a new brick by passing this address to the constructor. In this example, it will create a BrickPi3 with address 2.
 
+If you want to use BrickPi3 on another board than the RaspberryPi and you have to change the defauklt SPI bus and chip select line, you can do it as well in the constructor. Please note that for Raspbarry Pi, the default is 0 for bus Id and 1 for chip select line.
+
 ```csharp
 Brick brick = new Brick(2);
 ```

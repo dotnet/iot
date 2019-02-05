@@ -4,7 +4,6 @@
 
 namespace Iot.Device.BrickPi3.Models
 {
-
     /// <summary>
     /// All the supported SPI messages
     /// </summary>

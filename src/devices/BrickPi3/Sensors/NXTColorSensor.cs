@@ -6,12 +6,11 @@ using Iot.Device.BrickPi3.Extensions;
 using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Threading;
-using static Iot.Device.BrickPi3.SpiExceptions;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
-
     /// <summary>
     /// The color mode offered by the NXT Color sensor
     /// </summary>
@@ -222,7 +221,7 @@ namespace Iot.Device.BrickPi3.Sensors
                 for (int i = 0; i < _rawValues.Length; i++)
                     _rawValues[i] = ret[i];
             }
-            catch (Exception ex) when (ex is IOError || ex is SensorError)
+            catch (Exception ex) when (ex is IOException)
             { }
         }
 
@@ -284,7 +283,7 @@ namespace Iot.Device.BrickPi3.Sensors
                 {
                     return _brick.GetSensor((byte)Port)[0];
                 }
-                catch (Exception ex) when (ex is IOError || ex is SensorError)
+                catch (Exception ex) when (ex is IOException)
                 {
                     return -1;
                 }
@@ -332,7 +331,7 @@ namespace Iot.Device.BrickPi3.Sensors
                 {
                     color = (Color)_brick.GetSensor((byte)Port)[0];
                 }
-                catch (Exception ex) when (ex is IOError || ex is SensorError)
+                catch (Exception ex) when (ex is IOException)
                 {
                     color = Color.None;
                 }

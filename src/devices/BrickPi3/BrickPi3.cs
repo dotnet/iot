@@ -7,9 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Device.Spi;
-using static Iot.Device.BrickPi3.SpiExceptions;
 using System.Device.Spi.Drivers;
 using System.Linq;
+using System.IO;
 
 namespace Iot.Device.BrickPi3
 {
@@ -18,7 +18,6 @@ namespace Iot.Device.BrickPi3
     /// </summary>
     public class Brick: IDisposable
     {
-        private const int ChipSelectLine = 1;
         // To store the Sensor types as well as date to be sent when it's an I2C sensor
         private SensorType[] _sensorType = { SensorType.None, SensorType.None, SensorType.None, SensorType.None };
         private byte[] _i2cInBytes = { 0, 0, 0, 0 };
@@ -64,13 +63,13 @@ namespace Iot.Device.BrickPi3
         /// Initialize the brick including SPI communication
         /// </summary>
         /// <param name="spiAddress"></param>
-        public Brick(byte spiAddress = 1)
+        public Brick(byte spiAddress = 1, int busId = 0, int ChipSelectLine = 1)
         {
             try
             {
                 SpiAddress = spiAddress;
                 // SPI 0 is used on Raspberry with ChipSelectLine 1
-                var settings = new SpiConnectionSettings(0, ChipSelectLine);
+                var settings = new SpiConnectionSettings(busId, ChipSelectLine);
                 // 500K is the SPI communication with the brick
                 settings.ClockFrequency = 500000;
                 // see http://tightdev.net/SpiDev_Doc.pdf
@@ -88,7 +87,7 @@ namespace Iot.Device.BrickPi3
                 BrickPi3Info.SoftwareVersion = GetFirmwareVersion();
                 BrickPi3Info.Id = GetId();
             }
-            catch (Exception ex) when (ex is IOError)
+            catch (Exception ex) when (ex is IOException)
             {
                 Debug.Write($"Exception: {ex.Message}");
             }
@@ -147,7 +146,7 @@ namespace Iot.Device.BrickPi3
             }
             else
             {
-                throw new IOError($"{nameof(SpiRead32)} : no SPI response");
+                throw new IOException($"{nameof(SpiRead32)} : no SPI response");
             }
 
             return retVal;
@@ -170,7 +169,7 @@ namespace Iot.Device.BrickPi3
             }
             else
             {
-                throw new IOError($"{nameof(SpiRead16)} : no SPI response");
+                throw new IOException($"{nameof(SpiRead16)} : no SPI response");
             }
 
             return retVal;
@@ -236,7 +235,7 @@ namespace Iot.Device.BrickPi3
             byte[] reply = SpiTransferArray(outArray);
             if (reply[3] != 0xA5)
             {
-                throw new IOError("No SPI response");
+                throw new IOException("No SPI response");
             }
             else
             {
@@ -282,7 +281,7 @@ namespace Iot.Device.BrickPi3
             }
             else
             {
-                throw new IOError("No SPI response");
+                throw new IOException("No SPI response");
             }
             return retVal;
         }
@@ -316,7 +315,7 @@ namespace Iot.Device.BrickPi3
             }
             else
             {
-                throw new IOError("No SPI response");
+                throw new IOException("No SPI response");
             }
             return retVal;
         }
@@ -343,7 +342,7 @@ namespace Iot.Device.BrickPi3
             byte[] id_arr = new byte[16];
             if (id.Length != 32)
             {
-                if (id != "") throw new IOError("brickpi3.set_address error: wrong serial number id length. Must be a 32-digit hex string.");
+                if (id != "") throw new IOException("brickpi3.set_address error: wrong serial number id length. Must be a 32-digit hex string.");
             }
             if (id.Length == 32)
             {
@@ -354,7 +353,7 @@ namespace Iot.Device.BrickPi3
                     if (!isok)
                         break;
                 }
-                if (!isok) throw new IOError("brickpi3.set_address error: unknown serial number id problem. Make sure to use a valid 32-digit hex string serial number.");
+                if (!isok) throw new IOException("brickpi3.set_address error: unknown serial number id problem. Make sure to use a valid 32-digit hex string serial number.");
             }
             byte[] outArray = new byte[19];
             outArray[0] = 0;
@@ -485,7 +484,7 @@ namespace Iot.Device.BrickPi3
                 port_index = 3;
             }
             else
-                throw new IOError($"{nameof(GetSensor)} error. Must be one sensor port at a time. PORT_1, PORT_2, PORT_3, or PORT_4.");
+                throw new IOException($"{nameof(GetSensor)} error. Must be one sensor port at a time. PORT_1, PORT_2, PORT_3, or PORT_4.");
 
             List<byte> outArray = new List<byte>();
             byte[] reply;
@@ -499,10 +498,10 @@ namespace Iot.Device.BrickPi3
                     if ((reply[4] == (int)_sensorType[port_index]) && (reply[5] == (int)SensorState.ValidData))
                         return new byte[] { (byte)(((reply[8] & 0x0F) << 8) | reply[9]), (byte)(((reply[8] >> 4) & 0x0F) | (reply[7] << 4)), (byte)(reply[6] & 0x01), (byte)((reply[6] >> 1) & 0x01) };
                     else
-                        throw new SensorError(SensorErrorInvalidData);
+                        throw new IOException(SensorErrorInvalidData);
                 }
                 else
-                    throw new IOError(IOErrorMessage);
+                    throw new IOException(IOErrorMessage);
             }
             else if (_sensorType[port_index] == Models.SensorType.I2C)
             {
@@ -522,10 +521,10 @@ namespace Iot.Device.BrickPi3
                         return values.ToArray();
                     }
                     else
-                        throw new SensorError(SensorErrorInvalidData);
+                        throw new IOException(SensorErrorInvalidData);
                 }
                 else
-                    throw new IOError(IOErrorMessage);
+                    throw new IOException(IOErrorMessage);
             }
             else if ((_sensorType[port_index] == Models.SensorType.Touch)
                 || (_sensorType[port_index] == Models.SensorType.NXTTouch)
@@ -545,10 +544,10 @@ namespace Iot.Device.BrickPi3
                         || (reply[4] == (int)Models.SensorType.EV3Touch)))) && (reply[5] == (int)SensorState.ValidData))
                         return new byte[] { reply[6] };
                     else
-                        throw new SensorError(SensorErrorInvalidData);
+                        throw new IOException(SensorErrorInvalidData);
                 }
                 else
-                    throw new IOError(IOErrorMessage);
+                    throw new IOException(IOErrorMessage);
             }
             else if (_sensorType[port_index] == Models.SensorType.NXTColorFull)
             {
@@ -561,10 +560,10 @@ namespace Iot.Device.BrickPi3
                         return new byte[] { reply[6], (byte)((reply[7] << 2) | ((reply[11] >> 6) & 0x03)), (byte)((reply[8] << 2) | ((reply[11] >> 4) & 0x03)),
                             (byte)((reply[9] << 2) | ((reply[11] >> 2) & 0x03)), (byte)((reply[10] << 2) | (reply[11] & 0x03)) };
                     else
-                        throw new SensorError(SensorErrorInvalidData);
+                        throw new IOException(SensorErrorInvalidData);
                 }
                 else
-                    throw new IOError(IOErrorMessage);
+                    throw new IOException(IOErrorMessage);
             }
             else if ((_sensorType[port_index] == SensorType.NXTLightOn)
               || (_sensorType[port_index] == SensorType.NXTLightOff)
@@ -595,10 +594,10 @@ namespace Iot.Device.BrickPi3
                         return new byte[] { (byte)((value >> 8) & 0xFF), (byte)(value & 0xFF) };
                     }
                     else
-                        throw new SensorError(SensorErrorInvalidData);
+                        throw new IOException(SensorErrorInvalidData);
                 }
                 else
-                    throw new IOError(IOErrorMessage);
+                    throw new IOException(IOErrorMessage);
             }
             else if ((_sensorType[port_index] == SensorType.EV3ColorRawReflected)
               || (_sensorType[port_index] == SensorType.EV3GyroAbsDps))
@@ -620,10 +619,10 @@ namespace Iot.Device.BrickPi3
                         return new byte[] { (byte)((results[1] >> 8) & 0xFF), (byte)(results[1] & 0xFF), (byte)((results[0] >> 8) & 0xFF), (byte)(results[0] & 0xFF) };
                     }
                     else
-                        throw new SensorError(SensorErrorInvalidData);
+                        throw new IOException(SensorErrorInvalidData);
                 }
                 else
-                    throw new IOError(IOErrorMessage);
+                    throw new IOException(IOErrorMessage);
             }
             else if ((_sensorType[port_index] == SensorType.EV3ColorColorComponents))
             {
@@ -636,10 +635,10 @@ namespace Iot.Device.BrickPi3
                         return new byte[] { reply[6], reply[7], reply[8], reply[9], reply[10], reply[11], reply[12], reply[13] };
                     else
 
-                        throw new SensorError(SensorErrorInvalidData);
+                        throw new IOException(SensorErrorInvalidData);
                 }
                 else
-                    throw new IOError(IOErrorMessage);
+                    throw new IOException(IOErrorMessage);
             }
             else if (_sensorType[port_index] == SensorType.EV3InfraredSeek)
             {
@@ -655,10 +654,10 @@ namespace Iot.Device.BrickPi3
                         return new byte[] { (reply[6]), (reply[7]), (reply[8]), (reply[9]), (reply[10]), (reply[11]), (reply[12]), (reply[13]) };
                     }
                     else
-                        throw new SensorError(SensorErrorInvalidData);
+                        throw new IOException(SensorErrorInvalidData);
                 }
                 else
-                    throw new IOError(IOErrorMessage);
+                    throw new IOException(IOErrorMessage);
             }
             else if (_sensorType[port_index] == Models.SensorType.EV3InfraredRemote)
             {
@@ -700,12 +699,12 @@ namespace Iot.Device.BrickPi3
                         return results;
                     }
                     else
-                        throw new SensorError(SensorErrorInvalidData);
+                        throw new IOException(SensorErrorInvalidData);
                 }
                 else
-                    throw new IOError(IOErrorMessage);
+                    throw new IOException(IOErrorMessage);
             }
-            throw new IOError($"{nameof(GetSensor)}  error: Sensor not configured or not supported.");
+            throw new IOException($"{nameof(GetSensor)}  error: Sensor not configured or not supported.");
         }
 
         /// <summary>
@@ -872,7 +871,7 @@ namespace Iot.Device.BrickPi3
                 message_type = SpiMessageType.GetMotorDStatus;
             else
             {
-                throw new IOError($"{nameof(GetMotorStatus)} error. Must be one motor port at a time. PORT_A, PORT_B, PORT_C, or PORT_D.");
+                throw new IOException($"{nameof(GetMotorStatus)} error. Must be one motor port at a time. PORT_A, PORT_B, PORT_C, or PORT_D.");
             }
             byte[] outArray = { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             var reply = SpiTransferArray(outArray);
@@ -892,7 +891,7 @@ namespace Iot.Device.BrickPi3
             }
             else
             {
-                throw new IOError($"{nameof(GetMotorStatus)} error: no SPI response");
+                throw new IOException($"{nameof(GetMotorStatus)} error: no SPI response");
             }
 
             return motorStatus;
@@ -926,7 +925,7 @@ namespace Iot.Device.BrickPi3
             else if (port == (byte)MotorPort.PortD)
                 message_type = SpiMessageType.GetMotorDEncoder;
             else
-                throw new IOError($"{nameof(GetMotorEncoder)} error. Must be one motor port at a time. PORT_A, PORT_B, PORT_C, or PORT_D.");
+                throw new IOException($"{nameof(GetMotorEncoder)} error. Must be one motor port at a time. PORT_A, PORT_B, PORT_C, or PORT_D.");
 
             var encoder = SpiRead32(message_type);
             if ((encoder & 0x80000000) > 0)

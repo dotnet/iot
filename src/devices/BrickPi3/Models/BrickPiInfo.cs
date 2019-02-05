@@ -39,7 +39,7 @@ namespace Iot.Device.BrickPi3.Models
         /// <summary>
         /// Get the Hardware version as an int array
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Returns an int array of the hardware version</returns>
         public int[] GetHardwareVersion()
         {
             return GetVersionsFromString(HardwareVersion);
@@ -48,7 +48,7 @@ namespace Iot.Device.BrickPi3.Models
         /// <summary>
         /// Get the firmware version as an int array
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Returns an int array of the firmware version</returns>
         public int[] GetSoftwareVersion()
         {
             return GetVersionsFromString(SoftwareVersion);
