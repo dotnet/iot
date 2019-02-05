@@ -17,13 +17,12 @@ namespace Adxl345.Samples
         {
             SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
             {
-                ClockFrequency = Iot.Device.Adxl345.Adxl345.ClockFrequency,
-                Mode = Iot.Device.Adxl345.Adxl345.Mode
+                ClockFrequency = Iot.Device.Adxl345.Adxl345.SpiClockFrequency,
+                Mode = Iot.Device.Adxl345.Adxl345.SpiMode
             };
-            // Get SpiDevice(In Linux)
+            // get SpiDevice(In Linux)
             UnixSpiDevice device = new UnixSpiDevice(settings);
-            
-            // Get SpiDevice(In Win10)
+            // get SpiDevice(In Win10)
             // Windows10SpiDevice device = new Windows10SpiDevice(settings);
 
             // pass in a SpiDevice

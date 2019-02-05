@@ -14,33 +14,22 @@ namespace Iot.Device.Adxl345
     public class Adxl345 : IDisposable
     {
         private SpiDevice _sensor = null;
-                              
+                             
         private readonly byte _gravityRangeByte;                             
         private readonly int _range;
 
         private const int Resolution = 1024;        // All g ranges resolution
 
-        #region Addr
-        private const byte ADDRESS_POWER_CTL = 0x2D;        // Address of the Power Control register              
-        private const byte ADDRESS_DATA_FORMAT = 0x31;      // Address of the Data Format register               
-        private const byte ADDRESS_X0 = 0x32;               // Address of the X Axis data register                
-        private const byte ADDRESS_Y0 = 0x34;               // Address of the Y Axis data register              
-        private const byte ADDRESS_Z0 = 0x36;               // Address of the Z Axis data register               
-
-        private const byte ACCEL_SPI_RW_BIT = 0x80;         // Bit used in SPI transactions to indicate read/write  
-        private const byte ACCEL_SPI_MB_BIT = 0x40;         // Bit used to indicate multi-byte SPI transactions    
-        #endregion
-
         #region SpiSetting
         /// <summary>
-        /// ADXL345 SPI ClockFrequency
+        /// ADX1345 SPI Clock Frequency
         /// </summary>
-        public const int ClockFrequency = 5000000;
+        public const int SpiClockFrequency = 5000000;
 
         /// <summary>
-        /// ADXL345 SpiMode
+        /// ADX1345 SPI Mode
         /// </summary>
-        public const SpiMode Mode = SpiMode.Mode3;
+        public const SpiMode SpiMode = System.Device.Spi.SpiMode.Mode3;
         #endregion
 
         /// <summary>
@@ -49,7 +38,7 @@ namespace Iot.Device.Adxl345
         public Vector3 Acceleration => ReadAcceleration();
 
         /// <summary>
-        /// Constructor
+        /// SPI Accelerometer ADX1345
         /// </summary>
         /// <param name="sensor">The communications channel to a device on a SPI bus</param>
         /// <param name="gravityRange">Gravity Measurement Range</param>
@@ -83,8 +72,8 @@ namespace Iot.Device.Adxl345
         /// </summary>
         private void Initialize()
         {
-            Span<byte> dataFormat = stackalloc byte[] { ADDRESS_DATA_FORMAT, _gravityRangeByte };
-            Span<byte> powerControl = stackalloc byte[] { ADDRESS_POWER_CTL, 0x08 };
+            Span<byte> dataFormat = stackalloc byte[] { (byte)Register.ADLX_DATA_FORMAT, _gravityRangeByte };
+            Span<byte> powerControl = stackalloc byte[] { (byte)Register.ADLX_POWER_CTL, 0x08 };
 
             _sensor.Write(dataFormat);
             _sensor.Write(powerControl);
@@ -98,16 +87,16 @@ namespace Iot.Device.Adxl345
         {
             int units = Resolution / _range;
 
-            byte[] readBuf = new byte[6 + 1];
-            byte[] regAddrBuf = new byte[1 + 6];
+            Span<byte> readBuf = stackalloc byte[6 + 1];
+            Span<byte> regAddrBuf = stackalloc byte[1 + 6];
 
-            regAddrBuf[0] = ADDRESS_X0 | ACCEL_SPI_RW_BIT | ACCEL_SPI_MB_BIT;
+            regAddrBuf[0] = (byte)(Register.ADLX_X0 | Register.ADLX_SPI_RW_BIT | Register.ADLX_SPI_MB_BIT);
             _sensor.TransferFullDuplex(regAddrBuf, readBuf);
-            Array.Copy(readBuf, 1, readBuf, 0, 6);
+            Span<byte> readData = readBuf.Slice(1);
 
-            short AccelerationX = BitConverter.ToInt16(readBuf, 0);
-            short AccelerationY = BitConverter.ToInt16(readBuf, 2);
-            short AccelerationZ = BitConverter.ToInt16(readBuf, 4);
+            short AccelerationX = BitConverter.ToInt16(readData.ToArray(), 0);
+            short AccelerationY = BitConverter.ToInt16(readData.ToArray(), 2);
+            short AccelerationZ = BitConverter.ToInt16(readData.ToArray(), 4);
 
             Vector3 accel = new Vector3
             {

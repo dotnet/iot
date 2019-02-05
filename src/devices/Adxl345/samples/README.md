@@ -21,7 +21,7 @@ SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
     ClockFrequency = Adxl345.ClockFrequency,
     Mode = Adxl345.Mode
 };
-// Get SpiDevice(In Linux)
+// get SpiDevice(In Linux)
 UnixSpiDevice device = new UnixSpiDevice(settings);
 
 // pass in a SpiDevice
