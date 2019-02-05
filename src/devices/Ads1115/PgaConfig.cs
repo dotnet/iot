@@ -28,10 +28,10 @@ namespace Iot.Device.Ads1115
         /// <summary>
         /// ±0.512V
         /// </summary>
-        FS512 = 0x04,
+        FS0512 = 0x04,
         /// <summary>
         /// ±0.256V
         /// </summary>
-        FS256 = 0x05
+        FS0256 = 0x05
     }
 }

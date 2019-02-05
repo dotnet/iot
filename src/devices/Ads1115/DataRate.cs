@@ -9,10 +9,10 @@ namespace Iot.Device.Ads1115
     /// </summary>
     public enum DataRate
     {
-        SPS8 = 0x00,
-        SPS16 = 0x01,
-        SPS32 = 0x02,
-        SPS64 = 0x03,
+        SPS008 = 0x00,
+        SPS016 = 0x01,
+        SPS032 = 0x02,
+        SPS064 = 0x03,
         SPS128 = 0x04,
         SPS250 = 0x05,
         SPS475 = 0x06,

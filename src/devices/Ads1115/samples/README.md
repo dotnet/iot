@@ -22,19 +22,18 @@ Rotary Potentiometer
 * Pin 3 - GND
 
 ## Code
-* First, you need to create a ADS1115 object. After that you should call Initialize() to initialize.
-    ```C#
-    // the program runs in Linux
-    // set I2C bus ID: 1
-    // ADS1115 Addr Pin connect to GND
-    // measure the voltage AIN0
-    // set the maximum range to 6.144V
-    Ads1115 adc = new Ads1115(OSPlatform.Linux, 1, AddressSetting.GND, InputMultiplexeConfig.AIN0, PgaConfig.FS6144);
-    adc.Initialize();
-    ```
+```C#
+// set I2C bus ID: 1
+// ADS1115 Addr Pin connect to GND
+I2cConnectionSettings settings = new I2cConnectionSettings(1, (int)AddressSetting.GND);
+// get I2cDevice (in Linux)
+UnixI2cDevice device = new UnixI2cDevice(settings);
 
-* In the loop, read the sensor data.
-    ```C#
+// pass in I2cDevice
+// measure the voltage AIN0
+// set the maximum range to 6.144V
+using (Ads1115 adc = new Ads1115(device, InputMultiplexeConfig.AIN0, PgaConfig.FS6144))
+{
     // loop
     while (true)
     {
@@ -50,7 +49,8 @@ Rotary Potentiometer
         // wait for 2s
         Thread.Sleep(2000);
     }
-    ```
+}
+```
 
 ## Result
 ![](res.jpg)

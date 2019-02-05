@@ -12,58 +12,39 @@ namespace Iot.Device.Ads1115
     /// <summary>
     /// Analog-to-Digital Converter ADS1115
     /// </summary>
-    public class Ads1115
+    public class Ads1115 : IDisposable
     {
         const byte ADC_CONVERSION_REG_ADDR = 0x00;
         const byte ADC_CONFIG_REG_ADDR = 0x01;
 
-        private I2cDevice sensor = null;
+        private I2cDevice _sensor = null;
 
-        private readonly byte _adcAddr;
         private readonly byte _adcMux;
         private readonly byte _adcPga;
         private readonly byte _adcRate;
 
-        private readonly int _busId;
-        private readonly OSPlatform _os;
-
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="os">The program runing platform (Linux or Windows10)</param>
-        /// <param name="busId">I2C Bus ID</param>
-        /// <param name="addr">ADS1115 Address</param>
+        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
         /// <param name="mux">Input Multiplexer</param>
         /// <param name="pga">Programmable Gain Amplifier</param>
         /// <param name="rate">Data Rate</param>
-        public Ads1115(OSPlatform os, int busId = 1, AddressSetting addr = AddressSetting.GND, InputMultiplexeConfig mux = InputMultiplexeConfig.AIN0, PgaConfig pga = PgaConfig.FS4096, DataRate rate = DataRate.SPS128)
+        public Ads1115(I2cDevice sensor, InputMultiplexeConfig mux = InputMultiplexeConfig.AIN0, PgaConfig pga = PgaConfig.FS4096, DataRate rate = DataRate.SPS128)
         {
-            _busId = busId;
-            _os = os;
-
-            _adcAddr = (byte)addr;
+            _sensor = sensor;
             _adcMux = (byte)mux;
             _adcPga = (byte)pga;
             _adcRate = (byte)rate;
+
+            Initialize();
         }
 
         /// <summary>
         /// Initialize ADS1115
         /// </summary>
-        /// <returns></returns>
-        public void Initialize()
+        private void Initialize()
         {
-            var settings = new I2cConnectionSettings(_busId, _adcAddr);
-
-            if (_os == OSPlatform.Linux)
-            {
-                sensor = new UnixI2cDevice(settings);
-            }
-            else if (_os == OSPlatform.Windows)
-            {
-                sensor = new Windows10I2cDevice(settings);
-            }
-
             byte configHi = (byte)((_adcMux << 4) +
                             (_adcPga << 1) +
                             (byte)DeviceMode.Continuous);
@@ -74,7 +55,7 @@ namespace Iot.Device.Ads1115
                             ((byte)ComparatorLatching.NonLatching << 2) +
                             (byte)ComparatorQueue.Disable);
 
-            sensor.Write(new byte[] { ADC_CONFIG_REG_ADDR, configHi, configLo });
+            _sensor.Write(new byte[] { ADC_CONFIG_REG_ADDR, configHi, configLo });
         }
 
         /// <summary>
@@ -86,8 +67,8 @@ namespace Iot.Device.Ads1115
             short val;
             var data = new byte[2];
 
-            sensor.Write(new byte[] { ADC_CONVERSION_REG_ADDR });
-            sensor.Read(data);
+            _sensor.Write(new byte[] { ADC_CONVERSION_REG_ADDR });
+            _sensor.Read(data);
 
             Array.Reverse(data);
             val = BitConverter.ToInt16(data, 0);
@@ -147,20 +128,11 @@ namespace Iot.Device.Ads1115
         /// </summary>
         public void Dispose()
         {
-            if (sensor != null)
+            if (_sensor != null)
             {
-                sensor.Dispose();
-                sensor = null;
+                _sensor.Dispose();
+                _sensor = null;
             }
-        }
-
-        /// <summary>
-        /// Get ADS1115 Device
-        /// </summary>
-        /// <returns>I2cDevice</returns>
-        public I2cDevice GetDevice()
-        {
-            return sensor;
         }
     }
 }
