@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Runtime.InteropServices;
 using System.Threading;
-using Iot.Device.Ds3231;
+using System.Device.I2c;
+using System.Device.I2c.Drivers;
 
 namespace Ds3231.Samples
 {
@@ -13,27 +13,32 @@ namespace Ds3231.Samples
     {
         static void Main(string[] args)
         {
-            // the program runs in Linux, initialize RTC
-            Iot.Device.Ds3231.Ds3231 rtc = new Iot.Device.Ds3231.Ds3231(OSPlatform.Linux);
-            rtc.Initialize();
+            I2cConnectionSettings settings = new I2cConnectionSettings(1, Iot.Device.Ds3231.Ds3231.Address);
+            // get I2cDevice (in Linux)
+            UnixI2cDevice device = new UnixI2cDevice(settings);
+            // get I2cDevice (in Win10)
+            //Windows10I2cDevice device = new Windows10I2cDevice(settings);
 
-            // set DS3231 time
-            rtc.SetTime(DateTime.Now);
-
-            // loop
-            while (true)
+            using (Iot.Device.Ds3231.Ds3231 rtc = new Iot.Device.Ds3231.Ds3231(device))
             {
-                // read temperature
-                double temp = rtc.ReadTemperature();
-                // read time
-                DateTime dt = rtc.ReadTime();
+                // set DS3231 time
+                rtc.DateTime = DateTime.Now;
 
-                Console.WriteLine($"Time: {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
-                Console.WriteLine($"Temperature: {temp} ℃");
-                Console.WriteLine();
+                // loop
+                while (true)
+                {
+                    // read temperature
+                    double temp = rtc.Temperature;
+                    // read time
+                    DateTime dt = rtc.DateTime;
 
-                // wait for a second
-                Thread.Sleep(1000);
+                    Console.WriteLine($"Time: {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
+                    Console.WriteLine($"Temperature: {temp} ℃");
+                    Console.WriteLine();
+
+                    // wait for a second
+                    Thread.Sleep(1000);
+                }
             }
         }
     }

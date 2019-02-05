@@ -14,27 +14,23 @@ Ds3231
 * GND - GND
 
 ## Code
-* First, you need to create a Ds3231 object. After that you should call Initialize() to initialize.
-    ```C#
-    // the program runs in Linux, initialize RTC
-    Ds3231 rtc = new Ds3231(OSPlatform.Linux);
-    rtc.Initialize();
-    ```
+```C#
+I2cConnectionSettings settings = new I2cConnectionSettings(1, Iot.Device.Ds3231.Ds3231.Address);
+// get I2cDevice (in Linux)
+UnixI2cDevice device = new UnixI2cDevice(settings);
 
-* Second, set Ds3231 time
-    ```C#
-    rtc.SetTime(DateTime.Now);
-    ```
+using (Iot.Device.Ds3231.Ds3231 rtc = new Iot.Device.Ds3231.Ds3231(device))
+{
+    // set DS3231 time
+    rtc.DateTime = DateTime.Now;
 
-* In the loop, read the sensor data.
-    ```C#
     // loop
     while (true)
     {
         // read temperature
-        double temp = rtc.ReadTemperature();
+        double temp = rtc.Temperature;
         // read time
-        DateTime dt = rtc.ReadTime();
+        DateTime dt = rtc.DateTime;
 
         Console.WriteLine($"Time: {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
         Console.WriteLine($"Temperature: {temp} ℃");
@@ -43,7 +39,9 @@ Ds3231
         // wait for a second
         Thread.Sleep(1000);
     }
-    ```
+}
+
+```
 
 ## Result
 ![](res.jpg)

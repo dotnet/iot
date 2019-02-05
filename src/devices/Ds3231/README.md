@@ -5,27 +5,23 @@ DS3231 is a low-cost, extremely accurate I2C realtime clock (RTC) with an integr
 ![](sensor.jpg)
 
 ## Usage
-* First, you need to create a DS3231 object. After that you should call Initialize() to initialize.
-    ```C#
-    Ds3231 rtc = new Ds3231(OSPlatform.Linux);
-    rtc.Initialize();
-    ```
+```C#
+I2cConnectionSettings settings = new I2cConnectionSettings(1, Iot.Device.Ds3231.Ds3231.Address);
+// get I2cDevice (in Linux)
+UnixI2cDevice device = new UnixI2cDevice(settings);
+// get I2cDevice (in Win10)
+//Windows10I2cDevice device = new Windows10I2cDevice(settings);
 
-* After that, call SetTime() to set time
-    ```C#
-    rtc.SetTime(DateTime.Now);
-    ```
-
-* Then use ReadTemperature() to read temperature, ReadTime() to read time
-    ```C#
-    double temp = rtc.ReadTemperature();
-    DateTime dt = rtc.ReadTime();
-    ```
-
-* If you want to close the sensor, call Dispose().
-    ```C#
-    rtc.Dispose()
-    ```
+using (Iot.Device.Ds3231.Ds3231 rtc = new Iot.Device.Ds3231.Ds3231(device))
+{
+    // set DS3231 time
+    rtc.DateTime = DateTime.Now;
+    // read time
+    DateTime dt = rtc.DateTime;
+    // read temperature
+    double temp = rtc.Temperature;
+}
+```
 
 ## References
-https://github.com/ZhangGaoxing/windows-iot-demo/tree/master/src/DS3231/01_Datasheet
+https://datasheets.maximintegrated.com/en/ds/DS3231.pdf

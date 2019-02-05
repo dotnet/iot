@@ -7,7 +7,7 @@ namespace Iot.Device.Ds3231
     /// <summary>
     /// DS3231 Raw Data
     /// </summary>
-    public class Ds3231Data
+    internal class Ds3231Data
     {
         public int Sec { get; set; }
         public int Min { get; set; }
