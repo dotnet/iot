@@ -14,8 +14,8 @@ namespace Iot.Device.Ads1115
     /// </summary>
     public class Ads1115 : IDisposable
     {
-        const byte ADC_CONVERSION_REG_ADDR = 0x00;
-        const byte ADC_CONFIG_REG_ADDR = 0x01;
+        private const byte ADC_CONVERSION_REG_ADDR = 0x00;
+        private const byte ADC_CONFIG_REG_ADDR = 0x01;
 
         private I2cDevice _sensor = null;
 
