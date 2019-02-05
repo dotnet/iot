@@ -4,8 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
-using System.Runtime.InteropServices;
 
 namespace Iot.Device.Ads1115
 {
@@ -14,9 +12,6 @@ namespace Iot.Device.Ads1115
     /// </summary>
     public class Ads1115 : IDisposable
     {
-        private const byte ADC_CONVERSION_REG_ADDR = 0x00;
-        private const byte ADC_CONFIG_REG_ADDR = 0x01;
-
         private I2cDevice _sensor = null;
 
         private readonly byte _adcMux;
@@ -55,7 +50,7 @@ namespace Iot.Device.Ads1115
                             ((byte)ComparatorLatching.NonLatching << 2) +
                             (byte)ComparatorQueue.Disable);
 
-            _sensor.Write(new byte[] { ADC_CONFIG_REG_ADDR, configHi, configLo });
+            _sensor.Write(new [] { (byte)Register.ADC_CONFIG_REG_ADDR, configHi, configLo });
         }
 
         /// <summary>
@@ -65,13 +60,13 @@ namespace Iot.Device.Ads1115
         public short ReadRaw()
         {
             short val;
-            var data = new byte[2];
+            Span<byte> data = stackalloc byte[2];
 
-            _sensor.Write(new byte[] { ADC_CONVERSION_REG_ADDR });
+            _sensor.Write(new [] { (byte)Register.ADC_CONVERSION_REG_ADDR });
             _sensor.Read(data);
 
-            Array.Reverse(data);
-            val = BitConverter.ToInt16(data, 0);
+            data.Reverse();
+            val = BitConverter.ToInt16(data.ToArray(), 0);
 
             return val;
         }
