@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers.Binary;
 using System.Device.Spi;
 using System.Numerics;
 
@@ -94,9 +95,9 @@ namespace Iot.Device.Adxl345
             _sensor.TransferFullDuplex(regAddrBuf, readBuf);
             Span<byte> readData = readBuf.Slice(1);
 
-            short AccelerationX = BitConverter.ToInt16(readData.ToArray(), 0);
-            short AccelerationY = BitConverter.ToInt16(readData.ToArray(), 2);
-            short AccelerationZ = BitConverter.ToInt16(readData.ToArray(), 4);
+            short AccelerationX = BinaryPrimitives.ReadInt16LittleEndian(readData.Slice(0, 2));
+            short AccelerationY = BinaryPrimitives.ReadInt16LittleEndian(readData.Slice(2, 2));
+            short AccelerationZ = BinaryPrimitives.ReadInt16LittleEndian(readData.Slice(4, 2));
 
             Vector3 accel = new Vector3
             {
