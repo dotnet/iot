@@ -22,12 +22,13 @@ namespace Iot.Device.Mcp23xxx.Samples
             using (var mcp23xxx = GetMcp23xxxDevice(Mcp23xxxDevice.Mcp23017))
             {
                 // Uncomment sample to run.
-                // ReadSwitchesWriteLeds(mcp23xxx);
+                if (mcp23xxx.PinCount == 16)
+                    ReadSwitchesWriteLeds((Mcp23x1x)mcp23xxx);
                 // ReadAllRegisters(mcp23xxx);
                 // WriteIndividualByte(mcp23xxx);
                 // WriteSequentialBytes(mcp23xxx);
                 // ReadBits(mcp23xxx);
-                WriteBits(mcp23xxx);
+                // WriteBits(mcp23xxx);
             }
         }
 
@@ -87,28 +88,33 @@ namespace Iot.Device.Mcp23xxx.Samples
             throw new Exception($"Invalid Mcp23xxxDevice: {nameof(mcp23xxxDevice)}");
         }
 
-        private static void ReadSwitchesWriteLeds(Mcp23xxx mcp23xxx)
+        private static void ReadSwitchesWriteLeds(Mcp23x1x mcp23x1x)
         {
             Console.WriteLine("Read Switches & Write LEDs");
 
-            using (mcp23xxx)
+            using (mcp23x1x)
             {
                 // Input direction for switches.
-                mcp23xxx.Write(Register.Address.IODIR, 0b1111_1111, Port.PortA, Bank.Bank0);                
+                mcp23x1x.WriteByte(Register.IODIR, 0b1111_1111, Port.PortA);
                 // Output direction for LEDs.
-                mcp23xxx.Write(Register.Address.IODIR, 0b0000_0000, Port.PortB, Bank.Bank0);
+                mcp23x1x.WriteByte(Register.IODIR, 0b0000_0000, Port.PortB);
 
                 while (true)
                 {
                     // Read switches.
-                    byte data = mcp23xxx.Read(Register.Address.GPIO, Port.PortA, Bank.Bank0);
+                    byte data = mcp23x1x.ReadByte(Register.GPIO, Port.PortA);
                     // Write data to LEDs.
-                    mcp23xxx.Write(Register.Address.GPIO, data, Port.PortB, Bank.Bank0);
+                    mcp23x1x.WriteByte(Register.GPIO, data, Port.PortB);
                     Console.WriteLine(data);
                     Thread.Sleep(500);
                 }
             }
         }
+
+#if TODO
+        // Why would you want to raw read out of the Mcp* instead of the SPI/I2C? It can be done
+        // by deriving and exposing the protected members. Assumption is that it is an advance
+        // scenario that doesn't need to be in the face of normal users.
 
         private static void ReadAllRegisters(Mcp23xxx mcp23xxx)
         {
@@ -126,6 +132,8 @@ namespace Iot.Device.Mcp23xxx.Samples
                 }
             }
         }
+
+        // Just need to update this- supported through read/write byte
 
         private static void WriteIndividualByte(Mcp23xxx mcp23xxx)
         {
@@ -159,6 +167,8 @@ namespace Iot.Device.Mcp23xxx.Samples
             }
         }
 
+        // The key scenario is supported through read/write ushort
+
         private static void WriteSequentialBytes(Mcp23xxx mcp23xxx)
         {
             // This assumes the device is in default Sequential Operation mode.
@@ -190,6 +200,7 @@ namespace Iot.Device.Mcp23xxx.Samples
             }
         }
 
+        // This is now Read(pinNumber)
         private static void ReadBits(Mcp23xxx mcp23xxx)
         {
             Console.WriteLine("Read Bits");
@@ -204,6 +215,7 @@ namespace Iot.Device.Mcp23xxx.Samples
             }
         }
 
+        // This is now Write(pinNumber)
         private static void WriteBits(Mcp23xxx mcp23xxx)
         {
             Console.WriteLine("Write Bits");
@@ -225,5 +237,6 @@ namespace Iot.Device.Mcp23xxx.Samples
                 }
             }
         }
+#endif
     }
 }

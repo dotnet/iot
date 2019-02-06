@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp23xxx
         private readonly int _reset;
         private readonly int _interruptA;
         private readonly int _interruptB;
-        private BankStyle _bankStyle = BankStyle.Sequential;
+        private BankStyle _bankStyle;
         protected readonly IBusDevice _device;
         private bool _increments = true;
         private (int PinNumber, PinValue Value)[] _pinBuffer = new (int, PinValue)[1];
@@ -41,6 +41,7 @@ namespace Iot.Device.Mcp23xxx
             DeviceAddress = deviceAddress;
 
             _device = device;
+            _bankStyle = bankStyle;
 
             _reset = reset;
             _interruptA = interruptA;
@@ -352,7 +353,6 @@ namespace Iot.Device.Mcp23xxx
             Write(_pinBuffer);
         }
 
-        // public void Write(params (int, PinValue)[] pinValues);
         public void Write(ReadOnlySpan<(int pin, PinValue value)> pinValues)
         {
             ushort mask = 0;
@@ -442,7 +442,7 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="port">The bank of I/O ports used with the register.</param>
         /// <param name="bankStyle">The bank style that determines how the register addresses are grouped.</param>
         /// <returns>The byte address of the register for the given port bank and bank style.</returns>
-        public byte GetMappedAddress(Register register, Port port = Port.PortA, BankStyle bankStyle = BankStyle.Sequential)
+        private byte GetMappedAddress(Register register, Port port = Port.PortA, BankStyle bankStyle = BankStyle.Sequential)
         {
             if (port != Port.PortA && port != Port.PortB)
                 ThrowArgumentOutOfRange(nameof(port));
