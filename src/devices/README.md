@@ -9,7 +9,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Bmp280](Bmp280/README.md)
 * [Dhtxx](Dhtxx/README.md)
 * [Hcsr04](Hcsr04/README.md)
-* [Lcm1602a1](Lcm1602a1/README.md)
+* [CharacterLcd](CharacterLcd/README.md)
 * [Max7219](Max7219/README.md)
 * [Mcp23xxx](Mcp23xxx/README.md)
 * [Mcp3008](Mcp3008/README.md)

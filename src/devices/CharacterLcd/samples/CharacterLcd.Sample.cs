@@ -37,7 +37,7 @@ namespace Iot.Device.CharacterLcd.Samples
             int enablePin = 2;
             int backlight = 7;
             using (mcpDevice)
-            using (Lcd1602 lcd = new Lcd1602(registerSelectPin, enablePin, dataPins, backlight, controller: new Mcp23008Adapter(mcpDevice)))
+            using (Lcd1602 lcd = new Lcd1602(registerSelectPin, enablePin, dataPins, backlight, controller: new Mcp23xxxAdapter(mcpDevice)))
             {
                 lcd.Clear();
 

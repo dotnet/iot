@@ -63,6 +63,8 @@ namespace Iot.Device.CharacterLcd
         private byte _lastByte;
         private bool _useLastByte;
 
+        private (int pin, PinValue value)[] _pinBuffer = new (int, PinValue)[8];
+
         // We need to add PWM support to make this useful (to drive the VO pin).
         // For now we'll just stash the value and use it to decide the initial
         // backlight state.
@@ -495,12 +497,13 @@ namespace Iot.Device.CharacterLcd
         {
             PinValue ToPinValue(int bit) => (bit == 1) ? PinValue.High : PinValue.Low;
 
+            int changedCount = 0;
             for (int i = 0; i < count; i++)
             {
                 int newBit = (value >> i) & 1;
                 if (!_useLastByte)
                 {
-                    _controller.Write(_dataPins[i], ToPinValue(newBit));
+                    _pinBuffer[changedCount++] = (_dataPins[i], ToPinValue(newBit));
                 }
                 else
                 {
@@ -509,10 +512,13 @@ namespace Iot.Device.CharacterLcd
                     int oldBit = (_lastByte >> i) & 1;
                     if (oldBit != newBit)
                     {
-                        _controller.Write(_dataPins[i], ToPinValue(newBit));
+                        _pinBuffer[changedCount++] = (_dataPins[i], ToPinValue(newBit));
                     }
                 }
             }
+
+            if (changedCount > 0)
+                _controller.Write(new ReadOnlySpan<(int, PinValue)>(_pinBuffer, 0, changedCount));
 
             _useLastByte = true;
             _lastByte = value;
