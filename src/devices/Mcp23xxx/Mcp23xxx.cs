@@ -149,6 +149,23 @@ namespace Iot.Device.Mcp23xxx
             InternalWrite(register, buffer, port);
         }
 
+        /// <summary>
+        /// Read a byte from the given register.
+        /// </summary>
+        /// <remarks>
+        /// Writes to the A port registers on 16 bit devices.
+        /// </remarks>
+        public byte ReadByte(Register register) => InternalReadByte(register, Port.PortA);
+
+        /// <summary>
+        /// Write a byte to the given register.
+        /// </summary>
+        /// <remarks>
+        /// Writes to the A port registers on 16 bit devices.
+        /// </remarks>
+        public void WriteByte(Register register, byte value) => InternalWriteByte(register, value, Port.PortA);
+
+
         protected ushort InternalReadUInt16(Register register)
         {
             Span<byte> buffer = stackalloc byte[2];
@@ -232,43 +249,37 @@ namespace Iot.Device.Mcp23xxx
             _masterGpioController.Write(_reset, PinValue.High);
         }
 
-        /// <summary>
-        /// Reads the pin value of interrupt for Port A (INTA).
-        /// </summary>
-        /// <returns>The pin value of interrupt for Port A (INTA).</returns>
-        public PinValue ReadInterruptA()
+        protected PinValue InternalReadInterrupt(Port port)
         {
             if (_masterGpioController == null)
-            {
                 throw new Exception("Master controller has not been initialized.");
-            }
 
-            if (_interruptA == -1)
+            int pinNumber = 0;
+            switch (port)
             {
-                throw new Exception("INTA pin has not been initialized.");
+                case Port.PortA:
+                    pinNumber = _interruptA;
+                    break;
+                case Port.PortB:
+                    pinNumber = _interruptB;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(port));
             }
 
-            return _masterGpioController.Read(_interruptA);
+            if (pinNumber == -1)
+                throw new ArgumentException("No interrupt pin configured.", nameof(port));
+
+            return _masterGpioController.Read(pinNumber);
         }
 
         /// <summary>
-        /// Reads the pin value of interrupt for Port B (INTB).
+        /// Returns the value of the interrupt pin if configured.
         /// </summary>
-        /// <returns>The pin value of interrupt for Port B (INTB).</returns>
-        public PinValue ReadInterruptB()
-        {
-            if (_masterGpioController == null)
-            {
-                throw new Exception("Master controller has not been initialized.");
-            }
-
-            if (_interruptB == -1)
-            {
-                throw new Exception("INTB pin has not been initialized.");
-            }
-
-            return _masterGpioController.Read(_interruptB);
-        }
+        /// <returns>
+        /// Returns the interrupt for port A on 16 bit devices.
+        /// </returns>
+        public PinValue ReadInterrupt() => InternalReadInterrupt(Port.PortA);
 
         /// <summary>
         /// Sets a mode to a pin.

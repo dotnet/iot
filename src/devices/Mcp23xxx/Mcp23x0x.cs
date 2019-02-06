@@ -9,22 +9,11 @@ namespace Iot.Device.Mcp23xxx
     /// </summary>
     public abstract class Mcp23x0x : Mcp23xxx
     {
-        public Mcp23x0x(IBusDevice device, int deviceAddress,  int reset = -1, int interruptA = -1, int interruptB = -1)
-            : base(device, deviceAddress, reset, interruptA, interruptB)
+        public Mcp23x0x(IBusDevice device, int deviceAddress,  int reset = -1, int interrupt = -1)
+            : base(device, deviceAddress, reset, interrupt)
         {
         }
 
         public override int PinCount => 8;
-
-        /// <summary>
-        /// Read a byte from the given register.
-        /// </summary>
-        public byte ReadByte(Register register) => InternalReadByte(register, Port.PortA);
-
-        /// <summary>
-        /// Write a byte to the given register.
-        /// </summary>
-        public void WriteByte(Register register, byte value) => InternalWriteByte(register, value, Port.PortA);
-
     }
 }

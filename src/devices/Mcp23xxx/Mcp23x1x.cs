@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Device.Gpio;
+
 namespace Iot.Device.Mcp23xxx
 {
     /// <summary>
@@ -19,12 +21,12 @@ namespace Iot.Device.Mcp23xxx
         /// <summary>
         /// Read a byte from the given register on the given port.
         /// </summary>
-        public byte ReadByte(Register register, Port port = Port.PortA) => InternalReadByte(register, port);
+        public byte ReadByte(Register register, Port port) => InternalReadByte(register, port);
 
         /// <summary>
         /// Write a byte to the given register on the given port.
         /// </summary>
-        public void WriteByte(Register register, byte value, Port port = Port.PortA) => InternalWriteByte(register, value, port);
+        public void WriteByte(Register register, byte value, Port port) => InternalWriteByte(register, value, port);
 
         /// <summary>
         /// Read a ushort from the given register.
@@ -35,5 +37,10 @@ namespace Iot.Device.Mcp23xxx
         /// Write a ushort to the given register. Writes the value to both ports.
         /// </summary>
         public void WriteUInt16(Register register, ushort value) => InternalWriteUInt16(register, value);
+
+        /// <summary>
+        /// Reads the interrupt pin for the given port if configured.
+        /// </summary>
+        public PinValue ReadInterrupt(Port port) => InternalReadInterrupt(port);
     }
 }

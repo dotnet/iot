@@ -17,10 +17,9 @@ namespace Iot.Device.Mcp23xxx
         /// </summary>
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="reset">The output pin number that is connected to the hardware reset.</param>
-        /// <param name="interruptA">The input pin number that is connected to the interrupt for Port A (INTA).</param>
-        /// <param name="interruptB">The input pin number that is connected to the interrupt for Port B (INTB).</param>
-        public Mcp23009(I2cDevice i2cDevice, int reset = -1, int interruptA = -1, int interruptB = -1)
-            : base(new I2cAdapter(i2cDevice), i2cDevice.ConnectionSettings.DeviceAddress, reset, interruptA, interruptB)
+        /// <param name="interrupt">The input pin number that is connected to the interrupt.</param>
+        public Mcp23009(I2cDevice i2cDevice, int reset = -1, int interrupt = -1)
+            : base(new I2cAdapter(i2cDevice), i2cDevice.ConnectionSettings.DeviceAddress, reset, interrupt)
         {
         }
     }
