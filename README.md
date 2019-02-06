@@ -6,26 +6,31 @@ This repository contains the [System.Device.Gpio](https://dotnet.myget.org/feed/
 
 It also contains a growing set of community-maintained [device bindings](src/devices/README.md) for IoT components.
 
-Note: System.Device.Gpio is in early preview. It is not yet supported and will continue to change. It is currently published to myget (requires use of [nuget.config](samples/led-blink/nuget.config)).
+**Note**: System.Device.Gpio is in early preview. It is not yet supported and will continue to change. It is currently published to myget (requires use of [nuget.config](samples/led-blink/nuget.config)).
 
-## How to Install and Get Started
+## How to Install
 
-You can install the latest daily pre-release build of the .NET Core System.Device.Gpio nuget package from the [dotnet.myget.org feed](https://dotnet.myget.org/feed/dotnet-core/package/nuget/System.Device.Gpio).
+You can install the latest daily preview build of the .NET Core System.Device.Gpio NuGet package from the [dotnet.myget.org feed](https://dotnet.myget.org/feed/dotnet-core/package/nuget/System.Device.Gpio).
 
 #### NuGet.exe
-~~~~
+```console
 nuget install System.Device.Gpio -PreRelease -Source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
-~~~~
+```
 
 #### .NET CLI
-~~~~
+```console
 dotnet add package System.Device.Gpio --source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
-~~~~
+```
 
-After installing, see the [samples/README.md](samples/README.md) for step by step instructions on building your first app.
+## Getting Started
 
-![Raspberry Pi Breadboard diagram](samples/led-more-blinking-lights/rpi-more-blinking-lights_bb.png)
+After installing, please see the following areas to learn more:
 
+[**Documentation**](Documentation/README.md) - Contains many resources related to electronics, devices, vendors, software and other IoT topics.
+
+[**Samples**](samples/README.md) - Step-by-step instructions on building your first app.
+
+![Raspberry Pi Breadboard Diagram](samples/led-more-blinking-lights/rpi-more-blinking-lights_bb.png)
 
 ## Community 
 
@@ -37,35 +42,16 @@ to clarify expected behavior in our community. For more information, see the [.N
 Please contribute. We are primarily interested in the following:
 
 * Improving quality and capability of the drivers for supported boards.
-* Implementations for additional boards
+* Implementations for additional boards.
 * [.NET device bindings](src/devices) for a wide variety of sensors, chips, displays and other components.
-* Links to blog posts or tweets that showcase .NET Core being used for great IoT scenarios (file an issue).
-* Request a device binding or protocol that you need for your project (file an issue).
+* Request a device binding or protocol that you need for your project ([file an issue](https://github.com/dotnet/iot/issues)).
+* Links to blog posts or tweets that showcase .NET Core being used for great IoT scenarios ([file an issue](https://github.com/dotnet/iot/issues)).
 
 ## Roadmap
 
-We have the following deliverables on our intermediate-term roadmap (not in order of completion):
+While this repo is currently in preview, we want to focus our efforts in a particular direction, specifically to work on areas aligned with our [roadmap](Documentation/roadmap.md).
 
-* [x] Support General-purpose input/output protocols: GPIO, SPI, I2C, and PWM
-* [ ] Support common serial protocols: RS-485 Serial Port, CAN bus, Modbus
-* [ ] Support digital audio bus protocols: I2S
-* [x] Support Raspberry Pi 3 on Linux and Windows 10 IoT Core RS5
-* [ ] Support Hummingboard Edge on Linux and Windows 10 IoT Core RS5
-* [ ] Support BeagleBoard Black on Linux and Windows 10 IoT Core RS5
-* [x] Support sysfs (/sys/class/gpio) for Generic/Portable Device Driver on Linux Kernel 3.6+
-* [ ] Support libgpiod (/dev/gpiochipX) for Generic/Portable Device Driver on Linux Kernel 4.8+
-* [ ] Stabilize System.Device.* API
-* [ ] Publish System.Device.* API to NuGet.org
-* [x] Provide dockerfiles for all samples
-* [ ] Publish Docker images for a subset of samples
-* [ ] Support x64
-* [x] Support ARM32
-* [ ] Support ARM64
-* [ ] Support Device Bindings for common sensors and microcontrollers such as those bundled with the [Microsoft IoT Starter Pack](https://www.adafruit.com/product/2733)
-* [ ] Support Device Bindings and Canvas Widgets for LCDS, multi-panel [LED matrices](https://www.adafruit.com/product/607), and Displays
-* [ ] Support Device Bindings for servo and stepper motors, motor controllers, and drives
-* [ ] Stabilize IoT.Device.* APIs for Device Bindings
-* [ ] Publish IoT.Device.* Device Bindings to NuGet.org
+Of course, this doesn't mean we're not willing to explore areas that aren't part of our roadmap, but we'd prefer if these would start with a document ([file an issue](https://github.com/dotnet/iot/issues)), and not with code. This allows us to collaborate on how we want to approach specific holes or issues with our platform without being drowned in large PRs.
 
 ## License
 
