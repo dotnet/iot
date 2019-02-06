@@ -16,11 +16,9 @@ namespace Iot.Device.Fsr408.Samples
             Fsr408 fsr408 = new Fsr408(18);
 
             using (fsr408)
-            {
-                //Fsr produces analog signal, we can read this with 2 way, below commented example read it with capacitor 
-                //SampleUsingCapacitor(fsr408);
-
-                //Below sample demonstrate read that analog signal using ADC Mcp3008 
+            {   //Fsr produces analog signal, we can read this with 2 way, using ADC or capacitor
+                //Below sample demonstrate read the analog signal using ADC Mcp3008 
+                fsr408.PowerSupplied = 3300; // 3.3v
                 SampleUsingAdc_Mcp3008(fsr408);
             }
         }
@@ -28,7 +26,7 @@ namespace Iot.Device.Fsr408.Samples
         private static void SampleUsingAdc_Mcp3008(Fsr408 fsr408)
         {
             // Create Mcp3008 instance depending how you wired ADC pins to controller
-            // in this example i wired using "bit-banging" method showed in Mcp3008 example
+            // in this example "bit-banging" wiring method used.
             // please refer https://github.com/dotnet/iot/tree/master/src/devices/Mcp3008/samples for more information
             fsr408.AdcConverter = new Mcp3008.Mcp3008(18, 23, 24, 25);
 
@@ -47,9 +45,10 @@ namespace Iot.Device.Fsr408.Samples
             }
         }
 
+        //Example using Fsr with capacitor
         private static void SampleUsingCapacitor(Fsr408 fsr408)
         {
-            // Sample using Fsr with capasitor, set read pin number in Fsr constractor, default is 18
+            // set read pin number in Fsr constractor, default is 18
             Console.WriteLine("Reading capacitor charging");
             while (true)
             {
