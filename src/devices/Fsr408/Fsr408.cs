@@ -67,7 +67,7 @@ namespace Iot.Device.Fsr408
         {
             if (AdcConverter != null)
             {
-                int readValue = AdcConverter.Read(_pinNumber);
+                int readValue = AdcConverter.Read(0);
                 return CalculateVoltage(readValue);
             }
             else
@@ -88,7 +88,7 @@ namespace Iot.Device.Fsr408
         {
             if (AdcConverter != null)
             {
-                int readValue = AdcConverter.Read(_pinNumber);
+                int readValue = AdcConverter.Read(0);
                 return CalculateFsrResistance(CalculateVoltage(readValue));
             }
             else
@@ -111,7 +111,7 @@ namespace Iot.Device.Fsr408
         {
             if (AdcConverter != null)
             {
-                int readValue = AdcConverter.Read(_pinNumber);
+                int readValue = AdcConverter.Read(0);
                 return CalculateForce(CalculateFsrResistance(CalculateVoltage(readValue)));
             }
             else
