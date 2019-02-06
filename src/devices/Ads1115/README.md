@@ -27,4 +27,4 @@ using (Ads1115 adc = new Ads1115(device, InputMultiplexer.AIN0, MeasuringRange.F
 ```
 
 ## References
-https://datasheetspdf.com/pdf/1010416/TexasInstruments/ADS1115/1
+https://cdn-shop.adafruit.com/datasheets/ads1115.pdf
