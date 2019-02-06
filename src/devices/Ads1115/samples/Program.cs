@@ -16,7 +16,7 @@ namespace Ads1115.Samples
         {
             // set I2C bus ID: 1
             // ADS1115 Addr Pin connect to GND
-            I2cConnectionSettings settings = new I2cConnectionSettings(1, (int)AddressSetting.GND);
+            I2cConnectionSettings settings = new I2cConnectionSettings(1, (int)I2cAddress.GND);
             // get I2cDevice (in Linux)
             UnixI2cDevice device = new UnixI2cDevice(settings);
             // get I2cDevice (in Win10)
@@ -25,7 +25,7 @@ namespace Ads1115.Samples
             // pass in I2cDevice
             // measure the voltage AIN0
             // set the maximum range to 6.144V
-            using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, InputMultiplexeConfig.AIN0, PgaConfig.FS6144))
+            using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, InputMultiplexer.AIN0, MeasuringRange.FS6144))
             {
                 // loop
                 while (true)

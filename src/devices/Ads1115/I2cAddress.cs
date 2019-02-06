@@ -7,8 +7,10 @@ namespace Iot.Device.Ads1115
     /// <summary>
     /// ADS1115 I2C Address Setting
     /// </summary>
-    public enum AddressSetting
+    public enum I2cAddress
     {
+        // Details in Datasheet P17 Table5
+
         /// <summary>
         /// ADDR Pin connect to GND
         /// </summary>

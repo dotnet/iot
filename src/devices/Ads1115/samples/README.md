@@ -25,14 +25,14 @@ Rotary Potentiometer
 ```C#
 // set I2C bus ID: 1
 // ADS1115 Addr Pin connect to GND
-I2cConnectionSettings settings = new I2cConnectionSettings(1, (int)AddressSetting.GND);
+I2cConnectionSettings settings = new I2cConnectionSettings(1, (int)I2cAddress.GND);
 // get I2cDevice (in Linux)
 UnixI2cDevice device = new UnixI2cDevice(settings);
 
 // pass in I2cDevice
 // measure the voltage AIN0
 // set the maximum range to 6.144V
-using (Ads1115 adc = new Ads1115(device, InputMultiplexeConfig.AIN0, PgaConfig.FS6144))
+using (Ads1115 adc = new Ads1115(device, InputMultiplexer.AIN0, MeasuringRange.FS6144))
 {
     // loop
     while (true)

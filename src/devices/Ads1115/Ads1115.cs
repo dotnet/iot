@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers.Binary;
 using System.Device.I2c;
 
 namespace Iot.Device.Ads1115
@@ -14,23 +15,23 @@ namespace Iot.Device.Ads1115
     {
         private I2cDevice _sensor = null;
 
-        private readonly byte _adcMux;
-        private readonly byte _adcPga;
-        private readonly byte _adcRate;
+        private readonly byte _inputMultiplexer;
+        private readonly byte _measuringRange;
+        private readonly byte _dataRate;
 
         /// <summary>
-        /// Constructor
+        /// Initialize a new Ads1115 device connected through I2C
         /// </summary>
         /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
-        /// <param name="mux">Input Multiplexer</param>
-        /// <param name="pga">Programmable Gain Amplifier</param>
-        /// <param name="rate">Data Rate</param>
-        public Ads1115(I2cDevice sensor, InputMultiplexeConfig mux = InputMultiplexeConfig.AIN0, PgaConfig pga = PgaConfig.FS4096, DataRate rate = DataRate.SPS128)
+        /// <param name="inputMultiplexer">Input Multiplexer</param>
+        /// <param name="measuringRange">Programmable Gain Amplifier</param>
+        /// <param name="dataRate">Data Rate</param>
+        public Ads1115(I2cDevice sensor, InputMultiplexer inputMultiplexer = InputMultiplexer.AIN0, MeasuringRange measuringRange = MeasuringRange.FS4096, DataRate dataRate = DataRate.SPS128)
         {
             _sensor = sensor;
-            _adcMux = (byte)mux;
-            _adcPga = (byte)pga;
-            _adcRate = (byte)rate;
+            _inputMultiplexer = (byte)inputMultiplexer;
+            _measuringRange = (byte)measuringRange;
+            _dataRate = (byte)dataRate;
 
             Initialize();
         }
@@ -40,11 +41,12 @@ namespace Iot.Device.Ads1115
         /// </summary>
         private void Initialize()
         {
-            byte configHi = (byte)((_adcMux << 4) +
-                            (_adcPga << 1) +
+            // Details in Datasheet P18
+            byte configHi = (byte)((_inputMultiplexer << 4) +
+                            (_measuringRange << 1) +
                             (byte)DeviceMode.Continuous);
 
-            byte configLo = (byte)((_adcRate << 5) +
+            byte configLo = (byte)((_dataRate << 5) +
                             ((byte)(ComparatorMode.Traditional) << 4) +
                             ((byte)ComparatorPolarity.Low << 3) +
                             ((byte)ComparatorLatching.NonLatching << 2) +
@@ -65,8 +67,7 @@ namespace Iot.Device.Ads1115
             _sensor.Write(new [] { (byte)Register.ADC_CONVERSION_REG_ADDR });
             _sensor.Read(data);
 
-            data.Reverse();
-            val = BitConverter.ToInt16(data.ToArray(), 0);
+            val = BinaryPrimitives.ReadInt16BigEndian(data);
 
             return val;
         }
@@ -81,32 +82,32 @@ namespace Iot.Device.Ads1115
             double voltage;
             double resolution;
 
-            if (_adcPga == 0x00)
+            switch ((MeasuringRange)_measuringRange)
             {
-                voltage = 6.144;
-            }
-            else if (_adcPga == 0x01)
-            {
-                voltage = 4.096;
-            }
-            else if (_adcPga == 0x02)
-            {
-                voltage = 2.048;
-            }
-            else if (_adcPga == 0x03)
-            {
-                voltage = 1.024;
-            }
-            else if (_adcPga == 0x04)
-            {
-                voltage = 0.512;
-            }
-            else
-            {
-                voltage = 0.256;
+                case MeasuringRange.FS6144:
+                    voltage = 6.144;
+                    break;
+                case MeasuringRange.FS4096:
+                    voltage = 4.096;
+                    break;
+                case MeasuringRange.FS2048:
+                    voltage = 2.048;
+                    break;
+                case MeasuringRange.FS1024:
+                    voltage = 1.024;
+                    break;
+                case MeasuringRange.FS0512:
+                    voltage = 0.512;
+                    break;
+                case MeasuringRange.FS0256:
+                    voltage = 0.256;
+                    break;
+                default:
+                    voltage = 0;
+                    break;
             }
 
-            if (_adcMux <= 0x03)
+            if (_inputMultiplexer <= 0x03)
             {
                 resolution = 65535.0;
             }

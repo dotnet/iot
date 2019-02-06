@@ -5,10 +5,12 @@
 namespace Iot.Device.Ads1115
 {
     /// <summary>
-    ///  Configure the Programmable Gain Amplifier
+    /// Configure the Programmable Gain Amplifier, i.e. Measuring Range
     /// </summary>
-    public enum PgaConfig
+    public enum MeasuringRange
     {
+        // Details in Datasheet P19
+
         /// <summary>
         /// ±6.144V
         /// </summary>
