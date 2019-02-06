@@ -25,7 +25,7 @@ namespace Iot.Device.Mcp23xxx
             // Include OpCode and Register Address.
             Span<byte> writeBuffer = stackalloc byte[buffer.Length + 2];
             writeBuffer[0] = GetOpCode(_deviceAddress, isReadCommand: true);
-            writeBuffer[0] = registerAddress;
+            writeBuffer[1] = registerAddress;
             Span<byte> readBuffer = stackalloc byte[buffer.Length + 2];
 
             _device.TransferFullDuplex(writeBuffer, readBuffer);
@@ -39,7 +39,7 @@ namespace Iot.Device.Mcp23xxx
             // Include OpCode and Register Address.
             Span<byte> writeBuffer = stackalloc byte[data.Length + 2];
             writeBuffer[0] = GetOpCode(_deviceAddress, isReadCommand: false);
-            writeBuffer[0] = registerAddress;
+            writeBuffer[1] = registerAddress;
             data.CopyTo(writeBuffer.Slice(2));
 
             _device.Write(writeBuffer);
