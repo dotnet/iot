@@ -10,8 +10,6 @@ The repository also contains [IoT.Device.Bindings](https://www.nuget.org/package
 
 ## How to Install
 
-You can install the latest daily pre-release build of the .NET Core System.Device.Gpio and IoT.Device.Bindings NuGet packages from the [dotnet.myget.org feed](https://dotnet.myget.org/feed/dotnet-core/package/nuget/System.Device.Gpio).
-
 #### NuGet.exe
 ~~~~
 nuget install System.Device.Gpio -PreRelease -Source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json

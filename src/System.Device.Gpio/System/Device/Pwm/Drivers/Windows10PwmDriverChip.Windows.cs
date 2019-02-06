@@ -13,68 +13,92 @@ namespace System.Device.Pwm.Drivers
         private WinPwm.PwmController _winController;
         private readonly Dictionary<int, Windows10PwmDriverChannel> _channelMap = new Dictionary<int, Windows10PwmDriverChannel>();
 
-        public Windows10PwmDriverChip(int chipIndex, bool useDefaultChip)
+        /// <summary>
+        /// Initializes new instance of Windows10PwmDriverChip
+        /// </summary>
+        /// <param name="pwmChip">The PWM chip.</param>
+        /// <param name="useDefaultChip">Use the default chip.</param>
+        public Windows10PwmDriverChip(int pwmChip, bool useDefaultChip)
         {
-            // Open the Windows PWM controller for the specified PWM chip
-            string controllerFriendlyName = $"PWM{chipIndex}";
+            // Open the Windows PWM controller for the specified PWM chip.
+            string controllerFriendlyName = $"PWM{pwmChip}";
             string deviceSelector = useDefaultChip ? WinPwm.PwmController.GetDeviceSelector() : WinPwm.PwmController.GetDeviceSelector(controllerFriendlyName);
 
             DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
             if (deviceInformationCollection.Count == 0)
             {
-                throw new ArgumentException($"No PWM device exists for PWM chip at index {chipIndex}", $"{nameof(chipIndex)}");
+                throw new ArgumentException($"No PWM device exists for PWM chip at index {pwmChip}.", $"{nameof(pwmChip)}");
             }
 
             string deviceId = deviceInformationCollection[0].Id;
             _winController = WinPwm.PwmController.FromIdAsync(deviceId).WaitForCompletion();
         }
 
-        public void OpenChannel(int channelIndex)
+        /// <summary>
+        /// Opens a channel in order for it to be ready to use.
+        /// </summary>
+        /// <param name="pwmChannel">The PWM channel.</param>
+        public void OpenChannel(int pwmChannel)
         {
-            if (!_channelMap.TryGetValue(channelIndex, out Windows10PwmDriverChannel channel))
+            if (!_channelMap.TryGetValue(pwmChannel, out _))
             {
-                channel = new Windows10PwmDriverChannel(_winController, channelIndex);
-                _channelMap.Add(channelIndex, channel);
+                Windows10PwmDriverChannel channel = new Windows10PwmDriverChannel(_winController, pwmChannel);
+                _channelMap.Add(pwmChannel, channel);
             }
         }
 
         /// <summary>
-        /// Closes the channel.
+        /// Closes an open channel.
         /// </summary>
-        /// <param name="channelIndex">The PWM channel to close.</param>
+        /// <param name="pwmChannel">The PWM channel.</param>
         /// <returns><see langword="true" /> if the chip has no more open channels open upon exiting; <see langword="false" /> otherwise.</returns>
-        public bool CloseChannel(int channelIndex)
+        public bool CloseChannel(int pwmChannel)
         {
-            // This assumes that PwmController has ensured that the channel is already open
-            Windows10PwmDriverChannel channel = _channelMap[channelIndex];
+            // This assumes that PwmController has ensured that the channel is already open.
+            Windows10PwmDriverChannel channel = _channelMap[pwmChannel];
 
             channel.Dispose();
-            _channelMap.Remove(channelIndex);
+            _channelMap.Remove(pwmChannel);
 
             return _channelMap.Count == 0;
         }
 
-        public void ChangeDutyCycle(int channelIndex, double dutyCyclePercentage)
+        /// <summary>
+        /// Changes the duty cycle for an open channel.
+        /// </summary>
+        /// <param name="pwmChannel">The PWM channel.</param>
+        /// <param name="dutyCyclePercentage">The duty cycle percentage to change.</param>
+        public void ChangeDutyCycle(int pwmChannel, double dutyCyclePercentage)
         {
-            // This assumes that PwmController has ensured that the channel is already open
-            Windows10PwmDriverChannel channel = _channelMap[channelIndex];
+            // This assumes that PwmController has ensured that the channel is already open.
+            Windows10PwmDriverChannel channel = _channelMap[pwmChannel];
 
             channel.ChangeDutyCycle(dutyCyclePercentage);
         }
 
-        public void Start(int channelIndex, double frequencyInHertz, double dutyCyclePercentage)
+        /// <summary>
+        /// Starts writing to an open channel.
+        /// </summary>
+        /// <param name="pwmChannel">The PWM channel.</param>
+        /// <param name="frequencyInHertz"></param>
+        /// <param name="dutyCyclePercentage"></param>
+        public void Start(int pwmChannel, double frequencyInHertz, double dutyCyclePercentage)
         {
-            // This assumes that PwmController has ensured that the channel is already open
-            Windows10PwmDriverChannel channel = _channelMap[channelIndex];
+            // This assumes that PwmController has ensured that the channel is already open.
+            Windows10PwmDriverChannel channel = _channelMap[pwmChannel];
 
             _winController.SetDesiredFrequency(frequencyInHertz);
             channel.Start(dutyCyclePercentage);
         }
 
-        public void Stop(int channelIndex)
+        /// <summary>
+        /// Stops writing to an open channel.
+        /// </summary>
+        /// <param name="pwmChannel">The PWM channel.</param>
+        public void Stop(int pwmChannel)
         {
-            // This assumes that PwmController has ensured that the channel is already open
-            Windows10PwmDriverChannel channel = _channelMap[channelIndex];
+            // This assumes that PwmController has ensured that the channel is already open.
+            Windows10PwmDriverChannel channel = _channelMap[pwmChannel];
             channel.Stop();
         }
 

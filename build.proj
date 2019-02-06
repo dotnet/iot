@@ -22,7 +22,8 @@
 
   <Target Name="BuildProduct">
     <ItemGroup>
-      <_BuildProductProjects Include="$(MSBuildThisFileDirectory)src\**\*.csproj" />
+      <_ExcludeBuildProductProjects Include="$(MSBuildThisFileDirectory)src\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
+      <_BuildProductProjects Include="$(MSBuildThisFileDirectory)src\**\*.csproj" Exclude="@(_ExcludeBuildProductProjects)" />
     </ItemGroup>
 
     <MSBuild Projects="@(_BuildProductProjects)" />
@@ -38,7 +39,6 @@
 
   <Target Name="BuildSamples">
     <ItemGroup>
-      <_ExcludeBuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\pwm-led\pwm-led.csproj" />
       <_ExcludeBuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\serialport-arduino\arduino-demo.csproj" />
       <_BuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\**\*.csproj" Exclude="@(_ExcludeBuildSampleProjects)" />
     </ItemGroup>
@@ -59,7 +59,8 @@
 
   <Target Name="Pack">
     <ItemGroup>
-      <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\**\*.csproj" />
+      <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
+      <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\System.Device.Gpio\System.Device.Gpio.csproj" />
     </ItemGroup>
 
     <MSBuild Projects="@(_ProjectsToPackage)" Targets="Pack" />
