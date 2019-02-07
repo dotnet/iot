@@ -7,8 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="_DeviceBinding.cs" />
+    <Compile Include="Pca95x4.cs" />
+    <Compile Include="Register.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
   </ItemGroup>
 
