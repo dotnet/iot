@@ -63,7 +63,7 @@ namespace Iot.Device.CharacterLcd
         private byte _lastByte;
         private bool _useLastByte;
 
-        private (int pin, PinValue value)[] _pinBuffer = new (int, PinValue)[8];
+        private PinValuePair[] _pinBuffer = new PinValuePair[8];
 
         // We need to add PWM support to make this useful (to drive the VO pin).
         // For now we'll just stash the value and use it to decide the initial
@@ -128,7 +128,7 @@ namespace Iot.Device.CharacterLcd
                 throw new ArgumentException($"The length of the array given to parameter {nameof(data)} must be 4 or 8");
             }
 
-            _controller = controller ?? new GpioControllerAdapter(new GpioController(PinNumberingScheme.Logical));
+            _controller = controller ?? new GpioController(PinNumberingScheme.Logical);
             Initialize(size.Height);
         }
 
@@ -495,15 +495,13 @@ namespace Iot.Device.CharacterLcd
 
         private void WriteBits(byte value, int count)
         {
-            PinValue ToPinValue(int bit) => (bit == 1) ? PinValue.High : PinValue.Low;
-
             int changedCount = 0;
             for (int i = 0; i < count; i++)
             {
                 int newBit = (value >> i) & 1;
                 if (!_useLastByte)
                 {
-                    _pinBuffer[changedCount++] = (_dataPins[i], ToPinValue(newBit));
+                    _pinBuffer[changedCount++] = new PinValuePair(_dataPins[i], newBit);
                 }
                 else
                 {
@@ -512,13 +510,13 @@ namespace Iot.Device.CharacterLcd
                     int oldBit = (_lastByte >> i) & 1;
                     if (oldBit != newBit)
                     {
-                        _pinBuffer[changedCount++] = (_dataPins[i], ToPinValue(newBit));
+                        _pinBuffer[changedCount++] = new PinValuePair(_dataPins[i], newBit);
                     }
                 }
             }
 
             if (changedCount > 0)
-                _controller.Write(new ReadOnlySpan<(int, PinValue)>(_pinBuffer, 0, changedCount));
+                _controller.Write(new ReadOnlySpan<PinValuePair>(_pinBuffer, 0, changedCount));
 
             _useLastByte = true;
             _lastByte = value;

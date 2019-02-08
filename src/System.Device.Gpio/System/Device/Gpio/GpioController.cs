@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +11,7 @@ namespace System.Device.Gpio
     /// <summary>
     /// Represents a general-purpose I/O (GPIO) controller.
     /// </summary>
-    public sealed partial class GpioController : IDisposable
+    public sealed partial class GpioController : IGpioController
     {
         private readonly GpioDriver _driver;
         private readonly HashSet<int> _openPins;
@@ -298,6 +296,29 @@ namespace System.Device.Gpio
         public void Dispose()
         {
             Dispose(true);
+        }
+
+        /// <summary>
+        /// Write the given pins with the given values.
+        /// </summary>
+        public void Write(ReadOnlySpan<PinValuePair> pinValues)
+        {
+            for (int i = 0; i < pinValues.Length; i++)
+            {
+                Write(pinValues[i].PinNumber, pinValues[i].PinValue);
+            }
+        }
+
+        /// <summary>
+        /// Read the given pins.
+        /// </summary>
+        public void Read(Span<PinValuePair> pinValues)
+        {
+            for (int i = 0; i < pinValues.Length; i++)
+            {
+                int pin = pinValues[i].PinNumber;
+                pinValues[i] = new PinValuePair(pin, Read(pin));
+            }
         }
     }
 }

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <ProjectReference Include="..\..\..\System.Device.Gpio\System.Device.Gpio.csproj" />
     <ProjectReference Include="$(MSBuildThisFileDirectory)../../Mcp23xxx/Mcp23xxx.csproj" />
     <ProjectReference Include="..\CharacterLcd.csproj" />
   </ItemGroup>
