@@ -28,7 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\System.Device.Gpio\System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\..\System.Device.Gpio\System.Device.Gpio.csproj" >
+      <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
     <None Include="README.md" />
   </ItemGroup>
 
