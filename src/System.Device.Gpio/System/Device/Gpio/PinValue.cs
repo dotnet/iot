@@ -28,10 +28,20 @@ namespace System.Device.Gpio
 
         public static implicit operator PinValue(int value) => value == 0 ? Low : High;
         public static implicit operator PinValue(bool value) => value ? High : Low;
+        public static explicit operator byte(PinValue value) => value._value;
         public static explicit operator int(PinValue value) => value._value;
         public static explicit operator bool(PinValue value) => value._value == 0 ? false : true;
 
         public bool Equals(PinValue other) => other._value == _value;
+        public override bool Equals(object obj)
+        {
+            if (obj is PinValue)
+            {
+                return Equals((PinValue)obj);
+            }
+            return false;
+        }
+
         public static bool operator ==(PinValue a, PinValue b) => a.Equals(b);
         public static bool operator !=(PinValue a, PinValue b) => !a.Equals(b);
         public override int GetHashCode() => _value.GetHashCode();
