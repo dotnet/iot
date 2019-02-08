@@ -301,6 +301,7 @@ namespace System.Device.Gpio
         /// <summary>
         /// Write the given pins with the given values.
         /// </summary>
+        /// <param name="pinValues">The pin/value pairs to write.</param>
         public void Write(ReadOnlySpan<PinValuePair> pinValues)
         {
             for (int i = 0; i < pinValues.Length; i++)
@@ -312,6 +313,7 @@ namespace System.Device.Gpio
         /// <summary>
         /// Read the given pins.
         /// </summary>
+        /// <param name="pinValues">The pins to read.</param>
         public void Read(Span<PinValuePair> pinValues)
         {
             for (int i = 0; i < pinValues.Length; i++)

@@ -7,7 +7,7 @@ using System.Device.Gpio;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public abstract class Mcp23xxx : IDisposable, IGpioController
+    public abstract class Mcp23xxx : IGpioController
     {
         protected int DeviceAddress { get; }
         private GpioController _masterGpioController;
