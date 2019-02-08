@@ -9,6 +9,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetComPinsHardwareConfigurationTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetComPinsHardwareConfiguration setComPinsHardwareConfiguration = new SetComPinsHardwareConfiguration();
+            byte[] actualBytes = setComPinsHardwareConfiguration.GetBytes();
+            Assert.Equal(new byte[] { 0xDA, 0x12 }, actualBytes);
+        }
+
         [Theory]
         // AlternativeComPinConfiguration
         [InlineData(false, false, new byte[] { 0xDA, 0x02 })]

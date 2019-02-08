@@ -10,6 +10,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetColumnAddressTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetColumnAddress setColumnAddress = new SetColumnAddress();
+            byte[] actualBytes = setColumnAddress.GetBytes();
+            Assert.Equal(new byte[] { 0x21, 0x00, 0x7F }, actualBytes);
+        }
+
         [Theory]
         // StartAddress
         [InlineData(0x00, 0x00, new byte[] { 0x21, 0x00, 0x00 })]

@@ -9,6 +9,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetSegmentReMapTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetSegmentReMap setSegmentReMap = new SetSegmentReMap();
+            byte[] actualBytes = setSegmentReMap.GetBytes();
+            Assert.Equal(new byte[] { 0xA0 }, actualBytes);
+        }
+
         [Theory]
         [InlineData(false, new byte[] { 0xA0 })]
         [InlineData(true, new byte[] { 0xA1 })]

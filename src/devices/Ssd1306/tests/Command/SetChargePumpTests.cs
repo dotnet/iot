@@ -9,6 +9,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetChargePumpTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetChargePump setChargePump = new SetChargePump();
+            byte[] actualBytes = setChargePump.GetBytes();
+            Assert.Equal(new byte[] { 0x8D, 0x10 }, actualBytes);
+        }
+
         [Theory]
         [InlineData(false, new byte[] { 0x8D, 0x10 })]
         [InlineData(true, new byte[] { 0x8D, 0x14 })]

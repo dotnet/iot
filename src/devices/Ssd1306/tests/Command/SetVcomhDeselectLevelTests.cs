@@ -10,6 +10,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetVcomhDeselectLevelTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetVcomhDeselectLevel setVcomhDeselectLevel = new SetVcomhDeselectLevel();
+            byte[] actualBytes = setVcomhDeselectLevel.GetBytes();
+            Assert.Equal(new byte[] { 0xDB, 0x20 }, actualBytes);
+        }
+
         [Theory]
         [InlineData(DeselectLevel.Vcc0_65, new byte[] { 0xDB, 0x00 })]
         [InlineData(DeselectLevel.Vcc0_77, new byte[] { 0xDB, 0x20 })]

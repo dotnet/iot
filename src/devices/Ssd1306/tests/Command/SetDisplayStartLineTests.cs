@@ -10,6 +10,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetDisplayStartLineTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetDisplayStartLine setDisplayStartLine = new SetDisplayStartLine();
+            byte[] actualBytes = setDisplayStartLine.GetBytes();
+            Assert.Equal(new byte[] { 0x40 }, actualBytes);
+        }
+
         [Theory]
         [InlineData(0x00, new byte[] { 0x40 })]
         [InlineData(0x3F, new byte[] { 0x7F })]

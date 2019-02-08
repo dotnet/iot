@@ -50,6 +50,11 @@ namespace Iot.Device.Ssd1306
         /// <param name="data">The data to send to the display controller.</param>
         public void SendData(byte[] data)
         {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "The data is invalid.");
+            }
+
             byte[] writeBuffer = new byte[data.Length + 1];
             data.CopyTo(writeBuffer, 1);
             writeBuffer[0] = 0x40; // Control byte.

@@ -10,8 +10,17 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetDisplayOffsetTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetDisplayOffset setDisplayOffset = new SetDisplayOffset();
+            byte[] actualBytes = setDisplayOffset.GetBytes();
+            Assert.Equal(new byte[] { 0xD3, 0x00 }, actualBytes);
+        }
+
         [Theory]
         [InlineData(0x00, new byte[] { 0xD3, 0x00 })]
+        [InlineData(0x10, new byte[] { 0xD3, 0x10 })]
         public void Get_Bytes(byte displayOffset, byte[] expectedBytes)
         {
             SetDisplayOffset setDisplayOffset = new SetDisplayOffset(displayOffset);

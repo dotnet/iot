@@ -10,6 +10,15 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetLowerColumnStartAddressForPageAddressingModeTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetLowerColumnStartAddressForPageAddressingMode setLowerColumnStartAddressForPageAddressingMode =
+                new SetLowerColumnStartAddressForPageAddressingMode();
+            byte[] actualBytes = setLowerColumnStartAddressForPageAddressingMode.GetBytes();
+            Assert.Equal(new byte[] { 0x00 }, actualBytes);
+        }
+
         [Theory]
         [InlineData(0x00, new byte[] { 0x00 })]
         [InlineData(0x0F, new byte[] { 0x0F })]

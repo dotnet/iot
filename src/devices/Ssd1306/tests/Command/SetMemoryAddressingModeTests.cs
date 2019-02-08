@@ -11,6 +11,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetMemoryAddressingModeTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetMemoryAddressingMode setMemoryAddressingMode = new SetMemoryAddressingMode();
+            byte[] actualBytes = setMemoryAddressingMode.GetBytes();
+            Assert.Equal(new byte[] { 0x20, 0x02 }, actualBytes);
+        }
+
         [Theory]
         [InlineData(AddressingMode.Horizontal, new byte[] { 0x20, 0x00 })]
         [InlineData(AddressingMode.Vertical, new byte[] { 0x20, 0x01 })]

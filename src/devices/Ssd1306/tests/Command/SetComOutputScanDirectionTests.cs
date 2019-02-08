@@ -9,6 +9,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetComOutputScanDirectionTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetComOutputScanDirection setComOutputScanDirection = new SetComOutputScanDirection();
+            byte[] actualBytes = setComOutputScanDirection.GetBytes();
+            Assert.Equal(new byte[] { 0xC0 }, actualBytes);
+        }
+
         [Theory]
         [InlineData(false, new byte[] { 0xC8 })]
         [InlineData(true, new byte[] { 0xC0 })]

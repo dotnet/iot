@@ -10,6 +10,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetMultiplexRatioTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetMultiplexRatio setMultiplexRatio = new SetMultiplexRatio();
+            byte[] actualBytes = setMultiplexRatio.GetBytes();
+            Assert.Equal(new byte[] { 0xA8, 0x3F }, actualBytes);
+        }
+
         [Theory]
         [InlineData(0x0F, new byte[] { 0xA8, 0x0F })]
         [InlineData(0x3F, new byte[] { 0xA8, 0x3F })]

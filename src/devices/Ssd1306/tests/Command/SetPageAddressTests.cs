@@ -10,6 +10,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetPageAddressTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetPageAddress setPageAddress = new SetPageAddress();
+            byte[] actualBytes = setPageAddress.GetBytes();
+            Assert.Equal(new byte[] { 0x22, 0x00, 0x07 }, actualBytes);
+        }
+
         [Theory]
         // StartAddress
         [InlineData(PageAddress.Page0, PageAddress.Page0, new byte[] { 0x22, 0x00, 0x00 })]

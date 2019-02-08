@@ -10,6 +10,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetVerticalScrollAreaTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetVerticalScrollArea setVerticalScrollArea = new SetVerticalScrollArea();
+            byte[] actualBytes = setVerticalScrollArea.GetBytes();
+            Assert.Equal(new byte[] { 0xA3, 0x00, 0x40 }, actualBytes);
+        }
+
         [Theory]
         // TopFixedAreaRows
         [InlineData(0x00, 0x00, new byte[] { 0xA3, 0x00, 0x00 })]

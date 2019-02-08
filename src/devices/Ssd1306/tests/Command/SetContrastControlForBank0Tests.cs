@@ -9,6 +9,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetContrastControlForBank0Tests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetContrastControlForBank0 setContrastControlForBank0 = new SetContrastControlForBank0();
+            byte[] actualBytes = setContrastControlForBank0.GetBytes();
+            Assert.Equal(new byte[] { 0x81, 0x7F }, actualBytes);
+        }
+
         [Theory]
         [InlineData(0x00, new byte[] { 0x81, 0x00 })]
         [InlineData(0xFF, new byte[] { 0x81, 0xFF })]

@@ -10,6 +10,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetPreChargePeriodTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetPreChargePeriod setPreChargePeriod = new SetPreChargePeriod();
+            byte[] actualBytes = setPreChargePeriod.GetBytes();
+            Assert.Equal(new byte[] { 0xD9, 0x22 }, actualBytes);
+        }
+
         [Theory]
         // Phase1Period
         [InlineData(0x01, 0x01, new byte[] { 0xD9, 0x11 })]

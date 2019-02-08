@@ -10,6 +10,15 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class SetDisplayClockDivideRatioOscillatorFrequencyTests
     {
+        [Fact]
+        public void Get_Bytes_With_Default_Values()
+        {
+            SetDisplayClockDivideRatioOscillatorFrequency setDisplayClockDivideRatioOscillatorFrequency =
+                new SetDisplayClockDivideRatioOscillatorFrequency();
+            byte[] actualBytes = setDisplayClockDivideRatioOscillatorFrequency.GetBytes();
+            Assert.Equal(new byte[] { 0xD5, 0x80 }, actualBytes);
+        }
+
         [Theory]
         // DisplayClockDivideRatio
         [InlineData(0x00, 0x00, new byte[] { 0xD5, 0x00 })]
