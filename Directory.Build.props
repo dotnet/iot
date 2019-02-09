@@ -5,8 +5,8 @@
   	<PublishWindowsPdb>false</PublishWindowsPdb>
     <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
     <Language>C#</Language>
-    <TargetsWindows Condition="'$(RuntimeIdentifier)' == 'win'">true</TargetsWindows>
-    <TargetsLinux Condition="'$(RuntimeIdentifier)' == 'linux'">true</TargetsLinux>
+    <TargetsWindows Condition="$(RuntimeIdentifier.StartsWith('win'))">true</TargetsWindows>
+    <TargetsLinux Condition="$(RuntimeIdentifier.StartsWith('linux'))">true</TargetsLinux>
     <LangVersion>Latest</LangVersion>
   </PropertyGroup>
 

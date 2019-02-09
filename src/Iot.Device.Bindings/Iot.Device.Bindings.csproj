@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <LangVersion>Latest</LangVersion>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <IsPackable>true</IsPackable>
+    <DeviceRoot>$(MSBuildThisFileDirectory)../devices/</DeviceRoot>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackageRefAssembly</TargetsForTfmSpecificContentInPackage>
+    <!--Disabling default items so samples source won't get build by the main library-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_ExcludeFromCompile Include="$(DeviceRoot)**/samples/**/*.cs" />
+    <_ExcludeFromCompile Include="$(DeviceRoot)**/tests/**/*.cs" />
+    <_ExcludeFromCompile Include="$(DeviceRoot)**/obj/**/*.cs" />
+    <Compile Include="$(DeviceRoot)**/*.cs" Exclude="@(_ExcludeFromCompile)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../System.Device.Gpio/System.Device.Gpio.csproj">
+      <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
+  </ItemGroup>
+
+  <Target Name="PackageRefAssembly">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(TargetRefPath)">
+        <PackagePath>ref/$(TargetFramework)</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
+
+</Project>
