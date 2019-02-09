@@ -4,9 +4,9 @@ Our goal is to create a set of world-class APIs and tooling that will support a 
 
 ![](images/DotNetIotRoadmapComponents.png)
 
-We have the following deliverables on our intermediate-term roadmap (not in order of completion):
-
+The following deliverables are not in any particular order:
 * [x] Support General-purpose input/output protocols: GPIO, SPI, I2C, and PWM
+* [ ] Support analog-to-digital protocols: ADC
 * [ ] Support common serial protocols: RS-485 Serial Port, CAN bus, Modbus
 * [ ] Support digital audio bus protocols: I2S
 * [x] Support Raspberry Pi 3 on Linux and Windows 10 IoT Core RS5
