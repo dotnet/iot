@@ -12,41 +12,41 @@ namespace Iot.Device.Hmc5883l
         /// <summary>
         /// 1370, recommended sensor field range: ±0.88 Ga
         /// </summary>
-        Gain1 = 0x00,
+        Gain1370 = 0x00,
 
         /// <summary>
         /// 1090, recommended sensor field range: ±1.3 Ga
         /// </summary>
-        Gain2 = 0x01,
+        Gain1090 = 0x01,
 
         /// <summary>
         /// 820, recommended sensor field range: ±1.9 Ga
         /// </summary>
-        Gain3 = 0x02,
+        Gain0820 = 0x02,
 
         /// <summary>
         /// 660, recommended sensor field range: ±2.5 Ga
         /// </summary>
-        Gain4 = 0x03,
+        Gain0660 = 0x03,
 
         /// <summary>
         /// 440, recommended sensor field range: ±4.0 Ga
         /// </summary>
-        Gain5 = 0x04,
+        Gain0440 = 0x04,
 
         /// <summary>
         /// 390, recommended sensor field range: ±4.7 Ga
         /// </summary>
-        Gain6 = 0x05,
+        Gain0390 = 0x05,
 
         /// <summary>
         /// 330, recommended sensor field range: ±5.6 Ga
         /// </summary>
-        Gain7 = 0x06,
+        Gain0330 = 0x06,
 
         /// <summary>
         /// 230, recommended sensor field range: ±8.1 Ga
         /// </summary>
-        Gain8 = 0x07,
+        Gain0230 = 0x07,
     }
 }

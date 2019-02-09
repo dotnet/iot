@@ -34,4 +34,4 @@ using (Hmc5883l sensor = new Hmc5883l(device))
 ```
 
 ## Result
-![](res.jpg)
+![](RunningResult.jpg)

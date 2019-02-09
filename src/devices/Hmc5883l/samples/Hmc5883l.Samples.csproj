@@ -14,7 +14,7 @@
     <None Remove="HMC5883L_circuit.fzz" />
     <None Remove="HMC5883L_circuit_bb.png" />
     <None Remove="README.md" />
-    <None Remove="res.jpg" />
+    <None Remove="RunningResult.jpg" />
   </ItemGroup>
 
 </Project>

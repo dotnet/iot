@@ -9,8 +9,13 @@ namespace Iot.Device.Hmc5883l
     /// </summary>
     public enum MeasuringMode
     {
+        /// <summary>
+        /// Continuous Measuring Mode
+        /// </summary>
         Continuous = 0x00,
-        Single = 0x01,
-        Idle = 0x02
+        /// <summary>
+        /// Single Measuring Mode (Measure only once. In this mode, OutputRate will be invalid.)
+        /// </summary>
+        Single = 0x01
     }
 }

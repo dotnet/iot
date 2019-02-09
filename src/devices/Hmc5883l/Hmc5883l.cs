@@ -26,9 +26,14 @@ namespace Iot.Device.Hmc5883l
         private readonly byte _gain;
 
         /// <summary>
-        /// HMC5883L Direction Angle
+        /// HMC5883L Direction Vector
         /// </summary>
-        public double DirectionAngle => RawToDirectionAngle(ReadRaw());
+        public Vector3 DirectionVector => ReadDirectionVector();
+
+        /// <summary>
+        /// HMC5883L Direction Angle (Deg)
+        /// </summary>
+        public double DirectionAngle => VectorToDirectionAngle(ReadDirectionVector());
 
         /// <summary>
         /// Initialize a new HMC5883L device connected through I2C
@@ -37,7 +42,7 @@ namespace Iot.Device.Hmc5883l
         /// <param name="gain">Gain Setting</param>
         /// <param name="measuringMode">The mode of measuring</param>
         /// <param name="outputRate">Typical Data Output Rate (Hz)</param>
-        public Hmc5883l(I2cDevice sensor, Gain gain = Gain.Gain2, MeasuringMode measuringMode = MeasuringMode.Continuous, OutputRate outputRate = OutputRate.Rate5)
+        public Hmc5883l(I2cDevice sensor, Gain gain = Gain.Gain1090, MeasuringMode measuringMode = MeasuringMode.Continuous, OutputRate outputRate = OutputRate.Rate15)
         {
             _sensor = sensor;
             _gain = (byte)gain;
@@ -57,7 +62,7 @@ namespace Iot.Device.Hmc5883l
             byte configB = (byte)(_gain << 5);
 
             _sensor.Write(new[] { (byte)Register.HMC_CONFIG_REG_A_ADDR, configA });
-            _sensor.Write(new[] { (byte)Register.HMC_CONFIG_REG_A_ADDR, configB });
+            _sensor.Write(new[] { (byte)Register.HMC_CONFIG_REG_B_ADDR, configB });
             _sensor.Write(new[] { (byte)Register.HMC_MODE_REG_ADDR, _measuringMode });
         }
 
@@ -65,17 +70,17 @@ namespace Iot.Device.Hmc5883l
         /// Read raw data from HMC5883L
         /// </summary>
         /// <returns>Raw data</returns>
-        public Vector3 ReadRaw()
+        private Vector3 ReadDirectionVector()
         {
             Span<byte> xRead = stackalloc byte[2];
             Span<byte> yRead = stackalloc byte[2];
             Span<byte> zRead = stackalloc byte[2];
 
-            _sensor.Write(new[] { (byte)Register.HMC_X_MSB_REG_ADDR });
+            _sensor.WriteByte((byte)Register.HMC_X_MSB_REG_ADDR);
             _sensor.Read(xRead);
-            _sensor.Write(new[] { (byte)Register.HMC_Y_MSB_REG_ADDR });
+            _sensor.WriteByte((byte)Register.HMC_Y_MSB_REG_ADDR);
             _sensor.Read(yRead);
-            _sensor.Write(new[] { (byte)Register.HMC_Z_MSB_REG_ADDR });
+            _sensor.WriteByte((byte)Register.HMC_Z_MSB_REG_ADDR);
             _sensor.Read(zRead);
 
             short x = BinaryPrimitives.ReadInt16BigEndian(xRead);
@@ -86,13 +91,13 @@ namespace Iot.Device.Hmc5883l
         }
 
         /// <summary>
-        /// Calculate direction angle
+        /// Calculate direction angle (Deg)
         /// </summary>
-        /// <param name="rawData">Hmc5883l raw data</param>
+        /// <param name="directionVector">Hmc5883l raw data</param>
         /// <returns>Angle</returns>
-        public double RawToDirectionAngle(Vector3 rawData)
+        public double VectorToDirectionAngle(Vector3 directionVector)
         {
-            double angle = Math.Atan2(rawData.Y, rawData.X) * (180 / Math.PI) + 180;
+            double angle = Math.Atan2(directionVector.Y, directionVector.X) * (180 / Math.PI) + 180;
 
             return angle;
         }
@@ -102,7 +107,11 @@ namespace Iot.Device.Hmc5883l
         /// </summary>
         public void Dispose()
         {
-            _sensor.Dispose();
+            if (_sensor != null)
+            {
+                _sensor.Dispose();
+                _sensor = null;
+            }
         }
     }
 }

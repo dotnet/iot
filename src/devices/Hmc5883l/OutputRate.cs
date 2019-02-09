@@ -12,41 +12,36 @@ namespace Iot.Device.Hmc5883l
         /// <summary>
         /// 0.75 Hz
         /// </summary>
-        Rate1 = 0x00,
+        Rate00_75 = 0x00,
 
         /// <summary>
         /// 1.5 Hz
         /// </summary>
-        Rate2 = 0x01,
+        Rate01_5 = 0x01,
 
         /// <summary>
         /// 3 Hz
         /// </summary>
-        Rate3 = 0x02,
+        Rate03 = 0x02,
 
         /// <summary>
         /// 7.5 Hz
         /// </summary>
-        Rate4 = 0x03,
+        Rate07_5 = 0x03,
 
         /// <summary>
         /// 15 Hz
         /// </summary>
-        Rate5 = 0x04,
+        Rate15 = 0x04,
 
         /// <summary>
         /// 30 Hz
         /// </summary>
-        Rate6 = 0x05,
+        Rate30 = 0x05,
 
         /// <summary>
         /// 75 Hz
         /// </summary>
-        Rate7 = 0x06,
-
-        /// <summary>
-        /// Not Used
-        /// </summary>
-        Rate8 = 0x07,
+        Rate75 = 0x06,
     }
 }

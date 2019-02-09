@@ -7,7 +7,7 @@ namespace Iot.Device.Hmc5883l
     /// <summary>
     /// Register of HMC5883L
     /// </summary>
-    public enum Register : byte
+    internal enum Register : byte
     {
         HMC_CONFIG_REG_A_ADDR = 0x00,
         HMC_CONFIG_REG_B_ADDR = 0x01,
