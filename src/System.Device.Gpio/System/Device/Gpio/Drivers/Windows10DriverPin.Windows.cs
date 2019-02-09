@@ -198,17 +198,7 @@ namespace System.Device.Gpio.Drivers
         }
 
         private static WinGpio.GpioPinValue PinValueToGpioPinValue(PinValue value)
-        {
-            switch (value)
-            {
-                case PinValue.Low:
-                    return WinGpio.GpioPinValue.Low;
-                case PinValue.High:
-                    return WinGpio.GpioPinValue.High;
-                default:
-                    throw new ArgumentException($"GPIO pin value {value} not supported.", nameof(value));
-            }
-        }
+            => value == PinValue.High ? WinGpio.GpioPinValue.High : WinGpio.GpioPinValue.Low;
 
         private static PinEventTypes GpioEdgeToPinEventType(WinGpio.GpioPinEdge edge)
         {

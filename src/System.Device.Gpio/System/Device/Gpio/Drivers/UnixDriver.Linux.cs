@@ -213,21 +213,8 @@ namespace System.Device.Gpio.Drivers
         }
 
         private string ConvertPinValueToSysFs(PinValue value)
-        {
-            string result = string.Empty;
-            switch (value)
-            {
-                case PinValue.High:
-                    result = "1";
-                    break;
-                case PinValue.Low:
-                    result = "0";
-                    break;
-                default:
-                    throw new ArgumentException($"Invalid pin value {value}.");
-            }
-            return result;
-        }
+
+            => value == PinValue.High ? "1" : "0";
 
         /// <summary>
         /// Checks if a pin supports a specific mode.
