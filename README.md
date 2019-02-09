@@ -6,7 +6,7 @@ This repository contains the [System.Device.Gpio](https://www.nuget.org/packages
 
 The repository also contains [IoT.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings), a growing set of community-maintained [device bindings](src/devices/README.md) for IoT components.
 
-**Note**: System.Device.Gpio is in early preview. It is not yet supported and will continue to change. It is currently published to myget (requires use of [nuget.config](samples/led-blink/nuget.config)).
+**NOTE**: This repository is still in experimental stage and all APIs are subject to changes.
 
 ## How to Install
 
@@ -28,11 +28,9 @@ dotnet add package IoT.Device.Bindings --source https://dotnet.myget.org/F/dotne
 
 After installing, please see the following areas to learn more:
 
-[**Documentation**](Documentation/README.md) - Contains many resources related to electronics, devices, vendors, software and other IoT topics.
-
-[**Samples**](samples/README.md) - Step-by-step instructions on building your first app.
-
-![Raspberry Pi Breadboard Diagram](samples/led-more-blinking-lights/rpi-more-blinking-lights_bb.png)
+* [Documentation](Documentation/README.md) - Resources related to electronics, devices, vendors, software and other IoT topics.
+* [Samples](samples/README.md) - Step-by-step instructions on building your first app.
+* [Roadmap](Documentation/roadmap.md) - Areas planned or currently being worked on.
 
 ## Community 
 
@@ -48,12 +46,6 @@ Please contribute. We are primarily interested in the following:
 * [.NET device bindings](src/devices) for a wide variety of sensors, chips, displays and other components.
 * Request a device binding or protocol that you need for your project ([file an issue](https://github.com/dotnet/iot/issues)).
 * Links to blog posts or tweets that showcase .NET Core being used for great IoT scenarios ([file an issue](https://github.com/dotnet/iot/issues)).
-
-## Roadmap
-
-While this repo is currently in preview, we want to focus our efforts in a particular direction, specifically to work on areas aligned with our [roadmap](Documentation/roadmap.md).
-
-Of course, this doesn't mean we're not willing to explore areas that aren't part of our roadmap, but we'd prefer if these would start with a document ([file an issue](https://github.com/dotnet/iot/issues)), and not with code. This allows us to collaborate on how we want to approach specific holes or issues with our platform without being drowned in large PRs.
 
 ## License
 
