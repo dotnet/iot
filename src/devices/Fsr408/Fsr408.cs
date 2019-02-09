@@ -10,70 +10,31 @@ namespace Iot.Device.Fsr408
 {
     public class Fsr408 : IDisposable
     {
-        private GpioController _controller;
-        private int _pinNumber = 18;
+        private int _pinNumber = 0;
 
-        public Mcp3008.Mcp3008 AdcConverter { get; set; }
+        private Mcp3008.Mcp3008 _adcConverter;
         public int Resistance { get; set; } = 10000; // 10k ohm
         public int PowerSupplied { get; set; } = 5000;  // 5 mV
 
-        public Fsr408()
+        public Fsr408(Mcp3008.Mcp3008 adcConverter)
         {
-            _controller = new GpioController();
-            _controller.OpenPin(_pinNumber);
+            _adcConverter = adcConverter;
         }
-        public Fsr408(int pinNumber)
+
+        public Fsr408(int pinNumber, Mcp3008.Mcp3008 adcConverter)
         {
+            _adcConverter = adcConverter;
             _pinNumber = pinNumber;
-            _controller = new GpioController();
-            _controller.OpenPin(_pinNumber);
         }
 
-
-        public int ReadFromMcp3008()
+        public int Read()
         {
-            if (AdcConverter != null)
-            {
-                return AdcConverter.Read(0);
-            }
-            else
-            {
-                throw new NotSupportedException("ADC converter not set");
-            }
+            return _adcConverter.Read(_pinNumber);
         }
 
-        public int ReadCapacitorChargingDuration()
+        public int ReadVoltage()
         {
-            
-            // set pin to low
-            _controller.SetPinMode(_pinNumber, PinMode.Output);
-            _controller.Write(_pinNumber, PinValue.Low);
-
-            // Prepare pin for input and ...
-            _controller.SetPinMode(_pinNumber, PinMode.Input);
-            Stopwatch timeElapsed = Stopwatch.StartNew();
-            while (_controller.Read(_pinNumber) == PinValue.Low)
-            { // count until read high
-                
-                if (timeElapsed.ElapsedMilliseconds == 30000)
-                {   // if count goes too high it means FSR resustance is highest which means no pressure, don't need to count more  
-                    break;
-                }
-            }
-            return (int)timeElapsed.ElapsedMilliseconds;
-        }
-
-        public int ReadVotlageUsingMcp3008()
-        {
-            if (AdcConverter != null)
-            {
-                int readValue = AdcConverter.Read(0);
-                return CalculateVoltage(readValue);
-            }
-            else
-            {
-                throw new NotSupportedException("ADC converter not set");
-            }
+            return CalculateVoltage(_adcConverter.Read(_pinNumber));
         }
 
         public int CalculateVoltage(int readValue)
@@ -84,17 +45,9 @@ namespace Iot.Device.Fsr408
             return PowerSupplied * readValue / 1023;
         }
 
-        public int ReadFsrResistanceUsingMcp3008()
+        public int ReadFsrResistance()
         {
-            if (AdcConverter != null)
-            {
-                int readValue = AdcConverter.Read(0);
-                return CalculateFsrResistance(CalculateVoltage(readValue));
-            }
-            else
-            {
-                throw new NotSupportedException("ADC converter not set");
-            }
+            return CalculateFsrResistance(CalculateVoltage(_adcConverter.Read(_pinNumber)));
         }
 
         public int CalculateFsrResistance(int fsrVoltage)
@@ -109,15 +62,7 @@ namespace Iot.Device.Fsr408
 
         public int ReadPressureForceUsingMcp3008()
         {
-            if (AdcConverter != null)
-            {
-                int readValue = AdcConverter.Read(0);
-                return CalculateForce(CalculateFsrResistance(CalculateVoltage(readValue)));
-            }
-            else
-            {
-                throw new NotSupportedException("ADC converter not set");
-            }
+            return CalculateForce(CalculateFsrResistance(CalculateVoltage(_adcConverter.Read(_pinNumber))));
         }
 
         public int CalculateForce(int resistance)
@@ -144,10 +89,10 @@ namespace Iot.Device.Fsr408
 
         public void Dispose()
         {
-            if (_controller != null)
+            if (_adcConverter != null)
             {
-                _controller.Dispose();
-                _controller = null;
+                _adcConverter.Dispose();
+                _adcConverter = null;
             }
         }
     }
