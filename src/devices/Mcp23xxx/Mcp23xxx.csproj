@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>latest</LangVersion>
     <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
 
@@ -33,9 +33,8 @@
         <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" /> 
       -->
     <ProjectReference Include="..\..\System.Device.Gpio\System.Device.Gpio.csproj" >
-      <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
+      <AdditionalProperties>Configuration=Linux-Debug;RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
-
     <None Include="README.md" />
   </ItemGroup>
 
