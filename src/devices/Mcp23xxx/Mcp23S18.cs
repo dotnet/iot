@@ -6,7 +6,7 @@ using System.Device.Spi;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public class Mcp23S18 : Mcp23Sxx
+    public class Mcp23S18 : Mcp23x1x
     {
         /// <summary>
         /// Initializes new instance of Mcp23S18 device.
@@ -17,14 +17,9 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="reset">The output pin number that is connected to the hardware reset.</param>
         /// <param name="interruptA">The input pin number that is connected to the interrupt for Port A (INTA).</param>
         /// <param name="interruptB">The input pin number that is connected to the interrupt for Port B (INTB).</param>
-        public Mcp23S18(int deviceAddress, SpiDevice spiDevice, int? reset = null, int? interruptA = null, int? interruptB = null)
-            : base(deviceAddress, spiDevice, reset, interruptA, interruptB)
+        public Mcp23S18(int deviceAddress, SpiDevice spiDevice, int reset = -1, int interruptA = -1, int interruptB = -1)
+            : base(new SpiAdapter(spiDevice, deviceAddress), deviceAddress, reset, interruptA, interruptB)
         {
         }
-
-        /// <summary>
-        /// The I/O pin count of the device.
-        /// </summary>
-        public override int PinCount => 16;
     }
 }

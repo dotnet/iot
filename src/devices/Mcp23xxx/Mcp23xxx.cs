@@ -11,9 +11,16 @@ namespace Iot.Device.Mcp23xxx
     {
         protected int DeviceAddress { get; }
         private GpioController _masterGpioController;
-        private readonly int? _reset;
-        private readonly int? _interruptA;
-        private readonly int? _interruptB;
+        private readonly int _reset;
+        private readonly int _interruptA;
+        private readonly int _interruptB;
+        private BankStyle _bankStyle;
+        protected readonly IBusDevice _device;
+        private bool _increments = true;
+        private (int PinNumber, PinValue Value)[] _pinBuffer = new (int, PinValue)[1];
+
+        private ushort _gpioCache;
+        private bool _cacheValid;
 
         /// <summary>
         /// A general purpose parallel I/O expansion for I2C or SPI applications.
@@ -22,41 +29,49 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="reset">The output pin number that is connected to the hardware reset.</param>
         /// <param name="interruptA">The input pin number that is connected to the interrupt for Port A (INTA).</param>
         /// <param name="interruptB">The input pin number that is connected to the interrupt for Port B (INTB).</param>
-        public Mcp23xxx(int deviceAddress, int? reset = null, int? interruptA = null, int? interruptB = null)
+        /// <param name="bankStyle">
+        /// The current bank style of the ports. This does not set the bank style- it tells us what the bank style is.
+        /// It is *highly* recommended not to change the bank style from the default as there is no direct way to
+        /// detect what style the chip is in and most apps will fail if the chip is not set to defaults. This setting
+        /// has no impact on 8 bit expanders.
+        /// </param>
+        public Mcp23xxx(IBusDevice device, int deviceAddress, int reset = -1, int interruptA = -1, int interruptB = -1, BankStyle bankStyle = BankStyle.Sequential)
         {
             ValidateDeviceAddress(deviceAddress);
-
             DeviceAddress = deviceAddress;
+
+            _device = device;
+            _bankStyle = bankStyle;
+
             _reset = reset;
             _interruptA = interruptA;
             _interruptB = interruptB;
 
             InitializeMasterGpioController();
-        }
 
-        private static void ValidateBitNumber(int bitNumber)
-        {
-            if (bitNumber < 0 || bitNumber > 7)
+            // Set all of the pins to input, GPIO outputs to low, and
+            // disable all of the pull-ups
+            if (PinCount == 8)
             {
-                throw new IndexOutOfRangeException($"Invalid bit number {bitNumber}.");
+                InternalWriteByte(Register.IODIR, 0xFF, Port.PortA);
+                InternalWriteByte(Register.GPIO, 0x00, Port.PortA);
+                InternalWriteByte(Register.IPOL, 0x00, Port.PortA);
+            }
+            else
+            {
+                InternalWriteUInt16(Register.IODIR, 0xFFFF);
+                InternalWriteUInt16(Register.GPIO, 0x0000);
+                InternalWriteUInt16(Register.IPOL, 0x0000);
             }
         }
 
-        private static void ClearBit(ref byte data, int bitNumber)
+        private void UpdateCache()
         {
-            ValidateBitNumber(bitNumber);
-            data &= (byte)~(1 << bitNumber);
-        }
-
-        private void SetBit(ref byte data, int bitNumber)
-        {
-            ValidateBitNumber(bitNumber);
-            data |= (byte)(1 << bitNumber);
-        }
-
-        private static bool GetBit(byte data, int bitNumber)
-        {
-            return ((data >> bitNumber) & 1) == 1;
+            // Ouput state is read from the latches (OLAT)
+            _gpioCache = PinCount == 8
+                ? InternalReadByte(Register.OLAT, Port.PortA)
+                : InternalReadUInt16(Register.OLAT);
+            _cacheValid = true;
         }
 
         private void ValidateDeviceAddress(int deviceAddress)
@@ -70,23 +85,23 @@ namespace Iot.Device.Mcp23xxx
         private void InitializeMasterGpioController()
         {
             // Only need master controller if there are external pins provided.
-            if (_reset != null || _interruptA != null || _interruptB != null)
+            if (_reset != -1 || _interruptA != -1 || _interruptB != -1)
             {
                 _masterGpioController = new GpioController();
 
-                if (_interruptA != null)
+                if (_interruptA != -1)
                 {
-                    _masterGpioController.OpenPin((int)_interruptA, PinMode.Input);
+                    _masterGpioController.OpenPin(_interruptA, PinMode.Input);
                 }
 
-                if (_interruptB != null)
+                if (_interruptB != -1)
                 {
-                    _masterGpioController.OpenPin((int)_interruptB, PinMode.Input);
+                    _masterGpioController.OpenPin(_interruptB, PinMode.Input);
                 }
 
-                if (_reset != null)
+                if (_reset != -1)
                 {
-                    _masterGpioController.OpenPin((int)_reset, PinMode.Output);
+                    _masterGpioController.OpenPin(_reset, PinMode.Output);
                     Disable();
                 }
             }
@@ -100,29 +115,98 @@ namespace Iot.Device.Mcp23xxx
         /// <summary>
         /// Reads a number of bytes from registers.
         /// </summary>
-        /// <param name="startingRegisterAddress">The starting register address to read.</param>
-        /// <param name="byteCount">The number of bytes to read.</param>
+        /// <param name="register">The register to read from.</param>
+        /// <param name="buffer">The buffer to read bytes into.</param>
         /// <param name="port">The I/O port used with the register.</param>
-        /// <param name="bank">The bank type that determines how the registers are mapped.</param>
         /// <returns>The data read from the registers.</returns>
-        public abstract byte[] Read(Register.Address startingRegisterAddress, byte byteCount, Port port = Port.PortA, Bank bank = Bank.Bank1);
+        protected void InternalRead(Register register, Span<byte> buffer, Port port)
+        {
+            _device.Read(GetMappedAddress(register, port, _bankStyle), buffer);
+        }
 
         /// <summary>
         /// Writes a number of bytes to registers.
         /// </summary>
-        /// <param name="startingRegisterAddress">The starting register address to write.</param>
-        /// <param name="data">The data to write to registers.</param>
+        /// <param name="register">The register address to write to.</param>
+        /// <param name="buffer">The data to write to the registers.</param>
         /// <param name="port">The I/O port used with the registers.</param>
-        /// <param name="bank">The bank type that determines how the registers are mapped.</param>
-        public abstract void Write(Register.Address startingRegisterAddress, byte[] data, Port port = Port.PortA, Bank bank = Bank.Bank1);
+        protected void InternalWrite(Register register, Span<byte> data, Port port)
+        {
+            _device.Write(GetMappedAddress(register, port, _bankStyle), data);
+        }
+
+        protected byte InternalReadByte(Register register, Port port)
+        {
+            Span<byte> buffer = stackalloc byte[1];
+            InternalRead(register, buffer, port);
+            return buffer[0];
+        }
+
+        protected void InternalWriteByte(Register register, byte value, Port port)
+        {
+            Span<byte> buffer = stackalloc byte[1];
+            buffer[0] = value;
+            InternalWrite(register, buffer, port);
+        }
+
+        /// <summary>
+        /// Read a byte from the given register.
+        /// </summary>
+        /// <remarks>
+        /// Writes to the A port registers on 16 bit devices.
+        /// </remarks>
+        public byte ReadByte(Register register) => InternalReadByte(register, Port.PortA);
+
+        /// <summary>
+        /// Write a byte to the given register.
+        /// </summary>
+        /// <remarks>
+        /// Writes to the A port registers on 16 bit devices.
+        /// </remarks>
+        public void WriteByte(Register register, byte value) => InternalWriteByte(register, value, Port.PortA);
+
+
+        protected ushort InternalReadUInt16(Register register)
+        {
+            Span<byte> buffer = stackalloc byte[2];
+            if (_increments)
+            {
+                // Can read both bytes at the same time
+                InternalRead(register, buffer, Port.PortA);
+            }
+            else
+            {
+                // Have to read each separately
+                InternalRead(register, buffer.Slice(0, 1), Port.PortA);
+                InternalRead(register, buffer.Slice(1), Port.PortB);
+            }
+            return (ushort)(buffer[0] | buffer[1] << 8);
+        }
+
+        protected void InternalWriteUInt16(Register register, ushort value)
+        {
+            Span<byte> buffer = stackalloc byte[2];
+            buffer[0] = (byte)value;
+            buffer[1] = (byte)(value >> 8);
+
+            if (_increments)
+            {
+                // Can write both at the same time
+                InternalWrite(register, buffer, Port.PortA);
+            }
+            else
+            {
+                // Have to write each separately
+                InternalWrite(register, buffer.Slice(0, 1), Port.PortA);
+                InternalWrite(register, buffer.Slice(1), Port.PortB);
+            }
+        }
 
         public virtual void Dispose()
         {
-            if (_masterGpioController != null)
-            {
-                _masterGpioController.Dispose();
-                _masterGpioController = null;
-            }
+            _masterGpioController?.Dispose();
+            _masterGpioController = null;
+            _device?.Dispose();
         }
 
         /// <summary>
@@ -135,12 +219,16 @@ namespace Iot.Device.Mcp23xxx
                 throw new Exception("Master controller has not been initialized.");
             }
 
-            if (_reset == null)
+            if (_reset == -1)
             {
                 throw new Exception("Reset pin has not been initialized.");
             }
 
-            _masterGpioController.Write((int)_reset, PinValue.Low);
+            _masterGpioController.Write(_reset, PinValue.Low);
+
+            // Registers will all be reset when re-enabled
+            _bankStyle = BankStyle.Sequential;
+            _increments = true;
         }
 
         /// <summary>
@@ -153,115 +241,245 @@ namespace Iot.Device.Mcp23xxx
                 throw new Exception("Master controller has not been initialized.");
             }
 
-            if (_reset == null)
+            if (_reset == -1)
             {
                 throw new Exception("Reset pin has not been initialized.");
             }
 
-            _masterGpioController.Write((int)_reset, PinValue.High);
+            _masterGpioController.Write(_reset, PinValue.High);
         }
 
-        /// <summary>
-        /// Reads a byte from a register.
-        /// </summary>
-        /// <param name="registerAddress">The register address to read.</param>
-        /// <param name="port">The I/O port used with the registers.</param>
-        /// <param name="bank">The bank type that determines how the register is mapped.</param>
-        /// <returns>The data read from the register.</returns>
-        public byte Read(Register.Address registerAddress, Port port = Port.PortA, Bank bank = Bank.Bank1)
-        {
-            byte[] data = Read(registerAddress, 1, port, bank);
-            return data[0];
-        }
-
-        /// <summary>
-        /// Reads a bit from a register.
-        /// </summary>
-        /// <param name="registerAddress">The register address to read.</param>
-        /// <param name="bitNumber">The register bit number to read.</param>
-        /// <param name="port">The I/O port used with the registers.</param>
-        /// <param name="bank">The bank type that determines how the register is mapped.</param>
-        /// <returns>The value of the register bit read.</returns>
-        public bool ReadBit(Register.Address registerAddress, int bitNumber, Port port = Port.PortA, Bank bank = Bank.Bank1)
-        {
-            ValidateBitNumber(bitNumber);
-            byte data = Read(registerAddress, port, bank);
-            return GetBit(data, bitNumber);
-        }
-
-        /// <summary>
-        /// Reads the pin value of interrupt for Port A (INTA).
-        /// </summary>
-        /// <returns>The pin value of interrupt for Port A (INTA).</returns>
-        public PinValue ReadInterruptA()
+        protected PinValue InternalReadInterrupt(Port port)
         {
             if (_masterGpioController == null)
-            {
                 throw new Exception("Master controller has not been initialized.");
-            }
 
-            if (_interruptA == null)
+            int pinNumber = 0;
+            switch (port)
             {
-                throw new Exception("INTA pin has not been initialized.");
+                case Port.PortA:
+                    pinNumber = _interruptA;
+                    break;
+                case Port.PortB:
+                    pinNumber = _interruptB;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(port));
             }
 
-            return _masterGpioController.Read((int)_interruptA);
+            if (pinNumber == -1)
+                throw new ArgumentException("No interrupt pin configured.", nameof(port));
+
+            return _masterGpioController.Read(pinNumber);
         }
 
         /// <summary>
-        /// Reads the pin value of interrupt for Port B (INTB).
+        /// Returns the value of the interrupt pin if configured.
         /// </summary>
-        /// <returns>The pin value of interrupt for Port B (INTB).</returns>
-        public PinValue ReadInterruptB()
-        {
-            if (_masterGpioController == null)
-            {
-                throw new Exception("Master controller has not been initialized.");
-            }
-
-            if (_interruptB == null)
-            {
-                throw new Exception("INTB pin has not been initialized.");
-            }
-
-            return _masterGpioController.Read((int)_interruptB);
-        }
+        /// <returns>
+        /// Returns the interrupt for port A on 16 bit devices.
+        /// </returns>
+        public PinValue ReadInterrupt() => InternalReadInterrupt(Port.PortA);
 
         /// <summary>
-        ///  Writes a byte to a register.
+        /// Sets a mode to a pin.
         /// </summary>
-        /// <param name="registerAddress">The register address to write.</param>
-        /// <param name="data">The data to write to the register.</param>
-        /// <param name="port">The I/O port used with the registers.</param>
-        /// <param name="bank">The bank type that determines how the register is mapped.</param>
-        public void Write(Register.Address registerAddress, byte data, Port port = Port.PortA, Bank bank = Bank.Bank1)
+        /// <param name="pinNumber">The pin number.</param>
+        /// <param name="mode">The mode to be set.</param>
+        public void SetPinMode(int pinNumber, PinMode mode)
         {
-            Write(registerAddress, new byte[] { data }, port, bank);
-        }
+            ValidateMode(mode);
+            ValidatePin(pinNumber);
 
-        /// <summary>
-        ///  Writes to a register bit.
-        /// </summary>
-        /// <param name="registerAddress">The register address to write.</param>
-        /// <param name="bitNumber">The register bit number to write.</param>
-        /// <param name="bit">The value to write to register bit.</param>
-        /// <param name="port">The I/O port used with the registers.</param>
-        /// <param name="bank">The bank type that determines how the register is mapped.</param>
-        public void WriteBit(Register.Address registerAddress, int bitNumber, bool bit, Port port = Port.PortA, Bank bank = Bank.Bank1)
-        {
-            ValidateBitNumber(bitNumber);
-            byte data = Read(registerAddress, port, bank);
-
-            if (bit)
+            if (pinNumber < 8)
             {
-                SetBit(ref data, bitNumber);
+                byte value = mode == PinMode.Output
+                    ? ClearBit(InternalReadByte(Register.IODIR, Port.PortA), pinNumber)
+                    : SetBit(InternalReadByte(Register.IODIR, Port.PortA), pinNumber);
+                InternalWriteByte(Register.IODIR, value, Port.PortA);
             }
             else
             {
-                ClearBit(ref data, bitNumber);
+                byte value = mode == PinMode.Output
+                    ? ClearBit(InternalReadByte(Register.IODIR, Port.PortB), pinNumber - 8)
+                    : SetBit(InternalReadByte(Register.IODIR, Port.PortB), pinNumber - 8);
+                InternalWriteByte(Register.IODIR, value, Port.PortB);
+            }
+        }
+
+        /// <summary>
+        /// Reads the value of a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number.</param>
+        /// <returns>High or low pin value.</returns>
+        public PinValue Read(int pinNumber)
+        {
+            ValidatePin(pinNumber);
+            _pinBuffer[0] = (pinNumber, default);
+            Read(_pinBuffer);
+            return _pinBuffer[0].Value;
+        }
+
+        public void Read(Span<(int pin, PinValue value)> pinValues)
+        {
+            ushort pins = 0;
+            foreach ((int pin, PinValue value) in pinValues)
+            {
+                ValidatePin(pin);
+                pins |= (ushort)(1 << pin);
             }
 
-            Write(registerAddress, data, port, bank);
+            ushort result = 0;
+            if (pins < 0xFF + 1)
+            {
+                // Only need to get the first 8 pins (PortA)
+                result = InternalReadByte(Register.OLAT, Port.PortA);
+            }
+            else if ((pins & 0xFF) == 0)
+            {
+                // Only need to get the second 8 pins (PortB)
+                result = InternalReadByte(Register.OLAT, Port.PortB);
+            }
+            else
+            {
+                // Need to get both
+                result = InternalReadUInt16(Register.OLAT);
+            }
+
+            for (int i = 0; i < pinValues.Length; i++)
+            {
+                pinValues[i].value = (result & (1 << pinValues[i].pin)) > 0 ? PinValue.High : PinValue.Low;
+            }
         }
+
+        /// <summary>
+        /// Writes a value to a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number.</param>
+        /// <param name="value">The value to be written.</param>
+        public void Write(int pinNumber, PinValue value)
+        {
+            ValidatePin(pinNumber);
+            _pinBuffer[0] = (pinNumber, value);
+            Write(_pinBuffer);
+        }
+
+        public void Write(ReadOnlySpan<(int pin, PinValue value)> pinValues)
+        {
+            ushort mask = 0;
+            ushort newBits = 0;
+
+            foreach ((int pin, PinValue value) in pinValues)
+            {
+                ValidatePin(pin);
+                ushort bit = (ushort)(1 << pin);
+                mask |= bit;
+                if (value == PinValue.High)
+                {
+                    newBits |= bit;
+                }
+            }
+
+            if (!_cacheValid)
+                UpdateCache();
+
+            ushort cachedValue = _gpioCache;
+            ushort newValue = SetBits(cachedValue, newBits, mask);
+            if (cachedValue == newValue)
+                return;
+
+            if (mask < 0xFF + 1)
+            {
+                // Only need to change the first 8 pins (PortA)
+                InternalWriteByte(Register.GPIO, (byte)newValue, Port.PortA);
+            }
+            else if ((mask & 0xFF) == 0)
+            {
+                // Only need to change the second 8 pins (PortB)
+                InternalWriteByte(Register.GPIO, (byte)(newValue >> 8), Port.PortB);
+            }
+            else
+            {
+                // Need to change both
+                InternalWriteUInt16(Register.GPIO, newValue);
+            }
+
+            _gpioCache = newValue;
+        }
+
+        private byte SetBit(byte data, int bitNumber) => data |= (byte)(1 << bitNumber);
+
+        private byte ClearBit(byte data, int bitNumber) => data &= (byte)~(1 << bitNumber);
+
+        private byte SetBits(byte current, byte bits, byte mask)
+        {
+            current &= (byte)~mask;
+            current |= bits;
+            return current;
+        }
+
+        private ushort SetBits(ushort current, ushort bits, ushort mask)
+        {
+            current &= (ushort)~mask;
+            current |= bits;
+            return current;
+        }
+
+        private static void ValidateMode(PinMode mode)
+        {
+            if (mode != PinMode.Input && mode != PinMode.Output)
+            {
+                throw new ArgumentException("Mcp supports Input and Output modes only.");
+            }
+        }
+
+        private void ValidatePin(int pinNumber)
+        {
+            if (pinNumber >= PinCount || pinNumber < 0)
+            {
+                throw new ArgumentOutOfRangeException($"{pinNumber} is not a valid pin on the Mcp controller.");
+            }
+        }
+
+        private static void ThrowArgumentOutOfRange(string argument)
+        {
+            throw new ArgumentOutOfRangeException(argument);
+        }
+
+        /// <summary>
+        /// Gets the mapped address for a register.
+        /// </summary>
+        /// <param name="register">The register.</param>
+        /// <param name="port">The bank of I/O ports used with the register.</param>
+        /// <param name="bankStyle">The bank style that determines how the register addresses are grouped.</param>
+        /// <returns>The byte address of the register for the given port bank and bank style.</returns>
+        private byte GetMappedAddress(Register register, Port port = Port.PortA, BankStyle bankStyle = BankStyle.Sequential)
+        {
+            if (port != Port.PortA && port != Port.PortB)
+                ThrowArgumentOutOfRange(nameof(port));
+            if (bankStyle != BankStyle.Separated && bankStyle != BankStyle.Sequential)
+                ThrowArgumentOutOfRange(nameof(bankStyle));
+
+            byte address = (byte)register;
+
+            // There is no mapping for 8 bit expanders
+            if (PinCount == 8)
+                return address;
+
+            if (bankStyle == BankStyle.Sequential)
+            {
+                // Registers for each bank are sequential
+                // (IODIRA = 0x00, IODIRB = 0x01, IPOLA = 0x02, IPOLB = 0x03, ...)
+                address += address;
+                return port == Port.PortA ? address : ++address;
+            }
+
+            // Registers for each bank are separated
+            // (IODIRA = 0x00, ... OLATA = 0x0A, IODIRB = 0x10, ... OLATB = 0x1A)
+            return port == Port.PortA ? address : address += 0x10;
+        }
+
+        private static string GetBits(byte value) => Convert.ToString(value, 2).PadLeft(8, '0');
+        private static string GetBits(ushort value) => Convert.ToString(value, 2).PadLeft(16, '0');
     }
 }
