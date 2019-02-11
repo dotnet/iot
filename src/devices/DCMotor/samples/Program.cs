@@ -52,13 +52,14 @@ namespace samples
 
         static void Main(string[] args)
         {
+            const double Period = 10.0;
             DCMotorSettings settings = ThreePinMode();
             Stopwatch sw = Stopwatch.StartNew();
             using (DCMotor motor = DCMotor.Create(settings))
             {
                 double time = sw.ElapsedMilliseconds / 1000.0;
                 // Note: range is from -1 .. 1 (for 1 pin setup 0 .. 1)
-                motor.Speed = Math.Sin(time);
+                motor.Speed = Math.Sin(2.0 * Math.PI * time / Period);
             }
         }
     }
