@@ -4,8 +4,13 @@
 
 using Iot.Device.Ssd1306.Command;
 using System;
+using System.Collections.Generic;
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
+using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 
 namespace Iot.Device.Ssd1306.Samples
 {
@@ -19,7 +24,8 @@ namespace Iot.Device.Ssd1306.Samples
             {
                 InitializeSsd1306(ssd1306);
                 ClearScreen(ssd1306);
-                SendMessage(ssd1306);
+                //SendMessage(ssd1306, "Hello .NET IoT!!!");
+                DisplayIpAddress(ssd1306);
             }
         }
 
@@ -68,15 +74,10 @@ namespace Iot.Device.Ssd1306.Samples
             }
         }
 
-        // The device will display text/images by sending data via SendData method.
-        // This currently does not include a graphics library to make it easy with strings.
-        // For now, the sample show what it looks like to send "Hello .NET IoT".
-        private static void SendMessage(Ssd1306 ssd1306)
+        private static void SendMessage(Ssd1306 ssd1306, string message)
         {
             ssd1306.SendCommand(new SetColumnAddress());
             ssd1306.SendCommand(new SetPageAddress(PageAddress.Page0, PageAddress.Page3));
-
-            string message = "Hello .NET IoT!!!";
 
             foreach (char character in message)
             {
@@ -84,6 +85,53 @@ namespace Iot.Device.Ssd1306.Samples
             }
         }
 
-        
+        private static void DisplayIpAddress(Ssd1306 ssd1306)
+        {
+            string ipAddress = GetIpAddress();
+
+            if (ipAddress != null)
+            {
+                SendMessage(ssd1306, $"IP: {ipAddress}");
+            }
+            else
+            {
+                SendMessage(ssd1306, $"Error: IP Address Not Found");
+            }
+        }
+
+        // Referencing https://stackoverflow.com/questions/6803073/get-local-ip-address
+        private static string GetIpAddress()
+        {
+            // Get a list of all network interfaces (usually one per network card, dialup, and VPN connection).
+            NetworkInterface[] networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
+
+            foreach (NetworkInterface network in networkInterfaces)
+            {
+                // Read the IP configuration for each network
+                IPInterfaceProperties properties = network.GetIPProperties();
+
+                if (network.NetworkInterfaceType == NetworkInterfaceType.Ethernet &&
+                       network.OperationalStatus == OperationalStatus.Up &&
+                       !network.Description.ToLower().Contains("virtual") &&
+                       !network.Description.ToLower().Contains("pseudo"))
+                {
+                    // Each network interface may have multiple IP addresses.
+                    foreach (IPAddressInformation address in properties.UnicastAddresses)
+                    {
+                        // We're only interested in IPv4 addresses for now.
+                        if (address.Address.AddressFamily != AddressFamily.InterNetwork)
+                            continue;
+
+                        // Ignore loopback addresses (e.g., 127.0.0.1).
+                        if (IPAddress.IsLoopback(address.Address))
+                            continue;
+
+                        return address.Address.ToString();
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }
