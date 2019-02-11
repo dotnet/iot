@@ -138,7 +138,7 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
-            // Libgpiod Api seems do not support pull up or pull down resistors.
+            // Libgpiod Api do not support pull up or pull down resistors for now.
             return mode != PinMode.InputPullDown && mode != PinMode.InputPullUp;
         }
 
