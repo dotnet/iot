@@ -4,26 +4,13 @@
 
 This is a generic class to control any DC motor.
 
-DC motors are controlled by simply providing voltage on inputs (inverted voltage inverts the direction).
+DC motors are controlled by simply providing voltage on the inputs (inverted voltage inverts the direction).
 
-DC motors can be controlled with 1 or 2 pins:
-- When 1 pin is used the speed is controlled with PWM, second pin is connected to the ground
-- When 2 pins are used 1 of the pins is controlled with PWM and the second controlls the direction (PWM signal has to be inverted when direction is inverted)
+DC motors can be controlled with 1, 2 or 3 pins.
+Please refer to the [sample](samples/README.md) to see how to connect it.
 
-It is not recommended to connect any motors directly to the controller and to use H-Bridge instead (i.e. L298N)
+**Recommended setup is 3-pin mode, 1 and 2 pin mode may cause excessive warm up or damage the H-bridge for larger engines.**
+**Never connect DC motor directly to your board**
 
-## Sample
-
-```csharp
-using (var motor = new DCMotorController(23, 24))
-{
-    while (true)
-    {
-        double t = timer.Elapsed.TotalSeconds;
-        double speed = Math.Sin(2.0 * Math.PI * t / 5.0);
-        motor.Speed = speed;
-        Thread.Sleep(200);
-        Console.WriteLine($"speed = {speed}");
-    }
-}
-```
+By default 3 pin mode will be used. To turn on 1 or 2 pin mode set `UseEnableAsPwm = false` in the DCMotorSettings.
+This means you won't connect anything to enable pin the H-bridge.
