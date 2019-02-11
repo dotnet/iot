@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace DeviceApiTester.Infrastructure
@@ -22,13 +24,13 @@ namespace DeviceApiTester.Infrastructure
             }
 
             int dataLength = data.Length;
-            int lineCount = dataLength / perLine;
+            int lineCount = (int)Math.Ceiling((double)dataLength / perLine);
 
             const string groupDelimeter = " ";
 
             var sb = new StringBuilder(
                 dataLength * 2                                     // 2 characters per byte
-                + dataLength / perGroup * groupDelimeter.Length    // gropu delimiter string
+                + dataLength / perGroup * groupDelimeter.Length    // group delimiter string
                 + lineCount * Environment.NewLine.Length           // 1 new-line string between each line
                 + perLine);                                        // some extra calculation padding
 
@@ -53,5 +55,17 @@ namespace DeviceApiTester.Infrastructure
             return sb.ToString();
         }
 
+        public static byte[] HexStringToByteArray(string hexString)
+        {
+            if (string.IsNullOrEmpty(hexString))
+            {
+                return Array.Empty<byte>();
+            }
+
+            return Enumerable.Range(0, hexString.Length)
+                .Where(x => x % 2 == 0)
+                .Select(x => (byte)int.Parse(hexString.AsSpan().Slice(x, 2), NumberStyles.HexNumber))
+                .ToArray();
+        }
     }
 }

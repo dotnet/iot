@@ -6,17 +6,19 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ## Binding Index
 
-* [Bmp280](Bmp280/README.md)
-* [Max7219](Max7219/README.md)
-* [Mcp3008](Mcp3008/README.md)
-* [Mcp23xxx](Mcp23xxx/README.md)
-* [Si7021](Si7021/README.md)
+* [BMP280 -- digital pressure sensor](Bmp280/README.md)
+* [Dhtxx -- digital-output relative humidity & temperature sensor module](Dhtxx/README.md)
+* [Hcsr04 -- ultrasonic ranging module](Hcsr04/README.md)
+* [CharacterLcd](CharacterLcd/README.md)
+* [Max7219 -- LED matrix driver](Max7219/README.md)
+* [Mcp23xxx -- I/O expander](Mcp23xxx/README.md)
+* [Mcp3008 -- analog to digital converter](Mcp3008/README.md)
+* [Pca95x4 -- I2C GPIO expander](Pca95x4/README.md)
+* [Si7021 -- temperature and humidity sensor](Si7021/README.md)
 
 ## Binding Distribution
 
-We are currently encouraging source distribution of device bindings. The [Mcp3008 sample](Mcp3008/samples/README.md) references the [Mcp3008 library](Mcp3008/Mcp3008.csproj) within this repo. You can clone this repo and use the sample project reference model to a device binding or copy bindings directly into your project.
-
-We may publish NuGet packages of device bindings at a later date.
+These bindings are distributed via the [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings) NuGet package.  Daily builds with the latest bindings are available on [MyGet](https://dotnet.myget.org/feed/dotnet-core/package/nuget/Iot.Device.Bindings). You can also consume the bindings as source.
 
 ## Contributing a binding
 

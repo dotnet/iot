@@ -6,41 +6,21 @@ using System.Device.I2c;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public class Mcp23009 : Mcp230xx
+    /// <summary>
+    /// Driver for the Microchip MCP23009 8-Bit I2C I/O Expander with Open-Drain Output
+    /// </summary>
+    public class Mcp23009 : Mcp23x0x
     {
         /// <summary>
         /// Initializes new instance of Mcp23009 device.
         /// A general purpose parallel I/O expansion for I2C applications.
         /// </summary>
-        /// <param name="i2cDevice">I2C device used for communication.</param>
-        /// <param name="reset">Output pin number that is connected to the hardware reset.</param>
-        /// <param name="interruptA">Input pin number that is connected to the interrupt for Port A (INTA).</param>
-        /// <param name="interruptB">Input pin number that is connected to the interrupt for Port B (INTB).</param>
-        public Mcp23009(I2cDevice i2cDevice, int? reset = null, int? interruptA = null, int? interruptB = null)
-            : base(i2cDevice, reset, interruptA, interruptB)
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
+        /// <param name="reset">The output pin number that is connected to the hardware reset.</param>
+        /// <param name="interrupt">The input pin number that is connected to the interrupt.</param>
+        public Mcp23009(I2cDevice i2cDevice, int reset = -1, int interrupt = -1)
+            : base(new I2cAdapter(i2cDevice), i2cDevice.ConnectionSettings.DeviceAddress, reset, interrupt)
         {
-        }
-
-        public override int PinCount => 8;
-
-        public byte Read(Register.Address registerAddress)
-        {
-            return Read(registerAddress, Port.PortA, Bank.Bank1);
-        }
-
-        public byte[] Read(Register.Address startingRegisterAddress, byte byteCount)
-        {
-            return Read(startingRegisterAddress, byteCount, Port.PortA, Bank.Bank1);
-        }
-
-        public void Write(Register.Address registerAddress, byte data)
-        {
-            Write(registerAddress, data, Port.PortA, Bank.Bank1);
-        }
-
-        public void Write(Register.Address startingRegisterAddress, byte[] data)
-        {
-            Write(startingRegisterAddress, data, Port.PortA, Bank.Bank1);
         }
     }
 }

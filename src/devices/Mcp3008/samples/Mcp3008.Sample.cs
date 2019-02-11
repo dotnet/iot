@@ -22,7 +22,7 @@ namespace Iot.Device.Samples
             // the two implementations.
 
             // SPI implementation
-            Mcp3008 GetMcp3008WithSpi()
+            Mcp3008.Mcp3008 GetMcp3008WithSpi()
             {
                 Console.WriteLine("Using SPI protocol.");
 
@@ -33,19 +33,19 @@ namespace Iot.Device.Samples
                 };
 
                 var spi = new UnixSpiDevice(connection);
-                var mcp3008 = new Mcp3008(spi);
+                var mcp3008 = new Mcp3008.Mcp3008(spi);
                 return mcp3008;
             }
 
             // GPIO (via bit banging) implementation
-            Mcp3008 GetMcp3008WithGpio()
+            Mcp3008.Mcp3008 GetMcp3008WithGpio()
             {
                 Console.WriteLine("Using GPIO pins.");
-                var mcp3008 = new Mcp3008(18, 23, 24, 25);
+                var mcp3008 = new Mcp3008.Mcp3008(18, 23, 24, 25);
                 return mcp3008;
             }
 
-            Mcp3008 mcp = GetMcp3008WithSpi();
+            Mcp3008.Mcp3008 mcp = GetMcp3008WithSpi();
             // Uncomment next line to use GPIO instead.
             // Mcp3008 mcp = GetMcp3008WithGpio();
 
@@ -53,7 +53,7 @@ namespace Iot.Device.Samples
             {
                 while (true)
                 {
-                    double value = mcp.Read(0, Mcp3008.InputConfiguration.SingleEnded);
+                    double value = mcp.Read(0, Mcp3008.Mcp3008.InputConfiguration.SingleEnded);
                     value = value / 10.24;
                     value = Math.Round(value);
                     Console.WriteLine(value);
