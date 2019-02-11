@@ -7,7 +7,7 @@
     <ProductBuild Condition="'$(ProductBuild)'==''">true</ProductBuild>
     <ToolsBuild Condition="'$(ToolsBuild)'==''">true</ToolsBuild>
     <SampleBuild Condition="'$(SampleBuild)'==''">true</SampleBuild>
-    <BuildTests Condition="'$(BuildTests)'==''">false</BuildTests>
+    <BuildTests Condition="'$(BuildTests)'==''">true</BuildTests>
     <BuildPackages Condition="'$(BuildPackages)'==''">true</BuildPackages>
 
     <BuildDependsOn Condition="'$(BuildRestore)'=='true'">$(BuildDependsOn);Restore</BuildDependsOn>
