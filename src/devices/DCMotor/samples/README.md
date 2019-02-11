@@ -1,19 +1,18 @@
-# DC Motor Controller
+# DC Motor Controller sample
 
 ![schematics](dcmotor_bb.png)
 [Fritzing diagram](dcmotor.fzz)
 
-<details>
-<summary>[See full program](Program.cs)</summary>
+[See full sample](Program.cs)
 
-```
+```csharp
         static DCMotorSettings TwoPinModeAutoPwm()
         {
             // this will use software PWM on one of the pins
             return new DCMotorSettings()
             {
                 Pin0 = 24,
-                Pin1 = 23, // for 1 pin mode don't set this
+                Pin1 = 23, // for 1 pin mode don't set this and connect your pin to the ground
                 UseEnableAsPwm = false,
             };
         }
@@ -51,9 +50,8 @@
             using (DCMotor motor = DCMotor.Create(settings))
             {
                 double time = sw.ElapsedMilliseconds / 1000.0;
-                motor.Speed = Math.sin(time);
+                // Note: range is from -1 .. 1 (for 1 pin setup 0 .. 1)
+                motor.Speed = Math.Sin(time);
             }
         }
 ```
-
-</details>

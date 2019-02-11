@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,6 +6,7 @@ using System;
 using System.Device.Gpio;
 using System.Device.Pwm;
 using System.Device.Pwm.Drivers;
+using System.Diagnostics;
 using Iot.Device.DCMotor;
 
 namespace samples
@@ -18,7 +19,7 @@ namespace samples
             return new DCMotorSettings()
             {
                 Pin0 = 24,
-                Pin1 = 23, // for 1 pin mode don't set this
+                Pin1 = 23, // for 1 pin mode don't set this and connect your pin to the ground
                 UseEnableAsPwm = false,
             };
         }
@@ -56,7 +57,8 @@ namespace samples
             using (DCMotor motor = DCMotor.Create(settings))
             {
                 double time = sw.ElapsedMilliseconds / 1000.0;
-                motor.Speed = Math.sin(time);
+                // Note: range is from -1 .. 1 (for 1 pin setup 0 .. 1)
+                motor.Speed = Math.Sin(time);
             }
         }
     }
