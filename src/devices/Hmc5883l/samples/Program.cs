@@ -24,7 +24,7 @@ namespace Hmc5883l.Samples
                 while (true)
                 {
                     // read direction angle
-                    Console.WriteLine($"Direction Angle: {sensor.DirectionAngle.ToString("0.00")} °");
+                    Console.WriteLine($"Direction Angle: {sensor.Heading.ToString("0.00")} °");
                     Console.WriteLine();
 
                     // wait for a second

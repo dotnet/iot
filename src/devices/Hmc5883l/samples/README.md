@@ -23,7 +23,7 @@ using (Hmc5883l sensor = new Hmc5883l(device))
     while (true)
     {
         // read direction angle
-        Console.WriteLine($"Direction Angle: {sensor.DirectionAngle.ToString("0.00")} °");
+        Console.WriteLine($"Direction Angle: {sensor.Heading.ToString("0.00")} °");
         Console.WriteLine();
 
         // wait for a second

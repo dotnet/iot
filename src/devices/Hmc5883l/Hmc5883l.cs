@@ -26,21 +26,21 @@ namespace Iot.Device.Hmc5883l
         private readonly byte _gain;
 
         /// <summary>
-        /// HMC5883L Direction Vector
+        /// HMC5883L Raw Vector
         /// </summary>
-        public Vector3 DirectionVector => ReadDirectionVector();
+        public Vector3 RawVector => ReadRawVector();
 
         /// <summary>
-        /// HMC5883L Direction Angle (Deg)
+        /// HMC5883L Heading (DEG)
         /// </summary>
-        public double DirectionAngle => VectorToDirectionAngle(ReadDirectionVector());
+        public double Heading => VectorToAngle(ReadRawVector());
 
         /// <summary>
         /// Initialize a new HMC5883L device connected through I2C
         /// </summary>
         /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
         /// <param name="gain">Gain Setting</param>
-        /// <param name="measuringMode">The mode of measuring</param>
+        /// <param name="measuringMode">The Mode of Measuring</param>
         /// <param name="outputRate">Typical Data Output Rate (Hz)</param>
         public Hmc5883l(I2cDevice sensor, Gain gain = Gain.Gain1090, MeasuringMode measuringMode = MeasuringMode.Continuous, OutputRate outputRate = OutputRate.Rate15)
         {
@@ -69,8 +69,8 @@ namespace Iot.Device.Hmc5883l
         /// <summary>
         /// Read raw data from HMC5883L
         /// </summary>
-        /// <returns>Raw data</returns>
-        private Vector3 ReadDirectionVector()
+        /// <returns>Raw Data</returns>
+        private Vector3 ReadRawVector()
         {
             Span<byte> xRead = stackalloc byte[2];
             Span<byte> yRead = stackalloc byte[2];
@@ -91,15 +91,21 @@ namespace Iot.Device.Hmc5883l
         }
 
         /// <summary>
-        /// Calculate direction angle (Deg)
+        /// Calculate angle
         /// </summary>
-        /// <param name="directionVector">Hmc5883l raw data</param>
+        /// <param name="vector">HMC5883L Raw Data</param>
+        /// <param name="isRad">Determine whether the angle of return is RAD or DEG. Default value is DEG.</param>
         /// <returns>Angle</returns>
-        public double VectorToDirectionAngle(Vector3 directionVector)
+        public double VectorToAngle(Vector3 vector, bool isRad = false)
         {
-            double angle = Math.Atan2(directionVector.Y, directionVector.X) * (180 / Math.PI) + 180;
-
-            return angle;
+            if (!isRad)
+            {
+                return Math.Atan2(vector.Y, vector.X) * (180 / Math.PI) + 180;
+            }
+            else
+            {
+                return Math.Atan2(vector.Y, vector.X) + Math.PI;
+            }
         }
 
         /// <summary>
