@@ -16,7 +16,7 @@ namespace System.Device.Gpio.Drivers
             {
                 driver = new LibGpiodDriver();
             }
-            catch (DllNotFoundException e)
+            catch (DllNotFoundException)
             {
                 driver = new SysFSDriver();
             }
