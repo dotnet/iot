@@ -111,13 +111,12 @@ extern int SetGpiodLineValue(struct gpiod_line *line, int value)
 /**
  * @brief Wait for an event on a single line.
  * @param line GPIO line object.
- * @param timeout Wait time limit.
  * @return 0 if wait timed out, -1 if an error occurred, 1 if an event
  *         occurred.
  */
 extern int WaitForEventOnLine(struct gpiod_line *line)
 {
-	struct timespec timeout = { 0, 1000000 };
+	struct timespec timeout = { 0, 1000000 }; // one millisecond
 	return gpiod_line_event_wait(line, &timeout);
 }
 

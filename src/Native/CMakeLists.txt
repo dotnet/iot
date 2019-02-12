@@ -9,5 +9,5 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "")
 add_compile_options(-fPIC)
 
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
-	add_subdirectory(System.Device.Gpio.Native)
+    add_subdirectory(System.Device.Gpio.Native)
 endif()
