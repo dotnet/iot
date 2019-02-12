@@ -101,7 +101,12 @@ namespace Iot.Device.Hmc5883l
         /// <returns>Heading (DEG)</returns>
         private double VectorToHeading(Vector3 vector)
         {
-            return Math.Atan2(vector.Y, vector.X) * (180 / Math.PI) + 180;
+            double deg = Math.Atan2(vector.Y, vector.X) * 180 / Math.PI;
+
+            if (deg < 0)
+                deg += 360;
+
+            return deg;
         }
 
         /// <summary>
