@@ -49,11 +49,11 @@ namespace System.Device.Gpio
                         //{
                         //    return new HummingBoardDriver();
                         //} 
-                        return UnixDriver.InitUnixDriver();
+                        return UnixDriver.CreateUnixDriver();
                     }
                 }
             }
-            return UnixDriver.InitUnixDriver();
+            return UnixDriver.CreateUnixDriver();
         }
     }
 }
