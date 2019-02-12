@@ -11,7 +11,7 @@ namespace System.Device.Gpio
 {
     internal class SafeLineHandle : SafeHandle
     {
-        internal SafeLineHandle() : base(IntPtr.Zero, false) { }
+        public SafeLineHandle() : base(IntPtr.Zero, false) { }
 
         protected override bool ReleaseHandle() => true;
 

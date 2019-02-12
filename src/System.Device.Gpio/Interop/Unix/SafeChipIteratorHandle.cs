@@ -5,9 +5,9 @@ using System.Text;
 
 namespace System.Device.Gpio
 {
-    class SafeChipIteratorHandle : SafeHandle
+    internal class SafeChipIteratorHandle : SafeHandle
     {
-        internal SafeChipIteratorHandle() : base(IntPtr.Zero, true) { }
+        public SafeChipIteratorHandle() : base(IntPtr.Zero, true) { }
 
         protected override bool ReleaseHandle()
         {
