@@ -9,6 +9,9 @@ using System.Text;
 
 namespace System.Device.Gpio
 {
+    /// <summary>
+    /// Pointer to a pin.
+    /// </summary>
     internal class SafeLineHandle : SafeHandle
     {
         public SafeLineHandle() : base(IntPtr.Zero, false) { }

@@ -324,7 +324,7 @@ namespace System.Device.Gpio.Drivers
                 {
                     return;
                 }
-                _sysFSDriver = UnixDriver.CreateUnixDriver();
+                _sysFSDriver = new SysfsDriver();
             }
         }
 

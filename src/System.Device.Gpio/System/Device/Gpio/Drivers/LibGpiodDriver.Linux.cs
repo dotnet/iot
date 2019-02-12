@@ -22,14 +22,15 @@ namespace System.Device.Gpio.Drivers
             SafeChipIteratorHandle iterator = Interop.GetChipIterator();
             if (iterator == null)
             {
-                throw new IOException($"No any chip available, error code: {Marshal.GetLastWin32Error()}");
+                throw new IOException($"Unable to find a chip iterator, error code: {Marshal.GetLastWin32Error()}");
             }
 
             _chip = Interop.GetNextChipFromChipIterator(iterator);
             if (_chip == null)
             {
-                throw new IOException($"No chip found, error code: {Marshal.GetLastWin32Error()}");
+                throw new IOException($"Unable to find a chip, error code: {Marshal.GetLastWin32Error()}");
             }
+
             // Freeing other chips opened
             Interop.FreeChipIteratorNoCloseCurrentChip(iterator);
             _pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
@@ -74,6 +75,7 @@ namespace System.Device.Gpio.Drivers
             {
                 throw new IOException($"Pin number {pinNumber} not available for chip: {_chip} error: {Marshal.GetLastWin32Error()}");
             }
+
             _pinNumberToSafeLineHandle.Add(pinNumber, pinHandle);
         }
 
@@ -111,7 +113,8 @@ namespace System.Device.Gpio.Drivers
                 }
             }
 
-            if (success == -1) {
+            if (success == -1)
+            {
                 throw new IOException($"Error setting pin mode, pin:{pinNumber}, error: {Marshal.GetLastWin32Error()}");
             } 
         }
@@ -131,18 +134,22 @@ namespace System.Device.Gpio.Drivers
 
         protected override void Dispose(bool disposing)
         {
-            foreach (SafeLineHandle pinHandle in _pinNumberToSafeLineHandle.Values)
+            foreach (int pin in _pinNumberToSafeLineHandle.Keys)
             {
-                if (pinHandle != null)
+                if (_pinNumberToSafeLineHandle.TryGetValue(pin, out SafeLineHandle pinHandle))
                 {
                     Interop.ReleaseGpiodLine(pinHandle);
                 }
+
+                _pinNumberToSafeLineHandle.Remove(pin);
             }
 
             if (_chip != null)
             {
                 _chip.Dispose();
+                _chip = null;
             }
+
             base.Dispose(disposing);
         }
     }

@@ -12,7 +12,7 @@ namespace System.Device.Gpio.Drivers
     /// <summary>
     /// A GPIO driver for Unix.
     /// </summary>
-    internal class SysFSDriver : UnixDriver
+    public class SysfsDriver : UnixDriver
     {
         private const string GpioBasePath = "/sys/class/gpio";
         private int _pollFileDescriptor = -1;
@@ -213,7 +213,6 @@ namespace System.Device.Gpio.Drivers
         }
 
         private string ConvertPinValueToSysFs(PinValue value)
-
             => value == PinValue.High ? "1" : "0";
 
         /// <summary>

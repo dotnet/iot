@@ -8,7 +8,7 @@ namespace System.Device.Gpio.Tests
 {
     public class UnixDriverTests : GpioControllerTestBase
     {
-        protected override GpioDriver GetTestDriver() => UnixDriver.CreateUnixDriver();
+        protected override GpioDriver GetTestDriver() => UnixDriver.Create();
 
         protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
     }

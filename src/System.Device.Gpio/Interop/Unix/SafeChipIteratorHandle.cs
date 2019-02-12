@@ -5,6 +5,9 @@ using System.Text;
 
 namespace System.Device.Gpio
 {
+    /// <summary>
+    /// Pointer to an iterator of all GPIO chips available on the device.
+    /// </summary>
     internal class SafeChipIteratorHandle : SafeHandle
     {
         public SafeChipIteratorHandle() : base(IntPtr.Zero, true) { }

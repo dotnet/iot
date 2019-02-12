@@ -10,7 +10,7 @@ namespace System.Device.Gpio.Drivers
     public abstract class UnixDriver : GpioDriver
     {
         // TODO: remove try catch after https://github.com/dotnet/corefx/issues/32015 deployed
-        public static UnixDriver CreateUnixDriver()
+        public static UnixDriver Create()
         {
             UnixDriver driver = null;
             try
@@ -19,7 +19,7 @@ namespace System.Device.Gpio.Drivers
             }
             catch (DllNotFoundException)
             {
-                driver = new SysFSDriver();
+                driver = new UnixDriver.Create();
             }
             return driver;
         }
