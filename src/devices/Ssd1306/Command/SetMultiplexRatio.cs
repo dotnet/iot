@@ -15,7 +15,7 @@ namespace Iot.Device.Ssd1306.Command
         /// <param name="multiplexRatio">Multiplex ratio with a range of 15-63.</param>
         public SetMultiplexRatio(byte multiplexRatio = 63)
         {
-            if (multiplexRatio < 0x0F || multiplexRatio > 0x3F)
+            if (!Ssd1306.InRange(multiplexRatio, 0x0F, 0x3F))
             {
                 throw new ArgumentException("The multiplex ratio is invalid.", nameof(multiplexRatio));
             }

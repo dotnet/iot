@@ -4,10 +4,8 @@
 
 using Iot.Device.Ssd1306.Command;
 using System;
-using System.Collections.Generic;
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
-using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;

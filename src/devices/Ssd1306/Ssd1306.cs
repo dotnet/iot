@@ -28,6 +28,18 @@ namespace Iot.Device.Ssd1306
         }
 
         /// <summary>
+        /// Verifies value is within a specific range.
+        /// </summary>
+        /// <param name="value">Value to check.</param>
+        /// <param name="start">Starting value of range.</param>
+        /// <param name="end">Ending value of range.</param>
+        /// <returns>Determines if value is within range.</returns>
+        internal static bool InRange(uint value, uint start, uint end)
+        {
+            return (value - start) <= (end - start);
+        }
+
+        /// <summary>
         /// Send a command to the display controller.
         /// </summary>
         /// <param name="command">The command to send to the display controller.</param>

@@ -15,13 +15,13 @@ namespace Iot.Device.Ssd1306.Command
         /// <param name="phase1Period">Phase 1 period with a range of 1-15.</param>
         /// <param name="phase2Period">Phase 2 period with a range of 1-15.</param>
         public SetPreChargePeriod(byte phase1Period = 0x02, byte phase2Period = 0x02)
-        {
-            if (phase1Period < 0x01 || phase1Period > 0x0F)
+        {            
+            if (!Ssd1306.InRange(phase1Period, 0x01, 0x0F))
             {
                 throw new ArgumentException("The phase 1 period is invalid.", nameof(phase1Period));
             }
 
-            if (phase2Period < 0x01 || phase2Period > 0x0F)
+            if (!Ssd1306.InRange(phase2Period, 0x01, 0x0F))
             {
                 throw new ArgumentException("The phase 2 period is invalid.", nameof(phase2Period));
             }
