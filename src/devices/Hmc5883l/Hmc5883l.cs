@@ -95,11 +95,10 @@ namespace Iot.Device.Hmc5883l
         }
 
         /// <summary>
-        /// Calculate angle
+        /// Calculate heading
         /// </summary>
-        /// <param name="vector">HMC5883L Raw Data</param>
-        /// <param name="isRad">Determine whether the angle of return is RAD or DEG. Default value is DEG.</param>
-        /// <returns>Angle</returns>
+        /// <param name="vector">HMC5883L Direction Vector</param>
+        /// <returns>Heading (DEG)</returns>
         private double VectorToHeading(Vector3 vector)
         {
             return Math.Atan2(vector.Y, vector.X) * (180 / Math.PI) + 180;
