@@ -45,9 +45,19 @@ namespace Iot.Device.Ssd1306
         /// <param name="command">The command to send to the display controller.</param>
         public void SendCommand(ICommand command)
         {
+            const int stackThreshold = 32;
             byte[] commandBytes = command.GetBytes();
-            byte[] writeBuffer = new byte[commandBytes.Length + 1];
-            commandBytes.CopyTo(writeBuffer, 1);  // Control byte is 0x00 for first byte.
+
+            if (commandBytes == null || commandBytes.Length == 0)
+            {
+                return;
+            }
+
+            Span<byte> writeBuffer = commandBytes.Length < stackThreshold ?
+               stackalloc byte[commandBytes.Length + 1] :
+               new byte[commandBytes.Length + 1];
+
+            commandBytes.CopyTo(writeBuffer.Slice(1));
 
             // Be aware there is a Continuation Bit in the Control byte and can be used
             // to state (logic LOW) if there is only data bytes to follow.
@@ -62,14 +72,19 @@ namespace Iot.Device.Ssd1306
         /// <param name="data">The data to send to the display controller.</param>
         public void SendData(byte[] data)
         {
-            if (data == null)
+            const int stackThreshold = 512;
+
+            if (data == null || data.Length == 0)
             {
-                throw new ArgumentNullException(nameof(data), "The data is invalid.");
+                throw new ArgumentNullException(nameof(data));
             }
 
-            byte[] writeBuffer = new byte[data.Length + 1];
-            data.CopyTo(writeBuffer, 1);
+            Span<byte> writeBuffer = data.Length < stackThreshold ?
+               stackalloc byte[data.Length + 1] :
+               new byte[data.Length + 1];
+
             writeBuffer[0] = 0x40; // Control byte.
+            data.CopyTo(writeBuffer.Slice(1));
             _i2cDevice.Write(writeBuffer);
         }
 
