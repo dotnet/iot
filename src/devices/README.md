@@ -11,6 +11,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [BMP280 -- Digital Pressure Sensor](Bmp280/README.md)
 * [BrickPi3](BrickPi3/README.md)
 * [CharacterLcd -- Liquid Crystal Display](CharacterLcd/README.md)
+* [DC Motor](DCMotor/README.md)
 * [Dhtxx -- Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
 * [DS3231 -- Realtime Clock](Ds3231/README.md)
 * [HC-SR04 -- Ultrasonic Ranging Module](Hcsr04/README.md)
