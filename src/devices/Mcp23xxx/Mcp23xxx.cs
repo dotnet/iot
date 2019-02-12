@@ -7,7 +7,7 @@ using System.Device.Gpio;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public abstract class Mcp23xxx : IGpioController
+    public abstract partial class Mcp23xxx : IGpioController
     {
         protected int DeviceAddress { get; }
         private GpioController _masterGpioController;
@@ -15,7 +15,7 @@ namespace Iot.Device.Mcp23xxx
         private readonly int _interruptA;
         private readonly int _interruptB;
         private BankStyle _bankStyle;
-        protected readonly IBusDevice _device;
+        protected readonly BusAdapter _device;
         private bool _increments = true;
 
         private ushort _gpioCache;
@@ -34,7 +34,7 @@ namespace Iot.Device.Mcp23xxx
         /// detect what style the chip is in and most apps will fail if the chip is not set to defaults. This setting
         /// has no impact on 8 bit expanders.
         /// </param>
-        public Mcp23xxx(IBusDevice device, int deviceAddress, int reset = -1, int interruptA = -1, int interruptB = -1, BankStyle bankStyle = BankStyle.Sequential)
+        protected Mcp23xxx(BusAdapter device, int deviceAddress, int reset = -1, int interruptA = -1, int interruptB = -1, BankStyle bankStyle = BankStyle.Sequential)
         {
             ValidateDeviceAddress(deviceAddress);
             DeviceAddress = deviceAddress;
@@ -333,17 +333,17 @@ namespace Iot.Device.Mcp23xxx
             if (pins < 0xFF + 1)
             {
                 // Only need to get the first 8 pins (PortA)
-                result = InternalReadByte(Register.OLAT, Port.PortA);
+                result = InternalReadByte(Register.GPIO, Port.PortA);
             }
             else if ((pins & 0xFF) == 0)
             {
                 // Only need to get the second 8 pins (PortB)
-                result = InternalReadByte(Register.OLAT, Port.PortB);
+                result = (ushort)(InternalReadByte(Register.GPIO, Port.PortB) << 8);
             }
             else
             {
                 // Need to get both
-                result = InternalReadUInt16(Register.OLAT);
+                result = InternalReadUInt16(Register.GPIO);
             }
 
             for (int i = 0; i < pinValues.Length; i++)
@@ -361,8 +361,7 @@ namespace Iot.Device.Mcp23xxx
         public void Write(int pinNumber, PinValue value)
         {
             ValidatePin(pinNumber);
-            Span<PinValuePair> values = stackalloc PinValuePair[1];
-            values[0] = new PinValuePair(pinNumber, default);
+            Span<PinValuePair> values = stackalloc PinValuePair[] { new PinValuePair(pinNumber, value) };
             Write(values);
         }
 

@@ -9,7 +9,7 @@ namespace Iot.Device.Mcp23xxx
     /// </summary>
     public abstract class Mcp23x0x : Mcp23xxx
     {
-        public Mcp23x0x(IBusDevice device, int deviceAddress,  int reset = -1, int interrupt = -1)
+        protected Mcp23x0x(BusAdapter device, int deviceAddress,  int reset = -1, int interrupt = -1)
             : base(device, deviceAddress, reset, interrupt)
         {
         }

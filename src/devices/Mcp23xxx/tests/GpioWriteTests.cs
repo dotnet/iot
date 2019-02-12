@@ -12,24 +12,31 @@ namespace Iot.Device.Mcp23xxx.Tests
     {
         [Theory]
         [MemberData(nameof(TestDevices))]
-        public void Write_InvalidPin(Mcp23xxx device)
+        public void Write_InvalidPin(TestDevice testDevice)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => device.Write(-1, PinValue.High));
-            Assert.Throws<ArgumentOutOfRangeException>(() => device.Write(device.PinCount, PinValue.Low));
-            Assert.Throws<ArgumentOutOfRangeException>(() => device.Write(device.PinCount + 1, PinValue.High));
+            Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Write(-1, PinValue.High));
+            Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Write(testDevice.Device.PinCount, PinValue.Low));
+            Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Write(testDevice.Device.PinCount + 1, PinValue.High));
         }
 
         [Theory]
         [MemberData(nameof(TestDevices))]
-        public void Write_GoodPin(Mcp23xxx device)
+        public void Write_GoodPin(TestDevice testDevice)
         {
-            BusMock mock = ((IBusMock)device).BusMock;
-            for (int pin = 0; pin < device.PinCount; pin++)
+            Mcp23xxx device = testDevice.Device;
+            for (int pin = 0; pin < testDevice.Device.PinCount; pin++)
             {
                 bool first = pin < 8;
 
                 device.Write(pin, PinValue.High);
-                Assert.Equal((byte)(1 << (first ? pin : pin - 8)),
+                byte expected = (byte)(1 << (first ? pin : pin - 8));
+                if (expected !=
+                    (first ? device.ReadByte(Register.OLAT) : ((Mcp23x1x)device).ReadByte(Register.OLAT, Port.PortB)))
+                {
+                    Console.WriteLine();
+                }
+
+                Assert.Equal(expected,
                     first ? device.ReadByte(Register.OLAT) : ((Mcp23x1x)device).ReadByte(Register.OLAT, Port.PortB));
 
                 device.Write(pin, PinValue.Low);
