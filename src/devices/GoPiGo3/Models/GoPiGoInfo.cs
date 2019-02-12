@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 
 namespace Iot.Device.GoPiGo3.Models
@@ -21,12 +22,12 @@ namespace Iot.Device.GoPiGo3.Models
         /// <summary>
         /// Hardware version
         /// </summary>
-        public string HardwareVersion { get; set; }
+        public Version HardwareVersion { get; set; }
 
         /// <summary>
         /// Firmware version
         /// </summary>
-        public string SoftwareVersion { get; set; }
+        public Version SoftwareVersion { get; set; }
 
         /// <summary>
         /// Id of the GoPiGo3
@@ -39,7 +40,7 @@ namespace Iot.Device.GoPiGo3.Models
         /// <returns>Returns an int array of the hardware version</returns>
         public int[] GetHardwareVersion()
         {
-            return GetVersionsFromString(HardwareVersion);
+            return GetVersionsFromString(HardwareVersion.ToString());
         }
 
         /// <summary>
@@ -48,7 +49,7 @@ namespace Iot.Device.GoPiGo3.Models
         /// <returns>Returns an int array of the firmware version</returns>
         public int[] GetSoftwareVersion()
         {
-            return GetVersionsFromString(SoftwareVersion);
+            return GetVersionsFromString(SoftwareVersion.ToString());
         }
 
         private int[] GetVersionsFromString(string toconvert)

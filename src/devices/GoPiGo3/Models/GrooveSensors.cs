@@ -47,35 +47,5 @@ namespace Iot.Device.GoPiGo3.Models
         Configuring,
         NoData,
         I2cError
-    }
-
-    /// <summary>
-    /// The setup of the Groove element
-    /// </summary>
-    public enum GrooveInputOutput
-    {
-        InputDigital = 0,
-        OutputDigital,
-        InputDigitalPullUp,
-        InputDigitalPullDown,
-        InputAnalog,
-        OutputPwm,
-        InputAnalogPullUp,
-        InputAnalogPullDown
-    }
-
-    /// <summary>
-    /// The grove port used for analogic and/or digital read/write
-    /// </summary>
-    public enum GroovePort
-    {
-
-        Groove1Pin1 = 0x01,
-        Groove1Pin2 = 0x02,
-        Groove2Pin1 = 0x04,
-        Groove2Pin2 = 0x08,
-        Groove1 = Groove1Pin1 + Groove1Pin2,
-        Groove2 = Groove2Pin1 + Groove2Pin2,
-        Both = Groove1 + Groove2
-    }
+    }    
 }

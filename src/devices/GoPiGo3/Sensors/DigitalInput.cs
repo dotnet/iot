@@ -35,12 +35,12 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// <summary>
         /// Get the state of the digital pin
         /// </summary>
-        public int Value => _goPiGo.GetGrooveState(_mode);        
+        public int Value => _goPiGo.GetGrooveState(_mode);
 
         /// <summary>
         /// Get "High" when reading high, "Low" otherwise
         /// </summary>
-        public string ValueAsString => _goPiGo.GetGrooveState(_mode) !=0 ? "High" : "Low";        
+        public override string ToString() => _goPiGo.GetGrooveState(_mode) != 0 ? "High" : "Low";
 
         /// <summary>
         /// Get the sensor name "Digital Input"

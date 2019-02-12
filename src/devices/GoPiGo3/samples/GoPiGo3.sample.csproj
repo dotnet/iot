@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\GoPiGo3.csproj" />
+    <ProjectReference Include="..\GoPiGo3.csproj" />
   </ItemGroup>
 
 </Project>

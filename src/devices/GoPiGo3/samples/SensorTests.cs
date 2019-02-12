@@ -19,7 +19,7 @@ namespace GoPiGo3.sample
             while (!Console.KeyAvailable)
             {                
                 Console.CursorLeft = 0;
-                Console.Write($"Value: {ultraSonic.Value}, ValueAsString: {ultraSonic.ValueAsString}");
+                Console.Write($"Value: {ultraSonic.Value}, ValueAsString: {ultraSonic.ToString()}");
                 Thread.Sleep(100);
                 CleanALine();
             }
@@ -90,7 +90,7 @@ namespace GoPiGo3.sample
             while (!Console.KeyAvailable)
             {
                 Console.CursorLeft = 0;
-                Console.Write($"{soundSensor.SensorName}: {soundSensor.ValueAsString} which is {soundSensor.ValueAsPercent} %");
+                Console.Write($"{soundSensor.SensorName}: {soundSensor} which is {soundSensor.ValueAsPercent} %");
                 Thread.Sleep(100);
                 CleanALine();
             }
@@ -100,28 +100,28 @@ namespace GoPiGo3.sample
         {
             Relay relay = new Relay(_goPiGo3, GroovePort.Groove1);
             Console.WriteLine($"Test {relay.SensorName} on port {relay.Port}, will change the state of the relay from on to off, reverse the polarity, turn on and off, reverse the polarity and turn on an off again.");
-            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay.ValueAsString} IsInverted: {relay.IsInverted}");
+            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay} IsInverted: {relay.IsInverted}");
             // 2 is different than 0, so it should swith it to "on"
             Thread.Sleep(2000);
             relay.Value = 2;
-            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay.ValueAsString} IsInverted: {relay.IsInverted}");
+            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay} IsInverted: {relay.IsInverted}");
             Thread.Sleep(2000);
             relay.Value = 0;
-            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay.ValueAsString} IsInverted: {relay.IsInverted}");
+            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay} IsInverted: {relay.IsInverted}");
             Thread.Sleep(2000);
             relay.IsInverted = true;
             relay.Value = 0;
-            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay.ValueAsString} IsInverted: {relay.IsInverted}");
+            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay} IsInverted: {relay.IsInverted}");
             Thread.Sleep(2000);
             relay.Value = 2;
-            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay.ValueAsString} IsInverted: {relay.IsInverted}");
+            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay} IsInverted: {relay.IsInverted}");
             Thread.Sleep(2000);
             relay.IsInverted = false;
             relay.On();
-            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay.ValueAsString} IsInverted: {relay.IsInverted}");
+            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay} IsInverted: {relay.IsInverted}");
             Thread.Sleep(2000);
             relay.Off();
-            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay.ValueAsString} IsInverted: {relay.IsInverted}");
+            Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay} IsInverted: {relay.IsInverted}");
             Thread.Sleep(2000);
         }
 
@@ -133,7 +133,7 @@ namespace GoPiGo3.sample
             while (!Console.KeyAvailable)
             {
                 Console.CursorLeft = 0;
-                Console.Write($"{button.SensorName} is {button.IsPressed} so it is {button.ValueAsString}");
+                Console.Write($"{button.SensorName} is {button.IsPressed} so it is {button}");
                 Thread.Sleep(20);
                 CleanALine();
             }

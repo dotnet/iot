@@ -45,12 +45,12 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// <summary>
         /// Get the read value as a percentage from 0 to 100
         /// </summary>
-        public byte ValueAsPercent => (Value >= 0) ? (byte)(100 * Value / MaxAdc): byte.MaxValue;
+        public byte ValueAsPercent => (Value >= 0) ? (byte)(100 * Value / MaxAdc) : byte.MaxValue;
 
         /// <summary>
         /// Get the value as a string
         /// </summary>
-        public string ValueAsString => Value.ToString();
+        public override string ToString() => Value.ToString();
 
         /// <summary>
         /// Get the Groove Port
@@ -62,7 +62,7 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// <summary>
         /// Get the sensor name "Analog Sensor"
         /// </summary>
-        public string SensorName => "Analog Sensor";        
+        public string SensorName => "Analog Sensor";
 
     }
 }

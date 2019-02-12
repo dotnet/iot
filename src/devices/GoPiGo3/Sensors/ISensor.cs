@@ -20,13 +20,13 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// <summary>
         /// Property to return the raw value of the sensort as a string
         /// </summary>
-        string ValueAsString { get; }
+        string ToString();
 
         /// <summary>
         /// Gets the name of the sensor.
         /// </summary>
         /// <returns>The sensor name.</returns>
-		string SensorName { get; }
+        string SensorName { get; }
 
         /// <summary>
         /// Sensor port

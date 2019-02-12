@@ -147,7 +147,11 @@ namespace Iot.Device.GoPiGo3.Movements
         /// speed is between -255 and +255
         /// </summary>
         public int Speed
-        { get { return GetSpeed(); } set { SetSpeed(value); } }
+        {
+            get => GetSpeed();
+
+            set { SetSpeed(value); }
+        }
 
         public MotorPort Port { get; internal set; }
 
@@ -156,7 +160,7 @@ namespace Iot.Device.GoPiGo3.Movements
         /// </summary>
         public int PeriodRefresh
         {
-            get { return _periodRefresh; }
+            get => _periodRefresh;
 
             set
             {
@@ -178,7 +182,7 @@ namespace Iot.Device.GoPiGo3.Movements
         /// </summary>
         public int TachoCount
         {
-            get { return GetTachoCount(); }
+            get => GetTachoCount();
 
             internal set
             {

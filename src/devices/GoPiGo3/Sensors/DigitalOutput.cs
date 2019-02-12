@@ -50,7 +50,7 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// <summary>
         /// Get "High" when output is set to high, "Low" if set to low state
         /// </summary>
-        public string ValueAsString => _value ? "High" : "Low";
+        public override string ToString() => _value ? "High" : "Low";
 
         /// <summary>
         /// Get the sensor name "Digital Output"

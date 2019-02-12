@@ -231,7 +231,7 @@ There are high level classes to handle directly sensors like analogic sensors, b
 
 ### Using the Sensor classes
 
-Using the sensor classes is straight forward. Just reference a class and initialized it. Access properties which are common to all sensors, ```Value``` and ```ValueAsString```. 
+Using the sensor classes is straight forward. Just reference a class and initialized it. Access properties which are common to all sensors, ```Value``` and ```ToString()```. 
 
 Example creating an Ultrasonic sensor on Groove1 port:
 
@@ -241,7 +241,7 @@ Console.WriteLine($"Test {ultraSonic.SensorName} on port {ultraSonic.Port}. Give
 while (!Console.KeyAvailable)
 {                
     Console.CursorLeft = 0;
-    Console.Write($"Value: {ultraSonic.Value}, ValueAsString: {ultraSonic.ValueAsString}");
+    Console.Write($"Value: {ultraSonic.Value}, Value as String: {ultraSonic}");
     Thread.Sleep(100);
 }
 ```

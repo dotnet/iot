@@ -22,7 +22,7 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// <summary>
         /// Get the value as a percent
         /// </summary>
-        public new string ValueAsString => $"{ValueAsPercent} %";
+        public override string ToString() => $"{ValueAsPercent} %";
 
         /// <summary>
         /// Get the sensor name "Potentiometer Sensor"

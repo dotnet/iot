@@ -58,9 +58,9 @@ namespace GoPiGo3.sample
             motor.Stop();
         }
 
-        static private void TestVehicule()
+        static private void Testvehicle()
         {
-            Console.WriteLine("Vehicule drive test using Motor A for left, Motor D for right, not inverted direction.");
+            Console.WriteLine("vehicle drive test using Motor left, Motor right, not inverted direction.");
             Vehicle veh = new Vehicle(_goPiGo3);
             veh.DirectionOpposite = true;
             Console.WriteLine("Driving backward");

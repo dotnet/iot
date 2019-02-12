@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease.19078.2" />
-        <None Include="README.md" />
+    <None Include="README.md" />
   </ItemGroup>
 
   <ItemGroup>

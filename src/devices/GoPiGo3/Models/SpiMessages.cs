@@ -52,16 +52,4 @@ namespace Iot.Device.GoPiGo3.Models
         StartGroove1I2c,
         StartGroove2I2c
     }
-
-    /// <summary>
-    /// The different Led embedded in the system
-    /// </summary>
-    public enum GoPiGo3Led
-    {
-        LedEyeLeft = 0x02,
-        LedEyeRight = 0x01,
-        LedBlinkerLeft = 0x04,
-        LedBlinkerRight = 0x08,
-        LedWifi = 0x80 // Used to indicate WiFi status. Should not be controlled by the user.
-    }
 }

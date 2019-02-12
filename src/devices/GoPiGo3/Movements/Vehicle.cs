@@ -17,7 +17,7 @@ namespace Iot.Device.GoPiGo3.Movements
         private Timer _timer = null;
 
         /// <summary>
-        /// Create a vehicule with 2 motors, one left and one right
+        /// Create a vehicle with 2 motors, one left and one right
         /// </summary>
         public Vehicle(GoPiGo goPiGo)
         {
@@ -46,8 +46,8 @@ namespace Iot.Device.GoPiGo3.Movements
         }
 
         /// <summary>
-        /// Turn the vehicule left by the specified number of degrees for each motor. So 360 will do 1 motor turn.
-        /// You need to do some math to have the actual vehicule turning fully at 360. It depends of the reduction used.
+        /// Turn the vehicle left by the specified number of degrees for each motor. So 360 will do 1 motor turn.
+        /// You need to do some math to have the actual vehicle turning fully at 360. It depends of the reduction used.
         /// </summary>
         /// <param name="speed">speed is between -255 and +255</param>
         /// <param name="degrees">degrees to turn each motor</param>
@@ -57,8 +57,8 @@ namespace Iot.Device.GoPiGo3.Movements
         }
 
         /// <summary>
-        /// Turn the vehicule right by the specified number of degrees for each motor. So 360 will do 1 motor turn.
-        /// You need to do some math to have the actual vehicule turning fully at 360. It depends of the reduction used.
+        /// Turn the vehicle right by the specified number of degrees for each motor. So 360 will do 1 motor turn.
+        /// You need to do some math to have the actual vehicle turning fully at 360. It depends of the reduction used.
         /// </summary>
         /// <param name="speed">speed is between -255 and +255</param>
         /// <param name="degrees">degrees to turn each motor</param>
@@ -68,7 +68,7 @@ namespace Iot.Device.GoPiGo3.Movements
         }
 
         /// <summary>
-        /// Turn the vehicule left for a number of milliseconds
+        /// Turn the vehicle left for a number of milliseconds
         /// </summary>
         /// <param name="speed">speed is between -255 and +255</param>
         /// <param name="timeout">number of milliseconds to run the motors</param>
@@ -78,7 +78,7 @@ namespace Iot.Device.GoPiGo3.Movements
         }
 
         /// <summary>
-        /// Turn the vehicule right for a number of milliseconds
+        /// Turn the vehicle right for a number of milliseconds
         /// </summary>
         /// <param name="speed">speed is between -255 and +255</param>
         /// <param name="timeout">number of milliseconds to run the motors</param>
@@ -88,7 +88,7 @@ namespace Iot.Device.GoPiGo3.Movements
         }
 
         /// <summary>
-        /// Stop the vehicule
+        /// Stop the vehicle
         /// </summary>
         public void Stop()
         {
@@ -127,7 +127,7 @@ namespace Iot.Device.GoPiGo3.Movements
         public MotorPort PortRight { get; }
 
         /// <summary>
-        /// Is the vehicule has inverted direction, then true
+        /// Is the vehicle has inverted direction, then true
         /// </summary>
         public bool DirectionOpposite
         {
@@ -148,7 +148,7 @@ namespace Iot.Device.GoPiGo3.Movements
                 return;
             //create a timer for the needed time to run
             if (_timer == null)
-                _timer = new Timer(RunUntil, ports, TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
+                _timer = new Timer(RunUntil, null, TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
             else
                 _timer.Change(TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
 
@@ -172,14 +172,8 @@ namespace Iot.Device.GoPiGo3.Movements
 
         private void RunUntil(object state)
         {
-            if (state == null)
-                return;
-            //stop all motors!
-            MotorPort[] ports = (MotorPort[])state;
-            for (int i = 0; i < ports.Length; i++)
-            {
-                StopMotor(ports[i]);
-            }
+            StopMotor(PortLeft);
+            StopMotor(PortRight);
             if (_timer != null)
             {
                 _timer.Dispose();
@@ -220,7 +214,7 @@ namespace Iot.Device.GoPiGo3.Movements
                     initval[i] = _goPiGo.GetMotorEncoder(ports[i]);
                     StartMotor(ports[i], speeds[i]);
                 }
-                catch (Exception ex) when (ex is IOException)
+                catch (IOException)
                 { }
             }
 
@@ -250,15 +244,15 @@ namespace Iot.Device.GoPiGo3.Movements
                     }
                     nonstop = status;
                 }
-                catch (Exception ex) when (ex is IOException)
+                catch (IOException)
                 { }
             }
         }
 
         /// <summary>
-        /// Return true if the vehicule is moving
+        /// Return true if the vehicle is moving
         /// </summary>
-        /// <returns>true if vehicule moving</returns>
+        /// <returns>true if vehicle moving</returns>
         public bool IsRunning() => ((IsRunning(PortLeft) || IsRunning(PortRight)));
 
         private bool IsRunning(MotorPort port)
@@ -268,7 +262,7 @@ namespace Iot.Device.GoPiGo3.Movements
                 if (_goPiGo.GetMotorStatus(port).Speed == 0)
                     return false;
             }
-            catch (Exception ex) when (ex is IOException)
+            catch (IOException)
             { }
             return true;
         }

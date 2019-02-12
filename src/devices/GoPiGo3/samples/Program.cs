@@ -6,6 +6,7 @@ using Iot.Device.GoPiGo3.Models;
 using Iot.Device.GoPiGo3;
 using System;
 using System.Threading;
+using System.Drawing;
 
 namespace GoPiGo3.sample
 {
@@ -71,7 +72,7 @@ namespace GoPiGo3.sample
                     TestMotorTacho();
                     break;
                 case "13":
-                    TestVehicule();
+                    Testvehicle();
                     break;
                 default:
                     break;
@@ -115,25 +116,25 @@ namespace GoPiGo3.sample
                 {
                     for (int blue = 0; blue < 255; blue += 10)
                     {
-                        _goPiGo3.SetLed((byte)GoPiGo3Led.LedEyeLeft + (byte)GoPiGo3Led.LedEyeRight, (byte)red, (byte)green, (byte)blue);
+                        _goPiGo3.SetLed((byte)GoPiGo3Led.LedEyeLeft + (byte)GoPiGo3Led.LedEyeRight, Color.FromArgb(red, green, blue));
                     }
                 }
             }
             // Led wifi
             Console.WriteLine("Changing wifi led to red");
-            _goPiGo3.SetLed((byte)GoPiGo3Led.LedWifi, 255, 0, 0);
+            _goPiGo3.SetLed((byte)GoPiGo3Led.LedWifi, Color.Red);
             Thread.Sleep(2000);
             Console.WriteLine("Changing wifi led to blue");
-            _goPiGo3.SetLed((byte)GoPiGo3Led.LedWifi, 0, 0, 255);
+            _goPiGo3.SetLed((byte)GoPiGo3Led.LedWifi, Color.Green);
             Thread.Sleep(2000);
             Console.WriteLine("Changing wifi led to green");
-            _goPiGo3.SetLed((byte)GoPiGo3Led.LedWifi, 0, 255, 0);
+            _goPiGo3.SetLed((byte)GoPiGo3Led.LedWifi, Color.Blue);
             Thread.Sleep(2000);
             // Get the voltage details
             var voltage = _goPiGo3.GoPiGoVoltage;
             Console.WriteLine($"5V: {voltage.Voltage5V}");
             Console.WriteLine($"Battery voltage: {voltage.VoltageBattery}");
-            _goPiGo3.SetLed((byte)GoPiGo3Led.LedEyeLeft + (byte)GoPiGo3Led.LedEyeRight + (byte)GoPiGo3Led.LedWifi, 0, 0, 0);
+            _goPiGo3.SetLed((byte)GoPiGo3Led.LedEyeLeft + (byte)GoPiGo3Led.LedEyeRight + (byte)GoPiGo3Led.LedWifi, Color.Black);
         }
 
         static private void TestMotorPosition()

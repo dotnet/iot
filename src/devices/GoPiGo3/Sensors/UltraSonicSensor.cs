@@ -43,7 +43,7 @@ namespace Iot.Device.GoPiGo3.Sensors
                 {
                     return (_goPiGo.GetGrooveValue(Port)[0] << 8) + _goPiGo.GetGrooveValue(Port)[1];
                 }
-                catch (Exception ex) when (ex is IOException)
+                catch (IOException)
                 {
                     return -1;
                 }
@@ -53,7 +53,7 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// <summary>
         /// Return the raw value  as a string of the sensor
         /// </summary>
-        public string ValueAsString => $"{Value} cm";
+        public override string ToString() => $"{Value} cm";
 
         public List<GroovePort> SupportedPorts => new List<GroovePort> { GroovePort.Groove1, GroovePort.Groove2 };
 

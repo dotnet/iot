@@ -9,7 +9,7 @@ namespace Iot.Device.GoPiGo3.Sensors
     /// <summary>
     /// A Button class
     /// </summary>
-    public class Button:DigitalInput
+    public class Button : DigitalInput
     {
         /// <summary>
         /// Button constructor
@@ -27,7 +27,7 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// <summary>
         /// Get "Pressed" if the button is pressed "Not pressed" if not
         /// </summary>
-        public new string ValueAsString => Value != 0 ? "Pressed" : "Not pressed";
+        public override string ToString() => Value != 0 ? "Pressed" : "Not pressed";
 
         /// <summary>
         /// Get the sensor name "Button"

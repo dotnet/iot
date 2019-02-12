@@ -40,7 +40,7 @@ namespace Iot.Device.GoPiGo3.Sensors
             _goPiGo = goPiGo;
             Port = port;
             _goPiGo.SetGrooveType(port, GrooveSensorType.Custom);
-            _mode = (port == GroovePort.Groove1) ? GroovePort.Groove1Pin1 : GroovePort.Groove2Pin1;            
+            _mode = (port == GroovePort.Groove1) ? GroovePort.Groove1Pin1 : GroovePort.Groove2Pin1;
             _goPiGo.SetGrooveMode(_mode, GrooveInputOutput.OutputPwm);
             Duty = duty;
             Value = 24000; //The default value
@@ -50,14 +50,17 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// <summary>
         /// Get/set the PWM duty to use to generate the sound from 0 to 100
         /// </summary>
-        public byte Duty {
+        public byte Duty
+        {
             get { return _duty; }
-            set {
+            set
+            {
                 var prev = _duty;
                 _duty = Math.Clamp(value, (byte)0, (byte)100);
                 if (prev != _duty)
                     Start();
-            } }
+            }
+        }
 
         /// <summary>
         /// Starts the buzzer
@@ -78,7 +81,8 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// <summary>
         /// Get/set the frequency in Hz
         /// </summary>
-        public int Value {
+        public int Value
+        {
             get { return _value; }
 
             set
@@ -86,12 +90,12 @@ namespace Iot.Device.GoPiGo3.Sensors
                 _value = value;
                 _goPiGo.GetGroovePwmFrequency(Port, (uint)_value);
             }
-                }
+        }
 
         /// <summary>
         /// Get the frequency in Hertz
         /// </summary>
-        public string ValueAsString => $"{Value} Hz";
+        public override string ToString() => $"{Value} Hz";
 
         public GroovePort Port { get; internal set; }
 
