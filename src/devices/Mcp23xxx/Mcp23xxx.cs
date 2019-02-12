@@ -7,7 +7,7 @@ using System.Device.Gpio;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public abstract class Mcp23xxx : IDisposable
+    public abstract partial class Mcp23xxx : IGpioController
     {
         protected int DeviceAddress { get; }
         private GpioController _masterGpioController;
@@ -15,9 +15,8 @@ namespace Iot.Device.Mcp23xxx
         private readonly int _interruptA;
         private readonly int _interruptB;
         private BankStyle _bankStyle;
-        protected readonly IBusDevice _device;
+        protected readonly BusAdapter _device;
         private bool _increments = true;
-        private (int PinNumber, PinValue Value)[] _pinBuffer = new (int, PinValue)[1];
 
         private ushort _gpioCache;
         private bool _cacheValid;
@@ -35,7 +34,7 @@ namespace Iot.Device.Mcp23xxx
         /// detect what style the chip is in and most apps will fail if the chip is not set to defaults. This setting
         /// has no impact on 8 bit expanders.
         /// </param>
-        public Mcp23xxx(IBusDevice device, int deviceAddress, int reset = -1, int interruptA = -1, int interruptB = -1, BankStyle bankStyle = BankStyle.Sequential)
+        protected Mcp23xxx(BusAdapter device, int deviceAddress, int reset = -1, int interruptA = -1, int interruptB = -1, BankStyle bankStyle = BankStyle.Sequential)
         {
             ValidateDeviceAddress(deviceAddress);
             DeviceAddress = deviceAddress;
@@ -315,40 +314,42 @@ namespace Iot.Device.Mcp23xxx
         public PinValue Read(int pinNumber)
         {
             ValidatePin(pinNumber);
-            _pinBuffer[0] = (pinNumber, default);
-            Read(_pinBuffer);
-            return _pinBuffer[0].Value;
+            Span<PinValuePair> values = stackalloc PinValuePair[1];
+            values[0] = new PinValuePair(pinNumber, default);
+            Read(values);
+            return values[0].PinValue;
         }
 
-        public void Read(Span<(int pin, PinValue value)> pinValues)
+        public void Read(Span<PinValuePair> pinValues)
         {
             ushort pins = 0;
-            foreach ((int pin, PinValue value) in pinValues)
+            foreach (PinValuePair pair in pinValues)
             {
-                ValidatePin(pin);
-                pins |= (ushort)(1 << pin);
+                ValidatePin(pair.PinNumber);
+                pins |= (ushort)(1 << pair.PinNumber);
             }
 
             ushort result = 0;
             if (pins < 0xFF + 1)
             {
                 // Only need to get the first 8 pins (PortA)
-                result = InternalReadByte(Register.OLAT, Port.PortA);
+                result = InternalReadByte(Register.GPIO, Port.PortA);
             }
             else if ((pins & 0xFF) == 0)
             {
                 // Only need to get the second 8 pins (PortB)
-                result = InternalReadByte(Register.OLAT, Port.PortB);
+                result = (ushort)(InternalReadByte(Register.GPIO, Port.PortB) << 8);
             }
             else
             {
                 // Need to get both
-                result = InternalReadUInt16(Register.OLAT);
+                result = InternalReadUInt16(Register.GPIO);
             }
 
             for (int i = 0; i < pinValues.Length; i++)
             {
-                pinValues[i].value = (result & (1 << pinValues[i].pin)) > 0 ? PinValue.High : PinValue.Low;
+                int pin = pinValues[i].PinNumber;
+                pinValues[i]= new PinValuePair(pin, result & (1 << pin));
             }
         }
 
@@ -360,21 +361,21 @@ namespace Iot.Device.Mcp23xxx
         public void Write(int pinNumber, PinValue value)
         {
             ValidatePin(pinNumber);
-            _pinBuffer[0] = (pinNumber, value);
-            Write(_pinBuffer);
+            Span<PinValuePair> values = stackalloc PinValuePair[] { new PinValuePair(pinNumber, value) };
+            Write(values);
         }
 
-        public void Write(ReadOnlySpan<(int pin, PinValue value)> pinValues)
+        public void Write(ReadOnlySpan<PinValuePair> pinValues)
         {
             ushort mask = 0;
             ushort newBits = 0;
 
-            foreach ((int pin, PinValue value) in pinValues)
+            foreach (PinValuePair pair in pinValues)
             {
-                ValidatePin(pin);
-                ushort bit = (ushort)(1 << pin);
+                ValidatePin(pair.PinNumber);
+                ushort bit = (ushort)(1 << pair.PinNumber);
                 mask |= bit;
-                if (value == PinValue.High)
+                if (pair.PinValue == PinValue.High)
                 {
                     newBits |= bit;
                 }
@@ -481,5 +482,12 @@ namespace Iot.Device.Mcp23xxx
 
         private static string GetBits(byte value) => Convert.ToString(value, 2).PadLeft(8, '0');
         private static string GetBits(ushort value) => Convert.ToString(value, 2).PadLeft(16, '0');
+
+        public void OpenPin(int pinNumber, PinMode mode) => SetPinMode(pinNumber, mode);
+
+        public void ClosePin(int pinNumber)
+        {
+            // No-op
+        }
     }
 }
