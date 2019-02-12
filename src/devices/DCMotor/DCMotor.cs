@@ -11,21 +11,39 @@ namespace Iot.Device.DCMotor
 {
     public abstract class DCMotor : IDisposable
     {
-        protected GpioController _controller;
+        /// <summary>
+        /// Controller related with operations on pins
+        /// </summary>
+        protected GpioController Controller;
 
+        /// <summary>
+        /// Constructs generic DCMotor instance
+        /// </summary>
+        /// <param name="controller"> Controller related with operations on pins</param>
         protected DCMotor(GpioController controller)
         {
-            _controller = controller ?? new GpioController();
+            Controller = controller ?? new GpioController();
         }
 
+        /// <summary>
+        /// Gets or sets the speed of the motor. Range is -1..1 or 0..1 for 1-pin connection.
+        /// 1 means maximum speed, 0 means no movement and -1 means movement in opposite direction.
+        /// </summary>
         public abstract double Speed { get; set; }
 
+        /// <summary>
+        /// Disposes the DC motor class
+        /// </summary>
         public virtual void Dispose()
         {
-            _controller?.Dispose();
-            _controller = null;
+            Controller?.Dispose();
+            Controller = null;
         }
 
+        /// <summary>
+        /// Constructs DCMotor class.
+        /// Depending on the settings it will pick implementation suitable for the given connection.
+        /// </summary>
         public static DCMotor Create(DCMotorSettings settings)
         {
             if (settings.UseEnableAsPwm)

@@ -39,15 +39,15 @@ namespace Iot.Device.DCMotor
             _pin1 = pin1;
 
             _speed = 0;
-            
+
             _pwm.OpenChannel(_chip, _channel);
             _pwm.StartWriting(_chip, _channel, pwmFrequency, 0);
 
-            _controller.OpenPin(_pin0, PinMode.Output);
-            _controller.Write(_pin0, PinValue.Low);
+            Controller.OpenPin(_pin0, PinMode.Output);
+            Controller.Write(_pin0, PinValue.Low);
 
-            _controller.OpenPin(_pin1, PinMode.Output);
-            _controller.Write(_pin1, PinValue.Low);
+            Controller.OpenPin(_pin1, PinMode.Output);
+            Controller.Write(_pin1, PinValue.Low);
         }
 
         /// <summary>
@@ -70,13 +70,13 @@ namespace Iot.Device.DCMotor
 
                 if (val >= 0.0)
                 {
-                    _controller.Write(_pin0, PinValue.Low);
-                    _controller.Write(_pin1, PinValue.High);
+                    Controller.Write(_pin0, PinValue.Low);
+                    Controller.Write(_pin1, PinValue.High);
                 }
                 else
                 {
-                    _controller.Write(_pin0, PinValue.High);
-                    _controller.Write(_pin1, PinValue.Low);
+                    Controller.Write(_pin0, PinValue.High);
+                    Controller.Write(_pin1, PinValue.Low);
                 }
 
                 SetPwmFill(Math.Abs(val));
