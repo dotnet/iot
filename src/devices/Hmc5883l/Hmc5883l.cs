@@ -26,14 +26,14 @@ namespace Iot.Device.Hmc5883l
         private readonly byte _gain;
 
         /// <summary>
-        /// HMC5883L Raw Vector
+        /// HMC5883L Direction Vector
         /// </summary>
-        public Vector3 RawVector => ReadRawVector();
+        public Vector3 DirectionVector => ReadDirectionVector();
 
         /// <summary>
         /// HMC5883L Heading (DEG)
         /// </summary>
-        public double Heading => VectorToAngle(ReadRawVector());
+        public double Heading => VectorToHeading(ReadDirectionVector());
 
         /// <summary>
         /// Initialize a new HMC5883L device connected through I2C
@@ -61,16 +61,20 @@ namespace Iot.Device.Hmc5883l
             byte configA = (byte)(0x70 + _outputRate << 2);
             byte configB = (byte)(_gain << 5);
 
-            _sensor.Write(new[] { (byte)Register.HMC_CONFIG_REG_A_ADDR, configA });
-            _sensor.Write(new[] { (byte)Register.HMC_CONFIG_REG_B_ADDR, configB });
-            _sensor.Write(new[] { (byte)Register.HMC_MODE_REG_ADDR, _measuringMode });
+            Span<byte> commandA = stackalloc byte[] { (byte)Register.HMC_CONFIG_REG_A_ADDR, configA };
+            Span<byte> commandB = stackalloc byte[] { (byte)Register.HMC_CONFIG_REG_B_ADDR, configB };
+            Span<byte> commandMode = stackalloc byte[] { (byte)Register.HMC_MODE_REG_ADDR, _measuringMode };
+
+            _sensor.Write(commandA);
+            _sensor.Write(commandB);
+            _sensor.Write(commandMode);
         }
 
         /// <summary>
         /// Read raw data from HMC5883L
         /// </summary>
         /// <returns>Raw Data</returns>
-        private Vector3 ReadRawVector()
+        private Vector3 ReadDirectionVector()
         {
             Span<byte> xRead = stackalloc byte[2];
             Span<byte> yRead = stackalloc byte[2];
@@ -96,16 +100,9 @@ namespace Iot.Device.Hmc5883l
         /// <param name="vector">HMC5883L Raw Data</param>
         /// <param name="isRad">Determine whether the angle of return is RAD or DEG. Default value is DEG.</param>
         /// <returns>Angle</returns>
-        public double VectorToAngle(Vector3 vector, bool isRad = false)
+        private double VectorToHeading(Vector3 vector)
         {
-            if (!isRad)
-            {
-                return Math.Atan2(vector.Y, vector.X) * (180 / Math.PI) + 180;
-            }
-            else
-            {
-                return Math.Atan2(vector.Y, vector.X) + Math.PI;
-            }
+            return Math.Atan2(vector.Y, vector.X) * (180 / Math.PI) + 180;
         }
 
         /// <summary>

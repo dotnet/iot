@@ -14,8 +14,8 @@ UnixI2cDevice device = new UnixI2cDevice(settings);
 
 using (Hmc5883l sensor = new Hmc5883l(device))
 {
-    // read raw vector
-    Vector3 raw = sensor.RawVector;
+    // read direction vector
+    Vector3 directionVector = sensor.DirectionVector;
     // read direction angle
     double angle = sensor.Heading;
 
