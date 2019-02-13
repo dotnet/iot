@@ -100,20 +100,21 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
-            bool failed  = false;
+            int requestResult  = -1;
+            string consumer = pinNumber.ToString();
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
                 if (mode == PinMode.Input)
                 {
-                    failed = Interop.RequestLineInput(pinHandle, pinNumber.ToString()) == -1;
+                    requestResult = Interop.RequestLineInput(pinHandle, consumer);
                 }
                 else
                 {
-                    failed = Interop.RequestLineOutput(pinHandle, pinNumber.ToString()) == -1;
+                    requestResult = Interop.RequestLineOutput(pinHandle, consumer);
                 }
             }
 
-            if (failed)
+            if (requestResult == -1)
             {
                 ThrowHelper.ThrowIOException(ThrowHelper.ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(), pinNumber);
             } 
