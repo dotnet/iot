@@ -21,13 +21,13 @@ namespace System.Device.Gpio.Drivers
             SafeChipIteratorHandle iterator = Interop.GetChipIterator();
             if (iterator == null)
             {
-                ThrowHelper.ThrowIOException(ThrowHelper.ExceptionResource.NoChipIteratorFound, Marshal.GetLastWin32Error());
+                throw ExceptionHelper.GetIOException(ExceptionResource.NoChipIteratorFound, Marshal.GetLastWin32Error());
             }
 
             _chip = Interop.GetNextChipFromChipIterator(iterator);
             if (_chip == null)
             {
-                ThrowHelper.ThrowIOException(ThrowHelper.ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
+                throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
             }
 
             // Freeing other chips opened
@@ -50,7 +50,7 @@ namespace System.Device.Gpio.Drivers
         }
 
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw 
-            ThrowHelper.GetPlatformNotSupportedException(ThrowHelper.ExceptionResource.ConvertPinNumberingSchemaError);
+            ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.ConvertPinNumberingSchemaError);
 
         protected internal override PinMode GetPinMode(int pinNumber)
         {
@@ -58,7 +58,7 @@ namespace System.Device.Gpio.Drivers
             {
                 return (Interop.GetLineDirection(pinHandle) == 1) ? PinMode.Input : PinMode.Output;
             }
-            throw ThrowHelper.GetInvalidOperationException(ThrowHelper.ExceptionResource.PinNotOpenedError, pin:pinNumber);
+            throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError, pin:pinNumber);
         }
 
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
@@ -72,7 +72,7 @@ namespace System.Device.Gpio.Drivers
             SafeLineHandle pinHandle = Interop.GetChipLineByOffset(_chip, pinNumber);
             if (pinHandle == null)
             {
-                ThrowHelper.ThrowIOException(ThrowHelper.ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
+                throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
             }
 
             _pinNumberToSafeLineHandle.Add(pinNumber, pinHandle);
@@ -85,11 +85,12 @@ namespace System.Device.Gpio.Drivers
                 int result = Interop.GetGpiodLineValue(pinHandle);
                 if (result == -1)
                 {
-                    ThrowHelper.ThrowIOException(ThrowHelper.ExceptionResource.ReadPinError, Marshal.GetLastWin32Error(), pinNumber);
+                    throw ExceptionHelper.GetIOException(ExceptionResource.ReadPinError, Marshal.GetLastWin32Error(), pinNumber);
                 }
+
                 return result;
             }
-            throw ThrowHelper.GetInvalidOperationException(ThrowHelper.ExceptionResource.PinNotOpenedError, pin: pinNumber);
+            throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError, pin: pinNumber);
         }
 
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
@@ -100,9 +101,9 @@ namespace System.Device.Gpio.Drivers
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
             int requestResult  = -1;
-            string consumer = pinNumber.ToString();
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
+                string consumer = pinNumber.ToString();
                 if (mode == PinMode.Input)
                 {
                     requestResult = Interop.RequestLineInput(pinHandle, consumer);
@@ -115,7 +116,7 @@ namespace System.Device.Gpio.Drivers
 
             if (requestResult == -1)
             {
-                ThrowHelper.ThrowIOException(ThrowHelper.ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(), pinNumber);
+                throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(), pinNumber);
             } 
         }
 
@@ -126,12 +127,12 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void Write(int pinNumber, PinValue value)
         {
-            if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
+            if (!_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
-                Interop.SetGpiodLineValue(pinHandle, (value == PinValue.High) ? 1 : 0);
-                return;
+                throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError, pin: pinNumber);
             }
-            throw ThrowHelper.GetInvalidOperationException(ThrowHelper.ExceptionResource.PinNotOpenedError, pin: pinNumber);
+
+            Interop.SetGpiodLineValue(pinHandle, (value == PinValue.High) ? 1 : 0);
         }
 
         protected override void Dispose(bool disposing)
