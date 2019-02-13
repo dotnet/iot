@@ -12,6 +12,16 @@ namespace Iot.Device.Max7219
         private SpiDevice _spiDevice;
 
         /// <summary>
+        /// MAX7219 Spi Clock Frequency
+        /// </summary>
+        public const int SpiClockFrequency = 10_000_000;
+
+        /// <summary>
+        /// MAX7219 SPI Mode
+        /// </summary>
+        public const SpiMode SpiMode = System.Device.Spi.SpiMode.Mode0; 
+
+        /// <summary>
         /// Number of digits Register per Module
         /// </summary>
         public const int NumDigits = 8;
