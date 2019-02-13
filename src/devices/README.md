@@ -8,6 +8,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [Bmp280](Bmp280/README.md)
 * [Mcp3008](Mcp3008/README.md)
+* [Ssd1306](Ssd1306/README.md) -- OLED Display Controller
 
 ## Binding Distribution
 
