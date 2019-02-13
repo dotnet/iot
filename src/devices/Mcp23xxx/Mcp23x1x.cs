@@ -7,7 +7,7 @@ using System.Device.Gpio;
 namespace Iot.Device.Mcp23xxx
 {
     /// <summary>
-    /// Wraps 16 bit MCP I/O extenders
+    /// Wraps 16-bit MCP I/O expanders.
     /// </summary>
     public abstract class Mcp23x1x : Mcp23xxx
     {

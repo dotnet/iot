@@ -36,7 +36,7 @@ namespace Iot.Device.Mcp23xxx
         /// The current bank style of the ports. This does not set the bank style- it tells us what the bank style is.
         /// It is *highly* recommended not to change the bank style from the default as there is no direct way to
         /// detect what style the chip is in and most apps will fail if the chip is not set to defaults. This setting
-        /// has no impact on 8 bit expanders.
+        /// has no impact on 8-bit expanders.
         /// </param>
         protected Mcp23xxx(BusAdapter bus, int reset = -1, int interruptA = -1, int interruptB = -1, IGpioController masterController = null, BankStyle bankStyle = BankStyle.Sequential)
         {
@@ -311,7 +311,7 @@ namespace Iot.Device.Mcp23xxx
 
         public void Read(Span<PinValuePair> pinValues)
         {
-            (uint pins, _) = PinValuePair.ToBits(pinValues);
+            (uint pins, _) = new PinVector32(pinValues);
             if ((pins >> PinCount) > 0)
                 ThrowBadPin(nameof(pinValues));
 
@@ -353,7 +353,7 @@ namespace Iot.Device.Mcp23xxx
 
         public void Write(ReadOnlySpan<PinValuePair> pinValues)
         {
-            (uint mask, uint newBits) = PinValuePair.ToBits(pinValues);
+            (uint mask, uint newBits) = new PinVector32(pinValues);
             if ((mask >> PinCount) > 0)
                 ThrowBadPin(nameof(pinValues));
 
