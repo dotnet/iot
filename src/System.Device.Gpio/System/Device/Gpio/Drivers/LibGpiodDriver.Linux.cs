@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Runtime.InteropServices;
-using System.IO;
 
 namespace System.Device.Gpio.Drivers
 {
@@ -130,6 +129,7 @@ namespace System.Device.Gpio.Drivers
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
                 Interop.SetGpiodLineValue(pinHandle, (value == PinValue.High) ? 1 : 0);
+                return;
             }
             throw ThrowHelper.GetInvalidOperationException(ThrowHelper.ExceptionResource.PinNotOpenedError, pin: pinNumber);
         }
