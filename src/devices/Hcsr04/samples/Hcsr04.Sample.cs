@@ -23,8 +23,8 @@ namespace Iot.Device.Hcsr04.Samples
             {
                 while(true)
                 {
-                    Console.WriteLine($"Value = {sonar.GetDistance()}");
-                    System.Threading.Thread.Sleep(100);
+                    Console.WriteLine($"Distance: {sonar.Distance} cm");
+                    System.Threading.Thread.Sleep(1000);
                 }
             }
         }

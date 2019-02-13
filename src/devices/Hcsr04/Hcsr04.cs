@@ -5,10 +5,6 @@
 using System;
 using System.Diagnostics;
 using System.Device.Gpio;
-using System.Device.I2c;
-using System.Device.I2c.Drivers;
-using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using System.Threading;
 
 namespace Iot.Device.Hcsr04
@@ -19,6 +15,11 @@ namespace Iot.Device.Hcsr04
         private readonly int _trigger;
         private GpioController _controller;
         private Stopwatch _timer = new Stopwatch();
+
+        /// <summary>
+        /// Gets the current distance in cm.
+        /// </summary>
+        public double Distance => GetDistance();
 
         /// <summary>
         /// Creates a new instance of the HC-SCR04 sonar.
@@ -40,32 +41,31 @@ namespace Iot.Device.Hcsr04
         /// <summary>
         /// Gets the current distance in cm.
         /// </summary>
-        public double GetDistance()
+        private double GetDistance()
         {
             _timer.Reset();
 
             // Trigger input for 10uS to start ranging
             // ref https://components101.com/sites/default/files/component_datasheet/HCSR04%20Datasheet.pdf
+            _controller.Write(_trigger, PinValue.Low);
+            Thread.Sleep(TimeSpan.FromMilliseconds(0.002));
             _controller.Write(_trigger, PinValue.High);
             Thread.Sleep(TimeSpan.FromMilliseconds(0.01));
             _controller.Write(_trigger, PinValue.Low);
             
-            _timer.Start();
-            
             while(_controller.Read(_echo) == PinValue.Low)
             {
             }
-
+            _timer.Start();
             while(_controller.Read(_echo) == PinValue.High)
             {
             }
-
             _timer.Stop();
             
             TimeSpan elapsed = _timer.Elapsed;
 
             // distance = (time / 2) × velocity of sound (34300 cm/s)
-            return (double)(elapsed.TotalMilliseconds * 34.3) / 2 - 8;
+            return elapsed.TotalMilliseconds / 2.0 * 34.3;
         }
 
         public void Dispose()
