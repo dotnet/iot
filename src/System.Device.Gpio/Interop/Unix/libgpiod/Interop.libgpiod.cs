@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 internal partial class Interop
 {
     private const string LibgpiodLibrary = "System.Device.Gpio.Native";
+    internal static IntPtr InvalidHandleValue = new IntPtr(-1);
 
     /// <summary>
     /// Create a new gpiochip iterator.
