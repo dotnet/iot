@@ -32,11 +32,11 @@ namespace Iot.Device.Mcp23xxx.Tests
                     : 0x09;
 
                 // Flip the bit on (set the backing buffer directly to simulate incoming data)
-                testDevice.DeviceMock.Registers[register] = (byte)(1 << (first ? pin : pin - 8));
+                testDevice.ChipMock.Registers[register] = (byte)(1 << (first ? pin : pin - 8));
                 Assert.Equal(PinValue.High, device.Read(pin));
 
                 // Clear the register
-                testDevice.DeviceMock.Registers[register] = 0x00;
+                testDevice.ChipMock.Registers[register] = 0x00;
                 Assert.Equal(PinValue.Low, device.Read(pin));
             }
         }

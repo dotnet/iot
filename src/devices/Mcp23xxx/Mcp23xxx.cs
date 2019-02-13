@@ -4,89 +4,53 @@
 
 using System;
 using System.Device.Gpio;
+using System.Runtime.CompilerServices;
 
 namespace Iot.Device.Mcp23xxx
 {
     public abstract partial class Mcp23xxx : IGpioController
     {
-        protected int DeviceAddress { get; }
-        private GpioController _masterGpioController;
+        private IGpioController _masterGpioController;
         private readonly int _reset;
         private readonly int _interruptA;
         private readonly int _interruptB;
         private BankStyle _bankStyle;
-        protected readonly BusAdapter _device;
+        protected readonly BusAdapter _bus;
         private bool _increments = true;
 
         private ushort _gpioCache;
         private bool _cacheValid;
+        private bool _disabled;
 
         /// <summary>
         /// A general purpose parallel I/O expansion for I2C or SPI applications.
         /// </summary>
-        /// <param name="deviceAddress">The device address for the connection on the I2C or SPI bus.</param>
+        /// <param name="bus">The bus the device is connected to.</param>
         /// <param name="reset">The output pin number that is connected to the hardware reset.</param>
         /// <param name="interruptA">The input pin number that is connected to the interrupt for Port A (INTA).</param>
         /// <param name="interruptB">The input pin number that is connected to the interrupt for Port B (INTB).</param>
+        /// <param name="masterController">
+        /// The controller for the reset and interrupt pins. If not specified, the default controller will be used.
+        /// </param>
         /// <param name="bankStyle">
         /// The current bank style of the ports. This does not set the bank style- it tells us what the bank style is.
         /// It is *highly* recommended not to change the bank style from the default as there is no direct way to
         /// detect what style the chip is in and most apps will fail if the chip is not set to defaults. This setting
         /// has no impact on 8 bit expanders.
         /// </param>
-        protected Mcp23xxx(BusAdapter device, int deviceAddress, int reset = -1, int interruptA = -1, int interruptB = -1, BankStyle bankStyle = BankStyle.Sequential)
+        protected Mcp23xxx(BusAdapter bus, int reset = -1, int interruptA = -1, int interruptB = -1, IGpioController masterController = null, BankStyle bankStyle = BankStyle.Sequential)
         {
-            ValidateDeviceAddress(deviceAddress);
-            DeviceAddress = deviceAddress;
-
-            _device = device;
+            _bus = bus;
             _bankStyle = bankStyle;
 
             _reset = reset;
             _interruptA = interruptA;
             _interruptB = interruptB;
 
-            InitializeMasterGpioController();
-
-            // Set all of the pins to input, GPIO outputs to low, and
-            // disable all of the pull-ups
-            if (PinCount == 8)
-            {
-                InternalWriteByte(Register.IODIR, 0xFF, Port.PortA);
-                InternalWriteByte(Register.GPIO, 0x00, Port.PortA);
-                InternalWriteByte(Register.IPOL, 0x00, Port.PortA);
-            }
-            else
-            {
-                InternalWriteUInt16(Register.IODIR, 0xFFFF);
-                InternalWriteUInt16(Register.GPIO, 0x0000);
-                InternalWriteUInt16(Register.IPOL, 0x0000);
-            }
-        }
-
-        private void UpdateCache()
-        {
-            // Ouput state is read from the latches (OLAT)
-            _gpioCache = PinCount == 8
-                ? InternalReadByte(Register.OLAT, Port.PortA)
-                : InternalReadUInt16(Register.OLAT);
-            _cacheValid = true;
-        }
-
-        private void ValidateDeviceAddress(int deviceAddress)
-        {
-            if (deviceAddress < 0x20 || deviceAddress > 0x27)
-            {
-                throw new ArgumentOutOfRangeException(nameof(deviceAddress), deviceAddress, "The Mcp23xxx address must be a value of 32 (0x20) - 39 (0x27).");
-            }
-        }
-
-        private void InitializeMasterGpioController()
-        {
             // Only need master controller if there are external pins provided.
             if (_reset != -1 || _interruptA != -1 || _interruptB != -1)
             {
-                _masterGpioController = new GpioController();
+                _masterGpioController = masterController ?? new GpioController();
 
                 if (_interruptA != -1)
                 {
@@ -104,6 +68,33 @@ namespace Iot.Device.Mcp23xxx
                     Disable();
                 }
             }
+
+            if (!_disabled)
+            {
+                // Set all of the pins to input, GPIO outputs to low, and set input polarity to match the input.
+                // This is the normal power-on / reset state of the Mcp23xxx chips.
+                if (PinCount == 8)
+                {
+                    InternalWriteByte(Register.IODIR, 0xFF, Port.PortA);
+                    InternalWriteByte(Register.GPIO, 0x00, Port.PortA);
+                    InternalWriteByte(Register.IPOL, 0x00, Port.PortA);
+                }
+                else
+                {
+                    InternalWriteUInt16(Register.IODIR, 0xFFFF);
+                    InternalWriteUInt16(Register.GPIO, 0x0000);
+                    InternalWriteUInt16(Register.IPOL, 0x0000);
+                }
+            }
+        }
+
+        private void UpdateCache()
+        {
+            // Ouput state is read from the latches (OLAT)
+            _gpioCache = PinCount == 8
+                ? InternalReadByte(Register.OLAT, Port.PortA)
+                : InternalReadUInt16(Register.OLAT);
+            _cacheValid = true;
         }
 
         /// <summary>
@@ -120,7 +111,10 @@ namespace Iot.Device.Mcp23xxx
         /// <returns>The data read from the registers.</returns>
         protected void InternalRead(Register register, Span<byte> buffer, Port port)
         {
-            _device.Read(GetMappedAddress(register, port, _bankStyle), buffer);
+            if (_disabled)
+                ThrowDisabled();
+
+            _bus.Read(GetMappedAddress(register, port, _bankStyle), buffer);
         }
 
         /// <summary>
@@ -131,8 +125,15 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="port">The I/O port used with the registers.</param>
         protected void InternalWrite(Register register, Span<byte> data, Port port)
         {
-            _device.Write(GetMappedAddress(register, port, _bankStyle), data);
+            if (_disabled)
+                ThrowDisabled();
+
+            _bus.Write(GetMappedAddress(register, port, _bankStyle), data);
         }
+
+        // Keeping this a separate method to allow the Read/Write methods to inline
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void ThrowDisabled() => throw new InvalidOperationException("Chip is disabled");
 
         protected byte InternalReadByte(Register register, Port port)
         {
@@ -205,54 +206,41 @@ namespace Iot.Device.Mcp23xxx
         {
             _masterGpioController?.Dispose();
             _masterGpioController = null;
-            _device?.Dispose();
+            _bus?.Dispose();
         }
 
         /// <summary>
-        /// Disables the device by setting the reset pin LOW.
+        /// Disables the device by setting the reset pin low.
         /// </summary>
         public void Disable()
         {
-            if (_masterGpioController == null)
-            {
-                throw new Exception("Master controller has not been initialized.");
-            }
-
             if (_reset == -1)
-            {
-                throw new Exception("Reset pin has not been initialized.");
-            }
+                throw new InvalidOperationException("No reset pin configured.");
 
             _masterGpioController.Write(_reset, PinValue.Low);
 
             // Registers will all be reset when re-enabled
             _bankStyle = BankStyle.Sequential;
             _increments = true;
+            _disabled = true;
         }
 
         /// <summary>
-        /// Enables the device by setting the reset pin HIGH.
+        /// Enables the device by setting the reset pin high.
         /// </summary>
         public void Enable()
         {
-            if (_masterGpioController == null)
-            {
-                throw new Exception("Master controller has not been initialized.");
-            }
-
             if (_reset == -1)
-            {
-                throw new Exception("Reset pin has not been initialized.");
-            }
+                throw new InvalidOperationException("No reset pin configured.");
 
             _masterGpioController.Write(_reset, PinValue.High);
+
+            _disabled = false;
+            _cacheValid = false;
         }
 
         protected PinValue InternalReadInterrupt(Port port)
         {
-            if (_masterGpioController == null)
-                throw new Exception("Master controller has not been initialized.");
-
             int pinNumber = 0;
             switch (port)
             {
@@ -287,7 +275,9 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="mode">The mode to be set.</param>
         public void SetPinMode(int pinNumber, PinMode mode)
         {
-            ValidateMode(mode);
+            if (mode != PinMode.Input && mode != PinMode.Output)
+                throw new ArgumentException("The Mcp controller supports Input and Output modes only.");
+
             ValidatePin(pinNumber);
 
             if (pinNumber < 8)
@@ -314,20 +304,16 @@ namespace Iot.Device.Mcp23xxx
         public PinValue Read(int pinNumber)
         {
             ValidatePin(pinNumber);
-            Span<PinValuePair> values = stackalloc PinValuePair[1];
-            values[0] = new PinValuePair(pinNumber, default);
+            Span<PinValuePair> values = stackalloc PinValuePair[] { new PinValuePair(pinNumber, default) };
             Read(values);
             return values[0].PinValue;
         }
 
         public void Read(Span<PinValuePair> pinValues)
         {
-            ushort pins = 0;
-            foreach (PinValuePair pair in pinValues)
-            {
-                ValidatePin(pair.PinNumber);
-                pins |= (ushort)(1 << pair.PinNumber);
-            }
+            (uint pins, _) = PinValuePair.ToBits(pinValues);
+            if ((pins >> PinCount) > 0)
+                ThrowBadPin(nameof(pinValues));
 
             ushort result = 0;
             if (pins < 0xFF + 1)
@@ -367,25 +353,15 @@ namespace Iot.Device.Mcp23xxx
 
         public void Write(ReadOnlySpan<PinValuePair> pinValues)
         {
-            ushort mask = 0;
-            ushort newBits = 0;
-
-            foreach (PinValuePair pair in pinValues)
-            {
-                ValidatePin(pair.PinNumber);
-                ushort bit = (ushort)(1 << pair.PinNumber);
-                mask |= bit;
-                if (pair.PinValue == PinValue.High)
-                {
-                    newBits |= bit;
-                }
-            }
+            (uint mask, uint newBits) = PinValuePair.ToBits(pinValues);
+            if ((mask >> PinCount) > 0)
+                ThrowBadPin(nameof(pinValues));
 
             if (!_cacheValid)
                 UpdateCache();
 
             ushort cachedValue = _gpioCache;
-            ushort newValue = SetBits(cachedValue, newBits, mask);
+            ushort newValue = SetBits(cachedValue, (ushort)newBits, (ushort)mask);
             if (cachedValue == newValue)
                 return;
 
@@ -412,13 +388,6 @@ namespace Iot.Device.Mcp23xxx
 
         private byte ClearBit(byte data, int bitNumber) => data &= (byte)~(1 << bitNumber);
 
-        private byte SetBits(byte current, byte bits, byte mask)
-        {
-            current &= (byte)~mask;
-            current |= bits;
-            return current;
-        }
-
         private ushort SetBits(ushort current, ushort bits, ushort mask)
         {
             current &= (ushort)~mask;
@@ -426,25 +395,15 @@ namespace Iot.Device.Mcp23xxx
             return current;
         }
 
-        private static void ValidateMode(PinMode mode)
-        {
-            if (mode != PinMode.Input && mode != PinMode.Output)
-            {
-                throw new ArgumentException("Mcp supports Input and Output modes only.");
-            }
-        }
-
         private void ValidatePin(int pinNumber)
         {
             if (pinNumber >= PinCount || pinNumber < 0)
-            {
-                throw new ArgumentOutOfRangeException($"{pinNumber} is not a valid pin on the Mcp controller.");
-            }
+                ThrowBadPin(nameof(pinNumber));
         }
 
-        private static void ThrowArgumentOutOfRange(string argument)
+        private void ThrowBadPin(string argument)
         {
-            throw new ArgumentOutOfRangeException(argument);
+            throw new ArgumentOutOfRangeException(argument, $"Only pins {0} through {PinCount - 1} are valid.");
         }
 
         /// <summary>
@@ -457,9 +416,9 @@ namespace Iot.Device.Mcp23xxx
         private byte GetMappedAddress(Register register, Port port = Port.PortA, BankStyle bankStyle = BankStyle.Sequential)
         {
             if (port != Port.PortA && port != Port.PortB)
-                ThrowArgumentOutOfRange(nameof(port));
+                throw new ArgumentOutOfRangeException(nameof(port));
             if (bankStyle != BankStyle.Separated && bankStyle != BankStyle.Sequential)
-                ThrowArgumentOutOfRange(nameof(bankStyle));
+                throw new ArgumentOutOfRangeException(nameof(bankStyle));
 
             byte address = (byte)register;
 
@@ -479,9 +438,6 @@ namespace Iot.Device.Mcp23xxx
             // (IODIRA = 0x00, ... OLATA = 0x0A, IODIRB = 0x10, ... OLATB = 0x1A)
             return port == Port.PortA ? address : address += 0x10;
         }
-
-        private static string GetBits(byte value) => Convert.ToString(value, 2).PadLeft(8, '0');
-        private static string GetBits(ushort value) => Convert.ToString(value, 2).PadLeft(16, '0');
 
         public void OpenPin(int pinNumber, PinMode mode) => SetPinMode(pinNumber, mode);
 

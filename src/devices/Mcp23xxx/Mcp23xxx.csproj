@@ -13,10 +13,10 @@
     <Compile Include="BusAdapter.cs" />
     <Compile Include="Mcp23018.cs" />
     <Compile Include="Mcp23017.cs" />
-    <Compile Include="Mcp23S18.cs" />
-    <Compile Include="Mcp23S17.cs" />
-    <Compile Include="Mcp23S09.cs" />
-    <Compile Include="Mcp23S08.cs" />
+    <Compile Include="Mcp23s18.cs" />
+    <Compile Include="Mcp23s17.cs" />
+    <Compile Include="Mcp23s09.cs" />
+    <Compile Include="Mcp23s08.cs" />
     <Compile Include="Mcp23009.cs" />
     <Compile Include="Mcp23008.cs" />
     <Compile Include="Mcp23x0x.cs" />
