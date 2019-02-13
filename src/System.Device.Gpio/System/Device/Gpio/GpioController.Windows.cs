@@ -15,18 +15,19 @@ namespace System.Device.Gpio
         private const string HummingBoardProduct = "HummingBoard-Edge";
 
         /// <summary>
-        /// Controller that takes in a numbering scheme. Will default to use the driver that best applies given the platform the program is running on.
+        /// Initializes new instance of GpioController that will use the specified numbering scheme.
+        /// The controller will default to use the driver that best applies given the platform the program is executing on.
         /// </summary>
-        /// <param name="pinNumberingScheme">The numbering scheme used to represent pins on the board.</param>
+        /// <param name="pinNumberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
         public GpioController(PinNumberingScheme pinNumberingScheme)
             : this(pinNumberingScheme, GetBestDriverForBoard())
         {
         }
 
         /// <summary>
-        /// Private method that tries to get the best applicable driver for the board you are running in.
+        /// Attempt to get the best applicable driver for the board the program is executing on.
         /// </summary>
-        /// <returns>A driver which works on the current running board.</returns>
+        /// <returns>A driver that works with the board the program is executing on.</returns>
         /// <remarks>
         ///     This really feels like it needs a driver-based pattern, where each driver exposes a static method:
         ///     public static bool IsSpecificToCurrentEnvironment { get; }

@@ -6,19 +6,33 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ## Binding Index
 
-* [Bmp280](Bmp280/README.md)
-* [Mcp3008](Mcp3008/README.md)
-* [Ssd1306](Ssd1306/README.md) -- OLED Display Controller
+* [ADS1115 -- Analog-to-Digital Converter](Ads1115/README.md)
+* [ADXL345 -- SPI Accelerometer](Adxl345/README.md)
+* [BMP280 -- Digital Pressure Sensor](Bmp280/README.md)
+* [BrickPi3](BrickPi3/README.md)
+* [CharacterLcd -- Liquid Crystal Display](CharacterLcd/README.md)
+* [DC Motor](DCMotor/README.md)
+* [Dhtxx -- Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
+* [DS3231 -- Realtime Clock](Ds3231/README.md)
+* [HC-SR04 -- Ultrasonic Ranging Module](Hcsr04/README.md)
+* [HC-SR501 -- PIR Motion Sensor](Hcsr501/README.md)
+* [HMC5883L -- 3-Axis Digital Compass](Hmc5883l/README.md)
+* [Max7219 -- LED Matrix Driver](Max7219/README.md)
+* [Mcp23xxx -- I/O Expander](Mcp23xxx/README.md)
+* [Mcp3008 -- Analog-to-Digital Converter](Mcp3008/README.md)
+* [Pca95x4 -- I2C GPIO Expander](Pca95x4/README.md)
+* [Servo -- Servomotor Controller](Servo/README.md)
+* [Si7021 -- Temperature & Humidity Sensor](Si7021/README.md)
+* [SoftPwm -- Software PWM](SoftPwm/README.md)
+* [Ssd1306 -- OLED Display Controller](Ssd1306/README.md)
 
 ## Binding Distribution
 
-We are currently encouraging source distribution of device bindings. The [Mcp3008 sample](Mcp3008/samples/README.md) references the [Mcp3008 library](Mcp3008/Mcp3008.csproj) within this repo. You can clone this repo and use the sample project reference model to a device binding or copy bindings directly into your project.
-
-We may publish NuGet packages of device bindings at a later date.
+These bindings are distributed via the [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings) NuGet package.  Daily builds with the latest bindings are available on [MyGet](https://dotnet.myget.org/feed/dotnet-core/package/nuget/Iot.Device.Bindings). You can also consume the bindings as source.
 
 ## Contributing a binding
 
-Anyone can contribute a binding. Please do! Bindings should follow the model that is used for the [Mcp23xxx](Mcp23xxx/README.md) or [Mcp3008](Mcp3008/README.md) implementations.  There is a [Binding Markdown template](Device%20Binding%20Template.md) that can help you get started, as well.
+Anyone can contribute a binding. Please do! Bindings should follow the model that is used for the [Mcp23xxx](Mcp23xxx/README.md) or [Mcp3008](Mcp3008/README.md) implementations.  There is a [Device Binding Template](../../tools/templates/DeviceBindingTemplate/README.md) that can help you get started, as well.
 
 Bindings must:
 

@@ -9,21 +9,36 @@ using System.Threading;
 
 namespace System.Device.Gpio.Drivers
 {
+    /// <summary>
+    /// A GPIO driver for Unix.
+    /// </summary>
     public class UnixDriver : GpioDriver
     {
         private const string GpioBasePath = "/sys/class/gpio";
         private int _pollFileDescriptor = -1;
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
-        private static CancellationTokenSource s_EventThreadCancellationTokenSource = new CancellationTokenSource();
-        private List<int> _exportedPins = new List<int>();
-        private Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
-        private int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
+        private readonly static CancellationTokenSource s_eventThreadCancellationTokenSource = new CancellationTokenSource();
+        private readonly List<int> _exportedPins = new List<int>();
+        private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
+        private readonly int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
 
+        /// <summary>
+        /// The number of pins provided by the driver.
+        /// </summary>
         protected internal override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
 
+        /// <summary>
+        /// Converts a board pin number to the driver's logical numbering scheme.
+        /// </summary>
+        /// <param name="pinNumber">The board pin number to convert.</param>
+        /// <returns>The pin number in the driver's logical numbering scheme.</returns>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new PlatformNotSupportedException("This driver is generic so it can not perform conversions between pin numbering schemes.");
 
+        /// <summary>
+        /// Opens a pin in order for it to be ready to use.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void OpenPin(int pinNumber)
         {
             string pinPath = $"{GpioBasePath}/gpio{pinNumber}";
@@ -37,12 +52,16 @@ namespace System.Device.Gpio.Drivers
                 }
                 catch (UnauthorizedAccessException e)
                 {
-                    // Wrapping the exception in order to get a better message
+                    // Wrapping the exception in order to get a better message.
                     throw new UnauthorizedAccessException("Opening pins requires root permissions.", e);
                 }
             }
         }
 
+        /// <summary>
+        /// Closes an open pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void ClosePin(int pinNumber)
         {
             string pinPath = $"{GpioBasePath}/gpio{pinNumber}";
@@ -62,6 +81,11 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <summary>
+        /// Sets the mode to a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="mode">The mode to be set.</param>
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
             if (mode == PinMode.InputPullDown || mode == PinMode.InputPullUp)
@@ -83,7 +107,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to set a mode to a pin that is not yet open.");
+                throw new InvalidOperationException("There was an attempt to set a mode to a pin that is not open.");
             }
         }
 
@@ -114,9 +138,14 @@ namespace System.Device.Gpio.Drivers
             throw new ArgumentException($"Unable to parse {sysfsMode} as a PinMode.");
         }
 
+        /// <summary>
+        /// Reads the current value of a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <returns>The value of the pin.</returns>
         protected internal override PinValue Read(int pinNumber)
         {
-            PinValue result = default(PinValue);
+            PinValue result = default;
             string valuePath = $"{GpioBasePath}/gpio{pinNumber}/value";
             if (File.Exists(valuePath))
             {
@@ -132,7 +161,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to read from a pin that is not yet opened.");
+                throw new InvalidOperationException("There was an attempt to read from a pin that is not open.");
             }
             return result;
         }
@@ -151,12 +180,17 @@ namespace System.Device.Gpio.Drivers
                     result = PinValue.High;
                     break;
                 default:
-                    throw new ArgumentException($"Invalid Gpio pin value {value}");
+                    throw new ArgumentException($"Invalid GPIO pin value {value}.");
             }
 
             return result;
         }
 
+        /// <summary>
+        /// Writes a value to a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="value">The value to be written to the pin.</param>
         protected internal override void Write(int pinNumber, PinValue value)
         {
             string valuePath = $"{GpioBasePath}/gpio{pinNumber}/value";
@@ -174,40 +208,42 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to write to a pin that is not yet opened.");
+                throw new InvalidOperationException("There was an attempt to write to a pin that is not open.");
             }
         }
 
         private string ConvertPinValueToSysFs(PinValue value)
-        {
-            string result = string.Empty;
-            switch (value)
-            {
-                case PinValue.High:
-                    result = "1";
-                    break;
-                case PinValue.Low:
-                    result = "0";
-                    break;
-                default:
-                    throw new ArgumentException($"Invalid pin value {value}");
-            }
-            return result;
-        }
 
+            => value == PinValue.High ? "1" : "0";
+
+        /// <summary>
+        /// Checks if a pin supports a specific mode.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="mode">The mode to check.</param>
+        /// <returns>The status if the pin supports the mode.</returns>
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
             // Unix driver does not support pull up or pull down resistors.
             if (mode == PinMode.InputPullDown || mode == PinMode.InputPullUp)
+            {
                 return false;
+            }
             return true;
         }
 
-        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
+        /// <summary>
+        /// Blocks execution until an event of type eventType is received or a cancellation is requested.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
+        /// <returns>A structure that contains the result of the waiting operation.</returns>
+        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             int pollFileDescriptor = -1;
             int valueFileDescriptor = -1;
-            SetPinEventsToDetect(pinNumber, eventType);
+            SetPinEventsToDetect(pinNumber, eventTypes);
             AddPinToPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, out bool closePinValueFileDescriptor);
 
             bool eventDetected = WasEventDetected(pollFileDescriptor, valueFileDescriptor, out _, cancellationToken);
@@ -216,7 +252,7 @@ namespace System.Device.Gpio.Drivers
             return new WaitForEventResult
             {
                 TimedOut = !eventDetected,
-                EventType = eventType
+                EventType = eventTypes
             };
         }
 
@@ -248,7 +284,7 @@ namespace System.Device.Gpio.Drivers
                 case "falling":
                     return PinEventTypes.Falling;
                 default:
-                    throw new ArgumentException("Invalid pin event value", value);
+                    throw new ArgumentException("Invalid pin event value.", value);
             }
         }
 
@@ -270,7 +306,7 @@ namespace System.Device.Gpio.Drivers
             {
                 return "falling";
             }
-            throw new ArgumentException("Invalid Pin Event Type", nameof(kind));
+            throw new ArgumentException("Invalid Pin Event Type.", nameof(kind));
         }
 
         private void AddPinToPoll(int pinNumber, ref int valueFileDescriptor, ref int pollFileDescriptor, out bool closePinValueFileDescriptor)
@@ -379,13 +415,13 @@ namespace System.Device.Gpio.Drivers
             {
                 if (cancelEventDetectionThread)
                 {
-                    s_EventThreadCancellationTokenSource.Cancel();
+                    s_eventThreadCancellationTokenSource.Cancel();
                     while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                     {
                         Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
                     }
                 }
-                
+
                 Interop.close(pollFileDescriptor);
                 pollFileDescriptor = -1;
             }
@@ -396,7 +432,7 @@ namespace System.Device.Gpio.Drivers
             _pinsToDetectEventsCount = 0;
             if (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
             {
-                s_EventThreadCancellationTokenSource.Cancel();
+                s_eventThreadCancellationTokenSource.Cancel();
                 while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                 {
                     Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
@@ -419,6 +455,12 @@ namespace System.Device.Gpio.Drivers
             base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// Adds a handler for a pin value changed event.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
             if (!_devicePins.ContainsKey(pinNumber))
@@ -428,9 +470,13 @@ namespace System.Device.Gpio.Drivers
                 AddPinToPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, out _);
             }
             if (eventType.HasFlag(PinEventTypes.Rising))
+            {
                 _devicePins[pinNumber].ValueRising += callback;
+            }
             if (eventType.HasFlag(PinEventTypes.Falling))
+            {
                 _devicePins[pinNumber].ValueFalling += callback;
+            }
             SetPinEventsToDetect(pinNumber, (GetPinEventsToDetect(pinNumber) | eventType));
             InitializeEventDetectionThread();
         }
@@ -452,7 +498,7 @@ namespace System.Device.Gpio.Drivers
         {
             while (_pinsToDetectEventsCount > 0)
             {
-                bool eventDetected = WasEventDetected(_pollFileDescriptor, -1,  out int pinNumber, s_EventThreadCancellationTokenSource.Token);
+                bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, s_eventThreadCancellationTokenSource.Token);
                 if (eventDetected)
                 {
                     PinEventTypes eventType = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
@@ -463,10 +509,17 @@ namespace System.Device.Gpio.Drivers
             _eventDetectionThread = null;
         }
 
+        /// <summary>
+        /// Removes a handler for a pin value changed event.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             if (!_devicePins.ContainsKey(pinNumber))
+            {
                 throw new InvalidOperationException("Attempted to remove a callback for a pin that is not listening for events.");
+            }
             _devicePins[pinNumber].ValueFalling -= callback;
             _devicePins[pinNumber].ValueRising -= callback;
             if (_devicePins[pinNumber].IsCallbackListEmpty())
@@ -480,6 +533,11 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <summary>
+        /// Gets the mode of a pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <returns>The mode of the pin.</returns>
         protected internal override PinMode GetPinMode(int pinNumber)
         {
             string directionPath = $"{GpioBasePath}/gpio{pinNumber}/direction";
@@ -497,7 +555,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                throw new InvalidOperationException("There was an attempt to get a mode to a pin that is not yet open.");
+                throw new InvalidOperationException("There was an attempt to get a mode to a pin that is not open.");
             }
         }
     }

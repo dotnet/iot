@@ -2,65 +2,83 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Device.Spi;
 using Xunit;
 
 namespace Iot.Device.Mcp23xxx.Tests
 {
-    public class RegisterTests
+    public class RegisterTests : Mcp23xxxTest
     {
         [Theory]
         // Port A; Bank 0
-        [InlineData(Register.Address.IODIR, Port.PortA, Bank.Bank0, 0b0000_0000)]
-        [InlineData(Register.Address.IPOL, Port.PortA, Bank.Bank0, 0b0000_0010)]
-        [InlineData(Register.Address.GPINTEN, Port.PortA, Bank.Bank0, 0b0000_0100)]
-        [InlineData(Register.Address.DEFVAL, Port.PortA, Bank.Bank0, 0b0000_0110)]
-        [InlineData(Register.Address.INTCON, Port.PortA, Bank.Bank0, 0b0000_1000)]
-        [InlineData(Register.Address.IOCON, Port.PortA, Bank.Bank0, 0b0000_1010)]
-        [InlineData(Register.Address.GPPU, Port.PortA, Bank.Bank0, 0b0000_1100)]
-        [InlineData(Register.Address.INTF, Port.PortA, Bank.Bank0, 0b0000_1110)]
-        [InlineData(Register.Address.INTCAP, Port.PortA, Bank.Bank0, 0b0001_0000)]
-        [InlineData(Register.Address.GPIO, Port.PortA, Bank.Bank0, 0b0001_0010)]
-        [InlineData(Register.Address.OLAT, Port.PortA, Bank.Bank0, 0b0001_0100)]
+        [InlineData(Register.IODIR, Port.PortA, BankStyle.Sequential, 0x00)]
+        [InlineData(Register.IPOL, Port.PortA, BankStyle.Sequential, 0x02)]
+        [InlineData(Register.GPINTEN, Port.PortA, BankStyle.Sequential, 0x04)]
+        [InlineData(Register.DEFVAL, Port.PortA, BankStyle.Sequential, 0x06)]
+        [InlineData(Register.INTCON, Port.PortA, BankStyle.Sequential, 0x08)]
+        [InlineData(Register.IOCON, Port.PortA, BankStyle.Sequential, 0x0A)]
+        [InlineData(Register.GPPU, Port.PortA, BankStyle.Sequential, 0x0C)]
+        [InlineData(Register.INTF, Port.PortA, BankStyle.Sequential, 0x0E)]
+        [InlineData(Register.INTCAP, Port.PortA, BankStyle.Sequential, 0x10)]
+        [InlineData(Register.GPIO, Port.PortA, BankStyle.Sequential, 0x12)]
+        [InlineData(Register.OLAT, Port.PortA, BankStyle.Sequential, 0x14)]
         // Port A; Bank 1
-        [InlineData(Register.Address.IODIR, Port.PortA, Bank.Bank1, 0b0000_0000)]
-        [InlineData(Register.Address.IPOL, Port.PortA, Bank.Bank1, 0b0000_0001)]
-        [InlineData(Register.Address.GPINTEN, Port.PortA, Bank.Bank1, 0b0000_0010)]
-        [InlineData(Register.Address.DEFVAL, Port.PortA, Bank.Bank1, 0b0000_0011)]
-        [InlineData(Register.Address.INTCON, Port.PortA, Bank.Bank1, 0b0000_0100)]
-        [InlineData(Register.Address.IOCON, Port.PortA, Bank.Bank1, 0b0000_0101)]
-        [InlineData(Register.Address.GPPU, Port.PortA, Bank.Bank1, 0b0000_0110)]
-        [InlineData(Register.Address.INTF, Port.PortA, Bank.Bank1, 0b0000_0111)]
-        [InlineData(Register.Address.INTCAP, Port.PortA, Bank.Bank1, 0b0000_1000)]
-        [InlineData(Register.Address.GPIO, Port.PortA, Bank.Bank1, 0b0000_1001)]
-        [InlineData(Register.Address.OLAT, Port.PortA, Bank.Bank1, 0b0000_1010)]
+        [InlineData(Register.IODIR, Port.PortA, BankStyle.Separated, 0x00)]
+        [InlineData(Register.IPOL, Port.PortA, BankStyle.Separated, 0x01)]
+        [InlineData(Register.GPINTEN, Port.PortA, BankStyle.Separated, 0x02)]
+        [InlineData(Register.DEFVAL, Port.PortA, BankStyle.Separated, 0x03)]
+        [InlineData(Register.INTCON, Port.PortA, BankStyle.Separated, 0x04)]
+        [InlineData(Register.IOCON, Port.PortA, BankStyle.Separated, 0x05)]
+        [InlineData(Register.GPPU, Port.PortA, BankStyle.Separated, 0x06)]
+        [InlineData(Register.INTF, Port.PortA, BankStyle.Separated, 0x07)]
+        [InlineData(Register.INTCAP, Port.PortA, BankStyle.Separated, 0x08)]
+        [InlineData(Register.GPIO, Port.PortA, BankStyle.Separated, 0x09)]
+        [InlineData(Register.OLAT, Port.PortA, BankStyle.Separated, 0x0A)]
         // Port B; Bank 0
-        [InlineData(Register.Address.IODIR, Port.PortB, Bank.Bank0, 0b0000_0001)]
-        [InlineData(Register.Address.IPOL, Port.PortB, Bank.Bank0, 0b0000_0011)]
-        [InlineData(Register.Address.GPINTEN, Port.PortB, Bank.Bank0, 0b0000_0101)]
-        [InlineData(Register.Address.DEFVAL, Port.PortB, Bank.Bank0, 0b0000_0111)]
-        [InlineData(Register.Address.INTCON, Port.PortB, Bank.Bank0, 0b0000_1001)]
-        [InlineData(Register.Address.IOCON, Port.PortB, Bank.Bank0, 0b0000_1011)]
-        [InlineData(Register.Address.GPPU, Port.PortB, Bank.Bank0, 0b0000_1101)]
-        [InlineData(Register.Address.INTF, Port.PortB, Bank.Bank0, 0b0000_1111)]
-        [InlineData(Register.Address.INTCAP, Port.PortB, Bank.Bank0, 0b0001_0001)]
-        [InlineData(Register.Address.GPIO, Port.PortB, Bank.Bank0, 0b0001_0011)]
-        [InlineData(Register.Address.OLAT, Port.PortB, Bank.Bank0, 0b0001_0101)]
+        [InlineData(Register.IODIR, Port.PortB, BankStyle.Sequential, 0x01)]
+        [InlineData(Register.IPOL, Port.PortB, BankStyle.Sequential, 0x03)]
+        [InlineData(Register.GPINTEN, Port.PortB, BankStyle.Sequential, 0x05)]
+        [InlineData(Register.DEFVAL, Port.PortB, BankStyle.Sequential, 0x07)]
+        [InlineData(Register.INTCON, Port.PortB, BankStyle.Sequential, 0x09)]
+        [InlineData(Register.IOCON, Port.PortB, BankStyle.Sequential, 0x0B)]
+        [InlineData(Register.GPPU, Port.PortB, BankStyle.Sequential, 0x0D)]
+        [InlineData(Register.INTF, Port.PortB, BankStyle.Sequential, 0x0F)]
+        [InlineData(Register.INTCAP, Port.PortB, BankStyle.Sequential, 0x11)]
+        [InlineData(Register.GPIO, Port.PortB, BankStyle.Sequential, 0x13)]
+        [InlineData(Register.OLAT, Port.PortB, BankStyle.Sequential, 0x15)]
         // Port B; Bank 1
-        [InlineData(Register.Address.IODIR, Port.PortB, Bank.Bank1, 0b0001_0000)]
-        [InlineData(Register.Address.IPOL, Port.PortB, Bank.Bank1, 0b0001_0001)]
-        [InlineData(Register.Address.GPINTEN, Port.PortB, Bank.Bank1, 0b0001_0010)]
-        [InlineData(Register.Address.DEFVAL, Port.PortB, Bank.Bank1, 0b0001_0011)]
-        [InlineData(Register.Address.INTCON, Port.PortB, Bank.Bank1, 0b0001_0100)]
-        [InlineData(Register.Address.IOCON, Port.PortB, Bank.Bank1, 0b0001_0101)]
-        [InlineData(Register.Address.GPPU, Port.PortB, Bank.Bank1, 0b0001_0110)]
-        [InlineData(Register.Address.INTF, Port.PortB, Bank.Bank1, 0b0001_0111)]
-        [InlineData(Register.Address.INTCAP, Port.PortB, Bank.Bank1, 0b0001_1000)]
-        [InlineData(Register.Address.GPIO, Port.PortB, Bank.Bank1, 0b0001_1001)]
-        [InlineData(Register.Address.OLAT, Port.PortB, Bank.Bank1, 0b0001_1010)]
-        public void Get_Mapped_Address(Register.Address address, Port port, Bank bank, byte expectedMappedAddress)
+        [InlineData(Register.IODIR, Port.PortB, BankStyle.Separated, 0x010)]
+        [InlineData(Register.IPOL, Port.PortB, BankStyle.Separated, 0x11)]
+        [InlineData(Register.GPINTEN, Port.PortB, BankStyle.Separated, 0x12)]
+        [InlineData(Register.DEFVAL, Port.PortB, BankStyle.Separated, 0x13)]
+        [InlineData(Register.INTCON, Port.PortB, BankStyle.Separated, 0x14)]
+        [InlineData(Register.IOCON, Port.PortB, BankStyle.Separated, 0x15)]
+        [InlineData(Register.GPPU, Port.PortB, BankStyle.Separated, 0x16)]
+        [InlineData(Register.INTF, Port.PortB, BankStyle.Separated, 0x17)]
+        [InlineData(Register.INTCAP, Port.PortB, BankStyle.Separated, 0x18)]
+        [InlineData(Register.GPIO, Port.PortB, BankStyle.Separated, 0x19)]
+        [InlineData(Register.OLAT, Port.PortB, BankStyle.Separated, 0x1A)]
+        public void Get_Mapped_Address(Register register, Port port, BankStyle bankStyle, byte expectedMappedAddress)
         {
-            byte actualMappedAddress = Register.GetMappedAddress(address, port, bank);
-            Assert.Equal(expectedMappedAddress, actualMappedAddress);
+            SpiDeviceMock spiDeviceMock = new SpiDeviceMock(ports: 2);
+            BankStyleMock mock = new BankStyleMock(spiDeviceMock, bankStyle);
+            mock.Read(register, port);
+
+            // Reads are full duplex- commands go to "Write"
+            Assert.Equal(expectedMappedAddress, spiDeviceMock.DeviceMock.LastWriteBuffer[0]);
+        }
+
+        private class BankStyleMock : Mcp23xxx
+        {
+            public BankStyleMock(SpiDevice device, BankStyle bankStyle)
+                : base(new SpiAdapter(device, 0x20), 0x20, bankStyle: bankStyle)
+            {
+            }
+
+            public byte Read(Register register, Port port) => InternalReadByte(register, port);
+
+            public override int PinCount => 16;
         }
     }
 }

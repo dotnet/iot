@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Mcp23xxx/Mcp23xxx.csproj" />
+
+    <!--
+      Temporarily making a project reference until the daily has IGpioController
+      <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" /> 
+    -->
+    <ProjectReference Include="..\..\..\System.Device.Gpio\System.Device.Gpio.csproj" >
+      <AdditionalProperties>Configuration=Linux-Debug;RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
+    <ProjectReference Include="..\CharacterLcd.csproj" />
+  </ItemGroup>
+
+</Project>
