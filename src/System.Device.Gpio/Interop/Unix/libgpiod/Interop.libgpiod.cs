@@ -14,7 +14,7 @@ internal partial class Interop
     /// <summary>
     /// Create a new gpiochip iterator.
     /// </summary>
-    /// <returns>Pointer to a new chip iterator object or NULL if an error occurred.</returns>
+    /// <returns>Pointer to a new chip iterator object or <see langword="null" /> if an error occurred.</returns>
     [DllImport(LibgpiodLibrary, SetLastError = true)]
     internal static extern SafeChipIteratorHandle GetChipIterator();
 
@@ -59,7 +59,7 @@ internal partial class Interop
     /// </summary>
     /// <param name="chip">The GPIO chip handle</param>
     /// <param name="offset">The offset of the GPIO line</param>
-    /// <returns>Handle to the GPIO line or NULL if an error occured.</returns>
+    /// <returns>Handle to the GPIO line or <see langword="null" /> if an error occured.</returns>
     [DllImport(LibgpiodLibrary, SetLastError = true)]
     internal static extern SafeLineHandle GetChipLineByOffset(SafeChipHandle chip, int offset);
 

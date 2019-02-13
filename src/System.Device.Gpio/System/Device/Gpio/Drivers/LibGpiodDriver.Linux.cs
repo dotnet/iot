@@ -73,7 +73,7 @@ namespace System.Device.Gpio.Drivers
             SafeLineHandle pinHandle = Interop.GetChipLineByOffset(_chip, pinNumber);
             if (pinHandle == null)
             {
-                throw new IOException($"Pin number {pinNumber} not available for chip: {_chip} error: {Marshal.GetLastWin32Error()}");
+                throw new IOException($"Pin number {pinNumber} not available, error: {Marshal.GetLastWin32Error()}");
             }
 
             _pinNumberToSafeLineHandle.Add(pinNumber, pinHandle);
@@ -83,12 +83,12 @@ namespace System.Device.Gpio.Drivers
         {
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
-                int value = Interop.GetGpiodLineValue(pinHandle);
-                if (value == -1)
+                int result = Interop.GetGpiodLineValue(pinHandle);
+                if (result == -1)
                 {
                     throw new IOException($"Error while reading value from pin number: {pinNumber}, error: {Marshal.GetLastWin32Error()}");
                 }
-                return value;
+                return result;
             }
             throw new IOException($"Error while reading value from pin number: {pinNumber}");
         }
@@ -100,20 +100,20 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
-            int success = -1;
+            bool failed  = false;
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
                 if (mode == PinMode.Input)
                 {
-                    success = Interop.RequestLineInput(pinHandle, pinNumber.ToString());
+                    failed = Interop.RequestLineInput(pinHandle, pinNumber.ToString()) == -1;
                 }
                 else
                 {
-                    success = Interop.RequestLineOutput(pinHandle, pinNumber.ToString());
+                    failed = Interop.RequestLineOutput(pinHandle, pinNumber.ToString()) == -1;
                 }
             }
 
-            if (success == -1)
+            if (failed)
             {
                 throw new IOException($"Error setting pin mode, pin:{pinNumber}, error: {Marshal.GetLastWin32Error()}");
             } 
