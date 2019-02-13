@@ -12,18 +12,18 @@ namespace Iot.Device.Adxl345
         /// <summary>
         /// ±2G
         /// </summary>
-        Range1 = 0x00,
+        Range02 = 0x00,
         /// <summary>
         /// ±4G
         /// </summary>
-        Range2 = 0x01,
+        Range04 = 0x01,
         /// <summary>
         /// ±8G
         /// </summary>
-        Range3 = 0x02,
+        Range08 = 0x02,
         /// <summary>
         /// ±16G
         /// </summary>
-        Range4 = 0x03
+        Range16 = 0x03
     };
 }

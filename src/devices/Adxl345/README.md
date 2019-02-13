@@ -20,7 +20,7 @@ UnixSpiDevice device = new UnixSpiDevice(settings);
 
 // pass in a SpiDevice
 // set gravity measurement range ±4G
-using (Adxl345 sensor = new Adxl345(device, GravityRange.Range2))
+using (Adxl345 sensor = new Adxl345(device, GravityRange.Range04))
 {
     // read acceleration
     Vector3 data = sensor.Acceleration;
