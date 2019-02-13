@@ -45,15 +45,20 @@ namespace Iot.Device.Ssd1306
         /// <param name="command">The command to send to the display controller.</param>
         public void SendCommand(ICommand command)
         {
-            const int stackThreshold = 32;
+            const int StackThreshold = 32;
             byte[] commandBytes = command.GetBytes();
 
-            if (commandBytes == null || commandBytes.Length == 0)
+            if (commandBytes == null)
             {
-                return;
+                throw new ArgumentNullException(nameof(commandBytes));
             }
 
-            Span<byte> writeBuffer = commandBytes.Length < stackThreshold ?
+            if (commandBytes.Length == 0)
+            {
+                throw new ArgumentException("The command did not contain any bytes to send.");
+            }
+
+            Span<byte> writeBuffer = commandBytes.Length < StackThreshold ?
                stackalloc byte[commandBytes.Length + 1] :
                new byte[commandBytes.Length + 1];
 
@@ -72,14 +77,14 @@ namespace Iot.Device.Ssd1306
         /// <param name="data">The data to send to the display controller.</param>
         public void SendData(byte[] data)
         {
-            const int stackThreshold = 512;
+            const int StackThreshold = 512;
 
-            if (data == null || data.Length == 0)
+            if (data == null)
             {
                 throw new ArgumentNullException(nameof(data));
             }
 
-            Span<byte> writeBuffer = data.Length < stackThreshold ?
+            Span<byte> writeBuffer = data.Length < StackThreshold ?
                stackalloc byte[data.Length + 1] :
                new byte[data.Length + 1];
 
