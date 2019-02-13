@@ -26,11 +26,12 @@ namespace Iot.Device.Hcsr04
         /// </summary>
         /// <param name="triggerPin">Trigger pulse input.</param>
         /// <param name="echoPin">Trigger pulse output.</param>
-        public Sonar(int triggerPin, int echoPin)
+        /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
+        public Sonar(int triggerPin, int echoPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
         {
             _echo = echoPin;
             _trigger = triggerPin;
-            _controller = new GpioController();
+            _controller = new GpioController(pinNumberingScheme);
 
             _controller.OpenPin(_echo, PinMode.Input);
             _controller.OpenPin(_trigger, PinMode.Output);
