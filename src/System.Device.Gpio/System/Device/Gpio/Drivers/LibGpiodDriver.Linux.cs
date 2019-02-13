@@ -22,13 +22,13 @@ namespace System.Device.Gpio.Drivers
             SafeChipIteratorHandle iterator = Interop.GetChipIterator();
             if (iterator == null)
             {
-                throw new IOException($"Unable to find a chip iterator, error code: {Marshal.GetLastWin32Error()}");
+                ThrowHelper.ThrowIOException(ThrowHelper.ExceptionResource.NoChipIteratorFound, Marshal.GetLastWin32Error());
             }
 
             _chip = Interop.GetNextChipFromChipIterator(iterator);
             if (_chip == null)
             {
-                throw new IOException($"Unable to find a chip, error code: {Marshal.GetLastWin32Error()}");
+                ThrowHelper.ThrowIOException(ThrowHelper.ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
             }
 
             // Freeing other chips opened
@@ -50,8 +50,8 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new
-            PlatformNotSupportedException("This driver is generic so it cannot perform conversions between pin numbering schemes.");
+        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw 
+            ThrowHelper.GetPlatformNotSupportedException(ThrowHelper.ExceptionResource.ConvertPinNumberingSchemaError);
 
         protected internal override PinMode GetPinMode(int pinNumber)
         {
@@ -59,7 +59,7 @@ namespace System.Device.Gpio.Drivers
             {
                 return (Interop.GetLineDirection(pinHandle) == 1) ? PinMode.Input : PinMode.Output;
             }
-            throw new IOException($"Error while reading pin mode for pin: {pinNumber}");
+            throw ThrowHelper.GetInvalidOperationException(ThrowHelper.ExceptionResource.PinNotOpenedError, pin:pinNumber);
         }
 
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
@@ -73,7 +73,7 @@ namespace System.Device.Gpio.Drivers
             SafeLineHandle pinHandle = Interop.GetChipLineByOffset(_chip, pinNumber);
             if (pinHandle == null)
             {
-                throw new IOException($"Pin number {pinNumber} not available, error: {Marshal.GetLastWin32Error()}");
+                ThrowHelper.ThrowIOException(ThrowHelper.ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
             }
 
             _pinNumberToSafeLineHandle.Add(pinNumber, pinHandle);
@@ -86,11 +86,11 @@ namespace System.Device.Gpio.Drivers
                 int result = Interop.GetGpiodLineValue(pinHandle);
                 if (result == -1)
                 {
-                    throw new IOException($"Error while reading value from pin number: {pinNumber}, error: {Marshal.GetLastWin32Error()}");
+                    ThrowHelper.ThrowIOException(ThrowHelper.ExceptionResource.ReadPinError, Marshal.GetLastWin32Error(), pinNumber);
                 }
                 return result;
             }
-            throw new IOException($"Error while reading value from pin number: {pinNumber}");
+            throw ThrowHelper.GetInvalidOperationException(ThrowHelper.ExceptionResource.PinNotOpenedError, pin: pinNumber);
         }
 
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
@@ -115,7 +115,7 @@ namespace System.Device.Gpio.Drivers
 
             if (failed)
             {
-                throw new IOException($"Error setting pin mode, pin:{pinNumber}, error: {Marshal.GetLastWin32Error()}");
+                ThrowHelper.ThrowIOException(ThrowHelper.ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(), pinNumber);
             } 
         }
 
@@ -130,6 +130,7 @@ namespace System.Device.Gpio.Drivers
             {
                 Interop.SetGpiodLineValue(pinHandle, (value == PinValue.High) ? 1 : 0);
             }
+            throw ThrowHelper.GetInvalidOperationException(ThrowHelper.ExceptionResource.PinNotOpenedError, pin: pinNumber);
         }
 
         protected override void Dispose(bool disposing)
