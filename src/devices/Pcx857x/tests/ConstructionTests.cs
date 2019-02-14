@@ -20,6 +20,7 @@ namespace Iot.Device.Pcx857x.Tests
             }
             else
             {
+                Assert.Equal(16, device.PinCount);
                 Pcx8575 device16 = (Pcx8575)device;
                 Assert.Equal(0x0000, device16.ReadUInt16());
             }

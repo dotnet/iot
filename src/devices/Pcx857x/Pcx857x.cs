@@ -137,6 +137,10 @@ namespace Iot.Device.Pcx857x
         public void SetPinMode(int pinNumber, PinMode mode)
         {
             ValidatePinNumber(pinNumber);
+
+            ushort SetBit(ushort data, int bitNumber) => (ushort)(data | (1 << bitNumber));
+            ushort ClearBit(ushort data, int bitNumber) => (ushort)(data & ~(1 << bitNumber));
+
             if (mode == PinMode.Input)
             {
                 _pinModes = ClearBit(_pinModes, pinNumber);
@@ -168,18 +172,6 @@ namespace Iot.Device.Pcx857x
             }
         }
 
-        private ushort SetBit(ushort data, int bitNumber) => data |= (ushort)(1 << bitNumber);
-
-        private ushort ClearBit(ushort data, int bitNumber) => data &= (ushort)~(1 << bitNumber);
-
-        private ushort SetBits(ushort current, ushort bits, ushort mask)
-        {
-            current &= (ushort)~mask;
-            current |= bits;
-            return current;
-        }
-
-
         public void Write(int pinNumber, PinValue value)
         {
             Span<PinValuePair> values = stackalloc PinValuePair[] { new PinValuePair(pinNumber, value) };
@@ -196,6 +188,13 @@ namespace Iot.Device.Pcx857x
             {
                 // One of the specified pins was set to input (0)
                 throw new InvalidOperationException("Cannot write to input pins.");
+            }
+
+            ushort SetBits(ushort current, ushort bits, ushort mask)
+            {
+                current &= (ushort)~mask;
+                current |= bits;
+                return current;
             }
 
             WritePins(SetBits(_pinValues, (ushort)values, (ushort)pins));
