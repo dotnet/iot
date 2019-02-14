@@ -25,7 +25,6 @@ namespace Iot.Device.Samples
             }
         }
 
-
         static void Main(string[] args)
         {
             Console.WriteLine("Hello Max7219!");
@@ -55,7 +54,8 @@ namespace Iot.Device.Samples
                     0b10011001,
                     0b01000010,
                     0b00111100
-                    };
+                };
+
                 for (var i = 0; i < devices.CascadedDevices; i++)
                 {
                     for (var digit = 0; digit < 8; digit++)
@@ -73,7 +73,6 @@ namespace Iot.Device.Samples
                     Thread.Sleep(1000);
                 }
 
-
                 //reinitialize device and show message using the matrix graphics
                 devices.Init();
                 devices.Rotation = RotationType.Left;
@@ -82,7 +81,6 @@ namespace Iot.Device.Samples
                     graphics.Font = font;
                     graphics.ShowMessage("Hello World from MAX7219!", alwaysScroll: true);
                 }
-
             }
         }
     }
