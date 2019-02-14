@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp23xxx
     public class Mcp23s08 : Mcp23x0x
     {
         /// <summary>
-        /// Initializes s new instance of the Mcp23s08 device.
+        /// Initializes a new instance of the Mcp23s08 device.
         /// </summary>
         /// <param name="spiDevice">The SPI device used for communication.</param>
         /// <param name="deviceAddress">The device address for the connection on the SPI bus.</param>
