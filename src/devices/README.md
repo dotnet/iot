@@ -24,6 +24,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Servo -- Servomotor Controller](Servo/README.md)
 * [Si7021 -- Temperature & Humidity Sensor](Si7021/README.md)
 * [SoftPwm -- Software PWM](SoftPwm/README.md)
+* [Ssd1306 -- OLED Display Controller](Ssd1306/README.md)
 
 ## Binding Distribution
 
