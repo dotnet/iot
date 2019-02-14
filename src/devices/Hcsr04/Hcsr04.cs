@@ -15,6 +15,8 @@ namespace Iot.Device.Hcsr04
         private readonly int _trigger;
         private GpioController _controller;
         private Stopwatch _timer = new Stopwatch();
+        
+        private int lastMeasurment = 0;
 
         /// <summary>
         /// Gets the current distance in cm.
@@ -48,8 +50,9 @@ namespace Iot.Device.Hcsr04
 
             // Trigger input for 10uS to start ranging
             // ref https://components101.com/sites/default/files/component_datasheet/HCSR04%20Datasheet.pdf
-            _controller.Write(_trigger, PinValue.Low);
-            Thread.Sleep(TimeSpan.FromMilliseconds(0.002));
+            while (lastMeasurment - Environment.TickCount < 60)
+            {
+            }
             _controller.Write(_trigger, PinValue.High);
             Thread.Sleep(TimeSpan.FromMilliseconds(0.01));
             _controller.Write(_trigger, PinValue.Low);
@@ -57,6 +60,8 @@ namespace Iot.Device.Hcsr04
             while(_controller.Read(_echo) == PinValue.Low)
             {
             }
+            
+            lastMeasurment = Environment.TickCount;
             
             _timer.Start();
             while(_controller.Read(_echo) == PinValue.High)
