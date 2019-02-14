@@ -25,8 +25,8 @@ Grove LCD RGB Backlight uses two i2c devices:
 
 Here is a Hello World example of how to consume Grove LCD RGB Backlight binding:
 ```c#
-var i2cLcdDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress:0x3E));
-var i2cRgbDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress:0x62));
+var i2cLcdDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x3E));
+var i2cRgbDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x62));
 using (var lcd = new LcdRgb1602(i2cLcdDevice, i2cRgbDevice))
 {
     lcd.Write("Hello World!");

@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Timers;
+using Iot.Device.Mcp23xxx;
 
 namespace Iot.Device.CharacterLcd.Samples
 {
@@ -25,11 +26,11 @@ namespace Iot.Device.CharacterLcd.Samples
 
 #if USEI2C
             var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x21));
-            var controller = new Mcp23008Adapter(new Mcp23008(i2cDevice));
+            var controller = new Mcp23008(i2cDevice);
             var lcd = new Hd44780(registerSelect: 1, enable: 2, data: new int[] { 3, 4, 5, 6 }, size: new Size(16, 2), backlight: 7, controller: controller);
 #elif USERGB
-            var i2cLcdDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress:0x3E));
-            var i2cRgbDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress:0x62));
+            var i2cLcdDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x3E));
+            var i2cRgbDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x62));
             var lcd = new LcdRgb1602(i2cLcdDevice, i2cRgbDevice);
 #else
             Hd44780 lcd = new Hd44780(12, 26, new int[] { 16, 17, 18, 19, 20, 21, 22, 23 }, new Size(20, 4), readWrite: 13);
@@ -66,7 +67,7 @@ namespace Iot.Device.CharacterLcd.Samples
                 TestPrompt("Perf", lcd, PerfTests);
 
 #if USERGB
-                TestPrompt("Colors", lcd, SetColorTest);
+                TestPrompt("Colors", lcd, SetBacklightColorTest);
 #endif
 
                 // Shift display right
@@ -215,7 +216,7 @@ namespace Iot.Device.CharacterLcd.Samples
             Console.WriteLine(result);
         }
 
-        static void SetColorTest(LcdRgb1602 lcd)
+        static void SetBacklightColorTest(LcdRgb1602 lcd)
         {
             Color[] colors = { Color.Red, Color.Green, Color.Blue, Color.Aqua, Color.Azure,
                 Color.Brown, Color.Chocolate, Color.LemonChiffon, Color.Lime, Color.Tomato, Color.Yellow };
@@ -225,12 +226,12 @@ namespace Iot.Device.CharacterLcd.Samples
                 lcd.Clear();
                 lcd.Write(color.Name);
 
-                lcd.SetColor(color);
+                lcd.SetBacklightColor(color);
                 System.Threading.Thread.Sleep(1000);
             }
 
             lcd.Clear();
-            lcd.SetColor(Color.White);
+            lcd.SetBacklightColor(Color.White);
         }
 
         static void TestPrompt<T>(string test, T lcd, Action<T> action) where T : Hd44780Base

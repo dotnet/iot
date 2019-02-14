@@ -55,7 +55,8 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// Enable/disable the backlight.
         /// </summary>
-        public override bool BacklightOn {
+        public override bool BacklightOn
+        {
             get { return _backlightOn; }
 
             set
@@ -64,11 +65,11 @@ namespace Iot.Device.CharacterLcd
 
                 if (_backlightOn)
                 {
-                    ForceSetColor(_currentColor);
+                    ForceSetBacklightColor(_currentColor);
                 }
                 else
                 {
-                    ForceSetColor(Color.Black);
+                    ForceSetBacklightColor(Color.Black);
                 }
             }
         }
@@ -80,14 +81,15 @@ namespace Iot.Device.CharacterLcd
         /// <param name="value">The register value.</param>
         private void SetRgbRegister(RgbRegisters addr, byte value)
         {
-            _rgbDevice.Write(new byte[] { (byte)addr, value });
+            Span<byte> dataToSend = stackalloc byte[2] { (byte)addr, value };
+            _rgbDevice.Write(dataToSend);
         }
 
         /// <summary>
         /// Sets the backlight color without any checks.
         /// </summary>
         /// <param name="color">The color to set.</param>
-        private void ForceSetColor(Color color)
+        private void ForceSetBacklightColor(Color color)
         {
             SetRgbRegister(RgbRegisters.REG_RED, color.R);
             SetRgbRegister(RgbRegisters.REG_GREEN, color.G);
@@ -109,7 +111,7 @@ namespace Iot.Device.CharacterLcd
             // 0010 0000 -> 0x20  (DMBLNK to 1, ie blinky mode)
             SetRgbRegister(RgbRegisters.REG_MODE2, 0x20);
 
-            SetColor(Color.White);
+            SetBacklightColor(Color.White);
         }
 
         /// <summary>
@@ -118,7 +120,8 @@ namespace Iot.Device.CharacterLcd
         /// <param name="data">True to send data, otherwise sends a command.</param>
         protected override void Send(byte value, bool data = false)
         {
-            _lcdDevice.Write(new byte[] { data ? (byte)0x40 : (byte)0x80, (byte)value });
+            Span<byte> dataToSend = stackalloc byte[2] { data ? (byte)0x40 : (byte)0x80, (byte)value };
+            _lcdDevice.Write(dataToSend);
         }
 
         /// <summary>
@@ -140,14 +143,14 @@ namespace Iot.Device.CharacterLcd
         /// The action will be ignored in case of the backlight is disabled.
         /// </summary>
         /// <param name="color">The color to set.</param>
-        public void SetColor(Color color)
+        public void SetBacklightColor(Color color)
         {
             if (!BacklightOn)
             {
                 return;
             }
 
-            ForceSetColor(color);
+            ForceSetBacklightColor(color);
             _currentColor = color;
         }
     }
