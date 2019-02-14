@@ -72,7 +72,7 @@ namespace Iot.Device.Mcp23xxx.Tests
         private class BankStyleMock : Mcp23xxx
         {
             public BankStyleMock(SpiDevice device, BankStyle bankStyle)
-                : base(new SpiAdapter(device, 0x20), 0x20, bankStyle: bankStyle)
+                : base(new SpiAdapter(device, 0x20), bankStyle: bankStyle)
             {
             }
 

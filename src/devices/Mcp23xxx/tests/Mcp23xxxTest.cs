@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
+using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Spi;
 using Xunit;
@@ -28,13 +30,13 @@ namespace Iot.Device.Mcp23xxx.Tests
                 devices.Add(new TestDevice(new Mcp23018(i2c), i2c.DeviceMock));
 
                 SpiDeviceMock spi = new SpiDeviceMock(1);
-                devices.Add(new TestDevice(new Mcp23S08(0x20, spi), spi.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23s08(spi, 0x20), spi.DeviceMock));
                 spi = new SpiDeviceMock(1);
-                devices.Add(new TestDevice(new Mcp23S09(0x20, spi), spi.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23s09(spi), spi.DeviceMock));
                 spi = new SpiDeviceMock(2);
-                devices.Add(new TestDevice(new Mcp23S17(0x20, spi), spi.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23s17(spi, 0x20), spi.DeviceMock));
                 spi = new SpiDeviceMock(2);
-                devices.Add(new TestDevice(new Mcp23S18(0x20, spi), spi.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23s18(spi), spi.DeviceMock));
                 return devices;
             }
         }
@@ -42,22 +44,22 @@ namespace Iot.Device.Mcp23xxx.Tests
         public struct TestDevice
         {
             public Mcp23xxx Device { get; }
-            public Mcp23xxxMock DeviceMock { get; }
+            public Mcp23xxxChipMock ChipMock { get; }
 
-            public TestDevice(Mcp23xxx device, Mcp23xxxMock deviceMock)
+            public TestDevice(Mcp23xxx device, Mcp23xxxChipMock chipMock)
             {
                 Device = device;
-                DeviceMock = deviceMock;
+                ChipMock = chipMock;
             }
         }
 
         protected class SpiDeviceMock : SpiDevice
         {
-            public Mcp23xxxMock DeviceMock { get; private set; }
+            public Mcp23xxxChipMock DeviceMock { get; private set; }
 
             public SpiDeviceMock(int ports)
             {
-                DeviceMock = new Mcp23xxxMock(ports, isSpi: true);
+                DeviceMock = new Mcp23xxxChipMock(ports, isSpi: true);
             }
 
             public override void Read(Span<byte> buffer) => DeviceMock.Read(buffer);
@@ -78,11 +80,11 @@ namespace Iot.Device.Mcp23xxx.Tests
         protected class I2cDeviceMock : I2cDevice
         {
             private I2cConnectionSettings _settings;
-            public Mcp23xxxMock DeviceMock { get; private set; }
+            public Mcp23xxxChipMock DeviceMock { get; private set; }
 
             public I2cDeviceMock(int ports, I2cConnectionSettings settings = null)
             {
-                DeviceMock = new Mcp23xxxMock(ports, isSpi: false);
+                DeviceMock = new Mcp23xxxChipMock(ports, isSpi: false);
                 _settings = settings ?? new I2cConnectionSettings(0, 0x20);
             }
 
@@ -96,7 +98,10 @@ namespace Iot.Device.Mcp23xxx.Tests
             public override byte ReadByte() => throw new NotImplementedException();
         }
 
-        public class Mcp23xxxMock
+        /// <summary>
+        /// Mock the behavior of the chip
+        /// </summary>
+        public class Mcp23xxxChipMock
         {
             private int _ports;
             private bool _isSpi;
@@ -105,7 +110,7 @@ namespace Iot.Device.Mcp23xxx.Tests
             private byte[] _lastReadBuffer;
             private byte[] _lastWriteBuffer;
 
-            public Mcp23xxxMock(int ports, bool isSpi)
+            public Mcp23xxxChipMock(int ports, bool isSpi)
             {
                 _ports = ports;
                 _isSpi = isSpi;
@@ -154,6 +159,60 @@ namespace Iot.Device.Mcp23xxx.Tests
                 for (int i = 0; i < data.Length; i++)
                 {
                     _registers[i + registerAddress] = data[i];
+                }
+            }
+        }
+
+
+        public class GpioControllerMock : IGpioController
+        {
+            private Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
+
+            public void Reset() => _pinValues = new Dictionary<int, PinValue>();
+
+            public void ClosePin(int pinNumber)
+            {
+            }
+
+            public void Dispose()
+            {
+            }
+
+            public void OpenPin(int pinNumber, PinMode mode)
+            {
+            }
+
+            public PinValue Read(int pinNumber)
+            {
+                if (_pinValues.TryGetValue(pinNumber, out PinValue value))
+                    return value;
+
+                return PinValue.Low;
+            }
+
+            public void Read(Span<PinValuePair> pinValues)
+            {
+                for (int i = 0; i < pinValues.Length; i++)
+                {
+                    int pin = pinValues[i].PinNumber;
+                    pinValues[i] = new PinValuePair(pin, Read(pin));
+                }
+            }
+
+            public void SetPinMode(int pinNumber, PinMode mode)
+            {
+            }
+
+            public void Write(int pinNumber, PinValue value)
+            {
+                _pinValues[pinNumber] = value;
+            }
+
+            public void Write(ReadOnlySpan<PinValuePair> pinValues)
+            {
+                foreach ((int pin, PinValue value) in pinValues)
+                {
+                    Write(pin, value);
                 }
             }
         }
