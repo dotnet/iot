@@ -49,16 +49,16 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw 
-            ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.ConvertPinNumberingSchemaError);
+        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => 
+            throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.ConvertPinNumberingSchemaError);
 
         protected internal override PinMode GetPinMode(int pinNumber)
         {
-            if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
+            if (!_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
-                return (Interop.GetLineDirection(pinHandle) == 1) ? PinMode.Input : PinMode.Output;
+                throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError, pin: pinNumber);
             }
-            throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError, pin:pinNumber);
+            return (Interop.GetLineDirection(pinHandle) == 1) ? PinMode.Input : PinMode.Output;
         }
 
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
