@@ -7,6 +7,8 @@ using Iot.Device.GoPiGo3;
 using System;
 using System.Threading;
 using System.Drawing;
+using System.Device.Spi;
+using System.Device.Spi.Drivers;
 
 namespace GoPiGo3.sample
 {
@@ -17,19 +19,28 @@ namespace GoPiGo3.sample
         static void Main(string[] args)
         {
             Console.WriteLine("Hello GoPiGo3!");
-            _goPiGo3 = new GoPiGo();
+            // Default on the Raspberry is Bus ID = 0 and Chip Set Select Line = 1 for GoPiGo3
+            var settings = new SpiConnectionSettings(0, 1)
+            {
+                // 500K is the SPI communication with GoPiGo
+                ClockFrequency = 500000,
+                // see http://tightdev.net/SpiDev_Doc.pdf
+                Mode = SpiMode.Mode0,
+                DataBitLength = 8
+            };
+            _goPiGo3 = new GoPiGo(new UnixSpiDevice(settings));
             Console.WriteLine("Choose a test by entering the number and press enter:");
             Console.WriteLine("  1. Basic GoPiGo3 info and embedded led test");
             Console.WriteLine("  2. Control left motor from motor right position");
             Console.WriteLine("  3. Read encoder of right motor");
             Console.WriteLine("  4. Test both servo motors");
-            Console.WriteLine("  5. Test Ultrasonic sensor on Groove1");
-            Console.WriteLine("  6. Test buzzer on Groove1");
-            Console.WriteLine("  7. Change buzzer tone on Groove1 with a potentiometer on Groove2");
-            Console.WriteLine("  8. Test sound sensor on Groove1");
-            Console.WriteLine("  9. Test a relay on Groove1");
-            Console.WriteLine(" 10. Test a button on Groove1");
-            Console.WriteLine(" 11. Control a led light on Groove2 from a light sensor on Groove1");
+            Console.WriteLine("  5. Test Ultrasonic sensor on Grove1");
+            Console.WriteLine("  6. Test buzzer on Grove1");
+            Console.WriteLine("  7. Change buzzer tone on Grove1 with a potentiometer on Grove2");
+            Console.WriteLine("  8. Test sound sensor on Grove1");
+            Console.WriteLine("  9. Test a relay on Grove1");
+            Console.WriteLine(" 10. Test a button on Grove1");
+            Console.WriteLine(" 11. Control a led light on Grove2 from a light sensor on Grove1");
             Console.WriteLine(" 12. Test MotorLeft speed based on encoder");
             Console.WriteLine(" 13. Test driving the vehicle");
             var readCar = Console.ReadLine();
@@ -98,15 +109,6 @@ namespace GoPiGo3.sample
             Console.WriteLine($"Manufacturer: {goPiGoInfo.Manufacturer}");
             Console.WriteLine($"Board: {goPiGoInfo.Board}");
             Console.WriteLine($"Hardware version: {goPiGoInfo.HardwareVersion}");
-            var hdv = goPiGoInfo.GetHardwareVersion();
-            for (int i = 0; i < hdv.Length; i++)
-                Console.WriteLine($"Hardware version {i}: {hdv[i]}");
-
-            Console.WriteLine($"Software version: {goPiGoInfo.SoftwareVersion}");
-            var swv = goPiGoInfo.GetSoftwareVersion();
-            for (int i = 0; i < swv.Length; i++)
-                Console.WriteLine($"Software version {i}: {swv[i]}");
-
             Console.WriteLine($"Id: {goPiGoInfo.Id}");
             // Eyes led
             Console.WriteLine("Testing Led, changing colors for the leds on both eyes");

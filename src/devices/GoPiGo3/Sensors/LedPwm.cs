@@ -15,17 +15,17 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// Constructor for the LedPwm class
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
-        /// <param name="port">The Groove Port, need to be in the list of SupportedPorts</param>
-        public LedPwm(GoPiGo goPiGo, GroovePort port) : this(goPiGo, port, 0)
+        /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
+        public LedPwm(GoPiGo goPiGo, GrovePort port) : this(goPiGo, port, 0)
         { }
 
         /// <summary>
         /// Constructor for the LedPwm class
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
-        /// <param name="port">The Groove Port, need to be in the list of SupportedPorts</param>
+        /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
         /// <param name="duty">The duty cycle for the led, 100 = full bright, 0 = full dark</param>
-        public LedPwm(GoPiGo goPiGo, GroovePort port, byte duty) : base(goPiGo, port, duty)
+        public LedPwm(GoPiGo goPiGo, GrovePort port, byte duty) : base(goPiGo, port, duty)
         { }
 
         /// <summary>

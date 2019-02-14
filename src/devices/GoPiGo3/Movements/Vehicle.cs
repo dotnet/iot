@@ -111,7 +111,7 @@ namespace Iot.Device.GoPiGo3.Movements
         /// </summary>
         /// <param name="speed">speed is between -255 and +255</param>
         /// <param name="timeout">>number of milliseconds to run the motors</param>
-        public void Foreward(int speed, int timeout)
+        public void Forward(int speed, int timeout)
         {
             Backward(-speed, timeout);
         }

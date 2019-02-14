@@ -13,7 +13,7 @@ namespace GoPiGo3.sample
     {
         static private void TestUltrasound()
         {
-            UltraSonicSensor ultraSonic = new UltraSonicSensor(_goPiGo3, GroovePort.Groove1);
+            UltraSonicSensor ultraSonic = new UltraSonicSensor(_goPiGo3, GrovePort.Grove1);
             Console.WriteLine($"Test {ultraSonic.SensorName} on port {ultraSonic.Port}. Gives the distance. Press enter to stop the test.");
             AddLines();
             while (!Console.KeyAvailable)
@@ -28,7 +28,7 @@ namespace GoPiGo3.sample
         static private void TestBuzzer()
         {
             int[] notes = new int[] { 261, 293, 329, 349, 392, 440, 493, 523 };
-            Buzzer buzzer = new Buzzer(_goPiGo3, GroovePort.Groove1);
+            Buzzer buzzer = new Buzzer(_goPiGo3, GrovePort.Grove1);
             Console.WriteLine($"Play notes on {buzzer.SensorName} on port {buzzer.Port} in loops, changing duty cycle 50 (default), 80 and 10. Press a enter to stop the test.");
             buzzer.Start();
             Console.WriteLine($"Playing with duty cycle = {buzzer.Duty}");
@@ -68,8 +68,8 @@ namespace GoPiGo3.sample
 
         static private void TestPotentiometer()
         {
-            Buzzer buzzer = new Buzzer(_goPiGo3, GroovePort.Groove1);
-            PotentiometerSensor potentiometerSensor = new PotentiometerSensor(_goPiGo3, GroovePort.Groove2);
+            Buzzer buzzer = new Buzzer(_goPiGo3, GrovePort.Grove1);
+            PotentiometerSensor potentiometerSensor = new PotentiometerSensor(_goPiGo3, GrovePort.Grove2);
             Console.WriteLine($"Control the {buzzer.SensorName} on port {buzzer.Port} with the {potentiometerSensor.SensorName} on port {buzzer.Port}. Press enter to stop the test.");
             AddLines();
             buzzer.Value = potentiometerSensor.Value;
@@ -84,7 +84,7 @@ namespace GoPiGo3.sample
 
         static private void TestSound()
         {
-            SoundSensor soundSensor = new SoundSensor(_goPiGo3, GroovePort.Groove1);
+            SoundSensor soundSensor = new SoundSensor(_goPiGo3, GrovePort.Grove1);
             Console.WriteLine($"Test {soundSensor.SensorName} on port {soundSensor.Port}. Press a key to finish the test");
             AddLines();
             while (!Console.KeyAvailable)
@@ -98,7 +98,7 @@ namespace GoPiGo3.sample
 
         static private void TestRelay()
         {
-            Relay relay = new Relay(_goPiGo3, GroovePort.Groove1);
+            Relay relay = new Relay(_goPiGo3, GrovePort.Grove1);
             Console.WriteLine($"Test {relay.SensorName} on port {relay.Port}, will change the state of the relay from on to off, reverse the polarity, turn on and off, reverse the polarity and turn on an off again.");
             Console.WriteLine($"{relay.SensorName}, Value: {relay.Value}, state: {relay} IsInverted: {relay.IsInverted}");
             // 2 is different than 0, so it should swith it to "on"
@@ -127,7 +127,7 @@ namespace GoPiGo3.sample
 
         static private void TestButton()
         {
-            Button button = new Button(_goPiGo3, GroovePort.Groove2);
+            Button button = new Button(_goPiGo3, GrovePort.Grove2);
             Console.WriteLine($"Test {button.SensorName} on port {button.Port}. Press enter to stop the test.");
             AddLines();
             while (!Console.KeyAvailable)
@@ -141,8 +141,8 @@ namespace GoPiGo3.sample
 
         static private void TestLedPwmLightSensor()
         {
-            LedPwm ledPwm = new LedPwm(_goPiGo3, GroovePort.Groove2);
-            LightSensor lightSensor = new LightSensor(_goPiGo3, GroovePort.Groove1);
+            LedPwm ledPwm = new LedPwm(_goPiGo3, GrovePort.Grove2);
+            LightSensor lightSensor = new LightSensor(_goPiGo3, GrovePort.Grove1);
             Console.WriteLine($"Test {lightSensor.SensorName} on port {lightSensor.Port} controlling a {ledPwm.SensorName} on port {ledPwm.Port}. The intensity of the led will change proportionnaly to the intensity read by the sensor. Press enter to stop the test");
             AddLines();
             while (!Console.KeyAvailable)

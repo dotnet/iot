@@ -16,20 +16,20 @@ namespace Iot.Device.GoPiGo3.Sensors
     {
         private GoPiGo _goPiGo;
 
-        public GroovePort Port { get; internal set; }
+        public GrovePort Port { get; internal set; }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
-        /// <param name="port">The Groove Port, need to be in the list of SupportedPorts</param>
-        public UltraSonicSensor(GoPiGo goPiGo, GroovePort port)
+        /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
+        public UltraSonicSensor(GoPiGo goPiGo, GrovePort port)
         {
             if (!SupportedPorts.Contains(port))
-                throw new ArgumentException($"Error: Groove Port not supported");
+                throw new ArgumentException($"Error: Grove Port not supported");
             _goPiGo = goPiGo;
             Port = port;
-            _goPiGo.SetGrooveType(port, GrooveSensorType.Ultrasonic);
+            _goPiGo.SetGroveType(port, GroveSensorType.Ultrasonic);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Iot.Device.GoPiGo3.Sensors
             {
                 try
                 {
-                    return (_goPiGo.GetGrooveValue(Port)[0] << 8) + _goPiGo.GetGrooveValue(Port)[1];
+                    return (_goPiGo.GetGroveValue(Port)[0] << 8) + _goPiGo.GetGroveValue(Port)[1];
                 }
                 catch (IOException)
                 {
@@ -55,7 +55,10 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// </summary>
         public override string ToString() => $"{Value} cm";
 
-        public List<GroovePort> SupportedPorts => new List<GroovePort> { GroovePort.Groove1, GroovePort.Groove2 };
+        /// <summary>
+        /// List the supported Grove ports for the sensor
+        /// </summary>
+        static public List<GrovePort> SupportedPorts => new List<GrovePort> { GrovePort.Grove1, GrovePort.Grove2 };
 
         /// <summary>
         /// Get the sensor name "Ultrasonic Sensor"

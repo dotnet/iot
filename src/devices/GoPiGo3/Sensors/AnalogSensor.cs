@@ -14,28 +14,28 @@ namespace Iot.Device.GoPiGo3.Sensors
     public class AnalogSensor : ISensor
     {
         internal GoPiGo _goPiGo;
-        internal GroovePort _mode;
+        internal readonly GrovePort _mode;
 
         /// <summary>
         /// Constructor for the generic Analog Sensor
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
-        /// <param name="port">The Groove Port, need to be in the list of SupportedPorts</param>
-        public AnalogSensor(GoPiGo goPiGo, GroovePort port)
+        /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
+        public AnalogSensor(GoPiGo goPiGo, GrovePort port)
         {
             if (!SupportedPorts.Contains(port))
-                throw new ArgumentException($"Error: Groove Port not supported");
+                throw new ArgumentException($"Error: Grove Port not supported");
             _goPiGo = goPiGo;
             Port = port;
-            _goPiGo.SetGrooveType(port, GrooveSensorType.Custom);
-            _goPiGo.SetGrooveMode(port, GrooveInputOutput.InputAnalog);
-            _mode = Port == GroovePort.Groove1 ? GroovePort.Groove1Pin1 : GroovePort.Groove2Pin1;
+            _goPiGo.SetGroveType(port, GroveSensorType.Custom);
+            _goPiGo.SetGroveMode(port, GroveInputOutput.InputAnalog);
+            _mode = Port == GrovePort.Grove1 ? GrovePort.Grove1Pin1 : GrovePort.Grove2Pin1;
         }
 
         /// <summary>
         /// Get the value of the sensor from 0 to MaxAdc
         /// </summary>
-        public int Value => _goPiGo.GetGrooveAnalog(_mode);
+        public int Value => _goPiGo.GetGroveAnalog(_mode);
 
         /// <summary>
         /// The maximum ADC value 4095 for GoPiGo3
@@ -53,11 +53,14 @@ namespace Iot.Device.GoPiGo3.Sensors
         public override string ToString() => Value.ToString();
 
         /// <summary>
-        /// Get the Groove Port
+        /// Get the Grove Port
         /// </summary>
-        public GroovePort Port { get; internal set; }
+        public GrovePort Port { get; internal set; }
 
-        public List<GroovePort> SupportedPorts => new List<GroovePort>() { GroovePort.Groove1, GroovePort.Groove2 };
+        /// <summary>
+        /// List the supported Grove ports for the sensor
+        /// </summary>
+        static public List<GrovePort> SupportedPorts => new List<GrovePort>() { GrovePort.Grove1, GrovePort.Grove2 };
 
         /// <summary>
         /// Get the sensor name "Analog Sensor"

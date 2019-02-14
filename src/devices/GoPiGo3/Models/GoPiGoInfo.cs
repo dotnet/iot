@@ -32,35 +32,6 @@ namespace Iot.Device.GoPiGo3.Models
         /// <summary>
         /// Id of the GoPiGo3
         /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Get the Hardware version as an int array
-        /// </summary>
-        /// <returns>Returns an int array of the hardware version</returns>
-        public int[] GetHardwareVersion()
-        {
-            return GetVersionsFromString(HardwareVersion.ToString());
-        }
-
-        /// <summary>
-        /// Get the firmware version as an int array
-        /// </summary>
-        /// <returns>Returns an int array of the firmware version</returns>
-        public int[] GetSoftwareVersion()
-        {
-            return GetVersionsFromString(SoftwareVersion.ToString());
-        }
-
-        private int[] GetVersionsFromString(string toconvert)
-        {
-            if (toconvert == "")
-                return null;
-            var split = toconvert.Split('.');
-            List<int> ret = new List<int>();
-            foreach (var elem in split)
-                ret.Add(int.Parse(elem));
-            return ret.ToArray();
-        }
+        public string Id { get; set; }        
     }
 }

@@ -66,7 +66,7 @@ namespace GoPiGo3.sample
             Console.WriteLine("Driving backward");
             veh.Backward(30, 5000);
             Console.WriteLine("Driving forward");
-            veh.Foreward(30, 5000);
+            veh.Forward(30, 5000);
             Console.WriteLine("Turning left");
             veh.TrunLeftTime(30, 5000);
             Console.WriteLine("Turning right");

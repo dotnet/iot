@@ -13,6 +13,9 @@ namespace Iot.Device.GoPiGo3.Models
         LedEyeRight = 0x01,
         LedBlinkerLeft = 0x04,
         LedBlinkerRight = 0x08,
-        LedWifi = 0x80 // Used to indicate WiFi status. Should not be controlled by the user.
+        // Used to indicate WiFi status when used with Dexter OS. 
+        // Should not be controlled by the user if using Dexter OS.
+        // But you still can control it out of this context
+        LedWifi = 0x80 
     }
 }

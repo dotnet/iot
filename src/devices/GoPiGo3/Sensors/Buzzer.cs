@@ -15,7 +15,7 @@ namespace Iot.Device.GoPiGo3.Sensors
     {
 
         private GoPiGo _goPiGo;
-        private GroovePort _mode;
+        private readonly GrovePort _mode;
         private int _value;
         private byte _duty;
 
@@ -23,27 +23,27 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// Constructor for the Buzzer class
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
-        /// <param name="port">The Groove Port, need to be in the list of SupportedPorts</param>
-        public Buzzer(GoPiGo goPiGo, GroovePort port) : this(goPiGo, port, 50)
+        /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
+        public Buzzer(GoPiGo goPiGo, GrovePort port) : this(goPiGo, port, 50)
         { }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
-        /// <param name="port">The Groove Port, need to be in the list of SupportedPorts</param>
+        /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
         /// <param name="duty">The PWM duty to use to generate the sound from 0 to 100</param>
-        public Buzzer(GoPiGo goPiGo, GroovePort port, byte duty)
+        public Buzzer(GoPiGo goPiGo, GrovePort port, byte duty)
         {
             if (!SupportedPorts.Contains(port))
-                throw new ArgumentException($"Error: Groove Port not supported");
+                throw new ArgumentException($"Error: Grove Port not supported");
             _goPiGo = goPiGo;
             Port = port;
-            _goPiGo.SetGrooveType(port, GrooveSensorType.Custom);
-            _mode = (port == GroovePort.Groove1) ? GroovePort.Groove1Pin1 : GroovePort.Groove2Pin1;
-            _goPiGo.SetGrooveMode(_mode, GrooveInputOutput.OutputPwm);
+            _goPiGo.SetGroveType(port, GroveSensorType.Custom);
+            _mode = (port == GrovePort.Grove1) ? GrovePort.Grove1Pin1 : GrovePort.Grove2Pin1;
+            _goPiGo.SetGroveMode(_mode, GroveInputOutput.OutputPwm);
             Duty = duty;
-            Value = 24000; //The default value
+            Value = 24_000; //The default value
             Stop();
         }
 
@@ -58,7 +58,9 @@ namespace Iot.Device.GoPiGo3.Sensors
                 var prev = _duty;
                 _duty = Math.Clamp(value, (byte)0, (byte)100);
                 if (prev != _duty)
+                {
                     Start();
+                }
             }
         }
 
@@ -67,7 +69,7 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// </summary>
         public void Start()
         {
-            _goPiGo.SetGroovePwmDuty(_mode, Duty);
+            _goPiGo.SetGrovePwmDuty(_mode, Duty);
         }
 
         /// <summary>
@@ -75,7 +77,7 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// </summary>
         public void Stop()
         {
-            _goPiGo.SetGroovePwmDuty(_mode, 0);
+            _goPiGo.SetGrovePwmDuty(_mode, 0);
         }
 
         /// <summary>
@@ -88,7 +90,7 @@ namespace Iot.Device.GoPiGo3.Sensors
             set
             {
                 _value = value;
-                _goPiGo.GetGroovePwmFrequency(Port, (uint)_value);
+                _goPiGo.GetGrovePwmFrequency(Port, (uint)_value);
             }
         }
 
@@ -97,9 +99,12 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// </summary>
         public override string ToString() => $"{Value} Hz";
 
-        public GroovePort Port { get; internal set; }
+        public GrovePort Port { get; internal set; }
 
-        public List<GroovePort> SupportedPorts => new List<GroovePort>() { GroovePort.Groove1, GroovePort.Groove2 };
+        /// <summary>
+        /// List the supported Grove ports for the sensor
+        /// </summary>
+        public List<GrovePort> SupportedPorts => new List<GrovePort>() { GrovePort.Grove1, GrovePort.Grove2 };
 
         /// <summary>
         /// Get the sensor name "Buzzer"

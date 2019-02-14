@@ -5,9 +5,9 @@
 namespace Iot.Device.GoPiGo3.Models
 {
     /// <summary>
-    /// The setup of the Groove element
+    /// The setup of the Grove element
     /// </summary>
-    public enum GrooveInputOutput
+    public enum GroveInputOutput
     {
         InputDigital = 0,
         OutputDigital,

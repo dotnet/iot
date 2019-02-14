@@ -6,28 +6,28 @@ using System;
 
 namespace Iot.Device.GoPiGo3.Models
 {
-    public class GrooveSensor
+    public class GroveSensor
     {
         /// <summary>
-        /// Constructor for the groove sensor part of the main GoPiGo3 class
+        /// Constructor for the Grove sensor part of the main GoPiGo3 class
         /// </summary>
-        /// <param name="groovePort">The Groove port, either Groove1 or Groove2</param>
-        public GrooveSensor(GroovePort groovePort)
+        /// <param name="GrovePort">The Grove port, either Grove1 or Grove2</param>
+        public GroveSensor(GrovePort GrovePort)
         {
-            if (!((groovePort != GroovePort.Groove1) || (groovePort != GroovePort.Groove2)))
-                throw new ArgumentException("Groove sensor can only be on Port 1 or Port 2");
-            SensorType = GrooveSensorType.None;
+            if ((GrovePort != GrovePort.Grove1) && (GrovePort != GrovePort.Grove2))
+                throw new ArgumentException("Grove sensor can only be on Port 1 or Port 2");
+            SensorType = GroveSensorType.None;
         }
 
-        public GroovePort Port { get; }
-        public GrooveSensorType SensorType { get; set; }
+        public GrovePort Port { get; }
+        public GroveSensorType SensorType { get; set; }
         public byte I2cDataLength { get; set; }
     }
 
     /// <summary>
-    /// The type of Groove sensors
+    /// The type of Grove sensors
     /// </summary>
-    public enum GrooveSensorType
+    public enum GroveSensorType
     {
         None = 0,
         Custom = 1,
@@ -40,12 +40,12 @@ namespace Iot.Device.GoPiGo3.Models
     /// <summary>
     /// The state of the Goove element
     /// </summary>
-    public enum GrooveSensorState
+    public enum GroveSensorState
     {
         ValidData,
         NotConfigured,
         Configuring,
         NoData,
         I2cError
-    }    
+    }
 }

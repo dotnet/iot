@@ -4,7 +4,7 @@
 
 You will need a GoPiGo3 from [Dexter Industries](https://www.dexterindustries.com/gopigo3/) and a Raspberry Pi 3. That said, any board will work with the GoPiGo3 as it is using SPI. You’ll just need to link the pins from your board to the GoPiGo3 ones the correct way.
 
-GoPiGo3 have the ability to use Groove sensors, analogic, digital and I2C as well as servomotors. In order to take full advantage of this robot, you can add Groove sensors as well as servomotors. They are not mandatory. This project already embedded couple of Groove sensors. It is very easy to create groove sensors based on the ones provided.
+GoPiGo3 have the ability to use Grove sensors, analogic, digital and I2C as well as servomotors. In order to take full advantage of this robot, you can add Grove sensors as well as servomotors. They are not mandatory. This project already embedded couple of Grove sensors. It is very easy to create Grove sensors based on the ones provided.
 
 - [Device family](./README.md#device-family)
 - [GoPiGo3 requirements](./README.md#make-sure-you-have-a-GoPiGo3)
@@ -47,9 +47,18 @@ The main [GoPiGo3.samples](./samples) contains a series of test showing how to u
 Create a ```GoPiGo``` class.
 
 ```csharp
-GoPiGo _goPiGo = new GoPiGo();
+// Default on the Raspberry is Bus ID = 0 and Chip Set Select Line = 1 for GoPiGo3
+var settings = new SpiConnectionSettings(0, 1)
+{
+    // 500K is the SPI communication with GoPiGo
+    ClockFrequency = 500000,
+    Mode = SpiMode.Mode0,
+    DataBitLength = 8
+};
+_goPiGo3 = new GoPiGo(new UnixSpiDevice(settings));
 // Do whatever you want, read sensors, set motors, etc
 // once finished, and class will be disposed, all motors will be floated and sensors reinitialized
+// The SpiDevice will the disposed when GoPiGo will be disposed
 ```
 
 If you want to use GoPiGo3 on another board than the RaspberryPi and you have to change the default SPI bus and chip select line, you can do it as well in the constructor. Please note that for Raspberry Pi, the default is 0 for bus Id and 1 for chip select line.
@@ -114,16 +123,16 @@ Console.WriteLine($"Battery voltage: {voltage.VoltageBattery}");
 
 ### Using sensors
 
-To setup a sensor, you need first to set the type of sensor then you can read the data. The below example read an analogic input on the Groove1 port.
+To setup a sensor, you need first to set the type of sensor then you can read the data. The below example read an analogic input on the Grove1 port.
 
 ```csharp
-_goPiGo.SetGrooveType(GroovePort.Groove1, GrooveSensorType.Custom);
-_goPiGo.SetGrooveMode(GroovePort.Groove1, GrooveInputOutput.InputAnalog);
-var _mode = Port == GroovePort.Groove1 ? GroovePort.Groove1Pin1 : GroovePort.Groove2Pin1;
-var thevalue = _goPiGo.GetGrooveAnalog(_mode);
+_goPiGo.SetGroveType(GrovePort.Grove1, GroveSensorType.Custom);
+_goPiGo.SetGroveMode(GrovePort.Grove1, GroveInputOutput.InputAnalog);
+var _mode = Port == GrovePort.Grove1 ? GrovePort.Grove1Pin1 : GrovePort.Grove2Pin1;
+var thevalue = _goPiGo.GetGroveAnalog(_mode);
 ```
 
-It is **strongly recommended** to use the high level classes implementing the logic to decode correctly the raw values of sensor like in the previous example. If you want to build your own sensor classes, you can use those low level functions. You need to understand if the Pin1 is used (the yellow cable on Groove) and/or the Pin2 is used (the white cable). And of course, you'll need to know the sequence and how to read/write on those pins. You'll find detailed examples in the ```Sensors``` folder.
+It is **strongly recommended** to use the high level classes implementing the logic to decode correctly the raw values of sensor like in the previous example. If you want to build your own sensor classes, you can use those low level functions. You need to understand if the Pin1 is used (the yellow cable on Grove) and/or the Pin2 is used (the white cable). And of course, you'll need to know the sequence and how to read/write on those pins. You'll find detailed examples in the ```Sensors``` folder.
 
 ### Using motors
 
@@ -233,10 +242,10 @@ There are high level classes to handle directly sensors like analogic sensors, b
 
 Using the sensor classes is straight forward. Just reference a class and initialized it. Access properties which are common to all sensors, ```Value``` and ```ToString()```. 
 
-Example creating an Ultrasonic sensor on Groove1 port:
+Example creating an Ultrasonic sensor on Grove1 port:
 
 ```csharp
-UltraSonicSensor ultraSonic = new UltraSonicSensor(_goPiGo3, GroovePort.Groove1);
+UltraSonicSensor ultraSonic = new UltraSonicSensor(_goPiGo3, GrovePort.Grove1);
 Console.WriteLine($"Test {ultraSonic.SensorName} on port {ultraSonic.Port}. Gives the distance. Press enter to stop the test.");
 while (!Console.KeyAvailable)
 {                
@@ -301,13 +310,13 @@ Choose a test by entering the number and press enter:
   2. Control left motor from motor right position
   3. Read encoder of right motor
   4. Test both servo motors
-  5. Test Ultrasonic sensor on Groove1
-  6. Test buzzer on Groove1
-  7. Change buzzer tone on Groove1 with a potentiometer on Groove2
-  8. Test sound sensor on Groove1
-  9. Test a relay on Groove1
- 10. Test a button on Groove1
- 11. Control a led light on Groove2 from a light sensor on Groove1
+  5. Test Ultrasonic sensor on Grove1
+  6. Test buzzer on Grove1
+  7. Change buzzer tone on Grove1 with a potentiometer on Grove2
+  8. Test sound sensor on Grove1
+  9. Test a relay on Grove1
+ 10. Test a button on Grove1
+ 11. Control a led light on Grove2 from a light sensor on Grove1
  12. Test MotorLeft speed based on encoder
  13. Test driving the vehicle
 ```

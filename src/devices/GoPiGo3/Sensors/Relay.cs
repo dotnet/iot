@@ -15,17 +15,17 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// 
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
-        /// <param name="port">The Groove Port, need to be in the list of SupportedPorts</param>
-        public Relay(GoPiGo goPiGo, GroovePort port) : this(goPiGo, port, false)
+        /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
+        public Relay(GoPiGo goPiGo, GrovePort port) : this(goPiGo, port, false)
         { }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
-        /// <param name="port">The Groove Port, need to be in the list of SupportedPorts</param>
+        /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
         /// <param name="inverted">If inverted, the relay is on when output is low and off when output is high</param>
-        public Relay(GoPiGo goPiGo, GroovePort port, bool inverted) : base(goPiGo, port)
+        public Relay(GoPiGo goPiGo, GrovePort port, bool inverted) : base(goPiGo, port)
         {
             IsInverted = inverted;
         }
@@ -57,7 +57,7 @@ namespace Iot.Device.GoPiGo3.Sensors
             set
             {
                 _value = value != 0;
-                _goPiGo.SetGrooveState(_mode, _value && !IsInverted);
+                _goPiGo.SetGroveState(_mode, _value && !IsInverted);
             }
         }
 

@@ -15,14 +15,14 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// Button constructor
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
-        /// <param name="port">The Groove Port, need to be in the list of SupportedPorts</param>
-        public Button(GoPiGo goPiGo, GroovePort port) : base(goPiGo, port)
+        /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
+        public Button(GoPiGo goPiGo, GrovePort port) : base(goPiGo, port)
         { }
 
         /// <summary>
         /// True if the button is pressed, flase otherwise
         /// </summary>
-        public bool IsPressed => Value != 0 ? true : false;
+        public bool IsPressed => Value != 0;
 
         /// <summary>
         /// Get "Pressed" if the button is pressed "Not pressed" if not

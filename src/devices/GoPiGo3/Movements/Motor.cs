@@ -4,6 +4,7 @@
 
 using Iot.Device.GoPiGo3.Models;
 using System;
+using System.IO;
 using System.Threading;
 
 namespace Iot.Device.GoPiGo3.Movements
@@ -13,9 +14,7 @@ namespace Iot.Device.GoPiGo3.Movements
     /// </summary>
     public enum Polarity
     {
-#pragma warning disable
         Backward = -1, Forward = 1, OppositeDirection = 0
-#pragma warning restore
     };
 
     public class Motor
@@ -39,7 +38,7 @@ namespace Iot.Device.GoPiGo3.Movements
             _goPiGo = brick;
             Port = port;
             _periodRefresh = timeout;
-            _timer = new Timer(UpdateSensor, this, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(timeout));
+            _timer = new Timer(UpdateSensor, this, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(timeout));            
         }
 
         /// <summary>
@@ -96,7 +95,7 @@ namespace Iot.Device.GoPiGo3.Movements
         {
             try
             {
-                var motorstatus = _goPiGo.GetMotorStatus(Port);
+                MotorStatus motorstatus = _goPiGo.GetMotorStatus(Port);
                 switch (polarity)
                 {
                     case Polarity.Backward:
@@ -114,7 +113,7 @@ namespace Iot.Device.GoPiGo3.Movements
                         break;
                 }
             }
-            catch (Exception) { }
+            catch (IOException) { }
         }
 
         /// <summary>
@@ -127,7 +126,7 @@ namespace Iot.Device.GoPiGo3.Movements
             {
                 return _goPiGo.GetMotorEncoder(Port);
             }
-            catch (Exception)
+            catch (IOException)
             {
                 return int.MaxValue;
             }

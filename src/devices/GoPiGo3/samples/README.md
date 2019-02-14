@@ -28,13 +28,13 @@ Choose a test by entering the number and press enter:
   2. Control left motor from motor right position
   3. Read encoder of right motor
   4. Test both servo motors
-  5. Test Ultrasonic sensor on Groove1
-  6. Test buzzer on Groove1
-  7. Change buzzer tone on Groove1 with a potentiometer on Groove2
-  8. Test sound sensor on Groove1
-  9. Test a relay on Groove1
- 10. Test a button on Groove1
- 11. Control a led light on Groove2 from a light sensor on Groove1
+  5. Test Ultrasonic sensor on Grove1
+  6. Test buzzer on Grove1
+  7. Change buzzer tone on Grove1 with a potentiometer on Grove2
+  8. Test sound sensor on Grove1
+  9. Test a relay on Grove1
+ 10. Test a button on Grove1
+ 11. Control a led light on Grove2 from a light sensor on Grove1
  12. Test MotorLeft speed based on encoder
  13. Test driving the vehicle
 ```
@@ -42,8 +42,15 @@ Choose a test by entering the number and press enter:
 You always have to create a GoPiGo3 and initialize it. Then you can run your code. In this example, reading an analogic sound sensor.
 
 ```csharp
-private static GoPiGo _goPiGo3;
-SoundSensor soundSensor = new SoundSensor(_goPiGo3, GroovePort.Groove1);
+var settings = new SpiConnectionSettings(0, 1)
+{
+    // 500K is the SPI communication with GoPiGo
+    ClockFrequency = 500000,
+    Mode = SpiMode.Mode0,
+    DataBitLength = 8
+};
+GoPiGo _goPiGo3 = new GoPiGo(new UnixSpiDevice(settings));
+SoundSensor soundSensor = new SoundSensor(_goPiGo3, GrovePort.Grove1);
 Console.WriteLine($"Test {soundSensor.SensorName} on port {soundSensor.Port}. Press a key to finish the test");
 while (!Console.KeyAvailable)
 {
@@ -52,4 +59,4 @@ while (!Console.KeyAvailable)
 }
 ```
 
-
+Please keep in mind that default behavior when GoPiGo is disposed, the SpiDevice as well. You can override this default behavior by changing ```autoDispose``` to false.

@@ -32,11 +32,6 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// Sensor port
         /// </summary>
         /// <returns>The sensor port</returns>
-        GroovePort Port { get; }
-
-        /// <summary>
-        /// List the supported Groove ports for the sensor
-        /// </summary>
-        List<GroovePort> SupportedPorts { get; }
+        GrovePort Port { get; }
     }
 }
