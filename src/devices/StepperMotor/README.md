@@ -21,11 +21,13 @@ const int pinkPin = 17;
 const int yellowPin = 27;
 const int orangePin = 22;
 
-using (SM28BYJ48 motor = new SM28BYJ48(bluePin, pinkPin, yellowPin, orangePin))
+using (StepperMotor motor = new StepperMotor(bluePin, pinkPin, yellowPin, orangePin))
 {
-    // Perform 4096 steps (rotate the shaft 360 degrees clockwise)
-    motor.SetStepperType(StepperType.HalfStep)
-         .SetStepperDelay(4)
-         .RotateClockwise(4096); 
+  // The motor turns one direction for postive 2048 and the reverse direction for negative 2048 (180 degrees).
+  while (true)
+  {
+    motor.Step(2048);
+    motor.Step(-2048);
+  } 
 }
 ```
