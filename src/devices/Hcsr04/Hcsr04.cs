@@ -57,6 +57,7 @@ namespace Iot.Device.Hcsr04
             while(_controller.Read(_echo) == PinValue.Low)
             {
             }
+            
             _timer.Start();
             while(_controller.Read(_echo) == PinValue.High)
             {
