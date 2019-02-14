@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems> <!--Disabling default items so samples source won't get build by the main library-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <Compile Include="Mfrc522Controller.cs" />
+    <Compile Include="Mfrc522Exception.cs" />
+    <None Include="README.md" />
+  </ItemGroup>
+
+</Project>
