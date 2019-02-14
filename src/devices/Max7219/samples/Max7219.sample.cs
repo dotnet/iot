@@ -24,7 +24,7 @@ namespace Iot.Device.Samples
                 default: return null;
             }
         }
-        
+
 
         static void Main(string[] args)
         {
@@ -41,25 +41,20 @@ namespace Iot.Device.Samples
                 //initialize the devices
                 devices.Init();
 
-                // send a display test to the devices: All leds should be lighted
-                Console.WriteLine("Display-Test");
-                devices.SetRegister(Register.DISPLAYTEST, 1);
-                Thread.Sleep(1000);
-
                 // reinitialize the devices
                 Console.WriteLine("Init");
                 devices.Init();
 
                 // write a smiley to devices buffer
-                var smiley = new byte[] { 
-                    0b00111100, 
-                    0b01000010, 
-                    0b10100101, 
-                    0b10000001, 
-                    0b10100101, 
-                    0b10011001, 
-                    0b01000010, 
-                    0b00111100 
+                var smiley = new byte[] {
+                    0b00111100,
+                    0b01000010,
+                    0b10100101,
+                    0b10000001,
+                    0b10100101,
+                    0b10011001,
+                    0b01000010,
+                    0b00111100
                     };
                 for (var i = 0; i < devices.CascadedDevices; i++)
                 {
