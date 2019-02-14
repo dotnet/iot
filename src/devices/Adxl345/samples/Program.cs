@@ -27,7 +27,7 @@ namespace Adxl345.Samples
 
             // pass in a SpiDevice
             // set gravity measurement range ±4G
-            using (Iot.Device.Adxl345.Adxl345 sensor = new Iot.Device.Adxl345.Adxl345(device, GravityRange.Range2))
+            using (Iot.Device.Adxl345.Adxl345 sensor = new Iot.Device.Adxl345.Adxl345(device, GravityRange.Range04))
             {
                 // loop
                 while (true)
