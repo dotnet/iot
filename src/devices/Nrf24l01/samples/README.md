@@ -31,7 +31,9 @@
 This example needs to enable SPI1 on Raspberry Pi running Raspbian.
 
 1. Open **/boot/config.txt** using editor, like
-    > sudo nano /boot/config.txt
+    ```
+    sudo nano /boot/config.txt
+    ```
 2. Add the line **dtoverlay=spi1-3cs** and save
 3. Reboot
 
