@@ -6,14 +6,17 @@ using System;
 using System.Device.Gpio;
 using Xunit;
 
-namespace Iot.Device.Mcp23xxx.Tests
+namespace Iot.Device.Pcx857x.Tests
 {
-    public class GpioWriteTests : Mcp23xxxTest
+    public class GpioWriteTests : Pcx857xTest
     {
         [Theory]
         [MemberData(nameof(TestDevices))]
         public void Write_InvalidPin(TestDevice testDevice)
         {
+            // Set all pins to output
+            for (int pin = 0; pin < testDevice.Device.PinCount; pin++)
+
             Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Write(-1, PinValue.High));
             Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Write(testDevice.Device.PinCount, PinValue.Low));
             Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Write(testDevice.Device.PinCount + 1, PinValue.High));
@@ -23,7 +26,7 @@ namespace Iot.Device.Mcp23xxx.Tests
         [MemberData(nameof(TestDevices))]
         public void Write_GoodPin(TestDevice testDevice)
         {
-            Mcp23xxx device = testDevice.Device;
+            Pcx857x device = testDevice.Device;
             for (int pin = 0; pin < testDevice.Device.PinCount; pin++)
             {
                 bool first = pin < 8;
@@ -32,11 +35,11 @@ namespace Iot.Device.Mcp23xxx.Tests
                 byte expected = (byte)(1 << (first ? pin : pin - 8));
 
                 Assert.Equal(expected,
-                    first ? device.ReadByte(Register.OLAT) : ((Mcp23x1x)device).ReadByte(Register.OLAT, Port.PortB));
+                    first ? device.ReadByte() : (byte)(((Pcx8575)device).ReadUInt16() >> 8));
 
                 device.Write(pin, PinValue.Low);
                 Assert.Equal(0,
-                    first ? device.ReadByte(Register.OLAT) : ((Mcp23x1x)device).ReadByte(Register.OLAT, Port.PortB));
+                    first ? device.ReadByte() : (byte)(((Pcx8575)device).ReadUInt16() >> 8));
             }
         }
     }
