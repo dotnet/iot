@@ -180,6 +180,11 @@ namespace Iot.Device.Nrf24l01
             {
                 _sensor.Dispose();
             }
+            
+            if (_gpio != null)
+            {
+                _sensor.Dispose();
+            }
         }
 
         public delegate void DataReceivedHandle(object sender, DataReceivedEventArgs e);
