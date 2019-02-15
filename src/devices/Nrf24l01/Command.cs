@@ -4,7 +4,7 @@
 
 namespace Iot.Device.Nrf24l01
 {
-    public enum Command : byte
+    internal enum Command : byte
     {
         NRF_R_REGISTER = 0x00,
         NRF_W_REGISTER = 0x20,
