@@ -10,13 +10,13 @@
   </ItemGroup>
 
  <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)/../StepperMotor.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)/../Uln2003.csproj" />
   </ItemGroup>
 
   <ItemGroup> 
       <None Remove="README.md" />
-      <None Remove="SM28BYJ48.png" />
-      <None Remove="SM28BYJ48.fzz" />
+      <None Remove="Uln2003.png" />
+      <None Remove="Uln2003.fzz" />
   </ItemGroup>
 
 </Project>

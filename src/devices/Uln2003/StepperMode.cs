@@ -1,4 +1,4 @@
-﻿namespace Iot.Device.StepperMotor
+﻿namespace Iot.Device.Uln2003
 {
     /// <summary>
     /// The 28BYJ-48 motor has 512 full engine rotations to rotate the drive shaft once.
