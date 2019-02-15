@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Device.Gpio;
-
-namespace Iot.Device.CharacterLcd
+namespace System.Device.Gpio
 {
     public interface IGpioController : IDisposable
     {
@@ -13,8 +10,8 @@ namespace Iot.Device.CharacterLcd
         void ClosePin(int pinNumber);
         void SetPinMode(int pinNumber, PinMode mode);
         void Write(int pinNumber, PinValue value);
-        void Write(ReadOnlySpan<(int pin, PinValue value)> pinValues);
+        void Write(ReadOnlySpan<PinValuePair> pinValues);
         PinValue Read(int pinNumber);
-        void Read(Span<(int pin, PinValue value)> pinValues);
+        void Read(Span<PinValuePair> pinValues);
     }
 }
