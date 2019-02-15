@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
@@ -157,30 +158,25 @@ namespace Iot.Device.CharacterLcd
             Clear();
         }
 
-        protected void DelayMicroseconds(int microseconds, bool checkBusy = true)
+        /// <summary>
+        /// Wait for the device to not be busy.
+        /// </summary>
+        /// <param name="microseconds">Time to wait if checking busy state isn't possible/practical.</param>
+        protected void WaitForNotBusy(int microseconds)
         {
-            _stopwatch.Restart();
+            DelayHelper.DelayMicroseconds(microseconds, allowThreadYield: true);
 
-            // While we could check for the busy state it isn't currently practical.
-            // Most commands need a maximum of 37μs to complete. Reading the busy flag
-            // alone takes ~200μs (on the Pi). Prepping the pins and reading once can take
-            // nearly a millisecond, which clearly is not going to be performant.
-            // 
-            // Leaving the flag here to make sure calling code is describing when it
-            // cannot actually check the busy state should we be able to get performance
+            // While we could check for the busy state it isn't currently practical. Most
+            // commands need a maximum of 37μs to complete. Reading the busy flag alone takes
+            // ~200μs (on the Pi) if going through the software driver. Prepping the pins and
+            // reading once can take nearly a millisecond, which clearly is not going to be
+            // performant.
+
+            // Leaving the flag here to make sure calling code is describing when it cannot
+            // actually check the busy state should we be able to get performance
             // to the point where checking would be a net benefit.
 
             // Note that on a Raspberry Pi 3B+ we average about 1.5μs when delaying for one μs.
-            // 
-            // SpinWait currently spins to approximately 1μs before it will yield the thread.
-            // Thread.Yield() takes around 1.2μs. This gives us a fidelity of microseconds to
-            // microseconds + 1.4.
-            SpinWait spinWait = new SpinWait();
-            long v = (long)(((microseconds * Stopwatch.Frequency) / 1_000_000) * TimingMultiplier);
-            while (_stopwatch.ElapsedTicks < v)
-            {
-                spinWait.SpinOnce();
-            }
         }
 
         /// <summary>
@@ -190,7 +186,7 @@ namespace Iot.Device.CharacterLcd
         public void Clear()
         {
             Send(ClearDisplayCommand);
-            DelayMicroseconds(3000);
+            WaitForNotBusy(3000);
         }
 
         /// <summary>
@@ -199,7 +195,7 @@ namespace Iot.Device.CharacterLcd
         public void Home()
         {
             Send(ReturnHomeCommand);
-            DelayMicroseconds(3000);
+            WaitForNotBusy(3000);
         }
 
         /// <summary>

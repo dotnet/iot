@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device;
 using System.Device.Gpio;
 using System.Drawing;
 
@@ -141,11 +142,11 @@ namespace Iot.Device.CharacterLcd
             if (_dataPins.Length == 8)
             {
                 // Init to 8 bit mode
-                DelayMicroseconds(50_000, checkBusy: false);
+                DelayHelper.DelayMilliseconds(50, allowThreadYield: true);
                 Send(0b0011_0000);
-                DelayMicroseconds(5_000, checkBusy: false);
+                DelayHelper.DelayMilliseconds(5, allowThreadYield: true);
                 Send(0b0011_0000);
-                DelayMicroseconds(100, checkBusy: false);
+                DelayHelper.DelayMicroseconds(100, allowThreadYield: true);
                 Send(0b0011_0000);
             }
             else
@@ -153,11 +154,11 @@ namespace Iot.Device.CharacterLcd
                 // Init to 4 bit mode, setting _rspin to low as we're writing 4 bits directly.
                 // (Send writes the whole byte in two 4bit/nybble chunks)
                 _controller.Write(_rsPin, PinValue.Low);
-                DelayMicroseconds(50_000, checkBusy: false);
+                DelayHelper.DelayMilliseconds(50, allowThreadYield: true);
                 WriteBits(0b0011, 4);
-                DelayMicroseconds(5_000, checkBusy: false);
+                DelayHelper.DelayMilliseconds(5, allowThreadYield: true);
                 WriteBits(0b0011, 4);
-                DelayMicroseconds(100, checkBusy: false);
+                DelayHelper.DelayMicroseconds(100, allowThreadYield: true);
                 WriteBits(0b0011, 4);
                 WriteBits(0b0010, 4);
             }
@@ -205,7 +206,7 @@ namespace Iot.Device.CharacterLcd
             // Most commands need a maximum of 37μs to complete.
             // This is based on a 270kHz clock in the documentation.
             // (See page 25.)
-            DelayMicroseconds(37);
+            WaitForNotBusy(37);
         }
 
         private void WriteBits(byte value, int count)
@@ -240,7 +241,7 @@ namespace Iot.Device.CharacterLcd
             // and 230ns on 5V. (PWeh on page 49/52 and Figure 25 on page 58)
 
             _controller.Write(_enablePin, PinValue.High);
-            DelayMicroseconds(1);
+            DelayHelper.DelayMicroseconds(1, allowThreadYield: false);
             _controller.Write(_enablePin, PinValue.Low);
         }
     }
