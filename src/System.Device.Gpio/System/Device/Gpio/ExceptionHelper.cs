@@ -74,7 +74,7 @@ namespace System.Device.Gpio
                     message = $"Attempted to remove a callback for a pin that is not listening for events.";
                     break;
                 default:
-                Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
+                    Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
                     break;
             }
 
