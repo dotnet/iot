@@ -36,8 +36,8 @@ namespace Iot.Device.Nrf24l01.Samples
                 {
                     // Set sender send address, receiver pipe0 address (Optional)
                     byte[] receiverAddress = Encoding.UTF8.GetBytes("NRF24");
-                    sender.SetTxAddress(receiverAddress);
-                    receiver.SetRxAddress(0, receiverAddress);
+                    sender.Address = receiverAddress;
+                    receiver.Pipe0.Address = receiverAddress;
 
                     // Binding DataReceived event
                     receiver.DataReceived += Receiver_ReceivedData;

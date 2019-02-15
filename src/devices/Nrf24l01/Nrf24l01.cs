@@ -22,6 +22,7 @@ namespace Iot.Device.Nrf24l01
 
         private readonly byte[] _empty = new byte[0];
 
+        #region prop
         private byte _packetSize;
         /// <summary>
         /// nRF24L01 Receive Packet Size
@@ -31,6 +32,67 @@ namespace Iot.Device.Nrf24l01
             get { return _packetSize; }
             set { _packetSize = value < 0 || value > 32 ? throw new ArgumentOutOfRangeException("PacketSize needs to be in the range of 0 to 32!") : value; }
         }
+
+        /// <summary>
+        /// nRF24L01 Send Address
+        /// </summary>
+        public Span<byte> Address { get => ReadTxAddress(); set => SetTxAddress(value); }
+
+        /// <summary>
+        /// nRF24L01 Working Channel
+        /// </summary>
+        public byte Channel { get => ReadChannel(); set => SetChannel(value); }
+
+        /// <summary>
+        /// nRF24L01 Output Power
+        /// </summary>
+        public OutputPower OutputPower { get => ReadOutputPower(); set => SetOutputPower(value); }
+
+        /// <summary>
+        /// nRF24L01 Send Rate
+        /// </summary>
+        public DataRate DataRate { get => ReadDataRate(); set => SetDataRate(value); }
+
+        /// <summary>
+        /// nRF24L01 Power Mode
+        /// </summary>
+        public PowerMode PowerMode { get => ReadPowerMode(); set => SetPowerMode(value); }
+
+        /// <summary>
+        /// nRF24L01 Working Mode
+        /// </summary>
+        public WorkingMode WorkingMode { get => ReadWorkwingMode(); set => SetWorkingMode(value); }
+
+        /// <summary>
+        /// nRF24L01 Pipe 0
+        /// </summary>
+        public Nrf24l01Pipe Pipe0 { get; private set; }
+
+        /// <summary>
+        /// nRF24L01 Pipe 1
+        /// </summary>
+        public Nrf24l01Pipe Pipe1 { get; private set; }
+
+        /// <summary>
+        /// nRF24L01 Pipe 2
+        /// </summary>
+        public Nrf24l01Pipe Pipe2 { get; private set; }
+
+        /// <summary>
+        /// nRF24L01 Pipe 3
+        /// </summary>
+        public Nrf24l01Pipe Pipe3 { get; private set; }
+
+        /// <summary>
+        /// nRF24L01 Pipe 4
+        /// </summary>
+        public Nrf24l01Pipe Pipe4 { get; private set; }
+
+        /// <summary>
+        /// nRF24L01 Pipe 5
+        /// </summary>
+        public Nrf24l01Pipe Pipe5 { get; private set; }
+        #endregion
 
         #region SpiSettings
         /// <summary>
@@ -64,346 +126,7 @@ namespace Iot.Device.Nrf24l01
             PacketSize = packetSize;
 
             Initialize(pinNumberingScheme, outputPower, dataRate, channel);
-        }
-
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        private void Initialize(PinNumberingScheme pinNumberingScheme, OutputPower outputPower, DataRate dataRate, byte channel)
-        {
-            _gpio = new GpioController(pinNumberingScheme);
-            _gpio.OpenPin(_ce, PinMode.Output);
-            _gpio.OpenPin(_irq, PinMode.Input);
-            _gpio.RegisterCallbackForPinValueChangedEvent(_irq, PinEventTypes.Falling, Irq_ValueChanged);
-
-            Thread.Sleep(50);
-
-            // Details in the datasheet P53
-            _gpio.Write(_ce, PinValue.Low);
-            Write(Command.NRF_FLUSH_TX, Register.NRF_NOOP, _empty);
-            Write(Command.NRF_FLUSH_RX, Register.NRF_NOOP, _empty);
-            Write(Command.NRF_W_REGISTER, Register.NRF_CONFIG, 0x3B);
-            _gpio.Write(_ce, PinValue.High);
-
-            SetAutoAck(false);
-            SetChannel(channel);
-            SetOutputPower(outputPower);
-            SetDataRate(dataRate);
-            SetRxPayload(_packetSize);
-        }
-
-        /// <summary>
-        /// Set nRF24L01 Receive Packet Size (All Pipe)
-        /// </summary>
-        /// <param name="payload">Size, from 0 to 32</param>
-        public void SetRxPayload(byte payload)
-        {
-            if (payload > 32 || payload < 0)
-            {
-                throw new ArgumentOutOfRangeException("payload", "payload needs to be in the range of 0 to 32!");
-            }
-
-            _gpio.Write(_ce, PinValue.Low);
-
-            Span<byte> writeData = stackalloc byte[1] { payload };
-
-            Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P0, writeData);
-            Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P1, writeData);
-            Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P2, writeData);
-            Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P3, writeData);
-            Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P4, writeData);
-            Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P5, writeData);
-
-            _gpio.Write(_ce, PinValue.High);
-        }
-
-        /// <summary>
-        /// Set nRF24L01 Receive Packet Size
-        /// </summary>
-        /// <param name="pipe">Pipe, form 0 to 5</param>
-        /// <param name="payload">Size, from 0 to 32</param>
-        public void SetRxPayload(byte pipe, byte payload)
-        {
-            if (payload > 32 || payload < 0)
-            {
-                throw new ArgumentOutOfRangeException("payload", "payload needs to be in the range of 0 to 32!");
-            }
-
-            if (pipe > 5 || pipe < 0)
-            {
-                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
-            }
-
-            Span<byte> writeData = stackalloc byte[] { (byte)((byte)Command.NRF_W_REGISTER + (byte)Register.NRF_RX_PW_P0 + pipe), payload };
-
-            _gpio.Write(_ce, PinValue.Low);
-
-            Write(writeData);
-
-            _gpio.Write(_ce, PinValue.High);
-        }
-
-        /// <summary>
-        /// Set nRF24L01 Auto Acknowledgment (All Pipe)
-        /// </summary>
-        /// <param name="isAutoAck">Is Enable</param>
-        public void SetAutoAck(bool isAutoAck)
-        {
-            _gpio.Write(_ce, PinValue.Low);
-
-            if (isAutoAck)
-            {
-                Write(Command.NRF_W_REGISTER, Register.NRF_EN_AA, 0x3F);
-            }
-            else
-            {
-                Write(Command.NRF_W_REGISTER, Register.NRF_EN_AA, 0x00);
-            }
-
-            _gpio.Write(_ce, PinValue.High);
-        }
-
-        /// <summary>
-        /// Set nRF24L01 Auto Acknowledgment
-        /// </summary>
-        /// <param name="pipe">Pipe, form 0 to 5</param>
-        /// <param name="isAutoAck">Is Enable</param>
-        public void SetAutoAck(byte pipe, bool isAutoAck)
-        {
-            if (pipe > 5 || pipe < 0)
-            {
-                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
-            }
-
-            _gpio.Write(_ce, PinValue.Low);
-
-            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_EN_AA, 1);
-
-            byte setting;
-            if (isAutoAck)
-            {
-                setting = (byte)(readData[0] | (1 << pipe));
-            }
-            else
-            {
-                setting = (byte)(readData[0] & ~(1 << pipe));
-            }
-
-            Write(Command.NRF_W_REGISTER, Register.NRF_EN_AA, setting);
-
-            _gpio.Write(_ce, PinValue.High);
-        }
-
-        /// <summary>
-        /// Set nRF24L01 Receive Pipe (All Pipe)
-        /// </summary>
-        /// <param name="isEnable">Is Enable Receive</param>
-        public void SetRxPipe(bool isEnable)
-        {
-            _gpio.Write(_ce, PinValue.Low);
-
-            if (isEnable)
-            {
-                Write(Command.NRF_W_REGISTER, Register.NRF_EN_RXADDR, 0x3F);
-            }
-            else
-            {
-                Write(Command.NRF_W_REGISTER, Register.NRF_EN_RXADDR, 0x00);
-            }
-
-            _gpio.Write(_ce, PinValue.High);
-        }
-
-        /// <summary>
-        /// Set nRF24L01 Receive Pipe
-        /// </summary>
-        /// <param name="pipe">Pipe, form 0 to 5</param>
-        /// <param name="isEnable">Is Enable the Pipe Receive</param>
-        public void SetRxPipe(byte pipe, bool isEnable)
-        {
-            if (pipe > 5 || pipe < 0)
-            {
-                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
-            }
-
-            _gpio.Write(_ce, PinValue.Low);
-
-            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_EN_RXADDR, 1);
-
-            byte setting;
-            if (isEnable)
-            {
-                setting = (byte)(readData[0] | (1 << pipe));
-            }
-            else
-            {
-                setting = (byte)(readData[0] & ~(1 << pipe));
-            }
-
-            Write(Command.NRF_W_REGISTER, Register.NRF_EN_RXADDR, setting);
-
-            _gpio.Write(_ce, PinValue.High);
-        }
-
-        /// <summary>
-        /// Set nRF24L01 Power Mode
-        /// </summary>
-        /// <param name="mode">Power Mode</param>
-        public void SetPowerMode(PowerMode mode)
-        {
-            _gpio.Write(_ce, PinValue.Low);
-
-            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
-
-            byte setting;
-            switch (mode)
-            {
-                case PowerMode.UP:
-                    setting = (byte)(readData[0] | (1 << 1));
-                    break;
-                case PowerMode.DOWN:
-                    setting = (byte)(readData[0] & ~(1 << 1));
-                    break;
-                default:
-                    setting = (byte)(readData[0] | (1 << 1));
-                    break;
-            }
-
-            Write(Command.NRF_W_REGISTER, Register.NRF_CONFIG, setting);
-
-            _gpio.Write(_ce, PinValue.High);
-        }
-
-        /// <summary>
-        /// Set nRF24L01 Working Mode
-        /// </summary>
-        /// <param name="mode">Working Mode</param>
-        public void SetWorkingMode(WorkingMode mode)
-        {
-            _gpio.Write(_ce, PinValue.Low);
-
-            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
-
-            byte setting;
-            switch (mode)
-            {
-                case WorkingMode.RX:
-                    setting = (byte)(readData[0] | 1);
-                    break;
-                case WorkingMode.TX:
-                    setting = (byte)(readData[0] & ~1);
-                    break;
-                default:
-                    setting = (byte)(readData[0] | 1);
-                    break;
-            }
-
-            Write(Command.NRF_W_REGISTER, Register.NRF_CONFIG, setting);
-
-            _gpio.Write(_ce, PinValue.High);
-        }
-
-        /// <summary>
-        /// Set nRF24L01 Output Power
-        /// </summary>
-        /// <param name="power">Output Power</param>
-        public void SetOutputPower(OutputPower power)
-        {
-            _gpio.Write(_ce, PinValue.Low);
-
-            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, 1);
-
-            byte setting = (byte)(readData[0] & (~0x06) | ((byte)power << 1));
-
-            Write(Command.NRF_W_REGISTER, Register.NRF_RF_SETUP, setting);
-
-            _gpio.Write(_ce, PinValue.High);
-        }
-
-        /// <summary>
-        /// Set nRF24L01 Send Rate
-        /// </summary>
-        /// <param name="rate">Send Rate</param>
-        public void SetDataRate(DataRate rate)
-        {
-            _gpio.Write(_ce, PinValue.Low);
-
-            Span<byte> readData = stackalloc byte[1];
-
-            WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, _empty);
-
-            byte setting = (byte)(readData[0] & (~0x08) | ((byte)rate << 1));
-
-            Write(Command.NRF_W_REGISTER, Register.NRF_RF_SETUP, setting);
-
-            _gpio.Write(_ce, PinValue.High);
-        }
-
-        /// <summary>
-        /// Set nRF24L01 Receive Address
-        /// </summary>
-        /// <param name="pipe">Pipe, form 0 to 5</param>
-        /// <param name="address">Address, if (pipe > 1) then (address.Length = 1), else if (pipe = 1 || pipe = 0) then (address.Length ≤ 5)</param>
-        public void SetRxAddress(byte pipe, Span<byte> address)
-        {
-            if (address.Length > 5)
-            {
-                throw new ArgumentOutOfRangeException("Array Length must less than 6!");
-            }
-
-            if (pipe > 1 && address.Length > 1)
-            {
-                throw new ArgumentOutOfRangeException("Array Length must equal 1 when pipe more than 1. Address equal pipe1's address the first 4 byte + one byte your custom!");
-            }
-
-            Span<byte> writeData = stackalloc byte[1 + address.Length];
-            writeData[0] = (byte)((byte)Command.NRF_W_REGISTER + (byte)Register.NRF_RX_ADDR_P0 + pipe);
-            for (int i = 0; i < address.Length; i++)
-            {
-                writeData[i + 1] = address[i];
-            }
-
-            _gpio.Write(_ce, PinValue.Low);
-
-            Write(writeData);
-
-            _gpio.Write(_ce, PinValue.High);
-        }
-
-        /// <summary>
-        /// Set nRF24L01 Send Address
-        /// </summary>
-        /// <param name="address">Address, address.Length = 5</param>
-        public void SetTxAddress(Span<byte> address)
-        {
-            if (address.Length > 5)
-            {
-                throw new ArgumentOutOfRangeException("Array Length must less than 6!");
-            }
-
-            _gpio.Write(_ce, PinValue.Low);
-
-            Write(Command.NRF_W_REGISTER, Register.NRF_TX_ADDR, address);
-
-            _gpio.Write(_ce, PinValue.High);
-        }
-
-        /// <summary>
-        /// Set Working Channel
-        /// </summary>
-        /// <param name="channel">From 0 to 127</param>
-        public void SetChannel(byte channel)
-        {
-            if (channel < 0 || channel > 127)
-            {
-                throw new ArgumentOutOfRangeException("Channel needs to be in the range of 0 to 127!");
-            }
-
-            _gpio.Write(_ce, PinValue.Low);
-
-            Write(Command.NRF_W_REGISTER, Register.NRF_RF_CH, channel);
-
-            _gpio.Write(_ce, PinValue.High);
+            InitializePipe();
         }
 
         /// <summary>
@@ -471,15 +194,527 @@ namespace Iot.Device.Nrf24l01
             DataReceived(sender, new DataReceivedEventArgs(Receive(_packetSize).ToArray()));
         }
 
+        #region private and internal
+        /// <summary>
+        /// Initialize
+        /// </summary>
+        private void Initialize(PinNumberingScheme pinNumberingScheme, OutputPower outputPower, DataRate dataRate, byte channel)
+        {
+            _gpio = new GpioController(pinNumberingScheme);
+            _gpio.OpenPin(_ce, PinMode.Output);
+            _gpio.OpenPin(_irq, PinMode.Input);
+            _gpio.RegisterCallbackForPinValueChangedEvent(_irq, PinEventTypes.Falling, Irq_ValueChanged);
+
+            Thread.Sleep(50);
+
+            // Details in the datasheet P53
+            _gpio.Write(_ce, PinValue.Low);
+            Write(Command.NRF_FLUSH_TX, Register.NRF_NOOP, _empty);
+            Write(Command.NRF_FLUSH_RX, Register.NRF_NOOP, _empty);
+            Write(Command.NRF_W_REGISTER, Register.NRF_CONFIG, 0x3B);
+            _gpio.Write(_ce, PinValue.High);
+
+            SetAutoAck(false);
+            SetChannel(channel);
+            SetOutputPower(outputPower);
+            SetDataRate(dataRate);
+            SetRxPayload(_packetSize);
+        }
+
+        /// <summary>
+        /// Initialize nRF24L01 Pipe
+        /// </summary>
+        private void InitializePipe()
+        {
+            Pipe0 = new Nrf24l01Pipe(this, 0);
+            Pipe1 = new Nrf24l01Pipe(this, 1);
+            Pipe2 = new Nrf24l01Pipe(this, 2);
+            Pipe3 = new Nrf24l01Pipe(this, 3);
+            Pipe4 = new Nrf24l01Pipe(this, 4);
+            Pipe5 = new Nrf24l01Pipe(this, 5);
+        }
+
+        /// <summary>
+        /// Set nRF24L01 Receive Packet Size (All Pipe)
+        /// </summary>
+        /// <param name="payload">Size, from 0 to 32</param>
+        internal void SetRxPayload(byte payload)
+        {
+            if (payload > 32 || payload < 0)
+            {
+                throw new ArgumentOutOfRangeException("payload", "payload needs to be in the range of 0 to 32!");
+            }
+
+            _gpio.Write(_ce, PinValue.Low);
+
+            Span<byte> writeData = stackalloc byte[1] { payload };
+
+            Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P0, writeData);
+            Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P1, writeData);
+            Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P2, writeData);
+            Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P3, writeData);
+            Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P4, writeData);
+            Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P5, writeData);
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Set nRF24L01 Receive Packet Size
+        /// </summary>
+        /// <param name="pipe">Pipe, form 0 to 5</param>
+        /// <param name="payload">Size, from 0 to 32</param>
+        internal void SetRxPayload(byte pipe, byte payload)
+        {
+            if (payload > 32 || payload < 0)
+            {
+                throw new ArgumentOutOfRangeException("payload", "payload needs to be in the range of 0 to 32!");
+            }
+
+            if (pipe > 5 || pipe < 0)
+            {
+                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+            }
+
+            Span<byte> writeData = stackalloc byte[] { (byte)((byte)Command.NRF_W_REGISTER + (byte)Register.NRF_RX_PW_P0 + pipe), payload };
+
+            _gpio.Write(_ce, PinValue.Low);
+
+            Write(writeData);
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Read nRF24L01 Receive Packet Size
+        /// </summary>
+        /// <param name="pipe">Pipe, form 0 to 5</param>
+        /// <returns>Size</returns>
+        internal byte ReadRxPayload(byte pipe)
+        {
+            if (pipe > 5 || pipe < 0)
+            {
+                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+            }
+
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, (Register)((byte)Register.NRF_RX_PW_P0 + pipe), 1);
+
+            return readData[0];
+        }
+
+        /// <summary>
+        /// Set nRF24L01 Auto Acknowledgment (All Pipe)
+        /// </summary>
+        /// <param name="isAutoAck">Is Enable</param>
+        internal void SetAutoAck(bool isAutoAck)
+        {
+            _gpio.Write(_ce, PinValue.Low);
+
+            if (isAutoAck)
+            {
+                Write(Command.NRF_W_REGISTER, Register.NRF_EN_AA, 0x3F);
+            }
+            else
+            {
+                Write(Command.NRF_W_REGISTER, Register.NRF_EN_AA, 0x00);
+            }
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Set nRF24L01 Auto Acknowledgment
+        /// </summary>
+        /// <param name="pipe">Pipe, form 0 to 5</param>
+        /// <param name="isAutoAck">Is Enable</param>
+        internal void SetAutoAck(byte pipe, bool isAutoAck)
+        {
+            if (pipe > 5 || pipe < 0)
+            {
+                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+            }
+
+            _gpio.Write(_ce, PinValue.Low);
+
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_EN_AA, 1);
+
+            byte setting;
+            if (isAutoAck)
+            {
+                setting = (byte)(readData[0] | (1 << pipe));
+            }
+            else
+            {
+                setting = (byte)(readData[0] & ~(1 << pipe));
+            }
+
+            Write(Command.NRF_W_REGISTER, Register.NRF_EN_AA, setting);
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Read nRF24L01 Auto Acknowledgment
+        /// </summary>
+        /// <param name="pipe">Pipe, form 0 to 5</param>
+        /// <returns>Is Enable</returns>
+        internal bool ReadAutoAck(byte pipe)
+        {
+            if (pipe > 5 || pipe < 0)
+            {
+                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+            }
+
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_EN_AA, 1);
+
+            byte ret = (byte)(readData[0] >> pipe & 0x01);
+            if (ret == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Set nRF24L01 Receive Pipe (All Pipe)
+        /// </summary>
+        /// <param name="isEnable">Is Enable Receive</param>
+        internal void SetRxPipe(bool isEnable)
+        {
+            _gpio.Write(_ce, PinValue.Low);
+
+            if (isEnable)
+            {
+                Write(Command.NRF_W_REGISTER, Register.NRF_EN_RXADDR, 0x3F);
+            }
+            else
+            {
+                Write(Command.NRF_W_REGISTER, Register.NRF_EN_RXADDR, 0x00);
+            }
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Set nRF24L01 Receive Pipe is Enable
+        /// </summary>
+        /// <param name="pipe">Pipe, form 0 to 5</param>
+        /// <param name="isEnable">Is Enable the Pipe Receive</param>
+        internal void SetRxPipe(byte pipe, bool isEnable)
+        {
+            if (pipe > 5 || pipe < 0)
+            {
+                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+            }
+
+            _gpio.Write(_ce, PinValue.Low);
+
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_EN_RXADDR, 1);
+
+            byte setting;
+            if (isEnable)
+            {
+                setting = (byte)(readData[0] | (1 << pipe));
+            }
+            else
+            {
+                setting = (byte)(readData[0] & ~(1 << pipe));
+            }
+
+            Write(Command.NRF_W_REGISTER, Register.NRF_EN_RXADDR, setting);
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Read nRF24L01 Receive Pipe is Enable
+        /// </summary>
+        /// <param name="pipe">Pipe, form 0 to 5</param>
+        /// <returns>Is Enable the Pipe Receive</returns>
+        internal bool ReadRxPipe(byte pipe)
+        {
+            if (pipe > 5 || pipe < 0)
+            {
+                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+            }
+
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_EN_RXADDR, 1);
+
+            byte ret = (byte)(readData[0] >> pipe & 0x01);
+            if (ret == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Set nRF24L01 Power Mode
+        /// </summary>
+        /// <param name="mode">Power Mode</param>
+        internal void SetPowerMode(PowerMode mode)
+        {
+            _gpio.Write(_ce, PinValue.Low);
+
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
+
+            byte setting;
+            switch (mode)
+            {
+                case PowerMode.UP:
+                    setting = (byte)(readData[0] | (1 << 1));
+                    break;
+                case PowerMode.DOWN:
+                    setting = (byte)(readData[0] & ~(1 << 1));
+                    break;
+                default:
+                    setting = (byte)(readData[0] | (1 << 1));
+                    break;
+            }
+
+            Write(Command.NRF_W_REGISTER, Register.NRF_CONFIG, setting);
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Read nRF24L01 Power Mode
+        /// </summary>
+        /// <returns>Power Mode</returns>
+        internal PowerMode ReadPowerMode()
+        {
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
+
+            return (PowerMode)(readData[0] >> 1 & 0x01);
+        }
+
+        /// <summary>
+        /// Set nRF24L01 Working Mode
+        /// </summary>
+        /// <param name="mode">Working Mode</param>
+        internal void SetWorkingMode(WorkingMode mode)
+        {
+            _gpio.Write(_ce, PinValue.Low);
+
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
+
+            byte setting;
+            switch (mode)
+            {
+                case WorkingMode.RX:
+                    setting = (byte)(readData[0] | 1);
+                    break;
+                case WorkingMode.TX:
+                    setting = (byte)(readData[0] & ~1);
+                    break;
+                default:
+                    setting = (byte)(readData[0] | 1);
+                    break;
+            }
+
+            Write(Command.NRF_W_REGISTER, Register.NRF_CONFIG, setting);
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Read nRF24L01 Working Mode
+        /// </summary>
+        /// <returns>Working Mode</returns>
+        internal WorkingMode ReadWorkwingMode()
+        {
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
+
+            return (WorkingMode)(readData[0] & 0x01);
+        }
+
+        /// <summary>
+        /// Set nRF24L01 Output Power
+        /// </summary>
+        /// <param name="power">Output Power</param>
+        internal void SetOutputPower(OutputPower power)
+        {
+            _gpio.Write(_ce, PinValue.Low);
+
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, 1);
+
+            byte setting = (byte)(readData[0] & (~0x06) | ((byte)power << 1));
+
+            Write(Command.NRF_W_REGISTER, Register.NRF_RF_SETUP, setting);
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Read nRF24L01 Output Power
+        /// </summary>
+        /// <returns>Output Power</returns>
+        internal OutputPower ReadOutputPower()
+        {
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, 1);
+
+            return (OutputPower)(readData[0] & 0x06 >> 1);
+        }
+
+        /// <summary>
+        /// Set nRF24L01 Send Rate
+        /// </summary>
+        /// <param name="rate">Send Rate</param>
+        internal void SetDataRate(DataRate rate)
+        {
+            _gpio.Write(_ce, PinValue.Low);
+
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, 1);
+
+            byte setting = (byte)(readData[0] & (~0x08) | ((byte)rate << 1));
+
+            Write(Command.NRF_W_REGISTER, Register.NRF_RF_SETUP, setting);
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Read nRF24L01 Send Rate
+        /// </summary>
+        /// <returns>Send Rate</returns>
+        internal DataRate ReadDataRate()
+        {
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, 1);
+
+            return (DataRate)(readData[0] & 0x08 >> 3);
+        }
+
+        /// <summary>
+        /// Set nRF24L01 Receive Address
+        /// </summary>
+        /// <param name="pipe">Pipe, form 0 to 5</param>
+        /// <param name="address">Address, if (pipe > 1) then (address.Length = 1), else if (pipe = 1 || pipe = 0) then (address.Length ≤ 5)</param>
+        internal void SetRxAddress(byte pipe, Span<byte> address)
+        {
+            if (pipe > 5 || pipe < 0)
+            {
+                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+            }
+
+            if (address.Length > 5)
+            {
+                throw new ArgumentOutOfRangeException("Array Length must less than 6!");
+            }
+
+            if (pipe > 1 && address.Length > 1)
+            {
+                throw new ArgumentOutOfRangeException("Array Length must equal 1 when pipe more than 1. Address equal pipe1's address the first 4 byte + one byte your custom!");
+            }
+
+            Span<byte> writeData = stackalloc byte[1 + address.Length];
+            writeData[0] = (byte)((byte)Command.NRF_W_REGISTER + (byte)Register.NRF_RX_ADDR_P0 + pipe);
+            for (int i = 0; i < address.Length; i++)
+            {
+                writeData[i + 1] = address[i];
+            }
+
+            _gpio.Write(_ce, PinValue.Low);
+
+            Write(writeData);
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Read nRF24L01 Receive Address
+        /// </summary>
+        /// <param name="pipe">Pipe, form 0 to 5</param>
+        /// <returns>Address</returns>
+        internal Span<byte> ReadRxAddress(byte pipe)
+        {
+            if (pipe > 5 || pipe < 0)
+            {
+                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+            }
+
+            int length = 5;
+            if (pipe > 1)
+            {
+                length = 1;
+            }
+
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, (Register)((byte)Register.NRF_RX_ADDR_P0 + pipe), length);
+
+            return readData;
+        }
+
+        /// <summary>
+        /// Set nRF24L01 Send Address
+        /// </summary>
+        /// <param name="address">Address, address.Length = 5</param>
+        internal void SetTxAddress(Span<byte> address)
+        {
+            if (address.Length > 5)
+            {
+                throw new ArgumentOutOfRangeException("Array Length must less than 6!");
+            }
+
+            _gpio.Write(_ce, PinValue.Low);
+
+            Write(Command.NRF_W_REGISTER, Register.NRF_TX_ADDR, address);
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Read nRF24L01 Send Address
+        /// </summary>
+        /// <returns>Address</returns>
+        internal Span<byte> ReadTxAddress()
+        {
+            return WriteRead(Command.NRF_R_REGISTER, Register.NRF_TX_ADDR, 5);
+        }
+
+        /// <summary>
+        /// Set Working Channel
+        /// </summary>
+        /// <param name="channel">From 0 to 127</param>
+        internal void SetChannel(byte channel)
+        {
+            if (channel < 0 || channel > 127)
+            {
+                throw new ArgumentOutOfRangeException("Channel needs to be in the range of 0 to 127!");
+            }
+
+            _gpio.Write(_ce, PinValue.Low);
+
+            Write(Command.NRF_W_REGISTER, Register.NRF_RF_CH, channel);
+
+            _gpio.Write(_ce, PinValue.High);
+        }
+
+        /// <summary>
+        /// Read Working Channel
+        /// </summary>
+        /// <returns>Channel</returns>
+        internal byte ReadChannel()
+        {
+            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_CH, 1);
+
+            return readData[0];
+        }
+        #endregion
+
         #region sensor operation
-        private void Write(Span<byte> writeData)
+        internal void Write(Span<byte> writeData)
         {
             Span<byte> readBuf = stackalloc byte[writeData.Length];
 
             _sensor.TransferFullDuplex(writeData, readBuf);
         }
 
-        private void Write(Command command, Register register, byte writeByte)
+        internal void Write(Command command, Register register, byte writeByte)
         {
             Span<byte> writeBuf = stackalloc byte[2] { (byte)((byte)command + (byte)register), writeByte };
             Span<byte> readBuf = stackalloc byte[2];
@@ -487,7 +722,7 @@ namespace Iot.Device.Nrf24l01
             _sensor.TransferFullDuplex(writeBuf, readBuf);
         }
 
-        private void Write(Command command, Register register, Span<byte> writeData)
+        internal void Write(Command command, Register register, Span<byte> writeData)
         {
             Span<byte> writeBuf = stackalloc byte[1 + writeData.Length];
             Span<byte> readBuf = stackalloc byte[1 + writeData.Length];
@@ -501,7 +736,7 @@ namespace Iot.Device.Nrf24l01
             _sensor.TransferFullDuplex(writeBuf, readBuf);
         }
 
-        private Span<byte> WriteRead(Command command, Register register, int dataLength)
+        internal Span<byte> WriteRead(Command command, Register register, int dataLength)
         {
             Span<byte> writeBuf = stackalloc byte[1 + dataLength];
             Span<byte> readBuf = new byte[1 + dataLength];
@@ -513,7 +748,7 @@ namespace Iot.Device.Nrf24l01
             return readBuf.Slice(1);
         }
 
-        private Span<byte> WriteRead(Command command, Register register, Span<byte> writeData)
+        internal Span<byte> WriteRead(Command command, Register register, Span<byte> writeData)
         {
             Span<byte> writeBuf = stackalloc byte[1 + writeData.Length];
             Span<byte> readBuf = new byte[1 + writeData.Length];

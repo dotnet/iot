@@ -15,6 +15,11 @@ UnixSpiDevice device = new UnixSpiDevice(settings);
 
 using (Nrf24l01 sensor = new Nrf24l01(receiverDevice, 5, 6, 20))
 {
+    // Set sender send address, receiver pipe0 address (Optional)
+    byte[] receiverAddress = Encoding.UTF8.GetBytes("NRF24");
+    sensor.Address = receiverAddress;
+    sensor.Pipe0.Address = receiverAddress;
+
     // Binding DataReceived event
     sensor.DataReceived += Receiver_ReceivedData;
 

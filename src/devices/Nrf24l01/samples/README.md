@@ -61,8 +61,8 @@ using (Nrf24l01 sender = new Nrf24l01(senderDevice, 23, 24, 20))
     {
         // Set sender send address, receiver pipe0 address (Optional)
         byte[] receiverAddress = Encoding.UTF8.GetBytes("NRF24");
-        sender.SetTxAddress(receiverAddress);
-        receiver.SetRxAddress(0, receiverAddress);
+        sender.Address = receiverAddress;
+        receiver.Pipe0.Address = receiverAddress;
 
         // Binding DataReceived event
         receiver.DataReceived += Receiver_ReceivedData;
