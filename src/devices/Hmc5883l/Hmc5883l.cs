@@ -76,7 +76,7 @@ namespace Iot.Device.Hmc5883l
         private void Initialize()
         {
             // Details in Datasheet P12
-            byte configA = (byte)(_samplesAmount | _outputRate << 2 | _measurementConfig);
+            byte configA = (byte)(_samplesAmount | (_outputRate << 2) | _measurementConfig);
             byte configB = (byte)(_gain << 5);
 
             Span<byte> commandA = stackalloc byte[] { (byte)Register.HMC_CONFIG_REG_A_ADDR, configA };
@@ -140,28 +140,25 @@ namespace Iot.Device.Hmc5883l
         }
 
         /// <summary>
-        /// Reads device statuses .
+        /// Reads device statuses.
         /// </summary>
-        /// <returns>IList<Status></returns>
+        /// <returns>Device statuses</returns>
         private IList<Status> GetStatus()
         {
             var result = new List<Status>();
             _sensor.WriteByte((byte)Register.HMC_STATUS_REG_ADDR);
             byte status = _sensor.ReadByte();
 
-            byte mask = 0b00000001;
-            if ((status & mask) != 0) {
-                result.Add(Status.RDY);
+            if ((status & 0b_0000_0001) != 0) {
+                result.Add(Status.Ready);
             }
 
-            mask = 0b00000010;
-            if ((status & mask) != 0) {
-                result.Add(Status.LOCK);
+            if ((status & 0b_0000_0010) != 0) {
+                result.Add(Status.Lock);
             }
 
-            mask = 0b00000100;
-            if ((status & mask) != 0) {
-                result.Add(Status.Ren);
+            if ((status & 0b_0000_0100) != 0) {
+                result.Add(Status.RegulatorEnabled);
             }
 
             return result;
