@@ -21,26 +21,26 @@ namespace System.Device
         /// Delay for at least the specified <paramref name="microseconds"/>.
         /// </summary>
         /// <param name="microseconds">The number of microseconds to delay.</param>
-        /// <param name="allowThreadYield">True to allow yielding the thread.</param>
-        public static void DelayMicroseconds(int microseconds, bool allowThreadYield = true)
+        /// <param name="allowThreadYield">True to allow yielding the thread. On single-proc systems this will prevent all other code from running.</param>
+        public static void DelayMicroseconds(int microseconds, bool allowThreadYield)
         {
             long start = Stopwatch.GetTimestamp();
-            long end = start + (microseconds * Stopwatch.Frequency / 1_000_000);
+            ulong elapsed = (ulong)(microseconds * Stopwatch.Frequency / 1_000_000);
 
             if (!allowThreadYield)
             {
-                while (Stopwatch.GetTimestamp() < end)
+                do
                 {
                     Thread.SpinWait(1);
-                }
+                } while (elapsed < (ulong)(Stopwatch.GetTimestamp() - start));
             }
             else
             {
                 SpinWait spinWait = new SpinWait();
-                while (Stopwatch.GetTimestamp() < end)
+                do
                 {
                     spinWait.SpinOnce();
-                }
+                } while (elapsed < (ulong)(Stopwatch.GetTimestamp() - start));
             }
         }
 
@@ -48,26 +48,26 @@ namespace System.Device
         /// Delay for at least the specified <paramref name="milliseconds"/>
         /// </summary>
         /// <param name="milliseconds">The number of milliseconds to delay.</param>
-        /// <param name="allowThreadYield">True to allow yielding the thread.</param>
-        public static void DelayMilliseconds(int milliseconds, bool allowThreadYield = true)
+        /// <param name="allowThreadYield">True to allow yielding the thread. On single-proc systems this will prevent all other code from running.</param>
+        public static void DelayMilliseconds(int milliseconds, bool allowThreadYield)
         {
             long start = Stopwatch.GetTimestamp();
-            long end = start + (milliseconds * Stopwatch.Frequency / 1_000_000);
+            ulong elapsed = (ulong)(milliseconds * Stopwatch.Frequency / 1_000);
 
             if (!allowThreadYield)
             {
-                while (Stopwatch.GetTimestamp() < end)
+                do
                 {
                     Thread.SpinWait(1);
-                }
+                } while (elapsed < (ulong)(Stopwatch.GetTimestamp() - start));
             }
             else
             {
                 SpinWait spinWait = new SpinWait();
-                while (Stopwatch.GetTimestamp() < end)
+                do
                 {
                     spinWait.SpinOnce();
-                }
+                } while (elapsed < (ulong)(Stopwatch.GetTimestamp() - start));
             }
         }
     }
