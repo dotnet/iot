@@ -20,7 +20,7 @@ namespace Iot.Device.Nrf24l01
         private readonly int _ce;
         private readonly int _irq;
 
-        private readonly byte[] _empty = new byte[0];
+        private readonly byte[] _empty = Array.Empty<byte>();
 
         #region prop
         private byte _packetSize;
@@ -30,13 +30,13 @@ namespace Iot.Device.Nrf24l01
         public byte PacketSize
         {
             get { return _packetSize; }
-            set { _packetSize = value < 0 || value > 32 ? throw new ArgumentOutOfRangeException("PacketSize needs to be in the range of 0 to 32!") : value; }
+            set { _packetSize = value < 0 || value > 32 ? throw new ArgumentOutOfRangeException("PacketSize needs to be in the range of 0 to 32.") : value; }
         }
 
         /// <summary>
         /// nRF24L01 Send Address
         /// </summary>
-        public Span<byte> Address { get => ReadTxAddress(); set => SetTxAddress(value); }
+        public byte[] Address { get => ReadTxAddress(); set => SetTxAddress(value); }
 
         /// <summary>
         /// nRF24L01 Working Channel
@@ -135,7 +135,7 @@ namespace Iot.Device.Nrf24l01
         /// <param name="data">Send Data</param>
         public void Send(byte[] data)
         {
-            SetWorkingMode(WorkingMode.TX);
+            SetWorkingMode(WorkingMode.Transmit);
             Thread.Sleep(4);
 
             Write(Command.NRF_W_TX_PAYLOAD, Register.NRF_NOOP, data);
@@ -145,7 +145,7 @@ namespace Iot.Device.Nrf24l01
             _gpio.Write(_ce, PinValue.Low);
             Thread.Sleep(10);
 
-            SetWorkingMode(WorkingMode.RX);
+            SetWorkingMode(WorkingMode.Receive);
             Thread.Sleep(1);
         }
 
@@ -247,7 +247,7 @@ namespace Iot.Device.Nrf24l01
         {
             if (payload > 32 || payload < 0)
             {
-                throw new ArgumentOutOfRangeException("payload", "payload needs to be in the range of 0 to 32!");
+                throw new ArgumentOutOfRangeException(nameof(payload), $"{nameof(payload)} needs to be in the range of 0 to 32.");
             }
 
             _gpio.Write(_ce, PinValue.Low);
@@ -273,12 +273,12 @@ namespace Iot.Device.Nrf24l01
         {
             if (payload > 32 || payload < 0)
             {
-                throw new ArgumentOutOfRangeException("payload", "payload needs to be in the range of 0 to 32!");
+                throw new ArgumentOutOfRangeException(nameof(payload), $"{nameof(payload)} needs to be in the range of 0 to 32.");
             }
 
             if (pipe > 5 || pipe < 0)
             {
-                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+                throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
             }
 
             Span<byte> writeData = stackalloc byte[] { (byte)((byte)Command.NRF_W_REGISTER + (byte)Register.NRF_RX_PW_P0 + pipe), payload };
@@ -299,7 +299,7 @@ namespace Iot.Device.Nrf24l01
         {
             if (pipe > 5 || pipe < 0)
             {
-                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+                throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
             }
 
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, (Register)((byte)Register.NRF_RX_PW_P0 + pipe), 1);
@@ -336,7 +336,7 @@ namespace Iot.Device.Nrf24l01
         {
             if (pipe > 5 || pipe < 0)
             {
-                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+                throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
             }
 
             _gpio.Write(_ce, PinValue.Low);
@@ -367,7 +367,7 @@ namespace Iot.Device.Nrf24l01
         {
             if (pipe > 5 || pipe < 0)
             {
-                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+                throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
             }
 
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_EN_AA, 1);
@@ -412,7 +412,7 @@ namespace Iot.Device.Nrf24l01
         {
             if (pipe > 5 || pipe < 0)
             {
-                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+                throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
             }
 
             _gpio.Write(_ce, PinValue.Low);
@@ -443,7 +443,7 @@ namespace Iot.Device.Nrf24l01
         {
             if (pipe > 5 || pipe < 0)
             {
-                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+                throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
             }
 
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_EN_RXADDR, 1);
@@ -512,10 +512,10 @@ namespace Iot.Device.Nrf24l01
             byte setting;
             switch (mode)
             {
-                case WorkingMode.RX:
+                case WorkingMode.Receive:
                     setting = (byte)(readData[0] | 1);
                     break;
-                case WorkingMode.TX:
+                case WorkingMode.Transmit:
                     setting = (byte)(readData[0] & ~1);
                     break;
                 default:
@@ -600,21 +600,21 @@ namespace Iot.Device.Nrf24l01
         /// </summary>
         /// <param name="pipe">Pipe, form 0 to 5</param>
         /// <param name="address">Address, if (pipe > 1) then (address.Length = 1), else if (pipe = 1 || pipe = 0) then (address.Length ≤ 5)</param>
-        internal void SetRxAddress(byte pipe, Span<byte> address)
+        internal void SetRxAddress(byte pipe, ReadOnlySpan<byte> address)
         {
             if (pipe > 5 || pipe < 0)
             {
-                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+                throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
             }
 
-            if (address.Length > 5)
+            if (address.Length > 5 || address.Length < 1)
             {
-                throw new ArgumentOutOfRangeException("Array Length must less than 6!");
+                throw new ArgumentOutOfRangeException("Array Length must less than 6.");
             }
 
             if (pipe > 1 && address.Length > 1)
             {
-                throw new ArgumentOutOfRangeException("Array Length must equal 1 when pipe more than 1. Address equal pipe1's address the first 4 byte + one byte your custom!");
+                throw new ArgumentOutOfRangeException("Array Length must equal 1 when pipe more than 1. Address equal pipe1's address the first 4 byte + one byte your custom.");
             }
 
             Span<byte> writeData = stackalloc byte[1 + address.Length];
@@ -636,11 +636,11 @@ namespace Iot.Device.Nrf24l01
         /// </summary>
         /// <param name="pipe">Pipe, form 0 to 5</param>
         /// <returns>Address</returns>
-        internal Span<byte> ReadRxAddress(byte pipe)
+        internal byte[] ReadRxAddress(byte pipe)
         {
             if (pipe > 5 || pipe < 0)
             {
-                throw new ArgumentOutOfRangeException("pipe", "pipe needs to be in the range of 0 to 5!");
+                throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
             }
 
             int length = 5;
@@ -649,7 +649,7 @@ namespace Iot.Device.Nrf24l01
                 length = 1;
             }
 
-            Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, (Register)((byte)Register.NRF_RX_ADDR_P0 + pipe), length);
+            byte[] readData = WriteRead(Command.NRF_R_REGISTER, (Register)((byte)Register.NRF_RX_ADDR_P0 + pipe), length);
 
             return readData;
         }
@@ -658,11 +658,11 @@ namespace Iot.Device.Nrf24l01
         /// Set nRF24L01 Send Address
         /// </summary>
         /// <param name="address">Address, address.Length = 5</param>
-        internal void SetTxAddress(Span<byte> address)
+        internal void SetTxAddress(ReadOnlySpan<byte> address)
         {
-            if (address.Length > 5)
+            if (address.Length > 5 || address.Length < 1)
             {
-                throw new ArgumentOutOfRangeException("Array Length must less than 6!");
+                throw new ArgumentOutOfRangeException("Array Length must less than 6.");
             }
 
             _gpio.Write(_ce, PinValue.Low);
@@ -676,7 +676,7 @@ namespace Iot.Device.Nrf24l01
         /// Read nRF24L01 Send Address
         /// </summary>
         /// <returns>Address</returns>
-        internal Span<byte> ReadTxAddress()
+        internal byte[] ReadTxAddress()
         {
             return WriteRead(Command.NRF_R_REGISTER, Register.NRF_TX_ADDR, 5);
         }
@@ -689,7 +689,7 @@ namespace Iot.Device.Nrf24l01
         {
             if (channel < 0 || channel > 127)
             {
-                throw new ArgumentOutOfRangeException("Channel needs to be in the range of 0 to 127!");
+                throw new ArgumentOutOfRangeException("Channel needs to be in the range of 0 to 127.");
             }
 
             _gpio.Write(_ce, PinValue.Low);
@@ -712,11 +712,14 @@ namespace Iot.Device.Nrf24l01
         #endregion
 
         #region sensor operation
-        internal void Write(Span<byte> writeData)
+        internal void Write(ReadOnlySpan<byte> writeData)
         {
             Span<byte> readBuf = stackalloc byte[writeData.Length];
+            Span<byte> writeBuf = stackalloc byte[writeData.Length];
 
-            _sensor.TransferFullDuplex(writeData, readBuf);
+            writeData.CopyTo(writeBuf);
+
+            _sensor.TransferFullDuplex(writeBuf, readBuf);
         }
 
         internal void Write(Command command, Register register, byte writeByte)
@@ -727,7 +730,7 @@ namespace Iot.Device.Nrf24l01
             _sensor.TransferFullDuplex(writeBuf, readBuf);
         }
 
-        internal void Write(Command command, Register register, Span<byte> writeData)
+        internal void Write(Command command, Register register, ReadOnlySpan<byte> writeData)
         {
             Span<byte> writeBuf = stackalloc byte[1 + writeData.Length];
             Span<byte> readBuf = stackalloc byte[1 + writeData.Length];
@@ -741,7 +744,7 @@ namespace Iot.Device.Nrf24l01
             _sensor.TransferFullDuplex(writeBuf, readBuf);
         }
 
-        internal Span<byte> WriteRead(Command command, Register register, int dataLength)
+        internal byte[] WriteRead(Command command, Register register, int dataLength)
         {
             Span<byte> writeBuf = stackalloc byte[1 + dataLength];
             Span<byte> readBuf = new byte[1 + dataLength];
@@ -750,23 +753,20 @@ namespace Iot.Device.Nrf24l01
 
             _sensor.TransferFullDuplex(writeBuf, readBuf);
 
-            return readBuf.Slice(1);
+            return readBuf.Slice(1).ToArray();
         }
 
-        internal Span<byte> WriteRead(Command command, Register register, Span<byte> writeData)
+        internal byte[] WriteRead(Command command, Register register, ReadOnlySpan<byte> writeData)
         {
             Span<byte> writeBuf = stackalloc byte[1 + writeData.Length];
             Span<byte> readBuf = new byte[1 + writeData.Length];
 
             writeBuf[0] = (byte)((byte)command + (byte)register);
-            for (int i = 0; i < writeData.Length; i++)
-            {
-                writeBuf[1 + i] = writeData[i];
-            }
+            writeData.CopyTo(writeBuf.Slice(1));
 
             _sensor.TransferFullDuplex(writeBuf, readBuf);
 
-            return readBuf.Slice(1);
+            return readBuf.Slice(1).ToArray();
         }
         #endregion
     }

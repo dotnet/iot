@@ -28,7 +28,7 @@ namespace Iot.Device.Nrf24l01
         /// <summary>
         /// Receive Pipe Address
         /// </summary>
-        public Span<byte> Address { get => _nrf.ReadRxAddress(_pipeID); set => _nrf.SetRxAddress(_pipeID, value); }
+        public byte[] Address { get => _nrf.ReadRxAddress(_pipeID); set => _nrf.SetRxAddress(_pipeID, value); }
 
         /// <summary>
         /// Auto Acknowledgment
