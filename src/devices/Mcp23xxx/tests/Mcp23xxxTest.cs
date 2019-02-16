@@ -190,12 +190,12 @@ namespace Iot.Device.Mcp23xxx.Tests
                 return PinValue.Low;
             }
 
-            public void Read(Span<PinValuePair> pinValues)
+            public void Read(Span<PinValuePair> pinValuePairs)
             {
-                for (int i = 0; i < pinValues.Length; i++)
+                for (int i = 0; i < pinValuePairs.Length; i++)
                 {
-                    int pin = pinValues[i].PinNumber;
-                    pinValues[i] = new PinValuePair(pin, Read(pin));
+                    int pin = pinValuePairs[i].PinNumber;
+                    pinValuePairs[i] = new PinValuePair(pin, Read(pin));
                 }
             }
 
@@ -208,9 +208,9 @@ namespace Iot.Device.Mcp23xxx.Tests
                 _pinValues[pinNumber] = value;
             }
 
-            public void Write(ReadOnlySpan<PinValuePair> pinValues)
+            public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
             {
-                foreach ((int pin, PinValue value) in pinValues)
+                foreach ((int pin, PinValue value) in pinValuePairs)
                 {
                     Write(pin, value);
                 }

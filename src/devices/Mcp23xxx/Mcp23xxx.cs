@@ -304,16 +304,16 @@ namespace Iot.Device.Mcp23xxx
         public PinValue Read(int pinNumber)
         {
             ValidatePin(pinNumber);
-            Span<PinValuePair> values = stackalloc PinValuePair[] { new PinValuePair(pinNumber, default) };
-            Read(values);
-            return values[0].PinValue;
+            Span<PinValuePair> pinValuePairs = stackalloc PinValuePair[] { new PinValuePair(pinNumber, default) };
+            Read(pinValuePairs);
+            return pinValuePairs[0].PinValue;
         }
 
-        public void Read(Span<PinValuePair> pinValues)
+        public void Read(Span<PinValuePair> pinValuePairs)
         {
-            (uint pins, _) = new PinVector32(pinValues);
+            (uint pins, _) = new PinVector32(pinValuePairs);
             if ((pins >> PinCount) > 0)
-                ThrowBadPin(nameof(pinValues));
+                ThrowBadPin(nameof(pinValuePairs));
 
             ushort result = 0;
             if (pins < 0xFF + 1)
@@ -332,10 +332,10 @@ namespace Iot.Device.Mcp23xxx
                 result = InternalReadUInt16(Register.GPIO);
             }
 
-            for (int i = 0; i < pinValues.Length; i++)
+            for (int i = 0; i < pinValuePairs.Length; i++)
             {
-                int pin = pinValues[i].PinNumber;
-                pinValues[i]= new PinValuePair(pin, result & (1 << pin));
+                int pin = pinValuePairs[i].PinNumber;
+                pinValuePairs[i]= new PinValuePair(pin, result & (1 << pin));
             }
         }
 
@@ -347,15 +347,15 @@ namespace Iot.Device.Mcp23xxx
         public void Write(int pinNumber, PinValue value)
         {
             ValidatePin(pinNumber);
-            Span<PinValuePair> values = stackalloc PinValuePair[] { new PinValuePair(pinNumber, value) };
-            Write(values);
+            Span<PinValuePair> pinValuePairs = stackalloc PinValuePair[] { new PinValuePair(pinNumber, value) };
+            Write(pinValuePairs);
         }
 
-        public void Write(ReadOnlySpan<PinValuePair> pinValues)
+        public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
         {
-            (uint mask, uint newBits) = new PinVector32(pinValues);
+            (uint mask, uint newBits) = new PinVector32(pinValuePairs);
             if ((mask >> PinCount) > 0)
-                ThrowBadPin(nameof(pinValues));
+                ThrowBadPin(nameof(pinValuePairs));
 
             if (!_cacheValid)
                 UpdateCache();
