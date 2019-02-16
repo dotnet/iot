@@ -79,7 +79,7 @@ namespace Iot.Device.Mcp23xxx.Tests
 
         protected class I2cDeviceMock : I2cDevice
         {
-            private I2cConnectionSettings _settings;
+            private readonly I2cConnectionSettings _settings;
             public Mcp23xxxChipMock DeviceMock { get; private set; }
 
             public I2cDeviceMock(int ports, I2cConnectionSettings settings = null)
@@ -103,10 +103,10 @@ namespace Iot.Device.Mcp23xxx.Tests
         /// </summary>
         public class Mcp23xxxChipMock
         {
-            private int _ports;
-            private bool _isSpi;
+            private readonly int _ports;
+            private readonly bool _isSpi;
             // OLATB address is 0x15
-            private byte[] _registers;
+            private readonly byte[] _registers;
             private byte[] _lastReadBuffer;
             private byte[] _lastWriteBuffer;
 
@@ -120,8 +120,8 @@ namespace Iot.Device.Mcp23xxx.Tests
             public Span<byte> Registers => _registers;
 
             // Can't coalesce here https://github.com/dotnet/roslyn/issues/29927
-            public ReadOnlySpan<byte> LastReadBuffer => _lastReadBuffer == null ? ReadOnlySpan<byte>.Empty : _lastReadBuffer;
-            public ReadOnlySpan<byte> LastWriteBuffer => _lastWriteBuffer == null ? ReadOnlySpan<byte>.Empty : _lastWriteBuffer;
+            public ReadOnlySpan<byte> LastReadBuffer => _lastReadBuffer ?? ReadOnlySpan<byte>.Empty;
+            public ReadOnlySpan<byte> LastWriteBuffer => _lastWriteBuffer ?? ReadOnlySpan<byte>.Empty;
 
             public void Read(Span<byte> buffer)
             {
