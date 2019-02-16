@@ -25,14 +25,14 @@ namespace System.Device
         public static void DelayMicroseconds(int microseconds, bool allowThreadYield)
         {
             long start = Stopwatch.GetTimestamp();
-            ulong elapsed = (ulong)(microseconds * Stopwatch.Frequency / 1_000_000);
+            ulong minimumTicks = (ulong)(microseconds * Stopwatch.Frequency / 1_000_000);
 
             if (!allowThreadYield)
             {
                 do
                 {
                     Thread.SpinWait(1);
-                } while (elapsed < (ulong)(Stopwatch.GetTimestamp() - start));
+                } while ((ulong)(Stopwatch.GetTimestamp() - start) < minimumTicks);
             }
             else
             {
@@ -40,7 +40,7 @@ namespace System.Device
                 do
                 {
                     spinWait.SpinOnce();
-                } while (elapsed < (ulong)(Stopwatch.GetTimestamp() - start));
+                } while ((ulong)(Stopwatch.GetTimestamp() - start) < minimumTicks);
             }
         }
 
@@ -52,14 +52,14 @@ namespace System.Device
         public static void DelayMilliseconds(int milliseconds, bool allowThreadYield)
         {
             long start = Stopwatch.GetTimestamp();
-            ulong elapsed = (ulong)(milliseconds * Stopwatch.Frequency / 1_000);
+            ulong minimumTicks = (ulong)(milliseconds * Stopwatch.Frequency / 1_000);
 
             if (!allowThreadYield)
             {
                 do
                 {
                     Thread.SpinWait(1);
-                } while (elapsed < (ulong)(Stopwatch.GetTimestamp() - start));
+                } while ((ulong)(Stopwatch.GetTimestamp() - start) <  minimumTicks);
             }
             else
             {
@@ -67,7 +67,7 @@ namespace System.Device
                 do
                 {
                     spinWait.SpinOnce();
-                } while (elapsed < (ulong)(Stopwatch.GetTimestamp() - start));
+                } while ((ulong)(Stopwatch.GetTimestamp() - start) < minimumTicks);
             }
         }
     }
