@@ -19,6 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Utils\BitmapImage.cs" />
+    <Compile Include="Utils\BitmapImageRgb565.cs" />
+    <Compile Include="Utils\BitmapImageRgb888.cs" />
+    <Compile Include="Utils\Color.cs" />
+  </ItemGroup>
+
     <ProjectReference Include="$(MSBuildThisFileDirectory)../System.Device.Gpio/System.Device.Gpio.csproj">
       <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
