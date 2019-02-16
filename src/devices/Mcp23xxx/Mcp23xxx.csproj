@@ -29,13 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--
-        Temporarily making a project reference until the daily has IGpioController
-        <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" /> 
-      -->
-    <ProjectReference Include="..\..\System.Device.Gpio\System.Device.Gpio.csproj">
-      <AdditionalProperties>Configuration=Linux-Debug;RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
     <None Include="README.md" />
   </ItemGroup>
 
