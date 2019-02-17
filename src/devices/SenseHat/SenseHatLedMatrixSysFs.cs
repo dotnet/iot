@@ -30,7 +30,7 @@ namespace Iot.Device.SenseHat
             }
 
             _deviceFile = new FileStream(device, FileMode.Open, FileAccess.ReadWrite);
-            //Clear(Color.Black);
+            Clear(Color.Black);
         }
 
         public override void Write(ReadOnlySpan<Color> colors)

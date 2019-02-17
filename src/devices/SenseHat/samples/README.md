@@ -2,8 +2,6 @@
 
 ## LED matrix
 
-Sample usage
-
 ```csharp
 using (var m = new SenseHatLedMatrixI2c())
 {
@@ -26,3 +24,26 @@ There are currently two implementations of SenseHatLedMatrix:
 - SenseHatLedMatrixI2c - does not require any drivers - allows using brighter colors but colors are more pale by default.
 
 Both implementations implement SenseHatLedMatrix abstraction which should be used in the code.
+
+## Joystick
+
+```csharp
+using (var j = new SenseHatJoystick())
+{
+    while (true)
+    {
+        j.Read();
+        Console.Clear();
+        if (j.HoldingUp)
+            Console.Write("U");
+        if (j.HoldingDown)
+            Console.Write("D");
+        if (j.HoldingLeft)
+            Console.Write("L");
+        if (j.HoldingRight)
+            Console.Write("R");
+        if (j.HoldingButton)
+            Console.Write("!");
+    }
+}
+```

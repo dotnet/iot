@@ -10,7 +10,8 @@ namespace Iot.Device.SenseHat.Samples
     {
         static void Main(string[] args)
         {
-            LedMatrix.Run();
+            //LedMatrix.Run();
+            Joystick.Run();
         }
     }
 }

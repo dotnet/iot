@@ -26,6 +26,7 @@ namespace Iot.Device.SenseHat
         public SenseHatLedMatrixI2c(I2cDevice i2cDevice = null)
         {
             _i2c = i2cDevice ?? CreateDefaultI2cDevice();
+            Clear(Color.Black);
         }
 
         public override void Write(ReadOnlySpan<Color> colors)
