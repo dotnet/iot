@@ -9,8 +9,10 @@ It consists of multiple devices. Currently supported devices:
 
 ## Notes
 
-Please make sure to enable Sense HAT in `/boot/config.txt` before using by adding following line:
+When using SysFs implementation please make sure to enable Sense HAT in `/boot/config.txt` before using by adding following line:
 
 ```
 dtoverlay=rpi-sense
 ```
+
+This is not required when using I2c implementation. See more details in the samples about the differences.

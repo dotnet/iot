@@ -15,7 +15,10 @@ namespace Iot.Device.SenseHat.Samples
     {
         public static void Run()
         {
-            using (var m = new SenseHatLedMatrix())
+            // another implementation which can be used is: SenseHatLedMatrixSysFs
+            // I2C implementation does not require installing anything
+            // SysFs implementation is faster and has arguably better colors
+            using (var m = new SenseHatLedMatrixI2c())
             {
                 WriteDemo(m);
                 // SetPixelDemo(m);

@@ -5,7 +5,7 @@
 Sample usage
 
 ```csharp
-using (var m = new SenseHatLedMatrix())
+using (var m = new SenseHatLedMatrixI2c())
 {
     m.Clear(Color.Purple);
     m.SetPixel(0, 0, Color.Red);
@@ -20,3 +20,9 @@ using (var m = new SenseHatLedMatrix())
 ```
 
 Please see [sample](LedMatrix.Sample.cs) for more advanced example (also includes above).
+
+There are currently two implementations of SenseHatLedMatrix:
+- SenseHatLedMatrixSysFs - uses native driver - requires installing a driver but colors look (arguably) more vivid (also a bit faster).
+- SenseHatLedMatrixI2c - does not require any drivers - allows using brighter colors but colors are more pale by default.
+
+Both implementations implement SenseHatLedMatrix abstraction which should be used in the code.
