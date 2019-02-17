@@ -16,18 +16,4 @@
     </ProjectReference>
   </ItemGroup>
 
-  <Target Condition="$(BuildingInsideSshDeploy) ==''" Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="cd $(ProjectDir)" />
-    <Exec Command="dotnet-sshdeploy push" />
-  </Target>
-
-  <PropertyGroup>
-    <SshDeployHost>192.168.1.109</SshDeployHost>
-    <SshDeployClean />
-    <SshDeployTargetPath>/home/pi/neopix</SshDeployTargetPath>
-    <SshDeployUsername>pi</SshDeployUsername>
-    <SshDeployPassword>malooreader</SshDeployPassword>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-  </PropertyGroup>
-
 </Project>
