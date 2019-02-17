@@ -167,8 +167,7 @@ namespace Iot.Device.GoPiGo3
 
             if (reply[3] == SpiCorrectDataReturned)
             {
-                return BinaryPrimitives.ReadInt32BigEndian(reply.Skip(4).ToArray());
-                // retVal = (int)(reply[4] << 24) | (reply[5] << 16) | (reply[6] << 8) | reply[7];
+                return BinaryPrimitives.ReadInt32BigEndian(new Span<byte>(reply).Slice(4));
             }
             throw new IOException($"{nameof(SpiRead32)} : no SPI response");
         }
@@ -185,8 +184,7 @@ namespace Iot.Device.GoPiGo3
 
             if (reply[3] == SpiCorrectDataReturned)
             {
-                return BinaryPrimitives.ReadInt16BigEndian(reply.Skip(4).ToArray());
-                // retVal = (short)((reply[4] << 8) | reply[5]);
+                return BinaryPrimitives.ReadInt16BigEndian(new Span<byte>(reply).Slice(4));
             }
             throw new IOException($"{nameof(SpiRead16)} : no SPI response");
         }
@@ -477,7 +475,7 @@ namespace Iot.Device.GoPiGo3
                 motorStatus.Speed = reply[5];
                 if ((motorStatus.Speed & 0x80) > 0)
                     motorStatus.Speed = -motorStatus.Speed;
-                motorStatus.Encoder = (int)(BinaryPrimitives.ReadInt32BigEndian(reply.Skip(6).ToArray()) / MotorTicksPerDegree); //  (int)(((reply[6] << 24) | (reply[7] << 16) | (reply[8] << 8) | reply[9]) / MotorTicksPerDegree);
+                motorStatus.Encoder = (int)(BinaryPrimitives.ReadInt32BigEndian(new Span<byte>(reply).Slice(6)) / MotorTicksPerDegree); 
                 motorStatus.Dps = ((reply[10] << 8) | reply[11]);
                 if ((motorStatus.Dps & 0x8000) > 0)
                     motorStatus.Dps = motorStatus.Dps - 0x10000;

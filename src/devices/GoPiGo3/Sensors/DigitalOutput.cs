@@ -40,6 +40,7 @@ namespace Iot.Device.GoPiGo3.Sensors
         public int Value
         {
             get { return _value ? 1 : 0; }
+
             set
             {
                 _value = value != 0;

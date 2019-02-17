@@ -17,6 +17,7 @@ namespace Iot.Device.GoPiGo3.Models
             if ((GrovePort != GrovePort.Grove1) && (GrovePort != GrovePort.Grove2))
                 throw new ArgumentException("Grove sensor can only be on Port 1 or Port 2");
             SensorType = GroveSensorType.None;
+            Port = GrovePort;
         }
 
         public GrovePort Port { get; }

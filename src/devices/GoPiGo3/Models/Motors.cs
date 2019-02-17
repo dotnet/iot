@@ -27,7 +27,7 @@ namespace Iot.Device.GoPiGo3.Models
         Stop = 0,
         Full = 100,
         Half = 50,
-        // Motros in float mode
+        // Motors in float mode
         // Actually any value great than 100 will float motors
         Float = 128
     }
