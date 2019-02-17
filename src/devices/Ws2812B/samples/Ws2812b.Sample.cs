@@ -25,7 +25,7 @@ namespace Iot.Device.Ws2812b.Samples
             img.SetPixel(4, 0, Color.Yellow);
             img.SetPixel(5, 0, Color.Cyan);
             img.SetPixel(6, 0, Color.Magenta);
-            img.SetPixel(7, 0, 0xffff8000);
+            img.SetPixel(7, 0, Color.FromArgb(unchecked((int)0xffff8000)));
             neo.Update();
             System.Threading.Thread.Sleep(5000);
 

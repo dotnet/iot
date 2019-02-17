@@ -25,9 +25,6 @@ namespace Iot.Device.Ws2812b
         {
         }
 
-        public void SetPixel(int x, int y, uint color) => SetPixel(x, y, Color.FromArgb((int)color));
-        public void SetPixel(int x, int y, byte level) => SetPixel(x, y, Color.FromArgb(0xff, level, level, level));
-
         public override void SetPixel(int x, int y, Color c)
         {
             var offset = y * Stride + x * BytesPerPixel;
