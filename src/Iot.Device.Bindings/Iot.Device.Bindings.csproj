@@ -25,6 +25,7 @@
     <Compile Include="Utils\Color.cs" />
   </ItemGroup>
 
+  <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)../System.Device.Gpio/System.Device.Gpio.csproj">
       <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
