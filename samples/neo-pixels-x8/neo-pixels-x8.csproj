@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>neo_pixels_x8</RootNamespace>
   </PropertyGroup>
 
@@ -11,7 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease.19101.1" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../../src/System.Device.Gpio/System.Device.Gpio.csproj">
+      <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
   </ItemGroup>
 
   <Target Condition="$(BuildingInsideSshDeploy) ==''" Name="PostBuild" AfterTargets="PostBuildEvent">
