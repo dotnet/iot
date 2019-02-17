@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -16,11 +16,6 @@
     <_ExcludeFromCompile Include="$(DeviceRoot)**/tests/**/*.cs" />
     <_ExcludeFromCompile Include="$(DeviceRoot)**/obj/**/*.cs" />
     <Compile Include="$(DeviceRoot)**/*.cs" Exclude="@(_ExcludeFromCompile)" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Utils\BitmapImage.cs" />
-    <Compile Include="Utils\Color.cs" />
   </ItemGroup>
 
   <ItemGroup>

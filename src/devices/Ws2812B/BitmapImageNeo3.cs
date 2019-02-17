@@ -2,9 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Bindings.Utils;
+using Iot.Device.Graphics;
+using System.Drawing;
 
-namespace Iot.Device.Bindings.WS2812B
+namespace Iot.Device.Ws2812b
 {
     /// <summary>
     /// Special 24bit RGB format for Neo pixel LEDs where each bit is converted to 3 bits.
@@ -12,17 +13,20 @@ namespace Iot.Device.Bindings.WS2812B
     /// </summary>
     public class BitmapImageNeo3 : BitmapImage
     {
-        const int BytesPerComponent = 3;
-        const int BytesPerPixel = BytesPerComponent * 3;
-        const int ResetDelayInBytes = 30; // 100us @ 2.4Mbps
+        private const int BytesPerComponent = 3;
+        private const int BytesPerPixel = BytesPerComponent * 3;
+        // The Neo Pixels require a 50us delay (all zeros) after. Since Spi freq is not exactly
+        // as requested 100us is used here with good practical results. 100us @ 2.4Mbps and 8bit
+        // data means we have to add 30 bytes of zero padding.
+        private const int ResetDelayInBytes = 30;
 
         public BitmapImageNeo3(int width, int height)
             : base(new byte[width * height * BytesPerPixel + ResetDelayInBytes], width, height, width * BytesPerPixel)
         {
         }
 
-        public void SetPixel(int x, int y, uint color) => SetPixel(x, y, new Color(color));
-        public void SetPixel(int x, int y, byte level) => SetPixel(x, y, new Color(level));
+        public void SetPixel(int x, int y, uint color) => SetPixel(x, y, Color.FromArgb((int)color));
+        public void SetPixel(int x, int y, byte level) => SetPixel(x, y, Color.FromArgb(0xff, level, level, level));
 
         public override void SetPixel(int x, int y, Color c)
         {

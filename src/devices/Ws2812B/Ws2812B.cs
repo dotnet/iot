@@ -4,14 +4,14 @@
 
 using System.Device.Spi;
 
-namespace Iot.Device.Bindings.WS2812B
+namespace Iot.Device.Ws2812b
 {
-    public class WS2812B
+    public class Ws2812b
     {
         private readonly SpiDevice _spiDevice;
         public BitmapImageNeo3 Image { get; }
 
-        public WS2812B(SpiDevice spiDevice, int width, int height = 1)
+        public Ws2812b(SpiDevice spiDevice, int width, int height = 1)
         {
             _spiDevice = spiDevice;
             _spiDevice.ConnectionSettings.ClockFrequency = 2_400_000;
