@@ -9,7 +9,7 @@ namespace Iot.Device.Hmc5883l
     /// The status of HMC5883L device
     /// </summary>
     [Flags]
-    public enum Status: byte
+    public enum Status : byte
     {
         /// <summary>
         /// Ready Bit. Set when data is written to all six data registers. Cleared when device initiates a write to the data output
