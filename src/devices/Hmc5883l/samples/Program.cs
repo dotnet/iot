@@ -28,10 +28,12 @@ namespace Iot.Device.Hmc5883l.Samples
 
                     var status = sensor.DeviceStatus;
                     Console.Write("Statuses: ");
-                    foreach (var item in status)
+                    foreach (Status item in Enum.GetValues(typeof(Status)))
                     {
-                        Console.Write($"{item} ");
+                        if (status.HasFlag(item))
+                            Console.Write($"{item} ");
                     }
+
                     Console.WriteLine();
                     Console.WriteLine();
 

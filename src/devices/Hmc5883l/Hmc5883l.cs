@@ -41,7 +41,7 @@ namespace Iot.Device.Hmc5883l
         /// <summary>
         /// HMC5883L Status
         /// </summary>
-        public IList<Status> DeviceStatus => GetStatus();
+        public Status DeviceStatus => GetStatus();
 
         /// <summary>
         /// Initialize a new HMC5883L device connected through I2C
@@ -143,25 +143,12 @@ namespace Iot.Device.Hmc5883l
         /// Reads device statuses.
         /// </summary>
         /// <returns>Device statuses</returns>
-        private IList<Status> GetStatus()
+        private Status GetStatus()
         {
-            var result = new List<Status>();
             _sensor.WriteByte((byte)Register.HMC_STATUS_REG_ADDR);
             byte status = _sensor.ReadByte();
 
-            if ((status & 0b_0000_0001) != 0) {
-                result.Add(Status.Ready);
-            }
-
-            if ((status & 0b_0000_0010) != 0) {
-                result.Add(Status.Lock);
-            }
-
-            if ((status & 0b_0000_0100) != 0) {
-                result.Add(Status.RegulatorEnabled);
-            }
-
-            return result;
+            return (Status)status;
         }
     }
 }
