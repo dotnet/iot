@@ -24,7 +24,6 @@ namespace Iot.Device.Samples
                 default: return null;
             }
         }
-        
 
         static void Main(string[] args)
         {
@@ -32,8 +31,8 @@ namespace Iot.Device.Samples
 
             var connectionSettings = new SpiConnectionSettings(0, 0)
             {
-                ClockFrequency = 10_000_000,
-                Mode = SpiMode.Mode0
+                ClockFrequency = Max7219.SpiClockFrequency,
+                Mode = Max7219.SpiMode
             };
             var spi = new UnixSpiDevice(connectionSettings);
             using (var devices = new Max7219(spi, cascadedDevices: 4))
@@ -41,26 +40,22 @@ namespace Iot.Device.Samples
                 //initialize the devices
                 devices.Init();
 
-                // send a display test to the devices: All leds should be lighted
-                Console.WriteLine("Display-Test");
-                devices.SetRegister(Register.DISPLAYTEST, 1);
-                Thread.Sleep(1000);
-
                 // reinitialize the devices
                 Console.WriteLine("Init");
                 devices.Init();
 
                 // write a smiley to devices buffer
-                var smiley = new byte[] { 
-                    0b00111100, 
-                    0b01000010, 
-                    0b10100101, 
-                    0b10000001, 
-                    0b10100101, 
-                    0b10011001, 
-                    0b01000010, 
-                    0b00111100 
-                    };
+                var smiley = new byte[] {
+                    0b00111100,
+                    0b01000010,
+                    0b10100101,
+                    0b10000001,
+                    0b10100101,
+                    0b10011001,
+                    0b01000010,
+                    0b00111100
+                };
+
                 for (var i = 0; i < devices.CascadedDevices; i++)
                 {
                     for (var digit = 0; digit < 8; digit++)
@@ -78,7 +73,6 @@ namespace Iot.Device.Samples
                     Thread.Sleep(1000);
                 }
 
-
                 //reinitialize device and show message using the matrix graphics
                 devices.Init();
                 devices.Rotation = RotationType.Left;
@@ -87,7 +81,6 @@ namespace Iot.Device.Samples
                     graphics.Font = font;
                     graphics.ShowMessage("Hello World from MAX7219!", alwaysScroll: true);
                 }
-
             }
         }
     }

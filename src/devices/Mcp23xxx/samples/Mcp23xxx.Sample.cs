@@ -81,13 +81,13 @@ namespace Iot.Device.Mcp23xxx.Samples
             switch (mcp23xxxDevice)
             {
                 case Mcp23xxxDevice.Mcp23S08:
-                    return new Mcp23S08(s_deviceAddress, spiDevice);
+                    return new Mcp23s08(spiDevice, s_deviceAddress);
                 case Mcp23xxxDevice.Mcp23S09:
-                    return new Mcp23S09(s_deviceAddress, spiDevice);
+                    return new Mcp23s09(spiDevice);
                 case Mcp23xxxDevice.Mcp23S17:
-                    return new Mcp23S17(s_deviceAddress, spiDevice);
+                    return new Mcp23s17(spiDevice, s_deviceAddress);
                 case Mcp23xxxDevice.Mcp23S18:
-                    return new Mcp23S18(s_deviceAddress, spiDevice);
+                    return new Mcp23s18(spiDevice);
             }
 
             throw new Exception($"Invalid Mcp23xxxDevice: {nameof(mcp23xxxDevice)}");

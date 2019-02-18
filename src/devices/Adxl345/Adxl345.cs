@@ -45,19 +45,19 @@ namespace Iot.Device.Adxl345
         /// <param name="gravityRange">Gravity Measurement Range</param>
         public Adxl345(SpiDevice sensor, GravityRange gravityRange)
         {
-            if (gravityRange == GravityRange.Range1)
+            if (gravityRange == GravityRange.Range02)
             {
                 _range = 4;
             }
-            else if (gravityRange == GravityRange.Range2)
+            else if (gravityRange == GravityRange.Range04)
             {
                 _range = 8;
             }
-            else if (gravityRange == GravityRange.Range3)
+            else if (gravityRange == GravityRange.Range08)
             {
                 _range = 16;
             }
-            else if (gravityRange == GravityRange.Range4)
+            else if (gravityRange == GravityRange.Range16)
             {
                 _range = 32;
             }

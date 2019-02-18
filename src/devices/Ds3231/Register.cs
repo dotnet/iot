@@ -7,7 +7,7 @@ namespace Iot.Device.Ds3231
     /// <summary>
     /// Register of DS3231
     /// </summary>
-    public enum Register : byte
+    internal enum Register : byte
     {
         RTC_SEC_REG_ADDR = 0x00,
         RTC_MIN_REG_ADDR = 0x01,

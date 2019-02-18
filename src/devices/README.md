@@ -6,15 +6,26 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ## Binding Index
 
-* [BMP280 -- digital pressure sensor](Bmp280/README.md)
-* [Dhtxx -- digital-output relative humidity & temperature sensor module](Dhtxx/README.md)
-* [Hcsr04 -- ultrasonic ranging module](Hcsr04/README.md)
-* [CharacterLcd](CharacterLcd/README.md)
-* [Max7219 -- LED matrix driver](Max7219/README.md)
-* [Mcp23xxx -- I/O expander](Mcp23xxx/README.md)
-* [Mcp3008 -- analog to digital converter](Mcp3008/README.md)
-* [Pca95x4 -- I2C GPIO expander](Pca95x4/README.md)
-* [Si7021 -- temperature and humidity sensor](Si7021/README.md)
+* [ADS1115 -- Analog-to-Digital Converter](Ads1115/README.md)
+* [ADXL345 -- SPI Accelerometer](Adxl345/README.md)
+* [BMP280 -- Digital Pressure Sensor](Bmp280/README.md)
+* [BrickPi3](BrickPi3/README.md)
+* [CharacterLcd -- Liquid Crystal Display](CharacterLcd/README.md)
+* [DC Motor](DCMotor/README.md)
+* [Dhtxx -- Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
+* [DS3231 -- Realtime Clock](Ds3231/README.md)
+* [HC-SR04 -- Ultrasonic Ranging Module](Hcsr04/README.md)
+* [HC-SR501 -- PIR Motion Sensor](Hcsr501/README.md)
+* [HMC5883L -- 3-Axis Digital Compass](Hmc5883l/README.md)
+* [Max7219 -- LED Matrix Driver](Max7219/README.md)
+* [Mcp23xxx -- I/O Expander](Mcp23xxx/README.md)
+* [Mcp3008 -- Analog-to-Digital Converter](Mcp3008/README.md)
+* [Pca95x4 -- I2C GPIO Expander](Pca95x4/README.md)
+* [Pcx857x -- I2C GPIO Expander](Pcx857x/README.md)
+* [Servo -- Servomotor Controller](Servo/README.md)
+* [Si7021 -- Temperature & Humidity Sensor](Si7021/README.md)
+* [SoftPwm -- Software PWM](SoftPwm/README.md)
+* [Ssd1306 -- OLED Display Controller](Ssd1306/README.md)
 
 ## Binding Distribution
 
