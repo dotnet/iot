@@ -22,6 +22,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Mcp3008 -- Analog-to-Digital Converter](Mcp3008/README.md)
 * [Pca95x4 -- I2C GPIO Expander](Pca95x4/README.md)
 * [Pca9685 -- I2C PWM Driver](Pca9685/README.md)
+* [Pcx857x -- I2C GPIO Expander](Pcx857x/README.md)
 * [Servo -- Servomotor Controller](Servo/README.md)
 * [Si7021 -- Temperature & Humidity Sensor](Si7021/README.md)
 * [SoftPwm -- Software PWM](SoftPwm/README.md)
