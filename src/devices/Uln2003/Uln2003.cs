@@ -25,25 +25,25 @@ namespace Iot.Device.Uln2003
         private StepperMode _mode = StepperMode.HalfStep;
         private bool[,] _currentSwitchingSequence = _halfStepSequence;
         private bool _isClockwise = true;
-        private GpioController _controller;
-        private Stopwatch _stopwatch;
+        private IGpioController _controller;
+        private Stopwatch _stopwatch = new Stopwatch();
         private long _stepMicrosecondsDelay;
 
-        static bool[,] _halfStepSequence = new bool[4, 8] {
+        private static bool[,] _halfStepSequence = new bool[4, 8] {
                  { true, true, false, false, false, false, false, true },
                  { false, true, true, true, false, false, false, false },
                  { false, false, false, true, true, true, false, false },
                  { false, false, false, false, false, true, true, true }
             };
 
-        static bool[,] _fullStepSinglePhaseSequence = new bool[4, 8] {
+        private static bool[,] _fullStepSinglePhaseSequence = new bool[4, 8] {
                  { true, false, false, false, true, false, false, false },
                  { false, true, false, false, false, true, false, false },
                  { false, false, true, false, false, false, true, false },
                  { false, false, false, true, false, false, false, true }
             };
 
-        static bool[,] _fullStepDualPhaseSequence = new bool[4, 8] {
+        private static bool[,] _fullStepDualPhaseSequence = new bool[4, 8] {
                  { true, false, false, true, true, false, false, true },
                  { true, true, false, false, true, true, false, false },
                  { false, true, true, false, false, true, true, false },
@@ -57,14 +57,15 @@ namespace Iot.Device.Uln2003
         /// <param name="pin2">The GPIO pin number which corresponds pin B on ULN2003 driver board.</param>
         /// <param name="pin3">The GPIO pin number which corresponds pin C on ULN2003 driver board.</param>
         /// <param name="pin4">The GPIO pin number which corresponds pin D on ULN2003 driver board.</param>
-        public Uln2003(int pin1, int pin2, int pin3, int pin4)
+        /// <param name="controller">The controller.</param>
+        public Uln2003(int pin1, int pin2, int pin3, int pin4, IGpioController controller = null)
         {
             _pin1 = pin1;
             _pin2 = pin2;
             _pin3 = pin3;
             _pin4 = pin4;
 
-            _controller = new GpioController();
+            _controller = controller ?? new GpioController();
 
             _controller.OpenPin(_pin1, PinMode.Output);
             _controller.OpenPin(_pin2, PinMode.Output);
@@ -112,7 +113,7 @@ namespace Iot.Device.Uln2003
         public void Stop()
         {
             _steps = 0;
-            _stopwatch.Stop();
+            _stopwatch?.Stop();
             _controller.Write(_pin1, PinValue.Low);
             _controller.Write(_pin2, PinValue.Low);
             _controller.Write(_pin3, PinValue.Low);
@@ -126,7 +127,7 @@ namespace Iot.Device.Uln2003
         public void Step(int steps)
         {
             double lastStepTime = 0;
-            _stopwatch = Stopwatch.StartNew();
+            _stopwatch.Start();
             _isClockwise = steps >= 0;
             _steps = Math.Abs(steps);
             _stepMicrosecondsDelay = RPM > 0 ? 60 * 1000 * 1000 / _steps / RPM : StepperMotorDefaultDelay;
