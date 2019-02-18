@@ -47,3 +47,17 @@ using (var j = new SenseHatJoystick())
     }
 }
 ```
+
+## Accelerometer and Gyroscope
+
+```csharp
+using (var ag = new SenseHatAccelerometerAndGyroscope())
+{
+    while (true)
+    {
+        Console.WriteLine($"Acceleration={ag.Acceleration}"); 
+        Console.WriteLine($"AngularRate={ag.AngularRate}");
+        Thread.Sleep(100);
+    }
+}
+```

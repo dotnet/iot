@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Threading;
 
 namespace Iot.Device.SenseHat.Samples
 {
@@ -10,8 +11,9 @@ namespace Iot.Device.SenseHat.Samples
     {
         static void Main(string[] args)
         {
-            //LedMatrix.Run();
-            Joystick.Run();
+            // LedMatrix.Run();
+            // Joystick.Run();
+            AccelerometerAndGyroscope.Run();
         }
     }
 }
