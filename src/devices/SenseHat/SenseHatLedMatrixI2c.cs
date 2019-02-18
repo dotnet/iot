@@ -54,7 +54,7 @@ namespace Iot.Device.SenseHat
             _i2c.Write(buffer);
         }
 
-        public override void Clear(Color color)
+        public override void Clear(Color color = default(Color))
         {
             Span<byte> buffer = stackalloc byte[FrameBufferLength + 1];
 

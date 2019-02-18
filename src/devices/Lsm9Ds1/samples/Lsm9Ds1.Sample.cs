@@ -15,21 +15,8 @@ namespace Iot.Device.Lsm9Ds1.Samples
 
         static void Main(string[] args)
         {
-            using (var ag = new Lsm9Ds1AccelerometerAndGyroscope(CreateI2cDevice()))
-            {
-                while (true)
-                {
-                    Console.WriteLine($"Acceleration={ag.Acceleration}"); 
-                    Console.WriteLine($"AngularRate={ag.AngularRate}");
-                    Thread.Sleep(100);
-                }
-            }
-        }
-
-        private static I2cDevice CreateI2cDevice()
-        {
-            var settings = new I2cConnectionSettings(1, I2cAddress);
-            return new UnixI2cDevice(settings);
+            // AccelerometerAndGyroscope.Run();
+            Magnetometer.Run();
         }
     }
 }

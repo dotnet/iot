@@ -25,7 +25,7 @@ namespace Iot.Device.SenseHat
 
         public abstract void Write(ReadOnlySpan<Color> colors);
 
-        public abstract void Clear(Color color);
+        public abstract void Clear(Color color = default(Color));
 
         public abstract void SetPixel(int x, int y, Color color);
 

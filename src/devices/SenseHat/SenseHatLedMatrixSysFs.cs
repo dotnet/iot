@@ -48,7 +48,7 @@ namespace Iot.Device.SenseHat
             EndWriting();
         }
 
-        public override void Clear(Color color)
+        public override void Clear(Color color = default(Color))
         {
             StartWritingColors();
 
