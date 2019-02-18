@@ -18,10 +18,6 @@ namespace Iot.Device.Si7021
             _i2cDevice = i2cDevice;
         }
 
-        public void Dispose()
-        {
-        }
-
         public double ReadTemperatureInFahrenheit()
         {
             double tempCelcius = ReadTemperatureInCelcius();
@@ -58,6 +54,16 @@ namespace Iot.Device.Si7021
             double humidity = ((125 * rh_code) / 65536) - 6;
             
             return humidity;
+        }
+
+        public void Dispose()
+        {
+            if (_i2cDevice != null)
+            {
+                _i2cDevice.Dispose();
+                _i2cDevice = null;
+            }
+
         }
     }
 }
