@@ -1,4 +1,4 @@
-# Pca85
+# Pca9685
 
 ## Summary
 
@@ -8,4 +8,6 @@ The PCA9685 is an I²C-bus controlled 16-channel LED controller optimized for Re
 
 https://www.nxp.com/docs/en/data-sheet/PCA9685.pdf
 
-You can also use this to control servos
+--------
+
+You can also use this to control servos.
