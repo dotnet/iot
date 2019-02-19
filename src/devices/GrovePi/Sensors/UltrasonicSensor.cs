@@ -1,9 +1,12 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Iot.Device.GrovePiDevice.Models;
+using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
-using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -36,8 +39,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
             get
             {
                 _grovePi.WriteCommand(GrovePiCommands.UltrasonicRead, Port, 0, 0);
-                // Need to wait 50 millisecond before reading the value
-                Thread.Sleep(50);
+                // Need to wait at least 50 millisecond before reading the value
+                // Having 100 shows better results
+                Thread.Sleep(100);
                 var ret = _grovePi.ReadCommand(GrovePiCommands.UltrasonicRead, Port);
                 return BinaryPrimitives.ReadInt16BigEndian(ret.AsSpan(1, 2));
             }

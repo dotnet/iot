@@ -1,5 +1,8 @@
-﻿using Iot.Device.GrovePiDevice.Models;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -21,7 +24,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// <summary>
         /// Gets the name of the sensor.
         /// </summary>
-		string SensorName { get; }
+        string SensorName { get; }
 
         /// <summary>
         /// grove sensor port

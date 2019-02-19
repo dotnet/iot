@@ -1,8 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using Iot.Device.GrovePiDevice.Models;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -56,7 +59,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         {
             get
             {
-                ReadSensor();
+                Read();
                 return _lastTemHum;
             }
         }
@@ -64,7 +67,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// <summary>
         /// You need to read the sensorbefore getting the value
         /// </summary>
-        public void ReadSensor()
+        public void Read()
         {
             _grovePi.WriteCommand(GrovePiCommands.DhtTemp, Port, (byte)DhtType, 0);
             // Wait a little bit to read the result

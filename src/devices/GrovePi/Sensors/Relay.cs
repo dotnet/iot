@@ -1,7 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using Iot.Device.GrovePiDevice.Models;
+using System.Device.Gpio;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -31,7 +33,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         public void On()
         {
-            Value = PinLevel.Low;
+            Value = PinValue.Low;
         }
 
         /// <summary>
@@ -39,7 +41,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         public void Off()
         {
-            Value = PinLevel.High;
+            Value = PinValue.High;
         }
 
         public bool IsInverted { get; set; }
@@ -47,20 +49,20 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// <summary>
         /// Get/set the state of the relay, 0 for off, 1 for on. Wehn set, anything not 0 will be considered as on
         /// </summary>
-        public new PinLevel Value
+        public new PinValue Value
         {
             get { return _value; }
             set
             {
                 _value = value;
-                _grovePi.DigitalWrite(Port, ((_value == PinLevel.High) && !IsInverted) ? PinLevel.High : PinLevel.Low);
+                _grovePi.DigitalWrite(Port, ((_value == PinValue.High) && !IsInverted) ? PinValue.High : PinValue.Low);
             }
         }
 
         /// <summary>
         /// Get "On" when relay if on and "Off" when relay is off
         /// </summary>
-        public override string ToString() => (_value == PinLevel.High) ? "On" : "Off";
+        public override string ToString() => (_value == PinValue.High) ? "On" : "Off";
 
         /// <summary>
         /// Get the name Relay

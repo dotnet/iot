@@ -1,7 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using Iot.Device.GrovePiDevice.Models;
+using System.Device.Gpio;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -22,7 +24,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// Returns "Pressed" then button is pressed, "Not pressed" otherwise
         /// </summary>
         /// <returns>Returns "Pressed" then button is pressed, "Not pressed" otherwise</returns>
-        public override string ToString() => Value == PinLevel.High ? "Pressed" : "Not presed";
+        public override string ToString() => Value == PinValue.High ? "Pressed" : "Not presed";
 
         /// <summary>
         /// Get the name Button

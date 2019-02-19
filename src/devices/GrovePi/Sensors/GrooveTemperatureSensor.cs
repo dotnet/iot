@@ -1,7 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using Iot.Device.GrovePiDevice.Models;
+using System;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -42,9 +44,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public override string ToString() => $"{Temperature} °C";
 
         /// <summary>
-        /// Get the name grove Temperature Sensor
+        /// Get the name Grove Temperature Sensor
         /// </summary>
-        public new string SensorName => "grove Temperature Sensor";
+        public new string SensorName => "Grove Temperature Sensor";
 
     }
 }

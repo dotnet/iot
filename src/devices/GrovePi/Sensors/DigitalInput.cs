@@ -1,14 +1,18 @@
-﻿using Iot.Device.GrovePiDevice.Models;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Iot.Device.GrovePiDevice.Models;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Device.Gpio;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
     /// <summary>
     /// DigitalInput is a generic calss for digital input
     /// </summary>
-    public class DigitalInput : ISensor<PinLevel>
+    public class DigitalInput : ISensor<PinValue>
     {
         internal GrovePi _grovePi;
 
@@ -29,7 +33,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// <summary>
         /// Get the pin level, either high either low
         /// </summary>
-        public PinLevel Value => _grovePi.DigitalRead(Port);
+        public PinValue Value => _grovePi.DigitalRead(Port);
 
         /// <summary>
         /// Returns the value as a string
