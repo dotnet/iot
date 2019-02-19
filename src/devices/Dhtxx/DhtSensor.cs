@@ -3,12 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device;
 using System.Device.Gpio;
 using System.Diagnostics;
 
 namespace Iot.Device.DHTxx
 {
-    public class DHTSensor : IDisposable
+    public class DHTSensor : ITemperatureSensor, IDisposable
     {
         private const int MAX_TIME = 85;
         private const uint MAX_WAIT = 255;
@@ -22,7 +23,7 @@ namespace Iot.Device.DHTxx
 
         /// <summary>
         /// Wait for a specific number of milliseconds
-        /// 
+        ///
         /// </summary>
         /// <param name="milliseconds">Number of milliseconds to wait</param>
         /// <remarks>
@@ -51,7 +52,7 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public double Temperature => (_dhtType == DhtType.Dht11) ? GetTempDht11() : GetTempDht22();
+        public float Temperature => (float)((_dhtType == DhtType.Dht11) ? GetTempDht11() : GetTempDht22());
 
         /// <summary>
         /// Get the last read temperature in Farenheit
@@ -210,7 +211,7 @@ namespace Iot.Device.DHTxx
                 if (counter == MAX_WAIT)
                     break;
 
-                // top 3 transistions are ignored   
+                // top 3 transistions are ignored
                 if ((i >= 4) && (i % 2 == 0))
                 {
                     _dht11Val[j / 8] <<= 1;
