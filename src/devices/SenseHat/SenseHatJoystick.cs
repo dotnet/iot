@@ -25,11 +25,11 @@ namespace Iot.Device.SenseHat
             Read();
         }
 
-        public bool HoldingLeft { get; set; }
-        public bool HoldingRight { get; set; }
-        public bool HoldingUp { get; set; }
-        public bool HoldingDown { get; set; }
-        public bool HoldingButton { get; set; }
+        public bool HoldingLeft { get; private set; }
+        public bool HoldingRight { get; private set; }
+        public bool HoldingUp { get; private set; }
+        public bool HoldingDown { get; private set; }
+        public bool HoldingButton { get; private set; }
 
         public void Read()
         {
