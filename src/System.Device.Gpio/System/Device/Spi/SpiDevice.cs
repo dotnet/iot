@@ -41,14 +41,14 @@ namespace System.Device.Spi
         /// <param name="data">
         /// The buffer that contains the data to be written to the SPI device.
         /// </param>
-        public abstract void Write(Span<byte> data);
+        public abstract void Write(ReadOnlySpan<byte> data);
 
         /// <summary>
         /// Writes and reads data from the SPI device.
         /// </summary>
         /// <param name="writeBuffer">The buffer that contains the data to be written to the SPI device.</param>
         /// <param name="readBuffer">The buffer to read the data from the SPI device.</param>
-        public abstract void TransferFullDuplex(Span<byte> writeBuffer, Span<byte> readBuffer);
+        public abstract void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer);
 
         public void Dispose()
         {
