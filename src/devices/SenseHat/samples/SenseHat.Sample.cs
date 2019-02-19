@@ -15,7 +15,8 @@ namespace Iot.Device.SenseHat.Samples
             // Joystick.Run();
             // AccelerometerAndGyroscope.Run();
             // Magnetometer.Run();
-            TemperatureAndHumidity.Run();
+            // TemperatureAndHumidity.Run();
+            PressureAndTemperature.Run();
         }
     }
 }

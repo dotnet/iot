@@ -9,11 +9,11 @@ using System.Device.I2c.Drivers;
 
 namespace Iot.Device.SenseHat
 {
-    public class SenseHatTemperatureAndHumidity : Hts221.Hts221
+    public class SenseHatPressureAndTemperature : Lps25h.Lps25h
     {
-        public const int I2cAddress = 0x5F;
+        public const int I2cAddress = 0x5c;
 
-        public SenseHatTemperatureAndHumidity(I2cDevice i2cDevice = null)
+        public SenseHatPressureAndTemperature(I2cDevice i2cDevice = null)
             : base(i2cDevice ?? CreateDefaultI2cDevice())
         {
         }

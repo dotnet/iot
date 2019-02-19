@@ -129,3 +129,18 @@ using (var th = new SenseHatTemperatureAndHumidity())
     }
 }
 ```
+
+## Pressure and temperature
+
+```csharp
+using (var th = new SenseHatPressureAndTemperature())
+{
+    while (true)
+    {
+        Console.WriteLine($"Temperature: {th.Temperature}C   Humidity: {th.Pressure}hPa");
+        Thread.Sleep(1000);
+    }
+}
+```
+
+Note: There are more than 1 temperature sensors on SenseHat board
