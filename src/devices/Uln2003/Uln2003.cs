@@ -127,7 +127,7 @@ namespace Iot.Device.Uln2003
         public void Step(int steps)
         {
             double lastStepTime = 0;
-            _stopwatch.Start();
+            _stopwatch.Restart();
             _isClockwise = steps >= 0;
             _steps = Math.Abs(steps);
             _stepMicrosecondsDelay = RPM > 0 ? 60 * 1000 * 1000 / _steps / RPM : StepperMotorDefaultDelay;
