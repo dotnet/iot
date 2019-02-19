@@ -21,7 +21,7 @@ namespace Iot.Device.Lsm9Ds1
         private MagneticInductionScale _magneticInductionScale;
 
         /// <summary>
-        /// Lsm9Ds1 - Accelerometer and Gyroscope bus
+        /// Lsm9Ds1 - Magnetometer bus
         /// </summary>
         public Lsm9Ds1Magnetometer(
             I2cDevice i2cDevice,

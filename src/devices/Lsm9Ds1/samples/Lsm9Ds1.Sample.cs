@@ -11,8 +11,6 @@ namespace Iot.Device.Lsm9Ds1.Samples
 {
     class Program
     {
-        public const int I2cAddress = 0x6A;
-
         static void Main(string[] args)
         {
             // AccelerometerAndGyroscope.Run();

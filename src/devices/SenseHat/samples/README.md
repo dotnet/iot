@@ -73,6 +73,7 @@ using (var d = new SenseHatLedMatrixI2c())
     Stopwatch sw = Stopwatch.StartNew();
     Vector3 min = m.MagneticInduction;
     Vector3 max = m.MagneticInduction;
+
     while (min == max)
     {
         Vector3 sample = m.MagneticInduction;
@@ -80,6 +81,7 @@ using (var d = new SenseHatLedMatrixI2c())
         max = Vector3.Max(max, sample);
         Thread.Sleep(50);
     }
+
     const int intervals = 8;
     Color[] data = new Color[64];
     while (true)
@@ -90,14 +92,17 @@ using (var d = new SenseHatLedMatrixI2c())
         Vector3 size = max - min;
         Vector3 pos = Vector3.Divide(Vector3.Multiply((sample - min), intervals - 1), size);
         int x = Math.Clamp((int)pos.X, 0, intervals - 1);
+
         // reverse y to match magnetometer coordinate system
         int y = intervals - 1 - Math.Clamp((int)pos.Y, 0, intervals - 1);
         int idx = SenseHatLedMatrix.PositionToIndex(x, y);
+
         // fading
         for (int i = 0; i < 64; i++)
         {
             data[i] = Color.FromArgb((byte)Math.Clamp(data[i].R - 1, 0, 255), data[i].G, data[i].B);;
         }
+
         Color col = data[idx];
         col = Color.FromArgb(Math.Clamp(col.R + 20, 0, 255), col.G, col.B);
         Vector2 pos2 = new Vector2(sample.X, sample.Y);
@@ -108,6 +113,19 @@ using (var d = new SenseHatLedMatrixI2c())
         d.Write(data);
         data[idx] = col;
         Thread.Sleep(50);
+    }
+}
+```
+
+## Temperature and humidity
+
+```csharp
+using (var th = new SenseHatTemperatureAndHumidity())
+{
+    while (true)
+    {
+        Console.WriteLine($"Temperature: {th.Temperature}C   Humidity: {th.Humidity}%rH");
+        Thread.Sleep(1000);
     }
 }
 ```
