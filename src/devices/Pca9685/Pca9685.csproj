@@ -4,10 +4,13 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Pca9685.cs" />
+    <Compile Include="Bit.cs" />
+    <Compile Include="Register.cs" />
   </ItemGroup>
 
   <ItemGroup>
