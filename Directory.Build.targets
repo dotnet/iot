@@ -18,7 +18,7 @@
   <!-- Packaging Targets -->
   <PropertyGroup>
     <IncludeRIDSpecificBuildOutput Condition="'$(IncludeRIDSpecificBuildOutput)' == '' And '$(RuntimeIdentifiers)' != ''">true</IncludeRIDSpecificBuildOutput>
-    <TargetsForTfmSpecificContentInPackage Condition="'$(IncludeRIDSpecificBuildOutput)' == 'true'">$(TargetsForTfmSpecificContentInPackage);_WalkEachRIDForBuildOutput;_GetReferenceAssemblyForPackage</TargetsForTfmSpecificContentInPackage>
+    <TargetsForTfmSpecificContentInPackage Condition="'$(IncludeRIDSpecificBuildOutput)' == 'true'">$(TargetsForTfmSpecificContentInPackage);_WalkEachRIDForBuildOutput;_GetReferenceAssemblyForPackage;_GetNativeAssetsForPackage</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
   <ItemGroup>
@@ -42,6 +42,14 @@
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(TargetRefPath)">
         <PackagePath>ref/$(TargetFramework)</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_GetNativeAssetsForPackage">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(BaseOutputPath)../Native/Release/*.so">
+        <PackagePath>runtimes/linux/native/</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
   </Target>
