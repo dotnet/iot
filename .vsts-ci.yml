@@ -49,8 +49,8 @@ phases:
     - task: PublishBuildArtifacts@1
       displayName: Publish Windows managed assets
       inputs:
-        pathToPublish: $(Build.SourcesDirectory)/artifacts
-        artifactName: artifacts
+        pathToPublish: $(Build.SourcesDirectory)/artifacts/bin
+        artifactName: bin
         artifactType: container
       condition: eq(variables['_BuildConfig'], 'Release')
     variables:
@@ -170,8 +170,8 @@ phases:
     - task: DownloadBuildArtifacts@0
       displayName: Download Built Managed Assets
       inputs:
-        artifactName: artifacts
-        downloadPath: $(Build.SourcesDirectory)
+        artifactName: bin
+        downloadPath: $(Build.SourcesDirectory)/artifacts
     - task: DownloadBuildArtifacts@0
       displayName: Download Built Native Assets
       inputs:
@@ -188,13 +188,14 @@ phases:
       name: Build
       displayName: Build
       condition: succeeded()
-    - task: PublishBuildArtifacts@1
-      displayName: Publish Windows package assets
-      inputs:
-        pathToPublish: $(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)/Shipping
-        artifactName: BuiltPackageOutputs
-        artifactType: container
-      condition: eq(variables['_BuildConfig'], 'Release')
+    - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+      - task: PublishBuildArtifacts@1
+        displayName: Publish Windows package assets
+        inputs:
+          pathToPublish: $(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)/Shipping
+          artifactName: BuiltPackageOutputs
+          artifactType: container
+        condition: eq(variables['_BuildConfig'], 'Release')
     variables:
       _HelixBuildConfig: $(_BuildConfig)
       ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
