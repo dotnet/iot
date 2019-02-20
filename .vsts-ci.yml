@@ -40,7 +40,7 @@ phases:
     ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
       enableMicrobuild: true
     steps:
-    - script: build.cmd -ci -sign
+    - script: build.cmd -ci
         -configuration $(_BuildConfig)
         -prepareMachine
       name: Build
