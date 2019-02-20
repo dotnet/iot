@@ -86,7 +86,7 @@ namespace System.Device.I2c.Drivers
         /// The buffer that contains the data to be written to the I2C device.
         /// The data should not include the I2C device address.
         /// </param>
-        public override void Write(Span<byte> data)
+        public override void Write(ReadOnlySpan<byte> data)
         {
             _winI2cDevice.Write(data.ToArray());
         }

@@ -10,3 +10,5 @@ add_library(System.Device.Gpio.Native
 set_target_properties(System.Device.Gpio.Native PROPERTIES PREFIX "")
 
 target_link_libraries(System.Device.Gpio.Native LINK_PUBLIC gpiod)
+
+install_library_and_symbols (System.Device.Gpio.Native)
