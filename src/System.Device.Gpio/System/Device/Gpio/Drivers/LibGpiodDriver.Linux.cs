@@ -118,17 +118,12 @@ namespace System.Device.Gpio.Drivers
         {
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
-                if (pinHandle != null)
+                //Event listeners might still waiting for event, don't release them 
+                if (!_pinNumberToEventHandler.ContainsKey(pinNumber))
                 {
-                    //Event listeners might still waiting for event, don't release them 
-                    if (!_pinNumberToEventHandler.ContainsKey(pinNumber))
-                    {
-                        Interop.ReleaseGpiodLine(pinHandle);
-                        pinHandle.Dispose();
-                        pinHandle = null;
-                    }
+                    pinHandle?.Dispose();
+                    _pinNumberToSafeLineHandle.Remove(pinNumber);
                 }
-                _pinNumberToSafeLineHandle.Remove(pinNumber);
             }
         }
 
@@ -184,7 +179,7 @@ namespace System.Device.Gpio.Drivers
                 eventHandler.ValueRising -= callback;
                 if (eventHandler.IsCallbackListEmpty())
                 {
-                    DisposePin(pinNumber);
+                    eventHandler.Dispose();
                 }
             }
             else
@@ -271,48 +266,41 @@ namespace System.Device.Gpio.Drivers
         protected override void Dispose(bool disposing)
         {
             _disposing = disposing;
-            foreach (int pin in _pinNumberToEventHandler.Keys)
-            {
-                DisposePin(pin);
-            }
 
-            foreach (int pin in _pinNumberToSafeLineHandle.Keys)
+            if (_pinNumberToEventHandler != null)
             {
-                if (_pinNumberToSafeLineHandle.TryGetValue(pin, out SafeLineHandle pinHandle))
+                foreach (var kv in _pinNumberToEventHandler)
                 {
-                    if (pinHandle != null)
+                    int pin = kv.Key;
+                    LibGpiodDriverEventHandler eventHandler = kv.Value;
+                    eventHandler.Dispose();
+                    if (_pinNumberToSafeLineHandle.TryGetValue(pin, out SafeLineHandle pinHandle))
                     {
-                        Interop.ReleaseGpiodLine(pinHandle);
-                        pinHandle.Dispose();
-                        pinHandle = null;
+                        _pinNumberToSafeLineHandle.Remove(pin);
                     }
-                    _pinNumberToSafeLineHandle.Remove(pin);
                 }
+
+                _pinNumberToEventHandler = null;
             }
 
-            if (_chip != null)
+            
+            if (_pinNumberToSafeLineHandle != null)
             {
-                _chip.Dispose();
-                _chip = null;
+                foreach (int pin in _pinNumberToSafeLineHandle.Keys)
+                {
+                    if (_pinNumberToSafeLineHandle.TryGetValue(pin, out SafeLineHandle pinHandle))
+                    {
+                        pinHandle.Dispose();
+                    }
+                }
+
+                _pinNumberToSafeLineHandle = null;
             }
+
+            _chip?.Dispose();
+            _chip = null;
 
             base.Dispose(disposing);
-        }
-
-        private void DisposePin(int pin)
-        {
-            if (_pinNumberToEventHandler.TryRemove(pin, out LibGpiodDriverEventHandler pinEventHandler))
-            {
-                pinEventHandler.CancellationTokenSource.Cancel();
-                pinEventHandler.Task.Wait();
-                Interop.ReleaseGpiodLine(pinEventHandler.PinHandle);
-                pinEventHandler.PinHandle = null;
-                if (_pinNumberToSafeLineHandle.TryGetValue(pin, out SafeLineHandle pinHandle))
-                {
-                    _pinNumberToSafeLineHandle.Remove(pin);
-                }   
-                pinEventHandler.Dispose();
-            }
         }
     }
 }
