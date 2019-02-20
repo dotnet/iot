@@ -49,7 +49,7 @@
   <Target Name="_GetNativeAssetsForPackage">
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(BaseOutputPath)../Native/Release/*.so">
-        <PackagePath>runtimes/linux/native/</PackagePath>
+        <PackagePath>runtimes/linux-arm/native/</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
   </Target>
