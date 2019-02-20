@@ -120,7 +120,7 @@ internal partial class Interop
     /// <param name="consumer">Name of the consumer.</param>
     /// <returns>0 the operation succeeds, -1 on failure.</returns>
     [DllImport(LibgpiodLibrary, SetLastError = true)]
-    internal static extern int RequestBothEdgeEventForLine(SafeLineHandle line, string consumer);
+    internal static extern int RequestBothEdgesEventForLine(SafeLineHandle line, string consumer);
 
     /// <summary>
     /// Wait for an event on a single line.
@@ -128,7 +128,7 @@ internal partial class Interop
     /// <param name="line">GPIO line handle</param>
     /// <returns>0 if wait timed out, -1 if an error occurred, 1 if an event occurred.</returns>
     [DllImport(LibgpiodLibrary, SetLastError = true)]
-    internal static extern int WaitForEventOnLine(SafeLineHandle line);
+    internal static extern WaitEventResult WaitForEventOnLine(SafeLineHandle line);
 
     /// <summary>
     /// Read the last event from the GPIO line.
@@ -137,4 +137,11 @@ internal partial class Interop
     /// <returns>1 if rising edge event occured, 2 on falling edge, -1 on error.</returns>
     [DllImport(LibgpiodLibrary, SetLastError = true)]
     internal static extern int ReadEventForLine(SafeLineHandle line);
+}
+
+internal enum WaitEventResult
+{
+    Error = -1,
+    TimedOut = 0,
+    EventOccured = 1
 }

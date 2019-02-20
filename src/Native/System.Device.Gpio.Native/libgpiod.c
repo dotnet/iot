@@ -145,7 +145,7 @@ extern struct gpiod_chip * GetNextChipFromChipIterator(struct gpiod_chip_iter *i
  * @param consumer Name of the consumer.
  * @return 0 if the operation succeeds, -1 on failure.
  */
-extern int RequestBothEdgeEventForLine(struct gpiod_line *line, const char *consumer) 
+extern int RequestBothEdgesEventForLine(struct gpiod_line *line, const char *consumer) 
 {
 	return gpiod_line_request_both_edges_events(line, consumer);
 }

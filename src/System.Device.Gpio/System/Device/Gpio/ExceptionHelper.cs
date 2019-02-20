@@ -65,7 +65,7 @@ namespace System.Device.Gpio
                     message = $"Invalid or not supported event type requested";
                     break;
                 case ExceptionResource.EventWaitError:
-                    message = $"Error while waiting for event, error code {errorCode}";
+                    message = $"Error while waiting for event, error code {errorCode}, pin: {pin}";
                     break;
                 case ExceptionResource.EventReadError:
                     message = $"Error while reading pin event result, error code {errorCode}";
