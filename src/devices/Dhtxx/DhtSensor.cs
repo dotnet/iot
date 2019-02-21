@@ -52,7 +52,7 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public float Temperature => (float)((_dhtType == DhtType.Dht11) ? GetTempDht11() : GetTempDht22());
+        public double Temperature => (_dhtType == DhtType.Dht11) ? GetTempDht11() : GetTempDht22();
 
         /// <summary>
         /// Get the last read temperature in Farenheit

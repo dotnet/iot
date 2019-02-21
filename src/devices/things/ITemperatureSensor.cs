@@ -5,10 +5,10 @@
 namespace Iot.Device
 {
     /// <summary>
-    /// Abstraction for temperature
+    /// Abstraction for temperature sensor
     /// </summary>
     public interface ITemperatureSensor
     {
-        float Temperature { get; }
+        double Temperature { get; }
     }
 }
