@@ -37,7 +37,8 @@ namespace System.Device.Gpio.Drivers
             {
                 throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodNotInstalled);
             }
-                _chip = Interop.GetNextChipFromChipIterator(iterator);
+
+            _chip = Interop.GetNextChipFromChipIterator(iterator);
             if (_chip == null)
             {
                 throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
