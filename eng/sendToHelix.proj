@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.DotNet.Helix.Sdk">
+  <PropertyGroup>
+    <HelixSource>pr/dotnet/iot/$(BUILD_SOURCEBRANCH)/</HelixSource>
+    <HelixType>test/product/</HelixType>
+    <HelixBuild>$(BUILD_BUILDNUMBER)</HelixBuild>
+    <HelixBuild Condition="'$(HelixBuild)' == ''">123460.01</HelixBuild>
+
+    <IncludeDotNetCli>true</IncludeDotNetCli>
+    <DotNetCliPackageType>sdk</DotNetCliPackageType>
+
+    <EnableAzurePipelinesReporter Condition="'$(SYSTEM_ACCESSTOKEN)' != ''">true</EnableAzurePipelinesReporter>
+    <TestRunNamePrefix>$(AGENT_JOBNAME)</TestRunNamePrefix>
+    
+    <EnableXUnitReporter>true</EnableXUnitReporter>
+    <FailOnMissionControlTestFailure>true</FailOnMissionControlTestFailure>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- For now we only have a queue for Linux. Once we have a queue for Windows we will run 
+    those tests too. -->
+    <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
+      <TargetFramework>netcoreapp2.1</TargetFramework>
+      <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
+      <AdditionalProperties>RuntimeIdentifier=linux-arm</AdditionalProperties>
+    </XUnitProject>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(HelixAccessToken)' != '' ">
+    <HelixTargetQueue Include="Raspbian.9.Arm32.IoT"/>
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(HelixAccessToken)' == '' ">
+    <IsExternal>true</IsExternal>
+    <Creator>$(BUILD_SOURCEVERSIONAUTHOR)</Creator>
+    <Creator Condition=" '$(Creator)' == ''">anon</Creator>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(HelixAccessToken)' == '' ">
+    <HelixTargetQueue Include="Raspbian.9.Arm32.IoT.open"/>
+  </ItemGroup>
+
+  <!-- Our tests require to run as elevated. -->
+  <Target Name="AppendSudoToHelixWorkItems"
+          Inputs="%(HelixWorkItem.Identity)%(HelixWorkItem.Command)"
+          Outputs="unused"
+          AfterTargets="CreateXUnitWorkItems">
+    <PropertyGroup>
+      <HelixPreCommands>$(HelixPreCommands);export _dotnet="%24(which dotnet)"</HelixPreCommands>
+      <_newCommand>sudo -E %24_dotnet $throwAway%(HelixWorkItem.Command)</_newCommand>
+    </PropertyGroup>
+    <ItemGroup>
+      <HelixWorkItem>
+        <Command>$(_newCommand)</Command>
+      </HelixWorkItem>
+    </ItemGroup>
+  </Target>
+
+  <!-- Useless stuff to make Arcade SDK happy -->
+  <PropertyGroup>
+    <Language>msbuild</Language>
+  </PropertyGroup>
+  <Target Name="Pack"/>
+</Project>

@@ -22,5 +22,4 @@
     <!--Excluding Linux implementations-->
     <Compile Remove="**\*.Linux.cs" />
   </ItemGroup>
-
 </Project>
