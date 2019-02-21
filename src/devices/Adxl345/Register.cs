@@ -7,7 +7,7 @@ namespace Iot.Device.Adxl345
     /// <summary>
     /// Register of ADXL345
     /// </summary>
-    public enum Register : byte
+    internal enum Register : byte
     {
         ADLX_POWER_CTL = 0x2D,
         ADLX_DATA_FORMAT = 0x31,

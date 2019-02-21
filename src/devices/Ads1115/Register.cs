@@ -7,7 +7,7 @@ namespace Iot.Device.Ads1115
     /// <summary>
     /// Register of ADS1115
     /// </summary>
-    public enum Register : byte
+    internal enum Register : byte
     {
         ADC_CONVERSION_REG_ADDR = 0x00,
         ADC_CONFIG_REG_ADDR = 0x01,

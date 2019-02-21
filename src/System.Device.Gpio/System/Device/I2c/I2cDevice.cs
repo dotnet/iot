@@ -42,7 +42,7 @@ namespace System.Device.I2c
         /// The buffer that contains the data to be written to the I2C device.
         /// The data should not include the I2C device address.
         /// </param>
-        public abstract void Write(Span<byte> data);
+        public abstract void Write(ReadOnlySpan<byte> data);
 
         public void Dispose()
         {
