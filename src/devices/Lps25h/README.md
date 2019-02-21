@@ -7,3 +7,7 @@ Some of the applications mentioned by the datasheet:
 - Sport watches
 
 See [samples](samples/README.md) for information about usage.
+
+## References
+
+- https://www.st.com/resource/en/datasheet/lps25h.pdf

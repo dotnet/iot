@@ -11,3 +11,7 @@ Some of the applications mentioned by the datasheet:
 - Asset and goods tracking
 
 See [samples](samples/README.md) for information about usage.
+
+## References
+
+- https://www.st.com/resource/en/datasheet/hts221.pdf

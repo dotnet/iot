@@ -124,14 +124,14 @@ namespace Iot.Device.Hts221
             return (t0, t1);
         }
 
-        (byte h0, byte h1) GetHumidityCalibrationPointsRH()
+        private (byte h0, byte h1) GetHumidityCalibrationPointsRH()
         {
             Span<byte> h0h1 = stackalloc byte[2];
             Read(Register.Humidity0rHx2, h0h1);
             return (h0h1[0], h0h1[1]);
         }
 
-        (short h0, short h1) GetHumidityCalibrationPointsRaw()
+        private (short h0, short h1) GetHumidityCalibrationPointsRaw()
         {
             // space in addressing between both registers therefore do 2 reads
             short h0 = ReadInt16(Register.Humidity0Raw);
