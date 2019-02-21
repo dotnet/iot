@@ -12,7 +12,7 @@ using System.Buffers.Binary;
 
 namespace Iot.Device.Bmp280
 {
-    public class Bmp280 : IDisposable
+    public class Bmp280 : ITemperatureSensor, IDisposable
     {
         private const byte Signature = 0x58;
 
@@ -37,6 +37,8 @@ namespace Iot.Device.Bmp280
             _calibrationData = new CalibrationData();
             _communicationProtocol = CommunicationProtocol.I2c;
         }
+
+        public double Temperature => ReadTemperatureAsync().Result;
 
         private void Begin()
         {

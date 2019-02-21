@@ -10,7 +10,7 @@ namespace Iot.Device.Ds3231
     /// <summary>
     /// Realtime Clock DS3231
     /// </summary>
-    public class Ds3231 : IDisposable
+    public class Ds3231 : ITemperatureSensor, IDisposable
     {
         /// <summary>
         /// DS3231 I2C Address

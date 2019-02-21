@@ -13,6 +13,7 @@
     <Compile Include="Register.cs" />
     <Compile Include="Sampling.cs" />
     <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <ProjectReference Include="..\things\things.csproj" />
   </ItemGroup>
   
   <ItemGroup> 

@@ -24,7 +24,7 @@ namespace Iot.Device.Samples
             using (i2CSi7021)
             {
                 Console.WriteLine($"Temperature in fahrenheit: {i2CSi7021.ReadTemperatureInFahrenheit()}");
-                Console.WriteLine($"Temperature in celcius: {i2CSi7021.ReadTemperatureInCelcius()}");
+                Console.WriteLine($"Temperature in celsius: {i2CSi7021.ReadTemperatureInCelsius()}");
                 Console.WriteLine($"Relative humidity is: {i2CSi7021.ReadHumidity()}%");
             }
         }

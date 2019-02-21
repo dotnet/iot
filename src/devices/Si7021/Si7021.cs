@@ -7,7 +7,7 @@ using System.Device.I2c;
 
 namespace Iot.Device.Si7021
 {
-    public class Si7021 : IDisposable
+    public class Si7021 : ITemperatureSensor, IDisposable
     {
         private const byte ReadTemperatureCommand = 0xE3;
         private const byte ReadHumidityCommand = 0xE5;
@@ -22,15 +22,17 @@ namespace Iot.Device.Si7021
         {
         }
 
+        public double Temperature => ReadTemperatureInCelsius();
+
         public double ReadTemperatureInFahrenheit()
         {
-            double tempCelcius = ReadTemperatureInCelcius();
+            double tempCelcius = ReadTemperatureInCelsius();
             double tempFahrenheit = (tempCelcius * (9 / 5)) + 32;
             
             return tempFahrenheit;
         }
         
-        public double ReadTemperatureInCelcius()
+        public double ReadTemperatureInCelsius()
         {
             byte[] buffer = new byte[2];
 
