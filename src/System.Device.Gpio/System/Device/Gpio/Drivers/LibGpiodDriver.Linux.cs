@@ -24,13 +24,20 @@ namespace System.Device.Gpio.Drivers
 
         public LibGpiodDriver()
         {
-            SafeChipIteratorHandle iterator = Interop.GetChipIterator();
-            if (iterator == null)
+            SafeChipIteratorHandle iterator = null;
+            try
             {
-                throw ExceptionHelper.GetIOException(ExceptionResource.NoChipIteratorFound, Marshal.GetLastWin32Error());
+                iterator = Interop.GetChipIterator();
+                if (iterator == null)
+                {
+                    throw ExceptionHelper.GetIOException(ExceptionResource.NoChipIteratorFound, Marshal.GetLastWin32Error());
+                }
             }
-
-            _chip = Interop.GetNextChipFromChipIterator(iterator);
+            catch (DllNotFoundException)
+            {
+                throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodNotInstalled);
+            }
+                _chip = Interop.GetNextChipFromChipIterator(iterator);
             if (_chip == null)
             {
                 throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
