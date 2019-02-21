@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device;
 using System.Device.I2c;
 using System.Drawing;
 
@@ -130,11 +131,11 @@ namespace Iot.Device.CharacterLcd
         protected override void InitializeBitMode()
         {
             // Init to 8 bit mode
-            DelayMicroseconds(50_000, checkBusy: false);
+            DelayHelper.DelayMilliseconds(50, allowThreadYield: true);
             Send(0b0011_0000);
-            DelayMicroseconds(5_000, checkBusy: false);
+            DelayHelper.DelayMilliseconds(5, allowThreadYield: true);
             Send(0b0011_0000);
-            DelayMicroseconds(100, checkBusy: false);
+            DelayHelper.DelayMicroseconds(100, allowThreadYield: true);
             Send(0b0011_0000);
         }
 
