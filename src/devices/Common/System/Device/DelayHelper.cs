@@ -21,7 +21,10 @@ namespace System.Device
         /// Delay for at least the specified <paramref name="microseconds"/>.
         /// </summary>
         /// <param name="microseconds">The number of microseconds to delay.</param>
-        /// <param name="allowThreadYield">True to allow yielding the thread. On single-proc systems this will prevent all other code from running.</param>
+        /// <param name="allowThreadYield">
+        /// True to allow yielding the thread. If this is set to false, on single-proc systems
+        /// this will prevent all other code from running.
+        /// </param>
         public static void DelayMicroseconds(int microseconds, bool allowThreadYield)
         {
             long start = Stopwatch.GetTimestamp();
@@ -48,7 +51,10 @@ namespace System.Device
         /// Delay for at least the specified <paramref name="milliseconds"/>
         /// </summary>
         /// <param name="milliseconds">The number of milliseconds to delay.</param>
-        /// <param name="allowThreadYield">True to allow yielding the thread. On single-proc systems this will prevent all other code from running.</param>
+        /// <param name="allowThreadYield">
+        /// True to allow yielding the thread. If this is set to false, on single-proc systems
+        /// this will prevent all other code from running.
+        /// </param>
         public static void DelayMilliseconds(int milliseconds, bool allowThreadYield)
         {
             long start = Stopwatch.GetTimestamp();
