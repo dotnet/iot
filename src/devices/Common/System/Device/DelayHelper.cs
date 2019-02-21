@@ -57,24 +57,12 @@ namespace System.Device
         /// </param>
         public static void DelayMilliseconds(int milliseconds, bool allowThreadYield)
         {
-            long start = Stopwatch.GetTimestamp();
-            ulong minimumTicks = (ulong)(milliseconds * Stopwatch.Frequency / 1_000);
+            // We have this as a separate method for now to make calling code clearer
+            // and to allow us to add additional logic to the millisecond wait in the
+            // future. If waiting only 1 millisecond we still have ample room for more
+            // complicated logic. For 1 microsecond that isn't the case.
 
-            if (!allowThreadYield)
-            {
-                do
-                {
-                    Thread.SpinWait(1);
-                } while ((ulong)(Stopwatch.GetTimestamp() - start) <  minimumTicks);
-            }
-            else
-            {
-                SpinWait spinWait = new SpinWait();
-                do
-                {
-                    spinWait.SpinOnce();
-                } while ((ulong)(Stopwatch.GetTimestamp() - start) < minimumTicks);
-            }
+            DelayMicroseconds(milliseconds * 1000, allowThreadYield);
         }
     }
 }
