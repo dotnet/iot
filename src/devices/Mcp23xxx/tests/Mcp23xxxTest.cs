@@ -63,9 +63,9 @@ namespace Iot.Device.Mcp23xxx.Tests
             }
 
             public override void Read(Span<byte> buffer) => DeviceMock.Read(buffer);
-            public override void Write(Span<byte> data) => DeviceMock.Write(data);
+            public override void Write(ReadOnlySpan<byte> data) => DeviceMock.Write(data);
 
-            public override void TransferFullDuplex(Span<byte> writeBuffer, Span<byte> readBuffer)
+            public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
             {
                 Write(writeBuffer);
                 Read(readBuffer);
@@ -91,7 +91,7 @@ namespace Iot.Device.Mcp23xxx.Tests
             public override I2cConnectionSettings ConnectionSettings => _settings;
 
             public override void Read(Span<byte> buffer) => DeviceMock.Read(buffer);
-            public override void Write(Span<byte> data) => DeviceMock.Write(data);
+            public override void Write(ReadOnlySpan<byte> data) => DeviceMock.Write(data);
 
             // Don't need these
             public override void WriteByte(byte data) => throw new NotImplementedException();
@@ -138,7 +138,7 @@ namespace Iot.Device.Mcp23xxx.Tests
                 }
             }
 
-            public void Write(Span<byte> data)
+            public void Write(ReadOnlySpan<byte> data)
             {
                 if (_isSpi)
                     data = data.Slice(1);
