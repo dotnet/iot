@@ -9,7 +9,7 @@ using System.Device.I2c.Drivers;
 
 namespace Iot.Device.Lsm9Ds1.Samples
 {
-    public class Program
+    internal class Program
     {
         public static void Main(string[] args)
         {

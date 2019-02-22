@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Iot.Device.SenseHat.Samples
 {
-    public class Program
+    internal class Program
     {
         public static void Main(string[] args)
         {

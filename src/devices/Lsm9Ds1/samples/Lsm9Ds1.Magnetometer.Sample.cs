@@ -12,7 +12,7 @@ using System.Collections.Generic;
 
 namespace Iot.Device.Lsm9Ds1.Samples
 {
-    public class Magnetometer
+    internal class Magnetometer
     {
         public const int I2cAddress = 0x1C;
 
