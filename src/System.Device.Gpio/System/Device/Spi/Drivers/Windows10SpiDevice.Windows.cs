@@ -88,7 +88,7 @@ namespace System.Device.Spi.Drivers
         /// <param name="data">
         /// The buffer that contains the data to be written to the SPI device.
         /// </param>
-        public override void Write(Span<byte> data)
+        public override void Write(ReadOnlySpan<byte> data)
         {
             _winDevice.Write(data.ToArray());
         }
@@ -98,7 +98,7 @@ namespace System.Device.Spi.Drivers
         /// </summary>
         /// <param name="writeBuffer">The buffer that contains the data to be written to the SPI device.</param>
         /// <param name="readBuffer">The buffer to read the data from the SPI device.</param>
-        public override void TransferFullDuplex(Span<byte> writeBuffer, Span<byte> readBuffer)
+        public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
             if (writeBuffer.Length != readBuffer.Length)
             {

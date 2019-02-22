@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+ <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+  </ItemGroup>
+
+ <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)/../Uln2003.csproj" />
+  </ItemGroup>
+
+  <ItemGroup> 
+      <None Remove="README.md" />
+      <None Remove="Uln2003.png" />
+      <None Remove="Uln2003.fzz" />
+  </ItemGroup>
+
+</Project>

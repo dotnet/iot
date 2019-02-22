@@ -7,15 +7,6 @@ using System.Device.Gpio;
 
 namespace Iot.Device.Hcsr501
 {
-    public class Hcsr501ValueChangedEventArgs : EventArgs
-    {
-        public PinValue PinValue { get; private set; }
-        public Hcsr501ValueChangedEventArgs(PinValue value)
-        {
-            PinValue = value;
-        }
-    }
-
     /// <summary>
     /// PIR Sensor HC-SR501
     /// </summary>
@@ -25,7 +16,7 @@ namespace Iot.Device.Hcsr501
         private readonly int _outPin;
 
         /// <summary>
-        /// Constructor
+        /// Creates a new instance of the HC-SCR501.
         /// </summary>
         /// <param name="outPin">OUT Pin</param>
         /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
@@ -35,7 +26,8 @@ namespace Iot.Device.Hcsr501
 
             _controller = new GpioController(pinNumberingScheme);
             _controller.OpenPin(outPin, PinMode.Input);
-            _controller.RegisterCallbackForPinValueChangedEvent(outPin, PinEventTypes.None, Sensor_ValueChanged);
+            _controller.RegisterCallbackForPinValueChangedEvent(outPin, PinEventTypes.Falling, Sensor_ValueChanged);
+            _controller.RegisterCallbackForPinValueChangedEvent(outPin, PinEventTypes.Rising, Sensor_ValueChanged);
         }
 
         /// <summary>

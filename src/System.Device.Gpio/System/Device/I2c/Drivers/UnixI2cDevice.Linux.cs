@@ -152,7 +152,7 @@ namespace System.Device.I2c.Drivers
         }
 
         /// <summary>
-        /// Reads a byte from the I2C device.        
+        /// Reads a byte from the I2C device.
         /// </summary>
         /// <returns>A byte read from the I2C device.</returns>
         public override unsafe byte ReadByte()
@@ -201,7 +201,7 @@ namespace System.Device.I2c.Drivers
         /// The buffer that contains the data to be written to the I2C device.
         /// The data should not include the I2C device address.
         /// </param>
-        public override unsafe void Write(Span<byte> data)
+        public override unsafe void Write(ReadOnlySpan<byte> data)
         {
             Initialize();
 
