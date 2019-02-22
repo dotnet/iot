@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Bmp280
+namespace Iot.Device.Bmx280
 {
     internal class CalibrationData
     {
@@ -20,7 +20,7 @@ namespace Iot.Device.Bmp280
         public short DigP8 { get; set; }
         public short DigP9 { get; set; }
 
-        internal void ReadFromDevice(Bmp280 bmp280)
+        internal void ReadFromDevice(BmxBase bmp280)
         {
             // Read temperature calibration data
             DigT1 = bmp280.Read16BitsFromRegister((byte)Register.DIG_T1);

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Bmp280
+namespace Iot.Device.Bmx280
 {
     /// <summary>
     /// Oversampling settings. Maximum of x2 is recommended for temperature

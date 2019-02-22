@@ -6,44 +6,37 @@
 //Formulas and code examples can also be found in the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
 
 using System;
+using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Threading.Tasks;
-using System.Buffers.Binary;
 
-namespace Iot.Device.Bmp280
+namespace Iot.Device.Bmx280
 {
-    public class Bmp280 : IDisposable
+    public class BmxBase : IDisposable
     {
-        private const byte Signature = 0x58;
+        internal I2cDevice _i2cDevice;
+        internal byte _signature;
+        internal bool _initialized = false;
+        internal CommunicationProtocol _communicationProtocol;
+        internal CalibrationData _calibrationData;
 
-        private I2cDevice _i2cDevice;
-        private readonly CommunicationProtocol _communicationProtocol;
-        private bool _initialized = false;
-        private readonly CalibrationData _calibrationData;
         /// <summary>
         /// The variable _temperatureFine carries a fine resolution temperature value over to the
         /// pressure compensation formula and could be implemented as a global variable.
         /// </summary>
-        private int _temperatureFine;
+        internal int _temperatureFine;
 
-        private enum CommunicationProtocol
+        internal enum CommunicationProtocol
         {
             I2c
         }
 
-        public Bmp280(I2cDevice i2cDevice)
-        {
-            _i2cDevice = i2cDevice;
-            _calibrationData = new CalibrationData();
-            _communicationProtocol = CommunicationProtocol.I2c;
-        }
-
-        private void Begin()
+        internal void Begin()
         {
             _i2cDevice.WriteByte((byte)Register.CHIPID);
             byte readSignature = _i2cDevice.ReadByte();
 
-            if (readSignature != Signature)
+            if (readSignature != _signature)
             {
                 return;
             }
@@ -52,6 +45,7 @@ namespace Iot.Device.Bmp280
             //Read the coefficients table
             _calibrationData.ReadFromDevice(this);
         }
+
 
         /// <summary>
         /// Sets the power mode to the given mode
@@ -88,7 +82,6 @@ namespace Iot.Device.Bmp280
                 return PowerMode.Forced;
             }
         }
-
         /// <summary>
         /// Sets the temperature sampling to the given value
         /// </summary>
@@ -332,7 +325,6 @@ namespace Iot.Device.Bmp280
             p = ((p + var1 + var2) >> 8) + ((long)_calibrationData.DigP7 << 4);
             return p;
         }
-
         /// <summary>
         ///  Reads an 8 bit value from a register
         /// </summary>
@@ -342,7 +334,7 @@ namespace Iot.Device.Bmp280
         /// <returns>
         ///  Value from register
         /// </returns>
-        private byte Read8BitsFromRegister(byte register)
+        internal byte Read8BitsFromRegister(byte register)
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {
@@ -391,7 +383,7 @@ namespace Iot.Device.Bmp280
         /// <returns>
         ///  Value from register
         /// </returns>
-        private uint Read24BitsFromRegister(byte register)
+        internal uint Read24BitsFromRegister(byte register)
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {

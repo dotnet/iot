@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Bme280.cs" />
     <Compile Include="Bmp280.cs" />
+    <Compile Include="BmxBase.cs" />
     <Compile Include="CalibrationData.cs" />
     <Compile Include="PowerMode.cs" />
     <Compile Include="Register.cs" />

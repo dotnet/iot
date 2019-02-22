@@ -7,7 +7,7 @@ using System.Device.I2c;
 using System.Device.I2c.Drivers;
 using System.Threading;
 using System.Threading.Tasks;
-using Iot.Device.Bmp280;
+using Iot.Device.Bmx280;
 
 namespace Iot.Device.Samples
 {
@@ -17,17 +17,15 @@ namespace Iot.Device.Samples
         {
             Console.WriteLine("Hello Bmp280!");
 
-            //0x77 is the address for BMP280
-            const int bmp280Address = 0x77;
             //bus id on the raspberry pi 3
             const int busId = 1;
             //set this to the current sea level pressure in the area for correct altitude readings
             const double defaultSeaLevelPressure = 1033.00;
 
-            var i2cSettings = new I2cConnectionSettings(busId, bmp280Address);
+            var i2cSettings = new I2cConnectionSettings(busId, Bmp280.Address);
             var i2cDevice = new UnixI2cDevice(i2cSettings);
-            var i2CBmp280 = new Bmp280.Bmp280(i2cDevice);
-
+            var i2CBmp280 = new Bmp280(i2cDevice);
+            
             using (i2CBmp280)
             {
                 while (true)
