@@ -7,6 +7,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace System.Device.Gpio.Drivers
 {
@@ -78,7 +79,8 @@ namespace System.Device.Gpio.Drivers
             return Task.Run(() =>
             {       
                 while (!(token.IsCancellationRequested || _disposing))
-                {   // WaitEventResult can be TimedOut, EventOccured or Error, in case of TimedOut will continue waiting
+                {   
+                    // WaitEventResult can be TimedOut, EventOccured or Error, in case of TimedOut will continue waiting
                     WaitEventResult waitResult = Interop.WaitForEventOnLine(eventHandler.PinHandle);
                     if (waitResult == WaitEventResult.Error)
                     {
@@ -124,15 +126,16 @@ namespace System.Device.Gpio.Drivers
         
         protected internal override void ClosePin(int pinNumber)
         {
-            if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
+            if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle) && !IsListeningEvent(pinNumber))
             {
-                //Event listeners might still waiting for event, don't release them 
-                if (!_pinNumberToEventHandler.ContainsKey(pinNumber))
-                {
-                    pinHandle?.Dispose();
-                    _pinNumberToSafeLineHandle.Remove(pinNumber);
-                }
+                pinHandle?.Dispose();
+                _pinNumberToSafeLineHandle.Remove(pinNumber);
             }
+        }
+
+        private bool IsListeningEvent(int pinNumber)
+        {
+            return _pinNumberToEventHandler.ContainsKey(pinNumber);
         }
 
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => 
@@ -231,9 +234,10 @@ namespace System.Device.Gpio.Drivers
             }
 
             CancellationTokenSource cancelWhenEventOccured = new CancellationTokenSource();
-            PinChangeEventHandler callback = (o, e) => {
+            void callback(object o, PinValueChangedEventArgs e)
+            {
                 cancelWhenEventOccured.Cancel();
-            };
+            }
             if (eventType.HasFlag(PinEventTypes.Rising))
             {
                 eventHandler.ValueRising += callback;
@@ -241,23 +245,26 @@ namespace System.Device.Gpio.Drivers
             else if (eventType.HasFlag(PinEventTypes.Falling))
             {
                 eventHandler.ValueFalling += callback;
+            } else
+            {
+                Debug.Assert(false, "eventType has invalid value");
             }
 
-            WaitForEventResult(cancellationToken, eventHandler.CancellationTokenSource.Token, cancelWhenEventOccured.Token, eventType);
+            WaitForEventResult(cancellationToken, eventHandler.CancellationTokenSource.Token, cancelWhenEventOccured.Token);
             RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
 
             return new WaitForEventResult
             {
-                TimedOut = !cancelWhenEventOccured.IsCancellationRequested,
+                TimedOut = !cancelWhenEventOccured.Token.IsCancellationRequested,
                 EventType = eventType
             };
         }
 
-        private void WaitForEventResult(CancellationToken sourceToken, CancellationToken parentToken, CancellationToken eventOccuredToken,  PinEventTypes eventType)
+        private void WaitForEventResult(CancellationToken sourceToken, CancellationToken parentToken, CancellationToken eventOccured)
         {
-            while (!(sourceToken.IsCancellationRequested || parentToken.IsCancellationRequested || eventOccuredToken.IsCancellationRequested))
+            while (!(sourceToken.IsCancellationRequested || parentToken.IsCancellationRequested || eventOccured.IsCancellationRequested))
             {
-                Thread.Sleep(1_000);
+                Thread.Sleep(1);
             }
         }
 
@@ -277,7 +284,7 @@ namespace System.Device.Gpio.Drivers
 
             if (_pinNumberToEventHandler != null)
             {
-                foreach (var kv in _pinNumberToEventHandler)
+                foreach (KeyValuePair<int, LibGpiodDriverEventHandler> kv in _pinNumberToEventHandler)
                 {
                     int pin = kv.Key;
                     LibGpiodDriverEventHandler eventHandler = kv.Value;

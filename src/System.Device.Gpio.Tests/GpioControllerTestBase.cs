@@ -20,6 +20,7 @@ namespace System.Device.Gpio.Tests
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
+                Console.WriteLine("ControllerCanTurnOnLEDs run");
                 controller.OpenPin(LedPin, PinMode.Output);
                 Thread.Sleep(1_000);
                 controller.Write(LedPin, PinValue.High);
@@ -31,6 +32,7 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void PinValueReturnsToLowAfterDispose()
         {
+            Console.WriteLine("PinValueReturnsToLowAfterDispose run");
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(OutputPin, PinMode.Output);
@@ -51,6 +53,7 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void PinValueReadAndWrite()
         {
+            Console.WriteLine("PinValueReadAndWrite run");
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(OutputPin, PinMode.Output);
@@ -70,6 +73,7 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void ThrowsInvalidOperationExceptionWhenPinIsNotOpened()
         {
+            Console.WriteLine("ThrowsInvalidOperationExceptionWhenPinIsNotOpened run");
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 Assert.Throws<InvalidOperationException>(() => controller.Write(OutputPin, PinValue.High));
@@ -83,6 +87,7 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void IsPinOpenTest()
         {
+            Console.WriteLine("IsPinOpenTest run");
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 Assert.False(controller.IsPinOpen(LedPin));
@@ -96,6 +101,7 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void ThrowsIfWritingOnInputPin()
         {
+            Console.WriteLine("ThrowsIfWritingOnInputPin run");
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(InputPin, PinMode.Input);
@@ -106,6 +112,7 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void ThrowsIfReadingFromOutputPin()
         {
+            Console.WriteLine("ThrowsIfReadingFromOutputPin run");
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(OutputPin, PinMode.Output);
@@ -116,6 +123,7 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void OpenPinDefaultsModeToInput()
         {
+            Console.WriteLine("OpenPinDefaultsModeToInput run");
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(OutputPin);
@@ -130,9 +138,10 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void AddCallbackTest()
         {
-            while (!Debugger.IsAttached)
-                Thread.Sleep(1000);
-            Debugger.Break();
+            Console.WriteLine("AddCallbackTest run");
+            /*          while (!Debugger.IsAttached)
+                          Thread.Sleep(1000);
+                      Debugger.Break();*/
 
             ManualResetEvent mre = new ManualResetEvent(false);
             bool wasCalled = false;

@@ -13,7 +13,7 @@ namespace System.Device.Gpio.Drivers
 
         public event PinChangeEventHandler ValueFalling;
 
-        public int PinNumber;
+        public int PinNumber { get; private set; }
 
         public SafeLineHandle PinHandle = null;
 

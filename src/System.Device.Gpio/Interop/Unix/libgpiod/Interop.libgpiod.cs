@@ -138,10 +138,3 @@ internal partial class Interop
     [DllImport(LibgpiodLibrary, SetLastError = true)]
     internal static extern int ReadEventForLine(SafeLineHandle line);
 }
-
-internal enum WaitEventResult
-{
-    Error = -1,
-    TimedOut = 0,
-    EventOccured = 1
-}
