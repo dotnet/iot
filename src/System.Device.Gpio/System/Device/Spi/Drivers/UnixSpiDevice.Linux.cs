@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace System.Device.Spi.Drivers
 {
@@ -55,7 +56,7 @@ namespace System.Device.Spi.Drivers
                 _deviceFileDescriptor = Interop.open(deviceFileName, FileOpenFlags.O_RDWR);
                 if (_deviceFileDescriptor < 0)
                 {
-                    throw new IOException($"Can not open SPI device file '{deviceFileName}'.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not open SPI device file '{deviceFileName}'.");
                 }
 
                 UnixSpiMode mode = SpiModeToUnixSpiMode(_settings.Mode);
@@ -64,7 +65,7 @@ namespace System.Device.Spi.Drivers
                 int result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MODE, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Can not set SPI mode to {_settings.Mode}.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI mode to {_settings.Mode}.");
                 }
 
                 byte dataLengthInBits = (byte)_settings.DataBitLength;
@@ -73,7 +74,7 @@ namespace System.Device.Spi.Drivers
                 result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_BITS_PER_WORD, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Can not set SPI data bit length to {_settings.DataBitLength}.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI data bit length to {_settings.DataBitLength}.");
                 }
 
                 int clockFrequency = _settings.ClockFrequency;
@@ -82,7 +83,7 @@ namespace System.Device.Spi.Drivers
                 result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MAX_SPEED_HZ, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Can not set SPI clock frequency to {_settings.ClockFrequency}.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI clock frequency to {_settings.ClockFrequency}.");
                 }
             }
         }
@@ -202,7 +203,7 @@ namespace System.Device.Spi.Drivers
             int result = Interop.ioctl(_deviceFileDescriptor, SPI_IOC_MESSAGE_1, new IntPtr(&tr));
             if (result < 1)
             {
-                throw new IOException("Error performing SPI data transfer.");
+                throw new IOException($"Error {Marshal.GetLastWin32Error()} performing SPI data transfer.");
             }
         }
 
