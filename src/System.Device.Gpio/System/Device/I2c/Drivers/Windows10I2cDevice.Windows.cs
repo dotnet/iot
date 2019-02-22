@@ -73,22 +73,22 @@ namespace System.Device.I2c.Drivers
         /// <summary>
         /// Writes a byte to the I2C device.
         /// </summary>
-        /// <param name="data">The byte to be written to the I2C device.</param>
-        public override void WriteByte(byte data)
+        /// <param name="value">The byte to be written to the I2C device.</param>
+        public override void WriteByte(byte value)
         {
-            _winI2cDevice.Write(new[] { data });
+            _winI2cDevice.Write(new[] { value });
         }
 
         /// <summary>
         /// Writes data to the I2C device.
         /// </summary>
-        /// <param name="data">
+        /// <param name="buffer">
         /// The buffer that contains the data to be written to the I2C device.
         /// The data should not include the I2C device address.
         /// </param>
-        public override void Write(ReadOnlySpan<byte> data)
+        public override void Write(ReadOnlySpan<byte> buffer)
         {
-            _winI2cDevice.Write(data.ToArray());
+            _winI2cDevice.Write(buffer.ToArray());
         }
 
         public override void Dispose(bool disposing)

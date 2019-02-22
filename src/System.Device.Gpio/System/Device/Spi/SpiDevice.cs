@@ -32,16 +32,16 @@ namespace System.Device.Spi
         /// <summary>
         /// Writes a byte to the SPI device.
         /// </summary>
-        /// <param name="data">The byte to be written to the SPI device.</param>
-        public abstract void WriteByte(byte data);
+        /// <param name="value">The byte to be written to the SPI device.</param>
+        public abstract void WriteByte(byte value);
 
         /// <summary>
         /// Writes data to the SPI device.
         /// </summary>
-        /// <param name="data">
+        /// <param name="buffer">
         /// The buffer that contains the data to be written to the SPI device.
         /// </param>
-        public abstract void Write(ReadOnlySpan<byte> data);
+        public abstract void Write(ReadOnlySpan<byte> buffer);
 
         /// <summary>
         /// Writes and reads data from the SPI device.

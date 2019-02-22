@@ -139,28 +139,28 @@ namespace System.Device.Spi.Drivers
         /// <summary>
         /// Writes a byte to the SPI device.
         /// </summary>
-        /// <param name="data">The byte to be written to the SPI device.</param>
-        public override unsafe void WriteByte(byte data)
+        /// <param name="value">The byte to be written to the SPI device.</param>
+        public override unsafe void WriteByte(byte value)
         {
             Initialize();
 
             int length = sizeof(byte);
-            Transfer(&data, null, length);
+            Transfer(&value, null, length);
         }
 
         /// <summary>
         /// Writes data to the SPI device.
         /// </summary>
-        /// <param name="data">
+        /// <param name="buffer">
         /// The buffer that contains the data to be written to the SPI device.
         /// </param>
-        public override unsafe void Write(ReadOnlySpan<byte> data)
+        public override unsafe void Write(ReadOnlySpan<byte> buffer)
         {
             Initialize();
 
-            fixed (byte* dataPtr = data)
+            fixed (byte* dataPtr = buffer)
             {
-                Transfer(dataPtr, null, data.Length);
+                Transfer(dataPtr, null, buffer.Length);
             }
         }
 
