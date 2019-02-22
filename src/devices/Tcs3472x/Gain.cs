@@ -4,11 +4,18 @@
 
 namespace Iot.Device.Tcs3472x
 {
+    /// <summary>
+    /// The gain used to integrate the colors
+    /// </summary>
     public enum Gain
     {
-        GAIN_1X = 0x00,//  1x gain
-        GAIN_4X = 0x01,//  4x gain
-        GAIN_16X = 0x02,// 16x gain
-        GAIN_60X = 0x03,// 60x gain
+        //  1x gain
+        GAIN_1X = 0x00,
+        //  4x gain
+        GAIN_4X = 0x01,
+        // 16x gain
+        GAIN_16X = 0x02,
+        // 60x gain
+        GAIN_60X = 0x03,
     }
 }

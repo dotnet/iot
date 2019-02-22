@@ -17,16 +17,18 @@ namespace Tcs3472xsample
             Console.WriteLine("Hello TCS3472x!");
             var i2cSettings = new I2cConnectionSettings(1, Tcs3472xSensor.DefaultAddress);
             I2cDevice i2cDevice = new UnixI2cDevice(i2cSettings);
-            Tcs3472xSensor tcs3472X = new Tcs3472xSensor(i2cDevice);
-            while(!Console.KeyAvailable)
+            using(Tcs3472xSensor tcs3472X = new Tcs3472xSensor(i2cDevice))
             {
-                Console.WriteLine($"ID: {tcs3472X.ChipId} Gain: {tcs3472X.Gain} Time to wait: {tcs3472X.IntegrationTime}");
-                var col = tcs3472X.GetColor();
-                Console.WriteLine($"R: {col.R} G: {col.G} B: {col.B} A: {col.A} Color: {col.Name}");
-                Console.WriteLine($"Valid data: {tcs3472X.IsValidData()} Clear Interrupt: {tcs3472X.IsValidData()}");
-                Thread.Sleep(1000);
+                while(!Console.KeyAvailable)
+                {
+                    Console.WriteLine($"ID: {tcs3472X.ChipId} Gain: {tcs3472X.Gain} Time to wait: {tcs3472X.IntegrationTime}");
+                    var col = tcs3472X.GetColor();
+                    Console.WriteLine($"R: {col.R} G: {col.G} B: {col.B} A: {col.A} Color: {col.Name}");
+                    Console.WriteLine($"Valid data: {tcs3472X.IsValidData()} Clear Interrupt: {tcs3472X.IsValidData()}");
+                    Thread.Sleep(1000);
+                }
+                
             }
-
         }
     }
 }

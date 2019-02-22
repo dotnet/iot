@@ -22,7 +22,7 @@ namespace Iot.Device.Tcs3472x
 
         /// <summary>
         /// Set/Get the time to wait for the sensor to read the data
-        /// Minimum time is 0.0029 s
+        /// Minimum time is 0.0024 s
         /// Maximum time is 7.4 s
         /// Be aware that it is not a linear function
         /// </summary>
@@ -54,6 +54,13 @@ namespace Iot.Device.Tcs3472x
         /// </summary>
         public TCS3472Type ChipId { get; internal set; }
 
+        /// <summary>
+        /// Create a TCS4272x sensor
+        /// </summary>
+        /// <param name="i2cDevice">The I2C Device class</param>
+        /// <param name="integrationTime">The time to wait for sensor to read the data, minimum is 0.024 seconds, maximum in the constructor is 0.7 seconds</param>
+        /// <param name="gain">The gain when integrating the color measurement</param>
+        /// <param name="autoDisposable">true to dispose the I2C Device class at dispose</param>
         public Tcs3472xSensor(I2cDevice i2cDevice, double integrationTime = 0.0024, Gain gain = Gain.GAIN_16X, bool autoDisposable = true)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} can't be null");
@@ -188,6 +195,11 @@ namespace Iot.Device.Tcs3472x
             a = Math.Clamp(a, 0, 255);
             return Color.FromArgb(a, r, g, b);
         }
+
+        /// <summary>
+        /// Get the color
+        /// </summary>
+        public ConsoleColor Color => GetColor();
 
         private UInt16 I2cRead16(Registers reg)
         {
