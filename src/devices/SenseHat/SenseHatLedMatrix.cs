@@ -25,21 +25,28 @@ namespace Iot.Device.SenseHat
 
         public abstract void Write(ReadOnlySpan<Color> colors);
 
-        public abstract void Clear(Color color = default(Color));
+        public abstract void Fill(Color color = default(Color));
 
         public abstract void SetPixel(int x, int y, Color color);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (int x, int y) IndexToPosition(int index)
         {
+            if (index < 0 || index >= NumberOfPixelsPerRow * NumberOfPixelsPerRow)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
             return (index % NumberOfPixelsPerRow, index / NumberOfPixelsPerRow);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int PositionToIndex(int x, int y)
         {
-            Debug.Assert(x >= 0 && x < NumberOfPixelsPerRow);
-            Debug.Assert(y >= 0 && y < NumberOfPixelsPerColumn);
+            if (x < 0 || x >= NumberOfPixelsPerRow)
+                throw new ArgumentOutOfRangeException(nameof(x));
+
+            if (y < 0 || y >= NumberOfPixelsPerColumn)
+                throw new ArgumentOutOfRangeException(nameof(x));
+
             return x + y * NumberOfPixelsPerRow;
         }
 

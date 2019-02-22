@@ -22,11 +22,14 @@ namespace Iot.Device.Hts221
         /// </summary>
         public Hts221(I2cDevice i2cDevice)
         {
+            if (i2cDevice == null)
+                throw new ArgumentNullException(nameof(i2cDevice));
+
             _i2c = i2cDevice;
 
             // Highest resolution for both temperature and humidity sensor:
             // 0.007 Celsius and 0.03 percentage of relative humidity respectively
-            byte resolution = 0b00111111;
+            byte resolution = 0b0011_1111;
             WriteByte(Register.ResolutionMode, resolution);
 
             byte control1orig = Read(Register.Control1);
@@ -35,7 +38,7 @@ namespace Iot.Device.Hts221
             // 2 - BDU - block data update - 1 is recommended by datasheet and means that output registers
             //                               won't be updated until both LSB and MSB are read
             // 0-1 - output data rate - 11 means 12.5Hz
-            byte control1 = (byte)(0b10000111 | (control1orig & 0b01111000));
+            byte control1 = (byte)(0b1000_0111 | (control1orig & 0b0111_1000));
             WriteByte(Register.Control1, control1);
         }
 

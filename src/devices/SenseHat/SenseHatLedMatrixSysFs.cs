@@ -30,7 +30,7 @@ namespace Iot.Device.SenseHat
             }
 
             _deviceFile = new FileStream(device, FileMode.Open, FileAccess.ReadWrite);
-            Clear(Color.Black);
+            Fill(Color.Black);
         }
 
         public override void Write(ReadOnlySpan<Color> colors)
@@ -48,7 +48,7 @@ namespace Iot.Device.SenseHat
             EndWriting();
         }
 
-        public override void Clear(Color color = default(Color))
+        public override void Fill(Color color = default(Color))
         {
             StartWritingColors();
 
@@ -62,6 +62,12 @@ namespace Iot.Device.SenseHat
 
         public override void SetPixel(int x, int y, Color color)
         {
+            if (x < 0 || x >= NumberOfPixelsPerRow)
+                throw new ArgumentOutOfRangeException(nameof(x));
+
+            if (y < 0 || y >= NumberOfPixelsPerColumn)
+                throw new ArgumentOutOfRangeException(nameof(y));
+
             StartWritingColor(x, y);
             WriteColor(color);
             EndWriting();
@@ -93,7 +99,10 @@ namespace Iot.Device.SenseHat
             byte g = (byte)(color.G >> 2);
             byte b = (byte)(color.B >> 3);
             ushort col = (ushort)((r << 11) | (g << 5) | b);
-            Span<byte> encoded = stackalloc byte[2] { (byte)(col & 0xff), (byte)(col >> 8) };
+            Span<byte> encoded = stackalloc byte[2] {
+                (byte)(col & 0xff),
+                (byte)(col >> 8)
+            };
 
             _deviceFile.Write(encoded);
         }

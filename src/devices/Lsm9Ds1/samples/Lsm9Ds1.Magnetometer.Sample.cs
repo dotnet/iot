@@ -38,7 +38,7 @@ namespace Iot.Device.Lsm9Ds1.Samples
                 Thread.Sleep(3000);
 
                 const int intervals = 32;
-                bool[,] data = new bool[32,32];
+                bool[,] data = new bool[intervals, intervals];
 
                 Vector3 size = max - min;
 

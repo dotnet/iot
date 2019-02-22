@@ -34,7 +34,7 @@ namespace Iot.Device.SenseHat
         }
 
         // LED Matrix
-        public void Clear(Color color = default(Color)) => _ledMatrix.Clear(color);
+        public void Fill(Color color = default(Color)) => _ledMatrix.Fill(color);
         public void SetPixel(int x, int y, Color color) => _ledMatrix.SetPixel(x, y, color);
         public void Write(ReadOnlySpan<Color> colors) => _ledMatrix.Write(colors);
 

@@ -15,21 +15,19 @@ namespace Iot.Device.SenseHat.Samples
 {
     class Magnetometer
     {
-        public const int I2cAddress = 0x1C;
-
         public static void Run()
         {
-            using (var m = new SenseHatMagnetometer())
-            using (var d = new SenseHatLedMatrixI2c())
+            using (var magnetometer = new SenseHatMagnetometer())
+            using (var ledMatrix = new SenseHatLedMatrixI2c())
             {
                 Console.WriteLine("Move SenseHat around in every direction until dot on the LED matrix stabilizes when not moving.");
-                d.Clear();
+                ledMatrix.Fill();
                 Stopwatch sw = Stopwatch.StartNew();
-                Vector3 min = m.MagneticInduction;
-                Vector3 max = m.MagneticInduction;
+                Vector3 min = magnetometer.MagneticInduction;
+                Vector3 max = magnetometer.MagneticInduction;
                 while (min == max)
                 {
-                    Vector3 sample = m.MagneticInduction;
+                    Vector3 sample = magnetometer.MagneticInduction;
                     min = Vector3.Min(min, sample);
                     max = Vector3.Max(max, sample);
                     Thread.Sleep(50);
@@ -40,7 +38,7 @@ namespace Iot.Device.SenseHat.Samples
 
                 while (true)
                 {
-                    Vector3 sample = m.MagneticInduction;
+                    Vector3 sample = magnetometer.MagneticInduction;
                     min = Vector3.Min(min, sample);
                     max = Vector3.Max(max, sample);
                     Vector3 size = max - min;
@@ -66,7 +64,7 @@ namespace Iot.Device.SenseHat.Samples
 
                     data[idx] = Color.FromArgb(0, 255, (byte)Math.Clamp(255 * distFromCenter / max2, 0, 255));
 
-                    d.Write(data);
+                    ledMatrix.Write(data);
                     data[idx] = col;
 
                     Thread.Sleep(50);

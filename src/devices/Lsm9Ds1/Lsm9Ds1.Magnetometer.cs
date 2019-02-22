@@ -27,6 +27,9 @@ namespace Iot.Device.Lsm9Ds1
             I2cDevice i2cDevice,
             MagneticInductionScale magneticInductionScale = MagneticInductionScale.Scale04G)
         {
+            if (i2cDevice == null)
+                throw new ArgumentNullException(nameof(i2cDevice));
+
             _i2c = i2cDevice;
             _magneticInductionScale = magneticInductionScale;
 
@@ -44,7 +47,7 @@ namespace Iot.Device.Lsm9Ds1
             byte operativeModeForZAxis = 0b11; // ultra-high performance mode
             byte bigEndianEnabled = 0; // little endian
 
-            Span<byte> buff = stackalloc byte[]
+            Span<byte> buff = stackalloc byte[5]
             {
                 (byte)((temperatureCompensation << 7)
                         | (operativeMode << 5)
@@ -82,7 +85,6 @@ namespace Iot.Device.Lsm9Ds1
 
         private void Write(RegisterM register, ReadOnlySpan<byte> data)
         {
-            Debug.Assert(data.Length <= 10);
             Span<byte> buff = stackalloc byte[data.Length + 1];
             buff[0] = (byte)register;
             data.CopyTo(buff.Slice(1));

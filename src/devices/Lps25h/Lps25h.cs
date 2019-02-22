@@ -22,6 +22,9 @@ namespace Iot.Device.Lps25h
         /// </summary>
         public Lps25h(I2cDevice i2cDevice)
         {
+            if (i2cDevice == null)
+                throw new ArgumentNullException(nameof(i2cDevice));
+
             _i2c = i2cDevice;
 
             // Highest resolution for both pressure and temperature sensor
@@ -36,7 +39,7 @@ namespace Iot.Device.Lps25h
             // 2 - block data update - 1 means update when both MSB and LSB are read
             // 1 - reset auto-zero - 0 means disable
             // 0 - SPI mode - we don't care what value since we use I2c, leave at default (0)
-            byte control1 = 0b11000100;
+            byte control1 = 0b1100_0100;
             WriteByte(Register.Control1, control1);
         }
 
@@ -65,12 +68,13 @@ namespace Iot.Device.Lps25h
         {
             Debug.Assert(buff.Length == 3);
 
+            byte mostSignificantByte = buff[2];
             Span<byte> b = stackalloc byte[4]
             {
                 buff[0],
                 buff[1],
-                buff[2],
-                (buff[2] >> 7) != 0 ? (byte)0xff : (byte)0x00,
+                mostSignificantByte,
+                (mostSignificantByte >> 7) != 0 ? (byte)0xff : (byte)0x00,
             };
 
             return BinaryPrimitives.ReadInt32LittleEndian(b);

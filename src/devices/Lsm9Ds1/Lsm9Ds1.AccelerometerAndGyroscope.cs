@@ -29,17 +29,18 @@ namespace Iot.Device.Lsm9Ds1
             AccelerationScale accelerationScale = AccelerationScale.Scale02G,
             AngularRateScale angularRateScale = AngularRateScale.Scale0245Dps)
         {
+            if (i2cDevice == null)
+                throw new ArgumentNullException(nameof(i2cDevice));
+
             _i2c = i2cDevice;
             _accelerometerScale = accelerationScale;
             _angularRateScale = angularRateScale;
-
-            Span<byte> buff = stackalloc byte[2];
 
             byte accelerometerOutputDataRate = 0b011; // 119Hz, we cannot measure time accurate enough to use higher frequency
             WriteByte(RegisterAG.AccelerometerControl6, (byte)((accelerometerOutputDataRate << 5) | ((byte)accelerationScale << 3)));
 
             // enable all 3 axis of gyroscope
-            WriteByte(RegisterAG.Control4, 0b00111000);
+            WriteByte(RegisterAG.Control4, 0b0011_1000);
 
             byte angularRateOutputDataRate = 0b011; // 119Hz
             WriteByte(RegisterAG.AngularRateControl1, (byte)((angularRateOutputDataRate << 5) | ((byte)angularRateScale << 3)));

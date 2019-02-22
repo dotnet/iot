@@ -18,29 +18,31 @@ namespace Iot.Device.SenseHat.Samples
             // another implementation which can be used is: SenseHatLedMatrixSysFs
             // I2C implementation does not require installing anything
             // SysFs implementation is faster and has arguably better colors
-            using (var m = new SenseHatLedMatrixI2c())
+            using (var ledMatrix = new SenseHatLedMatrixI2c())
             {
-                WriteDemo(m);
+                WriteDemo(ledMatrix);
+
+                // Uncomment to see demo of SetPixel/Fill
                 // SetPixelDemo(m);
             }
         }
 
         // Not used by default but much simpler to understand
-        static void SetPixelDemo(SenseHatLedMatrix m)
+        static void SetPixelDemo(SenseHatLedMatrix ledMatrix)
         {
-            m.Clear(Color.Purple);
+            ledMatrix.Fill(Color.Purple);
 
-            m.SetPixel(0, 0, Color.Red);
-            m.SetPixel(1, 0, Color.Green);
-            m.SetPixel(2, 0, Color.Blue);
+            ledMatrix.SetPixel(0, 0, Color.Red);
+            ledMatrix.SetPixel(1, 0, Color.Green);
+            ledMatrix.SetPixel(2, 0, Color.Blue);
 
             for (int i = 1; i <= 7; i++)
             {
-                m.SetPixel(i, i, Color.White);
+                ledMatrix.SetPixel(i, i, Color.White);
             }
         }
 
-        static void WriteDemo(SenseHatLedMatrix m)
+        static void WriteDemo(SenseHatLedMatrix ledMatrix)
         {
             Color[] colors = new Color[SenseHatLedMatrix.NumberOfPixels];
 
@@ -51,7 +53,7 @@ namespace Iot.Device.SenseHat.Samples
             {
                 float time = sw.ElapsedMilliseconds / 1000.0f;
                 Frame(colors, time);
-                m.Write(colors);
+                ledMatrix.Write(colors);
 
                 frames++;
                 if (frames % 200 == 0 && time > 1.0)
@@ -82,7 +84,7 @@ namespace Iot.Device.SenseHat.Samples
             );
         }
 
-        static byte Col(double x)
+        private static byte Col(double x)
         {
             x = Math.Clamp(x, 0.0f, 1.0f);
             return (byte)(x * 255);

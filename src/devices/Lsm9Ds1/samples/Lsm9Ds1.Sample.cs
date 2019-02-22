@@ -13,6 +13,7 @@ namespace Iot.Device.Lsm9Ds1.Samples
     {
         static void Main(string[] args)
         {
+            // uncomment to run accelerometer sample
             // AccelerometerAndGyroscope.Run();
             Magnetometer.Run();
         }

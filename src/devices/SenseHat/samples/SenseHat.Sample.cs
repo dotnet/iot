@@ -37,7 +37,7 @@ namespace Iot.Device.SenseHat.Samples
                     x = (x + 8 + dx) % 8;
                     y = (y + 8 + dy) % 8;
 
-                    sh.Clear(n % 2 == 0 ? Color.DarkBlue : Color.DarkRed);
+                    sh.Fill(n % 2 == 0 ? Color.DarkBlue : Color.DarkRed);
                     sh.SetPixel(x, y, Color.Yellow);
 
                     Console.WriteLine($"Temperature: Sensor1: {sh.Temperature} C   Sensor2: {sh.Temperature2} C");

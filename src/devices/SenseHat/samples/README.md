@@ -17,7 +17,7 @@ static void Main(string[] args)
                 n++;
             x = (x + 8 + dx) % 8;
             y = (y + 8 + dy) % 8;
-            sh.Clear(n % 2 == 0 ? Color.DarkBlue : Color.DarkRed);
+            sh.Fill(n % 2 == 0 ? Color.DarkBlue : Color.DarkRed);
             sh.SetPixel(x, y, Color.Yellow);
             Console.WriteLine($"Temperature: Sensor1: {sh.Temperature} C   Sensor2: {sh.Temperature2} C");
             Console.WriteLine($"Humidity: {sh.Humidity} %rH");
@@ -55,16 +55,16 @@ static (int, int, bool) JoystickState(SenseHat sh)
 ## LED matrix
 
 ```csharp
-using (var m = new SenseHatLedMatrixI2c())
+using (var ledMatrix = new SenseHatLedMatrixI2c())
 {
-    m.Clear(Color.Purple);
-    m.SetPixel(0, 0, Color.Red);
-    m.SetPixel(1, 0, Color.Green);
-    m.SetPixel(2, 0, Color.Blue);
+    ledMatrix.Fill(Color.Purple);
+    ledMatrix.SetPixel(0, 0, Color.Red);
+    ledMatrix.SetPixel(1, 0, Color.Green);
+    ledMatrix.SetPixel(2, 0, Color.Blue);
 
     for (int i = 1; i <= 7; i++)
     {
-        m.SetPixel(i, i, Color.White);
+        ledMatrix.SetPixel(i, i, Color.White);
     }
 }
 ```
@@ -117,18 +117,17 @@ using (var ag = new SenseHatAccelerometerAndGyroscope())
 ## Magnetometer
 
 ```csharp
-using (var m = new SenseHatMagnetometer())
-using (var d = new SenseHatLedMatrixI2c())
+using (var magnetometer = new SenseHatMagnetometer())
+using (var ledMatrix = new SenseHatLedMatrixI2c())
 {
     Console.WriteLine("Move SenseHat around in every direction until dot on the LED matrix stabilizes when not moving.");
-    d.Clear();
+    ledMatrix.Fill();
     Stopwatch sw = Stopwatch.StartNew();
-    Vector3 min = m.MagneticInduction;
-    Vector3 max = m.MagneticInduction;
-
+    Vector3 min = magnetometer.MagneticInduction;
+    Vector3 max = magnetometer.MagneticInduction;
     while (min == max)
     {
-        Vector3 sample = m.MagneticInduction;
+        Vector3 sample = magnetometer.MagneticInduction;
         min = Vector3.Min(min, sample);
         max = Vector3.Max(max, sample);
         Thread.Sleep(50);
@@ -136,9 +135,10 @@ using (var d = new SenseHatLedMatrixI2c())
 
     const int intervals = 8;
     Color[] data = new Color[64];
+
     while (true)
     {
-        Vector3 sample = m.MagneticInduction;
+        Vector3 sample = magnetometer.MagneticInduction;
         min = Vector3.Min(min, sample);
         max = Vector3.Max(max, sample);
         Vector3 size = max - min;
@@ -161,9 +161,12 @@ using (var d = new SenseHatLedMatrixI2c())
         Vector2 center2 = Vector2.Multiply(new Vector2(min.X + max.X, min.Y + max.Y), 0.5f);
         float max2 = Math.Max(size.X, size.Y);
         float distFromCenter = (pos2 - center2).Length();
+
         data[idx] = Color.FromArgb(0, 255, (byte)Math.Clamp(255 * distFromCenter / max2, 0, 255));
-        d.Write(data);
+
+        ledMatrix.Write(data);
         data[idx] = col;
+
         Thread.Sleep(50);
     }
 }
