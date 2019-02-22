@@ -76,21 +76,21 @@ namespace System.Device.Spi.Drivers
         /// <summary>
         /// Writes a byte to the SPI device.
         /// </summary>
-        /// <param name="data">The byte to be written to the SPI device.</param>
-        public override void WriteByte(byte data)
+        /// <param name="value">The byte to be written to the SPI device.</param>
+        public override void WriteByte(byte value)
         {
-            _winDevice.Write(new[] { data });
+            _winDevice.Write(new[] { value });
         }
 
         /// <summary>
         /// Writes data to the SPI device.
         /// </summary>
-        /// <param name="data">
+        /// <param name="buffer">
         /// The buffer that contains the data to be written to the SPI device.
         /// </param>
-        public override void Write(ReadOnlySpan<byte> data)
+        public override void Write(ReadOnlySpan<byte> buffer)
         {
-            _winDevice.Write(data.ToArray());
+            _winDevice.Write(buffer.ToArray());
         }
 
         /// <summary>
