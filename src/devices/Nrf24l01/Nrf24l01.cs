@@ -715,11 +715,8 @@ namespace Iot.Device.Nrf24l01
         internal void Write(ReadOnlySpan<byte> writeData)
         {
             Span<byte> readBuf = stackalloc byte[writeData.Length];
-            Span<byte> writeBuf = stackalloc byte[writeData.Length];
 
-            writeData.CopyTo(writeBuf);
-
-            _sensor.TransferFullDuplex(writeBuf, readBuf);
+            _sensor.TransferFullDuplex(writeData, readBuf);
         }
 
         internal void Write(Command command, Register register, byte writeByte)
@@ -736,10 +733,7 @@ namespace Iot.Device.Nrf24l01
             Span<byte> readBuf = stackalloc byte[1 + writeData.Length];
 
             writeBuf[0] = (byte)((byte)command + (byte)register);
-            for (int i = 0; i < writeData.Length; i++)
-            {
-                writeBuf[1 + i] = writeData[i];
-            }
+            writeData.CopyTo(writeBuf.Slice(1));
 
             _sensor.TransferFullDuplex(writeBuf, readBuf);
         }
@@ -747,7 +741,7 @@ namespace Iot.Device.Nrf24l01
         internal byte[] WriteRead(Command command, Register register, int dataLength)
         {
             Span<byte> writeBuf = stackalloc byte[1 + dataLength];
-            Span<byte> readBuf = new byte[1 + dataLength];
+            Span<byte> readBuf = stackalloc byte[1 + dataLength];
 
             writeBuf[0] = (byte)((byte)command + (byte)register);
 
@@ -759,7 +753,7 @@ namespace Iot.Device.Nrf24l01
         internal byte[] WriteRead(Command command, Register register, ReadOnlySpan<byte> writeData)
         {
             Span<byte> writeBuf = stackalloc byte[1 + writeData.Length];
-            Span<byte> readBuf = new byte[1 + writeData.Length];
+            Span<byte> readBuf = stackalloc byte[1 + writeData.Length];
 
             writeBuf[0] = (byte)((byte)command + (byte)register);
             writeData.CopyTo(writeBuf.Slice(1));
