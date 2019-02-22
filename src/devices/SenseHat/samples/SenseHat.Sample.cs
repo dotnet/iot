@@ -8,9 +8,9 @@ using System.Threading;
 
 namespace Iot.Device.SenseHat.Samples
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             // Sample for each device separately
             // LedMatrix.Run();
@@ -52,7 +52,7 @@ namespace Iot.Device.SenseHat.Samples
             }
         }
 
-        static (int, int, bool) JoystickState(SenseHat sh)
+        private static (int, int, bool) JoystickState(SenseHat sh)
         {
             sh.ReadJoystickState();
 

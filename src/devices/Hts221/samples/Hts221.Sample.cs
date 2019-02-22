@@ -9,12 +9,12 @@ using System.Device.I2c.Drivers;
 
 namespace Iot.Device.Hts221.Samples
 {
-    class Program
+    internal class Program
     {
         // I2C address on SenseHat board
         public const int I2cAddress = 0x5F;
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             using (var th = new Hts221(CreateI2cDevice()))
             {

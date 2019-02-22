@@ -9,9 +9,9 @@ using System.Device.I2c.Drivers;
 
 namespace Iot.Device.Lsm9Ds1.Samples
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             // uncomment to run accelerometer sample
             // AccelerometerAndGyroscope.Run();

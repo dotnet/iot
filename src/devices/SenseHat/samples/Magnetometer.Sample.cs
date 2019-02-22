@@ -13,7 +13,7 @@ using System.Drawing;
 
 namespace Iot.Device.SenseHat.Samples
 {
-    class Magnetometer
+    public class Magnetometer
     {
         public static void Run()
         {

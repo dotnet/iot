@@ -9,7 +9,7 @@ using System.Device.I2c.Drivers;
 
 namespace Iot.Device.Lsm9Ds1.Samples
 {
-    class AccelerometerAndGyroscope
+    public class AccelerometerAndGyroscope
     {
         public const int I2cAddress = 0x6A;
 

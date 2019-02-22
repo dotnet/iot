@@ -28,7 +28,7 @@ namespace Iot.Device.SenseHat.Samples
         }
 
         // Not used by default but much simpler to understand
-        static void SetPixelDemo(SenseHatLedMatrix ledMatrix)
+        private static void SetPixelDemo(SenseHatLedMatrix ledMatrix)
         {
             ledMatrix.Fill(Color.Purple);
 
@@ -42,7 +42,7 @@ namespace Iot.Device.SenseHat.Samples
             }
         }
 
-        static void WriteDemo(SenseHatLedMatrix ledMatrix)
+        private static void WriteDemo(SenseHatLedMatrix ledMatrix)
         {
             Color[] colors = new Color[SenseHatLedMatrix.NumberOfPixels];
 
@@ -65,7 +65,7 @@ namespace Iot.Device.SenseHat.Samples
             }
         }
 
-        static void Frame(Span<Color> colors, float time)
+        private static void Frame(Span<Color> colors, float time)
         {
             for (int i = 0; i < colors.Length; i++)
             {
@@ -75,7 +75,7 @@ namespace Iot.Device.SenseHat.Samples
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Color Pixel(Vector2 uv, float time)
+        private static Color Pixel(Vector2 uv, float time)
         {
             return Color.FromArgb(
                 Col(0.5 + 0.5 * Math.Cos(time + uv.X)),
