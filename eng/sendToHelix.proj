@@ -25,17 +25,21 @@
     </XUnitProject>
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(HelixAccessToken)' != '' ">
+  <ItemGroup Condition=" '$(HelixAccessToken)' != '' And '$(HelixTargetQueue)' == ''">
     <HelixTargetQueue Include="Raspbian.9.Arm32.IoT"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(HelixTargetQueue)' != ''">
+    <HelixTargetQueue Include="$(HelixTargetQueue)"/>
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(HelixAccessToken)' == '' ">
     <IsExternal>true</IsExternal>
     <Creator>$(BUILD_SOURCEVERSIONAUTHOR)</Creator>
-    <Creator Condition=" '$(Creator)' == ''">anon</Creator>
+    <Creator Condition=" '$(Creator)' == ''">dotnet-bot</Creator>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(HelixAccessToken)' == '' ">
+  <ItemGroup Condition=" '$(HelixAccessToken)' == '' And '$(HelixTargetQueue)' == ''">
     <HelixTargetQueue Include="Raspbian.9.Arm32.IoT.open"/>
   </ItemGroup>
 
@@ -45,8 +49,13 @@
           Outputs="unused"
           AfterTargets="CreateXUnitWorkItems">
     <PropertyGroup>
+      <!-- Because our tests need to run as sudo, PATH environment variable is reset so we need to set
+      a different variable to the full path of dotnet -->
       <HelixPreCommands>$(HelixPreCommands);export _dotnet="%24(which dotnet)"</HelixPreCommands>
-      <_newCommand>sudo -E %24_dotnet $throwAway%(HelixWorkItem.Command)</_newCommand>
+      <!-- Pre append sudo and the full path to dotnet to the command, along with a dollarsign throwAway
+      which will remove the initial dotnet from the helix command as it will be interpreted as a
+      variable -->
+      <_newCommand>sudo -E $_dotnet $throwAway%(HelixWorkItem.Command)</_newCommand>
     </PropertyGroup>
     <ItemGroup>
       <HelixWorkItem>
@@ -59,5 +68,4 @@
   <PropertyGroup>
     <Language>msbuild</Language>
   </PropertyGroup>
-  <Target Name="Pack"/>
 </Project>
