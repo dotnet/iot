@@ -20,6 +20,7 @@ namespace Iot.Device.Sht3x
         private const byte CRC_INIT = 0xFF;
 
         #region prop
+
         /// <summary>
         /// SHT3x Resolution
         /// </summary>
@@ -46,16 +47,8 @@ namespace Iot.Device.Sht3x
             get => _heater;
             set
             {
-                if (value == true)
-                {
-                    OpenHeater();
-                    _heater = true;
-                }
-                else
-                {
-                    CloseHeater();
-                    _heater = false;
-                }
+                SetHeater(value);
+                _heater = value;
             }
         }
 
@@ -93,19 +86,15 @@ namespace Iot.Device.Sht3x
         }
 
         /// <summary>
-        /// Open SHT3x Heater
+        /// Set SHT3x Heater
         /// </summary>
-        private void OpenHeater()
+        /// <param name="isOn">Heater on when value is true</param>
+        private void SetHeater(bool isOn)
         {
-            Write(Register.SHT_HEATER_ENABLE);
-        }
-
-        /// <summary>
-        /// Close SHT3x Heater
-        /// </summary>
-        private void CloseHeater()
-        {
-            Write(Register.SHT_HEATER_DISABLE);
+            if (isOn)
+                Write(Register.SHT_HEATER_ENABLE);
+            else
+                Write(Register.SHT_HEATER_DISABLE);
         }
 
         /// <summary>
