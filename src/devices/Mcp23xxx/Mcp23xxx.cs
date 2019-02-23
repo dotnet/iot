@@ -241,7 +241,7 @@ namespace Iot.Device.Mcp23xxx
 
         protected PinValue InternalReadInterrupt(Port port)
         {
-            int pinNumber = 0;
+            int pinNumber;
             switch (port)
             {
                 case Port.PortA:
@@ -315,7 +315,7 @@ namespace Iot.Device.Mcp23xxx
             if ((pins >> PinCount) > 0)
                 ThrowBadPin(nameof(pinValuePairs));
 
-            ushort result = 0;
+            ushort result;
             if (pins < 0xFF + 1)
             {
                 // Only need to get the first 8 pins (PortA)
