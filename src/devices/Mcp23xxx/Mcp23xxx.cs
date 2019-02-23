@@ -280,6 +280,10 @@ namespace Iot.Device.Mcp23xxx
 
             ValidatePin(pinNumber);
 
+            byte SetBit(byte data, int bitNumber) => (byte)(data | (1 << bitNumber));
+
+            byte ClearBit(byte data, int bitNumber) => (byte)(data & ~(1 << bitNumber));
+
             if (pinNumber < 8)
             {
                 byte value = mode == PinMode.Output
@@ -383,10 +387,6 @@ namespace Iot.Device.Mcp23xxx
 
             _gpioCache = newValue;
         }
-
-        private byte SetBit(byte data, int bitNumber) => data |= (byte)(1 << bitNumber);
-
-        private byte ClearBit(byte data, int bitNumber) => data &= (byte)~(1 << bitNumber);
 
         private ushort SetBits(ushort current, ushort bits, ushort mask)
         {

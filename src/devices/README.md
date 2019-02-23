@@ -21,10 +21,12 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Mcp23xxx -- I/O Expander](Mcp23xxx/README.md)
 * [Mcp3008 -- Analog-to-Digital Converter](Mcp3008/README.md)
 * [Pca95x4 -- I2C GPIO Expander](Pca95x4/README.md)
+* [Pcx857x -- I2C GPIO Expander](Pcx857x/README.md)
 * [Servo -- Servomotor Controller](Servo/README.md)
 * [Si7021 -- Temperature & Humidity Sensor](Si7021/README.md)
 * [SoftPwm -- Software PWM](SoftPwm/README.md)
 * [Ssd1306 -- OLED Display Controller](Ssd1306/README.md)
+* [Uln2003 -- Driver board for stepper motor](Uln2003/README.md)
 
 ## Binding Distribution
 

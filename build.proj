@@ -5,12 +5,14 @@
   <PropertyGroup>
     <BuildRestore Condition="'$(BuildRestore)'==''">true</BuildRestore>
     <ProductBuild Condition="'$(ProductBuild)'==''">true</ProductBuild>
+    <BuildNative Condition="'$(BuildNative)'==''">false</BuildNative>
     <ToolsBuild Condition="'$(ToolsBuild)'==''">true</ToolsBuild>
     <SampleBuild Condition="'$(SampleBuild)'==''">true</SampleBuild>
     <BuildTests Condition="'$(BuildTests)'==''">true</BuildTests>
-    <BuildPackages Condition="'$(BuildPackages)'==''">true</BuildPackages>
+    <BuildPackages Condition="'$(BuildPackages)'==''">false</BuildPackages>
 
     <BuildDependsOn Condition="'$(BuildRestore)'=='true'">$(BuildDependsOn);Restore</BuildDependsOn>
+    <BuildDependsOn Condition="'$(BuildNative)'=='true'">$(BuildDependsOn);NativeBuild</BuildDependsOn>
     <BuildDependsOn Condition="'$(ProductBuild)'=='true'">$(BuildDependsOn);BuildProduct</BuildDependsOn>
     <BuildDependsOn Condition="'$(ToolsBuild)'=='true'">$(BuildDependsOn);BuildTools</BuildDependsOn>
     <BuildDependsOn Condition="'$(SampleBuild)'=='true'">$(BuildDependsOn);BuildSamples</BuildDependsOn>
@@ -23,10 +25,19 @@
   <Target Name="BuildProduct">
     <ItemGroup>
       <_ExcludeBuildProductProjects Include="$(MSBuildThisFileDirectory)src\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
+      <_ExcludeBuildProductProjects Include="$(MSBuildThisFileDirectory)src\Native\build-native.proj" />
       <_BuildProductProjects Include="$(MSBuildThisFileDirectory)src\**\*.csproj" Exclude="@(_ExcludeBuildProductProjects)" />
     </ItemGroup>
 
     <MSBuild Projects="@(_BuildProductProjects)" />
+  </Target>
+
+  <Target Name="NativeBuild">
+    <ItemGroup>
+      <_NativeBuildProjects Include="$(MSBuildThisFileDirectory)src\Native\build-native.proj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_NativeBuildProjects)" />
   </Target>
 
   <Target Name="BuildTools">
