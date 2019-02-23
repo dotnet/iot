@@ -5,7 +5,7 @@
 namespace Iot.Device.Pca9685
 {
     /// <summary>
-    /// Values for MODE1 register
+    /// Values for Mode1 register
     /// </summary>
     internal enum Mode1 : byte
     {
