@@ -17,7 +17,7 @@ namespace Iot.Device.Lm75
         /// <summary>
         /// LM75 I2C Address
         /// </summary>
-        public const byte I2cAddress = 0x48;
+        public const byte DefaultI2cAddress = 0x48;
 
         #region prop
 
