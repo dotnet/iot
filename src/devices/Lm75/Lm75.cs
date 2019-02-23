@@ -12,7 +12,7 @@ namespace Iot.Device.Lm75
     /// </summary>
     public class Lm75 : IDisposable
     {
-        I2cDevice _sensor;
+        private I2cDevice _sensor;
 
         /// <summary>
         /// LM75 I2C Address
@@ -26,11 +26,11 @@ namespace Iot.Device.Lm75
         /// </summary>
         public double Temperature { get => GetTemperature(); }
 
-        private bool _shutdown;
+        private bool _disable;
         /// <summary>
-        /// LM75 Shutdown
+        /// Disable LM75
         /// </summary>
-        public bool Shutdown { get { return _shutdown; } set { SetShutdown(value); _shutdown = value; } }
+        public bool Disabled { get { return _disable; } set { SetShutdown(value); _disable = value; } }
 
         #endregion
 
@@ -41,6 +41,8 @@ namespace Iot.Device.Lm75
         public Lm75(I2cDevice sensor)
         {
             _sensor = sensor;
+
+            Disabled = false;
         }
 
         /// <summary>
