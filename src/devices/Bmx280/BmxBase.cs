@@ -46,7 +46,6 @@ namespace Iot.Device.Bmx280
             _calibrationData.ReadFromDevice(this);
         }
 
-
         /// <summary>
         /// Sets the power mode to the given mode
         /// </summary>
