@@ -9,7 +9,8 @@
 
   <ItemGroup>
     <Compile Include="Pca9685.cs" />
-    <Compile Include="Bit.cs" />
+    <Compile Include="Mode1.cs" />
+    <Compile Include="Mode2.cs" />
     <Compile Include="Register.cs" />
   </ItemGroup>
 

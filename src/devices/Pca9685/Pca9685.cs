@@ -6,7 +6,8 @@ using System;
 using System.Device.I2c;
 using System.Threading;
 using static Iot.Device.Pca9685.Register;
-using static Iot.Device.Pca9685.Bit;
+using static Iot.Device.Pca9685.Mode1;
+using static Iot.Device.Pca9685.Mode2;
 
 namespace Iot.Device.Pca9685
 {
@@ -19,7 +20,7 @@ namespace Iot.Device.Pca9685
         /// <summary>
         /// I2C Device
         /// </summary>
-        public I2cDevice Device { get; private set; }
+        private I2cDevice _device;
 
         /// <summary>
         /// Get default clock rate. Set if you are using external clock.
@@ -63,27 +64,23 @@ namespace Iot.Device.Pca9685
         public Pca9685(I2cDevice i2cDevice)
         {
             // Setup I2C interface for the device.
-            Device = i2cDevice;
+            _device = i2cDevice;
 
             SetPwm(0, 0);
 
-            Span<byte> buffer = stackalloc byte[2];
+            Span<byte> buffer = stackalloc byte[2] { (byte)MODE2, (byte)OUTDRV };
+            _device.Write(buffer);
 
-            buffer[0] = (byte)MODE2;
-            buffer[1] = (byte)OUTDRV;
-            Device.Write(buffer);
-
-            buffer[0] = (byte)MODE1;
-            buffer[1] = (byte)ALLCALL;
-            Device.Write(buffer);
+            buffer = stackalloc byte[2] { (byte)MODE1, (byte)ALLCALL };
+            _device.Write(buffer);
 
             Thread.Sleep(5); // wait for oscillator
 
-            int mode1 = Device.ReadByte();
+            int mode1 = _device.ReadByte();
             mode1 &= ~(byte)SLEEP; // wake up (reset sleep)
 
-            buffer[1] = (byte)mode1;
-            Device.Write(buffer);
+            buffer = stackalloc byte[2] { (byte)MODE1, (byte)mode1 };
+            _device.Write(buffer);
 
             Thread.Sleep(5); // wait for oscillator
 
@@ -97,23 +94,21 @@ namespace Iot.Device.Pca9685
         /// <param name="channel">target channel</param>
         public void SetPwm(int on, int off, int channel)
         {
-            Span<byte> buffer = stackalloc byte[2];
+            on &= 0xFFF;
+            off &= 0xFFF;
+            channel &= 0xF;
 
-            buffer[0] = (byte)((byte)LED0_ON_L + 4 * channel);
-            buffer[1] = (byte)(on & 0xFF);
-            Device.Write(buffer);
+            Span<byte> buffer = stackalloc byte[2] { (byte)((byte)LED0_ON_L + 4 * channel), (byte)on };
+            _device.Write(buffer);
 
-            buffer[0] = (byte)((byte)LED0_ON_H + 4 * channel);
-            buffer[1] = (byte)(on >> 8);
-            Device.Write(buffer);
+            buffer = stackalloc byte[2] { (byte)((byte)LED0_ON_H + 4 * channel), (byte)(on >> 8) };
+            _device.Write(buffer);
 
-            buffer[0] = (byte)((byte)LED0_OFF_L + 4 * channel);
-            buffer[1] = (byte)(off & 0xFF);
-            Device.Write(buffer);
+            buffer = stackalloc byte[2] { (byte)((byte)LED0_OFF_L + 4 * channel), (byte)off };
+            _device.Write(buffer);
 
-            buffer[0] = (byte)((byte)LED0_OFF_H + 4 * channel);
-            buffer[1] = (byte)(off >> 8);
-            Device.Write(buffer);
+            buffer = stackalloc byte[2] { (byte)((byte)LED0_OFF_H + 4 * channel), (byte)(off >> 8) };
+            _device.Write(buffer);
         }
 
         /// <summary>
@@ -123,29 +118,26 @@ namespace Iot.Device.Pca9685
         /// <param name="off">The turn-on time of all channels</param>
         public void SetPwm(int on, int off)
         {
-            Span<byte> buffer = stackalloc byte[2];
+            on &= 0xFFF;
+            off &= 0xFFF;
 
-            buffer[0] = (byte)ALL_LED_ON_L;
-            buffer[1] = (byte)(on & 0xFF);
-            Device.Write(buffer);
+            Span<byte> buffer = stackalloc byte[2] { (byte)ALL_LED_ON_L, (byte)on };
+            _device.Write(buffer);
 
-            buffer[0] = (byte)ALL_LED_ON_H;
-            buffer[1] = (byte)(on >> 8);
-            Device.Write(buffer);
+            buffer = stackalloc byte[2] { (byte)ALL_LED_ON_H, (byte)(on >> 8) };
+            _device.Write(buffer);
 
-            buffer[0] = (byte)ALL_LED_OFF_L;
-            buffer[1] = (byte)(off & 0xFF);
-            Device.Write(buffer);
+            buffer = stackalloc byte[2] { (byte)ALL_LED_OFF_L, (byte)off };
+            _device.Write(buffer);
 
-            buffer[0] = (byte)ALL_LED_OFF_H;
-            buffer[1] = (byte)(off >> 8);
-            Device.Write(buffer);
+            buffer = stackalloc byte[2] { (byte)ALL_LED_OFF_H, (byte)(off >> 8) };
+            _device.Write(buffer);
         }
 
         public void Dispose()
         {
-            Device?.Dispose();
-            Device = null;
+            _device?.Dispose();
+            _device = null;
         }
 
         /// <summary>
@@ -153,7 +145,6 @@ namespace Iot.Device.Pca9685
         /// </summary>
         private byte GetPrescale(double freq_hz)
         {
-
             var prescaleval = ClockRate / 4096 / freq_hz - 1;
             //Debug.Print($"Setting PWM frequency to {freq_hz} Hz");
             //Debug.Print($"Estimated pre-scale: {prescaleval}");
@@ -177,28 +168,23 @@ namespace Iot.Device.Pca9685
         /// </summary>
         private void SetPwmFrequency(byte prescale)
         {
-            var oldmode = Device.ReadByte();
-            var newmode = (oldmode & 0x7F) | 0x10; // sleep
+            var oldmode = _device.ReadByte();
+            var newmode = (sbyte)oldmode | (byte)SLEEP;
 
-            Span<byte> buffer = stackalloc byte[2];
+            Span<byte> buffer = stackalloc byte[2] { (byte)MODE1, (byte)newmode };
+            _device.Write(buffer); // go to sleep
 
-            buffer[0] = (byte)MODE1;
-            buffer[1] = (byte)newmode;
-            Device.Write(buffer); // go to sleep
-
-            buffer[0] = (byte)PRESCALE;
-            buffer[1] = prescale;
-            Device.Write(buffer);
+            buffer = stackalloc byte[2] { (byte)PRESCALE, prescale };
+            _device.Write(buffer);
 
 
-            buffer[0] = (byte)MODE1;
-            buffer[1] = oldmode;
-            Device.Write(buffer);
+            buffer = stackalloc byte[2] { (byte)MODE1, oldmode };
+            _device.Write(buffer);
 
             Thread.Sleep(5);
 
-            buffer[1] = (byte)(oldmode | 0x80);
-            Device.Write(buffer);
+            buffer = stackalloc byte[2] { (byte)MODE1, (byte)(oldmode | (byte)RESTART) };
+            _device.Write(buffer);
 
         }
 

@@ -4,13 +4,13 @@
 
 namespace Iot.Device.Pca9685
 {
-    internal enum Bit : byte
+    /// <summary>
+    /// Values for Mode2 register
+    /// </summary>
+    internal enum Mode2 : byte
     {
-        // Bits:
-        RESTART = 0x80,
-        SLEEP = 0x10,
-        ALLCALL = 0x01,
-        INVRT = 0x10,
-        OUTDRV = 0x04,
+        INVRT   = 0b00010000,   // Bit 4
+        OCH     = 0b00001000,   // Bit 3
+        OUTDRV  = 0b00000100,   // Bit 2
     }
 }

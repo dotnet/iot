@@ -18,7 +18,10 @@ namespace Iot.Device.Pca9685.Samples
         {
 
             var busId = 1;  // /dev/i2c-1
-            var deviceAddress = 0x40;
+
+            var deviceAddress_fixed = 0x40;
+            var deviceAddress_selectable = 0b000000;    // A5 A4 A3 A2 A1 A0
+            var deviceAddress = deviceAddress_fixed | deviceAddress_selectable;
 
             var settings = new I2cConnectionSettings(busId, deviceAddress);
             var device = new UnixI2cDevice(settings);
@@ -28,7 +31,7 @@ namespace Iot.Device.Pca9685.Samples
 
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"PCA9685 is ready on I2C bus {pca9685.Device.ConnectionSettings.BusId} with address {pca9685.Device.ConnectionSettings.DeviceAddress}");
+                Console.WriteLine($"PCA9685 is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
 
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.Cyan;
