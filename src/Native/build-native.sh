@@ -128,7 +128,7 @@ build_native()
 
     make install -j $__NumProc $__MakeExtraArgs
     if [ $? != 0 ]; then
-        echo "Failed to build corefx native components."
+        echo "Failed to build iot native components."
         exit 1
     fi
 }
@@ -263,6 +263,6 @@ initTargetDistroRid
 
     prepare_native_build
 
-    # Build the corefx native components.
+    # Build the iot native components.
 
     build_native

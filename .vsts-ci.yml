@@ -40,20 +40,19 @@ phases:
     ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
       enableMicrobuild: true
     steps:
-    - script: eng\common\cibuild.cmd
+    - script: build.cmd -ci
         -configuration $(_BuildConfig)
         -prepareMachine
       name: Build
       displayName: Build
       condition: succeeded()
-    - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-      - task: PublishBuildArtifacts@1
-        displayName: Publish Windows package assets
-        inputs:
-          pathToPublish: $(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)/Shipping
-          artifactName: BuiltPackageOutputs
-          artifactType: container
-        condition: eq(variables['_BuildConfig'], 'Release')
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Windows managed assets
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/artifacts/bin
+        artifactName: bin
+        artifactType: container
+      condition: eq(variables['_BuildConfig'], 'Release')
     variables:
       _HelixBuildConfig: $(_BuildConfig)
       ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
@@ -74,7 +73,7 @@ phases:
         release_configuration:
           _BuildConfig: Release
     steps:
-    - script: eng/common/cibuild.sh
+    - script: ./build.sh --ci
         --configuration $(_BuildConfig)
         --prepareMachine
       name: Build
@@ -130,23 +129,84 @@ phases:
       name: MoveLibgpiod
       displayName: Move Libgpiod into crossrootfs
       condition: succeeded()
-    - script: ROOTFS_DIR=/crossrootfs/arm eng/common/cibuild.sh
+    - script: ROOTFS_DIR=/crossrootfs/arm ./build.sh --ci
         --configuration $(_BuildConfig)
         --prepareMachine
         /p:BuildNative=true
       name: Build
       displayName: Build
       condition: succeeded()
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Linux native assets
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Native
+        artifactName: Native
+        artifactType: container
+      condition: eq(variables['_BuildConfig'], 'Release')
     variables:
       _HelixBuildConfig: $(_BuildConfig)
+
+- template: /eng/common/templates/phases/base.yml
+  parameters:
+    dependsOn:
+    - Windows_NT
+    - OSX
+    - Linux
+    agentOs: Windows_NT
+    name: BuildPackages
+    enableTelemetry: $(_enableTelemetry)
+    queue:
+      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+        name: dotnet-internal-temp
+      ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+        name: dotnet-external-temp
+      parallel: 99
+      matrix:
+        release_configuration:
+          _BuildConfig: Release
+    ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+      enableMicrobuild: true
+    steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Built Managed Assets
+      inputs:
+        artifactName: bin
+        downloadPath: $(Build.SourcesDirectory)/artifacts
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Built Native Assets
+      inputs:
+        artifactName: Native
+        downloadPath: $(Build.SourcesDirectory)/artifacts/bin
+    - script: build.cmd -ci -sign
+        -configuration $(_BuildConfig)
+        -prepareMachine
+        /p:ProductBuild=false
+        /p:ToolsBuild=false
+        /p:SampleBuild=false
+        /p:BuildTests=false
+        /p:BuildPackages=true
+      name: Build
+      displayName: Build
+      condition: succeeded()
+    - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+      - task: PublishBuildArtifacts@1
+        displayName: Publish Windows package assets
+        inputs:
+          pathToPublish: $(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)/Shipping
+          artifactName: BuiltPackageOutputs
+          artifactType: container
+        condition: eq(variables['_BuildConfig'], 'Release')
+    variables:
+      _HelixBuildConfig: $(_BuildConfig)
+      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+        _TeamName: DotNetCore
+        _SignType: real
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/phases/base.yml
     parameters:
       dependsOn:
-        - Windows_NT
-        - OSX
-        - Linux
+      - BuildPackages
       agentOs: Windows_NT
       name: PublishToMyGet
       enableTelemetry: $(_enableTelemetry)

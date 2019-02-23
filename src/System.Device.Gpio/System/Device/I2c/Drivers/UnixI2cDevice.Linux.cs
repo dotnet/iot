@@ -58,7 +58,7 @@ namespace System.Device.I2c.Drivers
 
                 if (_deviceFileDescriptor < 0)
                 {
-                    throw new IOException($"Can not open I2C device file '{deviceFileName}'.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not open I2C device file '{deviceFileName}'.");
                 }
 
                 I2cFunctionalityFlags tempFlags;
@@ -120,7 +120,7 @@ namespace System.Device.I2c.Drivers
             int result = Interop.ioctl(_deviceFileDescriptor, (uint)I2cSettings.I2C_RDWR, new IntPtr(&msgset));
             if (result < 0)
             {
-                throw new IOException("Error performing I2C data transfer.");
+                throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
             }
         }
 
@@ -129,7 +129,7 @@ namespace System.Device.I2c.Drivers
             int result = Interop.ioctl(_deviceFileDescriptor, (uint)I2cSettings.I2C_SLAVE_FORCE, (ulong)_settings.DeviceAddress);
             if (result < 0)
             {
-                throw new IOException("Error performing I2C data transfer.");
+                throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
             }
 
             if (writeBuffer != null)
@@ -137,7 +137,7 @@ namespace System.Device.I2c.Drivers
                 result = Interop.write(_deviceFileDescriptor, new IntPtr(writeBuffer), writeBufferLength);
                 if (result < 0)
                 {
-                    throw new IOException("Error performing I2C data transfer.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
                 }
             }
 
@@ -146,7 +146,7 @@ namespace System.Device.I2c.Drivers
                 result = Interop.read(_deviceFileDescriptor, new IntPtr(readBuffer), readBufferLength);
                 if (result < 0)
                 {
-                    throw new IOException("Error performing I2C data transfer.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
                 }
             }
         }

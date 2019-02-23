@@ -21,13 +21,25 @@ const int pinkPin = 17;
 const int yellowPin = 27;
 const int orangePin = 22;
 
-using (StepperMotor motor = new StepperMotor(bluePin, pinkPin, yellowPin, orangePin))
+using (Uln2003 motor = new Uln2003(bluePin, pinkPin, yellowPin, orangePin))
 {
-  // The motor turns one direction for postive 2048 and the reverse direction for negative 2048 (180 degrees).
   while (true)
   {
+    // Set the motor speed to 15 revolutions per minute.
+    motor.RPM = 15;
+    // Set the motor mode.  
+    motor.Mode = StepperMode.HalfStep;
+    // The motor rotate 2048 steps clockwise (180 degrees for HalfStep mode).
     motor.Step(2048);
+
+    motor.Mode = StepperMode.FullStepDualPhase;
+    motor.RPM = 8;
+    // The motor rotate 2048 steps counterclockwise (360 degrees for FullStepDualPhase mode).
     motor.Step(-2048);
-  } 
+
+    motor.Mode = StepperMode.HalfStep;
+    motor.RPM = 1;
+    motor.Step(4096);
+  }
 }
 ```

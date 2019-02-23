@@ -15,5 +15,6 @@ namespace Iot.Device.Hmc5883l
         HMC_X_MSB_REG_ADDR = 0x03,
         HMC_Z_MSB_REG_ADDR = 0x05,
         HMC_Y_MSB_REG_ADDR = 0x07,
+        HMC_STATUS_REG_ADDR = 0x09
     }
 }
