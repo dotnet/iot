@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
     <Compile Include="..\Common\System\Device\Gpio\PinVector32.cs" Link="PinVector32.cs" />
     <Compile Include="BankStyle.cs" />
     <Compile Include="I2cAdapter.cs" />
@@ -27,8 +28,7 @@
     <Compile Include="SpiAdapter.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+  <ItemGroup>    
     <None Include="README.md" />
   </ItemGroup>
 
