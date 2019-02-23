@@ -139,12 +139,13 @@ namespace Iot.Device.Nrf24l01
         {
             // Details in the Datasheet P65
             SetWorkingMode(WorkingMode.Transmit);
-            Thread.Sleep(1);        // wait for some time so that it doesn't go too fast
+            // wait for some time so that it doesn't go too fast
+            Thread.Sleep(1);
 
             Write(Command.NRF_W_TX_PAYLOAD, Register.NRF_NOOP, data);
 
             _gpio.Write(_ce, PinValue.High);
-            Thread.Sleep(1);       
+            Thread.Sleep(1);
             _gpio.Write(_ce, PinValue.Low);
             Thread.Sleep(1);
 
@@ -169,7 +170,8 @@ namespace Iot.Device.Nrf24l01
             readData.CopyTo(ret);
 
             _gpio.Write(_ce, PinValue.Low);
-            Write(Command.NRF_W_REGISTER, Register.NRF_STATUS, 0b_0100_1110);       // clear RX FIFO interrupt
+            // clear RX FIFO interrupt
+            Write(Command.NRF_W_REGISTER, Register.NRF_STATUS, 0b_0100_1110);
             _gpio.Write(_ce, PinValue.High);
 
             return ret;
@@ -212,13 +214,15 @@ namespace Iot.Device.Nrf24l01
             _gpio.OpenPin(_irq, PinMode.Input);
             _gpio.RegisterCallbackForPinValueChangedEvent(_irq, PinEventTypes.Falling, Irq_ValueChanged);
 
-            Thread.Sleep(10);       // wait for some time
+            // wait for some time
+            Thread.Sleep(10);
 
             // Details in the datasheet P53
             _gpio.Write(_ce, PinValue.Low);
             Write(Command.NRF_FLUSH_TX, Register.NRF_NOOP, _empty);
             Write(Command.NRF_FLUSH_RX, Register.NRF_NOOP, _empty);
-            Write(Command.NRF_W_REGISTER, Register.NRF_CONFIG, 0b_0011_1011);       //  reflect RX_DR interrupt, TX_DS interrupt not reflected, power up, receive mode
+            // reflect RX_DR interrupt, TX_DS interrupt not reflected, power up, receive mode
+            Write(Command.NRF_W_REGISTER, Register.NRF_CONFIG, 0b_0011_1011);
             _gpio.Write(_ce, PinValue.High);
 
             SetAutoAck(false);
@@ -323,7 +327,8 @@ namespace Iot.Device.Nrf24l01
 
             if (isAutoAck)
             {
-                Write(Command.NRF_W_REGISTER, Register.NRF_EN_AA, 0b_0011_1111);        // all pipe
+                // all pipe
+                Write(Command.NRF_W_REGISTER, Register.NRF_EN_AA, 0b_0011_1111);
             }
             else
             {
@@ -402,7 +407,8 @@ namespace Iot.Device.Nrf24l01
 
             if (isEnable)
             {
-                Write(Command.NRF_W_REGISTER, Register.NRF_EN_RXADDR, 0b_0011_1111);        // all pipe
+                // all pipe
+                Write(Command.NRF_W_REGISTER, Register.NRF_EN_RXADDR, 0b_0011_1111);
             }
             else
             {
@@ -510,7 +516,7 @@ namespace Iot.Device.Nrf24l01
             // Details in the Datasheet P53
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
 
-            return (PowerMode)(readData[0] >> 1 & 0b_0000_0001);
+            return (PowerMode)((readData[0] >> 1) & 0b_0000_0001);
         }
 
         /// <summary>
@@ -584,7 +590,7 @@ namespace Iot.Device.Nrf24l01
             // Details in the Datasheet P54
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, 1);
 
-            return (OutputPower)(readData[0] & 0b_0000_0110 >> 1);
+            return (OutputPower)((readData[0] & 0b_0000_0110) >> 1);
         }
 
         /// <summary>
@@ -615,7 +621,7 @@ namespace Iot.Device.Nrf24l01
             // Details in the Datasheet P54
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, 1);
 
-            return (DataRate)(readData[0] & 0b_0000_1000 >> 3);
+            return (DataRate)((readData[0] & 0b_0000_1000) >> 3);
         }
 
         /// <summary>
