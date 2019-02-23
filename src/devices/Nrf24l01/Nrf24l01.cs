@@ -23,6 +23,7 @@ namespace Iot.Device.Nrf24l01
         private readonly byte[] _empty = Array.Empty<byte>();
 
         #region prop
+
         private byte _packetSize;
         /// <summary>
         /// nRF24L01 Receive Packet Size
@@ -92,6 +93,7 @@ namespace Iot.Device.Nrf24l01
         /// nRF24L01 Pipe 5
         /// </summary>
         public Nrf24l01Pipe Pipe5 { get; private set; }
+
         #endregion
 
         #region SpiSettings
@@ -135,15 +137,16 @@ namespace Iot.Device.Nrf24l01
         /// <param name="data">Send Data</param>
         public void Send(byte[] data)
         {
+            // Details in the Datasheet P65
             SetWorkingMode(WorkingMode.Transmit);
-            Thread.Sleep(4);
+            Thread.Sleep(1);        // wait for some time so that it doesn't go too fast
 
             Write(Command.NRF_W_TX_PAYLOAD, Register.NRF_NOOP, data);
 
             _gpio.Write(_ce, PinValue.High);
-            Thread.Sleep(1);
+            Thread.Sleep(1);       
             _gpio.Write(_ce, PinValue.Low);
-            Thread.Sleep(10);
+            Thread.Sleep(1);
 
             SetWorkingMode(WorkingMode.Receive);
             Thread.Sleep(1);
@@ -156,6 +159,7 @@ namespace Iot.Device.Nrf24l01
         /// <returns>Data</returns>
         public Span<byte> Receive(byte length)
         {
+            // Details in the Datasheet P65
             _gpio.Write(_ce, PinValue.Low);
 
             Span<byte> writeData = stackalloc byte[length];
@@ -165,7 +169,7 @@ namespace Iot.Device.Nrf24l01
             readData.CopyTo(ret);
 
             _gpio.Write(_ce, PinValue.Low);
-            Write(Command.NRF_W_REGISTER, Register.NRF_STATUS, 0x4E);
+            Write(Command.NRF_W_REGISTER, Register.NRF_STATUS, 0b_0100_1110);       // clear RX FIFO interrupt
             _gpio.Write(_ce, PinValue.High);
 
             return ret;
@@ -176,15 +180,11 @@ namespace Iot.Device.Nrf24l01
         /// </summary>
         public void Dispose()
         {
-            if (_sensor != null)
-            {
-                _sensor.Dispose();
-            }
-            
-            if (_gpio != null)
-            {
-                _sensor.Dispose();
-            }
+            _sensor?.Dispose();
+            _sensor = null;
+
+            _gpio?.Dispose();
+            _gpio = null;
         }
 
         public delegate void DataReceivedHandle(object sender, DataReceivedEventArgs e);
@@ -200,23 +200,25 @@ namespace Iot.Device.Nrf24l01
         }
 
         #region private and internal
+
         /// <summary>
         /// Initialize
         /// </summary>
         private void Initialize(PinNumberingScheme pinNumberingScheme, OutputPower outputPower, DataRate dataRate, byte channel)
         {
+            // open pins
             _gpio = new GpioController(pinNumberingScheme);
             _gpio.OpenPin(_ce, PinMode.Output);
             _gpio.OpenPin(_irq, PinMode.Input);
             _gpio.RegisterCallbackForPinValueChangedEvent(_irq, PinEventTypes.Falling, Irq_ValueChanged);
 
-            Thread.Sleep(50);
+            Thread.Sleep(10);       // wait for some time
 
             // Details in the datasheet P53
             _gpio.Write(_ce, PinValue.Low);
             Write(Command.NRF_FLUSH_TX, Register.NRF_NOOP, _empty);
             Write(Command.NRF_FLUSH_RX, Register.NRF_NOOP, _empty);
-            Write(Command.NRF_W_REGISTER, Register.NRF_CONFIG, 0x3B);
+            Write(Command.NRF_W_REGISTER, Register.NRF_CONFIG, 0b_0011_1011);       //  reflect RX_DR interrupt, TX_DS interrupt not reflected, power up, receive mode
             _gpio.Write(_ce, PinValue.High);
 
             SetAutoAck(false);
@@ -245,6 +247,7 @@ namespace Iot.Device.Nrf24l01
         /// <param name="payload">Size, from 0 to 32</param>
         internal void SetRxPayload(byte payload)
         {
+            // Details in the Datasheet P56
             if (payload > 32 || payload < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(payload), $"{nameof(payload)} needs to be in the range of 0 to 32.");
@@ -271,6 +274,7 @@ namespace Iot.Device.Nrf24l01
         /// <param name="payload">Size, from 0 to 32</param>
         internal void SetRxPayload(byte pipe, byte payload)
         {
+            // Details in the Datasheet P56
             if (payload > 32 || payload < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(payload), $"{nameof(payload)} needs to be in the range of 0 to 32.");
@@ -297,6 +301,7 @@ namespace Iot.Device.Nrf24l01
         /// <returns>Size</returns>
         internal byte ReadRxPayload(byte pipe)
         {
+            // Details in the Datasheet P56
             if (pipe > 5 || pipe < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
@@ -313,15 +318,16 @@ namespace Iot.Device.Nrf24l01
         /// <param name="isAutoAck">Is Enable</param>
         internal void SetAutoAck(bool isAutoAck)
         {
+            // Details in the Datasheet P53
             _gpio.Write(_ce, PinValue.Low);
 
             if (isAutoAck)
             {
-                Write(Command.NRF_W_REGISTER, Register.NRF_EN_AA, 0x3F);
+                Write(Command.NRF_W_REGISTER, Register.NRF_EN_AA, 0b_0011_1111);        // all pipe
             }
             else
             {
-                Write(Command.NRF_W_REGISTER, Register.NRF_EN_AA, 0x00);
+                Write(Command.NRF_W_REGISTER, Register.NRF_EN_AA, 0b_0000_0000);
             }
 
             _gpio.Write(_ce, PinValue.High);
@@ -334,6 +340,7 @@ namespace Iot.Device.Nrf24l01
         /// <param name="isAutoAck">Is Enable</param>
         internal void SetAutoAck(byte pipe, bool isAutoAck)
         {
+            // Details in the Datasheet P53
             if (pipe > 5 || pipe < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
@@ -365,6 +372,7 @@ namespace Iot.Device.Nrf24l01
         /// <returns>Is Enable</returns>
         internal bool ReadAutoAck(byte pipe)
         {
+            // Details in the Datasheet P53
             if (pipe > 5 || pipe < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
@@ -372,7 +380,7 @@ namespace Iot.Device.Nrf24l01
 
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_EN_AA, 1);
 
-            byte ret = (byte)(readData[0] >> pipe & 0x01);
+            byte ret = (byte)(readData[0] >> pipe & 0b_0000_0001);
             if (ret == 0)
             {
                 return false;
@@ -389,15 +397,16 @@ namespace Iot.Device.Nrf24l01
         /// <param name="isEnable">Is Enable Receive</param>
         internal void SetRxPipe(bool isEnable)
         {
+            // Details in the Datasheet P54
             _gpio.Write(_ce, PinValue.Low);
 
             if (isEnable)
             {
-                Write(Command.NRF_W_REGISTER, Register.NRF_EN_RXADDR, 0x3F);
+                Write(Command.NRF_W_REGISTER, Register.NRF_EN_RXADDR, 0b_0011_1111);        // all pipe
             }
             else
             {
-                Write(Command.NRF_W_REGISTER, Register.NRF_EN_RXADDR, 0x00);
+                Write(Command.NRF_W_REGISTER, Register.NRF_EN_RXADDR, 0b_0000_0000);
             }
 
             _gpio.Write(_ce, PinValue.High);
@@ -410,6 +419,7 @@ namespace Iot.Device.Nrf24l01
         /// <param name="isEnable">Is Enable the Pipe Receive</param>
         internal void SetRxPipe(byte pipe, bool isEnable)
         {
+            // Details in the Datasheet P54
             if (pipe > 5 || pipe < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
@@ -441,6 +451,7 @@ namespace Iot.Device.Nrf24l01
         /// <returns>Is Enable the Pipe Receive</returns>
         internal bool ReadRxPipe(byte pipe)
         {
+            // Details in the Datasheet P54
             if (pipe > 5 || pipe < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
@@ -465,6 +476,8 @@ namespace Iot.Device.Nrf24l01
         /// <param name="mode">Power Mode</param>
         internal void SetPowerMode(PowerMode mode)
         {
+            // Details in the Datasheet P53
+            // Register:0x00, bit[1]
             _gpio.Write(_ce, PinValue.Low);
 
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
@@ -494,9 +507,10 @@ namespace Iot.Device.Nrf24l01
         /// <returns>Power Mode</returns>
         internal PowerMode ReadPowerMode()
         {
+            // Details in the Datasheet P53
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
 
-            return (PowerMode)(readData[0] >> 1 & 0x01);
+            return (PowerMode)(readData[0] >> 1 & 0b_0000_0001);
         }
 
         /// <summary>
@@ -505,6 +519,8 @@ namespace Iot.Device.Nrf24l01
         /// <param name="mode">Working Mode</param>
         internal void SetWorkingMode(WorkingMode mode)
         {
+            // Details in the Datasheet P53
+            // Register:0x00, bit[0]
             _gpio.Write(_ce, PinValue.Low);
 
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
@@ -534,9 +550,10 @@ namespace Iot.Device.Nrf24l01
         /// <returns>Working Mode</returns>
         internal WorkingMode ReadWorkwingMode()
         {
+            // Details in the Datasheet P53
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
 
-            return (WorkingMode)(readData[0] & 0x01);
+            return (WorkingMode)(readData[0] & 0b_0000_0001);
         }
 
         /// <summary>
@@ -545,11 +562,13 @@ namespace Iot.Device.Nrf24l01
         /// <param name="power">Output Power</param>
         internal void SetOutputPower(OutputPower power)
         {
+            // Details in the Datasheet P54
+            // Register: 0x06, bit[2:1]
             _gpio.Write(_ce, PinValue.Low);
 
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, 1);
 
-            byte setting = (byte)(readData[0] & (~0x06) | ((byte)power << 1));
+            byte setting = (byte)(readData[0] & (~0b_0000_0110) | ((byte)power << 1));
 
             Write(Command.NRF_W_REGISTER, Register.NRF_RF_SETUP, setting);
 
@@ -562,9 +581,10 @@ namespace Iot.Device.Nrf24l01
         /// <returns>Output Power</returns>
         internal OutputPower ReadOutputPower()
         {
+            // Details in the Datasheet P54
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, 1);
 
-            return (OutputPower)(readData[0] & 0x06 >> 1);
+            return (OutputPower)(readData[0] & 0b_0000_0110 >> 1);
         }
 
         /// <summary>
@@ -573,11 +593,13 @@ namespace Iot.Device.Nrf24l01
         /// <param name="rate">Send Rate</param>
         internal void SetDataRate(DataRate rate)
         {
+            // Details in the Datasheet P54
+            // Register: 0x06, bit[3]
             _gpio.Write(_ce, PinValue.Low);
 
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, 1);
 
-            byte setting = (byte)(readData[0] & (~0x08) | ((byte)rate << 1));
+            byte setting = (byte)(readData[0] & (~0b_0000_1000) | ((byte)rate << 1));
 
             Write(Command.NRF_W_REGISTER, Register.NRF_RF_SETUP, setting);
 
@@ -590,9 +612,10 @@ namespace Iot.Device.Nrf24l01
         /// <returns>Send Rate</returns>
         internal DataRate ReadDataRate()
         {
+            // Details in the Datasheet P54
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, 1);
 
-            return (DataRate)(readData[0] & 0x08 >> 3);
+            return (DataRate)(readData[0] & 0b_0000_1000 >> 3);
         }
 
         /// <summary>
@@ -602,6 +625,7 @@ namespace Iot.Device.Nrf24l01
         /// <param name="address">Address, if (pipe > 1) then (address.Length = 1), else if (pipe = 1 || pipe = 0) then (address.Length ≤ 5)</param>
         internal void SetRxAddress(byte pipe, ReadOnlySpan<byte> address)
         {
+            // Details in the Datasheet P55
             if (pipe > 5 || pipe < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
@@ -638,6 +662,7 @@ namespace Iot.Device.Nrf24l01
         /// <returns>Address</returns>
         internal byte[] ReadRxAddress(byte pipe)
         {
+            // Details in the Datasheet P55
             if (pipe > 5 || pipe < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
@@ -660,6 +685,7 @@ namespace Iot.Device.Nrf24l01
         /// <param name="address">Address, address.Length = 5</param>
         internal void SetTxAddress(ReadOnlySpan<byte> address)
         {
+            // Details in the Datasheet P56
             if (address.Length > 5 || address.Length < 1)
             {
                 throw new ArgumentOutOfRangeException("Array Length must less than 6.");
@@ -678,6 +704,7 @@ namespace Iot.Device.Nrf24l01
         /// <returns>Address</returns>
         internal byte[] ReadTxAddress()
         {
+            // Details in the Datasheet P56
             return WriteRead(Command.NRF_R_REGISTER, Register.NRF_TX_ADDR, 5);
         }
 
@@ -687,6 +714,8 @@ namespace Iot.Device.Nrf24l01
         /// <param name="channel">From 0 to 127</param>
         internal void SetChannel(byte channel)
         {
+            // Details in the Datasheet P54
+            // Register: 0x05, bit[6:0]
             if (channel < 0 || channel > 127)
             {
                 throw new ArgumentOutOfRangeException("Channel needs to be in the range of 0 to 127.");
@@ -705,6 +734,7 @@ namespace Iot.Device.Nrf24l01
         /// <returns>Channel</returns>
         internal byte ReadChannel()
         {
+            // Details in the Datasheet P54
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_CH, 1);
 
             return readData[0];
