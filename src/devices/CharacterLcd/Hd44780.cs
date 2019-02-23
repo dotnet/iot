@@ -50,12 +50,12 @@ namespace Iot.Device.CharacterLcd
         private byte _lastByte;
         private bool _useLastByte;
 
-        private PinValuePair[] _pinBuffer = new PinValuePair[8];
+        private readonly PinValuePair[] _pinBuffer = new PinValuePair[8];
 
         // We need to add PWM support to make this useful (to drive the VO pin).
         // For now we'll just stash the value and use it to decide the initial
         // backlight state.
-        private float _backlightBrightness;
+        private readonly float _backlightBrightness;
 
         /// <summary>
         /// Initializes a new HD44780 LCD controller.
