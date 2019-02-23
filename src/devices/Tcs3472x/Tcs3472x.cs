@@ -12,7 +12,7 @@ namespace Iot.Device.Tcs3472x
 {
     public class Tcs3472xSensor : IDisposable
     {
-        public const byte DefaultAddress = 0x29;
+        public const byte DefaultI2cAddress = 0x29;
         private readonly I2cDevice _i2cDevice;
         private byte _integrationTimeByte;
         private double _integrationTime;
@@ -199,7 +199,7 @@ namespace Iot.Device.Tcs3472x
         /// <summary>
         /// Get the color
         /// </summary>
-        public ConsoleColor Color => GetColor();
+        public Color Color => GetColor();
 
         private UInt16 I2cRead16(Registers reg)
         {

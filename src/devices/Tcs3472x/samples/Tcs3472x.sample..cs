@@ -15,7 +15,7 @@ namespace Tcs3472xsample
         static void Main(string[] args)
         {
             Console.WriteLine("Hello TCS3472x!");
-            var i2cSettings = new I2cConnectionSettings(1, Tcs3472xSensor.DefaultAddress);
+            var i2cSettings = new I2cConnectionSettings(1, Tcs3472xSensor.DefaultI2cAddress);
             I2cDevice i2cDevice = new UnixI2cDevice(i2cSettings);
             using(Tcs3472xSensor tcs3472X = new Tcs3472xSensor(i2cDevice))
             {
