@@ -20,6 +20,11 @@ namespace Iot.Device.Uln2003.Samples
             Console.WriteLine($"Let's go!");
             using (Uln2003 motor = new Uln2003(bluePin, pinkPin, yellowPin, orangePin))
             {
+                Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs eventArgs) =>
+                {
+                    motor.Dispose();
+                };
+
                 while (true)
                 {
                     // Set the motor speed to 15 revolutions per minute.
