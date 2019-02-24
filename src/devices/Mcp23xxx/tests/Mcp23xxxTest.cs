@@ -123,9 +123,8 @@ namespace Iot.Device.Mcp23xxx.Tests
             public Span<byte> Registers => _registers;
 
             // Can't coalesce here https://github.com/dotnet/roslyn/issues/29927
-            public ReadOnlySpan<byte> LastReadBuffer => _lastReadBuffer ?? ReadOnlySpan<byte>.Empty;
-
-            public ReadOnlySpan<byte> LastWriteBuffer => _lastWriteBuffer ?? ReadOnlySpan<byte>.Empty;
+            public ReadOnlySpan<byte> LastReadBuffer => _lastReadBuffer == null ? ReadOnlySpan<byte>.Empty : _lastReadBuffer;
+            public ReadOnlySpan<byte> LastWriteBuffer => _lastWriteBuffer == null ? ReadOnlySpan<byte>.Empty : _lastWriteBuffer;
 
             public void Read(Span<byte> buffer)
             {
