@@ -432,6 +432,7 @@ namespace System.Device.Gpio.Drivers
             if (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
             {
                 s_eventThreadCancellationTokenSource.Cancel();
+                s_eventThreadCancellationTokenSource.Dispose();
                 while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                 {
                     Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.

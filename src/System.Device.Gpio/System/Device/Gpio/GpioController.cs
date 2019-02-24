@@ -201,8 +201,10 @@ namespace System.Device.Gpio
         /// <returns>A structure that contains the result of the waiting operation.</returns>
         public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
-            return WaitForEvent(pinNumber, eventTypes, tokenSource.Token);
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource(timeout))
+            {
+                return WaitForEvent(pinNumber, eventTypes, tokenSource.Token);
+            }
         }
 
         /// <summary>
@@ -231,8 +233,10 @@ namespace System.Device.Gpio
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation.</returns>
         public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
-            return WaitForEventAsync(pinNumber, eventTypes, tokenSource.Token);
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource(timeout))
+            {
+                return WaitForEventAsync(pinNumber, eventTypes, tokenSource.Token);
+            }
         }
 
         /// <summary>
