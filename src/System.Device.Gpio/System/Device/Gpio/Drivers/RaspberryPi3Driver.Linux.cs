@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -324,7 +325,7 @@ namespace System.Device.Gpio.Drivers
                 {
                     return;
                 }
-                _sysFSDriver = new UnixDriver();
+                _sysFSDriver = new SysfsDriver();
             }
         }
 
@@ -345,13 +346,13 @@ namespace System.Device.Gpio.Drivers
                 int fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
                 if (fileDescriptor < 0)
                 {
-                    throw new IOException("Error initializing the Gpio driver.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
                 }
 
                 IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, GpioRegisterOffset);
                 if (mapPointer.ToInt32() < 0)
                 {
-                    throw new IOException("Error initializing the Gpio driver.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
                 }
 
                 Interop.close(fileDescriptor);
