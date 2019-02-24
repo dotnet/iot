@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Max44009
 {
+    /// <summary>
+    /// Measurement Cycle
+    /// </summary>
     public enum IntegrationTime
     {
         /// <summary>

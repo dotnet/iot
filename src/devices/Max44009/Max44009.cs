@@ -12,7 +12,7 @@ namespace Iot.Device.Max44009
     /// </summary>
     public class Max44009 : IDisposable
     {
-        I2cDevice _sensor;
+        private I2cDevice _sensor;
 
         /// <summary>
         /// MAX44009 Default I2C Address
