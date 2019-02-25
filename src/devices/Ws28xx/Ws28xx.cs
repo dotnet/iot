@@ -4,7 +4,6 @@
 
 using Iot.Device.Graphics;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 
 namespace Iot.Device.Ws28xx
 {
