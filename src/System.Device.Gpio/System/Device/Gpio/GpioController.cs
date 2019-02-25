@@ -231,11 +231,11 @@ namespace System.Device.Gpio
         /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="timeout">The time to wait for the event.</param>
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation.</returns>
-        public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
+        public async ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
         {
             using (CancellationTokenSource tokenSource = new CancellationTokenSource(timeout))
             {
-                return WaitForEventAsync(pinNumber, eventTypes, tokenSource.Token);
+                return await WaitForEventAsync(pinNumber, eventTypes, tokenSource.Token).ConfigureAwait(false);
             }
         }
 
