@@ -61,10 +61,12 @@ namespace Iot.Device.Lm75
             ushort raw = (ushort)((readBuff[0] << 3) | (readBuff[1] >> 5));
             if ((readBuff[0] & 0x80) == 0)
             {
+                // temperature >= 0
                 temp = raw * 0.125;
             }
             else
             {
+                // temperature < 0
                 // two's complement
                 raw |= 0xF800;
                 raw = (ushort)(~raw + 1);
