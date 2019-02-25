@@ -4,7 +4,7 @@
 
 namespace Iot.Device.Lm75
 {
-    public enum Register : byte
+    internal enum Register : byte
     {
         LM_TEMP = 0x00,
         LM_CONFIG = 0x01,
