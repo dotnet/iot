@@ -13,11 +13,17 @@ namespace Iot.Device.Ws28xx.Samples
     class Program
     {
         // Configure the count of pixels
-        private const int count = 50; 
+        private const int count = 8; 
         static void Main()
         {
+            var settings = new SpiConnectionSettings(0, 0) {
+                ClockFrequency = 2_400_000,
+                Mode = SpiMode.Mode0,
+                DataBitLength = 8
+            };
+            
 		    // Create a Neo Pixel x8 stick on spi 0.0
-            var spi = new UnixSpiDevice(new SpiConnectionSettings(0, 0));
+            var spi = new UnixSpiDevice(settings);
             
 #if WS2808
             var neo = new Ws2808(spi, count);

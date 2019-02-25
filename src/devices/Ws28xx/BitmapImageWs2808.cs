@@ -19,9 +19,9 @@ namespace Iot.Device.Ws28xx
         public override void SetPixel(int x, int y, Color c)
         {
             var offset = y * Stride + x * BytesPerPixel;
-            Data[offset++] = (byte)(c.G & 0xFF);
-            Data[offset++] = (byte)(c.R & 0xFF);
-            Data[offset++] = (byte)(c.B & 0xFF);
+            Data[offset++] = c.R;
+            Data[offset++] = c.G;
+            Data[offset++] = c.B;
         }
     }
 }
