@@ -127,7 +127,6 @@ namespace Iot.Device.Mpr121
         public Mpr121(I2cDevice device, int periodRefresh, Mpr121Configuration configuration)
         {
             _device = device;
-            _periodRefresh = periodRefresh;
 
             _statuses = new Dictionary<Channels, bool>();
             foreach (Channels channel in Enum.GetValues(typeof(Channels)))
@@ -137,10 +136,7 @@ namespace Iot.Device.Mpr121
 
             InitializeController(configuration);
 
-            if (PeriodRefresh > 0)
-            {
-                _timer = new Timer(RefreshChannelStatuses, this, TimeSpan.FromMilliseconds(PeriodRefresh), TimeSpan.FromMilliseconds(PeriodRefresh));
-            }
+            PeriodRefresh = periodRefresh;
         }
 
         public void Dispose()

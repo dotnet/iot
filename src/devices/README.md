@@ -22,11 +22,15 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Mcp23xxx -- I/O Expander](Mcp23xxx/README.md)
 * [Mcp3008 -- Analog-to-Digital Converter](Mcp3008/README.md)
 <<<<<<< HEAD
+<<<<<<< HEAD
 * [Mpr121 - Proximity Capacitive Touch Sensor Controller](MPR121/README.md)
 * [nRF24L01 -- Single chip 2.4 GHz Transceiver](Nrf24l01/README.md)
 =======
 * [Mpr121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
 >>>>>>> Fix readme
+=======
+* [Mpr121 -- Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
+>>>>>>> Fixes.
 * [Pca95x4 -- I2C GPIO Expander](Pca95x4/README.md)
 * [Pcx857x -- I2C GPIO Expander](Pcx857x/README.md)
 * [Servo -- Servomotor Controller](Servo/README.md)

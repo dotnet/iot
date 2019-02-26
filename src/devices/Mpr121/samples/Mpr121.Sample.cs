@@ -7,7 +7,6 @@ using System.ComponentModel;
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
 
-
 namespace Iot.Device.Mpr121.Samples
 {
     class Program
