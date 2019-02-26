@@ -10,6 +10,7 @@
 - constructor should only require parameters it cannot work without - anything else should be a default value
   - for more advanced settings or devices which require many parameters using designated Settings class is recommended
 - invalid/unassigned pin should have number `-1` (as opposed to `Nullable<int>`)
+- if your device has internal register create an enum for the addresses (i.e. `enum Register : byte`)
 
 `*` -  Vector3 is currently backed by float, this may be changed in the future: https://github.com/dotnet/corefx/issues/25334
 
