@@ -60,7 +60,7 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
-        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
+        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             ValidatePinNumber(pinNumber);
             InitializeSysFS();
@@ -68,7 +68,7 @@ namespace System.Device.Gpio.Drivers
             _sysFSDriver.OpenPin(pinNumber);
             _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
-            _sysFSDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventType, callback);
+            _sysFSDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
         }
 
         /// <summary>

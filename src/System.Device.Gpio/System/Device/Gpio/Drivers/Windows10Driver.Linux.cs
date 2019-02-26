@@ -15,7 +15,7 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override int PinCount => throw new PlatformNotSupportedException();
 
-        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
+        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             throw new PlatformNotSupportedException();
         }
@@ -60,7 +60,7 @@ namespace System.Device.Gpio.Drivers
             throw new PlatformNotSupportedException();
         }
 
-        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
+        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             throw new PlatformNotSupportedException();
         }
