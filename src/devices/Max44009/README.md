@@ -15,7 +15,7 @@ UnixI2cDevice device = new UnixI2cDevice(settings);
 //Windows10I2cDevice device = new Windows10I2cDevice(settings);
 
 // integration time is 100ms
-using (Max44009 sensor = new Max44009(device, IntegrationTime.TIM_100))
+using (Max44009 sensor = new Max44009(device, IntegrationTime.Time100))
 {
     // read illuminance
     double illuminance = sensor.Illuminance;

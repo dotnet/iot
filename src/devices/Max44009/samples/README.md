@@ -18,7 +18,7 @@ I2cConnectionSettings settings = new I2cConnectionSettings(1, Max44009.DefaultI2
 UnixI2cDevice device = new UnixI2cDevice(settings);
 
 // integration time is 100ms
-using (Max44009 sensor = new Max44009(device, IntegrationTime.TIM_100))
+using (Max44009 sensor = new Max44009(device, IntegrationTime.Time100))
 {
     while (true)
     {
