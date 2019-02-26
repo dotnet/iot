@@ -5,7 +5,7 @@
 using Iot.Device.Graphics;
 using System.Drawing;
 
-namespace Iot.Device.Ws2812b
+namespace Iot.Device.Ws28xx
 {
     /// <summary>
     /// Special 24bit RGB format for Neo pixel LEDs where each bit is converted to 3 bits.

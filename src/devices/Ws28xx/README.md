@@ -1,14 +1,15 @@
-﻿# Ws2812b
+﻿# Ws28xx LED drivers
 
 ## Summary
 
-This binding allows you to update the RGB LEDs on Ws2812b based strips and matrices.
+This binding allows you to update the RGB LEDs on Ws28xx and based strips and matrices.
 
 To see how to use the binding in code, see the [sample](samples/README.md).
 
 ## Device Family
 
 * WS2812B: [Datasheet](https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf)
+* WS2808: [Datasheet](https://datasheetspdf.com/pdf-file/806051/Worldsemi/WS2801/1)
 
 ## Binding Notes
 

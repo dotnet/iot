@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-  	<ProjectReference Include="../Ws2812b.csproj" />
+  	<ProjectReference Include="../Ws28xx.csproj" />
   </ItemGroup>
 
 </Project>
