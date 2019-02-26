@@ -18,6 +18,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [HC-SR501 -- PIR Motion Sensor](Hcsr501/README.md)
 * [HMC5883L -- 3-Axis Digital Compass](Hmc5883l/README.md)
 * [Max7219 -- LED Matrix Driver](Max7219/README.md)
+* [MAX44009 -- Ambient Light Sensor](Max44009/README.md)
 * [Mcp23xxx -- I/O Expander](Mcp23xxx/README.md)
 * [Mcp3008 -- Analog-to-Digital Converter](Mcp3008/README.md)
 * [nRF24L01 -- Single chip 2.4 GHz Transceiver](Nrf24l01/README.md)
