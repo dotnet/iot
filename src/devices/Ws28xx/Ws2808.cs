@@ -9,7 +9,7 @@ namespace Iot.Device.Ws28xx
     public class Ws2808 : Ws28xx
     {
         public Ws2808(SpiDevice spiDevice, int width, int height = 1)
-            :base(spiDevice, width, height)
+            : base(spiDevice, width, height)
         {
             Image = new BitmapImageWs2808(width, height);
         }
