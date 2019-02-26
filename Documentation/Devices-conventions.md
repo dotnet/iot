@@ -9,6 +9,7 @@
 - only the most useful APIs should be public, anything else which may be useful but will unlikely get used by most of the people should be protected (inheriting the class allows you to use it but it is not visible by default) or internal/private
 - constructor should only require parameters it cannot work without - anything else should be a default value
   - for more advanced settings or devices which require many parameters using designated Settings class is recommended
+- invalid/unassigned pin should have number `-1` (as opposed to `Nullable<int>`)
 
 `*` -  Vector3 is currently backed by float, this may be changed in the future: https://github.com/dotnet/corefx/issues/25334
 
