@@ -17,7 +17,7 @@ namespace Iot.Device.CharacterLcd.Samples
         static void Main(string[] args)
         {
             // Sets up a 16x2 character LCD with a hardwired or no backlight.
-            using (Lcd1602 lcd = new Lcd1602(registerSelect: 1, enable: 2, data: new int[] { 3, 4, 5, 6 }))
+            using (Lcd1602 lcd = new Lcd1602(registerSelect: 22, enable: 17, data: new int[] { 25, 24, 23, 18 }))
             {
                 lcd.Clear();
                 lcd.Write("Hello World");
