@@ -20,7 +20,6 @@ namespace Iot.Device.Sht3x
         private const byte CRC_INIT = 0xFF;
 
         #region prop
-
         /// <summary>
         /// SHT3x Resolution
         /// </summary>
@@ -106,15 +105,17 @@ namespace Iot.Device.Sht3x
             Span<byte> readBuff = stackalloc byte[6];
 
             _sensor.Write(writeBuff);
-            Thread.Sleep(20);       // wait SCL free
+            // wait SCL free
+            Thread.Sleep(20);       
             _sensor.Read(readBuff);
 
             // Details in the Datasheet P13
             int st = (readBuff[0] << 8) | readBuff[1];      // Temp
             int srh = (readBuff[3] << 8) | readBuff[4];     // Humi
 
-            bool tCrc = CRC8(readBuff.Slice(0, 2), readBuff[2]);
-            bool rhCrc= CRC8(readBuff.Slice(3, 2), readBuff[5]);
+            // check 8-bit crc
+            bool tCrc = CheckCrc8(readBuff.Slice(0, 2), readBuff[2]);
+            bool rhCrc= CheckCrc8(readBuff.Slice(3, 2), readBuff[5]);
             if (tCrc == false || rhCrc == false)
             {
                 return;
@@ -131,7 +132,7 @@ namespace Iot.Device.Sht3x
         /// <param name="data">Raw Data</param>
         /// <param name="crc8">Raw CRC8</param>
         /// <returns>Checksum is true or false</returns>
-        private bool CRC8(ReadOnlySpan<byte> data, byte crc8)
+        private bool CheckCrc8(ReadOnlySpan<byte> data, byte crc8)
         {
             // Details in the Datasheet P13
             byte crc = CRC_INIT;
@@ -148,10 +149,7 @@ namespace Iot.Device.Sht3x
                 }
             }
 
-            if (crc == crc8)
-                return true;
-            else
-                return false;
+            return crc == crc8;
         }
 
         private void Write(Register register)
@@ -163,7 +161,8 @@ namespace Iot.Device.Sht3x
 
             _sensor.Write(writeBuff);
 
-            Thread.Sleep(20);       // wait SCL free
+            // wait SCL free
+            Thread.Sleep(20);       
         }
     }
 }

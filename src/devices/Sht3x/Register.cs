@@ -7,7 +7,7 @@ namespace Iot.Device.Sht3x
     /// <summary>
     /// SHT3x Register
     /// </summary>
-    internal enum Register : short
+    internal enum Register : ushort
     {
         SHT_MEAS = 0x24,
         SHT_RESET = 0x30A2,
