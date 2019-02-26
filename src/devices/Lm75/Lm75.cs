@@ -89,8 +89,11 @@ namespace Iot.Device.Lm75
             config &= 0xFE;
             if (isShutdown)
                 config |= 0x01;
-            else
-                config |= 0x00;
+            //else
+            //    config |= 0x00;
+
+            Span<byte> writeBuff = stackalloc byte[] { (byte)Register.LM_CONFIG, config };
+            _sensor.Write(writeBuff);
         }
 
         /// <summary>
