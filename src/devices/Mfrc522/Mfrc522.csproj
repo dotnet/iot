@@ -7,8 +7,12 @@
 
   <ItemGroup>
     <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
-    <Compile Include="Mfrc522Controller.cs" />
+    <Compile Include="Command.cs" />
     <Compile Include="Mfrc522Exception.cs" />
+    <Compile Include="Mfrc522Controller.cs" />
+    <Compile Include="Register.cs" />
+    <Compile Include="RequestMode.cs" />
+    <Compile Include="Status.cs" />
     <None Include="README.md" />
   </ItemGroup>
 
