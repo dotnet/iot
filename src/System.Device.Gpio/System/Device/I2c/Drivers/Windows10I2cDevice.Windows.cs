@@ -65,6 +65,9 @@ namespace System.Device.I2c.Drivers
         /// </param>
         public override void Read(Span<byte> buffer)
         {
+            if (buffer.Length == 0)
+                throw new ArgumentException($"{nameof(buffer)} cannot be empty.");
+
             byte[] byteArray = new byte[buffer.Length];
             _winI2cDevice.Read(byteArray);
             new Span<byte>(byteArray).CopyTo(buffer);

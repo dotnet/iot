@@ -129,6 +129,9 @@ namespace System.Device.Spi.Drivers
         /// </param>
         public override unsafe void Read(Span<byte> buffer)
         {
+            if (buffer.Length == 0)
+                throw new ArgumentException($"{nameof(buffer)} cannot be empty.");
+                
             Initialize();
 
             fixed (byte* bufferPtr = buffer)
