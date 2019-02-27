@@ -45,7 +45,7 @@ namespace Iot.Device.Tcs3472x
             set
             {
                 _gain = value;
-                _i2cDevice.Write(new byte[] { (byte)(Registers.COMMAND_BIT | Registers.CONTROL), (byte)_gain });
+                WriteRegister(Registers.CONTROL, (byte)_gain);
             }
         }
 
@@ -76,25 +76,29 @@ namespace Iot.Device.Tcs3472x
         }
 
         /// <summary>
-        /// Returns true is there are valid data
+        /// Get true is there are valid data
         /// </summary>
-        /// <returns>Returns true is there are valid data</returns>
-        public bool IsValidData()
-        {
-            _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | Registers.STATUS));
-            var stat = _i2cDevice.ReadByte();
-            return ((Registers)(stat & (byte)Registers.STATUS_AVALID) == Registers.STATUS_AVALID);
+        public bool IsValidData
+        { 
+            get
+            {
+                _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | Registers.STATUS));
+                var stat = _i2cDevice.ReadByte();
+                return ((Registers)(stat & (byte)Registers.STATUS_AVALID) == Registers.STATUS_AVALID);
+            }
         }
 
         /// <summary>
-        /// Returns true if RGBC is clear channel interrupt
-        /// </summary>
-        /// <returns>Returns true if RGBC is clear channel interrupt</returns>
-        public bool IsClearInterrupt()
+        /// Get true if RGBC is clear channel interrupt
+        /// </summary>        
+        public bool IsClearInterrupt
         {
-            _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | Registers.STATUS));
-            var stat = _i2cDevice.ReadByte();
-            return ((Registers)(stat & (byte)Registers.STATUS_AINT) == Registers.STATUS_AINT);
+            get
+            {
+                _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | Registers.STATUS));
+                var stat = _i2cDevice.ReadByte();
+                return ((Registers)(stat & (byte)Registers.STATUS_AINT) == Registers.STATUS_AINT);
+            }
         }
 
         /// <summary>
@@ -112,7 +116,7 @@ namespace Iot.Device.Tcs3472x
                 _isLongTime = false;
                 var timeByte = (int)(0x100 - (timeSeconds / 0.0024));
                 timeByte = Math.Clamp(timeByte, 0, 255);
-                _i2cDevice.Write(new byte[] { (byte)(Registers.COMMAND_BIT | Registers.ATIME), (byte)timeByte });
+                WriteRegister(Registers.ATIME, (byte)timeByte);
                 _integrationTimeByte = (byte)timeByte;
             }
             else
@@ -124,29 +128,29 @@ namespace Iot.Device.Tcs3472x
                 _isLongTime = true;
                 var timeByte = (int)(0x100 - (timeSeconds / 0.029));
                 timeByte = Math.Clamp(timeByte, 0, 255);
-                _i2cDevice.Write(new byte[] { (byte)(Registers.COMMAND_BIT | Registers.WTIME), (byte)timeByte });
+                WriteRegister(Registers.WTIME, (byte)timeByte);
                 _integrationTimeByte = (byte)timeByte;
             }
         }
 
         private void SetConfigLongTime(bool setLong)
         {
-            _i2cDevice.Write(new byte[] { (byte)(Registers.COMMAND_BIT | Registers.CONFIG), setLong ? (byte)(Registers.CONFIG_WLONG) : (byte)0 });
+            WriteRegister(Registers.CONFIG, setLong ? (byte)(Registers.CONFIG_WLONG) : (byte)0x00);
         }
 
         private void PowerOn()
         {
 
-            _i2cDevice.Write(new byte[] { (byte)(Registers.COMMAND_BIT | Registers.ENABLE), (byte)Registers.ENABLE_PON });
+            WriteRegister(Registers.ENABLE, (byte)Registers.ENABLE_PON);
             Thread.Sleep(10);
-            _i2cDevice.Write(new byte[] { (byte)(Registers.COMMAND_BIT | Registers.ENABLE), (byte)(Registers.ENABLE_PON | Registers.ENABLE_AEN) });
+            WriteRegister(Registers.ENABLE, (byte)(Registers.ENABLE_PON | Registers.ENABLE_AEN));
         }
 
         private void PowerOff()
         {
             var powerState = I2cRead8(Registers.ENABLE);
             powerState = (byte)(powerState & ~(byte)(Registers.ENABLE_PON | Registers.ENABLE_AEN));
-            _i2cDevice.Write(new byte[] { (byte)(Registers.COMMAND_BIT | Registers.ENABLE), powerState });
+            WriteRegister(Registers.ENABLE, powerState);
         }
 
         /// <summary>
@@ -165,10 +169,10 @@ namespace Iot.Device.Tcs3472x
         /// <param name="state">True to set the interrupt, false to clear</param>
         public void SetInterrupt(InterruptState interupt, bool state)
         {
-            _i2cDevice.Write(new byte[] { (byte)(Registers.COMMAND_BIT | Registers.PERS), (byte)interupt });
+            WriteRegister(Registers.PERS, (byte)interupt);
             var enable = I2cRead8(Registers.ENABLE);
             enable = state ? enable |= (byte)Registers.ENABLE_AIEN : enable = (byte)(enable & ~(byte)Registers.ENABLE_AIEN);
-            _i2cDevice.Write(new byte[] { (byte)(Registers.COMMAND_BIT | Registers.ENABLE), enable });
+            WriteRegister(Registers.ENABLE, enable);
         }
 
         /// <summary>
@@ -213,6 +217,11 @@ namespace Iot.Device.Tcs3472x
         {
             _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | reg));
             return _i2cDevice.ReadByte();
+        }
+
+        private void WriteRegister(Registers reg, byte data)
+        {
+            _i2cDevice.Write(new byte[] {(byte)(Registers.COMMAND_BIT | reg), data });
         }
 
         public void Dispose()

@@ -6,7 +6,6 @@ using System;
 
 namespace Iot.Device.Tcs3472x
 {
-    [Flags]
     public enum Registers
     {        
         ENABLE = 0x00,
