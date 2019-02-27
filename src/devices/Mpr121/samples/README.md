@@ -5,12 +5,11 @@ This sample demonstrates how to read channel statuses using auto-refresh configu
 ### Handling the channel statuses changes
 
 ```csharp
-mpr121.PropertyChanged += (object sender, PropertyChangedEventArgs e) => {
-    if (e.PropertyName == nameof(Mpr121.ChannelStatuses))
+mpr121.ChannelStatusesChanged += (object sender, ChannelStatusesChangedEventArgs e) =>
     {
-        // update the channel statuses table.
-    }
-};
+        var channelStatuses = e.ChannelStatuses;
+        // do something.
+    };
 ```
 
 ### Channel statuses table

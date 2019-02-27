@@ -13,10 +13,10 @@ namespace Iot.Device.Mpr121.Samples
     {
         static void Main(string[] args)
         {
-            var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x5A));
+            var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
 
             // Initialize controller with default configuration and auto-refresh the channel statuses every 100 ms.
-            var mpr121 = new Mpr121(i2cDevice, 100);
+            var mpr121 = new Mpr121(device: i2cDevice, periodRefresh: 100);
 
             Console.Clear();
             Console.CursorVisible = false;
@@ -25,16 +25,15 @@ namespace Iot.Device.Mpr121.Samples
             Console.WriteLine("Press Enter to exit.");
 
             // Subscribe to channel statuses updates.
-            mpr121.PropertyChanged += (object sender, PropertyChangedEventArgs e) => {
-                if (e.PropertyName == nameof(Mpr121.ChannelStatuses))
+            mpr121.ChannelStatusesChanged += (object sender, ChannelStatusesChangedEventArgs e) =>
                 {
-                    foreach (var channel in mpr121.ChannelStatuses.Keys)
+                    var channelStatuses = e.ChannelStatuses;
+                    foreach (var channel in channelStatuses.Keys)
                     {
-                        Console.SetCursorPosition(10, (int)channel * 2 + 1);
-                        Console.Write(mpr121.ChannelStatuses[channel] ? "#" : " ");
+                        Console.SetCursorPosition(14, (int)channel * 2 + 1);
+                        Console.Write(channelStatuses[channel] ? "#" : " ");
                     }
-                }
-            };
+                };
 
             using (mpr121)
             {
@@ -46,12 +45,12 @@ namespace Iot.Device.Mpr121.Samples
 
         private static void PrintChannelsTable()
         {
-            Console.WriteLine("-------------");
+            Console.WriteLine("-----------------");
 
             foreach (var channel in Enum.GetValues(typeof(Channels)))
             {
-                Console.WriteLine("| " + Enum.GetName(typeof(Channels), channel) + ((int)channel < (int)Channels.CH_10 ? " " : "")  + " |   |");
-                Console.WriteLine("-------------");
+                Console.WriteLine("| " + Enum.GetName(typeof(Channels), channel) + " |   |");
+                Console.WriteLine("-----------------");
             }
         }
     }

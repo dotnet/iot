@@ -7,7 +7,6 @@ using System.Buffers.Binary;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Device.I2c;
 using System.Threading;
 
@@ -16,8 +15,13 @@ namespace Iot.Device.Mpr121
     /// <summary>
     /// Supports MPR121 Proximity Capacitive Touch Sensor Controller.
     /// </summary>
-    public class Mpr121 : IDisposable, INotifyPropertyChanged
+    public class Mpr121 : IDisposable
     {
+        /// <summary>
+        /// MPR121 Default I2C Address.
+        /// </summary>
+        public static readonly byte DefaultI2cAddress = 0x5A;
+
         private static readonly int CHANNELS_NUMBER = Enum.GetValues(typeof(Channels)).Length;
 
         private I2cDevice _device;
@@ -28,39 +32,10 @@ namespace Iot.Device.Mpr121
         private int _periodRefresh;
 
         /// <summary>
-        /// Notifies about a property has been changed.
+        /// Notifies about a the channel statuses have been changed.
         /// Refresh period can be changed by setting PeriodRefresh property.
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        /// <summary>
-        /// Gets the channels statuses. The channel status is "true" if it's pressed. "False" otherwise.
-        /// </summary>
-        public IReadOnlyDictionary<Channels, bool> ChannelStatuses
-        {
-            get
-            {
-                return _statuses.ToImmutableDictionary();
-            }
-
-            private set
-            {
-                bool isStatusChanged = false;
-                foreach (Channels channel in value.Keys)
-                {
-                    if (_statuses[channel] != value[channel])
-                    {
-                        _statuses[channel] = value[channel];
-                        isStatusChanged = true;
-                    }
-                }
-
-                if (isStatusChanged)
-                {
-                    OnPropertyChanged(nameof(ChannelStatuses));
-                }
-            }
-        }
+        public event EventHandler<ChannelStatusesChangedEventArgs> ChannelStatusesChanged;
 
         /// <summary>
         /// Gets ot sets the period in milliseconds to refresh the channels statuses.
@@ -93,40 +68,16 @@ namespace Iot.Device.Mpr121
         }
 
         /// <summary>
-        /// Initialize a MPR121 controller with default configuration. Auto-refreshing of channel statuses is disabled.
-        /// </summary>
-        /// <param name="device">The i2c device.</param>
-        public Mpr121(I2cDevice device) : this(device, 0, GetDefaultConfiguration())
-        {
-        }
-
-        /// <summary>
-        /// Initialize a MPR121 controller with default configuration.
-        /// </summary>
-        /// <param name="device">The i2c device.</param>
-        /// <param name="periodRefresh">The period in milliseconds of refresing the channel statuses.</param>
-        public Mpr121(I2cDevice device, int periodRefresh) : this(device, periodRefresh, GetDefaultConfiguration())
-        {
-        }
-
-        /// <summary>
-        /// Initialize a MPR121 controller with custom configuration. Auto-refreshing of channel statuses is disabled.
-        /// </summary>
-        /// <param name="device">The i2c device.</param>
-        /// <param name="configuration">The controller configuration.</param>
-        public Mpr121(I2cDevice device, Mpr121Configuration configuration) : this(device, 0, configuration)
-        {
-        }
-
-        /// <summary>
         /// Initialize a MPR121 controller.
         /// </summary>
         /// <param name="device">The i2c device.</param>
         /// <param name="periodRefresh">The period in milliseconds of refresing the channel statuses.</param>
         /// <param name="configuration">The controller configuration.</param>
-        public Mpr121(I2cDevice device, int periodRefresh, Mpr121Configuration configuration)
+        public Mpr121(I2cDevice device, int? periodRefresh = null, Mpr121Configuration configuration = null)
         {
             _device = device;
+            periodRefresh = periodRefresh ?? 0;
+            configuration = configuration ?? GetDefaultConfiguration();
 
             _statuses = new Dictionary<Channels, bool>();
             foreach (Channels channel in Enum.GetValues(typeof(Channels)))
@@ -136,7 +87,7 @@ namespace Iot.Device.Mpr121
 
             InitializeController(configuration);
 
-            PeriodRefresh = periodRefresh;
+            PeriodRefresh = periodRefresh.Value;
         }
 
         public void Dispose()
@@ -155,22 +106,13 @@ namespace Iot.Device.Mpr121
         }
 
         /// <summary>
-        /// Refresh the channel statuses.
+        /// Reads the channel statuses of MPR121 controller.
         /// </summary>
-        public void RefreshChannelStatuses()
+        public IReadOnlyDictionary<Channels, bool> ReadChannelStatuses()
         {
-            Span<byte> buffer = stackalloc byte[2];
-            _device.Read(buffer);
+            RefreshChannelStatuses();
 
-            short rawStatus = BinaryPrimitives.ReadInt16LittleEndian(buffer);
-
-            Dictionary<Channels, bool> statuses = new Dictionary<Channels, bool>();
-            for (var i = 0; i < CHANNELS_NUMBER; i++)
-            {
-                statuses[(Channels)i] = ((1 << i) & rawStatus) > 0;
-            }
-
-            ChannelStatuses = statuses.ToImmutableDictionary();
+            return _statuses.ToImmutableDictionary();
         }
 
         private static Mpr121Configuration GetDefaultConfiguration()
@@ -230,12 +172,6 @@ namespace Iot.Device.Mpr121
             SetRegister(Registers.ELECONF, configuration.ElectrodeConfiguration);
         }
 
-        private void SetRegister(Registers register, byte value)
-        {
-            Span<byte> data = stackalloc byte[] { (byte)register, value };
-            _device.Write(data);
-        }
-
         /// <summary>
         /// The callback function for timer to refresh channels statuses.
         /// </summary>
@@ -244,9 +180,41 @@ namespace Iot.Device.Mpr121
             RefreshChannelStatuses();
         }
 
-        private void OnPropertyChanged(string name)
+        /// <summary>
+        /// Refresh the channel statuses.
+        /// </summary>
+        private void RefreshChannelStatuses()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            Span<byte> buffer = stackalloc byte[2];
+            _device.Read(buffer);
+
+            short rawStatus = BinaryPrimitives.ReadInt16LittleEndian(buffer);
+            bool isStatusChanged = false;
+            for (var i = 0; i < CHANNELS_NUMBER; i++)
+            {
+                bool status = ((1 << i) & rawStatus) > 0;
+                if (_statuses[(Channels)i] != status)
+                {
+                    _statuses[(Channels)i] = status;
+                    isStatusChanged = true;
+                }
+            }
+
+            if (isStatusChanged)
+            {
+                OnChannelStatusesChanged();
+            }
+        }
+
+        private void SetRegister(Registers register, byte value)
+        {
+            Span<byte> data = stackalloc byte[] { (byte)register, value };
+            _device.Write(data);
+        }
+
+        private void OnChannelStatusesChanged()
+        {
+            ChannelStatusesChanged?.Invoke(this, new ChannelStatusesChangedEventArgs(_statuses.ToImmutableDictionary()));
         }
     }
 }

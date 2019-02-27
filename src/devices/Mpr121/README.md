@@ -15,11 +15,11 @@ The binding provides different options of device configuration. The device can b
 #### Default configuration with manually updating of channel statuses
 
 ```csharp
-var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x5A));
-var mpr121 = new Mpr121(i2cDevice);
+var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
+var mpr121 = new Mpr121(device: i2cDevice);
 
-mpr121.RefreshChannelStatuses();
-var status = mpr121.ChannelStatuses[Channels.CH_1]
+var statuses = mpr121.ReadChannelStatuses();
+var status = statuses[Channels.Channel01]
     ? "pressed"
     : "released";
 
@@ -29,24 +29,23 @@ Console.WriteLine($"The 1st channel is {status}");
 #### Channel statuses auto refresh
 
 ```csharp
-var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x5A));
+var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
 
 // Initialize controller with default configuration and auto-refresh the channel statuses every 100 ms.
-var mpr121 = new Mpr121(i2cDevice, 100);
+var mpr121 = new Mpr121(device: i2cDevice, periodRefresh: 100);
 
 // Subscribe to channel statuses updates.
-mpr121.PropertyChanged += (object sender, PropertyChangedEventArgs e) => {
-    if (e.PropertyName == nameof(Mpr121.ChannelStatuses))
+mpr121.ChannelStatusesChanged += (object sender, ChannelStatusesChangedEventArgs e) =>
     {
+        var channelStatuses = e.ChannelStatuses;
         // do something.
-    }
-};
+    };
 ```
 
 #### Custom MPR121 registers configuration
 
 ```csharp
-var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x5A));
+var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
 var config = new Mpr121Configuration
 {
     MaxHalfDeltaRising = 0x01,
@@ -63,5 +62,5 @@ var config = new Mpr121Configuration
     ElectrodeConfiguration = 0x0C
 };
 
-var mpr121 = new Mpr121(i2cDevice, config);
+var mpr121 = new Mpr121(device: i2cDevice, configuration: config);
 ```

@@ -4,67 +4,67 @@
 
 namespace Iot.Device.Mpr121
 {
-    // Mpr121 channels.
+    // MPR121 channels.
     public enum Channels
     {
         /// <summary>
         /// Channel 0.
         /// </summary>
-        CH_0 = 0,
+        Channel00 = 0,
 
         /// <summary>
         /// Channel 1.
         /// </summary>
-        CH_1,
+        Channel01,
 
         /// <summary>
         /// Channel 2.
         /// </summary>
-        CH_2,
+        Channel02,
 
         /// <summary>
         /// Channel 3.
         /// </summary>
-        CH_3,
+        Channel03,
 
         /// <summary>
         /// Channel 4.
         /// </summary>
-        CH_4,
+        Channel04,
 
         /// <summary>
         /// Channel 5.
         /// </summary>
-        CH_5,
+        Channel05,
 
         /// <summary>
         /// Channel 6.
         /// </summary>
-        CH_6,
+        Channel06,
 
         /// <summary>
         /// Channel 7.
         /// </summary>
-        CH_7,
+        Channel07,
 
         /// <summary>
         /// Channel 8.
         /// </summary>
-        CH_8,
+        Channel08,
 
         /// <summary>
         /// Channel 9.
         /// </summary>
-        CH_9,
+        Channel09,
 
         /// <summary>
         /// Channel 10.
         /// </summary>
-        CH_10,
+        Channel10,
 
         /// <summary>
         /// Channel 11.
         /// </summary>
-        CH_11
+        Channel11
     }
 }

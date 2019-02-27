@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Compile Include="Channels.cs" />
+    <Compile Include="ChannelStatusesChangedEventArgs.cs" />
     <Compile Include="Mpr121.cs" />
     <Compile Include="Mpr121Configuration.cs" />
     <Compile Include="Registers.cs" />
