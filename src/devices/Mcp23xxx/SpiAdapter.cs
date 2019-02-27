@@ -3,59 +3,69 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device.Gpio;
 using System.Device.Spi;
 
 namespace Iot.Device.Mcp23xxx
 {
-    internal class SpiAdapter : IBusDevice
+    public abstract partial class Mcp23xxx : IGpioController
     {
-        private SpiDevice _device;
-        private int _deviceAddress;
-
-        public SpiAdapter(SpiDevice device, int deviceAddress)
+        protected class SpiAdapter : BusAdapter
         {
-            _device = device;
-            _deviceAddress = deviceAddress;
-        }
+            private SpiDevice _device;
+            private int _deviceAddress;
 
-        public void Dispose() => _device?.Dispose();
-
-        public void Read(byte registerAddress, Span<byte> buffer)
-        {
-            // Include OpCode and Register Address.
-            Span<byte> writeBuffer = stackalloc byte[buffer.Length + 2];
-            writeBuffer[0] = GetOpCode(_deviceAddress, isReadCommand: true);
-            writeBuffer[1] = registerAddress;
-            Span<byte> readBuffer = stackalloc byte[buffer.Length + 2];
-
-            _device.TransferFullDuplex(writeBuffer, readBuffer);
-
-            // First 2 bytes are from sending OpCode and Register Address.
-            readBuffer.Slice(2).CopyTo(buffer);
-        }
-
-        public void Write(byte registerAddress, Span<byte> data)
-        {
-            // Include OpCode and Register Address.
-            Span<byte> writeBuffer = stackalloc byte[data.Length + 2];
-            writeBuffer[0] = GetOpCode(_deviceAddress, isReadCommand: false);
-            writeBuffer[1] = registerAddress;
-            data.CopyTo(writeBuffer.Slice(2));
-
-            _device.Write(writeBuffer);
-        }
-
-        private static byte GetOpCode(int deviceAddress, bool isReadCommand)
-        {
-            int opCode = deviceAddress << 1;
-
-            if (isReadCommand)
+            public SpiAdapter(SpiDevice device, int deviceAddress)
             {
-                // Set read bit.
-                opCode |= 0b000_0001;
+                _device = device;
+                _deviceAddress = deviceAddress;
             }
 
-            return (byte)opCode;
+            public override void Dispose() => _device?.Dispose();
+
+            public override void Read(byte registerAddress, Span<byte> buffer)
+            {
+                // Include OpCode and Register Address.
+                Span<byte> writeBuffer = stackalloc byte[]
+                {
+                    GetOpCode(_deviceAddress, isReadCommand: true),
+                    registerAddress
+                };
+
+                Span<byte> readBuffer = stackalloc byte[buffer.Length + 2];
+
+                // Should this also contain the op code and register?
+                // Why are we transferring full duplex if we only really
+                // need to read?
+                _device.TransferFullDuplex(writeBuffer, readBuffer);
+
+                // First 2 bytes are from sending OpCode and Register Address.
+                readBuffer.Slice(2).CopyTo(buffer);
+            }
+
+            public override void Write(byte registerAddress, Span<byte> data)
+            {
+                // Include OpCode and Register Address.
+                Span<byte> writeBuffer = stackalloc byte[data.Length + 2];
+                writeBuffer[0] = GetOpCode(_deviceAddress, isReadCommand: false);
+                writeBuffer[1] = registerAddress;
+                data.CopyTo(writeBuffer.Slice(2));
+
+                _device.Write(writeBuffer);
+            }
+
+            private static byte GetOpCode(int deviceAddress, bool isReadCommand)
+            {
+                int opCode = deviceAddress << 1;
+
+                if (isReadCommand)
+                {
+                    // Set read bit.
+                    opCode |= 0b000_0001;
+                }
+
+                return (byte)opCode;
+            }
         }
     }
 }
