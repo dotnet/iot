@@ -301,25 +301,25 @@ namespace System.Device.Gpio
         /// <summary>
         /// Write the given pins with the given values.
         /// </summary>
-        /// <param name="pinValues">The pin/value pairs to write.</param>
-        public void Write(ReadOnlySpan<PinValuePair> pinValues)
+        /// <param name="pinValuePairs">The pin/value pairs to write.</param>
+        public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
         {
-            for (int i = 0; i < pinValues.Length; i++)
+            for (int i = 0; i < pinValuePairs.Length; i++)
             {
-                Write(pinValues[i].PinNumber, pinValues[i].PinValue);
+                Write(pinValuePairs[i].PinNumber, pinValuePairs[i].PinValue);
             }
         }
 
         /// <summary>
-        /// Read the given pins.
+        /// Read the given pins with the given pin numbers.
         /// </summary>
-        /// <param name="pinValues">The pins to read.</param>
-        public void Read(Span<PinValuePair> pinValues)
+        /// <param name="pinValuePairs">The pin/value pairs to read.</param>
+        public void Read(Span<PinValuePair> pinValuePairs)
         {
-            for (int i = 0; i < pinValues.Length; i++)
+            for (int i = 0; i < pinValuePairs.Length; i++)
             {
-                int pin = pinValues[i].PinNumber;
-                pinValues[i] = new PinValuePair(pin, Read(pin));
+                int pin = pinValuePairs[i].PinNumber;
+                pinValuePairs[i] = new PinValuePair(pin, Read(pin));
             }
         }
     }

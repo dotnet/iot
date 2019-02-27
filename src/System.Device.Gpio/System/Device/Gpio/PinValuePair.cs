@@ -19,10 +19,15 @@ namespace System.Device.Gpio
         /// </summary>
         public PinValue PinValue { get; }
 
-        public PinValuePair(int pin, PinValue value)
+        /// <summary>
+        /// Initializes new instance of PinValuePair.
+        /// </summary>
+        /// <param name="pinNumber">The pin number.</param>
+        /// <param name="pinValue">The pin value.</param>
+        public PinValuePair(int pinNumber, PinValue pinValue)
         {
-            PinNumber = pin;
-            PinValue = value;
+            PinNumber = pinNumber;
+            PinValue = pinValue;
         }
 
         /// <summary>

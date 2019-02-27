@@ -63,6 +63,7 @@ namespace Iot.Device.Mcp23xxx.Tests
             }
 
             public override void Read(Span<byte> buffer) => DeviceMock.Read(buffer);
+
             public override void Write(ReadOnlySpan<byte> data) => DeviceMock.Write(data);
 
             public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
@@ -79,7 +80,7 @@ namespace Iot.Device.Mcp23xxx.Tests
 
         protected class I2cDeviceMock : I2cDevice
         {
-            private I2cConnectionSettings _settings;
+            private readonly I2cConnectionSettings _settings;
             public Mcp23xxxChipMock DeviceMock { get; private set; }
 
             public I2cDeviceMock(int ports, I2cConnectionSettings settings = null)
@@ -91,10 +92,12 @@ namespace Iot.Device.Mcp23xxx.Tests
             public override I2cConnectionSettings ConnectionSettings => _settings;
 
             public override void Read(Span<byte> buffer) => DeviceMock.Read(buffer);
+
             public override void Write(ReadOnlySpan<byte> data) => DeviceMock.Write(data);
 
-            // Don't need these
+            // Don't need these.
             public override void WriteByte(byte data) => throw new NotImplementedException();
+
             public override byte ReadByte() => throw new NotImplementedException();
         }
 
@@ -103,10 +106,10 @@ namespace Iot.Device.Mcp23xxx.Tests
         /// </summary>
         public class Mcp23xxxChipMock
         {
-            private int _ports;
-            private bool _isSpi;
+            private readonly int _ports;
+            private readonly bool _isSpi;
             // OLATB address is 0x15
-            private byte[] _registers;
+            private readonly byte[] _registers;
             private byte[] _lastReadBuffer;
             private byte[] _lastWriteBuffer;
 
@@ -190,12 +193,12 @@ namespace Iot.Device.Mcp23xxx.Tests
                 return PinValue.Low;
             }
 
-            public void Read(Span<PinValuePair> pinValues)
+            public void Read(Span<PinValuePair> pinValuePairs)
             {
-                for (int i = 0; i < pinValues.Length; i++)
+                for (int i = 0; i < pinValuePairs.Length; i++)
                 {
-                    int pin = pinValues[i].PinNumber;
-                    pinValues[i] = new PinValuePair(pin, Read(pin));
+                    int pin = pinValuePairs[i].PinNumber;
+                    pinValuePairs[i] = new PinValuePair(pin, Read(pin));
                 }
             }
 
@@ -208,9 +211,9 @@ namespace Iot.Device.Mcp23xxx.Tests
                 _pinValues[pinNumber] = value;
             }
 
-            public void Write(ReadOnlySpan<PinValuePair> pinValues)
+            public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
             {
-                foreach ((int pin, PinValue value) in pinValues)
+                foreach ((int pin, PinValue value) in pinValuePairs)
                 {
                     Write(pin, value);
                 }
