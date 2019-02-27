@@ -73,12 +73,12 @@ namespace DeviceApiTester.Commands.Gpio
                         waitResult = await controller.WaitForEventAsync(ButtonPin, bothPinEventTypes, cancellationTokenSource.Token);
                         if (!waitResult.TimedOut)
                         {
-                            var pressedOrReleased = waitResult.EventType == PressedValue ? "pressed" : "released";
-                            Console.WriteLine($"[{count++}] Button {pressedOrReleased}: GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin number {ButtonPin}, ChangeType={waitResult.EventType}");
+                            var pressedOrReleased = waitResult.EventTypes == PressedValue ? "pressed" : "released";
+                            Console.WriteLine($"[{count++}] Button {pressedOrReleased}: GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin number {ButtonPin}, ChangeType={waitResult.EventTypes}");
 
                             if (LedPin != null)
                             {
-                                PinValue ledValue = waitResult.EventType == PressedValue ? OnValue : OffValue;
+                                PinValue ledValue = waitResult.EventTypes == PressedValue ? OnValue : OffValue;
                                 controller.Write(LedPin.Value, ledValue);
                             }
                         }
