@@ -7,7 +7,7 @@
 
 
   <ItemGroup>
-    <Compile Include="RpiCpuTemperature.cs" />
+    <Compile Include="CpuTemperature.cs" />
     <None Include="README.md" />
   </ItemGroup>
 
