@@ -22,7 +22,7 @@ namespace Iot.Device.Si7021
         public const byte DefaultI2cAddress = 0x40;
 
         /// <summary>
-        /// Si7021 Temperature (¡æ)
+        /// Si7021 Temperature (â„ƒ)
         /// </summary>
         public double Temperature => GetTemperature();
 
@@ -68,9 +68,9 @@ namespace Iot.Device.Si7021
         }
 
         /// <summary>
-        /// Get Si7021 Temperature (¡æ)
+        /// Get Si7021 Temperature (â„ƒ)
         /// </summary>
-        /// <returns>Temperature (¡æ)</returns>
+        /// <returns>Temperature (â„ƒ)</returns>
         private double GetTemperature()
         {
             Span<byte> readbuff = stackalloc byte[2];
