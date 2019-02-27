@@ -96,7 +96,8 @@ namespace Iot.Device.Buzzer.Samples
             else
             {
                 var frequency = GetFrequency(noteElement.Note, noteElement.Octave);
-                _buzzer.PlayTone(frequency, durationInMilliseconds);
+                _buzzer.PlayTone(frequency, (int)(durationInMilliseconds * 0.7));
+                Thread.Sleep((int)(durationInMilliseconds * 0.3));
             }
         }
 
