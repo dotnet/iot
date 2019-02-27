@@ -1,6 +1,6 @@
 namespace Iot.Device.Mfrc522
 {
-    public enum Register : byte
+    enum Register : byte
     {
         Reserved00 = 0x00,
         CommandReg = 0x01,

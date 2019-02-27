@@ -32,11 +32,13 @@ namespace Iot.Device.Mfrc522
             Init();
         }
 
+        public static readonly byte[] DefaultAuthKey = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+
         private void Init()
         {
             _controller.Write(NRSTPD, PinValue.High);
 
-            Reset();
+            SoftReset();
 
             WriteSpi(TModeReg, 0x8D);
             WriteSpi(TPrescalerReg, 0x3E);
@@ -49,43 +51,57 @@ namespace Iot.Device.Mfrc522
             AntennaOn();
         }
 
-        private void Reset()
+        private void SoftReset()
         {
             WriteSpi(CommandReg, (byte)ResetPhase);
         }
 
         private void WriteSpi(byte address, byte value)
         {
-            _spiDevice.Write(new byte[]
-            {
+            Span<byte> buffer = stackalloc byte[2] {
                 (byte) ((address << 1) & 0x7E),
                 value
-            });
+            };
+            _spiDevice.Write(buffer);
         }
-        public void WriteSpi(Register register, byte value)
+        private void WriteSpi(Register register, byte value)
         {
             WriteSpi((byte)register, value);
         }
 
-        public void WriteSpi(Register register, Command command)
+        private void WriteSpi(Register register, Command command)
         {
             WriteSpi((byte)register, (byte)command);
         }
 
-        public byte ReadSpi(byte address)
+        private byte ReadSpi(byte address)
         {
-            byte[] result = new byte[2];
-            _spiDevice.TransferFullDuplex(new byte[]
-            {
+            Span<byte> buffer = stackalloc byte[2] {
                 (byte) (((address << 1) & 0x7E) | 0x80),
                 0
-            }, result);
-            return result[1];
+            };
+            _spiDevice.TransferFullDuplex(buffer, buffer);
+            return buffer[1];
         }
 
-        public byte ReadSpi(Register register)
+        private byte ReadSpi(Register register)
         {
             return ReadSpi((byte)register);
+        }
+
+        public (Status status, byte[] data) ReadCardData(byte blockAddress)
+        {
+            List<byte> buff = new List<byte>
+            {
+              (byte)RequestMode.Read,
+              blockAddress
+            };
+            var crc = CalulateCRC(buff.ToArray());
+            buff.Add(crc[0]);
+            buff.Add(crc[1]);
+
+            var (status, data, _) = SendCommand(Command.Transceive, buff.ToArray());
+            return (status, data);
         }
 
         private void SetBitMask(Register register, byte mask)
@@ -111,7 +127,7 @@ namespace Iot.Device.Mfrc522
             ClearBitMask(TxControlReg, 0x03);
         }
 
-        private (Status status, byte[] backData, byte backLen) ToCard(Command command, byte[] sendData)
+        private (Status status, byte[] backData, byte backLen) SendCommand(Command command, byte[] sendData)
         {
             var backData = new List<byte>();
             byte backLen = 0;
@@ -121,14 +137,14 @@ namespace Iot.Device.Mfrc522
             byte n = 0;
             var i = 0;
 
-            switch(command) 
+            switch(command)
             {
-                case Authenticate:
+                case Command.Authenticate:
                     irqEn = 0x12;
                     waitIRq = 0x10;
                     break;
 
-                case Transceive:
+                case Command.Transceive:
                     irqEn = 0x77;
                     waitIRq = 0x30;
                     break;
@@ -218,7 +234,7 @@ namespace Iot.Device.Mfrc522
 
             WriteSpi(BitFramingReg, 0x07);
 
-            var (status, backData, backBits) = ToCard(Transceive, tagType.ToArray());
+            var (status, backData, backBits) = SendCommand(Transceive, tagType.ToArray());
 
             if ((status != OK) | (backBits != 0x10))
             {
@@ -239,7 +255,7 @@ namespace Iot.Device.Mfrc522
             serNum.Add((byte)RequestMode.AntiCollision);
             serNum.Add(0x20);
 
-            var (status, backData, _) = ToCard(Transceive, serNum.ToArray());
+            var (status, backData, _) = SendCommand(Transceive, serNum.ToArray());
 
             var i = 0;
             if (status == OK)
@@ -308,7 +324,7 @@ namespace Iot.Device.Mfrc522
             var pOut = CalulateCRC(buf.ToArray());
             buf.Add(pOut[0]);
             buf.Add(pOut[1]);
-            var (status, backData, backBits) = ToCard(Transceive, buf.ToArray());
+            var (status, backData, backBits) = SendCommand(Transceive, buf.ToArray());
 
             if (status != OK || backBits != 0x18)
                 return 0;
@@ -318,7 +334,7 @@ namespace Iot.Device.Mfrc522
 
         }
 
-        public Status Auth(RequestMode authenticationMode, byte blockAddress, byte[] sectorKey, byte[] serialNumber)
+        public Status Authenticate(RequestMode authenticationMode, byte blockAddress, byte[] sectorKey, byte[] serialNumber)
         {
             // First byte should be the authMode (A or B) Second byte is the trailerBlock (usually 7)
             var buff = new List<byte> { (byte)authenticationMode, blockAddress };
@@ -341,7 +357,7 @@ namespace Iot.Device.Mfrc522
             }
 
             // Now we start the authentication itself
-            var (status, _, _) = ToCard(Authenticate, buff.ToArray());
+            var (status, _, _) = SendCommand(Command.Authenticate, buff.ToArray());
 
             // Check if an error occurred
             if (status != OK)
@@ -358,18 +374,18 @@ namespace Iot.Device.Mfrc522
             return status;
         }
 
-        public void StopCrypto1()
+        public void ClearSelection()
         {
             ClearBitMask(Status2Reg, 0x08);
         }
 
-        private void Write(byte blockAddress, byte[] writeData)
+        public void WriteCardData(byte blockAddress, byte[] writeData)
         {
             var buff = new List<byte> { (byte)RequestMode.Write, blockAddress };
             var crc = CalulateCRC(buff.ToArray());
             buff.Add(crc[0]);
             buff.Add(crc[1]);
-            var (status, backData, backLen) = ToCard(Transceive, buff.ToArray());
+            var (status, backData, backLen) = SendCommand(Transceive, buff.ToArray());
 
             if (status != OK || backLen != 4 || (backData[0] & 0x0F) != 0x0A)
             {
@@ -392,7 +408,7 @@ namespace Iot.Device.Mfrc522
             buf.Add(crc[0]);
             buf.Add(crc[1]);
 
-            (status, backData, backLen) = ToCard(Transceive, buf.ToArray());
+            (status, backData, backLen) = SendCommand(Transceive, buf.ToArray());
 
             if (status != OK || backLen != 4 || (backData[0] & 0x0F) != 0x0A)
             {
@@ -406,7 +422,7 @@ namespace Iot.Device.Mfrc522
 
             while (i < 64)
             {
-                var status = Auth(Authenticate1A, i, key, uid);
+                var status = Authenticate(Authenticate1A, i, key, uid);
 
                 // Check if authenticated
                 if (status == OK)
