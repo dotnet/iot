@@ -1,4 +1,4 @@
-# RpiCpuTemperature
+# Cpu Temperature
 
 Device bindings for the CPU Temperature Sensor
 
