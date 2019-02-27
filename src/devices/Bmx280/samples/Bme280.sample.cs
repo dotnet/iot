@@ -22,7 +22,7 @@ namespace Iot.Device.Samples
             //set this to the current sea level pressure in the area for correct altitude readings
             const double defaultSeaLevelPressure = 1033.00;
 
-            var i2cSettings = new I2cConnectionSettings(busId, Bme280.Address);
+            var i2cSettings = new I2cConnectionSettings(busId, Bme280.DefaultI2cAddress);
             var i2cDevice = new UnixI2cDevice(i2cSettings);
             var i2CBmpe80 = new Bme280(i2cDevice);
 

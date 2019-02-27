@@ -15,7 +15,7 @@ namespace Iot.Device.Bmx280
     public class BmxBase : IDisposable
     {
         internal I2cDevice _i2cDevice;
-        internal byte _signature;
+        internal byte _deviceId;
         internal bool _initialized = false;
         internal CommunicationProtocol _communicationProtocol;
         internal CalibrationData _calibrationData;
@@ -24,7 +24,7 @@ namespace Iot.Device.Bmx280
         /// The variable _temperatureFine carries a fine resolution temperature value over to the
         /// pressure compensation formula and could be implemented as a global variable.
         /// </summary>
-        internal int _temperatureFine;
+        protected int TemperatureFine;
 
         internal enum CommunicationProtocol
         {
@@ -36,9 +36,9 @@ namespace Iot.Device.Bmx280
             _i2cDevice.WriteByte((byte)Register.CHIPID);
             byte readSignature = _i2cDevice.ReadByte();
 
-            if (readSignature != _signature)
+            if (readSignature != _deviceId)
             {
-                return;
+                throw new Exception($"Device ID {readSignature} is not the same as expected {_deviceId}. Please check you are using the right device.");
             }
             _initialized = true;
 
@@ -81,6 +81,7 @@ namespace Iot.Device.Bmx280
                 return PowerMode.Forced;
             }
         }
+
         /// <summary>
         /// Sets the temperature sampling to the given value
         /// </summary>
@@ -224,7 +225,7 @@ namespace Iot.Device.Bmx280
             }
 
             //Read the temperature first to load the t_fine value for compensation
-            if (_temperatureFine == int.MinValue)
+            if (TemperatureFine == int.MinValue)
             {
                 await ReadTemperatureAsync();
             }
@@ -286,7 +287,7 @@ namespace Iot.Device.Bmx280
             double var1 = ((adcTemperature / 16384.0) - (_calibrationData.DigT1 / 1024.0)) * _calibrationData.DigT2;
             double var2 = ((adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0)) * _calibrationData.DigT3;
 
-            _temperatureFine = (int)(var1 + var2);
+            TemperatureFine = (int)(var1 + var2);
 
             double T = (var1 + var2) / 5120.0;
             return T;
@@ -306,7 +307,7 @@ namespace Iot.Device.Bmx280
         {
             //Formula from the datasheet
             //The pressure is calculated using the compensation formula in the BMP280 datasheet
-            long var1 = _temperatureFine - 128000;
+            long var1 = TemperatureFine - 128000;
             long var2 = var1 * var1 * (long)_calibrationData.DigP6;
             var2 = var2 + ((var1 * (long)_calibrationData.DigP5) << 17);
             var2 = var2 + ((long)_calibrationData.DigP4 << 35);
@@ -324,6 +325,7 @@ namespace Iot.Device.Bmx280
             p = ((p + var1 + var2) >> 8) + ((long)_calibrationData.DigP7 << 4);
             return p;
         }
+
         /// <summary>
         ///  Reads an 8 bit value from a register
         /// </summary>

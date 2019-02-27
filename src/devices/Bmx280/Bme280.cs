@@ -8,13 +8,13 @@ namespace Iot.Device.Bmx280
 {
     public class Bme280 : BmxBase
     {
-        private const byte Signature = 0x60;
-        public const byte Address = 0x76;
+        private const byte DeviceId = 0x60;
+        public const byte DefaultI2cAddress = 0x76;
 
         public Bme280(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;
-            _signature = Signature;
+            _deviceId = DeviceId;
             _calibrationData = new CalibrationData();
             _communicationProtocol = CommunicationProtocol.I2c;
         }

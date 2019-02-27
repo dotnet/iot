@@ -31,3 +31,10 @@ I2C:
 |SCK| I2C clock pin|
 |SDI| I2C data pin|
 
+### Connection Type
+
+The following connection types are supported by this binding.
+
+- [X] I2C
+- [ ] SPI
+
