@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Pca9685;
 using System;
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
@@ -16,7 +15,6 @@ namespace Iot.Device.Pca9685.Samples
     {
         static void Main(string[] args)
         {
-
             var busId = 1;  // /dev/i2c-1
 
             var deviceAddress_fixed = 0x40;
@@ -28,7 +26,6 @@ namespace Iot.Device.Pca9685.Samples
 
             using (var pca9685 = new Pca9685(device))
             {
-
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"PCA9685 is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
@@ -44,7 +41,6 @@ namespace Iot.Device.Pca9685.Samples
                 Console.WriteLine();
                 while (true)
                 {
-
                     try
                     {
                         Console.ResetColor();
@@ -117,9 +113,7 @@ namespace Iot.Device.Pca9685.Samples
                         Console.ResetColor();
                     }
                 }
-
             }
-
         }
     }
 }

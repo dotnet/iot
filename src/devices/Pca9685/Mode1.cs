@@ -16,6 +16,6 @@ namespace Iot.Device.Pca9685
         SUB1    = 0b00001000,   // Bit 3
         SUB2    = 0b00000100,   // Bit 2
         SUB3    = 0b00000010,   // Bit 1
-        ALLCALL = 0x00000001,   // Bit 0
+        ALLCALL = 0x00000001    // Bit 0
     }
 }

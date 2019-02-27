@@ -11,6 +11,6 @@ namespace Iot.Device.Pca9685
     {
         INVRT   = 0b00010000,   // Bit 4
         OCH     = 0b00001000,   // Bit 3
-        OUTDRV  = 0b00000100,   // Bit 2
+        OUTDRV  = 0b00000100    // Bit 2
     }
 }

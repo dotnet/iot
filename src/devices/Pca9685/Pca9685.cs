@@ -16,7 +16,6 @@ namespace Iot.Device.Pca9685
     /// </summary>
     public class Pca9685 : IDisposable
     {
-
         /// <summary>
         /// I2C Device
         /// </summary>
@@ -83,7 +82,6 @@ namespace Iot.Device.Pca9685
             _device.Write(buffer);
 
             Thread.Sleep(5); // wait for oscillator
-
         }
 
         /// <summary>
@@ -185,8 +183,6 @@ namespace Iot.Device.Pca9685
 
             buffer = stackalloc byte[2] { (byte)MODE1, (byte)(oldmode | (byte)RESTART) };
             _device.Write(buffer);
-
         }
-
     }
 }

@@ -6,7 +6,6 @@ namespace Iot.Device.Pca9685
 {
     internal enum Register : byte
     {
-
         /// <summary>
         /// Mode register 1
         /// </summary>
@@ -80,7 +79,6 @@ namespace Iot.Device.Pca9685
         /// <summary>
         /// prescaler for PWM output frequency
         /// </summary>
-        PRESCALE = 0xFE,
-
+        PRESCALE = 0xFE
     }
 }
