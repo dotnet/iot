@@ -18,7 +18,7 @@ namespace Iot.Device.Bno055
         public const byte DefaultI2cAddress = 0x28;
 
         /// <summary>
-        /// If setup this is a valid I2C Address as well
+        /// This is the second I2C Address. It needs to be activated to be valid
         /// </summary>
         public const byte SecondI2cAddress = 0x29;
 
@@ -319,7 +319,7 @@ namespace Iot.Device.Bno055
         }
 
         /// <summary>
-        /// Get the orientation (Eular Angles) X = Heading, Y = Roll, Z = Pitch
+        /// Get the orientation (Euler Angles) X = Heading, Y = Roll, Z = Pitch
         /// </summary>
         public Vector3 Orientation
         {
@@ -327,7 +327,7 @@ namespace Iot.Device.Bno055
             {
                 var retVect = GetVectorData(Registers.EULER_H_LSB);
                 // If unit is MeterG, then divide by 900, otherwise divide by 16
-                if ((_units & Units.EulerAnglesRadians) == Units.EulerAnglesRadians)
+                if (_units.HasFlag(Units.EulerAnglesRadians))
                     return retVect / 900;
                 else
                     return retVect / 16;
@@ -355,6 +355,9 @@ namespace Iot.Device.Bno055
 
         /// <summary>
         /// Get the accelerometer
+        /// Acceleration Vector (100Hz)
+        /// Three axis of acceleration (gravity + linear motion) 
+        /// Default unit in m/s^2, can be changed for mg 
         /// </summary>
         public Vector3 Accelerometer
         {
@@ -371,6 +374,9 @@ namespace Iot.Device.Bno055
 
         /// <summary>
         /// Get the linear acceleration
+        /// Linear Acceleration Vector (100Hz)
+        /// Three axis of linear acceleration data (acceleration minus gravity)
+        /// Default unit in m/s^2, can be changed for mg 
         /// </summary>
         public Vector3 LinearAcceleration
         {
@@ -386,6 +392,9 @@ namespace Iot.Device.Bno055
         }
         /// <summary>
         /// Get the gravity
+        /// Gravity Vector (100Hz)
+        /// Three axis of gravitational acceleration (minus any movement)
+        /// Default unit in m/s^2, can be changed for mg 
         /// </summary>
         public Vector3 Gravity
         {
