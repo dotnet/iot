@@ -1,4 +1,8 @@
-﻿using Iot.Device.GrovePiDevice.Models;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Iot.Device.GrovePiDevice.Models;
 using System;
 using System.Buffers.Binary;
 using System.Device.Gpio;
@@ -155,7 +159,7 @@ namespace Iot.Device.GrovePiDevice
         {
             WriteCommand(GrovePiCommands.DigitalRead, pin, 0, 0);
             byte tries = 0;
-            IOException innerEx = new IOException();
+            IOException innerEx = null;
             while (tries < MaxRetries)
             {
                 try
