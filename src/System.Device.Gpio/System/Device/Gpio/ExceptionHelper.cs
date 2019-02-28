@@ -74,7 +74,7 @@ namespace System.Device.Gpio
                     message = $"Attempted to remove a callback for a pin that is not listening for events.";
                     break;
                 case ExceptionResource.LibGpiodNotInstalled:
-                    message = $"Libgpiod driver not installed. More information on: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/ ";
+                    message = $"Libgpiod driver not installed. More information on: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/";
                     break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");

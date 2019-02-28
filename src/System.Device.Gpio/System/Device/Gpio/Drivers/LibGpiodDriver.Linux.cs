@@ -38,24 +38,22 @@ namespace System.Device.Gpio.Drivers
             {
                 throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodNotInstalled);
             }
-
+            
             _chip = Interop.GetNextChipFromChipIterator(iterator);
             if (_chip == null)
             {
                 throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
             }
 
-            // Freeing other chips opened
-            Interop.FreeChipIteratorNoCloseCurrentChip(iterator);
             _pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
         }
 
         private SafeLineHandle SubscribeForEvent(int pinNumber, PinEventTypes eventType)
         {
-            int eventSuccess = -1; 
-            SafeLineHandle pinHandle = Interop.GetChipLineByOffset(_chip, pinNumber);
-            if (pinHandle != null)
+            int eventSuccess = -1;
+            if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
+                int direction = Interop.GetLineDirection(pinHandle);
                 if (eventType.HasFlag(PinEventTypes.Rising) || eventType.HasFlag(PinEventTypes.Falling))
                 {
                     eventSuccess = Interop.RequestBothEdgesEventForLine(pinHandle, $"Listen {pinNumber} for both edge event");
@@ -147,7 +145,7 @@ namespace System.Device.Gpio.Drivers
             {
                 throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError, pin: pinNumber);
             }
-            return (Interop.GetLineDirection(pinHandle) == 1) ? PinMode.Input : PinMode.Output;
+            return (Interop.GetLineDirection(pinHandle) == 2) ? PinMode.Output : PinMode.Input;
         }
 
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
