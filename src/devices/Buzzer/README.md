@@ -1,18 +1,64 @@
-﻿# Buzzer
+﻿
+# Buzzer
+
+  
 
 ## Summary
-Provide a brief description on what the component is and its functonality.
+
+This device binding allow to play certain tone using piezo buzzer. It uses PWM with 50% duty cycle and various frequencies.
+
+Piezo buzzers with three pins supported as well as piezo buzzers with 2 pins.
+
+  
 
 ## Device Family
-Provide a list of component names and link to datasheets (if available) the binding will work with.
 
-**[Family Name Here]**: [Datasheet link here]
+This binding was tested on two types of piezo buzzers. First type of buzzer has two pins vcc and gnd. Second type of buzzers has addition signal pin.
+
+Some piezo buzzer may be used by setting their input to logical 1, but this binding doesn't support this method due to we can't control tone frequnecy using this method. However this type of piezo buzzers still could be controlled by the binding.
+  
 
 ## Binding Notes
 
-Provide any specifics related to binding API.  This could include how to configure component for particular functions and example code.
+The  `Buzzer`  class can use either software either hardware PWM. this is done fully transparently by the initialization.
 
-**NOTE**:  Don't repeat the basics related to System.Device.API* (e.g. connection settings, etc.).  This helps keep text/steps down to a minimum for maintainability.
+If you want to use the software PWM, you have to specify the GPIO pin you want to use as the first parameter in the constructor. Use the value -1 for the second one. This will force usage of the software PWM as it is not a valid value for hardware PWM.
 
-## References 
+To use the hardware PWM, make sure you reference correctly the chip and channel you want to use. The  `Buzzer`  class will always try first to open a hardware PWM then a software PWM.
+
+Here's an example how you could use `Buzzer`.
+```csharp
+using (Buzzer buzzer = new Buzzer(21, -1)); // Initialize buzzer with software PWM connected to pin 21.
+{
+	buzzer.PlayTone(440, 1000); // Play tone with frequency 440 for one second.
+}
+```
+`Buzzer` allows to play tone for certain duration like in example above.
+Or you could start tone playing, perform some operation and then stop tone playing like in a following example.
+```csharp
+using (Buzzer buzzer = new Buzzer(21, -1)); // Initialize buzzer with software PWM connected to pin 21.
+{
+	buzzer.PlayTone(440);
+	Thread.Sleep(1000);
+	buzzer.StopTone();
+}
+```
+The result will be the same as in previous example.
+
+`Buzzer` allows you to play only single tone at a single moment. If you will call `PlayTone` sequentially with a different frequencies then the last call will override previous calls. Following example explains it.
+```csharp
+using (Buzzer buzzer = new Buzzer(21, -1)); // Initialize buzzer with software PWM connected to pin 21.
+{
+	buzzer.PlayTone(440);
+	Thread.Sleep(1000);
+	buzzer.PlayTone(880);
+	Thread.Sleep(1000);
+	buzzer.StopTone();
+}
+```
+This example will play tone with frequency 440 for a second and then will play tone with a frequency 880 for a second.
+
+
+## References
+
 Provide any references to other tutorials, blogs and hardware related to the component that could help others get started.
