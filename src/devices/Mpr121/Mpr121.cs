@@ -38,7 +38,7 @@ namespace Iot.Device.Mpr121
         public event EventHandler<ChannelStatusesChangedEventArgs> ChannelStatusesChanged;
 
         /// <summary>
-        /// Gets ot sets the period in milliseconds to refresh the channels statuses.
+        /// Gets or sets the period in milliseconds to refresh the channels statuses.
         /// </summary>
         /// <remark>
         /// Set value 0 to stop the automatically refreshing. Setting the value greater than 0 will start/update auto-refresh.
@@ -69,13 +69,12 @@ namespace Iot.Device.Mpr121
         /// <param name="device">The i2c device.</param>
         /// <param name="periodRefresh">The period in milliseconds of refresing the channel statuses.</param>
         /// <param name="configuration">The controller configuration.</param>
-        public Mpr121(I2cDevice device, int? periodRefresh = null, Mpr121Configuration configuration = null)
+        public Mpr121(I2cDevice device, int periodRefresh = -1, Mpr121Configuration configuration = null)
         {
+            configuration = configuration ?? GetDefaultConfiguration();
+
             _device = device;
             _timer = new Timer(RefreshChannelStatuses, this, Timeout.Infinite, Timeout.Infinite);
-
-            periodRefresh = periodRefresh ?? 0;
-            configuration = configuration ?? GetDefaultConfiguration();
 
             _statuses = new Dictionary<Channels, bool>();
             foreach (Channels channel in Enum.GetValues(typeof(Channels)))
@@ -111,6 +110,21 @@ namespace Iot.Device.Mpr121
             RefreshChannelStatuses();
 
             return _statuses.ToImmutableDictionary();
+        }
+
+        /// <summary>
+        /// Reads the channel status of MPR121 controller.
+        /// </summary>
+        /// <param name="channel">The channel to read status.</param>
+        /// <remark>
+        /// Please use ReadChannelStatuses() if you need to read statuses of multiple channels.
+        /// Using this method several times to read status for several channels can affect the performance.
+        /// </remark>
+        public bool ReadChannelStatus(Channels channel)
+        {
+            RefreshChannelStatuses();
+
+            return _statuses[channel];
         }
 
         private static Mpr121Configuration GetDefaultConfiguration()
