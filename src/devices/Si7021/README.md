@@ -1,4 +1,4 @@
-﻿# Si7021
+﻿# Si7021 - Temperature & Humidity Sensor
 The Si7021 device provides temperature and humidity sensor readings with an I2C interface.
 
 ## Sensor Image

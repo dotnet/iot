@@ -1,4 +1,4 @@
-# Example of Si7021
+# Si7021 - Samples
 
 ## Hardware Required
 * Si7021
