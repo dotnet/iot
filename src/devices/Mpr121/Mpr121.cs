@@ -84,7 +84,7 @@ namespace Iot.Device.Mpr121
 
             InitializeController(configuration);
 
-            PeriodRefresh = periodRefresh.Value;
+            PeriodRefresh = periodRefresh;
         }
 
         public void Dispose()
