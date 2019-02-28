@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <LangVersion>Latest</LangVersion>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <Compile Include="Register.cs" />
+    <Compile Include="Lm75.cs" />
+  </ItemGroup>
+
+  <ItemGroup> 
+    <None Remove="README.md" />
+    <None Remove="sensor.jpg" />
+  </ItemGroup>
+</Project>

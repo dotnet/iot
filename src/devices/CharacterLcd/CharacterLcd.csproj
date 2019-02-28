@@ -2,25 +2,24 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />
     <Compile Include="Flags.cs" />
-    <Compile Include="GpioControllerAdapter.cs" />
-    <Compile Include="IGpioController.cs" />
     <Compile Include="Hd44780.cs" />
+    <Compile Include="Hd44780Base.cs" />
     <Compile Include="Lcd1602.cs" />
     <Compile Include="Lcd2004.cs" />
-    <Compile Include="Mcp23008Adapter.cs" />
+    <Compile Include="LcdRgb1602.cs" />
+    <Compile Include="Registers.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
-    <ProjectReference Include="$(MSBuildThisFileDirectory)../Mcp23xxx/Mcp23xxx.csproj" />
     <None Include="README.md" />
   </ItemGroup>
-
+  
 </Project>

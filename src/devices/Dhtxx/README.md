@@ -8,8 +8,8 @@ The DHT temperature and humidity sensors are very popular. Most used sensors are
 
 Device Family contains DHT11 and DHT22 which are very popular.
 
-**DHT11** [datasheet in chineese](https://cdn-shop.adafruit.com/datasheets/DHT11-chinese.pdf)
-**DHT22** [datasheet](https://cdn-shop.adafruit.com/datasheets/DHT22.pdf)
+* **DHT11** [datasheet (in chinese)](https://cdn-shop.adafruit.com/datasheets/DHT11-chinese.pdf)
+* **DHT22** [datasheet](https://cdn-shop.adafruit.com/datasheets/DHT22.pdf)
 
 Note: other DHT components are not supported but code can be adjusted to have them working
 
