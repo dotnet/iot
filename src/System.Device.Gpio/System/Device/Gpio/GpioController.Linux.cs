@@ -18,9 +18,9 @@ namespace System.Device.Gpio
         /// Initializes new instance of GpioController that will use the specified numbering scheme.
         /// The controller will default to use the driver that best applies given the platform the program is executing on.
         /// </summary>
-        /// <param name="pinNumberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
-        public GpioController(PinNumberingScheme pinNumberingScheme)
-            : this(pinNumberingScheme, GetBestDriverForBoard())
+        /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
+        public GpioController(PinNumberingScheme numberingScheme)
+            : this(numberingScheme, GetBestDriverForBoard())
         {
         }
 
