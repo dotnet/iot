@@ -10,10 +10,13 @@ namespace Iot.Device.CpuTemperature
 {
     public class CpuTemperature
     {
+        private bool _isAvailable = false;
         public double Temperature => ReadTemperature();
+        public bool IsAvailable => _isAvailable;
         private double ReadTemperature()
         {
             double temperature = 0.0;
+            _isAvailable = false;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && File.Exists("/sys/class/thermal/thermal_zone0/temp"))
             {
@@ -27,6 +30,7 @@ namespace Iot.Device.CpuTemperature
                         if (int.TryParse(data, out temp))
                         {
                             temperature = temp / 1000F;
+                            _isAvailable = true;
                         }
                     }
                 }
