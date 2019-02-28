@@ -16,9 +16,9 @@ namespace Iot.Device.Hmc5883l
     public class Hmc5883l : IDisposable
     {
         /// <summary>
-        /// HMC5883L I2C Address
+        /// HMC5883L Default I2C Address
         /// </summary>
-        public const byte I2cAddress = 0x1E;
+        public const byte DefaultI2cAddress = 0x1E;
 
         private I2cDevice _sensor;
 
