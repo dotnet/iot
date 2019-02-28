@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.ComponentModel;
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
 

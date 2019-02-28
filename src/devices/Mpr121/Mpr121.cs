@@ -25,7 +25,7 @@ namespace Iot.Device.Mpr121
         private static readonly int CHANNELS_NUMBER = Enum.GetValues(typeof(Channels)).Length;
 
         private I2cDevice _device;
-        private Timer _timer = null;
+        private Timer _timer;
 
         private Dictionary<Channels, bool> _statuses;
 
@@ -51,18 +51,14 @@ namespace Iot.Device.Mpr121
             {
                 _periodRefresh = value;
 
-                if (_periodRefresh > 0 && _timer == null)
-                {
-                    _timer = new Timer(RefreshChannelStatuses, this, TimeSpan.FromMilliseconds(_periodRefresh), TimeSpan.FromMilliseconds(_periodRefresh));
-                }
-                else if (_periodRefresh == 0 && _timer != null)
-                {
-                    _timer.Dispose();
-                    _timer = null;
-                }
-                else if (_periodRefresh > 0 && _timer != null)
+                if (_periodRefresh > 0)
                 {
                     _timer.Change(TimeSpan.FromMilliseconds(_periodRefresh), TimeSpan.FromMilliseconds(_periodRefresh));
+                }
+                else
+                {
+                    // Disable the auto-refresh.
+                    _timer.Change(Timeout.Infinite, Timeout.Infinite);
                 }
             }
         }
@@ -76,6 +72,8 @@ namespace Iot.Device.Mpr121
         public Mpr121(I2cDevice device, int? periodRefresh = null, Mpr121Configuration configuration = null)
         {
             _device = device;
+            _timer = new Timer(RefreshChannelStatuses, this, Timeout.Infinite, Timeout.Infinite);
+
             periodRefresh = periodRefresh ?? 0;
             configuration = configuration ?? GetDefaultConfiguration();
 
@@ -185,6 +183,10 @@ namespace Iot.Device.Mpr121
         /// </summary>
         private void RefreshChannelStatuses()
         {
+            // Pause the auto-refresh to prevent possible collisions.
+            var periodRefresh = PeriodRefresh;
+            PeriodRefresh = 0;
+
             Span<byte> buffer = stackalloc byte[2];
             _device.Read(buffer);
 
@@ -204,6 +206,9 @@ namespace Iot.Device.Mpr121
             {
                 OnChannelStatusesChanged();
             }
+
+            // Resume the auto-refresh.
+            PeriodRefresh = periodRefresh;
         }
 
         private void SetRegister(Registers register, byte value)
