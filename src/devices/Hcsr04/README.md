@@ -1,4 +1,4 @@
-﻿# HC-SR04
+﻿# HC-SR04 - Ultrasonic Ranging Module
 
 Device bindings for the HC-SR04 sonar distance sensor.
 

@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace Iot.Device.Hcsr04
 {
-    public class Sonar : IDisposable
+    public class Hcsr04 : IDisposable
     {
         private readonly int _echo;
         private readonly int _trigger;
@@ -29,7 +29,7 @@ namespace Iot.Device.Hcsr04
         /// <param name="triggerPin">Trigger pulse input.</param>
         /// <param name="echoPin">Trigger pulse output.</param>
         /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
-        public Sonar(int triggerPin, int echoPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+        public Hcsr04(int triggerPin, int echoPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
         {
             _echo = echoPin;
             _trigger = triggerPin;
