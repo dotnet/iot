@@ -13,9 +13,9 @@ namespace Iot.Device.Ds3231
     public class Ds3231 : IDisposable
     {
         /// <summary>
-        /// DS3231 I2C Address
+        /// DS3231 Default I2C Address
         /// </summary>
-        public const byte I2cAddress = 0x68;
+        public const byte DefaultI2cAddress = 0x68;
 
         private I2cDevice _sensor = null;
 
