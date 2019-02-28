@@ -1,4 +1,4 @@
-# Example of ADXL345
+# ADXL345 - Samples
 
 ## Hardware Required
 * ADXL345
@@ -46,4 +46,4 @@ using (Adxl345 sensor = new Adxl345(device, GravityRange.Range04))
 ```
 
 ## Result
-![](res.jpg)
+![](RunningResult.jpg)
