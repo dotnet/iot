@@ -1,4 +1,4 @@
-# Example of nRF24L01
+# nRF24L01 - Samples
 
 ## Hardware Required
 * nRF24L01 × 2
@@ -82,7 +82,7 @@ using (Nrf24l01 sender = new Nrf24l01(senderDevice, 23, 24, 20))
 private static void Receiver_ReceivedData(object sender, DataReceivedEventArgs e)
 {
     var raw = e.Data;
-    var res = Encoding.UTF8.GetString(raw);
+    var msg = Encoding.UTF8.GetString(raw);
 
     Console.Write("Received Raw Data: ");
     foreach (var item in raw)
@@ -91,7 +91,7 @@ private static void Receiver_ReceivedData(object sender, DataReceivedEventArgs e
     }
     Console.WriteLine();
 
-    Console.WriteLine($"Massage: {res}");
+    Console.WriteLine($"Massage: {msg}");
     Console.WriteLine();
 }
 ```
