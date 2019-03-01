@@ -16,13 +16,17 @@ namespace Iot.Device.CpuTemperature
         public double Temperature => ReadTemperature();
         public bool IsAvailable => CheckAvailable();
 
-        private bool CheckAvailable(){
-            if (!_checkedIfAvailable){                
+        private bool CheckAvailable()
+        {
+            if (!_checkedIfAvailable)
+            {                
                 _checkedIfAvailable = true;
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && File.Exists("/sys/class/thermal/thermal_zone0/temp")){
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && File.Exists("/sys/class/thermal/thermal_zone0/temp"))
+                {
                     _isAvalable = true;
                 }
             }
+
             return _isAvalable;
         }
 
@@ -46,6 +50,7 @@ namespace Iot.Device.CpuTemperature
                     }
                 }
             }
+
             return temperature;
         }
     }
