@@ -28,7 +28,7 @@ namespace Iot.Device.GrovePiDevice
         public const byte DefaultI2cAddress = 0x04;
 
         /// <summary>
-        /// The maximum ADC, 12 bit so 1023 on GrovePi
+        /// The maximum ADC, 10 bit so 1023 on GrovePi
         /// </summary>
         public int MaxAdc => 1023;
         /// <summary>
