@@ -16,12 +16,14 @@ namespace Iot.Device.CpuTemperature.Samples
 
             while (true)
             {
-                double temperature = cpuTemperature.Temperature;
                 if (cpuTemperature.IsAvailable)
                 {
-                    Console.WriteLine($"CPU Temperature {temperature} degrees centigrade");
+                    double temperature = cpuTemperature.Temperature;
+                    if (temperature != double.NaN)
+                    {
+                        Console.WriteLine($"CPU Temperature {temperature} degrees centigrade");
+                    }
                 }
-
                 Thread.Sleep(1000);
             }
         }

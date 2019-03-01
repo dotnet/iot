@@ -10,15 +10,27 @@ namespace Iot.Device.CpuTemperature
 {
     public class CpuTemperature
     {
-        private bool _isAvailable = false;
+        private bool _isAvalable = false;
+        private bool _checkedIfAvailable = false;
+
         public double Temperature => ReadTemperature();
-        public bool IsAvailable => _isAvailable;
+        public bool IsAvailable => CheckAvailable();
+
+        private bool CheckAvailable(){
+            if (!_checkedIfAvailable){                
+                _checkedIfAvailable = true;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && File.Exists("/sys/class/thermal/thermal_zone0/temp")){
+                    _isAvalable = true;
+                }
+            }
+            return _isAvalable;
+        }
+
         private double ReadTemperature()
         {
-            double temperature = 0.0;
-            _isAvailable = false;
+            double temperature = double.NaN;
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && File.Exists("/sys/class/thermal/thermal_zone0/temp"))
+            if (CheckAvailable())
             {
                 using (FileStream fileStream = new FileStream("/sys/class/thermal/thermal_zone0/temp", FileMode.Open, FileAccess.Read))
                 using (StreamReader reader = new StreamReader(fileStream))
@@ -30,7 +42,6 @@ namespace Iot.Device.CpuTemperature
                         if (int.TryParse(data, out temp))
                         {
                             temperature = temp / 1000F;
-                            _isAvailable = true;
                         }
                     }
                 }
