@@ -1,21 +1,29 @@
-﻿# Using Si7021 (temperature and humidity sensor)
-
-## Summary
-
+﻿# Si7021 - Temperature & Humidity Sensor
 The Si7021 device provides temperature and humidity sensor readings with an I2C interface.
 
-## Device Family
+## Sensor Image
+![](sensor.jpg)
 
-**Si7021**: https://cdn.sparkfun.com/datasheets/Sensors/Weather/Si7021.pdf
+## Usage
+```C#
+I2cConnectionSettings settings = new I2cConnectionSettings(1, Si7021.DefaultI2cAddress);
+// get I2cDevice (in Linux)
+UnixI2cDevice device = new UnixI2cDevice(settings);
+// get I2cDevice (in Win10)
+//Windows10I2cDevice device = new Windows10I2cDevice(settings);
 
-## Binding Notes
-
-An example showing how to read and print the temperature and humidity from this device is available in the [samples](samples) folder.
-
-The fritzing diagram below shows an example wiring layout between the Si7021 and a Raspberry Pi.
-
-![](samples/Si7021_I2c_Read_Temp_Humidity.png)
+using (Si7021 sensor = new Si7021(device, Resolution.Resolution1))
+{
+    // opne heater
+    sensor.Heater = true;
+    // read revision
+    byte revision = sensor.Revision;
+    // read temperature
+    double temperature = sensor.Temperature;
+    // read humidity
+    double humidity = sensor.Humidity;
+}
+```
 
 ## References
-
-https://www.adafruit.com/product/3251
+https://cdn.sparkfun.com/datasheets/Sensors/Weather/Si7021.pdf
