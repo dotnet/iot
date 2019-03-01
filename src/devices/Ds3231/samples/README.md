@@ -1,4 +1,4 @@
-# Example of DS3231
+# DS3231 - Samples
 
 ## Hardware Required
 * DS3231
@@ -7,7 +7,6 @@
 ## Circuit
 ![](DS3231_circuit_bb.png)
 
-Ds3231
 * SCL - SCL
 * SDA - SDA
 * VCC - 5V
@@ -15,11 +14,11 @@ Ds3231
 
 ## Code
 ```C#
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Iot.Device.Ds3231.Ds3231.I2cAddress);
+I2cConnectionSettings settings = new I2cConnectionSettings(1, Ds3231.DefaultI2cAddress);
 // get I2cDevice (in Linux)
 UnixI2cDevice device = new UnixI2cDevice(settings);
 
-using (Iot.Device.Ds3231.Ds3231 rtc = new Iot.Device.Ds3231.Ds3231(device))
+using (Ds3231 rtc = new Ds3231(device))
 {
     // set DS3231 time
     rtc.DateTime = DateTime.Now;
@@ -44,4 +43,4 @@ using (Iot.Device.Ds3231.Ds3231 rtc = new Iot.Device.Ds3231.Ds3231(device))
 ```
 
 ## Result
-![](res.jpg)
+![](RunningResult.jpg)

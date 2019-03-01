@@ -1,4 +1,4 @@
-# ADXL345
+# ADXL345 - Accelerometer
 ADXL345 is a small, thin, low power, 3-axis accelerometer with high resolution (13-bit) measurement at up to ±16g.
 
 ## Sensor Image

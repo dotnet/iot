@@ -1,4 +1,4 @@
-# LM75
+# LM75 - Digital Temperature Sensor
 The LM75 is a temperature sensor, Delta-Sigma analog-to-digital converter, and digital over-temperature detector with I2C interface.
 
 ## Sensor Image
@@ -12,7 +12,7 @@ UnixI2cDevice device = new UnixI2cDevice(settings);
 // get I2cDevice (in Win10)
 //Windows10I2cDevice device = new Windows10I2cDevice(settings);
 
-using(Lm75 sensor=new Lm75(device))
+using(Lm75 sensor = new Lm75(device))
 {
     double temperature = sensor.Temperature;
 }

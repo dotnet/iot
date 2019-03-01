@@ -1,4 +1,4 @@
-# nRF24L01
+# nRF24L01 - Single Chip 2.4 GHz Transceiver
 The nRF24L01 is a single chip radio transceiver for the world wide 2.4 - 2.5 GHz ISM band.
 
 ## Sensor Image
@@ -6,6 +6,7 @@ The nRF24L01 is a single chip radio transceiver for the world wide 2.4 - 2.5 GHz
 
 ## Usage
 ```C#
+// Get SpiConnectionSettings and SpiDevice
 SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
 {
     ClockFrequency = Nrf24l01.SpiClockFrequency,
@@ -13,6 +14,7 @@ SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
 };
 UnixSpiDevice device = new UnixSpiDevice(settings);
 
+// Creates a new instance of the nRF24L01
 using (Nrf24l01 sensor = new Nrf24l01(receiverDevice, 5, 6, 20))
 {
     // Set sender send address, receiver pipe0 address (Optional)
@@ -36,7 +38,7 @@ using (Nrf24l01 sensor = new Nrf24l01(receiverDevice, 5, 6, 20))
 private static void Receiver_ReceivedData(object sender, DataReceivedEventArgs e)
 {
     var raw = e.Data;
-    var res = Encoding.UTF8.GetString(raw);
+    var msg = Encoding.UTF8.GetString(raw);
 
     Console.Write("Received Raw Data: ");
     foreach (var item in raw)
@@ -45,7 +47,7 @@ private static void Receiver_ReceivedData(object sender, DataReceivedEventArgs e
     }
     Console.WriteLine();
 
-    Console.WriteLine($"Massage: {res}");
+    Console.WriteLine($"Massage: {msg}");
     Console.WriteLine();
 }
 ```

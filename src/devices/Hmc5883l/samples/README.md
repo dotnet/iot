@@ -1,4 +1,4 @@
-# Example of HMC5883L
+# HMC5883L - Samples
 
 ## Hardware Required
 * HMC5883L
@@ -14,7 +14,7 @@
 
 ## Code
 ```C#
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Hmc5883l.I2cAddress);
+I2cConnectionSettings settings = new I2cConnectionSettings(1, Hmc5883l.DefaultI2cAddress);
 // get I2cDevice (in Linux)
 UnixI2cDevice device = new UnixI2cDevice(settings);
 
@@ -22,8 +22,8 @@ using (Hmc5883l sensor = new Hmc5883l(device))
 {
     while (true)
     {
-        // read direction angle
-        Console.WriteLine($"Direction Angle: {sensor.Heading.ToString("0.00")} °");
+        // read heading
+        Console.WriteLine($"Heading: {sensor.Heading.ToString("0.00")} °");
         Console.WriteLine();
 
         // wait for a second

@@ -1,4 +1,4 @@
-# Example of ADS1115
+# ADS1115 - Samples
 
 ## Hardware Required
 * ADS1115
@@ -53,4 +53,4 @@ using (Ads1115 adc = new Ads1115(device, InputMultiplexer.AIN0, MeasuringRange.F
 ```
 
 ## Result
-![](res.jpg)
+![](RunningResult.jpg)

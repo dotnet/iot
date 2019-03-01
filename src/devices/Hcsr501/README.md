@@ -1,4 +1,4 @@
-# HC-SR501
+# HC-SR501 - PIR Motion Sensor
 HC-SR501 is used to detect motion based on the infrared heat in the surrounding area. 
 
 ## Sensor Image
@@ -8,8 +8,8 @@ HC-SR501 is used to detect motion based on the infrared heat in the surrounding 
 ```C#
 using(Hcsr501 sensor = new Hcsr501(hcsr501Pin, PinNumberingScheme.Logical))
 {
+    // detect motion
     bool isDetected = sensor.IsMotionDetected;
-    // TODO
 }
 ```
 
