@@ -13,7 +13,8 @@ namespace Iot.Device.Bno055
     public class Bno055Sensor : IDisposable
     {
         /// <summary>
-        /// The default I2C Address
+        /// The default I2C Address, page 91 of the main documentation
+        /// https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BNO055-DS000.pdf
         /// </summary>
         public const byte DefaultI2cAddress = 0x28;
 
