@@ -158,13 +158,12 @@ namespace System.Device.Gpio.Tests
             {
                 controller.OpenPin(InputPin, PinMode.Input);
                 controller.OpenPin(OutputPin, PinMode.Output);
+                controller.Write(OutputPin, PinValue.Low);
 
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, (o, e) => {
                     risingEventOccuredCount++;
                 });
-                PinChangeEventHandler callback = (o, e) => {
-                    risingEventOccuredCount++;
-                };
+                                
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, callback);
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, (o, e) => {
                     risingEventOccuredCount++;
@@ -177,15 +176,21 @@ namespace System.Device.Gpio.Tests
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Falling, (o, e) => {
                     fallingEventOccuredCount++;
                 });
+
                 for (int i = 0; i < 10; i++)
                 {
                     controller.Write(OutputPin, PinValue.High);
-                    Thread.Sleep(100);
+                    Thread.Sleep(10);
                     controller.Write(OutputPin, PinValue.Low);
-                    Thread.Sleep(100);
+                    Thread.Sleep(10);
                 }
                 Assert.Equal(25, risingEventOccuredCount);
                 Assert.Equal(10, fallingEventOccuredCount);
+
+                void callback(object sender, PinValueChangedEventArgs e)
+                {
+                    risingEventOccuredCount++;
+                }
             }
         }
 
@@ -199,6 +204,7 @@ namespace System.Device.Gpio.Tests
                 controller.OpenPin(InputPin, PinMode.Input);
                 controller.OpenPin(LedPin, PinMode.Input);
                 controller.OpenPin(OutputPin, PinMode.Output);
+                controller.Write(OutputPin, PinValue.Low);
 
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, (o, e) =>
                 {
@@ -209,7 +215,7 @@ namespace System.Device.Gpio.Tests
                 Task.Run(() =>
                 {
                     controller.Write(OutputPin, PinValue.High);
-                    Thread.Sleep(100);
+                    Thread.Sleep(10);
                     controller.Write(OutputPin, PinValue.Low);
                 });
 
