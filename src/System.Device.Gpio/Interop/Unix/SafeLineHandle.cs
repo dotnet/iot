@@ -11,6 +11,8 @@ namespace System.Device.Gpio
     /// </summary>
     internal class SafeLineHandle : SafeHandle
     {
+        public PinMode PinMode { get; set; }
+
         public SafeLineHandle() : base(IntPtr.Zero, true) { }
 
         protected override bool ReleaseHandle()

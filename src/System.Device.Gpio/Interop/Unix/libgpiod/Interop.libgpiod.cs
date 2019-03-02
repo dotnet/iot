@@ -67,7 +67,7 @@ internal partial class Interop
     /// Read the GPIO line direction setting.
     /// </summary>
     /// <param name="line">GPIO line handle</param>
-    /// <returns>GPIOD_DIRECTION_INPUT or GPIOD_DIRECTION_OUTPUT.</returns>
+    /// <returns>1 if INPUT otherwise 2 (OUTPUT).</returns>
     [DllImport(LibgpiodLibrary)]
     internal static extern int GetLineDirection(SafeLineHandle line);
 
@@ -105,6 +105,14 @@ internal partial class Interop
     /// <returns>0 or 1 if the operation succeeds. On error this routine returns -1 and sets the last error number.</returns>
     [DllImport(LibgpiodLibrary, SetLastError = true)]
     internal static extern int GetGpiodLineValue(SafeLineHandle line);
+
+    /// <summary>
+    /// Check if line is no used (not set as Input or Output, not listening events).
+    /// </summary>
+    /// <param name="line">GPIO line handle</param>
+    /// <returns>0 or 1 if the operation succeeds. On error this routine returns -1 and sets the last error number.</returns>
+    [DllImport(LibgpiodLibrary)]
+    internal static extern bool LineIsFree(SafeLineHandle line);
 
     /// <summary>
     /// Release a previously reserved line.

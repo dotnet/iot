@@ -21,7 +21,6 @@ namespace System.Device.Gpio.Tests
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
-                
                 controller.OpenPin(LedPin, PinMode.Output);
                 Thread.Sleep(1_000);
                 controller.Write(LedPin, PinValue.High);
@@ -54,7 +53,7 @@ namespace System.Device.Gpio.Tests
         public void PinValueReadAndWrite()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
-            {                
+            {
                 controller.OpenPin(OutputPin, PinMode.Output);
                 controller.OpenPin(InputPin, PinMode.Input);
                 controller.Write(OutputPin, PinValue.High);
@@ -74,7 +73,6 @@ namespace System.Device.Gpio.Tests
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
-                
                 Assert.Throws<InvalidOperationException>(() => controller.Write(OutputPin, PinValue.High));
                 Assert.Throws<InvalidOperationException>(() => controller.Read(InputPin));
                 Assert.Throws<InvalidOperationException>(() => controller.ClosePin(OutputPin));
@@ -111,7 +109,6 @@ namespace System.Device.Gpio.Tests
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
-                
                 controller.OpenPin(OutputPin, PinMode.Output);
                 Assert.Throws<InvalidOperationException>(() => controller.Read(OutputPin));
             }
@@ -137,12 +134,12 @@ namespace System.Device.Gpio.Tests
             ManualResetEvent mre = new ManualResetEvent(false);
             bool wasCalled = false;
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
-            {                
+            {
                 controller.OpenPin(InputPin, PinMode.Input);
                 controller.OpenPin(OutputPin, PinMode.Output);
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, callback);
                 controller.Write(OutputPin, PinValue.High);
-                mre.WaitOne(TimeSpan.FromSeconds(3));
+                mre.WaitOne(TimeSpan.FromSeconds(5));
                 Assert.True(wasCalled);
             }
 
@@ -152,7 +149,83 @@ namespace System.Device.Gpio.Tests
                 mre.Set();
             }
         }
+/*
+        [Fact]
+        public void AddCallbackRemoveCallbackTest()
+        {
+            int risingEventOccuredCount = 0, fallingEventOccuredCount = 0;
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                controller.OpenPin(InputPin);
+                controller.OpenPin(OutputPin, PinMode.Output);
 
+                controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, (o, e) => {
+                    risingEventOccuredCount++;
+                });
+                PinChangeEventHandler callback = (o, e) => {
+                    risingEventOccuredCount++;
+                };
+                controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, callback);
+                controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, (o, e) => {
+                    risingEventOccuredCount++;
+                    if (fallingEventOccuredCount == 4)
+                    {
+                        controller.UnregisterCallbackForPinValueChangedEvent(InputPin, callback);
+                    }
+                });
+
+                controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Falling, (o, e) => {
+                    fallingEventOccuredCount++;
+                });
+                for (int i = 0; i < 10; i++)
+                {
+                    controller.Write(OutputPin, PinValue.High);
+                    Thread.Sleep(100);
+                    controller.Write(OutputPin, PinValue.Low);
+                    Thread.Sleep(100);
+                }
+                Assert.Equal(25, risingEventOccuredCount);
+                Assert.Equal(10, fallingEventOccuredCount);
+            }
+        }
+
+        [Fact]
+        public void WaitForEventTest()
+        {
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                int count = 0;
+                bool cancelled = false;
+                CancellationTokenSource tokenSource = new CancellationTokenSource();
+                controller.OpenPin(InputPin);
+                controller.OpenPin(18);
+                controller.OpenPin(OutputPin, PinMode.Output);
+
+                controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, (o, e) =>
+                {
+                    if (count == 33)
+                    {
+                        tokenSource.Cancel();
+                        cancelled = true;
+                    }
+                    count++;
+                });
+
+                Task.Run(() =>
+                {
+                    for (int i = 0; i < 100; i++)
+                    {
+                        controller.Write(OutputPin, PinValue.High);
+                        Thread.Sleep(100);
+                        controller.Write(OutputPin, PinValue.Low);
+                        Thread.Sleep(100);
+                    }
+                });
+
+                controller.WaitForEvent(18, PinEventTypes.Falling, tokenSource.Token);
+                Assert.True(cancelled);
+            }
+        }*/
         protected abstract GpioDriver GetTestDriver();
         protected abstract PinNumberingScheme GetTestNumberingScheme();
     }

@@ -65,7 +65,18 @@ extern int RequestLineOutput(struct gpiod_line *line, const char *consumer)
 {
 	return gpiod_line_request_output(line, consumer, 0);
 }
-			 
+		
+/**
+ * @brief Check if the calling user has neither requested ownership of this line nor configured any event notifications.
+ * @param line GPIO line object.
+ * @return True if given line is free, false otherwise.
+ */		
+extern bool LineIsFree(struct gpiod_line *line) 
+{
+	return gpiod_line_is_free(line);
+}
+
+		
 /**
  * @brief Release a previously reserved line.
  * @param line GPIO line object.
