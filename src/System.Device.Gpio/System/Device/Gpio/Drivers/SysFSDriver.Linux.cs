@@ -251,14 +251,14 @@ namespace System.Device.Gpio.Drivers
             return new WaitForEventResult
             {
                 TimedOut = !eventDetected,
-                EventType = eventTypes
+                EventTypes = eventTypes
             };
         }
 
-        private void SetPinEventsToDetect(int pinNumber, PinEventTypes eventType)
+        private void SetPinEventsToDetect(int pinNumber, PinEventTypes eventTypes)
         {
             string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber}", "edge");
-            string stringValue = PinEventTypeToStringValue(eventType);
+            string stringValue = PinEventTypeToStringValue(eventTypes);
             File.WriteAllText(edgePath, stringValue);
         }
 
@@ -432,6 +432,7 @@ namespace System.Device.Gpio.Drivers
             if (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
             {
                 s_eventThreadCancellationTokenSource.Cancel();
+                s_eventThreadCancellationTokenSource.Dispose();
                 while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                 {
                     Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
@@ -460,7 +461,7 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
-        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
+        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             if (!_devicePins.ContainsKey(pinNumber))
             {
@@ -468,15 +469,15 @@ namespace System.Device.Gpio.Drivers
                 _pinsToDetectEventsCount++;
                 AddPinToPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, out _);
             }
-            if (eventType.HasFlag(PinEventTypes.Rising))
+            if (eventTypes.HasFlag(PinEventTypes.Rising))
             {
                 _devicePins[pinNumber].ValueRising += callback;
             }
-            if (eventType.HasFlag(PinEventTypes.Falling))
+            if (eventTypes.HasFlag(PinEventTypes.Falling))
             {
                 _devicePins[pinNumber].ValueFalling += callback;
             }
-            SetPinEventsToDetect(pinNumber, (GetPinEventsToDetect(pinNumber) | eventType));
+            SetPinEventsToDetect(pinNumber, (GetPinEventsToDetect(pinNumber) | eventTypes));
             InitializeEventDetectionThread();
         }
 
@@ -499,8 +500,8 @@ namespace System.Device.Gpio.Drivers
                 bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, s_eventThreadCancellationTokenSource.Token);
                 if (eventDetected)
                 {
-                    PinEventTypes eventType = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
-                    var args = new PinValueChangedEventArgs(eventType, pinNumber);
+                    PinEventTypes eventTypes = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                    var args = new PinValueChangedEventArgs(eventTypes, pinNumber);
                     _devicePins[pinNumber]?.OnPinValueChanged(args, GetPinEventsToDetect(pinNumber));
                 }
             }

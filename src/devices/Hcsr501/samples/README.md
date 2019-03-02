@@ -1,4 +1,4 @@
-# Example of HC-SR501
+# HC-SR501 - Samples
 
 ## Hardware Required
 * PIR Motion Sensor - HC-SR501
@@ -56,4 +56,4 @@ using(Hcsr501 sensor = Hcsr501(17, PinNumberingScheme.Logical))
 
 
 ## Result
-![](res.gif)
+![](RunningResult.gif)

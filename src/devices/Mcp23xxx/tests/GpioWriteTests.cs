@@ -30,11 +30,6 @@ namespace Iot.Device.Mcp23xxx.Tests
 
                 device.Write(pin, PinValue.High);
                 byte expected = (byte)(1 << (first ? pin : pin - 8));
-                if (expected !=
-                    (first ? device.ReadByte(Register.OLAT) : ((Mcp23x1x)device).ReadByte(Register.OLAT, Port.PortB)))
-                {
-                    Console.WriteLine();
-                }
 
                 Assert.Equal(expected,
                     first ? device.ReadByte(Register.OLAT) : ((Mcp23x1x)device).ReadByte(Register.OLAT, Port.PortB));

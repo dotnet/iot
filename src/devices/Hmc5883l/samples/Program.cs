@@ -7,24 +7,34 @@ using System.Device.I2c;
 using System.Device.I2c.Drivers;
 using System.Threading;
 
-namespace Hmc5883l.Samples
+namespace Iot.Device.Hmc5883l.Samples
 {
     class Program
     {
         static void Main(string[] args)
         {
-            I2cConnectionSettings settings = new I2cConnectionSettings(1, Iot.Device.Hmc5883l.Hmc5883l.I2cAddress);
+            I2cConnectionSettings settings = new I2cConnectionSettings(1, Hmc5883l.DefaultI2cAddress);
             // get I2cDevice (in Linux)
             UnixI2cDevice device = new UnixI2cDevice(settings);
             // get I2cDevice (in Win10)
             //Windows10I2cDevice device = new Windows10I2cDevice(settings);
 
-            using (Iot.Device.Hmc5883l.Hmc5883l sensor = new Iot.Device.Hmc5883l.Hmc5883l(device))
+            using (Hmc5883l sensor = new Hmc5883l(device))
             {
                 while (true)
                 {
-                    // read direction angle
-                    Console.WriteLine($"Direction Angle: {sensor.Heading.ToString("0.00")} °");
+                    // read heading
+                    Console.WriteLine($"Heading: {sensor.Heading.ToString("0.00")} °");
+
+                    var status = sensor.DeviceStatus;
+                    Console.Write("Statuses: ");
+                    foreach (Status item in Enum.GetValues(typeof(Status)))
+                    {
+                        if (status.HasFlag(item))
+                            Console.Write($"{item} ");
+                    }
+
+                    Console.WriteLine();
                     Console.WriteLine();
 
                     // wait for a second

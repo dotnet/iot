@@ -201,8 +201,10 @@ namespace System.Device.Gpio
         /// <returns>A structure that contains the result of the waiting operation.</returns>
         public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
-            return WaitForEvent(pinNumber, eventTypes, tokenSource.Token);
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource(timeout))
+            {
+                return WaitForEvent(pinNumber, eventTypes, tokenSource.Token);
+            }
         }
 
         /// <summary>
@@ -229,10 +231,12 @@ namespace System.Device.Gpio
         /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="timeout">The time to wait for the event.</param>
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation.</returns>
-        public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
+        public async ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
-            return WaitForEventAsync(pinNumber, eventTypes, tokenSource.Token);
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource(timeout))
+            {
+                return await WaitForEventAsync(pinNumber, eventTypes, tokenSource.Token).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -301,25 +305,25 @@ namespace System.Device.Gpio
         /// <summary>
         /// Write the given pins with the given values.
         /// </summary>
-        /// <param name="pinValues">The pin/value pairs to write.</param>
-        public void Write(ReadOnlySpan<PinValuePair> pinValues)
+        /// <param name="pinValuePairs">The pin/value pairs to write.</param>
+        public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
         {
-            for (int i = 0; i < pinValues.Length; i++)
+            for (int i = 0; i < pinValuePairs.Length; i++)
             {
-                Write(pinValues[i].PinNumber, pinValues[i].PinValue);
+                Write(pinValuePairs[i].PinNumber, pinValuePairs[i].PinValue);
             }
         }
 
         /// <summary>
-        /// Read the given pins.
+        /// Read the given pins with the given pin numbers.
         /// </summary>
-        /// <param name="pinValues">The pins to read.</param>
-        public void Read(Span<PinValuePair> pinValues)
+        /// <param name="pinValuePairs">The pin/value pairs to read.</param>
+        public void Read(Span<PinValuePair> pinValuePairs)
         {
-            for (int i = 0; i < pinValues.Length; i++)
+            for (int i = 0; i < pinValuePairs.Length; i++)
             {
-                int pin = pinValues[i].PinNumber;
-                pinValues[i] = new PinValuePair(pin, Read(pin));
+                int pin = pinValuePairs[i].PinNumber;
+                pinValuePairs[i] = new PinValuePair(pin, Read(pin));
             }
         }
     }

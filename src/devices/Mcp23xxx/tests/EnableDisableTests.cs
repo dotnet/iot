@@ -11,7 +11,7 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class EnableDisableTests : Mcp23xxxTest
     {
-        private static GpioControllerMock s_gpioMock = new GpioControllerMock();
+        private static readonly GpioControllerMock s_gpioMock = new GpioControllerMock();
 
         [Theory]
         [MemberData(nameof(ResetTestDevices))]

@@ -44,7 +44,7 @@ namespace System.Device.Gpio.Drivers
             _pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
         }
 
-        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
+        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             if (eventType.HasFlag(PinEventTypes.Rising) || eventType.HasFlag(PinEventTypes.Falling))
             {
@@ -178,7 +178,7 @@ namespace System.Device.Gpio.Drivers
             } 
         }
 
-        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventType, CancellationToken cancellationToken)
+        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             if (eventType.HasFlag(PinEventTypes.Rising) || eventType.HasFlag(PinEventTypes.Falling))
             {
