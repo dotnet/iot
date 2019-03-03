@@ -25,7 +25,7 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
-        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
+        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             throw new NotImplementedException();
         }

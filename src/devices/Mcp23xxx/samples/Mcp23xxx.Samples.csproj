@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Mcp23xxx.csproj" />
   </ItemGroup>
 

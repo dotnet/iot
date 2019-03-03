@@ -6,18 +6,37 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ## Binding Index
 
-* [Bmp280](Bmp280/README.md)
-* [Dhtxx](Dhtxx/README.md)
-* [Hcsr04](Hcsr04/README.md)
-* [CharacterLcd](CharacterLcd/README.md)
-* [Max7219](Max7219/README.md)
-* [Mcp23xxx](Mcp23xxx/README.md)
-* [Mcp3008](Mcp3008/README.md)
-* [Si7021](Si7021/README.md)
+* [ADS1115 -- Analog-to-Digital Converter](Ads1115/README.md)
+* [ADXL345 -- SPI Accelerometer](Adxl345/README.md)
+* [BMP280 -- Digital Pressure Sensor](Bmp280/README.md)
+* [BrickPi3](BrickPi3/README.md)
+* [CharacterLcd -- Liquid Crystal Display](CharacterLcd/README.md)
+* [DC Motor](DCMotor/README.md)
+* [Dhtxx -- Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
+* [DS3231 -- Realtime Clock](Ds3231/README.md)
+* [HC-SR04 -- Ultrasonic Ranging Module](Hcsr04/README.md)
+* [HC-SR501 -- PIR Motion Sensor](Hcsr501/README.md)
+* [HMC5883L -- 3-Axis Digital Compass](Hmc5883l/README.md)
+* [LM75 -- Digital Temperature Sensor](Lm75/README.md)
+* [Max7219 -- LED Matrix Driver](Max7219/README.md)
+* [MAX44009 -- Ambient Light Sensor](Max44009/README.md)
+* [Mcp23xxx -- I/O Expander](Mcp23xxx/README.md)
+* [Mcp3008 -- Analog-to-Digital Converter](Mcp3008/README.md)
+* [Mpr121 -- Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
+* [nRF24L01 -- Single chip 2.4 GHz Transceiver](Nrf24l01/README.md)
+* [Pca95x4 -- I2C GPIO Expander](Pca95x4/README.md)
+* [Pca9685 -- I2C PWM Driver](Pca9685/README.md)
+* [Pcx857x -- I2C GPIO Expander](Pcx857x/README.md)
+* [Servo -- Servomotor Controller](Servo/README.md)
+* [SHT3x -- Humidity and Temperature Sensor](Sht3x/README.md)
+* [Si7021 -- Temperature & Humidity Sensor](Si7021/README.md)
+* [SoftPwm -- Software PWM](SoftPwm/README.md)
+* [Ssd1306 -- OLED Display Controller](Ssd1306/README.md)
+* [Uln2003 -- Driver board for stepper motor](Uln2003/README.md)
 
 ## Binding Distribution
 
-Binding distribution is primarily via the Iot.Device.Bindings NuGet package that ships via [NuGet](https://www.nuget.org/packages/Iot.Device.Bindings) (for preview and RTM releases) and [MyGet](https://dotnet.myget.org/feed/dotnet-core/package/nuget/Iot.Device.Bindings) (for daily builds with latest bindings). The MyGet package should be updated with every official build, which means that it will take at most 1 day for a binding to be includded in the package once it has been merged to the master branch.
+These bindings are distributed via the [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings) NuGet package.  Daily builds with the latest bindings are available on [MyGet](https://dotnet.myget.org/feed/dotnet-core/package/nuget/Iot.Device.Bindings). You can also consume the bindings as source.
 
 ## Contributing a binding
 
