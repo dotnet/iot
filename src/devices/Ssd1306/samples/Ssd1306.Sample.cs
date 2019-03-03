@@ -4,15 +4,23 @@
 
 using Iot.Device.Ssd1306.Command;
 using System;
+using System.Collections.Generic;
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Threading;
+using System.IO;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace Iot.Device.Ssd1306.Samples
 {
-    class Program
+    static class Program
     {
         static void Main(string[] args)
         {
@@ -23,7 +31,10 @@ namespace Iot.Device.Ssd1306.Samples
                 InitializeSsd1306(ssd1306);
                 ClearScreen(ssd1306);
                 //SendMessage(ssd1306, "Hello .NET IoT!!!");
-                DisplayIpAddress(ssd1306);
+                //DisplayIpAddress(ssd1306);
+                DisplayImages(ssd1306);
+                DisplayClock(ssd1306);
+                ClearScreen(ssd1306);
             }
         }
 
@@ -97,7 +108,50 @@ namespace Iot.Device.Ssd1306.Samples
             }
         }
 
-        // Referencing https://stackoverflow.com/questions/6803073/get-local-ip-address
+        private static void DisplayImages(Ssd1306 ssd1306)
+        {   
+            Console.WriteLine("Display Images"); 
+            foreach(var image_name in Directory.GetFiles("images", "*.bmp").OrderBy(f => f))
+            {
+                using (Image<Gray16> image = Image.Load<Gray16>(image_name))
+                {
+                    ssd1306.DisplayImage(image);
+                    Thread.Sleep(1000);
+                }
+            }
+        }
+
+        private static void DisplayClock(Ssd1306 ssd1306)
+        {
+            Console.WriteLine("Display clock");
+            var fontSize = 25;
+            var font =  "DejaVu Sans";
+            var fontsys = SystemFonts.CreateFont(font, fontSize, FontStyle.Italic);
+            var y = 0;
+
+            foreach(var i in Enumerable.Range(0,100))
+            {   
+                using (Image<Rgba32> image  = new Image<Rgba32>(128, 32))
+                {
+                    image.Mutate(ctx => ctx
+                        .Fill(Rgba32.Black)
+                        .DrawText(DateTime.Now.ToString("HH:mm:ss"), fontsys, Rgba32.White, new SixLabors.Primitives.PointF(0, y))
+                    );
+
+                    using(Image<Gray16> image_t = image.CloneAs<Gray16>())
+                    {
+                        ssd1306.DisplayImage(image_t);
+                    }
+
+                    y++;
+                    if(y >= image.Height) y = 0;
+
+                    Thread.Sleep(100);
+                }       
+            }
+        }
+        
+        // Referencing https://stackoverflow.com/questions/6803073/get-local-ip-address   
         private static string GetIpAddress()
         {
             // Get a list of all network interfaces (usually one per network card, dialup, and VPN connection).
@@ -131,5 +185,36 @@ namespace Iot.Device.Ssd1306.Samples
 
             return null;
         }
+
+        // Port from https://github.com/adafruit/Adafruit_Python_SSD1306/blob/8819e2d203df49f2843059d981b7347d9881c82b/Adafruit_SSD1306/SSD1306.py#L184
+        public static void DisplayImage(this Ssd1306 s, Image<Gray16> image)
+        {
+            Int16 width = 128;
+            Int16 pages = 4; 
+            List<byte> buffer = new List<byte>(); 
+
+            for (int page = 0; page < pages; page++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        int bits = 0;
+                        for (byte bit = 0; bit < 8; bit++)
+                        {                            
+                            bits = bits << 1;
+                            bits |= image[x, page * 8 + 7 - bit].PackedValue > 0 ? 1 : 0;                                              
+                                                         
+                        } 
+
+                        buffer.Add((byte)bits);          
+                    }
+                }
+            
+            int chunk_size = 16;
+            for(int i = 0; i < buffer.Count; i += chunk_size)
+            {
+                s.SendData(buffer.Skip(i).Take(chunk_size).ToArray());
+            }
+        }
+        
     }
 }
