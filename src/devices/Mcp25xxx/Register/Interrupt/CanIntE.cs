@@ -1,0 +1,123 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+namespace Iot.Device.Mcp25xxx.Register.Interrupt
+{
+    /// <summary>
+    /// CAN Interrupt Enable Register.
+    /// </summary>
+    public class CanIntE
+    {
+        /// <summary>
+        /// Initializes a new instance of the CanIntE class.
+        /// </summary>
+        /// <param name="rx0ie">
+        /// Receive Buffer 0 Full Interrupt Enable bit.
+        /// True = Interrupt when message is received in RXB0.
+        /// False = Disabled.
+        /// </param>
+        /// <param name="rx1ie">
+        /// Receive Buffer 1 Full Interrupt Enable bit.
+        /// True = Interrupt when message is received in RXB1.
+        /// False = Disabled.
+        /// </param>
+        /// <param name="tx0ie">
+        /// Transmit Buffer 0 Empty Interrupt Enable bit.
+        /// True = Interrupt on TXB0 becoming empty.
+        /// False = Disabled.
+        /// </param>
+        /// <param name="tx1ie">
+        /// Transmit Buffer 1 Empty Interrupt Enable bit.
+        /// True = Interrupt on TXB1 becoming empty.
+        /// False = Disabled.
+        /// </param>
+        /// <param name="tx2ie">
+        /// Transmit Buffer 2 Empty Interrupt Enable bit.
+        /// True = Interrupt on TXB2 becoming empty.
+        /// False = Disabled.
+        /// </param>
+        /// <param name="errie">
+        /// Error Interrupt Enable bit (multiple sources in the EFLG register).
+        /// True = Interrupt on EFLG error condition change.
+        /// False = Disabled.
+        /// </param>
+        /// <param name="wakie">
+        /// Wake-up Interrupt Enable bit.
+        /// True = Interrupt on CAN bus activity.
+        /// False = Disabled.
+        /// </param>
+        /// <param name="merre">
+        /// Message Error Interrupt Enable bit.
+        /// True = Interrupt on error during message reception or transmission.
+        /// False = Disabled.
+        /// </param>
+        public CanIntE(bool rx0ie, bool rx1ie, bool tx0ie, bool tx1ie, bool tx2ie, bool errie, bool wakie, bool merre)
+        {
+            Rx0Ie = rx0ie;
+            Rx1Ie = rx1ie;
+            Tx0Ie = tx0ie;
+            Tx1Ie = tx1ie;
+            Tx2Ie = tx2ie;
+            ErrIe = errie;
+            WakIe = wakie;
+            MerrE = merre;
+        }
+
+        /// <summary>
+        /// Receive Buffer 0 Full Interrupt Enable bit.
+        /// True = Interrupt when message is received in RXB0.
+        /// False = Disabled.
+        /// </summary>
+        public bool Rx0Ie { get; set; }
+
+        /// <summary>
+        /// Receive Buffer 1 Full Interrupt Enable bit.
+        /// True = Interrupt when message is received in RXB1.
+        /// False = Disabled.
+        /// </summary>
+        public bool Rx1Ie { get; set; }
+
+        /// <summary>
+        /// Transmit Buffer 0 Empty Interrupt Enable bit.
+        /// True = Interrupt on TXB0 becoming empty.
+        /// False = Disabled.
+        /// </summary>
+        public bool Tx0Ie { get; set; }
+
+        /// <summary>
+        /// Transmit Buffer 1 Empty Interrupt Enable bit.
+        /// True = Interrupt on TXB1 becoming empty.
+        /// False = Disabled.
+        /// </summary>
+        public bool Tx1Ie { get; set; }
+
+        /// <summary>
+        /// Transmit Buffer 2 Empty Interrupt Enable bit.
+        /// True = Interrupt on TXB2 becoming empty.
+        /// False = Disabled.
+        /// </summary>
+        public bool Tx2Ie { get; set; }
+
+        /// <summary>
+        /// Error Interrupt Enable bit (multiple sources in the EFLG register).
+        /// True = Interrupt on EFLG error condition change.
+        /// False = Disabled.
+        /// </summary>
+        public bool ErrIe { get; set; }
+
+        /// <summary>
+        /// Wake-up Interrupt Enable bit.
+        /// True = Interrupt on CAN bus activity.
+        /// False = Disabled.
+        /// </summary>
+        public bool WakIe { get; set; }
+
+        /// <summary>
+        /// Message Error Interrupt Enable bit.
+        /// True = Interrupt on error during message reception or transmission.
+        /// False = Disabled.
+        /// </summary>
+        public bool MerrE { get; set; }
+    }
+}
