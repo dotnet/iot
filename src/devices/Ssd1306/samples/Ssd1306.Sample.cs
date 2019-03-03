@@ -201,8 +201,7 @@ namespace Iot.Device.Ssd1306.Samples
                         for (byte bit = 0; bit < 8; bit++)
                         {                            
                             bits = bits << 1;
-                            bits |= image[x, page * 8 + 7 - bit].PackedValue > 0 ? 1 : 0;                                              
-                                                         
+                            bits |= image[x, page * 8 + 7 - bit].PackedValue > 0 ? 1 : 0;                                                                                        
                         } 
 
                         buffer.Add((byte)bits);          
