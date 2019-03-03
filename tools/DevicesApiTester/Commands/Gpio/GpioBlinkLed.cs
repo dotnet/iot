@@ -25,8 +25,8 @@ namespace DeviceApiTester.Commands.Gpio
         [Option("time-off", HelpText = "The number of milliseconds to keep the LED off for each blink.", Required = false, Default = 200)]
         public int TimeOff { get; set; }
 
-        [Option("on-value", HelpText = "The value that turns the LED on: { true | false }", Required = false, Default = true)]
-        public bool OnValue { get; set; }
+        [Option("on-value", HelpText = "The value that turns the LED on: { 0 | 1 }", Required = false, Default = 1)]
+        public int OnValue { get; set; }
 
         /// <summary>Executes the command asynchronously.</summary>
         /// <returns>The command's exit code.</returns>
@@ -59,6 +59,6 @@ namespace DeviceApiTester.Commands.Gpio
             return 0;
         }
 
-        private bool OffValue => !OnValue;
+        private int OffValue => OnValue == 0 ? 1 : 0;
     }
 }
