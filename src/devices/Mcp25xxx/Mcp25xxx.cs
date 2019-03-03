@@ -74,6 +74,12 @@ namespace Iot.Device.Mcp25xxx
             {
                 _masterGpioController = masterGpioController ?? new GpioController();
 
+                if (_reset != -1)
+                {
+                    _masterGpioController.OpenPin(_reset, PinMode.Output);
+                    ResetPin = PinValue.Low;
+                }
+
                 if (_tx0rts != -1)
                 {
                     _masterGpioController.OpenPin(_tx0rts, PinMode.Output);
@@ -108,104 +114,99 @@ namespace Iot.Device.Mcp25xxx
                 {
                     _masterGpioController.OpenPin(_clkout, PinMode.Input);
                 }
+            }
+        }
 
-                if (_reset != -1)
-                {
-                    _masterGpioController.OpenPin(_reset, PinMode.Output);
-                    WriteResetPin(PinValue.Low);
-                }
+        private void VerifyPinConfigured(int pin, string name)
+        {
+            if (pin == -1)
+            {
+                throw new InvalidOperationException($"No {name} pin configured.");
             }
         }
 
         /// <summary>
         /// Writes a value to Tx0RTS pin.
         /// </summary>
-        public void WriteTx0RtsPin(PinValue value)
+        public PinValue Tx0RtsPin
         {
-            if (_tx0rts == -1)
+            set
             {
-                throw new InvalidOperationException("No Tx0RTS pin configured.");
+                VerifyPinConfigured(_tx0rts, nameof(Tx0RtsPin));
+                _masterGpioController.Write(_tx0rts, value);
             }
-
-            _masterGpioController.Write(_tx0rts, value);
         }
 
         /// <summary>
         /// Writes a value to Tx1RTS pin.
         /// </summary>
-        public void WriteTx1RtsPin(PinValue value)
+        public PinValue Tx1RtsPin
         {
-            if (_tx1rts == -1)
+            set
             {
-                throw new InvalidOperationException("No Tx1RTS pin configured.");
+                VerifyPinConfigured(_tx1rts, nameof(Tx1RtsPin));
+                _masterGpioController.Write(_tx1rts, value);
             }
-
-            _masterGpioController.Write(_tx1rts, value);
         }
 
         /// <summary>
         /// Writes a value to Tx2RTS pin.
         /// </summary>
-        public void WriteTx2RtsPin(PinValue value)
+        public PinValue Tx2RtsPin
         {
-            if (_tx2rts == -1)
+            set
             {
-                throw new InvalidOperationException("No Tx2RTS pin configured.");
+                VerifyPinConfigured(_tx2rts, nameof(Tx2RtsPin));
+                _masterGpioController.Write(_tx2rts, value);
             }
-
-            _masterGpioController.Write(_tx2rts, value);
         }
 
         /// <summary>
         /// Writes a value to Reset pin.
         /// </summary>
-        public void WriteResetPin(PinValue value)
+        public PinValue ResetPin
         {
-            if (_reset == -1)
+            set
             {
-                throw new InvalidOperationException("No Reset pin configured.");
+                VerifyPinConfigured(_reset, nameof(ResetPin));
+                _masterGpioController.Write(_reset, value);
             }
-
-            _masterGpioController.Write(_reset, value);
         }
 
         /// <summary>
         /// Reads the current value of Interrupt pin.
         /// </summary>
-        public PinValue ReadInterruptPin()
+        public PinValue InterruptPin
         {
-            if (_interrupt == -1)
+            get
             {
-                throw new InvalidOperationException("No Interrupt pin configured.");
+                VerifyPinConfigured(_interrupt, nameof(InterruptPin));
+                return _masterGpioController.Read(_interrupt);
             }
-
-            return _masterGpioController.Read(_interrupt);
         }
 
         /// <summary>
         /// Reads the current value of Rx0BF pin.
         /// </summary>
-        public PinValue ReadRx0BfPin()
+        public PinValue Rx0BfPin
         {
-            if (_rx0bf == -1)
+            get
             {
-                throw new InvalidOperationException("No Rx0BF pin configured.");
+                VerifyPinConfigured(_rx0bf, nameof(Rx0BfPin));
+                return _masterGpioController.Read(_rx0bf);
             }
-
-            return _masterGpioController.Read(_rx0bf);
         }
 
         /// <summary>
         /// Reads the current value of Rx1BF pin.
         /// </summary>
-        public PinValue ReadRx1BfPin()
+        public PinValue Rx1BfPin
         {
-            if (_rx1bf == -1)
+            get
             {
-                throw new InvalidOperationException("No Rx1BF pin configured.");
+                VerifyPinConfigured(_rx1bf, nameof(Rx1BfPin));
+                return _masterGpioController.Read(_rx1bf);
             }
-
-            return _masterGpioController.Read(_rx1bf);
         }
 
         /// <summary>
