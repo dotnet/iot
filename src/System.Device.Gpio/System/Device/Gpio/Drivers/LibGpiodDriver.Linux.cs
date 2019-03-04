@@ -73,6 +73,7 @@ namespace System.Device.Gpio.Drivers
                 {
                     pinHandle.Dispose();
                     pinHandle = Interop.GetChipLineByOffset(_chip, pinNumber);
+                    _pinNumberToSafeLineHandle[pinNumber] = pinHandle;
                 }
             }
             return new LibGpiodDriverEventHandler(pinNumber, pinHandle);
@@ -241,10 +242,6 @@ namespace System.Device.Gpio.Drivers
                     int pin = kv.Key;
                     LibGpiodDriverEventHandler eventHandler = kv.Value;
                     eventHandler.Dispose();
-                    if (_pinNumberToSafeLineHandle.TryGetValue(pin, out SafeLineHandle pinHandle))
-                    {
-                        _pinNumberToSafeLineHandle.Remove(pin);
-                    }
                 }
 
                 _pinNumberToEventHandler = null;
@@ -257,7 +254,7 @@ namespace System.Device.Gpio.Drivers
                 {
                     if (_pinNumberToSafeLineHandle.TryGetValue(pin, out SafeLineHandle pinHandle))
                     {
-                        pinHandle.Dispose();
+                        pinHandle?.Dispose();
                     }
                 }
 

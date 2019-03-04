@@ -16,8 +16,6 @@ namespace System.Device.Gpio.Drivers
 
         private int _pinNumber;
 
-        private SafeLineHandle _pinHandle = null;
-
         public CancellationTokenSource CancellationTokenSource;
 
         private Task _task;
@@ -27,9 +25,8 @@ namespace System.Device.Gpio.Drivers
         public LibGpiodDriverEventHandler(int pinNumber, SafeLineHandle safeLineHandle) {
             _pinNumber = pinNumber;
             CancellationTokenSource = new CancellationTokenSource();
-            _pinHandle = safeLineHandle;
             SubscribeForEvent(safeLineHandle);
-            _task = InitializeEventDetectionTask(CancellationTokenSource.Token);
+            _task = InitializeEventDetectionTask(CancellationTokenSource.Token, safeLineHandle);
         }
 
         private void SubscribeForEvent(SafeLineHandle pinHandle)
@@ -43,14 +40,14 @@ namespace System.Device.Gpio.Drivers
         }
 
 
-        private Task InitializeEventDetectionTask(CancellationToken token)
+        private Task InitializeEventDetectionTask(CancellationToken token, SafeLineHandle pinHandle)
         {
             return Task.Run(() =>
             {
                 while (!(token.IsCancellationRequested || _disposing))
                 {
                     // WaitEventResult can be TimedOut, EventOccured or Error, in case of TimedOut will continue waiting
-                    WaitEventResult waitResult = Interop.WaitForEventOnLine(_pinHandle);
+                    WaitEventResult waitResult = Interop.WaitForEventOnLine(pinHandle);
                     if (waitResult == WaitEventResult.Error)
                     {
                         throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, Marshal.GetLastWin32Error(), _pinNumber);
@@ -58,7 +55,7 @@ namespace System.Device.Gpio.Drivers
 
                     if (waitResult == WaitEventResult.EventOccured)
                     {
-                        int readResult = Interop.ReadEventForLine(_pinHandle);
+                        int readResult = Interop.ReadEventForLine(pinHandle);
                         if (readResult == -1)
                         {
                             throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, Marshal.GetLastWin32Error());
@@ -87,13 +84,8 @@ namespace System.Device.Gpio.Drivers
         public void Dispose()
         {
             _disposing = true;
-            if (_pinHandle != null)
-            {
-                CancellationTokenSource.Cancel();
-                _task?.Wait();
-                _pinHandle?.Dispose();
-                _pinHandle = null;
-            }
+            CancellationTokenSource.Cancel();
+            _task?.Wait();
             ValueRising = null;
             ValueFalling = null;
         }
