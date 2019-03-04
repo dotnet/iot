@@ -35,6 +35,11 @@ namespace DeviceApiTester.Commands.Gpio
         /// </remarks>
         public Task<int> ExecuteAsync()
         {
+            if (OnValue != 0)
+            {
+                OnValue = 1;
+            }
+
             if (LedPin != null)
             {
                 Console.WriteLine($"Driver={Driver}, Scheme={Scheme}, ButtonPin={ButtonPin}, LedPin={LedPin}, PressedValue={PressedValue}, OnValue={OnValue}");
@@ -111,6 +116,6 @@ namespace DeviceApiTester.Commands.Gpio
             }
         }
 
-        private int OffValue => OnValue == 0 ? 1 : 0;
+        private int OffValue => 1 - OnValue;
     }
 }

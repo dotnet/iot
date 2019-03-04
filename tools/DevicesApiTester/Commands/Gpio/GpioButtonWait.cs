@@ -106,6 +106,6 @@ namespace DeviceApiTester.Commands.Gpio
             }
         }
 
-        private int OffValue => OnValue == 0 ? 1 : 0;
+        private int OffValue => 1 - OnValue;
     }
 }
