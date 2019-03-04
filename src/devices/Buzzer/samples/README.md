@@ -10,7 +10,7 @@ For buzzer with 3 pins: simply connect signal pin of buzzer to commutation pin (
 
 You could use any types of buzzers in any order. No changes to code are required.
  
-![schema](./Buzzer.Sample.wiring.png)
+![schema](./Buzzer.Samples.wiring.png)
 
 
 
