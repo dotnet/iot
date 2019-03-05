@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Iot.Units;
 
 namespace Iot.Device.CpuTemperature
 {
@@ -13,13 +14,13 @@ namespace Iot.Device.CpuTemperature
         private bool _isAvalable = false;
         private bool _checkedIfAvailable = false;
 
-        public double Temperature => ReadTemperature();
+        public Temperature Temperature => Temperature.FromCelsius(ReadTemperature());
         public bool IsAvailable => CheckAvailable();
 
         private bool CheckAvailable()
         {
             if (!_checkedIfAvailable)
-            {                
+            {
                 _checkedIfAvailable = true;
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && File.Exists("/sys/class/thermal/thermal_zone0/temp"))
                 {

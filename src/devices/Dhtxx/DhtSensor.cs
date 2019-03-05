@@ -5,6 +5,7 @@
 using System;
 using System.Device.Gpio;
 using System.Diagnostics;
+using Iot.Units;
 
 namespace Iot.Device.DHTxx
 {
@@ -46,48 +47,25 @@ namespace Iot.Device.DHTxx
         public bool IsLastReadSuccessful { get; internal set; }
 
         /// <summary>
-        /// Get the last read temperature in Celsius
+        /// Get the last read temperature
         /// </summary>
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public double Temperature => (_dhtType == DhtType.Dht11) ? GetTempDht11() : GetTempDht22();
+        public Temperature Temperature => Temperature.FromCelsius((_dhtType == DhtType.Dht11) ? GetTempDht11() : GetTempDht22());
 
         /// <summary>
-        /// Get the last read temperature in Farenheit
+        /// Get the temperature
         /// </summary>
-        /// <remarks>
-        /// If last read was not successfull, it returns double.MaxValue
-        /// </remarks>
-        public double TemperatureInFarenheit => IsLastReadSuccessful ? (9.0 / 5.0 * Temperature + 32) : Double.MaxValue;
-
-        /// <summary>
-        /// Get the temperature in Celsius
-        /// </summary>
-        /// <param name="temperatureInCelsius">The temperature in Celsius</param>
+        /// <param name="temperature">The temperature</param>
         /// <returns>Returns <c>true</c> if the read is successful</returns>
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public bool TryGetTemperature(out double temperatureInCelsius)
+        public bool TryGetTemperature(out Temperature temperature)
         {
             var ret = ReadData();
-            temperatureInCelsius = Temperature;
-            return ret;
-        }
-
-        /// <summary>
-        /// Get the temperature in Farenheit
-        /// </summary>
-        /// <param name="temperatureInFarenheit">The temperature in Farenheit</param>
-        /// <returns>Returns <c>true</c> if the read is successful</returns>
-        /// <remarks>
-        /// If last read was not successfull, it returns double.MaxValue
-        /// </remarks>
-        public bool TryGetTemperatureInFarenheit(out double temperatureInFarenheit)
-        {
-            var ret = ReadData();
-            temperatureInFarenheit = TemperatureInFarenheit;
+            temperature = Temperature;
             return ret;
         }
 
@@ -115,35 +93,18 @@ namespace Iot.Device.DHTxx
         }
 
         /// <summary>
-        /// Get the temperature in Celsius and the relative humidity in the air
+        /// Get the temperature and the relative humidity in the air
         /// </summary>
-        /// <param name="temperatureInCelsius">The temperature in Celsius</param>
+        /// <param name="temperature">The temperature</param>
         /// <param name="relativeHumidity">The percentage of relative humidity in the air</param>
         /// <returns>Returns <c>true</c> if the read is successful</returns>
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public bool TryGetTemperatureAndHumidity(out double temperatureInCelsius, out double relativeHumidity)
+        public bool TryGetTemperatureAndHumidity(out Temperature temperature, out double relativeHumidity)
         {
             var ret = ReadData();
-            temperatureInCelsius = Temperature;
-            relativeHumidity = Humidity;
-            return ret;
-        }
-
-        /// <summary>
-        /// Get the temperature in Farenheit and the relative humidity in the air
-        /// </summary>
-        /// <param name="temperatureInFarenheit">The temperature in Farenheit</param>
-        /// <param name="relativeHumidity">The percentage of relative humidity in the air</param>
-        /// <returns>Returns <c>true</c> if the read is successful</returns>
-        /// <remarks>
-        /// If last read was not successfull, it returns double.MaxValue
-        /// </remarks>
-        public bool TryGetTemperatureInFarenheitAndHumidity(out double temperatureInFarenheit, out double relativeHumidity)
-        {
-            var ret = ReadData();
-            temperatureInFarenheit = TemperatureInFarenheit;
+            temperature = Temperature;
             relativeHumidity = Humidity;
             return ret;
         }

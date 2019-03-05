@@ -9,6 +9,7 @@ using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Threading.Tasks;
+using Iot.Units;
 
 namespace Iot.Device.Bmx280
 {
@@ -142,9 +143,9 @@ namespace Iot.Device.Bmx280
         ///  Reads the temperature from the sensor
         /// </summary>
         /// <returns>
-        ///  Temperature in degrees celsius
+        ///  Temperature
         /// </returns>
-        public async Task<double> ReadTemperatureAsync()
+        public async Task<Temperature> ReadTemperatureAsync()
         {
             //Make sure the I2C device is initialized
             if (!_initialized)
@@ -165,11 +166,7 @@ namespace Iot.Device.Bmx280
             //Combine the values into a 32-bit integer
             int t = (msb << 12) + (lsb << 4) + (xlsb >> 4);
 
-            //Convert the raw value to the temperature in degC
-            double temp = CompensateTemperature(t);
-
-            //Return the temperature as a float value
-            return temp;
+            return CompensateTemperature(t);
         }
 
         /// <summary>
@@ -248,7 +245,7 @@ namespace Iot.Device.Bmx280
         /// <summary>
         ///  Calculates the altitude in meters from the specified sea-level pressure(in hPa).
         /// </summary>
-        /// <param name="seaLevelPressure" > 
+        /// <param name="seaLevelPressure" >
         ///  Sea-level pressure in hPa
         /// </param>
         /// <returns>
@@ -272,15 +269,15 @@ namespace Iot.Device.Bmx280
         }
 
         /// <summary>
-        ///  Returns the temperature in degrees celsius. Resolution is 0.01 DegC. Output value of “5123” equals 51.23 degrees celsius.
+        ///  Returns the temperature. Resolution is 0.01 DegC. Output value of “5123” equals 51.23 degrees celsius.
         /// </summary>
         /// <param name="adcTemperature">
         /// The temperature value read from the device
         /// </param>
         /// <returns>
-        ///  Degrees celsius
+        ///  Temperature
         /// </returns>
-        private double CompensateTemperature(int adcTemperature)
+        private Temperature CompensateTemperature(int adcTemperature)
         {
             //Formula from the datasheet
             //The temperature is calculated using the compensation formula in the BMP280 datasheet
@@ -289,8 +286,8 @@ namespace Iot.Device.Bmx280
 
             TemperatureFine = (int)(var1 + var2);
 
-            double T = (var1 + var2) / 5120.0;
-            return T;
+            double temp = (var1 + var2) / 5120.0;
+            return Temperature.FromCelsius(temp);
         }
 
         /// <summary>
@@ -350,7 +347,7 @@ namespace Iot.Device.Bmx280
         }
 
         /// <summary>
-        ///  Reads a 16 bit value over I2C 
+        ///  Reads a 16 bit value over I2C
         /// </summary>
         /// <param name="register">
         ///  Register to read from
@@ -376,7 +373,7 @@ namespace Iot.Device.Bmx280
         }
 
         /// <summary>
-        ///  Reads a 24 bit value over I2C 
+        ///  Reads a 24 bit value over I2C
         /// </summary>
         /// <param name="register">
         ///  Register to read from

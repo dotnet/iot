@@ -28,7 +28,7 @@ namespace Iot.Device.Ds3231.Samples
                 while (true)
                 {
                     // read temperature
-                    double temp = rtc.Temperature;
+                    double temp = rtc.Temperature.Celsius;
                     // read time
                     DateTime dt = rtc.DateTime;
 

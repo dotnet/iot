@@ -5,6 +5,7 @@
 using System;
 using System.Device.I2c;
 using System.Threading;
+using Iot.Units;
 
 namespace Iot.Device.Sht3x
 {
@@ -27,9 +28,16 @@ namespace Iot.Device.Sht3x
 
         private double _temperature;
         /// <summary>
-        /// SHT3x Temperature (℃)
+        /// SHT3x Temperature
         /// </summary>
-        public double Temperature { get { ReadTempAndHumi(); return _temperature; } }
+        public Temperature Temperature
+        {
+            get
+            {
+                ReadTempAndHumi();
+                return Temperature.FromCelsius(_temperature);
+            }
+        }
 
         private double _humidity;
         /// <summary>
@@ -106,7 +114,7 @@ namespace Iot.Device.Sht3x
 
             _sensor.Write(writeBuff);
             // wait SCL free
-            Thread.Sleep(20);       
+            Thread.Sleep(20);
             _sensor.Read(readBuff);
 
             // Details in the Datasheet P13
@@ -162,7 +170,7 @@ namespace Iot.Device.Sht3x
             _sensor.Write(writeBuff);
 
             // wait SCL free
-            Thread.Sleep(20);       
+            Thread.Sleep(20);
         }
     }
 }

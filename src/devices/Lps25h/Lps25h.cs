@@ -9,6 +9,7 @@ using System.Device.I2c;
 using System.Diagnostics;
 using System.Device.I2c.Drivers;
 using System.Buffers.Binary;
+using Iot.Units;
 
 namespace Iot.Device.Lps25h
 {
@@ -44,9 +45,9 @@ namespace Iot.Device.Lps25h
         }
 
         /// <summary>
-        /// Temperature in Celsius
+        /// Temperature
         /// </summary>
-        public float Temperature => 42.5f + ReadInt16(Register.Temperature) / 480f;
+        public Temperature Temperature => Temperature.FromCelsius(42.5f + ReadInt16(Register.Temperature) / 480f);
 
         /// <summary>
         /// Pressure in hPa

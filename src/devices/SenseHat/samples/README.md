@@ -19,7 +19,7 @@ static void Main(string[] args)
             y = (y + 8 + dy) % 8;
             sh.Fill(n % 2 == 0 ? Color.DarkBlue : Color.DarkRed);
             sh.SetPixel(x, y, Color.Yellow);
-            Console.WriteLine($"Temperature: Sensor1: {sh.Temperature} C   Sensor2: {sh.Temperature2} C");
+            Console.WriteLine($"Temperature: Sensor1: {sh.Temperature.Celsius} °C   Sensor2: {sh.Temperature2.Celsius} °C");
             Console.WriteLine($"Humidity: {sh.Humidity} %rH");
             Console.WriteLine($"Pressure: {sh.Pressure} hPa");
             Console.WriteLine($"Acceleration: {sh.Acceleration} g");
@@ -107,7 +107,7 @@ using (var ag = new SenseHatAccelerometerAndGyroscope())
 {
     while (true)
     {
-        Console.WriteLine($"Acceleration={ag.Acceleration}"); 
+        Console.WriteLine($"Acceleration={ag.Acceleration}");
         Console.WriteLine($"AngularRate={ag.AngularRate}");
         Thread.Sleep(100);
     }
@@ -179,7 +179,7 @@ using (var th = new SenseHatTemperatureAndHumidity())
 {
     while (true)
     {
-        Console.WriteLine($"Temperature: {th.Temperature}C   Humidity: {th.Humidity}%rH");
+        Console.WriteLine($"Temperature: {th.Temperature.Celsius}°C   Humidity: {th.Humidity}%rH");
         Thread.Sleep(1000);
     }
 }
@@ -192,7 +192,7 @@ using (var th = new SenseHatPressureAndTemperature())
 {
     while (true)
     {
-        Console.WriteLine($"Temperature: {th.Temperature}C   Humidity: {th.Pressure}hPa");
+        Console.WriteLine($"Temperature: {th.Temperature.Celsius}°C   Humidity: {th.Pressure}hPa");
         Thread.Sleep(1000);
     }
 }

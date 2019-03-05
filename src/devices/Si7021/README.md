@@ -19,7 +19,7 @@ using (Si7021 sensor = new Si7021(device, Resolution.Resolution1))
     // read revision
     byte revision = sensor.Revision;
     // read temperature
-    double temperature = sensor.Temperature;
+    double temperature = sensor.Temperature.Celsius;
     // read humidity
     double humidity = sensor.Humidity;
 }

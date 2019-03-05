@@ -50,11 +50,11 @@ namespace Bno055sample
                 Console.WriteLine($"Gravity X: {gravity.X} Y: {gravity.Y} Z: {gravity.Z}");
                 var qua = bno055Sensor.Quaternion;
                 Console.WriteLine($"Quaternion X: {qua.X} Y: {qua.Y} Z: {qua.Z} W: {qua.W}");
-                var temp = bno055Sensor.Temperature;
+                var temp = bno055Sensor.Temperature.Celsius;
                 Console.WriteLine($"Temperature: {temp} °C");
                 Thread.Sleep(100);
             }
-            
+
         }
     }
 }

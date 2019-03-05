@@ -27,7 +27,7 @@ using (Ds3231 rtc = new Ds3231(device))
     while (true)
     {
         // read temperature
-        double temp = rtc.Temperature;
+        double temp = rtc.Temperature.Celsius;
         // read time
         DateTime dt = rtc.DateTime;
 

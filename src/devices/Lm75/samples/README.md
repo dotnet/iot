@@ -21,7 +21,7 @@ using(Lm75 sensor = new Lm75(device))
 {
     while (true)
     {
-        Console.WriteLine($"Temperature: {sensor.Temperature} ℃");
+        Console.WriteLine($"Temperature: {sensor.Temperature.Celsius} ℃");
         Console.WriteLine();
 
         Thread.Sleep(1000);

@@ -15,9 +15,10 @@
     <Compile Include="Register.cs" />
     <Compile Include="Sampling.cs" />
     <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <ProjectReference Include="..\Units\Units.csproj" />
   </ItemGroup>
-  
-  <ItemGroup> 
+
+  <ItemGroup>
     <None Remove="README.md" />
   </ItemGroup>
 </Project>

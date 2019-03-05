@@ -15,7 +15,7 @@ UnixI2cDevice device = new UnixI2cDevice(settings);
 using (Sht3x sensor = new Sht3x(device))
 {
     // read temperature (℃)
-    double temperature = sensor.Temperature;
+    double temperature = sensor.Temperature.Celsius;
     // read humidity (%)
     double humidity = sensor.Humidity;
     // open heater

@@ -7,6 +7,7 @@ using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Numerics;
 using System.Threading;
+using Iot.Units;
 
 namespace Iot.Device.Bno055
 {
@@ -140,7 +141,7 @@ namespace Iot.Device.Bno055
         }
 
         /// <summary>
-        /// Set internal or external crystal usage. 
+        /// Set internal or external crystal usage.
         /// Note: if you don't have an external crystal, don't use this function
         /// </summary>
         /// <param name="external">true to set to external</param>
@@ -357,8 +358,8 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get the accelerometer
         /// Acceleration Vector (100Hz)
-        /// Three axis of acceleration (gravity + linear motion) 
-        /// Default unit in m/s^2, can be changed for mg 
+        /// Three axis of acceleration (gravity + linear motion)
+        /// Default unit in m/s^2, can be changed for mg
         /// </summary>
         public Vector3 Accelerometer
         {
@@ -377,7 +378,7 @@ namespace Iot.Device.Bno055
         /// Get the linear acceleration
         /// Linear Acceleration Vector (100Hz)
         /// Three axis of linear acceleration data (acceleration minus gravity)
-        /// Default unit in m/s^2, can be changed for mg 
+        /// Default unit in m/s^2, can be changed for mg
         /// </summary>
         public Vector3 LinearAcceleration
         {
@@ -395,7 +396,7 @@ namespace Iot.Device.Bno055
         /// Get the gravity
         /// Gravity Vector (100Hz)
         /// Three axis of gravitational acceleration (minus any movement)
-        /// Default unit in m/s^2, can be changed for mg 
+        /// Default unit in m/s^2, can be changed for mg
         /// </summary>
         public Vector3 Gravity
         {
@@ -417,15 +418,15 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get the temperature
         /// </summary>
-        public float Temperature
+        public Temperature Temperature
         {
             get
             {
                 // If unit is Farenheit, then divide by 2, otherwise no convertion
                 if ((_units & Units.TemperatureFarenheit) == Units.TemperatureFarenheit)
-                    return ReadByte(Registers.TEMP) / 2.0f;
+                    return Temperature.FromFahrenheit(ReadByte(Registers.TEMP) / 2.0f);
                 else
-                    return ReadByte(Registers.TEMP);
+                    return Temperature.FromCelsius(ReadByte(Registers.TEMP));
             }
         }
 
@@ -433,7 +434,7 @@ namespace Iot.Device.Bno055
         /// Get the interupt status
         /// </summary>
         /// <returns></returns>
-        public InteruptStatus GetInteruptStatus() => (InteruptStatus)ReadByte(Registers.INTR_STAT);       
+        public InteruptStatus GetInteruptStatus() => (InteruptStatus)ReadByte(Registers.INTR_STAT);
 
         private void SetOperationMode(OperationMode operation)
         {
