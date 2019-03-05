@@ -21,7 +21,7 @@ namespace Iot.Device.Lm75.Samples
                 while (true)
                 {
                     // read temperature
-                    Console.WriteLine($"Temperature: {sensor.Temperature} ℃");
+                    Console.WriteLine($"Temperature: {sensor.Temperature.Celsius} ℃");
                     Console.WriteLine();
 
                     Thread.Sleep(1000);

@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Device.I2c.Drivers;
 using System.Drawing;
 using System.Numerics;
+using Iot.Units;
 
 namespace Iot.Device.SenseHat
 {
@@ -54,12 +55,12 @@ namespace Iot.Device.SenseHat
         public Vector3 MagneticInduction => _mag.MagneticInduction;
 
         // TEMPERATURE AND HUMIDITY
-        public float Temperature => _temp.Temperature;
+        public Temperature Temperature => _temp.Temperature;
         public float Humidity => _temp.Humidity;
 
         // PRESSURE AND TEMPERATURE
         public float Pressure => _press.Pressure;
-        public float Temperature2 => _press.Temperature;
+        public Temperature Temperature2 => _press.Temperature;
 
 
         public void Dispose()

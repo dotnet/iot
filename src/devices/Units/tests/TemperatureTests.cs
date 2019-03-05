@@ -40,6 +40,87 @@ namespace Iot.Units.Tests
             Equal(kelvin, t.Kelvin);
         }
 
+        [Fact]
+        void FromCelsiusNaN()
+        {
+            Temperature t = Temperature.FromCelsius(double.NaN);
+            Assert.True(double.IsNaN(t.Celsius));
+            Assert.True(double.IsNaN(t.Fahrenheit));
+            Assert.True(double.IsNaN(t.Kelvin));
+        }
+
+        [Fact]
+        void FromFahrenheitNaN()
+        {
+            Temperature t = Temperature.FromFahrenheit(double.NaN);
+            Assert.True(double.IsNaN(t.Celsius));
+            Assert.True(double.IsNaN(t.Fahrenheit));
+            Assert.True(double.IsNaN(t.Kelvin));
+        }
+
+        [Fact]
+        void FromKelvinNaN()
+        {
+            Temperature t = Temperature.FromKelvin(double.NaN);
+            Assert.True(double.IsNaN(t.Celsius));
+            Assert.True(double.IsNaN(t.Fahrenheit));
+            Assert.True(double.IsNaN(t.Kelvin));
+        }
+
+        [Fact]
+        void FromCelsiusPositiveInfinity()
+        {
+            Temperature t = Temperature.FromCelsius(double.PositiveInfinity);
+            Assert.True(double.IsPositiveInfinity(t.Celsius));
+            Assert.True(double.IsPositiveInfinity(t.Fahrenheit));
+            Assert.True(double.IsPositiveInfinity(t.Kelvin));
+        }
+
+        [Fact]
+        void FromFahrenheitPositiveInfinity()
+        {
+            Temperature t = Temperature.FromFahrenheit(double.PositiveInfinity);
+            Assert.True(double.IsPositiveInfinity(t.Celsius));
+            Assert.True(double.IsPositiveInfinity(t.Fahrenheit));
+            Assert.True(double.IsPositiveInfinity(t.Kelvin));
+        }
+
+        [Fact]
+        void FromKelvinPositiveInfinity()
+        {
+            Temperature t = Temperature.FromKelvin(double.PositiveInfinity);
+            Assert.True(double.IsPositiveInfinity(t.Celsius));
+            Assert.True(double.IsPositiveInfinity(t.Fahrenheit));
+            Assert.True(double.IsPositiveInfinity(t.Kelvin));
+        }
+
+        [Fact]
+        void FromCelsiusNegativeInfinity()
+        {
+            Temperature t = Temperature.FromCelsius(double.NegativeInfinity);
+            Assert.True(double.IsNegativeInfinity(t.Celsius));
+            Assert.True(double.IsNegativeInfinity(t.Fahrenheit));
+            Assert.True(double.IsNegativeInfinity(t.Kelvin));
+        }
+
+        [Fact]
+        void FromFahrenheitNegativeInfinity()
+        {
+            Temperature t = Temperature.FromFahrenheit(double.NegativeInfinity);
+            Assert.True(double.IsNegativeInfinity(t.Celsius));
+            Assert.True(double.IsNegativeInfinity(t.Fahrenheit));
+            Assert.True(double.IsNegativeInfinity(t.Kelvin));
+        }
+
+        [Fact]
+        void FromKelvinNegativeInfinity()
+        {
+            Temperature t = Temperature.FromKelvin(double.NegativeInfinity);
+            Assert.True(double.IsNegativeInfinity(t.Celsius));
+            Assert.True(double.IsNegativeInfinity(t.Fahrenheit));
+            Assert.True(double.IsNegativeInfinity(t.Kelvin));
+        }
+
         private static void Equal(double expected, double actual)
         {
             const double epsilon = 0.001;

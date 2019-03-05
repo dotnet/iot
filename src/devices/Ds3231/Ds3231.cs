@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.I2c;
+using Iot.Units;
 
 namespace Iot.Device.Ds3231
 {
@@ -27,7 +28,7 @@ namespace Iot.Device.Ds3231
         /// <summary>
         /// DS3231 Temperature
         /// </summary>
-        public double Temperature => ReadTemperature();
+        public Temperature Temperature => Temperature.FromCelsius(ReadTemperature());
 
         /// <summary>
         /// Realtime Clock DS3231

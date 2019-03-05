@@ -6,6 +6,7 @@ using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Threading;
+using Iot.Units;
 
 namespace Iot.Device.Si7021
 {
@@ -22,9 +23,9 @@ namespace Iot.Device.Si7021
         public const byte DefaultI2cAddress = 0x40;
 
         /// <summary>
-        /// Si7021 Temperature (℃)
+        /// Si7021 Temperature
         /// </summary>
-        public double Temperature => GetTemperature();
+        public Temperature Temperature => Temperature.FromCelsius(GetTemperature());
 
         /// <summary>
         /// Si7021 Relative Humidity (%)

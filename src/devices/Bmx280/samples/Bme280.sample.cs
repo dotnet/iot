@@ -8,6 +8,7 @@ using System.Device.I2c.Drivers;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Bmx280;
+using Iot.Units;
 
 namespace Iot.Device.Samples
 {
@@ -38,8 +39,8 @@ namespace Iot.Device.Samples
                     i2CBmpe80.SetPressureSampling(Sampling.UltraLowPower);
 
                     //read values
-                    double tempValue = await i2CBmpe80.ReadTemperatureAsync();
-                    Console.WriteLine($"Temperature {tempValue}");
+                    Temperature tempValue = await i2CBmpe80.ReadTemperatureAsync();
+                    Console.WriteLine($"Temperature {tempValue.Celsius}");
                     double preValue = await i2CBmpe80.ReadPressureAsync();
                     Console.WriteLine($"Pressure {preValue}");
                     double altValue = await i2CBmpe80.ReadAltitudeAsync(defaultSeaLevelPressure);

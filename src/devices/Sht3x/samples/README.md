@@ -22,7 +22,7 @@ using (Sht3x sensor = new Sht3x(device))
 {
     while (true)
     {
-        Console.WriteLine($"Temperature: {sensor.Temperature} ℃");
+        Console.WriteLine($"Temperature: {sensor.Temperature.Celsius} ℃");
         Console.WriteLine($"Humidity: {sensor.Humidity} %");
         Console.WriteLine();
 

@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.I2c;
+using Iot.Units;
 
 namespace Iot.Device.Lm75
 {
@@ -22,9 +23,9 @@ namespace Iot.Device.Lm75
         #region prop
 
         /// <summary>
-        /// LM75 Temperature (℃)
+        /// LM75 Temperature
         /// </summary>
-        public double Temperature { get => GetTemperature(); }
+        public Temperature Temperature { get => Temperature.FromCelsius(GetTemperature()); }
 
         private bool _disable;
         /// <summary>

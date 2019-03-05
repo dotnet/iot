@@ -20,7 +20,7 @@ namespace Iot.Device.Sht3x.Samples
             {
                 while (true)
                 {
-                    Console.WriteLine($"Temperature: {sensor.Temperature} ℃");
+                    Console.WriteLine($"Temperature: {sensor.Temperature.Celsius} ℃");
                     Console.WriteLine($"Humidity: {sensor.Humidity} %");
                     Console.WriteLine();
 

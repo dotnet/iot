@@ -14,7 +14,7 @@ UnixI2cDevice device = new UnixI2cDevice(settings);
 
 using(Lm75 sensor = new Lm75(device))
 {
-    double temperature = sensor.Temperature;
+    double temperature = sensor.Temperature.Celsius;
 }
 ```
 

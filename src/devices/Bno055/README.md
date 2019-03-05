@@ -2,7 +2,7 @@
 
 ## Summary
 
-Those sensors are intelligent 9-axis absolute orientation sensors. Most of the implementations are using I2C sensors but the sensor supports as well HID over I2C and serial port communication. This class only support supports I2C. 
+Those sensors are intelligent 9-axis absolute orientation sensors. Most of the implementations are using I2C sensors but the sensor supports as well HID over I2C and serial port communication. This class only support supports I2C.
 
 All operations for a current usage has been developped. The individual interruption level settings for each sensor has not been implemented. If needed, they are quite straight forward to implement.
 
@@ -92,7 +92,7 @@ while(!Console.KeyAvailable)
     Console.WriteLine($"Gravity X: {gravity.X} Y: {gravity.Y} Z: {gravity.Z}");
     var qua = bno055Sensor.Quaternion;
     Console.WriteLine($"Quaternion X: {qua.X} Y: {qua.Y} Z: {qua.Z} W: {qua.W}");
-    var temp = bno055Sensor.Temperature;
+    var temp = bno055Sensor.Temperature.Celsius;
     Console.WriteLine($"Temperature: {temp} °C");
     Thread.Sleep(100);
 }
@@ -100,7 +100,7 @@ while(!Console.KeyAvailable)
 
 ## Information regarding sensors and units
 
-* *Orientation*: 
+* *Orientation*:
     * Absolute Orientation (Euler Vector, 100Hz)
     * Three axis orientation data based on a 360° sphere
     * Heading = Vector3.X; Roll = Vector3.Y; Pitch = Vector3.Z
@@ -119,18 +119,18 @@ while(!Console.KeyAvailable)
 
 * *Acceleration*
     * Acceleration Vector (100Hz)
-    * Three axis of acceleration (gravity + linear motion) 
-    * Default unit in m/s^2, can be changed for mg 
+    * Three axis of acceleration (gravity + linear motion)
+    * Default unit in m/s^2, can be changed for mg
 
 * *LinearAcceleration*
     * Linear Acceleration Vector (100Hz)
     * Three axis of linear acceleration data (acceleration minus gravity)
-    * Default unit in m/s^2, can be changed for mg 
+    * Default unit in m/s^2, can be changed for mg
 
 * *Gravity*
     * Gravity Vector (100Hz)
     * Three axis of gravitational acceleration (minus any movement)
-    * Default unit in m/s^2, can be changed for mg 
+    * Default unit in m/s^2, can be changed for mg
 
 * *Gyroscope*
     * Angular Velocity Vector (100Hz)

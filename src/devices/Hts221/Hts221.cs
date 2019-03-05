@@ -9,6 +9,7 @@ using System.Device.I2c;
 using System.Diagnostics;
 using System.Device.I2c.Drivers;
 using System.Buffers.Binary;
+using Iot.Units;
 
 namespace Iot.Device.Hts221
 {
@@ -43,9 +44,9 @@ namespace Iot.Device.Hts221
         }
 
         /// <summary>
-        /// Temperature in Celsius
+        /// Temperature
         /// </summary>
-        public float Temperature => GetActualTemperature(ReadInt16(Register.Temperature));
+        public Temperature Temperature => Temperature.FromCelsius(GetActualTemperature(ReadInt16(Register.Temperature)));
 
         /// <summary>
         /// Humidity in %rH (percentage relative humidity)
