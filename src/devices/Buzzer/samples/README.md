@@ -6,7 +6,7 @@
 ## Schematic
 
 This sample demonstrates using two types of buzzers.
-For buzzer with 3 pins: simply connect signal pin of buzzer to commutation pin (GPIO26), vcc pin to +5v, ground pin to ground. For buzzer with 2 pins: connect vcc pin of buzzer to commutation pin (GPIO21) and ground to ground.
+For buzzer with 3 pins: simply connect *signal* pin of buzzer to commutation pin (GPIO26), *vcc* pin to *+5v*, *gnd* pin to ground. For buzzer with 2 pins: connect *vcc* pin of buzzer to commutation pin (GPIO21) and *gnd* to ground.
 
 You could use any types of buzzers in any order. No changes to code are required.
  

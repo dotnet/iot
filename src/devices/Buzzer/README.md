@@ -7,20 +7,19 @@
 
 This device binding allow to play certain tone using piezo buzzer. It uses PWM with 50% duty cycle and various frequencies.
 
-Piezo buzzers with three pins supported as well as piezo buzzers with 2 pins.
+Piezo buzzers with three pins supported as well as piezo buzzers with two pins.
 
   
 
 ## Device Family
 
-This binding was tested on two types of piezo buzzers. First type of buzzer has two pins vcc and gnd. Second type of buzzers has addition signal pin.
-
-Some piezo buzzer may be used by setting their input to logical 1, but this binding doesn't support this method due to we can't control tone frequnecy using this method. However this type of piezo buzzers still could be controlled by the binding.
+This binding was tested on two types of piezo buzzers. First type of buzzer has two pins *vcc* and *gnd*. Second type of buzzers has addition *signal* pin.
   
+
 
 ## Binding Notes
 
-The  `Buzzer`  class can use either software either hardware PWM. this is done fully transparently by the initialization.
+The  `Buzzer`  class can use either software either hardware PWM. This is done fully transparently by the initialization.
 
 If you want to use the software PWM, you have to specify the GPIO pin you want to use as the first parameter in the constructor. Use the value -1 for the second one. This will force usage of the software PWM as it is not a valid value for hardware PWM.
 
