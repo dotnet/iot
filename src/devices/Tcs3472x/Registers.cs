@@ -6,7 +6,7 @@ using System;
 
 namespace Iot.Device.Tcs3472x
 {
-    public enum Registers
+    internal enum Registers
     {        
         ENABLE = 0x00,
         // RGBC interrupt enable.  When asserted, permits RGBC interrupts to be generated. 

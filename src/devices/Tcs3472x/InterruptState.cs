@@ -4,6 +4,10 @@
 
 namespace Iot.Device.Tcs3472x
 {
+    /// <summary>
+    /// This enum allows to select how many cycles cill be done measuring before
+    /// raising an interupt.
+    /// </summary>
     public enum InterruptState
     {
         // Every RGBC cycle generates an interrupt

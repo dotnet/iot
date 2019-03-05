@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace Iot.Device.Tcs3472x
 {
-    public class Tcs3472xSensor : IDisposable
+    public class Tcs3472x : IDisposable
     {
         public const byte DefaultI2cAddress = 0x29;
         private readonly I2cDevice _i2cDevice;
@@ -61,7 +61,7 @@ namespace Iot.Device.Tcs3472x
         /// <param name="integrationTime">The time to wait for sensor to read the data, minimum is 0.024 seconds, maximum in the constructor is 0.7 seconds</param>
         /// <param name="gain">The gain when integrating the color measurement</param>
         /// <param name="autoDisposable">true to dispose the I2C Device class at dispose</param>
-        public Tcs3472xSensor(I2cDevice i2cDevice, double integrationTime = 0.0024, Gain gain = Gain.GAIN_16X, bool autoDisposable = true)
+        public Tcs3472x(I2cDevice i2cDevice, double integrationTime = 0.0024, Gain gain = Gain.Gain16X, bool autoDisposable = true)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} can't be null");
             // Maximum is 700 ms for the initialization. Value can be changed for a long one but not during this initialization phase            
@@ -79,7 +79,7 @@ namespace Iot.Device.Tcs3472x
         /// Get true is there are valid data
         /// </summary>
         public bool IsValidData
-        { 
+        {
             get
             {
                 _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | Registers.STATUS));
@@ -221,7 +221,7 @@ namespace Iot.Device.Tcs3472x
 
         private void WriteRegister(Registers reg, byte data)
         {
-            _i2cDevice.Write(new byte[] {(byte)(Registers.COMMAND_BIT | reg), data });
+            _i2cDevice.Write(new byte[] { (byte)(Registers.COMMAND_BIT | reg), data });
         }
 
         public void Dispose()
