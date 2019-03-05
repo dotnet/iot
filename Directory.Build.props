@@ -13,5 +13,17 @@
     <TargetsWindows Condition="$(RuntimeIdentifier.StartsWith('win'))">true</TargetsWindows>
     <TargetsLinux Condition="$(RuntimeIdentifier.StartsWith('linux'))">true</TargetsLinux>
     <LangVersion>Latest</LangVersion>
+
+    <!-- Packaging props -->
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <!-- We need to clear PackageLicenseUrl since arcade sets it, and since we're using the new compilers
+    this property is deprecated by NuGet. -->
+    <PackageLicenseUrl></PackageLicenseUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Include license and third party files to packages -->
+    <Content Include="$(RepoRoot)THIRD-PARTY-NOTICES.TXT" Pack="true" PackagePath="\" />
+    <Content Include="$(RepoRoot)LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
 </Project>
