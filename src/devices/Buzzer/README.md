@@ -57,8 +57,3 @@ using (Buzzer buzzer = new Buzzer(21, -1)); // Initialize buzzer with software P
 }
 ```
 This example will play tone with frequency 440 for a second and then will play tone with a frequency 880 for a second.
-
-
-## References
-
-Provide any references to other tutorials, blogs and hardware related to the component that could help others get started.
