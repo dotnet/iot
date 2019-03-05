@@ -12,7 +12,7 @@ class Program
         {
             while (true)
             {
-                Console.WriteLine($"Temperature: {th.Temperature.Celsius}C   Pressure: {th.Pressure}hPa");
+                Console.WriteLine($"Temperature: {th.Temperature.Celsius}°C   Pressure: {th.Pressure}hPa");
                 Thread.Sleep(1000);
             }
         }

@@ -20,7 +20,7 @@ namespace Iot.Device.Hts221.Samples
             {
                 while (true)
                 {
-                    Console.WriteLine($"Temperature: {th.Temperature.Celsius}C   Humidity: {th.Humidity}%rH");
+                    Console.WriteLine($"Temperature: {th.Temperature.Celsius}°C   Humidity: {th.Humidity}%rH");
                     Thread.Sleep(1000);
                 }
             }
