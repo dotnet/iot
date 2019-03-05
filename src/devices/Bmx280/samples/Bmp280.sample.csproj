@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,7 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bmp280.csproj" />
+    <Compile Include="Bmp280.sample.cs" />
+    <ProjectReference Include="..\Bmx280.csproj" />
   </ItemGroup>
 
 </Project>

@@ -6,46 +6,39 @@
 //Formulas and code examples can also be found in the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
 
 using System;
+using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Threading.Tasks;
-using System.Buffers.Binary;
 
-namespace Iot.Device.Bmp280
+namespace Iot.Device.Bmx280
 {
-    public class Bmp280 : IDisposable
+    public class BmxBase : IDisposable
     {
-        private const byte Signature = 0x58;
+        internal I2cDevice _i2cDevice;
+        internal byte _deviceId;
+        internal bool _initialized = false;
+        internal CommunicationProtocol _communicationProtocol;
+        internal CalibrationData _calibrationData;
 
-        private I2cDevice _i2cDevice;
-        private readonly CommunicationProtocol _communicationProtocol;
-        private bool _initialized = false;
-        private readonly CalibrationData _calibrationData;
         /// <summary>
         /// The variable _temperatureFine carries a fine resolution temperature value over to the
         /// pressure compensation formula and could be implemented as a global variable.
         /// </summary>
-        private int _temperatureFine;
+        protected int TemperatureFine;
 
-        private enum CommunicationProtocol
+        internal enum CommunicationProtocol
         {
             I2c
         }
 
-        public Bmp280(I2cDevice i2cDevice)
-        {
-            _i2cDevice = i2cDevice;
-            _calibrationData = new CalibrationData();
-            _communicationProtocol = CommunicationProtocol.I2c;
-        }
-
-        private void Begin()
+        internal void Begin()
         {
             _i2cDevice.WriteByte((byte)Register.CHIPID);
             byte readSignature = _i2cDevice.ReadByte();
 
-            if (readSignature != Signature)
+            if (readSignature != _deviceId)
             {
-                return;
+                throw new Exception($"Device ID {readSignature} is not the same as expected {_deviceId}. Please check you are using the right device.");
             }
             _initialized = true;
 
@@ -232,7 +225,7 @@ namespace Iot.Device.Bmp280
             }
 
             //Read the temperature first to load the t_fine value for compensation
-            if (_temperatureFine == int.MinValue)
+            if (TemperatureFine == int.MinValue)
             {
                 await ReadTemperatureAsync();
             }
@@ -294,7 +287,7 @@ namespace Iot.Device.Bmp280
             double var1 = ((adcTemperature / 16384.0) - (_calibrationData.DigT1 / 1024.0)) * _calibrationData.DigT2;
             double var2 = ((adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0)) * _calibrationData.DigT3;
 
-            _temperatureFine = (int)(var1 + var2);
+            TemperatureFine = (int)(var1 + var2);
 
             double T = (var1 + var2) / 5120.0;
             return T;
@@ -314,7 +307,7 @@ namespace Iot.Device.Bmp280
         {
             //Formula from the datasheet
             //The pressure is calculated using the compensation formula in the BMP280 datasheet
-            long var1 = _temperatureFine - 128000;
+            long var1 = TemperatureFine - 128000;
             long var2 = var1 * var1 * (long)_calibrationData.DigP6;
             var2 = var2 + ((var1 * (long)_calibrationData.DigP5) << 17);
             var2 = var2 + ((long)_calibrationData.DigP4 << 35);
@@ -342,7 +335,7 @@ namespace Iot.Device.Bmp280
         /// <returns>
         ///  Value from register
         /// </returns>
-        private byte Read8BitsFromRegister(byte register)
+        internal byte Read8BitsFromRegister(byte register)
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {
@@ -391,7 +384,7 @@ namespace Iot.Device.Bmp280
         /// <returns>
         ///  Value from register
         /// </returns>
-        private uint Read24BitsFromRegister(byte register)
+        internal uint Read24BitsFromRegister(byte register)
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {
