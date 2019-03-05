@@ -1,4 +1,4 @@
-# Example of MAX44009
+# MAX44009 - Samples
 
 ## Hardware Required
 * MAX44009

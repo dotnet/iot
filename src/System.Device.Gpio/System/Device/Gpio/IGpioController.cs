@@ -10,8 +10,8 @@ namespace System.Device.Gpio
         void ClosePin(int pinNumber);
         void SetPinMode(int pinNumber, PinMode mode);
         void Write(int pinNumber, PinValue value);
-        void Write(ReadOnlySpan<PinValuePair> pinValues);
+        void Write(ReadOnlySpan<PinValuePair> pinValuePairs);
         PinValue Read(int pinNumber);
-        void Read(Span<PinValuePair> pinValues);
+        void Read(Span<PinValuePair> pinValuePairs);
     }
 }

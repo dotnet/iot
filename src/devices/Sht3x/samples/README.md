@@ -1,4 +1,4 @@
-# Example of SHT3x
+# SHT3x - Samples
 
 ## Hardware Required
 * SHT3x

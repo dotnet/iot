@@ -23,8 +23,8 @@ namespace DeviceApiTester.Commands.Gpio
         [Option('p', "pressed-value", HelpText = "The value of the GPIO pin when the button is pressed: { Rising | Falling }", Required = false, Default = PinEventTypes.Rising)]
         public PinEventTypes PressedValue { get; set; }
 
-        [Option("on-value", HelpText = "The value that turns the LED on: { High | Low }", Required = false, Default = true)]
-        public bool OnValue { get; set; }
+        [Option("on-value", HelpText = "The value that turns the LED on: { 0 | 1 }", Required = false, Default = 1)]
+        public int OnValue { get; set; }
 
         /// <summary>Executes the command asynchronously.</summary>
         /// <returns>The command's exit code.</returns>
@@ -73,12 +73,12 @@ namespace DeviceApiTester.Commands.Gpio
                         waitResult = await controller.WaitForEventAsync(ButtonPin, bothPinEventTypes, cancellationTokenSource.Token);
                         if (!waitResult.TimedOut)
                         {
-                            var pressedOrReleased = waitResult.EventType == PressedValue ? "pressed" : "released";
-                            Console.WriteLine($"[{count++}] Button {pressedOrReleased}: GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin number {ButtonPin}, ChangeType={waitResult.EventType}");
+                            var pressedOrReleased = waitResult.EventTypes == PressedValue ? "pressed" : "released";
+                            Console.WriteLine($"[{count++}] Button {pressedOrReleased}: GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin number {ButtonPin}, ChangeType={waitResult.EventTypes}");
 
                             if (LedPin != null)
                             {
-                                PinValue ledValue = waitResult.EventType == PressedValue ? OnValue : OffValue;
+                                PinValue ledValue = waitResult.EventTypes == PressedValue ? OnValue : OffValue;
                                 controller.Write(LedPin.Value, ledValue);
                             }
                         }
@@ -106,6 +106,6 @@ namespace DeviceApiTester.Commands.Gpio
             }
         }
 
-        private bool OffValue => !OnValue;
+        private int OffValue => 1 - OnValue;
     }
 }

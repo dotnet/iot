@@ -7,10 +7,20 @@
 
   <ItemGroup>
     <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <PackageReference Include="SixLabors.Fonts" Version="1.0.0-*" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-*" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-*" />
+    <PackageReference Include="SixLabors.Shapes.Text" Version="1.0.0-*" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ssd1306.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Ssd1306.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="images\*.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

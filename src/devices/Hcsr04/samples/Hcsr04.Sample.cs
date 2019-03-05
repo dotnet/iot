@@ -19,7 +19,7 @@ namespace Iot.Device.Hcsr04.Samples
         {
             Console.WriteLine("Hello Hcsr04 Sample!");
 
-            using(var sonar = new Iot.Device.Hcsr04.Sonar(4, 17))
+            using(var sonar = new Hcsr04(4, 17))
             {
                 while(true)
                 {

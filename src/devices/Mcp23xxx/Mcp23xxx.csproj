@@ -4,10 +4,10 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
     <LangVersion>latest</LangVersion>
-    <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
     <Compile Include="..\Common\System\Device\Gpio\PinVector32.cs" Link="PinVector32.cs" />
     <Compile Include="BankStyle.cs" />
     <Compile Include="I2cAdapter.cs" />
@@ -28,14 +28,7 @@
     <Compile Include="SpiAdapter.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!--
-        Temporarily making a project reference until the daily has IGpioController
-        <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" /> 
-      -->
-    <ProjectReference Include="..\..\System.Device.Gpio\System.Device.Gpio.csproj">
-      <AdditionalProperties>Configuration=Linux-Debug;RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+  <ItemGroup>    
     <None Include="README.md" />
   </ItemGroup>
 

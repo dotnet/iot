@@ -13,7 +13,7 @@ namespace Iot.Device.Hmc5883l.Samples
     {
         static void Main(string[] args)
         {
-            I2cConnectionSettings settings = new I2cConnectionSettings(1, Hmc5883l.I2cAddress);
+            I2cConnectionSettings settings = new I2cConnectionSettings(1, Hmc5883l.DefaultI2cAddress);
             // get I2cDevice (in Linux)
             UnixI2cDevice device = new UnixI2cDevice(settings);
             // get I2cDevice (in Win10)
@@ -23,8 +23,8 @@ namespace Iot.Device.Hmc5883l.Samples
             {
                 while (true)
                 {
-                    // read direction angle
-                    Console.WriteLine($"Direction Angle: {sensor.Heading.ToString("0.00")} °");
+                    // read heading
+                    Console.WriteLine($"Heading: {sensor.Heading.ToString("0.00")} °");
 
                     var status = sensor.DeviceStatus;
                     Console.Write("Statuses: ");

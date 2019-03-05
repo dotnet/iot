@@ -1,4 +1,4 @@
-# ADS1115
+# ADS1115 - Analog to Digital Converter
 ADS1115 is an Analog-to-Digital converter (ADC) with 16 bits of resolution.
 
 ## Sensor Image
