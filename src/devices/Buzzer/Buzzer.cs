@@ -15,9 +15,9 @@ namespace Iot.Device.Buzzer
     /// </summary>
     public class Buzzer : IDisposable
     {
-        private int _buzzerPin;
-        private int _pwmChannel;
-        private PwmController _pwmController;
+        private readonly int _buzzerPin;
+        private readonly int _pwmChannel;
+        private readonly PwmController _pwmController;
 
         /// <summary>
         /// Create Buzzer class instance with output on specified pin with specified channel.

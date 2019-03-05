@@ -14,7 +14,7 @@ namespace Iot.Device.Buzzer.Samples
     /// </summary>
     class MelodyPlayer : IDisposable
     {
-        private Buzzer _buzzer;
+        private readonly Buzzer _buzzer;
         private int _wholeNoteDurationInMilliseconds;
 
         /// <summary>
@@ -91,10 +91,12 @@ namespace Iot.Device.Buzzer.Samples
             var noteElement = element as NoteElement;
             if (noteElement == null)
             {
+                // In case it's a pause element we have only just wait desired time
                 Thread.Sleep(durationInMilliseconds);
             }
             else
             {
+                // In case it's a note element we play it
                 var frequency = GetFrequency(noteElement.Note, noteElement.Octave);
                 _buzzer.PlayTone(frequency, (int)(durationInMilliseconds * 0.7));
                 Thread.Sleep((int)(durationInMilliseconds * 0.3));

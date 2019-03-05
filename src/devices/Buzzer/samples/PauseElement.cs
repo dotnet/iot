@@ -5,18 +5,14 @@
 namespace Iot.Device.Buzzer.Samples
 {
     /// <summary>
-    /// A base class for melody sequence elements.
+    /// Pause element to define silence duration between sounds in melody.
     /// </summary>
-    public abstract class MelodyElement
+    public class PauseElement : MelodyElement
     {
         /// <summary>
-        /// Duration which defines how long should element take on melody sequence timeline.
+        /// Create Pause element.
         /// </summary>
-        public Duration Duration { get; set; }
-
-        public MelodyElement(Duration duration)
-        {
-            Duration = duration;
-        }
+        /// <param name="duration">Duration of pause in melody sequence timeline.</param>
+        public PauseElement(Duration duration) : base(duration) {}
     }
 }
