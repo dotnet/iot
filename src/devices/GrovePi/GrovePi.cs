@@ -43,7 +43,7 @@ namespace Iot.Device.GrovePiDevice
         /// <param name="autoDispose">True to dispose the I2C device when disposing GrovePi</param>
         public GrovePi(I2cDevice i2cDevice, bool autoDispose = true)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException("I2C device can't be null");
+            _i2cDevice = i2cDevice ?? throw new ArgumentException("I2C device can't be null", nameof(i2cDevice));
             _autoDispose = autoDispose;
             GrovePiInfo = new Info() { SoftwareVersion = GetFirmwareVerion() };
         }
@@ -80,6 +80,9 @@ namespace Iot.Device.GrovePiDevice
             Span<byte> outArray = stackalloc byte[4] { (byte)commands, (byte)(pin), param1, param2 };
             byte tries = 0;
             IOException innerEx = new IOException();
+            // When writing/reading to the I2C port, GrovePi doesn't respond on time in some cases
+            // So we wait a little bit before retrying
+            // In most cases, the I2C read/write can go thru without waiting
             while (tries < MaxRetries)
             {
                 try
@@ -131,6 +134,9 @@ namespace Iot.Device.GrovePiDevice
             byte[] outArray = new byte[numberBytesToRead];
             byte tries = 0;
             IOException innerEx = new IOException();
+            // When writing/reading the I2C port, GrovePi doesn't respond on time in some cases
+            // So we wait a little bit before retrying
+            // In most cases, the I2C read/write can go thru without waiting
             while (tries < MaxRetries)
             {
                 try
@@ -160,6 +166,9 @@ namespace Iot.Device.GrovePiDevice
             WriteCommand(GrovePiCommands.DigitalRead, pin, 0, 0);
             byte tries = 0;
             IOException innerEx = null;
+            // When writing/reading to the I2C port, GrovePi doesn't respond on time in some cases
+            // So we wait a little bit before retrying
+            // In most cases, the I2C read/write can go thru without waiting
             while (tries < MaxRetries)
             {
                 try

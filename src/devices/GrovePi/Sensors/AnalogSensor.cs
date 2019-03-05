@@ -29,7 +29,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public AnalogSensor(GrovePi grovePi, GrovePort port)
         {
             if (!SupportedPorts.Contains(port))
-                throw new ArgumentException($"Error: grove Port not supported");
+                throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
             _grovePi = grovePi;
             Port = port;
             _grovePi.PinMode(Port, PinMode.Input);
