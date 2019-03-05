@@ -18,7 +18,7 @@
 
 In the most common case units should match [International System of Units (aka. SI)](https://en.wikipedia.org/wiki/International_System_of_Units) with some exceptions:
 
-- Celsius should be used for temperature
+- If Iot.Units defines unit it should be used - i.e. for temperature you should use Iot.Units.Temperature
 
 ## Notes
 
