@@ -111,7 +111,7 @@ namespace Iot.Device.CharacterLcd
                 // It is possible that the initialization will fail if the power is not provided
                 // within specific tolerances. As such, we'll always perform the software based
                 // initialization as described on pages 45/46 of the HD44780 data sheet. We give
-                // a little extra time to the required waits.
+                // a little extra time to the required waits as described.
 
                 if (_dataPins.Length == 8)
                 {
@@ -197,8 +197,6 @@ namespace Iot.Device.CharacterLcd
                 }
 
                 // Most commands need a maximum of 37μs to complete.
-                // This is based on a 270kHz clock in the documentation.
-                // (See page 25.)
                 WaitForNotBusy(37);
             }
 

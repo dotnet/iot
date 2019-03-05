@@ -3,9 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Buffers;
 using System.Device.I2c;
-using System.Diagnostics;
 
 namespace Iot.Device.CharacterLcd
 {
@@ -71,7 +69,12 @@ namespace Iot.Device.CharacterLcd
 
             public override void SendCommands(ReadOnlySpan<byte> commands)
             {
-                Debug.Assert(commands.Length < 40, "more than 40 commands, review code to handle larger data sets");
+                // There is a limit to how much data the controller can accept at once. Haven't found documentation
+                // for this yet, can probably iterate a bit more on this to find a true "max". Not adding additional
+                // logic like SendData as we don't expect a need to send more than a handful of commands at a time.
+
+                if (commands.Length > 20)
+                    throw new ArgumentOutOfRangeException(nameof(commands), "Too many commands in one request.");
                 Span<byte> buffer = stackalloc byte[commands.Length + 1];
                 buffer[0] = 0x00;
                 commands.CopyTo(buffer.Slice(1));
@@ -86,7 +89,9 @@ namespace Iot.Device.CharacterLcd
 
             public override void SendData(ReadOnlySpan<byte> values)
             {
-                // There is a limit to how much data the controller can accept at once.
+                // There is a limit to how much data the controller can accept at once. Haven't found documentation
+                // for this yet, can probably iterate a bit more on this to find a true "max". 40 was too much.
+
                 const int MaxCopy = 20;
                 Span<byte> buffer = stackalloc byte[MaxCopy + 1];
                 buffer[0] = (byte)ControlByteFlags.RegisterSelect;

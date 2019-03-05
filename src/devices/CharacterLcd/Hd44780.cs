@@ -42,26 +42,6 @@ namespace Iot.Device.CharacterLcd
         protected readonly LcdInterface _interface;
 
         /// <summary>
-        /// The command wait time multiplier for the LCD.
-        /// </summary>
-        /// <remarks>
-        /// Timings are based off the original HD44780 specification, which dates back
-        /// to the late 1980s. Modern LCDs can often respond faster. In addition we spend
-        /// time in other code between pulsing in new data, which gives quite a bit of
-        /// headroom over the by-the-book waits.
-        /// 
-        /// This is more useful if you have a slow GpioAdapter as time spent in the
-        /// adapter may eat into the need to wait as long for a command to complete.
-        /// 
-        /// There is a busy signal that can be checked that could make this moot, but
-        /// currently we are unable to check the signal fast enough to make gains (or
-        /// even equal) going off hard timings. The busy signal also requires having a
-        /// r/w pin attached. And lastly, as already stated, it takes time to set up
-        /// for another byte of data to be pulsed in.
-        /// </remarks>
-        public double TimingMultiplier { get; set; } = 1.0;
-
-        /// <summary>
         /// Logical size, in characters, of the LCD.
         /// </summary>
         public Size Size { get; }
@@ -69,14 +49,8 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// Initializes a new HD44780 LCD controller.
         /// </summary>
-        /// <param name="registerSelect">The pin that controls the regsiter select.</param>
-        /// <param name="enable">The pin that controls the enable switch.</param>
-        /// <param name="data">Collection of pins holding the data that will be printed on the screen.</param>
         /// <param name="size">The logical size of the LCD.</param>
-        /// <param name="backlight">The optional pin that controls the backlight of the display.</param>
-        /// <param name="backlightBrightness">The brightness of the backlight. 0.0 for off, 1.0 for on.</param>
-        /// <param name="readWrite">The optional pin that controls the read and write switch.</param>
-        /// <param name="controller">The controller to use with the LCD. If not specified, uses the platform default.</param>
+        /// <param name="interface">The interface to use with the LCD.</param>
         public Hd44780(Size size, LcdInterface @interface)
         {
             Size = size;
@@ -193,16 +167,24 @@ namespace Iot.Device.CharacterLcd
         public void Clear()
         {
             SendCommand(ClearDisplayCommand);
-            WaitForNotBusy(3000);
+
+            // The HD44780 spec doesn't call out how long this takes. Home is documented as
+            // taking 1.52ms, and as this does more work (sets all memory to the space character)
+            // we do a longer wait. On the PCF2119x it is described as taking 165 clock cycles which
+            // would be 660μs on the "typical" clock.
+            WaitForNotBusy(2000);
         }
 
         /// <summary>
-        /// Moves the cursor to the first line and first column.
+        /// Moves the cursor to the first line and first column, unshifting if shifted.
         /// </summary>
         public void Home()
         {
             SendCommand(ReturnHomeCommand);
-            WaitForNotBusy(3000);
+
+            // The return home command is documented as taking 1.52ms with the standard 270KHz clock.
+            // SendCommand already waits for 37μs, 
+            WaitForNotBusy(1520);
         }
 
         /// <summary>
@@ -215,6 +197,10 @@ namespace Iot.Device.CharacterLcd
             int rows = _rowOffsets.Length;
             if (top < 0 || top >= rows)
                 throw new ArgumentOutOfRangeException(nameof(top));
+
+            // Throw if we're given a negative left value or the calculated address would be
+            // larger than the max "good" address. Addressing is covered in detail in
+            // InitializeRowOffsets above.
 
             int newAddress = left + _rowOffsets[top];
             if (left < 0 || (rows == 1 && newAddress >= 80) || (rows > 1 && newAddress >= 104))
@@ -336,12 +322,26 @@ namespace Iot.Device.CharacterLcd
         /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
         public void CreateCustomCharacter(byte location, params byte[] characterMap)
         {
+            if (characterMap == null)
+                throw new ArgumentNullException(nameof(characterMap));
+
+            CreateCustomCharacter(location, characterMap.AsSpan());
+        }
+
+        /// <summary>
+        /// Fill one of the 8 CGRAM locations (character codes 0 - 7) with custom characters.
+        /// </summary>
+        /// <param name="location">Should be between 0 and 7</param>
+        /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
+        public void CreateCustomCharacter(byte location, ReadOnlySpan<byte> characterMap)
+        {
             if (location > 7)
                 throw new ArgumentOutOfRangeException(nameof(location));
 
             if (characterMap.Length != 8)
                 throw new ArgumentException(nameof(characterMap));
 
+            // The character address is set in bits 3-5 of the command byte
             SendCommand((byte)(SetCGRamAddressCommand | (location << 3)));
             SendData(characterMap);
         }
