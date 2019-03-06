@@ -56,10 +56,10 @@ namespace Iot.Device.Buzzer
         }
 
         /// <summary>
-        /// Start playing tone of specific frequency.
+        /// Set new or overwrite previously set frequency and start playing the sound.
         /// </summary>
         /// <param name="frequency">Tone frequency in Hertz.</param>
-        public void PlayTone(double frequency)
+        public void SetFrequency(double frequency)
         {
             _pwmController.StartWriting(_buzzerPin, _pwmChannel, frequency, 0.5);
         }
@@ -67,7 +67,7 @@ namespace Iot.Device.Buzzer
         /// <summary>
         /// Stop playing tone.
         /// </summary>
-        public void StopTone()
+        public void StopPlaying()
         {
             _pwmController.StopWriting(_buzzerPin, _pwmChannel);
         }
@@ -79,9 +79,9 @@ namespace Iot.Device.Buzzer
         /// <param name="duraton">Playing duration in millisecons.</param>
         public void PlayTone(double frequency, int duraton)
         {
-            PlayTone(frequency);
+            SetFrequency(frequency);
             Thread.Sleep(duraton);
-            StopTone();
+            StopPlaying();
         }
 
         /// <summary>

@@ -39,22 +39,22 @@ Or you could start tone playing, perform some operation and then stop tone playi
 ```csharp
 using (Buzzer buzzer = new Buzzer(21, -1));
 {
-	buzzer.PlayTone(440);
+	buzzer.SetFrequency(440);
 	Thread.Sleep(1000);
-	buzzer.StopTone();
+	buzzer.StopPlaying();
 }
 ```
 The result will be the same as in previous example.
 
-`Buzzer` allows you to play only single tone at a single moment. If you will call `PlayTone` sequentially with a different frequencies then the last call will override previous calls. Following example explains it.
+`Buzzer` allows you to play only single tone at a single moment. If you will call `SetFrequency` sequentially with a different frequencies then the last call will override previous calls. Following example explains it.
 ```csharp
 using (Buzzer buzzer = new Buzzer(21, -1)); // Initialize buzzer with software PWM connected to pin 21.
 {
-	buzzer.PlayTone(440);
+	buzzer.SetFrequency(440);
 	Thread.Sleep(1000);
-	buzzer.PlayTone(880);
+	buzzer.SetFrequency(880);
 	Thread.Sleep(1000);
-	buzzer.StopTone();
+	buzzer.StopPlaying();
 }
 ```
 This example will play tone with frequency 440 for a second and then will play tone with a frequency 880 for a second.
