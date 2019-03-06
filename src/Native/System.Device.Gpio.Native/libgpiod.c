@@ -65,7 +65,18 @@ extern int RequestLineOutput(struct gpiod_line *line, const char *consumer)
 {
 	return gpiod_line_request_output(line, consumer, 0);
 }
-			 
+		
+/**
+ * @brief Check if the calling user has neither requested ownership of this line nor configured any event notifications.
+ * @param line GPIO line object.
+ * @return True if given line is free, false otherwise.
+ */		
+extern bool LineIsFree(struct gpiod_line *line) 
+{
+	return gpiod_line_is_free(line);
+}
+
+		
 /**
  * @brief Release a previously reserved line.
  * @param line GPIO line object.
@@ -137,4 +148,42 @@ extern void FreeChipIteratorNoCloseCurrentChip(struct gpiod_chip_iter *iter)
 extern struct gpiod_chip * GetNextChipFromChipIterator(struct gpiod_chip_iter *iter) 
 {
 	return gpiod_chip_iter_next(iter); 
+}
+
+/**
+ * @brief Request all event type notifications on a single line.
+ * @param line GPIO line object.
+ * @param consumer Name of the consumer.
+ * @return 0 if the operation succeeds, -1 on failure.
+ */
+extern int RequestBothEdgesEventForLine(struct gpiod_line *line, const char *consumer) 
+{
+	return gpiod_line_request_both_edges_events(line, consumer);
+}
+
+/**
+ * @brief Wait for an event on a single line.
+ * @param line GPIO line object.
+ * @return 0 if wait timed out, -1 if an error occurred, 1 if an event occurred.
+ */
+extern int WaitForEventOnLine(struct gpiod_line *line)
+{
+	struct timespec timeout = { 0, 1000000 }; // one millisecond
+	return gpiod_line_event_wait(line, &timeout);
+}
+
+/**
+ * @brief Read the last event from the GPIO line.
+ * @param line GPIO line object.
+ * @return event type if an event was read correctly (1 for rising edge, 2 for falling edge), -1 on error.
+ * @note This function will block if no event was queued for this line.
+ */
+extern int ReadEventForLine(struct gpiod_line *line) 
+{
+	struct gpiod_line_event event;
+	int response = gpiod_line_event_read(line, &event);
+	if (response == 0) { // 0 returned means event read correctly, -1 on error
+		return event.event_type;
+	}
+	return response;
 }

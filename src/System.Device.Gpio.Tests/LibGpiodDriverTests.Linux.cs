@@ -6,7 +6,7 @@ using System.Device.Gpio.Drivers;
 
 namespace System.Device.Gpio.Tests
 {
-    class LibGpiodDriverTests : GpioControllerTestBase
+    public class LibGpiodDriverTests : GpioControllerTestBase
     {
         protected override GpioDriver GetTestDriver() => new LibGpiodDriver();
 

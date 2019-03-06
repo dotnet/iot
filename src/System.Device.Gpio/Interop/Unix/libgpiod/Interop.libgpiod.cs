@@ -67,7 +67,7 @@ internal partial class Interop
     /// Read the GPIO line direction setting.
     /// </summary>
     /// <param name="line">GPIO line handle</param>
-    /// <returns>GPIOD_DIRECTION_INPUT or GPIOD_DIRECTION_OUTPUT.</returns>
+    /// <returns>1 if INPUT otherwise 2 (OUTPUT).</returns>
     [DllImport(LibgpiodLibrary)]
     internal static extern int GetLineDirection(SafeLineHandle line);
 
@@ -107,9 +107,42 @@ internal partial class Interop
     internal static extern int GetGpiodLineValue(SafeLineHandle line);
 
     /// <summary>
+    /// Check if line is no used (not set as Input or Output, not listening events).
+    /// </summary>
+    /// <param name="line">GPIO line handle</param>
+    /// <returns>false if pin is used as Input/Output or Listening an event, true if it is free</returns>
+    [DllImport(LibgpiodLibrary)]
+    internal static extern bool LineIsFree(SafeLineHandle line);
+
+    /// <summary>
     /// Release a previously reserved line.
     /// </summary>
     /// <param name="line">GPIO line handle</param>
     [DllImport(LibgpiodLibrary)]
-    internal static extern void ReleaseGpiodLine(SafeLineHandle lineHandle);
+    internal static extern void ReleaseGpiodLine(IntPtr lineHandle);
+
+    /// <summary>
+    /// Request all event type notifications on a single line.
+    /// </summary>
+    /// <param name="line">GPIO line handle</param>
+    /// <param name="consumer">Name of the consumer.</param>
+    /// <returns>0 the operation succeeds, -1 on failure.</returns>
+    [DllImport(LibgpiodLibrary, SetLastError = true)]
+    internal static extern int RequestBothEdgesEventForLine(SafeLineHandle line, string consumer);
+
+    /// <summary>
+    /// Wait for an event on a single line.
+    /// </summary>
+    /// <param name="line">GPIO line handle</param>
+    /// <returns>0 if wait timed out, -1 if an error occurred, 1 if an event occurred.</returns>
+    [DllImport(LibgpiodLibrary, SetLastError = true)]
+    internal static extern WaitEventResult WaitForEventOnLine(SafeLineHandle line);
+
+    /// <summary>
+    /// Read the last event from the GPIO line.
+    /// </summary>
+    /// <param name="line">GPIO line handle</param>
+    /// <returns>1 if rising edge event occured, 2 on falling edge, -1 on error.</returns>
+    [DllImport(LibgpiodLibrary, SetLastError = true)]
+    internal static extern int ReadEventForLine(SafeLineHandle line);
 }

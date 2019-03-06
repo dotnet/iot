@@ -24,6 +24,11 @@ namespace System.Device.Gpio
             return new PlatformNotSupportedException(GetResourceString(resource, -1, -1));
         }
 
+        public static ArgumentException GetArgumentException(ExceptionResource resource)
+        {
+            return new ArgumentException(GetResourceString(resource, -1, -1));
+        }
+
         private static string GetResourceString(ExceptionResource resource, int errorCode, int pin)
         {
             string message = "";
@@ -53,6 +58,24 @@ namespace System.Device.Gpio
                 case ExceptionResource.ConvertPinNumberingSchemaError:
                     message = $"This driver is generic so it cannot perform conversions between pin numbering schemes.";
                     break;
+                case ExceptionResource.RequestEventError:
+                    message = $"Error while requesting event listener for pin {pin}, error code: {errorCode}";
+                    break;
+                case ExceptionResource.InvalidEventType:
+                    message = $"Invalid or not supported event type requested";
+                    break;
+                case ExceptionResource.EventWaitError:
+                    message = $"Error while waiting for event, error code {errorCode}, pin: {pin}";
+                    break;
+                case ExceptionResource.EventReadError:
+                    message = $"Error while reading pin event result, error code {errorCode}";
+                    break;
+                case ExceptionResource.NotListeningForEventError:
+                    message = $"Attempted to remove a callback for a pin that is not listening for events.";
+                    break;
+                case ExceptionResource.LibGpiodNotInstalled:
+                    message = $"Libgpiod driver not installed. More information on: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/";
+                    break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
                     break;
@@ -71,6 +94,12 @@ namespace System.Device.Gpio
         ReadPinError,
         PinNotOpenedError,
         SetPinModeError,
-        ConvertPinNumberingSchemaError
+        ConvertPinNumberingSchemaError,
+        RequestEventError,
+        InvalidEventType,
+        EventWaitError,
+        EventReadError,
+        NotListeningForEventError,
+        LibGpiodNotInstalled
     }
 }
