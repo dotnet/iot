@@ -11,6 +11,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [AGS01DB -- MEMS VOC Gas Sensor ASG01DB](Ags01db/README.md)
 * [BMP280 -- Digital Pressure Sensor](Bmp280/README.md)
 * [BrickPi3](BrickPi3/README.md)
+* [Buzzer -- Piezo Buzzer Controller](Buzzer/README.md)
 * [CharacterLcd -- Liquid Crystal Display](CharacterLcd/README.md)
 * [DC Motor](DCMotor/README.md)
 * [Dhtxx -- Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
