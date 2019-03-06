@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+  <Import Project="$(RepoRoot)eng/Compilers.props" />
 
   <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
     <Copyright>$(CopyrightNetFoundation)</Copyright>
@@ -16,8 +17,7 @@
 
     <!-- Packaging props -->
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <!-- We need to clear PackageLicenseUrl since arcade sets it, and since we're using the new compilers
-    this property is deprecated by NuGet. -->
+    <!-- We need to clear PackageLicenseUrl since arcade sets it, and it is being deprecated -->
     <PackageLicenseUrl></PackageLicenseUrl>
   </PropertyGroup>
 
