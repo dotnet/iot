@@ -5,6 +5,7 @@
 using System;
 using System.Device.Gpio;
 using System.Device.Spi;
+using Iot.Device.Mcp25xxx.Register;
 
 namespace Iot.Device.Mcp25xxx
 {
@@ -224,11 +225,11 @@ namespace Iot.Device.Mcp25xxx
         /// </summary>
         /// <param name="address">The address to read.</param>
         /// <returns>The value of address read.</returns>
-        public byte Read(Register.Register register)
+        public byte Read(Address address)
         {
             const byte instructionFormat = 0x03;
             const byte dontCare = 0x00;
-            ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { instructionFormat, (byte)register, dontCare };
+            ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { instructionFormat, (byte)address, dontCare };
             Span<byte> readBuffer = stackalloc byte[3];
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
             return readBuffer[2];
@@ -255,7 +256,7 @@ namespace Iot.Device.Mcp25xxx
         /// </summary>
         /// <param name="address">The starting address to write the data.</param>
         /// <param name="value">The value to be written.</param>
-        public void WriteByte(byte address, byte value)
+        public void WriteByte(Address address, byte value)
         {
             Write(address, new byte[] { value });
         }
@@ -265,12 +266,12 @@ namespace Iot.Device.Mcp25xxx
         /// </summary>
         /// <param name="address">The starting address to write data.</param>
         /// <param name="buffer">The buffer that contains the data to be written.</param>
-        public void Write(byte address, ReadOnlySpan<byte> buffer)
+        public void Write(Address address, ReadOnlySpan<byte> buffer)
         {
             const byte instructionFormat = 0x02;
             Span<byte> writeBuffer = stackalloc byte[buffer.Length + 2];
             writeBuffer[0] = instructionFormat;
-            writeBuffer[1] = address;
+            writeBuffer[1] = (byte)address;
             buffer.CopyTo(writeBuffer.Slice(2));
             _spiDevice.Write(writeBuffer);
         }
@@ -362,10 +363,10 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="mask">The mask to determine which bits in the register will be allowed to change.
         /// A '1' will allow a bit to change while a '0' will not.</param>
         /// <param name="value">The value to be written.</param>
-        public void BitModify(byte address, byte mask, byte value)
+        public void BitModify(Address address, byte mask, byte value)
         {
             const byte instructionFormat = 0x05;
-            Span<byte> writeBuffer = stackalloc byte[] { instructionFormat, address, mask, value };
+            Span<byte> writeBuffer = stackalloc byte[] { instructionFormat, (byte)address, mask, value };
             _spiDevice.Write(writeBuffer);
         }
 
