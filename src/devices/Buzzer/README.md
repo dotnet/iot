@@ -5,7 +5,7 @@
 
 ## Summary
 
-This device binding allow to play certain tone using piezo buzzer. It uses PWM with 50% duty cycle and various frequencies.
+This device binding allows playing certain tones using piezo buzzer. It uses PWM with 50% duty cycle and various frequencies.
 
 Piezo buzzers with three pins supported as well as piezo buzzers with two pins.
 
