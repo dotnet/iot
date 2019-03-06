@@ -17,8 +17,6 @@
 
     <!-- Packaging props -->
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <!-- We need to clear PackageLicenseUrl since arcade sets it, and it is being deprecated -->
-    <PackageLicenseUrl></PackageLicenseUrl>
   </PropertyGroup>
 
   <ItemGroup>
