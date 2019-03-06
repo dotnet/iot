@@ -7,7 +7,7 @@ namespace Iot.Device.Mcp25xxx.Register
     /// <summary>
     /// Control Register Summary.
     /// </summary>
-    public enum Register : byte
+    public enum Address : byte
     {
         //
         // Message Transmit Registers.
