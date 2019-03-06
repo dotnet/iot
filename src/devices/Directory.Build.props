@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project>
+  <Import Project="..\..\eng\Compilers.props" />
   <PropertyGroup>
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
