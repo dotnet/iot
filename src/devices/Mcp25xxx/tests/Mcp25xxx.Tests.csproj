@@ -18,13 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Registers\AcceptanceFilter\" />
-    <Folder Include="Registers\BitTimeConfiguration\" />
-    <Folder Include="Registers\CanControl\" />
-    <Folder Include="Registers\ErrorDetection\" />
-    <Folder Include="Registers\Interrupt\" />
-    <Folder Include="Registers\MessageReceive\" />
-    <Folder Include="Registers\MessageTransmit\" />
+    <Folder Include="Register\BitTimeConfiguration\" />
+    <Folder Include="Register\CanControl\" />
+    <Folder Include="Register\ErrorDetection\" />
+    <Folder Include="Register\Interrupt\" />
+    <Folder Include="Register\MessageReceive\" />
+    <Folder Include="Register\MessageTransmit\" />
   </ItemGroup>
 
 </Project>
