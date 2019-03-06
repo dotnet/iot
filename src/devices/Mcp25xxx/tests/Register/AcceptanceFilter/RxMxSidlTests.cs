@@ -20,13 +20,8 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         }
 
         [Theory]
-        [InlineData(0b0000_0000, 0b0000_0000, 0b0000_0000)]
-        [InlineData(0b0000_0001, 0b0000_0000, 0b0000_0001)]
-        [InlineData(0b0000_0010, 0b0000_0000, 0b0000_0010)]
+        [InlineData(0b0000_0000, 0b000_0000, 0b0000_0000)]
         [InlineData(0b0000_0011, 0b0000_0000, 0b0000_0011)]
-        [InlineData(0b0000_0000, 0b0000_0001, 0b0010_0000)]
-        [InlineData(0b0000_0000, 0b0000_0010, 0b0100_0000)]
-        [InlineData(0b0000_0000, 0b0000_0100, 0b1000_0000)]
         [InlineData(0b0000_0000, 0b0000_0111, 0b1110_0000)]
         public void To_Byte(byte eid, byte sid, byte expectedByte)
         {

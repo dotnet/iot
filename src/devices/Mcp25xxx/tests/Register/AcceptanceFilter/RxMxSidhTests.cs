@@ -21,14 +21,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
 
         [Theory]
         [InlineData(0b0000_0000)]
-        [InlineData(0b0000_0001)]
-        [InlineData(0b0000_0010)]
-        [InlineData(0b0000_0100)]
-        [InlineData(0b0000_1000)]
-        [InlineData(0b0001_0000)]
-        [InlineData(0b0010_0000)]
-        [InlineData(0b0100_0000)]
-        [InlineData(0b1000_0000)]
+        [InlineData(0b1111_1111)]
         public void To_Byte(byte sid)
         {
             Assert.Equal(sid, new RxMxSidh(RxMaskNumber.Zero, sid).ToByte());
