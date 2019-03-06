@@ -110,7 +110,7 @@ internal partial class Interop
     /// Check if line is no used (not set as Input or Output, not listening events).
     /// </summary>
     /// <param name="line">GPIO line handle</param>
-    /// <returns>0 or 1 if the operation succeeds. On error this routine returns -1 and sets the last error number.</returns>
+    /// <returns>false if pin is used as Input/Output or Listening an event, true if it is free</returns>
     [DllImport(LibgpiodLibrary)]
     internal static extern bool LineIsFree(SafeLineHandle line);
 
