@@ -19,11 +19,13 @@ This binding was tested on two types of piezo buzzers. First type of buzzer has 
 
 ## Binding Notes
 
-The  `Buzzer`  class can use either software either hardware PWM. This is done fully transparently by the initialization.
+The  `Buzzer`  class can use either software or hardware PWM. This is done fully transparently by the initialization.
 
 If you want to use the software PWM, you have to specify the GPIO pin you want to use as the first parameter in the constructor. Use the value -1 for the second one. This will force usage of the software PWM as it is not a valid value for hardware PWM.
 
 To use the hardware PWM, make sure you reference correctly the chip and channel you want to use. The  `Buzzer`  class will always try first to open a hardware PWM then a software PWM.
+
+Also you could explicitly pass PWM controller as third parameter of an appropriate constructor.
 
 Here's an example how you could use `Buzzer`.
 ```csharp
@@ -35,7 +37,7 @@ using (Buzzer buzzer = new Buzzer(21, -1)); // Initialize buzzer with software P
 `Buzzer` allows to play tone for certain duration like in example above.
 Or you could start tone playing, perform some operation and then stop tone playing like in a following example.
 ```csharp
-using (Buzzer buzzer = new Buzzer(21, -1)); // Initialize buzzer with software PWM connected to pin 21.
+using (Buzzer buzzer = new Buzzer(21, -1));
 {
 	buzzer.PlayTone(440);
 	Thread.Sleep(1000);

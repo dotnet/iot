@@ -43,6 +43,19 @@ namespace Iot.Device.Buzzer
         }
 
         /// <summary>
+        /// Create Buzzer class instance with output on specified pin with specified channel using passed PWM controller.
+        /// </summary>
+        /// <param name="pinNumber">The GPIO pin number in case of a software PWM. The chip in case of a hardware PWM.</param>
+        /// <param name="pwmChannel">The channel to use in case of a hardware PWM.</param>
+        /// <param name="pwmController">The PWM controller to use during work.</param>
+        public Buzzer(int pinNumber, int pwmChannel, PwmController pwmController)
+        {
+            _buzzerPin = pinNumber;
+            _pwmChannel = pwmChannel;
+            _pwmController = pwmController;
+        }
+
+        /// <summary>
         /// Start playing tone of specific frequency.
         /// </summary>
         /// <param name="frequency">Tone frequency in Hertz.</param>
