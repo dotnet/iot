@@ -2,12 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
 {
     /// <summary>
     /// Configuration 1 Register.
     /// </summary>
-    public class Cnf1
+    public class Cnf1 : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the Cnf1 class.
@@ -19,6 +21,11 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// </param>
         public Cnf1(byte brp, SynchronizationJumpWidthLength sjw)
         {
+            if (brp > 0b0011_1111)
+            {
+                throw new ArgumentException($"Invalid BRP value {brp}.", nameof(brp));
+            }
+
             Brp = brp;
             Sjw = sjw;
         }
@@ -56,5 +63,22 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// Synchronization Jump Width Length bits.
         /// </summary>
         public SynchronizationJumpWidthLength Sjw { get; set; }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress() => Address.Cnf1;
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            byte value = (byte)((byte)Sjw << 6);
+            value |= Brp;
+            return value;
+        }
     }
 }

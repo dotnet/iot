@@ -2,12 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
 {
     /// <summary>
     /// Configuration 2 Register.
     /// </summary>
-    public class Cnf2
+    public class Cnf2 : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the Cnf2 class.
@@ -24,8 +26,18 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// True = Length of PS2 is determined by the PHSEG2[2:0] bits of CNF3.
         /// False = Length of PS2 is the greater of PS1 and IPT(2 TQ).
         /// </param>
-        public Cnf2(byte prseg, bool phseg1, bool sam, bool btlmode)
+        public Cnf2(byte prseg, byte phseg1, bool sam, bool btlmode)
         {
+            if (prseg > 0b0000_0111)
+            {
+                throw new ArgumentException($"Invalid PRSEG value {prseg}.", nameof(prseg));
+            }
+
+            if (phseg1 > 0b0000_0111)
+            {
+                throw new ArgumentException($"Invalid PHSEG1 value {phseg1}.", nameof(phseg1));
+            }
+
             PrSeg = prseg;
             PhSeg1 = phseg1;
             Sam = sam;
@@ -40,7 +52,7 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// <summary>
         /// PS1 Length bits.
         /// </summary>
-        public bool PhSeg1 { get; set; }
+        public byte PhSeg1 { get; set; }
 
         /// <summary>
         /// Sample Point Configuration bit.
@@ -55,5 +67,34 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// False = Length of PS2 is the greater of PS1 and IPT(2 TQ).
         /// </summary>
         public bool BtlMode { get; set; }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress() => Address.Cnf2;
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            byte value = 0;
+
+            if (BtlMode)
+            {
+                value |= 0b1000_0000;
+            }
+
+            if (Sam)
+            {
+                value |= 0b0100_0000;
+            }
+
+            value |= (byte)(PhSeg1 << 3);
+            value |= PrSeg;
+            return value;
+        }
     }
 }

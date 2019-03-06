@@ -2,12 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
 {
     /// <summary>
     /// Configuration 3 Register.
     /// </summary>
-    public class Cnf3
+    public class Cnf3 : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the Cnf3 class.
@@ -30,8 +32,13 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// If CLKEN(CANCTRL[2]) = 0:
         /// Bit is don’t care.
         /// </param>
-        public Cnf3(byte phseg2, byte wakfil, bool sof)
+        public Cnf3(byte phseg2, bool wakfil, bool sof)
         {
+            if (phseg2 > 0b0000_0111)
+            {
+                throw new ArgumentException($"Invalid PHSEG2 value {phseg2}.", nameof(phseg2));
+            }
+
             PhSeg2 = phseg2;
             WakFil = wakfil;
             Sof = sof;
@@ -49,7 +56,7 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// True = Wake-up filter is enabled.
         /// False = Wake-up filter is disabled.
         /// </summary>
-        public byte WakFil { get; set; }
+        public bool WakFil { get; set; }
 
         /// <summary>
         /// Start-of-Frame Signal bit.
@@ -60,5 +67,33 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// Bit is don’t care.
         /// </summary>
         public bool Sof { get; set; }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress() => Address.Cnf3;
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            byte value = 0;
+
+            if (Sof)
+            {
+                value |= 0b1000_0000;
+            }
+
+            if (WakFil)
+            {
+                value |= 0b0100_0000;
+            }
+
+            value |= PhSeg2;
+            return value;
+        }
     }
 }
