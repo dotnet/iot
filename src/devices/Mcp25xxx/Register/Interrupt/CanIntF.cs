@@ -7,7 +7,7 @@ namespace Iot.Device.Mcp25xxx.Register.Interrupt
     /// <summary>
     /// CAN Interrupt Flag Register.
     /// </summary>
-    public class CanIntF
+    public class CanIntF : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the CanIntF class.
@@ -119,5 +119,62 @@ namespace Iot.Device.Mcp25xxx.Register.Interrupt
         /// False = No interrupt pending.
         /// </summary>
         public bool Merrf { get; set; }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress() => Address.CanIntF;
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            byte value = 0;
+
+            if (Rx0If)
+            {
+                value |= 0b0000_0001;
+            }
+
+            if (Rx1If)
+            {
+                value |= 0b0000_0010;
+            }
+
+            if (Tx0If)
+            {
+                value |= 0b0000_0100;
+            }
+
+            if (Tx1If)
+            {
+                value |= 0b0000_1000;
+            }
+
+            if (Tx2If)
+            {
+                value |= 0b0001_0000;
+            }
+
+            if (ErrIf)
+            {
+                value |= 0b0010_0000;
+            }
+
+            if (WakIf)
+            {
+                value |= 0b0100_0000;
+            }
+
+            if (Merrf)
+            {
+                value |= 0b1000_0000;
+            }
+
+            return value;
+        }
     }
 }

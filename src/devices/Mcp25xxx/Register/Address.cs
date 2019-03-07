@@ -406,6 +406,18 @@ namespace Iot.Device.Mcp25xxx.Register
         Eflg = 0x2D,
 
         //
+        // Interrupt Registers.
+        // 
+        /// <summary>
+        /// CAN Interrupt Enable Register.
+        /// </summary>
+        CanIntE = 0x2B,
+        /// <summary>
+        /// CAN Interrupt Flag Register.
+        /// </summary>
+        CanIntF = 0x2C,
+
+        //
         // CAN Control Registers.
         //
         /// <summary>

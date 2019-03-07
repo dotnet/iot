@@ -7,7 +7,7 @@ namespace Iot.Device.Mcp25xxx.Register.Interrupt
     /// <summary>
     /// CAN Interrupt Enable Register.
     /// </summary>
-    public class CanIntE
+    public class CanIntE : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the CanIntE class.
@@ -61,7 +61,7 @@ namespace Iot.Device.Mcp25xxx.Register.Interrupt
             Tx2Ie = tx2ie;
             ErrIe = errie;
             WakIe = wakie;
-            MerrE = merre;
+            Merre = merre;
         }
 
         /// <summary>
@@ -118,6 +118,63 @@ namespace Iot.Device.Mcp25xxx.Register.Interrupt
         /// True = Interrupt on error during message reception or transmission.
         /// False = Disabled.
         /// </summary>
-        public bool MerrE { get; set; }
+        public bool Merre { get; set; }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress() => Address.CanIntE;
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            byte value = 0;
+
+            if (Rx0Ie)
+            {
+                value |= 0b0000_0001;
+            }
+
+            if (Rx1Ie)
+            {
+                value |= 0b0000_0010;
+            }
+
+            if (Tx0Ie)
+            {
+                value |= 0b0000_0100;
+            }
+
+            if (Tx1Ie)
+            {
+                value |= 0b0000_1000;
+            }
+
+            if (Tx2Ie)
+            {
+                value |= 0b0001_0000;
+            }
+
+            if (ErrIe)
+            {
+                value |= 0b0010_0000;
+            }
+
+            if (WakIe)
+            {
+                value |= 0b0100_0000;
+            }
+
+            if (Merre)
+            {
+                value |= 0b1000_0000;
+            }
+
+            return value;
+        }
     }
 }
