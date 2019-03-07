@@ -3,22 +3,20 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device;
 using System.Device.I2c;
 using System.Drawing;
 
 namespace Iot.Device.CharacterLcd
 {
     /// <summary>
-    /// Supports Grove - LCD RGB Backlight (16x2 LCD character display with RGB backlight).
+    /// Supports I2c LCDs with I2c RGB backlight, such as the Grove - LCD RGB Backlight (16x2 LCD character display with RGB backlight).
     /// </summary>
     /// <remarks>
     /// This implementation was drawn from numerous libraries such as Grove_LCD_RGB_Backlight.
     /// </remarks>
-    public class LcdRgb1602 : Hd44780Base, IDisposable
+    public class LcdRgb1602 : Lcd1602
     {
-        private I2cDevice _lcdDevice;
-        private I2cDevice _rgbDevice;
+        private readonly I2cDevice _rgbDevice;
 
         private Color _currentColor;
         private bool _backlightOn = true;
@@ -29,28 +27,11 @@ namespace Iot.Device.CharacterLcd
         /// <param name="lcdDevice">The I2C device to control LCD display.</param>
         /// <param name="rgbDevice">The I2C device to control RGB backlight.</param>
         public LcdRgb1602(I2cDevice lcdDevice, I2cDevice rgbDevice)
-            : base(new Size(16, 2))
+            : base(lcdDevice)
         {
-            _lcdDevice = lcdDevice;
             _rgbDevice = rgbDevice;
 
-            Initialize(Size.Height);
             InitRgb();
-        }
-
-        public void Dispose()
-        {
-            if (_lcdDevice != null)
-            {
-                _lcdDevice.Dispose();
-                _lcdDevice = null;
-            }
-
-            if (_rgbDevice != null)
-            {
-                _rgbDevice.Dispose();
-                _rgbDevice = null;
-            }
         }
 
         /// <summary>
@@ -58,20 +39,11 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         public override bool BacklightOn
         {
-            get { return _backlightOn; }
-
+            get => _backlightOn;
             set
             {
+                ForceSetBacklightColor(value ? _currentColor : Color.Black);
                 _backlightOn = value;
-
-                if (_backlightOn)
-                {
-                    ForceSetBacklightColor(_currentColor);
-                }
-                else
-                {
-                    ForceSetBacklightColor(Color.Black);
-                }
             }
         }
 
@@ -82,7 +54,7 @@ namespace Iot.Device.CharacterLcd
         /// <param name="value">The register value.</param>
         private void SetRgbRegister(RgbRegisters addr, byte value)
         {
-            Span<byte> dataToSend = stackalloc byte[2] { (byte)addr, value };
+            Span<byte> dataToSend = stackalloc byte[] { (byte)addr, value };
             _rgbDevice.Write(dataToSend);
         }
 
@@ -116,30 +88,6 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <summary>
-        /// Send a data or command byte to the controller.
-        /// </summary>
-        /// <param name="data">True to send data, otherwise sends a command.</param>
-        protected override void Send(byte value, bool data = false)
-        {
-            Span<byte> dataToSend = stackalloc byte[2] { data ? (byte)0x40 : (byte)0x80, (byte)value };
-            _lcdDevice.Write(dataToSend);
-        }
-
-        /// <summary>
-        /// Initializes the bit mode settings.
-        /// </summary>
-        protected override void InitializeBitMode()
-        {
-            // Init to 8 bit mode
-            DelayHelper.DelayMilliseconds(50, allowThreadYield: true);
-            Send(0b0011_0000);
-            DelayHelper.DelayMilliseconds(5, allowThreadYield: true);
-            Send(0b0011_0000);
-            DelayHelper.DelayMicroseconds(100, allowThreadYield: true);
-            Send(0b0011_0000);
-        }
-
-        /// <summary>
         /// Sets the backlight color.
         /// The action will be ignored in case of the backlight is disabled.
         /// </summary>
@@ -153,6 +101,12 @@ namespace Iot.Device.CharacterLcd
 
             ForceSetBacklightColor(color);
             _currentColor = color;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _rgbDevice?.Dispose();
+            base.Dispose(disposing);
         }
     }
 }
