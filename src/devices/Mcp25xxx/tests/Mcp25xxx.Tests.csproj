@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Register\CanControl\" />
     <Folder Include="Register\ErrorDetection\" />
     <Folder Include="Register\Interrupt\" />
     <Folder Include="Register\MessageReceive\" />

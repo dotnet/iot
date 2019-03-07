@@ -2,12 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Iot.Device.Mcp25xxx.Tests.Register.CanControl;
+
 namespace Iot.Device.Mcp25xxx.Register.CanControl
 {
     /// <summary>
     /// CAN Status Register.
     /// </summary>
-    public class CanStat
+    public class CanStat : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the CanStat class.
@@ -40,50 +42,23 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
             /// <summary>
             /// TXB0 interrupt.
             /// </summary>
-            TXB0 = 3,
+            TxB0 = 3,
             /// <summary>
             /// TXB1 interrupt.
             /// </summary>
-            TXB1 = 4,
+            TxB1 = 4,
             /// <summary>
             /// TXB2 interrupt.
             /// </summary>
-            TXB2 = 5,
+            TxB2 = 5,
             /// <summary>
             /// RXB0 interrupt.
             /// </summary>
-            RXB0 = 6,
+            RxB0 = 6,
             /// <summary>
             /// RXB1 interrupt.
             /// </summary>
-            RXB1 = 7
-        }
-
-        /// <summary>
-        /// Operation Mode.
-        /// </summary>
-        public enum OperationMode
-        {
-            /// <summary>
-            /// Device is in the Normal Operation mode.
-            /// </summary>
-            NormalOperation = 0,
-            /// <summary>
-            /// Device is in Sleep mode.
-            /// </summary>
-            Sleep = 1,
-            /// <summary>
-            /// Device is in Loopback mode.
-            /// </summary>
-            Loopback = 2,
-            /// <summary>
-            /// Device is in Listen-Only mode.
-            /// </summary>
-            ListenOnly = 3,
-            /// <summary>
-            /// Device is in Configuration mode.
-            /// </summary>
-            Configuration = 4
+            RxB1 = 7
         }
 
         /// <summary>
@@ -95,5 +70,22 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         /// Operation Mode bits.
         /// </summary>
         public OperationMode OpMod { get; set; }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress() => Address.CanStat;
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            byte value = (byte)((byte)OpMod << 5);
+            value |= (byte)((byte)Icod << 1);
+            return value;
+        }
     }
 }

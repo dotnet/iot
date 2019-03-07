@@ -2,18 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Iot.Device.Mcp25xxx.Tests.Register.CanControl;
+
 namespace Iot.Device.Mcp25xxx.Register.CanControl
 {
     /// <summary>
     /// CAN Control Register.
     /// </summary>
-    public class CanCtrl
+    public class CanCtrl : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the CanCtrl class.
         /// </summary>
-        /// <param name="clkpre">CLKOUT Pin Prescaler bits.</param>
-        /// <param name="clken">
+        /// <param name="clkPre">CLKOUT Pin Prescaler bits.</param>
+        /// <param name="clkEn">
         /// CLKOUT Pin Enable bit.
         /// True = CLKOUT pin is enabled.
         /// False = CLKOUT pin is disabled(pin is in a high-impedance state).
@@ -28,14 +30,19 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         /// True = Requests abort of all pending transmit buffers.
         /// False = Terminates request to abort all transmissions.
         /// </param>
-        /// <param name="reqop">Request Operation mode bits.</param>
-        public CanCtrl(ClkOutPinPrescaler clkpre, bool clken, bool osm, bool abat, RequestOperationMode reqop)
+        /// <param name="reqOp">Request Operation mode bits.</param>
+        public CanCtrl(
+            ClkOutPinPrescaler clkPre,
+            bool clkEn,
+            bool osm,
+            bool abat,
+            OperationMode reqOp)
         {
-            ClkPre = clkpre;
-            ClkEn = clken;
+            ClkPre = clkPre;
+            ClkEn = clkEn;
             Osm = osm;
             Abat = abat;
-            ReqOp = reqop;
+            ReqOp = reqOp;
         }
 
         /// <summary>
@@ -54,38 +61,11 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
             /// <summary>
             /// FCLKOUT = System Clock/4.
             /// </summary>
-            ClockDivideBy4 = 3,
+            ClockDivideBy4 = 2,
             /// <summary>
             /// FCLKOUT = System Clock/8.
             /// </summary>
-            ClockDivideBy8 = 4 
-        }
-
-        /// <summary>
-        /// Request Operation mode.
-        /// </summary>
-        public enum RequestOperationMode
-        {
-            /// <summary>
-            /// Sets Normal Operation mode.
-            /// </summary>
-            NormalOperation = 0,
-            /// <summary>
-            /// Sets Sleep mode.
-            /// </summary>
-            Sleep = 1,
-            /// <summary>
-            /// Sets Loopback mode.
-            /// </summary>
-            Loopback = 2,
-            /// <summary>
-            /// Sets Listen-Only mode.
-            /// </summary>
-            ListenOnly = 3,
-            /// <summary>
-            /// Sets Configuration mode.
-            /// </summary>
-            Configuration = 4
+            ClockDivideBy8 = 3
         }
 
         /// <summary>
@@ -117,6 +97,39 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         /// <summary>
         /// Request Operation mode bits.
         /// </summary>
-        public RequestOperationMode ReqOp { get; set; }
+        public OperationMode ReqOp { get; set; }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress() => Address.CanCtrl;
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            byte value = (byte)((byte)ReqOp << 5);
+
+            if (Abat)
+            {
+                value |= 0b0001_0000;
+            }
+
+            if (Osm)
+            {
+                value |= 0b0000_1000;
+            }
+
+            if (ClkEn)
+            {
+                value |= 0b0000_0100;
+            }
+
+            value |= (byte)ClkPre;
+            return value;
+        }
     }
 }
