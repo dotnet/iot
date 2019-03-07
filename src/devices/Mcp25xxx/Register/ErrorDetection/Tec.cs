@@ -7,7 +7,7 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
     /// <summary>
     /// Transmit Error Counter Register.
     /// </summary>
-    public class Tec
+    public class Tec : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the Tec class.
@@ -22,5 +22,20 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         /// Transmit Error Count bits.
         /// </summary>
         public byte Data { get; set; }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress() => Address.Tec;
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            return Data;
+        }
     }
 }

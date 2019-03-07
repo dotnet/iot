@@ -7,7 +7,7 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
     /// <summary>
     /// Error Flag Register.
     /// </summary>
-    public class Eflg
+    public class Eflg : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the Eflg class.
@@ -119,5 +119,62 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         /// Must be reset by MCU.
         /// </summary>
         public bool Rx1Ovr { get; set; }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress() => Address.Eflg;
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            byte value = 0;
+
+            if (Ewarn)
+            {
+                value |= 0b0000_0001;
+            }
+
+            if (RxWar)
+            {
+                value |= 0b0000_0010;
+            }
+
+            if (TxWar)
+            {
+                value |= 0b0000_0100;
+            }
+
+            if (RxEp)
+            {
+                value |= 0b0000_1000;
+            }
+
+            if (TxEp)
+            {
+                value |= 0b0001_0000;
+            }
+
+            if (TxBo)
+            {
+                value |= 0b0010_0000;
+            }
+
+            if (Rx0Ovr)
+            {
+                value |= 0b0100_0000;
+            }
+
+            if (Rx1Ovr)
+            {
+                value |= 0b1000_0000;
+            }
+
+            return value;
+        }
     }
 }
