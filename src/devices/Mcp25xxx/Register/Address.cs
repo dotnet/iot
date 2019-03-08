@@ -189,6 +189,10 @@ namespace Iot.Device.Mcp25xxx.Register
         // Message Receive Registers.
         //
         /// <summary>
+        /// RxnBF Pin Control and Status Register.
+        /// </summary>
+        BfpCtrl = 0x0C,
+        /// <summary>
         /// Receive Buffer 0 Control Register.
         /// </summary>
         RxB0Ctrl = 0x60,
@@ -213,6 +217,38 @@ namespace Iot.Device.Mcp25xxx.Register
         /// </summary>
         RxB0Dlc = 0x65,
         /// <summary>
+        /// Receive Buffer 0 Data Byte 0 Register.
+        /// </summary>
+        RxB0D0 = 0x66,
+        /// <summary>
+        /// Receive Buffer 0 Data Byte 1 Register.
+        /// </summary>
+        RxB0D1 = 0x67,
+        /// <summary>
+        /// Receive Buffer 0 Data Byte 2 Register.
+        /// </summary>
+        RxB0D2 = 0x68,
+        /// <summary>
+        /// Receive Buffer 0 Data Byte 3 Register.
+        /// </summary>
+        RxB0D3 = 0x69,
+        /// <summary>
+        /// Receive Buffer 0 Data Byte 4 Register.
+        /// </summary>
+        RxB0D4 = 0x6A,
+        /// <summary>
+        /// Receive Buffer 0 Data Byte 5 Register.
+        /// </summary>
+        RxB0D5 = 0x6B,
+        /// <summary>
+        /// Receive Buffer 0 Data Byte 6 Register.
+        /// </summary>
+        RxB0D6 = 0x6C,
+        /// <summary>
+        /// Receive Buffer 0 Data Byte 7 Register.
+        /// </summary>
+        RxB0D7 = 0x6D,
+        /// <summary>
         /// Receive Buffer 1 Control Register.
         /// </summary>
         RxB1Ctrl = 0x70,
@@ -231,15 +267,43 @@ namespace Iot.Device.Mcp25xxx.Register
         /// <summary>
         /// Receive Buffer 1 Extended Identifier Low Register.
         /// </summary>
-        RxB2Eid0 = 0x74,
+        RxB1Eid0 = 0x74,
         /// <summary>
         /// Receive Buffer 1 Data Length Code Register.
         /// </summary>
         RxB1Dlc = 0x75,
         /// <summary>
-        /// RxnBF Pin Control and Status Register.
+        /// Receive Buffer 1 Data Byte 0 Register.
         /// </summary>
-        BfbCtrl = 0x0C,
+        RxB1D0 = 0x76,
+        /// <summary>
+        /// Receive Buffer 1 Data Byte 1 Register.
+        /// </summary>
+        RxB1D1 = 0x77,
+        /// <summary>
+        /// Receive Buffer 1 Data Byte 2 Register.
+        /// </summary>
+        RxB1D2 = 0x78,
+        /// <summary>
+        /// Receive Buffer 1 Data Byte 3 Register.
+        /// </summary>
+        RxB1D3 = 0x79,
+        /// <summary>
+        /// Receive Buffer 1 Data Byte 4 Register.
+        /// </summary>
+        RxB1D4 = 0x7A,
+        /// <summary>
+        /// Receive Buffer 1 Data Byte 5 Register.
+        /// </summary>
+        RxB1D5 = 0x7B,
+        /// <summary>
+        /// Receive Buffer 1 Data Byte 6 Register.
+        /// </summary>
+        RxB1D6 = 0x7C,
+        /// <summary>
+        /// Receive Buffer 1 Data Byte 7 Register.
+        /// </summary>
+        RxB1D7 = 0x7D,
 
         //
         // Acceptance Filter Registers.

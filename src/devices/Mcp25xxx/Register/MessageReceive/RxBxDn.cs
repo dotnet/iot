@@ -2,12 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 namespace Iot.Device.Mcp25xxx.Register.MessageReceive
 {
     /// <summary>
     /// Receive Buffer Data Byte Register.
     /// </summary>
-    public class RxBxDn
+    public class RxBxDn : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the RxBxDn class.
@@ -15,12 +17,14 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <param name="rxBufferNumber">Receive Buffer Number.</param>
         /// <param name="index">Index of data.  Must be a value of 0 - 7.</param>
         /// <param name="data">Receive Buffer Data Field Bytes.</param>
-        public RxBxDn(RxBufferNumber rxBufferNumber, int index, byte data)
+        public RxBxDn(RxBufferNumber rxBufferNumber, byte index, byte data)
         {
+            if (index > 7)
+            {
+                throw new ArgumentException($"Invalid Index value {index}.", nameof(index));
+            }
+
             RxBufferNumber = rxBufferNumber;
-
-            // TODO: Add range check.
-
             Index = index;
             Data = data;
         }
@@ -33,11 +37,66 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Index of data.  Must be a value of 0 - 7.
         /// </summary>
-        public int Index { get; }
+        public byte Index { get; }
 
         /// <summary>
         /// Receive Buffer Data Field Bytes.
         /// </summary>
         public byte Data { get; }
+
+        /// <summary>
+        /// Gets the Rx Buffer Number based on the register address.
+        /// </summary>
+        /// <param name="address">The address to look up Rx Buffer Number.</param>
+        /// <returns>The Rx Buffer Number based on the register address.</returns>
+        public static RxBufferNumber GetRxBufferNumber(Address address)
+        {
+            switch (address)
+            {
+                case Address.RxB0D0:
+                case Address.RxB0D1:
+                case Address.RxB0D2:
+                case Address.RxB0D3:
+                case Address.RxB0D4:
+                case Address.RxB0D5:
+                case Address.RxB0D6:
+                case Address.RxB0D7:
+                    return RxBufferNumber.Zero;
+                case Address.RxB1D0:
+                case Address.RxB1D1:
+                case Address.RxB1D2:
+                case Address.RxB1D3:
+                case Address.RxB1D4:
+                case Address.RxB1D5:
+                case Address.RxB1D6:
+                case Address.RxB1D7:
+                    return RxBufferNumber.One;
+                default:
+                    throw new ArgumentException("Invalid address.", nameof(address));
+            }
+        }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress()
+        {
+            switch (RxBufferNumber)
+            {
+                case RxBufferNumber.Zero:
+                    return (Address)((byte)Address.RxB0D0 + Index);
+                case RxBufferNumber.One:
+                    return (Address)((byte)Address.RxB1D0 + Index);
+                default:
+                    throw new ArgumentException("Invalid Rx Bufferer Number.", nameof(RxBufferNumber));
+            }
+        }
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte() => Data;
     }
 }

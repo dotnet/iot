@@ -7,7 +7,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
     /// <summary>
     /// RxnBF Pin Control and Status Register.
     /// </summary>
-    public class BfpCtrl
+    public class BfpCtrl : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the BfpCtrl class.
@@ -89,5 +89,52 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// Reads as '0' when Rx1BF is configured as an interrupt pin.
         /// </summary>
         public bool B1Bfs { get; set; }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress() => Address.BfpCtrl;
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            byte value = 0;
+
+            if (B0Bfm)
+            {
+                value |= 0b0000_0001;
+            }
+
+            if (B1Bfm)
+            {
+                value |= 0b0000_0010;
+            }
+
+            if (B0Bfe)
+            {
+                value |= 0b0000_0100;
+            }
+
+            if (B1Bfe)
+            {
+                value |= 0b0000_1000;
+            }
+
+            if (B0Bfs)
+            {
+                value |= 0b0001_0000;
+            }
+
+            if (B1Bfs)
+            {
+                value |= 0b0010_0000;
+            }
+
+            return value;
+        }
     }
 }

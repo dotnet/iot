@@ -7,7 +7,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
     /// <summary>
     /// Receive Buffer 0 Control Register.
     /// </summary>
-    public class RxB0Ctrl
+    public class RxB0Ctrl : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the RxB0Ctrl class.
@@ -28,37 +28,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// False = No Remote Transfer Request received.
         /// </param>
         /// <param name="rxm">Receive Buffer Operating mode bits.</param>
-        public RxB0Ctrl(bool filhit0, bool bukt, bool rxrtr, ReceiveBufferOperatingMode rxm)
+        public RxB0Ctrl(bool filhit0, bool bukt, bool rxrtr, OperatingMode rxm)
         {
             FilHit0 = filhit0;
             Bukt = bukt;
             RxRtr = rxrtr;
             Rxm = rxm;
-        }
-
-        /// <summary>
-        /// Receive Buffer Operating mode bits.
-        /// </summary>
-        public enum ReceiveBufferOperatingMode
-        {
-            /// <summary>
-            /// Receives all valid messages using either Standard or Extended Identifiers that meet filter criteria;
-            /// Extended ID Filter registers, RXFxEID8 and RXFxEID0, are applied to the first two bytes of data in
-            /// the messages with standard IDs.
-            /// </summary>
-            ReceivesAllValidMessages = 0,
-            /// <summary>
-            /// Reserved.
-            /// </summary>
-            Reserved1 = 1,
-            /// <summary>
-            /// Reserved.
-            /// </summary>
-            Reserved2 = 2,
-            /// <summary>
-            /// Turns mask/filters off; receives any message.
-            /// </summary>
-            TurnsMaskFiltersOff = 3
         }
 
         /// <summary>
@@ -71,7 +46,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Read-Only copy of BUKT bit (used internally by the MCP25625).
         /// </summary>
-        public bool BUKT1 => Bukt;
+        public bool Bukt1 => Bukt;
 
         /// <summary>
         /// Rollover Enable bit.
@@ -90,6 +65,43 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Receive Buffer Operating mode bits.
         /// </summary>
-        public ReceiveBufferOperatingMode Rxm { get; set; }
+        public OperatingMode Rxm { get; set; }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress() => Address.RxB0Ctrl;
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            byte value = (byte)((byte)Rxm << 5);
+
+            if (RxRtr)
+            {
+                value |= 0b0000_1000;
+            }
+
+            if (Bukt)
+            {
+                value |= 0b0000_0100;
+            }
+
+            if (Bukt1)
+            {
+                value |= 0b0000_0010;
+            }
+
+            if (FilHit0)
+            {
+                value |= 0b0000_0001;
+            }
+
+            return value;
+        }
     }
 }
