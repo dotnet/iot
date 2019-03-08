@@ -3,11 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device.Spi;
 using Xunit;
 
 namespace Iot.Device.Mcp23xxx.Tests
 {
-    public class RegisterTests
+    public class RegisterTests : Mcp23xxxTest
     {
         [Theory]
         // Port A; Bank 0
@@ -48,8 +49,8 @@ namespace Iot.Device.Mcp23xxx.Tests
         [InlineData(Register.OLAT, Port.PortB, BankStyle.Sequential, 0x15)]
         // Port B; Bank 1
         [InlineData(Register.IODIR, Port.PortB, BankStyle.Separated, 0x010)]
-        [InlineData(Register.IPOL, Port.PortB, BankStyle.Separated, 0x011)]
-        [InlineData(Register.GPINTEN, Port.PortB, BankStyle.Separated, 0x012)]
+        [InlineData(Register.IPOL, Port.PortB, BankStyle.Separated, 0x11)]
+        [InlineData(Register.GPINTEN, Port.PortB, BankStyle.Separated, 0x12)]
         [InlineData(Register.DEFVAL, Port.PortB, BankStyle.Separated, 0x13)]
         [InlineData(Register.INTCON, Port.PortB, BankStyle.Separated, 0x14)]
         [InlineData(Register.IOCON, Port.PortB, BankStyle.Separated, 0x15)]
@@ -60,42 +61,24 @@ namespace Iot.Device.Mcp23xxx.Tests
         [InlineData(Register.OLAT, Port.PortB, BankStyle.Separated, 0x1A)]
         public void Get_Mapped_Address(Register register, Port port, BankStyle bankStyle, byte expectedMappedAddress)
         {
-            TestMappedBus bus = new TestMappedBus();
-            McpMock mock = new McpMock(bus, bankStyle);
-            mock.Write(register, port);
-            Assert.Equal(expectedMappedAddress, bus.LastAddress);
+            SpiDeviceMock spiDeviceMock = new SpiDeviceMock(ports: 2);
+            BankStyleMock mock = new BankStyleMock(spiDeviceMock, bankStyle);
+            mock.Read(register, port);
+
+            // Reads are full duplex- commands go to "Write"
+            Assert.Equal(expectedMappedAddress, spiDeviceMock.DeviceMock.LastWriteBuffer[0]);
         }
 
-        private class McpMock : Mcp23xxx
+        private class BankStyleMock : Mcp23xxx
         {
-            public McpMock(IBusDevice device, BankStyle bankStyle)
-                : base(device, 0x20, bankStyle: bankStyle)
+            public BankStyleMock(SpiDevice device, BankStyle bankStyle)
+                : base(new SpiAdapter(device, 0x20), bankStyle: bankStyle)
             {
-
             }
 
-            public void Write(Register register, Port port) => InternalWriteByte(register, 0xFE, port);
+            public byte Read(Register register, Port port) => InternalReadByte(register, port);
 
             public override int PinCount => 16;
-        }
-
-        private class TestMappedBus : IBusDevice
-        {
-            public void Dispose()
-            {
-            }
-
-            public byte LastAddress { get; private set; }
-
-            public void Read(byte registerAddress, Span<byte> buffer)
-            {
-                LastAddress = registerAddress;
-            }
-
-            public void Write(byte registerAddress, Span<byte> data)
-            {
-                LastAddress = registerAddress;
-            }
         }
     }
 }

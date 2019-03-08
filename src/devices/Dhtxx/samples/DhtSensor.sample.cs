@@ -7,6 +7,7 @@ using Iot.Device.DHTxx;
 using System.Diagnostics;
 using System.Device.Gpio;
 using System.Threading;
+using Iot.Units;
 
 class Program
 {
@@ -23,16 +24,16 @@ class Program
             // First way to read the data
             bool readret = dht.ReadData();
             if (readret)
-                Console.WriteLine($"Temperature: {dht.Temperature.ToString("0.00")} °C, Humidity: {dht.Humidity.ToString("0.00")} %");
+                Console.WriteLine($"Temperature: {dht.Temperature.Celsius.ToString("0.00")} °C, Humidity: {dht.Humidity.ToString("0.00")} %");
             else
                 Console.WriteLine("Error reading the sensor");
             Thread.Sleep(1000);
             
             // Second way to read the data
-            double Temp;
+            Temperature Temp;
             double Hum;
             if (dht.TryGetTemperatureAndHumidity(out Temp, out Hum))
-                Console.WriteLine($"Temperature: {Temp.ToString("0.00")} °C, Humidity: {Hum.ToString("0.00")} %");
+                Console.WriteLine($"Temperature: {Temp.Celsius.ToString("0.00")} °C, Humidity: {Hum.ToString("0.00")} %");
             else
                 Console.WriteLine("Error reading the sensor");
             Thread.Sleep(1000);

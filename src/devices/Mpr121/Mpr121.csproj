@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <!--Disabling default items so samples source won't get build by the main library-->
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Channels.cs" />
+    <Compile Include="ChannelStatusesChangedEventArgs.cs" />
+    <Compile Include="Mpr121.cs" />
+    <Compile Include="Mpr121Configuration.cs" />
+    <Compile Include="Registers.cs" />
+    <None Include="README.md" />
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+  </ItemGroup>
+
+</Project>

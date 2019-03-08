@@ -7,7 +7,7 @@ namespace Iot.Device.Max7219
     /// <summary>
     /// Register of the Max7219 Display Driver
     /// </summary>
-    public enum Register : byte
+    internal enum Register : byte
     {
         NOOP = 0x0,
         DIGIT0 = 0x1,
