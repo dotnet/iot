@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <!-- This is set to false by default when using the compilers' NuGet package. -->
+    <UseSharedCompilation>true</UseSharedCompilation>
+
+    <CompilerVersion>3.1.0-beta1-19127-06</CompilerVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="$(CompilerVersion)" IsImplicitlyDefined="true" />
+  </ItemGroup>
+</Project>
