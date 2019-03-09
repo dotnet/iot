@@ -7,7 +7,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
     /// <summary>
     /// TxnRTS Pin Control and Status Register.
     /// </summary>
-    public class TxRtsCtrl
+    public class TxRtsCtrl : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the TxRtsCtrl class.
@@ -93,5 +93,52 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Reads as '0' when pin is in 'Request-to-Send' mode.
         /// </summary>
         public bool B2Rts { get; set; }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress() => Address.TxRtsCtrl;
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            byte value = 0;
+
+            if (B2Rts)
+            {
+                value |= 0b0010_0000;
+            }
+
+            if (B1Rts)
+            {
+                value |= 0b0001_0000;
+            }
+
+            if (B0Rts)
+            {
+                value |= 0b0000_1000;
+            }
+
+            if (B2Rtsm)
+            {
+                value |= 0b0000_0100;
+            }
+
+            if (B1Rtsm)
+            {
+                value |= 0b0000_0010;
+            }
+
+            if (B0Rtsm)
+            {
+                value |= 0b0000_0001;
+            }
+
+            return value;
+        }
     }
 }

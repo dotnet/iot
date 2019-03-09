@@ -2,12 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
 {
     /// <summary>
     /// Transmit Buffer Data Byte Register.
     /// </summary>
-    public class TxBxDn
+    public class TxBxDn : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the TxBxDn class.
@@ -17,9 +19,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <param name="data">Transmit Buffer Data Field Bytes.</param>
         public TxBxDn(TxBufferNumber txBufferNumber, int index, byte data)
         {
-            TxBufferNumber = txBufferNumber;
-            // TODO: Add range check.
+            if (index > 7)
+            {
+                throw new ArgumentException($"Invalid Index value {index}.", nameof(index));
+            }
 
+            TxBufferNumber = txBufferNumber;
             Index = index;
             Data = data;
         }
@@ -38,5 +43,60 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Transmit Buffer Data Field Bytes.
         /// </summary>
         public byte Data { get; }
+
+        /// <summary>
+        /// Gets the Tx Buffer Number based on the register address.
+        /// </summary>
+        /// <param name="address">The address to look up Tx Buffer Number.</param>
+        /// <returns>The Tx Buffer Number based on the register address.</returns>
+        public static TxBufferNumber GetTxBufferNumber(Address address)
+        {
+            switch (address)
+            {
+                case Address.TxB0D0:
+                case Address.TxB0D1:
+                case Address.TxB0D2:
+                case Address.TxB0D3:
+                case Address.TxB0D4:
+                case Address.TxB0D5:
+                case Address.TxB0D6:
+                case Address.TxB0D7:
+                    return TxBufferNumber.Zero;
+                case Address.TxB1D0:
+                case Address.TxB1D1:
+                case Address.TxB1D2:
+                case Address.TxB1D3:
+                case Address.TxB1D4:
+                case Address.TxB1D5:
+                case Address.TxB1D6:
+                case Address.TxB1D7:
+                    return TxBufferNumber.One;
+                default:
+                    throw new ArgumentException("Invalid address.", nameof(address));
+            }
+        }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress()
+        {
+            switch (TxBufferNumber)
+            {
+                case TxBufferNumber.Zero:
+                    return (Address)((byte)Address.TxB0D0 + Index);
+                case TxBufferNumber.One:
+                    return (Address)((byte)Address.TxB1D0 + Index);
+                default:
+                    throw new ArgumentException("Invalid Tx Bufferer Number.", nameof(TxBufferNumber));
+            }
+        }
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte() => Data;
     }
 }

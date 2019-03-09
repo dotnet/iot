@@ -2,12 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
 {
     /// <summary>
     /// Transmit Buffer Control Register.
     /// </summary>
-    public class TxBxCtrl
+    public class TxBxCtrl : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the TxBxCtrl class.
@@ -43,7 +45,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
             bool abtf)
         {
             TxBufferNumber = txBufferNumber;
-            TXP = txp;
+            Txp = txp;
             TxReq = txreq;
             TxErr = txerr;
             Mloa = mloa;
@@ -81,7 +83,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Transmit Buffer Priority bits.
         /// </summary>
-        public TransmitBufferPriority TXP { get; set; }
+        public TransmitBufferPriority Txp { get; set; }
 
         /// <summary>
         /// Message Transmit Request bit.
@@ -110,5 +112,76 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// False = Message completed transmission successfully.
         /// </summary>
         public bool Abtf { get; set; }
+
+        /// <summary>
+        /// Gets the Tx Buffer Number based on the register address.
+        /// </summary>
+        /// <param name="address">The address to look up Tx Buffer Number.</param>
+        /// <returns>The Tx Buffer Number based on the register address.</returns>
+        public static TxBufferNumber GetTxBufferNumber(Address address)
+        {
+            switch (address)
+            {
+                case Address.TxB0Ctrl:
+                    return TxBufferNumber.Zero;
+                case Address.TxB1Ctrl:
+                    return TxBufferNumber.One;
+                case Address.TxB2Ctrl:
+                    return TxBufferNumber.Two;
+                default:
+                    throw new ArgumentException("Invalid address.", nameof(address));
+            }
+        }
+
+        /// <summary>
+        /// Gets the address of the register.
+        /// </summary>
+        /// <returns>The address of the register.</returns>
+        public Address GetAddress()
+        {
+            switch (TxBufferNumber)
+            {
+                case TxBufferNumber.Zero:
+                    return Address.TxB0Ctrl;
+                case TxBufferNumber.One:
+                    return Address.TxB1Ctrl;
+                case TxBufferNumber.Two:
+                    return Address.TxB2Ctrl;
+                default:
+                    throw new ArgumentException("Invalid Tx Buffer Number.", nameof(TxBufferNumber));
+            }
+        }
+
+        /// <summary>
+        /// Converts register contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the register contents.</returns>
+        public byte ToByte()
+        {
+            byte value = 0;
+
+            if (Abtf)
+            {
+                value |= 0b0100_0000;
+            }
+
+            if (Mloa)
+            {
+                value |= 0b0010_0000;
+            }
+
+            if (TxErr)
+            {
+                value |= 0b0001_0000;
+            }
+
+            if (TxReq)
+            {
+                value |= 0b0000_1000;
+            }
+
+            value |= (byte)Txp;
+            return value;
+        }
     }
 }
