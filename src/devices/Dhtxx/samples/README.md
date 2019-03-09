@@ -34,7 +34,7 @@ if (readret)
 The second way, use the ```TryGet```functions. they'll return ```true``` if a read has been successful and output the temperature and/or humidity.
 
 ```csharp
-double Temp;
+Temperature Temp;
 double Humidity;
 if (dht.TryGetTemperatureAndHumidity(out Temp, out Humidity))
 {
@@ -42,7 +42,7 @@ if (dht.TryGetTemperatureAndHumidity(out Temp, out Humidity))
 }
 ```
 
-Note: temperature is in Celsius and humidity is in relative percentage air humidity. Humidity is a value between 0.0 and 100.0. 100.0 represents 100% humidity in the air.
+Note: Humidity is in relative percentage air humidity. Humidity is a value between 0.0 and 100.0. 100.0 represents 100% humidity in the air.
 
 Here is a full example:
 
@@ -52,6 +52,8 @@ using Iot.Device.DHTxx;
 using System.Diagnostics;
 using System.Device.Gpio;
 using System.Threading;
+using Iot.Units;
+
 class Program
 {
     static void Main(string[] args)
@@ -64,16 +66,16 @@ class Program
             // First way to read the data
             bool readret = dht.ReadData();
             if (readret)
-                Console.WriteLine($"Temperature: {dht.Temperature.ToString("0.00")} °C, Humidity: {dht.Humidity.ToString("0.00")} %");
+                Console.WriteLine($"Temperature: {dht.Temperature.Celsius.ToString("0.00")} °C, Humidity: {dht.Humidity.ToString("0.00")} %");
             else
                 Console.WriteLine("Error reading the sensor");
             Thread.Sleep(1000);
             
             // Second way to read the data
-            double Temp;
+            Temperature Temp;
             double Hum;
             if (dht.TryGetTemperatureAndHumidity(out Temp, out Hum))
-                Console.WriteLine($"Temperature: {Temp.ToString("0.00")} °C, Humidity: {Hum.ToString("0.00")} %");
+                Console.WriteLine($"Temperature: {Temp.Celsius.ToString("0.00")} °C, Humidity: {Hum.ToString("0.00")} %");
             else
                 Console.WriteLine("Error reading the sensor");
             Thread.Sleep(1000);

@@ -12,6 +12,16 @@ namespace Iot.Device.Max7219
         private SpiDevice _spiDevice;
 
         /// <summary>
+        /// MAX7219 Spi Clock Frequency
+        /// </summary>
+        public const int SpiClockFrequency = 10_000_000;
+
+        /// <summary>
+        /// MAX7219 SPI Mode
+        /// </summary>
+        public const SpiMode SpiMode = System.Device.Spi.SpiMode.Mode0;
+
+        /// <summary>
         /// Number of digits Register per Module
         /// </summary>
         public const int NumDigits = 8;
@@ -70,7 +80,7 @@ namespace Iot.Device.Max7219
         /// <summary>
         /// Sends data to a specific register replicated for all cascaded devices
         /// </summary>
-        public void SetRegister(Register register, byte data)
+        internal void SetRegister(Register register, byte data)
         {
             var i = 0;
             for (byte deviceId = 0; deviceId < CascadedDevices; deviceId++)
@@ -93,7 +103,7 @@ namespace Iot.Device.Max7219
         }
 
         /// <summary>
-        /// Sets the brightness of all cascaded devices to the same intensity level. 
+        /// Sets the brightness of all cascaded devices to the same intensity level.
         /// </summary>
         /// <param name="intensity">intensity level ranging from 0..15. </param>
         public void Brightness(int intensity)
@@ -199,7 +209,7 @@ namespace Iot.Device.Max7219
         }
 
         /// <summary>
-        /// Writes a two dimensional buffer containing all the values to the devices 
+        /// Writes a two dimensional buffer containing all the values to the devices
         /// rotating values by 180 degree.
         /// </summary>
         private void WriteBufferRotateHalf(byte[,] buffer)
@@ -222,7 +232,7 @@ namespace Iot.Device.Max7219
         }
 
         /// <summary>
-        /// Writes a two dimensional buffer containing all the values to the devices 
+        /// Writes a two dimensional buffer containing all the values to the devices
         /// rotating values to the right.
         /// </summary>
         private void WriteBufferRotateRight(byte[,] buffer)
@@ -249,7 +259,7 @@ namespace Iot.Device.Max7219
         }
 
         /// <summary>
-        /// Writes a two dimensional buffer containing all the values to the devices 
+        /// Writes a two dimensional buffer containing all the values to the devices
         /// rotating values to the left.
         /// </summary>
         private void WriteBufferRotateLeft(byte[,] buffer)
