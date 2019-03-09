@@ -32,6 +32,19 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// </summary>
         public byte Eid { get; set; }
 
+        private Address GetAddress()
+        {
+            switch (RxMaskNumber)
+            {
+                case RxMaskNumber.Zero:
+                    return Address.RxM0Eid0;
+                case RxMaskNumber.One:
+                    return Address.RxM1Eid0;
+                default:
+                    throw new ArgumentException("Invalid Rx Mask Number.", nameof(RxMaskNumber));
+            }
+        }
+
         /// <summary>
         /// Gets the Rx Mask Number based on the register address.
         /// </summary>
@@ -54,18 +67,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Gets the address of the register.
         /// </summary>
         /// <returns>The address of the register.</returns>
-        public Address GetAddress()
-        {
-            switch (RxMaskNumber)
-            {
-                case RxMaskNumber.Zero:
-                    return Address.RxM0Eid0;
-                case RxMaskNumber.One:
-                    return Address.RxM1Eid0;
-                default:
-                    throw new ArgumentException("Invalid Rx Mask Number.", nameof(RxMaskNumber));
-            }
-        }
+        public Address Address => GetAddress();
 
         /// <summary>
         /// Converts register contents to a byte.

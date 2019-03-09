@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.CanControl
         [Fact]
         public void Get_Address()
         {
-            Assert.Equal(Address.CanStat, new CanStat(InterruptFlagCode.No, OperationMode.NormalOperation).GetAddress());
+            Assert.Equal(Address.CanStat, new CanStat(InterruptFlagCode.No, OperationMode.NormalOperation).Address);
         }
 
         [Theory]

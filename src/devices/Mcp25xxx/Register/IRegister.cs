@@ -10,7 +10,7 @@ namespace Iot.Device.Mcp25xxx.Register
         /// Gets the address of the register.
         /// </summary>
         /// <returns>The address of the register.</returns>
-        Address GetAddress();
+        Address Address { get; }
 
         /// <summary>
         /// Converts register contents to a byte.

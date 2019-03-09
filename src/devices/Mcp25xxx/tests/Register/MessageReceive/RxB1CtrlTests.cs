@@ -13,7 +13,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
         [Fact]
         public void Get_Address()
         {
-            Assert.Equal(Address.RxB1Ctrl, new RxB1Ctrl(RxB1Ctrl.FilterHit.Filter0, false, OperatingMode.ReceivesAllValidMessages).GetAddress());
+            Assert.Equal(Address.RxB1Ctrl, new RxB1Ctrl(RxB1Ctrl.FilterHit.Filter0, false, OperatingMode.ReceivesAllValidMessages).Address);
         }
 
         [Theory]

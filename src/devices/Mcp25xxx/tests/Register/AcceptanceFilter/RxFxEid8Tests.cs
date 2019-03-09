@@ -20,7 +20,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         public void Get_RxFilterNumber_Address(RxFilterNumber rxFilterNumber, Address address)
         {
             Assert.Equal(rxFilterNumber, RxFxEid8.GetRxFilterNumber(address));
-            Assert.Equal(address, new RxFxEid8(rxFilterNumber, 0x00).GetAddress());
+            Assert.Equal(address, new RxFxEid8(rxFilterNumber, 0x00).Address);
         }
 
         [Theory]

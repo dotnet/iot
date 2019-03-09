@@ -78,7 +78,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// Gets the address of the register.
         /// </summary>
         /// <returns>The address of the register.</returns>
-        public Address GetAddress() => Address.RxB1Ctrl;
+        public Address Address => Address.RxB1Ctrl;
 
         /// <summary>
         /// Converts register contents to a byte.

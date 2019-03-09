@@ -9,7 +9,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
     /// <summary>
     /// Transmit Buffer Standard Identifier Low Register.
     /// </summary>
-    public class TxBxSidl
+    public class TxBxSidl : IRegister
     {
         /// <summary>
         /// Initializes a new instance of the TxBxSidl class.
@@ -62,6 +62,21 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// </summary>
         public byte Sid { get; set; }
 
+        private Address GetAddress()
+        {
+            switch (TxBufferNumber)
+            {
+                case TxBufferNumber.Zero:
+                    return Address.TxB0Sidl;
+                case TxBufferNumber.One:
+                    return Address.TxB1Sidl;
+                case TxBufferNumber.Two:
+                    return Address.TxB2Sidl;
+                default:
+                    throw new ArgumentException("Invalid Tx Buffer Number.", nameof(TxBufferNumber));
+            }
+        }
+
         /// <summary>
         /// Gets the Tx Buffer Number based on the register address.
         /// </summary>
@@ -86,20 +101,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Gets the address of the register.
         /// </summary>
         /// <returns>The address of the register.</returns>
-        public Address GetAddress()
-        {
-            switch (TxBufferNumber)
-            {
-                case TxBufferNumber.Zero:
-                    return Address.TxB0Sidl;
-                case TxBufferNumber.One:
-                    return Address.TxB1Sidl;
-                case TxBufferNumber.Two:
-                    return Address.TxB2Sidl;
-                default:
-                    throw new ArgumentException("Invalid Tx Buffer Number.", nameof(TxBufferNumber));
-            }
-        }
+        public Address Address => GetAddress();
 
         /// <summary>
         /// Converts register contents to a byte.

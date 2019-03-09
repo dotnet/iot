@@ -16,7 +16,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         public void Get_RxMaskNumber_Address(RxMaskNumber rxMaskNumber, Address address)
         {
             Assert.Equal(rxMaskNumber, RxMxSidh.GetRxMaskNumber(address));
-            Assert.Equal(address, new RxMxSidh(rxMaskNumber, 0x00).GetAddress());
+            Assert.Equal(address, new RxMxSidh(rxMaskNumber, 0x00).Address);
         }
 
         [Theory]

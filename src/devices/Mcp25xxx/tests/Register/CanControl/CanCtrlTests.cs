@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.CanControl
         [Fact]
         public void Get_Address()
         {
-            Assert.Equal(Address.CanCtrl, new CanCtrl(ClkOutPinPrescaler.ClockDivideBy1, false, false, false, OperationMode.NormalOperation).GetAddress());
+            Assert.Equal(Address.CanCtrl, new CanCtrl(ClkOutPinPrescaler.ClockDivideBy1, false, false, false, OperationMode.NormalOperation).Address);
         }
 
         [Theory]

@@ -13,7 +13,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.ErrorDetection
         [Fact]
         public void Get_Address()
         {
-            Assert.Equal(Address.Tec, new Tec(0b0000_0000).GetAddress());
+            Assert.Equal(Address.Tec, new Tec(0b0000_0000).Address);
         }
 
         [Theory]

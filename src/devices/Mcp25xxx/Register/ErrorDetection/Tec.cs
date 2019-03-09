@@ -27,7 +27,7 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         /// Gets the address of the register.
         /// </summary>
         /// <returns>The address of the register.</returns>
-        public Address GetAddress() => Address.Tec;
+        public Address Address => Address.Tec;
 
         /// <summary>
         /// Converts register contents to a byte.

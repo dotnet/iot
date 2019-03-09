@@ -44,6 +44,19 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// </summary>
         public byte Data { get; }
 
+        private Address GetAddress()
+        {
+            switch (RxBufferNumber)
+            {
+                case RxBufferNumber.Zero:
+                    return (Address)((byte)Address.RxB0D0 + Index);
+                case RxBufferNumber.One:
+                    return (Address)((byte)Address.RxB1D0 + Index);
+                default:
+                    throw new ArgumentException("Invalid Rx Bufferer Number.", nameof(RxBufferNumber));
+            }
+        }
+
         /// <summary>
         /// Gets the Rx Buffer Number based on the register address.
         /// </summary>
@@ -80,18 +93,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// Gets the address of the register.
         /// </summary>
         /// <returns>The address of the register.</returns>
-        public Address GetAddress()
-        {
-            switch (RxBufferNumber)
-            {
-                case RxBufferNumber.Zero:
-                    return (Address)((byte)Address.RxB0D0 + Index);
-                case RxBufferNumber.One:
-                    return (Address)((byte)Address.RxB1D0 + Index);
-                default:
-                    throw new ArgumentException("Invalid Rx Bufferer Number.", nameof(RxBufferNumber));
-            }
-        }
+        public Address Address => GetAddress();
 
         /// <summary>
         /// Converts register contents to a byte.

@@ -72,7 +72,7 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// Gets the address of the register.
         /// </summary>
         /// <returns>The address of the register.</returns>
-        public Address GetAddress() => Address.Cnf3;
+        public Address Address => Address.Cnf3;
 
         /// <summary>
         /// Converts register contents to a byte.

@@ -13,7 +13,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.BitTimeConfiguration
         [Fact]
         public void Get_Address()
         {
-            Assert.Equal(Address.Cnf1, new Cnf1(0x00, Cnf1.SynchronizationJumpWidthLength.Tqx1).GetAddress());
+            Assert.Equal(Address.Cnf1, new Cnf1(0x00, Cnf1.SynchronizationJumpWidthLength.Tqx1).Address);
         }
 
         [Theory]

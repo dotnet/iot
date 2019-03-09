@@ -32,6 +32,27 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// </summary>
         public byte Eid { get; }
 
+        private Address GetAddress()
+        {
+            switch (RxFilterNumber)
+            {
+                case RxFilterNumber.Zero:
+                    return Address.RxF0Eid8;
+                case RxFilterNumber.One:
+                    return Address.RxF1Eid8;
+                case RxFilterNumber.Two:
+                    return Address.RxF2Eid8;
+                case RxFilterNumber.Three:
+                    return Address.RxF3Eid8;
+                case RxFilterNumber.Four:
+                    return Address.RxF4Eid8;
+                case RxFilterNumber.Five:
+                    return Address.RxF5Eid8;
+                default:
+                    throw new ArgumentException("Invalid Rx Filter Number.", nameof(RxFilterNumber));
+            }
+        }
+
         /// <summary>
         /// Gets the Rx Filter Number based on the register address.
         /// </summary>
@@ -62,26 +83,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Gets the address of the register.
         /// </summary>
         /// <returns>The address of the register.</returns>
-        public Address GetAddress()
-        {
-            switch (RxFilterNumber)
-            {
-                case RxFilterNumber.Zero:
-                    return Address.RxF0Eid8;
-                case RxFilterNumber.One:
-                    return Address.RxF1Eid8;
-                case RxFilterNumber.Two:
-                    return Address.RxF2Eid8;
-                case RxFilterNumber.Three:
-                    return Address.RxF3Eid8;
-                case RxFilterNumber.Four:
-                    return Address.RxF4Eid8;
-                case RxFilterNumber.Five:
-                    return Address.RxF5Eid8;
-                default:
-                    throw new ArgumentException("Invalid Rx Filter Number.", nameof(RxFilterNumber));
-            }
-        }
+        public Address Address => GetAddress();
 
         /// <summary>
         /// Converts register contents to a byte.

@@ -44,6 +44,19 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// </summary>
         public byte Data { get; }
 
+        private Address GetAddress()
+        {
+            switch (TxBufferNumber)
+            {
+                case TxBufferNumber.Zero:
+                    return (Address)((byte)Address.TxB0D0 + Index);
+                case TxBufferNumber.One:
+                    return (Address)((byte)Address.TxB1D0 + Index);
+                default:
+                    throw new ArgumentException("Invalid Tx Bufferer Number.", nameof(TxBufferNumber));
+            }
+        }
+
         /// <summary>
         /// Gets the Tx Buffer Number based on the register address.
         /// </summary>
@@ -80,18 +93,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Gets the address of the register.
         /// </summary>
         /// <returns>The address of the register.</returns>
-        public Address GetAddress()
-        {
-            switch (TxBufferNumber)
-            {
-                case TxBufferNumber.Zero:
-                    return (Address)((byte)Address.TxB0D0 + Index);
-                case TxBufferNumber.One:
-                    return (Address)((byte)Address.TxB1D0 + Index);
-                default:
-                    throw new ArgumentException("Invalid Tx Bufferer Number.", nameof(TxBufferNumber));
-            }
-        }
+        public Address Address => GetAddress();
 
         /// <summary>
         /// Converts register contents to a byte.

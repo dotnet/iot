@@ -30,7 +30,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         public void Get_RxBufferNumber_Address(TxBufferNumber txBufferNumber, Address address, byte index)
         {
             Assert.Equal(txBufferNumber, TxBxDn.GetTxBufferNumber(address));
-            Assert.Equal(address, new TxBxDn(txBufferNumber, index, 0).GetAddress());
+            Assert.Equal(address, new TxBxDn(txBufferNumber, index, 0).Address);
         }
 
         [Theory]

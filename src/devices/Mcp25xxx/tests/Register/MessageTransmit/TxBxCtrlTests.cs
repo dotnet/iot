@@ -18,7 +18,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         public void Get_TxBufferNumber_Address(TxBufferNumber txBufferNumber, Address address)
         {
             Assert.Equal(txBufferNumber, GetTxBufferNumber(address));
-            Assert.Equal(address, new TxBxCtrl(txBufferNumber, TransmitBufferPriority.LowestMessage, false, false, false, false).GetAddress());
+            Assert.Equal(address, new TxBxCtrl(txBufferNumber, TransmitBufferPriority.LowestMessage, false, false, false, false).Address);
         }
 
         [Theory]

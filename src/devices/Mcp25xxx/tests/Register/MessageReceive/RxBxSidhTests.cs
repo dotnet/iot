@@ -16,7 +16,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
         public void Get_RxFilterNumber_Address(RxBufferNumber rxBufferNumber, Address address)
         {
             Assert.Equal(rxBufferNumber, RxBxSidh.GetRxBufferNumber(address));
-            Assert.Equal(address, new RxBxSidh(rxBufferNumber, 0x00).GetAddress());
+            Assert.Equal(address, new RxBxSidh(rxBufferNumber, 0x00).Address);
         }
 
         [Theory]

@@ -13,7 +13,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.Interrupt
         [Fact]
         public void Get_Address()
         {
-            Assert.Equal(Address.CanIntF, new CanIntF(false, false, false, false, false, false, false, false).GetAddress());
+            Assert.Equal(Address.CanIntF, new CanIntF(false, false, false, false, false, false, false, false).Address);
         }
 
         [Theory]

@@ -103,7 +103,7 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         /// Gets the address of the register.
         /// </summary>
         /// <returns>The address of the register.</returns>
-        public Address GetAddress() => Address.CanCtrl;
+        public Address Address => Address.CanCtrl;
 
         /// <summary>
         /// Converts register contents to a byte.
