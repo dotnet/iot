@@ -9,6 +9,7 @@ using System;
 using System.Device.I2c;
 using System.Buffers.Binary;
 using System.Threading;
+using Iot.Units;
 
 namespace Iot.Device.Bmp180
 {
@@ -42,7 +43,7 @@ namespace Iot.Device.Bmp180
         /// <summary>
         /// Sets sampling to the given value
         /// </summary>
-        /// <param name="mode">Sapling Mode</param>
+        /// <param name="mode">Sampling Mode</param>
         public void SetSampling(Sampling mode)
         {
             this._mode = mode;
@@ -54,7 +55,7 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Temperature in degrees celsius
         /// </returns>
-        public double ReadTemperature()
+        public Temperature ReadTemperature()
         {
             // Make sure the I2C device is initialized
             if (!_initialized)
@@ -70,7 +71,7 @@ namespace Iot.Device.Bmp180
             int B5 = (X1 + X2);
             int T = (B5 + 8) / (1 << 4);
             
-            return (double)T/10;
+            return Temperature.FromCelsius((double)T/10);            
         }
 
         /// <summary>
@@ -130,7 +131,7 @@ namespace Iot.Device.Bmp180
         /// <summary>
         ///  Calculates the altitude in meters from the specified sea-level pressure(in hPa).
         /// </summary>
-        /// <param name="seaLevelPressure" > 
+        /// <param name="seaLevelPressure"> 
         ///  Sea-level pressure in hPa
         /// </param>
         /// <returns>
@@ -293,11 +294,8 @@ namespace Iot.Device.Bmp180
         
         public void Dispose()
         {
-            if (_i2cDevice != null)
-            {
-                _i2cDevice.Dispose();
-                _i2cDevice = null;
-            }
+            _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
     }
 }
