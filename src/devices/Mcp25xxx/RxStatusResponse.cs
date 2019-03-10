@@ -18,13 +18,13 @@ namespace Iot.Device.Mcp25xxx
         /// The extended ID bit is mapped to bit 4. The RTR bit is mapped to bit 3.</param>
         /// <param name="filterMatch"></param>
         public RxStatusResponse(
-            ReceivedMessageType receivedMessage,
+            FilterMatchType filterMatch,
             MessageReceivedType messageTypeReceived,
-            FilterMatchType filterMatch)
+            ReceivedMessageType receivedMessage)
         {
-            ReceivedMessage = receivedMessage;
-            MessageTypeReceived = messageTypeReceived;
             FilterMatch = filterMatch;
+            MessageTypeReceived = messageTypeReceived;
+            ReceivedMessage = receivedMessage;
         }
 
         /// <summary>
@@ -38,17 +38,17 @@ namespace Iot.Device.Mcp25xxx
             FilterMatch = (FilterMatchType)(value & 0b0000_0111);
         }
 
-        /// <summary>
-        /// RXxIF (CANINTF) bits are mapped to bits 7 and 6.
-        /// </summary>
-        public ReceivedMessageType ReceivedMessage { get; }
+        public FilterMatchType FilterMatch { get; }
 
         /// <summary>
         /// The extended ID bit is mapped to bit 4. The RTR bit is mapped to bit 3.
         /// </summary>
         public MessageReceivedType MessageTypeReceived { get; }
 
-        public FilterMatchType FilterMatch { get; }
+        /// <summary>
+        /// RXxIF (CANINTF) bits are mapped to bits 7 and 6.
+        /// </summary>
+        public ReceivedMessageType ReceivedMessage { get; }
 
         /// <summary>
         /// RXxIF (CANINTF) bits are mapped to bits 7 and 6.
@@ -106,6 +106,18 @@ namespace Iot.Device.Mcp25xxx
             RxF5 = 5,
             RxF0RolloverToRxB1 = 6,
             RxF1RolloverToRxB1 = 7,
+        }
+
+        /// <summary>
+        /// Converts contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the response contents.</returns>
+        public byte ToByte()
+        {
+            byte value = (byte)((byte)ReceivedMessage << 6);
+            value |= (byte)((byte)MessageTypeReceived << 3);
+            value |= (byte)FilterMatch;
+            return value;
         }
     }
 }

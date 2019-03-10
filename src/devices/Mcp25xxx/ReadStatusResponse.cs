@@ -95,5 +95,56 @@ namespace Iot.Device.Mcp25xxx
         /// TX2IF (CANINTF Register).
         /// </summary>
         public bool Tx2If { get; }
+
+        /// <summary>
+        /// Converts contents to a byte.
+        /// </summary>
+        /// <returns>The byte that represent the response contents.</returns>
+        public byte ToByte()
+        {
+            byte value = 0;
+
+            if (Tx2If)
+            {
+                value |= 0b1000_0000;
+            }
+
+            if (Tx2Req)
+            {
+                value |= 0b0100_0000;
+            }
+
+            if (Tx1If)
+            {
+                value |= 0b0010_0000;
+            }
+
+            if (Tx1Req)
+            {
+                value |= 0b0001_0000;
+            }
+
+            if (Tx0If)
+            {
+                value |= 0b0000_1000;
+            }
+
+            if (Tx0Req)
+            {
+                value |= 0b0000_0100;
+            }
+
+            if (Rx1If)
+            {
+                value |= 0b0000_0010;
+            }
+
+            if (Rx0If)
+            {
+                value |= 0b0000_0001;
+            }
+
+            return value;
+        }
     }
 }

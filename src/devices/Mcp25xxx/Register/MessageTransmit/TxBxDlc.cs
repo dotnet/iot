@@ -24,7 +24,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// True = Transmitted message will be a Remote Transmit Request.
         /// False = Transmitted message will be a data frame.
         /// </param>
-        public TxBxDlc(TxBufferNumber txBufferNumber, byte dlc, bool rtr)
+        public TxBxDlc(TxBufferNumber txBufferNumber, int dlc, bool rtr)
         {
             if (dlc > 8)
             {
@@ -45,7 +45,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Data Length Code bits.
         /// Sets the number of data bytes to be transmitted (0 to 8 bytes).
         /// </summary>
-        public byte Dlc { get; set; }
+        public int Dlc { get; set; }
 
         /// <summary>
         /// Remote Transmission Request bit.

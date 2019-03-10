@@ -216,8 +216,7 @@ namespace Iot.Device.Mcp25xxx
         public void Reset()
         {
             const byte instructionFormat = 0xC0;
-            ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { instructionFormat };
-            _spiDevice.Write(writeBuffer);
+            _spiDevice.WriteByte(instructionFormat);
         }
 
         /// <summary>
@@ -240,25 +239,48 @@ namespace Iot.Device.Mcp25xxx
         /// command by placing the Address Pointer at one of four locations for the receive buffer.
         /// </summary>
         /// <param name="addressPointer">The Address Pointer to one of four locations for the receive buffer.</param>
+        /// <param name="byteCount">Number of bytes to read.  This must be one or more to read.</param>
         /// <returns>The value of address read.</returns>
-        public byte ReadRxBuffer(RxBufferAddressPointer addressPointer)
+        public byte[] ReadRxBuffer(RxBufferAddressPointer addressPointer, int byteCount = 1)
         {
+            if (byteCount < 1)
+            {
+                throw new ArgumentException($"Invalid number of bytes {byteCount}.", nameof(byteCount));
+            }
+
+            const int StackThreshold = 32;  // Usually won't read more than this at a time.
+
+            Span<byte> writeBuffer = byteCount < StackThreshold ?
+               stackalloc byte[byteCount + 1] :
+               new byte[byteCount + 1];
+
+            Span<byte> readBuffer = byteCount < StackThreshold ?
+               stackalloc byte[byteCount + 1] :
+               new byte[byteCount + 1];
+
             byte instructionFormat = (byte)(0x90 | ((byte)addressPointer << 1));
-            const byte dontCare = 0x00;
-            ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { instructionFormat, dontCare };
-            Span<byte> readBuffer = stackalloc byte[2];
+            writeBuffer[0] = instructionFormat;
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
-            return readBuffer[1];
+            return readBuffer.Slice(1).ToArray();
         }
 
         /// <summary>
         /// Writes one byte to the register beginning at the selected address.
         /// </summary>
-        /// <param name="address">The starting address to write the data.</param>
+        /// <param name="address">The address to write the data.</param>
         /// <param name="value">The value to be written.</param>
         public void WriteByte(Address address, byte value)
         {
             Write(address, new byte[] { value });
+        }
+
+        /// <summary>
+        /// Writes a byte to the selected register address.
+        /// </summary>
+        /// <param name="register">The register to write the data.</param>
+        public void WriteByte(IRegister register)
+        {
+            Write(register.Address, new byte[] { register.ToByte() });
         }
 
         /// <summary>
@@ -348,10 +370,11 @@ namespace Iot.Device.Mcp25xxx
         public RxStatusResponse RxStatus()
         {
             const byte instructionFormat = 0xB0;
-            ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { instructionFormat };
-            Span<byte> readBuffer = stackalloc byte[1];
+            const byte dontCare = 0x00;
+            ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { instructionFormat, dontCare };
+            Span<byte> readBuffer = stackalloc byte[2];
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
-            RxStatusResponse rxStatusResponse = new RxStatusResponse(readBuffer[0]);
+            RxStatusResponse rxStatusResponse = new RxStatusResponse(readBuffer[1]);
             return rxStatusResponse;
         }
 
