@@ -2,46 +2,31 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Device.Gpio;
 using System.Device.Spi;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public class Mcp23S09 : Mcp23Sxx
+    /// <summary>
+    /// Driver for the Microchip MCP23S09 8-Bit I/O Expander with Open-Drain Outputs.
+    /// </summary>
+    public class Mcp23s09 : Mcp23x0x
     {
         /// <summary>
-        /// Initializes new instance of Mcp23S09 device.
-        /// A general purpose parallel I/O expansion for SPI applications.
+        /// Initializes new instance of the Mcp23s09 device.
         /// </summary>
-        /// <param name="deviceAddress">The device address for the connection on the SPI bus.</param>
-        /// <param name="spiDevice">SPI device used for communication.</param>
-        /// <param name="reset">Output pin number that is connected to the hardware reset.</param>
-        /// <param name="interruptA">Input pin number that is connected to the interrupt for Port A (INTA).</param>
-        /// <param name="interruptB">Input pin number that is connected to the interrupt for Port B (INTB).</param>
-        public Mcp23S09(int deviceAddress, SpiDevice spiDevice, int? reset = null, int? interruptA = null, int? interruptB = null)
-           : base(deviceAddress, spiDevice, reset, interruptA, interruptB)
+        /// <param name="spiDevice">The SPI device used for communication.</param>
+        /// <param name="reset">
+        /// The output pin number that is connected to the hardware reset, if any. If specified the device
+        /// will start in a disabled state.
+        /// </param>
+        /// <param name="interrupt">The input pin number that is connected to the interrupt, if any.</param>
+        /// <param name="masterController">
+        /// The controller for the reset and interrupt pins. If not specified, the default controller will be used.
+        /// </param>
+        public Mcp23s09(SpiDevice spiDevice, int reset = -1, int interrupt = -1, IGpioController masterController = null)
+            : base(new SpiAdapter(spiDevice, 0x20), reset, interrupt, masterController)
         {
-        }
-
-        public override int PinCount => 8;
-
-        public byte Read(Register.Address registerAddress)
-        {
-            return Read(registerAddress, Port.PortA, Bank.Bank1);
-        }
-
-        public byte[] Read(Register.Address startingRegisterAddress, byte byteCount)
-        {
-            return Read(startingRegisterAddress, byteCount, Port.PortA, Bank.Bank1);
-        }
-
-        public void Write(Register.Address registerAddress, byte data)
-        {
-            Write(registerAddress, data, Port.PortA, Bank.Bank1);
-        }
-
-        public void Write(Register.Address startingRegisterAddress, byte[] data)
-        {
-            Write(startingRegisterAddress, data, Port.PortA, Bank.Bank1);
         }
     }
 }

@@ -2,46 +2,42 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Device.Gpio;
 using System.Device.Spi;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public class Mcp23S08 : Mcp23Sxx
+    /// <summary>
+    /// Driver for the Microchip MCP23S08 8-Bit I/O Expander with Serial Interface.
+    /// </summary>
+    public class Mcp23s08 : Mcp23x0x
     {
         /// <summary>
-        /// Initializes new instance of Mcp23S08 device.
-        /// A general purpose parallel I/O expansion for I2C or SPI applications.
+        /// Initializes a new instance of the Mcp23s08 device.
         /// </summary>
+        /// <param name="spiDevice">The SPI device used for communication.</param>
         /// <param name="deviceAddress">The device address for the connection on the SPI bus.</param>
-        /// <param name="spiDevice">SPI device used for communication.</param>
-        /// <param name="reset">Output pin number that is connected to the hardware reset.</param>
-        /// <param name="interruptA">Input pin number that is connected to the interrupt for Port A (INTA).</param>
-        /// <param name="interruptB">Input pin number that is connected to the interrupt for Port B (INTB).</param>
-        public Mcp23S08(int deviceAddress, SpiDevice spiDevice, int? reset = null, int? interruptA = null, int? interruptB = null)
-            : base(deviceAddress, spiDevice, reset, interruptA, interruptB)
+        /// <param name="reset">
+        /// The output pin number that is connected to the hardware reset, if any. If specified the device
+        /// will start in a disabled state.
+        /// </param>
+        /// <param name="interrupt">The input pin number that is connected to the interrupt, if any.</param>
+        /// <param name="masterController">
+        /// The controller for the reset and interrupt pins. If not specified, the default controller will be used.
+        /// </param>
+        public Mcp23s08(SpiDevice spiDevice, int deviceAddress, int reset = -1, int interrupt = -1, IGpioController masterController = null)
+            : base(CreateAdapter(spiDevice, deviceAddress), reset, interrupt, masterController)
         {
         }
 
-        public override int PinCount => 8;
-
-        public byte Read(Register.Address registerAddress)
+        private static SpiAdapter CreateAdapter(SpiDevice spiDevice, int deviceAddress)
         {
-            return Read(registerAddress, Port.PortA, Bank.Bank1);
-        }
-
-        public byte[] Read(Register.Address startingRegisterAddress, byte byteCount)
-        {
-            return Read(startingRegisterAddress, byteCount, Port.PortA, Bank.Bank1);
-        }
-
-        public void Write(Register.Address registerAddress, byte data)
-        {
-            Write(registerAddress, data, Port.PortA, Bank.Bank1);
-        }
-
-        public void Write(Register.Address startingRegisterAddress, byte[] data)
-        {
-            Write(startingRegisterAddress, data, Port.PortA, Bank.Bank1);
+            if (deviceAddress < 0x20 || deviceAddress > 0x23)
+            {
+                throw new ArgumentOutOfRangeException(nameof(deviceAddress), "The Mcp23s08 address must be between 32 (0x20) and 35 (0x23).");
+            }
+            return new SpiAdapter(spiDevice, deviceAddress);
         }
     }
 }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
 using System.Device.Spi;
@@ -19,15 +20,20 @@ namespace Iot.Device.Mcp23xxx.Samples
         {
             Console.WriteLine("Hello Mcp23xxx!");
 
-            using (var mcp23xxx = GetMcp23xxxDevice(Mcp23xxxDevice.Mcp23017))
+            using (Mcp23xxx mcp23xxx = GetMcp23xxxDevice(Mcp23xxxDevice.Mcp23017))
             {
-                // Uncomment sample to run.
-                // ReadSwitchesWriteLeds(mcp23xxx);
-                // ReadAllRegisters(mcp23xxx);
-                // WriteIndividualByte(mcp23xxx);
-                // WriteSequentialBytes(mcp23xxx);
-                // ReadBits(mcp23xxx);
-                WriteBits(mcp23xxx);
+
+                // Samples are currently written specifically for the 16 bit variant
+                if (mcp23xxx is Mcp23x1x mcp23x1x)
+                {
+                    // Uncomment sample to run.
+                    ReadSwitchesWriteLeds(mcp23x1x);
+                    //WriteByte(mcp23x1x);
+                    //WriteUshort(mcp23x1x);
+                    //WriteBits(mcp23x1x);
+                }
+
+                //ReadBits(mcp23xxx);
             }
         }
 
@@ -75,154 +81,121 @@ namespace Iot.Device.Mcp23xxx.Samples
             switch (mcp23xxxDevice)
             {
                 case Mcp23xxxDevice.Mcp23S08:
-                    return new Mcp23S08(s_deviceAddress, spiDevice);
+                    return new Mcp23s08(spiDevice, s_deviceAddress);
                 case Mcp23xxxDevice.Mcp23S09:
-                    return new Mcp23S09(s_deviceAddress, spiDevice);
+                    return new Mcp23s09(spiDevice);
                 case Mcp23xxxDevice.Mcp23S17:
-                    return new Mcp23S17(s_deviceAddress, spiDevice);
+                    return new Mcp23s17(spiDevice, s_deviceAddress);
                 case Mcp23xxxDevice.Mcp23S18:
-                    return new Mcp23S18(s_deviceAddress, spiDevice);
+                    return new Mcp23s18(spiDevice);
             }
 
             throw new Exception($"Invalid Mcp23xxxDevice: {nameof(mcp23xxxDevice)}");
         }
 
-        private static void ReadSwitchesWriteLeds(Mcp23xxx mcp23xxx)
+        private static void ReadSwitchesWriteLeds(Mcp23x1x mcp23x1x)
         {
             Console.WriteLine("Read Switches & Write LEDs");
 
-            using (mcp23xxx)
-            {
-                // Input direction for switches.
-                mcp23xxx.Write(Register.Address.IODIR, 0b1111_1111, Port.PortA, Bank.Bank0);                
-                // Output direction for LEDs.
-                mcp23xxx.Write(Register.Address.IODIR, 0b0000_0000, Port.PortB, Bank.Bank0);
+            // Input direction for switches.
+            mcp23x1x.WriteByte(Register.IODIR, 0b1111_1111, Port.PortA);
+            // Output direction for LEDs.
+            mcp23x1x.WriteByte(Register.IODIR, 0b0000_0000, Port.PortB);
 
-                while (true)
-                {
-                    // Read switches.
-                    byte data = mcp23xxx.Read(Register.Address.GPIO, Port.PortA, Bank.Bank0);
-                    // Write data to LEDs.
-                    mcp23xxx.Write(Register.Address.GPIO, data, Port.PortB, Bank.Bank0);
-                    Console.WriteLine(data);
-                    Thread.Sleep(500);
-                }
+            while (true)
+            {
+                // Read switches.
+                byte data = mcp23x1x.ReadByte(Register.GPIO, Port.PortA);
+                // Write data to LEDs.
+                mcp23x1x.WriteByte(Register.GPIO, data, Port.PortB);
+                Console.WriteLine(data);
+                Thread.Sleep(500);
             }
         }
 
-        private static void ReadAllRegisters(Mcp23xxx mcp23xxx)
-        {
-            // This assumes the device is in default Sequential Operation mode.
-            Console.WriteLine("Read All Registers");
-
-            using (mcp23xxx)
-            {
-                // Start at first register.  Total of 22 registers for MCP23x17.
-                byte[] data = mcp23xxx.Read(0, 22, Port.PortA, Bank.Bank0);
-
-                for (int index = 0; index < data.Length; index++)
-                {
-                    Console.WriteLine($"0x{index:X2}: 0x{data[index]:X2}");
-                }
-            }
-        }
-
-        private static void WriteIndividualByte(Mcp23xxx mcp23xxx)
+        private static void WriteByte(Mcp23x1x mcp23x1x)
         {
             // This assumes the device is in default Sequential Operation mode.
             Console.WriteLine("Write Individual Byte");
 
-            using (mcp23xxx)
+            Register register = Register.IODIR;
+
+            void IndividualRead(Mcp23xxx mcp, Register registerToRead)
             {
-                Register.Address address = Register.Address.IODIR;
-
-                void IndividualRead(Mcp23xxx mcp, Register.Address addressToRead)
-                {
-                    byte[] dataRead = mcp23xxx.Read(addressToRead, 1, Port.PortB, Bank.Bank0);
-                    Console.WriteLine($"\tIODIRB: 0x{dataRead[0]:X2}");
-                }
-
-                Console.WriteLine("Before Write");
-                IndividualRead(mcp23xxx, address);
-
-                byte[] dataWrite = new byte[] { 0x12 };
-                mcp23xxx.Write(address, dataWrite, Port.PortB, Bank.Bank0);
-
-                Console.WriteLine("After Write");
-                IndividualRead(mcp23xxx, address);
-
-                dataWrite = new byte[] { 0xFF };
-                mcp23xxx.Write(address, dataWrite, Port.PortB, Bank.Bank0);
-
-                Console.WriteLine("After Writing Again");
-                IndividualRead(mcp23xxx, address);
+                byte dataRead = mcp23x1x.ReadByte(registerToRead, Port.PortB);
+                Console.WriteLine($"\tIODIRB: 0x{dataRead:X2}");
             }
+
+            Console.WriteLine("Before Write");
+            IndividualRead(mcp23x1x, register);
+
+            mcp23x1x.WriteByte(register, 0x12, Port.PortB);
+
+            Console.WriteLine("After Write");
+            IndividualRead(mcp23x1x, register);
+
+            mcp23x1x.WriteByte(register, 0xFF, Port.PortB);
+
+            Console.WriteLine("After Writing Again");
+            IndividualRead(mcp23x1x, register);
         }
 
-        private static void WriteSequentialBytes(Mcp23xxx mcp23xxx)
+        private static void WriteUshort(Mcp23x1x mcp23x1x)
         {
             // This assumes the device is in default Sequential Operation mode.
             Console.WriteLine("Write Sequential Bytes");
 
-            using (mcp23xxx)
+            void SequentialRead(Mcp23x1x mcp)
             {
-                void SequentialRead(Mcp23xxx mcp)
-                {
-                    byte[] dataRead = mcp23xxx.Read(0, 2, Port.PortA, Bank.Bank0);
-                    Console.WriteLine($"\tIODIRA: 0x{dataRead[0]:X2}");
-                    Console.WriteLine($"\tIODIRB: 0x{dataRead[1]:X2}");
-                }
-
-                Console.WriteLine("Before Write");
-                SequentialRead(mcp23xxx);
-
-                byte[] dataWrite = new byte[] { 0x12, 0x34 };
-                mcp23xxx.Write(0, dataWrite, Port.PortA, Bank.Bank0);
-
-                Console.WriteLine("After Write");
-                SequentialRead(mcp23xxx);
-
-                dataWrite = new byte[] { 0xFF, 0xFF };
-                mcp23xxx.Write(0, dataWrite, Port.PortA, Bank.Bank0);
-
-                Console.WriteLine("After Writing Again");
-                SequentialRead(mcp23xxx);
+                ushort dataRead = mcp.ReadUInt16(Register.IODIR);
+                Console.WriteLine($"\tIODIRA: 0x{(byte)dataRead:X2}");
+                Console.WriteLine($"\tIODIRB: 0x{(byte)dataRead>>8:X2}");
             }
+
+            Console.WriteLine("Before Write");
+            SequentialRead(mcp23x1x);
+
+            mcp23x1x.WriteUInt16(Register.IODIR, 0x3412);
+
+            Console.WriteLine("After Write");
+            SequentialRead(mcp23x1x);
+
+            mcp23x1x.WriteUInt16(Register.IODIR, 0xFFFF);
+
+            Console.WriteLine("After Writing Again");
+            SequentialRead(mcp23x1x);
         }
 
+        // This is now Read(pinNumber)
         private static void ReadBits(Mcp23xxx mcp23xxx)
         {
             Console.WriteLine("Read Bits");
 
-            using (mcp23xxx)
+            for (int bitNumber = 0; bitNumber < 8; bitNumber++)
             {
-                for (int bitNumber = 0; bitNumber < 8; bitNumber++)
-                {
-                    bool bit = mcp23xxx.ReadBit(Register.Address.GPIO, bitNumber, Port.PortA, Bank.Bank0);
-                    Console.WriteLine($"{bitNumber}: {bit}");
-                }
+                PinValue bit = mcp23xxx.Read(bitNumber);
+                Console.WriteLine($"{bitNumber}: {bit}");
             }
         }
 
-        private static void WriteBits(Mcp23xxx mcp23xxx)
+        // This is now Write(pinNumber)
+        private static void WriteBits(Mcp23x1x mcp23x1x)
         {
             Console.WriteLine("Write Bits");
 
             // Make port output and set all pins.
-            mcp23xxx.Write(Register.Address.IODIR, 0x00, Port.PortB, Bank.Bank0);
-            mcp23xxx.Write(Register.Address.GPIO, 0xFF, Port.PortB, Bank.Bank0);
+            // (SetPinMode will also set the direction for each GPIO pin)
+            mcp23x1x.WriteByte(Register.IODIR, 0x00, Port.PortB);
+            mcp23x1x.WriteByte(Register.GPIO, 0xFF, Port.PortB);
 
-            using (mcp23xxx)
+            for (int bitNumber = 9; bitNumber < 16; bitNumber++)
             {
-                for (int bitNumber = 0; bitNumber < 8; bitNumber++)
-                {
-                    mcp23xxx.WriteBit(Register.Address.GPIO, bitNumber, false, Port.PortB, Bank.Bank0);
-                    Console.WriteLine($"Bit {bitNumber} low");
-                    Thread.Sleep(500);
-                    mcp23xxx.WriteBit(Register.Address.GPIO, bitNumber, true, Port.PortB, Bank.Bank0);
-                    Console.WriteLine($"Bit {bitNumber} high");
-                    Thread.Sleep(500);
-                }
+                mcp23x1x.Write(bitNumber, PinValue.Low);
+                Console.WriteLine($"Bit {bitNumber} low");
+                Thread.Sleep(500);
+                mcp23x1x.Write(bitNumber, PinValue.High);
+                Console.WriteLine($"Bit {bitNumber} high");
+                Thread.Sleep(500);
             }
         }
     }

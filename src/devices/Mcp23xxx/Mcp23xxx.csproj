@@ -3,11 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <!--Disabling default items so samples source won't get build by the main library-->
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Bank.cs" />
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <Compile Include="..\Common\System\Device\Gpio\PinVector32.cs" Link="PinVector32.cs" />
+    <Compile Include="BankStyle.cs" />
+    <Compile Include="I2cAdapter.cs" />
+    <Compile Include="BusAdapter.cs" />
     <Compile Include="Mcp23018.cs" />
     <Compile Include="Mcp23017.cs" />
     <Compile Include="Mcp23S18.cs" />
@@ -16,16 +20,15 @@
     <Compile Include="Mcp23S08.cs" />
     <Compile Include="Mcp23009.cs" />
     <Compile Include="Mcp23008.cs" />
-    <Compile Include="Mcp23Sxx.cs" />
-    <Compile Include="Mcp230xx.cs" />
+    <Compile Include="Mcp23x0x.cs" />
+    <Compile Include="Mcp23x1x.cs" />
     <Compile Include="Mcp23xxx.cs" />
-    <Compile Include="OpCode.cs" />
     <Compile Include="Port.cs" />
     <Compile Include="Register.cs" />
+    <Compile Include="SpiAdapter.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+  <ItemGroup>    
     <None Include="README.md" />
   </ItemGroup>
 
