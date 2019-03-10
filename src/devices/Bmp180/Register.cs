@@ -25,10 +25,5 @@ namespace Iot.Device.Bmp180
          READPRESSURECMD = 0x34,
          TEMPDATA = 0xF6,
          PRESSUREDATA = 0xF6,
-
-         ULTRALOWPOWER = 0,
-         STANDARD = 1,
-         HIGHRES = 2,
-         ULTRAHIGHRES = 3,
     }
 }
