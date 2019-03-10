@@ -43,7 +43,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <summary>
         /// Initializes a new instance of the RxFxSidl class.
         /// </summary>
-        /// <param name="rxFilterNumber">Transmit Buffer Number.</param>
+        /// <param name="rxFilterNumber">Receive Filter Number.</param>
         /// <param name="value">The value that represents the register contents.</param>
         public RxFxSidl(RxFilterNumber rxFilterNumber, byte value)
         {
