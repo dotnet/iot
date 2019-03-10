@@ -45,6 +45,17 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         }
 
         /// <summary>
+        /// Initializes a new instance of the Cnf3 class.
+        /// </summary>
+        /// <param name="value">The value that represents the register contents.</param>
+        public Cnf3(byte value)
+        {
+            PhSeg2 = (byte)(value & 0b0000_0111);
+            WakFil = (value & 0b0100_0000) == 0b0100_0000;
+            Sof = (value & 0b1000_0000) == 0b1000_0000;
+        }
+
+        /// <summary>
         /// PS2 Length bits.
         /// (PHSEG2[2:0] + 1) x TQ.
         /// Minimum valid setting for PS2 is 2 TQ.

@@ -46,6 +46,19 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         }
 
         /// <summary>
+        /// Initializes a new instance of the CanCtrl class.
+        /// </summary>
+        /// <param name="value">The value that represents the register contents.</param>
+        public CanCtrl(byte value)
+        {
+            ClkPre = (ClkOutPinPrescaler)(value & 0b0000_0011);
+            ClkEn = (value & 0b0000_0100) == 0b0000_0100;
+            Osm = (value & 0b0000_1000) == 0b0000_1000;
+            Abat = (value & 0b0001_0000) == 0b0001_0000;
+            ReqOp = (OperationMode)((value & 0b1110_0000) >> 5);
+        }
+
+        /// <summary>
         /// CLKOUT Pin Prescaler.
         /// </summary>
         public enum ClkOutPinPrescaler

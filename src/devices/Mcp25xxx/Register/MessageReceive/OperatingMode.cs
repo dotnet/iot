@@ -12,7 +12,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Receives all valid messages using either Standard or Extended Identifiers that meet filter criteria.
         /// </summary>
-        ReceivesAllValidMessages = 0,
+        ReceiveAllValidMessages = 0,
         /// <summary>
         /// Reserved.
         /// </summary>

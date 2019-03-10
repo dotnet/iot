@@ -53,6 +53,21 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         }
 
         /// <summary>
+        /// Initializes a new instance of the TxBxCtrl class.
+        /// </summary>
+        /// <param name="txBufferNumber">Transmit Buffer Number.</param>
+        /// <param name="value">The value that represents the register contents.</param>
+        public TxBxCtrl(TxBufferNumber txBufferNumber, byte value)
+        {
+            TxBufferNumber = txBufferNumber;
+            Txp = (TransmitBufferPriority)(value & 0b0000_0011);
+            TxReq = (value & 0b0000_1000) == 0b0000_1000;
+            TxErr = (value & 0b0001_0000) == 0b0001_0000;
+            Mloa = (value & 0b0010_0000) == 0b0010_0000;
+            Abtf = (value & 0b0100_0000) == 0b0100_0000;
+        }
+
+        /// <summary>
         /// Transmit Buffer Priority.
         /// </summary>
         public enum TransmitBufferPriority

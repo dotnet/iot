@@ -53,6 +53,21 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         }
 
         /// <summary>
+        /// Initializes a new instance of the TxRtsCtrl class.
+        /// </summary>
+        /// <param name="txBufferNumber">Transmit Buffer Number.</param>
+        /// <param name="value">The value that represents the register contents.</param>
+        public TxRtsCtrl(byte value)
+        {
+            B0Rtsm = (value & 0b0000_0001) == 0b0000_0001;
+            B1Rtsm = (value & 0b0000_0010) == 0b0000_0010;
+            B2Rtsm = (value & 0b0000_0100) == 0b0000_0100;
+            B0Rts = (value & 0b0000_1000) == 0b0000_1000;
+            B1Rts = (value & 0b0001_0000) == 0b0001_0000;
+            B2Rts = (value & 0b0010_0000) == 0b0010_0000;
+        }
+
+        /// <summary>
         /// Tx0RTS Pin mode bit.
         /// True = Pin is used to request message transmission of TXB0 buffer (on falling edge).
         /// False = Digital input.

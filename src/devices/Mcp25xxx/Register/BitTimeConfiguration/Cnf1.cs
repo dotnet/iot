@@ -31,6 +31,16 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         }
 
         /// <summary>
+        /// Initializes a new instance of the Cnf1 class.
+        /// </summary>
+        /// <param name="value">The value that represents the register contents.</param>
+        public Cnf1(byte value)
+        {
+            Brp = (byte)(value & 0b0011_1111);
+            Sjw = (SynchronizationJumpWidthLength)((value & 0b1100_0000) >> 6);
+        }
+
+        /// <summary>
         /// Synchronization Jump Width Length.
         /// </summary>
         public enum SynchronizationJumpWidthLength

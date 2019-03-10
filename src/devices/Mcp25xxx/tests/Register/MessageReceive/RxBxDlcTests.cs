@@ -28,12 +28,5 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
         {
             Assert.Equal(expectedByte, new RxBxDlc(RxBufferNumber.Zero, dlc, rtr).ToByte());
         }
-
-        [Fact]
-        public void Invalid_Arguments()
-        {
-            Assert.Throws<ArgumentException>(() =>
-             new RxBxDlc(RxBufferNumber.Zero, 0b1001, false).ToByte());
-        }
     }
 }

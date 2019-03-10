@@ -23,6 +23,16 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         }
 
         /// <summary>
+        /// Initializes a new instance of the CanStat class.
+        /// </summary>
+        /// <param name="value">The value that represents the register contents.</param>
+        public CanStat(byte value)
+        {
+            Icod = (InterruptFlagCode)((value & 0b0000_1110) >> 1);
+            OpMod = (OperationMode)((value & 0b1110_0000) >> 5);
+        }
+
+        /// <summary>
         /// Interrupt Flag Code.
         /// </summary>
         public enum InterruptFlagCode

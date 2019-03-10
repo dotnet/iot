@@ -41,6 +41,19 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         }
 
         /// <summary>
+        /// Initializes a new instance of the TxBxSidl class.
+        /// </summary>
+        /// <param name="txBufferNumber">Transmit Buffer Number.</param>
+        /// <param name="value">The value that represents the register contents.</param>
+        public TxBxSidl(TxBufferNumber txBufferNumber, byte value)
+        {
+            TxBufferNumber = txBufferNumber;
+            Eid = (byte)(value & 0b0000_0011);
+            Exide = (value & 0b0000_1000) == 0b0000_1000;
+            Sid = (byte)((value & 0b1110_0000) >> 5);
+        }
+
+        /// <summary>
         /// Transmit Buffer Number.
         /// </summary>
         public TxBufferNumber TxBufferNumber { get; }

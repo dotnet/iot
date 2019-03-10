@@ -65,6 +65,22 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         }
 
         /// <summary>
+        /// Initializes a new instance of the Eflg class.
+        /// </summary>
+        /// <param name="value">The value that represents the register contents.</param>
+        public Eflg(byte value)
+        {
+            Ewarn = (value & 0b0000_0001) == 0b0000_0001;
+            RxWar = (value & 0b0000_0010) == 0b0000_0010;
+            TxWar = (value & 0b0000_0100) == 0b0000_0100;
+            RxEp = (value & 0b0000_1000) == 0b0000_1000;
+            TxEp = (value & 0b0001_0000) == 0b0001_0000;
+            TxBo = (value & 0b0010_0000) == 0b0010_0000;
+            Rx0Ovr = (value & 0b0100_0000) == 0b0100_0000;
+            Rx1Ovr = (value & 0b1000_0000) == 0b1000_0000;
+        }
+
+        /// <summary>
         /// Error Warning Flag bit.
         /// Sets when TEC or REC is equal to or greater than 96 (TXWAR or RXWAR = 1).
         /// Resets when both REC and TEC are less than 96.

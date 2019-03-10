@@ -30,12 +30,5 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         {
             Assert.Equal(expectedByte, new TxBxDlc(TxBufferNumber.One, dlc, rtr).ToByte());
         }
-
-        [Fact]
-        public void Invalid_Arguments()
-        {
-            Assert.Throws<ArgumentException>(() =>
-             new TxBxDlc(TxBufferNumber.One, 0b1001, false).ToByte());
-        }
     }
 }

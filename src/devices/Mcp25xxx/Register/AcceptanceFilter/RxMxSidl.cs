@@ -35,6 +35,18 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         }
 
         /// <summary>
+        /// Initializes a new instance of the RxMxSidl class.
+        /// </summary>
+        /// <param name="rxMaskNumber">Transmit Buffer Number.</param>
+        /// <param name="value">The value that represents the register contents.</param>
+        public RxMxSidl(RxMaskNumber rxMaskNumber, byte value)
+        {
+            RxMaskNumber = rxMaskNumber;
+            Eid = (byte)(value & 0b0000_0011);
+            Sid = (byte)((value & 0b1100_0000) >> 5);
+        }
+
+        /// <summary>
         /// Receive Mask Number.
         /// </summary>
         public RxMaskNumber RxMaskNumber { get; }

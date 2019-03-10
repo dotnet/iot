@@ -45,6 +45,18 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         }
 
         /// <summary>
+        /// Initializes a new instance of the Cnf2 class.
+        /// </summary>
+        /// <param name="value">The value that represents the register contents.</param>
+        public Cnf2(byte value)
+        {
+            PrSeg = (byte)(value & 0b0000_0111);
+            PhSeg1 = (byte)((value & 0b0011_1000) >> 3);
+            Sam = (value & 0b0100_0000) == 0b0100_0000;
+            BtlMode = (value & 0b1000_0000) == 0b1000_0000;
+        }
+
+        /// <summary>
         /// Propagation Segment Length bits.
         /// </summary>
         public byte PrSeg { get; }

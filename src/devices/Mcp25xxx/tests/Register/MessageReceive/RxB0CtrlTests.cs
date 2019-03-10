@@ -13,14 +13,14 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
         [Fact]
         public void Get_Address()
         {
-            Assert.Equal(Address.RxB0Ctrl, new RxB0Ctrl(false, false, false, OperatingMode.ReceivesAllValidMessages).Address);
+            Assert.Equal(Address.RxB0Ctrl, new RxB0Ctrl(false, false, false, OperatingMode.ReceiveAllValidMessages).Address);
         }
 
         [Theory]
-        [InlineData(false, false, false, OperatingMode.ReceivesAllValidMessages, 0b0000_0000)]
-        [InlineData(true, false, false, OperatingMode.ReceivesAllValidMessages, 0b0000_0001)]
-        [InlineData(false, true, false, OperatingMode.ReceivesAllValidMessages, 0b0000_0110)]
-        [InlineData(false, false, true, OperatingMode.ReceivesAllValidMessages, 0b0000_1000)]
+        [InlineData(false, false, false, OperatingMode.ReceiveAllValidMessages, 0b0000_0000)]
+        [InlineData(true, false, false, OperatingMode.ReceiveAllValidMessages, 0b0000_0001)]
+        [InlineData(false, true, false, OperatingMode.ReceiveAllValidMessages, 0b0000_0110)]
+        [InlineData(false, false, true, OperatingMode.ReceiveAllValidMessages, 0b0000_1000)]
         [InlineData(false, false, false, OperatingMode.Reserved1, 0b0010_0000)]
         [InlineData(false, false, false, OperatingMode.Reserved2, 0b0100_0000)]
         [InlineData(false, false, false, OperatingMode.TurnsMaskFiltersOff, 0b0110_0000)]

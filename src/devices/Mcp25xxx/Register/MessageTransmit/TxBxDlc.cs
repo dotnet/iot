@@ -26,14 +26,21 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// </param>
         public TxBxDlc(TxBufferNumber txBufferNumber, int dlc, bool rtr)
         {
-            if (dlc > 8)
-            {
-                throw new ArgumentException($"Invalid DLC value {dlc}.", nameof(dlc));
-            }
-
             TxBufferNumber = txBufferNumber;
             Dlc = dlc;
             Rtr = rtr;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the TxBxDlc class.
+        /// </summary>
+        /// <param name="txBufferNumber">Transmit Buffer Number.</param>
+        /// <param name="value">The value that represents the register contents.</param>
+        public TxBxDlc(TxBufferNumber txBufferNumber, byte value)
+        {
+            TxBufferNumber = txBufferNumber;
+            Dlc = (byte)(value & 0b0000_1111);
+            Rtr = (value & 0b0100_0000) == 0b0100_0000;
         }
 
         /// <summary>
@@ -44,6 +51,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Data Length Code bits.
         /// Sets the number of data bytes to be transmitted (0 to 8 bytes).
+        /// It is possible to set the DLC[3:0] bits to a value greater than eight; however, only eight bytes are transmitted.
         /// </summary>
         public int Dlc { get; }
 

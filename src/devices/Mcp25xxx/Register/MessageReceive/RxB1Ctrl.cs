@@ -27,6 +27,17 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         }
 
         /// <summary>
+        /// Initializes a new instance of the RxB1Ctrl class.
+        /// </summary>
+        /// <param name="value">The value that represents the register contents.</param>
+        public RxB1Ctrl(byte value)
+        {
+            FilHit = (FilterHit)(value & 0b0000_0111);
+            RxRtr = (value & 0b0000_1000) == 0b0000_1000;
+            Rxm = (OperatingMode)((value & 0b0110_0000) >> 5);
+        }
+
+        /// <summary>
         /// Filter Hit bits.
         /// </summary>
         public enum FilterHit

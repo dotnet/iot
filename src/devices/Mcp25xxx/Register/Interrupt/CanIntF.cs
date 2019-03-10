@@ -65,6 +65,22 @@ namespace Iot.Device.Mcp25xxx.Register.Interrupt
         }
 
         /// <summary>
+        /// Initializes a new instance of the CanIntF class.
+        /// </summary>
+        /// <param name="value">The value that represents the register contents.</param>
+        public CanIntF(byte value)
+        {
+            Rx0If = (value & 0b0000_0001) == 0b0000_0001;
+            Rx1If = (value & 0b0000_0010) == 0b0000_0010;
+            Tx0If = (value & 0b0000_0100) == 0b0000_0100;
+            Tx1If = (value & 0b0000_1000) == 0b0000_1000;
+            Tx2If = (value & 0b0001_0000) == 0b0001_0000;
+            ErrIf = (value & 0b0010_0000) == 0b0010_0000;
+            WakIf = (value & 0b0100_0000) == 0b0100_0000;
+            Merrf = (value & 0b1000_0000) == 0b1000_0000;
+        }
+
+        /// <summary>
         /// Receive Buffer 0 Full Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.

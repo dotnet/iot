@@ -53,6 +53,19 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         }
 
         /// <summary>
+        /// Initializes a new instance of the RxBxSidl class.
+        /// </summary>
+        /// <param name="value">The value that represents the register contents.</param>
+        public RxBxSidl(RxBufferNumber rxBufferNumber, byte value)
+        {
+            RxBufferNumber = rxBufferNumber;
+            Eid = (byte)(value & 0b0000_0011);
+            Ide = (value & 0b0000_1000) == 0b0000_1000;
+            Srr = (value & 0b0001_0000) == 0b0001_0000;
+            Sid = (byte)((value & 0b1110_0000) >> 5);
+        }
+
+        /// <summary>
         /// Receive Buffer Number.
         /// </summary>
         public RxBufferNumber RxBufferNumber { get; }

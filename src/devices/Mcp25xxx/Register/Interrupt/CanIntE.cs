@@ -65,6 +65,22 @@ namespace Iot.Device.Mcp25xxx.Register.Interrupt
         }
 
         /// <summary>
+        /// Initializes a new instance of the CanIntE class.
+        /// </summary>
+        /// <param name="value">The value that represents the register contents.</param>
+        public CanIntE(byte value)
+        {
+            Rx0Ie = (value & 0b0000_0001) == 0b0000_0001;
+            Rx1Ie = (value & 0b0000_0010) == 0b0000_0010;
+            Tx0Ie = (value & 0b0000_0100) == 0b0000_0100;
+            Tx1Ie = (value & 0b0000_1000) == 0b0000_1000;
+            Tx2Ie = (value & 0b0001_0000) == 0b0001_0000;
+            ErrIe = (value & 0b0010_0000) == 0b0010_0000;
+            WakIe = (value & 0b0100_0000) == 0b0100_0000;
+            Merre = (value & 0b1000_0000) == 0b1000_0000;
+        }
+
+        /// <summary>
         /// Receive Buffer 0 Full Interrupt Enable bit.
         /// True = Interrupt when message is received in RXB0.
         /// False = Disabled.

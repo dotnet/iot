@@ -37,6 +37,18 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         }
 
         /// <summary>
+        /// Initializes a new instance of the RxB0Ctrl class.
+        /// </summary>
+        /// <param name="value">The value that represents the register contents.</param>
+        public RxB0Ctrl(byte value)
+        {
+            FilHit0 = (value & 0b0000_0001) == 0b0000_0001;
+            Bukt = (value & 0b0000_0100) == 0b0000_0100;
+            RxRtr = (value & 0b0000_1000) == 0b0000_1000;
+            Rxm = (OperatingMode)((value & 0b0110_0000) >> 5);
+        }
+
+        /// <summary>
         /// Indicates which acceptance filter enabled the reception of a message.
         /// True = Acceptance Filter 1 (RXF1).
         /// False = Acceptance Filter 0 (RXF0).
