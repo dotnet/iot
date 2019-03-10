@@ -1,6 +1,6 @@
 # Using BMP180 
 
-BMP180 is a device that read barometic pressure, altitude and temperature. SPI and I2C can be used to communicate with the device (only I2C implemented so far).
+BMP180 is a device that read barometic pressure, altitude and temperature. I2C can be used to communicate with the device.
 
 [Datasheet](https://cdn-shop.adafruit.com/datasheets/BST-BMP180-DS000-09.pdf) for the BMP180.
 
