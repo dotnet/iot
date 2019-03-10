@@ -17,38 +17,38 @@ namespace Iot.Device.Samples
         {
             Console.WriteLine("Hello Bmp180!");
 
-            //0x77 is the address for BMP180
-            const int bmp280Address = 0x77;
             //bus id on the raspberry pi 3
             const int busId = 1;
+            //set this to the current sea level pressure in the area for correct altitude readings
+            const double defaultSeaLevelPressure = 1033.00;
 
-            var i2cSettings = new I2cConnectionSettings(busId, bmp280Address);
+            var i2cSettings = new I2cConnectionSettings(busId, Bmp180.DefaultI2cAddress);
             var i2cDevice = new UnixI2cDevice(i2cSettings);
-            var i2CBmp280 = new Bmp180.Bmp180(i2cDevice);
+            var i2cBmp280 = new Bmp180.Bmp180(i2cDevice);
 
-            using (i2CBmp280)
+            using (i2cBmp280)
             {
                 //set samplings
-                i2CBmp280.SetSampling(Sampling.UltraLowPower);
+                i2cBmp280.SetSampling(Sampling.Standard);
 
                 //read values
-                Temperature tempValue = i2CBmp280.ReadTemperature();
+                Temperature tempValue = i2cBmp280.ReadTemperature();
                 Console.WriteLine($"Temperature {tempValue}");                
-                double preValue = i2CBmp280.ReadPressure();
+                double preValue = i2cBmp280.ReadPressure();
                 Console.WriteLine($"Pressure {preValue}");
-                double altValue = i2CBmp280.ReadAltitude();
+                double altValue = i2cBmp280.ReadAltitude(defaultSeaLevelPressure);
                 Console.WriteLine($"Altitude {altValue:0.##}");
                 Thread.Sleep(1000);
 
                 //set higher sampling
-                i2CBmp280.SetSampling(Sampling.UltraLowPower);
+                i2cBmp280.SetSampling(Sampling.UltraLowPower);
 
                 //read values
-                tempValue = i2CBmp280.ReadTemperature();
+                tempValue = i2cBmp280.ReadTemperature();
                 Console.WriteLine($"Temperature {tempValue}");
-                preValue = i2CBmp280.ReadPressure();
+                preValue = i2cBmp280.ReadPressure();
                 Console.WriteLine($"Pressure {preValue}");
-                altValue = i2CBmp280.ReadAltitude();
+                altValue = i2cBmp280.ReadAltitude(defaultSeaLevelPressure);
                 Console.WriteLine($"Altitude {altValue:0.##}");
                 
             }
