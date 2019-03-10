@@ -7,6 +7,7 @@ using System.Device.I2c;
 using System.Device.I2c.Drivers;
 using System.Threading;
 using Iot.Device.Bmp180;
+using Iot.Units;
 
 namespace Iot.Device.Samples
 {
@@ -31,7 +32,7 @@ namespace Iot.Device.Samples
                 i2CBmp280.SetSampling(Sampling.UltraLowPower);
 
                 //read values
-                double tempValue = i2CBmp280.ReadTemperature();
+                Temperature tempValue = i2CBmp280.ReadTemperature();
                 Console.WriteLine($"Temperature {tempValue}");                
                 double preValue = i2CBmp280.ReadPressure();
                 Console.WriteLine($"Pressure {preValue}");
