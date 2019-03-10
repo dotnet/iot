@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-//Ported from https://github.com/adafruit/Adafruit_Python_BMP/blob/master/Adafruit_BMP/BMP085.py  
-//Formulas and code examples can also be found in the datasheet https://cdn-shop.adafruit.com/datasheets/BST-BMP180-DS000-09.pdf
+// Ported from https://github.com/adafruit/Adafruit_Python_BMP/blob/master/Adafruit_BMP/BMP085.py  
+// Formulas and code examples can also be found in the datasheet https://cdn-shop.adafruit.com/datasheets/BST-BMP180-DS000-09.pdf
 
 using System;
 using System.Device.I2c;
@@ -13,35 +13,29 @@ using Iot.Units;
 
 namespace Iot.Device.Bmp180
 {
-    public class Bmp180:IDisposable
+    public class Bmp180 : IDisposable
     {
         private I2cDevice _i2cDevice;        
-        private bool _initialized = false;
         private readonly CalibrationData _calibrationData;
-        private Sampling _mode = Sampling.Standard;
-
+        private Sampling _mode;
         public const byte DefaultI2cAddress = 0x77;
 
         public Bmp180(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;            
             _calibrationData = new CalibrationData();            
-        }
-
-        private void Begin()
-        {            
             //Read the coefficients table
             _calibrationData.ReadFromDevice(this);
-            _initialized = true;
+            SetSampling(Sampling.Standard);
         }
-
+        
         /// <summary>
         /// Sets sampling to the given value
         /// </summary>
         /// <param name="mode">Sampling Mode</param>
         public void SetSampling(Sampling mode)
         {
-            this._mode = mode;
+            _mode = mode;
         }
 
         /// <summary>
@@ -52,11 +46,6 @@ namespace Iot.Device.Bmp180
         /// </returns>
         public Temperature ReadTemperature()
         {
-            // Make sure the I2C device is initialized
-            if (!_initialized)
-            {
-                Begin();
-            }
             //Gets the compensated temperature in degrees celsius
             short UT = ReadRawTemperature();
 
@@ -77,12 +66,6 @@ namespace Iot.Device.Bmp180
         /// </returns>
         public int ReadPressure()
         {
-            //Make sure the I2C device is initialized
-            if (!_initialized)
-            {
-                Begin();
-            }
-
             //Gets the compensated pressure in Pascals
             short UT = ReadRawTemperature();
             int UP = ReadRawPressure();
@@ -163,7 +146,7 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Raw temperature
         /// </returns>
-        short ReadRawTemperature()
+        private short ReadRawTemperature()
         {
             // Reads the raw (uncompensated) temperature from the sensor
             _i2cDevice.Write(new[] { (byte)Register.CONTROL, (byte)Register.READTEMPCMD });            
@@ -177,23 +160,28 @@ namespace Iot.Device.Bmp180
 
         /// <summary>
         ///  Reads raw pressure from the sensor
+        ///  Taken from datasheet, Section 3.3.1
+        ///  Standard            - 8ms
+        ///  UltraLowPower       - 5ms
+        ///  HighResolution      - 14ms
+        ///  UltraHighResolution - 26ms
         /// </summary>
         /// <returns>
         ///  Raw pressure
         /// </returns>
-        int ReadRawPressure()
+        private int ReadRawPressure()
         {
             // Reads the raw (uncompensated) pressure level from the sensor.
             _i2cDevice.Write(new[] { (byte)Register.CONTROL, (byte)(Register.READPRESSURECMD + ((byte)Sampling.Standard << 6))});
 
-            if (this._mode.Equals(Sampling.UltraLowPower))
+            if (_mode.Equals(Sampling.UltraLowPower))
             {
                 Thread.Sleep(5);
-            }else if (this._mode.Equals(Sampling.HighResolution))
+            }else if (_mode.Equals(Sampling.HighResolution))
             {
                 Thread.Sleep(14);
             }
-            else if (this._mode.Equals(Sampling.UltraHighResolution))
+            else if (_mode.Equals(Sampling.UltraHighResolution))
             {
                 Thread.Sleep(26);
             }
