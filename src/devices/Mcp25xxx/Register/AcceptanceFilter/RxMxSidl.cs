@@ -24,7 +24,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
                 throw new ArgumentException($"Invalid EID value {eid}.", nameof(eid));
             }
 
-            if (eid > 7)
+            if (sid > 7)
             {
                 throw new ArgumentException($"Invalid SID value {sid}.", nameof(sid));
             }

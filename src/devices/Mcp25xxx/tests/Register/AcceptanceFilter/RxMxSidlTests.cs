@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using Iot.Device.Mcp25xxx.Register;
 using Iot.Device.Mcp25xxx.Register.AcceptanceFilter;
 using Xunit;
@@ -20,12 +21,21 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         }
 
         [Theory]
-        [InlineData(0b0000_0000, 0b000_0000, 0b0000_0000)]
-        [InlineData(0b0000_0011, 0b0000_0000, 0b0000_0011)]
-        [InlineData(0b0000_0000, 0b0000_0111, 0b1110_0000)]
+        [InlineData(0b00, 0b000, 0b0000_0000)]
+        [InlineData(0b11, 0b000, 0b0000_0011)]
+        [InlineData(0b00, 0b111, 0b1110_0000)]
         public void To_Byte(byte eid, byte sid, byte expectedByte)
         {
             Assert.Equal(expectedByte, new RxMxSidl(RxMaskNumber.Zero, eid, sid).ToByte());
+        }
+
+        [Theory]
+        [InlineData(0b100, 0b000)]
+        [InlineData(0b00, 0b1000)]
+        public void Invalid_Arguments(byte eid, byte sid)
+        {
+            Assert.Throws<ArgumentException>(() =>
+             new RxMxSidl(RxMaskNumber.Zero, eid, sid).ToByte());
         }
     }
 }

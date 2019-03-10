@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using Iot.Device.Mcp25xxx.Register;
 using Iot.Device.Mcp25xxx.Register.MessageReceive;
 using Xunit;
@@ -20,22 +21,24 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
         }
 
         [Theory]
-        [InlineData(0b0000_0000, false, false, 0b0000_0000, 0b0000_0000)]
-        [InlineData(0b0000_0001, false, false, 0b0000_0000, 0b0000_0001)]
-        [InlineData(0b0000_0010, false, false, 0b0000_0000, 0b0000_0010)]
-        [InlineData(0b0000_0011, false, false, 0b0000_0000, 0b0000_0011)]
-        [InlineData(0b0000_0000, true, false, 0b0000_0000, 0b0000_1000)]
-        [InlineData(0b0000_0000, false, true, 0b0000_0000, 0b0001_0000)]
-        [InlineData(0b0010_0000, false, false, 0b0000_0000, 0b0010_0000)]
-        [InlineData(0b0100_0000, false, false, 0b0000_0000, 0b0100_0000)]
-        [InlineData(0b0110_0000, false, false, 0b0000_0000, 0b0110_0000)]
-        [InlineData(0b1000_0000, false, false, 0b0000_0000, 0b1000_0000)]
-        [InlineData(0b1010_0000, false, false, 0b0000_0000, 0b1010_0000)]
-        [InlineData(0b1100_0000, false, false, 0b0000_0000, 0b1100_0000)]
-        [InlineData(0b1110_0000, false, false, 0b0000_0000, 0b1110_0000)]
+        [InlineData(0b00, false, false, 0b000, 0b0000_0000)]
+        [InlineData(0b11, false, false, 0b000, 0b0000_0011)]
+        [InlineData(0b00, true, false, 0b000, 0b0000_1000)]
+        [InlineData(0b00, false, true, 0b000, 0b0001_0000)]
+        [InlineData(0b00, false, false, 0b001, 0b0010_0000)]
+        [InlineData(0b00, false, false, 0b111, 0b1110_0000)]
         public void To_Byte(byte eid, bool ide, bool srr, byte sid, byte expectedByte)
         {
             Assert.Equal(expectedByte, new RxBxSidl(RxBufferNumber.Zero, eid, ide, srr, sid).ToByte());
+        }
+
+        [Theory]
+        [InlineData(0b100, false, false, 0b000)]
+        [InlineData(0b00, false, false, 0b1000)]
+        public void Invalid_Arguments(byte eid, bool ide, bool srr, byte sid)
+        {
+            Assert.Throws<ArgumentException>(() =>
+             new RxBxSidl(RxBufferNumber.Zero, eid, ide, srr, sid).ToByte());
         }
     }
 }

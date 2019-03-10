@@ -35,6 +35,16 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// </param>
         public RxBxSidl(RxBufferNumber rxBufferNumber, byte eid, bool ide, bool srr, byte sid)
         {
+            if (eid > 3)
+            {
+                throw new ArgumentException($"Invalid EID value {eid}.", nameof(eid));
+            }
+
+            if (sid > 7)
+            {
+                throw new ArgumentException($"Invalid SID value {sid}.", nameof(sid));
+            }
+
             RxBufferNumber = rxBufferNumber;
             Eid = eid;
             Ide = ide;

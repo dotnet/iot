@@ -27,6 +27,11 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// </param>
         public RxBxDlc(RxBufferNumber rxBufferNumber, byte dlc, bool rtr)
         {
+            if (dlc > 8)
+            {
+                throw new ArgumentException($"Invalid DLC value {dlc}.", nameof(dlc));
+            }
+
             RxBufferNumber = rxBufferNumber;
             Dlc = dlc;
             Rtr = rtr;
