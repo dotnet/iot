@@ -15,22 +15,17 @@ namespace Iot.Device.Bmp180
 {
     public class Bmp180:IDisposable
     {
-        private I2cDevice _i2cDevice;
-        private readonly CommunicationProtocol _communicationProtocol;
+        private I2cDevice _i2cDevice;        
         private bool _initialized = false;
         private readonly CalibrationData _calibrationData;
         private Sampling _mode = Sampling.Standard;
 
-        private enum CommunicationProtocol
-        {
-            I2c
-        }
+        public const byte DefaultI2cAddress = 0x77;
 
         public Bmp180(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;            
-            _calibrationData = new CalibrationData();
-            _communicationProtocol = CommunicationProtocol.I2c;
+            _calibrationData = new CalibrationData();            
         }
 
         private void Begin()
@@ -137,11 +132,10 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Height in meters from the sensor
         /// </returns>
-        public double ReadAltitude(double sealevel_pa = 101325.0)
+        public double ReadAltitude(double seaLevelPressure)
         {
             double pressure = (double)ReadPressure();
-            double altitude = 44330.0 * (1.0 - Math.Pow((pressure / sealevel_pa), (1.0 / 5.255)));
-
+            double altitude = 44330.0 * (1.0 - Math.Pow((pressure / seaLevelPressure), (1.0 / 5.255)));
 
             return altitude;
         }
@@ -227,17 +221,10 @@ namespace Iot.Device.Bmp180
         ///  Value from register
         /// </returns>
         internal byte Read8BitsFromRegister(byte register)
-        {
-            if (_communicationProtocol == CommunicationProtocol.I2c)
-            {                
-                _i2cDevice.WriteByte(register);
-                byte value = _i2cDevice.ReadByte();
-                return value;
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+        {                                
+            _i2cDevice.WriteByte(register);
+            byte value = _i2cDevice.ReadByte();
+            return value;         
         }
 
         /// <summary>
@@ -250,20 +237,12 @@ namespace Iot.Device.Bmp180
         ///  Value from register
         /// </returns>
         internal ushort Read16BitsFromRegister(byte register)
-        {
-            if (_communicationProtocol == CommunicationProtocol.I2c)
-            {
-                Span<byte> bytes = stackalloc byte[2];
+        {            
+            Span<byte> bytes = stackalloc byte[2];
+            _i2cDevice.WriteByte(register);
+            _i2cDevice.Read(bytes);
 
-                _i2cDevice.WriteByte(register);
-                _i2cDevice.Read(bytes);
-
-                return BinaryPrimitives.ReadUInt16LittleEndian(bytes);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            return BinaryPrimitives.ReadUInt16LittleEndian(bytes);         
         }
 
         /// <summary>
@@ -277,19 +256,12 @@ namespace Iot.Device.Bmp180
         /// </returns>
         internal ushort Read16BitsFromRegisterBE(byte register)
         {
-            if (_communicationProtocol == CommunicationProtocol.I2c)
-            {
-                Span<byte> bytes = stackalloc byte[2];
+            
+            Span<byte> bytes = stackalloc byte[2];
+            _i2cDevice.WriteByte(register);
+            _i2cDevice.Read(bytes);
 
-                _i2cDevice.WriteByte(register);
-                _i2cDevice.Read(bytes);
-
-                return BinaryPrimitives.ReadUInt16BigEndian(bytes);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            return BinaryPrimitives.ReadUInt16BigEndian(bytes);            
         }
         
         public void Dispose()
