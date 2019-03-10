@@ -25,12 +25,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Transmit Buffer Number.
         /// </summary>
-        public TxBufferNumber TxBufferNumber { get; set; }
+        public TxBufferNumber TxBufferNumber { get; }
 
         /// <summary>
         /// Extended Identifier bits.
         /// </summary>
-        public byte Eid { get; set; }
+        public byte Eid { get; }
 
         private Address GetAddress()
         {

@@ -45,13 +45,13 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Receive Buffer Number.
         /// </summary>
-        public RxBufferNumber RxBufferNumber { get; set; }
+        public RxBufferNumber RxBufferNumber { get; }
 
         /// <summary>
         /// Extended Identifier bits.
         /// These bits contain the three Least Significant bits of the Standard Identifier for the received message.
         /// </summary>
-        public byte Eid { get; set; }
+        public byte Eid { get; }
 
         /// <summary>
         /// Extended Identifier Flag bit.
@@ -59,19 +59,19 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// True = Received message was an extended frame.
         /// False = Received message was a standard frame.
         /// </summary>
-        public bool Ide { get; set; }
+        public bool Ide { get; }
 
         /// <summary>
         /// Standard Frame Remote Transmit Request bit (valid only if the IDE bit = 0).
         /// True = Standard frame Remote Transmit Request received.
         /// False = Standard data frame received.
         /// </summary>
-        public bool Srr { get; set; }
+        public bool Srr { get; }
 
         /// <summary>
         /// Extended Identifier bits.
         /// </summary>
-        public byte Sid { get; set; }
+        public byte Sid { get; }
 
         private Address GetAddress()
         {

@@ -69,56 +69,56 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         /// Sets when TEC or REC is equal to or greater than 96 (TXWAR or RXWAR = 1).
         /// Resets when both REC and TEC are less than 96.
         /// </summary>
-        public bool Ewarn { get; set; }
+        public bool Ewarn { get; }
 
         /// <summary>
         /// Receive Error Warning Flag bit.
         /// Sets when REC is equal to or greater than 96.
         /// Resets when REC is less than 96.
         /// </summary>
-        public bool RxWar { get; set; }
+        public bool RxWar { get; }
 
         /// <summary>
         /// Transmit Error Warning Flag bit.
         /// Sets when TEC is equal to or greater than 96.
         /// Resets when TEC is less than 96.
         /// </summary>
-        public bool TxWar { get; set; }
+        public bool TxWar { get; }
 
         /// <summary>
         /// Receive Error-Passive Flag bit.
         /// Sets when REC is equal to or greater than 128.
         /// Resets when REC is less than 128.
         /// </summary>
-        public bool RxEp { get; set; }
+        public bool RxEp { get; }
 
         /// <summary>
         /// Transmit Error-Passive Flag bit.
         /// Sets when TEC is equal to or greater than 128.
         /// Resets when TEC is less than 128.
         /// </summary>
-        public bool TxEp { get; set; }
+        public bool TxEp { get; }
 
         /// <summary>
         /// Bus-Off Error Flag bit.
         /// Bit sets when TEC reaches 255.
         /// Resets after a successful bus recovery sequence.
         /// </summary>
-        public bool TxBo { get; set; }
+        public bool TxBo { get; }
 
         /// <summary>
         /// Receive Buffer 0 Overflow Flag bit.
         /// Sets when a valid message is received for RXB0 and the RX0IF bit in the CANINTF register is ‘1’.
         /// Must be reset by MCU.
         /// </summary>
-        public bool Rx0Ovr { get; set; }
+        public bool Rx0Ovr { get; }
 
         /// <summary>
         /// Receive Buffer 1 Overflow Flag bit.
         /// Sets when a valid message is received for RXB1 and the RX1IF bit in the CANINTF register is ‘1’.
         /// Must be reset by MCU.
         /// </summary>
-        public bool Rx1Ovr { get; set; }
+        public bool Rx1Ovr { get; }
 
         /// <summary>
         /// Gets the address of the register.

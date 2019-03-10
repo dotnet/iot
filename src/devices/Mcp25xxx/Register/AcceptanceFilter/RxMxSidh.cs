@@ -25,12 +25,12 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <summary>
         /// Receive Mask Number.
         /// </summary>
-        public RxMaskNumber RxMaskNumber { get; set; }
+        public RxMaskNumber RxMaskNumber { get; }
 
         /// <summary>
         /// Standard Identifier Mask bits.
         /// </summary>
-        public byte Sid { get; set; }
+        public byte Sid { get; }
 
         private Address GetAddress()
         {

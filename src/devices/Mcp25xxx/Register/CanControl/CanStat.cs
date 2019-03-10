@@ -64,12 +64,12 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         /// <summary>
         /// Interrupt Flag Code bits.
         /// </summary>
-        public InterruptFlagCode Icod { get; set; }
+        public InterruptFlagCode Icod { get; }
 
         /// <summary>
         /// Operation Mode bits.
         /// </summary>
-        public OperationMode OpMod { get; set; }
+        public OperationMode OpMod { get; }
 
         /// <summary>
         /// Gets the address of the register.

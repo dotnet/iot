@@ -69,56 +69,56 @@ namespace Iot.Device.Mcp25xxx.Register.Interrupt
         /// True = Interrupt when message is received in RXB0.
         /// False = Disabled.
         /// </summary>
-        public bool Rx0Ie { get; set; }
+        public bool Rx0Ie { get; }
 
         /// <summary>
         /// Receive Buffer 1 Full Interrupt Enable bit.
         /// True = Interrupt when message is received in RXB1.
         /// False = Disabled.
         /// </summary>
-        public bool Rx1Ie { get; set; }
+        public bool Rx1Ie { get; }
 
         /// <summary>
         /// Transmit Buffer 0 Empty Interrupt Enable bit.
         /// True = Interrupt on TXB0 becoming empty.
         /// False = Disabled.
         /// </summary>
-        public bool Tx0Ie { get; set; }
+        public bool Tx0Ie { get; }
 
         /// <summary>
         /// Transmit Buffer 1 Empty Interrupt Enable bit.
         /// True = Interrupt on TXB1 becoming empty.
         /// False = Disabled.
         /// </summary>
-        public bool Tx1Ie { get; set; }
+        public bool Tx1Ie { get; }
 
         /// <summary>
         /// Transmit Buffer 2 Empty Interrupt Enable bit.
         /// True = Interrupt on TXB2 becoming empty.
         /// False = Disabled.
         /// </summary>
-        public bool Tx2Ie { get; set; }
+        public bool Tx2Ie { get; }
 
         /// <summary>
         /// Error Interrupt Enable bit (multiple sources in the EFLG register).
         /// True = Interrupt on EFLG error condition change.
         /// False = Disabled.
         /// </summary>
-        public bool ErrIe { get; set; }
+        public bool ErrIe { get; }
 
         /// <summary>
         /// Wake-up Interrupt Enable bit.
         /// True = Interrupt on CAN bus activity.
         /// False = Disabled.
         /// </summary>
-        public bool WakIe { get; set; }
+        public bool WakIe { get; }
 
         /// <summary>
         /// Message Error Interrupt Enable bit.
         /// True = Interrupt on error during message reception or transmission.
         /// False = Disabled.
         /// </summary>
-        public bool Merre { get; set; }
+        public bool Merre { get; }
 
         /// <summary>
         /// Gets the address of the register.

@@ -21,7 +21,7 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         /// <summary>
         /// Transmit Error Count bits.
         /// </summary>
-        public byte Data { get; set; }
+        public byte Data { get; }
 
         /// <summary>
         /// Gets the address of the register.

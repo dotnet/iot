@@ -47,26 +47,26 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// <summary>
         /// Propagation Segment Length bits.
         /// </summary>
-        public byte PrSeg { get; set; }
+        public byte PrSeg { get; }
 
         /// <summary>
         /// PS1 Length bits.
         /// </summary>
-        public byte PhSeg1 { get; set; }
+        public byte PhSeg1 { get; }
 
         /// <summary>
         /// Sample Point Configuration bit.
         /// True = Bus line is sampled three times at the sample point.
         /// False = Bus line is sampled once at the sample point.
         /// </summary>
-        public bool Sam { get; set; }
+        public bool Sam { get; }
 
         /// <summary>
         /// PS2 Bit Time Length bit.
         /// True = Length of PS2 is determined by the PHSEG2[2:0] bits of CNF3.
         /// False = Length of PS2 is the greater of PS1 and IPT(2 TQ).
         /// </summary>
-        public bool BtlMode { get; set; }
+        public bool BtlMode { get; }
 
         /// <summary>
         /// Gets the address of the register.

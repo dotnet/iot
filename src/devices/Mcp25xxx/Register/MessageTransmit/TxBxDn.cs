@@ -32,7 +32,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Transmit Buffer Number.
         /// </summary>
-        public TxBufferNumber TxBufferNumber { get; set; }
+        public TxBufferNumber TxBufferNumber { get; }
 
         /// <summary>
         /// Index of data.  Must be a value of 0 - 7.

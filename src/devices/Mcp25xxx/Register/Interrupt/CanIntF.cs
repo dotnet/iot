@@ -69,56 +69,56 @@ namespace Iot.Device.Mcp25xxx.Register.Interrupt
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool Rx0If { get; set; }
+        public bool Rx0If { get; }
 
         /// <summary>
         /// Receive Buffer 1 Full Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool Rx1If { get; set; }
+        public bool Rx1If { get; }
 
         /// <summary>
         /// Transmit Buffer 0 Empty Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool Tx0If { get; set; }
+        public bool Tx0If { get; }
 
         /// <summary>
         /// Transmit Buffer 1 Empty Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool Tx1If { get; set; }
+        public bool Tx1If { get; }
 
         /// <summary>
         /// Transmit Buffer 2 Empty Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool Tx2If { get; set; }
+        public bool Tx2If { get; }
 
         /// <summary>
         /// Error Interrupt Flag bit (multiple sources in the EFLG register).
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool ErrIf { get; set; }
+        public bool ErrIf { get; }
 
         /// <summary>
         /// Wake-up Interrupt Flag bit.
         /// True = Interrupt pending(must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool WakIf { get; set; }
+        public bool WakIf { get; }
 
         /// <summary>
         /// Message Error Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool Merrf { get; set; }
+        public bool Merrf { get; }
 
         /// <summary>
         /// Gets the address of the register.

@@ -60,19 +60,19 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Filter Hit bits.
         /// </summary>
-        public FilterHit FilHit { get; set; }
+        public FilterHit FilHit { get; }
 
         /// <summary>
         /// Received Remote Transfer Request bit.
         /// True = Remote Transfer Request received.
         /// False = No Remote Transfer Request received.
         /// </summary>
-        public bool RxRtr { get; set; }
+        public bool RxRtr { get; }
 
         /// <summary>
         /// Receive Buffer Operating mode bits.
         /// </summary>
-        public OperatingMode Rxm { get; set; }
+        public OperatingMode Rxm { get; }
 
         /// <summary>
         /// Gets the address of the register.

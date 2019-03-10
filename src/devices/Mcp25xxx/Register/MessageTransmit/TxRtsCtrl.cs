@@ -57,42 +57,42 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// True = Pin is used to request message transmission of TXB0 buffer (on falling edge).
         /// False = Digital input.
         /// </summary>
-        public bool B0Rtsm { get; set; }
+        public bool B0Rtsm { get; }
 
         /// <summary>
         /// Tx1RTS Pin mode bit.
         /// True = Pin is used to request message transmission of TXB1 buffer (on falling edge).
         /// False = Digital input.
         /// </summary>
-        public bool B1Rtsm { get; set; }
+        public bool B1Rtsm { get; }
 
         /// <summary>
         /// Tx2RTS Pin mode bit.
         /// True = Pin is used to request message transmission of TXB2 buffer (on falling edge).
         /// False = Digital input.
         /// </summary>
-        public bool B2Rtsm { get; set; }
+        public bool B2Rtsm { get; }
 
         /// <summary>
         /// Tx0RTS Pin State bit.
         /// Reads state of Tx0RTS pin when in Digital Input mode.
         /// Reads as '0' when pin is in 'Request-to-Send' mode.
         /// </summary>
-        public bool B0Rts { get; set; }
+        public bool B0Rts { get; }
 
         /// <summary>
         /// Tx1RTX Pin State bit.
         /// Reads state of Tx1RTS pin when in Digital Input mode.
         /// Reads as '0' when pin is in 'Request-to-Send' mode.
         /// </summary>
-        public bool B1Rts { get; set; }
+        public bool B1Rts { get; }
 
         /// <summary>
         /// Tx2RTS Pin State bit.
         /// Reads state of Tx2RTS pin when in Digital Input mode.
         /// Reads as '0' when pin is in 'Request-to-Send' mode.
         /// </summary>
-        public bool B2Rts { get; set; }
+        public bool B2Rts { get; }
 
         /// <summary>
         /// Gets the address of the register.

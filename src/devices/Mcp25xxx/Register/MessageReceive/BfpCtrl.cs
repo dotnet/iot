@@ -55,40 +55,40 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// True = Pin is used as an interrupt when a valid message is loaded into RXB0.
         /// False = Digital Output mode.
         /// </summary>
-        public bool B0Bfm { get; set; }
+        public bool B0Bfm { get; }
 
         /// <summary>
         /// Rx1BF Pin Operation mode bit.
         /// True = Pin is used as an interrupt when a valid message is loaded into RXB1.
         /// False = Digital Output mode.
         /// </summary>
-        public bool B1Bfm { get; set; }
+        public bool B1Bfm { get; }
 
         /// <summary>
         /// Rx0BF Pin Function Enable bit.
         /// True = Pin function is enabled, operation mode is determined by the B0BFM bit.
         /// False = Pin function is disabled, pin goes to the high-impedance state.
         /// </summary>
-        public bool B0Bfe { get; set; }
+        public bool B0Bfe { get; }
 
         /// <summary>
         /// Rx1BF Pin Function Enable bit.
         /// True = Pin function is enabled, operation mode is determined by the B1BFM bit.
         /// False = Pin function is disabled, pin goes to the high-impedance state.
         /// </summary>
-        public bool B1Bfe { get; set; }
+        public bool B1Bfe { get; }
 
         /// <summary>
         /// Rx0BF Pin State bit (Digital Output mode only).
         /// Reads as '0' when Rx0BF is configured as an interrupt pin.
         /// </summary>
-        public bool B0Bfs { get; set; }
+        public bool B0Bfs { get; }
 
         /// <summary>
         /// Rx1BF Pin State bit (Digital Output mode only).
         /// Reads as '0' when Rx1BF is configured as an interrupt pin.
         /// </summary>
-        public bool B1Bfs { get; set; }
+        public bool B1Bfs { get; }
 
         /// <summary>
         /// Gets the address of the register.

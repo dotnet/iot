@@ -41,7 +41,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// True = Acceptance Filter 1 (RXF1).
         /// False = Acceptance Filter 0 (RXF0).
         /// </summary>
-        public bool FilHit0 { get; set; }
+        public bool FilHit0 { get; }
 
         /// <summary>
         /// Read-Only copy of BUKT bit (used internally by the MCP25625).
@@ -53,19 +53,19 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// True = RXB0 message will roll over and be written to RXB1 if RXB0 is full.
         /// False = Rollover is disabled.
         /// </summary>
-        public bool Bukt { get; set; }
+        public bool Bukt { get; }
 
         /// <summary>
         /// Received Remote Transfer Request bit.
         /// True = Remote Transfer Request received.
         /// False = No Remote Transfer Request received.
         /// </summary>
-        public bool RxRtr { get; set; }
+        public bool RxRtr { get; }
 
         /// <summary>
         /// Receive Buffer Operating mode bits.
         /// </summary>
-        public OperatingMode Rxm { get; set; }
+        public OperatingMode Rxm { get; }
 
         /// <summary>
         /// Gets the address of the register.

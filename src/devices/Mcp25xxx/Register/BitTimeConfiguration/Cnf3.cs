@@ -49,14 +49,14 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// (PHSEG2[2:0] + 1) x TQ.
         /// Minimum valid setting for PS2 is 2 TQ.
         /// </summary>
-        public byte PhSeg2 { get; set; }
+        public byte PhSeg2 { get; }
 
         /// <summary>
         /// Wake-up Filter bit.
         /// True = Wake-up filter is enabled.
         /// False = Wake-up filter is disabled.
         /// </summary>
-        public bool WakFil { get; set; }
+        public bool WakFil { get; }
 
         /// <summary>
         /// Start-of-Frame Signal bit.
@@ -66,7 +66,7 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// If CLKEN(CANCTRL[2]) = 0:
         /// Bit is don’t care.
         /// </summary>
-        public bool Sof { get; set; }
+        public bool Sof { get; }
 
         /// <summary>
         /// Gets the address of the register.

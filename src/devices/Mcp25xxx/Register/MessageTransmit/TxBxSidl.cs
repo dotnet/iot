@@ -43,24 +43,24 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Transmit Buffer Number.
         /// </summary>
-        public TxBufferNumber TxBufferNumber { get; set; }
+        public TxBufferNumber TxBufferNumber { get; }
 
         /// <summary>
         /// Extended Identifier bits.
         /// </summary>
-        public byte Eid { get; set; }
+        public byte Eid { get; }
 
         /// <summary>
         /// Extended Identifier Enable bit.
         /// True = Message will transmit the Extended Identifier.
         /// False = Message will transmit the Standard Identifier.
         /// </summary>
-        public bool Exide { get; set; }
+        public bool Exide { get; }
 
         /// <summary>
         /// Standard Identifier bits.
         /// </summary>
-        public byte Sid { get; set; }
+        public byte Sid { get; }
 
         private Address GetAddress()
         {

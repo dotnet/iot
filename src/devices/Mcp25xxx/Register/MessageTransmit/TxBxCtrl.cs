@@ -78,40 +78,40 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Transmit Buffer Number.
         /// </summary>
-        public TxBufferNumber TxBufferNumber { get; set; }
+        public TxBufferNumber TxBufferNumber { get; }
 
         /// <summary>
         /// Transmit Buffer Priority bits.
         /// </summary>
-        public TransmitBufferPriority Txp { get; set; }
+        public TransmitBufferPriority Txp { get; }
 
         /// <summary>
         /// Message Transmit Request bit.
         /// True = Buffer is currently pending transmission (MCU sets this bit to request message be transmitted bit is automatically cleared when the message is sent).
         /// False = Buffer is not currently pending transmission (MCU can clear this bit to request a message abort).
         /// </summary>
-        public bool TxReq { get; set; }
+        public bool TxReq { get; }
 
         /// <summary>
         /// Transmission Error Detected bit.
         /// True = A bus error occurred while the message was being transmitted.
         /// False = No bus error occurred while the message was being transmitted.
         /// </summary>
-        public bool TxErr { get; set; }
+        public bool TxErr { get; }
 
         /// <summary>
         /// Message Lost Arbitration bit.
         /// True = Message lost arbitration while being sent.
         /// False = Message did not lose arbitration while being sent.
         /// </summary>
-        public bool Mloa { get; set; }
+        public bool Mloa { get; }
 
         /// <summary>
         /// Message Aborted Flag bit.
         /// True = Message was aborted.
         /// False = Message completed transmission successfully.
         /// </summary>
-        public bool Abtf { get; set; }
+        public bool Abtf { get; }
 
         private Address GetAddress()
         {

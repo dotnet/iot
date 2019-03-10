@@ -32,7 +32,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Receive Buffer Number.
         /// </summary>
-        public RxBufferNumber RxBufferNumber { get; set; }
+        public RxBufferNumber RxBufferNumber { get; }
 
         /// <summary>
         /// Index of data.  Must be a value of 0 - 7.

@@ -35,13 +35,13 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Receive Buffer Number.
         /// </summary>
-        public RxBufferNumber RxBufferNumber { get; set; }
+        public RxBufferNumber RxBufferNumber { get; }
 
         /// <summary>
         /// Data Length Code bits.
         /// Indicates the number of data bytes that were received. (0 to 8 bytes).
         /// </summary>
-        public byte Dlc { get; set; }
+        public byte Dlc { get; }
 
         /// <summary>
         /// Extended Frame Remote Transmission Request bit.
@@ -49,7 +49,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// True = Extended frame Remote Transmit Request received.
         /// False = Extended data frame received.
         /// </summary>
-        public bool Rtr { get; set; }
+        public bool Rtr { get; }
 
         private Address GetAddress()
         {

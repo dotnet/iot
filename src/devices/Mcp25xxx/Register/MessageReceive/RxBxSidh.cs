@@ -25,12 +25,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Receive Buffer Number.
         /// </summary>
-        public RxBufferNumber RxBufferNumber { get; set; }
+        public RxBufferNumber RxBufferNumber { get; }
 
         /// <summary>
         /// Standard Identifier bits.
         /// </summary>
-        public byte Sid { get; set; }
+        public byte Sid { get; }
 
         private Address GetAddress()
         {

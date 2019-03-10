@@ -39,20 +39,20 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Transmit Buffer Number.
         /// </summary>
-        public TxBufferNumber TxBufferNumber { get; set; }
+        public TxBufferNumber TxBufferNumber { get; }
 
         /// <summary>
         /// Data Length Code bits.
         /// Sets the number of data bytes to be transmitted (0 to 8 bytes).
         /// </summary>
-        public int Dlc { get; set; }
+        public int Dlc { get; }
 
         /// <summary>
         /// Remote Transmission Request bit.
         /// True = Transmitted message will be a Remote Transmit Request.
         /// False = Transmitted message will be a data frame.
         /// </summary>
-        public bool Rtr { get; set; }
+        public bool Rtr { get; }
 
         private Address GetAddress()
         {

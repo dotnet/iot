@@ -57,12 +57,12 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// Baud Rate Prescaler bits.
         /// TQ = 2 x (BRP[5:0] + 1)/FOSC.
         /// </summary>
-        public byte Brp { get; set; }
+        public byte Brp { get; }
 
         /// <summary>
         /// Synchronization Jump Width Length bits.
         /// </summary>
-        public SynchronizationJumpWidthLength Sjw { get; set; }
+        public SynchronizationJumpWidthLength Sjw { get; }
 
         /// <summary>
         /// Gets the address of the register.

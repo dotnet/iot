@@ -71,33 +71,33 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         /// <summary>
         /// CLKOUT Pin Prescaler bits.
         /// </summary>
-        public ClkOutPinPrescaler ClkPre { get; set; }
+        public ClkOutPinPrescaler ClkPre { get; }
 
         /// <summary>
         /// CLKOUT Pin Enable bit.
         /// True = CLKOUT pin is enabled.
         /// False = CLKOUT pin is disabled (pin is in a high-impedance state).
         /// </summary>
-        public bool ClkEn { get; set; }
+        public bool ClkEn { get; }
 
         /// <summary>
         /// One-Shot Mode bit.
         /// True = Enabled: Message will only attempt to transmit one time.
         /// False = Disabled: Messages will reattempt transmission if required.
         /// </summary>
-        public bool Osm { get; set; }
+        public bool Osm { get; }
 
         /// <summary>
         /// Abort All Pending Transmissions bit.
         /// True = Requests abort of all pending transmit buffers.
         /// False = Terminates request to abort all transmissions.
         /// </summary>
-        public bool Abat { get; set; }
+        public bool Abat { get; }
 
         /// <summary>
         /// Request Operation mode bits.
         /// </summary>
-        public OperationMode ReqOp { get; set; }
+        public OperationMode ReqOp { get; }
 
         /// <summary>
         /// Gets the address of the register.
