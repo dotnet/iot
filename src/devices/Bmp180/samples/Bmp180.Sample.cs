@@ -9,7 +9,7 @@ using System.Threading;
 using Iot.Device.Bmp180;
 using Iot.Units;
 
-namespace Iot.Device.Samples
+namespace Iot.Device.Bmp180.Samples
 {
     class Program
     {
@@ -24,7 +24,7 @@ namespace Iot.Device.Samples
 
             var i2cSettings = new I2cConnectionSettings(busId, Bmp180.DefaultI2cAddress);
             var i2cDevice = new UnixI2cDevice(i2cSettings);
-            var i2cBmp280 = new Bmp180.Bmp180(i2cDevice);
+            var i2cBmp280 = new Bmp180(i2cDevice); 
 
             using (i2cBmp280)
             {
@@ -49,8 +49,7 @@ namespace Iot.Device.Samples
                 preValue = i2cBmp280.ReadPressure();
                 Console.WriteLine($"Pressure {preValue}");
                 altValue = i2cBmp280.ReadAltitude(defaultSeaLevelPressure);
-                Console.WriteLine($"Altitude {altValue:0.##}");
-                
+                Console.WriteLine($"Altitude {altValue:0.##}");                
             }
         }
     }
