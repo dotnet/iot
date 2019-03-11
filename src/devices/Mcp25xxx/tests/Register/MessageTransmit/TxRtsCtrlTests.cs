@@ -24,8 +24,16 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         [InlineData(false, false, false, true, false, false, 0b0000_1000)]
         [InlineData(false, false, false, false, true, false, 0b0001_0000)]
         [InlineData(false, false, false, false, false, true, 0b0010_0000)]
-        public void To_Byte(bool b0rtsm, bool b1rtsm, bool b2rtsm, bool b0rts, bool b1rts, bool b2rts, byte expectedByte)
+        public void From_To_Byte(bool b0rtsm, bool b1rtsm, bool b2rtsm, bool b0rts, bool b1rts, bool b2rts, byte expectedByte)
         {
+            var txRtsCtrl = new TxRtsCtrl(expectedByte);
+            Assert.Equal(b0rtsm, txRtsCtrl.B0Rtsm);
+            Assert.Equal(b1rtsm, txRtsCtrl.B1Rtsm);
+            Assert.Equal(b2rtsm, txRtsCtrl.B2Rtsm);
+            Assert.Equal(b0rts, txRtsCtrl.B0Rts);
+            Assert.Equal(b1rts, txRtsCtrl.B1Rts);
+            Assert.Equal(b2rts, txRtsCtrl.B2Rts);
+
             Assert.Equal(expectedByte, new TxRtsCtrl(b0rtsm, b1rtsm, b2rtsm, b0rts, b1rts, b2rts).ToByte());
         }
     }

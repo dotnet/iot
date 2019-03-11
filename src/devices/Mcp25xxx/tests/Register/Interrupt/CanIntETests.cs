@@ -26,8 +26,18 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.Interrupt
         [InlineData(false, false, false, false, false, true, false, false, 0b0010_0000)]
         [InlineData(false, false, false, false, false, false, true, false, 0b0100_0000)]
         [InlineData(false, false, false, false, false, false, false, true, 0b1000_0000)]
-        public void To_Byte(bool rx0ie, bool rx1ie, bool tx0ie, bool tx1ie, bool tx2ie, bool errie, bool wakie, bool merre, byte expectedByte)
+        public void From_To_Byte(bool rx0ie, bool rx1ie, bool tx0ie, bool tx1ie, bool tx2ie, bool errie, bool wakie, bool merre, byte expectedByte)
         {
+            var canIntE = new CanIntE(expectedByte);
+            Assert.Equal(rx0ie, canIntE.Rx0Ie);
+            Assert.Equal(rx1ie, canIntE.Rx1Ie);
+            Assert.Equal(tx0ie, canIntE.Tx0Ie);
+            Assert.Equal(tx1ie, canIntE.Tx1Ie);
+            Assert.Equal(tx2ie, canIntE.Tx2Ie);
+            Assert.Equal(errie, canIntE.ErrIe);
+            Assert.Equal(wakie, canIntE.WakIe);
+            Assert.Equal(merre, canIntE.Merre);
+
             Assert.Equal(expectedByte, new CanIntE(rx0ie, rx1ie, tx0ie, tx1ie, tx2ie, errie, wakie, merre).ToByte());
         }
     }

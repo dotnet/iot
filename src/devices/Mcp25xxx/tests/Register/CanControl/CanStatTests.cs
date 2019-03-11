@@ -29,8 +29,12 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.CanControl
         [InlineData(InterruptFlagCode.No, OperationMode.Loopback, 0b0100_0000)]
         [InlineData(InterruptFlagCode.No, OperationMode.ListenOnly, 0b0110_0000)]
         [InlineData(InterruptFlagCode.No, OperationMode.Configuration, 0b1000_0000)]
-        public void To_Byte(InterruptFlagCode icod, OperationMode opMod, byte expectedByte)
+        public void From_To_Byte(InterruptFlagCode icod, OperationMode opMod, byte expectedByte)
         {
+            var canStat = new CanStat(expectedByte);
+            Assert.Equal(icod, canStat.Icod);
+            Assert.Equal(opMod, canStat.OpMod);
+
             Assert.Equal(expectedByte, new CanStat(icod, opMod).ToByte());
         }
     }

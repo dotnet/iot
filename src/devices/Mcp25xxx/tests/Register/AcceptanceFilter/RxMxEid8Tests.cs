@@ -24,6 +24,9 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         [InlineData(0b1111_1111)]
         public void To_Byte(byte eid)
         {
+            var rxMxEid8 = new RxMxEid8(RxMaskNumber.Zero, eid);
+            Assert.Equal(eid, rxMxEid8.Eid);
+
             Assert.Equal(eid, new RxMxEid8(RxMaskNumber.Zero, eid).ToByte());
         }
     }

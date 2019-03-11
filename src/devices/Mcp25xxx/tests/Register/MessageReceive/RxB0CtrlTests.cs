@@ -24,8 +24,15 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
         [InlineData(false, false, false, OperatingMode.Reserved1, 0b0010_0000)]
         [InlineData(false, false, false, OperatingMode.Reserved2, 0b0100_0000)]
         [InlineData(false, false, false, OperatingMode.TurnsMaskFiltersOff, 0b0110_0000)]
-        public void To_Byte(bool filhit0, bool bukt, bool rxrtr, OperatingMode rxm, byte expectedByte)
+        public void From_To_Byte(bool filhit0, bool bukt, bool rxrtr, OperatingMode rxm, byte expectedByte)
         {
+            var rxB0Ctrl = new RxB0Ctrl(expectedByte);
+            Assert.Equal(filhit0, rxB0Ctrl.FilHit0);
+            Assert.Equal(bukt, rxB0Ctrl.Bukt);
+            Assert.Equal(bukt, rxB0Ctrl.Bukt1);
+            Assert.Equal(rxrtr, rxB0Ctrl.RxRtr);
+            Assert.Equal(rxm, rxB0Ctrl.Rxm);
+
             Assert.Equal(expectedByte, new RxB0Ctrl(filhit0, bukt, rxrtr, rxm).ToByte());
         }
     }

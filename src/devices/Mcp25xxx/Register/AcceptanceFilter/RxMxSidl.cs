@@ -43,7 +43,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             RxMaskNumber = rxMaskNumber;
             Eid = (byte)(value & 0b0000_0011);
-            Sid = (byte)((value & 0b1100_0000) >> 5);
+            Sid = (byte)((value & 0b1110_0000) >> 5);
         }
 
         /// <summary>

@@ -29,13 +29,20 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.CanControl
         [InlineData(ClkOutPinPrescaler.ClockDivideBy1, false, false, false, OperationMode.Loopback, 0b0100_0000)]
         [InlineData(ClkOutPinPrescaler.ClockDivideBy1, false, false, false, OperationMode.ListenOnly, 0b0110_0000)]
         [InlineData(ClkOutPinPrescaler.ClockDivideBy1, false, false, false, OperationMode.Configuration, 0b1000_0000)]
-        public void To_Byte(ClkOutPinPrescaler clkPre,
+        public void From_To_Byte(ClkOutPinPrescaler clkPre,
             bool clkEn,
             bool osm,
             bool abat,
             OperationMode reqOp,
             byte expectedByte)
         {
+            var canCtrl = new CanCtrl(expectedByte);
+            Assert.Equal(clkPre, canCtrl.ClkPre);
+            Assert.Equal(clkEn, canCtrl.ClkEn);
+            Assert.Equal(osm, canCtrl.Osm);
+            Assert.Equal(abat, canCtrl.Abat);
+            Assert.Equal(reqOp, canCtrl.ReqOp);
+
             Assert.Equal(expectedByte, new CanCtrl(clkPre, clkEn, osm, abat, reqOp).ToByte());
         }
     }

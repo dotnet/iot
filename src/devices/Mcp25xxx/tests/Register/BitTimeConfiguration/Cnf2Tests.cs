@@ -23,8 +23,14 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.BitTimeConfiguration
         [InlineData(0b000, 0b111, false, false, 0b0011_1000)]
         [InlineData(0b000, 0b000, true, false, 0b0100_0000)]
         [InlineData(0b000, 0b000, false, true, 0b1000_0000)]
-        public void To_Byte(byte prseg, byte phseg1, bool sam, bool btlmode, byte expectedByte)
+        public void From_To_Byte(byte prseg, byte phseg1, bool sam, bool btlmode, byte expectedByte)
         {
+            var cnf2 = new Cnf2(expectedByte);
+            Assert.Equal(prseg, cnf2.PrSeg);
+            Assert.Equal(phseg1, cnf2.PhSeg1);
+            Assert.Equal(sam, cnf2.Sam);
+            Assert.Equal(btlmode, cnf2.BtlMode);
+
             Assert.Equal(expectedByte, new Cnf2(prseg, phseg1, sam, btlmode).ToByte());
         }
 

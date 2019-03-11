@@ -19,8 +19,11 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.ErrorDetection
         [Theory]
         [InlineData(0b0000_0000)]
         [InlineData(0b1111_1111)]
-        public void To_Byte(byte data)
+        public void From_To_Byte(byte data)
         {
+            var rec = new Rec(data);
+            Assert.Equal(data, rec.Data);
+
             Assert.Equal(data, new Rec(data).ToByte());
         }
     }

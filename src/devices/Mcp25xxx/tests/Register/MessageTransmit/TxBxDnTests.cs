@@ -36,8 +36,11 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         [Theory]
         [InlineData(0b0000_0000)]
         [InlineData(0b1111_1111)]
-        public void To_Byte(byte data)
+        public void From_To_Byte(byte data)
         {
+            var txBxDn = new TxBxDn(TxBufferNumber.Zero, 0, data);
+            Assert.Equal(data, txBxDn.Data);
+
             Assert.Equal(data, new TxBxDn(TxBufferNumber.Zero, 0, data).ToByte());
         }
     }

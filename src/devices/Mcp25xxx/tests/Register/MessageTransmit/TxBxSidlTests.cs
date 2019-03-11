@@ -26,8 +26,13 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         [InlineData(0b11, false, 0b000, 0b0000_0011)]
         [InlineData(0b00, true, 0b000, 0b0000_1000)]
         [InlineData(0b00, false, 0b111, 0b1110_0000)]
-        public void To_Byte(byte eid, bool exide, byte sid, byte expectedByte)
+        public void From_To_Byte(byte eid, bool exide, byte sid, byte expectedByte)
         {
+            var txBxSidl = new TxBxSidl(TxBufferNumber.Zero, expectedByte);
+            Assert.Equal(eid, txBxSidl.Eid);
+            Assert.Equal(exide, txBxSidl.Exide);
+            Assert.Equal(sid, txBxSidl.Sid);
+
             Assert.Equal(expectedByte, new TxBxSidl(TxBufferNumber.Zero, eid, exide, sid).ToByte());
         }
 

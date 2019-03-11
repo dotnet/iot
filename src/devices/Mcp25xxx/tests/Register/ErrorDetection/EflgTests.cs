@@ -26,8 +26,18 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.ErrorDetection
         [InlineData(false, false, false, false, false, true, false, false, 0b0010_0000)]
         [InlineData(false, false, false, false, false, false, true, false, 0b0100_0000)]
         [InlineData(false, false, false, false, false, false, false, true, 0b1000_0000)]
-        public void To_Byte(bool ewarn, bool rxwar, bool txwar, bool rxep, bool txep, bool txbo, bool rx0ovr, bool rx1ovr, byte expectedByte)
+        public void From_To_Byte(bool ewarn, bool rxwar, bool txwar, bool rxep, bool txep, bool txbo, bool rx0ovr, bool rx1ovr, byte expectedByte)
         {
+            var eflg = new Eflg(expectedByte);
+            Assert.Equal(ewarn, eflg.Ewarn);
+            Assert.Equal(rxwar, eflg.RxWar);
+            Assert.Equal(txwar, eflg.TxWar);
+            Assert.Equal(rxep, eflg.RxEp);
+            Assert.Equal(txep, eflg.TxEp);
+            Assert.Equal(txbo, eflg.TxBo);
+            Assert.Equal(rx0ovr, eflg.Rx0Ovr);
+            Assert.Equal(rx1ovr, eflg.Rx1Ovr);
+
             Assert.Equal(expectedByte, new Eflg(ewarn, rxwar, txwar, rxep, txep, txbo, rx0ovr, rx1ovr).ToByte());
         }
     }

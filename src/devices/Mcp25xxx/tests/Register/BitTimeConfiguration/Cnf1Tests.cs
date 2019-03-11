@@ -23,8 +23,12 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.BitTimeConfiguration
         [InlineData(0b00_0000, Cnf1.SynchronizationJumpWidthLength.Tqx2, 0b0100_0000)]
         [InlineData(0b00_0000, Cnf1.SynchronizationJumpWidthLength.Tqx3, 0b1000_0000)]
         [InlineData(0b00_0000, Cnf1.SynchronizationJumpWidthLength.Tqx4, 0b1100_0000)]
-        public void To_Byte(byte brp, Cnf1.SynchronizationJumpWidthLength sjw, byte expectedByte)
+        public void From_To_Byte(byte brp, Cnf1.SynchronizationJumpWidthLength sjw, byte expectedByte)
         {
+            var cnf1 = new Cnf1(expectedByte);
+            Assert.Equal(brp, cnf1.Brp);
+            Assert.Equal(sjw, cnf1.Sjw);
+
             Assert.Equal(expectedByte, new Cnf1(brp, sjw).ToByte());
         }
 

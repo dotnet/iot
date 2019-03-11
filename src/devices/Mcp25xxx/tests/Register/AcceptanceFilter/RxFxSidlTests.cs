@@ -29,8 +29,13 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         [InlineData(0b11, false, 0b000, 0b0000_0011)]
         [InlineData(0b00, true, 0b000, 0b0000_1000)]
         [InlineData(0b00, false, 0b111, 0b1110_0000)]
-        public void To_Byte(byte eid, bool exide, byte sid, byte expectedByte)
+        public void From_To_Byte(byte eid, bool exide, byte sid, byte expectedByte)
         {
+            var rxFxSidl = new RxFxSidl(RxFilterNumber.Zero, eid, exide, sid);
+            Assert.Equal(eid, rxFxSidl.Eid);
+            Assert.Equal(exide, rxFxSidl.Exide);
+            Assert.Equal(sid, rxFxSidl.Sid);
+
             Assert.Equal(expectedByte, new RxFxSidl(RxFilterNumber.Zero, eid, exide, sid).ToByte());
         }
 

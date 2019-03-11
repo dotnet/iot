@@ -24,8 +24,12 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
         [InlineData(0b0000, false, 0b0000_0000)]
         [InlineData(0b1000, false, 0b0000_1000)]
         [InlineData(0b0000, true, 0b0100_0000)]
-        public void To_Byte(byte dlc, bool rtr, byte expectedByte)
+        public void From_To_Byte(byte dlc, bool rtr, byte expectedByte)
         {
+            var rxBxDlc = new RxBxDlc(RxBufferNumber.Zero, expectedByte);
+            Assert.Equal(dlc, rxBxDlc.Dlc);
+            Assert.Equal(rtr, rxBxDlc.Rtr);
+
             Assert.Equal(expectedByte, new RxBxDlc(RxBufferNumber.Zero, dlc, rtr).ToByte());
         }
     }

@@ -30,8 +30,15 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         [InlineData(TransmitBufferPriority.LowestMessage, false, true, false, false, 0b0001_0000)]
         [InlineData(TransmitBufferPriority.LowestMessage, false, false, true, false, 0b0010_0000)]
         [InlineData(TransmitBufferPriority.LowestMessage, false, false, false, true, 0b0100_0000)]
-        public void To_Byte(TransmitBufferPriority txp, bool txreq, bool txerr, bool mloa, bool abtf, byte expectedByte)
+        public void From_To_Byte(TransmitBufferPriority txp, bool txreq, bool txerr, bool mloa, bool abtf, byte expectedByte)
         {
+            var txBxCtrl = new TxBxCtrl(TxBufferNumber.One, expectedByte);
+            Assert.Equal(txp, txBxCtrl.Txp);
+            Assert.Equal(txreq, txBxCtrl.TxReq);
+            Assert.Equal(txerr, txBxCtrl.TxErr);
+            Assert.Equal(mloa, txBxCtrl.Mloa);
+            Assert.Equal(abtf, txBxCtrl.Abtf);
+
             Assert.Equal(expectedByte, new TxBxCtrl(TxBufferNumber.One, txp, txreq, txerr, mloa, abtf).ToByte());
         }
     }

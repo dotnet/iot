@@ -26,9 +26,19 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.Interrupt
         [InlineData(false, false, false, false, false, true, false, false, 0b0010_0000)]
         [InlineData(false, false, false, false, false, false, true, false, 0b0100_0000)]
         [InlineData(false, false, false, false, false, false, false, true, 0b1000_0000)]
-        public void To_Byte(bool rx0ie, bool rx1ie, bool tx0ie, bool tx1ie, bool tx2ie, bool errie, bool wakie, bool merre, byte expectedByte)
+        public void From_To_Byte(bool rx0if, bool rx1if, bool tx0if, bool tx1if, bool tx2if, bool errif, bool wakif, bool merrf, byte expectedByte)
         {
-            Assert.Equal(expectedByte, new CanIntF(rx0ie, rx1ie, tx0ie, tx1ie, tx2ie, errie, wakie, merre).ToByte());
+            var canIntF = new CanIntF(expectedByte);
+            Assert.Equal(rx0if, canIntF.Rx0If);
+            Assert.Equal(rx1if, canIntF.Rx1If);
+            Assert.Equal(tx0if, canIntF.Tx0If);
+            Assert.Equal(tx1if, canIntF.Tx1If);
+            Assert.Equal(tx2if, canIntF.Tx2If);
+            Assert.Equal(errif, canIntF.ErrIf);
+            Assert.Equal(wakif, canIntF.WakIf);
+            Assert.Equal(merrf, canIntF.Merrf);
+
+            Assert.Equal(expectedByte, new CanIntF(rx0if, rx1if, tx0if, tx1if, tx2if, errif, wakif, merrf).ToByte());
         }
     }
 }
