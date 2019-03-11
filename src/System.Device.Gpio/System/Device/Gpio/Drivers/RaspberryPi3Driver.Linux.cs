@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace System.Device.Gpio.Drivers
 {
@@ -313,12 +314,20 @@ namespace System.Device.Gpio.Drivers
             *registerPointer = register;
         }
 
-        public void GetRegisters(out ulong* setRegister, out ulong* clearRegister)
+        protected virtual ulong SetRegister
         {
-            Initialize();
+            get { return *(ulong*)(_registerViewPointer->GPSET); }
 
-            setRegister   = (ulong*) _registerViewPointer->GPSET;
-            clearRegister = (ulong*) _registerViewPointer->GPCLR;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set {  *(ulong*)(_registerViewPointer->GPSET) = value; }
+        }
+
+        protected virtual ulong ClearRegister
+        {
+            get { return *(ulong*)(_registerViewPointer->GPCLR); }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set {  *(ulong*)(_registerViewPointer->GPCLR) = value; }
         }
 
         private void InitializeSysFS()
