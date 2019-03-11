@@ -4,9 +4,6 @@
 
 using System;
 using System.Threading;
-using System.Device.I2c.Drivers;
-using System.Device.I2c;
-using Iot.Units;
 using Iot.Device.DHTxx;
 
 class Program

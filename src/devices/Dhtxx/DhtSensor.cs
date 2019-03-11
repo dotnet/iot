@@ -54,12 +54,12 @@ namespace Iot.Device.DHTxx
                 switch (_dhtType)
                 {
                     case DhtType.DHT11:
-                        temperature = Temperature.FromCelsius(GetHumidityDht11());
+                        temperature = Temperature.FromCelsius(GetTempDht11());
                         break;
                     case DhtType.DHT12:
                     case DhtType.DHT21:
                     case DhtType.DHT22:
-                        temperature = Temperature.FromCelsius(GetHumidityDht22());
+                        temperature = Temperature.FromCelsius(GetTempDht22());
                         break;
                 }
 
@@ -108,7 +108,13 @@ namespace Iot.Device.DHTxx
             _controller = new GpioController(pinNumberingScheme);
             _pin = pin;
             _dhtType = dhtType;
-            _controller.OpenPin(pin);
+
+            _controller.OpenPin(_pin);
+            // keep data line HIGH
+            _controller.SetPinMode(_pin, PinMode.Output);
+            _controller.Write(_pin, PinValue.High);
+            // delay 1s to make sure DHT stable
+            DelayHelper.DelayMilliseconds(1000, true);
         }
 
         /// <summary>
@@ -154,8 +160,6 @@ namespace Iot.Device.DHTxx
         /// </returns>
         private bool ReadThroughOneWire()
         {
-            _controller.SetPinMode(_pin, PinMode.Output);
-
             _controller.Write(_pin, PinValue.Low);
             // wait 18 milliseconds
             DelayHelper.DelayMilliseconds(18, true);
@@ -166,10 +170,12 @@ namespace Iot.Device.DHTxx
 
             _controller.SetPinMode(_pin, PinMode.Input);
 
-            // DHT corresponding signal - LOW
-            DelayHelper.DelayMicroseconds(80, true);
-            // HIGH
-            DelayHelper.DelayMicroseconds(80, true);
+            // DHT corresponding signal - LOW - 80 microseconds
+            while (_controller.Read(_pin) == PinValue.Low)
+                ;
+            // HIGH - 80 microseconds
+            while (_controller.Read(_pin) == PinValue.High)
+                ;
 
             // the read data contains 40 bits
             byte readVal = 0;
@@ -200,6 +206,10 @@ namespace Iot.Device.DHTxx
             }
 
             _lastMeasurment = Environment.TickCount;
+
+            // keep data line HIGH
+            _controller.SetPinMode(_pin, PinMode.Output);
+            _controller.Write(_pin, PinValue.High);
 
             if ((_readBuff[4] == ((_readBuff[0] + _readBuff[1] + _readBuff[2] + _readBuff[3]) & 0xFF)))
             {
@@ -241,31 +251,32 @@ namespace Iot.Device.DHTxx
         }
 
         // Convertion for DHT11
-        private double GetTempDht11() => IsLastReadSuccessful ? (double)(_readBuff[2] + _readBuff[3] / 10) : double.MaxValue;
+        private double GetTempDht11() => IsLastReadSuccessful ? _readBuff[2] + _readBuff[3] / 10.0 : double.MaxValue;
 
-        private double GetHumidityDht11() => IsLastReadSuccessful ? (double)(_readBuff[0] + _readBuff[1] / 10) : double.MaxValue;
+        private double GetHumidityDht11() => IsLastReadSuccessful ? _readBuff[0] + _readBuff[1] / 10.0 : double.MaxValue;
 
         // convertion for DHT12, DHT21, DHT22
         private double GetTempDht22()
         {
             if (IsLastReadSuccessful)
             {
-                var temp = (((_readBuff[2] & 0x7F) << 8) | _readBuff[3]) * 0.1F;
+                var temp = _readBuff[2] + (_readBuff[3] & 0x7F) * 0.1;
                 // if MSB = 1 we have negative temperature
-                return ((_readBuff[2] & 0x80) == 0 ? temp : -temp);
+                return ((_readBuff[3] & 0x80) == 0 ? temp : -temp);
             }
             else
                 return (double.MaxValue);
         }
 
-        private double GetHumidityDht22() => IsLastReadSuccessful ? (double)((_readBuff[0] << 8) | _readBuff[1]) * 0.1F : double.MaxValue;
+        private double GetHumidityDht22() => IsLastReadSuccessful ? _readBuff[0] + _readBuff[1] * 0.1 : double.MaxValue;
 
         /// <summary>
         /// Cleanup
         /// </summary>
         public void Dispose()
         {
-            _controller.ClosePin(_pin);
+            _controller?.Dispose();
+            _sensor?.Dispose();
         }
     }
 }
