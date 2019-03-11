@@ -3,43 +3,35 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device;
 using System.Device.Gpio;
+using System.Device.I2c;
 using System.Diagnostics;
 using Iot.Units;
 
 namespace Iot.Device.DHTxx
 {
-    public class DHTSensor : IDisposable
+    /// <summary>
+    /// Temperature and Humidity Sensor DHTxx
+    /// </summary>
+    public class DhtSensor : IDisposable
     {
-        private const int MAX_TIME = 85;
-        private const uint MAX_WAIT = 255;
-        private byte[] _dht11Val = new byte[5];
-        private int _pin;
-        private DhtType _dhtType;
+        /// <summary>
+        /// DHT12 Default I2C Address
+        /// </summary>
+        public const byte Dht12DefaultI2cAddress = 0x5C;
 
-        private GpioController _controller = new GpioController();
+        private byte[] _readBuff = new byte[5];
+
+        private readonly CommunicationProtocol _protocol;
+        private readonly int _pin;
+        private readonly DhtType _dhtType;
+        private I2cDevice _sensor;
+        private GpioController _controller;
 
         private Stopwatch _stopwatch = new Stopwatch();
 
-        /// <summary>
-        /// Wait for a specific number of milliseconds
-        /// 
-        /// </summary>
-        /// <param name="milliseconds">Number of milliseconds to wait</param>
-        /// <remarks>
-        /// This function doesn't work if you want to wait for less than 100 microseconds.
-        /// </remarks>
-        private void Wait(double milliseconds)
-        {
-            long initialTick = _stopwatch.ElapsedTicks;
-            long initialElapsed = _stopwatch.ElapsedMilliseconds;
-            double desiredTicks = milliseconds / 1000.0 * Stopwatch.Frequency;
-            double finalTick = initialTick + desiredTicks;
-            while (_stopwatch.ElapsedTicks < finalTick)
-            {
-                //nothing than waiting
-            }
-        }
+        private int _lastMeasurment = 0;
 
         /// <summary>
         /// How last read went, <c>true</c> for success, <c>false</c> for failure
@@ -52,21 +44,27 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public Temperature Temperature => Temperature.FromCelsius((_dhtType == DhtType.Dht11) ? GetTempDht11() : GetTempDht22());
-
-        /// <summary>
-        /// Get the temperature
-        /// </summary>
-        /// <param name="temperature">The temperature</param>
-        /// <returns>Returns <c>true</c> if the read is successful</returns>
-        /// <remarks>
-        /// If last read was not successfull, it returns double.MaxValue
-        /// </remarks>
-        public bool TryGetTemperature(out Temperature temperature)
+        public Temperature Temperature
         {
-            var ret = ReadData();
-            temperature = Temperature;
-            return ret;
+            get
+            {
+                ReadData();
+
+                Temperature temperature = Temperature.FromCelsius(double.MaxValue);
+                switch (_dhtType)
+                {
+                    case DhtType.DHT11:
+                        temperature = Temperature.FromCelsius(GetHumidityDht11());
+                        break;
+                    case DhtType.DHT12:
+                    case DhtType.DHT21:
+                    case DhtType.DHT22:
+                        temperature = Temperature.FromCelsius(GetHumidityDht22());
+                        break;
+                }
+
+                return temperature;
+            }
         }
 
         /// <summary>
@@ -75,38 +73,27 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.MaxValue
         /// </remarks>
-        public double Humidity => (_dhtType == DhtType.Dht11) ? GetHumidityDht11() : GetHumidityDht22();
-
-        /// <summary>
-        /// Get the relative humidity in the air
-        /// </summary>
-        /// <param name="relativeHumidity">The percentage of relative humidity in the air</param>
-        /// <returns>Returns <c>true</c> if the read is successful</returns>
-        /// <remarks>
-        /// If last read was not successfull, it returns double.MaxValue
-        /// </remarks>
-        public bool TryGetHumidity(out double relativeHumidity)
+        public double Humidity
         {
-            var ret = ReadData();
-            relativeHumidity = Humidity;
-            return ret;
-        }
+            get
+            {
+                ReadData();
 
-        /// <summary>
-        /// Get the temperature and the relative humidity in the air
-        /// </summary>
-        /// <param name="temperature">The temperature</param>
-        /// <param name="relativeHumidity">The percentage of relative humidity in the air</param>
-        /// <returns>Returns <c>true</c> if the read is successful</returns>
-        /// <remarks>
-        /// If last read was not successfull, it returns double.MaxValue
-        /// </remarks>
-        public bool TryGetTemperatureAndHumidity(out Temperature temperature, out double relativeHumidity)
-        {
-            var ret = ReadData();
-            temperature = Temperature;
-            relativeHumidity = Humidity;
-            return ret;
+                double humidity = double.MaxValue;
+                switch (_dhtType)
+                {
+                    case DhtType.DHT11:
+                        humidity = GetHumidityDht11();
+                        break;
+                    case DhtType.DHT12:
+                    case DhtType.DHT21:
+                    case DhtType.DHT22:
+                        humidity = GetHumidityDht22();
+                        break;
+                }
+
+                return humidity;
+            }
         }
 
         /// <summary>
@@ -114,11 +101,25 @@ namespace Iot.Device.DHTxx
         /// </summary>
         /// <param name="pin">The pin number (GPIO number)</param>
         /// <param name="dhtType">The DHT Type, either Dht11 or Dht22</param>
-        public DHTSensor(int pin, DhtType dhtType)
+        /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
+        public DhtSensor(int pin, DhtType dhtType, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
         {
-            this._pin = pin;
-            this._dhtType = dhtType;
+            _protocol = CommunicationProtocol.OneWire;
+            _controller = new GpioController(pinNumberingScheme);
+            _pin = pin;
+            _dhtType = dhtType;
             _controller.OpenPin(pin);
+        }
+
+        /// <summary>
+        /// Create a DHT sensor through I2C (Only DHT12)
+        /// </summary>
+        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
+        public DhtSensor(I2cDevice sensor)
+        {
+            _protocol = CommunicationProtocol.I2C;
+            _sensor = sensor;
+            _dhtType = DhtType.DHT12;
         }
 
         /// <summary>
@@ -127,64 +128,109 @@ namespace Iot.Device.DHTxx
         /// <returns>
         /// <c>true</c> if read is successfull, otherwise <c>false</c>.
         /// </returns>
-        public bool ReadData()
+        private void ReadData()
         {
-            // Set the max value for waiting micro second
-            // 27 = debug
-            // 99 = release
-            byte waitMS = 99;
-#if DEBUG
-            waitMS = 27;
-#endif
-            _stopwatch.Start();
-            PinValue lststate = PinValue.High;
-            uint counter = 0;
-            byte j = 0, i;
-            for (i = 0; i < 5; i++)
-                _dht11Val[i] = 0;
+            // The time of two measurements should be more than 1s.
+            if (Environment.TickCount - _lastMeasurment < 1000)
+            {
+                return;
+            }
 
-            // write on the pin
+            if (_protocol == CommunicationProtocol.OneWire)
+            {
+                ReadThroughOneWire();
+            }
+            else
+            {
+                ReadThroughI2c();
+            }
+        }
+
+        /// <summary>
+        /// Read through One-Wire
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if read is successfull, otherwise <c>false</c>.
+        /// </returns>
+        private bool ReadThroughOneWire()
+        {
             _controller.SetPinMode(_pin, PinMode.Output);
+
             _controller.Write(_pin, PinValue.Low);
-            //wait 18 milliseconds
-            Wait(18);
+            // wait 18 milliseconds
+            DelayHelper.DelayMilliseconds(18, true);
+
             _controller.Write(_pin, PinValue.High);
-            // Wait about 40 microseconds
-            Wait(0.03);
+            // wait 20 - 40 microseconds
+            DelayHelper.DelayMicroseconds(30, true);
+
             _controller.SetPinMode(_pin, PinMode.Input);
 
-            for (i = 0; i < MAX_TIME; i++)
+            // DHT corresponding signal - LOW
+            DelayHelper.DelayMicroseconds(80, true);
+            // HIGH
+            DelayHelper.DelayMicroseconds(80, true);
+
+            // the read data contains 40 bits
+            byte readVal = 0;
+            for (int i = 0; i < 40; i++)
             {
-                counter = 0;
-                while (_controller.Read(_pin) == lststate)
+                // beginning signal per bit, 50 microseconds
+                while (_controller.Read(_pin) == PinValue.Low)
+                    ;
+
+                // 26 - 28 microseconds represent 0
+                // 70 microseconds represent 1
+                _stopwatch.Restart();
+                while (_controller.Read(_pin) == PinValue.High)
+                    ;
+                _stopwatch.Stop();
+
+                // bit to byte
+                readVal <<= 1;
+                if (_stopwatch.Elapsed.TotalMilliseconds > 0.028)
                 {
-                    counter++;
-                    // This wait about 1 microsecond
-                    // No other way to do it for such a precision
-                    for (byte wt = 0; wt < waitMS; wt++)
-                        ;
-                    if (counter == MAX_WAIT)
-                        break;
+                    readVal |= 1;
                 }
 
-                lststate = _controller.Read(_pin);
-                if (counter == MAX_WAIT)
-                    break;
-
-                // top 3 transistions are ignored   
-                if ((i >= 4) && (i % 2 == 0))
+                if (((i + 1) % 8) == 0)
                 {
-                    _dht11Val[j / 8] <<= 1;
-                    if (counter > 16)
-                        _dht11Val[j / 8] |= 1;
-                    j++;
+                    _readBuff[i / 8] = readVal;
                 }
             }
 
-            _stopwatch.Stop();
-            if ((j >= 40) && (_dht11Val[4] == ((_dht11Val[0] + _dht11Val[1] + _dht11Val[2] + _dht11Val[3]) & 0xFF)))
+            _lastMeasurment = Environment.TickCount;
+
+            if ((_readBuff[4] == ((_readBuff[0] + _readBuff[1] + _readBuff[2] + _readBuff[3]) & 0xFF)))
             {
-                IsLastReadSuccessful = (_dht11Val[0] != 0) || (_dht11Val[2] != 0);
+                IsLastReadSuccessful = (_readBuff[0] != 0) || (_readBuff[2] != 0);
+            }
+            else
+            {
+                IsLastReadSuccessful = false;
+            }
+
+            return IsLastReadSuccessful;
+        }
+
+        /// <summary>
+        /// Read through I2C
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if read is successfull, otherwise <c>false</c>.
+        /// </returns>
+        private bool ReadThroughI2c()
+        {
+            // DHT12 Humidity Register
+            _sensor.WriteByte(0x00);
+            // humidity int, humidity decimal, temperature int, temperature decimal, checksum
+            _sensor.Read(_readBuff);
+
+            _lastMeasurment = Environment.TickCount;
+
+            if ((_readBuff[4] == ((_readBuff[0] + _readBuff[1] + _readBuff[2] + _readBuff[3]) & 0xFF)))
+            {
+                IsLastReadSuccessful = (_readBuff[0] != 0) || (_readBuff[2] != 0);
             }
             else
             {
@@ -195,25 +241,28 @@ namespace Iot.Device.DHTxx
         }
 
         // Convertion for DHT11
-        private double GetTempDht11() => IsLastReadSuccessful ? (double)(_dht11Val[2] + _dht11Val[3] / 10) : double.MaxValue;
+        private double GetTempDht11() => IsLastReadSuccessful ? (double)(_readBuff[2] + _readBuff[3] / 10) : double.MaxValue;
 
-        private double GetHumidityDht11() => IsLastReadSuccessful ? (double)(_dht11Val[0] + _dht11Val[1] / 10) : double.MaxValue;
+        private double GetHumidityDht11() => IsLastReadSuccessful ? (double)(_readBuff[0] + _readBuff[1] / 10) : double.MaxValue;
 
-        // convertion for DHT22
+        // convertion for DHT12, DHT21, DHT22
         private double GetTempDht22()
         {
             if (IsLastReadSuccessful)
             {
-                var temp = (((_dht11Val[2] & 0x7F) << 8) | _dht11Val[3]) * 0.1F;
+                var temp = (((_readBuff[2] & 0x7F) << 8) | _readBuff[3]) * 0.1F;
                 // if MSB = 1 we have negative temperature
-                return ((_dht11Val[2] & 0x80) == 0 ? temp : -temp);
+                return ((_readBuff[2] & 0x80) == 0 ? temp : -temp);
             }
             else
                 return (double.MaxValue);
         }
 
-        private double GetHumidityDht22() => IsLastReadSuccessful ? (double)((_dht11Val[0] << 8) | _dht11Val[1]) * 0.1F : double.MaxValue;
+        private double GetHumidityDht22() => IsLastReadSuccessful ? (double)((_readBuff[0] << 8) | _readBuff[1]) * 0.1F : double.MaxValue;
 
+        /// <summary>
+        /// Cleanup
+        /// </summary>
         public void Dispose()
         {
             _controller.ClosePin(_pin);

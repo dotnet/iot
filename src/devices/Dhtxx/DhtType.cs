@@ -9,7 +9,15 @@ namespace Iot.Device.DHTxx
     /// </summary>
     public enum DhtType
     {
-        Dht11,
-        Dht22
+        DHT11,
+        DHT12,
+        /// <summary>
+        /// AM2301
+        /// </summary>
+        DHT21,
+        /// <summary>
+        /// AM2302
+        /// </summary>
+        DHT22
     }
 }
