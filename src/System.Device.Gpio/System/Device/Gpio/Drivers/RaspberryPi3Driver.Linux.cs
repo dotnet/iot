@@ -314,16 +314,18 @@ namespace System.Device.Gpio.Drivers
             *registerPointer = register;
         }
 
-        protected virtual ulong SetRegister
+        protected ulong SetRegister
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return *(ulong*)(_registerViewPointer->GPSET); }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set {  *(ulong*)(_registerViewPointer->GPSET) = value; }
         }
 
-        protected virtual ulong ClearRegister
+        protected ulong ClearRegister
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return *(ulong*)(_registerViewPointer->GPCLR); }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
