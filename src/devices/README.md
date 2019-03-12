@@ -9,7 +9,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [ADS1115 -- Analog-to-Digital Converter](Ads1115/README.md)
 * [ADXL345 -- SPI Accelerometer](Adxl345/README.md)
 * [AGS01DB -- MEMS VOC Gas Sensor ASG01DB](Ags01db/README.md)
-* [BMP280 -- Digital Pressure Sensor](Bmp280/README.md)
+* [BMx280 -- Digital Pressure Sensors BMP280/BME280 ](Bmx280/README.md)
 * [BrickPi3](BrickPi3/README.md)
 * [Buzzer -- Piezo Buzzer Controller](Buzzer/README.md)
 * [CharacterLcd -- Liquid Crystal Display](CharacterLcd/README.md)
