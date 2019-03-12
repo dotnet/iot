@@ -7,6 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="$(CompilerVersion)" IsImplicitlyDefined="true" />
+    <PackageReference Condition="'$(UseSdkCompilers)' != 'true'" Include="Microsoft.Net.Compilers.Toolset" Version="$(CompilerVersion)" IsImplicitlyDefined="true" />
   </ItemGroup>
 </Project>
