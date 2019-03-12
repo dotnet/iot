@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
@@ -14,19 +18,23 @@ namespace Iot.Device.apds9930.Samples
             //bus id on the raspberry pi 3
             const int busId = 1;
 
-            var i2cSettings = new I2cConnectionSettings(busId, apds9930.DefaultI2cAddress);
+            var i2cSettings = new I2cConnectionSettings(busId, Apds9930.DefaultI2cAddress);
             var i2cDevice = new UnixI2cDevice(i2cSettings);
-            var i2apds9930 = new  apds9930(i2cDevice);
+            var i2cApds9930 = new  Apds9930(i2cDevice);
             
-            i2apds9930.EnableProximitySensor();
-            i2apds9930.EnableLightSensor();
-           
-            while (true){
-
-                Console.WriteLine($"Prox : {i2apds9930.GetProximity()} Ambient Light : {i2apds9930.GetAmbientLight()} ch0: {i2apds9930.GetCh0Light()}");
-                Thread.Sleep(100);
-                Console.Clear();
+            using(i2cApds9930)
+            {
+                while(true)
+                {
+                    i2cApds9930.EnableProximitySensor();
+                    i2cApds9930.EnableLightSensor();
+                    Console.WriteLine($"Prox : {i2cApds9930.GetProximity()}");
+                    Console.WriteLine($"Ambient Light : {i2cApds9930.GetAmbientLight():N2} lux");                    
+                    Console.WriteLine();
+                    Thread.Sleep(100);                                
+                }
             }
+            
         }
     }
 }

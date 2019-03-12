@@ -10,4 +10,7 @@
     <ProjectReference Include="$(MSBuildThisFileDirectory)\..\apds9930.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="README.md" />
+  </ItemGroup>
 </Project>
