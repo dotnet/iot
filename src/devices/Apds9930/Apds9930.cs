@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Device.I2c;
 using System.Threading;
 
-namespace Iot.Device.apds9930
+namespace Iot.Device.Apds9930
 {
     public class Apds9930 : IDisposable
     {
@@ -44,7 +44,7 @@ namespace Iot.Device.apds9930
         ///  Reads the proximity from the sensor
         /// </summary>
         /// <returns>
-        ///  proximity in mm
+        ///  proximity
         /// </returns>
         public int GetProximity()
         {
@@ -58,13 +58,28 @@ namespace Iot.Device.apds9930
         ///  Reads the ambient light from the sensor
         /// </summary>
         /// <returns>
-        ///  ambient light in lux
+        ///  Ambient light in lux
         /// </returns>
-        public double GetAmbientLight(){
+        public double GetAmbientLight()
+        {
             int ch0 = GetCh0Light();
             int ch1 = GetCh1Light();
-            
-            return GetAmbientToLux(ch0, ch1);
+
+            // Constants according to the datasheet Page 9                     
+            //Device Factor
+            double DF = 52.0; 
+            //Glass (or Lens) Attenuation Factor 
+            double GA = 0.49;
+            // Coefficients in open air            
+            double B  = 1.862;
+            double C  = 0.746;
+            double D  = 1.291;  
+
+            double ALSIT = 2.73 * (256.00 - (double)Register.DEFAULT_ATIME);
+            double iac = Math.Max(ch0 - B * ch1, C * ch0 - D * ch1);
+            double lpc = GA * DF / (ALSIT * GetAmbientLightGain());
+
+            return iac * lpc;                
         }
 
         /// <summary>
@@ -73,7 +88,8 @@ namespace Iot.Device.apds9930
         /// <returns>
         ///  ADC count
         /// </returns>
-        public int GetCh0Light(){
+        public int GetCh0Light()
+        {
             byte l = (byte)ReadByteData((byte)Register.Ch0DATAL);
             byte h = (byte)ReadByteData((byte)Register.Ch0DATAH);
 
@@ -86,7 +102,8 @@ namespace Iot.Device.apds9930
         /// <returns>
         ///  ADC count
         /// </returns>
-        public int GetCh1Light(){
+        public int GetCh1Light()
+        {
             byte l = (byte)ReadByteData((byte)Register.Ch1DATAL);
             byte h = (byte)ReadByteData((byte)Register.Ch1DATAH);
 
@@ -97,9 +114,10 @@ namespace Iot.Device.apds9930
         ///  Accepts data from both channels and returns a value in lux
         /// </summary>
         /// <returns>
-        ///  ambient light in lux
+        ///  Ambient light in lux
         /// </returns>
-        public double GetAmbientToLux(int ch0, int ch1){     
+        public double GetAmbientToLux(int ch0, int ch1)
+        {     
             // Constants according to the datasheet Page 9                     
             //Device Factor
             double DF = 52.0; 
@@ -119,147 +137,175 @@ namespace Iot.Device.apds9930
 
         /// <summary>
         ///  Set Led drive strength for proximity and ALS
-        ///  Value  - Led Current
-        ///  0      -  100 mA
-        ///  1      -  50 mA
-        ///  2      -  25 mA
-        ///  3      -  12.5 mA
+        ///  <para> Value - Gain  </para>
+        ///  <para>  0    -  100 mA   </para>
+        ///  <para>  1    -  50 mA   </para>
+        ///  <para>  2    -  25 mA  </para>
+        ///  <para>  3    -  12.5 mA  </para>
         /// </summary>
-        private void SetLedDrive(byte ledValue){
+        private void SetLedDrive(byte ledValue)
+        {
             byte regValue = (byte)ReadByteData((byte)Register.CONTROL);
-            ledValue &= 3;
-            ledValue = (byte)(ledValue << 6);
-            regValue &= 0x3F;
-            regValue |= ledValue;
-                
+            ledValue &= 0b011;
+            ledValue = (byte)(ledValue << 6);            
+            regValue &= 0b0011_1111;
+            regValue |= ledValue;                
             WriteByteData((byte)Register.CONTROL, (byte)regValue);
         }
 
         /// <summary>
         ///  Set Receiver gain for proximity detection
-        ///  Value  - Gain
-        ///  0      -  1x
-        ///  1      -  2x
-        ///  2      -  4x
-        ///  3      -  8x
+        ///  <para> Value - Gain  </para>
+        ///  <para>  0    -  1x   </para>
+        ///  <para>  1    -  4x   </para>
+        ///  <para>  2    -  16x  </para>
+        ///  <para>  3    -  64x  </para>
         /// </summary>
-        private void SetProxmityGain(byte Value){
+        private void SetProxmityGain(byte Value)
+        {
             byte regValue = (byte)ReadByteData((byte)Register.CONTROL);
-
-            Value &= 3;
-            Value = (byte)(Value << 2);
-            regValue &= 0xF3;
-            regValue |= Value;
-                
+            Value &= 0b011;
+            Value = (byte)(Value << 2);            
+            regValue &= 0b1111_0011;
+            regValue |= Value;                
             WriteByteData((byte)Register.CONTROL, (byte)regValue);
         }
 
         /// <summary>
         ///  Set Receiver gain for ambient light sensor
-        ///  Value  - Gain
-        ///  0      -  1x
-        ///  1      -  4x
-        ///  2      -  16x
-        ///  3      -  64x
+        ///  <para> Value - Gain  </para>
+        ///  <para>  0    -  1x   </para>
+        ///  <para>  1    -  4x   </para>
+        ///  <para>  2    -  16x  </para>
+        ///  <para>  3    -  64x  </para>
         /// </summary>
-        private void SetAmbientLightGain(byte Value){
+        private void SetAmbientLightGain(byte Value)
+        {
             byte regValue = (byte)ReadByteData((byte)Register.CONTROL);
-            Value &= 3;           
-            regValue &= 0xFC;
-            regValue |= Value;
-                
+            Value &= 0b011;                       
+            regValue &= 0b1111_1100;
+            regValue |= Value;                
             WriteByteData((byte)Register.CONTROL, (byte)regValue);
         }
 
-        private byte GetAmbientLightGain(){
+        /// <summary>
+        ///  Get ambient light gain
+        /// </summary>
+        /// <return>
+        ///  <para> Value - Gain  </para>
+        ///  <para>  0    -  1x   </para>
+        ///  <para>  1    -  4x   </para>
+        ///  <para>  2    -  16x  </para>
+        ///  <para>  3    -  64x  </para>
+        /// </return>
+        private byte GetAmbientLightGain()
+        {
             byte regValue = (byte)ReadByteData((byte)Register.CONTROL);
-            regValue &= 3;           
+            regValue &= 0b011;           
                 
             return regValue;
         }
        
         /// <summary>
         ///  Set gain for Diode used for proximity sensor
-        ///  Value  - Gain
-        ///  0      -  Reserved
-        ///  1      -  Reserved
-        ///  2      -  Use Ch1 diode
-        ///  3      -  Reserved
+        ///  <para> Value - Gain  </para>
+        ///  <para>  0   -  Reserved   </para>
+        ///  <para>  1   -  Reserved   </para>
+        ///  <para>  2   -  Use Ch1 diode  </para>
+        ///  <para>  3   -  Reserved  </para>
         /// </summary>
-        private void SetProximityDiode(byte Value){
+        private void SetProximityDiode(byte Value)
+        {
             byte regValue = (byte)ReadByteData((byte)Register.CONTROL);
-            Value &= 3;     
-            Value = (byte)(Value << 4);      
-            regValue &= 0xCF;
-            regValue |= Value;
-                
+            Value &= 0b011;     
+            Value = (byte)(Value << 4);                  
+            regValue &= 0b1100_1111;
+            regValue |= Value;                
             WriteByteData((byte)Register.CONTROL, (byte)regValue);
         }
         
-        private void SetProximityIntLowThreshold(byte Value){
+        /// <summary>
+        ///  Set proximity low threshold
+        /// </summary>
+        private void SetProximityIntLowThreshold(byte Value)
+        {
             byte h = (byte)(Value >> 8);
             byte l = (byte)(Value & 0x00FF);                            
             WriteByteData((byte)Register.PILTL, (byte)l);
             WriteByteData((byte)Register.PILTH, (byte)h);
         }
 
-        private void SetProximityIntHighThreshold(byte Value){
+        /// <summary>
+        ///  Set proximity high threshold
+        /// </summary>
+        private void SetProximityIntHighThreshold(byte Value)
+        {
             byte h = (byte)(Value >> 8);
-            byte l = (byte)(Value & 0x00FF);
-                            
+            byte l = (byte)(Value & 0x00FF);                            
             WriteByteData((byte)Register.PIHTL, (byte)l);
             WriteByteData((byte)Register.PIHTH, (byte)h);
         }
 
-        public void EnableProximitySensor(bool interrupt = false){
+        /// <summary>
+        ///  Set all the needed values to turn on the proximity sensor and turn it on.
+        /// </summary>
+        public void EnableProximitySensor(bool interrupt = false)
+        {
             SetProxmityGain((byte)Register.DEFAULT_PGAIN);
             SetLedDrive((byte)Register.DEFAULT_PDRIVE);
             SetProximityDiode((byte)Register.DEFAULT_PDIODE);
-            EnableProximityInterrupt(interrupt);
+            //Enable proximity interrupt
+            SetMode((byte)Register.PROXIMITY_INT, interrupt);
             SetPower(true);
-            SetProximitySensor(true);
+            //Enable proximity sensor
+            SetMode((byte)Register.PROXIMITY, true);            
         }
 
+        /// <summary>
+        ///  Set all the needed values to turn on the ambient light sensor and turn it on.
+        /// </summary>
         public void EnableLightSensor(bool interrupt = false)
         {
             SetAmbientLightGain((byte)Register.DEFAULT_AGAIN);
-            SetAmbientLightInterreupt(interrupt);
-            SetPower(true);
-            SetAmbientLightSensor(true);
-        }
-
-        private void SetAmbientLightInterreupt(bool interrupt = false){
-            if(!interrupt){                
+            //Enable ambient light interreupt
+            if(!interrupt)
+            {                
                 _i2cDevice.WriteByte((byte)(Register.CLEAR_ALS_INT));                
-            }            
+            }                        
+            // Enable oscillator
+            SetPower(true);                        
+            //Enable ambient light sensor
+            SetMode((byte)Register.AMBIENT_LIGHT, true);
         }
 
-        private void SetAmbientLightSensor(bool value = false){
-            SetMode((byte)Register.AMBIENT_LIGHT, value);
-        }
-
-        private void EnableProximityInterrupt(bool interrupt = false){
-            SetMode((byte)Register.PROXIMITY_INT, interrupt);
-        }
-
-        private void SetPower(bool value){
+        /// <sumary>
+        /// Enable or disbale internal oscillator 
+        /// </summary>
+        private void SetPower(bool value)
+        {
             SetMode((byte)Register.POWER, value);
         }
-
-        private void SetProximitySensor(bool value){
-            SetMode((byte)Register.PROXIMITY, value);
-        }
-
-        private void SetMode(byte Mode, bool enable){
+        
+        /// <summary>
+        ///  Enable or disable the proximity interrupt.
+        /// </summary>
+        private void SetMode(byte Mode, bool enable)
+        {
             byte regValue = (byte)ReadByteData((byte)Register.ENABLE);
 
-            if(Mode >= 0 && Mode <=6){
-                if(enable){
+            if(Mode >= (byte)Register.POWER && Mode <= (byte)Register.SLEEP_AFTER_INT)
+            {
+                if(enable)
+                {
                     regValue |= (byte)(1 << Mode);
-                }else{
+                }
+                else
+                {
                     regValue &= (byte)(1 << Mode);
                 }
-            }else if(Mode == (byte)Register.ALL){
+            }
+            else if(Mode == (byte)Register.ALL)
+            {
                 regValue = enable ? (byte)0x7F : (byte)0x00;
             }
 
