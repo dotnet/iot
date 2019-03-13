@@ -29,7 +29,7 @@ namespace Iot.Device.Apds9930.Samples
 
                 while(true)
                 {                    
-                    Console.WriteLine($"Prox : {i2cApds9930.GetProximity()}");
+                    Console.WriteLine($"Proximity : {i2cApds9930.GetProximity()}");
                     Console.WriteLine($"Ambient Light : {i2cApds9930.GetAmbientLight():N2} lux");                    
                     Console.WriteLine();
                     Thread.Sleep(100);                                
