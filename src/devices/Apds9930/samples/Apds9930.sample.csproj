@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\apds9930.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Apds9930.csproj" />
   </ItemGroup>
 
   <ItemGroup>
