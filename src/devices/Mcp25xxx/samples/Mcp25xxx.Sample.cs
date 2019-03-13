@@ -230,61 +230,61 @@ namespace Iot.Device.Mcp25xxx.Samples
             ConsoleWriteRegisterItemDetails("RXRTR", $"{rxB1Ctrl.RxRtr}");
             ConsoleWriteRegisterItemDetails("RXM", $"{(byte)rxB1Ctrl.Rxm} - { rxB1Ctrl.Rxm}");
 
-            var rxB0Sidh = new RxBxSidh(RxBufferNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Sidh));
+            var rxB0Sidh = new RxBxSidh(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Sidh));
             ConsoleWriteRegisterItemDetails("SID[10:3]", $"0x{rxB0Sidh.Sid:X2}");
 
-            var rxB0Sidl = new RxBxSidl(RxBufferNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Sidl));
+            var rxB0Sidl = new RxBxSidl(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Sidl));
             ConsoleWriteRegisterItemDetails("EID[17:16]", $"0x{rxB0Sidl.Eid:X2}");
             ConsoleWriteRegisterItemDetails("IDE", $"{rxB0Sidl.Ide}");
             ConsoleWriteRegisterItemDetails("SRR", $"{rxB0Sidl.Srr}");
             ConsoleWriteRegisterItemDetails("SID[2:0]", $"0x{rxB0Sidl.Sid:X2}");
 
-            var rxB0Eid8 = new RxBxEid8(RxBufferNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Eid8));
+            var rxB0Eid8 = new RxBxEid8(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Eid8));
             ConsoleWriteRegisterItemDetails("EID[15:8]", $"0x{rxB0Eid8.Eid:X2}");
 
-            var rxB0Eid0 = new RxBxEid0(RxBufferNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Eid0));
+            var rxB0Eid0 = new RxBxEid0(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Eid0));
             ConsoleWriteRegisterItemDetails("EID[7:0]", $"0x{rxB0Eid0.Eid:X2}");
 
-            var rxB0Dlc = new RxBxDlc(RxBufferNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Dlc));
+            var rxB0Dlc = new RxBxDlc(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Dlc));
             ConsoleWriteRegisterItemDetails("DLC[3:0]", $"0x{rxB0Dlc.Dlc:X2}");
             ConsoleWriteRegisterItemDetails("RTR", $"{rxB0Dlc.Rtr}");
 
-            new RxBxDn(RxBufferNumber.Zero, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D0));
-            new RxBxDn(RxBufferNumber.Zero, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D1));
-            new RxBxDn(RxBufferNumber.Zero, 2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D2));
-            new RxBxDn(RxBufferNumber.Zero, 3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D3));
-            new RxBxDn(RxBufferNumber.Zero, 4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D4));
-            new RxBxDn(RxBufferNumber.Zero, 5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D5));
-            new RxBxDn(RxBufferNumber.Zero, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D6));
-            new RxBxDn(RxBufferNumber.Zero, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D7));
+            new RxBxDn(0, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D0));
+            new RxBxDn(0, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D1));
+            new RxBxDn(0, 2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D2));
+            new RxBxDn(0, 3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D3));
+            new RxBxDn(0, 4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D4));
+            new RxBxDn(0, 5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D5));
+            new RxBxDn(0, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D6));
+            new RxBxDn(0, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D7));
 
-            var rxB1Sidh = new RxBxSidh(RxBufferNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Sidh));
+            var rxB1Sidh = new RxBxSidh(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Sidh));
             ConsoleWriteRegisterItemDetails("SID[10:3]", $"0x{rxB1Sidh.Sid:X2}");
 
-            var rxB1Sidl = new RxBxSidl(RxBufferNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Sidl));
+            var rxB1Sidl = new RxBxSidl(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Sidl));
             ConsoleWriteRegisterItemDetails("EID[17:16]", $"0x{rxB1Sidl.Eid:X2}");
             ConsoleWriteRegisterItemDetails("IDE", $"{rxB1Sidl.Ide}");
             ConsoleWriteRegisterItemDetails("SRR", $"{rxB1Sidl.Srr}");
             ConsoleWriteRegisterItemDetails("SID[2:0]", $"0x{rxB1Sidl.Sid:X2}");
 
-            var rxB1Eid8 = new RxBxEid8(RxBufferNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Eid8));
+            var rxB1Eid8 = new RxBxEid8(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Eid8));
             ConsoleWriteRegisterItemDetails("EID[15:8]", $"0x{rxB1Eid8.Eid:X2}");
 
-            var rxB1Eid0 = new RxBxEid0(RxBufferNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Eid0));
+            var rxB1Eid0 = new RxBxEid0(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Eid0));
             ConsoleWriteRegisterItemDetails("EID[7:0]", $"0x{rxB1Eid0.Eid:X2}");
 
-            var rxB1Dlc = new RxBxDlc(RxBufferNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Dlc));
+            var rxB1Dlc = new RxBxDlc(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Dlc));
             ConsoleWriteRegisterItemDetails("DLC[3:0]", $"0x{rxB1Dlc.Dlc:X2}");
             ConsoleWriteRegisterItemDetails("RTR", $"{rxB1Dlc.Rtr}");
 
-            new RxBxDn(RxBufferNumber.One, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D0));
-            new RxBxDn(RxBufferNumber.One, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D1));
-            new RxBxDn(RxBufferNumber.One, 2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D2));
-            new RxBxDn(RxBufferNumber.One, 3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D3));
-            new RxBxDn(RxBufferNumber.One, 4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D4));
-            new RxBxDn(RxBufferNumber.One, 5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D5));
-            new RxBxDn(RxBufferNumber.One, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D6));
-            new RxBxDn(RxBufferNumber.One, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D7));
+            new RxBxDn(1, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D0));
+            new RxBxDn(1, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D1));
+            new RxBxDn(1, 2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D2));
+            new RxBxDn(1, 3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D3));
+            new RxBxDn(1, 4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D4));
+            new RxBxDn(1, 5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D5));
+            new RxBxDn(1, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D6));
+            new RxBxDn(1, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D7));
         }
 
         private static void ReadAllAcceptanceFilterRegistersWithDetails(Mcp25xxx mcp25xxx)

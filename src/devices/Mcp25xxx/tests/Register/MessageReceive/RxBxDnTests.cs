@@ -11,23 +11,23 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
     public class RxBxDnTests
     {
         [Theory]
-        [InlineData(RxBufferNumber.Zero, Address.RxB0D0, 0)]
-        [InlineData(RxBufferNumber.Zero, Address.RxB0D1, 1)]
-        [InlineData(RxBufferNumber.Zero, Address.RxB0D2, 2)]
-        [InlineData(RxBufferNumber.Zero, Address.RxB0D3, 3)]
-        [InlineData(RxBufferNumber.Zero, Address.RxB0D4, 4)]
-        [InlineData(RxBufferNumber.Zero, Address.RxB0D5, 5)]
-        [InlineData(RxBufferNumber.Zero, Address.RxB0D6, 6)]
-        [InlineData(RxBufferNumber.Zero, Address.RxB0D7, 7)]
-        [InlineData(RxBufferNumber.One, Address.RxB1D0, 0)]
-        [InlineData(RxBufferNumber.One, Address.RxB1D1, 1)]
-        [InlineData(RxBufferNumber.One, Address.RxB1D2, 2)]
-        [InlineData(RxBufferNumber.One, Address.RxB1D3, 3)]
-        [InlineData(RxBufferNumber.One, Address.RxB1D4, 4)]
-        [InlineData(RxBufferNumber.One, Address.RxB1D5, 5)]
-        [InlineData(RxBufferNumber.One, Address.RxB1D6, 6)]
-        [InlineData(RxBufferNumber.One, Address.RxB1D7, 7)]
-        public void Get_RxBufferNumber_Address(RxBufferNumber rxBufferNumber, Address address, byte index)
+        [InlineData(0, Address.RxB0D0, 0)]
+        [InlineData(0, Address.RxB0D1, 1)]
+        [InlineData(0, Address.RxB0D2, 2)]
+        [InlineData(0, Address.RxB0D3, 3)]
+        [InlineData(0, Address.RxB0D4, 4)]
+        [InlineData(0, Address.RxB0D5, 5)]
+        [InlineData(0, Address.RxB0D6, 6)]
+        [InlineData(0, Address.RxB0D7, 7)]
+        [InlineData(1, Address.RxB1D0, 0)]
+        [InlineData(1, Address.RxB1D1, 1)]
+        [InlineData(1, Address.RxB1D2, 2)]
+        [InlineData(1, Address.RxB1D3, 3)]
+        [InlineData(1, Address.RxB1D4, 4)]
+        [InlineData(1, Address.RxB1D5, 5)]
+        [InlineData(1, Address.RxB1D6, 6)]
+        [InlineData(1, Address.RxB1D7, 7)]
+        public void Get_RxBufferNumber_Address(byte rxBufferNumber, Address address, byte index)
         {
             Assert.Equal(rxBufferNumber, RxBxDn.GetRxBufferNumber(address));
             Assert.Equal(address, new RxBxDn(rxBufferNumber, index, 0).Address);
@@ -38,10 +38,10 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
         [InlineData(0b1111_1111)]
         public void From_To_Byte(byte data)
         {
-            var rxBxDn = new RxBxDn(RxBufferNumber.Zero, 0, data);
+            var rxBxDn = new RxBxDn(0, 0, data);
             Assert.Equal(data, rxBxDn.Data);
 
-            Assert.Equal(data, new RxBxDn(RxBufferNumber.Zero, 0, data).ToByte());
+            Assert.Equal(data, new RxBxDn(0, 0, data).ToByte());
         }
     }
 }

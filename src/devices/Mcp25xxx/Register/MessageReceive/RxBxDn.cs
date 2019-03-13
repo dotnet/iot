@@ -14,11 +14,16 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Initializes a new instance of the RxBxDn class.
         /// </summary>
-        /// <param name="rxBufferNumber">Receive Buffer Number.</param>
+        /// <param name="rxBufferNumber">Receive Buffer Number. Ranges 0 - 1.</param>
         /// <param name="index">Index of data.  Must be a value of 0 - 7.</param>
         /// <param name="data">Receive Buffer Data Field Bytes.</param>
-        public RxBxDn(RxBufferNumber rxBufferNumber, byte index, byte data)
+        public RxBxDn(byte rxBufferNumber, byte index, byte data)
         {
+            if (rxBufferNumber > 1)
+            {
+                throw new ArgumentException($"Invalid RX Buffer Number value {rxBufferNumber}.", nameof(rxBufferNumber));
+            }
+
             if (index > 7)
             {
                 throw new ArgumentException($"Invalid Index value {index}.", nameof(index));
@@ -32,7 +37,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Receive Buffer Number.
         /// </summary>
-        public RxBufferNumber RxBufferNumber { get; }
+        public byte RxBufferNumber { get; }
 
         /// <summary>
         /// Index of data.  Must be a value of 0 - 7.
@@ -48,12 +53,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             switch (RxBufferNumber)
             {
-                case RxBufferNumber.Zero:
+                case 0:
                     return (Address)((byte)Address.RxB0D0 + Index);
-                case RxBufferNumber.One:
+                case 1:
                     return (Address)((byte)Address.RxB1D0 + Index);
                 default:
-                    throw new ArgumentException("Invalid Rx Bufferer Number.", nameof(RxBufferNumber));
+                    throw new ArgumentException($"Invalid Rx Bufferer Number value {RxBufferNumber}.", nameof(RxBufferNumber));
             }
         }
 
@@ -62,7 +67,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// </summary>
         /// <param name="address">The address to look up Rx Buffer Number.</param>
         /// <returns>The Rx Buffer Number based on the register address.</returns>
-        public static RxBufferNumber GetRxBufferNumber(Address address)
+        public static byte GetRxBufferNumber(Address address)
         {
             switch (address)
             {
@@ -74,7 +79,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
                 case Address.RxB0D5:
                 case Address.RxB0D6:
                 case Address.RxB0D7:
-                    return RxBufferNumber.Zero;
+                    return 0;
                 case Address.RxB1D0:
                 case Address.RxB1D1:
                 case Address.RxB1D2:
@@ -83,9 +88,9 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
                 case Address.RxB1D5:
                 case Address.RxB1D6:
                 case Address.RxB1D7:
-                    return RxBufferNumber.One;
+                    return 1;
                 default:
-                    throw new ArgumentException("Invalid address.", nameof(address));
+                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
             }
         }
 

@@ -14,18 +14,23 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Initializes a new instance of the RxBxSidh class.
         /// </summary>
-        /// <param name="rxBufferNumber">Receive Buffer Number.</param>
+        /// <param name="rxBufferNumber">Receive Buffer Number. Ranges 0 - 1.</param>
         /// <param name="sid">Standard Identifier bits.</param>
-        public RxBxSidh(RxBufferNumber rxBufferNumber, byte sid)
+        public RxBxSidh(byte rxBufferNumber, byte sid)
         {
+            if (rxBufferNumber > 1)
+            {
+                throw new ArgumentException($"Invalid RX Buffer Number value {rxBufferNumber}.", nameof(rxBufferNumber));
+            }
+
             RxBufferNumber = rxBufferNumber;
             Sid = sid;
         }
 
         /// <summary>
-        /// Receive Buffer Number.
+        /// Receive Buffer Number. Ranges 0 - 1.
         /// </summary>
-        public RxBufferNumber RxBufferNumber { get; }
+        public byte RxBufferNumber { get; }
 
         /// <summary>
         /// Standard Identifier bits.
@@ -36,12 +41,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             switch (RxBufferNumber)
             {
-                case RxBufferNumber.Zero:
+                case 0:
                     return Address.RxB0Sidh;
-                case RxBufferNumber.One:
+                case 1:
                     return Address.RxB1Sidh;
                 default:
-                    throw new ArgumentException("Invalid Rx Buffer Number.", nameof(RxBufferNumber));
+                    throw new ArgumentException($"Invalid Rx Buffer Number value {RxBufferNumber}.", nameof(RxBufferNumber));
             }
         }
 
@@ -50,16 +55,16 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// </summary>
         /// <param name="address">The address to up look Rx Buffer Number.</param>
         /// <returns>The Rx Buffer Number based on the register address.</returns>
-        public static RxBufferNumber GetRxBufferNumber(Address address)
+        public static byte GetRxBufferNumber(Address address)
         {
             switch (address)
             {
                 case Address.RxB0Sidh:
-                    return RxBufferNumber.Zero;
+                    return 0;
                 case Address.RxB1Sidh:
-                    return RxBufferNumber.One;
+                    return 1;
                 default:
-                    throw new ArgumentException("Invalid address.", nameof(address));
+                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
             }
         }
 

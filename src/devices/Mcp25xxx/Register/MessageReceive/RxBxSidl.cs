@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         ///  Initializes a new instance of the RxBxSidl class.
         /// </summary>
-        /// <param name="rxBufferNumber">Receive Buffer Number.</param>
+        /// <param name="rxBufferNumber">Receive Buffer Number. Ranges 0 - 1.</param>
         /// <param name="eid">
         /// Extended Identifier bits.
         /// These bits contain the three Least Significant bits of the Standard Identifier for the received message.
@@ -33,8 +33,13 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <param name="sid">
         /// Extended Identifier bits.
         /// </param>
-        public RxBxSidl(RxBufferNumber rxBufferNumber, byte eid, bool ide, bool srr, byte sid)
+        public RxBxSidl(byte rxBufferNumber, byte eid, bool ide, bool srr, byte sid)
         {
+            if (rxBufferNumber > 1)
+            {
+                throw new ArgumentException($"Invalid RX Buffer Number value {rxBufferNumber}.", nameof(rxBufferNumber));
+            }
+
             if (eid > 3)
             {
                 throw new ArgumentException($"Invalid EID value {eid}.", nameof(eid));
@@ -56,8 +61,13 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// Initializes a new instance of the RxBxSidl class.
         /// </summary>
         /// <param name="value">The value that represents the register contents.</param>
-        public RxBxSidl(RxBufferNumber rxBufferNumber, byte value)
+        public RxBxSidl(byte rxBufferNumber, byte value)
         {
+            if (rxBufferNumber > 1)
+            {
+                throw new ArgumentException($"Invalid RX Buffer Number value {rxBufferNumber}.", nameof(rxBufferNumber));
+            }
+
             RxBufferNumber = rxBufferNumber;
             Eid = (byte)(value & 0b0000_0011);
             Ide = ((value >> 3) & 1) == 1;
@@ -66,9 +76,9 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         }
 
         /// <summary>
-        /// Receive Buffer Number.
+        /// Receive Buffer Number. Ranges 0 - 1.
         /// </summary>
-        public RxBufferNumber RxBufferNumber { get; }
+        public byte RxBufferNumber { get; }
 
         /// <summary>
         /// Extended Identifier bits.
@@ -100,12 +110,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             switch (RxBufferNumber)
             {
-                case RxBufferNumber.Zero:
+                case 0:
                     return Address.RxB0Sidl;
-                case RxBufferNumber.One:
+                case 1:
                     return Address.RxB1Sidl;
                 default:
-                    throw new ArgumentException("Invalid Rx Buffer Number.", nameof(RxBufferNumber));
+                    throw new ArgumentException($"Invalid Rx Buffer Number value {RxBufferNumber}.", nameof(RxBufferNumber));
             }
         }
 
@@ -114,16 +124,16 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// </summary>
         /// <param name="address">The address to look up Rx Buffer Number.</param>
         /// <returns>The Rx Buffer Number based on the register address.</returns>
-        public static RxBufferNumber GetRxBufferNumber(Address address)
+        public static byte GetRxBufferNumber(Address address)
         {
             switch (address)
             {
                 case Address.RxB0Sidl:
-                    return RxBufferNumber.Zero;
+                    return 0;
                 case Address.RxB1Sidl:
-                    return RxBufferNumber.One;
+                    return 1;
                 default:
-                    throw new ArgumentException("Invalid address.", nameof(address));
+                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
             }
         }
 

@@ -11,9 +11,9 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
     public class RxBxEid0Tests
     {
         [Theory]
-        [InlineData(RxBufferNumber.Zero, Address.RxB0Eid0)]
-        [InlineData(RxBufferNumber.One, Address.RxB1Eid0)]
-        public void Get_RxBufferNumber_Address(RxBufferNumber rxBufferNumber, Address address)
+        [InlineData(0, Address.RxB0Eid0)]
+        [InlineData(1, Address.RxB1Eid0)]
+        public void Get_RxBufferNumber_Address(byte rxBufferNumber, Address address)
         {
             Assert.Equal(rxBufferNumber, RxBxEid0.GetRxBufferNumber(address));
             Assert.Equal(address, new RxBxEid0(rxBufferNumber, 0).Address);
@@ -24,10 +24,10 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
         [InlineData(0b1111_1111)]
         public void From_To_Byte(byte eid)
         {
-            var rxBxEid0 = new RxBxEid0(RxBufferNumber.Zero, eid);
+            var rxBxEid0 = new RxBxEid0(0, eid);
             Assert.Equal(eid, rxBxEid0.Eid);
 
-            Assert.Equal(eid, new RxBxEid0(RxBufferNumber.Zero, eid).ToByte());
+            Assert.Equal(eid, new RxBxEid0(0, eid).ToByte());
         }
     }
 }
