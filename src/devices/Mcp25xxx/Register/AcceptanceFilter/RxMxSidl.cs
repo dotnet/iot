@@ -14,11 +14,16 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <summary>
         /// Initializes a new instance of the RxMxSidl class.
         /// </summary>
-        /// <param name="rxMaskNumber">Receive Mask Number.</param>
+        /// <param name="rxMaskNumber">Receive Mask Number.  Ranges 0 - 1.</param>
         /// <param name="eid">Extended Identifier Mask bits.</param>
         /// <param name="sid">Standard Identifier Mask bits.</param>
-        public RxMxSidl(RxMaskNumber rxMaskNumber, byte eid, byte sid)
+        public RxMxSidl(byte rxMaskNumber, byte eid, byte sid)
         {
+            if (rxMaskNumber > 1)
+            {
+                throw new ArgumentException($"Invalid RX Mask Number value {rxMaskNumber}.", nameof(rxMaskNumber));
+            }
+
             if (eid > 3)
             {
                 throw new ArgumentException($"Invalid EID value {eid}.", nameof(eid));
@@ -37,19 +42,24 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <summary>
         /// Initializes a new instance of the RxMxSidl class.
         /// </summary>
-        /// <param name="rxMaskNumber">Receive Mask Number.</param>
+        /// <param name="rxMaskNumber">Receive Mask Number.  Ranges 0 - 1.</param>
         /// <param name="value">The value that represents the register contents.</param>
-        public RxMxSidl(RxMaskNumber rxMaskNumber, byte value)
+        public RxMxSidl(byte rxMaskNumber, byte value)
         {
+            if (rxMaskNumber > 1)
+            {
+                throw new ArgumentException($"Invalid RX Mask Number value {rxMaskNumber}.", nameof(rxMaskNumber));
+            }
+
             RxMaskNumber = rxMaskNumber;
             Eid = (byte)(value & 0b0000_0011);
             Sid = (byte)((value & 0b1110_0000) >> 5);
         }
 
         /// <summary>
-        /// Receive Mask Number.
+        /// Receive Mask Number.  Ranges 0 - 1.
         /// </summary>
-        public RxMaskNumber RxMaskNumber { get; }
+        public byte RxMaskNumber { get; }
 
         /// <summary>
         /// Extended Identifier Mask bits.
@@ -65,12 +75,12 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             switch (RxMaskNumber)
             {
-                case RxMaskNumber.Zero:
+                case 0:
                     return Address.RxM0Sidl;
-                case RxMaskNumber.One:
+                case 1:
                     return Address.RxM1Sidl;
                 default:
-                    throw new ArgumentException("Invalid Rx Mask Number.", nameof(RxMaskNumber));
+                    throw new ArgumentException($"Invalid Rx Mask Number value {RxMaskNumber}.", nameof(RxMaskNumber));
             }
         }
 
@@ -79,16 +89,16 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// </summary>
         /// <param name="address">The address to look up Rx Mask Number.</param>
         /// <returns>The Rx Mask Number based on the register address.</returns>
-        public static RxMaskNumber GetRxMaskNumber(Address address)
+        public static byte GetRxMaskNumber(Address address)
         {
             switch (address)
             {
                 case Address.RxM0Sidl:
-                    return RxMaskNumber.Zero;
+                    return 0;
                 case Address.RxM1Sidl:
-                    return RxMaskNumber.One;
+                    return 1;
                 default:
-                    throw new ArgumentException("Invalid address.", nameof(address));
+                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
             }
         }
 

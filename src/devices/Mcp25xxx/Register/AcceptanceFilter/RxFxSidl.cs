@@ -52,6 +52,11 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <param name="value">The value that represents the register contents.</param>
         public RxFxSidl(byte rxFilterNumber, byte value)
         {
+            if (rxFilterNumber > 5)
+            {
+                throw new ArgumentException($"Invalid RX Filter Number value {rxFilterNumber}.", nameof(rxFilterNumber));
+            }
+
             RxFilterNumber = rxFilterNumber;
             Eid = (byte)(value & 0b0000_0011);
             Sid = (byte)((value & 0b1100_0000) >> 5);

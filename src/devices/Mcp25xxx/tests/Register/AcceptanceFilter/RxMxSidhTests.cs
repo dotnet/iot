@@ -11,9 +11,9 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
     public class RxMxSidhTests
     {
         [Theory]
-        [InlineData(RxMaskNumber.Zero, Address.RxM0Sidh)]
-        [InlineData(RxMaskNumber.One, Address.RxM1Sidh)]
-        public void Get_RxMaskNumber_Address(RxMaskNumber rxMaskNumber, Address address)
+        [InlineData(0, Address.RxM0Sidh)]
+        [InlineData(1, Address.RxM1Sidh)]
+        public void Get_RxMaskNumber_Address(byte rxMaskNumber, Address address)
         {
             Assert.Equal(rxMaskNumber, RxMxSidh.GetRxMaskNumber(address));
             Assert.Equal(address, new RxMxSidh(rxMaskNumber, 0x00).Address);
@@ -24,10 +24,10 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         [InlineData(0b1111_1111)]
         public void From_To_Byte(byte sid)
         {
-            var rxMxSidh = new RxMxSidh(RxMaskNumber.Zero, sid);
+            var rxMxSidh = new RxMxSidh(0, sid);
             Assert.Equal(sid, rxMxSidh.Sid);
 
-            Assert.Equal(sid, new RxMxSidh(RxMaskNumber.Zero, sid).ToByte());
+            Assert.Equal(sid, new RxMxSidh(0, sid).ToByte());
         }
     }
 }

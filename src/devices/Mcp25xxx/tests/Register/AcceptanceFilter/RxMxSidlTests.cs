@@ -12,9 +12,9 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
     public class RxMxSidlTests
     {
         [Theory]
-        [InlineData(RxMaskNumber.Zero, Address.RxM0Sidl)]
-        [InlineData(RxMaskNumber.One, Address.RxM1Sidl)]
-        public void Get_RxMaskNumber_Address(RxMaskNumber rxMaskNumber, Address address)
+        [InlineData(0, Address.RxM0Sidl)]
+        [InlineData(1, Address.RxM1Sidl)]
+        public void Get_RxMaskNumber_Address(byte rxMaskNumber, Address address)
         {
             Assert.Equal(rxMaskNumber, RxMxSidl.GetRxMaskNumber(address));
             Assert.Equal(address, new RxMxSidl(rxMaskNumber, 0x00, 0x00).Address);
@@ -26,11 +26,11 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         [InlineData(0b00, 0b111, 0b1110_0000)]
         public void From_To_Byte(byte eid, byte sid, byte expectedByte)
         {
-            var rxMxSidl = new RxMxSidl(RxMaskNumber.Zero, expectedByte);
+            var rxMxSidl = new RxMxSidl(0, expectedByte);
             Assert.Equal(eid, rxMxSidl.Eid);
             Assert.Equal(sid, rxMxSidl.Sid);
 
-            Assert.Equal(expectedByte, new RxMxSidl(RxMaskNumber.Zero, eid, sid).ToByte());
+            Assert.Equal(expectedByte, new RxMxSidl(0, eid, sid).ToByte());
         }
 
         [Theory]
@@ -39,7 +39,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         public void Invalid_Arguments(byte eid, byte sid)
         {
             Assert.Throws<ArgumentException>(() =>
-             new RxMxSidl(RxMaskNumber.Zero, eid, sid).ToByte());
+             new RxMxSidl(0, eid, sid).ToByte());
         }
     }
 }
