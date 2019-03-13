@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Initializes a new instance of the TxBxSidl class.
         /// </summary>
-        /// <param name="txBufferNumber">Transmit Buffer Number.</param>
+        /// <param name="txBufferNumber">Transmit Buffer Number.  Must be a value of 0 - 2.</param>
         /// <param name="eid">Extended Identifier bits.</param>
         /// <param name="exide">
         /// Extended Identifier Enable bit.
@@ -22,8 +22,13 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// False = Message will transmit the Standard Identifier.
         /// </param>
         /// <param name="sid">Standard Identifier bits.</param>
-        public TxBxSidl(TxBufferNumber txBufferNumber, byte eid, bool exide, byte sid)
+        public TxBxSidl(byte txBufferNumber, byte eid, bool exide, byte sid)
         {
+            if (txBufferNumber > 2)
+            {
+                throw new ArgumentException($"Invalid TX Buffer Number value {txBufferNumber}.", nameof(txBufferNumber));
+            }
+
             if (eid > 3)
             {
                 throw new ArgumentException($"Invalid EID value {eid}.", nameof(eid));
@@ -43,10 +48,15 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Initializes a new instance of the TxBxSidl class.
         /// </summary>
-        /// <param name="txBufferNumber">Transmit Buffer Number.</param>
+        /// <param name="txBufferNumber">Transmit Buffer Number.  Must be a value of 0 - 2.</param>
         /// <param name="value">The value that represents the register contents.</param>
-        public TxBxSidl(TxBufferNumber txBufferNumber, byte value)
+        public TxBxSidl(byte txBufferNumber, byte value)
         {
+            if (txBufferNumber > 2)
+            {
+                throw new ArgumentException($"Invalid TX Buffer Number value {txBufferNumber}.", nameof(txBufferNumber));
+            }
+
             TxBufferNumber = txBufferNumber;
             Eid = (byte)(value & 0b0000_0011);
             Exide = ((value >> 3) & 1) == 1;
@@ -54,9 +64,9 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         }
 
         /// <summary>
-        /// Transmit Buffer Number.
+        /// Transmit Buffer Number.  Must be a value of 0 - 2.
         /// </summary>
-        public TxBufferNumber TxBufferNumber { get; }
+        public byte TxBufferNumber { get; }
 
         /// <summary>
         /// Extended Identifier bits.
@@ -79,14 +89,14 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             switch (TxBufferNumber)
             {
-                case TxBufferNumber.Zero:
+                case 0:
                     return Address.TxB0Sidl;
-                case TxBufferNumber.One:
+                case 1:
                     return Address.TxB1Sidl;
-                case TxBufferNumber.Two:
+                case 2:
                     return Address.TxB2Sidl;
                 default:
-                    throw new ArgumentException("Invalid Tx Buffer Number.", nameof(TxBufferNumber));
+                    throw new ArgumentException($"Invalid Tx Buffer Number value {TxBufferNumber}.", nameof(TxBufferNumber));
             }
         }
 
@@ -95,18 +105,18 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// </summary>
         /// <param name="address">The address to look up Tx Buffer Number.</param>
         /// <returns>The Tx Buffer Number based on the register address.</returns>
-        public static TxBufferNumber GetTxBufferNumber(Address address)
+        public static byte GetTxBufferNumber(Address address)
         {
             switch (address)
             {
                 case Address.TxB0Sidl:
-                    return TxBufferNumber.Zero;
+                    return 0;
                 case Address.TxB1Sidl:
-                    return TxBufferNumber.One;
+                    return 1;
                 case Address.TxB2Sidl:
-                    return TxBufferNumber.Two;
+                    return 2;
                 default:
-                    throw new ArgumentException("Invalid address.", nameof(address));
+                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
             }
         }
 

@@ -103,107 +103,107 @@ namespace Iot.Device.Mcp25xxx.Samples
             ConsoleWriteRegisterItemDetails("B1RTS", $"{txRtsCtrl.B1Rts}");
             ConsoleWriteRegisterItemDetails("B2RTS", $"{txRtsCtrl.B2Rts}");
 
-            var txB0Ctrl = new TxBxCtrl(TxBufferNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Ctrl));
+            var txB0Ctrl = new TxBxCtrl(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Ctrl));
             ConsoleWriteRegisterItemDetails("TXP[1:0]", $"{(byte)txB0Ctrl.Txp} - { txB0Ctrl.Txp}");
             ConsoleWriteRegisterItemDetails("TXREQ", $"{txB0Ctrl.TxReq}");
             ConsoleWriteRegisterItemDetails("TXERR", $"{txB0Ctrl.TxErr}");
             ConsoleWriteRegisterItemDetails("MLOA", $"{txB0Ctrl.Mloa}");
             ConsoleWriteRegisterItemDetails("ABTF", $"{txB0Ctrl.Abtf}");
 
-            var txB0Sidh = new TxBxSidh(TxBufferNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Sidh));
+            var txB0Sidh = new TxBxSidh(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Sidh));
             ConsoleWriteRegisterItemDetails("SID[10:3]", $"0x{txB0Sidh.Sid:X2}");
 
-            var txB0Sidl = new TxBxSidl(TxBufferNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Sidl));
+            var txB0Sidl = new TxBxSidl(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Sidl));
             ConsoleWriteRegisterItemDetails("EID[17:16]", $"0x{txB0Sidl.Eid:X2}");
             ConsoleWriteRegisterItemDetails("EXIDE", $"{txB0Sidl.Exide}");
             ConsoleWriteRegisterItemDetails("SID[2:0]", $"0x{txB0Sidl.Sid:X2}");
 
-            var txB0Eid8 = new TxBxEid8(TxBufferNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Eid8));
+            var txB0Eid8 = new TxBxEid8(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Eid8));
             ConsoleWriteRegisterItemDetails("EID[15:8]", $"0x{txB0Eid8.Eid:X2}");
 
-            var txB0Eid0 = new TxBxEid0(TxBufferNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Eid0));
+            var txB0Eid0 = new TxBxEid0(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Eid0));
             ConsoleWriteRegisterItemDetails("EID[7:0]", $"0x{txB0Eid0.Eid:X2}");
 
-            var txB0Dlc = new TxBxDlc(TxBufferNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Dlc));
+            var txB0Dlc = new TxBxDlc(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Dlc));
             ConsoleWriteRegisterItemDetails("DLC[3:0]", $"0x{txB0Dlc.Dlc:X2}");
             ConsoleWriteRegisterItemDetails("RTR", $"{txB0Dlc.Rtr}");
 
-            new TxBxDn(TxBufferNumber.Zero, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D0));
-            new TxBxDn(TxBufferNumber.Zero, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D1));
-            new TxBxDn(TxBufferNumber.Zero, 2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D2));
-            new TxBxDn(TxBufferNumber.Zero, 3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D3));
-            new TxBxDn(TxBufferNumber.Zero, 4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D4));
-            new TxBxDn(TxBufferNumber.Zero, 5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D5));
-            new TxBxDn(TxBufferNumber.Zero, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D6));
-            new TxBxDn(TxBufferNumber.Zero, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D7));
+            new TxBxDn(0, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D0));
+            new TxBxDn(0, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D1));
+            new TxBxDn(0, 2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D2));
+            new TxBxDn(0, 3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D3));
+            new TxBxDn(0, 4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D4));
+            new TxBxDn(0, 5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D5));
+            new TxBxDn(0, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D6));
+            new TxBxDn(0, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D7));
 
-            var txB1Ctrl = new TxBxCtrl(TxBufferNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Ctrl));
+            var txB1Ctrl = new TxBxCtrl(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Ctrl));
             ConsoleWriteRegisterItemDetails("TXP[1:0]", $"{(byte)txB1Ctrl.Txp} - { txB1Ctrl.Txp}");
             ConsoleWriteRegisterItemDetails("TXREQ", $"{txB1Ctrl.TxReq}");
             ConsoleWriteRegisterItemDetails("TXERR", $"{txB1Ctrl.TxErr}");
             ConsoleWriteRegisterItemDetails("MLOA", $"{txB1Ctrl.Mloa}");
             ConsoleWriteRegisterItemDetails("ABTF", $"{txB1Ctrl.Abtf}");
 
-            var txB1Sidh = new TxBxSidh(TxBufferNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Sidh));
+            var txB1Sidh = new TxBxSidh(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Sidh));
             ConsoleWriteRegisterItemDetails("SID[10:3]", $"0x{txB1Sidh.Sid:X2}");
 
-            var txB1Sidl = new TxBxSidl(TxBufferNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Sidl));
+            var txB1Sidl = new TxBxSidl(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Sidl));
             ConsoleWriteRegisterItemDetails("EID[17:16]", $"0X{txB1Sidl.Eid:X2}");
             ConsoleWriteRegisterItemDetails("EXIDE", $"{txB1Sidl.Exide}");
             ConsoleWriteRegisterItemDetails("SID[2:0]", $"0x{txB1Sidl.Sid:X2}");
 
-            var txB1Eid8 = new TxBxEid8(TxBufferNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Eid8));
+            var txB1Eid8 = new TxBxEid8(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Eid8));
             ConsoleWriteRegisterItemDetails("EID[15:8]", $"0x{txB1Eid8.Eid:X2}");
 
-            var txB1Eid0 = new TxBxEid0(TxBufferNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Eid0));
+            var txB1Eid0 = new TxBxEid0(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Eid0));
             ConsoleWriteRegisterItemDetails("EID[7:0]", $"0x{txB1Eid0.Eid:X2}");
 
-            var txB1Dlc = new TxBxDlc(TxBufferNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Dlc));
+            var txB1Dlc = new TxBxDlc(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Dlc));
             ConsoleWriteRegisterItemDetails("DLC[3:0]", $"0x{txB1Dlc.Dlc:X2}");
             ConsoleWriteRegisterItemDetails("RTR", $"{txB1Dlc.Rtr}");
 
-            new TxBxDn(TxBufferNumber.One, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D0));
-            new TxBxDn(TxBufferNumber.One, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D1));
-            new TxBxDn(TxBufferNumber.One, 2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D2));
-            new TxBxDn(TxBufferNumber.One, 3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D3));
-            new TxBxDn(TxBufferNumber.One, 4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D4));
-            new TxBxDn(TxBufferNumber.One, 5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D5));
-            new TxBxDn(TxBufferNumber.One, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D6));
-            new TxBxDn(TxBufferNumber.One, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D7));
+            new TxBxDn(1, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D0));
+            new TxBxDn(1, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D1));
+            new TxBxDn(1, 2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D2));
+            new TxBxDn(1, 3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D3));
+            new TxBxDn(1, 4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D4));
+            new TxBxDn(1, 5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D5));
+            new TxBxDn(1, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D6));
+            new TxBxDn(1, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D7));
 
-            var txB2Ctrl = new TxBxCtrl(TxBufferNumber.Two, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Ctrl));
+            var txB2Ctrl = new TxBxCtrl(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Ctrl));
             ConsoleWriteRegisterItemDetails("TXP[1:0]", $"{(byte)txB2Ctrl.Txp} - { txB2Ctrl.Txp}");
             ConsoleWriteRegisterItemDetails("TXREQ", $"{txB2Ctrl.TxReq}");
             ConsoleWriteRegisterItemDetails("TXERR", $"{txB2Ctrl.TxErr}");
             ConsoleWriteRegisterItemDetails("MLOA", $"{txB2Ctrl.Mloa}");
             ConsoleWriteRegisterItemDetails("ABTF", $"{txB2Ctrl.Abtf}");
 
-            var txB2Sidh = new TxBxSidh(TxBufferNumber.Two, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Sidh));
+            var txB2Sidh = new TxBxSidh(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Sidh));
             ConsoleWriteRegisterItemDetails("SID[10:3]", $"0x{txB2Sidh.Sid:X2}");
 
-            var txB2Sidl = new TxBxSidl(TxBufferNumber.Two, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Sidl));
+            var txB2Sidl = new TxBxSidl(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Sidl));
             ConsoleWriteRegisterItemDetails("EID[17:16]", $"0x{txB2Sidl.Eid:X2}");
             ConsoleWriteRegisterItemDetails("EXIDE", $"{txB2Sidl.Exide}");
             ConsoleWriteRegisterItemDetails("SID[2:0]", $"0x{txB2Sidl.Sid:X2}");
 
-            var txB2Eid8 = new TxBxEid8(TxBufferNumber.Two, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Eid8));
+            var txB2Eid8 = new TxBxEid8(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Eid8));
             ConsoleWriteRegisterItemDetails("EID[15:8]", $"0x{txB2Eid8.Eid:X2}");
 
-            var txB2Eid0 = new TxBxEid0(TxBufferNumber.Two, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Eid0));
+            var txB2Eid0 = new TxBxEid0(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Eid0));
             ConsoleWriteRegisterItemDetails("EID[7:0]", $"0x{txB2Eid0.Eid:X2}");
 
-            var txB2Dlc = new TxBxDlc(TxBufferNumber.Two, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Dlc));
+            var txB2Dlc = new TxBxDlc(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Dlc));
             ConsoleWriteRegisterItemDetails("DLC[3:0]", $"0x{txB2Dlc.Dlc:X2}");
             ConsoleWriteRegisterItemDetails("RTR", $"{txB2Dlc.Rtr}");
 
-            new TxBxDn(TxBufferNumber.Two, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D0));
-            new TxBxDn(TxBufferNumber.Two, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D1));
-            new TxBxDn(TxBufferNumber.Two, 2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D2));
-            new TxBxDn(TxBufferNumber.Two, 3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D3));
-            new TxBxDn(TxBufferNumber.Two, 4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D4));
-            new TxBxDn(TxBufferNumber.Two, 5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D5));
-            new TxBxDn(TxBufferNumber.Two, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D6));
-            new TxBxDn(TxBufferNumber.Two, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D7));
+            new TxBxDn(2, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D0));
+            new TxBxDn(2, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D1));
+            new TxBxDn(2, 2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D2));
+            new TxBxDn(2, 3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D3));
+            new TxBxDn(2, 4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D4));
+            new TxBxDn(2, 5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D5));
+            new TxBxDn(2, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D6));
+            new TxBxDn(2, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D7));
         }
 
         private static void ReadAllMessageReceiveRegistersWithDetails(Mcp25xxx mcp25xxx)
@@ -626,11 +626,11 @@ namespace Iot.Device.Mcp25xxx.Samples
                 Address.TxB0Sidh,
                 new byte[]
                 {
-                    new TxBxSidh(TxBufferNumber.Zero, 0b0000_1001).ToByte(),
-                    new TxBxSidl(TxBufferNumber.Zero, 0b001, false, 0b00).ToByte(),
-                    new TxBxEid8(TxBufferNumber.Zero, 0b0000_0000).ToByte(),
-                    new TxBxEid0(TxBufferNumber.Zero, 0b0000_0000).ToByte(),
-                    new TxBxDlc(TxBufferNumber.Zero, data.Length, false).ToByte()
+                    new TxBxSidh(0, 0b0000_1001).ToByte(),
+                    new TxBxSidl(0, 0b001, false, 0b00).ToByte(),
+                    new TxBxEid8(0, 0b0000_0000).ToByte(),
+                    new TxBxEid0(0, 0b0000_0000).ToByte(),
+                    new TxBxDlc(0, data.Length, false).ToByte()
                 });
 
             mcp25xxx.Write(Address.TxB0D0, data);

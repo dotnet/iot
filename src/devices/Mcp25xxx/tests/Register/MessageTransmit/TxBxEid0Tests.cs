@@ -11,10 +11,10 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
     public class TxBxEid0Tests
     {
         [Theory]
-        [InlineData(TxBufferNumber.Zero, Address.TxB0Eid0)]
-        [InlineData(TxBufferNumber.One, Address.TxB1Eid0)]
-        [InlineData(TxBufferNumber.Two, Address.TxB2Eid0)]
-        public void Get_RxFilterNumber_Address(TxBufferNumber txBufferNumber, Address address)
+        [InlineData(0, Address.TxB0Eid0)]
+        [InlineData(1, Address.TxB1Eid0)]
+        [InlineData(2, Address.TxB2Eid0)]
+        public void Get_RxFilterNumber_Address(byte txBufferNumber, Address address)
         {
             Assert.Equal(txBufferNumber, TxBxEid0.GetTxBufferNumber(address));
             Assert.Equal(address, new TxBxEid0(txBufferNumber, 0x00).Address);
@@ -25,10 +25,10 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         [InlineData(0b1111_1111)]
         public void From_To_Byte(byte eid)
         {
-            var txBxEid0 = new TxBxEid0(TxBufferNumber.Zero, eid);
+            var txBxEid0 = new TxBxEid0(0, eid);
             Assert.Equal(eid, txBxEid0.Eid);
 
-            Assert.Equal(eid, new TxBxEid0(TxBufferNumber.Zero, eid).ToByte());
+            Assert.Equal(eid, new TxBxEid0(0, eid).ToByte());
         }
     }
 }

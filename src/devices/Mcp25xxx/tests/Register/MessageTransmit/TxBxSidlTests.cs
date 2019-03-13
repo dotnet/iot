@@ -12,10 +12,10 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
     public class TxBxSidlTests
     {
         [Theory]
-        [InlineData(TxBufferNumber.Zero, Address.TxB0Sidl)]
-        [InlineData(TxBufferNumber.One, Address.TxB1Sidl)]
-        [InlineData(TxBufferNumber.Two, Address.TxB2Sidl)]
-        public void Get_RxFilterNumber_Address(TxBufferNumber txBufferNumber, Address address)
+        [InlineData(0, Address.TxB0Sidl)]
+        [InlineData(1, Address.TxB1Sidl)]
+        [InlineData(2, Address.TxB2Sidl)]
+        public void Get_RxFilterNumber_Address(byte txBufferNumber, Address address)
         {
             Assert.Equal(txBufferNumber, TxBxSidl.GetTxBufferNumber(address));
             Assert.Equal(address, new TxBxSidl(txBufferNumber, 0x00, false, 0x00).Address);
@@ -28,12 +28,12 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         [InlineData(0b00, false, 0b111, 0b1110_0000)]
         public void From_To_Byte(byte eid, bool exide, byte sid, byte expectedByte)
         {
-            var txBxSidl = new TxBxSidl(TxBufferNumber.Zero, expectedByte);
+            var txBxSidl = new TxBxSidl(0, expectedByte);
             Assert.Equal(eid, txBxSidl.Eid);
             Assert.Equal(exide, txBxSidl.Exide);
             Assert.Equal(sid, txBxSidl.Sid);
 
-            Assert.Equal(expectedByte, new TxBxSidl(TxBufferNumber.Zero, eid, exide, sid).ToByte());
+            Assert.Equal(expectedByte, new TxBxSidl(0, eid, exide, sid).ToByte());
         }
 
         [Theory]
@@ -42,7 +42,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         public void Invalid_Arguments(byte eid, bool exide, byte sid)
         {
             Assert.Throws<ArgumentException>(() =>
-             new TxBxSidl(TxBufferNumber.Zero, eid, exide, sid).ToByte());
+             new TxBxSidl(0, eid, exide, sid).ToByte());
         }
     }
 }

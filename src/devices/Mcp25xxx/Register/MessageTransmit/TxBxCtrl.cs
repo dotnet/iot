@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Initializes a new instance of the TxBxCtrl class.
         /// </summary>
-        /// <param name="txBufferNumber">Transmit Buffer Number.</param>
+        /// <param name="txBufferNumber">Transmit Buffer Number.  Must be a value of 0 - 2.</param>
         /// <param name="txp">Transmit Buffer Priority bits.</param>
         /// <param name="txreq">
         /// Message Transmit Request bit.
@@ -37,13 +37,18 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// False = Message completed transmission successfully.
         /// </param>
         public TxBxCtrl(
-            TxBufferNumber txBufferNumber,
+            byte txBufferNumber,
             TransmitBufferPriority txp,
             bool txreq,
             bool txerr,
             bool mloa,
             bool abtf)
         {
+            if (txBufferNumber > 2)
+            {
+                throw new ArgumentException($"Invalid TX Buffer Number value {txBufferNumber}.", nameof(txBufferNumber));
+            }
+
             TxBufferNumber = txBufferNumber;
             Txp = txp;
             TxReq = txreq;
@@ -55,10 +60,15 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Initializes a new instance of the TxBxCtrl class.
         /// </summary>
-        /// <param name="txBufferNumber">Transmit Buffer Number.</param>
+        /// <param name="txBufferNumber">Transmit Buffer Number.  Must be a value of 0 - 2.</param>
         /// <param name="value">The value that represents the register contents.</param>
-        public TxBxCtrl(TxBufferNumber txBufferNumber, byte value)
+        public TxBxCtrl(byte txBufferNumber, byte value)
         {
+            if (txBufferNumber > 2)
+            {
+                throw new ArgumentException($"Invalid TX Buffer Number value {txBufferNumber}.", nameof(txBufferNumber));
+            }
+
             TxBufferNumber = txBufferNumber;
             Txp = (TransmitBufferPriority)(value & 0b0000_0011);
             TxReq = ((value >> 3) & 1) == 1;
@@ -93,7 +103,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Transmit Buffer Number.
         /// </summary>
-        public TxBufferNumber TxBufferNumber { get; }
+        public byte TxBufferNumber { get; }
 
         /// <summary>
         /// Transmit Buffer Priority bits.
@@ -132,14 +142,14 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             switch (TxBufferNumber)
             {
-                case TxBufferNumber.Zero:
+                case 0:
                     return Address.TxB0Ctrl;
-                case TxBufferNumber.One:
+                case 1:
                     return Address.TxB1Ctrl;
-                case TxBufferNumber.Two:
+                case 2:
                     return Address.TxB2Ctrl;
                 default:
-                    throw new ArgumentException("Invalid Tx Buffer Number.", nameof(TxBufferNumber));
+                    throw new ArgumentException($"Invalid Tx Buffer Number value {TxBufferNumber}.", nameof(TxBufferNumber));
             }
         }
 
@@ -148,18 +158,18 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// </summary>
         /// <param name="address">The address to look up Tx Buffer Number.</param>
         /// <returns>The Tx Buffer Number based on the register address.</returns>
-        public static TxBufferNumber GetTxBufferNumber(Address address)
+        public static byte GetTxBufferNumber(Address address)
         {
             switch (address)
             {
                 case Address.TxB0Ctrl:
-                    return TxBufferNumber.Zero;
+                    return 0;
                 case Address.TxB1Ctrl:
-                    return TxBufferNumber.One;
+                    return 1;
                 case Address.TxB2Ctrl:
-                    return TxBufferNumber.Two;
+                    return 2;
                 default:
-                    throw new ArgumentException("Invalid address.", nameof(address));
+                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
             }
         }
 

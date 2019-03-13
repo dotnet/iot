@@ -12,10 +12,10 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
     public class TxBxCtrlTests
     {
         [Theory]
-        [InlineData(TxBufferNumber.Zero, Address.TxB0Ctrl)]
-        [InlineData(TxBufferNumber.One, Address.TxB1Ctrl)]
-        [InlineData(TxBufferNumber.Two, Address.TxB2Ctrl)]
-        public void Get_TxBufferNumber_Address(TxBufferNumber txBufferNumber, Address address)
+        [InlineData(0, Address.TxB0Ctrl)]
+        [InlineData(1, Address.TxB1Ctrl)]
+        [InlineData(2, Address.TxB2Ctrl)]
+        public void Get_TxBufferNumber_Address(byte txBufferNumber, Address address)
         {
             Assert.Equal(txBufferNumber, GetTxBufferNumber(address));
             Assert.Equal(address, new TxBxCtrl(txBufferNumber, TransmitBufferPriority.LowestMessage, false, false, false, false).Address);
@@ -32,14 +32,14 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         [InlineData(TransmitBufferPriority.LowestMessage, false, false, false, true, 0b0100_0000)]
         public void From_To_Byte(TransmitBufferPriority txp, bool txreq, bool txerr, bool mloa, bool abtf, byte expectedByte)
         {
-            var txBxCtrl = new TxBxCtrl(TxBufferNumber.One, expectedByte);
+            var txBxCtrl = new TxBxCtrl(1, expectedByte);
             Assert.Equal(txp, txBxCtrl.Txp);
             Assert.Equal(txreq, txBxCtrl.TxReq);
             Assert.Equal(txerr, txBxCtrl.TxErr);
             Assert.Equal(mloa, txBxCtrl.Mloa);
             Assert.Equal(abtf, txBxCtrl.Abtf);
 
-            Assert.Equal(expectedByte, new TxBxCtrl(TxBufferNumber.One, txp, txreq, txerr, mloa, abtf).ToByte());
+            Assert.Equal(expectedByte, new TxBxCtrl(1, txp, txreq, txerr, mloa, abtf).ToByte());
         }
     }
 }
