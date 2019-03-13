@@ -11,13 +11,13 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
     public class RxFxEid0Tests
     {
         [Theory]
-        [InlineData(RxFilterNumber.Zero, Address.RxF0Eid0)]
-        [InlineData(RxFilterNumber.One, Address.RxF1Eid0)]
-        [InlineData(RxFilterNumber.Two, Address.RxF2Eid0)]
-        [InlineData(RxFilterNumber.Three, Address.RxF3Eid0)]
-        [InlineData(RxFilterNumber.Four, Address.RxF4Eid0)]
-        [InlineData(RxFilterNumber.Five, Address.RxF5Eid0)]
-        public void Get_RxFilterNumber_Address(RxFilterNumber rxFilterNumber, Address address)
+        [InlineData(0, Address.RxF0Eid0)]
+        [InlineData(1, Address.RxF1Eid0)]
+        [InlineData(2, Address.RxF2Eid0)]
+        [InlineData(3, Address.RxF3Eid0)]
+        [InlineData(4, Address.RxF4Eid0)]
+        [InlineData(5, Address.RxF5Eid0)]
+        public void Get_RxFilterNumber_Address(byte rxFilterNumber, Address address)
         {
             Assert.Equal(rxFilterNumber, RxFxEid0.GetRxFilterNumber(address));
             Assert.Equal(address, new RxFxEid0(rxFilterNumber, 0x00).Address);
@@ -28,10 +28,10 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         [InlineData(0b1111_1111)]
         public void From_To_Byte(byte eid)
         {
-            var rxFxEid0 = new RxFxEid0(RxFilterNumber.Zero, eid);
+            var rxFxEid0 = new RxFxEid0(0, eid);
             Assert.Equal(eid, rxFxEid0.Eid);
 
-            Assert.Equal(eid, new RxFxEid0(RxFilterNumber.Zero, eid).ToByte());
+            Assert.Equal(eid, new RxFxEid0(0, eid).ToByte());
         }
     }
 }

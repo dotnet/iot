@@ -291,88 +291,88 @@ namespace Iot.Device.Mcp25xxx.Samples
         {
             Console.WriteLine("Acceptance Filter Registers");
 
-            var rxF0Sidh = new RxFxSidh(RxFilterNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Sidh));
+            var rxF0Sidh = new RxFxSidh(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Sidh));
             ConsoleWriteRegisterItemDetails("SID[10:3]", $"0x{rxF0Sidh.Sid:X2}");
 
-            var rxF0Sidl = new RxFxSidl(RxFilterNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Sidl));
+            var rxF0Sidl = new RxFxSidl(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Sidl));
             ConsoleWriteRegisterItemDetails("EID[17:16]", $"0x{rxF0Sidl.Eid:X2}");
             ConsoleWriteRegisterItemDetails("EXIDE", $"{rxF0Sidl.Exide}");
             ConsoleWriteRegisterItemDetails("SID[2:0]", $"0x{rxF0Sidl.Sid:X2}");
 
-            var rxF0Eid8 = new RxFxEid8(RxFilterNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Eid8));
+            var rxF0Eid8 = new RxFxEid8(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Eid8));
             ConsoleWriteRegisterItemDetails("EID[15:8]", $"0x{rxF0Eid8.Eid:X2}");
 
-            var rxF0Eid0 = new RxFxEid0(RxFilterNumber.Zero, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Eid0));
+            var rxF0Eid0 = new RxFxEid0(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Eid0));
             ConsoleWriteRegisterItemDetails("EID[7:0]", $"0x{rxF0Eid0.Eid:X2}");
 
-            var rxF1Sidh = new RxFxSidh(RxFilterNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Sidh));
+            var rxF1Sidh = new RxFxSidh(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Sidh));
             ConsoleWriteRegisterItemDetails("SID[10:3]", $"0x{rxF1Sidh.Sid:X2}");
 
-            var rxF1Sidl = new RxFxSidl(RxFilterNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Sidl));
+            var rxF1Sidl = new RxFxSidl(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Sidl));
             ConsoleWriteRegisterItemDetails("EID[17:16]", $"0x{rxF1Sidl.Eid:X2}");
             ConsoleWriteRegisterItemDetails("EXIDE", $"{rxF1Sidl.Exide}");
             ConsoleWriteRegisterItemDetails("SID[2:0]", $"0x{rxF1Sidl.Sid:X2}");
 
-            var rxF1Eid8 = new RxFxEid8(RxFilterNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Eid8));
+            var rxF1Eid8 = new RxFxEid8(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Eid8));
             ConsoleWriteRegisterItemDetails("EID[15:8]", $"0x{rxF1Eid8.Eid:X2}");
 
-            var rxF1Eid0 = new RxFxEid0(RxFilterNumber.One, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Eid0));
+            var rxF1Eid0 = new RxFxEid0(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Eid0));
             ConsoleWriteRegisterItemDetails("EID[7:0]", $"0x{rxF1Eid0.Eid:X2}");
 
-            var rxF2Sidh = new RxFxSidh(RxFilterNumber.Two, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Sidh));
+            var rxF2Sidh = new RxFxSidh(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Sidh));
             ConsoleWriteRegisterItemDetails("SID[10:3]", $"0x{rxF2Sidh.Sid:X2}");
 
-            var rxF2Sidl = new RxFxSidl(RxFilterNumber.Two, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Sidl));
+            var rxF2Sidl = new RxFxSidl(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Sidl));
             ConsoleWriteRegisterItemDetails("EID[17:16]", $"0x{rxF2Sidl.Eid:X2}");
             ConsoleWriteRegisterItemDetails("EXIDE", $"{rxF2Sidl.Exide}");
             ConsoleWriteRegisterItemDetails("SID[2:0]", $"0x{rxF2Sidl.Sid:X2}");
 
-            var rxF2Eid8 = new RxFxEid8(RxFilterNumber.Two, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Eid8));
+            var rxF2Eid8 = new RxFxEid8(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Eid8));
             ConsoleWriteRegisterItemDetails("EID[15:8]", $"0x{rxF2Eid8.Eid:X2}");
 
-            var rxF2Eid0 = new RxFxEid0(RxFilterNumber.Two, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Eid0));
+            var rxF2Eid0 = new RxFxEid0(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Eid0));
             ConsoleWriteRegisterItemDetails("EID[7:0]", $"0x{rxF2Eid0.Eid:X2}");
 
-            var rxF3Sidh = new RxFxSidh(RxFilterNumber.Three, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Sidh));
+            var rxF3Sidh = new RxFxSidh(3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Sidh));
             ConsoleWriteRegisterItemDetails("SID[10:3]", $"0x{rxF3Sidh.Sid:X2}");
 
-            var rxF3Sidl = new RxFxSidl(RxFilterNumber.Three, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Sidl));
+            var rxF3Sidl = new RxFxSidl(3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Sidl));
             ConsoleWriteRegisterItemDetails("EID[17:16]", $"0x{rxF3Sidl.Eid:X2}");
             ConsoleWriteRegisterItemDetails("EXIDE", $"{rxF3Sidl.Exide}");
             ConsoleWriteRegisterItemDetails("SID[2:0]", $"0x{rxF3Sidl.Sid:X2}");
 
-            var rxF3Eid8 = new RxFxEid8(RxFilterNumber.Three, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Eid8));
+            var rxF3Eid8 = new RxFxEid8(3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Eid8));
             ConsoleWriteRegisterItemDetails("EID[15:8]", $"0x{rxF3Eid8.Eid:X2}");
 
-            var rxF3Eid0 = new RxFxEid0(RxFilterNumber.Three, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Eid0));
+            var rxF3Eid0 = new RxFxEid0(3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Eid0));
             ConsoleWriteRegisterItemDetails("EID[7:0]", $"0x{rxF3Eid0.Eid:X2}");
 
-            var rxF4Sidh = new RxFxSidh(RxFilterNumber.Four, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Sidh));
+            var rxF4Sidh = new RxFxSidh(4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Sidh));
             ConsoleWriteRegisterItemDetails("SID[10:3]", $"0x{rxF4Sidh.Sid:X2}");
 
-            var rxF4Sidl = new RxFxSidl(RxFilterNumber.Four, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Sidl));
+            var rxF4Sidl = new RxFxSidl(4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Sidl));
             ConsoleWriteRegisterItemDetails("EID[17:16]", $"0x{rxF4Sidl.Eid:X2}");
             ConsoleWriteRegisterItemDetails("EXIDE", $"{rxF4Sidl.Exide}");
             ConsoleWriteRegisterItemDetails("SID[2:0]", $"0x{rxF4Sidl.Sid:X2}");
 
-            var rxF4Eid8 = new RxFxEid8(RxFilterNumber.Four, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Eid8));
+            var rxF4Eid8 = new RxFxEid8(4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Eid8));
             ConsoleWriteRegisterItemDetails("EID[15:8]", $"0x{rxF4Eid8.Eid:X2}");
 
-            var rxF4Eid0 = new RxFxEid0(RxFilterNumber.Four, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Eid0));
+            var rxF4Eid0 = new RxFxEid0(4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Eid0));
             ConsoleWriteRegisterItemDetails("EID[7:0]", $"0x{rxF4Eid0.Eid:X2}");
 
-            var rxF5Sidh = new RxFxSidh(RxFilterNumber.Five, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Sidh));
+            var rxF5Sidh = new RxFxSidh(5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Sidh));
             ConsoleWriteRegisterItemDetails("SID[10:3]", $"0x{rxF5Sidh.Sid:X2}");
 
-            var rxF5Sidl = new RxFxSidl(RxFilterNumber.Five, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Sidl));
+            var rxF5Sidl = new RxFxSidl(5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Sidl));
             ConsoleWriteRegisterItemDetails("EID[17:16]", $"0x{rxF5Sidl.Eid:X2}");
             ConsoleWriteRegisterItemDetails("EXIDE", $"{rxF5Sidl.Exide}");
             ConsoleWriteRegisterItemDetails("SID[2:0]", $"0x{rxF5Sidl.Sid:X2}");
 
-            var rxF5Eid8 = new RxFxEid8(RxFilterNumber.Five, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Eid8));
+            var rxF5Eid8 = new RxFxEid8(5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Eid8));
             ConsoleWriteRegisterItemDetails("EID[15:8]", $"0x{rxF5Eid8.Eid:X2}");
 
-            var rxF5Eid0 = new RxFxEid0(RxFilterNumber.Five, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Eid0));
+            var rxF5Eid0 = new RxFxEid0(5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Eid0));
             ConsoleWriteRegisterItemDetails("EID[7:0]", $"0x{rxF5Eid0.Eid:X2}");
 
 

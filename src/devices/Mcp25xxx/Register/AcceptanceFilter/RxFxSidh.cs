@@ -14,18 +14,23 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <summary>
         /// Initializes a new instance of the RxFxSidh class.
         /// </summary>
-        /// <param name="rxFilterNumber">Receive Filter Number.</param>
+        /// <param name="rxFilterNumber">Receive Filter Number.  Ranges 0 - 5.</param>
         /// <param name="sid">Standard Identifier bits.</param>
-        public RxFxSidh(RxFilterNumber rxFilterNumber, byte sid)
+        public RxFxSidh(byte rxFilterNumber, byte sid)
         {
+            if (rxFilterNumber > 5)
+            {
+                throw new ArgumentException($"Invalid RX Filter Number value {rxFilterNumber}.", nameof(rxFilterNumber));
+            }
+
             RxFilterNumber = rxFilterNumber;
             Sid = sid;
         }
 
         /// <summary>
-        /// Receive Filter Number.
+        /// Receive Filter Number.  Ranges 0 - 5.
         /// </summary>
-        public RxFilterNumber RxFilterNumber { get; }
+        public byte RxFilterNumber { get; }
 
         /// <summary>
         /// Standard Identifier bits.
@@ -36,20 +41,20 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             switch (RxFilterNumber)
             {
-                case RxFilterNumber.Zero:
+                case 0:
                     return Address.RxF0Sidh;
-                case RxFilterNumber.One:
+                case 1:
                     return Address.RxF1Sidh;
-                case RxFilterNumber.Two:
+                case 2:
                     return Address.RxF2Sidh;
-                case RxFilterNumber.Three:
+                case 3:
                     return Address.RxF3Sidh;
-                case RxFilterNumber.Four:
+                case 4:
                     return Address.RxF4Sidh;
-                case RxFilterNumber.Five:
+                case 5:
                     return Address.RxF5Sidh;
                 default:
-                    throw new ArgumentException("Invalid Rx Filter Number.", nameof(RxFilterNumber));
+                    throw new ArgumentException($"Invalid Rx Filter Number value {RxFilterNumber}.", nameof(RxFilterNumber));
             }
         }
 
@@ -58,24 +63,24 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// </summary>
         /// <param name="address">The address to up look Rx Filter Number.</param>
         /// <returns>The Rx Filter Number based on the register address.</returns>
-        public static RxFilterNumber GetRxFilterNumber(Address address)
+        public static byte GetRxFilterNumber(Address address)
         {
             switch (address)
             {
                 case Address.RxF0Sidh:
-                    return RxFilterNumber.Zero;
+                    return 0;
                 case Address.RxF1Sidh:
-                    return RxFilterNumber.One;
+                    return 1;
                 case Address.RxF2Sidh:
-                    return RxFilterNumber.Two;
+                    return 2;
                 case Address.RxF3Sidh:
-                    return RxFilterNumber.Three;
+                    return 3;
                 case Address.RxF4Sidh:
-                    return RxFilterNumber.Four;
+                    return 4;
                 case Address.RxF5Sidh:
-                    return RxFilterNumber.Five;
+                    return 5;
                 default:
-                    throw new ArgumentException("Invalid address.", nameof(address));
+                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
             }
         }
 

@@ -12,13 +12,13 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
     public class RxFxSidlTests
     {
         [Theory]
-        [InlineData(RxFilterNumber.Zero, Address.RxF0Sidl)]
-        [InlineData(RxFilterNumber.One, Address.RxF1Sidl)]
-        [InlineData(RxFilterNumber.Two, Address.RxF2Sidl)]
-        [InlineData(RxFilterNumber.Three, Address.RxF3Sidl)]
-        [InlineData(RxFilterNumber.Four, Address.RxF4Sidl)]
-        [InlineData(RxFilterNumber.Five, Address.RxF5Sidl)]
-        public void Get_RxFilterNumber_Address(RxFilterNumber rxFilterNumber, Address address)
+        [InlineData(0, Address.RxF0Sidl)]
+        [InlineData(1, Address.RxF1Sidl)]
+        [InlineData(2, Address.RxF2Sidl)]
+        [InlineData(3, Address.RxF3Sidl)]
+        [InlineData(4, Address.RxF4Sidl)]
+        [InlineData(5, Address.RxF5Sidl)]
+        public void Get_RxFilterNumber_Address(byte rxFilterNumber, Address address)
         {
             Assert.Equal(rxFilterNumber, RxFxSidl.GetRxFilterNumber(address));
             Assert.Equal(address, new RxFxSidl(rxFilterNumber, 0x00, false, 0x00).Address);
@@ -31,12 +31,12 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         [InlineData(0b00, false, 0b111, 0b1110_0000)]
         public void From_To_Byte(byte eid, bool exide, byte sid, byte expectedByte)
         {
-            var rxFxSidl = new RxFxSidl(RxFilterNumber.Zero, eid, exide, sid);
+            var rxFxSidl = new RxFxSidl(0, eid, exide, sid);
             Assert.Equal(eid, rxFxSidl.Eid);
             Assert.Equal(exide, rxFxSidl.Exide);
             Assert.Equal(sid, rxFxSidl.Sid);
 
-            Assert.Equal(expectedByte, new RxFxSidl(RxFilterNumber.Zero, eid, exide, sid).ToByte());
+            Assert.Equal(expectedByte, new RxFxSidl(0, eid, exide, sid).ToByte());
         }
 
         [Theory]
@@ -45,7 +45,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         public void Invalid_Arguments(byte eid, bool exide, byte sid)
         {
             Assert.Throws<ArgumentException>(() =>
-             new RxFxSidl(RxFilterNumber.Zero, eid, exide, sid).ToByte());
+             new RxFxSidl(0, eid, exide, sid).ToByte());
         }
     }
 }
