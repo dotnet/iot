@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <summary>
         /// Initializes a new instance of the RxFxEid8 class.
         /// </summary>
-        /// <param name="rxFilterNumber">Receive Filter Number. Ranges 0 - 5.</param>
+        /// <param name="rxFilterNumber">Receive Filter Number. Must be a value of 0 - 5.</param>
         /// <param name="eid">Extended Identifier bits.</param>
         public RxFxEid8(byte rxFilterNumber, byte eid)
         {
@@ -28,7 +28,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         }
 
         /// <summary>
-        /// Receive Filter Number. Ranges 0 - 5.
+        /// Receive Filter Number. Must be a value of 0 - 5.
         /// </summary>
         public byte RxFilterNumber { get; }
 

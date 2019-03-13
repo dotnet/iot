@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Initializes a new instance of the RxBxDlc class.
         /// </summary>
-        /// <param name="rxBufferNumber">Receive Buffer Number. Ranges 0 - 1.</param>
+        /// <param name="rxBufferNumber">Receive Buffer Number. Must be a value of 0 - 1.</param>
         /// <param name="dlc">
         /// Data Length Code bits.
         /// Indicates the number of data bytes that were received. (0 to 8 bytes).
@@ -54,7 +54,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         }
 
         /// <summary>
-        /// Receive Buffer Number. Ranges 0 - 1.
+        /// Receive Buffer Number. Must be a value of 0 - 1.
         /// </summary>
         public byte RxBufferNumber { get; }
 

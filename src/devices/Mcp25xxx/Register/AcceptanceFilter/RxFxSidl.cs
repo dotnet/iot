@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <summary>
         /// Initializes a new instance of the RxFxSidl class.
         /// </summary>
-        /// <param name="rxFilterNumber">Receive Filter Number.  Ranges 0 - 5.</param>
+        /// <param name="rxFilterNumber">Receive Filter Number.  Must be a value of 0 - 5.</param>
         /// <param name="eid">Extended Identifier Filter bits.</param>
         /// <param name="exide">
         /// Extended Identifier Enable bit.
@@ -48,7 +48,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <summary>
         /// Initializes a new instance of the RxFxSidl class.
         /// </summary>
-        /// <param name="rxFilterNumber">Receive Filter Number. Ranges 0 - 5.</param>
+        /// <param name="rxFilterNumber">Receive Filter Number. Must be a value of 0 - 5.</param>
         /// <param name="value">The value that represents the register contents.</param>
         public RxFxSidl(byte rxFilterNumber, byte value)
         {
@@ -63,7 +63,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         }
 
         /// <summary>
-        /// Receive Filter Number.  Ranges 0 - 5.
+        /// Receive Filter Number.  Must be a value of 0 - 5.
         /// </summary>
         public byte RxFilterNumber { get; }
 

@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Initializes a new instance of the RxBxDn class.
         /// </summary>
-        /// <param name="rxBufferNumber">Receive Buffer Number. Ranges 0 - 1.</param>
+        /// <param name="rxBufferNumber">Receive Buffer Number. Must be a value of 0 - 1.</param>
         /// <param name="index">Index of data.  Must be a value of 0 - 7.</param>
         /// <param name="data">Receive Buffer Data Field Bytes.</param>
         public RxBxDn(byte rxBufferNumber, byte index, byte data)

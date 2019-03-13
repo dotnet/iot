@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         ///  Initializes a new instance of the RxBxSidl class.
         /// </summary>
-        /// <param name="rxBufferNumber">Receive Buffer Number. Ranges 0 - 1.</param>
+        /// <param name="rxBufferNumber">Receive Buffer Number. Must be a value of 0 - 1.</param>
         /// <param name="eid">
         /// Extended Identifier bits.
         /// These bits contain the three Least Significant bits of the Standard Identifier for the received message.
@@ -76,7 +76,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         }
 
         /// <summary>
-        /// Receive Buffer Number. Ranges 0 - 1.
+        /// Receive Buffer Number. Must be a value of 0 - 1.
         /// </summary>
         public byte RxBufferNumber { get; }
 

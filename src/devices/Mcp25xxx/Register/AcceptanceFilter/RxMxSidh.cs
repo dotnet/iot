@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <summary>
         /// Initializes a new instance of the RxMxSidh class.
         /// </summary>
-        /// <param name="rxMaskNumber">Receive Mask Number.  Ranges 0 - 1.</param>
+        /// <param name="rxMaskNumber">Receive Mask Number.  Must be a value of 0 - 1.</param>
         /// <param name="sid">Standard Identifier Mask bits.</param>
         public RxMxSidh(byte rxMaskNumber, byte sid)
         {
@@ -28,7 +28,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         }
 
         /// <summary>
-        /// Receive Mask Number.  Ranges 0 - 1.
+        /// Receive Mask Number.  Must be a value of 0 - 1.
         /// </summary>
         public byte RxMaskNumber { get; }
 
