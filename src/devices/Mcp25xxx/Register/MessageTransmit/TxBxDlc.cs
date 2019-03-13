@@ -40,7 +40,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             TxBufferNumber = txBufferNumber;
             Dlc = (byte)(value & 0b0000_1111);
-            Rtr = (value & 0b0100_0000) == 0b0100_0000;
+            Rtr = ((value >> 6) & 1) == 1;
         }
 
         /// <summary>

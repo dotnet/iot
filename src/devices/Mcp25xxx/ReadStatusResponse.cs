@@ -46,14 +46,14 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="value">The value that represents the respective flags.</param>
         public ReadStatusResponse(byte value)
         {
-            Rx0If = (value & 0b0000_0001) == 0b0000_0001;
-            Rx1If = (value & 0b0000_0010) == 0b0000_0010;
-            Tx0Req = (value & 0b0000_0100) == 0b0000_0100;
-            Tx0If = (value & 0b0000_1000) == 0b0000_1000;
-            Tx1Req = (value & 0b0001_0000) == 0b0001_0000;
-            Tx1If = (value & 0b0010_0000) == 0b0010_0000;
-            Tx2Req = (value & 0b0100_0000) == 0b0100_0000;
-            Tx2If = (value & 0b1000_0000) == 0b1000_0000;
+            Rx0If = (value & 1) == 1;
+            Rx1If = ((value >> 1) & 1) == 1;
+            Tx0Req = ((value >> 2) & 1) == 1;
+            Tx0If = ((value >> 3) & 1) == 1;
+            Tx1Req = ((value >> 4) & 1) == 1;
+            Tx1If = ((value >> 5) & 1) == 1;
+            Tx2Req = ((value >> 6) & 1) == 1;
+            Tx2If = ((value >> 7) & 1) == 1;
         }
 
         /// <summary>

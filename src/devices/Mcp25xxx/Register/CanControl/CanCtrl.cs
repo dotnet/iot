@@ -52,9 +52,9 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         public CanCtrl(byte value)
         {
             ClkPre = (ClkOutPinPrescaler)(value & 0b0000_0011);
-            ClkEn = (value & 0b0000_0100) == 0b0000_0100;
-            Osm = (value & 0b0000_1000) == 0b0000_1000;
-            Abat = (value & 0b0001_0000) == 0b0001_0000;
+            ClkEn = ((value >> 2) & 1) == 1;
+            Osm = ((value >> 3) & 1) == 1;
+            Abat = ((value >> 4) & 1) == 1;
             ReqOp = (OperationMode)((value & 0b1110_0000) >> 5);
         }
 

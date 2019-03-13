@@ -56,12 +56,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <param name="value">The value that represents the register contents.</param>
         public BfpCtrl(byte value)
         {
-            B0Bfm = (value & 0b0000_0001) == 0b0000_0001;
-            B1Bfm = (value & 0b0000_0010) == 0b0000_0010;
-            B0Bfe = (value & 0b0000_0100) == 0b0000_0100;
-            B1Bfe = (value & 0b0000_1000) == 0b0000_1000;
-            B0Bfs = (value & 0b0001_0000) == 0b0001_0000;
-            B1Bfs = (value & 0b0010_0000) == 0b0010_0000;
+            B0Bfm = (value & 1) == 1;
+            B1Bfm = ((value >> 1) & 1) == 1;
+            B0Bfe = ((value >> 2) & 1) == 1;
+            B1Bfe = ((value >> 3) & 1) == 1;
+            B0Bfs = ((value >> 4) & 1) == 1;
+            B1Bfs = ((value >> 5) & 1) == 1;
         }
 
         /// <summary>

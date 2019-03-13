@@ -60,8 +60,8 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             RxBufferNumber = rxBufferNumber;
             Eid = (byte)(value & 0b0000_0011);
-            Ide = (value & 0b0000_1000) == 0b0000_1000;
-            Srr = (value & 0b0001_0000) == 0b0001_0000;
+            Ide = ((value >> 3) & 1) == 1;
+            Srr = ((value >> 4) & 1) == 1;
             Sid = (byte)((value & 0b1110_0000) >> 5);
         }
 

@@ -33,7 +33,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         public RxB1Ctrl(byte value)
         {
             FilHit = (FilterHit)(value & 0b0000_0111);
-            RxRtr = (value & 0b0000_1000) == 0b0000_1000;
+            RxRtr = ((value >> 3) & 1) == 1;
             Rxm = (OperatingMode)((value & 0b0110_0000) >> 5);
         }
 

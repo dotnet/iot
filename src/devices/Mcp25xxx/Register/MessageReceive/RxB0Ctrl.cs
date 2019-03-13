@@ -42,9 +42,9 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <param name="value">The value that represents the register contents.</param>
         public RxB0Ctrl(byte value)
         {
-            FilHit0 = (value & 0b0000_0001) == 0b0000_0001;
-            Bukt = (value & 0b0000_0100) == 0b0000_0100;
-            RxRtr = (value & 0b0000_1000) == 0b0000_1000;
+            FilHit0 = (value & 1) == 1;
+            Bukt = ((value >> 2) & 1) == 1;
+            RxRtr = ((value >> 3) & 1) == 1;
             Rxm = (OperatingMode)((value & 0b0110_0000) >> 5);
         }
 

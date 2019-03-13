@@ -59,12 +59,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <param name="value">The value that represents the register contents.</param>
         public TxRtsCtrl(byte value)
         {
-            B0Rtsm = (value & 0b0000_0001) == 0b0000_0001;
-            B1Rtsm = (value & 0b0000_0010) == 0b0000_0010;
-            B2Rtsm = (value & 0b0000_0100) == 0b0000_0100;
-            B0Rts = (value & 0b0000_1000) == 0b0000_1000;
-            B1Rts = (value & 0b0001_0000) == 0b0001_0000;
-            B2Rts = (value & 0b0010_0000) == 0b0010_0000;
+            B0Rtsm = (value & 1) == 1;
+            B1Rtsm = ((value >> 1) & 1) == 1;
+            B2Rtsm = ((value >> 2) & 1) == 1;
+            B0Rts = ((value >> 3) & 1) == 1;
+            B1Rts = ((value >> 4) & 1) == 1;
+            B2Rts = ((value >> 5) & 1) == 1;
         }
 
         /// <summary>

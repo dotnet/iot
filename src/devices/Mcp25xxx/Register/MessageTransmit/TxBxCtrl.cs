@@ -61,10 +61,10 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             TxBufferNumber = txBufferNumber;
             Txp = (TransmitBufferPriority)(value & 0b0000_0011);
-            TxReq = (value & 0b0000_1000) == 0b0000_1000;
-            TxErr = (value & 0b0001_0000) == 0b0001_0000;
-            Mloa = (value & 0b0010_0000) == 0b0010_0000;
-            Abtf = (value & 0b0100_0000) == 0b0100_0000;
+            TxReq = ((value >> 3) & 1) == 1;
+            TxErr = ((value >> 4) & 1) == 1;
+            Mloa = ((value >> 5) & 1) == 1;
+            Abtf = ((value >> 6) & 1) == 1;
         }
 
         /// <summary>

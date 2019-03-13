@@ -49,7 +49,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             TxBufferNumber = txBufferNumber;
             Eid = (byte)(value & 0b0000_0011);
-            Exide = (value & 0b0000_1000) == 0b0000_1000;
+            Exide = ((value >> 3) & 1) == 1;
             Sid = (byte)((value & 0b1110_0000) >> 5);
         }
 

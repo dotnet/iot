@@ -70,14 +70,14 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         /// <param name="value">The value that represents the register contents.</param>
         public Eflg(byte value)
         {
-            Ewarn = (value & 0b0000_0001) == 0b0000_0001;
-            RxWar = (value & 0b0000_0010) == 0b0000_0010;
-            TxWar = (value & 0b0000_0100) == 0b0000_0100;
-            RxEp = (value & 0b0000_1000) == 0b0000_1000;
-            TxEp = (value & 0b0001_0000) == 0b0001_0000;
-            TxBo = (value & 0b0010_0000) == 0b0010_0000;
-            Rx0Ovr = (value & 0b0100_0000) == 0b0100_0000;
-            Rx1Ovr = (value & 0b1000_0000) == 0b1000_0000;
+            Ewarn = (value & 1) == 1;
+            RxWar = ((value >> 1) & 1) == 1;
+            TxWar = ((value >> 2) & 1) == 1;
+            RxEp = ((value >> 3) & 1) == 1;
+            TxEp = ((value >> 4) & 1) == 1;
+            TxBo = ((value >> 5) & 1) == 1;
+            Rx0Ovr = ((value >> 6) & 1) == 1;
+            Rx1Ovr = ((value >> 7) & 1) == 1;
         }
 
         /// <summary>
