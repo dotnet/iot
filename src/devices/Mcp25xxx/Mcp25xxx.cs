@@ -273,7 +273,8 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="value">The value to be written.</param>
         public void WriteByte(Address address, byte value)
         {
-            Write(address, new byte[] { value });
+            ReadOnlySpan<byte> buffer = stackalloc byte[1] { value };
+            Write(address, buffer);
         }
 
         /// <summary>
