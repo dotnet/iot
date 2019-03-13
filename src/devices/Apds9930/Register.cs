@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.apds9930
+namespace Iot.Device.Apds9930
 {
     public enum Register : byte
     {
@@ -37,10 +37,6 @@ namespace Iot.Device.apds9930
         PDATAL = 0x18,
         PDATAH  = 0x19,
         POFFSET = 0x1E,
-
-        //On Off definitions
-        OFF = 0,
-        ON = 1,
 
         //Acceptable parameters for setMode
         POWER = 0,
