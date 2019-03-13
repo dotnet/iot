@@ -258,6 +258,8 @@ namespace Iot.Device.Mcp25xxx
                stackalloc byte[byteCount + 1] :
                new byte[byteCount + 1];
 
+            // This instruction has a base value of 0x90.
+            // The 2nd and 3rd bits are used for the pointer address for reading.
             byte instructionFormat = (byte)(0x90 | ((byte)addressPointer << 1));
             writeBuffer[0] = instructionFormat;
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
