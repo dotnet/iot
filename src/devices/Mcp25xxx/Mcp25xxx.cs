@@ -361,7 +361,7 @@ namespace Iot.Device.Mcp25xxx
             ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { instructionFormat, dontCare };
             Span<byte> readBuffer = stackalloc byte[2];
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
-            ReadStatusResponse readStatusResponse = new ReadStatusResponse(readBuffer[1]);
+            ReadStatusResponse readStatusResponse = (ReadStatusResponse)readBuffer[1];
             return readStatusResponse;
         }
 

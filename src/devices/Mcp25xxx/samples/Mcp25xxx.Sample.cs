@@ -581,16 +581,16 @@ namespace Iot.Device.Mcp25xxx.Samples
         {
             Console.WriteLine("Read Status Instruction");
             ReadStatusResponse readStatusResponse = mcp25xxx.ReadStatus();
-            Console.WriteLine($"Value: 0x{readStatusResponse.ToByte():X2}");
-            Console.WriteLine($"Rx0If: {readStatusResponse.Rx0If}");
-            Console.WriteLine($"Rx1If: {readStatusResponse.Rx1If}");
-            Console.WriteLine($"Tx0Req: {readStatusResponse.Tx0Req}");
-            Console.WriteLine($"Tx0If: {readStatusResponse.Tx0If}");
-            Console.WriteLine($"Tx0Req: {readStatusResponse.Tx0Req}");
-            Console.WriteLine($"Tx1If: {readStatusResponse.Tx1If}");
-            Console.WriteLine($"Tx1Req: {readStatusResponse.Tx1Req}");
-            Console.WriteLine($"Tx2Req: {readStatusResponse.Tx2Req}");
-            Console.WriteLine($"Tx2If: {readStatusResponse.Tx2If}");
+            Console.WriteLine($"Value: 0x{readStatusResponse:X2}");
+            Console.WriteLine($"Rx0If: {readStatusResponse.HasFlag(ReadStatusResponse.Rx0If)}");
+            Console.WriteLine($"Rx1If: {readStatusResponse.HasFlag(ReadStatusResponse.Rx1If)}");
+            Console.WriteLine($"Tx0Req: {readStatusResponse.HasFlag(ReadStatusResponse.Tx0Req)}");
+            Console.WriteLine($"Tx0If: {readStatusResponse.HasFlag(ReadStatusResponse.Tx0If)}");
+            Console.WriteLine($"Tx0Req: {readStatusResponse.HasFlag(ReadStatusResponse.Tx0Req)}");
+            Console.WriteLine($"Tx1If: {readStatusResponse.HasFlag(ReadStatusResponse.Tx1If)}");
+            Console.WriteLine($"Tx1Req: {readStatusResponse.HasFlag(ReadStatusResponse.Tx1Req)}");
+            Console.WriteLine($"Tx2Req: {readStatusResponse.HasFlag(ReadStatusResponse.Tx2Req)}");
+            Console.WriteLine($"Tx2If: {readStatusResponse.HasFlag(ReadStatusResponse.Tx2If)}");
         }
 
         private static void RxStatus(Mcp25xxx mcp25xxx)
