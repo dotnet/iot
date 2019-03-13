@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx
     /// </summary>
     public abstract class Mcp25xxx : IDisposable
     {
-        internal IGpioController _masterGpioController;
+        internal IGpioController _gpioController;
         private SpiDevice _spiDevice;
         private readonly int _reset;
         private readonly int _tx0rts;
@@ -37,7 +37,7 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="rx0bf">The input pin number that is connected to Rx0BF.</param>
         /// <param name="rx1bf">The input pin number that is connected to Rx1BF.</param>
         /// <param name="clkout">The input pin number that is connected to CLKOUT.</param>
-        /// <param name="masterGpioController">
+        /// <param name="gpioController">
         /// The GPIO controller for defined external pins. If not specified, the default controller will be used.
         /// </param>
         public Mcp25xxx(
@@ -50,7 +50,7 @@ namespace Iot.Device.Mcp25xxx
             int rx0bf = -1,
             int rx1bf = -1,
             int clkout = -1,
-            IGpioController masterGpioController = null)
+            IGpioController gpioController = null)
         {
             _spiDevice = spiDevice;
 
@@ -73,47 +73,47 @@ namespace Iot.Device.Mcp25xxx
                 _rx1bf != -1 ||
                 _clkout != -1)
             {
-                _masterGpioController = masterGpioController ?? new GpioController();
+                _gpioController = gpioController ?? new GpioController();
 
                 if (_reset != -1)
                 {
-                    _masterGpioController.OpenPin(_reset, PinMode.Output);
+                    _gpioController.OpenPin(_reset, PinMode.Output);
                     ResetPin = PinValue.Low;
                 }
 
                 if (_tx0rts != -1)
                 {
-                    _masterGpioController.OpenPin(_tx0rts, PinMode.Output);
+                    _gpioController.OpenPin(_tx0rts, PinMode.Output);
                 }
 
                 if (_tx1rts != -1)
                 {
-                    _masterGpioController.OpenPin(_tx1rts, PinMode.Output);
+                    _gpioController.OpenPin(_tx1rts, PinMode.Output);
                 }
 
                 if (_tx2rts != -1)
                 {
-                    _masterGpioController.OpenPin(_tx2rts, PinMode.Output);
+                    _gpioController.OpenPin(_tx2rts, PinMode.Output);
                 }
 
                 if (_interrupt != -1)
                 {
-                    _masterGpioController.OpenPin(_interrupt, PinMode.Input);
+                    _gpioController.OpenPin(_interrupt, PinMode.Input);
                 }
 
                 if (_rx0bf != -1)
                 {
-                    _masterGpioController.OpenPin(_rx0bf, PinMode.Input);
+                    _gpioController.OpenPin(_rx0bf, PinMode.Input);
                 }
 
                 if (_rx1bf != -1)
                 {
-                    _masterGpioController.OpenPin(_rx1bf, PinMode.Input);
+                    _gpioController.OpenPin(_rx1bf, PinMode.Input);
                 }
 
                 if (_clkout != -1)
                 {
-                    _masterGpioController.OpenPin(_clkout, PinMode.Input);
+                    _gpioController.OpenPin(_clkout, PinMode.Input);
                 }
             }
         }
@@ -134,7 +134,7 @@ namespace Iot.Device.Mcp25xxx
             set
             {
                 VerifyPinConfigured(_tx0rts, nameof(Tx0RtsPin));
-                _masterGpioController.Write(_tx0rts, value);
+                _gpioController.Write(_tx0rts, value);
             }
         }
 
@@ -146,7 +146,7 @@ namespace Iot.Device.Mcp25xxx
             set
             {
                 VerifyPinConfigured(_tx1rts, nameof(Tx1RtsPin));
-                _masterGpioController.Write(_tx1rts, value);
+                _gpioController.Write(_tx1rts, value);
             }
         }
 
@@ -158,7 +158,7 @@ namespace Iot.Device.Mcp25xxx
             set
             {
                 VerifyPinConfigured(_tx2rts, nameof(Tx2RtsPin));
-                _masterGpioController.Write(_tx2rts, value);
+                _gpioController.Write(_tx2rts, value);
             }
         }
 
@@ -170,7 +170,7 @@ namespace Iot.Device.Mcp25xxx
             set
             {
                 VerifyPinConfigured(_reset, nameof(ResetPin));
-                _masterGpioController.Write(_reset, value);
+                _gpioController.Write(_reset, value);
             }
         }
 
@@ -182,7 +182,7 @@ namespace Iot.Device.Mcp25xxx
             get
             {
                 VerifyPinConfigured(_interrupt, nameof(InterruptPin));
-                return _masterGpioController.Read(_interrupt);
+                return _gpioController.Read(_interrupt);
             }
         }
 
@@ -194,7 +194,7 @@ namespace Iot.Device.Mcp25xxx
             get
             {
                 VerifyPinConfigured(_rx0bf, nameof(Rx0BfPin));
-                return _masterGpioController.Read(_rx0bf);
+                return _gpioController.Read(_rx0bf);
             }
         }
 
@@ -206,7 +206,7 @@ namespace Iot.Device.Mcp25xxx
             get
             {
                 VerifyPinConfigured(_rx1bf, nameof(Rx1BfPin));
-                return _masterGpioController.Read(_rx1bf);
+                return _gpioController.Read(_rx1bf);
             }
         }
 
@@ -395,8 +395,8 @@ namespace Iot.Device.Mcp25xxx
 
         public void Dispose()
         {
-            _masterGpioController?.Dispose();
-            _masterGpioController = null;
+            _gpioController?.Dispose();
+            _gpioController = null;
             _spiDevice?.Dispose();
             _spiDevice = null;
         }

@@ -24,7 +24,7 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="rx0bf">The input pin number that is connected to Rx0BF.</param>
         /// <param name="rx1bf">The input pin number that is connected to Rx1BF.</param>
         /// <param name="clkout">The input pin number that is connected to CLKOUT.</param>
-        /// <param name="masterGpioController">
+        /// <param name="gpioController">
         /// The GPIO controller for defined external pins. If not specified, the default controller will be used.
         /// </param>
         public Mcp2515(
@@ -37,7 +37,7 @@ namespace Iot.Device.Mcp25xxx
             int rx0bf = -1,
             int rx1bf = -1,
             int clkout = -1,
-            IGpioController masterGpioController = null)
+            IGpioController gpioController = null)
             : base(
                   spiDevice,
                   reset,
@@ -48,7 +48,7 @@ namespace Iot.Device.Mcp25xxx
                   rx0bf,
                   rx1bf,
                   clkout,
-                  masterGpioController)
+                  gpioController)
         {
         }
     }
