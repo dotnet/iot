@@ -7,7 +7,7 @@ using System.Device.I2c;
 using System.Device.I2c.Drivers;
 using System.Threading;
 
-namespace Iot.Device.apds9930.Samples
+namespace Iot.Device.Apds9930.Samples
 {
     class Program
     {
@@ -24,10 +24,11 @@ namespace Iot.Device.apds9930.Samples
             
             using(i2cApds9930)
             {
+                i2cApds9930.EnableProximitySensor();
+                i2cApds9930.EnableLightSensor();
+
                 while(true)
-                {
-                    i2cApds9930.EnableProximitySensor();
-                    i2cApds9930.EnableLightSensor();
+                {                    
                     Console.WriteLine($"Prox : {i2cApds9930.GetProximity()}");
                     Console.WriteLine($"Ambient Light : {i2cApds9930.GetAmbientLight():N2} lux");                    
                     Console.WriteLine();
