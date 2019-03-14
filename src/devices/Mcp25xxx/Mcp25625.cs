@@ -66,16 +66,15 @@ namespace Iot.Device.Mcp25xxx
         }
 
         /// <summary>
-        /// Writes a value to STBY pin.
+        /// Writes a value to Standby (STBY) pin.
         /// </summary>
-        public void WriteStandbyPin(PinValue value)
+        public PinValue StandbyPin
         {
-            if (_standby == -1)
+            set
             {
-                throw new InvalidOperationException("No Standby pin configured.");
+                VerifyPinConfigured(_standby, nameof(StandbyPin));
+                _gpioController.Write(_standby, value);
             }
-
-            _gpioController.Write(_standby, value);
         }
     }
 }

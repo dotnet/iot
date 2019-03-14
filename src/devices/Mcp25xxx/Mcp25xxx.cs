@@ -118,7 +118,7 @@ namespace Iot.Device.Mcp25xxx
             }
         }
 
-        private void VerifyPinConfigured(int pin, string name)
+        internal void VerifyPinConfigured(int pin, string name)
         {
             if (pin == -1)
             {
