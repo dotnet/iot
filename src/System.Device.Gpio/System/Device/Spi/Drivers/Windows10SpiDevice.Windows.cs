@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Device.Gpio;
 using Windows.Devices.Enumeration;
 using WinSpi = Windows.Devices.Spi;
 
@@ -23,6 +24,11 @@ namespace System.Device.Spi.Drivers
         /// </param>
         public Windows10SpiDevice(SpiConnectionSettings settings)
         {
+            if (settings.DataFlow != DataFlow.MsbFirst || settings.ChipSelectLineActiveState != PinValue.Low)
+            {
+                throw new PlatformNotSupportedException($"Changing {nameof(settings.DataFlow)} or {nameof(settings.ChipSelectLineActiveState)} options is not supported on the current platform.");
+            }
+
             _settings = settings;
             var winSettings = new WinSpi.SpiConnectionSettings(_settings.ChipSelectLine)
             {
