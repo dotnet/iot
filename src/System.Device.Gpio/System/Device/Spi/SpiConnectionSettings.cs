@@ -52,7 +52,7 @@ namespace System.Device.Spi
         /// </summary>
         public int ClockFrequency { get; set; }
         /// <summary>
-        /// Specifies which bits will be transfered first over the wire.
+        /// Specifies order in which bits are transferred first on the SPI bus.
         /// </summary>
         public DataFlow DataFlow { get; set; } = DataFlow.MsbFirst;
         /// <summary>

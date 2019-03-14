@@ -5,7 +5,7 @@
 namespace System.Device.Spi
 {
     /// <summary>
-    /// Defines order in which data is send over the wire.
+    /// Specifies order in which bits are transferred first on the SPI bus.
     /// </summary>
     public enum DataFlow
     {
