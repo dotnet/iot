@@ -39,12 +39,13 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
         }
 
         [Theory]
-        [InlineData(0b100, false, false, 0b000)]
-        [InlineData(0b00, false, false, 0b1000)]
-        public void Invalid_Arguments(byte eid, bool ide, bool srr, byte sid)
+        [InlineData(2, 0b00, false, false, 0b0000)]
+        [InlineData(0, 0b100, false, false, 0b000)]
+        [InlineData(0, 0b00, false, false, 0b1000)]
+        public void Invalid_Arguments(byte rxBufferNumber, byte eid, bool ide, bool srr, byte sid)
         {
             Assert.Throws<ArgumentException>(() =>
-             new RxBxSidl(0, eid, ide, srr, sid).ToByte());
+             new RxBxSidl(rxBufferNumber, eid, ide, srr, sid).ToByte());
         }
     }
 }

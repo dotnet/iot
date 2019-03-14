@@ -40,12 +40,13 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         }
 
         [Theory]
-        [InlineData(0b100, false, 0b000)]
-        [InlineData(0b00, false, 0b1000)]
-        public void Invalid_Arguments(byte eid, bool exide, byte sid)
+        [InlineData(6, 0b000, false, 0b000)]
+        [InlineData(0, 0b100, false, 0b000)]
+        [InlineData(0, 0b00, false, 0b1000)]
+        public void Invalid_Arguments(byte rxFilterNumber, byte eid, bool exide, byte sid)
         {
             Assert.Throws<ArgumentException>(() =>
-             new RxFxSidl(0, eid, exide, sid).ToByte());
+             new RxFxSidl(rxFilterNumber, eid, exide, sid).ToByte());
         }
     }
 }
