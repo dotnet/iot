@@ -15,7 +15,10 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// Initializes a new instance of the RxBxSidh class.
         /// </summary>
         /// <param name="rxBufferNumber">Receive Buffer Number. Must be a value of 0 - 1.</param>
-        /// <param name="sid">Standard Identifier bits.</param>
+        /// <param name="sid">
+        /// Standard Identifier bits.
+        /// These bits contain the eight Most Significant bits of the Standard Identifier for the received message.
+        /// </param>
         public RxBxSidh(byte rxBufferNumber, byte sid)
         {
             if (rxBufferNumber > 1)
@@ -34,6 +37,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
 
         /// <summary>
         /// Standard Identifier bits.
+        /// These bits contain the eight Most Significant bits of the Standard Identifier for the received message.
         /// </summary>
         public byte Sid { get; }
 

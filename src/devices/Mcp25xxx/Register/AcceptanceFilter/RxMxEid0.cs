@@ -15,7 +15,11 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Initializes a new instance of the RxMxEid0 class.
         /// </summary>
         /// <param name="rxMaskNumber">Receive Mask Number.  Must be a value of 0 - 1.</param>
-        /// <param name="eid">Extended Identifier Mask bits.</param>
+        /// <param name="eid">
+        /// Extended Identifier Mask bits.
+        /// These bits hold the filter bits to be applied to bits[7:0] of the Extended Identifier portion of a received
+        /// message.If corresponding with RXM[1:0] = 00 and EXIDE = 0, these bits are applied to Byte 1 in received data.
+        /// </param>
         public RxMxEid0(byte rxMaskNumber, byte eid)
         {
             if (rxMaskNumber > 1)
@@ -34,6 +38,8 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
 
         /// <summary>
         /// Extended Identifier Mask bits.
+        /// These bits hold the filter bits to be applied to bits[7:0] of the Extended Identifier portion of a received
+        /// message.If corresponding with RXM[1:0] = 00 and EXIDE = 0, these bits are applied to Byte 1 in received data.
         /// </summary>
         public byte Eid { get; }
 

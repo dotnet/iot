@@ -14,8 +14,12 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <summary>
         /// Initializes a new instance of the RxFxSidh class.
         /// </summary>
-        /// <param name="rxFilterNumber">Receive Filter Number.  Must be a value of 0 - 5.</param>
-        /// <param name="sid">Standard Identifier bits.</param>
+        /// <param name="rxFilterNumber">
+        /// Receive Filter Number.  Must be a value of 0 - 5.</param>
+        /// <param name="sid">
+        /// Standard Identifier Filter bits
+        /// These bits hold the filter bits to be applied to bits[10:3] of the Standard Identifier portion of a received message.
+        /// </param>
         public RxFxSidh(byte rxFilterNumber, byte sid)
         {
             if (rxFilterNumber > 5)
@@ -33,7 +37,8 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         public byte RxFilterNumber { get; }
 
         /// <summary>
-        /// Standard Identifier bits.
+        /// Standard Identifier Filter bits
+        /// These bits hold the filter bits to be applied to bits[10:3] of the Standard Identifier portion of a received message.
         /// </summary>
         public byte Sid { get; }
 

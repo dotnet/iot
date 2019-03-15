@@ -17,7 +17,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <param name="rxBufferNumber">Receive Buffer Number. Must be a value of 0 - 1.</param>
         /// <param name="eid">
         /// Extended Identifier bits.
-        /// These bits contain the three Least Significant bits of the Standard Identifier for the received message.
+        /// These bits contain the two Most Significant bits of the Extended Identifier for the received message.
         /// </param>
         /// <param name="ide">
         /// Extended Identifier Flag bit.
@@ -31,7 +31,8 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// False = Standard data frame received.
         /// </param>
         /// <param name="sid">
-        /// Extended Identifier bits.
+        /// Standard Identifier bits.
+        /// These bits contain the three Least Significant bits of the Standard Identifier for the received message.
         /// </param>
         public RxBxSidl(byte rxBufferNumber, byte eid, bool ide, bool srr, byte sid)
         {
@@ -82,7 +83,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
 
         /// <summary>
         /// Extended Identifier bits.
-        /// These bits contain the three Least Significant bits of the Standard Identifier for the received message.
+        /// These bits contain the two Most Significant bits of the Extended Identifier for the received message.
         /// </summary>
         public byte Eid { get; }
 
@@ -102,7 +103,8 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         public bool Srr { get; }
 
         /// <summary>
-        /// Extended Identifier bits.
+        /// Standard Identifier bits.
+        /// These bits contain the three Least Significant bits of the Standard Identifier for the received message.
         /// </summary>
         public byte Sid { get; }
 

@@ -15,7 +15,10 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// Initializes a new instance of the RxBxEid0 class.
         /// </summary>
         /// <param name="rxBufferNumber">Receive Buffer Number. Must be a value of 0 - 1.</param>
-        /// <param name="eid">Extended Identifier bits.</param>
+        /// <param name="eid">
+        /// Extended Identifier bits.
+        /// These bits hold the Least Significant eight bits of the Extended Identifier for the received message.
+        /// </param>
         public RxBxEid0(byte rxBufferNumber, byte eid)
         {
             if (rxBufferNumber > 1)
@@ -34,6 +37,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
 
         /// <summary>
         /// Extended Identifier bits.
+        /// These bits hold the Least Significant eight bits of the Extended Identifier for the received message.
         /// </summary>
         public byte Eid { get; }
 

@@ -15,7 +15,10 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Initializes a new instance of the TxBxEid0 class.
         /// </summary>
         /// <param name="txBufferNumber">Transmit Buffer Number.  Must be a value of 0 - 2.</param>
-        /// <param name="eid">Extended Identifier bits.</param>
+        /// <param name="eid">
+        /// Extended Identifier bits.
+        /// These bits hold the Least Significant eight bits of the Extended Identifier for the transmit message.
+        /// </param>
         public TxBxEid0(byte txBufferNumber, byte eid)
         {
             if (txBufferNumber > 2)
@@ -34,6 +37,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
 
         /// <summary>
         /// Extended Identifier bits.
+        /// These bits hold the Least Significant eight bits of the Extended Identifier for the transmit message.
         /// </summary>
         public byte Eid { get; }
 

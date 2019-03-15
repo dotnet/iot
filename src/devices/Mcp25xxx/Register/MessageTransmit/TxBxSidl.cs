@@ -15,13 +15,19 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Initializes a new instance of the TxBxSidl class.
         /// </summary>
         /// <param name="txBufferNumber">Transmit Buffer Number.  Must be a value of 0 - 2.</param>
-        /// <param name="eid">Extended Identifier bits.</param>
+        /// <param name="eid">
+        /// Extended Identifier bits.
+        /// These bits contain the two Most Significant bits of the Extended Identifier for the transmit message.
+        /// </param>
         /// <param name="exide">
         /// Extended Identifier Enable bit.
         /// True = Message will transmit the Extended Identifier.
         /// False = Message will transmit the Standard Identifier.
         /// </param>
-        /// <param name="sid">Standard Identifier bits.</param>
+        /// <param name="sid">
+        /// Standard Identifier bits.
+        /// These bits contain the three Least Significant bits of the Standard Identifier for the transmit message.
+        /// </param>
         public TxBxSidl(byte txBufferNumber, byte eid, bool exide, byte sid)
         {
             if (txBufferNumber > 2)
@@ -70,6 +76,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
 
         /// <summary>
         /// Extended Identifier bits.
+        /// These bits contain the two Most Significant bits of the Extended Identifier for the transmit message.
         /// </summary>
         public byte Eid { get; }
 
@@ -82,6 +89,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
 
         /// <summary>
         /// Standard Identifier bits.
+        /// These bits contain the three Least Significant bits of the Standard Identifier for the transmit message.
         /// </summary>
         public byte Sid { get; }
 

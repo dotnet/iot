@@ -15,13 +15,19 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Initializes a new instance of the RxFxSidl class.
         /// </summary>
         /// <param name="rxFilterNumber">Receive Filter Number.  Must be a value of 0 - 5.</param>
-        /// <param name="eid">Extended Identifier Filter bits.</param>
+        /// <param name="eid">
+        /// Extended Identifier Filter bits.
+        /// These bits hold the filter bits to be applied to bits[17:16] of the Extended Identifier portion of a received message.
+        /// </param>
         /// <param name="exide">
         /// Extended Identifier Enable bit.
         /// True = Filter is applied only to extended frames.
         /// False = Filter is applied only to standard frames.
         /// </param>
-        /// <param name="sid">Standard Identifier Filter bits.</param>
+        /// <param name="sid">
+        /// Standard Identifier Filter bits.
+        /// These bits hold the filter bits to be applied to bits[2:0] of the Standard Identifier portion of a received message.
+        /// </param>
         public RxFxSidl(byte rxFilterNumber, byte eid, bool exide, byte sid)
         {
             if (rxFilterNumber > 5)
@@ -69,6 +75,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
 
         /// <summary>
         /// Extended Identifier Filter bits.
+        /// These bits hold the filter bits to be applied to bits[17:16] of the Extended Identifier portion of a received message.
         /// </summary>
         public byte Eid { get; }
 
@@ -81,6 +88,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
 
         /// <summary>
         /// Standard Identifier Filter bits.
+        /// These bits hold the filter bits to be applied to bits[2:0] of the Standard Identifier portion of a received message.
         /// </summary>
         public byte Sid { get; }
 
