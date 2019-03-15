@@ -1,6 +1,6 @@
 # DHTxx Sensors - Temperature and Humidity Sensors
 
-The DHT temperature and humidity sensors are very popular. This project support DHT11, DHT12, DHT21(AM2301), DHT22(AM2302).
+The DHT temperature and humidity sensors are very popular. This projects support DHT11, DHT12, DHT21(AM2301), DHT22(AM2302).
 
 ## Usage
 
@@ -8,7 +8,7 @@ The DHT temperature and humidity sensors are very popular. This project support 
 
 ```csharp
 // GPIO Pin, DHT Type
-using (DhtSensor dht = new DhtSensor(26, DhtType.Dht22))
+using (DhtSensor dht = new DhtSensor(26, DhtType.DHT22))
 {
     Temperature temperature = dht.Temperature;
     double humidity = dht.Humidity;
@@ -16,10 +16,11 @@ using (DhtSensor dht = new DhtSensor(26, DhtType.Dht22))
 ```
 
 ### I2C Protocol
+
 Only DHT12 can use I2C protocol.
 
 ```csharp
-I2cConnectionSettings settings = new I2cConnectionSettings(1, DhtSensor.Dht12DefaultI2cAddress);
+I2cConnectionSettings settings = new I2cConnectionSettings(1, DhtSensor.DefaultI2cAddressDht12);
 UnixI2cDevice device = new UnixI2cDevice(settings);
 
 using (DhtSensor dht = new DhtSensor(device))

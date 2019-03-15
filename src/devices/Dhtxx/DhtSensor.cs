@@ -31,7 +31,7 @@ namespace Iot.Device.DHTxx
 
         private Stopwatch _stopwatch = new Stopwatch();
 
-        private int _lastMeasurment = 0;
+        private int _lastMeasurement = 0;
 
         /// <summary>
         /// How last read went, <c>true</c> for success, <c>false</c> for failure
@@ -50,20 +50,17 @@ namespace Iot.Device.DHTxx
             {
                 ReadData();
 
-                Temperature temperature = Temperature.FromCelsius(double.MaxValue);
                 switch (_dhtType)
                 {
                     case DhtType.DHT11:
-                        temperature = Temperature.FromCelsius(GetTempDht11());
-                        break;
+                        return Temperature.FromCelsius(GetHumidityDht11());
                     case DhtType.DHT12:
                     case DhtType.DHT21:
                     case DhtType.DHT22:
-                        temperature = Temperature.FromCelsius(GetTempDht22());
-                        break;
+                        return Temperature.FromCelsius(GetHumidityDht22());
+                    default:
+                        return Temperature.FromCelsius(double.MaxValue);
                 }
-
-                return temperature;
             }
         }
 
@@ -79,20 +76,17 @@ namespace Iot.Device.DHTxx
             {
                 ReadData();
 
-                double humidity = double.MaxValue;
                 switch (_dhtType)
                 {
                     case DhtType.DHT11:
-                        humidity = GetHumidityDht11();
-                        break;
+                        return GetHumidityDht11();
                     case DhtType.DHT12:
                     case DhtType.DHT21:
                     case DhtType.DHT22:
-                        humidity = GetHumidityDht22();
-                        break;
+                        return GetHumidityDht22();
+                    default:
+                        return double.MaxValue;
                 }
-
-                return humidity;
             }
         }
 
@@ -137,7 +131,7 @@ namespace Iot.Device.DHTxx
         private void ReadData()
         {
             // The time of two measurements should be more than 1s.
-            if (Environment.TickCount - _lastMeasurment < 1000)
+            if (Environment.TickCount - _lastMeasurement < 1000)
             {
                 return;
             }
@@ -205,7 +199,7 @@ namespace Iot.Device.DHTxx
                 }
             }
 
-            _lastMeasurment = Environment.TickCount;
+            _lastMeasurement = Environment.TickCount;
 
             // keep data line HIGH
             _controller.SetPinMode(_pin, PinMode.Output);
@@ -236,7 +230,7 @@ namespace Iot.Device.DHTxx
             // humidity int, humidity decimal, temperature int, temperature decimal, checksum
             _sensor.Read(_readBuff);
 
-            _lastMeasurment = Environment.TickCount;
+            _lastMeasurement = Environment.TickCount;
 
             if ((_readBuff[4] == ((_readBuff[0] + _readBuff[1] + _readBuff[2] + _readBuff[3]) & 0xFF)))
             {
@@ -251,9 +245,10 @@ namespace Iot.Device.DHTxx
         }
 
         // Convertion for DHT11
-        private double GetTempDht11() => IsLastReadSuccessful ? _readBuff[2] + _readBuff[3] / 10.0 : double.MaxValue;
+        // The meaning of 0.1 is to convert byte to decimal
+        private double GetTempDht11() => IsLastReadSuccessful ? _readBuff[2] + _readBuff[3] * 0.1 : double.MaxValue;
 
-        private double GetHumidityDht11() => IsLastReadSuccessful ? _readBuff[0] + _readBuff[1] / 10.0 : double.MaxValue;
+        private double GetHumidityDht11() => IsLastReadSuccessful ? _readBuff[0] + _readBuff[1] * 0.1 : double.MaxValue;
 
         // convertion for DHT12, DHT21, DHT22
         private double GetTempDht22()
