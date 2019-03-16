@@ -72,7 +72,7 @@ Here we are using pin 18 for input, if you are using different pin please update
 The following elements are used in this sample:
 
 * [Force Sensitive Resistor](https://www.adafruit.com/product/166)
-* [Capacitor 0.1 micro Farade]
+* Capacitor 0.1 micro Farade
 
 ## References 
 The sample is based on following resources:
