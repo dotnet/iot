@@ -77,7 +77,7 @@ The following elements are used in this sample:
 ## References 
 The sample is based on following resources:
 
-* [FSR data sheet] (https://cdn-learn.adafruit.com/assets/assets/000/010/126/original/fsrguide.pdf)
+* [FSR data sheet](https://cdn-learn.adafruit.com/assets/assets/000/010/126/original/fsrguide.pdf)
 * [Reading Analog Input from a Potentiometer](https://github.com/dotnet/iot/tree/master/src/devices/Mcp3008/samples) 
 * [Using an FSR](https://learn.adafruit.com/force-sensitive-resistor-fsr/using-an-fsr)
 * [Basic Resistor Sensor Reading on Raspberry Pi](https://learn.adafruit.com/basic-resistor-sensor-reading-on-raspberry-pi)
