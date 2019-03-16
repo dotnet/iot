@@ -20,7 +20,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// These bits contain the two Most Significant bits of the Extended Identifier for the received message.
         /// </param>
         /// <param name="ide">
-        /// Extended Identifier Flag bit.
+        /// Extended Identifier Flag bit.  This is sometimes referred to as EFF.
         /// This bit indicates whether the received message was a standard or an extended frame.
         /// True = Received message was an extended frame.
         /// False = Received message was a standard frame.
