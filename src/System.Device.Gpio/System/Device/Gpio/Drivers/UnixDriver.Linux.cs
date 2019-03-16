@@ -16,7 +16,7 @@ namespace System.Device.Gpio.Drivers
             }
             catch (DllNotFoundException)
             {
-                driver = new SysfsDriver();
+                driver = new SysFsDriver();
             }
             return driver;
         }

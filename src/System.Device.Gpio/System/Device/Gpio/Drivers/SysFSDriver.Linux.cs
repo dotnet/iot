@@ -12,7 +12,7 @@ namespace System.Device.Gpio.Drivers
     /// <summary>
     /// A GPIO driver for Unix.
     /// </summary>
-    public class SysfsDriver : UnixDriver
+    public class SysFsDriver : UnixDriver
     {
         private const string GpioBasePath = "/sys/class/gpio";
         private int _pollFileDescriptor = -1;
@@ -93,12 +93,12 @@ namespace System.Device.Gpio.Drivers
                 throw new PlatformNotSupportedException("This driver is generic so it does not support Input Pull Down or Input Pull Up modes.");
             }
             string directionPath = $"{GpioBasePath}/gpio{pinNumber}/direction";
-            string sysfsMode = ConvertPinModeToSysFsMode(mode);
+            string sysFsMode = ConvertPinModeToSysFsMode(mode);
             if (File.Exists(directionPath))
             {
                 try
                 {
-                    File.WriteAllText(directionPath, sysfsMode);
+                    File.WriteAllText(directionPath, sysFsMode);
                 }
                 catch (UnauthorizedAccessException e)
                 {
@@ -124,18 +124,18 @@ namespace System.Device.Gpio.Drivers
             throw new PlatformNotSupportedException($"{mode} is not supported by this driver.");
         }
 
-        private PinMode ConvertSysFsModeToPinMode(string sysfsMode)
+        private PinMode ConvertSysFsModeToPinMode(string sysFsMode)
         {
-            sysfsMode = sysfsMode.Trim();
-            if (sysfsMode == "in")
+            sysFsMode = sysFsMode.Trim();
+            if (sysFsMode == "in")
             {
                 return PinMode.Input;
             }
-            if (sysfsMode == "out")
+            if (sysFsMode == "out")
             {
                 return PinMode.Output;
             }
-            throw new ArgumentException($"Unable to parse {sysfsMode} as a PinMode.");
+            throw new ArgumentException($"Unable to parse {sysFsMode} as a PinMode.");
         }
 
         /// <summary>
@@ -545,8 +545,8 @@ namespace System.Device.Gpio.Drivers
             {
                 try
                 {
-                    string sysfsMode = File.ReadAllText(directionPath);
-                    return ConvertSysFsModeToPinMode(sysfsMode);
+                    string sysFsMode = File.ReadAllText(directionPath);
+                    return ConvertSysFsModeToPinMode(sysFsMode);
                 }
                 catch (UnauthorizedAccessException e)
                 {
