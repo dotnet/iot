@@ -63,7 +63,8 @@ namespace Iot.Tools.DeviceListing
                 }
                 else
                 {
-                    return FindRepoRoot(new DirectoryInfo(dir).Parent.FullName);
+                    DirectoryInfo parentDir = new DirectoryInfo(dir).Parent;
+                    return parentDir == null ? null : FindRepoRoot(parentDir.FullName);
                 }
             }
 
