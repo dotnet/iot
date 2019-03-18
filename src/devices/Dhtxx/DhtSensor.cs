@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Diagnostics;
+using System.Threading;
 using Iot.Units;
 
 namespace Iot.Device.DHTxx
@@ -22,6 +24,9 @@ namespace Iot.Device.DHTxx
         public const byte Dht12DefaultI2cAddress = 0x5C;
 
         private byte[] _readBuff = new byte[5];
+
+        // wait about 1 ms
+        private readonly uint _loopCount = 10000;
 
         private readonly CommunicationProtocol _protocol;
         private readonly int _pin;
@@ -52,12 +57,12 @@ namespace Iot.Device.DHTxx
 
                 switch (_dhtType)
                 {
-                    case DhtType.DHT11:
-                        return Temperature.FromCelsius(GetHumidityDht11());
-                    case DhtType.DHT12:
-                    case DhtType.DHT21:
-                    case DhtType.DHT22:
-                        return Temperature.FromCelsius(GetHumidityDht22());
+                    case DhtType.Dht11:
+                        return Temperature.FromCelsius(GetTempDht11());
+                    case DhtType.Dht12:
+                    case DhtType.Dht21:
+                    case DhtType.Dht22:
+                        return Temperature.FromCelsius(GetTempDht22());
                     default:
                         return Temperature.FromCelsius(double.MaxValue);
                 }
@@ -78,11 +83,11 @@ namespace Iot.Device.DHTxx
 
                 switch (_dhtType)
                 {
-                    case DhtType.DHT11:
+                    case DhtType.Dht11:
                         return GetHumidityDht11();
-                    case DhtType.DHT12:
-                    case DhtType.DHT21:
-                    case DhtType.DHT22:
+                    case DhtType.Dht12:
+                    case DhtType.Dht21:
+                    case DhtType.Dht22:
                         return GetHumidityDht22();
                     default:
                         return double.MaxValue;
@@ -104,11 +109,8 @@ namespace Iot.Device.DHTxx
             _dhtType = dhtType;
 
             _controller.OpenPin(_pin);
-            // keep data line HIGH
-            _controller.SetPinMode(_pin, PinMode.Output);
-            _controller.Write(_pin, PinValue.High);
             // delay 1s to make sure DHT stable
-            DelayHelper.DelayMilliseconds(1000, true);
+            Thread.Sleep(1000);
         }
 
         /// <summary>
@@ -119,7 +121,7 @@ namespace Iot.Device.DHTxx
         {
             _protocol = CommunicationProtocol.I2C;
             _sensor = sensor;
-            _dhtType = DhtType.DHT12;
+            _dhtType = DhtType.Dht12;
         }
 
         /// <summary>
@@ -154,41 +156,82 @@ namespace Iot.Device.DHTxx
         /// </returns>
         private bool ReadThroughOneWire()
         {
-            _controller.Write(_pin, PinValue.Low);
-            // wait 18 milliseconds
-            DelayHelper.DelayMilliseconds(18, true);
+            byte readVal = 0;
+            uint count;
 
+            // keep data line HIGH
+            _controller.SetPinMode(_pin, PinMode.Output);
+            _controller.Write(_pin, PinValue.High);
+            DelayHelper.DelayMilliseconds(20, true);
+
+            // send trigger signal
+            _controller.Write(_pin, PinValue.Low);
+            // wait at least 18 milliseconds
+            // here wait for 18 milliseconds will cause sensor initialization to fail
+            DelayHelper.DelayMilliseconds(20, true);
+
+            // pull up data line
             _controller.Write(_pin, PinValue.High);
             // wait 20 - 40 microseconds
-            DelayHelper.DelayMicroseconds(30, true);
+            DelayHelper.DelayMicroseconds(40, true);
 
-            _controller.SetPinMode(_pin, PinMode.Input);
+            _controller.SetPinMode(_pin, PinMode.InputPullUp);
 
-            // DHT corresponding signal - LOW - 80 microseconds
+            // DHT corresponding signal - LOW - about 80 microseconds
+            count = _loopCount;
             while (_controller.Read(_pin) == PinValue.Low)
-                ;
-            // HIGH - 80 microseconds
+            { 
+                if (count-- == 0)
+                {
+                    IsLastReadSuccessful = false;
+                    return IsLastReadSuccessful;
+                }
+            }
+
+            // HIGH - about 80 microseconds
+            count = _loopCount;
             while (_controller.Read(_pin) == PinValue.High)
-                ;
+            {
+                if (count-- == 0)
+                {
+                    IsLastReadSuccessful = false;
+                    return IsLastReadSuccessful;
+                }
+            }
 
             // the read data contains 40 bits
-            byte readVal = 0;
             for (int i = 0; i < 40; i++)
             {
-                // beginning signal per bit, 50 microseconds
+                // beginning signal per bit, about 50 microseconds
+                count = _loopCount;
                 while (_controller.Read(_pin) == PinValue.Low)
-                    ;
+                {
+                    if (count-- == 0)
+                    {
+                        IsLastReadSuccessful = false;
+                        return IsLastReadSuccessful;
+                    }
+                }
 
                 // 26 - 28 microseconds represent 0
                 // 70 microseconds represent 1
                 _stopwatch.Restart();
+                count = _loopCount;
                 while (_controller.Read(_pin) == PinValue.High)
-                    ;
+                {
+                    if (count-- == 0)
+                    {
+                        IsLastReadSuccessful = false;
+                        return IsLastReadSuccessful;
+                    }
+                }
                 _stopwatch.Stop();
 
                 // bit to byte
+                // less than 40 microseconds can be considered as 0, not necessarily less than 28 microseconds
+                // here take 30 microseconds
                 readVal <<= 1;
-                if (_stopwatch.Elapsed.TotalMilliseconds > 0.028)
+                if (!(_stopwatch.ElapsedTicks * 1000000F / Stopwatch.Frequency <= 30))
                 {
                     readVal |= 1;
                 }
@@ -200,10 +243,6 @@ namespace Iot.Device.DHTxx
             }
 
             _lastMeasurement = Environment.TickCount;
-
-            // keep data line HIGH
-            _controller.SetPinMode(_pin, PinMode.Output);
-            _controller.Write(_pin, PinValue.High);
 
             if ((_readBuff[4] == ((_readBuff[0] + _readBuff[1] + _readBuff[2] + _readBuff[3]) & 0xFF)))
             {
@@ -244,8 +283,8 @@ namespace Iot.Device.DHTxx
             return IsLastReadSuccessful;
         }
 
-        // Convertion for DHT11
-        // The meaning of 0.1 is to convert byte to decimal
+        // convertion for DHT11
+        // the meaning of 0.1 is to convert byte to decimal
         private double GetTempDht11() => IsLastReadSuccessful ? _readBuff[2] + _readBuff[3] * 0.1 : double.MaxValue;
 
         private double GetHumidityDht11() => IsLastReadSuccessful ? _readBuff[0] + _readBuff[1] * 0.1 : double.MaxValue;

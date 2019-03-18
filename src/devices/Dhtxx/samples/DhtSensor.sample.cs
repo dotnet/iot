@@ -18,13 +18,13 @@ class Program
         //UnixI2cDevice device = new UnixI2cDevice(settings);
         //DhtSensor dht = new DhtSensor(device);
 
-        using (DhtSensor dht = new DhtSensor(26, DhtType.DHT22))
+        using (DhtSensor dht = new DhtSensor(4, DhtType.Dht11))
         {
             while (true)
             {
                 Console.WriteLine($"Temperature: {dht.Temperature.Celsius.ToString("0.0")} °C, Humidity: {dht.Humidity.ToString("0.0")} %");
 
-                Thread.Sleep(1000);
+                Thread.Sleep(2000);
             }
         }
     }
