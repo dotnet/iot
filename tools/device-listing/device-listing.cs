@@ -7,13 +7,20 @@ using System.IO;
 using System.Text;
 using System.Threading;
 
-namespace Iot.Device.device_listing.Samples
+namespace Iot.Tools.DeviceListing
 {
     class Program
     {
         static void Main(string[] args)
         {
             string repoRoot = FindRepoRoot(Environment.CurrentDirectory);
+
+            if (repoRoot == null)
+            {
+                Console.WriteLine("Error: not in a git repository");
+                return;
+            }
+
             string devices = Path.Combine(repoRoot, "src", "devices");
 
             var deviceListing = new StringBuilder();
