@@ -1,4 +1,4 @@
-# DHTxx Sensors
+# DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module
 
 ## Summary
 

@@ -1,7 +1,4 @@
-﻿
-# Buzzer
-
-  
+﻿# Buzzer - Piezo Buzzer Controller
 
 ## Summary
 
@@ -9,13 +6,9 @@ This device binding allows playing certain tones using piezo buzzer. It uses PWM
 
 Piezo buzzers with three pins supported as well as piezo buzzers with two pins.
 
-  
-
 ## Device Family
 
 This binding was tested on two types of piezo buzzers. First type of buzzer has two pins *vcc* and *gnd*. Second type of buzzers has addition *signal* pin.
-  
-
 
 ## Binding Notes
 

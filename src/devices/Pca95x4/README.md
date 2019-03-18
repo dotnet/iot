@@ -1,4 +1,4 @@
-﻿# Pca95x4
+﻿# Pca95x4 - I2C GPIO Expander
 
 ## Summary
 The PCA95x4 provides 8 bits of General Purpose parallel Input/Output (GPIO) expansion for I2C-bus applications.
