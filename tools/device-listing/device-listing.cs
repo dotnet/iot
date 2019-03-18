@@ -128,6 +128,8 @@ namespace Iot.Tools.DeviceListing
                 filePath,
                 fileContent.Substring(0, startIdx) +
                 Environment.NewLine +
+                // Extra empty line is needed so that github does not break bullet points
+                Environment.NewLine +
                 newContent +
                 fileContent.Substring(endIdx));
         }
