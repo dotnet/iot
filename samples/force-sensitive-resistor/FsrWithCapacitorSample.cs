@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Device.Gpio;
-using System.Diagnostics;
-using System.Threading;
 
 namespace force_sensitive_resistor
 {
@@ -20,7 +17,7 @@ namespace force_sensitive_resistor
             _controller.OpenPin(_pinNumber);
         }
 
-        private long ReadCapacitorChargingDuration()
+        public int ReadCapacitorChargingDuration()
         {
             int count = 0;
             _controller.SetPinMode(_pinNumber, PinMode.Output);
@@ -38,24 +35,6 @@ namespace force_sensitive_resistor
                 }
             }
             return count;
-        }
-
-        public void StartReading()
-        {
-            while (true)
-            {
-                long value = ReadCapacitorChargingDuration();
-
-                if (value == 30000)
-                {   // 30000 is count limit, if we got this count it means Fsr has its highest resistance, so it is not pressed
-                    Console.WriteLine("Not pressed");
-                }
-                else
-                {
-                    Console.WriteLine("Pressed");
-                }
-                Thread.Sleep(500);
-            }
         }
     }
 }
