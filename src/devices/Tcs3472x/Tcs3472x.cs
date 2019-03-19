@@ -12,8 +12,11 @@ namespace Iot.Device.Tcs3472x
 {
     public class Tcs3472x : IDisposable
     {
+        /// <summary>
+        /// Default I2C address for TCS3472x familly
+        /// </summary>
         public const byte DefaultI2cAddress = 0x29;
-        private readonly I2cDevice _i2cDevice;
+        private I2cDevice _i2cDevice;
         private byte _integrationTimeByte;
         private double _integrationTime;
         private bool _isLongTime;
@@ -63,7 +66,7 @@ namespace Iot.Device.Tcs3472x
         /// <param name="autoDisposable">true to dispose the I2C Device class at dispose</param>
         public Tcs3472x(I2cDevice i2cDevice, double integrationTime = 0.0024, Gain gain = Gain.Gain16X, bool autoDisposable = true)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} can't be null");
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             // Maximum is 700 ms for the initialization. Value can be changed for a long one but not during this initialization phase            
             _autoDisposable = autoDisposable;
             _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | Registers.ID));
@@ -105,7 +108,7 @@ namespace Iot.Device.Tcs3472x
         /// Set the integration (sampling) time for the sensor
         /// </summary>
         /// <param name="timeSeconds">Time in seconds for each sample. 0.0024 second(2.4ms) increments.Clipped to the range of 0.0024 to 0.6144 seconds.</param>
-        public void SetIntegrationTime(double timeSeconds)
+        private void SetIntegrationTime(double timeSeconds)
         {
             if (timeSeconds <= 700)
             {
@@ -114,8 +117,7 @@ namespace Iot.Device.Tcs3472x
                     SetConfigLongTime(false);
                 }
                 _isLongTime = false;
-                var timeByte = (int)(0x100 - (timeSeconds / 0.0024));
-                timeByte = Math.Clamp(timeByte, 0, 255);
+                var timeByte = Math.Clamp((int)(0x100 - (timeSeconds / 0.0024)), 0, 255);
                 WriteRegister(Registers.ATIME, (byte)timeByte);
                 _integrationTimeByte = (byte)timeByte;
             }
@@ -164,6 +166,8 @@ namespace Iot.Device.Tcs3472x
 
         /// <summary>
         /// Set/clear a specific interrupt persistence
+        /// This is used to have more than 1 cycle before generating an
+        /// interruption. 
         /// </summary>
         /// <param name="interupt">The percistence cycles</param>
         /// <param name="state">True to set the interrupt, false to clear</param>
@@ -182,7 +186,8 @@ namespace Iot.Device.Tcs3472x
         /// <returns></returns>
         public Color GetColor(bool delay = true)
         {
-
+            // To have a new reading, you need to wait for integration time to happen
+            // If you don't wait, then you'll read the previous value
             if (delay)
                 Thread.Sleep((int)(IntegrationTime * 1000));
             var divide = ((256 - _integrationTimeByte) * 1024);
@@ -205,7 +210,7 @@ namespace Iot.Device.Tcs3472x
         /// </summary>
         public Color Color => GetColor();
 
-        private UInt16 I2cRead16(Registers reg)
+        private ushort I2cRead16(Registers reg)
         {
             _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | reg));
             Span<byte> outArray = stackalloc byte[2] { 0, 0 };
@@ -230,6 +235,7 @@ namespace Iot.Device.Tcs3472x
             if (_autoDisposable)
             {
                 _i2cDevice?.Dispose();
+                _i2cDevice = null;
             }
         }
     }

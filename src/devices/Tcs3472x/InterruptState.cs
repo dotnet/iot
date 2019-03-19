@@ -13,13 +13,13 @@ namespace Iot.Device.Tcs3472x
         // Every RGBC cycle generates an interrupt
         All = 0b0000,
         // 1 clear channel value outside of threshold range
-        Percistence1Cycle = 0b0001,
+        Percistence01Cycle = 0b0001,
         // 2 clear channel consecutive values out of range 
-        Percistence2Cycle = 0b0010,
+        Percistence02Cycle = 0b0010,
         // 3 clear channel consecutive values out of range 
-        Percistence3Cycle = 0b0011,
+        Percistence03Cycle = 0b0011,
         // 5 clear channel consecutive values out of range
-        Percistence5Cycle = 0b0100,
+        Percistence05Cycle = 0b0100,
         // 10 clear channel consecutive values out of range
         Percistence10Cycle = 0b0101,
         // 15 clear channel consecutive values out of range
