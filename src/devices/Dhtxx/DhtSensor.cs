@@ -47,7 +47,7 @@ namespace Iot.Device.DHTxx
         /// Get the last read temperature
         /// </summary>
         /// <remarks>
-        /// If last read was not successfull, it returns double.MaxValue
+        /// If last read was not successfull, it returns double.NaN
         /// </remarks>
         public Temperature Temperature
         {
@@ -64,7 +64,7 @@ namespace Iot.Device.DHTxx
                     case DhtType.Dht22:
                         return Temperature.FromCelsius(GetTempDht22());
                     default:
-                        return Temperature.FromCelsius(double.MaxValue);
+                        return Temperature.FromCelsius(double.NaN);
                 }
             }
         }
@@ -73,7 +73,7 @@ namespace Iot.Device.DHTxx
         /// Get the last read of relative humidity in percentage
         /// </summary>
         /// <remarks>
-        /// If last read was not successfull, it returns double.MaxValue
+        /// If last read was not successfull, it returns double.NaN
         /// </remarks>
         public double Humidity
         {
@@ -90,7 +90,7 @@ namespace Iot.Device.DHTxx
                     case DhtType.Dht22:
                         return GetHumidityDht22();
                     default:
-                        return double.MaxValue;
+                        return double.NaN;
                 }
             }
         }
@@ -285,9 +285,9 @@ namespace Iot.Device.DHTxx
 
         // convertion for DHT11
         // the meaning of 0.1 is to convert byte to decimal
-        private double GetTempDht11() => IsLastReadSuccessful ? _readBuff[2] + _readBuff[3] * 0.1 : double.MaxValue;
+        private double GetTempDht11() => IsLastReadSuccessful ? _readBuff[2] + _readBuff[3] * 0.1 : double.NaN;
 
-        private double GetHumidityDht11() => IsLastReadSuccessful ? _readBuff[0] + _readBuff[1] * 0.1 : double.MaxValue;
+        private double GetHumidityDht11() => IsLastReadSuccessful ? _readBuff[0] + _readBuff[1] * 0.1 : double.NaN;
 
         // convertion for DHT12, DHT21, DHT22
         private double GetTempDht22()
@@ -299,10 +299,10 @@ namespace Iot.Device.DHTxx
                 return ((_readBuff[3] & 0x80) == 0 ? temp : -temp);
             }
             else
-                return (double.MaxValue);
+                return double.NaN;
         }
 
-        private double GetHumidityDht22() => IsLastReadSuccessful ? _readBuff[0] + _readBuff[1] * 0.1 : double.MaxValue;
+        private double GetHumidityDht22() => IsLastReadSuccessful ? _readBuff[0] + _readBuff[1] * 0.1 : double.NaN;
 
         /// <summary>
         /// Cleanup
