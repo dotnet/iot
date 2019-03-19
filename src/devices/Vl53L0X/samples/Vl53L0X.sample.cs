@@ -16,13 +16,13 @@ namespace Vl53L0Xsample
         {
             Console.WriteLine("Hello VL53L0X!");
             Vl53L0X vL53L0X = new Vl53L0X(new UnixI2cDevice(new I2cConnectionSettings(1, Vl53L0X.DefaultI2cAddress)));
-            Console.WriteLine($"Rev: {vL53L0X.Info.Revision}, Prod: {vL53L0X.Info.ProductId}, Mod: {vL53L0X.Info.ModuleId}");
-            // vL53L0X.SetPrecision(Precision.HighPrecision);
+            Console.WriteLine($"Rev: {vL53L0X.Information.Revision}, Prod: {vL53L0X.Information.ProductId}, Mod: {vL53L0X.Information.ModuleId}");
+            vL53L0X.MeasurementMode = MeasurementMode.Continuous;
             while (!Console.KeyAvailable)
             {
                 try
                 {
-                    var dist = vL53L0X.DistanceContinousMillimeters;
+                    var dist = vL53L0X.Distance;
                     if (dist != (UInt16)OperationRange.OutOfRange)
                     {
                         Console.WriteLine($"Distance: {dist}");
@@ -36,10 +36,6 @@ namespace Vl53L0Xsample
                 {
                     Console.WriteLine($"Exception: {ex.Message}");
                 }
-                // You can use as well single measurement, be aware that reading it may not be that accurate
-                // So using this function will return a safe averaged value with few readings or OutOfRange 
-                // in case of any issue
-                // Console.WriteLine($"Distance: {vL53L0X.GetDistanceSingleMillimeters(true)}");
                 Thread.Sleep(500);
             }
 

@@ -20,10 +20,11 @@ namespace Iot.Device.Vl53L0X
     public class Vl53L0X : IDisposable
     {
         /// <summary>
-        /// The default I2C Address, page 18 of the documentation 0x52 >> 1 = 0x29
+        /// The default I2C Address
         /// </summary>
         public const byte DefaultI2cAddress = 0x29;
-
+        // Default address can be found in documentation
+        // page 18 with value 0x52 >> 1 = 0x29
         private readonly I2cDevice _i2cDevice;
         private readonly bool _autoDisposable;
         private byte _stopData;
@@ -31,17 +32,21 @@ namespace Iot.Device.Vl53L0X
         private UInt32 _measurementTimingBudgetMicrosecond;
         private bool _continuousInitialized = false;
         private bool _highResolution;
+        private Precision _precision;
 
         /// <summary>
-        /// Get the sensor information
+        /// Get the sensor information including internal signal and distance offsets
         /// </summary>
-        public Info Info { get; internal set; }
+        public Information Information { get; internal set; }
 
         /// <summary>
         /// Used to find a clean measurement when reading in single shot 
         /// </summary>
         public int MaxTryReadSingle { get; set; }
 
+        /// <summary>
+        /// Set/Get high resolution measurement
+        /// </summary>
         public bool HighResolution
         {
             get
@@ -71,7 +76,7 @@ namespace Iot.Device.Vl53L0X
             GetInfo();
             MaxTryReadSingle = 3;
             // Set longer range
-            SetPrecision(Precision.LongRange);
+            Precision = Precision.LongRange;
         }
 
         /// <summary>
@@ -142,6 +147,16 @@ namespace Iot.Device.Vl53L0X
             WriteRegister((byte)Registers.SYSTEM_INTERRUPT_CLEAR, 0x01);
             return range;
         }
+
+        /// <summary>
+        /// Get the distance depending on the measurement mode
+        /// </summary>
+        public UInt16 Distance => MeasurementMode == MeasurementMode.Continuous ? DistanceContinousMillimeters : GetDistanceSingleMillimeters(true);
+
+        /// <summary>
+        /// Get/Set the measurement mode used to return the distance property
+        /// </summary>
+        public MeasurementMode MeasurementMode { get; set; }
 
         /// <summary>
         /// Get a distance in millimeters from the continous measurement feature.
@@ -277,7 +292,7 @@ namespace Iot.Device.Vl53L0X
                         WriteRegister((byte)Registers.MSRC_CONFIG_TIMEOUT_MACROP, (byte)(newMsrcTimeoutMclks - 1));
                     break;
                 case VcselType.VcselPeriodFinalRange:
-                    if (periodPclks == PeriodPulse.Period8)
+                    if (periodPclks == PeriodPulse.Period08)
                     {
                         WriteRegister((byte)Registers.FINAL_RANGE_CONFIG_VALID_PHASE_HIGH, 0x10);
                         WriteRegister((byte)Registers.FINAL_RANGE_CONFIG_VALID_PHASE_LOW, 0x08);
@@ -351,30 +366,36 @@ namespace Iot.Device.Vl53L0X
         /// Set the type of precision needed for measurement
         /// </summary>
         /// <param name="precision">The type of precision needed</param>
-        public void SetPrecision(Precision precision)
+        public Precision Precision
         {
-            switch (precision)
+            get { return _precision; }
+
+            set
             {
-                case Precision.ShortRange:
-                    HighResolution = false;
-                    SetSignalRateLimit(0.25);
-                    SetVcselPulsePeriod(VcselType.VcselPeriodPreRange, PeriodPulse.Period14);
-                    SetVcselPulsePeriod(VcselType.VcselPeriodFinalRange, PeriodPulse.Period10);
-                    break;
-                case Precision.LongRange:
-                    HighResolution = false;
-                    SetSignalRateLimit(0.1);
-                    SetVcselPulsePeriod(VcselType.VcselPeriodPreRange, PeriodPulse.Period18);
-                    SetVcselPulsePeriod(VcselType.VcselPeriodFinalRange, PeriodPulse.Period14);
-                    break;
-                case Precision.HighPrecision:
-                    HighResolution = true;
-                    SetSignalRateLimit(0.1);
-                    SetVcselPulsePeriod(VcselType.VcselPeriodPreRange, PeriodPulse.Period18);
-                    SetVcselPulsePeriod(VcselType.VcselPeriodFinalRange, PeriodPulse.Period14);
-                    break;
-                default:
-                    break;
+                _precision = value;
+                switch (_precision)
+                {
+                    case Precision.ShortRange:
+                        HighResolution = false;
+                        SetSignalRateLimit(0.25);
+                        SetVcselPulsePeriod(VcselType.VcselPeriodPreRange, PeriodPulse.Period14);
+                        SetVcselPulsePeriod(VcselType.VcselPeriodFinalRange, PeriodPulse.Period10);
+                        break;
+                    case Precision.LongRange:
+                        HighResolution = false;
+                        SetSignalRateLimit(0.1);
+                        SetVcselPulsePeriod(VcselType.VcselPeriodPreRange, PeriodPulse.Period18);
+                        SetVcselPulsePeriod(VcselType.VcselPeriodFinalRange, PeriodPulse.Period14);
+                        break;
+                    case Precision.HighPrecision:
+                        HighResolution = true;
+                        SetSignalRateLimit(0.1);
+                        SetVcselPulsePeriod(VcselType.VcselPeriodPreRange, PeriodPulse.Period18);
+                        SetVcselPulsePeriod(VcselType.VcselPeriodFinalRange, PeriodPulse.Period14);
+                        break;
+                    default:
+                        break;
+                }
             }
 
         }
@@ -596,11 +617,13 @@ namespace Iot.Device.Vl53L0X
             Thread.Sleep(30);
             WriteRegister(0x80, 0x01);
             // Reading the data from the sensor
-            Info = new Info()
+            Information = new Information()
             {
                 ModuleId = GetDeviceInfo(InfoDevice.ModuleId),
                 Revision = new Version(GetDeviceInfo(InfoDevice.PartUIDUpper), GetDeviceInfo(InfoDevice.PartUIDLower)),
-                ProductId = GetProductId()
+                ProductId = GetProductId(),
+                SignalRateMeasFixed1104_400_Micrometers = GetSignalRate(),
+                DistMeasFixed1104_400_Micrometers = GetDistanceFixed()
             };
             // Closing sequence
             WriteRegister(0x81, 0x00);
@@ -618,6 +641,32 @@ namespace Iot.Device.Vl53L0X
             WriteRegister((byte)Registers.GET_INFO_DEVICE, (byte)infoDevice);
             ReadStrobe();
             return ReadByte((byte)Registers.DEVICE_INFO_READING);
+        }
+
+        private UInt32 GetSignalRate()
+        {
+            WriteRegister((byte)Registers.GET_INFO_DEVICE, (byte)(InfoDevice.SignalRate1));
+            ReadStrobe();
+            var intermediate = ReadUIn32(0x90);
+            var SignalRateMeasFixed1104_400_mm = (intermediate & 0x0000000ff) << 8;
+            WriteRegister((byte)Registers.GET_INFO_DEVICE, (byte)(InfoDevice.SignalRate2));
+            ReadStrobe();
+            intermediate = ReadUIn32(0x90);
+            SignalRateMeasFixed1104_400_mm |= ((intermediate & 0xff000000) >> 24);
+            return SignalRateMeasFixed1104_400_mm;
+        }
+
+        private UInt32 GetDistanceFixed()
+        {
+            WriteRegister((byte)Registers.GET_INFO_DEVICE, (byte)(InfoDevice.DistanceFixed1));
+            ReadStrobe();
+            var intermediate = ReadUIn32(0x90);
+            var DistMeasFixed1104_400_mm = (intermediate & 0x0000000ff) << 8;
+            WriteRegister((byte)Registers.GET_INFO_DEVICE, (byte)(InfoDevice.DistanceFixed2));
+            ReadStrobe();
+            intermediate = ReadUIn32(0x90);
+            DistMeasFixed1104_400_mm |= ((intermediate & 0xff000000) >> 24);
+            return DistMeasFixed1104_400_mm;
         }
 
         /// <summary>

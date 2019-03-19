@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VL53L0X.csproj" />
+    <ProjectReference Include="..\Vl53L0X.csproj" />
   </ItemGroup>
 
 </Project>

@@ -23,7 +23,7 @@ while (!Console.KeyAvailable)
 {
     try
     {        
-        Console.WriteLine($"Distance: {vL53L0X.DistanceContinousMillimeters}");
+        Console.WriteLine($"Distance: {vL53L0X.Distance}");
     }
     catch (Exception ex)
     {
@@ -35,7 +35,7 @@ while (!Console.KeyAvailable)
 
 Be aware that when reading a distance using the Continuous or Single measurement feature, you can get an exception, you should trap it.
 
-You can as well get a single measurement, in this case, the precision can be lower and we do recommend to use the ```GetDistanceSingleMillimeters(true)``` which will return an ```OperantionRange.OutOfRange``` in case of any exception an average value with a number of ```MaxTryReadSingle``` which is 3 be default but that you can adjust.
+You can as well get a single measurement, in this case, the precision can be lower. Use the property ```MeasurementMode``` to change the mode.
 
 You can adjust the type of measurement you want. By default, the sensor is put into long range. This does allow to have a quite accurate (+-5%) precision within 2 meters but still can measure distances up to 8 meters (accuracy much less correct). You can switch to short range using the ```SetPrecision``` function. If you want to setup your own mode, you should use in conjunction the ```SetSignalRateLimit``` and the ```SetVcselPulsePeriod``` functions plus the ```HighResolution``` property like in the below example: 
 
@@ -46,5 +46,4 @@ SetVcselPulsePeriod(VcselType.VcselPeriodPreRange, PeriodPulse.Period14);
 SetVcselPulsePeriod(VcselType.VcselPeriodFinalRange, PeriodPulse.Period10);
 ```
 
-Please refer to the documentation to understand the impact of changing the various pluses as well as using the high resolution precision measurement.
-
+Please refer to the documentation to understand the impact of changing the various pluses as well as using the high resolution precision measurement. The sensor can't be precise in long range and in general, the longer it can see, the less precise are the data. High resolution will return a more precise measurement but mainly in short distance. 

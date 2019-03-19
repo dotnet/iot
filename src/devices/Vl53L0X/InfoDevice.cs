@@ -14,5 +14,9 @@ namespace Iot.Device.Vl53L0X
         ProductId2 = 0x78,
         ProductId3 = 0x79,
         ProductId4 = 0x7A,
+        SignalRate1 = 0x73,
+        SignalRate2 = 0x74,
+        DistanceFixed1 = 0x75,
+        DistanceFixed2 = 0x76
     }
 }

@@ -5,16 +5,13 @@
 namespace Iot.Device.Vl53L0X
 {
     /// <summary>
-    /// The period used for the pulse when setting the 
-    /// VCSEL (vertical cavity surface emitting laser) pulse period
+    /// The measurement mode
+    /// Continuous measurement is processed in the sensor and readings are 
+    /// more reliable than the Single measurement mode
     /// </summary>
-    public enum PeriodPulse
+    public enum MeasurementMode
     {
-        Period08 = 8,
-        Period10 = 10,
-        Period12 = 12,
-        Period14 = 14,
-        Period16 = 16,
-        Period18 = 18
+        Continuous = 0,
+        Single
     }
 }
