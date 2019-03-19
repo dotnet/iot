@@ -1,4 +1,4 @@
-﻿# MPR121
+﻿# MPR121 - Proximity Capacitive Touch Sensor Controller
 
 ## Summary
 The 12-channels I2C proximity capacitive touch sensor controller.

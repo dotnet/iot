@@ -1,4 +1,4 @@
-# DHTxx Sensors - Temperature and Humidity Sensors
+# DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module
 
 The DHT temperature and humidity sensors are very popular. This projects support DHT11, DHT12, DHT21(AM2301), DHT22(AM2302).
 
