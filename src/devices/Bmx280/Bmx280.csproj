@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
