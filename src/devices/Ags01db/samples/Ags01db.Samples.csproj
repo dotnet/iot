@@ -3,14 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <LangVersion>Latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Ags01db.csproj" />
   </ItemGroup>
 
-  <ItemGroup> 
+  <ItemGroup>
     <None Remove="AGS01DB_circuit.fzz" />
     <None Remove="AGS01DB_circuit_bb.png" />
     <None Remove="README.md" />

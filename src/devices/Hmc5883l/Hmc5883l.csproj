@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <LangVersion>Latest</LangVersion>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
@@ -16,10 +15,10 @@
     <Compile Include="Hmc5883l.cs" />
     <Compile Include="SamplesAmount.cs" />
     <Compile Include="Status.cs" />
-    
+
   </ItemGroup>
 
-  <ItemGroup> 
+  <ItemGroup>
     <None Remove="README.md" />
     <None Remove="sensor.jpg" />
   </ItemGroup>
