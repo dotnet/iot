@@ -16,10 +16,10 @@ Code sample for [measuring pressure/squeezing with Fsr408 and ADC converter MCP3
     while (true)
     {
         int value = fsrWithAdc.Read(0);
-        int voltage = fsrWithAdc.CalculateVoltage(value);
-        int resistance = fsrWithAdc.CalculateFsrResistance(voltage);
-        int force = fsrWithAdc.CalculateForce(resistance);
-        Console.WriteLine($"Read value: {value}, voltage: {voltage}, resistance: {resistance}, approximate force in Newtons: {force}");
+        double voltage = fsrWithAdc.CalculateVoltage(value);
+        double resistance = fsrWithAdc.CalculateFsrResistance(voltage);
+        double force = fsrWithAdc.CalculateForce(resistance);
+        Console.WriteLine($"Read value: {value}, milli voltage: {voltage.ToString("f2")}, resistance: {resistance.ToString("f2")}, approximate force in Newtons: {force.ToString("f2")}");
         Thread.Sleep(500);
     }
 ```
