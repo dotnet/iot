@@ -9,7 +9,7 @@ namespace force_sensitive_resistor
     class FsrWithCapacitorSample
     {
         private GpioController _controller;
-        private int _pinNumber = 18; // set the pin number reading
+        private int _pinNumber = 18; // set the reading pin number
 
         public FsrWithCapacitorSample()
         {

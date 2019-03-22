@@ -10,7 +10,7 @@ namespace force_sensitive_resistor
     class FsrWithAdcSample
     {
         private int _resistance = 10_000; // kOhm
-        private int _voltageSupplied = 3_300;  // 3300mV = 3.3V\
+        private int _voltageSupplied = 3_300;  // 3300mV = 3.3V
         private Mcp3008 _adcConvertor;
 
         public FsrWithAdcSample()
@@ -48,7 +48,7 @@ namespace force_sensitive_resistor
             if (resistance > 0)
             {
                 int force;
-                int fsrConductance = 1_000_000 / resistance; // conductance is inverse of resistance which converted to micro ohms (1/??)
+                int fsrConductance = 1_000_000 / resistance; // conductance is inverse of resistance which converted to micro ohms
 
                 // Use the two FSR guide graphs to approximate the force
                 if (fsrConductance <= 1000)

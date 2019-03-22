@@ -8,21 +8,19 @@ FSR generates analog signal so it should be connected to analog input of a contr
 
  In below example MCP3008 Analog to Digital Converter used for converting FSR analog output into digital. Read value then can be used for calculating voltage, resistance and pressure force approxinmately. We need to create Mcp3008 instance depending on how you connected it to the controller, [please refer this for more about binding MCP3008](https://github.com/dotnet/iot/tree/master/src/devices/Mcp3008/samples)
 
-Code sample for [measuring pressure/squeezing with Fsr408 and ADC converter MCP3008](FsrWithAdcSample.cs#L58-L75):
+Code sample for [measuring pressure/squeezing with Fsr408 and ADC converter MCP3008](Program.cs#L24-L37):
 
 ```csharp
-    using (Mcp3008 adcConvertor = new Mcp3008(18, 23, 24, 25))
+    FsrWithAdcSample fsrWithAdc = new FsrWithAdcSample();
+            
+    while (true)
     {
-        while (true)
-            {
-                int value = adcConvertor.Read(_pinNumber);
-                int voltage = CalculateVoltage(value);
-                int resistance = CalculateFsrResistance(voltage);
-                int force = CalculateForce(resistance);
-                Console.WriteLine($"Read value: {value}, voltage: {voltage}, resistance: {resistance}, approximate force in Newtons: {force}");
-                Thread.Sleep(500);
-            }
-        }
+        int value = fsrWithAdc.Read(0);
+        int voltage = fsrWithAdc.CalculateVoltage(value);
+        int resistance = fsrWithAdc.CalculateFsrResistance(voltage);
+        int force = fsrWithAdc.CalculateForce(resistance);
+        Console.WriteLine($"Read value: {value}, voltage: {voltage}, resistance: {resistance}, approximate force in Newtons: {force}");
+        Thread.Sleep(500);
     }
 ```
 
@@ -44,12 +42,14 @@ The following elements are used in this sample:
 
 Using capacitor for reading FSR analog input was producing kind of noisy signal, so from my experience if you only need to check/determine if FSR is pressed or not use of capacitor could serve well, but if you need more fine tuned measurement better use Analog to Digital Converter.
 
-You can use the following code to [detect if Force Sensitive Resistor is pressed, using - capacitor](FsrWithCapacitorSample.cs#L53-L65):
+You can use the following code to [detect if Force Sensitive Resistor is pressed, using - capacitor](Program.cs#L41-L56):
 
 ```csharp
+    FsrWithCapacitorSample fsrWithCapacitor = new FsrWithCapacitorSample();
+
     while (true)
     {
-        long value = ReadCapacitorChargingDuration();
+        int value = fsrWithCapacitor.ReadCapacitorChargingDuration();
 
         if (value == 30000)
         {   // 30000 is count limit, if we got this count it means Fsr has its highest resistance, so it is not pressed
@@ -57,7 +57,7 @@ You can use the following code to [detect if Force Sensitive Resistor is pressed
         }
         else
         {
-            Console.WriteLine("Pressed");
+            Console.WriteLine($"Pressed {value}");
         }
         Thread.Sleep(500);
     }
