@@ -21,7 +21,7 @@ namespace force_sensitive_resistor
             _adcConvertor = new Mcp3008(18, 23, 24, 25);
         }
 
-        public int CalculateVoltage(int readValue)
+        public double CalculateVoltage(int readValue)
         {
             // This sample used Mcp3008 ADC which analog voltage read output ranges from 0 to 1023 (10 bit) 
             // mapping it to corresponding milli voltage, update output range if you use different ADC
@@ -33,7 +33,7 @@ namespace force_sensitive_resistor
             return _adcConvertor.Read(0);
         }
 
-        public int CalculateFsrResistance(int fsrVoltage)
+        public double CalculateFsrResistance(double fsrVoltage)
         {
             // Formula: FSR = ((Vcc - V) * R) / V
             if (fsrVoltage > 0)
@@ -43,12 +43,12 @@ namespace force_sensitive_resistor
             return 0;
         }
 
-        public int CalculateForce(int resistance)
+        public double CalculateForce(double resistance)
         {
             if (resistance > 0)
             {
-                int force;
-                int fsrConductance = 1_000_000 / resistance; // conductance is inverse of resistance which converted to micro ohms
+                double force;
+                double fsrConductance = 1_000_000 / resistance; 
 
                 // Use the two FSR guide graphs to approximate the force
                 if (fsrConductance <= 1000)
