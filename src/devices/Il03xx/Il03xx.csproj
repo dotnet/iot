@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>Iot.Device.Il03xx</RootNamespace>
+    <!--Disabling default items so samples source won't get build by the main library-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />
+    <Compile Include="..\Common\System\Device\Gpio\PinVector32.cs" Link="PinVector32.cs" />
+    <Compile Include="Commands.cs" />
+    <Compile Include="Il0389.cs" />
+    <Compile Include="Il0376.cs" />
+    <Compile Include="Il03xx.cs" />
+    <Compile Include="DisplayOptions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+        Temporarily making a project reference until the daily has IGpioController
+        <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" /> 
+      -->
+    <ProjectReference Include="..\..\System.Device.Gpio\System.Device.Gpio.csproj">
+      <AdditionalProperties>Configuration=Linux-Debug;RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
+    <None Include="README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
+  </ItemGroup>
+
+</Project>
