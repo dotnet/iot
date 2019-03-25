@@ -10,11 +10,11 @@ namespace Iot.Device.Vl53L0X
     {
         public byte PreRangeVcselPeriodPclks { get; set; }
         public byte FinalRangeVcselPeriodPclks { get; set; }
-        public UInt32 MsrcDssTccMclks { get; set; }
-        public UInt32 PreRangeMclks { get; set; }
-        public UInt32 FinalRangeMclks { get; set; }
-        public UInt32 MsrcDssTccMicroseconds { get; set; }
-        public UInt32 PreRangeMicroseconds { get; set; }
-        public UInt32 FinalRangeMicroseconds { get; set; }
+        public uint MsrcDssTccMclks { get; set; }
+        public uint PreRangeMclks { get; set; }
+        public uint FinalRangeMclks { get; set; }
+        public uint MsrcDssTccMicroseconds { get; set; }
+        public uint PreRangeMicroseconds { get; set; }
+        public uint FinalRangeMicroseconds { get; set; }
     }
 }

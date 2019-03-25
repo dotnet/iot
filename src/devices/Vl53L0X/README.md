@@ -2,7 +2,7 @@
 
 ## Summary
 
-The VL53L0X sensor is a Time-to-Flight sensor measuring precisely distances. The sensor allows you to get precise short distance measurement (from 5 millimeters to 2 meters) as well as long distance measurement (up to 8 meters but with a decreased precision). This sensor is a laser ranging sensor. So it is using laser pulses to measure the distances.
+The VL53L0X sensor is a Time-to-Flight sensor measuring precisely distances. The sensor allows you to get precise short distance measurement (from 5 millimeters to 2 meters) as well as long distance measurement (up to 8 meters but with a decreased precision). This sensor is a laser ranging sensor. It is using laser pulses to measure the distances.
 
 ## Device Family
 
@@ -46,4 +46,4 @@ SetVcselPulsePeriod(VcselType.VcselPeriodPreRange, PeriodPulse.Period14);
 SetVcselPulsePeriod(VcselType.VcselPeriodFinalRange, PeriodPulse.Period10);
 ```
 
-Please refer to the documentation to understand the impact of changing the various pluses as well as using the high resolution precision measurement. The sensor can't be precise in long range and in general, the longer it can see, the less precise are the data. High resolution will return a more precise measurement but mainly in short distance. 
+Please refer to the documentation to understand the impact of changing the various pulses as well as using the high resolution precision measurement. The sensor can't be precise in long range and in general, the longer it can see, the less precise are the data. High resolution will return a more precise measurement but mainly in short distance. 

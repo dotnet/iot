@@ -22,7 +22,7 @@ while (!Console.KeyAvailable)
     try
     {
         var dist = vL53L0X.Distance;
-        if (dist != (UInt16)OperationRange.OutOfRange)
+        if (dist != (ushort)OperationRange.OutOfRange)
         {
             Console.WriteLine($"Distance: {dist}");
         }

@@ -29,7 +29,7 @@ namespace Iot.Device.Vl53L0X
         private readonly bool _autoDisposable;
         private byte _stopData;
         private readonly int _operationTimeout;
-        private UInt32 _measurementTimingBudgetMicrosecond;
+        private uint _measurementTimingBudgetMicrosecond;
         private bool _continuousInitialized = false;
         private bool _highResolution;
         private Precision _precision;
@@ -84,17 +84,17 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         /// <param name="i2cDevice">The current I2C Device</param>
         /// <param name="newAddress">The new I2C Address from 0x00 to 0x7F</param>
-        static public void ChangeI2cAddress(I2cDevice i2cDevice, byte newAddress)
+        public static void ChangeI2cAddress(I2cDevice i2cDevice, byte newAddress)
         {
             if (newAddress > 0x7F)
                 throw new ArgumentException($"{nameof(newAddress)} can't exceed 0x7F");
+
             try
             {
                 i2cDevice.Write(new byte[] { (byte)Registers.I2C_SLAVE_DEVICE_ADDRESS, newAddress });
             }
             catch (IOException ex)
             {
-
                 throw new IOException($"Can't change I2C Address to {newAddress}", ex);
             }
         }
@@ -107,7 +107,7 @@ namespace Iot.Device.Vl53L0X
         /// takes a measurement.
         /// </summary>
         /// <param name="periodMilliseconds">The interval period between 2 measurements. Default is 0</param>
-        public void StartContinuousMeasurement(Int32 periodMilliseconds = 0)
+        public void StartContinuousMeasurement(int periodMilliseconds = 0)
         {
             // Initialize the measurement
             InitMeasurement();
@@ -118,7 +118,7 @@ namespace Iot.Device.Vl53L0X
                 var osc_calibrate_val = ReadUInt16((byte)Registers.OSC_CALIBRATE_VAL);
                 if (osc_calibrate_val != 0)
                     periodMilliseconds *= osc_calibrate_val;
-                WriteUInt32((byte)Registers.SYSTEM_INTERMEASUREMENT_PERIOD, (UInt32)periodMilliseconds);
+                WriteUInt32((byte)Registers.SYSTEM_INTERMEASUREMENT_PERIOD, (uint)periodMilliseconds);
                 WriteRegister((byte)Registers.SYSRANGE_START, 0x04);
             }
             else
@@ -132,7 +132,7 @@ namespace Iot.Device.Vl53L0X
         /// Reads the measurement when the mode is set to continuious. 
         /// </summary>
         /// <returns>The range in millimeters, a maximum value is returned depending on the various settings</returns>
-        private UInt16 ReadContinuousMeasrurementMillimeters()
+        private ushort ReadContinuousMeasrurementMillimeters()
         {
             Stopwatch stopWatch = Stopwatch.StartNew();
             var expirationMilliseconds = stopWatch.ElapsedMilliseconds + _operationTimeout;
@@ -151,7 +151,7 @@ namespace Iot.Device.Vl53L0X
         /// <summary>
         /// Get the distance depending on the measurement mode
         /// </summary>
-        public UInt16 Distance => MeasurementMode == MeasurementMode.Continuous ? DistanceContinousMillimeters : GetDistanceSingleMillimeters(true);
+        public ushort Distance => MeasurementMode == MeasurementMode.Continuous ? DistanceContinous : GetDistanceOnce(true);
 
         /// <summary>
         /// Get/Set the measurement mode used to return the distance property
@@ -162,7 +162,8 @@ namespace Iot.Device.Vl53L0X
         /// Get a distance in millimeters from the continous measurement feature.
         /// It is recommended to used this method to gethigher quality measurements
         /// </summary>
-        public UInt16 DistanceContinousMillimeters
+        /// <returns>Returns the distance in millimeters, if any error, returns the maximum range so 8190</returns>
+        public ushort DistanceContinous
         {
             get
             {
@@ -178,12 +179,12 @@ namespace Iot.Device.Vl53L0X
         /// Get a distance in millimeters
         /// </summary>
         /// <param name="multipleReads">True if you want multiple try to get a clean value</param>
-        /// <returns>Returns the maximum range so 8190</returns>
-        public UInt16 GetDistanceSingleMillimeters(bool multipleReads = false)
+        /// <returns>Returns the distance in millimeters, if any error, returns the maximum range so 8190</returns>
+        public ushort GetDistanceOnce(bool multipleReads = false)
         {
             try
             {
-                var value = DistanceSingleMeasurementMillimeters;
+                var value = DistanceSingleMeasurement;
                 // Sensor can read maximum range while there is an object in front
                 // Make an average with a few reading withg the good readings
                 // Catch any exception and return the maximum range
@@ -193,12 +194,12 @@ namespace Iot.Device.Vl53L0X
                 {
                     for (int i = 0; i < MaxTryReadSingle; i++)
                     {
-                        if (value < (UInt16)OperationRange.OutOfRange)
+                        if (value < (ushort)OperationRange.OutOfRange)
                         {
                             goodCount++;
                             average += value;
                         }
-                        value = DistanceSingleMeasurementMillimeters;
+                        value = DistanceSingleMeasurement;
                     }
 
                 }
@@ -206,11 +207,11 @@ namespace Iot.Device.Vl53L0X
                 {
                     return value;
                 }
-                return goodCount != 0 ? (UInt16)(average / goodCount) : (UInt16)OperationRange.OutOfRange;
+                return goodCount != 0 ? (ushort)(average / goodCount) : (ushort)OperationRange.OutOfRange;
             }
             catch (IOException)
             {
-                return (UInt16)OperationRange.OutOfRange;
+                return (ushort)OperationRange.OutOfRange;
             }
 
         }
@@ -219,7 +220,7 @@ namespace Iot.Device.Vl53L0X
         /// Performs a single-shot range measurement and returns the reading in millimeters 
         /// </summary>
         /// <returns>Returns distance in millimeters</returns>
-        public UInt16 DistanceSingleMeasurementMillimeters
+        public ushort DistanceSingleMeasurement
         {
             get
             {
@@ -232,7 +233,7 @@ namespace Iot.Device.Vl53L0X
                 while ((ReadByte((byte)Registers.SYSRANGE_START) & 0x01) == 0x01)
                 {
                     if (stopWatch.ElapsedMilliseconds > expirationMilliseconds)
-                        throw new IOException($"{nameof(DistanceSingleMeasurementMillimeters)} timeout error");
+                        throw new IOException($"{nameof(DistanceSingleMeasurement)} timeout error");
                 }
                 return ReadContinuousMeasrurementMillimeters();
             }
@@ -248,7 +249,7 @@ namespace Iot.Device.Vl53L0X
         /// based on official API
         /// </summary>
         /// <param name="type">The type of VCSEL</param>
-        /// <param name="periodPclks">The period paert of the supported periods. Be aware periods are a bit different depending on the VCSEL you are targetting.</param>
+        /// <param name="periodPclks">The period part of the supported periods. Be aware periods are a bit different depending on the VCSEL you are targetting.</param>
         /// <returns></returns>
         public bool SetVcselPulsePeriod(VcselType type, PeriodPulse periodPclks)
         {
@@ -284,7 +285,7 @@ namespace Iot.Device.Vl53L0X
 
                     // update timeouts
                     var newPreRangeTimeoutMclks = TimeoutMicrosecondsToMclks(timeouts.PreRangeMicroseconds, (byte)periodPclks);
-                    WriteUInt16((byte)Registers.PRE_RANGE_CONFIG_TIMEOUT_MACROP_HI, (UInt16)EncodeTimeout(newPreRangeTimeoutMclks));
+                    WriteUInt16((byte)Registers.PRE_RANGE_CONFIG_TIMEOUT_MACROP_HI, (ushort)EncodeTimeout(newPreRangeTimeoutMclks));
                     var newMsrcTimeoutMclks = TimeoutMicrosecondsToMclks(timeouts.MsrcDssTccMicroseconds, (byte)periodPclks);
                     if (newMsrcTimeoutMclks > 256)
                         WriteRegister((byte)Registers.MSRC_CONFIG_TIMEOUT_MACROP, 255);
@@ -346,7 +347,7 @@ namespace Iot.Device.Vl53L0X
                     {
                         newFinalRangeTimeoutMclks += timeouts.PreRangeMclks;
                     }
-                    WriteUInt16((byte)Registers.FINAL_RANGE_CONFIG_TIMEOUT_MACROP_HI, (UInt16)EncodeTimeout(newFinalRangeTimeoutMclks));
+                    WriteUInt16((byte)Registers.FINAL_RANGE_CONFIG_TIMEOUT_MACROP_HI, (ushort)EncodeTimeout(newFinalRangeTimeoutMclks));
                     break;
                 default:
                     return false;
@@ -643,7 +644,7 @@ namespace Iot.Device.Vl53L0X
             return ReadByte((byte)Registers.DEVICE_INFO_READING);
         }
 
-        private UInt32 GetSignalRate()
+        private uint GetSignalRate()
         {
             WriteRegister((byte)Registers.GET_INFO_DEVICE, (byte)(InfoDevice.SignalRate1));
             ReadStrobe();
@@ -656,7 +657,7 @@ namespace Iot.Device.Vl53L0X
             return SignalRateMeasFixed1104_400_mm;
         }
 
-        private UInt32 GetDistanceFixed()
+        private uint GetDistanceFixed()
         {
             WriteRegister((byte)Registers.GET_INFO_DEVICE, (byte)(InfoDevice.DistanceFixed1));
             ReadStrobe();
@@ -785,7 +786,7 @@ namespace Iot.Device.Vl53L0X
         /// Get the measurement timing budget in microseconds. Based on official API
         /// </summary>
         /// <returns>The measurement timing budget in microseconds</returns>
-        private UInt32 GetMeasurementTimingBudget()
+        private uint GetMeasurementTimingBudget()
         {
             // Note that this is different than the value in SetMEasurementTimingBudget
             // This is setup like this in the API
@@ -798,7 +799,7 @@ namespace Iot.Device.Vl53L0X
             const int FinalRangeOverhead = 550;
 
             // "Start and end overhead times always present"
-            UInt32 budget_us = StartOverhead + EndOverhead;
+            uint budget_us = StartOverhead + EndOverhead;
 
             var enables = GetSequenceStepEnables();
             var timeouts = GetSequenceStepTimeouts(enables.PreRange);
@@ -833,7 +834,7 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         /// <param name="budgetMicroseconds">Take the exisitng measurement budget to calculate the new one</param>
         /// <returns>True in case all goes right</returns>
-        private bool SetMeasurementTimingBudget(UInt32 budgetMicroseconds)
+        private bool SetMeasurementTimingBudget(uint budgetMicroseconds)
         {
             // note that this is different than the value in GetMeasurementTimingBudget function
             const int StartOverhead = 1320;
@@ -849,7 +850,7 @@ namespace Iot.Device.Vl53L0X
             if (budgetMicroseconds < MinTimingBudget)
                 return false;
 
-            UInt32 used_budget_us = StartOverhead + EndOverhead;
+            uint used_budget_us = StartOverhead + EndOverhead;
 
             // Get the enablers and timeouts
             var enables = GetSequenceStepEnables();
@@ -884,19 +885,19 @@ namespace Iot.Device.Vl53L0X
                 if (used_budget_us > budgetMicroseconds)
                     return false;
 
-                UInt32 final_range_timeout_us = (UInt32)(budgetMicroseconds - used_budget_us);
+                uint final_range_timeout_us = (uint)(budgetMicroseconds - used_budget_us);
 
                 // For the final range timeout, the pre-range timeout
                 // must be added. To do this both final and pre-range
                 // timeouts must be expressed in macro periods MClks
                 // because they have different vcsel periods.
-                UInt32 final_range_timeout_mclks = TimeoutMicrosecondsToMclks(final_range_timeout_us, timeouts.FinalRangeVcselPeriodPclks);
+                uint final_range_timeout_mclks = TimeoutMicrosecondsToMclks(final_range_timeout_us, timeouts.FinalRangeVcselPeriodPclks);
 
                 if (enables.PreRange)
                     final_range_timeout_mclks += timeouts.PreRangeMclks;
 
                 // Finally write the new timing budget
-                WriteUInt16((byte)Registers.FINAL_RANGE_CONFIG_TIMEOUT_MACROP_HI, (UInt16)EncodeTimeout(final_range_timeout_mclks));
+                WriteUInt16((byte)Registers.FINAL_RANGE_CONFIG_TIMEOUT_MACROP_HI, (ushort)EncodeTimeout(final_range_timeout_mclks));
 
                 // Store for internal reuse if any change require to recalculate it again
                 _measurementTimingBudgetMicrosecond = budgetMicroseconds;
@@ -929,7 +930,7 @@ namespace Iot.Device.Vl53L0X
         {
             StepTimeouts sequence = new StepTimeouts();
             sequence.PreRangeVcselPeriodPclks = GetVcselPulsePeriod(VcselType.VcselPeriodPreRange);
-            sequence.MsrcDssTccMclks = (UInt32)(ReadByte((byte)Registers.MSRC_CONFIG_TIMEOUT_MACROP) + 1);
+            sequence.MsrcDssTccMclks = (uint)(ReadByte((byte)Registers.MSRC_CONFIG_TIMEOUT_MACROP) + 1);
             sequence.MsrcDssTccMicroseconds = TimeoutMclksToMicroseconds(sequence.MsrcDssTccMclks, sequence.PreRangeVcselPeriodPclks);
             sequence.PreRangeMclks = DecodeTimeout(ReadUInt16((byte)Registers.PRE_RANGE_CONFIG_TIMEOUT_MACROP_HI));
             sequence.PreRangeMicroseconds = TimeoutMclksToMicroseconds(sequence.PreRangeMclks, sequence.PreRangeVcselPeriodPclks);
@@ -949,10 +950,10 @@ namespace Iot.Device.Vl53L0X
         /// <param name="timeoutPeriodMclks"></param>
         /// <param name="vcselPeriodPclks"></param>
         /// <returns></returns>
-        private UInt32 TimeoutMclksToMicroseconds(UInt32 timeoutPeriodMclks, byte vcselPeriodPclks)
+        private uint TimeoutMclksToMicroseconds(uint timeoutPeriodMclks, byte vcselPeriodPclks)
         {
             var macroPeriodNanoseconds = CalcMacroPeriod(vcselPeriodPclks);
-            return (UInt32)(((timeoutPeriodMclks * macroPeriodNanoseconds) + (macroPeriodNanoseconds / 2)) / 1000);
+            return (uint)(((timeoutPeriodMclks * macroPeriodNanoseconds) + (macroPeriodNanoseconds / 2)) / 1000);
         }
 
         /// <summary>
@@ -961,10 +962,10 @@ namespace Iot.Device.Vl53L0X
         /// <param name="timeoutPeriodMicroseconds">The timeout period in microseconds</param>
         /// <param name="vcselPeriodPclks">The VCSEL period in PCLKs</param>
         /// <returns>Returns the converted timeout</returns>
-        private UInt32 TimeoutMicrosecondsToMclks(UInt32 timeoutPeriodMicroseconds, byte vcselPeriodPclks)
+        private uint TimeoutMicrosecondsToMclks(uint timeoutPeriodMicroseconds, byte vcselPeriodPclks)
         {
             var macroPeriodNanoseconds = CalcMacroPeriod(vcselPeriodPclks);
-            return (UInt32)(((timeoutPeriodMicroseconds * 1000) + (macroPeriodNanoseconds / 2)) / macroPeriodNanoseconds);
+            return (uint)(((timeoutPeriodMicroseconds * 1000) + (macroPeriodNanoseconds / 2)) / macroPeriodNanoseconds);
         }
 
         /// <summary>
@@ -984,7 +985,6 @@ namespace Iot.Device.Vl53L0X
                     // Should not arrive
                     return byte.MaxValue;
             }
-
         }
 
         /// <summary>
@@ -1000,7 +1000,7 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         /// <param name="valueToDecode"></param>
         /// <returns>The decoded value</returns>
-        private UInt32 DecodeTimeout(int valueToDecode) => (UInt32)(((valueToDecode & 0x00FF) << ((valueToDecode & 0xFF00) >> 8)) + 1);
+        private uint DecodeTimeout(int valueToDecode) => (uint)(((valueToDecode & 0x00FF) << ((valueToDecode & 0xFF00) >> 8)) + 1);
 
         /// <summary>
         /// Encode sequence step timeout register value from timeout in MCLKs 
@@ -1009,10 +1009,10 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         /// <param name="timeoutMclks">The timeout in MCLKs to encode</param>
         /// <returns>The encoded value</returns>
-        private UInt32 EncodeTimeout(UInt32 timeoutMclks)
+        private uint EncodeTimeout(uint timeoutMclks)
         {
-            UInt32 ls_byte = 0;
-            UInt32 ms_byte = 0;
+            uint ls_byte = 0;
+            uint ms_byte = 0;
 
             if (timeoutMclks > 0)
             {
@@ -1042,9 +1042,9 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         /// <param name="vcselPeriodPclks">the VCSEL perios in PCKLs</param>
         /// <returns>The macro period in nanoseconds</returns>
-        private UInt32 CalcMacroPeriod(UInt32 vcselPeriodPclks)
+        private uint CalcMacroPeriod(uint vcselPeriodPclks)
         {
-            return (UInt32)((((2304 * vcselPeriodPclks * 1655) + 500) / 1000));
+            return (uint)((((2304 * vcselPeriodPclks * 1655) + 500) / 1000));
         }
 
         /// <summary>
@@ -1058,7 +1058,7 @@ namespace Iot.Device.Vl53L0X
                 throw new ArgumentException($"{nameof(limitMcps)} can't be negative and more than 511.99");
 
             // Q9.7 fixed point format (9 integer bits, 7 fractional bits)
-            WriteInt16((byte)Registers.FINAL_RANGE_CONFIG_MIN_COUNT_RATE_RTN_LIMIT, (Int16)(limitMcps * (1 << 7)));
+            WriteUInt16((byte)Registers.FINAL_RANGE_CONFIG_MIN_COUNT_RATE_RTN_LIMIT, (ushort)(limitMcps * (1 << 7)));
         }
 
         /// <summary>
@@ -1085,6 +1085,7 @@ namespace Iot.Device.Vl53L0X
             WriteRegister((byte)Registers.SYSRANGE_START, 0x00);
             return true;
         }
+
         public void Dispose()
         {
             if (_autoDisposable)
@@ -1112,7 +1113,7 @@ namespace Iot.Device.Vl53L0X
             return BinaryPrimitives.ReadInt16BigEndian(outArray);
         }
 
-        private UInt16 ReadUInt16(byte reg)
+        private ushort ReadUInt16(byte reg)
         {
             Span<byte> outArray = stackalloc byte[2];
             _i2cDevice.WriteByte(reg);
@@ -1120,7 +1121,7 @@ namespace Iot.Device.Vl53L0X
             return BinaryPrimitives.ReadUInt16BigEndian(outArray);
         }
 
-        private UInt32 ReadUIn32(byte reg)
+        private uint ReadUIn32(byte reg)
         {
             Span<byte> outArray = stackalloc byte[4];
             _i2cDevice.WriteByte(reg);
@@ -1128,7 +1129,7 @@ namespace Iot.Device.Vl53L0X
             return BinaryPrimitives.ReadUInt32BigEndian(outArray);
         }
 
-        private void WriteInt16(byte reg, Int16 data)
+        private void WriteInt16(byte reg, short data)
         {
             Span<byte> outArray = stackalloc byte[3];
             outArray[0] = reg;
@@ -1136,7 +1137,7 @@ namespace Iot.Device.Vl53L0X
             _i2cDevice.Write(outArray);
         }
 
-        private void WriteUInt16(byte reg, UInt16 data)
+        private void WriteUInt16(byte reg, ushort data)
         {
             Span<byte> outArray = stackalloc byte[3];
             outArray[0] = reg;
@@ -1144,7 +1145,7 @@ namespace Iot.Device.Vl53L0X
             _i2cDevice.Write(outArray);
         }
 
-        private void WriteInt32(byte reg, Int32 data)
+        private void WriteInt32(byte reg, int data)
         {
             Span<byte> outArray = stackalloc byte[5];
             outArray[0] = reg;
@@ -1152,7 +1153,7 @@ namespace Iot.Device.Vl53L0X
             _i2cDevice.Write(outArray);
         }
 
-        private void WriteUInt32(byte reg, UInt32 data)
+        private void WriteUInt32(byte reg, uint data)
         {
             Span<byte> outArray = stackalloc byte[5];
             outArray[0] = reg;
