@@ -12,7 +12,7 @@ namespace System.Device.Gpio.Drivers
     public class LibGpiodDriver : UnixDriver
     {
         private SafeChipHandle _chip;
-        private bool _gpiochip_seted = false;
+        private bool _gpioChipIsSet = false;
 
         private Dictionary<int, SafeLineHandle> _pinNumberToSafeLineHandle;
 
@@ -27,9 +27,9 @@ namespace System.Device.Gpio.Drivers
                 SetDefaultGpioChip(0);
         }
 
-        protected internal override void SetDefaultGpioChip(int devGpioChip)
+        protected internal override void SetDefaultGpioChip(int gpioChip)
         {
-            if (!_gpiochip_seted)
+            if (!_gpioChipIsSet)
             {
                 SafeChipIteratorHandle iterator = null;
                 try
@@ -46,7 +46,7 @@ namespace System.Device.Gpio.Drivers
                 }
 
                 // here we are getting the default controller /dev/gpiochipX
-                for (int i = 0; i <= devGpioChip; i++)
+                for (int i = 0; i <= gpioChip; i++)
                 {
                     _chip = Interop.GetNextChipFromChipIterator(iterator);
                     if (_chip == null)
@@ -55,12 +55,12 @@ namespace System.Device.Gpio.Drivers
                     }
                 }
 
-                _gpiochip_seted = true;
+                _gpioChipIsSet = true;
                 _pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
             }
             else
             {
-                throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.GpioChipControllerAlreadySeted);
+                throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.GpioChipControllerAlreadySet);
             }
         }
 
