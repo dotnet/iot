@@ -6,6 +6,7 @@ namespace System.Device.Gpio
 {
     public interface IGpioController : IDisposable
     {
+		void SetDefaultGpioChip(int devGpioChip);
         void OpenPin(int pinNumber, PinMode mode);
         void ClosePin(int pinNumber);
         void SetPinMode(int pinNumber, PinMode mode);
