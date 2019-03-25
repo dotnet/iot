@@ -12,6 +12,7 @@ namespace System.Device.Gpio.Drivers
     public class LibGpiodDriver : UnixDriver
     {
         private SafeChipHandle _chip;
+		private bool _gpiochip_seted = false;
 
         private Dictionary<int, SafeLineHandle> _pinNumberToSafeLineHandle;
 
@@ -21,28 +22,47 @@ namespace System.Device.Gpio.Drivers
 
         public LibGpiodDriver()
         {
-            SafeChipIteratorHandle iterator = null;
-            try
-            {
-                iterator = Interop.GetChipIterator();
-                if (iterator == null)
-                {
-                    throw ExceptionHelper.GetIOException(ExceptionResource.NoChipIteratorFound, Marshal.GetLastWin32Error());
-                }
-            }
-            catch (DllNotFoundException)
-            {
-                throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodNotInstalled);
-            }
-            
-            _chip = Interop.GetNextChipFromChipIterator(iterator);
-            if (_chip == null)
-            {
-                throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
-            }
-
-            _pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
+			// set /dev/gpiochip0 as default if hardware has only one GPIO bank
+			if (Interop.GetNumberOfChips() == 1)
+            	SetDefaultGpioChip(0);
         }
+
+		protected internal override void SetDefaultGpioChip(int devGpioChip)
+		{
+			if (!_gpiochip_seted) 
+			{
+				SafeChipIteratorHandle iterator = null;
+				try
+				{
+					iterator = Interop.GetChipIterator();
+					if (iterator == null)
+					{
+						throw ExceptionHelper.GetIOException(ExceptionResource.NoChipIteratorFound, Marshal.GetLastWin32Error());
+					}
+				}
+				catch (DllNotFoundException)
+				{
+					throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodNotInstalled);
+				}
+
+				// here we are getting the default controller /dev/gpiochipX
+				for (int i = 0; i <= devGpioChip; i++) 
+				{
+					_chip = Interop.GetNextChipFromChipIterator(iterator);
+					if (_chip == null)
+					{
+						throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
+					}
+				}
+
+				_gpiochip_seted = true;
+				_pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
+			}
+			else 
+			{
+				throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.GpioChipControllerAlreadySeted);
+			}
+		}
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
