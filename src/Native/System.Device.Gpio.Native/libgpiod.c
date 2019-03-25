@@ -187,3 +187,26 @@ extern int ReadEventForLine(struct gpiod_line *line)
 	}
 	return response;
 }
+
+/**
+ * @brief List all GPIO chips.
+ * @return The number of GPIO chips, -1 if an error occurred.
+ */
+extern int GetNumberOfChips()
+{
+	struct gpiod_chip_iter *iter;
+	struct gpiod_chip *chip;
+	int sum = 0;
+
+	iter = gpiod_chip_iter_new();
+	if (!iter)
+		return -1;
+	
+	gpiod_foreach_chip(iter, chip) {
+		sum++;
+	}
+
+	gpiod_chip_iter_free(iter);
+
+	return sum;
+}
