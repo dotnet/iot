@@ -56,10 +56,10 @@ namespace System.Device.Gpio
             return (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : _driver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
         }
 
-		public void SetDefaultGpioChip(int devGpioChip)
-		{
-			_driver.SetDefaultGpioChip(devGpioChip);
-		}
+        public void SetDefaultGpioChip(int devGpioChip)
+        {
+            _driver.SetDefaultGpioChip(devGpioChip);
+        }
 
         /// <summary>
         /// Opens a pin in order for it to be ready to use.

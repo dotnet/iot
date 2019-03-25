@@ -194,19 +194,20 @@ extern int ReadEventForLine(struct gpiod_line *line)
  */
 extern int GetNumberOfChips()
 {
-	struct gpiod_chip_iter *iter;
-	struct gpiod_chip *chip;
-	int sum = 0;
+    struct gpiod_chip_iter *iter;
+    struct gpiod_chip *chip;
+    int sum = 0;
 
-	iter = gpiod_chip_iter_new();
-	if (!iter)
-		return -1;
-	
-	gpiod_foreach_chip(iter, chip) {
-		sum++;
-	}
+    iter = gpiod_chip_iter_new();
+    if (!iter)
+        return -1;
 
-	gpiod_chip_iter_free(iter);
+    gpiod_foreach_chip(iter, chip) 
+    {
+        sum++;
+    }
 
-	return sum;
+    gpiod_chip_iter_free(iter);
+
+    return sum;
 }
