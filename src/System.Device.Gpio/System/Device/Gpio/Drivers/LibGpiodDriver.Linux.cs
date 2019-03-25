@@ -31,28 +31,10 @@ namespace System.Device.Gpio.Drivers
         {
             if (!_gpioChipIsSet)
             {
-                SafeChipIteratorHandle iterator = null;
-                try
+                _chip = Interop.OpenChipByNumber(gpioChip);
+                if (_chip == null)
                 {
-                    iterator = Interop.GetChipIterator();
-                    if (iterator == null)
-                    {
-                        throw ExceptionHelper.GetIOException(ExceptionResource.NoChipIteratorFound, Marshal.GetLastWin32Error());
-                    }
-                }
-                catch (DllNotFoundException)
-                {
-                    throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodNotInstalled);
-                }
-
-                // here we are getting the default controller /dev/gpiochipX
-                for (int i = 0; i <= gpioChip; i++)
-                {
-                    _chip = Interop.GetNextChipFromChipIterator(iterator);
-                    if (_chip == null)
-                    {
-                        throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
-                    }
+                    throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
                 }
 
                 _gpioChipIsSet = true;

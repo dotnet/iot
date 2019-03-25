@@ -152,4 +152,11 @@ internal partial class Interop
     /// <returns>The number of GPIO chips, -1 if an error occurred.</returns>
     [DllImport(LibgpiodLibrary, SetLastError = true)]
     internal static extern int GetNumberOfChips();
+
+    /// <summary>
+    /// Open a gpiochip by number.
+    /// </summary>
+    /// <returns>GPIO chip pointer handle or NULL if an error occurred.</returns>
+    [DllImport(LibgpiodLibrary, SetLastError = true)]
+    internal static extern SafeChipHandle OpenChipByNumber(int number);
 }

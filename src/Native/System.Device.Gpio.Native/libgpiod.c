@@ -211,3 +211,12 @@ extern int GetNumberOfChips()
 
     return sum;
 }
+
+/**
+ * @brief Open a gpiochip by number.
+ * @return GPIO chip pointer handle or NULL if an error occurred.
+ */
+extern struct gpiod_chip * OpenChipByNumber(int number)
+{
+    return gpiod_chip_open_by_number(number);
+}
