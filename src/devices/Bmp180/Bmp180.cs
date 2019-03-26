@@ -46,13 +46,7 @@ namespace Iot.Device.Bmp180
         /// </returns>
         public Temperature ReadTemperature()
         {
-            //Gets the compensated temperature in degrees celsius
-            short UT = ReadRawTemperature();
-
-            // Calculations below are taken straight from section 3.5 of the datasheet.
-            int X1 = (UT - _calibrationData.AC6) * _calibrationData.AC5 / (1 << 15);
-            int X2 = _calibrationData.MC * (1 << 11) / (X1 + _calibrationData.MD);
-            int B5 = (X1 + X2);
+            int B5 = CalculateTrueTemperature();
             int T = (B5 + 8) / (1 << 4);
             
             return Temperature.FromCelsius((double)T/10);            
@@ -66,15 +60,8 @@ namespace Iot.Device.Bmp180
         /// </returns>
         public int ReadPressure()
         {
-            //Gets the compensated pressure in Pascals
-            short UT = ReadRawTemperature();
+            int B5 = CalculateTrueTemperature();
             int UP = ReadRawPressure();
-
-            // Calculations below are taken straight from section 3.5 of the datasheet.
-            // Calculate true temperature coefficient B5.
-            int X1 = (UT - (short)_calibrationData.AC6) * (short)_calibrationData.AC5 / (1 << 15);
-            int X2 = (short)_calibrationData.MC * (1 << 11) / (X1 + (short)_calibrationData.MD);
-            int B5 = (X1 + X2);
 
             // Pressure Calculations
             int B6 = B5 - 4000;
@@ -141,6 +128,23 @@ namespace Iot.Device.Bmp180
         }
 
         /// <summary>
+        ///  Calculate true temperature
+        /// </summary>
+        /// <returns>
+        ///  Coefficient B5
+        /// </returns>
+        private int CalculateTrueTemperature()
+        {
+            // Calculations below are taken straight from section 3.5 of the datasheet.
+            short UT = ReadRawTemperature();
+            int X1 = (UT - _calibrationData.AC6) * _calibrationData.AC5 / (1 << 15);
+            int X2 = _calibrationData.MC * (1 << 11) / (X1 + _calibrationData.MD);
+            int B5 = (X1 + X2);
+            
+            return B5;
+        }
+
+        /// <summary>
         ///  Reads raw temperatue from the sensor
         /// </summary>
         /// <returns>
@@ -156,7 +160,6 @@ namespace Iot.Device.Bmp180
             
             return raw;
         }
-
 
         /// <summary>
         ///  Reads raw pressure from the sensor
