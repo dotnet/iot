@@ -13,7 +13,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         /// programs the oscillator frequency Fosc that is the source of CLK if CLS pin is pulled high.
         /// </summary>
         /// <param name="displayClockDivideRatio">Display clock divide ratio with a range of 0-15.</param>
-        /// <param name="oscillatorFrequency">Oscillator frequency with a range of 0-15.</param>
+        /// <param name="oscillatorFrequency">Oscillator frequency with a range of 0-15 in Kilohertz.</param>
         public SetDisplayClockDivideRatioOscillatorFrequency(byte displayClockDivideRatio = 0x00, byte oscillatorFrequency = 0x00)
         {
             if (displayClockDivideRatio > 0x0F)

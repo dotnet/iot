@@ -6,7 +6,7 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
-     public class ContinuousVerticalAndHorizontalScrollSetup : ISsd1306Command
+    public class ContinuousVerticalAndHorizontalScrollSetup : ISsd1306Command
     {
         /// <summary>
         /// This command consists of 6 consecutive bytes to set up the continuous vertical

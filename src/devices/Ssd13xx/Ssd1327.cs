@@ -13,6 +13,7 @@ namespace Iot.Device.Ssd13xx
     {
         private const byte Command_Mode = 0x80;
         private const byte Data_Mode = 0x40;
+        private const int CleaningBufferSize = 48 * 96;
 
         /// <summary>
         /// Initializes new instance of Ssd1327 device that will communicate using I2C bus.
@@ -38,7 +39,7 @@ namespace Iot.Device.Ssd13xx
             SendCommand(new SetDisplayOff());
             SetColumnAddress();
             SetRowAddress();
-            byte[] data = new byte[48 * 96];
+            byte[] data = new byte[CleaningBufferSize];
             SendData(data);
             SendCommand(new SetDisplayOn());
         }

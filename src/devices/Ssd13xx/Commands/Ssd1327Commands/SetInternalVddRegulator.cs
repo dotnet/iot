@@ -11,8 +11,10 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         /// <summary>
         /// This command is used to enable internal VDD regulator. 
         /// </summary>
-        public SetInternalVddRegulator()
+        /// <param name="enable">Represents if internal VDD have to be enabled.</param>
+        public SetInternalVddRegulator(bool enable)
         {
+            UseInternalVdd = (byte)(enable ? 0b_0000_0001 : 0b_0000_0000);
         }
 
         /// <summary>
@@ -21,12 +23,17 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         public byte Id => 0xAB;
 
         /// <summary>
+        /// The value that represent if internal or external vdd should be used.
+        /// </summary>
+        public byte UseInternalVdd { get; }
+
+        /// <summary>
         /// Gets the bytes that represent the command.
         /// </summary>
         /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
-            return new byte[] { Id, 0b_0000_0001 };
+            return new byte[] { Id, UseInternalVdd };
         }
     }
 }

@@ -15,27 +15,32 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
             bool columnAddressRemap = false,
             bool nibbleRemap = true,
             bool verticalMode = true,
-            bool COMRemap = false,
-            bool COMSplitOddEven = true)
+            bool comRemap = false,
+            bool comSplitOddEven = true)
         {
             config = 0b_0000_0000;
-            if (columnAddressRemap) {
+            if (columnAddressRemap)
+            {
                 config |= 0b_0000_0001;
             }
             
-            if (nibbleRemap) {
+            if (nibbleRemap)
+            {
                 config |= 0b_0000_0010;
             }
 
-            if (verticalMode) {
+            if (verticalMode)
+            {
                 config |= 0b_0000_0100;
             }
 
-            if (COMRemap) {
+            if (comRemap)
+            {
                 config |= 0b_0001_0000;
             }
 
-            if (COMSplitOddEven) {
+            if (comSplitOddEven)
+            {
                 config |= 0b_0100_0000;
             }
         }
