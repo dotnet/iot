@@ -6,19 +6,19 @@ namespace Iot.Device.Bmp180
 {
     internal class CalibrationData
     {
-        public short AC1 {get;set;}
-        public short AC2 {get;set;}
-        public short AC3 {get;set;}
-        public ushort AC4 {get;set;}
-        public ushort AC5 {get;set;}
-        public ushort AC6 {get;set;}
+        public short AC1 { get; set; }
+        public short AC2 { get; set; }
+        public short AC3 { get; set; }
+        public ushort AC4 { get; set; }
+        public ushort AC5 { get; set; }
+        public ushort AC6 { get; set; }
 
-        public short B1 {get;set;}
-        public short B2 {get;set;}
+        public short B1 { get; set; }
+        public short B2 { get; set; }
 
-        public short MB {get;set;}
-        public short MC {get;set;}
-        public short MD {get;set;}
+        public short MB { get; set; }
+        public short MC { get; set; }
+        public short MD { get; set; }
 
         internal void ReadFromDevice(Bmp180 bmp180)
         {
