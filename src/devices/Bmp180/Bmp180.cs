@@ -65,24 +65,24 @@ namespace Iot.Device.Bmp180
 
             // Pressure Calculations
             int B6 = B5 - 4000;
-            X1 = ((short)_calibrationData.B2 * (B6 * B6 / (1 << 12))) / (1 << 11);
-            X2 = (short)_calibrationData.AC2 * B6 / (1 << 11);
+            int X1 = ((short)_calibrationData.B2 * (B6 * B6 / (1 << 12))) / (1 << 11);
+            int X2 = (short)_calibrationData.AC2 * B6 / (1 << 11);
             int X3 = X1 + X2;
             int B3 = ((((short)_calibrationData.AC1 * 4 + X3) << (short)Sampling.Standard) + 2) / 4;
             X1 = (short)_calibrationData.AC3 * B6 / (1 << 13);
             X2 = ((short)_calibrationData.B1 * (B6 * B6 / (1 << 12))) / (1 << 16);
             X3 = ((X1 + X2) + 2) / (1 << 2);
             int B4 = _calibrationData.AC4 * (X3 + 32768) / (1 << 15);
-            int B7 = (UP - B3) * (50000 >> (short)Sampling.Standard);
+            uint B7 = (uint)(UP - B3) * (50000 >> (short)Sampling.Standard);
 
             int p = 0;
-            if((uint)B7 < 0x80000000)
+            if(B7 < 0x80000000)
             {                
-                p = (int)(((long)B7 * 2) / B4);                
+                p = (int)((B7 * 2) / B4);                
             }
             else
             {               
-                p = (int)(((long)B7 / B4) * 2);             
+                p = (int)((B7 / B4) * 2);             
             }
             
             X1 = (p / (1 << 8)) * (p / (1 << 8));
@@ -102,7 +102,7 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Height in meters from the sensor
         /// </returns>
-        public double ReadAltitude(double seaLevelPressure)
+        public double ReadAltitude(double seaLevelPressure = 101325.0)
         {
             double pressure = (double)ReadPressure();
             double altitude = 44330.0 * (1.0 - Math.Pow((pressure / seaLevelPressure), (1.0 / 5.255)));
