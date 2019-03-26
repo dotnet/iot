@@ -177,7 +177,8 @@ namespace Iot.Device.Bmp180
             if (_mode.Equals(Sampling.UltraLowPower))
             {
                 Thread.Sleep(5);
-            }else if (_mode.Equals(Sampling.HighResolution))
+            }
+            else if (_mode.Equals(Sampling.HighResolution))
             {
                 Thread.Sleep(14);
             }
