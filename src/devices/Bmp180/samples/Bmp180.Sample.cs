@@ -19,8 +19,6 @@ namespace Iot.Device.Bmp180.Samples
 
             //bus id on the raspberry pi 3
             const int busId = 1;
-            //set this to the current sea level pressure in the area for correct altitude readings
-            const double defaultSeaLevelPressure = 1033.00;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bmp180.DefaultI2cAddress);
             var i2cDevice = new UnixI2cDevice(i2cSettings);
@@ -33,11 +31,11 @@ namespace Iot.Device.Bmp180.Samples
 
                 //read values
                 Temperature tempValue = i2cBmp280.ReadTemperature();
-                Console.WriteLine($"Temperature {tempValue}");                
+                Console.WriteLine($"Temperature {tempValue.Celsius} °C");                
                 double preValue = i2cBmp280.ReadPressure();
-                Console.WriteLine($"Pressure {preValue}");
-                double altValue = i2cBmp280.ReadAltitude(defaultSeaLevelPressure);
-                Console.WriteLine($"Altitude {altValue:0.##}");
+                Console.WriteLine($"Pressure {preValue} Pa");
+                double altValue = i2cBmp280.ReadAltitude();
+                Console.WriteLine($"Altitude {altValue:0.##} m");
                 Thread.Sleep(1000);
 
                 //set higher sampling
@@ -45,11 +43,11 @@ namespace Iot.Device.Bmp180.Samples
 
                 //read values
                 tempValue = i2cBmp280.ReadTemperature();
-                Console.WriteLine($"Temperature {tempValue}");
+                Console.WriteLine($"Temperature {tempValue.Celsius} °C");
                 preValue = i2cBmp280.ReadPressure();
-                Console.WriteLine($"Pressure {preValue}");
-                altValue = i2cBmp280.ReadAltitude(defaultSeaLevelPressure);
-                Console.WriteLine($"Altitude {altValue:0.##}");                
+                Console.WriteLine($"Pressure {preValue} Pa");
+                altValue = i2cBmp280.ReadAltitude();
+                Console.WriteLine($"Altitude {altValue:0.##} m");                
             }
         }
     }
