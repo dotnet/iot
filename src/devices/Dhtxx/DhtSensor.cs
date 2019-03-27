@@ -23,10 +23,10 @@ namespace Iot.Device.DHTxx
         /// </summary>
         public const byte Dht12DefaultI2cAddress = 0x5C;
 
-        private byte[] _readBuff = new byte[5];
-
         // wait about 1 ms
         private readonly uint _loopCount = 10000;
+
+        private byte[] _readBuff = new byte[5];
 
         private readonly CommunicationProtocol _protocol;
         private readonly int _pin;
@@ -178,26 +178,10 @@ namespace Iot.Device.DHTxx
             _controller.SetPinMode(_pin, PinMode.InputPullUp);
 
             // DHT corresponding signal - LOW - about 80 microseconds
-            count = _loopCount;
-            while (_controller.Read(_pin) == PinValue.Low)
-            { 
-                if (count-- == 0)
-                {
-                    IsLastReadSuccessful = false;
-                    return IsLastReadSuccessful;
-                }
-            }
+            DelayHelper.DelayMicroseconds(80, true);
 
             // HIGH - about 80 microseconds
-            count = _loopCount;
-            while (_controller.Read(_pin) == PinValue.High)
-            {
-                if (count-- == 0)
-                {
-                    IsLastReadSuccessful = false;
-                    return IsLastReadSuccessful;
-                }
-            }
+            DelayHelper.DelayMicroseconds(80, true);
 
             // the read data contains 40 bits
             for (int i = 0; i < 40; i++)
