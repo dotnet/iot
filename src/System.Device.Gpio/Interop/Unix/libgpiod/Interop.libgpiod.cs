@@ -145,4 +145,11 @@ internal partial class Interop
     /// <returns>1 if rising edge event occured, 2 on falling edge, -1 on error.</returns>
     [DllImport(LibgpiodLibrary, SetLastError = true)]
     internal static extern int ReadEventForLine(SafeLineHandle line);
+
+    /// <summary>
+    /// Open a gpiochip by number.
+    /// </summary>
+    /// <returns>GPIO chip pointer handle or NULL if an error occurred.</returns>
+    [DllImport(LibgpiodLibrary, SetLastError = true)]
+    internal static extern SafeChipHandle OpenChipByNumber(int number);
 }
