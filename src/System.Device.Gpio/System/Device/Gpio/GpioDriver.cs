@@ -15,14 +15,6 @@ namespace System.Device.Gpio
         protected internal abstract int PinCount { get; }
 
         /// <summary>
-        /// Set the GPIO bank to be used /dev/gpiochip0 ... /dev/gpiochipX
-        /// </summary>
-        protected internal virtual void SetDefaultGpioChip(int devGpioChip) 
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Converts a board pin number to the driver's logical numbering scheme.
         /// </summary>
         /// <param name="pinNumber">The board pin number to convert.</param>

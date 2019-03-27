@@ -76,9 +76,6 @@ namespace System.Device.Gpio
                 case ExceptionResource.LibGpiodNotInstalled:
                     message = $"Libgpiod driver not installed. More information on: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/";
                     break;
-                case ExceptionResource.GpioChipControllerAlreadySet:
-                    message = $"GpioController Default gpiochip already set.";
-                    break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
                     break;
@@ -104,6 +101,5 @@ namespace System.Device.Gpio
         EventReadError,
         NotListeningForEventError,
         LibGpiodNotInstalled,
-        GpioChipControllerAlreadySet,
     }
 }

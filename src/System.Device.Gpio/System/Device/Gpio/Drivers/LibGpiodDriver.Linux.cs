@@ -20,29 +20,20 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override int PinCount => Interop.GetNumberOfLines(_chip);
 
-        public LibGpiodDriver()
+        public LibGpiodDriver(int gpioChip = 0)
         {
-            // set /dev/gpiochip0 as default if hardware has only one GPIO bank
-            if (Interop.GetNumberOfChips() == 1)
-                SetDefaultGpioChip(0);
-        }
-
-        protected internal override void SetDefaultGpioChip(int gpioChip)
-        {
-            if (!_gpioChipIsSet)
+            try
             {
                 _chip = Interop.OpenChipByNumber(gpioChip);
                 if (_chip == null)
                 {
                     throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
                 }
-
-                _gpioChipIsSet = true;
                 _pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
             }
-            else
+            catch (DllNotFoundException)
             {
-                throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.GpioChipControllerAlreadySet);
+                throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodNotInstalled);
             }
         }
 
