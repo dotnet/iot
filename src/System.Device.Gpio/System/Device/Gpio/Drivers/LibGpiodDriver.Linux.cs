@@ -12,7 +12,6 @@ namespace System.Device.Gpio.Drivers
     public class LibGpiodDriver : UnixDriver
     {
         private SafeChipHandle _chip;
-        private bool _gpioChipIsSet = false;
 
         private Dictionary<int, SafeLineHandle> _pinNumberToSafeLineHandle;
 
