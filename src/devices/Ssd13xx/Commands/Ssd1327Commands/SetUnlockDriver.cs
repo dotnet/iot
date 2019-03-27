@@ -10,7 +10,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         /// <summary>
         /// This command sets the display to be normal.
         /// </summary>
-        /// <param name="unlock">Represents if drived have to be unlocked.</param>
+        /// <param name="unlock">Represents if driver have to be unlocked.</param>
         public SetUnlockDriver(bool unlock)
         {
             SetUnlock = (byte)(unlock ? 0b_0001_0010 : 0b_0001_0110);
