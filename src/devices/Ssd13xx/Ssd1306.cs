@@ -39,7 +39,7 @@ namespace Iot.Device.Ssd13xx
         /// Send a command to the display controller.
         /// </summary>
         /// <param name="command">The command to send to the display controller.</param>
-        protected override void SendCommand(ICommand command)
+        private void SendCommand(ICommand command)
         {
             const int StackThreshold = 32;
             byte[] commandBytes = command.GetBytes();

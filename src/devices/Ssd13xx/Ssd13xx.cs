@@ -33,8 +33,6 @@ namespace Iot.Device.Ssd13xx
         /// Send a command to the display controller.
         /// </summary>
         /// <param name="command">The command to send to the display controller.</param>
-        protected abstract void SendCommand(ICommand command);
-
         public abstract void SendCommand(ISharedCommand command);
 
         /// <summary>

@@ -65,7 +65,7 @@ namespace Iot.Device.Ssd13xx
             SendCommand((ICommand)command);
         }
 
-        protected override void SendCommand(ICommand command)
+        private void SendCommand(ICommand command)
         {
             byte[] commandBytes = command.GetBytes();
 
