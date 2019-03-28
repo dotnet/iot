@@ -1,9 +1,27 @@
-﻿# Distance sensor sample (using HC-SR04)
+﻿# HC-SR04 - Samples
 
-This simple example shows how to use the HC-SR04 device binding with dotnet/iot.
+## Hardware Required
+* HC-SR04
+* Male/Female Jumper Wires
 
-## Breadboard layout
-
-The following fritz diagram depicts how you should wire your RPi in order to run the program, the resistance for R1 is 1kOhm.
-
+## Circuit
 ![Fritz diagram](raspberry_hc-sr04.png)
+
+* VCC - 5V
+* GND - GND
+* Trig - GPIO 4
+* Echo - GPIO 17
+
+The fritz diagram above depicts how you should wire your RPi in order to run the program, the resistance for R1 is 1kOhm. (Optional)
+
+## Code
+```C#
+using(var sonar = new Hcsr04(4, 17))
+{
+    while(true)
+    {
+        Console.WriteLine($"Distance: {sonar.Distance} cm");
+        System.Threading.Thread.Sleep(1000);
+    }
+}
+```

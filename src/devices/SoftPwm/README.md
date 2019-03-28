@@ -2,7 +2,7 @@
 
 Software PWM is necessary when you cannot use hardware PWM. PWM is used for example to control and pilot servo motors.
 
-## How to Uue
+## How to Use
 
 SoftPwm is part of ```System.Device.Pwm.Drivers``` and is a driver for the ```System.Device.Pwm.PwmController``` class. You can then create a software PWM like this:
 

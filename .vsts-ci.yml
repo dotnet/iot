@@ -14,7 +14,10 @@ resources:
     image: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
 
 trigger:
-- master
+  batch: true
+  branches:
+    include:
+    - master
 
 pr:
 - master
@@ -40,9 +43,151 @@ phases:
     ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
       enableMicrobuild: true
     steps:
-    - script: eng\common\cibuild.cmd
+    - script: build.cmd -ci
         -configuration $(_BuildConfig)
         -prepareMachine
+      name: Build
+      displayName: Build
+      condition: succeeded()
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Windows managed assets
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/artifacts/bin
+        artifactName: bin
+        artifactType: container
+      condition: eq(variables['_BuildConfig'], 'Release')
+    variables:
+      _HelixBuildConfig: $(_BuildConfig)
+      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+        _TeamName: DotNetCore
+        _SignType: real
+
+- template: /eng/common/templates/phases/base.yml
+  parameters:
+    agentOs: OSX
+    name: OSX
+    enableTelemetry: $(_enableTelemetry)
+    queue:
+      name: Hosted macOS Preview
+      parallel: 99
+      matrix:
+        debug_configuration:
+          _BuildConfig: Debug
+        release_configuration:
+          _BuildConfig: Release
+    steps:
+    - script: ./build.sh --ci
+        --configuration $(_BuildConfig)
+        --prepareMachine
+      name: Build
+      displayName: Build
+      condition: succeeded()
+    variables:
+      _HelixBuildConfig: $(_BuildConfig)
+
+- template: /eng/common/templates/phases/base.yml
+  parameters:
+    agentOs: Linux
+    name: Linux_libgpiod
+    enableTelemetry: $(_enableTelemetry)
+    queue:
+      name: Hosted Ubuntu 1604
+    steps:
+    - script: src/Native/copyLibgpiod.sh
+      name: CopyLibgpiod
+      displayName: Copy Libgpiod dependency from container
+      condition: succeeded()
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Libgpiod lib assets
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/artifacts/libgpiod/
+        artifactName: Libgpiod
+        artifactType: container
+    variables:
+      _HelixBuildConfig: $(_BuildConfig)
+
+- template: /eng/common/templates/phases/base.yml
+  parameters:
+    dependsOn:
+    - Linux_libgpiod
+    agentOs: Linux
+    name: Linux
+    enableTelemetry: $(_enableTelemetry)
+    queue:
+      name: Hosted Ubuntu 1604
+      parallel: 99
+      container: LinuxContainer
+      matrix:
+        debug_configuration:
+          _BuildConfig: Debug
+        release_configuration:
+          _BuildConfig: Release
+    steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Libgpiod assets
+      inputs:
+        artifactName: Libgpiod
+        downloadPath: $(Build.SourcesDirectory)/artifacts/
+    - script: src/Native/moveLibgpiod.sh
+      name: MoveLibgpiod
+      displayName: Move Libgpiod into crossrootfs
+      condition: succeeded()
+    - script: ROOTFS_DIR=/crossrootfs/arm ./build.sh --ci
+        --configuration $(_BuildConfig)
+        --prepareMachine
+        /p:BuildNative=true
+      name: Build
+      displayName: Build
+      condition: succeeded()
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Linux native assets
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Native
+        artifactName: Native
+        artifactType: container
+      condition: eq(variables['_BuildConfig'], 'Release')
+    variables:
+      _HelixBuildConfig: $(_BuildConfig)
+
+- template: /eng/common/templates/phases/base.yml
+  parameters:
+    dependsOn:
+    - Windows_NT
+    - OSX
+    - Linux
+    agentOs: Windows_NT
+    name: BuildPackages
+    enableTelemetry: $(_enableTelemetry)
+    queue:
+      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+        name: dotnet-internal-temp
+      ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+        name: dotnet-external-temp
+      parallel: 99
+      matrix:
+        release_configuration:
+          _BuildConfig: Release
+    ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+      enableMicrobuild: true
+    steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Built Managed Assets
+      inputs:
+        artifactName: bin
+        downloadPath: $(Build.SourcesDirectory)/artifacts
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Built Native Assets
+      inputs:
+        artifactName: Native
+        downloadPath: $(Build.SourcesDirectory)/artifacts/bin
+    - script: build.cmd -ci -sign
+        -configuration $(_BuildConfig)
+        -prepareMachine
+        /p:ProductBuild=false
+        /p:ToolsBuild=false
+        /p:SampleBuild=false
+        /p:BuildTests=false
+        /p:BuildPackages=true
       name: Build
       displayName: Build
       condition: succeeded()
@@ -60,61 +205,11 @@ phases:
         _TeamName: DotNetCore
         _SignType: real
 
-
-- template: /eng/common/templates/phases/base.yml
-  parameters:
-    agentOs: OSX
-    name: OSX
-    enableTelemetry: $(_enableTelemetry)
-    queue:
-      name: Hosted macOS Preview
-      parallel: 99
-      matrix:
-        debug_configuration:
-          _BuildConfig: Debug
-        release_configuration:
-          _BuildConfig: Release
-    steps:
-    - script: eng/common/cibuild.sh
-        --configuration $(_BuildConfig)
-        --prepareMachine
-      name: Build
-      displayName: Build
-      condition: succeeded()
-    variables:
-      _HelixBuildConfig: $(_BuildConfig)
-
-- template: /eng/common/templates/phases/base.yml
-  parameters:
-    agentOs: Linux
-    name: Linux
-    enableTelemetry: $(_enableTelemetry)
-    queue:
-      name: Hosted Ubuntu 1604
-      parallel: 99
-      container: LinuxContainer
-      matrix:
-        debug_configuration:
-          _BuildConfig: Debug
-        release_configuration:
-          _BuildConfig: Release
-    steps:
-    - script: eng/common/cibuild.sh
-        --configuration $(_BuildConfig)
-        --prepareMachine
-      name: Build
-      displayName: Build
-      condition: succeeded()
-    variables:
-      _HelixBuildConfig: $(_BuildConfig)
-
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/phases/base.yml
     parameters:
       dependsOn:
-        - Windows_NT
-        - OSX
-        - Linux
+      - BuildPackages
       agentOs: Windows_NT
       name: PublishToMyGet
       enableTelemetry: $(_enableTelemetry)

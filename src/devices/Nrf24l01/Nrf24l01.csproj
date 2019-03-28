@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <Compile Include="Command.cs" />
+    <Compile Include="DataRate.cs" />
+    <Compile Include="DataReceivedEventArgs.cs" />
+    <Compile Include="Nrf24l01.cs" />
+    <Compile Include="Nrf24l01Pipe.cs" />
+    <Compile Include="OutputPower.cs" />
+    <Compile Include="PowerMode.cs" />
+    <Compile Include="Register.cs" />
+    <Compile Include="WorkingMode.cs" />
+  </ItemGroup>
+
+  <ItemGroup> 
+    <None Remove="README.md" />
+    <None Remove="sensor.jpg" />
+  </ItemGroup>
+</Project>

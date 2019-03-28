@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+  <Import Project="$(RepositoryEngineeringDir)Compilers.props" />
+
+  <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
+    <Copyright>$(CopyrightNetFoundation)</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  
   <PropertyGroup>
-  	<UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
-  	<PublishWindowsPdb>false</PublishWindowsPdb>
-    <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
+    <PublishWindowsPdb>false</PublishWindowsPdb>
     <Language>C#</Language>
     <TargetsWindows Condition="$(RuntimeIdentifier.StartsWith('win'))">true</TargetsWindows>
     <TargetsLinux Condition="$(RuntimeIdentifier.StartsWith('linux'))">true</TargetsLinux>
     <LangVersion>Latest</LangVersion>
+
+    <!-- Packaging props -->
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
-  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+  <ItemGroup>
+    <!-- Include license and third party files to packages -->
+    <Content Include="$(RepoRoot)THIRD-PARTY-NOTICES.TXT" Pack="true" PackagePath="\" />
+    <Content Include="$(RepoRoot)LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
 </Project>

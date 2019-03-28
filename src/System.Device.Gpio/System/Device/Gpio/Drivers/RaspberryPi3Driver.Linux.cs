@@ -4,8 +4,10 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace System.Device.Gpio.Drivers
 {
@@ -59,7 +61,7 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
-        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
+        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             ValidatePinNumber(pinNumber);
             InitializeSysFS();
@@ -67,7 +69,7 @@ namespace System.Device.Gpio.Drivers
             _sysFSDriver.OpenPin(pinNumber);
             _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
-            _sysFSDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventType, callback);
+            _sysFSDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
         }
 
         /// <summary>
@@ -126,7 +128,7 @@ namespace System.Device.Gpio.Drivers
             ValidatePinNumber(pinNumber);
 
             /*
-             * There are two registers that contain the value of a pin. Each hold the value of 32 
+             * There are two registers that contain the value of a pin. Each hold the value of 32
              * different pins. 1 bit represents the value of a pin, 0 is PinValue.Low and 1 is PinValue.High
              */
 
@@ -219,14 +221,14 @@ namespace System.Device.Gpio.Drivers
              * This is the process outlined by the BCM2835 datasheet on how to set the pull mode.
              * The GPIO Pull - up/down Clock Registers control the actuation of internal pull-downs on the respective GPIO pins.
              * These registers must be used in conjunction with the GPPUD register to effect GPIO Pull-up/down changes.
-             * The following sequence of events is required: 
-             * 
+             * The following sequence of events is required:
+             *
              * 1. Write to GPPUD to set the required control signal (i.e.Pull-up or Pull-Down or neither to remove the current Pull-up/down)
-             * 2. Wait 150 cycles – this provides the required set-up time for the control signal 
+             * 2. Wait 150 cycles – this provides the required set-up time for the control signal
              * 3. Write to GPPUDCLK0/1 to clock the control signal into the GPIO pads you wish to modify
              *    – NOTE only the pads which receive a clock will be modified, all others will retain their previous state.
-             * 4. Wait 150 cycles – this provides the required hold time for the control signal 
-             * 5. Write to GPPUD to remove the control signal 
+             * 4. Wait 150 cycles – this provides the required hold time for the control signal
+             * 5. Write to GPPUD to remove the control signal
              * 6. Write to GPPUDCLK0/1 to remove the clock
              */
 
@@ -246,7 +248,7 @@ namespace System.Device.Gpio.Drivers
             register |= 1U << shift;
             *gppudclkPointer = register;
 
-            // Wait 150 cycles – this provides the required hold time for the control signal 
+            // Wait 150 cycles – this provides the required hold time for the control signal
             Thread.SpinWait(150);
 
             register = *gppudPointer;
@@ -302,7 +304,7 @@ namespace System.Device.Gpio.Drivers
 
             /*
              * If the value is High, GPSET register is used. Otherwise, GPCLR will be used. For
-             * both cases, a 1 is set on the corresponding bit in the register in order to set 
+             * both cases, a 1 is set on the corresponding bit in the register in order to set
              * the desired value.
              */
 
@@ -310,6 +312,24 @@ namespace System.Device.Gpio.Drivers
             uint register = *registerPointer;
             register = 1U << (pinNumber % 32);
             *registerPointer = register;
+        }
+
+        protected ulong SetRegister
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return *(ulong*)(_registerViewPointer->GPSET); }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set {  *(ulong*)(_registerViewPointer->GPSET) = value; }
+        }
+
+        protected ulong ClearRegister
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return *(ulong*)(_registerViewPointer->GPCLR); }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set {  *(ulong*)(_registerViewPointer->GPCLR) = value; }
         }
 
         private void InitializeSysFS()
@@ -324,7 +344,7 @@ namespace System.Device.Gpio.Drivers
                 {
                     return;
                 }
-                _sysFSDriver = new UnixDriver();
+                _sysFSDriver = new SysFsDriver();
             }
         }
 
@@ -345,13 +365,13 @@ namespace System.Device.Gpio.Drivers
                 int fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
                 if (fileDescriptor < 0)
                 {
-                    throw new IOException("Error initializing the Gpio driver.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
                 }
 
                 IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, GpioRegisterOffset);
                 if (mapPointer.ToInt32() < 0)
                 {
-                    throw new IOException("Error initializing the Gpio driver.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
                 }
 
                 Interop.close(fileDescriptor);

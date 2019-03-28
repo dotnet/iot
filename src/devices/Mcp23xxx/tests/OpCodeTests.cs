@@ -32,7 +32,9 @@ namespace Iot.Device.Mcp23xxx.Tests
         public void Get_OpCode(int deviceAddress, bool isReadCommand, byte expectedOpCode)
         {
             SpiMock spiMock = new SpiMock();
-            Mcp23S08 mcp23S08 = new Mcp23S08(deviceAddress, spiMock);
+
+            // The Mcp23s17 is the only SPI device that supports all 8 addresses
+            Mcp23s17 mcp23S08 = new Mcp23s17(spiMock, deviceAddress);
             if (isReadCommand)
             {
                 mcp23S08.ReadByte(Register.GPIO);
@@ -54,12 +56,12 @@ namespace Iot.Device.Mcp23xxx.Tests
 
             public override byte ReadByte() => 0x42;
 
-            public override void TransferFullDuplex(Span<byte> writeBuffer, Span<byte> readBuffer)
+            public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
             {
                 LastInitialWriteByte = writeBuffer[0];
             }
 
-            public override void Write(Span<byte> data)
+            public override void Write(ReadOnlySpan<byte> data)
             {
                 LastInitialWriteByte = data[0];
             }

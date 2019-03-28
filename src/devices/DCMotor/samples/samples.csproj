@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <!-- Normally you will use following package reference instead  -->
+    <!-- <PackageReference Include="IoT.Device.Bindings" Version="0.1.0-prerelease*" /> -->
+    <ProjectReference Include="..\..\SoftPwm\SoftPwm.csproj" />
+    <ProjectReference Include="..\DCMotor.csproj" />
+  </ItemGroup>
+
+</Project>
