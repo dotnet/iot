@@ -5,6 +5,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Threading;
 
 namespace Iot.Device.Ads1115
 {
@@ -93,6 +94,9 @@ namespace Iot.Device.Ads1115
             Span<byte> writeBuff = stackalloc byte[3] { (byte)Register.ADC_CONFIG_REG_ADDR, configHi, configLo };
 
             _sensor.Write(writeBuff);
+
+            // waiting for the sensor stability
+            Thread.Sleep(10);
         }
 
         /// <summary>
