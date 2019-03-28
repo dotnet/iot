@@ -81,14 +81,14 @@ namespace Iot.Device.Ads1115
         private void SetConfig()
         {
             // Details in Datasheet P18
-            byte configHi = (byte)(((byte)_inputMultiplexer << 4) +
-                            ((byte)_measuringRange << 1) +
+            byte configHi = (byte)(((byte)_inputMultiplexer << 4) |
+                            ((byte)_measuringRange << 1) |
                             (byte)DeviceMode.Continuous);
 
-            byte configLo = (byte)(((byte)_dataRate << 5) +
-                            ((byte)(ComparatorMode.Traditional) << 4) +
-                            ((byte)ComparatorPolarity.Low << 3) +
-                            ((byte)ComparatorLatching.NonLatching << 2) +
+            byte configLo = (byte)(((byte)_dataRate << 5) |
+                            ((byte)(ComparatorMode.Traditional) << 4) |
+                            ((byte)ComparatorPolarity.Low << 3) |
+                            ((byte)ComparatorLatching.NonLatching << 2) |
                             (byte)ComparatorQueue.Disable);
 
             Span<byte> writeBuff = stackalloc byte[3] { (byte)Register.ADC_CONFIG_REG_ADDR, configHi, configLo };
