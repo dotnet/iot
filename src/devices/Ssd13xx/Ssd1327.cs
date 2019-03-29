@@ -65,6 +65,17 @@ namespace Iot.Device.Ssd13xx
             SendCommand(command);
         }
 
+        /// <summary>
+        /// Send data to the display controller.
+        /// </summary>
+        /// <param name="data">The data to send to the display controller.</param>
+        public void SendData(byte data)
+        {
+            Span<byte> writeBuffer = new byte[] { Data_Mode, data };
+
+            _i2cDevice.Write(writeBuffer);
+        }
+
         private void SendCommand(ICommand command)
         {
             byte[] commandBytes = command.GetBytes();
@@ -83,17 +94,6 @@ namespace Iot.Device.Ssd13xx
             {
                 SendCommand(item);
             }
-        }
-
-        /// <summary>
-        /// Send data to the display controller.
-        /// </summary>
-        /// <param name="data">The data to send to the display controller.</param>
-        public void SendData(byte data)
-        {
-            Span<byte> writeBuffer = new byte[] { Data_Mode, data };
-
-            _i2cDevice.Write(writeBuffer);
         }
     }
 }
