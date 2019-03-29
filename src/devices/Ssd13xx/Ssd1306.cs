@@ -27,7 +27,7 @@ namespace Iot.Device.Ssd13xx
 
         public void SendCommand(ISsd1306Command command)
         {
-            SendCommand(command);
+            SendCommand((ICommand)command);
         }
 
         public override void SendCommand(ISharedCommand command)
@@ -41,7 +41,6 @@ namespace Iot.Device.Ssd13xx
         /// <param name="command">The command to send to the display controller.</param>
         private void SendCommand(ICommand command)
         {
-            const int StackThreshold = 32;
             byte[] commandBytes = command.GetBytes();
 
             if (commandBytes == null)
@@ -54,9 +53,7 @@ namespace Iot.Device.Ssd13xx
                 throw new ArgumentException("The command did not contain any bytes to send.");
             }
 
-            Span<byte> writeBuffer = commandBytes.Length < StackThreshold ?
-               stackalloc byte[commandBytes.Length + 1] :
-               new byte[commandBytes.Length + 1];
+            Span<byte> writeBuffer = SliceGenericBuffer(commandBytes.Length + 1);
 
             commandBytes.CopyTo(writeBuffer.Slice(1));
 

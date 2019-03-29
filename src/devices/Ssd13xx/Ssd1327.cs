@@ -57,7 +57,7 @@ namespace Iot.Device.Ssd13xx
 
         public void SendCommand(ISsd1327Command command)
         {
-            SendCommand(command);
+            SendCommand((ICommand)command);
         }
 
         public override void SendCommand(ISharedCommand command)

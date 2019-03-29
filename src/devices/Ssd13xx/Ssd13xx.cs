@@ -10,10 +10,13 @@ namespace Iot.Device.Ssd13xx
 {
     public abstract class Ssd13xx : IDisposable
     {
+        private const int DefaultBufferSize = 48 * 96;
+        private byte[] _genericBuffer;
         protected I2cDevice _i2cDevice;
 
-        public Ssd13xx(I2cDevice i2cDevice)
+        public Ssd13xx(I2cDevice i2cDevice, int bufferSize = DefaultBufferSize)
         {
+            _genericBuffer = new byte[bufferSize];
             _i2cDevice = i2cDevice;
         }
 
@@ -41,16 +44,12 @@ namespace Iot.Device.Ssd13xx
         /// <param name="data">The data to send to the display controller.</param>
         public virtual void SendData(byte[] data)
         {
-            const int StackThreshold = 512;
-
             if (data == null)
             {
                 throw new ArgumentNullException(nameof(data));
             }
 
-            Span<byte> writeBuffer = data.Length < StackThreshold ?
-               stackalloc byte[data.Length + 1] :
-               new byte[data.Length + 1];
+            Span<byte> writeBuffer = SliceGenericBuffer(data.Length + 1);
 
             writeBuffer[0] = 0x40; // Control byte.
             data.CopyTo(writeBuffer.Slice(1));
@@ -61,6 +60,22 @@ namespace Iot.Device.Ssd13xx
         {
             _i2cDevice?.Dispose();
             _i2cDevice = null;
+        }
+
+        protected Span<byte> SliceGenericBuffer(int length)
+        {
+            return _genericBuffer.AsSpan(0, length);
+        }
+
+        protected Span<byte> SliceGenericBuffer(int start, int length)
+        {
+            if (_genericBuffer.Length < length)
+            {
+                var newBuffer = new byte[_genericBuffer.Length * 2];
+                _genericBuffer.CopyTo(newBuffer, 0);
+                _genericBuffer = newBuffer;
+            }
+            return _genericBuffer.AsSpan(start, length);
         }
     }
 }
