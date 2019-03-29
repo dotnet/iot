@@ -33,7 +33,7 @@ namespace Iot.Device.Ssd13xx.Samples
             {
                 Initialize(device);
                 ClearScreen(device);
-                //SendMessage(ssd1306, "Hello .NET IoT!!!");
+                //SendMessage(device, "Hello .NET IoT!");
                 SendMessage(device, DisplayIpAddress());
             }
 #else
@@ -41,7 +41,7 @@ namespace Iot.Device.Ssd13xx.Samples
             {
                 Initialize(device);
                 ClearScreen(device);
-                //SendMessage(ssd1306, "Hello .NET IoT!!!");
+                //SendMessage(device, "Hello .NET IoT!!!");
                 //SendMessage(device, DisplayIpAddress());
                 DisplayImages(device);
                 DisplayClock(device);

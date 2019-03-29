@@ -10,7 +10,8 @@ namespace Iot.Device.Ssd13xx
 {
     public abstract class Ssd13xx : IDisposable
     {
-        private const int DefaultBufferSize = 48 * 96;
+        // Multiply of screen resolution plus single command byte.
+        private const int DefaultBufferSize = 48 * 96 + 1;
         private byte[] _genericBuffer;
         protected I2cDevice _i2cDevice;
 
@@ -64,7 +65,7 @@ namespace Iot.Device.Ssd13xx
 
         protected Span<byte> SliceGenericBuffer(int length)
         {
-            return _genericBuffer.AsSpan(0, length);
+            return SliceGenericBuffer(0, length);
         }
 
         protected Span<byte> SliceGenericBuffer(int start, int length)
