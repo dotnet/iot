@@ -55,7 +55,7 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Atmospheric pressure in Pa
         /// </returns>
-        public int ReadPressure()
+        public double ReadPressure()
         {
             // Pressure Calculations
             int B6 = CalculateTrueTemperature() - 4000;
@@ -125,7 +125,8 @@ namespace Iot.Device.Bmp180
         private short ReadRawTemperature()
         {
             // Reads the raw (uncompensated) temperature from the sensor
-            _i2cDevice.Write(new[] { (byte)Register.CONTROL, (byte)Register.READTEMPCMD });            
+            Span<byte> command = stackalloc byte[]  { (byte)Register.CONTROL, (byte)Register.READTEMPCMD };  
+            _i2cDevice.Write(command);            
             // Wait 5ms
             Thread.Sleep(5);
             
