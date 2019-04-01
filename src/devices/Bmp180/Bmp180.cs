@@ -127,7 +127,7 @@ namespace Iot.Device.Bmp180
             // Reads the raw (uncompensated) temperature from the sensor
             Span<byte> command = stackalloc byte[]  { (byte)Register.CONTROL, (byte)Register.READTEMPCMD };  
             _i2cDevice.Write(command);            
-            // Wait 5ms
+            // Wait 5ms, taken straight from section 3.3 of the datasheet. 
             Thread.Sleep(5);
             
             return (short)Read16BitsFromRegisterBE((byte)Register.TEMPDATA);
