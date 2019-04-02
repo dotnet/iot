@@ -5,11 +5,11 @@
 namespace Iot.Device.Ads1115
 {
     /// <summary>
-    /// Controls the Polarity of the ALERT Pin
+    /// Registers of ADS1115
     /// </summary>
-    public enum ComparatorPolarity
+    internal enum Registers : byte
     {
-        Low = 0x00,
-        High = 0x01
+        ADC_CONVERSION_REG_ADDR = 0x00,
+        ADC_CONFIG_REG_ADDR = 0x01,
     }
 }
