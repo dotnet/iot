@@ -25,7 +25,7 @@ namespace Ads1115.Samples
             // pass in I2cDevice
             // measure the voltage AIN0
             // set the maximum range to 6.144V
-            using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, InputMultiplexer.AIN0, MeasuringRange.FS6144))
+            using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, Config.ADS1015_REG_CONFIG_MUX_SINGLE_0 | Config.ADS1015_REG_CONFIG_PGA_6_144V))
             {
                 // loop
                 while (true)
@@ -35,9 +35,20 @@ namespace Ads1115.Samples
                     // raw data convert to voltage
                     double voltage = adc.RawToVoltage(raw);
 
+                    Console.WriteLine($"ADC1115 config now {adc.ReadConfig():x}");
                     Console.WriteLine($"ADS1115 Raw Data: {raw}");
                     Console.WriteLine($"Voltage: {voltage}");
                     Console.WriteLine();
+
+                    // set config to read another channel
+                    adc.SetConfig(Config.ADS1015_REG_CONFIG_MUX_SINGLE_1, Config.ADS1015_REG_CONFIG_MUX_MASK);
+                    Console.WriteLine($"ADC1115 config now {adc.ReadConfig():x}");
+                    Console.WriteLine($"ADS1115 Raw Data: {raw}");
+                    Console.WriteLine($"Voltage: {voltage}");
+                    Console.WriteLine();
+
+                    raw = adc.ReadRaw();
+                    voltage = adc.RawToVoltage(raw);
 
                     // wait for 2s
                     Thread.Sleep(2000);
