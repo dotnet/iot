@@ -17,7 +17,7 @@ UnixI2cDevice device = new UnixI2cDevice(settings);
 // pass in I2cDevice
 // measure the voltage AIN0
 // set the maximum range to 6.144V
-using (Ads1115 adc = new Ads1115(device, InputMultiplexer.AIN0, MeasuringRange.FS6144))
+using (Ads1115 adc = new Ads1115.Ads1115(device, Config.ADS1015_REG_CONFIG_MUX_SINGLE_0 | Config.ADS1015_REG_CONFIG_PGA_6_144V))
 {
     // read raw data form the sensor
     short raw = adc.ReadRaw();
