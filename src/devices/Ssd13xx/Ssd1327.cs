@@ -13,6 +13,7 @@ namespace Iot.Device.Ssd13xx
     {
         private const byte Command_Mode = 0x80;
         private const byte Data_Mode = 0x40;
+        private const int CleaningBufferSize = 48 * 96;
 
         /// <summary>
         /// Initializes new instance of Ssd1327 device that will communicate using I2C bus.
@@ -38,7 +39,7 @@ namespace Iot.Device.Ssd13xx
             SendCommand(new SetDisplayOff());
             SetColumnAddress();
             SetRowAddress();
-            byte[] data = new byte[48 * 96];
+            byte[] data = new byte[CleaningBufferSize];
             SendData(data);
             SendCommand(new SetDisplayOn());
         }
@@ -61,10 +62,21 @@ namespace Iot.Device.Ssd13xx
 
         public override void SendCommand(ISharedCommand command)
         {
-            SendCommand((ICommand)command);
+            SendCommand(command);
         }
 
-        protected override void SendCommand(ICommand command)
+        /// <summary>
+        /// Send data to the display controller.
+        /// </summary>
+        /// <param name="data">The data to send to the display controller.</param>
+        public void SendData(byte data)
+        {
+            Span<byte> writeBuffer = new byte[] { Data_Mode, data };
+
+            _i2cDevice.Write(writeBuffer);
+        }
+
+        private void SendCommand(ICommand command)
         {
             byte[] commandBytes = command.GetBytes();
 
@@ -82,17 +94,6 @@ namespace Iot.Device.Ssd13xx
             {
                 SendCommand(item);
             }
-        }
-
-        /// <summary>
-        /// Send data to the display controller.
-        /// </summary>
-        /// <param name="data">The data to send to the display controller.</param>
-        public void SendData(byte data)
-        {
-            Span<byte> writeBuffer = new byte[] { Data_Mode, data };
-
-            _i2cDevice.Write(writeBuffer);
         }
     }
 }

@@ -12,8 +12,8 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         /// This command sets the divide ratio to generate DCLK (Display Clock) from CLK and
         /// programs the oscillator frequency Fosc that is the source of CLK if CLS pin is pulled high.
         /// </summary>
-        /// <param name="displayClockDivideRatio">Display clock divide ratio with a range of 0-15.</param>
-        /// <param name="oscillatorFrequency">Oscillator frequency with a range of 0-15.</param>
+        /// <param name="displayClockDivideRatio">Display clock divide ratio with a range of 0-15. For more information see device documentations.</param>
+        /// <param name="oscillatorFrequency">Oscillator frequency with a range of 0-15 in Kilohertz. For more information see device documentations.</param>
         public SetDisplayClockDivideRatioOscillatorFrequency(byte displayClockDivideRatio = 0x00, byte oscillatorFrequency = 0x00)
         {
             if (displayClockDivideRatio > 0x0F)

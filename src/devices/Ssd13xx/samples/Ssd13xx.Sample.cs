@@ -33,7 +33,7 @@ namespace Iot.Device.Ssd13xx.Samples
             {
                 Initialize(device);
                 ClearScreen(device);
-                //SendMessage(ssd1306, "Hello .NET IoT!!!");
+                //SendMessage(device, "Hello .NET IoT!");
                 SendMessage(device, DisplayIpAddress());
             }
 #else
@@ -41,7 +41,7 @@ namespace Iot.Device.Ssd13xx.Samples
             {
                 Initialize(device);
                 ClearScreen(device);
-                //SendMessage(ssd1306, "Hello .NET IoT!!!");
+                //SendMessage(device, "Hello .NET IoT!!!");
                 //SendMessage(device, DisplayIpAddress());
                 DisplayImages(device);
                 DisplayClock(device);
@@ -93,13 +93,13 @@ namespace Iot.Device.Ssd13xx.Samples
         // Display size 96x96.
         private static void Initialize(Ssd1327 device) 
         {
-            device.SendCommand(new Ssd1327Cmnds.SetUnlockDriver());
+            device.SendCommand(new Ssd1327Cmnds.SetUnlockDriver(true));
             device.SendCommand(new SetDisplayOff());
             device.SendCommand(new SetMultiplexRatio(0x5F));
             device.SendCommand(new Ssd1327Cmnds.SetDisplayStartLine());
             device.SendCommand(new Ssd1327Cmnds.SetDisplayOffset(0x5F));
             device.SendCommand(new Ssd1327Cmnds.SetReMap());
-            device.SendCommand(new Ssd1327Cmnds.SetInternalVddRegulator());
+            device.SendCommand(new Ssd1327Cmnds.SetInternalVddRegulator(true));
             device.SendCommand(new SetContrastControlForBank0(0x53));
             device.SendCommand(new Ssd1327Cmnds.SetPhaseLength(0X51));
             device.SendCommand(new Ssd1327Cmnds.SetDisplayClockDivideRatioOscillatorFrequency(0x01, 0x00));

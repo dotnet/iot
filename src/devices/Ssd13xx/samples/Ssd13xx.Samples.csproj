@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Ssd13xx.csproj" />
+    <ProjectReference Include="../Ssd13xx.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -19,6 +19,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
             Phase2Period = phase2Period;
             PhasePeriod = (byte)((Phase2Period << 4) | Phase1Period);
         }
+        
         public SetPhaseLength(byte phasePeriod)
         {
             byte phase1Period = (byte)(phasePeriod & 0x0F);
@@ -59,7 +60,8 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
             return new byte[] { Id, PhasePeriod };
         }
 
-        private void CheckPeriods(byte phase1Period, byte phase2Period){
+        private void CheckPeriods(byte phase1Period, byte phase2Period)
+        {
             if (!Ssd13xx.InRange(phase1Period, 0x01, 0x0F))
             {
                 throw new ArgumentException("The phase 1 period is invalid.", nameof(phase1Period));
