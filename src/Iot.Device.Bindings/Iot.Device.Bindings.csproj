@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Excluding RGBLedMatrix for now till we figure if it is ok to add dependency on stuff like System.Drawing  -->
+    <_ExcludeFromCompile Include="$(DeviceRoot)/RGBLedMatrix/**/*.cs" />
+    <_ExcludeFromCompile Include="$(DeviceRoot)/Interop/**/*.cs" />
+
     <_ExcludeFromCompile Include="$(DeviceRoot)**/samples/**/*.cs" />
     <_ExcludeFromCompile Include="$(DeviceRoot)**/tests/**/*.cs" />
     <_ExcludeFromCompile Include="$(DeviceRoot)**/obj/**/*.cs" />
