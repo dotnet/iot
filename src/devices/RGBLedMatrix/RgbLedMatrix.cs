@@ -53,7 +53,7 @@ namespace Iot.Device.LEDMatrix
 
             _mapping = mapping;
 
-            if ((width | height) < 0 || height < 8 || height % chainRows != 0)
+            if (width < 8 || height < 8 || height % chainRows != 0)
             {
                 throw new ArgumentException("Invalid rows or width values");
             }
@@ -160,7 +160,7 @@ namespace Iot.Device.LEDMatrix
         /// Return the time in microseconds used to draw a full display frame
         /// </summary>
         /// <value></value>
-        public long FrameTime { get => _frameTime; }
+        public long FrameTime => _frameTime;
 
         /// <summary>
         /// Fill a rectangle on the display with specific color
@@ -359,23 +359,28 @@ namespace Iot.Device.LEDMatrix
 
             BitmapData bitmapData = bitmap.LockBits(fullImageRectangle, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
-            int pos = 3 * ((y < 0 ? Math.Abs(y) * bitmap.Width : 0) + (x < 0 ? Math.Abs(x) : 0));
-            int stride = (bitmapData.Stride - 3 * bitmap.Width) + 3 * (bitmap.Width - partialBitmap.Width);
-
-            Span<byte> span = new Span<byte>((void*) bitmapData.Scan0, fullImageRectangle.Width * fullImageRectangle.Height * 3);
-
-            for (int j = 0; j < partialBitmap.Height; j++)
+            try
             {
-                for (int i = 0; i < partialBitmap.Width; i++)
+                int pos = 3 * ((y < 0 ? Math.Abs(y) * bitmap.Width : 0) + (x < 0 ? Math.Abs(x) : 0));
+                int stride = (bitmapData.Stride - 3 * bitmap.Width) + 3 * (bitmap.Width - partialBitmap.Width);
+
+                Span<byte> span = new Span<byte>((void*) bitmapData.Scan0, fullImageRectangle.Width * fullImageRectangle.Height * 3);
+
+                for (int j = 0; j < partialBitmap.Height; j++)
                 {
-                    SetPixel(partialBitmap.X + i, partialBitmap.Y + j, span[pos + 2], span[pos + 1], span[pos], buffer);
-                    pos += 3;
+                    for (int i = 0; i < partialBitmap.Width; i++)
+                    {
+                        SetPixel(partialBitmap.X + i, partialBitmap.Y + j, span[pos + 2], span[pos + 1], span[pos], buffer);
+                        pos += 3;
+                    }
+
+                    pos += stride;
                 }
-
-                pos += stride;
             }
-
-            bitmap.UnlockBits(bitmapData);
+            finally
+            {
+                bitmap.UnlockBits(bitmapData);
+            }
         }
 
         /// <summary>
@@ -410,30 +415,35 @@ namespace Iot.Device.LEDMatrix
 
             BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
-            int pos = 3 * (bitmapY * bitmap.Width + bitmapX);
-            int stride = (bitmapData.Stride - 3 * bitmap.Width) + 3 * (bitmap.Width - bitmapWidth);
-
-            Span<byte> span = new Span<byte>((void*) bitmapData.Scan0, bitmapData.Stride * bitmap.Height);
-
-            for (int j = 0; j < bitmapHeight; j++)
+            try
             {
-                for (int i = 0; i < bitmapWidth; i++)
+                int pos = 3 * (bitmapY * bitmap.Width + bitmapX);
+                int stride = (bitmapData.Stride - 3 * bitmap.Width) + 3 * (bitmap.Width - bitmapWidth);
+
+                Span<byte> span = new Span<byte>((void*) bitmapData.Scan0, bitmapData.Stride * bitmap.Height);
+
+                for (int j = 0; j < bitmapHeight; j++)
                 {
-                    if (red == span[pos + 2] && green == span[pos + 1] && blue == span[pos])
+                    for (int i = 0; i < bitmapWidth; i++)
                     {
-                        SetPixel(coorX + i, coorY + j, repRed, repGreen, repBlue, buffer);
+                        if (red == span[pos + 2] && green == span[pos + 1] && blue == span[pos])
+                        {
+                            SetPixel(coorX + i, coorY + j, repRed, repGreen, repBlue, buffer);
+                        }
+                        else
+                        {
+                            SetPixel(coorX + i, coorY + j, span[pos + 2], span[pos + 1], span[pos], buffer);
+                        }
+                        pos += 3;
                     }
-                    else
-                    {
-                        SetPixel(coorX + i, coorY + j, span[pos + 2], span[pos + 1], span[pos], buffer);
-                    }
-                    pos += 3;
+
+                    pos += stride;
                 }
-
-                pos += stride;
             }
-
-            bitmap.UnlockBits(bitmapData);
+            finally
+            {
+                bitmap.UnlockBits(bitmapData);
+            }
         }
 
         public void DrawText(int x, int y, ReadOnlySpan<char> text, BdfFont font, byte textR, byte textG, byte textB, byte bkR, byte bkG, byte bkB, bool backBuffer = false)

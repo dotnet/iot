@@ -20,6 +20,7 @@ namespace Iot.Device.Graphics
         public int DefaultChar  { private set; get; }
         public int CharsCount   { private set; get; }
 
+        // GlyphMapper is mapping from the character number to the index of the character bitmap data in the buffer GlyphUshortData.
         private Dictionary<int, int> GlyphMapper { set; get; }
         private int BytesPerGlyph { set; get; }
         private ushort[] GlyphUshortData { set; get; }
@@ -48,29 +49,29 @@ namespace Iot.Device.Graphics
                 while (!sr.EndOfStream)
                 {
                     ReadOnlySpan<char> span = sr.ReadLine().AsSpan().Trim();
-                    if (span.StartsWith(s_fontBoundingBox.AsSpan(), StringComparison.Ordinal))
+                    if (span.StartsWith(s_fontBoundingBox, StringComparison.Ordinal))
                     {
                         span = span.Slice(s_fontBoundingBox.Length).Trim();
                         font.Width = ReadNextDecimalNumber(ref span);
                         font.Height = ReadNextDecimalNumber(ref span);
                         font.XDisplacement = ReadNextDecimalNumber(ref span);
                         font.YDisplacement = ReadNextDecimalNumber(ref span);
-                        font.BytesPerGlyph = (int) Math.Ceiling(((double)font.Width) / 8);
+                        font.BytesPerGlyph = (int)Math.Ceiling(((double)font.Width) / 8);
                     }
-                    else if (span.StartsWith(s_charSet.AsSpan(), StringComparison.Ordinal))
+                    else if (span.StartsWith(s_charSet, StringComparison.Ordinal))
                     {
                         span = span.Slice(s_charSet.Length).Trim();
-                        if (span.CompareTo(s_isoCharset.AsSpan(), StringComparison.Ordinal) != 0)
+                        if (span.CompareTo(s_isoCharset, StringComparison.Ordinal) != 0)
                         {
                             throw new NotSupportedException("We only support ISO10646 for now.");
                         }
                     }
-                    else if (span.StartsWith(s_defaultChar.AsSpan(), StringComparison.Ordinal))
+                    else if (span.StartsWith(s_defaultChar, StringComparison.Ordinal))
                     {
                         span = span.Slice(s_defaultChar.Length).Trim();
                         font.DefaultChar = ReadNextDecimalNumber(ref span);
                     }
-                    else if (span.StartsWith(s_Chars.AsSpan(), StringComparison.Ordinal))
+                    else if (span.StartsWith(s_Chars, StringComparison.Ordinal))
                     {
                         span = span.Slice(s_Chars.Length).Trim();
                         font.CharsCount = ReadNextDecimalNumber(ref span);
@@ -90,9 +91,9 @@ namespace Iot.Device.Graphics
 
         public void GetCharData(char c, out ReadOnlySpan<ushort> charData)
         {
-            if (!GlyphMapper.TryGetValue((int) c, out int index))
+            if (!GlyphMapper.TryGetValue((int)c, out int index))
             {
-                if (!GlyphMapper.TryGetValue((int) DefaultChar, out index))
+                if (!GlyphMapper.TryGetValue((int)DefaultChar, out index))
                 {
                     throw new InvalidDataException("Couldn't get the glyph data");
                 }
@@ -101,7 +102,7 @@ namespace Iot.Device.Graphics
             charData = GlyphUshortData.AsSpan().Slice(index, Height);
         }
 
-        public int [] SupportedChars
+        public int[] SupportedChars
         {
             get
             {
@@ -154,13 +155,13 @@ namespace Iot.Device.Graphics
             for (int i = 0; i < CharsCount; i++)
             {
                 ReadOnlySpan<char> span = sr.ReadLine().AsSpan().Trim();
-                if (!span.StartsWith(s_startChar.AsSpan(), StringComparison.Ordinal))
+                if (!span.StartsWith(s_startChar, StringComparison.Ordinal))
                 {
                     throw new InvalidDataException("The font data is not well formed. expected STARTCHAR tag in the beginning of glyoh data.");
                 }
 
                 span = sr.ReadLine().AsSpan().Trim();
-                if (!span.StartsWith(s_encoding.AsSpan(), StringComparison.Ordinal))
+                if (!span.StartsWith(s_encoding, StringComparison.Ordinal))
                 {
                     throw new InvalidDataException("The font data is not well formed. expected ENCODING tag.");
                 }
@@ -171,7 +172,7 @@ namespace Iot.Device.Graphics
                 do
                 {
                     span = sr.ReadLine().AsSpan().Trim();
-                } while (!span.StartsWith(s_bbx.AsSpan(), StringComparison.Ordinal));
+                } while (!span.StartsWith(s_bbx, StringComparison.Ordinal));
 
                 span = span.Slice(s_bbx.Length).Trim();
                 if (ReadNextDecimalNumber(ref span) != Width ||
@@ -183,7 +184,7 @@ namespace Iot.Device.Graphics
                 }
 
                 span = sr.ReadLine().AsSpan().Trim();
-                if (span.CompareTo(s_bitmap.AsSpan(), StringComparison.Ordinal) != 0)
+                if (span.CompareTo(s_bitmap, StringComparison.Ordinal) != 0)
                 {
                     throw new InvalidDataException("The font data is not well formed. expected BITMAP tag.");
                 }
@@ -207,7 +208,7 @@ namespace Iot.Device.Graphics
                 }
 
                 span = sr.ReadLine().AsSpan().Trim();
-                if (!span.StartsWith(s_endChar.AsSpan(), StringComparison.Ordinal))
+                if (!span.StartsWith(s_endChar, StringComparison.Ordinal))
                 {
                     throw new InvalidDataException("The font data is not well formed. expected ENDCHAR tag in the beginning of glyoh data.");
                 }
@@ -226,7 +227,7 @@ namespace Iot.Device.Graphics
             }
 
             int number = 0;
-            while (span.Length > 0 && ((uint) (span[0] - '0')) <= 9)
+            while (span.Length > 0 && ((uint)(span[0] - '0')) <= 9)
             {
                 number = number * 10 + (span[0] - '0');
                 span = span.Slice(1);
@@ -248,7 +249,7 @@ namespace Iot.Device.Graphics
                     span = span.Slice(1);
                     continue;
                 }
-                else if ((uint) (Char.ToLowerInvariant(span[0]) - 'a') <= ((uint) ('f' - 'a')))
+                else if ((uint)(Char.ToLowerInvariant(span[0]) - 'a') <= ((uint)('f' - 'a')))
                 {
                     number = number * 16 + (Char.ToLowerInvariant(span[0]) - 'a') + 10;
                     span = span.Slice(1);

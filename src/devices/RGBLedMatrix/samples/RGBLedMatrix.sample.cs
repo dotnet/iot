@@ -540,19 +540,13 @@ namespace dotnettest
 
             float blur = 4.0f + 3.0f * (float)Math.Sin(time * 2f * Math.PI / 5f);
             float c = smoothstep(0.0f, 1.0f, (x - r) * blur);//x <= r ? 0.0 : 1.0;
-            //// return hsv2rgb_smooth(new Vector3(mod(time / 11.0f, 1.0f), 1.0f, c));
 
             float ha = a;
-            //ha = ha + time / 10f;
             float h = mod(ha, 1.0f);
-            //h = (float)Math.Floor(h * colFac) / colFac;
-            //h = mod(h + mod(time / 4.0f, 0.5f), 1.0f);
 
             float v = c;
-            //v = (float)Math.Floor(v * colFac2) / colFac2;
 
             float s = 1.0f;
-            //s = (float)Math.Pow(r * 5.0f, 0.5f);
             return hsv2rgb_smooth(new Vector3(h, s, v));
         }
 
@@ -566,14 +560,11 @@ namespace dotnettest
             float r = p.Length();
 
             float ha = a;
-            //ha = ha + time / 10f;
             float h = mod(ha, 1.0f);
-            //v = (float)Math.Floor(v * colFac2) / colFac2;
 
             float s = 1.0f;
             float v = r * 2.0f;
 
-            //s = (float)Math.Pow(r * 5.0f, 0.5f);
             return hsv2rgb_smooth(new Vector3(a, s, v));
         }
 

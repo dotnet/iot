@@ -8,11 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)/../RGBLedMatrix.csproj" />
+    <ProjectReference Include="../RGBLedMatrix.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)/../../Interop/Unix/ThreadHelper.cs" />
+    <Compile Include="../../Interop/Unix/ThreadHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>

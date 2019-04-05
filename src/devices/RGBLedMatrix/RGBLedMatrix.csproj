@@ -16,8 +16,8 @@
     <Compile Include="Gpio.cs" />
     <Compile Include="PinMapping.cs" />
     <Compile Include="RgbLedMatrix.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)/../Common/Iot/Device/Graphics/BdfFont.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)/../Interop/Unix/ThreadHelper.cs" />
+    <Compile Include="../Common/Iot/Device/Graphics/BdfFont.cs" />
+    <Compile Include="../Interop/Unix/ThreadHelper.cs" />
   </ItemGroup>
 
 </Project>
