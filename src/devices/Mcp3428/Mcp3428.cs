@@ -10,59 +10,81 @@ using System.Device.I2c.Drivers;
 using System.Device.Spi;
 using System.Device.Spi.Drivers;
 using System.IO;
+using System.Threading;
 
 namespace Iot.Device.Mcp3428
 {
     public class Mcp3428 : IDisposable
     {
-        private const int MaxRetries = 5;
+        private const int MaxRetries = 50;
         private readonly I2cDevice _i2cDevice;
-        private readonly byte[] _readBuffer = new byte[4];
-        private byte _lastChannel = 0xFF;
+        private readonly byte[] _readBuffer = new byte[3];
+
         private double _lastValue;
-        private byte _lastConfigByte => _readBuffer[3];
+        private byte _lastConfigByte => _readBuffer[2];
         private bool _isReadyBit = false;
 
         //Config params
         private GainEnum _pgaGain = GainEnum.X1;
         private ResolutionEnum _resolution = ResolutionEnum.Bit12;
         private ModeEnum _mode = ModeEnum.Continuous;
+        private byte _lastChannel = 0xFF;
+
+        private int WaitTime() => (int)(1000.0 / UpdateFrequency(_resolution));
 
         public ResolutionEnum Resolution
         {
             get => _resolution;
-            private set => _resolution = value;
+            set
+            {
+                WriteConfig(SetResolutionBits(_lastConfigByte, value));
+                _resolution = value;
+            }
         }
+        public byte LastChannel => _lastChannel;
 
         public GainEnum PGAGain
         {
             get => _pgaGain;
-            private set => _pgaGain = value;
+            set
+            {
+                WriteConfig(SetGainBits(_lastConfigByte, value));
+                _pgaGain = value;
+            }
         }
 
         public ModeEnum Mode
         {
             get => _mode;
-            private set => _mode = value;
+            set
+            {
+                WriteConfig(SetModeBit(_lastConfigByte, value));
+                _mode = value;
+            }
         }
 
         public Mcp3428(I2cDevice i2CDevice)
         {
             _i2cDevice = i2CDevice;
-            ReadValue(); // Don't like this, makes sure props are valid
+            ReadValue(); // Don't like this in constructor, makes sure props are valid
         }
 
         public Mcp3428(I2cDevice i2CDevice, ModeEnum mode = ModeEnum.Continuous,
-            ResolutionEnum resolution = ResolutionEnum.Bit12, GainEnum pgaGain = GainEnum.X1):this(i2CDevice)
+            ResolutionEnum resolution = ResolutionEnum.Bit12, GainEnum pgaGain = GainEnum.X1) : this(i2CDevice)
         {
-            Resolution = resolution;
-            Mode = mode;
-            PGAGain = pgaGain;
+            _resolution = resolution;
+            _mode = mode;
+            _pgaGain = pgaGain;
+            SetConfig(0, resolution: _resolution, mode: _mode, pgaGain: _pgaGain);
         }
 
         public void Dispose()
         {
         }
+
+        internal ReadOnlyMemory<byte> LastBytes => _readBuffer;
+
+        public double ReadChannel(int channel) { return ReadValue(channel); }
 
         private double ReadValue(int channel = -1)
         {
@@ -72,7 +94,7 @@ namespace Iot.Device.Mcp3428
             }
             else
             {
-                if (channel > 0 && channel != _lastChannel)
+                if (channel > 0 && channel != LastChannel)
                 {
                     var conf = SetChannelBits(_lastConfigByte, channel);
                     WriteConfig(conf);
@@ -81,7 +103,8 @@ namespace Iot.Device.Mcp3428
                 ReadConfigByte(_lastConfigByte);
             }
 
-            var value = BinaryPrimitives.ReadInt16LittleEndian(_readBuffer.AsSpan().Slice(1, 2));
+            //var value = BinaryPrimitives.ReadInt16LittleEndian(_readBuffer.AsSpan().Slice(1, 2));
+            var value = BinaryPrimitives.ReadInt16BigEndian(_readBuffer.AsSpan().Slice(0, 2));
             _lastValue = value * LSBValue(Resolution);
             return _lastValue;
         }
@@ -93,16 +116,20 @@ namespace Iot.Device.Mcp3428
             var tries = 0;
             _isReadyBit = false;
             var conf = SetReadyBit(_lastConfigByte, false);
-            if (channel >= 0)
+            if (channel >= 0 && channel != LastChannel)
             {
                 conf = SetChannelBits(conf, channel);
             }
+
+            var waittime = WaitTime();
             WriteConfig(conf);
             while (!_isReadyBit && tries < MaxRetries)
             {
                 _i2cDevice.Read(_readBuffer);
                 ReadConfigByte(_lastConfigByte);
                 tries++;
+                if (!_isReadyBit)
+                    Thread.Sleep(waittime); //TODO Get rid of Thread.Sleep
             }
 
             if (!_isReadyBit)
@@ -114,15 +141,15 @@ namespace Iot.Device.Mcp3428
         private void ReadConfigByte(byte config)
         {
             _isReadyBit = (config & Masks.ReadyMask) == 0; // Negated bit
-            _lastChannel = (byte) ((config & Masks.ChannelMask) >> 5);
-            _mode = (ModeEnum) (config & Masks.ModeMask);
-            _pgaGain = (GainEnum) (config & Masks.GainMask);
-            _resolution = (ResolutionEnum) (config & Masks.ResolutionMask);
+            _lastChannel = (byte)((config & Masks.ChannelMask) >> 5);
+            _mode = (ModeEnum)(config & Masks.ModeMask);
+            _pgaGain = (GainEnum)(config & Masks.GainMask);
+            _resolution = (ResolutionEnum)(config & Masks.ResolutionMask);
         }
 
         public enum ResolutionEnum : byte { Bit12 = 0, Bit14 = 4, Bit16 = 8 } // From datasheet 5.2
-        public enum GainEnum :byte{ X1 = 0, X2 = 1, X3 = 2, X4 =3}
-        public enum ModeEnum : byte {  OneShot=0, Continuous=16 }
+        public enum GainEnum : byte { X1 = 0, X2 = 1, X4 = 2, X8 = 3 }
+        public enum ModeEnum : byte { OneShot = 0, Continuous = 16 }
         public enum PinState { Low, High, Floating }
 
         /// <summary>
@@ -135,7 +162,7 @@ namespace Iot.Device.Mcp3428
         /// <autogeneratedoc />
         public static byte AddressFromPins(PinState Adr1, PinState Adr0)
         {
-            byte addr = 0b11010000; // Base value from doc
+            byte addr = 0b1101000; // Base value from doc
 
             switch (new ValueTuple<PinState, PinState>(Adr0, Adr1))
             { //TODO Remove C# 8 dependency for pull request
@@ -170,40 +197,81 @@ namespace Iot.Device.Mcp3428
             return addr;
         }
 
+        private bool SetConfig(int channel = 0, ModeEnum mode = ModeEnum.Continuous,
+            ResolutionEnum resolution = ResolutionEnum.Bit12, GainEnum pgaGain = GainEnum.X1)
+        {
+            byte conf = 0;
+            var ok = true;
+            conf = SetModeBit(conf, mode);
+            conf = SetChannelBits(conf, channel);
+            conf = SetGainBits(conf, pgaGain);
+            conf = SetResolutionBits(conf, resolution);
+            conf = SetReadyBit(conf, false);
+            _i2cDevice.WriteByte(conf);
+            for (int i = 0; i < 1000; i++)
+            {
+                ;
+            }
+            _i2cDevice.Read(_readBuffer);
+            ReadConfigByte(_lastConfigByte);
+            Console.WriteLine($"Sent config byte {conf:X}, received {_lastConfigByte:X}");
+            if (_lastChannel != channel)
+            {
+                Console.WriteLine($"Channel update failed from {_lastChannel} to {channel}");
+                ok = false;
+            }
+            if (Resolution != resolution)
+            {
+                Console.WriteLine($"Resolution update failed from {Resolution} to {resolution}");
+                ok = false;
+            }
+            if (mode != Mode)
+            {
+                Console.WriteLine($"Mode update failed from {Mode} to {mode}");
+                ok = false;
+            }
+            if (PGAGain != pgaGain)
+            {
+                Console.WriteLine($"PGAGain update failed from {PGAGain} to {pgaGain}");
+                ok = false;
+            }
+
+            return ok;
+        }
+
         private void WriteConfig(byte configByte)
         {
             _i2cDevice.WriteByte(configByte);
-            ReadConfigByte(configByte);
+            _i2cDevice.Read(_readBuffer);
+            ReadConfigByte(_lastConfigByte);
         }
 
-        private byte SetResolutionBits(byte configByte, ResolutionEnum resolution)
+        private static byte SetResolutionBits(byte configByte, ResolutionEnum resolution)
         {
-            return (byte) ((configByte & ~Masks.ReadyMask)|(byte)resolution);
+            return (byte)((configByte & ~Masks.ResolutionMask) | (byte)resolution);
         }
 
-        private byte SetReadyBit(byte configByte, bool ready)
+        private static byte SetReadyBit(byte configByte, bool ready)
         {
-            
-            return (byte) (ready ? configByte & ~Masks.ReadyMask : configByte | Masks.ReadyMask);
+            return (byte)(ready ? configByte & ~Masks.ReadyMask : configByte | Masks.ReadyMask);
         }
 
-        private byte SetModeBit(byte configByte, ModeEnum mode)
+        private static byte SetModeBit(byte configByte, ModeEnum mode)
         {
             return (byte)((configByte & ~Masks.ModeMask) | (byte)mode);
         }
 
-        private byte SetGainBits(byte configByte, GainEnum gain)
+        private static byte SetGainBits(byte configByte, GainEnum gain)
         {
             return (byte)((configByte & ~Masks.GainMask) | (byte)gain);
         }
 
-        private byte SetChannelBits(byte configByte, int channel)
+        private static byte SetChannelBits(byte configByte, int channel)
         {
             if (channel > 3 || channel < 0)
-                throw new ArgumentException("Channel numbers are only valid 0 to 3",nameof(channel));
-            return (byte)((configByte & ~Masks.ChannelMask) | (byte)channel);
+                throw new ArgumentException("Channel numbers are only valid 0 to 3", nameof(channel));
+            return (byte)((configByte & ~Masks.ChannelMask) | ((byte)channel << 5));
         }
-
 
         private static double LSBValue(ResolutionEnum res)
         {
@@ -220,6 +288,21 @@ namespace Iot.Device.Mcp3428
             }
         }
 
+        private static int UpdateFrequency(ResolutionEnum res)
+        {
+            switch (res)
+            {
+                case ResolutionEnum.Bit12:
+                    return 240;
+                case ResolutionEnum.Bit14:
+                    return 60;
+                case ResolutionEnum.Bit16:
+                    return 15;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(res), res, null);
+            }
+        }
+
         // From datasheet 5.2
         private static class Masks
         {
@@ -230,4 +313,5 @@ namespace Iot.Device.Mcp3428
             public const byte ReadyMask = 0b10000000;
         }
     }
+
 }
