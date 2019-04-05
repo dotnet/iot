@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview4.19164.7" />
-
     <ProjectReference Include="$(MSBuildThisFileDirectory)../System.Device.Gpio/System.Device.Gpio.csproj">
       <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
