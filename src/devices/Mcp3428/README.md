@@ -22,6 +22,7 @@ With this instantiating the device and reading the first channel is done like th
 var options = new I2cConnectionSettings(1,
     Mcp3428.AddressFromPins(PinState.Low, PinState.Floating));
 using (var dev = new UnixI2cDevice(options))
+using (var adc = new Mcp3428(dev)) // Default settings
 {
     var ch1 = adc.ReadChannel(0);
 
