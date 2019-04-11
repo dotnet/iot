@@ -14,7 +14,6 @@ namespace Iot.Device.Mcp3428
 {
     using static Helpers;
 
-
     public class Mcp3428 : IDisposable
     {
         public Mcp3428(I2cDevice i2CDevice) : this(i2CDevice,4)
@@ -24,7 +23,7 @@ namespace Iot.Device.Mcp3428
         public Mcp3428(I2cDevice i2CDevice, ModeEnum mode = ModeEnum.Continuous,
             ResolutionEnum resolution = ResolutionEnum.Bit12, GainEnum pgaGain = GainEnum.X1) : this(i2CDevice)
         {
-            SetConfig(0, resolution: resolution, mode: mode, pgaGain: pgaGain);
+            SetConfig(0, mode: mode, resolution: resolution, pgaGain: pgaGain);
         }
 
         /// <summary>
@@ -241,7 +240,6 @@ namespace Iot.Device.Mcp3428
             _i2cDevice.Read(_readBuffer);
             ReadConfigByte(LastConfigByte);
 
-            
             if (_lastChannel != channel)
             {
                 Console.WriteLine($"Channel update failed from {_lastChannel} to {channel}");
@@ -271,9 +269,9 @@ namespace Iot.Device.Mcp3428
         }
 
         protected int WaitTime => (int)(1000.0 / UpdateFrequency(Resolution));
-        
+
         public int ChannelCount { get; }
-                
+
         protected ConversionResult LastConversion
         {
             get

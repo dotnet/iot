@@ -4,7 +4,6 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
-    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
