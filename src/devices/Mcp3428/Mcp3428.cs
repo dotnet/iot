@@ -17,8 +17,6 @@ namespace Iot.Device.Mcp3428
 
     public class Mcp3428 : IDisposable
     {
-        #region Public Constructors
-
         public Mcp3428(I2cDevice i2CDevice) : this(i2CDevice,4)
         {
         }
@@ -41,10 +39,6 @@ namespace Iot.Device.Mcp3428
             ChannelCount = channels;
             ReadValue(); // Don't like this in constructor, makes sure props are valid
         }
-
-        #endregion Public Constructors
-
-        #region Public Properties
 
         /// <summary>
         /// Gets the last transmitted bytes. Debug function
@@ -101,10 +95,6 @@ namespace Iot.Device.Mcp3428
             }
         }
 
-        #endregion Public Properties
-
-        #region Public Methods
-
         public void Dispose()
         {
         }
@@ -120,10 +110,6 @@ namespace Iot.Device.Mcp3428
             return ReadValue(channel);
         }
 
-        #endregion Public Methods
-
-        #region Private Fields
-
         protected const int MaxRetries = 50;
         protected readonly I2cDevice _i2cDevice;
         protected readonly byte[] _readBuffer = new byte[3];
@@ -137,15 +123,7 @@ namespace Iot.Device.Mcp3428
 
         protected ResolutionEnum _resolution = ResolutionEnum.Bit12;
 
-        #endregion Private Fields
-
-        #region Private Properties
-
         protected byte LastConfigByte => _readBuffer[2];
-
-        #endregion Private Properties
-
-        #region Private Methods
 
         /// <summary>
         /// Initiates One-shot reading and waits for the conversion to finish.
@@ -183,7 +161,7 @@ namespace Iot.Device.Mcp3428
 
         protected void WaitForConversion(TimeSpan? waitSpan = null, Action<int> progressCallback = null, CancellationToken cancellationToken = default)
         {
-            waitSpan ??= TimeSpan.FromMilliseconds(WaitTime);
+            waitSpan = waitSpan ?? TimeSpan.FromMilliseconds(WaitTime);
             var allms = 0;
             _isReadyBit = false;
             while (!_isReadyBit && !cancellationToken.IsCancellationRequested)
@@ -318,14 +296,6 @@ namespace Iot.Device.Mcp3428
             //ReadConfigByte(_lastConfigByte);
         }
 
-        #endregion Private Methods
-
-        #region Private Classes
-
-
-
-        #endregion Private Classes
-        
         public static int AddressFromPins(PinState Adr0, PinState Adr1) { return Helpers.AddressFromPins(Adr0, Adr1); }
     }
 }

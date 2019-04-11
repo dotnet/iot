@@ -1,24 +1,18 @@
-﻿// Mcp3428::Mcp3428
-// Filename: Helpers.cs
-// Created: 2019_04_05
-// Edited: 20190405
-// Creator: Máté Kullai
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 
 namespace Iot.Device.Mcp3428
 {
-    #region Public Enums
-
     public enum GainEnum : byte { X1 = 0, X2 = 1, X4 = 2, X8 = 3 }
 
     public enum ModeEnum : byte { OneShot = 0, Continuous = 16 }
 
-    public enum PinState { Low, High, Floating }
+    public enum PinState : byte { Low = 0, High = 1, Floating = 2 }
 
     public enum ResolutionEnum : byte { Bit12 = 0, Bit14 = 4, Bit16 = 8 }
-
-    #endregion Public Enums
 
     internal static class Helpers
     {
@@ -53,37 +47,40 @@ namespace Iot.Device.Mcp3428
         {
             byte addr = 0b1101000; // Base value from doc
 
-            switch (new ValueTuple<PinState, PinState>(Adr0, Adr1))
-            { //TODO Remove C# 8 dependency for pull request
-                case (PinState.Low, PinState.Low):
-                case (PinState.Floating, PinState.Floating):
+            var idx = (byte)Adr0 << 4 + (byte)Adr1;
+
+            // switch (new ValueTuple<PinState, PinState>(Adr0, Adr1))
+            switch (idx)
+            {
+                case (0):
+                case (0x22):
                     break;
 
-                case (PinState.Low, PinState.Floating):
+                case (0x02):
                     addr += 1;
                     break;
 
-                case (PinState.Low, PinState.High):
+                case (0x01):
                     addr += 2;
                     break;
 
-                case (PinState.High, PinState.Low):
+                case (0x10):
                     addr += 4;
                     break;
 
-                case (PinState.High, PinState.Floating):
+                case (0x12):
                     addr += 5;
                     break;
 
-                case (PinState.High, PinState.High):
+                case (0x11):
                     addr += 6;
                     break;
 
-                case (PinState.Floating, PinState.Low):
+                case (0x20):
                     addr += 3;
                     break;
 
-                case (PinState.Floating, PinState.High):
+                case (0x21):
                     addr += 7;
                     break;
 
@@ -142,15 +139,11 @@ namespace Iot.Device.Mcp3428
         // From datasheet 5.2
         public static class Masks
         {
-            #region Public Fields
-
             public const byte ChannelMask = 0b01100000;
             public const byte GainMask = 0b00000011;
             public const byte ModeMask = 0b00010000;
             public const byte ReadyMask = 0b10000000;
             public const byte ResolutionMask = 0b00001100;
-
-            #endregion Public Fields
         }
     }
 }

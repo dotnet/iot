@@ -1,8 +1,6 @@
-﻿// Mcp3428::Mcp3428
-// Filename: Mcp3428Async.cs
-// Created: __
-// Edited: 20190405
-// Creator: Máté Kullai
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -83,7 +81,7 @@ namespace Iot.Device.Mcp3428
 
         protected async ValueTask WaitForConversionAsync(TimeSpan? waitSpan = null, Action<int> progressCallback = null, CancellationToken cancellationToken = default)
         {
-            waitSpan ??= TimeSpan.FromMilliseconds(WaitTime);
+            waitSpan = waitSpan ?? TimeSpan.FromMilliseconds(WaitTime);
             var allms = 0;
             _isReadyBit = false;
             while (!_isReadyBit && !cancellationToken.IsCancellationRequested)
