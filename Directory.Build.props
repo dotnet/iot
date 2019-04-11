@@ -4,6 +4,7 @@
   <Import Project="$(RepositoryEngineeringDir)Compilers.props" />
 
   <PropertyGroup>
+    <Copyright>$(CopyrightNetFoundation)</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
