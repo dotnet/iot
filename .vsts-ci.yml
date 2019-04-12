@@ -98,6 +98,10 @@ jobs:
     helixRepo: dotnet/iot
     pool:
       name: Hosted Ubuntu 1604
+    strategy:
+      matrix:
+        release_configuration:
+          _BuildConfig: Release
     steps:
     - script: src/Native/copyLibgpiod.sh
       name: CopyLibgpiod
