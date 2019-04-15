@@ -175,6 +175,7 @@ jobs:
           _BuildConfig: Release
     ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
       enableMicrobuild: true
+      enablePublishBuildAssets: true
     steps:
     - task: DownloadBuildArtifacts@0
       displayName: Download Built Managed Assets
@@ -189,11 +190,13 @@ jobs:
     - script: build.cmd -ci -sign
         -configuration $(_BuildConfig)
         -prepareMachine
+        -publish
         /p:ProductBuild=false
         /p:ToolsBuild=false
         /p:SampleBuild=false
         /p:BuildTests=false
         /p:BuildPackages=true
+        $(_InternalBuildArgs)
       name: Build
       displayName: Build
       condition: succeeded()
@@ -209,6 +212,29 @@ jobs:
       - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
         - _TeamName: DotNetCore
         - _SignType: real
+        - _DotNetPublishToBlobFeed : true
+        # DotNet-Blob-Feed provides: dotnetfeed-storage-access-key-1
+        # Publish-Build-Assets provides: MaestroAccessToken, BotAccount-dotnet-maestro-bot-PAT
+        - group: DotNet-Blob-Feed
+        - group: Publish-Build-Assets
+        - _PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json
+        - _InternalBuildArgs: /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
+            /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+            /p:DotNetPublishBlobFeedUrl=$(_PublishBlobFeedUrl)
+
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+  - template: /eng/common/templates/job/publish-build-assets.yml
+    parameters:
+      dependsOn:
+      - BuildPackages
+      agentOs: Windows_NT
+      name: PublishToBlobFeed
+      enableTelemetry: $(_enableTelemetry)
+      enablePublishBuildArtifacts: true
+      helixRepo: dotnet/iot
+      pool:
+        name: NetCoreInternal-Int-Pool
+        queue: buildpool.windows.10.amd64.vs2017
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/job/job.yml
@@ -217,9 +243,16 @@ jobs:
       - BuildPackages
       agentOs: Windows_NT
       name: PublishToMyGet
+      displayName: Publish To MyGet
       enableTelemetry: $(_enableTelemetry)
       enablePublishBuildArtifacts: true
       helixRepo: dotnet/iot
+      strategy:
+        matrix:
+          release_configuration:
+            _BuildConfig: Release
+      variables:
+        - group: DotNet-MyGet-Publish
       pool:
         ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
           name: NetCoreInternal-Int-Pool
@@ -232,14 +265,8 @@ jobs:
         inputs:
           artifactName: BuiltPackageOutputs
           downloadPath: $(Build.SourcesDirectory)/artifacts/packages/pushToMyGet
-      - task: AzureKeyVault@1
-        displayName: Downloading MyGet Secret
-        inputs:
-          azureSubscription: 'DotNet-Engineering-Services_KeyVault'
-          KeyVaultName: EngKeyVault
-          SecretsFilter: 'dotnet-myget-org-api-key'
       - script: powershell -ExecutionPolicy ByPass -NoProfile -command "& """$(Build.SourcesDirectory)\eng\common\Build.ps1""" -restore" &&
-          for /f %%x in ('dir /s /b $(Build.SourcesDirectory)\artifacts\packages\pushToMyGet\*.nupkg') do $(Build.SourcesDirectory)\.dotnet\dotnet.exe nuget push %%x -k $(dotnet-myget-org-api-key) -s https://dotnet.myget.org/F/dotnet-core/
+          for /f %%x in ('dir /s /b $(Build.SourcesDirectory)\artifacts\packages\pushToMyGet\*.nupkg') do dotnet nuget push %%x -k $(dotnet-myget-org-api-key) -s https://dotnet.myget.org/F/dotnet-core/
         name: PublishPackages
         displayName: Publishing Packages to MyGet
         condition: succeeded()
