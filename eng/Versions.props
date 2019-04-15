@@ -3,5 +3,6 @@
   <PropertyGroup>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
     <SystemDeviceGpioPackageVersion>0.1.0-prerelease.19215.5</SystemDeviceGpioPackageVersion>
+    <IotDeviceBindingsPackageVersion>0.1.0-prerelease.19215.5</IotDeviceBindingsPackageVersion>
   </PropertyGroup>
 </Project>
