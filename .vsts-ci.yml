@@ -251,6 +251,8 @@ jobs:
         matrix:
           release_configuration:
             _BuildConfig: Release
+      variables:
+        - group: DotNet-MyGet-Publish
       pool:
         ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
           name: NetCoreInternal-Int-Pool
@@ -263,12 +265,6 @@ jobs:
         inputs:
           artifactName: BuiltPackageOutputs
           downloadPath: $(Build.SourcesDirectory)/artifacts/packages/pushToMyGet
-      - task: AzureKeyVault@1
-        displayName: Downloading MyGet Secret
-        inputs:
-          azureSubscription: 'DotNet-Engineering-Services_KeyVault'
-          KeyVaultName: EngKeyVault
-          SecretsFilter: 'dotnet-myget-org-api-key'
       - script: powershell -ExecutionPolicy ByPass -NoProfile -command "& """$(Build.SourcesDirectory)\eng\common\Build.ps1""" -restore" &&
           for /f %%x in ('dir /s /b $(Build.SourcesDirectory)\artifacts\packages\pushToMyGet\*.nupkg') do dotnet nuget push %%x -k $(dotnet-myget-org-api-key) -s https://dotnet.myget.org/F/dotnet-core/
         name: PublishPackages
