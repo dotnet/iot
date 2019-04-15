@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview4.19164.7" />
   </ItemGroup>
 
