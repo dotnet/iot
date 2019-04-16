@@ -246,7 +246,6 @@ jobs:
       displayName: Publish To MyGet
       continueOnError: true
       enableTelemetry: $(_enableTelemetry)
-      enablePublishBuildArtifacts: true
       helixRepo: dotnet/iot
       strategy:
         matrix:
