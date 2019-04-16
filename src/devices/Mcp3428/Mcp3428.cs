@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp3428
 {
     using static Helpers;
 
-    public class Mcp3428 : IDisposable
+    public partial class Mcp3428 : IDisposable
     {
         public Mcp3428(I2cDevice i2CDevice) : this(i2CDevice,4)
         {
