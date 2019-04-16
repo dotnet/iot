@@ -10,7 +10,6 @@
     <Compile Include="Bh1750fvi.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="I2cAddress.cs" />
-    <Compile Include="LightTransmittance.cs" />
     <Compile Include="MeasuringMode.cs" />
   </ItemGroup>
 
