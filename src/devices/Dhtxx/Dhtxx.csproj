@@ -3,16 +3,18 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <!--Disabling default items so samples source won't get build by the main library-->
+    <LangVersion>Latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="CommunicationProtocol.cs" />
     <Compile Include="DhtType.cs" />
     <Compile Include="DhtSensor.cs" />
+    <Compile Include="..\Common\System\Device\DelayHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <ProjectReference Include="..\Units\Units.csproj" />
     <None Include="README.md" />
   </ItemGroup>

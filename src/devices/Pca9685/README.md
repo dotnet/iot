@@ -1,4 +1,4 @@
-# Pca9685
+# Pca9685 - I2C PWM Driver
 
 ## Summary
 

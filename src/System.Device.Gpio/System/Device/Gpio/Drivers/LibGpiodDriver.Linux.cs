@@ -19,29 +19,21 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override int PinCount => Interop.GetNumberOfLines(_chip);
 
-        public LibGpiodDriver()
+        public LibGpiodDriver(int gpioChip = 0)
         {
-            SafeChipIteratorHandle iterator = null;
             try
             {
-                iterator = Interop.GetChipIterator();
-                if (iterator == null)
+                _chip = Interop.OpenChipByNumber(gpioChip);
+                if (_chip == null)
                 {
-                    throw ExceptionHelper.GetIOException(ExceptionResource.NoChipIteratorFound, Marshal.GetLastWin32Error());
+                    throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
                 }
+                _pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
             }
             catch (DllNotFoundException)
             {
                 throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodNotInstalled);
             }
-            
-            _chip = Interop.GetNextChipFromChipIterator(iterator);
-            if (_chip == null)
-            {
-                throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
-            }
-
-            _pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
         }
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)

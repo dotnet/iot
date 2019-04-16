@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <LangVersion>Latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <IsPackable>true</IsPackable>
     <DeviceRoot>$(MSBuildThisFileDirectory)../devices/</DeviceRoot>
@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview4.19164.7" />
     <ProjectReference Include="$(MSBuildThisFileDirectory)../System.Device.Gpio/System.Device.Gpio.csproj">
       <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>

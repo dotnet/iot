@@ -16,7 +16,7 @@ namespace System.Device.Gpio.Drivers
             }
             catch (PlatformNotSupportedException)
             {
-                driver = new SysfsDriver();
+                driver = new SysFsDriver();
             }
             return driver;
         }

@@ -2,18 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <LangVersion>Latest</LangVersion>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <Compile Include="GravityRange.cs" />
     <Compile Include="Register.cs" />
     <Compile Include="Adxl345.cs" />
   </ItemGroup>
 
-  <ItemGroup> 
+  <ItemGroup>
     <None Remove="README.md" />
     <None Remove="sensor.jpg" />
   </ItemGroup>

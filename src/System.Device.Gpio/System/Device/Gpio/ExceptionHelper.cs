@@ -100,6 +100,6 @@ namespace System.Device.Gpio
         EventWaitError,
         EventReadError,
         NotListeningForEventError,
-        LibGpiodNotInstalled
+        LibGpiodNotInstalled,
     }
 }

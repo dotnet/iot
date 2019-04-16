@@ -3,11 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <LangVersion>Latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <Compile Include="I2cAddress.cs" />
     <Compile Include="ComparatorLatching.cs" />
     <Compile Include="ComparatorMode.cs" />
@@ -21,7 +20,7 @@
     <Compile Include="Ads1115.cs" />
   </ItemGroup>
 
-  <ItemGroup> 
+  <ItemGroup>
     <None Remove="README.md" />
     <None Remove="sensor.jpg" />
   </ItemGroup>

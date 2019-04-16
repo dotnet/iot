@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
 using System.Device;
 using System.Device.Gpio;
 using System.Drawing;
@@ -16,233 +17,372 @@ namespace Iot.Device.CharacterLcd
     /// <remarks>
     /// The Hitatchi HD44780 was released in 1987 and set the standard for LCD controllers. Hitatchi does not make this chipset anymore, but
     /// most character LCD drivers are intended to be fully compatible with this chipset. Some examples: Sunplus SPLC780D, Sitronix ST7066U,
-    /// Samsung KS0066U (and many more).
+    /// Samsung KS0066U, Aiptek AIP31066, and many more.
     /// 
     /// Some compatible chips extend the HD44780 with addtional pins and features. They are still fully compatible. The ST7036 is one example.
     /// 
     /// This implementation was drawn from numerous datasheets and libraries such as Adafruit_Python_CharLCD.
     /// </remarks>
-    public class Hd44780 : Hd44780Base, IDisposable
+    public class Hd44780 : IDisposable
     {
-        /// <summary>
-        /// Register select pin. Low is for writing to the instruction
-        /// register and reading the address counter. High is for reading
-        /// and writing to the data register.
-        /// </summary>
-        private readonly int _rsPin;
+        private bool _disposed;
+
+        protected const byte ClearDisplayCommand = 0b_0001;
+        protected const byte ReturnHomeCommand = 0b_0010;
+
+        protected const byte SetCGRamAddressCommand = 0b_0100_0000;
+        protected const byte SetDDRamAddressCommand = 0b_1000_0000;
+
+        internal DisplayFunction _displayFunction = DisplayFunction.Command;
+        internal DisplayControl _displayControl = DisplayControl.Command;
+        internal DisplayEntryMode _displayMode = DisplayEntryMode.Command;
+
+        protected readonly byte[] _rowOffsets;
+
+        protected readonly LcdInterface _interface;
 
         /// <summary>
-        /// Read/write pin. Low for write, high for read.
+        /// Logical size, in characters, of the LCD.
         /// </summary>
-        private readonly int _rwPin;
-
-        /// <summary>
-        /// Enable pin. Pulse high to process a read/write.
-        /// </summary>
-        private readonly int _enablePin;
-
-        private readonly int _backlight;
-
-        private readonly int[] _dataPins;
-
-        private IGpioController _controller;
-
-        private byte _lastByte;
-        private bool _useLastByte;
-
-        private readonly PinValuePair[] _pinBuffer = new PinValuePair[8];
-
-        // We need to add PWM support to make this useful (to drive the VO pin).
-        // For now we'll just stash the value and use it to decide the initial
-        // backlight state.
-        private readonly float _backlightBrightness;
+        public Size Size { get; }
 
         /// <summary>
         /// Initializes a new HD44780 LCD controller.
         /// </summary>
-        /// <param name="registerSelect">The pin that controls the regsiter select.</param>
-        /// <param name="enable">The pin that controls the enable switch.</param>
-        /// <param name="data">Collection of pins holding the data that will be printed on the screen.</param>
         /// <param name="size">The logical size of the LCD.</param>
-        /// <param name="backlight">The optional pin that controls the backlight of the display.</param>
-        /// <param name="backlightBrightness">The brightness of the backlight. 0.0 for off, 1.0 for on.</param>
-        /// <param name="readWrite">The optional pin that controls the read and write switch.</param>
-        /// <param name="controller">The controller to use with the LCD. If not specified, uses the platform default.</param>
-        public Hd44780(int registerSelect, int enable, int[] data, Size size, int backlight = -1, float backlightBrightness = 1.0f, int readWrite = -1, IGpioController controller = null)
-            : base(size)
+        /// <param name="interface">The interface to use with the LCD.</param>
+        public Hd44780(Size size, LcdInterface @interface)
         {
-            _rwPin = readWrite;
-            _rsPin = registerSelect;
-            _enablePin = enable;
-            _dataPins = data;
-            _backlight = backlight;
-            _backlightBrightness = backlightBrightness;
+            Size = size;
+            _interface = @interface;
 
-            if (data.Length == 8)
-            {
+            if (_interface.EightBitMode)
                 _displayFunction |= DisplayFunction.EightBit;
-            }
-            else if (data.Length != 4)
-            {
-                throw new ArgumentException($"The length of the array given to parameter {nameof(data)} must be 4 or 8");
-            }
 
-            _controller = controller ?? new GpioController(PinNumberingScheme.Logical);
             Initialize(size.Height);
-        }
-
-        public void Dispose()
-        {
-            if (_controller != null)
-            {
-                _controller.Dispose();
-                _controller = null;
-            }
+            _rowOffsets = InitializeRowOffsets(size.Height);
         }
 
         /// <summary>
-        /// Initializes the bit mode settings.
+        /// Initializes the display by setting the specified columns and lines.
         /// </summary>
-        protected override void InitializeBitMode()
+        private void Initialize(int rows)
         {
-            // Prep the pins
-            _controller.OpenPin(_rsPin, PinMode.Output);
+            // While the chip supports 5x10 pixel characters for one line displays they
+            // don't seem to be generally available. Supporting 5x10 would require extra
+            // support for CreateCustomCharacter
 
-            if (_rwPin != -1)
-            {
-                _controller.OpenPin(_rwPin, PinMode.Output);
-            }
-            if (_backlight != -1)
-            {
-                _controller.OpenPin(_backlight, PinMode.Output);
-                if (_backlightBrightness > 0)
-                {
-                    // Turn on the backlight
-                    _controller.Write(_backlight, PinValue.High);
-                }
-            }
-            _controller.OpenPin(_enablePin, PinMode.Output);
+            if (SetTwoLineMode(rows))
+                _displayFunction |= DisplayFunction.TwoLine;
 
-            for (int i = 0; i < _dataPins.Length; ++i)
-            {
-                _controller.OpenPin(_dataPins[i], PinMode.Output);
-            }
+            _displayControl |= DisplayControl.DisplayOn;
+            _displayMode |= DisplayEntryMode.Increment;
 
-            // The HD44780 self-initializes when power is turned on to the following settings:
-            // 
-            //  - 8 bit, 1 line, 5x7 font
-            //  - Display, cursor, and blink off
-            //  - Increment with no shift
-            //
-            // It is possible that the initialization will fail if the power is not provided
-            // within specific tolerances. As such, we'll always perform the software based
-            // initialization as described on pages 45/46 of the HD44780 data sheet. We give
-            // a little extra time to the required waits.
+            ReadOnlySpan<byte> commands = stackalloc byte[]
+            {
+                // Function must be set first to ensure that we always have the basic
+                // instruction set selected. (See PCF2119x datasheet Function_set note
+                // for one documented example of where this is necessary.)
+                (byte)_displayFunction,
+                (byte)_displayControl,
+                (byte)_displayMode,
+                ClearDisplayCommand
+            };
 
-            if (_dataPins.Length == 8)
-            {
-                // Init to 8 bit mode
-                DelayHelper.DelayMilliseconds(50, allowThreadYield: true);
-                Send(0b0011_0000);
-                DelayHelper.DelayMilliseconds(5, allowThreadYield: true);
-                Send(0b0011_0000);
-                DelayHelper.DelayMicroseconds(100, allowThreadYield: true);
-                Send(0b0011_0000);
-            }
-            else
-            {
-                // Init to 4 bit mode, setting _rspin to low as we're writing 4 bits directly.
-                // (Send writes the whole byte in two 4bit/nybble chunks)
-                _controller.Write(_rsPin, PinValue.Low);
-                DelayHelper.DelayMilliseconds(50, allowThreadYield: true);
-                WriteBits(0b0011, 4);
-                DelayHelper.DelayMilliseconds(5, allowThreadYield: true);
-                WriteBits(0b0011, 4);
-                DelayHelper.DelayMicroseconds(100, allowThreadYield: true);
-                WriteBits(0b0011, 4);
-                WriteBits(0b0010, 4);
-            }
+            SendCommands(commands);
         }
 
         /// <summary>
         /// Enable/disable the backlight. (Will always return false if no backlight pin was provided.)
         /// </summary>
-        public override bool BacklightOn
+        public virtual bool BacklightOn
         {
-            get
+            get => _interface.BacklightOn;
+            set => _interface.BacklightOn = value;
+        }
+
+        protected void SendData(byte value) => _interface.SendData(value);
+        protected void SendCommand(byte command) => _interface.SendCommand(command);
+        protected void SendData(ReadOnlySpan<byte> values) => _interface.SendData(values);
+        protected void SendCommands(ReadOnlySpan<byte> commands) => _interface.SendCommands(commands);
+
+        protected virtual bool SetTwoLineMode(int rows) => rows > 1;
+
+
+        protected virtual byte[] InitializeRowOffsets(int rows)
+        {
+            // In one-line mode DDRAM addresses go from 0 - 79 [0x00 - 0x4F]
+            //
+            // In two-line mode DDRAM addresses are laid out as follows:
+            //
+            //   First row:  0 - 39   [0x00 - 0x27]
+            //   Second row: 64 - 103 [0x40 - 0x67]
+            //
+            // (The address gap presumably is to allow all second row addresses to be
+            // identifiable with one bit? Not sure what the value of that is.)
+            //
+            // The chipset doesn't natively support more than two rows. For tested
+            // four row displays the two rows are split as follows:
+            //
+            //   First row:  0 - 19   [0x00 - 0x13]
+            //   Second row: 64 - 83  [0x40 - 0x53]
+            //   Third row:  20 - 39  [0x14 - 0x27]  (Continues first row)
+            //   Fourth row: 84 - 103 [0x54 - 0x67]  (Continues second row)
+
+            byte[] rowOffsets;
+
+            switch (rows)
             {
-                return _backlight != -1 && _controller.Read(_backlight) == PinValue.High;
+                case 1:
+                    rowOffsets = new byte[1];
+                    break;
+                case 2:
+                    rowOffsets = new byte[] { 0, 64 };
+                    break;
+                case 4:
+                    rowOffsets = new byte[] { 0, 64, 20, 84 };
+                    break;
+                default:
+                    // We don't support other rows, users can derive for odd cases.
+                    // (Three row LCDs exist, but aren't common.)
+                    throw new ArgumentOutOfRangeException(nameof(rows));
             }
-            set
-            {
-                if (_backlight != -1)
-                    _controller.Write(_backlight, value ? PinValue.High : PinValue.Low);
-            }
+
+            return rowOffsets;
         }
 
         /// <summary>
-        /// Send a data or command byte to the controller.
+        /// Wait for the device to not be busy.
         /// </summary>
-        /// <param name="data">True to send data, otherwise sends a command.</param>
-        protected override void Send(byte value, bool data = false)
+        /// <param name="microseconds">Time to wait if checking busy state isn't possible/practical.</param>
+        protected void WaitForNotBusy(int microseconds)
         {
-            _controller.Write(_rsPin, data ? PinValue.High : PinValue.Low);
-
-            if (_rwPin != -1)
-            {
-                _controller.Write(_rwPin, PinValue.Low);
-            }
-
-            if (_dataPins.Length == 8)
-            {
-                WriteBits(value, 8);
-            }
-            else
-            {
-                WriteBits((byte)(value >> 4), 4);
-                WriteBits(value, 4);
-            }
-
-            // Most commands need a maximum of 37μs to complete.
-            // This is based on a 270kHz clock in the documentation.
-            // (See page 25.)
-            WaitForNotBusy(37);
+            _interface.WaitForNotBusy(microseconds);
         }
 
-        private void WriteBits(byte value, int count)
+        /// <summary>
+        /// Clears the LCD, returning the cursor to home and unshifting if shifted.
+        /// Will also set to Increment.
+        /// </summary>
+        public void Clear()
         {
-            int changedCount = 0;
-            for (int i = 0; i < count; i++)
+            SendCommand(ClearDisplayCommand);
+
+            // The HD44780 spec doesn't call out how long this takes. Home is documented as
+            // taking 1.52ms, and as this does more work (sets all memory to the space character)
+            // we do a longer wait. On the PCF2119x it is described as taking 165 clock cycles which
+            // would be 660μs on the "typical" clock.
+            WaitForNotBusy(2000);
+        }
+
+        /// <summary>
+        /// Moves the cursor to the first line and first column, unshifting if shifted.
+        /// </summary>
+        public void Home()
+        {
+            SendCommand(ReturnHomeCommand);
+
+            // The return home command is documented as taking 1.52ms with the standard 270KHz clock.
+            // SendCommand already waits for 37μs, 
+            WaitForNotBusy(1520);
+        }
+
+        /// <summary>
+        /// Moves the cursor to an explicit column and row position.
+        /// </summary>
+        /// <param name="left">The column position from left to right starting with 0.</param>
+        /// <param name="top">The row position from the top starting with 0.</param>
+        public void SetCursorPosition(int left, int top)
+        {
+            int rows = _rowOffsets.Length;
+            if (top < 0 || top >= rows)
+                throw new ArgumentOutOfRangeException(nameof(top));
+
+            // Throw if we're given a negative left value or the calculated address would be
+            // larger than the max "good" address. Addressing is covered in detail in
+            // InitializeRowOffsets above.
+
+            int newAddress = left + _rowOffsets[top];
+            if (left < 0 || (rows == 1 && newAddress >= 80) || (rows > 1 && newAddress >= 104))
+                throw new ArgumentOutOfRangeException(nameof(left));
+
+            SendCommand((byte)(SetDDRamAddressCommand | newAddress));
+        }
+
+        /// <summary>
+        /// Enable/disable the display.
+        /// </summary>
+        public bool DisplayOn
+        {
+            get => (_displayControl & DisplayControl.DisplayOn) > 0;
+            set => SendCommand((byte)(value ? _displayControl |= DisplayControl.DisplayOn
+                : _displayControl &= ~DisplayControl.DisplayOn));
+        }
+
+        /// <summary>
+        /// Enable/disable the underline cursor.
+        /// </summary>
+        public bool UnderlineCursorVisible
+        {
+            get => (_displayControl & DisplayControl.CursorOn) > 0;
+            set => SendCommand((byte)(value ? _displayControl |= DisplayControl.CursorOn
+                : _displayControl &= ~DisplayControl.CursorOn));
+        }
+
+        /// <summary>
+        /// Enable/disable the blinking cursor.
+        /// </summary>
+        public bool BlinkingCursorVisible
+        {
+            get => (_displayControl & DisplayControl.BlinkOn) > 0;
+            set => SendCommand((byte)(value ? _displayControl |= DisplayControl.BlinkOn
+                : _displayControl &= ~DisplayControl.BlinkOn));
+        }
+
+        /// <summary>
+        /// When enabled the display will shift rather than the cursor.
+        /// </summary>
+        public bool AutoShift
+        {
+            get => (_displayMode & DisplayEntryMode.DisplayShift) > 0;
+            set => SendCommand((byte)(value ? _displayMode |= DisplayEntryMode.DisplayShift
+                : _displayMode &= ~DisplayEntryMode.DisplayShift));
+        }
+
+        /// <summary>
+        /// Gets/sets whether the cursor location increments (true) or decrements (false).
+        /// </summary>
+        public bool Increment
+        {
+            get => (_displayMode & DisplayEntryMode.Increment) > 0;
+            set => SendCommand((byte)(value ? _displayMode |= DisplayEntryMode.Increment
+                : _displayMode &= ~DisplayEntryMode.Increment));
+        }
+
+        /// <summary>
+        /// Move the display left one position.
+        /// </summary>
+        public void ShiftDisplayLeft() => SendCommand((byte)(DisplayShift.Command | DisplayShift.Display));
+
+        /// <summary>
+        /// Move the display right one position.
+        /// </summary>
+        public void ShiftDisplayRight() => SendCommand((byte)(DisplayShift.Command | DisplayShift.Display | DisplayShift.Right));
+
+        /// <summary>
+        /// Move the cursor left one position.
+        /// </summary>
+        public void ShiftCursorLeft() => SendCommand((byte)(DisplayShift.Command | DisplayShift.Display));
+
+        /// <summary>
+        /// Move the cursor right one position.
+        /// </summary>
+        public void ShiftCursorRight() => SendCommand((byte)(DisplayShift.Command | DisplayShift.Display | DisplayShift.Right));
+
+        /// <summary>
+        /// Fill one of the 8 CGRAM locations (character codes 0 - 7) with custom characters.
+        /// </summary>
+        /// <remarks>
+        /// The custom characters also occupy character codes 8 - 15.
+        /// 
+        /// You can find help designing characters at https://www.quinapalus.com/hd44780udg.html.
+        /// 
+        /// The datasheet description for custom characters is very difficult to follow. Here is
+        /// a rehash of the technical details that is hopefully easier:
+        /// 
+        /// Only 6 bits of addresses are available for character ram. That makes for 64 bytes of
+        /// available character data. 8 bytes of data are used for each character, which is where
+        /// the 8 total custom characters comes from (64/8).
+        /// 
+        /// Each byte corresponds to a character line. Characters are only 5 bits wide so only
+        /// bits 0-4 are used for display. Whatever is in bits 5-7 is just ignored. Store bits
+        /// there if it makes you happy, but it won't impact the display. '1' is on, '0' is off.
+        /// 
+        /// In the built-in characters the 8th byte is usually empty as this is where the underline
+        /// cursor will be if enabled. You can put data there if you like, which gives you the full
+        /// 5x8 character. The underline cursor just turns on the entire bottom row.
+        /// 
+        /// 5x10 mode is effectively useless as displays aren't available that utilize it. In 5x10
+        /// mode *16* bytes of data are used for each character. That leaves room for only *4*
+        /// custom characters. The first character is addressable from code 0, 1, 8, and 9. The
+        /// second is 2, 3, 10, 11 and so on...
+        /// 
+        /// In this mode *11* bytes of data are actually used for the character data, which
+        /// effectively gives you a 5x11 character, although typically the last line is blank to
+        /// leave room for the underline cursor. Why the modes are referred to as 5x8 and 5x10 as
+        /// opposed to 5x7 and 5x10 or 5x8 and 5x11 is a mystery. In an early pre-release data
+        /// book 5x7 and 5x10 is used (Advance Copy #AP4 from July 1985). Perhaps it was a
+        /// marketing change?
+        /// 
+        /// As only 11 bytes are used in 5x10 mode, but 16 bytes are reserved, the last 5 bytes
+        /// are useless. The datasheet helpfully suggests that you can store your own data there.
+        /// The same would be true for bits 5-7 of lines that matter for both 5x8 and 5x10.
+        /// </remarks>
+        /// <param name="location">Should be between 0 and 7</param>
+        /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
+        public void CreateCustomCharacter(byte location, params byte[] characterMap)
+        {
+            if (characterMap == null)
+                throw new ArgumentNullException(nameof(characterMap));
+
+            CreateCustomCharacter(location, characterMap.AsSpan());
+        }
+
+        /// <summary>
+        /// Fill one of the 8 CGRAM locations (character codes 0 - 7) with custom characters.
+        /// </summary>
+        /// <param name="location">Should be between 0 and 7</param>
+        /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
+        public void CreateCustomCharacter(byte location, ReadOnlySpan<byte> characterMap)
+        {
+            if (location > 7)
+                throw new ArgumentOutOfRangeException(nameof(location));
+
+            if (characterMap.Length != 8)
+                throw new ArgumentException(nameof(characterMap));
+
+            // The character address is set in bits 3-5 of the command byte
+            SendCommand((byte)(SetCGRamAddressCommand | (location << 3)));
+            SendData(characterMap);
+        }
+
+        /// <summary>
+        /// Write text to display.
+        /// </summary>
+        /// <remarks>
+        /// There are only 256 characters available. There are chip variants
+        /// with different character sets. Characters from space ' ' (32) to
+        /// '}' are usually the same with the exception of '\', which is a
+        /// yen symbol on some chips '¥'.
+        /// </remarks>
+        /// <param name="value">Text to be displayed.</param>
+        public void Write(string value)
+        {
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(value.Length);
+            for (int i = 0; i < value.Length; ++i)
             {
-                int newBit = (value >> i) & 1;
-                if (!_useLastByte)
-                {
-                    _pinBuffer[changedCount++] = new PinValuePair(_dataPins[i], newBit);
-                }
-                else
-                {
-                    // Each bit change takes ~23μs, so only change what we have to
-                    // This is particularly impactful when using all 8 data lines.
-                    int oldBit = (_lastByte >> i) & 1;
-                    if (oldBit != newBit)
-                    {
-                        _pinBuffer[changedCount++] = new PinValuePair(_dataPins[i], newBit);
-                    }
-                }
+                buffer[i] = (byte)value[i];
             }
 
-            if (changedCount > 0)
-                _controller.Write(new ReadOnlySpan<PinValuePair>(_pinBuffer, 0, changedCount));
+            SendData(new ReadOnlySpan<byte>(buffer, 0, value.Length));
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
 
-            _useLastByte = true;
-            _lastByte = value;
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _interface?.Dispose();
+            }
+        }
 
-            // Enable pin needs to be high for at least 450ns when running on 3V
-            // and 230ns on 5V. (PWeh on page 49/52 and Figure 25 on page 58)
-
-            _controller.Write(_enablePin, PinValue.High);
-            DelayHelper.DelayMicroseconds(1, allowThreadYield: false);
-            _controller.Write(_enablePin, PinValue.Low);
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                Dispose(true);
+               _disposed = true;
+            }
         }
     }
 }
