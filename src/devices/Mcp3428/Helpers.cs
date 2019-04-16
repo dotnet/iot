@@ -34,7 +34,6 @@ namespace Iot.Device.Mcp3428
             }
         }
 
-
         /// <summary>
         /// Determine device I2C address based on the configuration pin states. Based on documentation TABLE 5-3-
         /// </summary>

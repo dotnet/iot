@@ -398,7 +398,6 @@ namespace Iot.Device.Mcp3428
             return LastConversion.Voltage;
         }
 
-
         /// <summary>
         /// Determine device I2C address based on the configuration pin states.
         /// </summary>
