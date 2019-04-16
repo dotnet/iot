@@ -6,13 +6,7 @@ using System;
 
 namespace Iot.Device.Mcp3428
 {
-    public interface IAdcResult
-    {
-        byte Channel { get; }
-        double Voltage { get; }
-    }
-
-    public readonly struct ConversionResult : IAdcResult
+    public readonly struct ConversionResult
     {
         public ConversionResult(byte channel, short rawData, ResolutionEnum resolution)
         {
