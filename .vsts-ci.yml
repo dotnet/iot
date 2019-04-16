@@ -244,6 +244,7 @@ jobs:
       agentOs: Windows_NT
       name: PublishToMyGet
       displayName: Publish To MyGet
+      continueOnError: true
       enableTelemetry: $(_enableTelemetry)
       enablePublishBuildArtifacts: true
       helixRepo: dotnet/iot
