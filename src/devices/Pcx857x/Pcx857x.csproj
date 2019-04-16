@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace>Iot.Device.Pcx857x</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <Compile Include="..\Common\System\Device\Gpio\PinVector32.cs" Link="PinVector32.cs" />
+    <Compile Include="..\Common\System\Device\Gpio\PinVector64.cs" Link="PinVector64.cs" />
+    <Compile Include="Pca8574.cs" />
+    <Compile Include="Pca8575.cs" />
+    <Compile Include="Pcf8574.cs" />
+    <Compile Include="Pcf8575.cs" />
+    <Compile Include="Pcx8574.cs" />
+    <Compile Include="Pcx8575.cs" />
+    <Compile Include="Pcx857x.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
+
+</Project>

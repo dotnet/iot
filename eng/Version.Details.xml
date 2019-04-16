@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <ProductDependencies></ProductDependencies>
+  <ProductDependencies>
+    <Dependency Name="System.Device.Gpio" Version="0.1.0-prerelease.19215.5">
+      <Uri>https://github.com/dotnet/iot</Uri>
+      <Sha>909d6dd81bfdf35a2ab02f48ac54c5f30821ea8b</Sha>
+    </Dependency>
+    <Dependency Name="Iot.Device.Bindings" Version="0.1.0-prerelease.19215.5">
+      <Uri>https://github.com/dotnet/iot</Uri>
+      <Sha>909d6dd81bfdf35a2ab02f48ac54c5f30821ea8b</Sha>
+    </Dependency>
+  </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.18505.3">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19214.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>504a862aa4e98755eb4c5bff93f06579de891104</Sha>
+      <Sha>bcf1186cb0db792906fd319ae49bdbc41f44f8ec</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

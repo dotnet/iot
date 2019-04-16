@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Bme280.cs" />
+    <Compile Include="Bmp280.cs" />
+    <Compile Include="BmxBase.cs" />
+    <Compile Include="CalibrationData.cs" />
+    <Compile Include="PowerMode.cs" />
+    <Compile Include="Register.cs" />
+    <Compile Include="Sampling.cs" />
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="..\Units\Units.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="README.md" />
+  </ItemGroup>
+</Project>

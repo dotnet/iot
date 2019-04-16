@@ -1,6 +1,6 @@
 # Reading Analog Input from a Potentiometer
 
-You can use .NET Core to read analog values from a [potentiometer](https://en.wikipedia.org/wiki/Trimmer_(electronics)), like a [volume control](https://www.adafruit.com/product/356).
+You can use .NET Core to read analog values from a [potentiometer](https://en.wikipedia.org/wiki/Trimmer_(electronics)), like a [volume control](https://www.adafruit.com/product/356). You can use some sensors with variable resistance instead of potentiometer. Such example exist within samples: [using MCP3008 with FSR (Force Sensitive Resistor)](../../../../samples/force-sensitive-resistor/README.md)   
 
 The Raspberry Pi cannot read analog values directly so relies on an analog to digital converter, like the [MCP3008 ADC](https://www.adafruit.com/product/856). The MCP3008 supports the SPI interface. The 10-bit chip can be accessed as an SPI device or manually via raw GPIO pins. Both options are demonstrated.
 

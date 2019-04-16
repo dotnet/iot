@@ -3,12 +3,12 @@
   <PropertyGroup>
     <MajorVersion>0</MajorVersion>
     <MinorVersion>1</MinorVersion>
-    <Description>This preview package allows projects to access GPIO, SPI, I2C, and PWM devices connected to an IoT board.</Description>
-    <Copyright>Microsoft Corporation, All rights reserved.</Copyright>
+    <Description>The System.Device.Gpio preview package supports general-purpose I/O (GPIO) pins, PWM, I2C, SPI and related interfaces for interacting with low level hardware pins to control hardware sensors, displays and input devices on single-board-computers; Raspberry Pi, BeagleBoard, HummingBoard, ODROID, and other single-board-computers that are supported by Linux and Windows 10 IoT Core OS can be used with .NET Core and System.Device.Gpio.  On Windows 10 IoT Core OS, the library wraps the Windows.Devices.Gpio.dll assembly.  On Linux, the library supports three driver modes: libgpiod for fast full-featured GPIO access on all Linux distros since version 4.8 of the Linux kernel; slower and limited-functionality GPIO access via the deprecated Sysfs interface (/sys/class/gpio) when running on older Linux distro versions with a Linux kernel older than version 4.8; and lastly board-specific Linux drivers that access GPIO addresses in /dev/mem for fasted performance at the trade-off of being able to run on very specific versions of single-board-computers.  In the future, the board-specific Linux drivers may be removed in favor of only supporting libgpiod and sysfs Linux interfaces.  In addition to System.Device.Gpio, the optional IoT.Device.Bindings NuGet package contains device bindings for many sensors, displays, and input devices that can be used with System.Device.Gpio.
+</Description>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <PackageTags>.NET Core GPIO Pins SPI I2C PWM BCM2835 RPi IoT</PackageTags>
   </PropertyGroup>
-  
+
   <!--Project Configurations properties for VS-->
   <PropertyGroup>
     <RuntimeIdentifier Condition="'$(Configuration)' == 'Windows-Debug'">win</RuntimeIdentifier>
