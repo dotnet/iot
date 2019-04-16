@@ -12,11 +12,9 @@ using System.Threading;
 
 namespace Iot.Device.Mcp3428
 {
-    using static Helpers;
-
     public partial class Mcp3428 : IDisposable
     {
-        public Mcp3428(I2cDevice i2CDevice) : this(i2CDevice,4)
+        public Mcp3428(I2cDevice i2CDevice) : this(i2CDevice, 4)
         {
         }
 
@@ -58,7 +56,7 @@ namespace Iot.Device.Mcp3428
             get => _mode;
             set
             {
-                WriteConfig(SetModeBit(LastConfigByte, value));
+                WriteConfig(Helpers.SetModeBit(LastConfigByte, value));
                 _mode = value;
             }
         }
@@ -73,7 +71,7 @@ namespace Iot.Device.Mcp3428
             get => _pgaGain;
             set
             {
-                WriteConfig(SetGainBits(LastConfigByte, value));
+                WriteConfig(Helpers.SetGainBits(LastConfigByte, value));
                 _pgaGain = value;
             }
         }
@@ -88,7 +86,7 @@ namespace Iot.Device.Mcp3428
             get => _resolution;
             set
             {
-                WriteConfig(SetResolutionBits(LastConfigByte, value));
+                WriteConfig(Helpers.SetResolutionBits(LastConfigByte, value));
                 _resolution = value;
                 //WaitTime = (int)(1000.0 / UpdateFrequency(_resolution));
             }
@@ -140,21 +138,21 @@ namespace Iot.Device.Mcp3428
                 throw new IOException("Device is not in One-Shot mode");
 
             _isReadyBit = false;
-            var conf = SetReadyBit(LastConfigByte, false);
+            var conf = Helpers.SetReadyBit(LastConfigByte, false);
             if (channel >= 0 && channel != LastChannel)
             {
-                conf = SetChannelBits(conf, channel);
+                conf = Helpers.SetChannelBits(conf, channel);
             }
 
             WriteConfig(conf);
-            using (var source = new CancellationTokenSource(TimeSpan.FromMilliseconds(WaitTime*5)))
+            using (var source = new CancellationTokenSource(TimeSpan.FromMilliseconds(WaitTime * 5)))
             {
-                WaitForConversion(TimeSpan.FromMilliseconds(WaitTime), cancellationToken:source.Token);
+                WaitForConversion(TimeSpan.FromMilliseconds(WaitTime), cancellationToken: source.Token);
 
-            if (!_isReadyBit)
-            {
-                throw new IOException($"ADC Conversion was not ready after {WaitTime*5} ms.");
-            }
+                if (!_isReadyBit)
+                {
+                    throw new IOException($"ADC Conversion was not ready after {WaitTime * 5} ms.");
+                }
             }
         }
 
@@ -197,7 +195,7 @@ namespace Iot.Device.Mcp3428
             {
                 if (channel > 0 && channel != LastChannel)
                 {
-                    var conf = SetChannelBits(LastConfigByte, channel);
+                    var conf = Helpers.SetChannelBits(LastConfigByte, channel);
                     WriteConfig(conf);
                 }
 
@@ -226,14 +224,15 @@ namespace Iot.Device.Mcp3428
         protected bool SetConfig(int channel = 0, ModeEnum mode = ModeEnum.Continuous,
             ResolutionEnum resolution = ResolutionEnum.Bit12, GainEnum pgaGain = GainEnum.X1)
         {
-            if (channel < 0 || channel > ChannelCount-1) throw new ArgumentOutOfRangeException(nameof(channel));
+            if (channel < 0 || channel > ChannelCount - 1)
+                throw new ArgumentOutOfRangeException(nameof(channel));
             byte conf = 0;
             var ok = true;
-            conf = SetModeBit(conf, mode);
-            conf = SetChannelBits(conf, channel);
-            conf = SetGainBits(conf, pgaGain);
-            conf = SetResolutionBits(conf, resolution);
-            conf = SetReadyBit(conf, false);
+            conf = Helpers.SetModeBit(conf, mode);
+            conf = Helpers.SetChannelBits(conf, channel);
+            conf = Helpers.SetGainBits(conf, pgaGain);
+            conf = Helpers.SetResolutionBits(conf, resolution);
+            conf = Helpers.SetReadyBit(conf, false);
 
             _i2cDevice.WriteByte(conf);
 
@@ -268,7 +267,7 @@ namespace Iot.Device.Mcp3428
             return ok;
         }
 
-        protected int WaitTime => (int)(1000.0 / UpdateFrequency(Resolution));
+        protected int WaitTime => (int)(1000.0 / Helpers.UpdateFrequency(Resolution));
 
         public int ChannelCount { get; }
 
@@ -294,6 +293,12 @@ namespace Iot.Device.Mcp3428
             //ReadConfigByte(_lastConfigByte);
         }
 
-        public static int AddressFromPins(PinState Adr0, PinState Adr1) { return Helpers.AddressFromPins(Adr0, Adr1); }
+        /// <summary>
+        /// Determine device I2C address based on the configuration pin states.
+        /// </summary>
+        /// <param name="Adr0">The adr0 pin state</param>
+        /// <param name="Adr1">The adr1 pin state</param>
+        /// <returns>System.Int32.</returns>
+        public static int I2CAddressFromPins(PinState Adr0, PinState Adr1) { return Helpers.AddressFromPins(Adr0, Adr1); }
     }
 }
