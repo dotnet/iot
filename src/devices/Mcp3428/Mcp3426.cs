@@ -23,7 +23,7 @@ namespace Iot.Device.Mcp3428
 
 #pragma warning disable RCS1163 // Unused parameter.
 #pragma warning disable IDE0060 // Remove unused parameter
-        public new static int AddressFromPins(PinState _ = PinState.Low, PinState _NA = PinState.Low) { return Address; }
+        public new static int I2CAddressFromPins(PinState _ = PinState.Low, PinState _NA = PinState.Low) { return Address; }
 #pragma warning restore IDE0060 // Remove unused parameter
 #pragma warning restore RCS1163 // Unused parameter.
     }

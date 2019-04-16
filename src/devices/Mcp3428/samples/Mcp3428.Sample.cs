@@ -16,7 +16,7 @@ namespace Iot.Device.Mcp3428.Samples
         {
             Console.WriteLine("Hello Mcp3428 Sample!");
             var options = new I2cConnectionSettings(1,
-                Mcp3428.AddressFromPins(PinState.Low, PinState.Low));
+                Mcp3428.I2CAddressFromPins(PinState.Low, PinState.Low));
             using (var dev = new UnixI2cDevice(options))
             {
                 using (var adc = new Mcp3428(dev, ModeEnum.OneShot, resolution: ResolutionEnum.Bit16, pgaGain: GainEnum.X1))
