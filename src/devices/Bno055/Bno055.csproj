@@ -3,13 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="Models/*.cs" />
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease.19078.2" />
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <PackageReference Include="System.Memory" Version="4.5.2" />
     <ProjectReference Include="..\Units\Units.csproj" />
   </ItemGroup>

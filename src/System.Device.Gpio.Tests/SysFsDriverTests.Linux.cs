@@ -6,9 +6,9 @@ using System.Device.Gpio.Drivers;
 
 namespace System.Device.Gpio.Tests
 {
-    public class SysfsDriverTests : GpioControllerTestBase
+    public class SysFsDriverTests : GpioControllerTestBase
     {
-        protected override GpioDriver GetTestDriver() => new SysfsDriver();
+        protected override GpioDriver GetTestDriver() => new SysFsDriver();
 
         protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
     }

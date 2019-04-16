@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Device.Gpio;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -59,7 +60,7 @@ namespace System.Device.Spi.Drivers
                     throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not open SPI device file '{deviceFileName}'.");
                 }
 
-                UnixSpiMode mode = SpiModeToUnixSpiMode(_settings.Mode);
+                UnixSpiMode mode = SpiSettingsToUnixSpiMode();
                 IntPtr nativePtr = new IntPtr(&mode);
 
                 int result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MODE, nativePtr);
@@ -86,6 +87,23 @@ namespace System.Device.Spi.Drivers
                     throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI clock frequency to {_settings.ClockFrequency}.");
                 }
             }
+        }
+
+        private UnixSpiMode SpiSettingsToUnixSpiMode()
+        {
+            UnixSpiMode mode = SpiModeToUnixSpiMode(_settings.Mode);
+
+            if (_settings.ChipSelectLineActiveState == PinValue.High)
+            {
+                mode |= UnixSpiMode.SPI_CS_HIGH;
+            }
+
+            if (_settings.DataFlow == DataFlow.LsbFirst)
+            {
+                mode |= UnixSpiMode.SPI_LSB_FIRST;
+            }
+
+            return mode;
         }
 
         private UnixSpiMode SpiModeToUnixSpiMode(SpiMode mode)

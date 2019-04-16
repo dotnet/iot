@@ -3,14 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <LangVersion>Latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Hmc5883l.csproj" />
   </ItemGroup>
 
-  <ItemGroup> 
+  <ItemGroup>
     <None Remove="HMC5883L_circuit.fzz" />
     <None Remove="HMC5883L_circuit_bb.png" />
     <None Remove="README.md" />

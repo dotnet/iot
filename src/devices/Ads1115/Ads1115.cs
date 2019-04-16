@@ -5,6 +5,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Threading;
 
 namespace Iot.Device.Ads1115
 {
@@ -15,9 +16,47 @@ namespace Iot.Device.Ads1115
     {
         private I2cDevice _sensor = null;
 
-        private readonly byte _inputMultiplexer;
-        private readonly byte _measuringRange;
-        private readonly byte _dataRate;
+        private InputMultiplexer _inputMultiplexer;
+        /// <summary>
+        /// ADS1115 Input Multiplexer
+        /// </summary>
+        public InputMultiplexer InputMultiplexer
+        {
+            get => _inputMultiplexer;
+            set
+            {
+                _inputMultiplexer = value;
+                SetConfig();
+            }
+        }
+
+        private MeasuringRange _measuringRange;
+        /// <summary>
+        /// ADS1115 Programmable Gain Amplifier
+        /// </summary>
+        public MeasuringRange MeasuringRange
+        {
+            get => _measuringRange;
+            set
+            {
+                _measuringRange = value;
+                SetConfig();
+            }
+        }
+
+        private DataRate _dataRate;
+        /// <summary>
+        /// ADS1115 Data Rate
+        /// </summary>
+        public DataRate DataRate
+        {
+            get => _dataRate;
+            set
+            {
+                _dataRate = value;
+                SetConfig();
+            }
+        }
 
         /// <summary>
         /// Initialize a new Ads1115 device connected through I2C
@@ -29,30 +68,35 @@ namespace Iot.Device.Ads1115
         public Ads1115(I2cDevice sensor, InputMultiplexer inputMultiplexer = InputMultiplexer.AIN0, MeasuringRange measuringRange = MeasuringRange.FS4096, DataRate dataRate = DataRate.SPS128)
         {
             _sensor = sensor;
-            _inputMultiplexer = (byte)inputMultiplexer;
-            _measuringRange = (byte)measuringRange;
-            _dataRate = (byte)dataRate;
+            _inputMultiplexer = inputMultiplexer;
+            _measuringRange = measuringRange;
+            _dataRate = dataRate;
 
-            Initialize();
+            SetConfig();
         }
 
         /// <summary>
-        /// Initialize ADS1115
+        /// Set ADS1115 Config Register
         /// </summary>
-        private void Initialize()
+        private void SetConfig()
         {
             // Details in Datasheet P18
-            byte configHi = (byte)((_inputMultiplexer << 4) +
-                            (_measuringRange << 1) +
+            byte configHi = (byte)(((byte)_inputMultiplexer << 4) |
+                            ((byte)_measuringRange << 1) |
                             (byte)DeviceMode.Continuous);
 
-            byte configLo = (byte)((_dataRate << 5) +
-                            ((byte)(ComparatorMode.Traditional) << 4) +
-                            ((byte)ComparatorPolarity.Low << 3) +
-                            ((byte)ComparatorLatching.NonLatching << 2) +
+            byte configLo = (byte)(((byte)_dataRate << 5) |
+                            ((byte)(ComparatorMode.Traditional) << 4) |
+                            ((byte)ComparatorPolarity.Low << 3) |
+                            ((byte)ComparatorLatching.NonLatching << 2) |
                             (byte)ComparatorQueue.Disable);
 
-            _sensor.Write(new [] { (byte)Register.ADC_CONFIG_REG_ADDR, configHi, configLo });
+            Span<byte> writeBuff = stackalloc byte[3] { (byte)Register.ADC_CONFIG_REG_ADDR, configHi, configLo };
+
+            _sensor.Write(writeBuff);
+
+            // waiting for the sensor stability
+            Thread.Sleep(10);
         }
 
         /// <summary>
@@ -62,12 +106,12 @@ namespace Iot.Device.Ads1115
         public short ReadRaw()
         {
             short val;
-            Span<byte> data = stackalloc byte[2];
+            Span<byte> readBuff = stackalloc byte[2];
 
-            _sensor.Write(new [] { (byte)Register.ADC_CONVERSION_REG_ADDR });
-            _sensor.Read(data);
+            _sensor.WriteByte((byte)Register.ADC_CONVERSION_REG_ADDR);
+            _sensor.Read(readBuff);
 
-            val = BinaryPrimitives.ReadInt16BigEndian(data);
+            val = BinaryPrimitives.ReadInt16BigEndian(readBuff);
 
             return val;
         }
@@ -107,7 +151,7 @@ namespace Iot.Device.Ads1115
                     break;
             }
 
-            if (_inputMultiplexer <= 0x03)
+            if ((byte)_inputMultiplexer <= 0x03)
             {
                 resolution = 65535.0;
             }

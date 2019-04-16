@@ -1,4 +1,4 @@
-# BMx280 Sensors
+# BMx280 - Digital Pressure Sensors BMP280/BME280
 
 ## Summary
 
