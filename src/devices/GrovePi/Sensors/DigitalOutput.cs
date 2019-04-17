@@ -12,10 +12,15 @@ namespace Iot.Device.GrovePiDevice.Sensors
     /// <summary>
     /// DigitalOutput class is a generic output class
     /// </summary>
-    public class DigitalOutput : ISensor<PinValue>
+    public class DigitalOutput
     {
         internal GrovePi _grovePi;
         internal PinValue _value;
+
+        /// <summary>
+        /// grove sensor port
+        /// </summary>
+        internal GrovePort _port;
 
         /// <summary>
         /// DigitalOutput constructor
@@ -27,8 +32,8 @@ namespace Iot.Device.GrovePiDevice.Sensors
             if (!SupportedPorts.Contains(port))
                 throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
             _grovePi = grovePi;
-            Port = port;
-            _grovePi.PinMode(Port, PinMode.Output);
+            _port = port;
+            _grovePi.PinMode(_port, PinMode.Output);
             Value = 0;
         }
 
@@ -42,7 +47,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
             set
             {
                 _value = value;
-                _grovePi.DigitalWrite(Port, _value);
+                _grovePi.DigitalWrite(_port, _value);
             }
         }
 
@@ -58,14 +63,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public string SensorName => "Digital Output";
 
         /// <summary>
-        /// grove sensor port
-        /// </summary>
-        public GrovePort Port { get; internal set; }
-
-        /// <summary>
         /// Only Digital ports including the analogic sensors (A0 = D14, A1 = D15, A2 = D16)
         /// </summary>
-        static public List<GrovePort> SupportedPorts => new List<GrovePort>()
+        public static List<GrovePort> SupportedPorts => new List<GrovePort>()
         {
             GrovePort.DigitalPin2,
             GrovePort.DigitalPin3,

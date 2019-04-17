@@ -31,6 +31,7 @@ namespace Iot.Device.GrovePiDevice
         /// The maximum ADC, 10 bit so 1023 on GrovePi
         /// </summary>
         public int MaxAdc => 1023;
+
         /// <summary>
         /// Contains the GrovePi key information
         /// </summary>
@@ -43,7 +44,7 @@ namespace Iot.Device.GrovePiDevice
         /// <param name="autoDispose">True to dispose the I2C device when disposing GrovePi</param>
         public GrovePi(I2cDevice i2cDevice, bool autoDispose = true)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException("I2C device can't be null", nameof(i2cDevice));
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _autoDispose = autoDispose;
             GrovePiInfo = new Info() { SoftwareVersion = GetFirmwareVerion() };
         }
@@ -63,23 +64,23 @@ namespace Iot.Device.GrovePiDevice
         /// <returns>GroovePi firmware version</returns>
         public Version GetFirmwareVerion()
         {
-            WriteCommand(GrovePiCommands.Version, 0, 0, 0);
-            var inArray = ReadCommand(GrovePiCommands.Version, 0);
+            WriteCommand(GrovePiCommand.Version, 0, 0, 0);
+            byte[] inArray = ReadCommand(GrovePiCommand.Version, 0);
             return new Version(inArray[1], inArray[2], inArray[3]);
         }
 
         /// <summary>
         /// Write a GrovePi command
         /// </summary>
-        /// <param name="commands">The GrovePi command</param>
+        /// <param name="command">The GrovePi command</param>
         /// <param name="pin">The pin to write the command</param>
         /// <param name="param1">First parameter</param>
         /// <param name="param2">Second parameter</param>
-        public void WriteCommand(GrovePiCommands commands, GrovePort pin, byte param1, byte param2)
+        public void WriteCommand(GrovePiCommand command, GrovePort pin, byte param1, byte param2)
         {
-            Span<byte> outArray = stackalloc byte[4] { (byte)commands, (byte)(pin), param1, param2 };
+            Span<byte> outArray = stackalloc byte[4] { (byte)command, (byte)(pin), param1, param2 };
             byte tries = 0;
-            IOException innerEx = new IOException();
+            IOException innerEx = null;
             // When writing/reading to the I2C port, GrovePi doesn't respond on time in some cases
             // So we wait a little bit before retrying
             // In most cases, the I2C read/write can go thru without waiting
@@ -99,32 +100,32 @@ namespace Iot.Device.GrovePiDevice
                 }
             }
 
-            throw new IOException($"{nameof(WriteCommand)} error writting command", innerEx);
+            throw new IOException($"{nameof(WriteCommand)}: Failed to write command {command}", innerEx);
         }
 
         /// <summary>
         /// Read data from GrovePi
         /// </summary>
-        /// <param name="commands">The GrovePi command</param>
+        /// <param name="command">The GrovePi command</param>
         /// <param name="pin">The pin to read</param>
         /// <returns></returns>
-        public byte[] ReadCommand(GrovePiCommands commands, GrovePort pin)
+        public byte[] ReadCommand(GrovePiCommand command, GrovePort pin)
         {
             int numberBytesToRead = 0;
-            switch (commands)
+            switch (command)
             {
-                case GrovePiCommands.DigitalRead:
+                case GrovePiCommand.DigitalRead:
                     numberBytesToRead = 1;
                     break;
-                case GrovePiCommands.AnalogRead:
-                case GrovePiCommands.UltrasonicRead:
-                case GrovePiCommands.LetBarGet:
+                case GrovePiCommand.AnalogRead:
+                case GrovePiCommand.UltrasonicRead:
+                case GrovePiCommand.LetBarGet:
                     numberBytesToRead = 3;
                     break;
-                case GrovePiCommands.Version:
+                case GrovePiCommand.Version:
                     numberBytesToRead = 4;
                     break;
-                case GrovePiCommands.DhtTemp:
+                case GrovePiCommand.DhtTemp:
                     numberBytesToRead = 9;
                     break;
                 // No other commands are for read
@@ -133,7 +134,7 @@ namespace Iot.Device.GrovePiDevice
             }
             byte[] outArray = new byte[numberBytesToRead];
             byte tries = 0;
-            IOException innerEx = new IOException();
+            IOException innerEx = null;
             // When writing/reading the I2C port, GrovePi doesn't respond on time in some cases
             // So we wait a little bit before retrying
             // In most cases, the I2C read/write can go thru without waiting
@@ -153,7 +154,7 @@ namespace Iot.Device.GrovePiDevice
                 }
             }
 
-            throw new IOException($"{nameof(ReadCommand)} error read command", innerEx);
+            throw new IOException($"{nameof(ReadCommand)}: Failed to write command {command}", innerEx);
         }
 
         /// <summary>
@@ -163,7 +164,7 @@ namespace Iot.Device.GrovePiDevice
         /// <returns>Returns the level either High or Low</returns>
         public PinValue DigitalRead(GrovePort pin)
         {
-            WriteCommand(GrovePiCommands.DigitalRead, pin, 0, 0);
+            WriteCommand(GrovePiCommand.DigitalRead, pin, 0, 0);
             byte tries = 0;
             IOException innerEx = null;
             // When writing/reading to the I2C port, GrovePi doesn't respond on time in some cases
@@ -184,7 +185,7 @@ namespace Iot.Device.GrovePiDevice
                 }
             }
 
-            throw new IOException($"{nameof(DigitalRead)} error reading byte", innerEx);
+            throw new IOException($"{nameof(DigitalRead)}: Failed to read byte with command {GrovePiCommand.DigitalRead}", innerEx);
         }
 
         /// <summary>
@@ -194,7 +195,7 @@ namespace Iot.Device.GrovePiDevice
         /// <param name="pinLevel">High to put the pin high, Low to put the pin low</param>
         public void DigitalWrite(GrovePort pin, PinValue pinLevel)
         {
-            WriteCommand(GrovePiCommands.DigitalWrite, pin, (byte)pinLevel, 0);
+            WriteCommand(GrovePiCommand.DigitalWrite, pin, (byte)pinLevel, 0);
         }
 
         /// <summary>
@@ -204,7 +205,7 @@ namespace Iot.Device.GrovePiDevice
         /// <param name="mode">THe mode to setup Intput or Output</param>
         public void PinMode(GrovePort pin, PinMode mode)
         {
-            WriteCommand(GrovePiCommands.PinMode, pin, (byte)mode, 0);
+            WriteCommand(GrovePiCommand.PinMode, pin, (byte)mode, 0);
         }
 
         /// <summary>
@@ -214,10 +215,10 @@ namespace Iot.Device.GrovePiDevice
         /// <returns></returns>
         public int AnalogRead(GrovePort pin)
         {
-            WriteCommand(GrovePiCommands.AnalogRead, pin, 0, 0);
+            WriteCommand(GrovePiCommand.AnalogRead, pin, 0, 0);
             try
             {
-                var inArray = ReadCommand(GrovePiCommands.AnalogRead, pin);
+                var inArray = ReadCommand(GrovePiCommand.AnalogRead, pin);
                 return BinaryPrimitives.ReadInt16BigEndian(inArray.AsSpan(1, 2));
             }
             catch (IOException)
@@ -233,7 +234,7 @@ namespace Iot.Device.GrovePiDevice
         /// <param name="value">The value to write between 0 and 255</param>
         public void AnalogWrite(GrovePort pin, byte value)
         {
-            WriteCommand(GrovePiCommands.AnalogWrite, pin, value, 0);
+            WriteCommand(GrovePiCommand.AnalogWrite, pin, value, 0);
         }
     }
 }

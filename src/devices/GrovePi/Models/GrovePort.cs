@@ -5,7 +5,7 @@
 namespace Iot.Device.GrovePiDevice.Models
 {
     /// <summary>
-    /// The supported Grove Ports
+    /// The supported Digital Grove Ports
     /// See README.md files for the exact location of each Port
     /// </summary>
     public enum GrovePort
@@ -20,11 +20,17 @@ namespace Iot.Device.GrovePiDevice.Models
         DigitalPin6 = 6,
         DigitalPin7 = 7,
         DigitalPin8 = 8,
-        // This is Analogic Pin A0 used as digital Pin
+        /// <summary>
+        /// This is Analog Pin A0 used as Digital Pin
+        /// </summary>
         DigitalPin14 = 14,
-        // This is Analogic Pin A1 used as digital Pin
+        /// <summary>
+        /// This is Analog Pin A1 used as Digital Pin 
+        /// </summary>
         DigitalPin15 = 15,
-        // This is Analogic Pin A2 used as digital Pin
+        /// <summary>
+        /// This is Analog Pin A2 used as Digital Pin
+        /// </summary>
         DigitalPin16 = 16
     }
 }

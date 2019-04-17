@@ -13,9 +13,14 @@ namespace Iot.Device.GrovePiDevice.Sensors
     /// <summary>
     /// UltrasonicSensor class to support ultrasonic Grove sensors
     /// </summary>
-    public class UltrasonicSensor : ISensor<int>
+    public class UltrasonicSensor 
     {
         private GrovePi _grovePi;
+
+        /// <summary>
+        /// grove sensor port
+        /// </summary>
+        private GrovePort _port;
 
         /// <summary>
         /// UltrasonicSensor constructor
@@ -27,7 +32,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
             if (!SupportedPorts.Contains(port))
                 throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
             _grovePi = grovePi;
-            Port = port;
+            _port = port;
         }
 
         /// <summary>
@@ -38,11 +43,11 @@ namespace Iot.Device.GrovePiDevice.Sensors
         {
             get
             {
-                _grovePi.WriteCommand(GrovePiCommands.UltrasonicRead, Port, 0, 0);
+                _grovePi.WriteCommand(GrovePiCommand.UltrasonicRead, _port, 0, 0);
                 // Need to wait at least 50 millisecond before reading the value
                 // Having 100 shows better results
                 Thread.Sleep(100);
-                var ret = _grovePi.ReadCommand(GrovePiCommands.UltrasonicRead, Port);
+                var ret = _grovePi.ReadCommand(GrovePiCommand.UltrasonicRead, _port);
                 return BinaryPrimitives.ReadInt16BigEndian(ret.AsSpan(1, 2));
             }
         }
@@ -59,14 +64,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public string SensorName => "Ultrasonic Sensor";
 
         /// <summary>
-        /// grove sensor port
-        /// </summary>
-        public GrovePort Port { get; internal set; }
-
-        /// <summary>
         /// Only Digital ports including the analogic sensors (A0 = D14, A1 = D15, A2 = D16)
         /// </summary>
-        static public List<GrovePort> SupportedPorts => new List<GrovePort>()
+        public static List<GrovePort> SupportedPorts => new List<GrovePort>()
         {
             GrovePort.DigitalPin2,
             GrovePort.DigitalPin3,

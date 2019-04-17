@@ -20,11 +20,16 @@ namespace Iot.Device.GrovePiDevice.Sensors
     /// <summary>
     /// LedBar class to support grove LedBar http://wiki.seeedstudio.com/Grove-LED_Bar/
     /// </summary>
-    public class LedBar : ISensor<byte>
+    public class LedBar
     {
         private GrovePi _grovePi;
         private byte _level;
         private LedBarOrientation _orientation;
+
+        /// <summary>
+        /// grove sensor port
+        /// </summary>
+        private GrovePort _port;
 
         /// <summary>
         /// LedBar constructor
@@ -45,9 +50,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
             if (!SupportedPorts.Contains(port))
                 throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
             _grovePi = grovePi;
-            Port = port;
+            _port = port;
             _orientation = orientation;
-            _grovePi.WriteCommand(GrovePiCommands.LedBarInitialization, port, (byte)_orientation, 0);
+            _grovePi.WriteCommand(GrovePiCommand.LedBarInitialization, port, (byte)_orientation, 0);
             _level = 0;
         }
 
@@ -63,7 +68,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
                 if (_orientation != value)
                 {
                     _orientation = value;
-                    _grovePi.WriteCommand(GrovePiCommands.LedBarOrientation, Port, (byte)_orientation, 0);
+                    _grovePi.WriteCommand(GrovePiCommand.LedBarOrientation, _port, (byte)_orientation, 0);
                 }
             }
         }
@@ -79,7 +84,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
             {
                 if (value > 10)
                     throw new ArgumentException($"Only 10 leds can be controlled");
-                _grovePi.WriteCommand(GrovePiCommands.LedBarLevel, Port, _level, 0);
+                _grovePi.WriteCommand(GrovePiCommand.LedBarLevel, _port, _level, 0);
             }
         }
 
@@ -91,7 +96,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public void SetOneLed(byte led, bool status)
         {
             led = Math.Clamp(led, (byte)0, (byte)10);
-            _grovePi.WriteCommand(GrovePiCommands.LedBarSetOneLed, Port, led, status ? (byte)1 : (byte)0);
+            _grovePi.WriteCommand(GrovePiCommand.LedBarSetOneLed, _port, led, status ? (byte)1 : (byte)0);
         }
 
         /// <summary>
@@ -102,7 +107,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public void SetAllLeds(int leds)
         {
             leds = leds & 0b00000111111111;
-            _grovePi.WriteCommand(GrovePiCommands.LedBarSet, Port, (byte)(leds & 0xFF), (byte)((leds >> 8) & 0xFF));
+            _grovePi.WriteCommand(GrovePiCommand.LedBarSet, _port, (byte)(leds & 0xFF), (byte)((leds >> 8) & 0xFF));
         }
 
         /// <summary>
@@ -111,8 +116,8 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// <returns>Returns all leds status in an int, lower bit is led 0, 1 is on, 0 is off</returns>
         public int GetAllLeds()
         {
-            _grovePi.WriteCommand(GrovePiCommands.LetBarGet, Port, 0, 0);
-            var ret = _grovePi.ReadCommand(GrovePiCommands.LetBarGet, Port);
+            _grovePi.WriteCommand(GrovePiCommand.LetBarGet, _port, 0, 0);
+            var ret = _grovePi.ReadCommand(GrovePiCommand.LetBarGet, _port);
             return ret[1] + (ret[2] >> 8);
         }
 
@@ -123,7 +128,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public void ToggleLeds(byte led)
         {
             led = Math.Clamp(led, (byte)0, (byte)10);
-            _grovePi.WriteCommand(GrovePiCommands.LedBarToggleOneLed, Port, led, 0);
+            _grovePi.WriteCommand(GrovePiCommand.LedBarToggleOneLed, _port, led, 0);
         }
 
         /// <summary>
@@ -138,15 +143,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public string SensorName => "Led Bar";
 
         /// <summary>
-        /// grove sensor port
-        /// </summary>
-        public GrovePort Port { get; internal set; }
-
-        /// <summary>
         /// Only Digital ports only but you can't create more than 4 bars as each bar is using 2 Pins
         /// So you have to have at least 1 Grove Port empty between 2 bars
         /// </summary>
-        static public List<GrovePort> SupportedPorts => new List<GrovePort>()
+        public static List<GrovePort> SupportedPorts => new List<GrovePort>()
         {
             GrovePort.DigitalPin2,
             GrovePort.DigitalPin3,

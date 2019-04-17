@@ -9,9 +9,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
     public class PotentiometerSensor : AnalogSensor
     {
         /// <summary>
-        /// 
+        /// Potentiometer sensor constructor
         /// </summary>
-        /// <param name="goPiGo">The GoPiGo3 class</param>
+        /// <param name="grovePi">The GrovePi class</param>
         /// <param name="port">The grove Port, need to be in the list of SupportedPorts</param>
         public PotentiometerSensor(GrovePi grovePi, GrovePort port) : base(grovePi, port)
         { }

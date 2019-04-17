@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Iot.Device.GroovePiDevice.Models;
 using Iot.Device.GrovePiDevice.Models;
 using System;
 using System.Collections.Generic;
@@ -10,26 +11,20 @@ using System.Threading;
 namespace Iot.Device.GrovePiDevice.Sensors
 {
     /// <summary>
-    /// Type of DHT sensors
-    /// </summary>
-    public enum DhtType
-    {
-        Dht11 = 0,
-        Dht22 = 1,
-        Dht21 = 2,
-        Am2301 = 3
-    }
-
-    /// <summary>
     /// DhtSensor supports DHT familly sensors
     /// </summary>
-    public class DhtSensor : ISensor<double[]>
+    public class DhtSensor
     {
         private GrovePi _grovePi;
         private readonly double[] _lastTemHum = new double[2];
 
         /// <summary>
-        /// 
+        /// grove sensor port
+        /// </summary>
+        private GrovePort _port;
+
+        /// <summary>
+        /// Initialize the DHT Sensor class
         /// </summary>
         /// <param name="grovePi">The GrovePi class</param>
         /// <param name="port">The grove Port, need to be in the list of SupportedPorts</param>
@@ -40,9 +35,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
                 throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
             _grovePi = grovePi;
             DhtType = dhtType;
-            Port = port;
+            _port = port;
             // Ask for the temperature so we will have one in cache
-            _grovePi.WriteCommand(GrovePiCommands.DhtTemp, Port, (byte)DhtType, 0);
+            _grovePi.WriteCommand(GrovePiCommand.DhtTemp, _port, (byte)DhtType, 0);
         }
 
         /// <summary>
@@ -69,10 +64,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         public void Read()
         {
-            _grovePi.WriteCommand(GrovePiCommands.DhtTemp, Port, (byte)DhtType, 0);
+            _grovePi.WriteCommand(GrovePiCommand.DhtTemp, _port, (byte)DhtType, 0);
             // Wait a little bit to read the result
             Thread.Sleep(50);
-            var retArray = _grovePi.ReadCommand(GrovePiCommands.DhtTemp, Port);
+            var retArray = _grovePi.ReadCommand(GrovePiCommand.DhtTemp, _port);
             _lastTemHum[0] = BitConverter.ToSingle(retArray.AsSpan(1, 4));
             _lastTemHum[1] = BitConverter.ToSingle(retArray.AsSpan(5, 4));
         }
@@ -104,14 +99,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public string SensorName => $"{DhtType} Temperature and Humidity Sensor";
 
         /// <summary>
-        /// grove sensor port
-        /// </summary>
-        public GrovePort Port { get; internal set; }
-
-        /// <summary>
         /// Only Digital ports including the analogic sensors (A0 = D14, A1 = D15, A2 = D16)
         /// </summary>
-        static public List<GrovePort> SupportedPorts => new List<GrovePort>()
+        public static List<GrovePort> SupportedPorts => new List<GrovePort>()
         {
             GrovePort.DigitalPin2,
             GrovePort.DigitalPin3,

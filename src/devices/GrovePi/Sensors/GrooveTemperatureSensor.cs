@@ -13,7 +13,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
     public class GroveTemperatureSensor : AnalogSensor
     {
         /// <summary>
-        /// 
+        /// Grove temperature sensor constructor
         /// </summary>
         /// <param name="grovePi">The GrovePi class</param>
         /// <param name="port">The grove Port, need to be in the list of SupportedPorts</param>

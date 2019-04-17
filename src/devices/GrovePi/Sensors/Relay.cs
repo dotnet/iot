@@ -10,23 +10,28 @@ namespace Iot.Device.GrovePiDevice.Sensors
     public class Relay : DigitalOutput
     {
         /// <summary>
-        /// 
+        /// Relay constructor
         /// </summary>
-        /// <param name="grovePi">The GoPiGo3 class</param>
+        /// <param name="grovePi">The GrovePi class</param>
         /// <param name="port">The grove Port, need to be in the list of SupportedPorts</param>
         public Relay(GrovePi grovePi, GrovePort port) : this(grovePi, port, false)
         { }
 
         /// <summary>
-        /// 
+        /// Relay constructor
         /// </summary>
-        /// <param name="goPiGo">The GoPiGo3 class</param>
+        /// <param name="goPiGo">The GrovePi class</param>
         /// <param name="port">The grove Port, need to be in the list of SupportedPorts</param>
         /// <param name="inverted">If inverted, the relay is on when output is low and off when output is high</param>
         public Relay(GrovePi grovePi, GrovePort port, bool inverted) : base(grovePi, port)
         {
             IsInverted = inverted;
         }
+
+        /// <summary>
+        /// True when the relay is on
+        /// </summary>
+        public bool IsOn => (_value == PinValue.High) && !IsInverted;
 
         /// <summary>
         /// Switch on the relay
@@ -44,7 +49,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
             Value = PinValue.High;
         }
 
-        public bool IsInverted { get; set; }
+        public bool IsInverted { get; internal set; }
 
         /// <summary>
         /// Get/set the state of the relay, 0 for off, 1 for on. Wehn set, anything not 0 will be considered as on
@@ -55,14 +60,14 @@ namespace Iot.Device.GrovePiDevice.Sensors
             set
             {
                 _value = value;
-                _grovePi.DigitalWrite(Port, ((_value == PinValue.High) && !IsInverted) ? PinValue.High : PinValue.Low);
+                _grovePi.DigitalWrite(_port, ((_value == PinValue.High) && !IsInverted) ? PinValue.High : PinValue.Low);
             }
         }
 
         /// <summary>
         /// Get "On" when relay if on and "Off" when relay is off
         /// </summary>
-        public override string ToString() => (_value == PinValue.High) ? "On" : "Off";
+        public override string ToString() => ((_value == PinValue.High) && !IsInverted) ? "On" : "Off";
 
         /// <summary>
         /// Get the name Relay

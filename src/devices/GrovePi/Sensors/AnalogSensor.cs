@@ -12,9 +12,14 @@ namespace Iot.Device.GrovePiDevice.Sensors
     /// <summary>
     /// AnalogSensor is a generic analog sensor
     /// </summary>
-    public class AnalogSensor : ISensor<int>
+    public class AnalogSensor
     {
         internal GrovePi _grovePi;
+
+        /// <summary>
+        /// grove sensor port
+        /// </summary>
+        internal GrovePort _port;
 
         /// <summary>
         /// On GrovePi, ADC is 1023
@@ -31,20 +36,20 @@ namespace Iot.Device.GrovePiDevice.Sensors
             if (!SupportedPorts.Contains(port))
                 throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
             _grovePi = grovePi;
-            Port = port;
-            _grovePi.PinMode(Port, PinMode.Input);
+            _port = port;
+            _grovePi.PinMode(_port, PinMode.Input);
         }
 
         /// <summary>
         /// Get the measurement from 0 to MaxAdc
         /// </summary>
-        public int Value => _grovePi.AnalogRead(Port);
+        public int Value => _grovePi.AnalogRead(_port);
 
         /// <summary>
         /// Returns the measurement as a string
         /// </summary>
         /// <returns>Returns the measurement as a string</returns>
-        public override string ToString() => _grovePi.AnalogRead(Port).ToString();
+        public override string ToString() => _grovePi.AnalogRead(_port).ToString();
 
         /// <summary>
         /// Get the value as a percentage from 0 to 100
@@ -54,17 +59,12 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// <summary>
         /// Get the namme Analog Sensor
         /// </summary>
-        public string SensorName => "Analog Sensor";
-
-        /// <summary>
-        /// grove sensor port
-        /// </summary>
-        public GrovePort Port { get; internal set; }
+        public string SensorName => "Analog Sensor";        
 
         /// <summary>
         /// Only Analogic ports are supported
         /// </summary>
-        static public List<GrovePort> SupportedPorts => new List<GrovePort>()
+        public static List<GrovePort> SupportedPorts => new List<GrovePort>()
         {
             GrovePort.AnalogPin0,
             GrovePort.AnalogPin1,

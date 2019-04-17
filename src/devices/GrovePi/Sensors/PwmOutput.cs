@@ -12,23 +12,28 @@ namespace Iot.Device.GrovePiDevice.Sensors
     /// <summary>
     /// PwmOutput class to support hardware PWM on PWM hardware enabled pins
     /// </summary>
-    public class PwmOutput : ISensor<byte>
+    public class PwmOutput
     {
         internal GrovePi _grovePi;
         internal byte _duty;
 
         /// <summary>
+        /// grove sensor port
+        /// </summary>
+        internal GrovePort _port;
+
+        /// <summary>
         /// PwmOutput constructor
         /// </summary>
-        /// <param name="grovePi"></param>
-        /// <param name="port"></param>
+        /// <param name="grovePi">The GrovePi class</param>
+        /// <param name="port">The grove Port, need to be in the list of SupportedPorts</param>
         public PwmOutput(GrovePi grovePi, GrovePort port)
         {
             if (!SupportedPorts.Contains(port))
                 throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
             _grovePi = grovePi;
-            Port = port;
-            _grovePi.PinMode(Port, PinMode.Output);
+            _port = port;
+            _grovePi.PinMode(_port, PinMode.Output);
             Value = 0;
         }
 
@@ -59,7 +64,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         public void Start()
         {
-            _grovePi.AnalogWrite(Port, _duty);
+            _grovePi.AnalogWrite(_port, _duty);
         }
 
         /// <summary>
@@ -67,7 +72,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         public void Stop()
         {
-            _grovePi.AnalogWrite(Port, 0);
+            _grovePi.AnalogWrite(_port, 0);
         }
 
         /// <summary>
@@ -87,14 +92,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public string SensorName => "PWM Output";
 
         /// <summary>
-        /// grove sensor port
-        /// </summary>
-        public GrovePort Port { get; internal set; }
-
-        /// <summary>
         /// Only Digital PWM are supported
         /// </summary>
-        static public List<GrovePort> SupportedPorts => new List<GrovePort>()
+        public static List<GrovePort> SupportedPorts => new List<GrovePort>()
         {
             GrovePort.DigitalPin3,
             GrovePort.DigitalPin5,

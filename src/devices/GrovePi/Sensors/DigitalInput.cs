@@ -12,12 +12,12 @@ namespace Iot.Device.GrovePiDevice.Sensors
     /// <summary>
     /// DigitalInput is a generic calss for digital input
     /// </summary>
-    public class DigitalInput : ISensor<PinValue>
+    public class DigitalInput
     {
         internal GrovePi _grovePi;
 
         /// <summary>
-        /// 
+        /// DigitalInput constructor
         /// </summary>
         /// <param name="grovePi">The GrovePi class</param>
         /// <param name="port">The grove Port, need to be in the list of SupportedPorts</param>
@@ -52,9 +52,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public GrovePort Port { get; internal set; }
 
         /// <summary>
-        /// Only Digital ports including the analogic sensors (A0 = D14, A1 = D15, A2 = D16)
+        /// Only Digital ports including the analog sensors (A0 = D14, A1 = D15, A2 = D16)
         /// </summary>
-        static public List<GrovePort> SupportedPorts => new List<GrovePort>()
+        public static List<GrovePort> SupportedPorts => new List<GrovePort>()
         {
             GrovePort.DigitalPin2,
             GrovePort.DigitalPin3,
