@@ -19,6 +19,7 @@ namespace Iot.Device.Bh1750fvi
         private I2cDevice _sensor;
 
         private double _lightTransmittance;
+
         /// <summary>
         /// BH1750FVI Light Transmittance, from 27.20% to 222.50%
         /// </summary>
@@ -65,6 +66,7 @@ namespace Iot.Device.Bh1750fvi
         public void Dispose()
         {
             _sensor?.Dispose();
+            _sensor = null;
         }
 
         /// <summary>
@@ -100,10 +102,12 @@ namespace Iot.Device.Bh1750fvi
 
             ushort raw = BinaryPrimitives.ReadUInt16BigEndian(readBuff);
 
+            double result = raw / (1.2 * _lightTransmittance);
+
             if (MeasuringMode == MeasuringMode.ContinuouslyHighResolutionMode2 || MeasuringMode == MeasuringMode.OneTimeHighResolutionMode2)
-                return raw / (1.2 * _lightTransmittance * 0.5);
-            else
-                return raw / (1.2 * _lightTransmittance);
+                result *= 2;
+
+            return result;
         }
     }
 }
