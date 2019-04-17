@@ -46,7 +46,7 @@ namespace Iot.Device.Bmp180
         /// </returns>
         public Temperature ReadTemperature()
         {
-            return Temperature.FromCelsius((CalculateTrueTemperature() + 8 )/ 160.0);              
+            return Temperature.FromCelsius((CalculateTrueTemperature() + 8) / 160.0);              
         }
 
         /// <summary>
