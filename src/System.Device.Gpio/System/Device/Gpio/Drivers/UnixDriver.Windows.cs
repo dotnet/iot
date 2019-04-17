@@ -16,7 +16,7 @@ namespace System.Device.Gpio.Drivers
 
         public static UnixDriver Create()
         {
-            return new UnixDriver();
+            throw new PlatformNotSupportedException();
         }
 
         protected internal override int PinCount => throw new PlatformNotSupportedException();
