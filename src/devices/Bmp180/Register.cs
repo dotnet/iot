@@ -1,10 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Bmp180
 {
-    public enum Register : byte
+    internal enum Register : byte
     {
          AC1 = 0xAA,
          AC2 = 0xAC,
