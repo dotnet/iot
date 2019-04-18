@@ -95,7 +95,8 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// <param name="status">true for on, false for off</param>
         public void SetOneLed(byte led, bool status)
         {
-            led = Math.Clamp(led, (byte)0, (byte)10);
+            if (led > 10)
+                throw new ArgumentException($"{nameof(led)} can only be from 0 to 10");
             _grovePi.WriteCommand(GrovePiCommand.LedBarSetOneLed, _port, led, status ? (byte)1 : (byte)0);
         }
 
