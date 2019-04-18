@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="rpi-bmp180_i2c.fzz" />
+    <None Remove="rpi-bmp180_i2c_bb.png" />    
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bmp180.csproj" />
+  </ItemGroup>
+
+</Project>
