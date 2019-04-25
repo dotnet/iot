@@ -6,7 +6,7 @@ using System.Device.I2c;
 
 namespace Iot.Device.Mcp3428
 {
-    public class Mcp3426 : Mcp3428
+    public class Mcp3426 : Mcp342x
     {
         /// <summary>
         /// The number of channels
@@ -26,11 +26,5 @@ namespace Iot.Device.Mcp3428
         {
             SetConfig(0, mode: mode, resolution: resolution, pgaGain: pgaGain);
         }
-
-#pragma warning disable RCS1163 // Unused parameter.
-#pragma warning disable IDE0060 // Remove unused parameter
-        public new static int I2CAddressFromPins(PinState _ = PinState.Low, PinState _NA = PinState.Low) { return I2CAddress; }
-#pragma warning restore IDE0060 // Remove unused parameter
-#pragma warning restore RCS1163 // Unused parameter.
     }
 }

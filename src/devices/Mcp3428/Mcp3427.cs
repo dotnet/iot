@@ -6,7 +6,7 @@ using System.Device.I2c;
 
 namespace Iot.Device.Mcp3428 
 {
-    public class Mcp3427 : Mcp3428 
+    public class Mcp3427 : Mcp342x 
     {
         /// <summary>
         /// The number of channels
@@ -24,5 +24,13 @@ namespace Iot.Device.Mcp3428
         {
             SetConfig(0, mode: mode, resolution: resolution, pgaGain: pgaGain);
         }
+
+        /// <summary>
+        /// Determine device I2C address based on the configuration pin states.
+        /// </summary>
+        /// <param name="Adr0">The adr0 pin state</param>
+        /// <param name="Adr1">The adr1 pin state</param>
+        /// <returns>System.Int32.</returns>
+        public static int I2CAddressFromPins(PinState Adr0, PinState Adr1) { return Helpers.I2CAddressFromPins(Adr0, Adr1); }
     }
 }
