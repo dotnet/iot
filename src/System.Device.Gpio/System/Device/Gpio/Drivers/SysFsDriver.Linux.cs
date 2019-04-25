@@ -26,19 +26,26 @@ namespace System.Device.Gpio.Drivers
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
         private readonly int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
-        private int _pinOffset = 0;
+        private static int _pinOffset;
 
-        public SysFsDriver() {
+        public SysFsDriver()
+        {
             IEnumerable<string> fileNames = Directory.EnumerateFileSystemEntries(GpioBasePath);
             foreach (string name in fileNames)
             {
                 if (name.Contains(GpioChip))
                 {
-                    if (File.ReadAllText($"{name}{GpioLabel}").StartsWith(GpioContoller))
+                    try
                     {
-                        _pinOffset = int.Parse(File.ReadAllText($"{name}{GpioOffsetBase}"));
-                        break;
-                    }
+                        if (File.ReadAllText($"{name}{GpioLabel}").StartsWith(GpioContoller, StringComparison.Ordinal))
+                        {
+                            if (int.TryParse(File.ReadAllText($"{name}{GpioOffsetBase}"), out _pinOffset))
+                                break;
+                        }
+                    } 
+                    // Ignoring file not found or any other IO exceptions as it is not guaranteed the folder would have files "label" "base"
+                    // And don't want to throw in this case just continue to load the gpiochip with default offset = 0  
+                    catch (IOException) { }
                 }
             }
         }
@@ -389,7 +396,7 @@ namespace System.Device.Gpio.Drivers
                 }
                 if (waitResult > 0)
                 {
-                    pinNumber = events.data.pinNumber - _pinOffset;
+                    pinNumber = events.data.pinNumber;
 
                     // valueFileDescriptor will be -1 when using the callback eventing. For WaitForEvent, the value will be set.
                     if (valueFileDescriptor == -1)
