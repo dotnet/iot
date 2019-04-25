@@ -6,14 +6,6 @@ using System;
 
 namespace Iot.Device.Mcp3428
 {
-    public enum GainEnum : byte { X1 = 0, X2 = 1, X4 = 2, X8 = 3 }
-
-    public enum ModeEnum : byte { OneShot = 0, Continuous = 16 }
-
-    public enum PinState : byte { Low = 0, High = 1, Floating = 2 }
-
-    public enum ResolutionEnum : byte { Bit12 = 0, Bit14 = 4, Bit16 = 8 }
-
     internal static class Helpers
     {
         public static double LSBValue(ResolutionEnum res)
