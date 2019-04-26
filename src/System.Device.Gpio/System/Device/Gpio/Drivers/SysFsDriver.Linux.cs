@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -75,7 +76,7 @@ namespace System.Device.Gpio.Drivers
             {
                 try
                 {
-                    File.WriteAllText(Path.Combine(GpioBasePath, "export"), pinOffset.ToString());
+                    File.WriteAllText(Path.Combine(GpioBasePath, "export"), pinOffset.ToString(CultureInfo.InvariantCulture));
                     _exportedPins.Add(pinNumber);
                 }
                 catch (UnauthorizedAccessException e)
@@ -100,7 +101,7 @@ namespace System.Device.Gpio.Drivers
                 try
                 {
                     SetPinEventsToDetect(pinNumber, PinEventTypes.None);
-                    File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinOffset.ToString());
+                    File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinOffset.ToString(CultureInfo.InvariantCulture));
                     _exportedPins.Remove(pinNumber);
                 }
                 catch (UnauthorizedAccessException e)
