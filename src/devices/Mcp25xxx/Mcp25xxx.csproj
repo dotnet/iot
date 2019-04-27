@@ -3,11 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
     <Compile Include="InstructionFormat.cs" />
     <Compile Include="Mcp25xxx.cs" />
     <Compile Include="Mcp2515.cs" />
@@ -16,14 +15,7 @@
     <Compile Include="RxBufferAddressPointer.cs" />
     <Compile Include="RxStatusResponse.cs" />
     <Compile Include="TxBufferAddressPointer.cs" />
-    <Compile Include="Register\*.cs" />
-    <Compile Include="Register\AcceptanceFilter\*.cs" />
-    <Compile Include="Register\BitTimeConfiguration\*.cs" />
-    <Compile Include="Register\CanControl\*.cs" />
-    <Compile Include="Register\ErrorDetection\*.cs" />
-    <Compile Include="Register\Interrupt\*.cs" />
-    <Compile Include="Register\MessageReceive\*.cs" />
-    <Compile Include="Register\MessageTransmit\*.cs" />
+    <Compile Include="Register\**\*.cs" />
     <None Include="README.md" />
   </ItemGroup>
 
