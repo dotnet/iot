@@ -69,29 +69,16 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <returns>The Rx Buffer Number based on the register address.</returns>
         public static byte GetRxBufferNumber(Address address)
         {
-            switch (address)
+            if (address >= Address.RxB0D0 && address <= Address.RxB0D7)
             {
-                case Address.RxB0D0:
-                case Address.RxB0D1:
-                case Address.RxB0D2:
-                case Address.RxB0D3:
-                case Address.RxB0D4:
-                case Address.RxB0D5:
-                case Address.RxB0D6:
-                case Address.RxB0D7:
-                    return 0;
-                case Address.RxB1D0:
-                case Address.RxB1D1:
-                case Address.RxB1D2:
-                case Address.RxB1D3:
-                case Address.RxB1D4:
-                case Address.RxB1D5:
-                case Address.RxB1D6:
-                case Address.RxB1D7:
-                    return 1;
-                default:
-                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
+                return 0;
             }
+            else if (address >= Address.RxB1D0 && address <= Address.RxB1D7)
+            {
+                return 1;
+            }
+
+            throw new ArgumentException($"Invalid address value {address}.", nameof(address));
         }
 
         /// <summary>
