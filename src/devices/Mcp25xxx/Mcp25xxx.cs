@@ -294,7 +294,8 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="buffer">The data to load in transmit buffer.</param>
         public void LoadTxBuffer(TxBufferAddressPointer addressPointer, ReadOnlySpan<byte> buffer)
         {
-            byte instructionFormat = (byte)(0x40 | (byte)addressPointer);
+            // The instruction format for Load Tx Buffer instruction is made up of the 7th bit set and 3 lower bits based on addressPointer parameter.
+            byte instructionFormat = (byte)(0x40 + (byte)addressPointer);
             Span<byte> writeBuffer = stackalloc byte[buffer.Length + 1];
             writeBuffer[0] = instructionFormat;
             buffer.CopyTo(writeBuffer.Slice(1));
