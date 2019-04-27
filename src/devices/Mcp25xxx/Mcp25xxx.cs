@@ -200,8 +200,7 @@ namespace Iot.Device.Mcp25xxx
         /// </summary>
         public void Reset()
         {
-            const byte instructionFormat = 0xC0;
-            _spiDevice.WriteByte(instructionFormat);
+            _spiDevice.WriteByte((byte)InstructionFormat.Reset);
         }
 
         /// <summary>
@@ -211,9 +210,8 @@ namespace Iot.Device.Mcp25xxx
         /// <returns>The value of address read.</returns>
         public byte Read(Address address)
         {
-            const byte instructionFormat = 0x03;
             const byte dontCare = 0x00;
-            ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { instructionFormat, (byte)address, dontCare };
+            ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { (byte)InstructionFormat.Read, (byte)address, dontCare };
             Span<byte> readBuffer = stackalloc byte[3];
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
             return readBuffer[2];
@@ -245,8 +243,7 @@ namespace Iot.Device.Mcp25xxx
 
             // This instruction has a base value of 0x90.
             // The 2nd and 3rd bits are used for the pointer address for reading.
-            byte instructionFormat = (byte)(0x90 | ((byte)addressPointer << 1));
-            writeBuffer[0] = instructionFormat;
+            writeBuffer[0] = (byte)((byte)InstructionFormat.ReadRxBuffer | ((byte)addressPointer << 1));
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
             return readBuffer.Slice(1).ToArray();
         }
@@ -278,9 +275,8 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="buffer">The buffer that contains the data to be written.</param>
         public void Write(Address address, ReadOnlySpan<byte> buffer)
         {
-            const byte instructionFormat = 0x02;
             Span<byte> writeBuffer = stackalloc byte[buffer.Length + 2];
-            writeBuffer[0] = instructionFormat;
+            writeBuffer[0] = (byte)InstructionFormat.Write;
             writeBuffer[1] = (byte)address;
             buffer.CopyTo(writeBuffer.Slice(2));
             _spiDevice.Write(writeBuffer);
@@ -294,10 +290,11 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="buffer">The data to load in transmit buffer.</param>
         public void LoadTxBuffer(TxBufferAddressPointer addressPointer, ReadOnlySpan<byte> buffer)
         {
-            // The instruction format for Load Tx Buffer instruction is made up of the 7th bit set and 3 lower bits based on addressPointer parameter.
-            byte instructionFormat = (byte)(0x40 + (byte)addressPointer);
             Span<byte> writeBuffer = stackalloc byte[buffer.Length + 1];
-            writeBuffer[0] = instructionFormat;
+            
+            // This instruction has a base value of 0x90.
+            // The 3 lower bits are used for the pointer address for loading.
+            writeBuffer[0] = (byte)((byte)InstructionFormat.LoadTxBuffer + (byte)addressPointer);
             buffer.CopyTo(writeBuffer.Slice(1));
             _spiDevice.Write(writeBuffer);
         }
@@ -312,7 +309,9 @@ namespace Iot.Device.Mcp25xxx
         {
             byte GetInstructionFormat()
             {
-                byte value = 0x80;
+                // This instruction has a base value of 0xA0.
+                // The 3 lower bits are used for the pointer address for reading.
+                byte value = (byte)InstructionFormat.RequestToSend;
 
                 if (txb0)
                 {
@@ -342,9 +341,8 @@ namespace Iot.Device.Mcp25xxx
         /// <returns>The response from READ STATUS instruction.</returns>
         public ReadStatusResponse ReadStatus()
         {
-            const byte instructionFormat = 0xA0;
             const byte dontCare = 0x00;
-            ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { instructionFormat, dontCare };
+            ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { (byte)InstructionFormat.ReadStatus, dontCare };
             Span<byte> readBuffer = stackalloc byte[2];
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
             ReadStatusResponse readStatusResponse = (ReadStatusResponse)readBuffer[1];
@@ -358,9 +356,8 @@ namespace Iot.Device.Mcp25xxx
         /// <returns>Response from RX STATUS instruction.</returns>
         public RxStatusResponse RxStatus()
         {
-            const byte instructionFormat = 0xB0;
             const byte dontCare = 0x00;
-            ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { instructionFormat, dontCare };
+            ReadOnlySpan<byte> writeBuffer = stackalloc byte[] { (byte)InstructionFormat.RxStatus, dontCare };
             Span<byte> readBuffer = stackalloc byte[2];
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
             RxStatusResponse rxStatusResponse = new RxStatusResponse(readBuffer[1]);
@@ -377,8 +374,7 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="value">The value to be written.</param>
         public void BitModify(Address address, byte mask, byte value)
         {
-            const byte instructionFormat = 0x05;
-            Span<byte> writeBuffer = stackalloc byte[] { instructionFormat, (byte)address, mask, value };
+            Span<byte> writeBuffer = stackalloc byte[] { (byte)InstructionFormat.BitModify, (byte)address, mask, value };
             _spiDevice.Write(writeBuffer);
         }
 
