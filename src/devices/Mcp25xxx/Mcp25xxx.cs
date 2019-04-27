@@ -118,14 +118,6 @@ namespace Iot.Device.Mcp25xxx
             }
         }
 
-        internal void VerifyPinConfigured(int pin, string name)
-        {
-            if (pin == -1)
-            {
-                throw new InvalidOperationException($"No {name} pin configured.");
-            }
-        }
-
         /// <summary>
         /// Writes a value to Tx0RTS pin.
         /// </summary>
@@ -133,7 +125,6 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
-                VerifyPinConfigured(_tx0rts, nameof(Tx0RtsPin));
                 _gpioController.Write(_tx0rts, value);
             }
         }
@@ -145,7 +136,6 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
-                VerifyPinConfigured(_tx1rts, nameof(Tx1RtsPin));
                 _gpioController.Write(_tx1rts, value);
             }
         }
@@ -157,7 +147,6 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
-                VerifyPinConfigured(_tx2rts, nameof(Tx2RtsPin));
                 _gpioController.Write(_tx2rts, value);
             }
         }
@@ -169,7 +158,6 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
-                VerifyPinConfigured(_reset, nameof(ResetPin));
                 _gpioController.Write(_reset, value);
             }
         }
@@ -181,7 +169,6 @@ namespace Iot.Device.Mcp25xxx
         {
             get
             {
-                VerifyPinConfigured(_interrupt, nameof(InterruptPin));
                 return _gpioController.Read(_interrupt);
             }
         }
@@ -193,7 +180,6 @@ namespace Iot.Device.Mcp25xxx
         {
             get
             {
-                VerifyPinConfigured(_rx0bf, nameof(Rx0BfPin));
                 return _gpioController.Read(_rx0bf);
             }
         }
@@ -205,7 +191,6 @@ namespace Iot.Device.Mcp25xxx
         {
             get
             {
-                VerifyPinConfigured(_rx1bf, nameof(Rx1BfPin));
                 return _gpioController.Read(_rx1bf);
             }
         }

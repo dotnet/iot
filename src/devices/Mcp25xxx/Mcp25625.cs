@@ -72,7 +72,6 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
-                VerifyPinConfigured(_standby, nameof(StandbyPin));
                 _gpioController.Write(_standby, value);
             }
         }
