@@ -233,7 +233,7 @@ namespace Iot.Device.Mcp25xxx
                 throw new ArgumentException($"Invalid number of bytes {byteCount}.", nameof(byteCount));
             }
 
-            const int StackThreshold = 32;  // Usually won't read more than this at a time.
+            const int StackThreshold = 31;  // Usually won't read more than this at a time.
 
             Span<byte> writeBuffer = byteCount < StackThreshold ?
                stackalloc byte[byteCount + 1] :
