@@ -18,28 +18,34 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         public void Get_TxBufferNumber_Address(byte txBufferNumber, Address address)
         {
             Assert.Equal(txBufferNumber, GetTxBufferNumber(address));
-            Assert.Equal(address, new TxBxCtrl(txBufferNumber, TransmitBufferPriority.LowestMessage, false, false, false, false).Address);
+            Assert.Equal(address, new TxBxCtrl(txBufferNumber, BufferPriority.LowestMessage, false, false, false, false).Address);
         }
 
         [Theory]
-        [InlineData(TransmitBufferPriority.LowestMessage, false, false, false, false, 0b0000_0000)]
-        [InlineData(TransmitBufferPriority.LowIntermediateMessage, false, false, false, false, 0b0000_0001)]
-        [InlineData(TransmitBufferPriority.HighIntermediateMessage, false, false, false, false, 0b0000_0010)]
-        [InlineData(TransmitBufferPriority.HighestMessage, false, false, false, false, 0b0000_0011)]
-        [InlineData(TransmitBufferPriority.LowestMessage, true, false, false, false, 0b0000_1000)]
-        [InlineData(TransmitBufferPriority.LowestMessage, false, true, false, false, 0b0001_0000)]
-        [InlineData(TransmitBufferPriority.LowestMessage, false, false, true, false, 0b0010_0000)]
-        [InlineData(TransmitBufferPriority.LowestMessage, false, false, false, true, 0b0100_0000)]
-        public void From_To_Byte(TransmitBufferPriority txp, bool txreq, bool txerr, bool mloa, bool abtf, byte expectedByte)
+        [InlineData(BufferPriority.LowestMessage, false, false, false, false, 0b0000_0000)]
+        [InlineData(BufferPriority.LowIntermediateMessage, false, false, false, false, 0b0000_0001)]
+        [InlineData(BufferPriority.HighIntermediateMessage, false, false, false, false, 0b0000_0010)]
+        [InlineData(BufferPriority.HighestMessage, false, false, false, false, 0b0000_0011)]
+        [InlineData(BufferPriority.LowestMessage, true, false, false, false, 0b0000_1000)]
+        [InlineData(BufferPriority.LowestMessage, false, true, false, false, 0b0001_0000)]
+        [InlineData(BufferPriority.LowestMessage, false, false, true, false, 0b0010_0000)]
+        [InlineData(BufferPriority.LowestMessage, false, false, false, true, 0b0100_0000)]
+        public void From_To_Byte(
+            BufferPriority transmitBufferPriority,
+            bool messageTransmitRequest,
+            bool transmissionErrorDetected,
+            bool messageLostArbitration,
+            bool messageAbortedFlag,
+            byte expectedByte)
         {
-            var txBxCtrl = new TxBxCtrl(1, expectedByte);
-            Assert.Equal(txp, txBxCtrl.Txp);
-            Assert.Equal(txreq, txBxCtrl.TxReq);
-            Assert.Equal(txerr, txBxCtrl.TxErr);
-            Assert.Equal(mloa, txBxCtrl.Mloa);
-            Assert.Equal(abtf, txBxCtrl.Abtf);
-
-            Assert.Equal(expectedByte, new TxBxCtrl(1, txp, txreq, txerr, mloa, abtf).ToByte());
+            var txBxCtrl = new TxBxCtrl(1, transmitBufferPriority, messageTransmitRequest, transmissionErrorDetected, messageLostArbitration, messageAbortedFlag);
+            Assert.Equal(transmitBufferPriority, txBxCtrl.TransmitBufferPriority);
+            Assert.Equal(messageTransmitRequest, txBxCtrl.MessageTransmitRequest);
+            Assert.Equal(transmissionErrorDetected, txBxCtrl.TransmissionErrorDetected);
+            Assert.Equal(messageLostArbitration, txBxCtrl.MessageLostArbitration);
+            Assert.Equal(messageAbortedFlag, txBxCtrl.MessageAbortedFlag);
+            Assert.Equal(expectedByte, txBxCtrl.ToByte());
+            Assert.Equal(expectedByte, new TxBxCtrl(1, expectedByte).ToByte());
         }
     }
 }

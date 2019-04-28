@@ -14,35 +14,35 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         /// <summary>
         /// Initializes a new instance of the CanCtrl class.
         /// </summary>
-        /// <param name="clkPre">CLKOUT Pin Prescaler bits.</param>
-        /// <param name="clkEn">
-        /// CLKOUT Pin Enable bit.
+        /// <param name="clkOutPinPrescaler">CLKPRE[1:0]: CLKOUT Pin Prescaler bits.</param>
+        /// <param name="clkOutPinEnable">
+        /// CLKEN: CLKOUT Pin Enable bit.
         /// True = CLKOUT pin is enabled.
         /// False = CLKOUT pin is disabled(pin is in a high-impedance state).
         /// </param>
-        /// <param name="osm">
-        /// One-Shot Mode bit.
+        /// <param name="oneShotMode">
+        /// OSM: One-Shot Mode bit.
         /// True = Enabled: Message will only attempt to transmit one time.
         /// False = Disabled: Messages will reattempt transmission if required.
         /// </param>
-        /// <param name="abat">
-        /// Abort All Pending Transmissions bit.
+        /// <param name="abortAllPendingTransmissions">
+        /// ABAT: Abort All Pending Transmissions bit.
         /// True = Requests abort of all pending transmit buffers.
         /// False = Terminates request to abort all transmissions.
         /// </param>
-        /// <param name="reqOp">Request Operation mode bits.</param>
+        /// <param name="requestOperationMode">REQOP[2:0]: Request Operation mode bits.</param>
         public CanCtrl(
-            ClkOutPinPrescaler clkPre,
-            bool clkEn,
-            bool osm,
-            bool abat,
-            OperationMode reqOp)
+            PinPrescaler clkOutPinPrescaler,
+            bool clkOutPinEnable,
+            bool oneShotMode,
+            bool abortAllPendingTransmissions,
+            OperationMode requestOperationMode)
         {
-            ClkPre = clkPre;
-            ClkEn = clkEn;
-            Osm = osm;
-            Abat = abat;
-            ReqOp = reqOp;
+            ClkOutPinPrescaler = clkOutPinPrescaler;
+            ClkOutPinEnable = clkOutPinEnable;
+            OneShotMode = oneShotMode;
+            AbortAllPendingTransmissions = abortAllPendingTransmissions;
+            RequestOperationMode = requestOperationMode;
         }
 
         /// <summary>
@@ -51,17 +51,17 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         /// <param name="value">The value that represents the register contents.</param>
         public CanCtrl(byte value)
         {
-            ClkPre = (ClkOutPinPrescaler)(value & 0b0000_0011);
-            ClkEn = ((value >> 2) & 1) == 1;
-            Osm = ((value >> 3) & 1) == 1;
-            Abat = ((value >> 4) & 1) == 1;
-            ReqOp = (OperationMode)((value & 0b1110_0000) >> 5);
+            ClkOutPinPrescaler = (PinPrescaler)(value & 0b0000_0011);
+            ClkOutPinEnable = ((value >> 2) & 1) == 1;
+            OneShotMode = ((value >> 3) & 1) == 1;
+            AbortAllPendingTransmissions = ((value >> 4) & 1) == 1;
+            RequestOperationMode = (OperationMode)((value & 0b1110_0000) >> 5);
         }
 
         /// <summary>
         /// CLKOUT Pin Prescaler.
         /// </summary>
-        public enum ClkOutPinPrescaler
+        public enum PinPrescaler
         {
             /// <summary>
             /// FCLKOUT = System Clock/1.
@@ -82,35 +82,35 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         }
 
         /// <summary>
-        /// CLKOUT Pin Prescaler bits.
+        /// CLKPRE[1:0]: CLKOUT Pin Prescaler bits.
         /// </summary>
-        public ClkOutPinPrescaler ClkPre { get; }
+        public PinPrescaler ClkOutPinPrescaler { get; }
 
         /// <summary>
-        /// CLKOUT Pin Enable bit.
+        /// CLKEN: CLKOUT Pin Enable bit.
         /// True = CLKOUT pin is enabled.
         /// False = CLKOUT pin is disabled (pin is in a high-impedance state).
         /// </summary>
-        public bool ClkEn { get; }
+        public bool ClkOutPinEnable { get; }
 
         /// <summary>
-        /// One-Shot Mode bit.
+        /// OSM: One-Shot Mode bit.
         /// True = Enabled: Message will only attempt to transmit one time.
         /// False = Disabled: Messages will reattempt transmission if required.
         /// </summary>
-        public bool Osm { get; }
+        public bool OneShotMode { get; }
 
         /// <summary>
-        /// Abort All Pending Transmissions bit.
+        /// ABAT: Abort All Pending Transmissions bit.
         /// True = Requests abort of all pending transmit buffers.
         /// False = Terminates request to abort all transmissions.
         /// </summary>
-        public bool Abat { get; }
+        public bool AbortAllPendingTransmissions { get; }
 
         /// <summary>
-        /// Request Operation mode bits.
+        /// REQOP[2:0]: Request Operation mode bits.
         /// </summary>
-        public OperationMode ReqOp { get; }
+        public OperationMode RequestOperationMode { get; }
 
         /// <summary>
         /// Gets the address of the register.
@@ -124,24 +124,24 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         /// <returns>The byte that represent the register contents.</returns>
         public byte ToByte()
         {
-            byte value = (byte)((byte)ReqOp << 5);
+            byte value = (byte)((byte)RequestOperationMode << 5);
 
-            if (Abat)
+            if (AbortAllPendingTransmissions)
             {
                 value |= 0b0001_0000;
             }
 
-            if (Osm)
+            if (OneShotMode)
             {
                 value |= 0b0000_1000;
             }
 
-            if (ClkEn)
+            if (ClkOutPinEnable)
             {
                 value |= 0b0000_0100;
             }
 
-            value |= (byte)ClkPre;
+            value |= (byte)ClkOutPinPrescaler;
             return value;
         }
     }

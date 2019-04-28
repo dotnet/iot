@@ -12,42 +12,48 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Initializes a new instance of the BfpCtrl class.
         /// </summary>
-        /// <param name="b0bfm">
-        /// Rx0BF Pin Operation mode bit.
+        /// <param name="rx0bfPinOperationMode">
+        /// B0BFM: Rx0BF Pin Operation mode bit.
         /// True = Pin is used as an interrupt when a valid message is loaded into RXB0.
         /// False = Digital Output mode.
         /// </param>
-        /// <param name="b1bfm">
-        /// Rx1BF Pin Operation mode bit.
+        /// <param name="rx1bfPinOperationMode">
+        /// B1BFM: Rx1BF Pin Operation mode bit.
         /// True = Pin is used as an interrupt when a valid message is loaded into RXB1.
         /// False = Digital Output mode.
         /// </param>
-        /// <param name="b0bfe">
-        /// Rx0BF Pin Function Enable bit.
+        /// <param name="rx0bfPinFunctionEnable">
+        /// B0BFE: Rx0BF Pin Function Enable bit.
         /// True = Pin function is enabled, operation mode is determined by the B0BFM bit.
         /// False = Pin function is disabled, pin goes to the high-impedance state.
         /// </param>
-        /// <param name="b1bfe">
-        /// Rx1BF Pin Function Enable bit.
+        /// <param name="rx1bfPinFunctionEnable">
+        /// B1BFE: Rx1BF Pin Function Enable bit.
         /// True = Pin function is enabled, operation mode is determined by the B1BFM bit.
         /// False = Pin function is disabled, pin goes to the high-impedance state.
         /// </param>
-        /// <param name="b0bfs">
-        /// Rx0BF Pin State bit (Digital Output mode only).
+        /// <param name="rx0bfPinState">
+        /// B0BFS: Rx0BF Pin State bit (Digital Output mode only).
         /// Reads as '0' when Rx0BF is configured as an interrupt pin.
         /// </param>
-        /// <param name="b1bfs">
-        /// Rx1BF Pin State bit (Digital Output mode only).
+        /// <param name="rx1bfPinState">
+        /// B1BFS: Rx1BF Pin State bit (Digital Output mode only).
         /// Reads as '0' when Rx1BF is configured as an interrupt pin.
         /// </param>
-        public BfpCtrl(bool b0bfm, bool b1bfm, bool b0bfe, bool b1bfe, bool b0bfs, bool b1bfs)
+        public BfpCtrl(
+            bool rx0bfPinOperationMode,
+            bool rx1bfPinOperationMode,
+            bool rx0bfPinFunctionEnable,
+            bool rx1bfPinFunctionEnable,
+            bool rx0bfPinState,
+            bool rx1bfPinState)
         {
-            B0Bfm = b0bfm;
-            B1Bfm = b1bfm;
-            B0Bfe = b0bfe;
-            B1Bfe = b1bfe;
-            B0Bfs = b0bfs;
-            B1Bfs = b1bfs;
+            Rx0bfPinOperationMode = rx0bfPinOperationMode;
+            Rx1bfPinOperationMode = rx1bfPinOperationMode;
+            Rx0bfPinFunctionEnable = rx0bfPinFunctionEnable;
+            Rx1bfPinFunctionEnable = rx1bfPinFunctionEnable;
+            Rx0bfPinState = rx0bfPinState;
+            Rx1bfPinState = rx1bfPinState;
         }
 
         /// <summary>
@@ -56,53 +62,53 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <param name="value">The value that represents the register contents.</param>
         public BfpCtrl(byte value)
         {
-            B0Bfm = (value & 1) == 1;
-            B1Bfm = ((value >> 1) & 1) == 1;
-            B0Bfe = ((value >> 2) & 1) == 1;
-            B1Bfe = ((value >> 3) & 1) == 1;
-            B0Bfs = ((value >> 4) & 1) == 1;
-            B1Bfs = ((value >> 5) & 1) == 1;
+            Rx0bfPinOperationMode = (value & 1) == 1;
+            Rx1bfPinOperationMode = ((value >> 1) & 1) == 1;
+            Rx0bfPinFunctionEnable = ((value >> 2) & 1) == 1;
+            Rx1bfPinFunctionEnable = ((value >> 3) & 1) == 1;
+            Rx0bfPinState = ((value >> 4) & 1) == 1;
+            Rx1bfPinState = ((value >> 5) & 1) == 1;
         }
 
         /// <summary>
-        /// Rx0BF Pin Operation mode bit.
+        /// B0BFM: Rx0BF Pin Operation mode bit.
         /// True = Pin is used as an interrupt when a valid message is loaded into RXB0.
         /// False = Digital Output mode.
         /// </summary>
-        public bool B0Bfm { get; }
+        public bool Rx0bfPinOperationMode { get; }
 
         /// <summary>
-        /// Rx1BF Pin Operation mode bit.
+        /// B1BFM: Rx1BF Pin Operation mode bit.
         /// True = Pin is used as an interrupt when a valid message is loaded into RXB1.
         /// False = Digital Output mode.
         /// </summary>
-        public bool B1Bfm { get; }
+        public bool Rx1bfPinOperationMode { get; }
 
         /// <summary>
-        /// Rx0BF Pin Function Enable bit.
+        /// B0BFE: Rx0BF Pin Function Enable bit.
         /// True = Pin function is enabled, operation mode is determined by the B0BFM bit.
         /// False = Pin function is disabled, pin goes to the high-impedance state.
         /// </summary>
-        public bool B0Bfe { get; }
+        public bool Rx0bfPinFunctionEnable { get; }
 
         /// <summary>
-        /// Rx1BF Pin Function Enable bit.
+        /// B1BFE: Rx1BF Pin Function Enable bit.
         /// True = Pin function is enabled, operation mode is determined by the B1BFM bit.
         /// False = Pin function is disabled, pin goes to the high-impedance state.
         /// </summary>
-        public bool B1Bfe { get; }
+        public bool Rx1bfPinFunctionEnable { get; }
 
         /// <summary>
-        /// Rx0BF Pin State bit (Digital Output mode only).
+        /// B0BFS: Rx0BF Pin State bit (Digital Output mode only).
         /// Reads as '0' when Rx0BF is configured as an interrupt pin.
         /// </summary>
-        public bool B0Bfs { get; }
+        public bool Rx0bfPinState { get; }
 
         /// <summary>
-        /// Rx1BF Pin State bit (Digital Output mode only).
+        /// B1BFS: Rx1BF Pin State bit (Digital Output mode only).
         /// Reads as '0' when Rx1BF is configured as an interrupt pin.
         /// </summary>
-        public bool B1Bfs { get; }
+        public bool Rx1bfPinState { get; }
 
         /// <summary>
         /// Gets the address of the register.
@@ -118,32 +124,32 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             byte value = 0;
 
-            if (B0Bfm)
+            if (Rx0bfPinOperationMode)
             {
                 value |= 0b0000_0001;
             }
 
-            if (B1Bfm)
+            if (Rx1bfPinOperationMode)
             {
                 value |= 0b0000_0010;
             }
 
-            if (B0Bfe)
+            if (Rx0bfPinFunctionEnable)
             {
                 value |= 0b0000_0100;
             }
 
-            if (B1Bfe)
+            if (Rx1bfPinFunctionEnable)
             {
                 value |= 0b0000_1000;
             }
 
-            if (B0Bfs)
+            if (Rx0bfPinState)
             {
                 value |= 0b0001_0000;
             }
 
-            if (B1Bfs)
+            if (Rx1bfPinState)
             {
                 value |= 0b0010_0000;
             }

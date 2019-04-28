@@ -29,24 +29,24 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         [InlineData(0b11, false, 0b000, 0b0000_0011)]
         [InlineData(0b00, true, 0b000, 0b0000_1000)]
         [InlineData(0b00, false, 0b111, 0b1110_0000)]
-        public void From_To_Byte(byte eid, bool exide, byte sid, byte expectedByte)
+        public void From_To_Byte(byte extendedIdentifierFilter, bool extendedIdentifierEnable, byte standardIdentifierFilter, byte expectedByte)
         {
-            var rxFxSidl = new RxFxSidl(0, eid, exide, sid);
-            Assert.Equal(eid, rxFxSidl.Eid);
-            Assert.Equal(exide, rxFxSidl.Exide);
-            Assert.Equal(sid, rxFxSidl.Sid);
-
-            Assert.Equal(expectedByte, new RxFxSidl(0, eid, exide, sid).ToByte());
+            var rxFxSidl = new RxFxSidl(0, extendedIdentifierFilter, extendedIdentifierEnable, standardIdentifierFilter);
+            Assert.Equal(extendedIdentifierFilter, rxFxSidl.ExtendedIdentifierFilter);
+            Assert.Equal(extendedIdentifierEnable, rxFxSidl.ExtendedIdentifierEnable);
+            Assert.Equal(standardIdentifierFilter, rxFxSidl.StandardIdentifierFilter);
+            Assert.Equal(expectedByte, rxFxSidl.ToByte());
+            Assert.Equal(expectedByte, new RxFxSidl(0, expectedByte).ToByte());
         }
 
         [Theory]
         [InlineData(6, 0b000, false, 0b000)]
         [InlineData(0, 0b100, false, 0b000)]
         [InlineData(0, 0b00, false, 0b1000)]
-        public void Invalid_Arguments(byte rxFilterNumber, byte eid, bool exide, byte sid)
+        public void Invalid_Arguments(byte rxFilterNumber, byte extendedIdentifierFilter, bool extendedIdentifierEnable, byte standardIdentifierFilter)
         {
             Assert.Throws<ArgumentException>(() =>
-             new RxFxSidl(rxFilterNumber, eid, exide, sid).ToByte());
+             new RxFxSidl(rxFilterNumber, extendedIdentifierFilter, extendedIdentifierEnable, standardIdentifierFilter).ToByte());
         }
     }
 }

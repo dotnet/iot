@@ -15,12 +15,12 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Initializes a new instance of the RxFxEid8 class.
         /// </summary>
         /// <param name="rxFilterNumber">Receive Filter Number. Must be a value of 0 - 5.</param>
-        /// <param name="eid">
-        /// Extended Identifier bits.
+        /// <param name="extendedIdentifier">
+        /// EID[15:]: Extended Identifier bits.
         /// These bits hold the filter bits to be applied to bits[15:8] of the Extended Identifier portion of a received
         /// message or to Byte 0 in received data if corresponding with RXM[1:0] = 00 and EXIDE = 0.
         /// </param>
-        public RxFxEid8(byte rxFilterNumber, byte eid)
+        public RxFxEid8(byte rxFilterNumber, byte extendedIdentifier)
         {
             if (rxFilterNumber > 5)
             {
@@ -28,7 +28,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
             }
 
             RxFilterNumber = rxFilterNumber;
-            Eid = eid;
+            ExtendedIdentifier = extendedIdentifier;
         }
 
         /// <summary>
@@ -37,11 +37,11 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         public byte RxFilterNumber { get; }
 
         /// <summary>
-        /// Extended Identifier bits.
+        /// EID[15:]: Extended Identifier bits.
         /// These bits hold the filter bits to be applied to bits[15:8] of the Extended Identifier portion of a received
         /// message or to Byte 0 in received data if corresponding with RXM[1:0] = 00 and EXIDE = 0.
         /// </summary>
-        public byte Eid { get; }
+        public byte ExtendedIdentifier { get; }
 
         private Address GetAddress()
         {
@@ -100,6 +100,6 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Converts register contents to a byte.
         /// </summary>
         /// <returns>The byte that represent the register contents.</returns>
-        public byte ToByte() => Eid;
+        public byte ToByte() => ExtendedIdentifier;
     }
 }

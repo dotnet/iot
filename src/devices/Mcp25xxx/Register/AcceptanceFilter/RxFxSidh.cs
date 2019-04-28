@@ -16,11 +16,11 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// </summary>
         /// <param name="rxFilterNumber">
         /// Receive Filter Number.  Must be a value of 0 - 5.</param>
-        /// <param name="sid">
-        /// Standard Identifier Filter bits
+        /// <param name="standardIdentifierFilter">
+        /// SID[10:3]: Standard Identifier Filter bits
         /// These bits hold the filter bits to be applied to bits[10:3] of the Standard Identifier portion of a received message.
         /// </param>
-        public RxFxSidh(byte rxFilterNumber, byte sid)
+        public RxFxSidh(byte rxFilterNumber, byte standardIdentifierFilter)
         {
             if (rxFilterNumber > 5)
             {
@@ -28,7 +28,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
             }
 
             RxFilterNumber = rxFilterNumber;
-            Sid = sid;
+            StandardIdentifierFilter = standardIdentifierFilter;
         }
 
         /// <summary>
@@ -37,10 +37,10 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         public byte RxFilterNumber { get; }
 
         /// <summary>
-        /// Standard Identifier Filter bits
+        /// SID[10:3]: Standard Identifier Filter bits
         /// These bits hold the filter bits to be applied to bits[10:3] of the Standard Identifier portion of a received message.
         /// </summary>
-        public byte Sid { get; }
+        public byte StandardIdentifierFilter { get; }
 
         private Address GetAddress()
         {
@@ -99,6 +99,6 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Converts register contents to a byte.
         /// </summary>
         /// <returns>The byte that represent the register contents.</returns>
-        public byte ToByte() => Sid;
+        public byte ToByte() => StandardIdentifierFilter;
     }
 }

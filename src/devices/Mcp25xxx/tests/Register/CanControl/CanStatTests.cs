@@ -14,28 +14,28 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.CanControl
         [Fact]
         public void Get_Address()
         {
-            Assert.Equal(Address.CanStat, new CanStat(InterruptFlagCode.No, OperationMode.NormalOperation).Address);
+            Assert.Equal(Address.CanStat, new CanStat(FlagCode.No, OperationMode.NormalOperation).Address);
         }
 
         [Theory]
-        [InlineData(InterruptFlagCode.No, OperationMode.NormalOperation, 0b0000_0000)]
-        [InlineData(InterruptFlagCode.Error, OperationMode.NormalOperation, 0b0000_0010)]
-        [InlineData(InterruptFlagCode.WakeUp, OperationMode.NormalOperation, 0b0000_0100)]
-        [InlineData(InterruptFlagCode.TxB0, OperationMode.NormalOperation, 0b0000_0110)]
-        [InlineData(InterruptFlagCode.TxB1, OperationMode.NormalOperation, 0b0000_1000)]
-        [InlineData(InterruptFlagCode.RxB0, OperationMode.NormalOperation, 0b0000_1100)]
-        [InlineData(InterruptFlagCode.RxB1, OperationMode.NormalOperation, 0b0000_1110)]
-        [InlineData(InterruptFlagCode.No, OperationMode.Sleep, 0b0010_0000)]
-        [InlineData(InterruptFlagCode.No, OperationMode.Loopback, 0b0100_0000)]
-        [InlineData(InterruptFlagCode.No, OperationMode.ListenOnly, 0b0110_0000)]
-        [InlineData(InterruptFlagCode.No, OperationMode.Configuration, 0b1000_0000)]
-        public void From_To_Byte(InterruptFlagCode icod, OperationMode opMod, byte expectedByte)
+        [InlineData(FlagCode.No, OperationMode.NormalOperation, 0b0000_0000)]
+        [InlineData(FlagCode.Error, OperationMode.NormalOperation, 0b0000_0010)]
+        [InlineData(FlagCode.WakeUp, OperationMode.NormalOperation, 0b0000_0100)]
+        [InlineData(FlagCode.TxB0, OperationMode.NormalOperation, 0b0000_0110)]
+        [InlineData(FlagCode.TxB1, OperationMode.NormalOperation, 0b0000_1000)]
+        [InlineData(FlagCode.RxB0, OperationMode.NormalOperation, 0b0000_1100)]
+        [InlineData(FlagCode.RxB1, OperationMode.NormalOperation, 0b0000_1110)]
+        [InlineData(FlagCode.No, OperationMode.Sleep, 0b0010_0000)]
+        [InlineData(FlagCode.No, OperationMode.Loopback, 0b0100_0000)]
+        [InlineData(FlagCode.No, OperationMode.ListenOnly, 0b0110_0000)]
+        [InlineData(FlagCode.No, OperationMode.Configuration, 0b1000_0000)]
+        public void From_To_Byte(FlagCode interruptFlagCode, OperationMode operationMode, byte expectedByte)
         {
-            var canStat = new CanStat(expectedByte);
-            Assert.Equal(icod, canStat.Icod);
-            Assert.Equal(opMod, canStat.OpMod);
-
-            Assert.Equal(expectedByte, new CanStat(icod, opMod).ToByte());
+            var canStat = new CanStat(interruptFlagCode, operationMode);
+            Assert.Equal(interruptFlagCode, canStat.InterruptFlagCode);
+            Assert.Equal(operationMode, canStat.OperationMode);
+            Assert.Equal(expectedByte, canStat.ToByte());
+            Assert.Equal(expectedByte, new CanStat(expectedByte).ToByte());
         }
     }
 }

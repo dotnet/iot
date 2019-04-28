@@ -15,40 +15,40 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Initializes a new instance of the RxFxSidl class.
         /// </summary>
         /// <param name="rxFilterNumber">Receive Filter Number.  Must be a value of 0 - 5.</param>
-        /// <param name="eid">
-        /// Extended Identifier Filter bits.
+        /// <param name="extendedIdentifierFilter">
+        /// EID[17:16]: Extended Identifier Filter bits.
         /// These bits hold the filter bits to be applied to bits[17:16] of the Extended Identifier portion of a received message.
         /// </param>
-        /// <param name="exide">
-        /// Extended Identifier Enable bit.
+        /// <param name="extendedIdentifierEnable">
+        /// EXIDE: Extended Identifier Enable bit.
         /// True = Filter is applied only to extended frames.
         /// False = Filter is applied only to standard frames.
         /// </param>
-        /// <param name="sid">
-        /// Standard Identifier Filter bits.
+        /// <param name="standardIdentifierFilter">
+        /// SID[2:0]: Standard Identifier Filter bits.
         /// These bits hold the filter bits to be applied to bits[2:0] of the Standard Identifier portion of a received message.
         /// </param>
-        public RxFxSidl(byte rxFilterNumber, byte eid, bool exide, byte sid)
+        public RxFxSidl(byte rxFilterNumber, byte extendedIdentifierFilter, bool extendedIdentifierEnable, byte standardIdentifierFilter)
         {
             if (rxFilterNumber > 5)
             {
                 throw new ArgumentException($"Invalid RX Filter Number value {rxFilterNumber}.", nameof(rxFilterNumber));
             }
 
-            if (eid > 3)
+            if (extendedIdentifierFilter > 3)
             {
-                throw new ArgumentException($"Invalid EID value {eid}.", nameof(eid));
+                throw new ArgumentException($"Invalid EID value {extendedIdentifierFilter}.", nameof(extendedIdentifierFilter));
             }
 
-            if (sid > 7)
+            if (standardIdentifierFilter > 7)
             {
-                throw new ArgumentException($"Invalid SID value {sid}.", nameof(sid));
+                throw new ArgumentException($"Invalid SID value {standardIdentifierFilter}.", nameof(standardIdentifierFilter));
             }
 
             RxFilterNumber = rxFilterNumber;
-            Eid = eid;
-            Exide = exide;
-            Sid = sid;
+            ExtendedIdentifierFilter = extendedIdentifierFilter;
+            ExtendedIdentifierEnable = extendedIdentifierEnable;
+            StandardIdentifierFilter = standardIdentifierFilter;
         }
 
         /// <summary>
@@ -64,8 +64,9 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
             }
 
             RxFilterNumber = rxFilterNumber;
-            Eid = (byte)(value & 0b0000_0011);
-            Sid = (byte)((value & 0b1100_0000) >> 5);
+            ExtendedIdentifierFilter = (byte)(value & 0b0000_0011);
+            ExtendedIdentifierEnable = (value & 0b0000_1000) == 0b0000_1000;
+            StandardIdentifierFilter = (byte)((value & 0b1110_0000) >> 5);
         }
 
         /// <summary>
@@ -74,23 +75,23 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         public byte RxFilterNumber { get; }
 
         /// <summary>
-        /// Extended Identifier Filter bits.
+        /// EID[17:16]: Extended Identifier Filter bits.
         /// These bits hold the filter bits to be applied to bits[17:16] of the Extended Identifier portion of a received message.
         /// </summary>
-        public byte Eid { get; }
+        public byte ExtendedIdentifierFilter { get; }
 
         /// <summary>
-        /// Extended Identifier Enable bit.
+        /// EXIDE: Extended Identifier Enable bit.
         /// True = Filter is applied only to extended frames.
         /// False = Filter is applied only to standard frames.
         /// </summary>
-        public bool Exide { get; }
+        public bool ExtendedIdentifierEnable { get; }
 
         /// <summary>
-        /// Standard Identifier Filter bits.
+        /// SID[2:0]:Standard Identifier Filter bits.
         /// These bits hold the filter bits to be applied to bits[2:0] of the Standard Identifier portion of a received message.
         /// </summary>
-        public byte Sid { get; }
+        public byte StandardIdentifierFilter { get; }
 
         private Address GetAddress()
         {
@@ -151,14 +152,14 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <returns>The byte that represent the register contents.</returns>
         public byte ToByte()
         {
-            byte value = (byte)(Sid << 5);
+            byte value = (byte)(StandardIdentifierFilter << 5);
 
-            if (Exide)
+            if (ExtendedIdentifierEnable)
             {
                 value |= 0b0000_1000;
             }
 
-            value |= Eid;
+            value |= ExtendedIdentifierFilter;
             return value;
         }
     }

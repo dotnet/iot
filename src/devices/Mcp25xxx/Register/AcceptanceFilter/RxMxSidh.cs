@@ -15,11 +15,11 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Initializes a new instance of the RxMxSidh class.
         /// </summary>
         /// <param name="rxMaskNumber">Receive Mask Number.  Must be a value of 0 - 1.</param>
-        /// <param name="sid">
-        /// Standard Identifier Mask bits.
+        /// <param name="standardIdentifierMask">
+        /// SID[10:3]: Standard Identifier Mask bits.
         /// These bits hold the mask bits to be applied to bits[10:3] of the Standard Identifier portion of a received message.
         /// </param>
-        public RxMxSidh(byte rxMaskNumber, byte sid)
+        public RxMxSidh(byte rxMaskNumber, byte standardIdentifierMask)
         {
             if (rxMaskNumber > 1)
             {
@@ -27,7 +27,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
             }
 
             RxMaskNumber = rxMaskNumber;
-            Sid = sid;
+            StandardIdentifierMask = standardIdentifierMask;
         }
 
         /// <summary>
@@ -36,10 +36,10 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         public byte RxMaskNumber { get; }
 
         /// <summary>
-        /// Standard Identifier Mask bits.
+        /// SID[10:3]: Standard Identifier Mask bits.
         /// These bits hold the mask bits to be applied to bits[10:3] of the Standard Identifier portion of a received message.
         /// </summary>
-        public byte Sid { get; }
+        public byte StandardIdentifierMask { get; }
 
         private Address GetAddress()
         {
@@ -82,6 +82,6 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Converts register contents to a byte.
         /// </summary>
         /// <returns>The byte that represent the register contents.</returns>
-        public byte ToByte() => Sid;
+        public byte ToByte() => StandardIdentifierMask;
     }
 }

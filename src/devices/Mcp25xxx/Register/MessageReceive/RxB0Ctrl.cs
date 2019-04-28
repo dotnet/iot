@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using static Iot.Device.Mcp25xxx.Register.MessageReceive.RxB1Ctrl;
+
 namespace Iot.Device.Mcp25xxx.Register.MessageReceive
 {
     /// <summary>
@@ -12,28 +14,34 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Initializes a new instance of the RxB0Ctrl class.
         /// </summary>
-        /// <param name="filhit0">
-        /// Indicates which acceptance filter enabled the reception of a message.
+        /// <param name="filterHit">
+        /// FILHIT0: Indicates which acceptance filter enabled the reception of a message.
         /// True = Acceptance Filter 1 (RXF1).
         /// False = Acceptance Filter 0 (RXF0).
         /// </param>
-        /// <param name="bukt">
-        /// Rollover Enable bit.
+        /// <param name="rolloverEnable">
+        /// BUKT: Rollover Enable bit.
         /// True = RXB0 message will roll over and be written to RXB1 if RXB0 is full.
         /// False = Rollover is disabled.
         /// </param>
-        /// <param name="rxrtr">
-        /// Received Remote Transfer Request bit.
+        /// <param name="receivedRemoteTransferRequest">
+        /// RXRTR: Received Remote Transfer Request bit.
         /// True = Remote Transfer Request received.
         /// False = No Remote Transfer Request received.
         /// </param>
-        /// <param name="rxm">Receive Buffer Operating mode bits.</param>
-        public RxB0Ctrl(bool filhit0, bool bukt, bool rxrtr, OperatingMode rxm)
+        /// <param name="receiveBufferOperatingMode">
+        /// RXM[1:0]: Receive Buffer Operating mode bits.
+        /// </param>
+        public RxB0Ctrl(
+            bool filterHit,
+            bool rolloverEnable,
+            bool receivedRemoteTransferRequest,
+            OperatingMode receiveBufferOperatingMode)
         {
-            FilHit0 = filhit0;
-            Bukt = bukt;
-            RxRtr = rxrtr;
-            Rxm = rxm;
+            FilterHit = filterHit;
+            RolloverEnable = rolloverEnable;
+            ReceivedRemoteTransferRequest = receivedRemoteTransferRequest;
+            ReceiveBufferOperatingMode = receiveBufferOperatingMode;
         }
 
         /// <summary>
@@ -42,42 +50,42 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <param name="value">The value that represents the register contents.</param>
         public RxB0Ctrl(byte value)
         {
-            FilHit0 = (value & 1) == 1;
-            Bukt = ((value >> 2) & 1) == 1;
-            RxRtr = ((value >> 3) & 1) == 1;
-            Rxm = (OperatingMode)((value & 0b0110_0000) >> 5);
+            FilterHit = (value & 1) == 1;
+            RolloverEnable = ((value >> 2) & 1) == 1;
+            ReceivedRemoteTransferRequest = ((value >> 3) & 1) == 1;
+            ReceiveBufferOperatingMode = (OperatingMode)((value & 0b0110_0000) >> 5);
         }
 
         /// <summary>
-        /// Indicates which acceptance filter enabled the reception of a message.
+        /// FILHIT0: Indicates which acceptance filter enabled the reception of a message.
         /// True = Acceptance Filter 1 (RXF1).
         /// False = Acceptance Filter 0 (RXF0).
         /// </summary>
-        public bool FilHit0 { get; }
+        public bool FilterHit { get; }
 
         /// <summary>
-        /// Read-Only copy of BUKT bit (used internally by the MCP25625).
+        /// BUKT: Read-Only copy of BUKT bit (used internally by the MCP25625).
         /// </summary>
-        public bool Bukt1 => Bukt;
+        public bool Bukt1 => RolloverEnable;
 
         /// <summary>
         /// Rollover Enable bit.
         /// True = RXB0 message will roll over and be written to RXB1 if RXB0 is full.
         /// False = Rollover is disabled.
         /// </summary>
-        public bool Bukt { get; }
+        public bool RolloverEnable { get; }
 
         /// <summary>
-        /// Received Remote Transfer Request bit.
+        /// RXRTR: Received Remote Transfer Request bit.
         /// True = Remote Transfer Request received.
         /// False = No Remote Transfer Request received.
         /// </summary>
-        public bool RxRtr { get; }
+        public bool ReceivedRemoteTransferRequest { get; }
 
         /// <summary>
-        /// Receive Buffer Operating mode bits.
+        /// RXM[1:0]: Receive Buffer Operating mode bits.
         /// </summary>
-        public OperatingMode Rxm { get; }
+        public OperatingMode ReceiveBufferOperatingMode { get; }
 
         /// <summary>
         /// Gets the address of the register.
@@ -91,14 +99,14 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <returns>The byte that represent the register contents.</returns>
         public byte ToByte()
         {
-            byte value = (byte)((byte)Rxm << 5);
+            byte value = (byte)((byte)ReceiveBufferOperatingMode << 5);
 
-            if (RxRtr)
+            if (ReceivedRemoteTransferRequest)
             {
                 value |= 0b0000_1000;
             }
 
-            if (Bukt)
+            if (RolloverEnable)
             {
                 value |= 0b0000_0100;
             }
@@ -108,7 +116,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
                 value |= 0b0000_0010;
             }
 
-            if (FilHit0)
+            if (FilterHit)
             {
                 value |= 0b0000_0001;
             }

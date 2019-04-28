@@ -24,23 +24,23 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         [InlineData(0b00, 0b000, 0b0000_0000)]
         [InlineData(0b11, 0b000, 0b0000_0011)]
         [InlineData(0b00, 0b111, 0b1110_0000)]
-        public void From_To_Byte(byte eid, byte sid, byte expectedByte)
+        public void From_To_Byte(byte extendedIdentifierMask, byte standardIdentifierMask, byte expectedByte)
         {
-            var rxMxSidl = new RxMxSidl(0, expectedByte);
-            Assert.Equal(eid, rxMxSidl.Eid);
-            Assert.Equal(sid, rxMxSidl.Sid);
-
-            Assert.Equal(expectedByte, new RxMxSidl(0, eid, sid).ToByte());
+            var rxMxSidl = new RxMxSidl(0, extendedIdentifierMask, standardIdentifierMask);
+            Assert.Equal(extendedIdentifierMask, rxMxSidl.ExtendedIdentifierMask);
+            Assert.Equal(standardIdentifierMask, rxMxSidl.StandardIdentifierMask);
+            Assert.Equal(expectedByte, rxMxSidl.ToByte());
+            Assert.Equal(expectedByte, new RxMxSidl(0, expectedByte).ToByte());
         }
 
         [Theory]
         [InlineData(2, 0b000, 0b000)]
         [InlineData(0, 0b100, 0b000)]
         [InlineData(0, 0b00, 0b1000)]
-        public void Invalid_Arguments(byte rxMaskNumber, byte eid, byte sid)
+        public void Invalid_Arguments(byte rxMaskNumber, byte extendedIdentifierMask, byte standardIdentifierMask)
         {
             Assert.Throws<ArgumentException>(() =>
-             new RxMxSidl(rxMaskNumber, eid, sid).ToByte());
+             new RxMxSidl(rxMaskNumber, extendedIdentifierMask, standardIdentifierMask).ToByte());
         }
     }
 }

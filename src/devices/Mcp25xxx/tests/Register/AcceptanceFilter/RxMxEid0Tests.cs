@@ -22,12 +22,11 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         [Theory]
         [InlineData(0b0000_0000)]
         [InlineData(0b1111_1111)]
-        public void From_To_Byte(byte eid)
+        public void From_To_Byte(byte extendedIdentifierMask)
         {
-            var rxMxEid0 = new RxMxEid0(0, eid);
-            Assert.Equal(eid, rxMxEid0.Eid);
-
-            Assert.Equal(eid, new RxMxEid0(0, eid).ToByte());
+            var rxMxEid0 = new RxMxEid0(0, extendedIdentifierMask);
+            Assert.Equal(extendedIdentifierMask, rxMxEid0.ExtendedIdentifierMask);
+            Assert.Equal(extendedIdentifierMask, rxMxEid0.ToByte());
         }
     }
 }

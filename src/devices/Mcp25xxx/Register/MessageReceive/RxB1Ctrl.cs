@@ -12,18 +12,23 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Initializes a new instance of the RxB1Ctrl class.
         /// </summary>
-        /// <param name="filhit">Receive Buffer Operating mode bits</param>
-        /// <param name="rxrtr">
-        /// Received Remote Transfer Request bit.
+        /// <param name="filterHit">FILHIT[2:0]: Receive Buffer Operating mode bits</param>
+        /// <param name="receivedRemoteTransferRequest">
+        /// RXRTR: Received Remote Transfer Request bit.
         /// True = Remote Transfer Request received.
         /// False = No Remote Transfer Request received.
         /// </param>
-        /// <param name="rxm">Receive Buffer Operating mode bits.</param>
-        public RxB1Ctrl(FilterHit filhit, bool rxrtr, OperatingMode rxm)
+        /// <param name="receiveBufferOperatingMode">
+        /// RXM[1:0]: Receive Buffer Operating mode bits.
+        /// </param>
+        public RxB1Ctrl(
+            Filter filterHit,
+            bool receivedRemoteTransferRequest,
+            OperatingMode receiveBufferOperatingMode)
         {
-            FilHit = filhit;
-            RxRtr = rxrtr;
-            Rxm = rxm;
+            FilterHit = filterHit;
+            ReceivedRemoteTransferRequest = receivedRemoteTransferRequest;
+            ReceiveBufferOperatingMode = receiveBufferOperatingMode;
         }
 
         /// <summary>
@@ -32,15 +37,15 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <param name="value">The value that represents the register contents.</param>
         public RxB1Ctrl(byte value)
         {
-            FilHit = (FilterHit)(value & 0b0000_0111);
-            RxRtr = ((value >> 3) & 1) == 1;
-            Rxm = (OperatingMode)((value & 0b0110_0000) >> 5);
+            FilterHit = (Filter)(value & 0b0000_0111);
+            ReceivedRemoteTransferRequest = ((value >> 3) & 1) == 1;
+            ReceiveBufferOperatingMode = (OperatingMode)((value & 0b0110_0000) >> 5);
         }
 
         /// <summary>
         /// Filter Hit bits.
         /// </summary>
-        public enum FilterHit
+        public enum Filter
         {
             /// <summary>
             /// Acceptance Filter 0 (RXF0) (only if the BUKT bit is set in RXB0CTRL).
@@ -69,21 +74,21 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         }
 
         /// <summary>
-        /// Filter Hit bits.
+        /// FILHIT[2:0]: Filter Hit bits.
         /// </summary>
-        public FilterHit FilHit { get; }
+        public Filter FilterHit { get; }
 
         /// <summary>
-        /// Received Remote Transfer Request bit.
+        /// RXRTR: Received Remote Transfer Request bit.
         /// True = Remote Transfer Request received.
         /// False = No Remote Transfer Request received.
         /// </summary>
-        public bool RxRtr { get; }
+        public bool ReceivedRemoteTransferRequest { get; }
 
         /// <summary>
-        /// Receive Buffer Operating mode bits.
+        /// RXM[1:0]: Receive Buffer Operating mode bits.
         /// </summary>
-        public OperatingMode Rxm { get; }
+        public OperatingMode ReceiveBufferOperatingMode { get; }
 
         /// <summary>
         /// Gets the address of the register.
@@ -97,14 +102,14 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <returns>The byte that represent the register contents.</returns>
         public byte ToByte()
         {
-            byte value = (byte)((byte)Rxm << 5);
+            byte value = (byte)((byte)ReceiveBufferOperatingMode << 5);
 
-            if (RxRtr)
+            if (ReceivedRemoteTransferRequest)
             {
                 value |= 0b0000_1000;
             }
 
-            value |= (byte)(FilHit);
+            value |= (byte)(FilterHit);
             return value;
         }
     }

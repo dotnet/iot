@@ -15,17 +15,17 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// Initializes a new instance of the RxBxDlc class.
         /// </summary>
         /// <param name="rxBufferNumber">Receive Buffer Number. Must be a value of 0 - 1.</param>
-        /// <param name="dlc">
-        /// Data Length Code bits.
+        /// <param name="dataLengthCode">
+        /// DLC[3:0]: Data Length Code bits.
         /// Indicates the number of data bytes that were received. (0 to 8 bytes).
         /// </param>
-        /// <param name="rtr">
-        /// Extended Frame Remote Transmission Request bit.
+        /// <param name="extendedFrameRemoteTransmissionRequest">
+        /// RTR: Extended Frame Remote Transmission Request bit.
         /// (valid only when the IDE bit in the RXBxSIDL register is '1').
         /// True = Extended frame Remote Transmit Request received.
         /// False = Extended data frame received.
         /// </param>
-        public RxBxDlc(byte rxBufferNumber, byte dlc, bool rtr)
+        public RxBxDlc(byte rxBufferNumber, byte dataLengthCode, bool extendedFrameRemoteTransmissionRequest)
         {
             if (rxBufferNumber > 1)
             {
@@ -33,8 +33,8 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
             }
 
             RxBufferNumber = rxBufferNumber;
-            Dlc = dlc;
-            Rtr = rtr;
+            DataLengthCode = dataLengthCode;
+            ExtendedFrameRemoteTransmissionRequest = extendedFrameRemoteTransmissionRequest;
         }
 
         /// <summary>
@@ -49,8 +49,8 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
             }
 
             RxBufferNumber = rxBufferNumber;
-            Dlc = (byte)(value & 0b0000_1111);
-            Rtr = ((value >> 6) & 1) == 1;
+            DataLengthCode = (byte)(value & 0b0000_1111);
+            ExtendedFrameRemoteTransmissionRequest = ((value >> 6) & 1) == 1;
         }
 
         /// <summary>
@@ -59,18 +59,18 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         public byte RxBufferNumber { get; }
 
         /// <summary>
-        /// Data Length Code bits.
+        /// DLC[3:0]: Data Length Code bits.
         /// Indicates the number of data bytes that were received. (0 to 8 bytes).
         /// </summary>
-        public byte Dlc { get; }
+        public byte DataLengthCode { get; }
 
         /// <summary>
-        /// Extended Frame Remote Transmission Request bit.
+        /// RTR: Extended Frame Remote Transmission Request bit.
         /// (valid only when the IDE bit in the RXBxSIDL register is '1').
         /// True = Extended frame Remote Transmit Request received.
         /// False = Extended data frame received.
         /// </summary>
-        public bool Rtr { get; }
+        public bool ExtendedFrameRemoteTransmissionRequest { get; }
 
         private Address GetAddress()
         {
@@ -117,12 +117,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             byte value = 0;
 
-            if (Rtr)
+            if (ExtendedFrameRemoteTransmissionRequest)
             {
                 value |= 0b100_0000;
             }
 
-            value |= Dlc;
+            value |= DataLengthCode;
             return value;
         }
     }

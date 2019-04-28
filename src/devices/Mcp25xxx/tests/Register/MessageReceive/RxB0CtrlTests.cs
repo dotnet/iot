@@ -24,16 +24,21 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
         [InlineData(false, false, false, OperatingMode.Reserved1, 0b0010_0000)]
         [InlineData(false, false, false, OperatingMode.Reserved2, 0b0100_0000)]
         [InlineData(false, false, false, OperatingMode.TurnsMaskFiltersOff, 0b0110_0000)]
-        public void From_To_Byte(bool filhit0, bool bukt, bool rxrtr, OperatingMode rxm, byte expectedByte)
+        public void From_To_Byte(
+            bool filterHit,
+            bool rolloverEnable,
+            bool receivedRemoteTransferRequest,
+            OperatingMode receiveBufferOperatingMode,
+            byte expectedByte)
         {
-            var rxB0Ctrl = new RxB0Ctrl(expectedByte);
-            Assert.Equal(filhit0, rxB0Ctrl.FilHit0);
-            Assert.Equal(bukt, rxB0Ctrl.Bukt);
-            Assert.Equal(bukt, rxB0Ctrl.Bukt1);
-            Assert.Equal(rxrtr, rxB0Ctrl.RxRtr);
-            Assert.Equal(rxm, rxB0Ctrl.Rxm);
-
-            Assert.Equal(expectedByte, new RxB0Ctrl(filhit0, bukt, rxrtr, rxm).ToByte());
+            var rxB0Ctrl = new RxB0Ctrl(filterHit, rolloverEnable, receivedRemoteTransferRequest, receiveBufferOperatingMode);
+            Assert.Equal(filterHit, rxB0Ctrl.FilterHit);
+            Assert.Equal(rolloverEnable, rxB0Ctrl.RolloverEnable);
+            Assert.Equal(rolloverEnable, rxB0Ctrl.Bukt1);
+            Assert.Equal(receivedRemoteTransferRequest, rxB0Ctrl.ReceivedRemoteTransferRequest);
+            Assert.Equal(receiveBufferOperatingMode, rxB0Ctrl.ReceiveBufferOperatingMode);
+            Assert.Equal(expectedByte, rxB0Ctrl.ToByte());
+            Assert.Equal(expectedByte, new RxB0Ctrl(expectedByte).ToByte());
         }
     }
 }

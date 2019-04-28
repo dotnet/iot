@@ -14,34 +14,34 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// <summary>
         /// Initializes a new instance of the Cnf2 class.
         /// </summary>
-        /// <param name="prseg">Propagation Segment Length bits.</param>
-        /// <param name="phseg1">PS1 Length bits.</param>
-        /// <param name="sam">
-        /// Sample Point Configuration bit.
+        /// <param name="propagationSegmentLength">PRSEG[2:0]: Propagation Segment Length bits.</param>
+        /// <param name="ps1Length">PHSEG1[2:0]: PS1 Length bits.</param>
+        /// <param name="samplePointConfiguration">
+        /// SAM: Sample Point Configuration bit.
         /// True = Bus line is sampled three times at the sample point.
         /// False = Bus line is sampled once at the sample point.
         /// </param>
-        /// <param name="btlmode">
-        /// PS2 Bit Time Length bit.
+        /// <param name="ps2BitTimeLength">
+        /// BTLMODE: PS2 Bit Time Length bit.
         /// True = Length of PS2 is determined by the PHSEG2[2:0] bits of CNF3.
         /// False = Length of PS2 is the greater of PS1 and IPT(2 TQ).
         /// </param>
-        public Cnf2(byte prseg, byte phseg1, bool sam, bool btlmode)
+        public Cnf2(byte propagationSegmentLength, byte ps1Length, bool samplePointConfiguration, bool ps2BitTimeLength)
         {
-            if (prseg > 0b0000_0111)
+            if (propagationSegmentLength > 0b0000_0111)
             {
-                throw new ArgumentException($"Invalid PRSEG value {prseg}.", nameof(prseg));
+                throw new ArgumentException($"Invalid PRSEG value {propagationSegmentLength}.", nameof(propagationSegmentLength));
             }
 
-            if (phseg1 > 0b0000_0111)
+            if (ps1Length > 0b0000_0111)
             {
-                throw new ArgumentException($"Invalid PHSEG1 value {phseg1}.", nameof(phseg1));
+                throw new ArgumentException($"Invalid PHSEG1 value {ps1Length}.", nameof(ps1Length));
             }
 
-            PrSeg = prseg;
-            PhSeg1 = phseg1;
-            Sam = sam;
-            BtlMode = btlmode;
+            PropagationSegmentLength = propagationSegmentLength;
+            Ps1Length = ps1Length;
+            SamplePointConfiguration = samplePointConfiguration;
+            Ps2BitTimeLength = ps2BitTimeLength;
         }
 
         /// <summary>
@@ -50,35 +50,35 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// <param name="value">The value that represents the register contents.</param>
         public Cnf2(byte value)
         {
-            PrSeg = (byte)(value & 0b0000_0111);
-            PhSeg1 = (byte)((value & 0b0011_1000) >> 3);
-            Sam = (value & 0b0100_0000) == 0b0100_0000;
-            BtlMode = (value & 0b1000_0000) == 0b1000_0000;
+            PropagationSegmentLength = (byte)(value & 0b0000_0111);
+            Ps1Length = (byte)((value & 0b0011_1000) >> 3);
+            SamplePointConfiguration = (value & 0b0100_0000) == 0b0100_0000;
+            Ps2BitTimeLength = (value & 0b1000_0000) == 0b1000_0000;
         }
 
         /// <summary>
-        /// Propagation Segment Length bits.
+        /// PRSEG[2:0]: Propagation Segment Length bits.
         /// </summary>
-        public byte PrSeg { get; }
+        public byte PropagationSegmentLength { get; }
 
         /// <summary>
-        /// PS1 Length bits.
+        /// PHSEG1[2:0]: PS1 Length bits.
         /// </summary>
-        public byte PhSeg1 { get; }
+        public byte Ps1Length { get; }
 
         /// <summary>
-        /// Sample Point Configuration bit.
+        /// SAM: Sample Point Configuration bit.
         /// True = Bus line is sampled three times at the sample point.
         /// False = Bus line is sampled once at the sample point.
         /// </summary>
-        public bool Sam { get; }
+        public bool SamplePointConfiguration { get; }
 
         /// <summary>
-        /// PS2 Bit Time Length bit.
+        /// BTLMODE: PS2 Bit Time Length bit.
         /// True = Length of PS2 is determined by the PHSEG2[2:0] bits of CNF3.
         /// False = Length of PS2 is the greater of PS1 and IPT(2 TQ).
         /// </summary>
-        public bool BtlMode { get; }
+        public bool Ps2BitTimeLength { get; }
 
         /// <summary>
         /// Gets the address of the register.
@@ -94,18 +94,18 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         {
             byte value = 0;
 
-            if (BtlMode)
+            if (Ps2BitTimeLength)
             {
                 value |= 0b1000_0000;
             }
 
-            if (Sam)
+            if (SamplePointConfiguration)
             {
                 value |= 0b0100_0000;
             }
 
-            value |= (byte)(PhSeg1 << 3);
-            value |= PrSeg;
+            value |= (byte)(Ps1Length << 3);
+            value |= PropagationSegmentLength;
             return value;
         }
     }

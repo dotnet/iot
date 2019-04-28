@@ -12,56 +12,64 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         /// <summary>
         /// Initializes a new instance of the Eflg class.
         /// </summary>
-        /// <param name="ewarn">
-        /// Error Warning Flag bit.
+        /// <param name="errorWarningFlag">
+        /// EWARN: Error Warning Flag bit.
         /// Sets when TEC or REC is equal to or greater than 96 (TXWAR or RXWAR = 1).
         /// Resets when both REC and TEC are less than 96.
         /// </param>
-        /// <param name="rxwar">
-        /// Receive Error Warning Flag bit.
+        /// <param name="receiveErrorWarningFlag">
+        /// RXWAR: Receive Error Warning Flag bit.
         /// Sets when REC is equal to or greater than 96.
         /// Resets when REC is less than 96.
         /// </param>
-        /// <param name="txwar">
-        /// Transmit Error Warning Flag bit.
+        /// <param name="transmitErrorWarningFlag">
+        /// TXWAR: Transmit Error Warning Flag bit.
         /// Sets when TEC is equal to or greater than 96.
         /// Resets when TEC is less than 96.
         /// </param>
-        /// <param name="rxep">
-        /// Receive Error-Passive Flag bit.
+        /// <param name="receiveErrorPassiveFlag">
+        /// RXEP: Receive Error-Passive Flag bit.
         /// Sets when REC is equal to or greater than 128.
         /// Resets when REC is less than 128.
         /// </param>
-        /// <param name="txep">
-        /// Transmit Error-Passive Flag bit.
+        /// <param name="transmitErrorPassiveFlag">
+        /// TXEP: Transmit Error-Passive Flag bit.
         /// Sets when TEC is equal to or greater than 128.
         /// Resets when TEC is less than 128.
         /// </param>
-        /// <param name="txbo">
-        /// Bus-Off Error Flag bit.
+        /// <param name="busOffErrorFlag">
+        /// TXBO: Bus-Off Error Flag bit.
         /// Bit sets when TEC reaches 255.
         /// Resets after a successful bus recovery sequence.
         /// </param>
-        /// <param name="rx0ovr">
-        /// Receive Buffer 0 Overflow Flag bit.
+        /// <param name="receiveBuffer0OverflowFlag">
+        /// RX0OVR: Receive Buffer 0 Overflow Flag bit.
         /// Sets when a valid message is received for RXB0 and the RX0IF bit in the CANINTF register is ‘1’.
         /// Must be reset by MCU.
         /// </param>
-        /// <param name="rx1ovr">
-        /// Receive Buffer 1 Overflow Flag bit.
+        /// <param name="receiveBuffer1OverflowFlag">
+        /// RX1OVR: Receive Buffer 1 Overflow Flag bit.
         /// Sets when a valid message is received for RXB1 and the RX1IF bit in the CANINTF register is ‘1’.
         /// Must be reset by MCU.
         /// </param>
-        public Eflg(bool ewarn, bool rxwar, bool txwar, bool rxep, bool txep, bool txbo, bool rx0ovr, bool rx1ovr)
+        public Eflg(
+            bool errorWarningFlag,
+            bool receiveErrorWarningFlag,
+            bool transmitErrorWarningFlag,
+            bool receiveErrorPassiveFlag,
+            bool transmitErrorPassiveFlag,
+            bool busOffErrorFlag,
+            bool receiveBuffer0OverflowFlag,
+            bool receiveBuffer1OverflowFlag)
         {
-            Ewarn = ewarn;
-            RxWar = rxwar;
-            TxWar = txwar;
-            RxEp = rxep;
-            TxEp = txep;
-            TxBo = txbo;
-            Rx0Ovr = rx0ovr;
-            Rx1Ovr = rx1ovr;
+            ErrorWarningFlag = errorWarningFlag;
+            ReceiveErrorWarningFlag = receiveErrorWarningFlag;
+            TransmitErrorWarningFlag = transmitErrorWarningFlag;
+            ReceiveErrorPassiveFlag = receiveErrorPassiveFlag;
+            TransmitErrorPassiveFlag = transmitErrorPassiveFlag;
+            BusOffErrorFlag = busOffErrorFlag;
+            ReceiveBuffer0OverflowFlag = receiveBuffer0OverflowFlag;
+            ReceiveBuffer1OverflowFlag = receiveBuffer1OverflowFlag;
         }
 
         /// <summary>
@@ -70,71 +78,71 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         /// <param name="value">The value that represents the register contents.</param>
         public Eflg(byte value)
         {
-            Ewarn = (value & 1) == 1;
-            RxWar = ((value >> 1) & 1) == 1;
-            TxWar = ((value >> 2) & 1) == 1;
-            RxEp = ((value >> 3) & 1) == 1;
-            TxEp = ((value >> 4) & 1) == 1;
-            TxBo = ((value >> 5) & 1) == 1;
-            Rx0Ovr = ((value >> 6) & 1) == 1;
-            Rx1Ovr = ((value >> 7) & 1) == 1;
+            ErrorWarningFlag = (value & 1) == 1;
+            ReceiveErrorWarningFlag = ((value >> 1) & 1) == 1;
+            TransmitErrorWarningFlag = ((value >> 2) & 1) == 1;
+            ReceiveErrorPassiveFlag = ((value >> 3) & 1) == 1;
+            TransmitErrorPassiveFlag = ((value >> 4) & 1) == 1;
+            BusOffErrorFlag = ((value >> 5) & 1) == 1;
+            ReceiveBuffer0OverflowFlag = ((value >> 6) & 1) == 1;
+            ReceiveBuffer1OverflowFlag = ((value >> 7) & 1) == 1;
         }
 
         /// <summary>
-        /// Error Warning Flag bit.
+        /// EWARN: Error Warning Flag bit.
         /// Sets when TEC or REC is equal to or greater than 96 (TXWAR or RXWAR = 1).
         /// Resets when both REC and TEC are less than 96.
         /// </summary>
-        public bool Ewarn { get; }
+        public bool ErrorWarningFlag { get; }
 
         /// <summary>
-        /// Receive Error Warning Flag bit.
+        /// RXWAR: Receive Error Warning Flag bit.
         /// Sets when REC is equal to or greater than 96.
         /// Resets when REC is less than 96.
         /// </summary>
-        public bool RxWar { get; }
+        public bool ReceiveErrorWarningFlag { get; }
 
         /// <summary>
-        /// Transmit Error Warning Flag bit.
+        /// TXWAR: Transmit Error Warning Flag bit.
         /// Sets when TEC is equal to or greater than 96.
         /// Resets when TEC is less than 96.
         /// </summary>
-        public bool TxWar { get; }
+        public bool TransmitErrorWarningFlag { get; }
 
         /// <summary>
-        /// Receive Error-Passive Flag bit.
+        /// RXEP: Receive Error-Passive Flag bit.
         /// Sets when REC is equal to or greater than 128.
         /// Resets when REC is less than 128.
         /// </summary>
-        public bool RxEp { get; }
+        public bool ReceiveErrorPassiveFlag { get; }
 
         /// <summary>
-        /// Transmit Error-Passive Flag bit.
+        /// TXEP: Transmit Error-Passive Flag bit.
         /// Sets when TEC is equal to or greater than 128.
         /// Resets when TEC is less than 128.
         /// </summary>
-        public bool TxEp { get; }
+        public bool TransmitErrorPassiveFlag { get; }
 
         /// <summary>
-        /// Bus-Off Error Flag bit.
+        /// TXBO: Bus-Off Error Flag bit.
         /// Bit sets when TEC reaches 255.
         /// Resets after a successful bus recovery sequence.
         /// </summary>
-        public bool TxBo { get; }
+        public bool BusOffErrorFlag { get; }
 
         /// <summary>
-        /// Receive Buffer 0 Overflow Flag bit.
+        /// RX0OVR: Receive Buffer 0 Overflow Flag bit.
         /// Sets when a valid message is received for RXB0 and the RX0IF bit in the CANINTF register is ‘1’.
         /// Must be reset by MCU.
         /// </summary>
-        public bool Rx0Ovr { get; }
+        public bool ReceiveBuffer0OverflowFlag { get; }
 
         /// <summary>
-        /// Receive Buffer 1 Overflow Flag bit.
+        /// RX1OVR: Receive Buffer 1 Overflow Flag bit.
         /// Sets when a valid message is received for RXB1 and the RX1IF bit in the CANINTF register is ‘1’.
         /// Must be reset by MCU.
         /// </summary>
-        public bool Rx1Ovr { get; }
+        public bool ReceiveBuffer1OverflowFlag { get; }
 
         /// <summary>
         /// Gets the address of the register.
@@ -150,42 +158,42 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         {
             byte value = 0;
 
-            if (Ewarn)
+            if (ErrorWarningFlag)
             {
                 value |= 0b0000_0001;
             }
 
-            if (RxWar)
+            if (ReceiveErrorWarningFlag)
             {
                 value |= 0b0000_0010;
             }
 
-            if (TxWar)
+            if (TransmitErrorWarningFlag)
             {
                 value |= 0b0000_0100;
             }
 
-            if (RxEp)
+            if (ReceiveErrorPassiveFlag)
             {
                 value |= 0b0000_1000;
             }
 
-            if (TxEp)
+            if (TransmitErrorPassiveFlag)
             {
                 value |= 0b0001_0000;
             }
 
-            if (TxBo)
+            if (BusOffErrorFlag)
             {
                 value |= 0b0010_0000;
             }
 
-            if (Rx0Ovr)
+            if (ReceiveBuffer0OverflowFlag)
             {
                 value |= 0b0100_0000;
             }
 
-            if (Rx1Ovr)
+            if (ReceiveBuffer1OverflowFlag)
             {
                 value |= 0b1000_0000;
             }

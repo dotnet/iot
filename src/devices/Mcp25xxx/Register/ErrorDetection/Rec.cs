@@ -12,16 +12,16 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         /// <summary>
         /// Initializes a new instance of the Rec class.
         /// </summary>
-        /// <param name="data">Receive Error Count bits.</param>
-        public Rec(byte data)
+        /// <param name="receiveErrorCount">REC[7:0]: Receive Error Count bits.</param>
+        public Rec(byte receiveErrorCount)
         {
-            Data = data;
+            ReceiveErrorCount = receiveErrorCount;
         }
 
         /// <summary>
-        /// Receive Error Count bits.
+        /// REC[7:0]: Receive Error Count bits.
         /// </summary>
-        public byte Data { get; }
+        public byte ReceiveErrorCount { get; }
 
         /// <summary>
         /// Gets the address of the register.
@@ -35,7 +35,7 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         /// <returns>The byte that represent the register contents.</returns>
         public byte ToByte()
         {
-            return Data;
+            return ReceiveErrorCount;
         }
     }
 }

@@ -15,11 +15,11 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// Initializes a new instance of the RxBxEid8 class.
         /// </summary>
         /// <param name="rxBufferNumber">Receive Buffer Number. Must be a value of 0 - 1.</param>
-        /// <param name="eid">
-        /// Extended Identifier bits.
+        /// <param name="extendedIdentifier">
+        /// EID[15:8]: Extended Identifier bits.
         /// These bits hold bits 15 through 8 of the Extended Identifier for the received message.
         /// </param>
-        public RxBxEid8(byte rxBufferNumber, byte eid)
+        public RxBxEid8(byte rxBufferNumber, byte extendedIdentifier)
         {
             if (rxBufferNumber > 1)
             {
@@ -27,7 +27,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
             }
 
             RxBufferNumber = rxBufferNumber;
-            Eid = eid;
+            ExtendedIdentifier = extendedIdentifier;
         }
 
         /// <summary>
@@ -36,10 +36,10 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         public byte RxBufferNumber { get; }
 
         /// <summary>
-        /// Extended Identifier bits.
+        /// EID[15:8]: Extended Identifier bits.
         /// These bits hold bits 15 through 8 of the Extended Identifier for the received message.
         /// </summary>
-        public byte Eid { get; }
+        public byte ExtendedIdentifier { get; }
 
         private Address GetAddress()
         {
@@ -82,6 +82,6 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// Converts register contents to a byte.
         /// </summary>
         /// <returns>The byte that represent the register contents.</returns>
-        public byte ToByte() => Eid;
+        public byte ToByte() => ExtendedIdentifier;
     }
 }

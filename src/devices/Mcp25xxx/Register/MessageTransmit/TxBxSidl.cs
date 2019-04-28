@@ -15,40 +15,40 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Initializes a new instance of the TxBxSidl class.
         /// </summary>
         /// <param name="txBufferNumber">Transmit Buffer Number.  Must be a value of 0 - 2.</param>
-        /// <param name="eid">
-        /// Extended Identifier bits.
+        /// <param name="extendedIdentifier">
+        /// EID[17:16]: Extended Identifier bits.
         /// These bits contain the two Most Significant bits of the Extended Identifier for the transmit message.
         /// </param>
-        /// <param name="exide">
-        /// Extended Identifier Enable bit.
+        /// <param name="extendedIdentifierEnable">
+        /// EXIDE: Extended Identifier Enable bit.
         /// True = Message will transmit the Extended Identifier.
         /// False = Message will transmit the Standard Identifier.
         /// </param>
-        /// <param name="sid">
-        /// Standard Identifier bits.
+        /// <param name="standardIdentifier">
+        /// SID[2:0]: Standard Identifier bits.
         /// These bits contain the three Least Significant bits of the Standard Identifier for the transmit message.
         /// </param>
-        public TxBxSidl(byte txBufferNumber, byte eid, bool exide, byte sid)
+        public TxBxSidl(byte txBufferNumber, byte extendedIdentifier, bool extendedIdentifierEnable, byte standardIdentifier)
         {
             if (txBufferNumber > 2)
             {
                 throw new ArgumentException($"Invalid TX Buffer Number value {txBufferNumber}.", nameof(txBufferNumber));
             }
 
-            if (eid > 3)
+            if (extendedIdentifier > 3)
             {
-                throw new ArgumentException($"Invalid EID value {eid}.", nameof(eid));
+                throw new ArgumentException($"Invalid EID value {extendedIdentifier}.", nameof(extendedIdentifier));
             }
 
-            if (sid > 7)
+            if (standardIdentifier > 7)
             {
-                throw new ArgumentException($"Invalid SID value {sid}.", nameof(sid));
+                throw new ArgumentException($"Invalid SID value {standardIdentifier}.", nameof(standardIdentifier));
             }
 
             TxBufferNumber = txBufferNumber;
-            Eid = eid;
-            Exide = exide;
-            Sid = sid;
+            ExtendedIdentifier = extendedIdentifier;
+            ExtendedIdentifierEnable = extendedIdentifierEnable;
+            StandardIdentifier = standardIdentifier;
         }
 
         /// <summary>
@@ -64,9 +64,9 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
             }
 
             TxBufferNumber = txBufferNumber;
-            Eid = (byte)(value & 0b0000_0011);
-            Exide = ((value >> 3) & 1) == 1;
-            Sid = (byte)((value & 0b1110_0000) >> 5);
+            ExtendedIdentifier = (byte)(value & 0b0000_0011);
+            ExtendedIdentifierEnable = ((value >> 3) & 1) == 1;
+            StandardIdentifier = (byte)((value & 0b1110_0000) >> 5);
         }
 
         /// <summary>
@@ -75,23 +75,23 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         public byte TxBufferNumber { get; }
 
         /// <summary>
-        /// Extended Identifier bits.
+        /// EID[17:16]: Extended Identifier bits.
         /// These bits contain the two Most Significant bits of the Extended Identifier for the transmit message.
         /// </summary>
-        public byte Eid { get; }
+        public byte ExtendedIdentifier { get; }
 
         /// <summary>
-        /// Extended Identifier Enable bit.
+        /// EXIDE: Extended Identifier Enable bit.
         /// True = Message will transmit the Extended Identifier.
         /// False = Message will transmit the Standard Identifier.
         /// </summary>
-        public bool Exide { get; }
+        public bool ExtendedIdentifierEnable { get; }
 
         /// <summary>
-        /// Standard Identifier bits.
+        /// SID[2:0]: Standard Identifier bits.
         /// These bits contain the three Least Significant bits of the Standard Identifier for the transmit message.
         /// </summary>
-        public byte Sid { get; }
+        public byte StandardIdentifier { get; }
 
         private Address GetAddress()
         {
@@ -140,14 +140,14 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <returns>The byte that represent the register contents.</returns>
         public byte ToByte()
         {
-            byte value = (byte)(Sid << 5);
+            byte value = (byte)(StandardIdentifier << 5);
 
-            if (Exide)
+            if (ExtendedIdentifierEnable)
             {
                 value |= 0b0000_1000;
             }
 
-            value |= Eid;
+            value |= ExtendedIdentifier;
             return value;
         }
     }

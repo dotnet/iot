@@ -15,11 +15,11 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Initializes a new instance of the TxBxEid0 class.
         /// </summary>
         /// <param name="txBufferNumber">Transmit Buffer Number.  Must be a value of 0 - 2.</param>
-        /// <param name="eid">
-        /// Extended Identifier bits.
+        /// <param name="extendedIdentifier">
+        /// EID[7:0]: Extended Identifier bits.
         /// These bits hold the Least Significant eight bits of the Extended Identifier for the transmit message.
         /// </param>
-        public TxBxEid0(byte txBufferNumber, byte eid)
+        public TxBxEid0(byte txBufferNumber, byte extendedIdentifier)
         {
             if (txBufferNumber > 2)
             {
@@ -27,7 +27,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
             }
 
             TxBufferNumber = txBufferNumber;
-            Eid = eid;
+            ExtendedIdentifier = extendedIdentifier;
         }
 
         /// <summary>
@@ -36,10 +36,10 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         public byte TxBufferNumber { get; }
 
         /// <summary>
-        /// Extended Identifier bits.
+        /// EID[7:0]: Extended Identifier bits.
         /// These bits hold the Least Significant eight bits of the Extended Identifier for the transmit message.
         /// </summary>
-        public byte Eid { get; }
+        public byte ExtendedIdentifier { get; }
 
         private Address GetAddress()
         {
@@ -86,6 +86,6 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Converts register contents to a byte.
         /// </summary>
         /// <returns>The byte that represent the register contents.</returns>
-        public byte ToByte() => Eid;
+        public byte ToByte() => ExtendedIdentifier;
     }
 }

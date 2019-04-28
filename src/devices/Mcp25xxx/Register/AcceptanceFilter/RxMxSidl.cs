@@ -15,34 +15,34 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Initializes a new instance of the RxMxSidl class.
         /// </summary>
         /// <param name="rxMaskNumber">Receive Mask Number.  Must be a value of 0 - 1.</param>
-        /// <param name="eid">
-        /// Extended Identifier Mask bits.
+        /// <param name="extendedIdentifierMask">
+        /// EID[17:16]: Extended Identifier Mask bits.
         /// These bits hold the mask bits to be applied to bits[17:16] of the Extended Identifier portion of a received message.
         /// </param>
-        /// <param name="sid">
-        /// Standard Identifier Mask bits.
+        /// <param name="standardIdentifierMask">
+        /// SID[2:0]: Standard Identifier Mask bits.
         /// These bits hold the mask bits to be applied to bits[2:0] of the Standard Identifier portion of a received message.
         /// </param>
-        public RxMxSidl(byte rxMaskNumber, byte eid, byte sid)
+        public RxMxSidl(byte rxMaskNumber, byte extendedIdentifierMask, byte standardIdentifierMask)
         {
             if (rxMaskNumber > 1)
             {
                 throw new ArgumentException($"Invalid RX Mask Number value {rxMaskNumber}.", nameof(rxMaskNumber));
             }
 
-            if (eid > 3)
+            if (extendedIdentifierMask > 3)
             {
-                throw new ArgumentException($"Invalid EID value {eid}.", nameof(eid));
+                throw new ArgumentException($"Invalid EID value {extendedIdentifierMask}.", nameof(extendedIdentifierMask));
             }
 
-            if (sid > 7)
+            if (standardIdentifierMask > 7)
             {
-                throw new ArgumentException($"Invalid SID value {sid}.", nameof(sid));
+                throw new ArgumentException($"Invalid SID value {standardIdentifierMask}.", nameof(standardIdentifierMask));
             }
 
             RxMaskNumber = rxMaskNumber;
-            Eid = eid;
-            Sid = sid;
+            ExtendedIdentifierMask = extendedIdentifierMask;
+            StandardIdentifierMask = standardIdentifierMask;
         }
 
         /// <summary>
@@ -58,8 +58,8 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
             }
 
             RxMaskNumber = rxMaskNumber;
-            Eid = (byte)(value & 0b0000_0011);
-            Sid = (byte)((value & 0b1110_0000) >> 5);
+            ExtendedIdentifierMask = (byte)(value & 0b0000_0011);
+            StandardIdentifierMask = (byte)((value & 0b1110_0000) >> 5);
         }
 
         /// <summary>
@@ -68,16 +68,16 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         public byte RxMaskNumber { get; }
 
         /// <summary>
-        /// Extended Identifier Mask bits.
+        /// EID[17:16]: Extended Identifier Mask bits.
         /// These bits hold the mask bits to be applied to bits[17:16] of the Extended Identifier portion of a received message.
         /// </summary>
-        public byte Eid { get; }
+        public byte ExtendedIdentifierMask { get; }
 
         /// <summary>
-        /// Standard Identifier Mask bits.
+        /// SID[2:0]: Standard Identifier Mask bits.
         /// These bits hold the mask bits to be applied to bits[2:0] of the Standard Identifier portion of a received message.
         /// </summary>
-        public byte Sid { get; }
+        public byte StandardIdentifierMask { get; }
 
         private Address GetAddress()
         {
@@ -122,8 +122,8 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// <returns>The byte that represent the register contents.</returns>
         public byte ToByte()
         {
-            byte value = (byte)(Sid << 5);
-            value |= Eid;
+            byte value = (byte)(StandardIdentifierMask << 5);
+            value |= ExtendedIdentifierMask;
             return value;
         }
     }

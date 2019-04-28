@@ -14,20 +14,22 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// <summary>
         /// Initializes a new instance of the Cnf1 class.
         /// </summary>
-        /// <param name="brp">Synchronization Jump Width Length bits.</param>
-        /// <param name="sjw">
-        /// Baud Rate Prescaler bits.
+        /// <param name="baudRatePrescaler">
+        /// BRP[5:0]: Baud Rate Prescaler bits.
         /// TQ = 2 x (BRP[5:0] + 1)/FOSC.
         /// </param>
-        public Cnf1(byte brp, SynchronizationJumpWidthLength sjw)
+        /// <param name="synchronizationJumpWidthLength">
+        /// SJW[1:0]: Synchronization Jump Width Length bits.
+        /// </param>
+        public Cnf1(byte baudRatePrescaler, JumpWidthLength synchronizationJumpWidthLength)
         {
-            if (brp > 0b0011_1111)
+            if (baudRatePrescaler > 0b0011_1111)
             {
-                throw new ArgumentException($"Invalid BRP value {brp}.", nameof(brp));
+                throw new ArgumentException($"Invalid BRP value {baudRatePrescaler}.", nameof(baudRatePrescaler));
             }
 
-            Brp = brp;
-            Sjw = sjw;
+            BaudRatePrescaler = baudRatePrescaler;
+            SynchronizationJumpWidthLength = synchronizationJumpWidthLength;
         }
 
         /// <summary>
@@ -36,14 +38,14 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// <param name="value">The value that represents the register contents.</param>
         public Cnf1(byte value)
         {
-            Brp = (byte)(value & 0b0011_1111);
-            Sjw = (SynchronizationJumpWidthLength)((value & 0b1100_0000) >> 6);
+            BaudRatePrescaler = (byte)(value & 0b0011_1111);
+            SynchronizationJumpWidthLength = (JumpWidthLength)((value & 0b1100_0000) >> 6);
         }
 
         /// <summary>
         /// Synchronization Jump Width Length.
         /// </summary>
-        public enum SynchronizationJumpWidthLength
+        public enum JumpWidthLength
         {
             /// <summary>
             /// Length = 1 x TQ.
@@ -64,15 +66,15 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         }
 
         /// <summary>
-        /// Baud Rate Prescaler bits.
+        /// BRP[5:0]: Baud Rate Prescaler bits.
         /// TQ = 2 x (BRP[5:0] + 1)/FOSC.
         /// </summary>
-        public byte Brp { get; }
+        public byte BaudRatePrescaler { get; }
 
         /// <summary>
-        /// Synchronization Jump Width Length bits.
+        /// SJW[1:0]: Synchronization Jump Width Length bits.
         /// </summary>
-        public SynchronizationJumpWidthLength Sjw { get; }
+        public JumpWidthLength SynchronizationJumpWidthLength { get; }
 
         /// <summary>
         /// Gets the address of the register.
@@ -86,8 +88,8 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// <returns>The byte that represent the register contents.</returns>
         public byte ToByte()
         {
-            byte value = (byte)((byte)Sjw << 6);
-            value |= Brp;
+            byte value = (byte)((byte)SynchronizationJumpWidthLength << 6);
+            value |= BaudRatePrescaler;
             return value;
         }
     }

@@ -27,25 +27,35 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
         [InlineData(0b00, false, true, 0b000, 0b0001_0000)]
         [InlineData(0b00, false, false, 0b001, 0b0010_0000)]
         [InlineData(0b00, false, false, 0b111, 0b1110_0000)]
-        public void From_To_Byte(byte eid, bool ide, bool srr, byte sid, byte expectedByte)
+        public void From_To_Byte(
+            byte extendedIdentifier,
+            bool extendedIdentifierFlag,
+            bool standardFrameRemoteTransmitRequest,
+            byte standardIdentifier,
+            byte expectedByte)
         {
-            var rxBxSidl = new RxBxSidl(0, expectedByte);
-            Assert.Equal(eid, rxBxSidl.Eid);
-            Assert.Equal(ide, rxBxSidl.Ide);
-            Assert.Equal(srr, rxBxSidl.Srr);
-            Assert.Equal(sid, rxBxSidl.Sid);
-
-            Assert.Equal(expectedByte, new RxBxSidl(0, eid, ide, srr, sid).ToByte());
+            var rxBxSidl = new RxBxSidl(0, extendedIdentifier, extendedIdentifierFlag, standardFrameRemoteTransmitRequest, standardIdentifier);
+            Assert.Equal(extendedIdentifier, rxBxSidl.ExtendedIdentifier);
+            Assert.Equal(extendedIdentifierFlag, rxBxSidl.ExtendedIdentifierFlag);
+            Assert.Equal(standardFrameRemoteTransmitRequest, rxBxSidl.StandardFrameRemoteTransmitRequest);
+            Assert.Equal(standardIdentifier, rxBxSidl.StandardIdentifier);
+            Assert.Equal(expectedByte, rxBxSidl.ToByte());
+            Assert.Equal(expectedByte, new RxBxSidl(0, expectedByte).ToByte());
         }
 
         [Theory]
         [InlineData(2, 0b00, false, false, 0b0000)]
         [InlineData(0, 0b100, false, false, 0b000)]
         [InlineData(0, 0b00, false, false, 0b1000)]
-        public void Invalid_Arguments(byte rxBufferNumber, byte eid, bool ide, bool srr, byte sid)
+        public void Invalid_Arguments(
+            byte rxBufferNumber,
+            byte extendedIdentifier,
+            bool extendedIdentifierFlag,
+            bool standardFrameRemoteTransmitRequest,
+            byte standardIdentifier)
         {
             Assert.Throws<ArgumentException>(() =>
-             new RxBxSidl(rxBufferNumber, eid, ide, srr, sid).ToByte());
+             new RxBxSidl(rxBufferNumber, extendedIdentifier, extendedIdentifierFlag, standardFrameRemoteTransmitRequest, standardIdentifier).ToByte());
         }
     }
 }

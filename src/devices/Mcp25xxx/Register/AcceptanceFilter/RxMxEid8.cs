@@ -15,12 +15,12 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Initializes a new instance of the RxMxEid8 class.
         /// </summary>
         /// <param name="rxMaskNumber">Receive Mask Number.  Must be a value of 0 - 1.</param>
-        /// <param name="eid">
-        /// Extended Identifier bits.
+        /// <param name="extendedIdentifier">
+        /// EID[15:8]: Extended Identifier bits.
         /// These bits hold the filter bits to be applied to bits[15:8] of the Extended Identifier portion of a received
         /// message.If corresponding with RXM[1:0] = 00 and EXIDE = 0, these bits are applied to Byte 0 in received data.
         /// </param>
-        public RxMxEid8(byte rxMaskNumber, byte eid)
+        public RxMxEid8(byte rxMaskNumber, byte extendedIdentifier)
         {
             if (rxMaskNumber > 1)
             {
@@ -28,7 +28,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
             }
 
             RxMaskNumber = rxMaskNumber;
-            Eid = eid;
+            ExtendedIdentifier = extendedIdentifier;
         }
 
         /// <summary>
@@ -37,11 +37,11 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         public byte RxMaskNumber { get; }
 
         /// <summary>
-        /// Extended Identifier bits.
+        /// EID[15:8]: Extended Identifier bits.
         /// These bits hold the filter bits to be applied to bits[15:8] of the Extended Identifier portion of a received
         /// message.If corresponding with RXM[1:0] = 00 and EXIDE = 0, these bits are applied to Byte 0 in received data.
         /// </summary>
-        public byte Eid { get; }
+        public byte ExtendedIdentifier { get; }
 
         private Address GetAddress()
         {
@@ -84,6 +84,6 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// Converts register contents to a byte.
         /// </summary>
         /// <returns>The byte that represent the register contents.</returns>
-        public byte ToByte() => Eid;
+        public byte ToByte() => ExtendedIdentifier;
     }
 }

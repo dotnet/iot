@@ -15,11 +15,11 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Initializes a new instance of the TxBxSidh class.
         /// </summary>
         /// <param name="txBufferNumber">Transmit Buffer Number.  Must be a value of 0 - 2.</param>
-        /// <param name="sid">
-        /// Standard Identifier bits.
+        /// <param name="standardIdentifier">
+        /// SID[10:3]: Standard Identifier bits.
         /// These bits contain the eight Most Significant bits of the Standard Identifier for the transmit message.
         /// </param>
-        public TxBxSidh(byte txBufferNumber, byte sid)
+        public TxBxSidh(byte txBufferNumber, byte standardIdentifier)
         {
             if (txBufferNumber > 2)
             {
@@ -27,7 +27,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
             }
 
             TxBufferNumber = txBufferNumber;
-            Sid = sid;
+            StandardIdentifier = standardIdentifier;
         }
 
         /// <summary>
@@ -36,10 +36,10 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         public byte TxBufferNumber { get; }
 
         /// <summary>
-        /// Standard Identifier bits.
+        /// SID[10:3]: Standard Identifier bits.
         /// These bits contain the eight Most Significant bits of the Standard Identifier for the transmit message.
         /// </summary>
-        public byte Sid { get; }
+        public byte StandardIdentifier { get; }
 
         private Address GetAddress()
         {
@@ -86,6 +86,6 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Converts register contents to a byte.
         /// </summary>
         /// <returns>The byte that represent the register contents.</returns>
-        public byte ToByte() => Sid;
+        public byte ToByte() => StandardIdentifier;
     }
 }

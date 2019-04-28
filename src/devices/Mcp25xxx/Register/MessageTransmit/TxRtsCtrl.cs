@@ -12,44 +12,50 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Initializes a new instance of the TxRtsCtrl class.
         /// </summary>
-        /// <param name="b0rtsm">
-        /// Tx0RTS Pin mode bit.
+        /// <param name="tx0RtsPinMode">
+        /// B0RTSM: Tx0RTS Pin mode bit.
         /// True = Pin is used to request message transmission of TXB0 buffer (on falling edge).
         /// False = Digital input.
         /// </param>
-        /// <param name="b1rtsm">
-        /// Tx1RTS Pin mode bit.
+        /// <param name="tx1RtsPinMode">
+        /// B1RTSM: Tx1RTS Pin mode bit.
         /// True = Pin is used to request message transmission of TXB1 buffer (on falling edge).
         /// False = Digital input.
         /// </param>
-        /// <param name="b2rtsm">
-        /// Tx2RTS Pin mode bit.
+        /// <param name="tx2RtsPinMode">
+        /// B2RTSM: Tx2RTS Pin mode bit.
         /// True = Pin is used to request message transmission of TXB2 buffer (on falling edge).
         /// False = Digital input.
         /// </param>
-        /// <param name="b0rts">
-        /// Tx0RTS Pin State bit.
+        /// <param name="tx0RtsPinState">
+        /// B0RTS: Tx0RTS Pin State bit.
         /// Reads state of Tx0RTS pin when in Digital Input mode.
         /// Reads as '0' when pin is in 'Request-to-Send' mode.
         /// </param>
-        /// <param name="b1rts">
-        /// Tx1RTX Pin State bit.
+        /// <param name="tx1RtsPinState">
+        /// B1RTS: Tx1RTX Pin State bit.
         /// Reads state of Tx1RTS pin when in Digital Input mode.
         /// Reads as '0' when pin is in 'Request-to-Send' mode.
         /// </param>
-        /// <param name="b2rts">
-        /// Tx2RTS Pin State bit.
+        /// <param name="tx2RtsPinState">
+        /// B2RTS: Tx2RTS Pin State bit.
         /// Reads state of Tx2RTS pin when in Digital Input mode.
         /// Reads as '0' when pin is in 'Request-to-Send' mode.
         /// </param>
-        public TxRtsCtrl(bool b0rtsm, bool b1rtsm, bool b2rtsm, bool b0rts, bool b1rts, bool b2rts)
+        public TxRtsCtrl(
+            bool tx0RtsPinMode,
+            bool tx1RtsPinMode,
+            bool tx2RtsPinMode,
+            bool tx0RtsPinState,
+            bool tx1RtsPinState,
+            bool tx2RtsPinState)
         {
-            B0Rtsm = b0rtsm;
-            B1Rtsm = b1rtsm;
-            B2Rtsm = b2rtsm;
-            B0Rts = b0rts;
-            B1Rts = b1rts;
-            B2Rts = b2rts;
+            Tx0RtsPinMode = tx0RtsPinMode;
+            Tx1RtsPinMode = tx1RtsPinMode;
+            Tx2RtsPinMode = tx2RtsPinMode;
+            Tx0RtsPinState = tx0RtsPinState;
+            Tx1RtsPinState = tx1RtsPinState;
+            Tx2RtsPinState = tx2RtsPinState;
         }
 
         /// <summary>
@@ -59,55 +65,55 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <param name="value">The value that represents the register contents.</param>
         public TxRtsCtrl(byte value)
         {
-            B0Rtsm = (value & 1) == 1;
-            B1Rtsm = ((value >> 1) & 1) == 1;
-            B2Rtsm = ((value >> 2) & 1) == 1;
-            B0Rts = ((value >> 3) & 1) == 1;
-            B1Rts = ((value >> 4) & 1) == 1;
-            B2Rts = ((value >> 5) & 1) == 1;
+            Tx0RtsPinMode = (value & 1) == 1;
+            Tx1RtsPinMode = ((value >> 1) & 1) == 1;
+            Tx2RtsPinMode = ((value >> 2) & 1) == 1;
+            Tx0RtsPinState = ((value >> 3) & 1) == 1;
+            Tx1RtsPinState = ((value >> 4) & 1) == 1;
+            Tx2RtsPinState = ((value >> 5) & 1) == 1;
         }
 
         /// <summary>
-        /// Tx0RTS Pin mode bit.
+        /// B0RTSM: Tx0RTS Pin mode bit.
         /// True = Pin is used to request message transmission of TXB0 buffer (on falling edge).
         /// False = Digital input.
         /// </summary>
-        public bool B0Rtsm { get; }
+        public bool Tx0RtsPinMode { get; }
 
         /// <summary>
-        /// Tx1RTS Pin mode bit.
+        /// B1RTSM: Tx1RTS Pin mode bit.
         /// True = Pin is used to request message transmission of TXB1 buffer (on falling edge).
         /// False = Digital input.
         /// </summary>
-        public bool B1Rtsm { get; }
+        public bool Tx1RtsPinMode { get; }
 
         /// <summary>
-        /// Tx2RTS Pin mode bit.
+        /// B2RTSM: Tx2RTS Pin mode bit.
         /// True = Pin is used to request message transmission of TXB2 buffer (on falling edge).
         /// False = Digital input.
         /// </summary>
-        public bool B2Rtsm { get; }
+        public bool Tx2RtsPinMode { get; }
 
         /// <summary>
-        /// Tx0RTS Pin State bit.
+        /// B0RTS: Tx0RTS Pin State bit.
         /// Reads state of Tx0RTS pin when in Digital Input mode.
         /// Reads as '0' when pin is in 'Request-to-Send' mode.
         /// </summary>
-        public bool B0Rts { get; }
+        public bool Tx0RtsPinState { get; }
 
         /// <summary>
-        /// Tx1RTX Pin State bit.
+        /// B1RTS: Tx1RTX Pin State bit.
         /// Reads state of Tx1RTS pin when in Digital Input mode.
         /// Reads as '0' when pin is in 'Request-to-Send' mode.
         /// </summary>
-        public bool B1Rts { get; }
+        public bool Tx1RtsPinState { get; }
 
         /// <summary>
-        /// Tx2RTS Pin State bit.
+        /// B2RTS: Tx2RTS Pin State bit.
         /// Reads state of Tx2RTS pin when in Digital Input mode.
         /// Reads as '0' when pin is in 'Request-to-Send' mode.
         /// </summary>
-        public bool B2Rts { get; }
+        public bool Tx2RtsPinState { get; }
 
         /// <summary>
         /// Gets the address of the register.
@@ -123,32 +129,32 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             byte value = 0;
 
-            if (B2Rts)
+            if (Tx2RtsPinState)
             {
                 value |= 0b0010_0000;
             }
 
-            if (B1Rts)
+            if (Tx1RtsPinState)
             {
                 value |= 0b0001_0000;
             }
 
-            if (B0Rts)
+            if (Tx0RtsPinState)
             {
                 value |= 0b0000_1000;
             }
 
-            if (B2Rtsm)
+            if (Tx2RtsPinMode)
             {
                 value |= 0b0000_0100;
             }
 
-            if (B1Rtsm)
+            if (Tx1RtsPinMode)
             {
                 value |= 0b0000_0010;
             }
 
-            if (B0Rtsm)
+            if (Tx0RtsPinMode)
             {
                 value |= 0b0000_0001;
             }

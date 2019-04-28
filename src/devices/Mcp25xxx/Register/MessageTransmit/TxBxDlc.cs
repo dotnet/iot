@@ -15,16 +15,16 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Initializes a new instance of the TxBxDlc class.
         /// </summary>
         /// <param name="txBufferNumber">Transmit Buffer Number.  Must be a value of 0 - 2.</param>
-        /// <param name="dlc">
-        /// Data Length Code bits.
+        /// <param name="dataLengthCode">
+        /// DLC[3:0]: Data Length Code bits.
         /// Sets the number of data bytes to be transmitted (0 to 8 bytes).
         /// </param>
-        /// <param name="rtr">
-        /// Remote Transmission Request bit.
+        /// <param name="remoteTransmissionRequest">
+        /// RTR: Remote Transmission Request bit.
         /// True = Transmitted message will be a Remote Transmit Request.
         /// False = Transmitted message will be a data frame.
         /// </param>
-        public TxBxDlc(byte txBufferNumber, int dlc, bool rtr)
+        public TxBxDlc(byte txBufferNumber, int dataLengthCode, bool remoteTransmissionRequest)
         {
             if (txBufferNumber > 2)
             {
@@ -32,8 +32,8 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
             }
 
             TxBufferNumber = txBufferNumber;
-            Dlc = dlc;
-            Rtr = rtr;
+            DataLengthCode = dataLengthCode;
+            RemoteTransmissionRequest = remoteTransmissionRequest;
         }
 
         /// <summary>
@@ -49,8 +49,8 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
             }
 
             TxBufferNumber = txBufferNumber;
-            Dlc = (byte)(value & 0b0000_1111);
-            Rtr = ((value >> 6) & 1) == 1;
+            DataLengthCode = (byte)(value & 0b0000_1111);
+            RemoteTransmissionRequest = ((value >> 6) & 1) == 1;
         }
 
         /// <summary>
@@ -59,18 +59,18 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         public byte TxBufferNumber { get; }
 
         /// <summary>
-        /// Data Length Code bits.
+        /// DLC[3:0]: Data Length Code bits.
         /// Sets the number of data bytes to be transmitted (0 to 8 bytes).
         /// It is possible to set the DLC[3:0] bits to a value greater than eight; however, only eight bytes are transmitted.
         /// </summary>
-        public int Dlc { get; }
+        public int DataLengthCode { get; }
 
         /// <summary>
-        /// Remote Transmission Request bit.
+        /// RTR: Remote Transmission Request bit.
         /// True = Transmitted message will be a Remote Transmit Request.
         /// False = Transmitted message will be a data frame.
         /// </summary>
-        public bool Rtr { get; }
+        public bool RemoteTransmissionRequest { get; }
 
         private Address GetAddress()
         {
@@ -121,12 +121,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             byte value = 0;
 
-            if (Rtr)
+            if (RemoteTransmissionRequest)
             {
                 value |= 0b0100_0000;
             }
 
-            value |= (byte)Dlc;
+            value |= (byte)DataLengthCode;
             return value;
         }
     }

@@ -16,8 +16,8 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// </summary>
         /// <param name="txBufferNumber">Transmit Buffer Number.  Must be a value of 0 - 2.</param>
         /// <param name="index">Index of data.  Must be a value of 0 - 7.</param>
-        /// <param name="data">Transmit Buffer Data Field Bytes.</param>
-        public TxBxDn(byte txBufferNumber, int index, byte data)
+        /// <param name="transmitBufferDataFieldBytes">TXBxDn[7:0]: Transmit Buffer Data Field Bytes.</param>
+        public TxBxDn(byte txBufferNumber, int index, byte transmitBufferDataFieldBytes)
         {
             if (txBufferNumber > 2)
             {
@@ -31,7 +31,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
 
             TxBufferNumber = txBufferNumber;
             Index = index;
-            Data = data;
+            TransmitBufferDataFieldBytes = transmitBufferDataFieldBytes;
         }
 
         /// <summary>
@@ -45,9 +45,9 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         public int Index { get; }
 
         /// <summary>
-        /// Transmit Buffer Data Field Bytes.
+        /// TXBxDn[7:0]: Transmit Buffer Data Field Bytes.
         /// </summary>
-        public byte Data { get; }
+        public byte TransmitBufferDataFieldBytes { get; }
 
         private Address GetAddress()
         {
@@ -104,6 +104,6 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Converts register contents to a byte.
         /// </summary>
         /// <returns>The byte that represent the register contents.</returns>
-        public byte ToByte() => Data;
+        public byte ToByte() => TransmitBufferDataFieldBytes;
     }
 }

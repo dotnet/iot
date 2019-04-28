@@ -14,12 +14,12 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         /// <summary>
         /// Initializes a new instance of the CanStat class.
         /// </summary>
-        /// <param name="icod">Interrupt Flag Code bits.</param>
-        /// <param name="opMod">Operation Mode bits.</param>
-        public CanStat(InterruptFlagCode icod, OperationMode opMod)
+        /// <param name="interruptFlagCode">ICOD[2:0]: Interrupt Flag Code bits.</param>
+        /// <param name="operationMode">OPMOD[2:0]: Operation Mode bits.</param>
+        public CanStat(FlagCode interruptFlagCode, OperationMode operationMode)
         {
-            Icod = icod;
-            OpMod = opMod;
+            InterruptFlagCode = interruptFlagCode;
+            OperationMode = operationMode;
         }
 
         /// <summary>
@@ -28,14 +28,14 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         /// <param name="value">The value that represents the register contents.</param>
         public CanStat(byte value)
         {
-            Icod = (InterruptFlagCode)((value & 0b0000_1110) >> 1);
-            OpMod = (OperationMode)((value & 0b1110_0000) >> 5);
+            InterruptFlagCode = (FlagCode)((value & 0b0000_1110) >> 1);
+            OperationMode = (OperationMode)((value & 0b1110_0000) >> 5);
         }
 
         /// <summary>
         /// Interrupt Flag Code.
         /// </summary>
-        public enum InterruptFlagCode
+        public enum FlagCode
         {
             /// <summary>
             /// No Interrupt.
@@ -72,14 +72,14 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         }
 
         /// <summary>
-        /// Interrupt Flag Code bits.
+        /// ICOD[2:0]: Interrupt Flag Code bits.
         /// </summary>
-        public InterruptFlagCode Icod { get; }
+        public FlagCode InterruptFlagCode { get; }
 
         /// <summary>
-        /// Operation Mode bits.
+        /// OPMOD[2:0]: Operation Mode bits.
         /// </summary>
-        public OperationMode OpMod { get; }
+        public OperationMode OperationMode { get; }
 
         /// <summary>
         /// Gets the address of the register.
@@ -93,8 +93,8 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
         /// <returns>The byte that represent the register contents.</returns>
         public byte ToByte()
         {
-            byte value = (byte)((byte)OpMod << 5);
-            value |= (byte)((byte)Icod << 1);
+            byte value = (byte)((byte)OperationMode << 5);
+            value |= (byte)((byte)InterruptFlagCode << 1);
             return value;
         }
     }

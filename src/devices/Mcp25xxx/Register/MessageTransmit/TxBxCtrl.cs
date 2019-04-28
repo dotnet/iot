@@ -15,34 +15,34 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// Initializes a new instance of the TxBxCtrl class.
         /// </summary>
         /// <param name="txBufferNumber">Transmit Buffer Number.  Must be a value of 0 - 2.</param>
-        /// <param name="txp">Transmit Buffer Priority bits.</param>
-        /// <param name="txreq">
-        /// Message Transmit Request bit.
+        /// <param name="transmitBufferPriority">TXP[1:0]: Transmit Buffer Priority bits.</param>
+        /// <param name="messageTransmitRequest">
+        /// TXREQ: Message Transmit Request bit.
         /// True = Buffer is currently pending transmission (MCU sets this bit to request message be transmitted bit is automatically cleared when the message is sent).
         /// False = Buffer is not currently pending transmission (MCU can clear this bit to request a message abort).
         /// </param>
-        /// <param name="txerr">
-        /// Transmission Error Detected bit.
+        /// <param name="transmissionErrorDetected">
+        /// TXERR: Transmission Error Detected bit.
         /// True = A bus error occurred while the message was being transmitted.
         /// False = No bus error occurred while the message was being transmitted.
         /// </param>
-        /// <param name="mloa">
-        /// Message Lost Arbitration bit.
+        /// <param name="messageLostArbitration">
+        /// MLOA: Message Lost Arbitration bit.
         /// True = Message lost arbitration while being sent.
         /// False = Message did not lose arbitration while being sent.
         /// </param>
-        /// <param name="abtf">
-        /// Message Aborted Flag bit.
+        /// <param name="messageAbortedFlag">
+        /// ABTF: Message Aborted Flag bit.
         /// True = Message was aborted.
         /// False = Message completed transmission successfully.
         /// </param>
         public TxBxCtrl(
             byte txBufferNumber,
-            TransmitBufferPriority txp,
-            bool txreq,
-            bool txerr,
-            bool mloa,
-            bool abtf)
+            BufferPriority transmitBufferPriority,
+            bool messageTransmitRequest,
+            bool transmissionErrorDetected,
+            bool messageLostArbitration,
+            bool messageAbortedFlag)
         {
             if (txBufferNumber > 2)
             {
@@ -50,11 +50,11 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
             }
 
             TxBufferNumber = txBufferNumber;
-            Txp = txp;
-            TxReq = txreq;
-            TxErr = txerr;
-            Mloa = mloa;
-            Abtf = abtf;
+            TransmitBufferPriority = transmitBufferPriority;
+            MessageTransmitRequest = messageTransmitRequest;
+            TransmissionErrorDetected = transmissionErrorDetected;
+            MessageLostArbitration = messageLostArbitration;
+            MessageAbortedFlag = messageAbortedFlag;
         }
 
         /// <summary>
@@ -70,17 +70,17 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
             }
 
             TxBufferNumber = txBufferNumber;
-            Txp = (TransmitBufferPriority)(value & 0b0000_0011);
-            TxReq = ((value >> 3) & 1) == 1;
-            TxErr = ((value >> 4) & 1) == 1;
-            Mloa = ((value >> 5) & 1) == 1;
-            Abtf = ((value >> 6) & 1) == 1;
+            TransmitBufferPriority = (BufferPriority)(value & 0b0000_0011);
+            MessageTransmitRequest = ((value >> 3) & 1) == 1;
+            TransmissionErrorDetected = ((value >> 4) & 1) == 1;
+            MessageLostArbitration = ((value >> 5) & 1) == 1;
+            MessageAbortedFlag = ((value >> 6) & 1) == 1;
         }
 
         /// <summary>
         /// Transmit Buffer Priority.
         /// </summary>
-        public enum TransmitBufferPriority
+        public enum BufferPriority
         {
             /// <summary>
             /// Lowest message priority.
@@ -106,37 +106,37 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         public byte TxBufferNumber { get; }
 
         /// <summary>
-        /// Transmit Buffer Priority bits.
+        /// TXP[1:0]: Transmit Buffer Priority bits.
         /// </summary>
-        public TransmitBufferPriority Txp { get; }
+        public BufferPriority TransmitBufferPriority { get; }
 
         /// <summary>
-        /// Message Transmit Request bit.
+        /// TXREQ: Message Transmit Request bit.
         /// True = Buffer is currently pending transmission (MCU sets this bit to request message be transmitted bit is automatically cleared when the message is sent).
         /// False = Buffer is not currently pending transmission (MCU can clear this bit to request a message abort).
         /// </summary>
-        public bool TxReq { get; }
+        public bool MessageTransmitRequest { get; }
 
         /// <summary>
-        /// Transmission Error Detected bit.
+        /// TXERR: Transmission Error Detected bit.
         /// True = A bus error occurred while the message was being transmitted.
         /// False = No bus error occurred while the message was being transmitted.
         /// </summary>
-        public bool TxErr { get; }
+        public bool TransmissionErrorDetected { get; }
 
         /// <summary>
-        /// Message Lost Arbitration bit.
+        /// MLOA: Message Lost Arbitration bit.
         /// True = Message lost arbitration while being sent.
         /// False = Message did not lose arbitration while being sent.
         /// </summary>
-        public bool Mloa { get; }
+        public bool MessageLostArbitration { get; }
 
         /// <summary>
-        /// Message Aborted Flag bit.
+        /// ABTF: Message Aborted Flag bit.
         /// True = Message was aborted.
         /// False = Message completed transmission successfully.
         /// </summary>
-        public bool Abtf { get; }
+        public bool MessageAbortedFlag { get; }
 
         private Address GetAddress()
         {
@@ -187,27 +187,27 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             byte value = 0;
 
-            if (Abtf)
+            if (MessageAbortedFlag)
             {
                 value |= 0b0100_0000;
             }
 
-            if (Mloa)
+            if (MessageLostArbitration)
             {
                 value |= 0b0010_0000;
             }
 
-            if (TxErr)
+            if (TransmissionErrorDetected)
             {
                 value |= 0b0001_0000;
             }
 
-            if (TxReq)
+            if (MessageTransmitRequest)
             {
                 value |= 0b0000_1000;
             }
 
-            value |= (byte)Txp;
+            value |= (byte)TransmitBufferPriority;
             return value;
         }
     }

@@ -15,47 +15,52 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         ///  Initializes a new instance of the RxBxSidl class.
         /// </summary>
         /// <param name="rxBufferNumber">Receive Buffer Number. Must be a value of 0 - 1.</param>
-        /// <param name="eid">
-        /// Extended Identifier bits.
+        /// <param name="extendedIdentifier">
+        /// EID[17:16]: Extended Identifier bits.
         /// These bits contain the two Most Significant bits of the Extended Identifier for the received message.
         /// </param>
-        /// <param name="ide">
-        /// Extended Identifier Flag bit.  This is sometimes referred to as EFF.
+        /// <param name="extendedIdentifierFlag">
+        /// IDE: Extended Identifier Flag bit.  This is sometimes referred to as EFF.
         /// This bit indicates whether the received message was a standard or an extended frame.
         /// True = Received message was an extended frame.
         /// False = Received message was a standard frame.
         /// </param>
-        /// <param name="srr">
-        /// Standard Frame Remote Transmit Request bit (valid only if the IDE bit = 0).
+        /// <param name="standardFrameRemoteTransmitRequest">
+        /// SRR: Standard Frame Remote Transmit Request bit (valid only if the IDE bit = 0).
         /// True = Standard frame Remote Transmit Request received.
         /// False = Standard data frame received.
         /// </param>
-        /// <param name="sid">
-        /// Standard Identifier bits.
+        /// <param name="standardIdentifier">
+        /// SID[2:0]: Standard Identifier bits.
         /// These bits contain the three Least Significant bits of the Standard Identifier for the received message.
         /// </param>
-        public RxBxSidl(byte rxBufferNumber, byte eid, bool ide, bool srr, byte sid)
+        public RxBxSidl(
+            byte rxBufferNumber,
+            byte extendedIdentifier,
+            bool extendedIdentifierFlag,
+            bool standardFrameRemoteTransmitRequest,
+            byte standardIdentifier)
         {
             if (rxBufferNumber > 1)
             {
                 throw new ArgumentException($"Invalid RX Buffer Number value {rxBufferNumber}.", nameof(rxBufferNumber));
             }
 
-            if (eid > 3)
+            if (extendedIdentifier > 3)
             {
-                throw new ArgumentException($"Invalid EID value {eid}.", nameof(eid));
+                throw new ArgumentException($"Invalid EID value {extendedIdentifier}.", nameof(extendedIdentifier));
             }
 
-            if (sid > 7)
+            if (standardIdentifier > 7)
             {
-                throw new ArgumentException($"Invalid SID value {sid}.", nameof(sid));
+                throw new ArgumentException($"Invalid SID value {standardIdentifier}.", nameof(standardIdentifier));
             }
 
             RxBufferNumber = rxBufferNumber;
-            Eid = eid;
-            Ide = ide;
-            Srr = srr;
-            Sid = sid;
+            ExtendedIdentifier = extendedIdentifier;
+            ExtendedIdentifierFlag = extendedIdentifierFlag;
+            StandardFrameRemoteTransmitRequest = standardFrameRemoteTransmitRequest;
+            StandardIdentifier = standardIdentifier;
         }
 
         /// <summary>
@@ -70,10 +75,10 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
             }
 
             RxBufferNumber = rxBufferNumber;
-            Eid = (byte)(value & 0b0000_0011);
-            Ide = ((value >> 3) & 1) == 1;
-            Srr = ((value >> 4) & 1) == 1;
-            Sid = (byte)((value & 0b1110_0000) >> 5);
+            ExtendedIdentifier = (byte)(value & 0b0000_0011);
+            ExtendedIdentifierFlag = ((value >> 3) & 1) == 1;
+            StandardFrameRemoteTransmitRequest = ((value >> 4) & 1) == 1;
+            StandardIdentifier = (byte)((value & 0b1110_0000) >> 5);
         }
 
         /// <summary>
@@ -82,31 +87,31 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         public byte RxBufferNumber { get; }
 
         /// <summary>
-        /// Extended Identifier bits.
+        /// EID[17:16]: Extended Identifier bits.
         /// These bits contain the two Most Significant bits of the Extended Identifier for the received message.
         /// </summary>
-        public byte Eid { get; }
+        public byte ExtendedIdentifier { get; }
 
         /// <summary>
-        /// Extended Identifier Flag bit.
+        /// IDE: Extended Identifier Flag bit.
         /// This bit indicates whether the received message was a standard or an extended frame.
         /// True = Received message was an extended frame.
         /// False = Received message was a standard frame.
         /// </summary>
-        public bool Ide { get; }
+        public bool ExtendedIdentifierFlag { get; }
 
         /// <summary>
-        /// Standard Frame Remote Transmit Request bit (valid only if the IDE bit = 0).
+        /// SRR: Standard Frame Remote Transmit Request bit (valid only if the IDE bit = 0).
         /// True = Standard frame Remote Transmit Request received.
         /// False = Standard data frame received.
         /// </summary>
-        public bool Srr { get; }
+        public bool StandardFrameRemoteTransmitRequest { get; }
 
         /// <summary>
-        /// Standard Identifier bits.
+        /// SID[2:0]: Standard Identifier bits.
         /// These bits contain the three Least Significant bits of the Standard Identifier for the received message.
         /// </summary>
-        public byte Sid { get; }
+        public byte StandardIdentifier { get; }
 
         private Address GetAddress()
         {
@@ -151,19 +156,19 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <returns>The byte that represent the register contents.</returns>
         public byte ToByte()
         {
-            byte value = (byte)(Sid << 5);
+            byte value = (byte)(StandardIdentifier << 5);
 
-            if (Srr)
+            if (StandardFrameRemoteTransmitRequest)
             {
                 value |= 0b0001_0000;
             }
 
-            if (Ide)
+            if (ExtendedIdentifierFlag)
             {
                 value |= 0b0000_1000;
             }
 
-            value |= Eid;
+            value |= ExtendedIdentifier;
             return value;
         }
     }

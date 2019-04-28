@@ -23,12 +23,11 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         [Theory]
         [InlineData(0b0000_0000)]
         [InlineData(0b1111_1111)]
-        public void From_To_Byte(byte sid)
+        public void From_To_Byte(byte standardIdentifier)
         {
-            var txBxSidh = new TxBxSidh(0, sid);
-            Assert.Equal(sid, txBxSidh.Sid);
-
-            Assert.Equal(sid, new TxBxSidh(0, sid).ToByte());
+            var txBxSidh = new TxBxSidh(0, standardIdentifier);
+            Assert.Equal(standardIdentifier, txBxSidh.StandardIdentifier);
+            Assert.Equal(standardIdentifier, txBxSidh.ToByte());
         }
     }
 }

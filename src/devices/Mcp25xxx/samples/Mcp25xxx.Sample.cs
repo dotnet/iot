@@ -345,7 +345,7 @@ namespace Iot.Device.Mcp25xxx.Samples
             Console.WriteLine("Transmit Message");
 
             mcp25xxx.WriteByte(
-                new CanCtrl(CanCtrl.ClkOutPinPrescaler.ClockDivideBy8,
+                new CanCtrl(CanCtrl.PinPrescaler.ClockDivideBy8,
                 false,
                 false,
                 false,
@@ -375,7 +375,7 @@ namespace Iot.Device.Mcp25xxx.Samples
             Console.WriteLine("Loopback Mode");
             mcp25xxx.WriteByte(
                 new CanCtrl(
-                    CanCtrl.ClkOutPinPrescaler.ClockDivideBy8,
+                    CanCtrl.PinPrescaler.ClockDivideBy8,
                     true,
                     false,
                     false,

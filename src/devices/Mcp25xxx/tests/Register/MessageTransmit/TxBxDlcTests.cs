@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using Iot.Device.Mcp25xxx.Register;
 using Iot.Device.Mcp25xxx.Register.MessageTransmit;
 using Xunit;
@@ -26,13 +25,13 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         [InlineData(0b0000, false, 0b0000_0000)]
         [InlineData(0b0000, true, 0b0100_0000)]
         [InlineData(0b1000, false, 0b0000_1000)]
-        public void From_To_Byte(byte dlc, bool rtr, byte expectedByte)
+        public void From_To_Byte(byte dataLengthCode, bool remoteTransmissionRequest, byte expectedByte)
         {
-            var txBxDlc = new TxBxDlc(1, expectedByte);
-            Assert.Equal(dlc, txBxDlc.Dlc);
-            Assert.Equal(rtr, txBxDlc.Rtr);
-
-            Assert.Equal(expectedByte, new TxBxDlc(1, dlc, rtr).ToByte());
+            var txBxDlc = new TxBxDlc(1, dataLengthCode, remoteTransmissionRequest);
+            Assert.Equal(dataLengthCode, txBxDlc.DataLengthCode);
+            Assert.Equal(remoteTransmissionRequest, txBxDlc.RemoteTransmissionRequest);
+            Assert.Equal(expectedByte, txBxDlc.ToByte());
+            Assert.Equal(expectedByte, new TxBxDlc(1, expectedByte).ToByte());
         }
     }
 }

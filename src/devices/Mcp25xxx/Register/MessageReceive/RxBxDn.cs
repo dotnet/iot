@@ -16,8 +16,8 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// </summary>
         /// <param name="rxBufferNumber">Receive Buffer Number. Must be a value of 0 - 1.</param>
         /// <param name="index">Index of data.  Must be a value of 0 - 7.</param>
-        /// <param name="data">Receive Buffer Data Field Bytes.</param>
-        public RxBxDn(byte rxBufferNumber, byte index, byte data)
+        /// <param name="receiveBufferDataFieldBytes">RBxD[7:0]: Receive Buffer Data Field Bytes.</param>
+        public RxBxDn(byte rxBufferNumber, byte index, byte receiveBufferDataFieldBytes)
         {
             if (rxBufferNumber > 1)
             {
@@ -31,7 +31,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
 
             RxBufferNumber = rxBufferNumber;
             Index = index;
-            Data = data;
+            ReceiveBufferDataFieldBytes = receiveBufferDataFieldBytes;
         }
 
         /// <summary>
@@ -45,9 +45,9 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         public byte Index { get; }
 
         /// <summary>
-        /// Receive Buffer Data Field Bytes.
+        /// RBxD[7:0]: Receive Buffer Data Field Bytes.
         /// </summary>
-        public byte Data { get; }
+        public byte ReceiveBufferDataFieldBytes { get; }
 
         private Address GetAddress()
         {
@@ -91,6 +91,6 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// Converts register contents to a byte.
         /// </summary>
         /// <returns>The byte that represent the register contents.</returns>
-        public byte ToByte() => Data;
+        public byte ToByte() => ReceiveBufferDataFieldBytes;
     }
 }

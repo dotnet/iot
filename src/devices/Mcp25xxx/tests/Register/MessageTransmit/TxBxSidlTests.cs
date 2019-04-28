@@ -26,23 +26,23 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageTransmit
         [InlineData(0b11, false, 0b000, 0b0000_0011)]
         [InlineData(0b00, true, 0b000, 0b0000_1000)]
         [InlineData(0b00, false, 0b111, 0b1110_0000)]
-        public void From_To_Byte(byte eid, bool exide, byte sid, byte expectedByte)
+        public void From_To_Byte(byte extendedIdentifier, bool extendedIdentifierEnable, byte standardIdentifier, byte expectedByte)
         {
-            var txBxSidl = new TxBxSidl(0, expectedByte);
-            Assert.Equal(eid, txBxSidl.Eid);
-            Assert.Equal(exide, txBxSidl.Exide);
-            Assert.Equal(sid, txBxSidl.Sid);
-
-            Assert.Equal(expectedByte, new TxBxSidl(0, eid, exide, sid).ToByte());
+            var txBxSidl = new TxBxSidl(0, extendedIdentifier, extendedIdentifierEnable, standardIdentifier);
+            Assert.Equal(extendedIdentifier, txBxSidl.ExtendedIdentifier);
+            Assert.Equal(extendedIdentifierEnable, txBxSidl.ExtendedIdentifierEnable);
+            Assert.Equal(standardIdentifier, txBxSidl.StandardIdentifier);
+            Assert.Equal(expectedByte, txBxSidl.ToByte());
+            Assert.Equal(expectedByte, new TxBxSidl(0, expectedByte).ToByte());
         }
 
         [Theory]
         [InlineData(0b100, false, 0b000)]
         [InlineData(0b00, false, 0b1000)]
-        public void Invalid_Arguments(byte eid, bool exide, byte sid)
+        public void Invalid_Arguments(byte extendedIdentifier, bool extendedIdentifierEnable, byte standardIdentifier)
         {
             Assert.Throws<ArgumentException>(() =>
-             new TxBxSidl(0, eid, exide, sid).ToByte());
+             new TxBxSidl(0, extendedIdentifier, extendedIdentifierEnable, standardIdentifier).ToByte());
         }
     }
 }

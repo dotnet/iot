@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using Iot.Device.Mcp25xxx.Register;
@@ -26,12 +25,11 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         [Theory]
         [InlineData(0b0000_0000)]
         [InlineData(0b1111_1111)]
-        public void From_To_Byte(byte sid)
+        public void From_To_Byte(byte standardIdentifierFilter)
         {
-            var rxFxEid8 = new RxFxSidh(0, sid);
-            Assert.Equal(sid, rxFxEid8.Sid);
-
-            Assert.Equal(sid, new RxFxSidh(0, sid).ToByte());
+            var rxFxEid8 = new RxFxSidh(0, standardIdentifierFilter);
+            Assert.Equal(standardIdentifierFilter, rxFxEid8.StandardIdentifierFilter);
+            Assert.Equal(standardIdentifierFilter, rxFxEid8.ToByte());
         }
     }
 }

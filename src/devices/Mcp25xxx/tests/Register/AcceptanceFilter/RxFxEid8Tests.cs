@@ -26,12 +26,11 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.AcceptanceFilter
         [Theory]
         [InlineData(0b0000_0000)]
         [InlineData(0b1111_1111)]
-        public void From_To_Byte(byte eid)
+        public void From_To_Byte(byte extendedIdentifier)
         {
-            var rxFxEid8 = new RxFxEid8(0, eid);
-            Assert.Equal(eid, rxFxEid8.Eid);
-
-            Assert.Equal(eid, new RxFxEid8(0, eid).ToByte());
+            var rxFxEid8 = new RxFxEid8(0, extendedIdentifier);
+            Assert.Equal(extendedIdentifier, rxFxEid8.ExtendedIdentifier);
+            Assert.Equal(extendedIdentifier, rxFxEid8.ToByte());
         }
     }
 }

@@ -14,34 +14,34 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// <summary>
         /// Initializes a new instance of the Cnf3 class.
         /// </summary>
-        /// <param name="phseg2">
-        /// PS2 Length bits.
+        /// <param name="ps2Length">
+        /// PHSEG2[2:0]: PS2 Length bits.
         /// (PHSEG2[2:0] + 1) x TQ.
         /// Minimum valid setting for PS2 is 2 TQ.
         /// </param>
-        /// <param name="wakfil">
-        /// Wake-up Filter bit.
+        /// <param name="wakeUpFilter">
+        /// WAKFIL: Wake-up Filter bit.
         /// True = Wake-up filter is enabled.
         /// False = Wake-up filter is disabled.
         /// </param>
-        /// <param name="sof">
-        /// Start-of-Frame Signal bit.
+        /// <param name="startOfFrameSignal">
+        /// SOF: Start-of-Frame Signal bit.
         /// If CLKEN(CANCTRL[2]) = 1:
         /// True = CLKOUT pin is enabled for SOF signal.
         /// False = CLKOUT pin is enabled for clock out function;
         /// If CLKEN(CANCTRL[2]) = 0:
         /// Bit is don’t care.
         /// </param>
-        public Cnf3(byte phseg2, bool wakfil, bool sof)
+        public Cnf3(byte ps2Length, bool wakeUpFilter, bool startOfFrameSignal)
         {
-            if (phseg2 > 0b0000_0111)
+            if (ps2Length > 0b0000_0111)
             {
-                throw new ArgumentException($"Invalid PHSEG2 value {phseg2}.", nameof(phseg2));
+                throw new ArgumentException($"Invalid PHSEG2 value {ps2Length}.", nameof(ps2Length));
             }
 
-            PhSeg2 = phseg2;
-            WakFil = wakfil;
-            Sof = sof;
+            Ps2Length = ps2Length;
+            WakeUpFilter = wakeUpFilter;
+            StartOfFrameSignal = startOfFrameSignal;
         }
 
         /// <summary>
@@ -50,34 +50,34 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         /// <param name="value">The value that represents the register contents.</param>
         public Cnf3(byte value)
         {
-            PhSeg2 = (byte)(value & 0b0000_0111);
-            WakFil = (value & 0b0100_0000) == 0b0100_0000;
-            Sof = (value & 0b1000_0000) == 0b1000_0000;
+            Ps2Length = (byte)(value & 0b0000_0111);
+            WakeUpFilter = (value & 0b0100_0000) == 0b0100_0000;
+            StartOfFrameSignal = (value & 0b1000_0000) == 0b1000_0000;
         }
 
         /// <summary>
-        /// PS2 Length bits.
+        /// PHSEG2[2:0]: PS2 Length bits.
         /// (PHSEG2[2:0] + 1) x TQ.
         /// Minimum valid setting for PS2 is 2 TQ.
         /// </summary>
-        public byte PhSeg2 { get; }
+        public byte Ps2Length { get; }
 
         /// <summary>
-        /// Wake-up Filter bit.
+        /// WAKFIL: Wake-up Filter bit.
         /// True = Wake-up filter is enabled.
         /// False = Wake-up filter is disabled.
         /// </summary>
-        public bool WakFil { get; }
+        public bool WakeUpFilter { get; }
 
         /// <summary>
-        /// Start-of-Frame Signal bit.
+        /// SOF: Start-of-Frame Signal bit.
         /// If CLKEN(CANCTRL[2]) = 1:
         /// True = CLKOUT pin is enabled for SOF signal.
         /// False = CLKOUT pin is enabled for clock out function;
         /// If CLKEN(CANCTRL[2]) = 0:
         /// Bit is don’t care.
         /// </summary>
-        public bool Sof { get; }
+        public bool StartOfFrameSignal { get; }
 
         /// <summary>
         /// Gets the address of the register.
@@ -93,17 +93,17 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         {
             byte value = 0;
 
-            if (Sof)
+            if (StartOfFrameSignal)
             {
                 value |= 0b1000_0000;
             }
 
-            if (WakFil)
+            if (WakeUpFilter)
             {
                 value |= 0b0100_0000;
             }
 
-            value |= PhSeg2;
+            value |= Ps2Length;
             return value;
         }
     }

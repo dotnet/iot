@@ -12,56 +12,64 @@ namespace Iot.Device.Mcp25xxx.Register.Interrupt
         /// <summary>
         /// Initializes a new instance of the CanIntF class.
         /// </summary>
-        /// <param name="rx0if">
-        /// Receive Buffer 0 Full Interrupt Flag bit.
+        /// <param name="receiveBuffer0FullInterruptFlag">
+        /// RX0IF: Receive Buffer 0 Full Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </param>
-        /// <param name="rx1if">
-        /// Receive Buffer 1 Full Interrupt Flag bit.
+        /// <param name="receiveBuffer1FullInterruptFlag">
+        /// RX1IF: Receive Buffer 1 Full Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </param>
-        /// <param name="tx0if">
-        /// Transmit Buffer 0 Empty Interrupt Flag bit.
+        /// <param name="transmitBuffer0EmptyInterruptFlag">
+        /// TX0IF: Transmit Buffer 0 Empty Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </param>
-        /// <param name="tx1if">
-        /// Transmit Buffer 1 Empty Interrupt Flag bit.
+        /// <param name="transmitBuffer1EmptyInterruptFlag">
+        /// TX1IF: Transmit Buffer 1 Empty Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </param>
-        /// <param name="tx2if">
-        /// Transmit Buffer 2 Empty Interrupt Flag bit.
+        /// <param name="transmitBuffer2EmptyInterruptFlag">
+        /// TX2IF: Transmit Buffer 2 Empty Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </param>
-        /// <param name="errif">
-        /// Error Interrupt Flag bit (multiple sources in the EFLG register).
+        /// <param name="errorInterruptFlag">
+        /// ERRIF: Error Interrupt Flag bit (multiple sources in the EFLG register).
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </param>
-        /// <param name="wakif">
-        /// Wake-up Interrupt Flag bit.
+        /// <param name="wakeUpInterruptFlag">
+        /// WAKIF: Wake-up Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </param>
-        /// <param name="merrf">
-        /// Message Error Interrupt Flag bit.
+        /// <param name="messageErrorInterruptFlag">
+        /// MERRF: Message Error Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </param>
-        public CanIntF(bool rx0if, bool rx1if, bool tx0if, bool tx1if, bool tx2if, bool errif, bool wakif, bool merrf)
+        public CanIntF(
+            bool receiveBuffer0FullInterruptFlag,
+            bool receiveBuffer1FullInterruptFlag,
+            bool transmitBuffer0EmptyInterruptFlag,
+            bool transmitBuffer1EmptyInterruptFlag,
+            bool transmitBuffer2EmptyInterruptFlag,
+            bool errorInterruptFlag,
+            bool wakeUpInterruptFlag,
+            bool messageErrorInterruptFlag)
         {
-            Rx0If = rx0if;
-            Rx1If = rx1if;
-            Tx0If = tx0if;
-            Tx1If = tx1if;
-            Tx2If = tx2if;
-            ErrIf = errif;
-            WakIf = wakif;
-            Merrf = merrf;
+            ReceiveBuffer0FullInterruptFlag = receiveBuffer0FullInterruptFlag;
+            ReceiveBuffer1FullInterruptFlag = receiveBuffer1FullInterruptFlag;
+            TransmitBuffer0EmptyInterruptFlag = transmitBuffer0EmptyInterruptFlag;
+            TransmitBuffer1EmptyInterruptFlag = transmitBuffer1EmptyInterruptFlag;
+            TransmitBuffer2EmptyInterruptFlag = transmitBuffer2EmptyInterruptFlag;
+            ErrorInterruptFlag = errorInterruptFlag;
+            WakeUpInterruptFlag = wakeUpInterruptFlag;
+            MessageErrorInterruptFlag = messageErrorInterruptFlag;
         }
 
         /// <summary>
@@ -70,71 +78,71 @@ namespace Iot.Device.Mcp25xxx.Register.Interrupt
         /// <param name="value">The value that represents the register contents.</param>
         public CanIntF(byte value)
         {
-            Rx0If = (value & 1) == 1;
-            Rx1If = ((value >> 1) & 1) == 1;
-            Tx0If = ((value >> 2) & 1) == 1;
-            Tx1If = ((value >> 3) & 1) == 1;
-            Tx2If = ((value >> 4) & 1) == 1;
-            ErrIf = ((value >> 5) & 1) == 1;
-            WakIf = ((value >> 6) & 1) == 1;
-            Merrf = ((value >> 7) & 1) == 1;
+            ReceiveBuffer0FullInterruptFlag = (value & 1) == 1;
+            ReceiveBuffer1FullInterruptFlag = ((value >> 1) & 1) == 1;
+            TransmitBuffer0EmptyInterruptFlag = ((value >> 2) & 1) == 1;
+            TransmitBuffer1EmptyInterruptFlag = ((value >> 3) & 1) == 1;
+            TransmitBuffer2EmptyInterruptFlag = ((value >> 4) & 1) == 1;
+            ErrorInterruptFlag = ((value >> 5) & 1) == 1;
+            WakeUpInterruptFlag = ((value >> 6) & 1) == 1;
+            MessageErrorInterruptFlag = ((value >> 7) & 1) == 1;
         }
 
         /// <summary>
-        /// Receive Buffer 0 Full Interrupt Flag bit.
+        /// RX0IF: Receive Buffer 0 Full Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool Rx0If { get; }
+        public bool ReceiveBuffer0FullInterruptFlag { get; }
 
         /// <summary>
-        /// Receive Buffer 1 Full Interrupt Flag bit.
+        /// RX1IF: Receive Buffer 1 Full Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool Rx1If { get; }
+        public bool ReceiveBuffer1FullInterruptFlag { get; }
 
         /// <summary>
-        /// Transmit Buffer 0 Empty Interrupt Flag bit.
+        /// TX0IF: Transmit Buffer 0 Empty Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool Tx0If { get; }
+        public bool TransmitBuffer0EmptyInterruptFlag { get; }
 
         /// <summary>
-        /// Transmit Buffer 1 Empty Interrupt Flag bit.
+        /// TX1IF: Transmit Buffer 1 Empty Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool Tx1If { get; }
+        public bool TransmitBuffer1EmptyInterruptFlag { get; }
 
         /// <summary>
-        /// Transmit Buffer 2 Empty Interrupt Flag bit.
+        /// TX2IF: Transmit Buffer 2 Empty Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool Tx2If { get; }
+        public bool TransmitBuffer2EmptyInterruptFlag { get; }
 
         /// <summary>
-        /// Error Interrupt Flag bit (multiple sources in the EFLG register).
+        /// ERRIF: Error Interrupt Flag bit (multiple sources in the EFLG register).
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool ErrIf { get; }
+        public bool ErrorInterruptFlag { get; }
 
         /// <summary>
-        /// Wake-up Interrupt Flag bit.
+        /// WAKIF: Wake-up Interrupt Flag bit.
         /// True = Interrupt pending(must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool WakIf { get; }
+        public bool WakeUpInterruptFlag { get; }
 
         /// <summary>
-        /// Message Error Interrupt Flag bit.
+        /// MERRF: Message Error Interrupt Flag bit.
         /// True = Interrupt pending (must be cleared by MCU to reset interrupt condition).
         /// False = No interrupt pending.
         /// </summary>
-        public bool Merrf { get; }
+        public bool MessageErrorInterruptFlag { get; }
 
         /// <summary>
         /// Gets the address of the register.
@@ -150,42 +158,42 @@ namespace Iot.Device.Mcp25xxx.Register.Interrupt
         {
             byte value = 0;
 
-            if (Rx0If)
+            if (ReceiveBuffer0FullInterruptFlag)
             {
                 value |= 0b0000_0001;
             }
 
-            if (Rx1If)
+            if (ReceiveBuffer1FullInterruptFlag)
             {
                 value |= 0b0000_0010;
             }
 
-            if (Tx0If)
+            if (TransmitBuffer0EmptyInterruptFlag)
             {
                 value |= 0b0000_0100;
             }
 
-            if (Tx1If)
+            if (TransmitBuffer1EmptyInterruptFlag)
             {
                 value |= 0b0000_1000;
             }
 
-            if (Tx2If)
+            if (TransmitBuffer2EmptyInterruptFlag)
             {
                 value |= 0b0001_0000;
             }
 
-            if (ErrIf)
+            if (ErrorInterruptFlag)
             {
                 value |= 0b0010_0000;
             }
 
-            if (WakIf)
+            if (WakeUpInterruptFlag)
             {
                 value |= 0b0100_0000;
             }
 
-            if (Merrf)
+            if (MessageErrorInterruptFlag)
             {
                 value |= 0b1000_0000;
             }

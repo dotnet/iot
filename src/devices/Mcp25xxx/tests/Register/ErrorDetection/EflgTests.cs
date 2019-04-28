@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Iot.Device.Mcp25xxx.Tests.Register.ErrorDetection
 {
-    public class RecTests
+    public class EflgTests
     {
         [Fact]
         public void Get_Address()
@@ -26,19 +26,28 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.ErrorDetection
         [InlineData(false, false, false, false, false, true, false, false, 0b0010_0000)]
         [InlineData(false, false, false, false, false, false, true, false, 0b0100_0000)]
         [InlineData(false, false, false, false, false, false, false, true, 0b1000_0000)]
-        public void From_To_Byte(bool ewarn, bool rxwar, bool txwar, bool rxep, bool txep, bool txbo, bool rx0ovr, bool rx1ovr, byte expectedByte)
+        public void From_To_Byte(
+            bool errorWarningFlag,
+            bool receiveErrorWarningFlag,
+            bool transmitErrorWarningFlag,
+            bool receiveErrorPassiveFlag,
+            bool transmitErrorPassiveFlag,
+            bool busOffErrorFlag,
+            bool receiveBuffer0OverflowFlag,
+            bool receiveBuffer1OverflowFlag,
+            byte expectedByte)
         {
-            var eflg = new Eflg(expectedByte);
-            Assert.Equal(ewarn, eflg.Ewarn);
-            Assert.Equal(rxwar, eflg.RxWar);
-            Assert.Equal(txwar, eflg.TxWar);
-            Assert.Equal(rxep, eflg.RxEp);
-            Assert.Equal(txep, eflg.TxEp);
-            Assert.Equal(txbo, eflg.TxBo);
-            Assert.Equal(rx0ovr, eflg.Rx0Ovr);
-            Assert.Equal(rx1ovr, eflg.Rx1Ovr);
-
-            Assert.Equal(expectedByte, new Eflg(ewarn, rxwar, txwar, rxep, txep, txbo, rx0ovr, rx1ovr).ToByte());
+            var eflg = new Eflg(errorWarningFlag, receiveErrorWarningFlag, transmitErrorWarningFlag, receiveErrorPassiveFlag, transmitErrorPassiveFlag, busOffErrorFlag, receiveBuffer0OverflowFlag, receiveBuffer1OverflowFlag);
+            Assert.Equal(errorWarningFlag, eflg.ErrorWarningFlag);
+            Assert.Equal(receiveErrorWarningFlag, eflg.ReceiveErrorWarningFlag);
+            Assert.Equal(transmitErrorWarningFlag, eflg.TransmitErrorWarningFlag);
+            Assert.Equal(receiveErrorPassiveFlag, eflg.ReceiveErrorPassiveFlag);
+            Assert.Equal(transmitErrorPassiveFlag, eflg.TransmitErrorPassiveFlag);
+            Assert.Equal(busOffErrorFlag, eflg.BusOffErrorFlag);
+            Assert.Equal(receiveBuffer0OverflowFlag, eflg.ReceiveBuffer0OverflowFlag);
+            Assert.Equal(receiveBuffer1OverflowFlag, eflg.ReceiveBuffer1OverflowFlag);
+            Assert.Equal(expectedByte, eflg.ToByte());
+            Assert.Equal(expectedByte, new Eflg(expectedByte).ToByte());
         }
     }
 }

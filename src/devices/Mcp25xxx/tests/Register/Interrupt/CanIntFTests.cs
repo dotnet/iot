@@ -26,19 +26,36 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.Interrupt
         [InlineData(false, false, false, false, false, true, false, false, 0b0010_0000)]
         [InlineData(false, false, false, false, false, false, true, false, 0b0100_0000)]
         [InlineData(false, false, false, false, false, false, false, true, 0b1000_0000)]
-        public void From_To_Byte(bool rx0if, bool rx1if, bool tx0if, bool tx1if, bool tx2if, bool errif, bool wakif, bool merrf, byte expectedByte)
+        public void From_To_Byte(
+            bool receiveBuffer0FullInterruptFlag,
+            bool receiveBuffer1FullInterruptFlag,
+            bool transmitBuffer0EmptyInterruptFlag,
+            bool transmitBuffer1EmptyInterruptFlag,
+            bool transmitBuffer2EmptyInterruptFlag,
+            bool errorInterruptFlag,
+            bool wakeUpInterruptFlag,
+            bool messageErrorInterruptFlag,
+            byte expectedByte)
         {
-            var canIntF = new CanIntF(expectedByte);
-            Assert.Equal(rx0if, canIntF.Rx0If);
-            Assert.Equal(rx1if, canIntF.Rx1If);
-            Assert.Equal(tx0if, canIntF.Tx0If);
-            Assert.Equal(tx1if, canIntF.Tx1If);
-            Assert.Equal(tx2if, canIntF.Tx2If);
-            Assert.Equal(errif, canIntF.ErrIf);
-            Assert.Equal(wakif, canIntF.WakIf);
-            Assert.Equal(merrf, canIntF.Merrf);
-
-            Assert.Equal(expectedByte, new CanIntF(rx0if, rx1if, tx0if, tx1if, tx2if, errif, wakif, merrf).ToByte());
+            var canIntF = new CanIntF(
+                receiveBuffer0FullInterruptFlag,
+                receiveBuffer1FullInterruptFlag,
+                transmitBuffer0EmptyInterruptFlag,
+                transmitBuffer1EmptyInterruptFlag,
+                transmitBuffer2EmptyInterruptFlag,
+                errorInterruptFlag,
+                wakeUpInterruptFlag,
+                messageErrorInterruptFlag);
+            Assert.Equal(receiveBuffer0FullInterruptFlag, canIntF.ReceiveBuffer0FullInterruptFlag);
+            Assert.Equal(receiveBuffer1FullInterruptFlag, canIntF.ReceiveBuffer1FullInterruptFlag);
+            Assert.Equal(transmitBuffer0EmptyInterruptFlag, canIntF.TransmitBuffer0EmptyInterruptFlag);
+            Assert.Equal(transmitBuffer1EmptyInterruptFlag, canIntF.TransmitBuffer1EmptyInterruptFlag);
+            Assert.Equal(transmitBuffer2EmptyInterruptFlag, canIntF.TransmitBuffer2EmptyInterruptFlag);
+            Assert.Equal(errorInterruptFlag, canIntF.ErrorInterruptFlag);
+            Assert.Equal(wakeUpInterruptFlag, canIntF.WakeUpInterruptFlag);
+            Assert.Equal(messageErrorInterruptFlag, canIntF.MessageErrorInterruptFlag);
+            Assert.Equal(expectedByte, canIntF.ToByte());
+            Assert.Equal(expectedByte, new CanIntF(expectedByte).ToByte());
         }
     }
 }
