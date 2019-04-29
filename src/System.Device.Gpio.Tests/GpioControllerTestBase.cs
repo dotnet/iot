@@ -15,7 +15,7 @@ namespace System.Device.Gpio.Tests
         private const int LedPin = 18;
         private const int OutputPin = 16;
         private const int InputPin = 12;
-        private static readonly int WaitMilliSeconds = 10;
+        private static readonly int WaitMilliSeconds = 1000;
 
         [Fact]
         public void ControllerCanTurnOnLEDs()
@@ -137,6 +137,7 @@ namespace System.Device.Gpio.Tests
             {
                 controller.OpenPin(InputPin, PinMode.Input);
                 controller.OpenPin(OutputPin, PinMode.Output);
+                controller.Write(OutputPin, PinValue.Low);
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, callback);
                 controller.Write(OutputPin, PinValue.High);
                 Thread.Sleep(WaitMilliSeconds);
@@ -166,6 +167,7 @@ namespace System.Device.Gpio.Tests
 
             void callback(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
             {
+                Debug.WriteLine("Oops I was called!");
                 wasCalled = true;
             }
         }

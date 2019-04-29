@@ -55,7 +55,7 @@
       <!-- Pre append sudo and the full path to dotnet to the command, along with a dollarsign throwAway
       which will remove the initial dotnet from the helix command as it will be interpreted as a
       variable -->
-      <_newCommand>sudo -E $_dotnet $throwAway%(HelixWorkItem.Command)</_newCommand>
+      <_newCommand>sudo -E $_dotnet $throwAway%(HelixWorkItem.Command) -verbose -serialize -maxthreads 1</_newCommand>
     </PropertyGroup>
     <ItemGroup>
       <HelixWorkItem>
