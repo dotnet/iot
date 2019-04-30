@@ -27,9 +27,9 @@ namespace System.Device.Gpio.Drivers
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
         private readonly int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
-        private static int _pinOffset;
+        private static int _pinOffset = ReadOffset();
 
-        public SysFsDriver()
+        private static int ReadOffset()
         {
             IEnumerable<string> fileNames = Directory.EnumerateFileSystemEntries(GpioBasePath);
             foreach (string name in fileNames)
@@ -41,14 +41,15 @@ namespace System.Device.Gpio.Drivers
                         if (File.ReadAllText($"{name}{GpioLabel}").StartsWith(GpioContoller, StringComparison.Ordinal))
                         {
                             if (int.TryParse(File.ReadAllText($"{name}{GpioOffsetBase}"), out _pinOffset))
-                                break;
+                                return _pinOffset;
                         }
-                    } 
+                    }
                     // Ignoring file not found or any other IO exceptions as it is not guaranteed the folder would have files "label" "base"
                     // And don't want to throw in this case just continue to load the gpiochip with default offset = 0  
                     catch (IOException) { }
                 }
             }
+            return 0;
         }
 
         /// <summary>
