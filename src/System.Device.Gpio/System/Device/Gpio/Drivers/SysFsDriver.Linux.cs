@@ -27,7 +27,7 @@ namespace System.Device.Gpio.Drivers
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
         private readonly int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
-        private static int _pinOffset = ReadOffset();
+        private static readonly int s_pinOffset = ReadOffset();
 
         private static int ReadOffset()
         {
@@ -40,8 +40,8 @@ namespace System.Device.Gpio.Drivers
                     {
                         if (File.ReadAllText($"{name}{GpioLabel}").StartsWith(GpioContoller, StringComparison.Ordinal))
                         {
-                            if (int.TryParse(File.ReadAllText($"{name}{GpioOffsetBase}"), out _pinOffset))
-                                return _pinOffset;
+                            if (int.TryParse(File.ReadAllText($"{name}{GpioOffsetBase}"), out int pinOffset))
+                                return pinOffset;
                         }
                     }
                     // Ignoring file not found or any other IO exceptions as it is not guaranteed the folder would have files "label" "base"
@@ -70,7 +70,7 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void OpenPin(int pinNumber)
         {
-            int pinOffset = pinNumber + _pinOffset;
+            int pinOffset = pinNumber + s_pinOffset;
             string pinPath = $"{GpioBasePath}/gpio{pinOffset}";
             // If the directory exists, this becomes a no-op since the pin might have been opened already by the some controller or somebody else.
             if (!Directory.Exists(pinPath))
@@ -94,7 +94,7 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void ClosePin(int pinNumber)
         {
-            int pinOffset = pinNumber + _pinOffset;
+            int pinOffset = pinNumber + s_pinOffset;
             string pinPath = $"{GpioBasePath}/gpio{pinOffset}";
             // If the directory doesn't exist, this becomes a no-op since the pin was closed already.
             if (Directory.Exists(pinPath))
@@ -123,7 +123,7 @@ namespace System.Device.Gpio.Drivers
             {
                 throw new PlatformNotSupportedException("This driver is generic so it does not support Input Pull Down or Input Pull Up modes.");
             }
-            string directionPath = $"{GpioBasePath}/gpio{pinNumber + _pinOffset}/direction";
+            string directionPath = $"{GpioBasePath}/gpio{pinNumber + s_pinOffset}/direction";
             string sysFsMode = ConvertPinModeToSysFsMode(mode);
             if (File.Exists(directionPath))
             {
@@ -177,7 +177,7 @@ namespace System.Device.Gpio.Drivers
         protected internal override PinValue Read(int pinNumber)
         {
             PinValue result = default;
-            string valuePath = $"{GpioBasePath}/gpio{pinNumber + _pinOffset}/value";
+            string valuePath = $"{GpioBasePath}/gpio{pinNumber + s_pinOffset}/value";
             if (File.Exists(valuePath))
             {
                 try
@@ -224,7 +224,7 @@ namespace System.Device.Gpio.Drivers
         /// <param name="value">The value to be written to the pin.</param>
         protected internal override void Write(int pinNumber, PinValue value)
         {
-            string valuePath = $"{GpioBasePath}/gpio{pinNumber + _pinOffset}/value";
+            string valuePath = $"{GpioBasePath}/gpio{pinNumber + s_pinOffset}/value";
             if (File.Exists(valuePath))
             {
                 try
@@ -288,14 +288,14 @@ namespace System.Device.Gpio.Drivers
 
         private void SetPinEventsToDetect(int pinNumber, PinEventTypes eventTypes)
         {
-            string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + _pinOffset}", "edge");
+            string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "edge");
             string stringValue = PinEventTypeToStringValue(eventTypes);
             File.WriteAllText(edgePath, stringValue);
         }
 
         private PinEventTypes GetPinEventsToDetect(int pinNumber)
         {
-            string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + _pinOffset}", "edge");
+            string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "edge");
             string stringValue = File.ReadAllText(edgePath);
             return StringValueToPinEventType(stringValue);
         }
@@ -354,7 +354,7 @@ namespace System.Device.Gpio.Drivers
 
             if (valueFileDescriptor == -1)
             {
-                string valuePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + _pinOffset}", "value");
+                string valuePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "value");
                 valueFileDescriptor = Interop.open(valuePath, FileOpenFlags.O_RDONLY | FileOpenFlags.O_NONBLOCK);
                 if (valueFileDescriptor < 0)
                 {
@@ -571,7 +571,7 @@ namespace System.Device.Gpio.Drivers
         /// <returns>The mode of the pin.</returns>
         protected internal override PinMode GetPinMode(int pinNumber)
         {
-            pinNumber += _pinOffset;
+            pinNumber += s_pinOffset;
             string directionPath = $"{GpioBasePath}/gpio{pinNumber}/direction";
             if (File.Exists(directionPath))
             {
