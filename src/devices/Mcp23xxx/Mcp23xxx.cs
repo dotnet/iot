@@ -165,7 +165,6 @@ namespace Iot.Device.Mcp23xxx
         /// </remarks>
         public void WriteByte(Register register, byte value) => InternalWriteByte(register, value, Port.PortA);
 
-
         protected ushort InternalReadUInt16(Register register)
         {
             Span<byte> buffer = stackalloc byte[2];
@@ -439,11 +438,48 @@ namespace Iot.Device.Mcp23xxx
             return port == Port.PortA ? address : address += 0x10;
         }
 
+        public void OpenPin(int pinNumber) => SetPinMode(pinNumber, PinMode.Input);
+
         public void OpenPin(int pinNumber, PinMode mode) => SetPinMode(pinNumber, mode);
 
         public void ClosePin(int pinNumber)
         {
             // No-op
+        }
+
+        public bool IsPinOpen(int pinNumber)
+        {
+            ValidatePin(pinNumber);
+            return true;
+        }
+
+        public PinMode GetPinMode(int pinNumber)
+        {
+            ValidatePin(pinNumber);
+
+            byte direction;
+            if (pinNumber < 9)
+            {
+                direction = InternalReadByte(Register.IODIR, Port.PortA);
+            }
+            else
+            {
+                direction = InternalReadByte(Register.IODIR, Port.PortB);
+            }
+
+            return ((direction >> pinNumber - 1) & 1) == 1 ? PinMode.Input : PinMode.Output;
+        }
+
+        public bool IsPinModeSupported(int pinNumber, PinMode mode)
+        {
+            ValidatePin(pinNumber);
+
+            if (mode != PinMode.Input && mode != PinMode.Output)
+            {
+                throw new ArgumentException("The Mcp controller supports Input and Output modes only.");
+            }
+
+            return true;
         }
     }
 }
