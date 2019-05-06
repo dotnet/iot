@@ -438,7 +438,7 @@ namespace Iot.Device.Mcp23xxx
             return port == Port.PortA ? address : address += 0x10;
         }
 
-        public void OpenPin(int pinNumber) => SetPinMode(pinNumber, PinMode.Input);
+        public void OpenPin(int pinNumber) => throw new NotImplementedException();
 
         public void OpenPin(int pinNumber, PinMode mode) => SetPinMode(pinNumber, mode);
 
@@ -447,39 +447,10 @@ namespace Iot.Device.Mcp23xxx
             // No-op
         }
 
-        public bool IsPinOpen(int pinNumber)
-        {
-            ValidatePin(pinNumber);
-            return true;
-        }
+        public bool IsPinOpen(int pinNumber) => throw new NotImplementedException();
 
-        public PinMode GetPinMode(int pinNumber)
-        {
-            ValidatePin(pinNumber);
+        public PinMode GetPinMode(int pinNumber) => throw new NotImplementedException();
 
-            byte direction;
-            if (pinNumber < 9)
-            {
-                direction = InternalReadByte(Register.IODIR, Port.PortA);
-            }
-            else
-            {
-                direction = InternalReadByte(Register.IODIR, Port.PortB);
-            }
-
-            return ((direction >> pinNumber - 1) & 1) == 1 ? PinMode.Input : PinMode.Output;
-        }
-
-        public bool IsPinModeSupported(int pinNumber, PinMode mode)
-        {
-            ValidatePin(pinNumber);
-
-            if (mode != PinMode.Input && mode != PinMode.Output)
-            {
-                throw new ArgumentException("The Mcp controller supports Input and Output modes only.");
-            }
-
-            return true;
-        }
+        public bool IsPinModeSupported(int pinNumber, PinMode mode) => throw new NotImplementedException();
     }
 }
