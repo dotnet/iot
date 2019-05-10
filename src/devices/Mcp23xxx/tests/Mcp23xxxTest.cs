@@ -171,6 +171,8 @@ namespace Iot.Device.Mcp23xxx.Tests
         {
             private Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
 
+            public int PinCount => 10;
+
             public void Reset() => _pinValues = new Dictionary<int, PinValue>();
 
             public void ClosePin(int pinNumber)
@@ -218,6 +220,16 @@ namespace Iot.Device.Mcp23xxx.Tests
                     Write(pin, value);
                 }
             }
+
+            public void OpenPin(int pinNumber)
+            {
+            }
+
+            public bool IsPinOpen(int pinNumber) => true;
+
+            public PinMode GetPinMode(int pinNumber) => PinMode.Input;
+
+            public bool IsPinModeSupported(int pinNumber, PinMode mode) => true;
         }
     }
 }
