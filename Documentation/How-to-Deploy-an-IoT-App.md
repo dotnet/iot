@@ -15,7 +15,7 @@ This provides information how to prepare a Publish Profile and deploy an applica
 5. You can configure the profile's settings by clicking Configure... in the Publish Window.  A Profile Settings dialog prompt includes a few options.  
   
     **Notes**  
-    * Currently, the Target Runtime doesn't offer a selection for Linux ARM or Windows ARM.  You will need to manually open the profile's XML and change the RuntimeIdentifier element to **linux-arm** or **win-arm** shown below:
+    * Prior to Visual Studio 2019, the Target Runtime doesn't offer a selection for Linux ARM or Windows ARM.  You will need to manually open the profile's XML and change the RuntimeIdentifier element to **linux-arm** or **win-arm** shown below:
 
         ```
         <RuntimeIdentifier>linux-arm</RuntimeIdentifier>
