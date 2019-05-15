@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <RuntimeIdentifiers>linux-arm</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Iot.Device.Bindings" Version="0.1.0-prerelease.19171.3" />
+    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease.19176.1" />
+  </ItemGroup>
+
+</Project>
