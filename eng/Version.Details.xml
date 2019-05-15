@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="System.Device.Gpio" Version="0.1.0-prerelease.19263.1">
+    <Dependency Name="System.Device.Gpio" Version="0.1.0-prerelease.19264.2">
       <Uri>https://github.com/dotnet/iot</Uri>
-      <Sha>51ee433b09da0c0dee0471df831822a4afc08fa9</Sha>
+      <Sha>fc067c9192455464a4d779276b6e663e7337a8cd</Sha>
     </Dependency>
-    <Dependency Name="Iot.Device.Bindings" Version="0.1.0-prerelease.19263.1">
+    <Dependency Name="Iot.Device.Bindings" Version="0.1.0-prerelease.19264.2">
       <Uri>https://github.com/dotnet/iot</Uri>
-      <Sha>51ee433b09da0c0dee0471df831822a4afc08fa9</Sha>
+      <Sha>fc067c9192455464a4d779276b6e663e7337a8cd</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
