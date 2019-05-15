@@ -47,3 +47,4 @@ there is a full working example in the samples/PCF8574T Sample directory.
 - Very complete tutorial on how to connect and work with one of these displays: https://learn.adafruit.com/drive-a-16x2-lcd-directly-with-a-raspberry-pi/overview
 - Good guide explaining how the device works internally: http://www.site2241.net/november2014.htm
 - Seeedstudio, Grove - LCD RGB Backlight library: https://github.com/Seeed-Studio/Grove_LCD_RGB_Backlight
+- PCF8574T information https://alselectro.wordpress.com/2016/05/12/serial-lcd-i2c-module-pcf8574/
