@@ -27,7 +27,14 @@ namespace Iot.Device.Samples
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello Max7219!");
+            var message = "Hello World from MAX7219!";
+
+            if (args.Length > 0)
+            {
+                message = string.Join(" ", args);
+            }
+
+            Console.WriteLine(message);
 
             var connectionSettings = new SpiConnectionSettings(0, 0)
             {
@@ -75,11 +82,11 @@ namespace Iot.Device.Samples
 
                 //reinitialize device and show message using the matrix graphics
                 devices.Init();
-                devices.Rotation = RotationType.Left;
+                devices.Rotation = RotationType.Right;
                 var graphics = new MatrixGraphics(devices, Fonts.Default);
                 foreach (var font in new[]{Fonts.CP437, Fonts.LCD, Fonts.Sinclair, Fonts.Tiny, Fonts.CyrillicUkrainian}) {
                     graphics.Font = font;
-                    graphics.ShowMessage("Hello World from MAX7219!", alwaysScroll: true);
+                    graphics.ShowMessage(message, alwaysScroll: true);
                 }
             }
         }
