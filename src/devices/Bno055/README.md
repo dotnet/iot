@@ -2,7 +2,7 @@
 
 ## Summary
 
-Those sensors are intelligent 9-axis absolute orientation sensors. Most of the implementations are using I2C sensors but the sensor supports as well HID over I2C and serial port communication. This class only support supports I2C.
+Those sensors are intelligent 9-axis absolute orientation sensors. Most of the implementations are using I2C sensors but the sensor supports as well HID over I2C and serial port communication. This class only supports I2C.
 
 All operations for a current usage has been developped. The individual interruption level settings for each sensor has not been implemented. If needed, they are quite straight forward to implement.
 
