@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Device.Gpio;
+
 namespace System.Device.Spi
 {
     /// <summary>
@@ -49,5 +51,13 @@ namespace System.Device.Spi
         /// The frequency in which the data will be transfered.
         /// </summary>
         public int ClockFrequency { get; set; }
+        /// <summary>
+        /// Specifies order in which bits are transferred first on the SPI bus.
+        /// </summary>
+        public DataFlow DataFlow { get; set; } = DataFlow.MsbFirst;
+        /// <summary>
+        /// Specifies which value on chip select pin means "active".
+        /// </summary>
+        public PinValue ChipSelectLineActiveState { get; set; } = PinValue.Low;
     }
 }

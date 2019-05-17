@@ -29,21 +29,26 @@ docker run --rm -it -v /sys:/sys led-blink
 The following code provides write access to a GPIO pin (GPIO 17 in this case):
 
 ```csharp
-GpioController controller = new GpioController(PinNumberingScheme.Gpio);
-GpioPin ledPin = controller.OpenPin(17, PinMode.Output);
+int pin = 17;
+GpioController controller = new GpioController();
+controller.OpenPin(pin, PinMode.Output);
 ```
 
-Given a `GpioPin`, the following code blinks the LED on a schedule for an indefinite duration (forever):
+The following code blinks the LED on a schedule for an indefinite duration (forever):
 
 ```csharp
+
+int lightTimeInMilliseconds = 1000;
+int dimTimeInMilliseconds = 200;
+            
 while (true)
 {
-    Console.WriteLine($"Light for {lightTime}ms");
-    ledPin.Write(PinValue.High);
-    Thread.Sleep(lightTime);
-    Console.WriteLine($"Dim for {dimTime}ms");
-    ledPin.Write(PinValue.Low);
-    Thread.Sleep(dimTime);
+    Console.WriteLine($"Light for {lightTimeInMilliseconds}ms");
+    controller.Write(pin, PinValue.High);
+    Thread.Sleep(lightTimeInMilliseconds);
+    Console.WriteLine($"Dim for {dimTimeInMilliseconds}ms");
+    controller.Write(pin, PinValue.Low);
+    Thread.Sleep(dimTimeInMilliseconds); 
 }
 ```
 

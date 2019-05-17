@@ -25,8 +25,8 @@ namespace DeviceApiTester.Commands.Gpio
         [Option("time-off", HelpText = "The number of milliseconds to keep the LED off for each blink.", Required = false, Default = 200)]
         public int TimeOff { get; set; }
 
-        [Option("on-value", HelpText = "The value that turns the LED on: { High | Low }", Required = false, Default = PinValue.High)]
-        public PinValue OnValue { get; set; }
+        [Option("on-value", HelpText = "The value that turns the LED on: { 0 | 1 }", Required = false, Default = 1)]
+        public int OnValue { get; set; }
 
         /// <summary>Executes the command asynchronously.</summary>
         /// <returns>The command's exit code.</returns>
@@ -37,6 +37,11 @@ namespace DeviceApiTester.Commands.Gpio
         /// </remarks>
         public async Task<int> ExecuteAsync()
         {
+            if (OnValue != 0)
+            {
+                OnValue = 1;
+            }
+
             Console.WriteLine($"Driver={Driver}, Scheme={Scheme}, LedPin ={LedPin}, Count={Count}, TimeOn={TimeOn} ms, TimeOff={TimeOff} ms");
 
             using (GpioController controller = CreateGpioController())
@@ -59,9 +64,6 @@ namespace DeviceApiTester.Commands.Gpio
             return 0;
         }
 
-        private PinValue OffValue
-        {
-            get { return OnValue == PinValue.High ? PinValue.Low : PinValue.High; }
-        }
+        private int OffValue => 1 - OnValue;
     }
 }

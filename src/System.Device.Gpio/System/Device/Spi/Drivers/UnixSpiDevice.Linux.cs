@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Device.Gpio;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace System.Device.Spi.Drivers
 {
@@ -55,16 +57,16 @@ namespace System.Device.Spi.Drivers
                 _deviceFileDescriptor = Interop.open(deviceFileName, FileOpenFlags.O_RDWR);
                 if (_deviceFileDescriptor < 0)
                 {
-                    throw new IOException($"Can not open SPI device file '{deviceFileName}'.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not open SPI device file '{deviceFileName}'.");
                 }
 
-                UnixSpiMode mode = SpiModeToUnixSpiMode(_settings.Mode);
+                UnixSpiMode mode = SpiSettingsToUnixSpiMode();
                 IntPtr nativePtr = new IntPtr(&mode);
 
                 int result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MODE, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Can not set SPI mode to {_settings.Mode}.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI mode to {_settings.Mode}.");
                 }
 
                 byte dataLengthInBits = (byte)_settings.DataBitLength;
@@ -73,7 +75,7 @@ namespace System.Device.Spi.Drivers
                 result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_BITS_PER_WORD, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Can not set SPI data bit length to {_settings.DataBitLength}.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI data bit length to {_settings.DataBitLength}.");
                 }
 
                 int clockFrequency = _settings.ClockFrequency;
@@ -82,9 +84,26 @@ namespace System.Device.Spi.Drivers
                 result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MAX_SPEED_HZ, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Can not set SPI clock frequency to {_settings.ClockFrequency}.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI clock frequency to {_settings.ClockFrequency}.");
                 }
             }
+        }
+
+        private UnixSpiMode SpiSettingsToUnixSpiMode()
+        {
+            UnixSpiMode mode = SpiModeToUnixSpiMode(_settings.Mode);
+
+            if (_settings.ChipSelectLineActiveState == PinValue.High)
+            {
+                mode |= UnixSpiMode.SPI_CS_HIGH;
+            }
+
+            if (_settings.DataFlow == DataFlow.LsbFirst)
+            {
+                mode |= UnixSpiMode.SPI_LSB_FIRST;
+            }
+
+            return mode;
         }
 
         private UnixSpiMode SpiModeToUnixSpiMode(SpiMode mode)
@@ -128,6 +147,9 @@ namespace System.Device.Spi.Drivers
         /// </param>
         public override unsafe void Read(Span<byte> buffer)
         {
+            if (buffer.Length == 0)
+                throw new ArgumentException($"{nameof(buffer)} cannot be empty.");
+                
             Initialize();
 
             fixed (byte* bufferPtr = buffer)
@@ -139,28 +161,28 @@ namespace System.Device.Spi.Drivers
         /// <summary>
         /// Writes a byte to the SPI device.
         /// </summary>
-        /// <param name="data">The byte to be written to the SPI device.</param>
-        public override unsafe void WriteByte(byte data)
+        /// <param name="value">The byte to be written to the SPI device.</param>
+        public override unsafe void WriteByte(byte value)
         {
             Initialize();
 
             int length = sizeof(byte);
-            Transfer(&data, null, length);
+            Transfer(&value, null, length);
         }
 
         /// <summary>
         /// Writes data to the SPI device.
         /// </summary>
-        /// <param name="data">
+        /// <param name="buffer">
         /// The buffer that contains the data to be written to the SPI device.
         /// </param>
-        public override unsafe void Write(Span<byte> data)
+        public override unsafe void Write(ReadOnlySpan<byte> buffer)
         {
             Initialize();
 
-            fixed (byte* dataPtr = data)
+            fixed (byte* dataPtr = buffer)
             {
-                Transfer(dataPtr, null, data.Length);
+                Transfer(dataPtr, null, buffer.Length);
             }
         }
 
@@ -169,7 +191,7 @@ namespace System.Device.Spi.Drivers
         /// </summary>
         /// <param name="writeBuffer">The buffer that contains the data to be written to the SPI device.</param>
         /// <param name="readBuffer">The buffer to read the data from the SPI device.</param>
-        public override unsafe void TransferFullDuplex(Span<byte> writeBuffer, Span<byte> readBuffer)
+        public override unsafe void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
             Initialize();
 
@@ -202,7 +224,7 @@ namespace System.Device.Spi.Drivers
             int result = Interop.ioctl(_deviceFileDescriptor, SPI_IOC_MESSAGE_1, new IntPtr(&tr));
             if (result < 1)
             {
-                throw new IOException("Error performing SPI data transfer.");
+                throw new IOException($"Error {Marshal.GetLastWin32Error()} performing SPI data transfer.");
             }
         }
 
