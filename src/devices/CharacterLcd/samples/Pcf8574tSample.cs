@@ -8,11 +8,9 @@ using System.Timers;
 using Iot.Device.Mcp23xxx;
 using Iot.Device.CharacterLcd;
 
-
-
-namespace test
+namespace Iot.Device.CharacterLcd.Samples
 {
-    class Program
+    class Pcf8574tSample
     {
         public class ExtendedSample
         {
@@ -25,10 +23,8 @@ namespace test
             {
                 Console.WriteLine("Starting...");
 
-
             var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x27));
             var controller = new Mcp23008(i2cDevice);
-                
             var lcd = new Lcd1602(registerSelectPin: 0, enablePin: 2, dataPins: new int[] { 4, 5, 6, 7}, backlightPin: 3, readWritePin: 1, controller: controller);
 
                 using (lcd)

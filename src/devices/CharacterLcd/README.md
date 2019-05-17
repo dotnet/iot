@@ -41,7 +41,7 @@ var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddr
 var controller = new Mcp23008(i2cDevice); 
 var lcd = new Lcd1602(registerSelectPin: 0, enablePin: 2, dataPins: new int[] { 4, 5, 6, 7}, backlightPin: 3, readWritePin: 1, controller: controller);
 ```
-there is a full working example in the samples/PCF8574T Sample directory.
+there is a full working example in the samples directory called Pcf8574tSample.cs
 
 ## References 
 - Very complete tutorial on how to connect and work with one of these displays: https://learn.adafruit.com/drive-a-16x2-lcd-directly-with-a-raspberry-pi/overview
