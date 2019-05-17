@@ -41,7 +41,7 @@ namespace Iot.Device.DHTxx
         /// <summary>
         /// How last read went, <c>true</c> for success, <c>false</c> for failure
         /// </summary>
-        public bool IsLastReadSuccessful { get; internal set; }
+        public bool IsLastReadSuccessful { get; private set; }
 
         /// <summary>
         /// Get the last read temperature
@@ -173,15 +173,31 @@ namespace Iot.Device.DHTxx
             // pull up data line
             _controller.Write(_pin, PinValue.High);
             // wait 20 - 40 microseconds
-            DelayHelper.DelayMicroseconds(40, true);
+            DelayHelper.DelayMicroseconds(30, true);
 
             _controller.SetPinMode(_pin, PinMode.InputPullUp);
 
             // DHT corresponding signal - LOW - about 80 microseconds
-            DelayHelper.DelayMicroseconds(80, true);
+            count = _loopCount;
+            while (_controller.Read(_pin) == PinValue.Low)
+            {
+                if (count-- == 0)
+                {
+                    IsLastReadSuccessful = false;
+                    return IsLastReadSuccessful;
+                }
+            }
 
             // HIGH - about 80 microseconds
-            DelayHelper.DelayMicroseconds(80, true);
+            count = _loopCount;
+            while (_controller.Read(_pin) == PinValue.High)
+            {
+                if (count-- == 0)
+                {
+                    IsLastReadSuccessful = false;
+                    return IsLastReadSuccessful;
+                }
+            }
 
             // the read data contains 40 bits
             for (int i = 0; i < 40; i++)
