@@ -41,6 +41,10 @@ namespace Iot.Device.Bmx280
             status = (byte)(status & 0b1111_1000);
             status = (byte)(status | (byte)sampling);
             _i2cDevice.Write(new[] { (byte)Register.CTRL_HUM, status });
+
+            // Changes to the above register only become effective after a write operation to "CTRL_MEAS".
+            byte measureState = Read8BitsFromRegister((byte)Register.CTRL_MEAS);
+            _i2cDevice.Write(new[] { (byte)Register.CTRL_MEAS, measureState });
         }
 
         /// <summary>
