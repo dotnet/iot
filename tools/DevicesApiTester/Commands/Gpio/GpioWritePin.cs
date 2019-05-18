@@ -15,8 +15,8 @@ namespace DeviceApiTester.Commands.Gpio
         [Option('p', "pin", HelpText = "The GPIO pin to write to. The number is based on the --scheme argument.", Required = true)]
         public int Pin { get; set; }
 
-        [Option('v', "value", HelpText = "The value to write to pin: { High | Low }", Required = true)]
-        public PinValue Value { get; set; }
+        [Option('v', "value", HelpText = "The value to write to pin: { 0 | 1 }", Required = true)]
+        public int Value { get; set; }
 
         /// <summary>Executes the command asynchronously.</summary>
         /// <returns>The command's exit code.</returns>

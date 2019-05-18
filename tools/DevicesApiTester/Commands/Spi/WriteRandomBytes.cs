@@ -30,14 +30,14 @@ namespace DeviceApiTester.Commands.Spi
                 Mode = Mode,
             };
 
-            using (var spi = CreateSpiDevice(connectionSettings))
+            using (var spiDevice = CreateSpiDevice(connectionSettings))
             {
                 // Write random bytes of data
                 var buffer = new byte[ByteCount];
                 new Random().NextBytes(buffer);
 
                 Console.WriteLine($"Writing random bytes:{Environment.NewLine}{HexStringUtilities.FormatByteData(buffer)}");
-                spi.Write(buffer.AsSpan());
+                spiDevice.Write(buffer.AsSpan());
             }
 
             return 0;
@@ -45,7 +45,5 @@ namespace DeviceApiTester.Commands.Spi
 
         [Option('n', "byte-count", HelpText = "The number of random bytes to write to the connection", Required = false, Default = 16)]
         public int ByteCount { get; set; }
-
-        private static readonly Random s_random = new Random();
     }
 }
