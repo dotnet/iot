@@ -23,14 +23,25 @@ namespace Iot.Device.Bmx280
         DIG_P8 = 0x9C,
         DIG_P9 = 0x9E,
 
+        // BME280 Only
+        DIG_H1 = 0xA1,
+        DIG_H2 = 0xE1,
+        DIG_H3 = 0xE3,
+        DIG_H4 = 0xE4,
+        DIG_H5 = 0xE5,
+        DIG_H6 = 0xE7,
+
         CHIPID = 0xD0,
         VERSION = 0xD1,
         SOFTRESET = 0xE0,
 
         CAL26 = 0xE1,  // R calibration stored in 0xE1-0xF0
 
+        // BME280 Only
+        CTRL_HUM = 0xF2,
+
         STATUS = 0xF3,
-        CONTROL = 0xF4,
+        CTRL_MEAS = 0xF4,
         CONFIG = 0xF5,
 
         PRESSUREDATA_MSB = 0xF7,
@@ -40,5 +51,9 @@ namespace Iot.Device.Bmx280
         TEMPDATA_MSB = 0xFA,
         TEMPDATA_LSB = 0xFB,
         TEMPDATA_XLSB = 0xFC, // bits <7:4>=
+
+        // BME280 Only
+        HUMIDDATA_LSB = 0xFE,
+        HUMIDDATA_MSB = 0xFD
     }
 }

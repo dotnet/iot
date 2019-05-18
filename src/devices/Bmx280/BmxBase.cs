@@ -13,13 +13,14 @@ using Iot.Units;
 
 namespace Iot.Device.Bmx280
 {
-    public class BmxBase : IDisposable
+    public abstract class BmxBase : IDisposable
     {
         internal I2cDevice _i2cDevice;
         internal byte _deviceId;
         internal bool _initialized = false;
         internal CommunicationProtocol _communicationProtocol;
-        internal CalibrationData _calibrationData;
+
+        internal CalibrationData CalibrationData { get; private set; }
 
         /// <summary>
         /// The variable _temperatureFine carries a fine resolution temperature value over to the
@@ -31,6 +32,8 @@ namespace Iot.Device.Bmx280
         {
             I2c
         }
+
+        internal abstract CalibrationData ReadCalibrationData();
 
         internal void Begin()
         {
@@ -44,7 +47,7 @@ namespace Iot.Device.Bmx280
             _initialized = true;
 
             //Read the coefficients table
-            _calibrationData.ReadFromDevice(this);
+            CalibrationData = ReadCalibrationData();
         }
 
         /// <summary>
@@ -53,11 +56,11 @@ namespace Iot.Device.Bmx280
         /// <param name="powerMode"></param>
         public void SetPowerMode(PowerMode powerMode)
         {
-            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
+            byte status = Read8BitsFromRegister((byte)Register.CTRL_MEAS);
             //clear last two bits
             status = (byte)(status & 0b1111_1100);
             status = (byte)(status | (byte)powerMode);
-            _i2cDevice.Write(new[] { (byte)Register.CONTROL, status });
+            _i2cDevice.Write(new[] { (byte)Register.CTRL_MEAS, status });
 
         }
 
@@ -67,7 +70,7 @@ namespace Iot.Device.Bmx280
         /// <returns></returns>
         public PowerMode ReadPowerMode()
         {
-            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
+            byte status = Read8BitsFromRegister((byte)Register.CTRL_MEAS);
             status = (byte)(status & 0b000_00011);
             if (status == (byte)PowerMode.Normal)
             {
@@ -89,10 +92,10 @@ namespace Iot.Device.Bmx280
         /// <param name="sampling"></param>
         public void SetTemperatureSampling(Sampling sampling)
         {
-            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
+            byte status = Read8BitsFromRegister((byte)Register.CTRL_MEAS);
             status = (byte)(status & 0b0001_1111);
             status = (byte)(status | (byte)sampling << 5);
-            _i2cDevice.Write(new[] { (byte)Register.CONTROL, status });
+            _i2cDevice.Write(new[] { (byte)Register.CTRL_MEAS, status });
         }
 
         /// <summary>
@@ -101,14 +104,14 @@ namespace Iot.Device.Bmx280
         /// <returns></returns>
         public Sampling ReadTemperatureSampling()
         {
-            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
+            byte status = Read8BitsFromRegister((byte)Register.CTRL_MEAS);
             status = (byte)((status & 0b1110_0000) >> 5);
             return ByteToSampling(status);
         }
 
-        private Sampling ByteToSampling(byte value)
+        internal Sampling ByteToSampling(byte value)
         {
-            //Values >=5 equals UltraHighResolution
+            //Values >=5 equals UltraHighResolution (others)
             if (value >= 5)
             {
                 return Sampling.UltraHighResolution;
@@ -122,7 +125,7 @@ namespace Iot.Device.Bmx280
         /// <returns></returns>
         public Sampling ReadPressureSampling()
         {
-            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
+            byte status = Read8BitsFromRegister((byte)Register.CTRL_MEAS);
             status = (byte)((status & 0b0001_1100) >> 2);
             return ByteToSampling(status);
         }
@@ -133,10 +136,10 @@ namespace Iot.Device.Bmx280
         /// <param name="sampling"></param>
         public void SetPressureSampling(Sampling sampling)
         {
-            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
+            byte status = Read8BitsFromRegister((byte)Register.CTRL_MEAS);
             status = (byte)(status & 0b1110_0011);
             status = (byte)(status | (byte)sampling << 2);
-            _i2cDevice.Write(new[] { (byte)Register.CONTROL, status });
+            _i2cDevice.Write(new[] { (byte)Register.CTRL_MEAS, status });
         }
 
         /// <summary>
@@ -177,7 +180,7 @@ namespace Iot.Device.Bmx280
         /// <returns>
         /// The time it takes for the chip to read data in milliseconds rounded up
         /// </returns>
-        private int GetMeasurementTimeForForcedMode(Sampling sampleMode)
+        internal int GetMeasurementTimeForForcedMode(Sampling sampleMode)
         {
             if (sampleMode == Sampling.UltraLowPower)
             {
@@ -281,9 +284,9 @@ namespace Iot.Device.Bmx280
         {
             //Formula from the datasheet
             //The temperature is calculated using the compensation formula in the BMP280 datasheet
-            double var1 = ((adcTemperature / 16384.0) - (_calibrationData.DigT1 / 1024.0)) * _calibrationData.DigT2;
-            double var2 = ((adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0));
-            var2 *= var2 * _calibrationData.DigT3;
+            double var1 = ((adcTemperature / 16384.0) - (CalibrationData.DigT1 / 1024.0)) * CalibrationData.DigT2;
+            double var2 = ((adcTemperature / 131072.0) - (CalibrationData.DigT1 / 8192.0));
+            var2 *= var2 * CalibrationData.DigT3;
 
             TemperatureFine = (int)(var1 + var2);
 
@@ -306,11 +309,11 @@ namespace Iot.Device.Bmx280
             //Formula from the datasheet
             //The pressure is calculated using the compensation formula in the BMP280 datasheet
             long var1 = TemperatureFine - 128000;
-            long var2 = var1 * var1 * (long)_calibrationData.DigP6;
-            var2 = var2 + ((var1 * (long)_calibrationData.DigP5) << 17);
-            var2 = var2 + ((long)_calibrationData.DigP4 << 35);
-            var1 = ((var1 * var1 * (long)_calibrationData.DigP3) >> 8) + ((var1 * (long)_calibrationData.DigP2) << 12);
-            var1 = (((((long)1 << 47) + var1)) * (long)_calibrationData.DigP1) >> 33;
+            long var2 = var1 * var1 * (long)CalibrationData.DigP6;
+            var2 = var2 + ((var1 * (long)CalibrationData.DigP5) << 17);
+            var2 = var2 + ((long)CalibrationData.DigP4 << 35);
+            var1 = ((var1 * var1 * (long)CalibrationData.DigP3) >> 8) + ((var1 * (long)CalibrationData.DigP2) << 12);
+            var1 = (((((long)1 << 47) + var1)) * (long)CalibrationData.DigP1) >> 33;
             if (var1 == 0)
             {
                 return 0; //Avoid exception caused by division by zero
@@ -318,9 +321,9 @@ namespace Iot.Device.Bmx280
             //Perform calibration operations
             long p = 1048576 - adcPressure;
             p = (((p << 31) - var2) * 3125) / var1;
-            var1 = ((long)_calibrationData.DigP9 * (p >> 13) * (p >> 13)) >> 25;
-            var2 = ((long)_calibrationData.DigP8 * p) >> 19;
-            p = ((p + var1 + var2) >> 8) + ((long)_calibrationData.DigP7 << 4);
+            var1 = ((long)CalibrationData.DigP9 * (p >> 13) * (p >> 13)) >> 25;
+            var2 = ((long)CalibrationData.DigP8 * p) >> 19;
+            p = ((p + var1 + var2) >> 8) + ((long)CalibrationData.DigP7 << 4);
             return p;
         }
 
