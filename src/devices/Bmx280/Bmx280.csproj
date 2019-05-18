@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace>Iot.Device.Bmx280</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
