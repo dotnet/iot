@@ -61,7 +61,6 @@ namespace Iot.Device.Bmx280
             status = (byte)(status & 0b1111_1100);
             status = (byte)(status | (byte)powerMode);
             _i2cDevice.Write(new[] { (byte)Register.CTRL_MEAS, status });
-
         }
 
         /// <summary>
@@ -325,6 +324,15 @@ namespace Iot.Device.Bmx280
             var2 = ((long)CalibrationData.DigP8 * p) >> 19;
             p = ((p + var1 + var2) >> 8) + ((long)CalibrationData.DigP7 << 4);
             return p;
+        }
+
+        /// <summary>
+        /// When called, the device is reset using the complete power-on-reset procedure.
+        /// </summary>
+        public void Reset()
+        {
+            const byte resetCommand = 0xb6;
+            _i2cDevice.Write(new[] { (byte)Register.RESET, resetCommand });
         }
 
         /// <summary>

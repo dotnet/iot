@@ -33,7 +33,7 @@ namespace Iot.Device.Bmx280
 
         CHIPID = 0xD0,
         VERSION = 0xD1,
-        SOFTRESET = 0xE0,
+        RESET = 0xE0,
 
         CAL26 = 0xE1,  // R calibration stored in 0xE1-0xF0
 
