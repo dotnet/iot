@@ -336,6 +336,26 @@ namespace Iot.Device.Bmx280
         }
 
         /// <summary>
+        /// Get the current status of the device.
+        /// </summary>
+        /// <returns></returns>
+        public DeviceStatus ReadStatus()
+        {
+            var status = Read8BitsFromRegister((byte)Register.STATUS);
+
+            // Bit 3
+            var measuring = ((status >> 3) & 1) == 1;
+            // Bit 0
+            var imUpdate = (status & 1) == 1;
+
+            return new DeviceStatus
+            {
+                ImageUpdating = imUpdate,
+                Measuring = measuring
+            };
+        }
+
+        /// <summary>
         ///  Reads an 8 bit value from a register
         /// </summary>
         /// <param name="register">
