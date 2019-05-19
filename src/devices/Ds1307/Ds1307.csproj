@@ -8,7 +8,6 @@
   <ItemGroup>
     <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <Compile Include="Ds1307.cs" />
-    <Compile Include="Ds1307Data.cs" />
     <Compile Include="Register.cs" />
   </ItemGroup>
 

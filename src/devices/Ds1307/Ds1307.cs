@@ -45,18 +45,12 @@ namespace Iot.Device.Ds1307
             _sensor.Read(rawData);
 
             // Details in the Datasheet P8
-            Ds1307Data data = new Ds1307Data
-            {
-                Sec = Bcd2Int((byte)(rawData[0] & 0b_0111_1111)),
-                Min = Bcd2Int(rawData[1]),
-                Hour = Bcd2Int(rawData[2]),
-                Day = Bcd2Int(rawData[3]),
-                Date = Bcd2Int(rawData[4]),
-                Month = Bcd2Int(rawData[5]),
-                Year = 2000 + Bcd2Int(rawData[6])
-            };
-
-            return new DateTime(data.Year, data.Month, data.Date, data.Hour, data.Min, data.Sec);
+            return new DateTime(2000 + Bcd2Int(rawData[6]), 
+                                Bcd2Int(rawData[5]), 
+                                Bcd2Int(rawData[4]), 
+                                Bcd2Int(rawData[2]),
+                                Bcd2Int(rawData[1]), 
+                                Bcd2Int((byte)(rawData[0] & 0b_0111_1111)));
         }
 
         /// <summary>
