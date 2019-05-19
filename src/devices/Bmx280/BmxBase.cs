@@ -356,6 +356,40 @@ namespace Iot.Device.Bmx280
         }
 
         /// <summary>
+        /// Sets the IIR filter mode.
+        /// </summary>
+        /// <param name="filteringMode"></param>
+        public void SetFilterMode(FilteringMode filteringMode)
+        {
+            byte current = Read8BitsFromRegister((byte)Register.CONFIG);
+            current = (byte)((current & 0b1110_0011) | (byte)filteringMode << 2);
+            _i2cDevice.Write(new[] { (byte)Register.CONFIG, current });
+        }
+
+        /// <summary>
+        /// Reads the current IIR filter mode the device is running in.
+        /// </summary>
+        /// <returns></returns>
+        public FilteringMode ReadFilterMode()
+        {
+            byte current = Read8BitsFromRegister((byte)Register.CONFIG);
+            var mode = (byte)((current & 0b0001_1100) >> 2);
+            switch (mode)
+            {
+                case 0b000:
+                    return FilteringMode.Off;
+                case 0b001:
+                    return FilteringMode.X2;
+                case 0b010:
+                    return FilteringMode.X4;
+                case 0b011:
+                    return FilteringMode.X8;
+                default:
+                    return FilteringMode.X16;
+            }
+        }
+
+        /// <summary>
         ///  Reads an 8 bit value from a register
         /// </summary>
         /// <param name="register">

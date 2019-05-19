@@ -58,6 +58,9 @@ namespace Iot.Device.Samples
                     i2CBmpe80.SetHumiditySampling(Sampling.Standard);
                     Console.WriteLine(i2CBmpe80.ReadHumiditySampling());
 
+                    i2CBmpe80.SetFilterMode(FilteringMode.Off);
+                    Console.WriteLine(i2CBmpe80.ReadFilterMode());
+
                     //set mode forced and read again
                     i2CBmpe80.SetPowerMode(PowerMode.Forced);
 
@@ -79,6 +82,9 @@ namespace Iot.Device.Samples
                     Console.WriteLine(i2CBmpe80.ReadPressureSampling());
                     i2CBmpe80.SetHumiditySampling(Sampling.UltraLowPower);
                     Console.WriteLine(i2CBmpe80.ReadHumiditySampling());
+
+                    i2CBmpe80.SetFilterMode(FilteringMode.X2);
+                    Console.WriteLine(i2CBmpe80.ReadFilterMode());
                 }
             }
         }
