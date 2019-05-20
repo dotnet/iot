@@ -31,7 +31,7 @@ namespace Iot.Device.Ds3231
         public Temperature Temperature => Temperature.FromCelsius(ReadTemperature());
 
         /// <summary>
-        /// Realtime Clock DS3231
+        /// Creates a new instance of the DS3231
         /// </summary>
         /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
         public Ds3231(I2cDevice sensor)
@@ -45,26 +45,18 @@ namespace Iot.Device.Ds3231
         /// <returns>DS3231 Time</returns>
         private DateTime ReadTime()
         {
+            // Sec, Min, Hour, Day, Date, Month & Century, Year
             Span<byte> rawData = stackalloc byte[7];
 
-            _sensor.Write(new [] { (byte)Register.RTC_SEC_REG_ADDR });
+            _sensor.WriteByte((byte)Register.RTC_SEC_REG_ADDR);
             _sensor.Read(rawData);
 
-            Ds3231Data data = new Ds3231Data();
-
-            data.Sec = Bcd2Int(rawData[0]);
-            data.Min = Bcd2Int(rawData[1]);
-            data.Hour = Bcd2Int(rawData[2]);
-            data.Day = Bcd2Int(rawData[3]);
-            data.Date = Bcd2Int(rawData[4]);
-            data.Month = Bcd2Int((byte)(rawData[5] & 0x1F));
-            data.Century = rawData[5] >> 7;
-            if (data.Century == 1)
-                data.Year = 2000 + Bcd2Int(rawData[6]);
-            else
-                data.Year = 1900 + Bcd2Int(rawData[6]);
-
-            return new DateTime(data.Year, data.Month, data.Date, data.Hour, data.Min, data.Sec);
+            return new DateTime(rawData[5] >> 7 == 1 ? 2000 + Bcd2Int(rawData[6]) : 1900 + Bcd2Int(rawData[6]),
+                                Bcd2Int((byte)(rawData[5] & 0b_0001_1111)),
+                                Bcd2Int(rawData[3]),
+                                Bcd2Int(rawData[2]),
+                                Bcd2Int(rawData[1]),
+                                Bcd2Int(rawData[0]));
         }
 
         /// <summary>
@@ -84,7 +76,7 @@ namespace Iot.Device.Ds3231
             setData[5] = Int2Bcd(time.Day);
             if (time.Year >= 2000)
             {
-                setData[6] = (byte)(Int2Bcd(time.Month) + 0x80);
+                setData[6] = (byte)(Int2Bcd(time.Month) | 0b_1000_0000);
                 setData[7] = Int2Bcd(time.Year - 2000);
             }
             else
@@ -104,7 +96,7 @@ namespace Iot.Device.Ds3231
         {
             Span<byte> data = stackalloc byte[2];
 
-            _sensor.Write(new [] { (byte)Register.RTC_TEMP_MSB_REG_ADDR });
+            _sensor.WriteByte((byte)Register.RTC_TEMP_MSB_REG_ADDR);
             _sensor.Read(data);
 
             // datasheet Temperature part
@@ -116,11 +108,8 @@ namespace Iot.Device.Ds3231
         /// </summary>
         public void Dispose()
         {
-            if (_sensor != null)
-            {
-                _sensor.Dispose();
-                _sensor = null;
-            }
+            _sensor?.Dispose();
+            _sensor = null;
         }
 
         /// <summary>
@@ -130,7 +119,7 @@ namespace Iot.Device.Ds3231
         /// <returns>int</returns>
         private int Bcd2Int(byte bcd)
         {
-            return ((bcd / 16 * 10) + (bcd % 16));
+            return ((bcd >> 4) * 10) + (bcd % 16);
         }
 
         /// <summary>
@@ -140,7 +129,7 @@ namespace Iot.Device.Ds3231
         /// <returns>BCD Code</returns>
         private byte Int2Bcd(int dec)
         {
-            return (byte)((dec / 10 * 16) + (dec % 10));
+            return (byte)(((dec / 10) << 4) + (dec % 10));
         }
     }
 }
