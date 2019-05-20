@@ -2,12 +2,12 @@
 
 ## Summary
 
-You will need a GrovePi from [Dexter Industries](https://www.dexterindustries.com/grovepi/) and a Raspberry Pi. That said, any board will work with the GrovePi as it is using I2C. You’ll just need to link the pins from your board to the GrovePi ones the correct way.
+You will need a GrovePi+ from [Dexter Industries](https://www.dexterindustries.com/grovepi/) and a Raspberry Pi. That said, any board will work with the GrovePi+ as it is using I2C. You’ll just need to link the pins from your board to the GrovePi+ ones the correct way.
 
-GrovePi have the ability to use Grove sensors, analogic, digital. GrovePi provide as well extensions for I2C sensors. In order to take advantage of GrovePi, you'll need Grove compatible sensors. There are lots existing like on [Seeed Studio](http://wiki.seeedstudio.com/Grove/).
+GrovePi+ have the ability to use Grove sensors, analogic, digital. GrovePi+ provide as well extensions for I2C sensors. In order to take advantage of GrovePi, you'll need Grove compatible sensors. There are lots existing like on [Seeed Studio](http://wiki.seeedstudio.com/Grove/).
 
 - [Device family](./README.md#device-family)
-- [GrovePi requirements](./README.md#make-sure-you-have-a-GrovePi)
+- [GrovePi requirements](./README.md#make-sure-you-have-a-GrovePi+)
 - [Know limitations](./README.md#known-limitations)
 - [Using the driver](./README.md#how-to-use-the-driver)
   - [Accessing GrovePi information](./README.md#accessing-GrovePi-information)
@@ -21,9 +21,11 @@ The device supported is the GrovePi [Dexter Industries](https://www.dexterindust
 
 ![GrovePi](grovepi.jpg)
 
-## Make sure you have a GrovePi
+## Make sure you have a GrovePi+
 
-There are multiple versions of GrovePi, this code is only working for the last version GrovePi. We do recommend you to use as well the latest firmware of GrovePi. This binding is supposed to work starting at version 1.2 and has been tested with this older version. To update GrovePi firmware, please check the [GrovePi GitHub](https://github.com/DexterInd/GrovePi/blob/master/Firmware/firmware_update.sh). In short, you should clone it from Linux on a RaspberryPi and run the update script.
+There are multiple versions of GrovePi, this code is only working for the last version GrovePi+. We do recommend you to use as well the latest firmware of GrovePi. This binding is supposed to work starting at version 1.2 and has been tested with this older version. To update GrovePi firmware, please check the [GrovePi GitHub](https://github.com/DexterInd/GrovePi/blob/master/Firmware/firmware_update.sh). In short, you should clone it from Linux on a RaspberryPi and run the update script.
+
+This code does not work with the Grove Base Hat.
 
 ## Known limitations
 
