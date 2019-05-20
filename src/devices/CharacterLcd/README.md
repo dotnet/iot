@@ -34,7 +34,17 @@ using (var lcd = new LcdRgb1602(i2cLcdDevice, i2cRgbDevice))
 }
 ```
 
+PCF8574T Sample
+The I2C backpack based on the PCF8574T IC uses specific pin mapping, to consume this device binding on this backpack use like so
+```c#
+var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x27)); 
+var controller = new Mcp23008(i2cDevice); 
+var lcd = new Lcd1602(registerSelectPin: 0, enablePin: 2, dataPins: new int[] { 4, 5, 6, 7}, backlightPin: 3, readWritePin: 1, controller: controller);
+```
+there is a full working example in the samples directory called Pcf8574tSample.cs
+
 ## References 
 - Very complete tutorial on how to connect and work with one of these displays: https://learn.adafruit.com/drive-a-16x2-lcd-directly-with-a-raspberry-pi/overview
 - Good guide explaining how the device works internally: http://www.site2241.net/november2014.htm
 - Seeedstudio, Grove - LCD RGB Backlight library: https://github.com/Seeed-Studio/Grove_LCD_RGB_Backlight
+- PCF8574T information https://alselectro.wordpress.com/2016/05/12/serial-lcd-i2c-module-pcf8574/
