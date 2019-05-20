@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <PackageReference Include="System.Memory" Version="4.5.2" />
+    <None Include="README.md" />
+  </ItemGroup>
+
+<ItemGroup>
+    <Compile Include="GrovePi.cs" />
+    <Compile Include="Models\*.cs" />    
+    <Compile Include="Sensors\*.cs" />
+  </ItemGroup>
+
+</Project>

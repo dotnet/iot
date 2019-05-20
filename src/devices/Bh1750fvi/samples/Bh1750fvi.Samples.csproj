@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bh1750fvi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="BH1750FVI_Circuit.fzz" />
+    <None Remove="BH1750FVI_Circuit_bb.png" />
+    <None Remove="README.md" />
+    <None Remove="RunningResult.jpg" />
+  </ItemGroup>
+
+</Project>

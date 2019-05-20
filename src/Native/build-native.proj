@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(Directory.Build.props))" />
+
+  <PropertyGroup>
+    <_BuildNativeArgs>arm $(Configuration)</_BuildNativeArgs>
+  </PropertyGroup>
+
+  <Target Name="BuildNativeUnix"
+          Condition="'$(OS)' != 'Windows_NT'">
+
+    <PropertyGroup>
+      <!--
+        MSBuildNodeCount should a good approximation for how many procs to use for native build, if we find that doesn't work
+        then we should consider calling Environment.ProcessorCount
+      -->
+      <_ProcessorCountArg> --numproc $(MSBuildNodeCount)</_ProcessorCountArg>
+      <_StripSymbolsArg Condition="'$(BuildNativeStripSymbols)' == 'true'"> stripsymbols</_StripSymbolsArg>
+
+      <!--
+        BuildNativeClang is a pass-through argument, to pass an argument to build-native.sh. It is intended to be
+        used to force a specific clang toolset.
+      -->
+      <_BuildNativeClangArg Condition="'$(BuildNativeClang)' != ''"> $(BuildNativeClang)</_BuildNativeClangArg>
+
+      <_BuildNativeUnixArgs>$(_BuildNativeArgs)$(_ProcessCountArg)$(_StripSymbolsArg)$(_PortableBuildArg)$(_BuildNativeClangArg)</_BuildNativeUnixArgs>
+    </PropertyGroup>
+
+    <Message Text="$(MSBuildProjectDirectory)/build-native.sh $(_BuildNativeUnixArgs)" Importance="High"/>
+    <Exec Command="&quot;$(MSBuildProjectDirectory)/build-native.sh&quot; $(_BuildNativeUnixArgs)" IgnoreStandardErrorWarningFormat="true">
+      <Output TaskParameter="ExitCode" PropertyName="BuildNativeExitCode" />
+    </Exec>
+
+    <Error Condition="'$(BuildNativeExitCode)' != '0'" Text="An error occured when building native project." />
+
+  </Target>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(Directory.Build.targets))" />
+
+  <!-- Target that builds all the native binaries in the Native folder -->
+  <Target Name="Build" DependsOnTargets="BuildNativeUnix" />
+</Project>

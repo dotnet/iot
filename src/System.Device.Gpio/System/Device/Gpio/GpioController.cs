@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +11,7 @@ namespace System.Device.Gpio
     /// <summary>
     /// Represents a general-purpose I/O (GPIO) controller.
     /// </summary>
-    public sealed partial class GpioController : IDisposable
+    public sealed partial class GpioController : IGpioController
     {
         private readonly GpioDriver _driver;
         private readonly HashSet<int> _openPins;
@@ -203,8 +201,10 @@ namespace System.Device.Gpio
         /// <returns>A structure that contains the result of the waiting operation.</returns>
         public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
-            return WaitForEvent(pinNumber, eventTypes, tokenSource.Token);
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource(timeout))
+            {
+                return WaitForEvent(pinNumber, eventTypes, tokenSource.Token);
+            }
         }
 
         /// <summary>
@@ -231,10 +231,12 @@ namespace System.Device.Gpio
         /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="timeout">The time to wait for the event.</param>
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation.</returns>
-        public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
+        public async ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
-            return WaitForEventAsync(pinNumber, eventTypes, tokenSource.Token);
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource(timeout))
+            {
+                return await WaitForEventAsync(pinNumber, eventTypes, tokenSource.Token).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -298,6 +300,31 @@ namespace System.Device.Gpio
         public void Dispose()
         {
             Dispose(true);
+        }
+
+        /// <summary>
+        /// Write the given pins with the given values.
+        /// </summary>
+        /// <param name="pinValuePairs">The pin/value pairs to write.</param>
+        public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
+        {
+            for (int i = 0; i < pinValuePairs.Length; i++)
+            {
+                Write(pinValuePairs[i].PinNumber, pinValuePairs[i].PinValue);
+            }
+        }
+
+        /// <summary>
+        /// Read the given pins with the given pin numbers.
+        /// </summary>
+        /// <param name="pinValuePairs">The pin/value pairs to read.</param>
+        public void Read(Span<PinValuePair> pinValuePairs)
+        {
+            for (int i = 0; i < pinValuePairs.Length; i++)
+            {
+                int pin = pinValuePairs[i].PinNumber;
+                pinValuePairs[i] = new PinValuePair(pin, Read(pin));
+            }
         }
     }
 }

@@ -12,7 +12,13 @@
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.3.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.10.0" />
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <!-- Normally package reference should be used: -->
+    <!-- <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" /> -->
+    <!-- We use project reference in our repository -->
+    <!-- so that our build breaks immediately and not on the next day when the official build happens -->
+    <ProjectReference Include="..\..\src\System.Device.Gpio\System.Device.Gpio.csproj">
+      <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>

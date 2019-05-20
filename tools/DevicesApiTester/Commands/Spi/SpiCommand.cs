@@ -30,7 +30,7 @@ namespace DeviceApiTester.Commands.Spi
 
         protected SpiDevice CreateSpiDevice(SpiConnectionSettings connectionSettings)
         {
-            return DriverFactory.CreateFromEnum<SpiDevice, SpiDriverType>(this.Device, connectionSettings);
+            return DriverFactory.CreateFromEnum<SpiDevice, SpiDriverType>(Device, connectionSettings);
         }
     }
 }

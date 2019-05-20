@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <Compile Include="Bh1750fvi.cs" />
+    <Compile Include="Command.cs" />
+    <Compile Include="I2cAddress.cs" />
+    <Compile Include="MeasuringMode.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="README.md" />
+    <None Remove="sensor.jpg" />
+  </ItemGroup>
+</Project>

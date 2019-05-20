@@ -5,31 +5,35 @@
 using System;
 using System.Diagnostics;
 using System.Device.Gpio;
-using System.Device.I2c;
-using System.Device.I2c.Drivers;
-using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using System.Threading;
 
 namespace Iot.Device.Hcsr04
 {
-    public class Sonar : IDisposable
+    public class Hcsr04 : IDisposable
     {
         private readonly int _echo;
         private readonly int _trigger;
         private GpioController _controller;
         private Stopwatch _timer = new Stopwatch();
 
+        private int _lastMeasurment = 0;
+
+        /// <summary>
+        /// Gets the current distance in cm.
+        /// </summary>
+        public double Distance => GetDistance();
+
         /// <summary>
         /// Creates a new instance of the HC-SCR04 sonar.
         /// </summary>
         /// <param name="triggerPin">Trigger pulse input.</param>
         /// <param name="echoPin">Trigger pulse output.</param>
-        public Sonar(int triggerPin, int echoPin)
+        /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
+        public Hcsr04(int triggerPin, int echoPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
         {
             _echo = echoPin;
             _trigger = triggerPin;
-            _controller = new GpioController();
+            _controller = new GpioController(pinNumberingScheme);
 
             _controller.OpenPin(_echo, PinMode.Input);
             _controller.OpenPin(_trigger, PinMode.Output);
@@ -40,32 +44,39 @@ namespace Iot.Device.Hcsr04
         /// <summary>
         /// Gets the current distance in cm.
         /// </summary>
-        public double GetDistance()
+        private double GetDistance()
         {
             _timer.Reset();
 
             // Trigger input for 10uS to start ranging
             // ref https://components101.com/sites/default/files/component_datasheet/HCSR04%20Datasheet.pdf
+            while (Environment.TickCount - _lastMeasurment < 60)
+            {
+                Thread.Sleep(TimeSpan.FromMilliseconds(Environment.TickCount - _lastMeasurment));
+            }
+
             _controller.Write(_trigger, PinValue.High);
             Thread.Sleep(TimeSpan.FromMilliseconds(0.01));
             _controller.Write(_trigger, PinValue.Low);
-            
-            _timer.Start();
-            
+
             while(_controller.Read(_echo) == PinValue.Low)
             {
             }
+
+            _lastMeasurment = Environment.TickCount;
+
+            _timer.Start();
 
             while(_controller.Read(_echo) == PinValue.High)
             {
             }
 
             _timer.Stop();
-            
+
             TimeSpan elapsed = _timer.Elapsed;
 
             // distance = (time / 2) × velocity of sound (34300 cm/s)
-            return (double)(elapsed.TotalMilliseconds * 34.3) / 2 - 8;
+            return elapsed.TotalMilliseconds / 2.0 * 34.3;
         }
 
         public void Dispose()
