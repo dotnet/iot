@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
-    <SystemDeviceGpioPackageVersion>0.1.0-prerelease.19267.1</SystemDeviceGpioPackageVersion>
-    <IotDeviceBindingsPackageVersion>0.1.0-prerelease.19267.1</IotDeviceBindingsPackageVersion>
+    <SystemDeviceGpioPackageVersion>0.1.0-prerelease.19270.2</SystemDeviceGpioPackageVersion>
+    <IotDeviceBindingsPackageVersion>0.1.0-prerelease.19270.2</IotDeviceBindingsPackageVersion>
   </PropertyGroup>
 </Project>
