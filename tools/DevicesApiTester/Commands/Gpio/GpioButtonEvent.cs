@@ -23,8 +23,8 @@ namespace DeviceApiTester.Commands.Gpio
         [Option('p', "pressed-value", HelpText = "The value of the GPIO pin when the button is pressed: { Rising | Falling }", Required = false, Default = PinEventTypes.Rising)]
         public PinEventTypes PressedValue { get; set; }
 
-        [Option("on-value", HelpText = "The value that turns the LED on: { High | Low }", Required = false, Default = PinValue.High)]
-        public PinValue OnValue { get; set; }
+        [Option("on-value", HelpText = "The value that turns the LED on: { 0 | 1 }", Required = false, Default = 1)]
+        public int OnValue { get; set; }
 
         /// <summary>Executes the command asynchronously.</summary>
         /// <returns>The command's exit code.</returns>
@@ -35,6 +35,11 @@ namespace DeviceApiTester.Commands.Gpio
         /// </remarks>
         public Task<int> ExecuteAsync()
         {
+            if (OnValue != 0)
+            {
+                OnValue = 1;
+            }
+
             if (LedPin != null)
             {
                 Console.WriteLine($"Driver={Driver}, Scheme={Scheme}, ButtonPin={ButtonPin}, LedPin={LedPin}, PressedValue={PressedValue}, OnValue={OnValue}");
@@ -111,9 +116,6 @@ namespace DeviceApiTester.Commands.Gpio
             }
         }
 
-        private PinValue OffValue
-        {
-            get { return OnValue == PinValue.High ? PinValue.Low : PinValue.High; }
-        }
+        private int OffValue => 1 - OnValue;
     }
 }

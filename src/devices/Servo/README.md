@@ -63,5 +63,5 @@ This will turn the servo motor using a 2 milliseconds pulse.
 
 ## Dependencies
 
-This class has a dependency on ```SoftPwm```. Please make user you add this software PWM in your project.
+This class has a dependency on ```SoftPwm```. Please make sure you add this software PWM in your project.
 

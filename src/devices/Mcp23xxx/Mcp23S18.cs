@@ -2,23 +2,30 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Device.Gpio;
 using System.Device.Spi;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public class Mcp23S18 : Mcp23x1x
+    /// <summary>
+    /// Driver for the Microchip MCP23s18 16-Bit I/O Expander with Open-Drain Outputs.
+    /// </summary>
+    public class Mcp23s18 : Mcp23x1x
     {
         /// <summary>
-        /// Initializes new instance of Mcp23S18 device.
-        /// A general purpose parallel I/O expansion for SPI applications.
+        /// Initializes a new instance of the Mcp23s18 device.
         /// </summary>
-        /// <param name="deviceAddress">The device address for the connection on the SPI bus.</param>
         /// <param name="spiDevice">The SPI device used for communication.</param>
-        /// <param name="reset">The output pin number that is connected to the hardware reset.</param>
-        /// <param name="interruptA">The input pin number that is connected to the interrupt for Port A (INTA).</param>
-        /// <param name="interruptB">The input pin number that is connected to the interrupt for Port B (INTB).</param>
-        public Mcp23S18(int deviceAddress, SpiDevice spiDevice, int reset = -1, int interruptA = -1, int interruptB = -1)
-            : base(new SpiAdapter(spiDevice, deviceAddress), deviceAddress, reset, interruptA, interruptB)
+        /// <param name="reset">
+        /// The output pin number that is connected to the hardware reset, if any. If specified the device
+        /// will start in a disabled state.
+        /// <param name="interruptA">The input pin number that is connected to the interrupt for Port A (INTA), if any.</param>
+        /// <param name="interruptB">The input pin number that is connected to the interrupt for Port B (INTB), if any.</param>
+        /// <param name="masterController">
+        /// The controller for the reset and interrupt pins. If not specified, the default controller will be used.
+        /// </param>
+        public Mcp23s18(SpiDevice spiDevice, int reset = -1, int interruptA = -1, int interruptB = -1, IGpioController masterController = null)
+            : base(new SpiAdapter(spiDevice, 0x20), reset, interruptA, interruptB, masterController)
         {
         }
     }

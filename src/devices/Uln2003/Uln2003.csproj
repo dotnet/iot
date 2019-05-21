@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <!--Disabling default items so samples source won't get build by the main library-->
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <Compile Include="Uln2003.cs" />
+    <Compile Include="StepperMode.cs" />
+  </ItemGroup>
+
+  <ItemGroup> 
+    <None Remove="README.md" />
+    <None Remove="SM28BYJ48.png" />
+  </ItemGroup>
+
+</Project>

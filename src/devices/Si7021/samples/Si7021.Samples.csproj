@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Si7021.csproj" />
+  </ItemGroup>
+
+  <ItemGroup> 
+    <None Remove="Si7021_I2c_Read_Temp_Humidity.fzz" />
+    <None Remove="Si7021_I2c_Read_Temp_Humidity.png" />
+    <None Remove="README.md" />
+    <None Remove="RunningResult.jpg" />
+  </ItemGroup>
+</Project>

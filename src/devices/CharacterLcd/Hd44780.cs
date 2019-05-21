@@ -3,10 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
+using System.Device;
 using System.Device.Gpio;
-using System.Diagnostics;
 using System.Drawing;
-using System.Threading;
 
 namespace Iot.Device.CharacterLcd
 {
@@ -17,7 +17,7 @@ namespace Iot.Device.CharacterLcd
     /// <remarks>
     /// The Hitatchi HD44780 was released in 1987 and set the standard for LCD controllers. Hitatchi does not make this chipset anymore, but
     /// most character LCD drivers are intended to be fully compatible with this chipset. Some examples: Sunplus SPLC780D, Sitronix ST7066U,
-    /// Samsung KS0066U (and many more).
+    /// Samsung KS0066U, Aiptek AIP31066, and many more.
     /// 
     /// Some compatible chips extend the HD44780 with addtional pins and features. They are still fully compatible. The ST7036 is one example.
     /// 
@@ -25,50 +25,21 @@ namespace Iot.Device.CharacterLcd
     /// </remarks>
     public class Hd44780 : IDisposable
     {
-        private const byte ClearDisplayCommand = 0b_0001;
-        private const byte ReturnHomeCommand   = 0b_0010;
+        private bool _disposed;
 
-        private const byte SetCGRamAddressCommand = 0b_0100_0000;
-        private const byte SetDDRamAddressCommand = 0b_1000_0000;
+        protected const byte ClearDisplayCommand = 0b_0001;
+        protected const byte ReturnHomeCommand = 0b_0010;
 
-        /// <summary>
-        /// Register select pin. Low is for writing to the instruction
-        /// register and reading the address counter. High is for reading
-        /// and writing to the data register.
-        /// </summary>
-        private readonly int _rsPin;
+        protected const byte SetCGRamAddressCommand = 0b_0100_0000;
+        protected const byte SetDDRamAddressCommand = 0b_1000_0000;
 
-        /// <summary>
-        /// Read/write pin. Low for write, high for read.
-        /// </summary>
-        private readonly int _rwPin;
+        internal DisplayFunction _displayFunction = DisplayFunction.Command;
+        internal DisplayControl _displayControl = DisplayControl.Command;
+        internal DisplayEntryMode _displayMode = DisplayEntryMode.Command;
 
-        /// <summary>
-        /// Enable pin. Pulse high to process a read/write.
-        /// </summary>
-        private readonly int _enablePin;
+        protected readonly byte[] _rowOffsets;
 
-        private readonly int _backlight;
-
-        private readonly int[] _dataPins;
-
-        private IGpioController _controller;
-
-        private DisplayFunction _displayFunction = DisplayFunction.Command;
-        private DisplayControl _displayControl = DisplayControl.Command;
-        private DisplayEntryMode _displayMode = DisplayEntryMode.Command;
-
-        private readonly byte[] _rowOffsets;
-        private Stopwatch _stopwatch = new Stopwatch();
-        private byte _lastByte;
-        private bool _useLastByte;
-
-        private (int pin, PinValue value)[] _pinBuffer = new (int, PinValue)[8];
-
-        // We need to add PWM support to make this useful (to drive the VO pin).
-        // For now we'll just stash the value and use it to decide the initial
-        // backlight state.
-        private float _backlightBrightness;
+        protected readonly LcdInterface _interface;
 
         /// <summary>
         /// Logical size, in characters, of the LCD.
@@ -76,61 +47,67 @@ namespace Iot.Device.CharacterLcd
         public Size Size { get; }
 
         /// <summary>
-        /// The command wait time multiplier for the LCD.
-        /// </summary>
-        /// <remarks>
-        /// Timings are based off the original HD44780 specification, which dates back
-        /// to the late 1980s. Modern LCDs can often respond faster. In addition we spend
-        /// time in other code between pulsing in new data, which gives quite a bit of
-        /// headroom over the by-the-book waits.
-        /// 
-        /// This is more useful if you have a slow GpioAdapter as time spent in the
-        /// adapter may eat into the need to wait as long for a command to complete.
-        /// 
-        /// There is a busy signal that can be checked that could make this moot, but
-        /// currently we are unable to check the signal fast enough to make gains (or
-        /// even equal) going off hard timings. The busy signal also requires having a
-        /// r/w pin attached. And lastly, as already stated, it takes time to set up
-        /// for another byte of data to be pulsed in.
-        /// </remarks>
-        public double TimingMultiplier { get; set; } = 1.0;
-
-        /// <summary>
         /// Initializes a new HD44780 LCD controller.
         /// </summary>
-        /// <param name="registerSelect">The pin that controls the regsiter select.</param>
-        /// <param name="enable">The pin that controls the enable switch.</param>
-        /// <param name="data">Collection of pins holding the data that will be printed on the screen.</param>
         /// <param name="size">The logical size of the LCD.</param>
-        /// <param name="backlight">The optional pin that controls the backlight of the display.</param>
-        /// <param name="backlightBrightness">The brightness of the backlight. 0.0 for off, 1.0 for on.</param>
-        /// <param name="readWrite">The optional pin that controls the read and write switch.</param>
-        /// <param name="controller">The controller to use with the LCD. If not specified, uses the platform default.</param>
-        public Hd44780(int registerSelect, int enable, int[] data, Size size, int backlight = -1, float backlightBrightness = 1.0f, int readWrite = -1, IGpioController controller = null)
+        /// <param name="interface">The interface to use with the LCD.</param>
+        public Hd44780(Size size, LcdInterface @interface)
         {
-            _rwPin = readWrite;
-            _rsPin = registerSelect;
-            _enablePin = enable;
-            _dataPins = data;
-            _backlight = backlight;
-            _backlightBrightness = backlightBrightness;
-
             Size = size;
+            _interface = @interface;
 
-            _rowOffsets = InitializeRowOffsets(size.Height);
-
-            if (data.Length == 8)
-            {
+            if (_interface.EightBitMode)
                 _displayFunction |= DisplayFunction.EightBit;
-            }
-            else if (data.Length != 4)
-            {
-                throw new ArgumentException($"The length of the array given to parameter {nameof(data)} must be 4 or 8");
-            }
 
-            _controller = controller ?? new GpioControllerAdapter(new GpioController(PinNumberingScheme.Logical));
             Initialize(size.Height);
+            _rowOffsets = InitializeRowOffsets(size.Height);
         }
+
+        /// <summary>
+        /// Initializes the display by setting the specified columns and lines.
+        /// </summary>
+        private void Initialize(int rows)
+        {
+            // While the chip supports 5x10 pixel characters for one line displays they
+            // don't seem to be generally available. Supporting 5x10 would require extra
+            // support for CreateCustomCharacter
+
+            if (SetTwoLineMode(rows))
+                _displayFunction |= DisplayFunction.TwoLine;
+
+            _displayControl |= DisplayControl.DisplayOn;
+            _displayMode |= DisplayEntryMode.Increment;
+
+            ReadOnlySpan<byte> commands = stackalloc byte[]
+            {
+                // Function must be set first to ensure that we always have the basic
+                // instruction set selected. (See PCF2119x datasheet Function_set note
+                // for one documented example of where this is necessary.)
+                (byte)_displayFunction,
+                (byte)_displayControl,
+                (byte)_displayMode,
+                ClearDisplayCommand
+            };
+
+            SendCommands(commands);
+        }
+
+        /// <summary>
+        /// Enable/disable the backlight. (Will always return false if no backlight pin was provided.)
+        /// </summary>
+        public virtual bool BacklightOn
+        {
+            get => _interface.BacklightOn;
+            set => _interface.BacklightOn = value;
+        }
+
+        protected void SendData(byte value) => _interface.SendData(value);
+        protected void SendCommand(byte command) => _interface.SendCommand(command);
+        protected void SendData(ReadOnlySpan<byte> values) => _interface.SendData(values);
+        protected void SendCommands(ReadOnlySpan<byte> commands) => _interface.SendCommands(commands);
+
+        protected virtual bool SetTwoLineMode(int rows) => rows > 1;
+
 
         protected virtual byte[] InitializeRowOffsets(int rows)
         {
@@ -149,8 +126,8 @@ namespace Iot.Device.CharacterLcd
             //
             //   First row:  0 - 19   [0x00 - 0x13]
             //   Second row: 64 - 83  [0x40 - 0x53]
-            //   Third row:  20 - 39  [0x14 - 0x27]
-            //   Fourth row: 84 - 103 [0x54 - 0x67]
+            //   Third row:  20 - 39  [0x14 - 0x27]  (Continues first row)
+            //   Fourth row: 84 - 103 [0x54 - 0x67]  (Continues second row)
 
             byte[] rowOffsets;
 
@@ -174,96 +151,13 @@ namespace Iot.Device.CharacterLcd
             return rowOffsets;
         }
 
-        protected virtual bool SetTwoLineMode(int rows) => rows > 1;
-
-        public void Dispose()
-        {
-            if (_controller != null)
-            {
-                _controller.Dispose();
-                _controller = null;
-            }
-        }
-
         /// <summary>
-        /// Initializes the display by setting the specified columns and lines.
+        /// Wait for the device to not be busy.
         /// </summary>
-        private void Initialize(int rows)
+        /// <param name="microseconds">Time to wait if checking busy state isn't possible/practical.</param>
+        protected void WaitForNotBusy(int microseconds)
         {
-            // While the chip supports 5x10 pixel characters for one line displays they
-            // don't seem to be generally available. Supporting 5x10 would require extra
-            // support for CreateCustomCharacter
-
-            if (SetTwoLineMode(rows))
-                _displayFunction |= DisplayFunction.TwoLine;
-
-            _displayControl |= DisplayControl.DisplayOn;
-            _displayMode |= DisplayEntryMode.Increment;
-
-            // Prep the pins
-            _controller.OpenPin(_rsPin, PinMode.Output);
-
-            if (_rwPin != -1)
-            {
-                _controller.OpenPin(_rwPin, PinMode.Output);
-            }
-            if (_backlight != -1)
-            {
-                _controller.OpenPin(_backlight, PinMode.Output);
-                if (_backlightBrightness > 0)
-                {
-                    // Turn on the backlight
-                    _controller.Write(_backlight, PinValue.High);
-                }
-            }
-            _controller.OpenPin(_enablePin, PinMode.Output);
-
-            for (int i = 0; i < _dataPins.Length; ++i)
-            {
-                _controller.OpenPin(_dataPins[i], PinMode.Output);
-            }
-
-            // The HD44780 self-initializes when power is turned on to the following settings:
-            // 
-            //  - 8 bit, 1 line, 5x7 font
-            //  - Display, cursor, and blink off
-            //  - Increment with no shift
-            //
-            // It is possible that the initialization will fail if the power is not provided
-            // within specific tolerances. As such, we'll always perform the software based
-            // initialization as described on pages 45/46 of the HD44780 data sheet. We give
-            // a little extra time to the required waits.
-
-            if (_dataPins.Length == 8)
-            {
-                // Init to 8 bit mode
-                DelayMicroseconds(50_000, checkBusy: false);
-                Send(0b0011_0000);
-                DelayMicroseconds(5_000, checkBusy: false);
-                Send(0b0011_0000);
-                DelayMicroseconds(100, checkBusy: false);
-                Send(0b0011_0000);
-            }
-            else
-            {
-                // Init to 4 bit mode, setting _rspin to low as we're writing 4 bits directly.
-                // (Send writes the whole byte in two 4bit/nybble chunks)
-                _controller.Write(_rsPin, PinValue.Low);
-                DelayMicroseconds(50_000, checkBusy: false);
-                WriteBits(0b0011, 4);
-                DelayMicroseconds(5_000, checkBusy: false);
-                WriteBits(0b0011, 4);
-                DelayMicroseconds(100, checkBusy: false);
-                WriteBits(0b0011, 4);
-                WriteBits(0b0010, 4);
-            }
-
-            // The busy flag cannot be checked until this point.
-
-            Send((byte)_displayFunction);
-            Send((byte)_displayControl);
-            Send((byte)_displayMode);
-            Clear();
+            _interface.WaitForNotBusy(microseconds);
         }
 
         /// <summary>
@@ -272,17 +166,25 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         public void Clear()
         {
-            Send(ClearDisplayCommand);
-            DelayMicroseconds(3000);
+            SendCommand(ClearDisplayCommand);
+
+            // The HD44780 spec doesn't call out how long this takes. Home is documented as
+            // taking 1.52ms, and as this does more work (sets all memory to the space character)
+            // we do a longer wait. On the PCF2119x it is described as taking 165 clock cycles which
+            // would be 660μs on the "typical" clock.
+            WaitForNotBusy(2000);
         }
 
         /// <summary>
-        /// Moves the cursor to the first line and first column.
+        /// Moves the cursor to the first line and first column, unshifting if shifted.
         /// </summary>
         public void Home()
         {
-            Send(ReturnHomeCommand);
-            DelayMicroseconds(3000);
+            SendCommand(ReturnHomeCommand);
+
+            // The return home command is documented as taking 1.52ms with the standard 270KHz clock.
+            // SendCommand already waits for 37μs, 
+            WaitForNotBusy(1520);
         }
 
         /// <summary>
@@ -296,11 +198,15 @@ namespace Iot.Device.CharacterLcd
             if (top < 0 || top >= rows)
                 throw new ArgumentOutOfRangeException(nameof(top));
 
+            // Throw if we're given a negative left value or the calculated address would be
+            // larger than the max "good" address. Addressing is covered in detail in
+            // InitializeRowOffsets above.
+
             int newAddress = left + _rowOffsets[top];
             if (left < 0 || (rows == 1 && newAddress >= 80) || (rows > 1 && newAddress >= 104))
                 throw new ArgumentOutOfRangeException(nameof(left));
 
-            Send((byte)(SetDDRamAddressCommand | newAddress));
+            SendCommand((byte)(SetDDRamAddressCommand | newAddress));
         }
 
         /// <summary>
@@ -309,24 +215,8 @@ namespace Iot.Device.CharacterLcd
         public bool DisplayOn
         {
             get => (_displayControl & DisplayControl.DisplayOn) > 0;
-            set => Send((byte)(value ? _displayControl |= DisplayControl.DisplayOn
+            set => SendCommand((byte)(value ? _displayControl |= DisplayControl.DisplayOn
                 : _displayControl &= ~DisplayControl.DisplayOn));
-        }
-
-        /// <summary>
-        /// Enable/disable the backlight. (Will always return false if no backlight pin was provided.)
-        /// </summary>
-        public bool BacklightOn
-        {
-            get
-            {
-                return _backlight != -1 && _controller.Read(_backlight) == PinValue.High;
-            }
-            set
-            {
-                if (_backlight != -1)
-                    _controller.Write(_backlight, value ? PinValue.High : PinValue.Low);
-            }
         }
 
         /// <summary>
@@ -335,7 +225,7 @@ namespace Iot.Device.CharacterLcd
         public bool UnderlineCursorVisible
         {
             get => (_displayControl & DisplayControl.CursorOn) > 0;
-            set => Send((byte)(value ? _displayControl |= DisplayControl.CursorOn
+            set => SendCommand((byte)(value ? _displayControl |= DisplayControl.CursorOn
                 : _displayControl &= ~DisplayControl.CursorOn));
         }
 
@@ -345,7 +235,7 @@ namespace Iot.Device.CharacterLcd
         public bool BlinkingCursorVisible
         {
             get => (_displayControl & DisplayControl.BlinkOn) > 0;
-            set => Send((byte)(value ? _displayControl |= DisplayControl.BlinkOn
+            set => SendCommand((byte)(value ? _displayControl |= DisplayControl.BlinkOn
                 : _displayControl &= ~DisplayControl.BlinkOn));
         }
 
@@ -355,7 +245,7 @@ namespace Iot.Device.CharacterLcd
         public bool AutoShift
         {
             get => (_displayMode & DisplayEntryMode.DisplayShift) > 0;
-            set => Send((byte)(value ? _displayMode |= DisplayEntryMode.DisplayShift
+            set => SendCommand((byte)(value ? _displayMode |= DisplayEntryMode.DisplayShift
                 : _displayMode &= ~DisplayEntryMode.DisplayShift));
         }
 
@@ -365,29 +255,29 @@ namespace Iot.Device.CharacterLcd
         public bool Increment
         {
             get => (_displayMode & DisplayEntryMode.Increment) > 0;
-            set => Send((byte)(value ? _displayMode |= DisplayEntryMode.Increment
+            set => SendCommand((byte)(value ? _displayMode |= DisplayEntryMode.Increment
                 : _displayMode &= ~DisplayEntryMode.Increment));
         }
 
         /// <summary>
         /// Move the display left one position.
         /// </summary>
-        public void ShiftDisplayLeft() => Send((byte)(DisplayShift.Command | DisplayShift.Display));
+        public void ShiftDisplayLeft() => SendCommand((byte)(DisplayShift.Command | DisplayShift.Display));
 
         /// <summary>
         /// Move the display right one position.
         /// </summary>
-        public void ShiftDisplayRight() => Send((byte)(DisplayShift.Command | DisplayShift.Display | DisplayShift.Right));
+        public void ShiftDisplayRight() => SendCommand((byte)(DisplayShift.Command | DisplayShift.Display | DisplayShift.Right));
 
         /// <summary>
         /// Move the cursor left one position.
         /// </summary>
-        public void ShiftCursorLeft() => Send((byte)(DisplayShift.Command | DisplayShift.Display));
+        public void ShiftCursorLeft() => SendCommand((byte)(DisplayShift.Command | DisplayShift.Display));
 
         /// <summary>
         /// Move the cursor right one position.
         /// </summary>
-        public void ShiftCursorRight() => Send((byte)(DisplayShift.Command | DisplayShift.Display | DisplayShift.Right));
+        public void ShiftCursorRight() => SendCommand((byte)(DisplayShift.Command | DisplayShift.Display | DisplayShift.Right));
 
         /// <summary>
         /// Fill one of the 8 CGRAM locations (character codes 0 - 7) with custom characters.
@@ -432,18 +322,28 @@ namespace Iot.Device.CharacterLcd
         /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
         public void CreateCustomCharacter(byte location, params byte[] characterMap)
         {
+            if (characterMap == null)
+                throw new ArgumentNullException(nameof(characterMap));
+
+            CreateCustomCharacter(location, characterMap.AsSpan());
+        }
+
+        /// <summary>
+        /// Fill one of the 8 CGRAM locations (character codes 0 - 7) with custom characters.
+        /// </summary>
+        /// <param name="location">Should be between 0 and 7</param>
+        /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
+        public void CreateCustomCharacter(byte location, ReadOnlySpan<byte> characterMap)
+        {
             if (location > 7)
                 throw new ArgumentOutOfRangeException(nameof(location));
 
             if (characterMap.Length != 8)
                 throw new ArgumentException(nameof(characterMap));
 
-            Send((byte)(SetCGRamAddressCommand | (location << 3)));
-
-            for (int i = 0; i < 8; i++)
-            {
-                Send(characterMap[i], data: true);
-            }
+            // The character address is set in bits 3-5 of the command byte
+            SendCommand((byte)(SetCGRamAddressCommand | (location << 3)));
+            SendData(characterMap);
         }
 
         /// <summary>
@@ -458,102 +358,30 @@ namespace Iot.Device.CharacterLcd
         /// <param name="value">Text to be displayed.</param>
         public void Write(string value)
         {
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(value.Length);
             for (int i = 0; i < value.Length; ++i)
             {
-                Send((byte)value[i], data: true);
+                buffer[i] = (byte)value[i];
+            }
+
+            SendData(new ReadOnlySpan<byte>(buffer, 0, value.Length));
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _interface?.Dispose();
             }
         }
 
-        /// <summary>
-        /// Send a data or command byte to the controller.
-        /// </summary>
-        /// <param name="data">True to send data, otherwise sends a command.</param>
-        private void Send(byte value, bool data = false)
+        public void Dispose()
         {
-            _controller.Write(_rsPin, data ? PinValue.High : PinValue.Low);
-
-            if (_rwPin != -1)
+            if (!_disposed)
             {
-                _controller.Write(_rwPin, PinValue.Low);
-            }
-
-            if (_dataPins.Length == 8)
-            {
-                WriteBits(value, 8);
-            }
-            else
-            {
-                WriteBits((byte)(value >> 4), 4);
-                WriteBits(value, 4);
-            }
-
-            // Most commands need a maximum of 37μs to complete.
-            // This is based on a 270kHz clock in the documentation.
-            // (See page 25.)
-            DelayMicroseconds(37);
-        }
-
-        private void WriteBits(byte value, int count)
-        {
-            PinValue ToPinValue(int bit) => (bit == 1) ? PinValue.High : PinValue.Low;
-
-            int changedCount = 0;
-            for (int i = 0; i < count; i++)
-            {
-                int newBit = (value >> i) & 1;
-                if (!_useLastByte)
-                {
-                    _pinBuffer[changedCount++] = (_dataPins[i], ToPinValue(newBit));
-                }
-                else
-                {
-                    // Each bit change takes ~23μs, so only change what we have to
-                    // This is particularly impactful when using all 8 data lines.
-                    int oldBit = (_lastByte >> i) & 1;
-                    if (oldBit != newBit)
-                    {
-                        _pinBuffer[changedCount++] = (_dataPins[i], ToPinValue(newBit));
-                    }
-                }
-            }
-
-            if (changedCount > 0)
-                _controller.Write(new ReadOnlySpan<(int, PinValue)>(_pinBuffer, 0, changedCount));
-
-            _useLastByte = true;
-            _lastByte = value;
-
-            // Enable pin needs to be high for at least 450ns when running on 3V
-            // and 230ns on 5V. (PWeh on page 49/52 and Figure 25 on page 58)
-
-            _controller.Write(_enablePin, PinValue.High);
-            DelayMicroseconds(1);
-            _controller.Write(_enablePin, PinValue.Low);
-        }
-
-        private void DelayMicroseconds(int microseconds, bool checkBusy = true)
-        {
-            _stopwatch.Restart();
-
-            // While we could check for the busy state it isn't currently practical.
-            // Most commands need a maximum of 37μs to complete. Reading the busy flag
-            // alone takes ~200μs (on the Pi). Prepping the pins and reading once can take
-            // nearly a millisecond, which clearly is not going to be performant.
-            // 
-            // Leaving the flag here to make sure calling code is describing when it
-            // cannot actually check the busy state should we be able to get performance
-            // to the point where checking would be a net benefit.
-
-            // Note that on a Raspberry Pi 3B+ we average about 1.5μs when delaying for one μs.
-            // 
-            // SpinWait currently spins to approximately 1μs before it will yield the thread.
-            // Thread.Yield() takes around 1.2μs. This gives us a fidelity of microseconds to
-            // microseconds + 1.4.
-            SpinWait spinWait = new SpinWait();
-            long v = (long)(((microseconds * Stopwatch.Frequency) / 1_000_000) * TimingMultiplier);
-            while (_stopwatch.ElapsedTicks < v)
-            {
-                spinWait.SpinOnce();
+                Dispose(true);
+               _disposed = true;
             }
         }
     }

@@ -10,7 +10,7 @@ namespace System.Device.Pwm.Drivers
     /// <summary>
     /// A PWM driver for Windows 10 IoT.
     /// </summary>
-    internal class Windows10PwmDriver : PwmDriver
+    public class Windows10PwmDriver : PwmDriver
     {
         private readonly Dictionary<int, Windows10PwmDriverChip> _chipMap = new Dictionary<int, Windows10PwmDriverChip>();
         private readonly bool _useDefaultChip;
