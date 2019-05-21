@@ -1,7 +1,15 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
+using System.Device.I2c;
+using System.Device.I2c.Drivers;
 using System.Diagnostics;
+using System.Drawing;
 using System.Text;
 using System.Timers;
+using Iot.Device.Mcp23xxx;
 
 namespace Iot.Device.CharacterLcd.Samples
 {
@@ -13,7 +21,7 @@ namespace Iot.Device.CharacterLcd.Samples
         const string Fourty = Thirty + "123456789\u000b";
         const string Eighty = Fourty + "123456789\u000c123456789\u000d123456789\u000e123456789\u000f";
 
-        static void Main()
+        public static void SampleEntryPoint()
         {
             Console.WriteLine("Starting...");
 
