@@ -53,7 +53,7 @@ namespace Iot.Device.Ds3231
 
             return new DateTime(rawData[5] >> 7 == 1 ? 2000 + Bcd2Int(rawData[6]) : 1900 + Bcd2Int(rawData[6]),
                                 Bcd2Int((byte)(rawData[5] & 0b_0001_1111)),
-                                Bcd2Int(rawData[3]),
+                                Bcd2Int(rawData[4]),
                                 Bcd2Int(rawData[2]),
                                 Bcd2Int(rawData[1]),
                                 Bcd2Int(rawData[0]));
