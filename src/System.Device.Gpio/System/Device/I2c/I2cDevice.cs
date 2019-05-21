@@ -44,6 +44,8 @@ namespace System.Device.I2c
         /// </param>
         public abstract void Write(ReadOnlySpan<byte> buffer);
 
+        public abstract void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer);
+
         public void Dispose()
         {
             Dispose(true);

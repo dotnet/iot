@@ -214,6 +214,22 @@ namespace System.Device.I2c.Drivers
             }
         }
 
+        public override unsafe void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            if (readBuffer.Length == 0)
+                throw new ArgumentException($"{nameof(readBuffer)} cannot be empty.");
+
+            Initialize();
+
+            fixed (byte* writeBufferPointer = writeBuffer)
+            {
+                fixed (byte* readBufferPointer = readBuffer)
+                {
+                    Transfer(writeBufferPointer, readBufferPointer, writeBuffer.Length, readBuffer.Length);
+                }
+            }
+        }
+
         public override void Dispose(bool disposing)
         {
             if (_deviceFileDescriptor >= 0)

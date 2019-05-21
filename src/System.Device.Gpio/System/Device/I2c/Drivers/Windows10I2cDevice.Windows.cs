@@ -94,6 +94,16 @@ namespace System.Device.I2c.Drivers
             _winI2cDevice.Write(buffer.ToArray());
         }
 
+        public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            if (readBuffer.Length == 0)
+                throw new ArgumentException($"{nameof(readBuffer)} cannot be empty.");
+
+            byte[] byteArray = new byte[readBuffer.Length];
+            _winI2cDevice.WriteRead(writeBuffer.ToArray(), byteArray);
+            new Span<byte>(byteArray).CopyTo(readBuffer);
+        }
+
         public override void Dispose(bool disposing)
         {
             _winI2cDevice?.Dispose();
