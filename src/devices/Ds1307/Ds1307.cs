@@ -39,18 +39,18 @@ namespace Iot.Device.Ds1307
         /// <returns>DS1307 Time</returns>
         private DateTime ReadTime()
         {
-            Span<byte> rawData = stackalloc byte[7];
+            Span<byte> readBuffer = stackalloc byte[7];
 
             _sensor.WriteByte((byte)Register.RTC_SEC_REG_ADDR);
-            _sensor.Read(rawData);
+            _sensor.Read(readBuffer);
 
             // Details in the Datasheet P8
-            return new DateTime(2000 + Bcd2Int(rawData[6]), 
-                                Bcd2Int(rawData[5]), 
-                                Bcd2Int(rawData[4]), 
-                                Bcd2Int(rawData[2]),
-                                Bcd2Int(rawData[1]), 
-                                Bcd2Int((byte)(rawData[0] & 0b_0111_1111)));
+            return new DateTime(2000 + Bcd2Int(readBuffer[6]), 
+                                Bcd2Int(readBuffer[5]), 
+                                Bcd2Int(readBuffer[4]), 
+                                Bcd2Int(readBuffer[2]),
+                                Bcd2Int(readBuffer[1]), 
+                                Bcd2Int((byte)(readBuffer[0] & 0b_0111_1111)));
         }
 
         /// <summary>
@@ -59,22 +59,22 @@ namespace Iot.Device.Ds1307
         /// <param name="time">Time</param>
         private void SetTime(DateTime time)
         {
-            Span<byte> setData = stackalloc byte[8];
+            Span<byte> writeBuffer = stackalloc byte[8];
 
-            setData[0] = (byte)Register.RTC_SEC_REG_ADDR;
+            writeBuffer[0] = (byte)Register.RTC_SEC_REG_ADDR;
 
             // Details in the Datasheet P8
             // | bit 7: CH | bit 6-0: sec |
-            setData[1] = (byte)(Int2Bcd(time.Second) & 0b_0111_1111);
-            setData[2] = Int2Bcd(time.Minute);
+            writeBuffer[1] = (byte)(Int2Bcd(time.Second) & 0b_0111_1111);
+            writeBuffer[2] = Int2Bcd(time.Minute);
             // | bit 7: 0 | bit 6: 12/24 hour | bit 5-0: hour |
-            setData[3] = (byte)(Int2Bcd(time.Hour) & 0b_0011_1111);
-            setData[4] = Int2Bcd((int)time.DayOfWeek + 1);
-            setData[5] = Int2Bcd(time.Day);
-            setData[6] = Int2Bcd(time.Month);
-            setData[7] = Int2Bcd(time.Year - 2000);
+            writeBuffer[3] = (byte)(Int2Bcd(time.Hour) & 0b_0011_1111);
+            writeBuffer[4] = Int2Bcd((int)time.DayOfWeek + 1);
+            writeBuffer[5] = Int2Bcd(time.Day);
+            writeBuffer[6] = Int2Bcd(time.Month);
+            writeBuffer[7] = Int2Bcd(time.Year - 2000);
 
-            _sensor.Write(setData);
+            _sensor.Write(writeBuffer);
         }
 
         /// <summary>
