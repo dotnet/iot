@@ -41,6 +41,7 @@ namespace Iot.Device.Ds1307
         {
             Span<byte> readBuffer = stackalloc byte[7];
 
+            // Read all registers at the same time
             _sensor.WriteByte((byte)Register.RTC_SEC_REG_ADDR);
             _sensor.Read(readBuffer);
 
