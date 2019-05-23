@@ -23,7 +23,7 @@ namespace System.Device.Gpio.Drivers
         private int _pollFileDescriptor = -1;
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
-        private readonly static CancellationTokenSource s_eventThreadCancellationTokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource s_eventThreadCancellationTokenSource;
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
         private readonly int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
@@ -50,6 +50,11 @@ namespace System.Device.Gpio.Drivers
                 }
             }
             return 0;
+        }
+
+        public SysFsDriver()
+        {
+            s_eventThreadCancellationTokenSource = new CancellationTokenSource();
         }
 
         /// <summary>
@@ -445,7 +450,10 @@ namespace System.Device.Gpio.Drivers
             {
                 if (cancelEventDetectionThread)
                 {
-                    s_eventThreadCancellationTokenSource.Cancel();
+                    try
+                    {
+                        s_eventThreadCancellationTokenSource.Cancel();
+                    } catch (ObjectDisposedException) { }
                     while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                     {
                         Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
@@ -462,8 +470,11 @@ namespace System.Device.Gpio.Drivers
             _pinsToDetectEventsCount = 0;
             if (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
             {
-                s_eventThreadCancellationTokenSource.Cancel();
-                s_eventThreadCancellationTokenSource.Dispose();
+                try
+                {
+                    s_eventThreadCancellationTokenSource.Cancel();
+                    s_eventThreadCancellationTokenSource.Dispose();
+                } catch (ObjectDisposedException) { } //The Cancellation Token source may already be disposed.
                 while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                 {
                     Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
@@ -528,12 +539,19 @@ namespace System.Device.Gpio.Drivers
         {
             while (_pinsToDetectEventsCount > 0)
             {
-                bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, s_eventThreadCancellationTokenSource.Token);
-                if (eventDetected)
+                try
                 {
-                    PinEventTypes eventTypes = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
-                    var args = new PinValueChangedEventArgs(eventTypes, pinNumber);
-                    _devicePins[pinNumber]?.OnPinValueChanged(args, GetPinEventsToDetect(pinNumber));
+                    bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, s_eventThreadCancellationTokenSource.Token);
+                    if (eventDetected)
+                    {
+                        Thread.Sleep(1); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
+                        PinEventTypes eventTypes = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                        var args = new PinValueChangedEventArgs(eventTypes, pinNumber);
+                        _devicePins[pinNumber]?.OnPinValueChanged(args);
+                    }
+                } catch (ObjectDisposedException)
+                {
+                    break; //If cancellation token source is dispossed then we need to exit this thread.
                 }
             }
 
