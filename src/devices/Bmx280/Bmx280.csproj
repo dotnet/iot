@@ -16,6 +16,7 @@
     <Compile Include="Register.cs" />
     <Compile Include="Sampling.cs" />
     <Compile Include="DeviceStatus.cs" />
+    <Compile Include="StandbyTime.cs" />
     <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <ProjectReference Include="..\Units\Units.csproj" />
   </ItemGroup>

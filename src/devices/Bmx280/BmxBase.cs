@@ -390,6 +390,48 @@ namespace Iot.Device.Bmx280
         }
 
         /// <summary>
+        /// Sets the standby time mode the device will used when operating in normal mode.
+        /// </summary>
+        /// <param name="standbyTime"></param>
+        public void SetStandbyTime(StandbyTime standbyTime)
+        {
+            byte current = Read8BitsFromRegister((byte)Register.CONFIG);
+            current = (byte)((current & 0b0001_1111) | (byte)standbyTime << 5);
+            _i2cDevice.Write(new[] { (byte)Register.CONFIG, current });
+        }
+
+        /// <summary>
+        /// Reads the currently configured standby time mode the device will used when operating in normal mode.
+        /// </summary>
+        /// <returns></returns>
+        public StandbyTime ReadStandbyTime()
+        {
+            byte current = Read8BitsFromRegister((byte)Register.CONFIG);
+            var time = (byte)((current & 0b1110_0000) >> 5);
+            switch (time)
+            {
+                case 0b000:
+                    return StandbyTime.Ms0_5;
+                case 0b001:
+                    return StandbyTime.Ms62_5;
+                case 0b010:
+                    return StandbyTime.Ms125;
+                case 0b011:
+                    return StandbyTime.Ms250;
+                case 0b100:
+                    return StandbyTime.Ms500;
+                case 0b101:
+                    return StandbyTime.Ms1000;
+                case 0b110:
+                    return StandbyTime.Ms10;
+                case 0b111:
+                    return StandbyTime.Ms20;
+                default:
+                    throw new NotImplementedException($"Value read from registers {time:x2} was not defined by specifications.");
+            }
+        }
+
+        /// <summary>
         ///  Reads an 8 bit value from a register
         /// </summary>
         /// <param name="register">
