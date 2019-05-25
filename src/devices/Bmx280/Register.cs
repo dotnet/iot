@@ -5,7 +5,7 @@
 namespace Iot.Device.Bmx280
 {
     /// <summary>
-    ///  Register
+    /// Bmx280 registers.
     /// </summary>
     internal enum Register : byte
     {
