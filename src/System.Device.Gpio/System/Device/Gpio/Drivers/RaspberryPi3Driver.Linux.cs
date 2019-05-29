@@ -67,6 +67,7 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
+            Thread.Sleep(100);
             _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
             _sysFSDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
@@ -147,6 +148,7 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
+            Thread.Sleep(100);
             _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
             _sysFSDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
@@ -270,6 +272,7 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
+            Thread.Sleep(100);
             _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
             return _sysFSDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
@@ -288,6 +291,7 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
+            Thread.Sleep(100);
             _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
             return _sysFSDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
