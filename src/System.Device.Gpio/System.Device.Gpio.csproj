@@ -3,6 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RuntimeIdentifiers>win;linux</RuntimeIdentifiers>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>preview</LangVersion>
     <!-- Only produce reference assembly in one of our inner builds -->
     <ProduceReferenceAssembly Condition="'$(TargetsLinux)' == 'true'">true</ProduceReferenceAssembly>
     <TargetRefPath>$(OutputPath)$(TargetFramework)\$(MSBuildProjectName).dll</TargetRefPath>

@@ -19,17 +19,13 @@ internal static partial class Interop
                 waitEvent.WaitOne();
             }
 
-            switch (operation.Status)
+            return operation.Status switch
             {
-                case AsyncStatus.Canceled:
-                    return default;
-                case AsyncStatus.Completed:
-                    return operation.GetResults();
-                case AsyncStatus.Error:
-                    throw operation.ErrorCode;
-                default:
-                    throw new InvalidOperationException($"Unexpected asynchronous operation state: {operation.Status}");
-            }
+                AsyncStatus.Canceled => default,
+                AsyncStatus.Completed => operation.GetResults(),
+                AsyncStatus.Error => throw operation.ErrorCode,
+                _ => throw new InvalidOperationException($"Unexpected asynchronous operation state: {operation.Status}")
+            };
         }
     }
 }
