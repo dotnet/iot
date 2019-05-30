@@ -99,6 +99,8 @@ namespace Iot.Device.Mcp23xxx.Tests
             public override void WriteByte(byte data) => throw new NotImplementedException();
 
             public override byte ReadByte() => throw new NotImplementedException();
+
+            public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer) => throw new NotImplementedException();
         }
 
         /// <summary>

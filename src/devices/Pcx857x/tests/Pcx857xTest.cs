@@ -62,6 +62,7 @@ namespace Iot.Device.Pcx857x.Tests
             // Don't need these
             public override void WriteByte(byte data) => DeviceMock.WriteByte(data);
             public override byte ReadByte() => DeviceMock.ReadByte();
+            public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer) => throw new NotImplementedException();
         }
 
         /// <summary>
