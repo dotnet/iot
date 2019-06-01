@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -21,40 +22,81 @@ namespace Iot.Device.SocketCan
             _handle = new SafeCanRawSocketHandle(networkInterface);
         }
 
-        public void WriteFrame(ref CanFrame frame)
+        public void WriteFrame(ReadOnlySpan<byte> data, CanId id)
         {
+            if (!id.IsValid)
+                throw new ArgumentException(nameof(id), "Id is not valid. Ensure Error flag is not set and that id is in the valid range (11-bit for standard frame and 29-bit for extended frame).");
+
+            if (data.Length > CanFrame.MaxLength)
+                throw new ArgumentException(nameof(data), $"Data length cannot exceed {CanFrame.MaxLength} bytes.");
+
+            CanFrame frame = new CanFrame();
+            frame.Id = id;
+            frame.Length = (byte)data.Length;
+            Debug.Assert(frame.IsValid);
+
+            unsafe
+            {
+                Span<byte> frameData = new Span<byte>(frame.Data, data.Length);
+                data.CopyTo(frameData);
+            }
+
             ReadOnlySpan<CanFrame> frameSpan = MemoryMarshal.CreateReadOnlySpan(ref frame, 1);
             ReadOnlySpan<byte> buff = MemoryMarshal.AsBytes(frameSpan);
             Interop.Write(_handle, buff);
         }
 
-        public void ReadFrame(ref CanFrame frame)
+        public bool TryReadFrame(Span<byte> buffer, out int frameLength, out CanId id)
         {
-            Span<CanFrame> frameSpan = MemoryMarshal.CreateSpan(ref frame, 1);
-            Span<byte> buff = MemoryMarshal.AsBytes(frameSpan);
-
-            while (buff.Length > 0)
+            CanFrame frame = new CanFrame();
+            
             {
-                int read = Interop.Read(_handle, buff);
-                buff = buff.Slice(read);
+                Span<CanFrame> frameSpan = MemoryMarshal.CreateSpan(ref frame, 1);
+                Span<byte> buff = MemoryMarshal.AsBytes(frameSpan);
+                while (buff.Length > 0)
+                {
+                    int read = Interop.Read(_handle, buff);
+                    buff = buff.Slice(read);
+                }
             }
+
+            id = frame.Id;
+            frameLength = frame.Length;
+
+            if (!frame.IsValid)
+            {
+                // invalid frame
+                // we will leave id filled in case it is useful for anyone
+                frameLength = 0;
+                return false;
+            }
+            
+            if (frame.Length > buffer.Length)
+            {
+                // insufficient buffer
+                // bytesWritten will tell how much is needed
+                return false;
+            }
+
+            unsafe
+            {
+                Span<byte> frameData = new Span<byte>(frame.Data, frame.Length);
+                frameData.CopyTo(buffer);
+            }
+
+            return true;
         }
 
-        public void Filter(bool extendedFrameFormat, uint id)
+        public void Filter(CanId id)
         {
-            uint idMask = extendedFrameFormat ? Interop.CAN_EFF_MASK : Interop.CAN_SFF_MASK;
-
-            if ((id & idMask) != id)
-                throw new ArgumentOutOfRangeException($"{nameof(id)} must not be {(extendedFrameFormat ? 29 : 11)} bit identifier");
-
-            if (extendedFrameFormat)
+            if (!id.IsValid)
             {
-                id |= (uint)CanFlags.ExtendedFrameFormat;
+                throw new ArgumentException($"{nameof(id)} must be a valid CanId");
             }
 
             Span<Interop.CanFilter> filters = stackalloc Interop.CanFilter[1];
-            filters[0].can_id = id;
-            filters[0].can_mask = idMask | (uint)CanFlags.ExtendedFrameFormat | (uint)CanFlags.RemoteTransmissionRequest;
+            filters[0].can_id = id.Raw;
+            filters[0].can_mask = id.Value | (uint)CanFlags.ExtendedFrameFormat | (uint)CanFlags.RemoteTransmissionRequest;
 
             Interop.SetCanRawSocketOption<Interop.CanFilter>(_handle, Interop.CanSocketOption.CAN_RAW_FILTER, filters);
         }

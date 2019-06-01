@@ -5,17 +5,21 @@ APIs are under `Iot.Device.SocketCan` namespace.
 ## Reading a frame
 
 ```csharp
+
 using (CanRaw can = new CanRaw())
 {
-    CanFrame frame = new CanFrame();
+    byte[] buffer = new byte[8];
+    // to scope to specific id
+    // can.Filter(id);
+
     while (true)
     {
-        can.ReadFrame(ref frame);
-        if (frame.IsValid)
+        if (can.TryReadFrame(buffer, out int frameLength, out CanId id))
         {
-            string type = frame.ExtendedFrameFormat ? "EFF" : "SFF";
-            string dataAsHex = string.Join("", frame.Data.ToArray().Select((x) => x.ToString("X2")));
-            Console.WriteLine($"Id: {frame.Id} [{type}]: {dataAsHex}");
+            Span<byte> data = new Span<byte>(buffer, 0, frameLength);
+            string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
+            string dataAsHex = string.Join("", data.ToArray().Select((x) => x.ToString("X2")));
+            Console.WriteLine($"Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
         }
         else
         {
@@ -29,44 +33,29 @@ using (CanRaw can = new CanRaw())
 
 
 ```csharp
+CanId id = new CanId()
+{
+    Standard = 0x1A // arbitrary id
+};
+
 using (CanRaw can = new CanRaw())
 {
-    byte[] buffer = new byte[8] { 1, 2, 3, 40, 50, 60, 70, 80 };
-    CanFrame frame = new CanFrame();
-    frame.StandardId = Id;
+    byte[][] buffers = new byte[][]
+    {
+        new byte[8] { 1, 2, 3, 40, 50, 60, 70, 80 },
+        new byte[7] { 1, 2, 3, 40, 50, 60, 70 },
+        new byte[0] { },
+        new byte[1] { 254 },
+    };
 
     while (true)
     {
-        frame.Data = buffer;
-        can.WriteFrame(ref frame);
-        string dataAsHex = string.Join("", frame.Data.ToArray().Select((x) => x.ToString("X2")));
-        Console.WriteLine($"Sending: {dataAsHex}");
-        Thread.Sleep(1000);
-    }
-}
-```
-
-## Filtering
-
-```csharp
-using (CanRaw can = new CanRaw())
-{
-    // first argument is true if id (0x1A) is extended
-    can.Filter(false, 0x1A);
-    CanFrame frame = new CanFrame();
-
-    while (true)
-    {
-        can.ReadFrame(ref frame);
-        if (frame.IsValid)
+        foreach (byte[] buffer in buffers)
         {
-            string type = frame.ExtendedFrameFormat ? "EFF" : "SFF";
-            string dataAsHex = string.Join("", frame.Data.ToArray().Select((x) => x.ToString("X2")));
-            Console.WriteLine($"Id: {frame.Id} [{type}]: {dataAsHex}");
-        }
-        else
-        {
-            Console.WriteLine($"Invalid frame received!");
+            can.WriteFrame(buffer, id);
+            string dataAsHex = string.Join("", buffer.Select((x) => x.ToString("X2")));
+            Console.WriteLine($"Sending: {dataAsHex}");
+            Thread.Sleep(1000);
         }
     }
 }
