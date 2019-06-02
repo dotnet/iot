@@ -294,15 +294,15 @@ namespace Iot.Device.DHTxx
         {
             if (IsLastReadSuccessful)
             {
-                var temp = _readBuff[2] + (_readBuff[3] & 0x7F) * 0.1;
+                var temp = (_readBuff[2] << 8 | _readBuff[3]) * 0.1;
                 // if MSB = 1 we have negative temperature
-                return ((_readBuff[3] & 0x80) == 0 ? temp : -temp);
+                return ((_readBuff[2] & 0x80) == 0 ? temp : -temp);
             }
             else
                 return double.NaN;
         }
 
-        private double GetHumidityDht22() => IsLastReadSuccessful ? _readBuff[0] + _readBuff[1] * 0.1 : double.NaN;
+        private double GetHumidityDht22() => IsLastReadSuccessful ? (_readBuff[0] << 8 | _readBuff[1]) * 0.1 : double.NaN;
 
         /// <summary>
         /// Cleanup
