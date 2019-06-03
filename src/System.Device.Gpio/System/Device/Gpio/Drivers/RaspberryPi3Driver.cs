@@ -29,39 +29,38 @@ namespace System.Device.Gpio.Drivers
         /// <returns>The pin number in the driver's logical numbering scheme.</returns>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
-            switch (pinNumber)
+            return pinNumber switch
             {
-                case 3: return 2;
-                case 5: return 3;
-                case 7: return 4;
-                case 8: return 14;
-                case 10: return 15;
-                case 11: return 17;
-                case 12: return 18;
-                case 13: return 27;
-                case 15: return 22;
-                case 16: return 23;
-                case 18: return 24;
-                case 19: return 10;
-                case 21: return 9;
-                case 22: return 25;
-                case 23: return 11;
-                case 24: return 8;
-                case 26: return 7;
-                case 27: return 0;
-                case 28: return 1;
-                case 29: return 5;
-                case 31: return 6;
-                case 32: return 12;
-                case 33: return 13;
-                case 35: return 19;
-                case 36: return 16;
-                case 37: return 26;
-                case 38: return 20;
-                case 40: return 21;
-            }
-
-            throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber));
+                3 => 2,
+                5 => 3,
+                7 => 4,
+                8 => 14,
+                10 => 15,
+                11 => 17,
+                12 => 18,
+                13 => 27,
+                15 => 22,
+                16 => 23,
+                18 => 24,
+                19 => 10,
+                21 => 9,
+                22 => 25,
+                23 => 11,
+                24 => 8,
+                26 => 7,
+                27 => 0,
+                28 => 1,
+                29 => 5,
+                31 => 6,
+                32 => 12,
+                33 => 13,
+                35 => 19,
+                36 => 16,
+                37 => 26,
+                38 => 20,
+                40 => 21,
+                _ => throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber))
+            };
         }
     }
 }

@@ -204,22 +204,12 @@ namespace System.Device.Gpio.Drivers
 
         private PinValue ConvertSysFsValueToPinValue(string value)
         {
-            PinValue result;
-            value = value.Trim();
-
-            switch (value)
+            return value.Trim() switch
             {
-                case "0":
-                    result = PinValue.Low;
-                    break;
-                case "1":
-                    result = PinValue.High;
-                    break;
-                default:
-                    throw new ArgumentException($"Invalid GPIO pin value {value}.");
-            }
-
-            return result;
+                "0" => PinValue.Low,
+                "1" => PinValue.High,
+                _ => throw new ArgumentException($"Invalid GPIO pin value {value}.")
+            };
         }
 
         /// <summary>
@@ -307,20 +297,14 @@ namespace System.Device.Gpio.Drivers
 
         private PinEventTypes StringValueToPinEventType(string value)
         {
-            value = value.Trim();
-            switch (value)
+            return value.Trim() switch
             {
-                case "none":
-                    return PinEventTypes.None;
-                case "both":
-                    return PinEventTypes.Falling | PinEventTypes.Rising;
-                case "rising":
-                    return PinEventTypes.Rising;
-                case "falling":
-                    return PinEventTypes.Falling;
-                default:
-                    throw new ArgumentException("Invalid pin event value.", value);
-            }
+                "none" => PinEventTypes.None,
+                "both" => PinEventTypes.Falling | PinEventTypes.Rising,
+                "rising" => PinEventTypes.Rising,
+                "falling" => PinEventTypes.Falling,
+                _ => throw new ArgumentException("Invalid pin event value.", value)
+            };
         }
 
         private string PinEventTypeToStringValue(PinEventTypes kind)

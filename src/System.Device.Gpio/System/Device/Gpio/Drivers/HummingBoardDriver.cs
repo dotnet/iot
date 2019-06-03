@@ -16,19 +16,18 @@ namespace System.Device.Gpio.Drivers
         /// <returns>The pin number in the driver's logical numbering scheme.</returns>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
-            switch (pinNumber)
+            return pinNumber switch
             {
-                case 7: return 1;
-                case 11: return 73;
-                case 12: return 72;
-                case 13: return 71;
-                case 15: return 10;
-                case 16: return 194;
-                case 18: return 195;
-                case 22: return 67;
-            }
-
-            throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber));
+                7 => 1,
+                11 => 73,
+                12 => 72,
+                13 => 71,
+                15 => 10,
+                16 => 194,
+                18 => 195,
+                22 => 67,
+                _ => throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber))
+            };
         }
 
         /// <summary>
