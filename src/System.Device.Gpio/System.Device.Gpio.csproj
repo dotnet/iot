@@ -6,7 +6,7 @@
     <LangVersion>preview</LangVersion>
     <!-- Only produce reference assembly in one of our inner builds -->
     <ProduceReferenceAssembly Condition="'$(TargetsLinux)' == 'true'">true</ProduceReferenceAssembly>
-    <TargetRefPath>$(OutputPath)$(TargetFramework)\$(MSBuildProjectName).dll</TargetRefPath>
+    <TargetRefPath>$(OutputPath)$(TargetFramework)\ref\$(MSBuildProjectName).dll</TargetRefPath>
     <IsPackable>true</IsPackable>
     <Configurations>Debug;Release;Windows-Debug;Linux-Debug</Configurations>
   </PropertyGroup>
@@ -24,6 +24,7 @@
     <!--Excluding Windows implementations-->
     <Compile Remove="**\*.Windows.cs" />
     <Compile Remove="Interop\Windows\**\*.cs" />
+    <CreateDirectory Include="$(OutputPath)..\ref\" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <!--Excluding Linux implementations-->
@@ -42,4 +43,54 @@
       <IsWinMDFile>true</IsWinMDFile>
     </Reference>
   </ItemGroup>
+
+  <PropertyGroup>
+    <NotSupportedSourceFile>$(IntermediateOutputPath)$(MSBuildProjectName).notsupported.cs</NotSupportedSourceFile>
+  </PropertyGroup>
+  <Target Name="GenerateNotSupportedAssemblyForNetStandardSource"
+          Condition="'$(RuntimeIdentifier)' == 'linux'"
+          Inputs="@(ReferencePath);@(IntermediateRefAssembly)"
+          Outputs="$(NotSupportedSourceFile)"
+          AfterTargets="CoreCompile">
+    <!-- Calculate reference path directories without duplicates. -->
+    <ItemGroup>
+      <!-- Build list where dependencies are located. -->
+      <_referencePathDirectoriesWithDuplicates Include="@(ReferencePath->'%(RootDir)%(Directory)'->TrimEnd('\'))" />
+      <!-- strip metadata, removing duplicates -->
+      <_referencePathDirectories Include="%(_referencePathDirectoriesWithDuplicates.Identity)" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <GenAPIArgs>"%(IntermediateRefAssembly.Identity)"</GenAPIArgs>
+      <GenAPIArgs>$(GenAPIArgs) --lib-path "@(_referencePathDirectories)"</GenAPIArgs>
+      <GenAPIArgs>$(GenAPIArgs) --out "$(NotSupportedSourceFile)"</GenAPIArgs>
+      <GenAPIArgs Condition="'$(LangVersion)' != ''">$(GenAPIArgs) --lang-version "$(LangVersion)"</GenAPIArgs>
+      <GenAPIArgs>$(GenAPIArgs) --throw "$(GeneratePlatformNotSupportedAssemblyMessage)"</GenAPIArgs>
+      <GenAPIArgs Condition="'$(GeneratePlatformNotSupportedAssemblyWithGlobalPrefix)' == 'true'">$(GenAPIArgs) --global</GenAPIArgs>
+    </PropertyGroup>
+
+    <Exec Command="$(_GenAPICommand) $(GenAPIArgs)" 
+          WorkingDirectory="$(ToolRuntimePath)" />
+
+    <ItemGroup>
+      <FileWrites Include="$(NotSupportedSourceFile)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="SetupEnvironmentForNotSupportedAssembly">
+    <PropertyGroup>
+      <OutDir>$(OutDir)notsupported\</OutDir>
+      <ProjectDepsFilePath>$(OutDir)$(ProjectDepsFileName)</ProjectDepsFilePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <Compile Remove="@(Compile)" />
+      <Compile Include="$(IntermediateOutputPath)..\$(MSBuildProjectName).notsupported.cs" />
+      <CreateDirectory Include="$(OutputPath)notsupported\" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="BuildNotSupportedAssembly"
+          Condition="'$(RuntimeIdentifier)' == ''"
+          AfterTargets="Build"
+          DependsOnTargets="SetupEnvironmentForNotSupportedAssembly;$(BuildDependsOn)" />
 </Project>

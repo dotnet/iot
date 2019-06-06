@@ -11,6 +11,7 @@
   <PropertyGroup>
     <PublishWindowsPdb>false</PublishWindowsPdb>
     <Language>C#</Language>
+    <ToolSetCommonDirectory>$(MSBuildThisFileDirectory)artifacts\toolset\Common\</ToolSetCommonDirectory>
     <TargetsWindows Condition="$(RuntimeIdentifier.StartsWith('win'))">true</TargetsWindows>
     <TargetsLinux Condition="$(RuntimeIdentifier.StartsWith('linux'))">true</TargetsLinux>
     <LangVersion>Latest</LangVersion>
