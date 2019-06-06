@@ -6,8 +6,9 @@
     <LangVersion>preview</LangVersion>
     <!-- Only produce reference assembly in one of our inner builds -->
     <ProduceReferenceAssembly Condition="'$(TargetsLinux)' == 'true'">true</ProduceReferenceAssembly>
-    <TargetRefPath>$(OutputPath)$(TargetFramework)\$(MSBuildProjectName).dll</TargetRefPath>
+    <TargetRefPath>$(OutputPath)$(TargetFramework)\ref\$(MSBuildProjectName).dll</TargetRefPath>
     <IsPackable>true</IsPackable>
+    <GeneratePlatformNotSupportedAssembly Condition="'$(RuntimeIdentifier)' == ''">true</GeneratePlatformNotSupportedAssembly>
     <Configurations>Debug;Release;Windows-Debug;Linux-Debug</Configurations>
   </PropertyGroup>
   <ItemGroup>
@@ -19,11 +20,15 @@
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.1" />
     <PackageReference Include="System.Memory" Version="4.5.1" />
     <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" /> <!-- This is Windows specific -->
+    <PackageReference Include="Microsoft.DotNet.GenAPI" Version="$(MicrosoftDotNetGenApiPackageVersion)">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsLinux)' == 'true'">
     <!--Excluding Windows implementations-->
     <Compile Remove="**\*.Windows.cs" />
     <Compile Remove="Interop\Windows\**\*.cs" />
+    <CreateDirectory Include="$(OutputPath)..\ref\" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <!--Excluding Linux implementations-->
@@ -42,4 +47,26 @@
       <IsWinMDFile>true</IsWinMDFile>
     </Reference>
   </ItemGroup>
+
+  <Target Name="SetupEnvironmentForNotSupportedAssembly">
+    <PropertyGroup>
+      <OutDir>$(OutDir)notsupported\</OutDir>
+      <ProjectDepsFilePath>$(OutDir)$(ProjectDepsFileName)</ProjectDepsFilePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <Compile Remove="@(Compile)" />
+      <CreateDirectory Include="$(OutputPath)notsupported\" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ResolveMatchingContract">
+    <ItemGroup>
+      <ResolvedMatchingContract Include="$(OutputPath)ref\$(MSBuildProjectName).dll" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="BuildNotSupportedAssembly"
+          Condition="'$(RuntimeIdentifier)' == ''"
+          AfterTargets="Build"
+          DependsOnTargets="SetupEnvironmentForNotSupportedAssembly;$(BuildDependsOn)" />
 </Project>

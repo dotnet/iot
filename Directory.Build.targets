@@ -18,7 +18,13 @@
   <!-- Packaging Targets -->
   <PropertyGroup>
     <IncludeRIDSpecificBuildOutput Condition="'$(IncludeRIDSpecificBuildOutput)' == '' And '$(RuntimeIdentifiers)' != ''">true</IncludeRIDSpecificBuildOutput>
-    <TargetsForTfmSpecificContentInPackage Condition="'$(IncludeRIDSpecificBuildOutput)' == 'true'">$(TargetsForTfmSpecificContentInPackage);_WalkEachRIDForBuildOutput;_GetReferenceAssemblyForPackage;_GetNativeAssetsForPackage</TargetsForTfmSpecificContentInPackage>
+    <TargetsForTfmSpecificContentInPackage Condition="'$(IncludeRIDSpecificBuildOutput)' == 'true'">
+      $(TargetsForTfmSpecificContentInPackage);
+      _WalkEachRIDForBuildOutput;
+      _GetReferenceAssemblyForPackage;
+      _GetTurdAssemblyForPackage;
+      _GetNativeAssetsForPackage
+    </TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
   <ItemGroup>
@@ -42,6 +48,14 @@
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(TargetRefPath)">
         <PackagePath>ref/$(TargetFramework)</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_GetTurdAssemblyForPackage">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutputPath)notsupported\$(MSBuildProjectName).dll">
+        <PackagePath>lib/$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
   </Target>

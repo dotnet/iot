@@ -4,5 +4,6 @@
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
     <SystemDeviceGpioPackageVersion>0.1.0-prerelease.19305.1</SystemDeviceGpioPackageVersion>
     <IotDeviceBindingsPackageVersion>0.1.0-prerelease.19305.1</IotDeviceBindingsPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19306.3</MicrosoftDotNetGenAPIPackageVersion>
   </PropertyGroup>
 </Project>
