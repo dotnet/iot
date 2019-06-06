@@ -10,6 +10,7 @@
     <Compile Include="*.cs" />
     <None Include="README.md" />
     <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="..\Units\Units.csproj" />
   </ItemGroup>
 
 </Project>

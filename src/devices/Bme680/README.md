@@ -1,18 +1,28 @@
 ﻿# Bme680
 
 ## Summary
-Provide a brief description on what the component is and its functonality.
+BME680 is a device that reads temperature, gas, barometric pressure, and humidity. SPI and I2C can be used to communicate with the device (only I2C implemented so far).
 
 ## Device Family
-Provide a list of component names and link to datasheets (if available) the binding will work with.
 
-**[Family Name Here]**: [Datasheet link here]
+[Datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME680-DS001.pdf) for the BME680.
 
 ## Binding Notes
 
-Provide any specifics related to binding API.  This could include how to configure component for particular functions and example code.
+Examples on how to use this device binding are available in the [samples](Bme680.Samples) folder.
 
-**NOTE**:  Don't repeat the basics related to System.Device.API* (e.g. connection settings, etc.).  This helps keep text/steps down to a minimum for maintainability.
+### Connection Type
 
-## References 
-Provide any references to other tutorials, blogs and hardware related to the component that could help others get started.
+The following connection types are supported by this binding.
+
+- [X] I2C
+- [ ] SPI
+
+### Sensors
+
+The following sensors are supported by this binding.
+
+- [X] Temperature
+- [X] Humidity
+- [X] Pressure
+- [ ] Gas
