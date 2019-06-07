@@ -145,9 +145,9 @@ jobs:
       displayName: Build
       condition: succeeded()
     - script: ./eng/common/msbuild.sh --warnaserror false --ci
-        --configuration $(_BuildConfig)
         eng/sendToHelix.proj
         /t:Test
+        /p:Configuration=$(_BuildConfig)
         /p:HelixBuild=$(Build.BuildNumber)
         /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
         /p:HelixAccessToken=$(HelixApiAccessToken)
