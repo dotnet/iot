@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <Compile Include="Bme280.cs" />
+    <Compile Include="Bme680.cs" />
     <Compile Include="Bmp280.cs" />
     <Compile Include="BmxBase.cs" />
     <Compile Include="CalibrationData.cs" />
