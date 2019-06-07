@@ -28,6 +28,9 @@ namespace Iot.Device.Bme680
         // The ChipId of the BME680
         private const byte DeviceId = 0x61;
 
+        // The I2c address of the Bme680 is either 0x76 (primary) or 0x77 (secondary)
+        public const byte DefaultI2cAddress = 0x76;
+
         /// <summary>
         /// Gets the last measured temperature data from the corresponding register.
         /// </summary>

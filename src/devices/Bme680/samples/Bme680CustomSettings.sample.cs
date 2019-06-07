@@ -17,8 +17,7 @@ namespace Iot.Device.Bme680.Samples
 			//bus id on the raspberry pi 3
             const int busId = 1;
 			
-			// TODO: change to Bme680.DefaultI2cAddress
-            var settings = new I2cConnectionSettings(busId, 0x76);
+			var settings = new I2cConnectionSettings(busId, Bme680.DefaultI2cAddress);
             var device = new UnixI2cDevice(settings);
             var bme680 = new Bme680(device);
 
