@@ -144,6 +144,17 @@ jobs:
       name: Build
       displayName: Build
       condition: succeeded()
+    - script: ./eng/common/msbuild.sh --warnaserror false --ci
+        --configuration $(_BuildConfig)
+        eng/sendToHelix.proj
+        /t:Test
+        /p:HelixBuild=$(Build.BuildNumber)
+        /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
+        /p:HelixAccessToken=$(HelixApiAccessToken)
+      displayName: Send to Helix
+      condition: succeeded()
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
     - task: PublishBuildArtifacts@1
       displayName: Publish Linux native assets
       inputs:
@@ -151,6 +162,9 @@ jobs:
         artifactName: Native
         artifactType: container
       condition: eq(variables['_BuildConfig'], 'Release')
+    variables:
+      - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+        - group: DotNet-HelixApi-Access
 
 - template: /eng/common/templates/job/job.yml
   parameters:
