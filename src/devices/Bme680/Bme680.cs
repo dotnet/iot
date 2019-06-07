@@ -285,9 +285,9 @@ namespace Iot.Device.Bme680
             // not fully implemented yet, translation of memory addresses and memory page access missing
             throw new NotImplementedException();
 
-            _spiDevice = spiDevice;
-            _calibrationData = new CalibrationData();
-            _protocol = CommunicationProtocol.Spi;
+            //_spiDevice = spiDevice;
+            //_calibrationData = new CalibrationData();
+            //_protocol = CommunicationProtocol.Spi;
         }
 
         public enum CommunicationProtocol
@@ -331,7 +331,6 @@ namespace Iot.Device.Bme680
         /// </summary>
         public void TriggerSoftReset()
         {
-            // TODO: do we need a delay after resetting? test read directly after reset
             Write8BitsToRegister((byte)Register.RESET, 0xB6);
             _initialized = false;
         }
@@ -379,8 +378,6 @@ namespace Iot.Device.Bme680
             return (PowerMode)status;
         }
 
-        // TODO: why is time for gas measurement always added, what happens if conversion is disabled to 477*5???
-        // TODO: compare with real values (check NewDataIsAvailable for measurement time)
         /// <summary>
         /// Gets the required time in ms to perform a measurement with the given heater profile.
         /// The precision of this duration is within 1ms of the actual measurement time
