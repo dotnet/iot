@@ -34,7 +34,7 @@ namespace Iot.Device.Bmx280
 
         internal void Begin()
         {
-            _i2cDevice.WriteByte((byte)Register.CHIPID);
+            _i2cDevice.WriteByte((byte)Bmx280Register.CHIPID);
             byte readSignature = _i2cDevice.ReadByte();
 
             if (readSignature != _deviceId)
@@ -53,11 +53,11 @@ namespace Iot.Device.Bmx280
         /// <param name="powerMode"></param>
         public void SetPowerMode(PowerMode powerMode)
         {
-            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
+            byte status = Read8BitsFromRegister((byte)Bmx280Register.CONTROL);
             //clear last two bits
             status = (byte)(status & 0b1111_1100);
             status = (byte)(status | (byte)powerMode);
-            _i2cDevice.Write(new[] { (byte)Register.CONTROL, status });
+            _i2cDevice.Write(new[] { (byte)Bmx280Register.CONTROL, status });
 
         }
 
@@ -67,7 +67,7 @@ namespace Iot.Device.Bmx280
         /// <returns></returns>
         public PowerMode ReadPowerMode()
         {
-            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
+            byte status = Read8BitsFromRegister((byte)Bmx280Register.CONTROL);
             status = (byte)(status & 0b000_00011);
             if (status == (byte)PowerMode.Normal)
             {
@@ -89,10 +89,10 @@ namespace Iot.Device.Bmx280
         /// <param name="sampling"></param>
         public void SetTemperatureSampling(Sampling sampling)
         {
-            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
+            byte status = Read8BitsFromRegister((byte)Bmx280Register.CONTROL);
             status = (byte)(status & 0b0001_1111);
             status = (byte)(status | (byte)sampling << 5);
-            _i2cDevice.Write(new[] { (byte)Register.CONTROL, status });
+            _i2cDevice.Write(new[] { (byte)Bmx280Register.CONTROL, status });
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Iot.Device.Bmx280
         /// <returns></returns>
         public Sampling ReadTemperatureSampling()
         {
-            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
+            byte status = Read8BitsFromRegister((byte)Bmx280Register.CONTROL);
             status = (byte)((status & 0b1110_0000) >> 5);
             return ByteToSampling(status);
         }
@@ -122,7 +122,7 @@ namespace Iot.Device.Bmx280
         /// <returns></returns>
         public Sampling ReadPressureSampling()
         {
-            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
+            byte status = Read8BitsFromRegister((byte)Bmx280Register.CONTROL);
             status = (byte)((status & 0b0001_1100) >> 2);
             return ByteToSampling(status);
         }
@@ -133,10 +133,10 @@ namespace Iot.Device.Bmx280
         /// <param name="sampling"></param>
         public void SetPressureSampling(Sampling sampling)
         {
-            byte status = Read8BitsFromRegister((byte)Register.CONTROL);
+            byte status = Read8BitsFromRegister((byte)Bmx280Register.CONTROL);
             status = (byte)(status & 0b1110_0011);
             status = (byte)(status | (byte)sampling << 2);
-            _i2cDevice.Write(new[] { (byte)Register.CONTROL, status });
+            _i2cDevice.Write(new[] { (byte)Bmx280Register.CONTROL, status });
         }
 
         /// <summary>
@@ -159,9 +159,9 @@ namespace Iot.Device.Bmx280
             }
 
             //Read the MSB, LSB and bits 7:4 (XLSB) of the temperature from the BMP280 registers
-            byte msb = Read8BitsFromRegister((byte)Register.TEMPDATA_MSB);
-            byte lsb = Read8BitsFromRegister((byte)Register.TEMPDATA_LSB);
-            byte xlsb = Read8BitsFromRegister((byte)Register.TEMPDATA_XLSB); // bits 7:4
+            byte msb = Read8BitsFromRegister((byte)Bmx280Register.TEMPDATA_MSB);
+            byte lsb = Read8BitsFromRegister((byte)Bmx280Register.TEMPDATA_LSB);
+            byte xlsb = Read8BitsFromRegister((byte)Bmx280Register.TEMPDATA_XLSB); // bits 7:4
 
             //Combine the values into a 32-bit integer
             int t = (msb << 12) + (lsb << 4) + (xlsb >> 4);
@@ -228,9 +228,9 @@ namespace Iot.Device.Bmx280
             }
 
             //Read the MSB, LSB and bits 7:4 (XLSB) of the pressure from the BMP280 registers
-            byte msb = Read8BitsFromRegister((byte)Register.PRESSUREDATA_MSB);
-            byte lsb = Read8BitsFromRegister((byte)Register.PRESSUREDATA_LSB);
-            byte xlsb = Read8BitsFromRegister((byte)Register.PRESSUREDATA_XLSB); // bits 7:4
+            byte msb = Read8BitsFromRegister((byte)Bmx280Register.PRESSUREDATA_MSB);
+            byte lsb = Read8BitsFromRegister((byte)Bmx280Register.PRESSUREDATA_LSB);
+            byte xlsb = Read8BitsFromRegister((byte)Bmx280Register.PRESSUREDATA_XLSB); // bits 7:4
 
             //Combine the values into a 32-bit integer
             int t = (msb << 12) + (lsb << 4) + (xlsb >> 4);

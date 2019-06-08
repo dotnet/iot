@@ -7,7 +7,7 @@ namespace Iot.Device.Bmx280
     /// <summary>
     ///  Register
     /// </summary>
-    internal enum Register : byte
+    internal enum Bmx280Register : byte
     {
         DIG_T1 = 0x88,
         DIG_T2 = 0x8A,

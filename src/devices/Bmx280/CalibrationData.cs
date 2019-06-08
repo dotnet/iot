@@ -23,20 +23,20 @@ namespace Iot.Device.Bmx280
         internal void ReadFromDevice(BmxBase bmp280)
         {
             // Read temperature calibration data
-            DigT1 = bmp280.Read16BitsFromRegister((byte)Register.DIG_T1);
-            DigT2 = (short)bmp280.Read16BitsFromRegister((byte)Register.DIG_T2);
-            DigT3 = (short)bmp280.Read16BitsFromRegister((byte)Register.DIG_T3);
+            DigT1 = bmp280.Read16BitsFromRegister((byte)Bmx280Register.DIG_T1);
+            DigT2 = (short)bmp280.Read16BitsFromRegister((byte)Bmx280Register.DIG_T2);
+            DigT3 = (short)bmp280.Read16BitsFromRegister((byte)Bmx280Register.DIG_T3);
 
             // Read pressure calibration data
-            DigP1 = bmp280.Read16BitsFromRegister((byte)Register.DIG_P1);
-            DigP2 = (short)bmp280.Read16BitsFromRegister((byte)Register.DIG_P2);
-            DigP3 = (short)bmp280.Read16BitsFromRegister((byte)Register.DIG_P3);
-            DigP4 = (short)bmp280.Read16BitsFromRegister((byte)Register.DIG_P4);
-            DigP5 = (short)bmp280.Read16BitsFromRegister((byte)Register.DIG_P5);
-            DigP6 = (short)bmp280.Read16BitsFromRegister((byte)Register.DIG_P6);
-            DigP7 = (short)bmp280.Read16BitsFromRegister((byte)Register.DIG_P7);
-            DigP8 = (short)bmp280.Read16BitsFromRegister((byte)Register.DIG_P8);
-            DigP9 = (short)bmp280.Read16BitsFromRegister((byte)Register.DIG_P9);
+            DigP1 = bmp280.Read16BitsFromRegister((byte)Bmx280Register.DIG_P1);
+            DigP2 = (short)bmp280.Read16BitsFromRegister((byte)Bmx280Register.DIG_P2);
+            DigP3 = (short)bmp280.Read16BitsFromRegister((byte)Bmx280Register.DIG_P3);
+            DigP4 = (short)bmp280.Read16BitsFromRegister((byte)Bmx280Register.DIG_P4);
+            DigP5 = (short)bmp280.Read16BitsFromRegister((byte)Bmx280Register.DIG_P5);
+            DigP6 = (short)bmp280.Read16BitsFromRegister((byte)Bmx280Register.DIG_P6);
+            DigP7 = (short)bmp280.Read16BitsFromRegister((byte)Bmx280Register.DIG_P7);
+            DigP8 = (short)bmp280.Read16BitsFromRegister((byte)Bmx280Register.DIG_P8);
+            DigP9 = (short)bmp280.Read16BitsFromRegister((byte)Bmx280Register.DIG_P9);
         }
     }
 }
