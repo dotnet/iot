@@ -7,11 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="rpi-bmp280_i2c.fzz" />
+    <None Remove="rpi-bmp280_i2c.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="Bme680.sample.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Bmxx80.csproj" />
+    <ProjectReference Include="..\Bmxx80.csproj" />
   </ItemGroup>
 
 </Project>
