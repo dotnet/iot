@@ -8,11 +8,11 @@
   <ItemGroup>
     <Compile Include="Bme280.cs" />
     <Compile Include="Bme680.cs" />
-    <Compile Include="Bme680Register.cs" />
+    <Compile Include="Register/Bme680Register.cs" />
     <Compile Include="Bmp280.cs" />
-    <Compile Include="Bmx280Register.cs" />
+    <Compile Include="Register/Bmx280Register.cs" />
     <Compile Include="BmxBase.cs" />
-    <Compile Include="BmxRegister.cs" />
+    <Compile Include="Register/Bmxx80Register.cs" />
     <Compile Include="CalibrationData.cs" />
     <Compile Include="PowerMode.cs" />
     <Compile Include="Sampling.cs" />
