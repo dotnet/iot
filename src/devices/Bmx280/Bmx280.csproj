@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -12,6 +12,8 @@
     <Compile Include="Bmp280.cs" />
     <Compile Include="Bmx280CalibrationData.cs" />
     <Compile Include="BmxBase.cs" />
+    <Compile Include="Bmxx80Base.cs" />
+    <Compile Include="Bmxx80CalibrationData.cs" />
     <Compile Include="PowerMode.cs" />
     <Compile Include="Register/Bme680Register.cs" />
     <Compile Include="Register/Bmx280Register.cs" />
