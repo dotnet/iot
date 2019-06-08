@@ -13,7 +13,10 @@
 
   <ItemGroup>
     <Compile Include="Bmp280.sample.cs" />
-    <ProjectReference Include="..\Bmx280.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bmxx80.csproj" />
   </ItemGroup>
 
 </Project>
