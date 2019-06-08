@@ -6,7 +6,7 @@ using Iot.Device.Bmx280.Register;
 
 namespace Iot.Device.Bmx280
 {
-    internal class CalibrationData
+    internal class Bmx280CalibrationData
     {
         public ushort DigT1 { get; set; }
         public short DigT2 { get; set; }

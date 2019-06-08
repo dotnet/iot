@@ -20,7 +20,7 @@ namespace Iot.Device.Bmx280
         internal byte _deviceId;
         internal bool _initialized = false;
         internal CommunicationProtocol _communicationProtocol;
-        internal CalibrationData _calibrationData;
+        internal Bmx280CalibrationData _calibrationData;
 
         /// <summary>
         /// The variable _temperatureFine carries a fine resolution temperature value over to the

@@ -9,7 +9,7 @@ namespace Iot.Device.Bmx280
     /// <summary>
     /// Calibration data for the <see cref="Bme680"/>.
     /// </summary>
-    internal class Bme680CalibrationData : CalibrationData
+    internal class Bme680CalibrationData : Bmx280CalibrationData
     {
         public ushort DigH1 { get; set; }
         public ushort DigH2 { get; set; }

@@ -30,7 +30,7 @@ namespace Iot.Device.Bmx280
         {
             _i2cDevice = i2cDevice;
             _deviceId = DeviceId;
-            _calibrationData = new CalibrationData();
+            _calibrationData = new Bmx280CalibrationData();
             _communicationProtocol = CommunicationProtocol.I2c;
         }
     }
