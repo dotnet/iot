@@ -11,7 +11,7 @@
     <Compile Include="Bme680CalibrationData.cs" />
     <Compile Include="Bmp280.cs" />
     <Compile Include="Bmx280CalibrationData.cs" />
-    <Compile Include="BmxBase.cs" />
+    <Compile Include="Bmx280Base.cs" />
     <Compile Include="Bmxx80Base.cs" />
     <Compile Include="Bmxx80CalibrationData.cs" />
     <Compile Include="PowerMode.cs" />
