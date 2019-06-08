@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -20,8 +20,6 @@ namespace Iot.Device.Bmxx80
     /// </summary>
     public class Bmx280Base : Bmxx80Base
     {
-        internal new Bmx280CalibrationData _calibrationData = new Bmx280CalibrationData();
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Bmx280Base"/> class.
         /// </summary>
@@ -29,6 +27,7 @@ namespace Iot.Device.Bmxx80
         public Bmx280Base(I2cDevice i2cDevice)
             : base(i2cDevice)
         {
+            _calibrationData = new Bmx280CalibrationData();
             _calibrationData.ReadFromDevice(this);
         }
 

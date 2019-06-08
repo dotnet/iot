@@ -11,21 +11,11 @@ namespace Iot.Device.Bmxx80.CalibrationData
     /// </summary>
     internal class Bmx280CalibrationData : Bmxx80CalibrationData
     {
-        public ushort DigP1 { get; set; }
-        public short DigP2 { get; set; }
-        public short DigP3 { get; set; }
-        public short DigP4 { get; set; }
-        public short DigP5 { get; set; }
-        public short DigP6 { get; set; }
-        public short DigP7 { get; set; }
-        public short DigP8 { get; set; }
-        public short DigP9 { get; set; }
-
         /// <summary>
         /// Read coefficient data from device.
         /// </summary>
         /// <param name="bmxx80Base">The <see cref="Bmxx80Base"/> to read coefficient data from.</param>
-        internal virtual void ReadFromDevice(Bmxx80Base bmxx80Base)
+        internal override void ReadFromDevice(Bmxx80Base bmxx80Base)
         {
             // Read temperature calibration data
             DigT1 = bmxx80Base.Read16BitsFromRegister((byte)Bmx280Register.DIG_T1);

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -17,7 +17,7 @@ namespace Iot.Device.Bmxx80
     /// </summary>
     public class Bmxx80Base : IDisposable
     {
-        internal Bmxx80CalibrationData _calibrationData = new Bmxx80CalibrationData();
+        internal Bmxx80CalibrationData _calibrationData;
         internal I2cDevice _i2cDevice;
         internal byte _deviceId;
         internal CommunicationProtocol _communicationProtocol;
