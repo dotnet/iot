@@ -20,7 +20,6 @@ namespace Iot.Device.Bmxx80
     {
         internal Bmxx80CalibrationData _calibrationData;
         internal I2cDevice _i2cDevice;
-        internal byte _deviceId;
         internal CommunicationProtocol _communicationProtocol;
         internal byte _controlRegister;
 
@@ -46,13 +45,12 @@ namespace Iot.Device.Bmxx80
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _i2cDevice.WriteByte((byte)Bmxx80Register.CHIPID);
-            _deviceId = deviceId;
 
             byte readSignature = _i2cDevice.ReadByte();
 
-            if (readSignature != _deviceId)
+            if (readSignature != deviceId)
             {
-                throw new IOException($"Unable to find a chip with id {_deviceId}");
+                throw new IOException($"Unable to find a chip with id {deviceId}");
             }
         }
 
