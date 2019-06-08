@@ -85,7 +85,7 @@ namespace Iot.Device.Bme680
             }
 
             // Ensure the device exists on the I2C bus.
-            byte readChipId = Read8Bits(Register.Id);
+            byte readChipId = Read8Bits(Register.CHIPID);
             if (readChipId != _expectedChipId)
             {
                 throw new IOException($"Unable to find a chip with id {_expectedChipId}");
@@ -100,7 +100,7 @@ namespace Iot.Device.Bme680
         /// <param name="oversampling">The <see cref="Oversampling"/> to set.</param>
         public void SetHumidityOversampling(Oversampling oversampling)
         {
-            var register = Register.Ctrl_hum;
+            var register = Register.CONTROL_HUM;
             byte read = Read8Bits(register);
 
             // Clear first 3 bits.
@@ -115,7 +115,7 @@ namespace Iot.Device.Bme680
         /// <param name="powerMode">The <see cref="PowerMode"/> to set.</param>
         public void SetPowerMode(PowerMode powerMode)
         {
-            var register = Register.Ctrl_meas;
+            var register = Register.CONTROL;
             byte read = Read8Bits(register);
 
             // Clear first 2 bits.
@@ -130,7 +130,7 @@ namespace Iot.Device.Bme680
         /// <param name="oversampling">The <see cref="Oversampling"/> value to set.</param>
         public void SetPressureOversampling(Oversampling oversampling)
         {
-            var register = Register.Ctrl_meas;
+            var register = Register.CONTROL;
             byte read = Read8Bits(register);
 
             // Clear bits 4, 3 and 2.
@@ -145,7 +145,7 @@ namespace Iot.Device.Bme680
         /// <param name="oversampling">The <see cref="Oversampling"/> value to set.</param>
         public void SetTemperatureOversampling(Oversampling oversampling)
         {
-            var register = Register.Ctrl_meas;
+            var register = Register.CONTROL;
             byte read = Read8Bits(register);
 
             // Clear last 3 bits.
@@ -190,7 +190,7 @@ namespace Iot.Device.Bme680
         /// <returns>True if new data is available.</returns>
         private bool ReadHasNewData()
         {
-            var register = Register.eas_status_0;
+            var register = Register.STATUS;
             byte read = Read8Bits(register);
 
             // Get only the power mode bit.
@@ -205,7 +205,7 @@ namespace Iot.Device.Bme680
         /// <returns>The current <see cref="PowerMode"/>.</returns>
         private PowerMode ReadPowerMode()
         {
-            var register = Register.Ctrl_meas;
+            var register = Register.CONTROL;
             byte read = Read8Bits(register);
 
             // Get only the power mode bits.
@@ -221,8 +221,8 @@ namespace Iot.Device.Bme680
         private double ReadHumidity()
         {
             // Read humidity data.
-            byte msb = Read8Bits(Register.hum_msb);
-            byte lsb = Read8Bits(Register.hum_lsb);
+            byte msb = Read8Bits(Register.HUMIDITYDATA_MSB);
+            byte lsb = Read8Bits(Register.HUMIDITYDATA_LSB);
             var temperature = Temperature.Celsius;
 
             // Convert to a 32bit integer.
@@ -255,9 +255,9 @@ namespace Iot.Device.Bme680
         private double ReadPressure()
         {
             // Read pressure data.
-            byte lsb = Read8Bits(Register.pres_lsb);
-            byte msb = Read8Bits(Register.pres_msb);
-            byte xlsb = Read8Bits(Register.pres_xlsb);
+            byte lsb = Read8Bits(Register.PRESSUREDATA_LSB);
+            byte msb = Read8Bits(Register.PRESSUREDATA_MSB);
+            byte xlsb = Read8Bits(Register.PRESSUREDATA_XLSB);
 
             // Convert to a 32bit integer.
             var adcPressure = (msb << 12) + (lsb << 4) + (xlsb >> 4);
@@ -296,9 +296,9 @@ namespace Iot.Device.Bme680
         private Temperature ReadTemperature()
         {
             // Read temperature data.
-            byte lsb = Read8Bits(Register.temp_lsb);
-            byte msb = Read8Bits(Register.temp_msb);
-            byte xlsb = Read8Bits(Register.temp_xlsb);
+            byte lsb = Read8Bits(Register.TEMPDATA_LSB);
+            byte msb = Read8Bits(Register.TEMPDATA_MSB);
+            byte xlsb = Read8Bits(Register.TEMPDATA_XLSB);
 
             // Convert to a 32bit integer.
             var adcTemperature = (msb << 12) + (lsb << 4) + (xlsb >> 4);

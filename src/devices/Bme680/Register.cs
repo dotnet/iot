@@ -5,198 +5,53 @@
 namespace Iot.Device.Bme680
 {
     /// <summary>
-    /// General control registers.
+    /// General control registers for the BME680.
     /// </summary>
     /// <remarks>
-    /// Register names have been kept the same as listed in the BME680 datasheet. See section 5.2 Memory map.
+    /// See section 5.2 Memory map.
     /// </remarks>
     public enum Register : byte
     {
-        /// <summary>
-        /// Measurement control register for humidity.
-        /// </summary>
-        /// <remarks>
-        /// Bits 2 to 0.
-        /// </remarks>
-        Ctrl_hum = 0x72,
+        CHIPID = 0xD0,
+        CONTROL = 0x74,
+        CONTROL_HUM = 0x72,
 
-        /// <summary>
-        /// Measurement condition control register.
-        /// </summary>
-        /// <remarks>
-        /// Temperature oversampling (bits 7 to 5).
-        /// Pressure oversampling (bits 4 to 2).
-        /// Power mode (bits 1 to 0).
-        /// </remarks>
-        Ctrl_meas = 0x74,
+        DIG_H1_LSB = 0xE2,
+        DIG_H1_MSB = 0xE3,
+        DIG_H2_LSB = 0xE2,
+        DIG_H2_MSB = 0xE1,
+        DIG_H3 = 0xE4,
+        DIG_H4 = 0xE5,
+        DIG_H5 = 0xE6,
+        DIG_H6 = 0xE7,
+        DIG_H7 = 0xE8,
 
-        /// <summary>
-        /// Register for retrieving  status flags and index of measurement.
-        /// </summary>
-        eas_status_0 = 0x1D,
+        DIG_T1 = 0xE9,
+        DIG_T2 = 0x8A,
+        DIG_T3 = 0x8C,
 
-        /// <summary>
-        /// Register for retrieving humidity calibration data.
-        /// </summary>
-        hum_cal_1_lsb = 0xE2,
+        DIG_P1_LSB = 0x8E,
+        DIG_P2_LSB = 0x90,
+        DIG_P3 = 0x92,
+        DIG_P4_LSB = 0x94,
+        DIG_P5_LSB = 0x96,
+        DIG_P6 = 0x99,
+        DIG_P7 = 0x98,
+        DIG_P8_LSB = 0x9C,
+        DIG_P9_LSB = 0x9E,
+        DIG_P10 = 0xA0,
 
-        /// <summary>
-        /// Register for retrieving humidity calibration data.
-        /// </summary>
-        hum_cal_1_msb = 0xE3,
+        HUMIDITYDATA_LSB = 0x26,
+        HUMIDITYDATA_MSB = 0x25,
 
-        /// <summary>
-        /// Register for retrieving humidity calibration data.
-        /// </summary>
-        hum_cal_2_lsb = 0xE2,
+        PRESSUREDATA_MSB = 0x1F,
+        PRESSUREDATA_LSB = 0x20,
+        PRESSUREDATA_XLSB = 0x21,
 
-        /// <summary>
-        /// Register for retrieving humidity calibration data.
-        /// </summary>
-        hum_cal_2_msb = 0xE1,
+        STATUS = 0x1D,
 
-        /// <summary>
-        /// Register for retrieving humidity calibration data.
-        /// </summary>
-        hum_cal_3 = 0xE4,
-
-        /// <summary>
-        /// Register for retrieving humidity calibration data.
-        /// </summary>
-        hum_cal_4 = 0xE5,
-
-        /// <summary>
-        /// Register for retrieving humidity calibration data.
-        /// </summary>
-        hum_cal_5 = 0xE6,
-
-        /// <summary>
-        /// Register for retrieving humidity calibration data.
-        /// </summary>
-        hum_cal_6 = 0xE7,
-
-        /// <summary>
-        /// Register for retrieving humidity calibration data.
-        /// </summary>
-        hum_cal_7 = 0xE8,
-
-        /// <summary>
-        /// Register for retrieving the LSB part of the raw humidity measurement.
-        /// </summary>
-        hum_lsb = 0x26,
-
-        /// <summary>
-        /// Register for retrieving the MSB part of the raw humidity measurement.
-        /// </summary>
-        hum_msb = 0x25,
-
-        /// <summary>
-        /// Register for retrieving the chip ID of the device.
-        /// </summary>
-        /// <remarks>
-        /// Status register. This register is read-only.
-        /// </remarks>
-        Id = 0xD0,
-
-        /// <summary>
-        /// Register for retrieving pressure calibration data.
-        /// </summary>
-        pres_cal_1_lsb = 0x8E,
-
-        /// <summary>
-        /// Register for retrieving pressure calibration data.
-        /// </summary>
-        pres_cal_2_lsb = 0x90,
-
-        /// <summary>
-        /// Register for retrieving pressure calibration data.
-        /// </summary>
-        pres_cal_3 = 0x92,
-
-        /// <summary>
-        /// Register for retrieving pressure calibration data.
-        /// </summary>
-        pres_cal_4_lsb = 0x94,
-
-        /// <summary>
-        /// Register for retrieving pressure calibration data.
-        /// </summary>
-        pres_cal_5_lsb = 0x96,
-
-        /// <summary>
-        /// Register for retrieving pressure calibration data.
-        /// </summary>
-        pres_cal_7 = 0x98,
-
-        /// <summary>
-        /// Register for retrieving pressure calibration data.
-        /// </summary>
-        pres_cal_6 = 0x99,
-
-        /// <summary>
-        /// Register for retrieving pressure calibration data.
-        /// </summary>
-        pres_cal_8_lsb = 0x9C,
-
-        /// <summary>
-        /// Register for retrieving pressure calibration data.
-        /// </summary>
-        pres_cal_9_lsb = 0x9E,
-
-        /// <summary>
-        /// Register for retrieving pressure calibration data.
-        /// </summary>
-        pres_cal_10 = 0xA0,
-
-        /// <summary>
-        /// Register for retrieving the LSB part of the raw pressure measurement.
-        /// </summary>
-        pres_lsb = 0x20,
-
-        /// <summary>
-        /// Register for retrieving the MSB part of the raw pressure measurement.
-        /// </summary>
-        pres_msb = 0x1F,
-
-        /// <summary>
-        /// Register for retrieving the XLSB part of the raw pressure measurement.
-        /// </summary>
-        /// <remarks>
-        /// Contents depend on pressure resolution controlled by oversampling setting.
-        /// </remarks>
-        pres_xlsb = 0x21,
-
-        /// <summary>
-        /// Register for retrieving temperature calibration data.
-        /// </summary>
-        temp_cal_1 = 0xE9,
-
-        /// <summary>
-        /// Register for retrieving temperature calibration data.
-        /// </summary>
-        temp_cal_2 = 0x8A,
-
-        /// <summary>
-        /// Register for retrieving temperature calibration data.
-        /// </summary>
-        temp_cal_3 = 0x8C,
-
-        /// <summary>
-        /// Register for retrieving the LSB part of the raw temperature measurement.
-        /// </summary>
-        temp_lsb = 0x23,
-
-        /// <summary>
-        /// Register for retrieving the MSB part of the raw temperature measurement.
-        /// </summary>
-        temp_msb = 0x22,
-
-        /// <summary>
-        /// Register for retrieving the XLSB part of the raw temperature measurement.
-        /// </summary>
-        /// <remarks>
-        /// Contents depend on temperature resolution controlled by oversampling setting.
-        /// </remarks>
-        temp_xlsb = 0x24,
+        TEMPDATA_MSB = 0x22,
+        TEMPDATA_LSB = 0x23,
+        TEMPDATA_XLSB = 0x24,
     }
 }
