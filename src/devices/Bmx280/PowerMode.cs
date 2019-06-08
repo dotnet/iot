@@ -5,7 +5,7 @@
 namespace Iot.Device.Bmx280
 {
     /// <summary>
-    /// BMP280s power modes
+    /// Sensor power mode.
     /// </summary>
     public enum PowerMode : byte
     {
@@ -13,10 +13,12 @@ namespace Iot.Device.Bmx280
         /// Power saving mode, does not do new measurements
         /// </summary>
         Sleep = 0b00,
+
         /// <summary>
         /// Device goes to sleep mode after one measurement
         /// </summary>
         Forced = 0b10,
+
         /// <summary>
         /// Device does continuous measurements
         /// </summary>
