@@ -1,12 +1,18 @@
-﻿using System.Device.I2c;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Device.I2c;
 
 namespace Iot.Device.Bmx280
 {
     /// <summary>
     /// Represents a BME680 temperature, pressure, relative humidity and VOC gas sensor.
     /// </summary>
-    public class Bme680 : BmxBase
+    public class Bme680 : Bmxx80Base
     {
+        internal new Bmx280CalibrationData _calibrationData = new Bme680CalibrationData();
+
         /// <summary>
         /// Default I2C bus address.
         /// </summary>
@@ -27,11 +33,11 @@ namespace Iot.Device.Bmx280
         /// </summary>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
         public Bme680(I2cDevice i2cDevice)
+            : base(i2cDevice)
         {
-            _i2cDevice = i2cDevice;
-            _deviceId = DeviceId;
-            _calibrationData = new Bmx280CalibrationData();
+            _calibrationData.ReadFromDevice(this);
             _communicationProtocol = CommunicationProtocol.I2c;
+            _deviceId = DeviceId;
         }
     }
 }
