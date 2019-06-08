@@ -1,0 +1,15 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+namespace Iot.Device.Bmx280
+{
+    /// <summary>
+    /// Registers shared in the Bmxx80 family.
+    /// </summary>
+    internal enum Bmxx80Register
+    {
+        CHIPID = 0xD0,
+        CONTROL = 0xF4,
+    }
+}

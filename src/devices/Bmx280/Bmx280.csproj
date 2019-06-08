@@ -12,6 +12,7 @@
     <Compile Include="Bmp280.cs" />
     <Compile Include="Bmx280Register.cs" />
     <Compile Include="BmxBase.cs" />
+    <Compile Include="BmxRegister.cs" />
     <Compile Include="CalibrationData.cs" />
     <Compile Include="PowerMode.cs" />
     <Compile Include="Sampling.cs" />

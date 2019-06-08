@@ -23,14 +23,12 @@ namespace Iot.Device.Bmx280
         DIG_P8 = 0x9C,
         DIG_P9 = 0x9E,
 
-        CHIPID = 0xD0,
         VERSION = 0xD1,
         SOFTRESET = 0xE0,
 
         CAL26 = 0xE1,  // R calibration stored in 0xE1-0xF0
 
         STATUS = 0xF3,
-        CONTROL = 0xF4,
         CONFIG = 0xF5,
 
         PRESSUREDATA_MSB = 0xF7,
