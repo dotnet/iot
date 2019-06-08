@@ -8,6 +8,7 @@ using System.Device.I2c.Drivers;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Bmxx80;
+using Iot.Device.Bmxx80.PowerMode;
 using Iot.Units;
 
 namespace Iot.Device.Samples
