@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Bmx280.Register;
+using Iot.Device.Bmxx80.Register;
 
-namespace Iot.Device.Bmx280.CalibrationData
+namespace Iot.Device.Bmxx80.CalibrationData
 {
     /// <summary>
     /// Calibration data for the <see cref="Bme680"/>.

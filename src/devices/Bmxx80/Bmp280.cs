@@ -4,7 +4,7 @@
 
 using System.Device.I2c;
 
-namespace Iot.Device.Bmx280
+namespace Iot.Device.Bmxx80
 {
     /// <summary>
     /// Represents a BME280 temperature and barometric pressure sensor.

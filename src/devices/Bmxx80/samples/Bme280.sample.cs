@@ -7,7 +7,7 @@ using System.Device.I2c;
 using System.Device.I2c.Drivers;
 using System.Threading;
 using System.Threading.Tasks;
-using Iot.Device.Bmx280;
+using Iot.Device.Bmxx80;
 using Iot.Units;
 
 namespace Iot.Device.Samples

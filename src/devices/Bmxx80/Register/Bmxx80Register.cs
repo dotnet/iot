@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Bmx280.Register
+namespace Iot.Device.Bmxx80.Register
 {
     /// <summary>
     /// Registers shared in the Bmxx80 family.
