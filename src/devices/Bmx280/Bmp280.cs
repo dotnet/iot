@@ -6,17 +6,23 @@ using System.Device.I2c;
 
 namespace Iot.Device.Bmx280
 {
-    public class Bmp280 : BmxBase
+    /// <summary>
+    /// Represents a BME280 temperature and barometric pressure sensor.
+    /// </summary>
+    public class Bmp280 : Bmx280Base
     {
         private const byte DeviceId = 0x58;
         public const byte DefaultI2cAddress = 0x77;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Bmp280"/> class.
+        /// </summary>
+        /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
         public Bmp280(I2cDevice i2cDevice)
+            : base(i2cDevice)
         {
-            _i2cDevice = i2cDevice;
             _deviceId = DeviceId;
-            _calibrationData = new Bmx280CalibrationData();
-            _communicationProtocol = CommunicationProtocol.I2c;            
-        }                   
+            _communicationProtocol = CommunicationProtocol.I2c;
+        }
     }
 }
