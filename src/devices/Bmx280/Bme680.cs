@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Device.I2c;
+using Iot.Device.Bmx280.CalibrationData;
 
 namespace Iot.Device.Bmx280
 {

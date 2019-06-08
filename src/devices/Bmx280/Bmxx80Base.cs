@@ -6,6 +6,7 @@ using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.IO;
+using Iot.Device.Bmx280.CalibrationData;
 using Iot.Device.Bmx280.Register;
 using Iot.Units;
 

@@ -1,4 +1,4 @@
-﻿namespace Iot.Device.Bmx280
+﻿namespace Iot.Device.Bmx280.CalibrationData
 {
     /// <summary>
     /// Calibration data for the Bmxx80 family.

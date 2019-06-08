@@ -4,7 +4,7 @@
 
 using Iot.Device.Bmx280.Register;
 
-namespace Iot.Device.Bmx280
+namespace Iot.Device.Bmx280.CalibrationData
 {
     /// <summary>
     /// Calibration data for the Bmx280 family.
