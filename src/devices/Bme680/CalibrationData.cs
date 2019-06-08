@@ -9,105 +9,49 @@ namespace Iot.Device.Bme680
     /// </summary>
     public class CalibrationData
     {
-        /// <summary>
-        /// Gets a temperature coefficient from <see cref="Register.DIG_T1"/>.
-        /// </summary>
-        public ushort TCal1 { get; private set; }
+        public ushort DigT1 { get; private set; }
 
-        /// <summary>
-        /// Gets a temperature coefficient from <see cref="Register.DIG_T2"/>.
-        /// </summary>
-        public short TCal2 { get; private set; }
+        public short DigT2 { get; private set; }
 
-        /// <summary>
-        /// Gets a temperature coefficient from <see cref="Register.DIG_T3"/>
-        /// </summary>
-        public byte TCal3 { get; private set; }
+        public byte DigT3 { get; private set; }
 
-        /// <summary>
-        /// Gets a humidity coefficient from <see cref="Register.DIG_H1_MSB"/> and <see cref="Register.DIG_H1_LSB"/>.
-        /// </summary>
-        public ushort HCal1 { get; private set; }
 
-        /// <summary>
-        /// Gets a humidity coefficient from <see cref="Register.DIG_H2_MSB"/> and <see cref="Register.DIG_H2_LSB"/>.
-        /// </summary>
-        public ushort HCal2 { get; private set; }
 
-        /// <summary>
-        /// Gets a humidity coefficient from <see cref="Register.DIG_H3"/>.
-        /// </summary>
-        public sbyte HCal3 { get; private set; }
+        public ushort DigH1 { get; private set; }
 
-        /// <summary>
-        /// Gets a humidity coefficient from <see cref="Register.DIG_H4"/>.
-        /// </summary>
-        public sbyte HCal4 { get; private set; }
+        public ushort DigH2 { get; private set; }
 
-        /// <summary>
-        /// Gets a humidity coefficient from <see cref="Register.DIG_H5"/>.
-        /// </summary>
-        public sbyte HCal5 { get; private set; }
+        public sbyte DigH3 { get; private set; }
 
-        /// <summary>
-        /// Gets a humidity coefficient from <see cref="Register.DIG_H6"/>.
-        /// </summary>
-        public byte HCal6 { get; private set; }
+        public sbyte DigH4 { get; private set; }
 
-        /// <summary>
-        /// Gets a humidity coefficient from <see cref="Register.DIG_H7"/>.
-        /// </summary>
-        public sbyte HCal7 { get; private set; }
+        public sbyte DigH5 { get; private set; }
 
-        /// <summary>
-        /// Gets a pressure coefficient from <see cref="Register.DIG_P1_LSB"/>.
-        /// </summary>
-        public ushort PCal1 { get; private set; }
+        public byte DigH6 { get; private set; }
 
-        /// <summary>
-        /// Gets a pressure coefficient from <see cref="Register.DIG_P2_LSB"/>.
-        /// </summary>
-        public short PCal2 { get; private set; }
+        public sbyte DigH7 { get; private set; }
 
-        /// <summary>
-        /// Gets a pressure coefficient from <see cref="Register.DIG_P3"/>.
-        /// </summary>
-        public byte PCal3 { get; private set; }
 
-        /// <summary>
-        /// Gets a pressure coefficient from <see cref="Register.DIG_P4_LSB"/>.
-        /// </summary>
-        public short PCal4 { get; private set; }
 
-        /// <summary>
-        /// Gets a pressure coefficient from <see cref="Register.DIG_P5_LSB"/>.
-        /// </summary>
-        public short PCal5 { get; private set; }
+        public ushort DigP1 { get; private set; }
 
-        /// <summary>
-        /// Gets a pressure coefficient from <see cref="Register.DIG_P6"/>.
-        /// </summary>
-        public byte PCal6 { get; private set; }
+        public short DigP2 { get; private set; }
 
-        /// <summary>
-        /// Gets a pressure coefficient from <see cref="Register.DIG_P7"/>.
-        /// </summary>
-        public byte PCal7 { get; private set; }
+        public byte DigP3 { get; private set; }
 
-        /// <summary>
-        /// Gets a pressure coefficient from <see cref="Register.pres_cal_8"/>.
-        /// </summary>
-        public short PCal8 { get; private set; }
+        public short DigP4 { get; private set; }
 
-        /// <summary>
-        /// Gets a pressure coefficient from <see cref="Register.pres_cal_9"/>.
-        /// </summary>
-        public short PCal9 { get; private set; }
+        public short DigP5 { get; private set; }
 
-        /// <summary>
-        /// Gets a pressure coefficient from <see cref="Register.DIG_P10"/>.
-        /// </summary>
-        public byte PCal10 { get; private set; }
+        public byte DigP6 { get; private set; }
+
+        public byte DigP7 { get; private set; }
+
+        public short DigP8 { get; private set; }
+
+        public short DigP9 { get; private set; }
+
+        public byte DigP10 { get; private set; }
 
         /// <summary>
         /// Read coefficient data from device.
@@ -116,30 +60,30 @@ namespace Iot.Device.Bme680
         internal void ReadFromDevice(Bme680 bme680)
         {
             // Temperature.
-            TCal1 = (ushort)bme680.Read16Bits(Register.DIG_T1);
-            TCal2 = bme680.Read16Bits(Register.DIG_T2);
-            TCal3 = bme680.Read8Bits(Register.DIG_T3);
+            DigT1 = (ushort)bme680.Read16Bits(Register.DIG_T1);
+            DigT2 = bme680.Read16Bits(Register.DIG_T2);
+            DigT3 = bme680.Read8Bits(Register.DIG_T3);
 
             // Humidity.
-            HCal1 = (ushort)((bme680.Read8Bits(Register.DIG_H1_MSB) << 4) | (bme680.Read8Bits(Register.DIG_H1_LSB) & 0b_0000_1111));
-            HCal2 = (ushort)((bme680.Read8Bits(Register.DIG_H2_MSB) << 4) | (bme680.Read8Bits(Register.DIG_H2_LSB) >> 4));
-            HCal3 = (sbyte)bme680.Read8Bits(Register.DIG_H3);
-            HCal4 = (sbyte)bme680.Read8Bits(Register.DIG_H4);
-            HCal5 = (sbyte)bme680.Read8Bits(Register.DIG_H5);
-            HCal6 = bme680.Read8Bits(Register.DIG_H6);
-            HCal7 = (sbyte)(bme680.Read8Bits(Register.DIG_H7));
+            DigH1 = (ushort)((bme680.Read8Bits(Register.DIG_H1_MSB) << 4) | (bme680.Read8Bits(Register.DIG_H1_LSB) & 0b_0000_1111));
+            DigH2 = (ushort)((bme680.Read8Bits(Register.DIG_H2_MSB) << 4) | (bme680.Read8Bits(Register.DIG_H2_LSB) >> 4));
+            DigH3 = (sbyte)bme680.Read8Bits(Register.DIG_H3);
+            DigH4 = (sbyte)bme680.Read8Bits(Register.DIG_H4);
+            DigH5 = (sbyte)bme680.Read8Bits(Register.DIG_H5);
+            DigH6 = bme680.Read8Bits(Register.DIG_H6);
+            DigH7 = (sbyte)(bme680.Read8Bits(Register.DIG_H7));
 
             // Pressure.
-            PCal1 = (ushort)bme680.Read16Bits(Register.DIG_P1_LSB);
-            PCal2 = bme680.Read16Bits(Register.DIG_P2_LSB);
-            PCal3 = bme680.Read8Bits(Register.DIG_P3);
-            PCal4 = bme680.Read16Bits(Register.DIG_P4_LSB);
-            PCal5 = bme680.Read16Bits(Register.DIG_P5_LSB);
-            PCal6 = bme680.Read8Bits(Register.DIG_P6);
-            PCal7 = bme680.Read8Bits(Register.DIG_P7);
-            PCal8 = bme680.Read16Bits(Register.DIG_P8_LSB);
-            PCal9 = bme680.Read16Bits(Register.DIG_P9_LSB);
-            PCal10 = bme680.Read8Bits(Register.DIG_P10);
+            DigP1 = (ushort)bme680.Read16Bits(Register.DIG_P1_LSB);
+            DigP2 = bme680.Read16Bits(Register.DIG_P2_LSB);
+            DigP3 = bme680.Read8Bits(Register.DIG_P3);
+            DigP4 = bme680.Read16Bits(Register.DIG_P4_LSB);
+            DigP5 = bme680.Read16Bits(Register.DIG_P5_LSB);
+            DigP6 = bme680.Read8Bits(Register.DIG_P6);
+            DigP7 = bme680.Read8Bits(Register.DIG_P7);
+            DigP8 = bme680.Read16Bits(Register.DIG_P8_LSB);
+            DigP9 = bme680.Read16Bits(Register.DIG_P9_LSB);
+            DigP10 = bme680.Read8Bits(Register.DIG_P10);
         }
     }
 }

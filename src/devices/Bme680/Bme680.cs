@@ -229,11 +229,11 @@ namespace Iot.Device.Bme680
             var adcHumidity = (msb << 8) + lsb;
 
             // Calculate the humidity.
-            var var1 = adcHumidity - ((_calibrationData.HCal1 * 16.0) + ((_calibrationData.HCal3 / 2.0) * temperature));
-            var var2 = var1 * ((_calibrationData.HCal2 / 262144.0) * (1.0 + ((_calibrationData.HCal4 / 16384.0) * temperature)
-                + ((_calibrationData.HCal5 / 1048576.0) * temperature * temperature)));
-            var var3 = _calibrationData.HCal6 / 16384.0;
-            var var4 = _calibrationData.HCal7 / 2097152.0;
+            var var1 = adcHumidity - ((_calibrationData.DigH1 * 16.0) + ((_calibrationData.DigH3 / 2.0) * temperature));
+            var var2 = var1 * ((_calibrationData.DigH2 / 262144.0) * (1.0 + ((_calibrationData.DigH4 / 16384.0) * temperature)
+                + ((_calibrationData.DigH5 / 1048576.0) * temperature * temperature)));
+            var var3 = _calibrationData.DigH6 / 16384.0;
+            var var4 = _calibrationData.DigH7 / 2097152.0;
             var calculatedHumidity = var2 + ((var3 + (var4 * temperature)) * var2 * var2);
 
             if (calculatedHumidity > 100.0)
@@ -264,22 +264,22 @@ namespace Iot.Device.Bme680
 
             // Calculate the pressure.
             var var1 = (Temperature.Celsius * 5120.0 / 2.0) - 64000.0;
-            var var2 = var1 * var1 * (_calibrationData.PCal6 / 131072.0);
-            var2 += (var1 * _calibrationData.PCal5 * 2.0);
-            var2 = (var2 / 4.0) + (_calibrationData.PCal4 * 65536.0);
-            var1 = ((_calibrationData.PCal3 * var1 * var1 / 16384.0) + (_calibrationData.PCal2 * var1)) / 524288.0;
-            var1 = (1.0 + (var1 / 32768.0)) * _calibrationData.PCal1;
+            var var2 = var1 * var1 * (_calibrationData.DigP6 / 131072.0);
+            var2 += (var1 * _calibrationData.DigP5 * 2.0);
+            var2 = (var2 / 4.0) + (_calibrationData.DigP4 * 65536.0);
+            var1 = ((_calibrationData.DigP3 * var1 * var1 / 16384.0) + (_calibrationData.DigP2 * var1)) / 524288.0;
+            var1 = (1.0 + (var1 / 32768.0)) * _calibrationData.DigP1;
             var calculatedPressure = 1048576.0 - adcPressure;
 
             // Avoid exception caused by division by zero.
             if (var1 != 0)
             {
                 calculatedPressure = (calculatedPressure - (var2 / 4096.0)) * 6250.0 / var1;
-                var1 = _calibrationData.PCal9 * calculatedPressure * calculatedPressure / 2147483648.0;
-                var2 = calculatedPressure * (_calibrationData.PCal8 / 32768.0);
+                var1 = _calibrationData.DigP9 * calculatedPressure * calculatedPressure / 2147483648.0;
+                var2 = calculatedPressure * (_calibrationData.DigP8 / 32768.0);
                 var var3 = (calculatedPressure / 256.0) * (calculatedPressure / 256.0) * (calculatedPressure / 256.0)
-                    * (_calibrationData.PCal10 / 131072.0);
-                calculatedPressure += (var1 + var2 + var3 + (_calibrationData.PCal7 * 128.0)) / 16.0;
+                    * (_calibrationData.DigP10 / 131072.0);
+                calculatedPressure += (var1 + var2 + var3 + (_calibrationData.DigP7 * 128.0)) / 16.0;
             }
             else
             {
@@ -304,8 +304,8 @@ namespace Iot.Device.Bme680
             var adcTemperature = (msb << 12) + (lsb << 4) + (xlsb >> 4);
 
             // Calculate the temperature.
-            var var1 = ((adcTemperature / 16384.0) - (_calibrationData.TCal1 / 1024.0)) * _calibrationData.TCal2;
-            var var2 = ((adcTemperature / 131072.0) - (_calibrationData.TCal1 / 8192.0)) * _calibrationData.TCal3;
+            var var1 = ((adcTemperature / 16384.0) - (_calibrationData.DigT1 / 1024.0)) * _calibrationData.DigT2;
+            var var2 = ((adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0)) * _calibrationData.DigT3;
 
             return Temperature.FromCelsius((var1 + var2) / 5120.0);
         }
