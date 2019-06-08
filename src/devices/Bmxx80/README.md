@@ -1,15 +1,17 @@
-# BMx280 - Digital Pressure Sensors BMP280/BME280
+# BMxx80 Device Family
 
 ## Summary
 
-BMx280 is a device family that read barometric pressure, altitude and temperature. SPI and I2C can be used to communicate with the device (only I2C implemented so far).
+BMxx80 is a device family that senses temperature, barometric pressure, altitude, humidity and VOC gas.
 
-The implementation supports both BME280 and BMP280.
+SPI and I2C can be used to communicate with the device (only I2C implemented so far).
 
 ## Device Family
+The implementation supports the following devices:
 
-[Datasheet](https://cdn-shop.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf) for the BMP280.
-[Datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME280-DS002.pdf) for the BME280.
+- BMP280 temperature and barometric pressure sensor ([Datasheet](https://cdn-shop.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf))
+- BME280 temperature, barometric pressure and humidity sensor ([Datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME280-DS002.pdf))
+- BME680 Temperature, barometric pressure, Humidity and VOC gas sensor ([Datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME680-DS001.pdf))
 
 ## Usage
 
