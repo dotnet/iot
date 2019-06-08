@@ -9,7 +9,6 @@ namespace Iot.Device.Bmxx80.Register
     /// </summary>
     internal enum Bmxx80Register
     {
-        CHIPID = 0xD0,
-        CONTROL = 0xF4,
+        CHIPID = 0xD0
     }
 }

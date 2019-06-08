@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -7,6 +7,7 @@ using System.Buffers.Binary;
 using System.Device.I2c;
 using System.IO;
 using Iot.Device.Bmxx80.CalibrationData;
+using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
 using Iot.Units;
 
@@ -21,6 +22,7 @@ namespace Iot.Device.Bmxx80
         internal I2cDevice _i2cDevice;
         internal byte _deviceId;
         internal CommunicationProtocol _communicationProtocol;
+        internal byte _controlRegister;
 
         internal enum CommunicationProtocol
         {
@@ -36,14 +38,16 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Initializes a new instance of the <see cref="Bmxx80Base"/> class.
         /// </summary>
+        /// <param name="deviceId">The ID of the device.</param>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="IOException"></exception>
-        public Bmxx80Base(I2cDevice i2cDevice)
+        public Bmxx80Base(byte deviceId, I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
-
             _i2cDevice.WriteByte((byte)Bmxx80Register.CHIPID);
+            _deviceId = deviceId;
+
             byte readSignature = _i2cDevice.ReadByte();
 
             if (readSignature != _deviceId)
@@ -53,30 +57,15 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Sets the power mode to the given mode
-        /// </summary>
-        /// <param name="powerMode">The <see cref="PowerMode"/> to set.</param>
-        public void SetPowerMode(PowerMode powerMode)
-        {
-            byte status = Read8BitsFromRegister((byte)Bmxx80Register.CONTROL);
-
-            //clear last two bits.
-            status = (byte)(status & 0b1111_1100);
-
-            status = (byte)(status | (byte)powerMode);
-            _i2cDevice.Write(new[] { (byte)Bmxx80Register.CONTROL, status });
-        }
-
-        /// <summary>
         /// Sets the pressure sampling.
         /// </summary>
         /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
         public void SetPressureSampling(Sampling sampling)
         {
-            byte status = Read8BitsFromRegister((byte)Bmxx80Register.CONTROL);
+            byte status = Read8BitsFromRegister(_controlRegister);
             status = (byte)(status & 0b1110_0011);
             status = (byte)(status | (byte)sampling << 2);
-            _i2cDevice.Write(new[] { (byte)Bmxx80Register.CONTROL, status });
+            _i2cDevice.Write(new[] { _controlRegister, status });
         }
 
         /// <summary>
@@ -85,24 +74,10 @@ namespace Iot.Device.Bmxx80
         /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
         public void SetTemperatureSampling(Sampling sampling)
         {
-            byte status = Read8BitsFromRegister((byte)Bmxx80Register.CONTROL);
+            byte status = Read8BitsFromRegister(_controlRegister);
             status = (byte)(status & 0b0001_1111);
             status = (byte)(status | (byte)sampling << 5);
-            _i2cDevice.Write(new[] { (byte)Bmxx80Register.CONTROL, status });
-        }
-
-        /// <summary>
-        /// Read the <see cref="PowerMode"/> state.
-        /// </summary>
-        /// <returns>The current <see cref="PowerMode"/>.</returns>
-        public PowerMode ReadPowerMode()
-        {
-            byte read = Read8BitsFromRegister((byte)Bmxx80Register.CONTROL);
-
-            // Get only the power mode bits.
-            var powerMode = (byte)(read & 0b_0000_0011);
-
-            return (PowerMode)powerMode;
+            _i2cDevice.Write(new[] { _controlRegister, status });
         }
 
         /// <summary>
@@ -111,7 +86,7 @@ namespace Iot.Device.Bmxx80
         /// <returns>The current pressure <see cref="Sampling"/> rate.</returns>
         public Sampling ReadPressureSampling()
         {
-            byte status = Read8BitsFromRegister((byte)Bmxx80Register.CONTROL);
+            byte status = Read8BitsFromRegister(_controlRegister);
             status = (byte)((status & 0b0001_1100) >> 2);
 
             return ByteToSampling(status);
@@ -123,7 +98,7 @@ namespace Iot.Device.Bmxx80
         /// <returns>The current temperature <see cref="Sampling"/> rate.</returns>
         public Sampling ReadTemperatureSampling()
         {
-            byte status = Read8BitsFromRegister((byte)Bmxx80Register.CONTROL);
+            byte status = Read8BitsFromRegister(_controlRegister);
             status = (byte)((status & 0b1110_0000) >> 5);
 
             return ByteToSampling(status);

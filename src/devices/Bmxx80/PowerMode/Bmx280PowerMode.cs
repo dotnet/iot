@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Bmxx80
+namespace Iot.Device.Bmxx80.PowerMode
 {
     /// <summary>
     /// Sensor power mode.
     /// </summary>
-    public enum PowerMode : byte
+    public enum Bmx280PowerMode : byte
     {
         /// <summary>
         /// Power saving mode, does not do new measurements

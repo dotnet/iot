@@ -12,6 +12,7 @@ namespace Iot.Device.Bmxx80.Register
     /// </remarks>
     internal enum Bme680Register
     {
+        CONTROL = 0x74,
         CONTROL_HUM = 0x72,
 
         DIG_H1_LSB = 0xE2,

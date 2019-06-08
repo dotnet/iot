@@ -3,6 +3,7 @@ using System.Device.I2c;
 using System.Device.I2c.Drivers;
 using System.Threading;
 using Iot.Device.Bmxx80;
+using Iot.Device.Bmxx80.PowerMode;
 
 namespace Iot.Device.Samples
 {
@@ -33,10 +34,10 @@ namespace Iot.Device.Samples
                 while (true)
                 {
                     // Once a reading has been taken, the sensor goes back to sleep mode.
-                    if (bme680.ReadPowerMode() == PowerMode.Sleep)
+                    if (bme680.ReadPowerMode() == Bme680PowerMode.Sleep)
                     {
                         // This instructs the sensor to take a measurement.
-                        bme680.SetPowerMode(PowerMode.Forced);
+                        bme680.SetPowerMode(Bme680PowerMode.Forced);
                     }
 
                     // This prevent us from reading old data from the sensor.

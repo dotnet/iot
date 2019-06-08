@@ -19,9 +19,8 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
         public Bme280(I2cDevice i2cDevice)
-            : base(i2cDevice)
+            : base(DeviceId, i2cDevice)
         {
-            _deviceId = DeviceId;
             _communicationProtocol = CommunicationProtocol.I2c;
         }
     }

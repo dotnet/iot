@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -10,6 +10,7 @@ using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Threading.Tasks;
 using Iot.Device.Bmxx80.CalibrationData;
+using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
 using Iot.Units;
 
@@ -24,11 +25,12 @@ namespace Iot.Device.Bmxx80
         /// Initializes a new instance of the <see cref="Bmx280Base"/> class.
         /// </summary>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
-        public Bmx280Base(I2cDevice i2cDevice)
-            : base(i2cDevice)
+        public Bmx280Base(byte deviceId, I2cDevice i2cDevice)
+            : base(deviceId, i2cDevice)
         {
             _calibrationData = new Bmx280CalibrationData();
             _calibrationData.ReadFromDevice(this);
+            _controlRegister = (byte)Bmx280Register.CONTROL;
         }
 
         /// <summary>
@@ -37,7 +39,7 @@ namespace Iot.Device.Bmxx80
         /// <returns>Calculated temperature.</returns>
         public async Task<Temperature> ReadTemperatureAsync()
         {
-            if (ReadPowerMode() == PowerMode.Forced)
+            if (ReadPowerMode() == Bmx280PowerMode.Forced)
             {
                 await Task.Delay(GetMeasurementTimeForForcedMode(ReadTemperatureSampling()));
             }
@@ -84,12 +86,26 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
+        /// Read the <see cref="Bmx280PowerMode"/> state.
+        /// </summary>
+        /// <returns>The current <see cref="Bmx280PowerMode"/>.</returns>
+        public Bmx280PowerMode ReadPowerMode()
+        {
+            byte read = Read8BitsFromRegister(_controlRegister);
+
+            // Get only the power mode bits.
+            var powerMode = (byte)(read & 0b_0000_0011);
+
+            return (Bmx280PowerMode)powerMode;
+        }
+
+        /// <summary>
         /// Reads the pressure from the sensor.
         /// </summary>
         /// <returns>Atmospheric pressure in Pa.</returns>
         public async Task<double> ReadPressureAsync()
         {
-            if (ReadPowerMode() == PowerMode.Forced)
+            if (ReadPowerMode() == Bmx280PowerMode.Forced)
             {
                 await Task.Delay(GetMeasurementTimeForForcedMode(ReadPressureSampling()));
             }
@@ -130,6 +146,21 @@ namespace Iot.Device.Bmxx80
 
             // Calculate and return the altitude using the international barometric formula.
             return 44330.0 * (1.0 - Math.Pow((pressure / seaLevelPressure), 0.1903));
+        }
+
+        /// <summary>
+        /// Sets the power mode to the given mode
+        /// </summary>
+        /// <param name="powerMode">The <see cref="Bmx280PowerMode"/> to set.</param>
+        public void SetPowerMode(Bmx280PowerMode powerMode)
+        {
+            byte status = Read8BitsFromRegister(_controlRegister);
+
+            //clear last two bits.
+            status = (byte)(status & 0b1111_1100);
+
+            status = (byte)(status | (byte)powerMode);
+            _i2cDevice.Write(new[] { _controlRegister, status });
         }
 
         /// <summary>

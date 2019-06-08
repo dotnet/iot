@@ -1,9 +1,10 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Device.I2c;
 using Iot.Device.Bmxx80.CalibrationData;
+using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
 using Iot.Units;
 
@@ -47,19 +48,19 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// The expected chip ID of the BME68x product family.
         /// </summary>
-        private readonly byte DeviceId = 0x61;
+        private const byte DeviceId = 0x61;
 
         /// <summary>
         /// Initialize a new instance of the <see cref="Bme680"/> class.
         /// </summary>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
         public Bme680(I2cDevice i2cDevice)
-            : base(i2cDevice)
+            : base(DeviceId, i2cDevice)
         {
             _calibrationData = new Bme680CalibrationData();
             _calibrationData.ReadFromDevice(this);
             _communicationProtocol = CommunicationProtocol.I2c;
-            _deviceId = DeviceId;
+            _controlRegister = (byte)Bme680Register.CONTROL;
         }
 
         /// <summary>
@@ -75,6 +76,20 @@ namespace Iot.Device.Bmxx80
             var cleared = (byte)(read & 0b_1111_1000);
 
             _i2cDevice.Write(new[] { register, (byte)(cleared | (byte)sampling) });
+        }
+
+        /// <summary>
+        /// Sets the power mode to the given mode
+        /// </summary>
+        /// <param name="powerMode">The <see cref="Bme680PowerMode"/> to set.</param>
+        public void SetPowerMode(Bme680PowerMode powerMode)
+        {
+            byte read = Read8BitsFromRegister(_controlRegister);
+
+            // Clear first 2 bits.
+            var cleared = (byte)(read & 0b_1111_1100);
+
+            _i2cDevice.Write(new[] { _controlRegister, (byte)(cleared | (byte)powerMode) });
         }
 
         /// <summary>
@@ -167,6 +182,20 @@ namespace Iot.Device.Bmxx80
             var adcHumidity = (msb << 8) + lsb;
 
             return CompensateHumidity(Temperature.Celsius, adcHumidity);
+        }
+
+        /// <summary>
+        /// Read the <see cref="Bme680PowerMode"/> state.
+        /// </summary>
+        /// <returns>The current <see cref="Bme680PowerMode"/>.</returns>
+        public Bme680PowerMode ReadPowerMode()
+        {
+            byte read = Read8BitsFromRegister(_controlRegister);
+
+            // Get only the power mode bits.
+            var powerMode = (byte)(read & 0b_0000_0011);
+
+            return (Bme680PowerMode)(powerMode);
         }
 
         /// <summary>
