@@ -1,8 +1,12 @@
-﻿using Iot.Units;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Iot.Units;
 
 namespace Dhtxx.Devices
 {
-    public class Dht11Device : IDhtDevice
+    internal class Dht11Device : IDhtDevice
     {
         public double GetHumidity(byte[] readBuff)
         {

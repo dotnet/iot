@@ -32,16 +32,12 @@ namespace Iot.Device.DHTxx
         private readonly GpioController _controller;
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private int _lastMeasurement = 0;
+        private IDhtDevice _device;
 
         /// <summary>
         /// How last read went, <c>true</c> for success, <c>false</c> for failure
         /// </summary>
         public bool IsLastReadSuccessful { get; private set; }
-
-        /// <summary>
-        /// Get the device for which this sensor instance is configured
-        /// </summary>
-        public IDhtDevice Device { get; set; }
 
         /// <summary>
         /// Get the last read temperature
@@ -54,7 +50,7 @@ namespace Iot.Device.DHTxx
             get
             {
                 ReadData();
-                return IsLastReadSuccessful ? Device.GetTemperature(_readBuff) : Temperature.FromCelsius(double.NaN);
+                return IsLastReadSuccessful ? _device.GetTemperature(_readBuff) : Temperature.FromCelsius(double.NaN);
             }
         }
 
@@ -69,7 +65,7 @@ namespace Iot.Device.DHTxx
             get
             {
                 ReadData();
-                return IsLastReadSuccessful ? Device.GetHumidity(_readBuff) : double.NaN;
+                return IsLastReadSuccessful ? _device.GetHumidity(_readBuff) : double.NaN;
             }
         }
 
@@ -269,12 +265,12 @@ namespace Iot.Device.DHTxx
             switch (type)
             {
                 case DhtType.Dht11:
-                    Device = new Dht11Device();
+                    _device = new Dht11Device();
                     break;
                 case DhtType.Dht12:
                 case DhtType.Dht21:
                 case DhtType.Dht22:
-                    Device = new Dht22Device();
+                    _device = new Dht22Device();
                     break;
             }
         }
