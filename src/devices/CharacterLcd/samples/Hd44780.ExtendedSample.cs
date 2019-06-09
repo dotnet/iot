@@ -3,10 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device.I2c;
+using System.Device.I2c.Drivers;
 using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Timers;
+using Iot.Device.Mcp23xxx;
 
 namespace Iot.Device.CharacterLcd.Samples
 {
@@ -23,10 +26,14 @@ namespace Iot.Device.CharacterLcd.Samples
 
 #if USEI2C
             var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x21));
-            var controller = new Mcp23008Adapter(new Mcp23008(i2cDevice));
-            var lcd = new Hd44780(registerSelect: 1, enable: 2, data: new int[] { 3, 4, 5, 6 }, size: new Size(16, 2), backlight: 7, controller: controller);
+            var controller = new Mcp23008(i2cDevice);
+            var lcd = new Lcd1602(registerSelectPin: 1, enablePin: 2, dataPins: new int[] { 3, 4, 5, 6 }, backlightPin: 7, controller: controller);
+#elif USERGB
+            var i2cLcdDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x3E));
+            var i2cRgbDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x62));
+            var lcd = new LcdRgb1602(i2cLcdDevice, i2cRgbDevice);
 #else
-            Hd44780 lcd = new Hd44780(12, 26, new int[] { 16, 17, 18, 19, 20, 21, 22, 23 }, new Size(20, 4), readWrite: 13);
+            Hd44780 lcd = new Hd44780(new Size(20, 4), LcdInterface.CreateGpio(12, 26, new int[] { 16, 17, 18, 19, 20, 21, 22, 23 }, readWritePin: 13));
 #endif
             using (lcd)
             {
@@ -58,6 +65,10 @@ namespace Iot.Device.CharacterLcd.Samples
 
                 TestPrompt("Wrap", lcd, l => l.Write(new string('*', 80) + ">>>>>"));
                 TestPrompt("Perf", lcd, PerfTests);
+
+#if USERGB
+                TestPrompt("Colors", lcd, SetBacklightColorTest);
+#endif
 
                 // Shift display right
                 lcd.Write("Hello .NET!");
@@ -205,7 +216,25 @@ namespace Iot.Device.CharacterLcd.Samples
             Console.WriteLine(result);
         }
 
-        static void TestPrompt(string test, Hd44780 lcd, Action<Hd44780> action)
+        static void SetBacklightColorTest(LcdRgb1602 lcd)
+        {
+            Color[] colors = { Color.Red, Color.Green, Color.Blue, Color.Aqua, Color.Azure,
+                Color.Brown, Color.Chocolate, Color.LemonChiffon, Color.Lime, Color.Tomato, Color.Yellow };
+
+            foreach (var color in colors)
+            {
+                lcd.Clear();
+                lcd.Write(color.Name);
+
+                lcd.SetBacklightColor(color);
+                System.Threading.Thread.Sleep(1000);
+            }
+
+            lcd.Clear();
+            lcd.SetBacklightColor(Color.White);
+        }
+
+        static void TestPrompt<T>(string test, T lcd, Action<T> action) where T : Hd44780
         {
             string prompt = $"Test {test}:";
             lcd.Clear();

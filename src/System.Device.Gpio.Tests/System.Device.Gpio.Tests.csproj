@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RuntimeIdentifiers>win-arm;linux-arm</RuntimeIdentifiers>
@@ -23,4 +22,15 @@
     <Compile Remove="**\*.Linux.cs" />
   </ItemGroup>
 
+  <!-- Make sure that we copy the native shim to the publish directory before sending the tests to Helix -->
+  <Target Name="AddNativeShimToCopyToPublishDirectory" BeforeTargets="_ComputeResolvedFilesToPublishTypes">
+    <ItemGroup>
+      <_nativeShimFiles Include="$(ArtifactsBinDir)Native\$(Configuration)\*.*" />
+
+      <ResolvedFileToPublish Include="@(_nativeShimFiles)">
+        <RelativePath>%(_nativeShimFiles.Filename)%(_nativeShimFiles.Extension)</RelativePath>
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
 </Project>

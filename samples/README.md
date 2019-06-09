@@ -7,6 +7,7 @@
 The following samples demonstrate various scenarios: 
 
 * [Blinking LED](led-blink/README.md)
+* [Force Sensitive Resistor usage](force-sensitive-resistor/README.md)
 * [More blinking lights](led-more-blinking-lights/README.md)
 * [Serial Port - Arduino](serialport-arduino/README.md)
 

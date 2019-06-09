@@ -16,8 +16,10 @@ namespace System.Device.I2c.Drivers
 
         public override byte ReadByte() => throw new PlatformNotSupportedException();
 
-        public override void Write(Span<byte> data) => throw new PlatformNotSupportedException();
+        public override void Write(ReadOnlySpan<byte> buffer) => throw new PlatformNotSupportedException();
 
-        public override void WriteByte(byte data) => throw new PlatformNotSupportedException();
+        public override void WriteByte(byte value) => throw new PlatformNotSupportedException();
+
+        public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer) => throw new PlatformNotSupportedException();
     }
 }

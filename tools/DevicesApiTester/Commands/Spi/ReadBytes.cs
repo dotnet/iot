@@ -30,11 +30,11 @@ namespace DeviceApiTester.Commands.Spi
                 Mode = Mode,
             };
 
-            using (var spi = CreateSpiDevice(connectionSettings))
+            using (var spiDevice = CreateSpiDevice(connectionSettings))
             {
                 // Read bytes of data
                 var buffer = new byte[ByteCount];
-                spi.Read(buffer.AsSpan());
+                spiDevice.Read(buffer.AsSpan());
 
                 Console.WriteLine($"Bytes read:{Environment.NewLine}{HexStringUtilities.FormatByteData(buffer)}");
             }
@@ -44,7 +44,5 @@ namespace DeviceApiTester.Commands.Spi
 
         [Option('n', "byte-count", HelpText = "The number of bytes to read from the connection", Required = false, Default = 16)]
         public int ByteCount { get; set; }
-
-        private static readonly Random s_random = new Random();
     }
 }

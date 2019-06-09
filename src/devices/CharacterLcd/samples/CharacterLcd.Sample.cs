@@ -17,7 +17,7 @@ namespace Iot.Device.CharacterLcd.Samples
         static void Main(string[] args)
         {
             // Sets up a 16x2 character LCD with a hardwired or no backlight.
-            using (Lcd1602 lcd = new Lcd1602(registerSelect: 1, enable: 2, data: new int[] { 3, 4, 5, 6 }))
+            using (Lcd1602 lcd = new Lcd1602(registerSelectPin: 22, enablePin: 17, dataPins: new int[] { 25, 24, 23, 18 }))
             {
                 lcd.Clear();
                 lcd.Write("Hello World");
@@ -37,7 +37,7 @@ namespace Iot.Device.CharacterLcd.Samples
             int enablePin = 2;
             int backlight = 7;
             using (mcpDevice)
-            using (Lcd1602 lcd = new Lcd1602(registerSelectPin, enablePin, dataPins, backlight, controller: new Mcp23xxxAdapter(mcpDevice)))
+            using (Lcd1602 lcd = new Lcd1602(registerSelectPin, enablePin, dataPins, backlight, controller: mcpDevice))
             {
                 lcd.Clear();
 
