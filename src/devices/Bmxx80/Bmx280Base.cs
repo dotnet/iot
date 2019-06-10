@@ -19,13 +19,13 @@ namespace Iot.Device.Bmxx80
     /// <summary>
     /// Represents the core functionality of the Bmx280 family.
     /// </summary>
-    public class Bmx280Base : Bmxx80Base
+    public abstract class Bmx280Base : Bmxx80Base
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Bmx280Base"/> class.
         /// </summary>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
-        public Bmx280Base(byte deviceId, I2cDevice i2cDevice)
+        protected Bmx280Base(byte deviceId, I2cDevice i2cDevice)
             : base(deviceId, i2cDevice)
         {
             _calibrationData = new Bmx280CalibrationData();

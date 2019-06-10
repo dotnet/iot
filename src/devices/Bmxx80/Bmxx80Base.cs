@@ -16,7 +16,7 @@ namespace Iot.Device.Bmxx80
     /// <summary>
     /// Represents the core functionality of the Bmxx80 family.
     /// </summary>
-    public class Bmxx80Base : IDisposable
+    public abstract class Bmxx80Base : IDisposable
     {
         internal Bmxx80CalibrationData _calibrationData;
         internal I2cDevice _i2cDevice;
@@ -41,7 +41,7 @@ namespace Iot.Device.Bmxx80
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="IOException"></exception>
-        public Bmxx80Base(byte deviceId, I2cDevice i2cDevice)
+        protected Bmxx80Base(byte deviceId, I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _i2cDevice.WriteByte((byte)Bmxx80Register.CHIPID);
