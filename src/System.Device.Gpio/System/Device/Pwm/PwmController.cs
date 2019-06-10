@@ -3,11 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace System.Device.Pwm
 {
-    public sealed partial class PwmController : IDisposable
+    public sealed partial class PwmController : IPwmController
     {
         private readonly PwmDriver _driver;
         /// <summary>

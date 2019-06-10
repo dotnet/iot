@@ -6,9 +6,7 @@ using System.Device.Gpio.Drivers;
 
 namespace System.Device.Gpio.Tests
 {
-    // TODO: Uncomment making public once the LibGpiodTests stop crashing with SegFault.
-    // public
-    class LibGpiodDriverTests : GpioControllerTestBase
+    public class LibGpiodDriverTests : GpioControllerTestBase
     {
         protected override GpioDriver GetTestDriver() => new LibGpiodDriver();
 
