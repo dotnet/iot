@@ -144,6 +144,17 @@ jobs:
       name: Build
       displayName: Build
       condition: succeeded()
+    - script: ./eng/common/msbuild.sh --warnaserror false --ci
+        eng/sendToHelix.proj
+        /t:Test
+        /p:Configuration=$(_BuildConfig)
+        /p:HelixBuild=$(Build.BuildNumber)
+        /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
+        /p:HelixAccessToken=$(HelixApiAccessToken)
+      displayName: Send to Helix
+      condition: succeeded()
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
     - task: PublishBuildArtifacts@1
       displayName: Publish Linux native assets
       inputs:
@@ -151,6 +162,9 @@ jobs:
         artifactName: Native
         artifactType: container
       condition: eq(variables['_BuildConfig'], 'Release')
+    variables:
+      - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+        - group: DotNet-HelixApi-Access
 
 - template: /eng/common/templates/job/job.yml
   parameters:
@@ -235,38 +249,3 @@ jobs:
       pool:
         name: NetCoreInternal-Int-Pool
         queue: buildpool.windows.10.amd64.vs2017
-
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-  - template: /eng/common/templates/job/job.yml
-    parameters:
-      dependsOn:
-      - BuildPackages
-      agentOs: Windows_NT
-      name: PublishToMyGet
-      displayName: Publish To MyGet
-      continueOnError: true
-      enableTelemetry: $(_enableTelemetry)
-      helixRepo: dotnet/iot
-      strategy:
-        matrix:
-          release_configuration:
-            _BuildConfig: Release
-      variables:
-        - group: DotNet-MyGet-Publish
-      pool:
-        ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-          name: NetCoreInternal-Int-Pool
-          queue: buildpool.windows.10.amd64.vs2017
-        ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-          name: Hosted VS2017
-      steps:
-      - task: DownloadBuildArtifacts@0
-        displayName: Download Built Packages
-        inputs:
-          artifactName: BuiltPackageOutputs
-          downloadPath: $(Build.SourcesDirectory)/artifacts/packages/pushToMyGet
-      - script: powershell -ExecutionPolicy ByPass -NoProfile -command "& """$(Build.SourcesDirectory)\eng\common\Build.ps1""" -restore" &&
-          for /f %%x in ('dir /s /b $(Build.SourcesDirectory)\artifacts\packages\pushToMyGet\*.nupkg') do dotnet nuget push %%x -k $(dotnet-myget-org-api-key) -s https://dotnet.myget.org/F/dotnet-core/
-        name: PublishPackages
-        displayName: Publishing Packages to MyGet
-        condition: succeeded()

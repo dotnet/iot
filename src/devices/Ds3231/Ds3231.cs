@@ -23,7 +23,7 @@ namespace Iot.Device.Ds3231
         /// <summary>
         /// DS3231 DateTime
         /// </summary>
-        public DateTime DateTime { get => ReadTime(); set => SetTime(DateTime); }
+        public DateTime DateTime { get => ReadTime(); set => SetTime(value); }
 
         /// <summary>
         /// DS3231 Temperature

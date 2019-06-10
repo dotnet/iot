@@ -113,6 +113,7 @@ namespace Iot.Device.Bmxx80
             //The temperature is calculated using the compensation formula in the BMP280 datasheet
             double var1 = ((adcTemperature / 16384.0) - (_calibrationData.DigT1 / 1024.0)) * _calibrationData.DigT2;
             double var2 = ((adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0)) * _calibrationData.DigT3;
+            var2 *= var2 * _calibrationData.DigT3;
 
             TemperatureFine = (int)(var1 + var2);
 
