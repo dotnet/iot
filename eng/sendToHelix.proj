@@ -46,6 +46,7 @@
 
   <PropertyGroup Condition="'$(TestOS)' == 'Windows_NT'">
     <DotNetCliRuntime>win-arm</DotNetCliRuntime>
+    <XUnitArguments>$(XUnitArguments) -notrait "SkipOnTestRun=Windows_NT"</XUnitArguments>
   </PropertyGroup>
 
   <!-- Linux-specific settings -->
@@ -60,6 +61,10 @@
     <HelixTargetQueue Condition="'$(HelixAccessToken)' != ''" Include="Raspbian.9.Arm32.IoT"/>
     <HelixTargetQueue Condition="'$(HelixAccessToken)' == ''" Include="Raspbian.9.Arm32.IoT.Open"/>
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(TestOS)' == 'Unix'">
+    <XUnitArguments>$(XUnitArguments) -notrait "SkipOnTestRun=Unix"</XUnitArguments>
+  </PropertyGroup>
 
   <!-- Our Unix tests require to run as elevated. -->
   <Target Name="AppendSudoToHelixWorkItems"
