@@ -17,7 +17,7 @@ namespace System.Device.Gpio
 
         protected override bool ReleaseHandle()
         {
-            Interop.ReleaseGpiodLine(handle);
+            Interop.gpiod_line_release(handle);
             return true;
         }
 

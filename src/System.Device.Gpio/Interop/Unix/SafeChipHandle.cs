@@ -15,7 +15,7 @@ namespace System.Device.Gpio
 
         protected override bool ReleaseHandle()
         {
-            Interop.CloseChip(handle);
+            Interop.gpiod_chip_close(handle);
             return true;
         }
 
