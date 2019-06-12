@@ -10,7 +10,7 @@ namespace Dhtxx.Devices
     {
         public double GetHumidity(byte[] readBuff)
         {
-            return (readBuff[0] * 256 + readBuff[1]) * 0.1;
+            return (readBuff[0] << 8 | readBuff[1]) * 0.1;
         }
 
         public Temperature GetTemperature(byte[] readBuff)
