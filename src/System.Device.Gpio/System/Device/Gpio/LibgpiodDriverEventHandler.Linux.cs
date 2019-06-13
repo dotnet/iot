@@ -31,7 +31,7 @@ namespace System.Device.Gpio.Drivers
 
         private void SubscribeForEvent(SafeLineHandle pinHandle)
         {
-            int eventSuccess = Interop.gpiod_line_request_both_edges_events(pinHandle, $"Listen {_pinNumber} for both edge event");
+            int eventSuccess = Interop.libgpiod.gpiod_line_request_both_edges_events(pinHandle, $"Listen {_pinNumber} for both edge event");
 
             if (eventSuccess < 0)
             {
@@ -40,7 +40,7 @@ namespace System.Device.Gpio.Drivers
         }
 
 
-        private unsafe Task InitializeEventDetectionTask(CancellationToken token, SafeLineHandle pinHandle)
+        private Task InitializeEventDetectionTask(CancellationToken token, SafeLineHandle pinHandle)
         {
             return Task.Run(() =>
             {
@@ -53,7 +53,7 @@ namespace System.Device.Gpio.Drivers
                         TvNsec = new IntPtr(1000000)
                     };
 
-                    WaitEventResult waitResult = Interop.gpiod_line_event_wait(pinHandle, &timeout);
+                    WaitEventResult waitResult = Interop.libgpiod.gpiod_line_event_wait(pinHandle, ref timeout);
                     if (waitResult == WaitEventResult.Error)
                     {
                         throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, Marshal.GetLastWin32Error(), _pinNumber);
@@ -62,7 +62,7 @@ namespace System.Device.Gpio.Drivers
                     if (waitResult == WaitEventResult.EventOccured)
                     {
                         GpioLineEvent eventResult = new GpioLineEvent();
-                        int checkForEvent = Interop.gpiod_line_event_read(pinHandle, ref eventResult);
+                        int checkForEvent = Interop.libgpiod.gpiod_line_event_read(pinHandle, ref eventResult);
                         if (checkForEvent == -1)
                         {
                             throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, Marshal.GetLastWin32Error());

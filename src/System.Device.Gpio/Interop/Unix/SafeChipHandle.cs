@@ -15,10 +15,10 @@ namespace System.Device.Gpio
 
         protected override bool ReleaseHandle()
         {
-            Interop.gpiod_chip_close(handle);
+            Interop.libgpiod.gpiod_chip_close(handle);
             return true;
         }
 
-        public override bool IsInvalid => handle == IntPtr.Zero || handle == Interop.InvalidHandleValue;
+        public override bool IsInvalid => handle == IntPtr.Zero || handle == Interop.libgpiod.InvalidHandleValue;
     }
 }

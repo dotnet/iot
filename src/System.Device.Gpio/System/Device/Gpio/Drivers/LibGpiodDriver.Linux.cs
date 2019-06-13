@@ -17,13 +17,13 @@ namespace System.Device.Gpio.Drivers
 
         private ConcurrentDictionary<int, LibGpiodDriverEventHandler> _pinNumberToEventHandler = new ConcurrentDictionary<int, LibGpiodDriverEventHandler>();
 
-        protected internal override int PinCount => Interop.gpiod_chip_num_lines(_chip);
+        protected internal override int PinCount => Interop.libgpiod.gpiod_chip_num_lines(_chip);
 
         public LibGpiodDriver(int gpioChip = 0)
         {
             try
             {
-                _chip = Interop.gpiod_chip_open_by_number(gpioChip);
+                _chip = Interop.libgpiod.gpiod_chip_open_by_number(gpioChip);
                 if (_chip == null)
                 {
                     throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
@@ -61,10 +61,10 @@ namespace System.Device.Gpio.Drivers
         {
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
-                if (!Interop.gpiod_line_is_free(pinHandle))
+                if (!Interop.libgpiod.gpiod_line_is_free(pinHandle))
                 {
                     pinHandle.Dispose();
-                    pinHandle = Interop.gpiod_chip_get_line(_chip, pinNumber);
+                    pinHandle = Interop.libgpiod.gpiod_chip_get_line(_chip, pinNumber);
                     _pinNumberToSafeLineHandle[pinNumber] = pinHandle;
                 }
             }
@@ -105,7 +105,7 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void OpenPin(int pinNumber)
         {
-            SafeLineHandle pinHandle = Interop.gpiod_chip_get_line(_chip, pinNumber);
+            SafeLineHandle pinHandle = Interop.libgpiod.gpiod_chip_get_line(_chip, pinNumber);
             if (pinHandle == null)
             {
                 throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
@@ -118,7 +118,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
-                int result = Interop.gpiod_line_get_value(pinHandle);
+                int result = Interop.libgpiod.gpiod_line_get_value(pinHandle);
                 if (result == -1)
                 {
                     throw ExceptionHelper.GetIOException(ExceptionResource.ReadPinError, Marshal.GetLastWin32Error(), pinNumber);
@@ -155,11 +155,11 @@ namespace System.Device.Gpio.Drivers
                 string consumer = pinNumber.ToString();
                 if (mode == PinMode.Input)
                 {
-                    requestResult = Interop.gpiod_line_request_input(pinHandle, consumer);
+                    requestResult = Interop.libgpiod.gpiod_line_request_input(pinHandle, consumer);
                 }
                 else
                 {
-                    requestResult = Interop.gpiod_line_request_output(pinHandle, consumer);
+                    requestResult = Interop.libgpiod.gpiod_line_request_output(pinHandle, consumer);
                 }
 
                 pinHandle.PinMode = mode;
@@ -222,7 +222,7 @@ namespace System.Device.Gpio.Drivers
                 throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError, pin: pinNumber);
             }
 
-            Interop.gpiod_line_set_value(pinHandle, (value == PinValue.High) ? 1 : 0);
+            Interop.libgpiod.gpiod_line_set_value(pinHandle, (value == PinValue.High) ? 1 : 0);
         }
 
         protected override void Dispose(bool disposing)
