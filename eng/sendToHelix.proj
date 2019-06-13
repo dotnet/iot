@@ -22,7 +22,6 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(HelixAccessToken)' == '' ">
-    <IsExternal>true</IsExternal>
     <Creator>$(BUILD_SOURCEVERSIONAUTHOR)</Creator>
     <Creator Condition=" '$(Creator)' == ''">dotnet-bot</Creator>
   </PropertyGroup>
