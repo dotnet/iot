@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <!-- Make sure that we copy the native shim to the publish directory before sending the tests to Helix -->
-  <Target Name="AddNativeShimToCopyToPublishDirectory" BeforeTargets="_ComputeResolvedFilesToPublishTypes">
+  <Target Name="AddNativeShimToCopyToPublishDirectory" Condition="'$(TargetsLinux)' == 'true'" BeforeTargets="_ComputeResolvedFilesToPublishTypes">
     <ItemGroup>
       <_nativeShimFiles Include="$(ArtifactsBinDir)Native\$(Configuration)\*.*" />
 

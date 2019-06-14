@@ -1,13 +1,18 @@
 <Project Sdk="Microsoft.DotNet.Helix.Sdk">
   <PropertyGroup>
-    <HelixSource>pr/dotnet/iot/$(BUILD_SOURCEBRANCH)/</HelixSource>
+    <TestOS Condition="'$(TestOS)' == ''">$(OS)</TestOS>
+    <HelixSourcePrefix>pr</HelixSourcePrefix>
+    <HelixSourcePrefix Condition="'$(HelixAccessToken)' != ''">official</HelixSourcePrefix>
+    <HelixSource>$(HelixSourcePrefix)/dotnet/iot/$(BUILD_SOURCEBRANCH)/</HelixSource>
     <HelixType>test/product/</HelixType>
     <HelixBuild>$(BUILD_BUILDNUMBER)</HelixBuild>
     <HelixBuild Condition="'$(HelixBuild)' == ''">123460.01</HelixBuild>
     <HelixConfiguration>$(Configuration)</HelixConfiguration>
+    <XUnitArguments>$(XUnitArguments) -nocolor -verbose -serialize -maxthreads 1</XUnitArguments>
 
     <IncludeDotNetCli>true</IncludeDotNetCli>
     <DotNetCliPackageType>sdk</DotNetCliPackageType>
+    <DotNetCliVersion>2.2.300</DotNetCliVersion>
 
     <EnableAzurePipelinesReporter Condition="'$(SYSTEM_ACCESSTOKEN)' != ''">true</EnableAzurePipelinesReporter>
     <TestRunNamePrefix>$(AGENT_JOBNAME)</TestRunNamePrefix>
@@ -16,36 +21,53 @@
     <FailOnMissionControlTestFailure>true</FailOnMissionControlTestFailure>
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- For now we only have a queue for Linux. Once we have a queue for Windows we will run 
-    those tests too. -->
-    <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
-      <TargetFramework>netcoreapp2.1</TargetFramework>
-      <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
-      <AdditionalProperties>RuntimeIdentifier=linux-arm</AdditionalProperties>
-    </XUnitProject>
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(HelixAccessToken)' != '' And '$(HelixTargetQueue)' == ''">
-    <HelixTargetQueue Include="Raspbian.9.Arm32.IoT"/>
-  </ItemGroup>
+  <PropertyGroup Condition=" '$(HelixAccessToken)' == '' ">
+    <Creator>$(BUILD_SOURCEVERSIONAUTHOR)</Creator>
+    <Creator Condition=" '$(Creator)' == ''">dotnet-bot</Creator>
+  </PropertyGroup>
 
   <ItemGroup Condition="'$(HelixTargetQueue)' != ''">
     <HelixTargetQueue Include="$(HelixTargetQueue)"/>
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(HelixAccessToken)' == '' ">
-    <IsExternal>true</IsExternal>
-    <Creator>$(BUILD_SOURCEVERSIONAUTHOR)</Creator>
-    <Creator Condition=" '$(Creator)' == ''">dotnet-bot</Creator>
-  </PropertyGroup>
-
-  <ItemGroup Condition=" '$(HelixAccessToken)' == '' And '$(HelixTargetQueue)' == ''">
-    <HelixTargetQueue Include="Raspbian.9.Arm32.IoT.open"/>
+  <!-- Windows-specific settings -->
+  <ItemGroup Condition="'$(TestOS)' == 'Windows_NT'">
+    <!-- Xunit project to test -->
+    <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
+      <TargetFramework>netcoreapp2.1</TargetFramework>
+      <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
+      <AdditionalProperties>RuntimeIdentifier=win-arm</AdditionalProperties>
+    </XUnitProject>
+    <!-- Target queues -->
+    <HelixTargetQueue Condition="'$(HelixAccessToken)' != ''" Include="Windows.10.Arm32.IoT"/>
+    <HelixTargetQueue Condition="'$(HelixAccessToken)' == ''" Include="Windows.10.Arm32.IoT.Open"/>
   </ItemGroup>
 
-  <!-- Our tests require to run as elevated. -->
+  <PropertyGroup Condition="'$(TestOS)' == 'Windows_NT'">
+    <DotNetCliRuntime>win-arm</DotNetCliRuntime>
+    <XUnitArguments>$(XUnitArguments) -notrait "SkipOnTestRun=Windows_NT"</XUnitArguments>
+  </PropertyGroup>
+
+  <!-- Linux-specific settings -->
+  <ItemGroup Condition="'$(TestOS)' == 'Unix'">
+    <!-- Xunit project to test -->
+    <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
+      <TargetFramework>netcoreapp2.1</TargetFramework>
+      <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
+      <AdditionalProperties>RuntimeIdentifier=linux-arm</AdditionalProperties>
+    </XUnitProject>
+    <!-- Target queues -->
+    <HelixTargetQueue Condition="'$(HelixAccessToken)' != ''" Include="Raspbian.9.Arm32.IoT"/>
+    <HelixTargetQueue Condition="'$(HelixAccessToken)' == ''" Include="Raspbian.9.Arm32.IoT.Open"/>
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TestOS)' == 'Unix'">
+    <XUnitArguments>$(XUnitArguments) -notrait "SkipOnTestRun=Unix"</XUnitArguments>
+  </PropertyGroup>
+
+  <!-- Our Unix tests require to run as elevated. -->
   <Target Name="AppendSudoToHelixWorkItems"
+          Condition="'$(TestOS)' == 'Unix'"
           Inputs="%(HelixWorkItem.Identity)%(HelixWorkItem.Command)"
           Outputs="unused"
           AfterTargets="CreateXUnitWorkItems">
@@ -56,7 +78,7 @@
       <!-- Pre append sudo and the full path to dotnet to the command, along with a dollarsign throwAway
       which will remove the initial dotnet from the helix command as it will be interpreted as a
       variable -->
-      <_newCommand>sudo -E $_dotnet $throwAway%(HelixWorkItem.Command) -verbose -serialize -maxthreads 1</_newCommand>
+      <_newCommand>sudo -E $_dotnet $throwAway%(HelixWorkItem.Command)</_newCommand>
     </PropertyGroup>
     <ItemGroup>
       <HelixWorkItem>

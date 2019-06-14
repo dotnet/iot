@@ -6,7 +6,7 @@ using System.Device.Gpio.Drivers;
 
 namespace System.Device.Gpio.Tests
 {
-    class WindowsDriverTests : GpioControllerTestBase
+    public class WindowsDriverTests : GpioControllerTestBase
     {
         protected override GpioDriver GetTestDriver() => new Windows10Driver();
 
