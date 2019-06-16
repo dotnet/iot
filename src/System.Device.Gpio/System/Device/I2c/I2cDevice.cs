@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Device.I2c.Drivers;
+using System.Runtime.InteropServices;
+
 namespace System.Device.I2c
 {
     /// <summary>
@@ -56,6 +59,30 @@ namespace System.Device.I2c
         /// The length of the buffer determines how much data to read from the I2C device.
         /// </param>
         public abstract void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer);
+
+        /// <summary>
+        /// Initializes new instance of I2cDevice based on the OS platform.
+        /// <summary>
+        /// <param name="settings">
+        /// The connection settings of a device on an I2C bus.
+        /// </param>
+        public static I2cDevice CreateDevice(I2cConnectionSettings settings)
+        {
+            OSPlatform osPlatform = Interop.OperatingSystem.GetOsPlatform();
+
+            if (osPlatform == OSPlatform.Linux)
+            {
+                return new UnixI2cDevice(settings);
+            }
+            else if (osPlatform == OSPlatform.Windows)
+            {
+                return new Windows10I2cDevice(settings);
+            }
+            else
+            {
+                throw new PlatformNotSupportedException($"I2C not supported for this platform.");
+            }
+        }
 
         public void Dispose()
         {
