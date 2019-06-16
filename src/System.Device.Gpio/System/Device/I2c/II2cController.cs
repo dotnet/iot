@@ -2,22 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Device.I2c;
-
-namespace System.Device.Gpio.System.Device.I2c
+namespace System.Device.I2c
 {
     public interface II2cController : IDisposable
     {
         /// <summary>
-        /// The bus ID the I2C devices are connected to.
-        /// </summary>
-        int BusId { get; }
-
-        /// <summary>
         /// Adds a new I2C device to controller.
         /// </summary>
+        /// <param name="busId">The bus ID the I2C device is connected to.</param>
         /// <param name="address">The bus address of the I2C device to add.</param>
-        void AddDevice(int address);
+        void AddDevice(int busId, int address);
 
         /// <summary>
         /// Adds a new I2C device to controller.
@@ -28,8 +22,9 @@ namespace System.Device.Gpio.System.Device.I2c
         /// <summary>
         /// Removes specified I2C device from controller.
         /// </summary>
+        /// <param name="busId">The bus ID the I2C device is connected to.</param>
         /// <param name="address">The bus address of the I2C device to remove.</param>
-        void RemoveDevice(int address);
+        void RemoveDevice(int busId, int address);
 
         /// <summary>
         /// Removes all I2C devices from controller.
@@ -39,40 +34,45 @@ namespace System.Device.Gpio.System.Device.I2c
         /// <summary>
         /// Reads data from the specified I2C device.
         /// </summary>
+        /// <param name="busId">The bus ID the I2C device is connected to.</param>
         /// <param name="address">The bus address of the I2C device to read.</param>
         /// <param name="buffer">
         /// The buffer to read the data from the I2C device.
         /// The length of the buffer determines how much data to read from the I2C device.
         /// </param>
-        void Read(int address, Span<byte> buffer);
+        void Read(int busId, int address, Span<byte> buffer);
 
         /// <summary>
         /// Reads a byte from the specified I2C device.
         /// </summary>
+        /// <param name="busId">The bus ID the I2C device is connected to.</param>
         /// <param name="address">The bus address of the I2C device to read.</param>
         /// <returns>A byte read from the I2C device.</returns>
-        byte ReadByte(int address);
+        byte ReadByte(int busId, int address);
 
         /// <summary>
         /// Writes data to the specified I2C device.
         /// </summary>
+        /// <param name="busId">The bus ID the I2C device is connected to.</param>
         /// <param name="address">The bus address of the I2C device to write.</param>
         /// <param name="buffer">
         /// The buffer that contains the data to be written to the I2C device.
         /// The data should not include the I2C device address.
         /// </param>
-        void Write(int address, ReadOnlySpan<byte> buffer);
+        void Write(int busId, int address, ReadOnlySpan<byte> buffer);
 
         /// <summary>
         /// Writes a byte to the specified I2C device.
         /// </summary>
+        /// <param name="busId">The bus ID the I2C device is connected to.</param>
         /// <param name="address">The bus address of the I2C device to write.</param>
         /// <param name="value">The byte to be written to the I2C device.</param>
-        void WriteByte(int address, byte value);
+        void WriteByte(int busId, int address, byte value);
 
         /// <summary>
         /// Writes and reads data to the specified I2C device with a restart condition between operations.
         /// </summary>
+        /// <param name="busId">The bus ID the I2C device is connected to.</param>
         /// <param name="address">The bus address of the I2C device to write and read.</param>
         /// <param name="writeBuffer">
         /// The buffer that contains the data to be written to the I2C device.
@@ -81,6 +81,6 @@ namespace System.Device.Gpio.System.Device.I2c
         /// The buffer to read the data from the I2C device.
         /// The length of the buffer determines how much data to read from the I2C device.
         /// </param>
-        void WriteRead(int address, ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer);
+        void WriteRead(int busId, int address, ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer);
     }
 }
