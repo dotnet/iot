@@ -3,12 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Diagnostics;
 using System.Threading;
+using Dhtxx.Devices;
 using Iot.Units;
 
 namespace Iot.Device.DHTxx
@@ -25,18 +25,14 @@ namespace Iot.Device.DHTxx
 
         // wait about 1 ms
         private readonly uint _loopCount = 10000;
-
-        private byte[] _readBuff = new byte[5];
-
+        private readonly byte[] _readBuff = new byte[5];
         private readonly CommunicationProtocol _protocol;
         private readonly int _pin;
-        private readonly DhtType _dhtType;
-        private I2cDevice _sensor;
-        private GpioController _controller;
-
-        private Stopwatch _stopwatch = new Stopwatch();
-
+        private readonly I2cDevice _sensor;
+        private readonly GpioController _controller;
+        private readonly Stopwatch _stopwatch = new Stopwatch();
         private int _lastMeasurement = 0;
+        private IDhtDevice _device;
 
         /// <summary>
         /// How last read went, <c>true</c> for success, <c>false</c> for failure
@@ -54,18 +50,7 @@ namespace Iot.Device.DHTxx
             get
             {
                 ReadData();
-
-                switch (_dhtType)
-                {
-                    case DhtType.Dht11:
-                        return Temperature.FromCelsius(GetTempDht11());
-                    case DhtType.Dht12:
-                    case DhtType.Dht21:
-                    case DhtType.Dht22:
-                        return Temperature.FromCelsius(GetTempDht22());
-                    default:
-                        return Temperature.FromCelsius(double.NaN);
-                }
+                return IsLastReadSuccessful ? _device.GetTemperature(_readBuff) : Temperature.FromCelsius(double.NaN);
             }
         }
 
@@ -80,18 +65,7 @@ namespace Iot.Device.DHTxx
             get
             {
                 ReadData();
-
-                switch (_dhtType)
-                {
-                    case DhtType.Dht11:
-                        return GetHumidityDht11();
-                    case DhtType.Dht12:
-                    case DhtType.Dht21:
-                    case DhtType.Dht22:
-                        return GetHumidityDht22();
-                    default:
-                        return double.NaN;
-                }
+                return IsLastReadSuccessful ? _device.GetHumidity(_readBuff) : double.NaN;
             }
         }
 
@@ -106,7 +80,7 @@ namespace Iot.Device.DHTxx
             _protocol = CommunicationProtocol.OneWire;
             _controller = new GpioController(pinNumberingScheme);
             _pin = pin;
-            _dhtType = dhtType;
+            SetDevice(dhtType);
 
             _controller.OpenPin(_pin);
             // delay 1s to make sure DHT stable
@@ -121,7 +95,7 @@ namespace Iot.Device.DHTxx
         {
             _protocol = CommunicationProtocol.I2C;
             _sensor = sensor;
-            _dhtType = DhtType.Dht12;
+            SetDevice(DhtType.Dht12);
         }
 
         /// <summary>
@@ -283,26 +257,23 @@ namespace Iot.Device.DHTxx
             return IsLastReadSuccessful;
         }
 
-        // convertion for DHT11
-        // the meaning of 0.1 is to convert byte to decimal
-        private double GetTempDht11() => IsLastReadSuccessful ? _readBuff[2] + _readBuff[3] * 0.1 : double.NaN;
-
-        private double GetHumidityDht11() => IsLastReadSuccessful ? _readBuff[0] + _readBuff[1] * 0.1 : double.NaN;
-
-        // convertion for DHT12, DHT21, DHT22
-        private double GetTempDht22()
+        /// <summary>
+        /// Initialise the sensor instance with the corresponding device based on DhtType.
+        /// </summary>
+        private void SetDevice(DhtType type)
         {
-            if (IsLastReadSuccessful)
+            switch (type)
             {
-                var temp = _readBuff[2] + (_readBuff[3] & 0x7F) * 0.1;
-                // if MSB = 1 we have negative temperature
-                return ((_readBuff[3] & 0x80) == 0 ? temp : -temp);
+                case DhtType.Dht11:
+                    _device = new Dht11Device();
+                    break;
+                case DhtType.Dht12:
+                case DhtType.Dht21:
+                case DhtType.Dht22:
+                    _device = new Dht22Device();
+                    break;
             }
-            else
-                return double.NaN;
         }
-
-        private double GetHumidityDht22() => IsLastReadSuccessful ? _readBuff[0] + _readBuff[1] * 0.1 : double.NaN;
 
         /// <summary>
         /// Cleanup
