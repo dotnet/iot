@@ -8,9 +8,9 @@
   </PropertyGroup>
   <Choose>
     <When Condition="'$(IsCrossTargetingRIDs)' == 'true'">
-       <PropertyGroup>
-          <CrossTargetingRIDTargetsPath>$(MSBuildThisFileDirectory)eng\CrosstargetingRIDs.targets</CrossTargetingRIDTargetsPath>
-        </PropertyGroup>
+      <PropertyGroup>
+        <CrossTargetingRIDTargetsPath>$(MSBuildThisFileDirectory)eng\CrosstargetingRIDs.targets</CrossTargetingRIDTargetsPath>
+      </PropertyGroup>
     </When>
   </Choose>
   <Import Project="$(CrossTargetingRIDTargetsPath)" Condition="Exists('$(CrossTargetingRIDTargetsPath)')" />
@@ -18,7 +18,12 @@
   <!-- Packaging Targets -->
   <PropertyGroup>
     <IncludeRIDSpecificBuildOutput Condition="'$(IncludeRIDSpecificBuildOutput)' == '' And '$(RuntimeIdentifiers)' != ''">true</IncludeRIDSpecificBuildOutput>
-    <TargetsForTfmSpecificContentInPackage Condition="'$(IncludeRIDSpecificBuildOutput)' == 'true'">$(TargetsForTfmSpecificContentInPackage);_WalkEachRIDForBuildOutput;_GetReferenceAssemblyForPackage;_GetNativeAssetsForPackage</TargetsForTfmSpecificContentInPackage>
+    <TargetsForTfmSpecificContentInPackage Condition="'$(IncludeRIDSpecificBuildOutput)' == 'true'">
+      $(TargetsForTfmSpecificContentInPackage);
+      _WalkEachRIDForBuildOutput;
+      _GetNotSupportedAssemblyForPackage;
+      _GetNativeAssetsForPackage
+    </TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,10 +43,10 @@
     </MSBuild>
   </Target>
 
-  <Target Name="_GetReferenceAssemblyForPackage">
+  <Target Name="_GetNotSupportedAssemblyForPackage">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(TargetRefPath)">
-        <PackagePath>ref/$(TargetFramework)</PackagePath>
+      <TfmSpecificPackageFile Include="$(OutputPath)notsupported\$(MSBuildProjectName).dll">
+        <PackagePath>lib/$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
   </Target>

@@ -1,0 +1,94 @@
+<Project Sdk="Microsoft.DotNet.Helix.Sdk">
+  <PropertyGroup>
+    <TestOS Condition="'$(TestOS)' == ''">$(OS)</TestOS>
+    <HelixSourcePrefix>pr</HelixSourcePrefix>
+    <HelixSourcePrefix Condition="'$(HelixAccessToken)' != ''">official</HelixSourcePrefix>
+    <HelixSource>$(HelixSourcePrefix)/dotnet/iot/$(BUILD_SOURCEBRANCH)/</HelixSource>
+    <HelixType>test/product/</HelixType>
+    <HelixBuild>$(BUILD_BUILDNUMBER)</HelixBuild>
+    <HelixBuild Condition="'$(HelixBuild)' == ''">123460.01</HelixBuild>
+    <HelixConfiguration>$(Configuration)</HelixConfiguration>
+    <XUnitArguments>$(XUnitArguments) -nocolor -verbose -serialize -maxthreads 1</XUnitArguments>
+
+    <IncludeDotNetCli>true</IncludeDotNetCli>
+    <DotNetCliPackageType>sdk</DotNetCliPackageType>
+    <DotNetCliVersion>2.2.300</DotNetCliVersion>
+
+    <EnableAzurePipelinesReporter Condition="'$(SYSTEM_ACCESSTOKEN)' != ''">true</EnableAzurePipelinesReporter>
+    <TestRunNamePrefix>$(AGENT_JOBNAME)</TestRunNamePrefix>
+    
+    <EnableXUnitReporter>true</EnableXUnitReporter>
+    <FailOnMissionControlTestFailure>true</FailOnMissionControlTestFailure>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(HelixAccessToken)' == '' ">
+    <Creator>$(BUILD_SOURCEVERSIONAUTHOR)</Creator>
+    <Creator Condition=" '$(Creator)' == ''">dotnet-bot</Creator>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(HelixTargetQueue)' != ''">
+    <HelixTargetQueue Include="$(HelixTargetQueue)"/>
+  </ItemGroup>
+
+  <!-- Windows-specific settings -->
+  <ItemGroup Condition="'$(TestOS)' == 'Windows_NT'">
+    <!-- Xunit project to test -->
+    <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
+      <TargetFramework>netcoreapp2.1</TargetFramework>
+      <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
+      <AdditionalProperties>RuntimeIdentifier=win-arm</AdditionalProperties>
+    </XUnitProject>
+    <!-- Target queues -->
+    <HelixTargetQueue Condition="'$(HelixAccessToken)' != ''" Include="Windows.10.Arm32.IoT"/>
+    <HelixTargetQueue Condition="'$(HelixAccessToken)' == ''" Include="Windows.10.Arm32.IoT.Open"/>
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TestOS)' == 'Windows_NT'">
+    <DotNetCliRuntime>win-arm</DotNetCliRuntime>
+    <XUnitArguments>$(XUnitArguments) -notrait "SkipOnTestRun=Windows_NT"</XUnitArguments>
+  </PropertyGroup>
+
+  <!-- Linux-specific settings -->
+  <ItemGroup Condition="'$(TestOS)' == 'Unix'">
+    <!-- Xunit project to test -->
+    <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
+      <TargetFramework>netcoreapp2.1</TargetFramework>
+      <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
+      <AdditionalProperties>RuntimeIdentifier=linux-arm</AdditionalProperties>
+    </XUnitProject>
+    <!-- Target queues -->
+    <HelixTargetQueue Condition="'$(HelixAccessToken)' != ''" Include="Raspbian.9.Arm32.IoT"/>
+    <HelixTargetQueue Condition="'$(HelixAccessToken)' == ''" Include="Raspbian.9.Arm32.IoT.Open"/>
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TestOS)' == 'Unix'">
+    <XUnitArguments>$(XUnitArguments) -notrait "SkipOnTestRun=Unix"</XUnitArguments>
+  </PropertyGroup>
+
+  <!-- Our Unix tests require to run as elevated. -->
+  <Target Name="AppendSudoToHelixWorkItems"
+          Condition="'$(TestOS)' == 'Unix'"
+          Inputs="%(HelixWorkItem.Identity)%(HelixWorkItem.Command)"
+          Outputs="unused"
+          AfterTargets="CreateXUnitWorkItems">
+    <PropertyGroup>
+      <!-- Because our tests need to run as sudo, PATH environment variable is reset so we need to set
+      a different variable to the full path of dotnet -->
+      <HelixPreCommands>$(HelixPreCommands);export _dotnet="%24(which dotnet)"</HelixPreCommands>
+      <!-- Pre append sudo and the full path to dotnet to the command, along with a dollarsign throwAway
+      which will remove the initial dotnet from the helix command as it will be interpreted as a
+      variable -->
+      <_newCommand>sudo -E $_dotnet $throwAway%(HelixWorkItem.Command)</_newCommand>
+    </PropertyGroup>
+    <ItemGroup>
+      <HelixWorkItem>
+        <Command>$(_newCommand)</Command>
+      </HelixWorkItem>
+    </ItemGroup>
+  </Target>
+
+  <!-- Useless stuff to make Arcade SDK happy -->
+  <PropertyGroup>
+    <Language>msbuild</Language>
+  </PropertyGroup>
+</Project>

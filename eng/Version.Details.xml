@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="System.Device.Gpio" Version="0.1.0-prerelease.19265.2">
+    <Dependency Name="System.Device.Gpio" Version="0.1.0-prerelease.19312.2">
       <Uri>https://github.com/dotnet/iot</Uri>
-      <Sha>602c785f8c76cdd3a928b746eb546e45e9b4a572</Sha>
+      <Sha>fda617c6197e8765b70b31ed8fe4603713039d7c</Sha>
     </Dependency>
-    <Dependency Name="Iot.Device.Bindings" Version="0.1.0-prerelease.19265.2">
+    <Dependency Name="Iot.Device.Bindings" Version="0.1.0-prerelease.19312.2">
       <Uri>https://github.com/dotnet/iot</Uri>
-      <Sha>602c785f8c76cdd3a928b746eb546e45e9b4a572</Sha>
+      <Sha>fda617c6197e8765b70b31ed8fe4603713039d7c</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19266.4">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19312.21">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>61cc7d4d347300835925ce5245bfc3ecb6b621d7</Sha>
+      <Sha>e5cd71926eaa13aba3138c14cd80def0ccfebb30</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="2.0.0-beta.19312.21">
+      <Uri>https://github.com/dotnet/arcade</Uri>
+      <Sha>e5cd71926eaa13aba3138c14cd80def0ccfebb30</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.DotNet.GenAPI" Version="1.0.0-beta.19312.21">
+      <Uri>https://github.com/dotnet/arcade</Uri>
+      <Sha>e5cd71926eaa13aba3138c14cd80def0ccfebb30</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

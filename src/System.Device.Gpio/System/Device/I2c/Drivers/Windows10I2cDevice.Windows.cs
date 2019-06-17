@@ -94,6 +94,27 @@ namespace System.Device.I2c.Drivers
             _winI2cDevice.Write(buffer.ToArray());
         }
 
+        /// <summary>
+        /// Performs an atomic operation to write data to and then read data from the I2C bus on which the device is connected, 
+        /// and sends a restart condition between the write and read operations.
+        /// </summary>
+        /// <param name="writeBuffer">
+        /// The buffer that contains the data to be written to the I2C device.
+        /// The data should not include the I2C device address.</param>
+        /// <param name="readBuffer">
+        /// The buffer to read the data from the I2C device.
+        /// The length of the buffer determines how much data to read from the I2C device.
+        /// </param>
+        public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            if (readBuffer.Length == 0)
+                throw new ArgumentException($"{nameof(readBuffer)} cannot be empty.");
+
+            byte[] byteArray = new byte[readBuffer.Length];
+            _winI2cDevice.WriteRead(writeBuffer.ToArray(), byteArray);
+            new Span<byte>(byteArray).CopyTo(readBuffer);
+        }
+
         public override void Dispose(bool disposing)
         {
             _winI2cDevice?.Dispose();
