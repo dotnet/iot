@@ -11,37 +11,11 @@ namespace System.Device.I2c
         private readonly Dictionary<(int, int), I2cDevice> _devices;
 
         /// <summary>
-        /// Initializes new instance of I2cController with no I2C device added initially.
+        /// Initializes new instance of I2cController.
         /// </summary>
-        /// <param name="settings">The connection settings of a device on an I2C bus to initially add.</param>
-        public I2cController(I2cConnectionSettings? settings = null)
+        public I2cController()
         {
             _devices = new Dictionary<(int, int), I2cDevice>();
-
-            if (settings != null)
-            {
-                AddDevice(settings.BusId, settings.DeviceAddress);
-            }
-        }
-
-        /// <summary>
-        /// Initializes new instance of I2cController and adds an I2C device.
-        /// </summary>
-        /// <param name="device">The I2C device to add.</param>
-        public I2cController(I2cDevice device)
-            : this(device.ConnectionSettings.BusId, device.ConnectionSettings.DeviceAddress)
-        {
-        }
-
-        /// <summary>
-        /// Initializes new instance of I2cController and adds an I2C device with specified bus ID and address.
-        /// </summary>
-        /// <param name="busId">The bus ID the I2C device is connected to.</param>
-        /// <param name="address">The bus address of the I2C device.</param>
-        public I2cController(int busId, int address)
-        {
-            _devices = new Dictionary<(int, int), I2cDevice>();
-            AddDevice(busId, address);
         }
 
         /// <summary>
@@ -61,50 +35,53 @@ namespace System.Device.I2c
         }
 
         /// <summary>
-        /// Adds a new I2C device to controller.
+        /// Opens an I2C device with specified settings in order for it to be ready to use with the controller.
         /// </summary>
-        /// <param name="busId">The bus ID the I2C device is connected to.</param>
-        /// <param name="address">The bus address of the I2C device to add.</param>
-        public void AddDevice(int busId, int address)
+        /// <param name="settings">The connection settings of a device on an I2C bus.</param>
+        public void OpenDevice(I2cConnectionSettings settings)
         {
+            int busId = settings.BusId;
+            int address = settings.DeviceAddress;
+
             if (_devices.ContainsKey((busId, address)))
             {
-                throw new InvalidOperationException("The specified bus ID and address is already used with another I2C device.");
+                throw new InvalidOperationException($"The specified bus ID ({busId}) and address ({address}) is already used with another I2C device.");
             }
 
             _devices.Add((busId, address), I2cController.Create(new I2cConnectionSettings(busId, address)));
         }
 
         /// <summary>
-        /// Adds a new I2C device to controller.
+        /// Opens an I2C device in order for it to be ready to use with the controller.
         /// </summary>
-        /// <param name="device">The I2C device to add.</param>
-        public void AddDevice(I2cDevice device)
+        /// <param name="device">The I2C device to open.</param>
+        public void OpenDevice(I2cDevice device)
         {
-            int busId = device.ConnectionSettings.BusId;
-            int address = device.ConnectionSettings.DeviceAddress;
-
-            // TODO: Should this compare type with other devices added to makes sure they are all the same.
+            // TODO: Should this compare type with other devices added to makes sure they are all the same (at least on same bus).
             // Example: Would not want to add one for UnixI2cDevice and another for GpioI2cDevice.
 
-            if (_devices.ContainsKey((busId, address)))
-            {
-                throw new InvalidOperationException("The specified bus ID and address is already used with another I2C device.");
-            }
-
-            _devices.Add((busId, address), device);
+            OpenDevice(device.ConnectionSettings);
         }
 
         /// <summary>
-        /// Removes specified I2C device from controller.
+        /// Closes an open I2C device based on specified settings.
         /// </summary>
-        /// <param name="busId">The bus ID the I2C device is connected to.</param>
-        /// <param name="address">The bus address of the I2C device to remove.</param>
-        public void RemoveDevice(int busId, int address)
+        /// <param name="settings">The connection settings of a device on an I2C bus.</param>
+        public void CloseDevice(I2cConnectionSettings settings)
         {
+            int busId = settings.BusId;
+            int address = settings.DeviceAddress;
+
             GetDevice(busId, address);  // This checks if device with address is present before removing.
             _devices.Remove((busId, address));
+
         }
+
+        /// <summary>
+        /// Closes an open I2C device.
+        /// </summary>
+        /// <param name="device">The I2C device to close.</param>
+        public void CloseDevice(I2cDevice device) => CloseDevice(device.ConnectionSettings);
 
         /// <summary>
         /// Removes all I2C devices from controller.

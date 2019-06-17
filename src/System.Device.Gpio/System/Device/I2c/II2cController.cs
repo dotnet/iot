@@ -7,24 +7,28 @@ namespace System.Device.I2c
     public interface II2cController : IDisposable
     {
         /// <summary>
-        /// Adds a new I2C device to controller.
+        /// Opens an I2C device with specified settings in order for it to be ready to use with the controller.
         /// </summary>
-        /// <param name="busId">The bus ID the I2C device is connected to.</param>
-        /// <param name="address">The bus address of the I2C device to add.</param>
-        void AddDevice(int busId, int address);
+        /// <param name="settings">The connection settings of a device on an I2C bus.</param>
+        void OpenDevice(I2cConnectionSettings settings);
 
         /// <summary>
-        /// Adds a new I2C device to controller.
+        /// Opens an I2C device in order for it to be ready to use with the controller.
         /// </summary>
-        /// <param name="device">The I2C device to add.</param>
-        void AddDevice(I2cDevice device);
+        /// <param name="device">The I2C device to open.</param>
+        void OpenDevice(I2cDevice device);
 
         /// <summary>
-        /// Removes specified I2C device from controller.
+        /// Closes an open I2C device based on specified settings.
         /// </summary>
-        /// <param name="busId">The bus ID the I2C device is connected to.</param>
-        /// <param name="address">The bus address of the I2C device to remove.</param>
-        void RemoveDevice(int busId, int address);
+        /// <param name="settings">The connection settings of a device on an I2C bus.</param>
+        void CloseDevice(I2cConnectionSettings settings);
+
+        /// <summary>
+        /// Closes an open I2C device.
+        /// </summary>
+        /// <param name="device">The I2C device to close.</param>
+        void CloseDevice(I2cDevice device);
 
         /// <summary>
         /// Removes all I2C devices from controller.
