@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace System.Device.I2c
 {
-    public class I2cController : II2cController
+    public sealed partial class I2cController : II2cController
     {
         private readonly Dictionary<(int, int), I2cDevice> _devices;
 
@@ -72,7 +72,7 @@ namespace System.Device.I2c
                 throw new InvalidOperationException("The specified bus ID and address is already used with another I2C device.");
             }
 
-            _devices.Add((busId, address), I2cDevice.CreateDevice(new I2cConnectionSettings(busId, address)));
+            _devices.Add((busId, address), I2cController.Create(new I2cConnectionSettings(busId, address)));
         }
 
         /// <summary>

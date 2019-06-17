@@ -60,30 +60,6 @@ namespace System.Device.I2c
         /// </param>
         public abstract void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer);
 
-        /// <summary>
-        /// Initializes new instance of I2cDevice based on the OS platform.
-        /// <summary>
-        /// <param name="settings">
-        /// The connection settings of a device on an I2C bus.
-        /// </param>
-        public static I2cDevice CreateDevice(I2cConnectionSettings settings)
-        {
-            OSPlatform osPlatform = Interop.OperatingSystem.GetOsPlatform();
-
-            if (osPlatform == OSPlatform.Linux)
-            {
-                return new UnixI2cDevice(settings);
-            }
-            else if (osPlatform == OSPlatform.Windows)
-            {
-                return new Windows10I2cDevice(settings);
-            }
-            else
-            {
-                throw new PlatformNotSupportedException($"I2C not supported for this platform.");
-            }
-        }
-
         public void Dispose()
         {
             Dispose(true);
