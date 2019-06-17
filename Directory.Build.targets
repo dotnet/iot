@@ -22,7 +22,6 @@
       $(TargetsForTfmSpecificContentInPackage);
       _WalkEachRIDForBuildOutput;
       _GetNotSupportedAssemblyForPackage;
-      _GetNativeAssetsForPackage
     </TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
@@ -49,22 +48,6 @@
         <PackagePath>lib/$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
-  </Target>
-
-  <Target Name="_GetNativeAssetsForPackage">
-    <ItemGroup>
-      <_nativeAssetsToPackage Include="$(BaseOutputPath)../Native/Release/*.so" />
-      <TfmSpecificPackageFile Include="@(_nativeAssetsToPackage)">
-        <!-- For now, we are only building native assets for linux-arm so we can hardcode the package path.
-             Once we start producing arm64 native assets then we will have to change this so it is not hardcoded
-             and instead is calculated depending on where the assets are located. -->
-        <PackagePath>runtimes/linux-arm/native/</PackagePath>
-      </TfmSpecificPackageFile>
-    </ItemGroup>
-
-    <!-- During CI or an official build, we should fail if there where no native assets to package -->
-    <Error Condition="'$(ContinuousIntegrationBuild)' == 'true' And '@(_nativeAssetsToPackage)' == ''" 
-           Text="Unable to find native assets to include in the package" />
   </Target>
 
   <Target Name="_GetBuildOutputWithRID" Returns="@(RIDSpecificPackageFile)">
