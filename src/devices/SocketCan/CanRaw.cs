@@ -48,16 +48,19 @@ namespace Iot.Device.SocketCan
 
         public bool TryReadFrame(Span<byte> buffer, out int frameLength, out CanId id)
         {
+            if (buffer.Length < CanFrame.MaxLength)
+            {
+                throw new ArgumentException($"Buffer length must be at minimum {CanFrame.MaxLength} bytes", nameof(buffer));
+            }
+
             CanFrame frame = new CanFrame();
             
+            Span<CanFrame> frameSpan = MemoryMarshal.CreateSpan(ref frame, 1);
+            Span<byte> buff = MemoryMarshal.AsBytes(frameSpan);
+            while (buff.Length > 0)
             {
-                Span<CanFrame> frameSpan = MemoryMarshal.CreateSpan(ref frame, 1);
-                Span<byte> buff = MemoryMarshal.AsBytes(frameSpan);
-                while (buff.Length > 0)
-                {
-                    int read = Interop.Read(_handle, buff);
-                    buff = buff.Slice(read);
-                }
+                int read = Interop.Read(_handle, buff);
+                buff = buff.Slice(read);
             }
 
             id = frame.Id;
@@ -71,15 +74,17 @@ namespace Iot.Device.SocketCan
                 return false;
             }
             
-            if (frame.Length > buffer.Length)
-            {
-                // insufficient buffer
-                // bytesWritten will tell how much is needed
-                return false;
-            }
+            // This is guaranteed by minimum buffer length and the fact that frame is valid
+            Debug.Assert(frame.Length <= buffer.Length);
 
             unsafe
             {
+                // We should not use input buffer directly for reading:
+                // - we do not know how many bytes will be read up front without reading length first
+                // - we should not write anything more than pointed by frameLength
+                // - we still need to read the remaining bytes to read the full frame
+                // Considering there are at most 8 bytes to read it is cheaper
+                // to copy rather than doing multiple syscalls.
                 Span<byte> frameData = new Span<byte>(frame.Data, frame.Length);
                 frameData.CopyTo(buffer);
             }

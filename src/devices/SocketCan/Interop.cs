@@ -39,10 +39,10 @@ namespace Iot.Device.SocketCan
         [DllImport("libc", EntryPoint = "close", CallingConvention = CallingConvention.Cdecl)]
         private static extern int CloseSocket(int fd);
 
-        [DllImport("libc", EntryPoint = "write", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
+        [DllImport("libc", EntryPoint = "write", CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern int SocketWrite(int fd, byte* buffer, int size);
 
-        [DllImport("libc", EntryPoint = "read", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
+        [DllImport("libc", EntryPoint = "read", CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern int SocketRead(int fd, byte* buffer, int size);
 
         [DllImport("libc", EntryPoint = "setsockopt", CallingConvention = CallingConvention.Cdecl)]
