@@ -7,7 +7,7 @@ using System;
 namespace Iot.Device.SocketCan
 {
     [Flags]
-    public enum CanFlags : uint
+    internal enum CanFlags : uint
     {
         ExtendedFrameFormat = 0x80000000,
         RemoteTransmissionRequest = 0x40000000,

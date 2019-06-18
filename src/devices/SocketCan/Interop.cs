@@ -133,7 +133,7 @@ namespace Iot.Device.SocketCan
             const uint SIOCGIFINDEX = 0x8933;
             const int MaxLen = ifreq.IFNAMSIZ - 1;
 
-            if (Encoding.ASCII.GetByteCount(name) >= MaxLen)
+            if (name.Length >= MaxLen)
             {
                 throw new ArgumentException($"`{name}` exceeds maximum allowed length of {MaxLen} size", nameof(name));
             }
@@ -154,7 +154,6 @@ namespace Iot.Device.SocketCan
             return ifr.ifr_ifindex;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct ifreq
         {
             internal const int IFNAMSIZ = 16;
@@ -164,7 +163,6 @@ namespace Iot.Device.SocketCan
 
         }
 
-        [StructLayout(LayoutKind.Sequential)]
         internal struct CanSocketAddress
         {
             public short can_family;
@@ -173,7 +171,6 @@ namespace Iot.Device.SocketCan
             public uint tx_id;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
         internal struct CanFilter
         {
             public uint can_id;
