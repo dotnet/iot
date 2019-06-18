@@ -15,7 +15,8 @@ namespace Iot.Device.SocketCan
     public struct CanId
     {
         // Raw (can_id) includes EFF, RTR and ERR flags
-        public uint Raw { get; set; }
+        internal uint Raw { get; set; }
+
         public uint Value => ExtendedFrameFormat ? Extended : Standard;
 
         public uint Standard
