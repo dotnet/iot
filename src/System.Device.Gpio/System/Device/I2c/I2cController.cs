@@ -89,6 +89,29 @@ namespace System.Device.I2c
         public void ClearDevices() => _devices.Clear();
 
         /// <summary>
+        /// Gets the I2C device associated with the specified bus ID and address.
+        /// </summary>
+        /// <param name="busId">The bus ID the I2C device is connected to.</param>
+        /// <param name="address">The bus address of the I2C device to write.</param>
+        /// <param name="device">
+        /// When this method returns, contains the I2C device associated with the specified bus ID and address, if they are found;
+        /// otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.
+        /// </param>
+        public bool TryGetDevice(int busId, int address, out I2cDevice? device)
+        {
+            try
+            {
+                device = GetDevice(busId, address);
+                return true;
+            }
+            catch
+            {
+                device = null;
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Reads data from the specified I2C device.
         /// </summary>
         /// <param name="busId">The bus ID the I2C device is connected to.</param>

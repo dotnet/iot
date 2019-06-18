@@ -6,6 +6,7 @@ namespace System.Device.I2c
 {
     public interface II2cController : IDisposable
     {
+        
         /// <summary>
         /// Opens an I2C device with specified settings in order for it to be ready to use with the controller.
         /// </summary>
@@ -34,6 +35,17 @@ namespace System.Device.I2c
         /// Removes all I2C devices from controller.
         /// </summary>
         void ClearDevices();
+
+        /// <summary>
+        /// Gets the I2C device associated with the specified bus ID and address.
+        /// </summary>
+        /// <param name="busId">The bus ID the I2C device is connected to.</param>
+        /// <param name="address">The bus address of the I2C device to write.</param>
+        /// <param name="device">
+        /// When this method returns, contains the I2C device associated with the specified bus ID and address, if they are found;
+        /// otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.
+        /// </param>
+        bool TryGetDevice(int busId, int address, out I2cDevice? device);
 
         /// <summary>
         /// Reads data from the specified I2C device.
