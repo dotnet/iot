@@ -7,7 +7,7 @@ namespace Iot.Device.Bmxx80.Register
     /// <summary>
     ///  Register
     /// </summary>
-    internal enum Bmx280Register : byte
+    public enum Bmx280Register : byte
     {
         CONTROL = 0xF4,
 
