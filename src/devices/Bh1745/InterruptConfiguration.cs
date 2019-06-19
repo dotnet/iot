@@ -4,7 +4,7 @@
 
 namespace Iot.Device.Bh1745
 {
-/// <summary>
+    /// <summary>
     /// Represents the configuration for the interrupt persistence functionality of the Bh1745.
     /// </summary>
     public enum InterruptPersistence : byte

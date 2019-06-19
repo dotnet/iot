@@ -173,7 +173,7 @@ namespace Iot.Device.Bh1745
             }
             set
             {
-                if(!Enum.IsDefined(typeof(LatchBehavior), value))
+                if (!Enum.IsDefined(typeof(LatchBehavior), value))
                     throw new ArgumentOutOfRangeException();
 
                 var intLatch = Read8BitsFromRegister((byte)Register.INTERRUPT);
@@ -239,7 +239,7 @@ namespace Iot.Device.Bh1745
             {
                 var intPersistence = Read8BitsFromRegister((byte)Register.PERSISTENCE);
                 intPersistence = (byte)((intPersistence & (byte)~Mask.PERSISTENCE) | (byte)value);
-                
+
                 Write8BitsToRegister((byte)Register.PERSISTENCE, intPersistence);
             }
         }

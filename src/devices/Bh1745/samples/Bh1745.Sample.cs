@@ -30,7 +30,7 @@ namespace Iot.Device.Bh1745.Samples
             {                
                 var color = i2CBh1745.GetCompensatedColor();
                 Console.WriteLine("RGB color read: #{0:X2}{1:X2}{2:X2}", color.R, color.G, color.B);
-				Console.WriteLine($"Raw illumination value: {i2CBh1745.ClearDataRegister}")
+                Console.WriteLine($"Raw illumination value: {i2CBh1745.ClearDataRegister}");
 
                 Task.Delay(i2CBh1745.MeasurementTime.ToMilliseconds()).Wait();
             }
