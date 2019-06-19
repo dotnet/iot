@@ -8,15 +8,20 @@ namespace System.Device.I2c
 {
     public sealed partial class I2cController : II2cController
     {
-        private readonly Dictionary<(int, int), I2cDevice> _devices;
+        private readonly Dictionary<(int, int), I2cDevice> _openDevices;
 
         /// <summary>
         /// Initializes new instance of I2cController.
         /// </summary>
         public I2cController()
         {
-            _devices = new Dictionary<(int, int), I2cDevice>();
+            _openDevices = new Dictionary<(int, int), I2cDevice>();
         }
+
+        /// <summary>
+        /// Determines if this should be disposed.
+        /// </summary>
+        public bool ShouldDispose { get; set; } = true;
 
         /// <summary>
         /// Gets the I2C device for specified address.
@@ -26,7 +31,7 @@ namespace System.Device.I2c
         /// <returns>The I2C device with specified address.</returns>
         private I2cDevice GetDevice(int busId, int address)
         {
-            if (!_devices.TryGetValue((busId, address), out I2cDevice device))
+            if (!_openDevices.TryGetValue((busId, address), out I2cDevice device))
             {
                 throw new InvalidOperationException("The specified bus ID and address is not being used with an I2C device.");
             }
@@ -38,29 +43,33 @@ namespace System.Device.I2c
         /// Opens an I2C device with specified settings in order for it to be ready to use with the controller.
         /// </summary>
         /// <param name="settings">The connection settings of a device on an I2C bus.</param>
-        public void OpenDevice(I2cConnectionSettings settings)
+        /// <param name="shouldDispose">Determines if the device should be disposed by a controller or binding.</param>
+        public void OpenDevice(I2cConnectionSettings settings, bool shouldDispose = true)
         {
             int busId = settings.BusId;
             int address = settings.DeviceAddress;
 
-            if (_devices.ContainsKey((busId, address)))
+            if (_openDevices.ContainsKey((busId, address)))
             {
                 throw new InvalidOperationException($"The specified bus ID ({busId}) and address ({address}) is already used with another I2C device.");
             }
 
-            _devices.Add((busId, address), I2cController.Create(new I2cConnectionSettings(busId, address)));
+            I2cDevice device = I2cController.Create(new I2cConnectionSettings(busId, address));
+            device.ShouldDispose = shouldDispose;
+            _openDevices.Add((busId, address), device);
         }
 
         /// <summary>
         /// Opens an I2C device in order for it to be ready to use with the controller.
         /// </summary>
         /// <param name="device">The I2C device to open.</param>
-        public void OpenDevice(I2cDevice device)
+        /// <param name="shouldDispose">Determines if the device should be disposed by a controller or binding.</param>
+        public void OpenDevice(I2cDevice device, bool shouldDispose = true)
         {
             // TODO: Should this compare type with other devices added to makes sure they are all the same (at least on same bus).
             // Example: Would not want to add one for UnixI2cDevice and another for GpioI2cDevice.
 
-            OpenDevice(device.ConnectionSettings);
+            OpenDevice(device.ConnectionSettings, shouldDispose);
         }
 
         /// <summary>
@@ -71,22 +80,35 @@ namespace System.Device.I2c
         {
             int busId = settings.BusId;
             int address = settings.DeviceAddress;
+            I2cDevice device = GetDevice(busId, address);
+            _openDevices.Remove((busId, address));
 
-            GetDevice(busId, address);  // This checks if device with address is present before removing.
-            _devices.Remove((busId, address));
-
+            if (device.ShouldDispose)
+            {
+                device.Dispose();
+            }
         }
 
         /// <summary>
         /// Closes an open I2C device.
         /// </summary>
         /// <param name="device">The I2C device to close.</param>
-        public void CloseDevice(I2cDevice device) => CloseDevice(device.ConnectionSettings);
+        public void CloseDevice(I2cDevice device)
+        {
+            int busId = device.ConnectionSettings.BusId;
+            int address = device.ConnectionSettings.DeviceAddress;
+            _openDevices.Remove((busId, address));
+
+            if (device.ShouldDispose)
+            {
+                device.Dispose();
+            }
+        }
 
         /// <summary>
         /// Removes all I2C devices from controller.
         /// </summary>
-        public void ClearDevices() => _devices.Clear();
+        public void ClearDevices() => _openDevices.Clear();
 
         /// <summary>
         /// Gets the I2C device associated with the specified bus ID and address.
@@ -170,12 +192,15 @@ namespace System.Device.I2c
 
         private void Dispose(bool disposing)
         {
-            foreach (KeyValuePair<(int, int), I2cDevice> device in _devices)
+            foreach (KeyValuePair<(int, int), I2cDevice> device in _openDevices)
             {
-                device.Value.Dispose();
+                if (device.Value.ShouldDispose)
+                {
+                    device.Value.Dispose();
+                }
             }
 
-            _devices.Clear();
+            _openDevices.Clear();
         }
     }
 }

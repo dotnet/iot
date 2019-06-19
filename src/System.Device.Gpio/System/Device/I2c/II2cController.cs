@@ -6,18 +6,24 @@ namespace System.Device.I2c
 {
     public interface II2cController : IDisposable
     {
-        
+        /// <summary>
+        /// Determines if this should be disposed.
+        /// </summary>
+        bool ShouldDispose { get; set; }
+
         /// <summary>
         /// Opens an I2C device with specified settings in order for it to be ready to use with the controller.
         /// </summary>
         /// <param name="settings">The connection settings of a device on an I2C bus.</param>
-        void OpenDevice(I2cConnectionSettings settings);
+        /// <param name="shouldDispose">Determines if this should be disposed.</param>
+        void OpenDevice(I2cConnectionSettings settings, bool shouldDispose = true);
 
         /// <summary>
         /// Opens an I2C device in order for it to be ready to use with the controller.
         /// </summary>
         /// <param name="device">The I2C device to open.</param>
-        void OpenDevice(I2cDevice device);
+        /// <param name="shouldDispose">Determines if this should be disposed.</param>
+        void OpenDevice(I2cDevice device, bool shouldDispose = true);
 
         /// <summary>
         /// Closes an open I2C device based on specified settings.
