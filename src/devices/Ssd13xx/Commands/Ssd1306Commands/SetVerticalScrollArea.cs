@@ -19,12 +19,12 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
         {
             if (topFixedAreaRows > 0x3F)
             {
-                throw new ArgumentException("The top fixed area rows are invalid.", nameof(topFixedAreaRows));
+                throw new ArgumentOutOfRangeException(nameof(topFixedAreaRows));
             }
 
             if (scrollAreaRows > 0x7F)
             {
-                throw new ArgumentException("The scroll area rows are invalid.", nameof(scrollAreaRows));
+                throw new ArgumentOutOfRangeException(nameof(scrollAreaRows));
             }
 
             TopFixedAreaRows = topFixedAreaRows;

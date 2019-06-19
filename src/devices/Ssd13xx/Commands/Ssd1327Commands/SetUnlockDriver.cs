@@ -6,7 +6,6 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
     public class SetUnlockDriver : ISsd1327Command
     {
-
         /// <summary>
         /// This command sets the display to be normal.
         /// </summary>

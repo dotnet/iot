@@ -17,7 +17,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         {
             if (displayOffset > 0x5F)
             {
-                throw new ArgumentException("The display offset is invalid.", nameof(displayOffset));
+                throw new ArgumentOutOfRangeException(nameof(displayOffset));
             }
 
             DisplayOffset = displayOffset;

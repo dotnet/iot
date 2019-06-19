@@ -18,7 +18,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         {
             if (displayStartLine > 0x7F)
             {
-                throw new ArgumentException("The display start line is invalid.", nameof(displayStartLine));
+                throw new ArgumentOutOfRangeException(nameof(displayStartLine));
             }
 
             DisplayStartLine = displayStartLine;

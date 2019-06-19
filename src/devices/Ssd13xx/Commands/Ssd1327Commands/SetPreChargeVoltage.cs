@@ -20,7 +20,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         {
             if (level > 0x08)
             {
-                throw new ArgumentException("The pre-charge voltage level is invalid.");
+                throw new ArgumentOutOfRangeException(nameof(level));
             }
 
             Level = level;

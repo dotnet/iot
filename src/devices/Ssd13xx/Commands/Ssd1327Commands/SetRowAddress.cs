@@ -17,12 +17,12 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         {
             if (startAddress > 0x5f)
             {
-                throw new ArgumentException("The row start address is invalid.", nameof(startAddress));
+                throw new ArgumentOutOfRangeException(nameof(startAddress));
             }
 
             if (endAddress > 0x5f)
             {
-                throw new ArgumentException("The row end address is invalid.", nameof(endAddress));
+                throw new ArgumentOutOfRangeException(nameof(endAddress));
             }
 
             StartAddress = startAddress;

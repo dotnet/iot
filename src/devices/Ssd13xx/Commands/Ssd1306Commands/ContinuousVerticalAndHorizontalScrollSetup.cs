@@ -27,7 +27,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
         {
             if (verticalScrollingOffset > 0x3F)
             {
-                throw new ArgumentException("The vertical scrolling offset is invalid.", nameof(verticalScrollingOffset));
+                throw new ArgumentOutOfRangeException(nameof(verticalScrollingOffset));
             }
 
             ScrollType = scrollType;

@@ -16,7 +16,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         {
             if (level > 0x07)
             {
-                throw new ArgumentException("The COM deselect voltage level is invalid.");
+                throw new ArgumentOutOfRangeException(nameof(level));
             }
 
             Level = level;

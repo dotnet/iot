@@ -64,12 +64,12 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         {
             if (!Ssd13xx.InRange(phase1Period, 0x01, 0x0F))
             {
-                throw new ArgumentException("The phase 1 period is invalid.", nameof(phase1Period));
+                throw new ArgumentOutOfRangeException(nameof(phase1Period));
             }
 
             if (!Ssd13xx.InRange(phase2Period, 0x01, 0x0F))
             {
-                throw new ArgumentException("The phase 2 period is invalid.", nameof(phase2Period));
+                throw new ArgumentOutOfRangeException(nameof(phase2Period));
             }
         }
     }

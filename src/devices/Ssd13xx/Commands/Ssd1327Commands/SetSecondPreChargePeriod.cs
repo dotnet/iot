@@ -16,7 +16,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         {
             if (period > 0x0F)
             {
-                throw new ArgumentException("The second pre-charge period is invalid.");
+                throw new ArgumentOutOfRangeException(nameof(period));
             }
 
             Period = period;

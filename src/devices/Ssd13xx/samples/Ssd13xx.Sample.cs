@@ -292,6 +292,5 @@ namespace Iot.Device.Ssd13xx.Samples
                 s.SendData(buffer.Skip(i).Take(chunk_size).ToArray());
             }
         }
-        
     }
 }

@@ -18,7 +18,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
         {
             if (higherColumnStartAddress > 0x0F)
             {
-                throw new ArgumentException("The higher column start address is invalid.", nameof(higherColumnStartAddress));
+                throw new ArgumentOutOfRangeException(nameof(higherColumnStartAddress));
             }
 
             HigherColumnStartAddress = higherColumnStartAddress;

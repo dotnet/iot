@@ -18,12 +18,12 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
         {
             if (displayClockDivideRatio > 0x0F)
             {
-                throw new ArgumentException("The display clock divide ratio is invalid.", nameof(displayClockDivideRatio));
+                throw new ArgumentOutOfRangeException(nameof(displayClockDivideRatio));
             }
 
             if (oscillatorFrequency > 0x0F)
             {
-                throw new ArgumentException("The oscillator frequency is invalid.", nameof(oscillatorFrequency));
+                throw new ArgumentOutOfRangeException(nameof(oscillatorFrequency));
             }
 
             DisplayClockDivideRatio = displayClockDivideRatio;

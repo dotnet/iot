@@ -19,12 +19,12 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         {
             if (startAddress > 0x37)
             {
-                throw new ArgumentException("The column start address is invalid.", nameof(startAddress));
+                throw new ArgumentOutOfRangeException(nameof(startAddress));
             }
 
             if (endAddress > 0x37)
             {
-                throw new ArgumentException("The column end address is invalid.", nameof(endAddress));
+                throw new ArgumentOutOfRangeException(nameof(endAddress));
             }
 
             StartAddress = startAddress;
