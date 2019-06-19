@@ -13,6 +13,11 @@ namespace System.Device.I2c
     public abstract class I2cDevice : IDisposable
     {
         /// <summary>
+        /// Determines if this should be disposed.
+        /// </summary>
+        public bool ShouldDispose { get; set; } = true;
+
+        /// <summary>
         /// The connection settings of a device on an I2C bus.
         /// </summary>
         public abstract I2cConnectionSettings ConnectionSettings { get; }
