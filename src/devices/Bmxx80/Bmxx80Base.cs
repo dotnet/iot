@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -18,12 +18,12 @@ namespace Iot.Device.Bmxx80
     /// </summary>
     public abstract class Bmxx80Base : IDisposable
     {
-        internal Bmxx80CalibrationData _calibrationData;
-        internal I2cDevice _i2cDevice;
-        internal CommunicationProtocol _communicationProtocol;
-        internal byte _controlRegister;
+        protected Bmxx80CalibrationData _calibrationData;
+        protected I2cDevice _i2cDevice;
+        protected CommunicationProtocol _communicationProtocol;
+        protected byte _controlRegister;
 
-        internal enum CommunicationProtocol
+        public enum CommunicationProtocol
         {
             I2c
         }
@@ -107,7 +107,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="adcTemperature">The temperature value read from the device.</param>
         /// <returns>The <see cref="Temperature"/>.</returns>
-        internal Temperature CompensateTemperature(int adcTemperature)
+        protected Temperature CompensateTemperature(int adcTemperature)
         {
             //Formula from the datasheet
             //The temperature is calculated using the compensation formula in the BMP280 datasheet
@@ -184,7 +184,7 @@ namespace Iot.Device.Bmxx80
             }
         }
 
-        internal Sampling ByteToSampling(byte value)
+        protected Sampling ByteToSampling(byte value)
         {
             //Values >=5 equals UltraHighResolution.
             if (value >= 5)
