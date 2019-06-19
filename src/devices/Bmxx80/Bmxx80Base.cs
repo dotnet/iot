@@ -109,8 +109,8 @@ namespace Iot.Device.Bmxx80
         /// <returns>The <see cref="Temperature"/>.</returns>
         protected Temperature CompensateTemperature(int adcTemperature)
         {
-            //Formula from the datasheet
-            //The temperature is calculated using the compensation formula in the BMP280 datasheet
+            // The temperature is calculated using the compensation formula in the BMP280 datasheet.
+            // See: https://cdn-shop.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
             double var1 = ((adcTemperature / 16384.0) - (_calibrationData.DigT1 / 1024.0)) * _calibrationData.DigT2;
             double var2 = ((adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0)) * _calibrationData.DigT3;
             var2 *= var2 * _calibrationData.DigT3;
