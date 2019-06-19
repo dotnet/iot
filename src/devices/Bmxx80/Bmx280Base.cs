@@ -62,27 +62,15 @@ namespace Iot.Device.Bmxx80
         /// <returns>The time it takes for the chip to read data in milliseconds rounded up.</returns>
         private int GetMeasurementTimeForForcedMode(Sampling sampleMode)
         {
-            if (sampleMode == Sampling.UltraLowPower)
+            return sampleMode switch
             {
-                return 7;
-            }
-            else if (sampleMode == Sampling.LowPower)
-            {
-                return 9;
-            }
-            else if (sampleMode == Sampling.Standard)
-            {
-                return 14;
-            }
-            else if (sampleMode == Sampling.HighResolution)
-            {
-                return 23;
-            }
-            else if (sampleMode == Sampling.UltraHighResolution)
-            {
-                return 44;
-            }
-            return 0;
+                Sampling.UltraLowPower => 7,
+                Sampling.LowPower => 9,
+                Sampling.Standard => 14,
+                Sampling.HighResolution => 23,
+                Sampling.UltraHighResolution => 44,
+                _ => 0
+            };
         }
 
         /// <summary>
