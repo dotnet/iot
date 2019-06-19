@@ -39,8 +39,8 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="deviceId">The ID of the device.</param>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="IOException"></exception>
+        /// <exception cref="ArgumentNullException">Thrown when the given <see cref="I2cDevice"/> is null.</exception>
+        /// <exception cref="IOException">Thrown when the device cannot be found on the bus.</exception>
         protected Bmxx80Base(byte deviceId, I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
