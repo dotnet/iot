@@ -15,7 +15,7 @@ namespace Iot.Device.Bmxx80.CalibrationData
         /// Read coefficient data from device.
         /// </summary>
         /// <param name="bmxx80Base">The <see cref="Bmxx80Base"/> to read coefficient data from.</param>
-        internal override void ReadFromDevice(Bmxx80Base bmxx80Base)
+        protected internal override void ReadFromDevice(Bmxx80Base bmxx80Base)
         {
             // Read temperature calibration data
             DigT1 = bmxx80Base.Read16BitsFromRegister((byte)Bmx280Register.DIG_T1);

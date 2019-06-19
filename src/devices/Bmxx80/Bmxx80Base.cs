@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -126,7 +126,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="register">Register to read from.</param>
         /// <returns>Value from register.</returns>
-        internal byte Read8BitsFromRegister(byte register)
+        protected internal byte Read8BitsFromRegister(byte register)
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {
@@ -145,7 +145,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="register">Register to read from.</param>
         /// <returns>Value from register.</returns>
-        internal ushort Read16BitsFromRegister(byte register)
+        protected internal ushort Read16BitsFromRegister(byte register)
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {
@@ -167,7 +167,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="register">Register to read from.</param>
         /// <returns>Value from register.</returns>
-        internal uint Read24BitsFromRegister(byte register)
+        protected internal uint Read24BitsFromRegister(byte register)
         {
             if (_communicationProtocol == CommunicationProtocol.I2c)
             {

@@ -7,7 +7,7 @@ namespace Iot.Device.Bmxx80.CalibrationData
     /// <summary>
     /// Calibration data for the Bmxx80 family.
     /// </summary>
-    internal abstract class Bmxx80CalibrationData
+    public abstract class Bmxx80CalibrationData
     {
         public ushort DigT1 { get; set; }
         public short DigT2 { get; set; }
@@ -36,6 +36,6 @@ namespace Iot.Device.Bmxx80.CalibrationData
         /// Read coefficient data from device.
         /// </summary>
         /// <param name="bmxx80Base">The <see cref="Bmxx80Base"/> to read coefficient data from.</param>
-        internal virtual void ReadFromDevice(Bmxx80Base bmxx80Base) { }
+        protected internal virtual void ReadFromDevice(Bmxx80Base bmxx80Base) { }
     }
 }
