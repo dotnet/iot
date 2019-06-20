@@ -24,9 +24,16 @@ namespace Iot.Device.Bme680
         /// </summary>
         public byte HeaterDuration { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="profile">The used heater profile.</param>
+        /// <param name="heaterResistance">The heater resistance in Ohm.</param>
+        /// <param name="heaterDuration">The heating duration in ms.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if a non existent heater profile is selected.</exception>
         public HeaterProfileConfiguration(HeaterProfile profile, ushort heaterResistance, byte heaterDuration)
         {
-            if(!Enum.IsDefined(typeof(HeaterProfile), profile))
+            if (!Enum.IsDefined(typeof(HeaterProfile), profile))
                 throw new ArgumentOutOfRangeException();
 
             HeaterProfile = profile;

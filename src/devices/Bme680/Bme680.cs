@@ -14,6 +14,9 @@ using Iot.Units;
 
 namespace Iot.Device.Bme680
 {
+    /// <summary>
+    /// Temperature, humidity, pressure and gas resistance sensor Bme680.
+    /// </summary>
     public class Bme680 : IDisposable
     {
 
@@ -28,33 +31,40 @@ namespace Iot.Device.Bme680
         // The ChipId of the BME680
         private const byte DeviceId = 0x61;
 
-        // The I2c address of the Bme680 is either 0x76 (primary) or 0x77 (secondary)
+        /// <summary>
+        /// The default I2c address of the Bme680.
+        /// </summary>
         public const byte DefaultI2cAddress = 0x76;
 
         /// <summary>
-        /// Gets the last measured temperature data from the corresponding register.
+        /// The secondary I2c address of the Bme680.
+        /// </summary>
+        public const byte SecondaryI2cAddress = 0x77;
+
+        /// <summary>
+        /// Gets the last measured temperature data.
         /// </summary>
         public Temperature Temperature => ReadTemperature();
 
         /// <summary>
-        /// Gets the last measured relative humidity in percent from the corresponding register.
+        /// Gets the last measured relative humidity in percent.
         /// </summary>
         public double Humidity => ReadHumidity();
 
         /// <summary>
-        /// Gets the last measured pressure in Pa from the corresponding register.
+        /// Gets the last measured pressure in Pa.
         /// </summary>
         public double Pressure => ReadPressure();
 
         /// <summary>
-        /// Gets the last measured gas resistance in Ohm from the corresponding register.
+        /// Gets the last measured gas resistance in Ohm.
         /// </summary>
         public double GasResistance => ReadGasResistance();
 
         /// <summary>
         /// Gets or sets whether the heater is enabled.
         /// </summary>
-        public bool HeaterIsEnabled
+        public bool HeaterIsDisabled
         {
             get
             {
@@ -65,8 +75,7 @@ namespace Iot.Device.Bme680
             set
             {
                 var heaterStatus = Read8BitsFromRegister((byte)Register.CTRL_GAS_0);
-                heaterStatus = (byte)(heaterStatus & ((byte)Mask.HEAT_OFF ^ (byte)Mask.CLR));
-                heaterStatus = (byte)(heaterStatus | Convert.ToUInt32(value) << 4);
+                heaterStatus = (byte)((heaterStatus & (byte)~Mask.HEAT_OFF) | Convert.ToByte(value) << 3);
 
                 Write8BitsToRegister((byte)Register.CTRL_GAS_0, heaterStatus);
             }
@@ -86,8 +95,7 @@ namespace Iot.Device.Bme680
             set
             {
                 var gasConversion = Read8BitsFromRegister((byte)Register.CTRL_GAS_1);
-                gasConversion = (byte)(gasConversion & ((byte)Mask.RUN_GAS ^ (byte)Mask.CLR));
-                gasConversion = (byte)(gasConversion | Convert.ToUInt32(value) << 4);
+                gasConversion = (byte)((gasConversion & (byte)~Mask.RUN_GAS) | Convert.ToByte(value) << 4);
 
                 Write8BitsToRegister((byte)Register.CTRL_GAS_1, gasConversion);
             }
@@ -172,8 +180,7 @@ namespace Iot.Device.Bme680
             set
             {
                 var heaterProfile = Read8BitsFromRegister((byte)Register.CTRL_GAS_1);
-                heaterProfile = (byte)(heaterProfile & ((byte)Mask.NB_CONV ^ (byte)Mask.CLR));
-                heaterProfile = (byte)(heaterProfile | (byte)value);
+                heaterProfile = (byte)((heaterProfile & (byte)~Mask.NB_CONV) | (byte)value);
 
                 Write8BitsToRegister((byte)Register.CTRL_GAS_1, heaterProfile);
             }
@@ -197,8 +204,7 @@ namespace Iot.Device.Bme680
             set
             {
                 var filter = Read8BitsFromRegister((byte)Register.CONFIG);
-                filter = (byte)(filter & ((byte)Mask.FILTER_COEFFICIENT ^ (byte)Mask.CLR));
-                filter = (byte)(filter | (byte)value << 2);
+                filter = (byte)((filter & (byte)~Mask.FILTER_COEFFICIENT) | (byte)value << 2);
 
                 Write8BitsToRegister((byte)Register.CONFIG, filter);
             }
@@ -218,8 +224,7 @@ namespace Iot.Device.Bme680
             set
             {
                 var status = Read8BitsFromRegister((byte)Register.CTRL_MEAS);
-                status = (byte)(status & ((byte)Mask.TEMPERATURE_SAMPLING ^ (byte)Mask.CLR));
-                status = (byte)(status | (byte)value << 5);
+                status = (byte)((status & (byte)~Mask.TEMPERATURE_SAMPLING) | (byte)value << 5);
 
                 Write8BitsToRegister((byte)Register.CTRL_MEAS, status);
             }
@@ -239,8 +244,7 @@ namespace Iot.Device.Bme680
             set
             {
                 var status = Read8BitsFromRegister((byte)Register.CTRL_HUM);
-                status = (byte)(status & ((byte)Mask.HUMIDITY_SAMPLING ^ (byte)Mask.CLR));
-                status = (byte)(status | (byte)value);
+                status = (byte)((status & (byte)~Mask.HUMIDITY_SAMPLING) | (byte)value);
 
                 Write8BitsToRegister((byte)Register.CTRL_HUM, status);
             }
@@ -260,8 +264,7 @@ namespace Iot.Device.Bme680
             set
             {
                 var status = Read8BitsFromRegister((byte)Register.CTRL_MEAS);
-                status = (byte)(status & ((byte)Mask.PRESSURE_SAMPLING ^ (byte)Mask.CLR));
-                status = (byte)(status | (byte)value << 2);
+                status = (byte)((status & (byte)~Mask.PRESSURE_SAMPLING) | (byte)value << 2);
 
                 Write8BitsToRegister((byte)Register.CTRL_MEAS, status);
             }
@@ -276,6 +279,10 @@ namespace Iot.Device.Bme680
             return (Sampling)value;
         }
 
+        /// <summary>
+        /// Temperature, humidity, pressure and gas resistance sensor Bme680.
+        /// </summary>
+        /// <param name="i2cDevice">The used I2c communication device.</param>
         public Bme680(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;
@@ -293,7 +300,7 @@ namespace Iot.Device.Bme680
             //_protocol = CommunicationProtocol.Spi;
         }
 
-        public enum CommunicationProtocol
+        private enum CommunicationProtocol
         {
             I2C,
             Spi
@@ -309,8 +316,9 @@ namespace Iot.Device.Bme680
             if (readSignature != DeviceId)
                 throw new Exception($"Device ID {readSignature} is not the same as expected {DeviceId}. Please check if you are using the right device.");
 
-            _initialized = true;
+            TriggerSoftReset();
             _calibrationData.ReadFromDevice(this);
+            _initialized = true;
 
             // perform a single temperature reading to set the temperature fine and set the default configuration
             TemperatureSampling = Sampling.X1;
@@ -348,7 +356,7 @@ namespace Iot.Device.Bme680
             SetPowerMode(PowerMode.Forced);
 
             if (GasConversionIsEnabled)
-                HeaterIsEnabled = true;
+                HeaterIsDisabled = false;
 
             await Task.Delay(duration);
         }
@@ -363,8 +371,7 @@ namespace Iot.Device.Bme680
                 InitDevice();
 
             var status = Read8BitsFromRegister((byte)Register.CTRL_MEAS);
-            status = (byte)(status & ((byte)Mask.PWR_MODE ^ (byte)Mask.CLR));
-            status = (byte)(status | (byte)powerMode);
+            status = (byte)((status & (byte)~Mask.PWR_MODE) | (byte)powerMode);
 
             Write8BitsToRegister((byte)Register.CTRL_MEAS, status);
         }
@@ -383,14 +390,14 @@ namespace Iot.Device.Bme680
 
         /// <summary>
         /// Gets the required time in ms to perform a measurement with the given heater profile.
-        /// The precision of this duration is within 1ms of the actual measurement time
+        /// The precision of this duration is within 1ms of the actual measurement time.
         /// </summary>
         /// <param name="profile">The heater profile.</param>
         /// <returns></returns>
         public int GetProfileDuration(HeaterProfile profile)
         {
             var osToMeasCycles = new byte[] { 0, 1, 2, 4, 8, 16 };
-            var osToSwitchCount = new byte[] {0, 1, 1, 1, 1, 1};
+            var osToSwitchCount = new byte[] { 0, 1, 1, 1, 1, 1 };
 
             var measCycles = osToMeasCycles[(int)TemperatureSampling];
             measCycles += osToMeasCycles[(int)PressureSampling];
@@ -399,7 +406,7 @@ namespace Iot.Device.Bme680
             var switchCount = osToSwitchCount[(int)TemperatureSampling];
             switchCount += osToSwitchCount[(int)PressureSampling];
             switchCount += osToSwitchCount[(int)HumiditySampling];
-            
+
             double measDuration = measCycles * 1963;
             measDuration += 477 * switchCount;      // TPH switching duration
 
@@ -452,7 +459,7 @@ namespace Iot.Device.Bme680
         /// <summary>
         /// Reads the temperature from the sensor.
         /// </summary>
-        /// <returns>Temperature</returns>
+        /// <returns>Temperature in degrees Celsius.</returns>
         private Temperature ReadTemperature()
         {
             if (TemperatureSampling == Sampling.Skipped)
@@ -555,10 +562,10 @@ namespace Iot.Device.Bme680
         private double CalculatePressure(uint adcPressure)
         {
             var var1 = _temperatureFine / 2.0 - 64000.0;
-            var var2 = Math.Pow(var1, 2) * (_calibrationData.ParP6 / 131072.0);
+            var var2 = var1 * var1 * (_calibrationData.ParP6 / 131072.0);
             var2 += var1 * _calibrationData.ParP5 * 2.0;
             var2 = var2 / 4.0 + _calibrationData.ParP4 * 65536.0;
-            var1 = (_calibrationData.ParP3 * Math.Pow(var1, 2) / 16384.0 + _calibrationData.ParP2 * var1) / 524288.0;
+            var1 = (_calibrationData.ParP3 * var1 * var1 / 16384.0 + _calibrationData.ParP2 * var1) / 524288.0;
             var1 = (1.0 + var1 / 32768.0) * _calibrationData.ParP1;
             var pressure = 1048576.0 - adcPressure;
 
@@ -566,9 +573,9 @@ namespace Iot.Device.Bme680
                 return 0;
 
             pressure = (pressure - var2 / 4096.0) * 6250.0 / var1;
-            var1 = _calibrationData.ParP9 * Math.Pow(pressure, 2) / 2147483648.0;
+            var1 = _calibrationData.ParP9 * pressure * pressure / 2147483648.0;
             var2 = pressure * (_calibrationData.ParP8 / 32768.0);
-            var var3 = Math.Pow(pressure / 256.0, 3) * (_calibrationData.ParP10 / 131072.0);
+            var var3 = (pressure / 256.0) * (pressure / 256.0) * (pressure / 256.0) * (_calibrationData.ParP10 / 131072.0);
             pressure += (var1 + var2 + var3 + _calibrationData.ParP7 * 128.0) / 16.0;
 
             return pressure;
@@ -578,7 +585,7 @@ namespace Iot.Device.Bme680
         {
             var tempComp = _temperatureFine / 5120.0;
             var var1 = adcHumidity - (_calibrationData.ParH1 * 16.0 + _calibrationData.ParH3 / 2.0 * tempComp);
-            var var2 = var1 * (float)(_calibrationData.ParH2 / 262144.0 * (1.0 + _calibrationData.ParH4 / 16384.0 * tempComp + _calibrationData.ParH5 / 1048576.0 * Math.Pow(tempComp, 2)));
+            var var2 = var1 * (_calibrationData.ParH2 / 262144.0 * (1.0 + _calibrationData.ParH4 / 16384.0 * tempComp + _calibrationData.ParH5 / 1048576.0 * (tempComp * tempComp)));
             var var3 = _calibrationData.ParH6 / 16384.0;
             var var4 = _calibrationData.ParH7 / 2097152.0;
             var humidity = var2 + (var3 + var4 * tempComp) * var2 * var2;
@@ -624,7 +631,7 @@ namespace Iot.Device.Bme680
 
         // The duration is interpreted as follows:
         // Byte [7:6]: multiplication factor of 1 ,4, 16 or 64
-        // Byte [5:0] 64 timer values, 1ms step size
+        // Byte [5:0]: 64 timer values, 1ms step size
         // Values are rounded down
         private byte CalculateHeaterDuration(ushort duration)
         {
@@ -723,6 +730,9 @@ namespace Iot.Device.Bme680
             BigEndian
         }
 
+        /// <summary>
+        /// Disposes the Bme680 resources.
+        /// </summary>
         public void Dispose()
         {
             if (_i2cDevice != null)

@@ -26,8 +26,6 @@ namespace Iot.Device.Bme680
         GAS_MEASURING = 0x40,
         MEASURING = 0x20,
         GAS_VALID = 0x20,
-        HEAT_STAB = 0x10,
-
-        CLR = 0xFF
+        HEAT_STAB = 0x10
     }
 }
