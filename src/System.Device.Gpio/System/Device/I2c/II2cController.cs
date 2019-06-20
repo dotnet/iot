@@ -3,28 +3,24 @@
 // See the LICENSE file in the project root for more information.
 
 #nullable enable
+using System.Collections.Generic;
 
 namespace System.Device.I2c
 {
     public interface II2cController : IDisposable
     {
         /// <summary>
-        /// Determines if this should be disposed.
-        /// </summary>
-        bool ShouldDispose { get; set; }
-
-        /// <summary>
         /// Opens an I2C device with specified settings in order for it to be ready to use with the controller.
         /// </summary>
         /// <param name="settings">The connection settings of a device on an I2C bus.</param>
-        /// <param name="shouldDispose">Determines if this should be disposed.</param>
+        /// <param name="shouldDispose">Determines if the device should be disposed by a controller or binding.</param>
         void OpenDevice(I2cConnectionSettings settings, bool shouldDispose = true);
 
         /// <summary>
         /// Opens an I2C device in order for it to be ready to use with the controller.
         /// </summary>
         /// <param name="device">The I2C device to open.</param>
-        /// <param name="shouldDispose">Determines if this should be disposed.</param>
+        /// <param name="shouldDispose">Determines if the device should be disposed by a controller or binding.</param>
         void OpenDevice(I2cDevice device, bool shouldDispose = true);
 
         /// <summary>
@@ -40,7 +36,7 @@ namespace System.Device.I2c
         void CloseDevice(I2cDevice device);
 
         /// <summary>
-        /// Removes all I2C devices from controller.
+        /// Removes all I2C devices.
         /// </summary>
         void ClearDevices();
 
@@ -54,6 +50,12 @@ namespace System.Device.I2c
         /// otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.
         /// </param>
         bool TryGetDevice(int busId, int address, out I2cDevice? device);
+
+        /// <summary>
+        /// Gets all I2C devices.
+        /// </summary>
+        /// <returns>All I2C devices.</returns>
+        IEnumerable<I2cDevice> GetDevices();
 
         /// <summary>
         /// Reads data from the specified I2C device.
