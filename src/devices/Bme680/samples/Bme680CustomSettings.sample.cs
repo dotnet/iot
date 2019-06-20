@@ -31,7 +31,7 @@ namespace Iot.Device.Bme680.Samples
             bme680.PressureSampling = Sampling.Skipped;
             bme680.FilterCoefficient = FilterCoefficient.C31;
             bme680.GasConversionIsEnabled = true;
-            bme680.HeaterIsEnabled = true;
+            bme680.HeaterIsDisabled = false;
 
             Console.WriteLine("Performing measurements with custom configuration:\n");
             while (true)
