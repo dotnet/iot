@@ -15,6 +15,9 @@ namespace Iot.Device.Bh1745
     /// </summary>
     public class Bh1745 : IDisposable
     {
+        /// <summary>
+        /// The primary I2c address of the BH1745
+        /// </summary>
         public const byte DefaultI2cAddress = 0x38;
 
         /// <summary>
