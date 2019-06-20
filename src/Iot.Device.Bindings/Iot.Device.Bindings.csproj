@@ -8,7 +8,7 @@
     <DeviceRoot>$(MSBuildThisFileDirectory)../devices/</DeviceRoot>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackageRefAssembly</TargetsForTfmSpecificContentInPackage>
-	<LangVersion>8</LangVersion>
+	  <LangVersion>8</LangVersion>
     <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
 
