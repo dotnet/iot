@@ -15,9 +15,6 @@ namespace Iot.Device.Bh1745
     /// </summary>
     public class Bh1745 : IDisposable
     {
-        /// <summary>
-        /// The primary I2c address of the BH1745
-        /// </summary>
         public const byte DefaultI2cAddress = 0x38;
 
         /// <summary>
@@ -41,7 +38,7 @@ namespace Iot.Device.Bh1745
             set
             {
                 var status = Read8BitsFromRegister((byte)Register.SYSTEM_CONTROL);
-                status = (byte)(((status & (byte)~Mask.SW_RESET) | Convert.ToByte(value)) << 7);
+                status = (byte)((status & (byte)~Mask.SW_RESET) | Convert.ToByte(value) << 7);
 
                 Write8BitsToRegister((byte)Register.SYSTEM_CONTROL, status);
             }
@@ -65,7 +62,7 @@ namespace Iot.Device.Bh1745
                     throw new ArgumentOutOfRangeException();
 
                 var intReset = Read8BitsFromRegister((byte)Register.SYSTEM_CONTROL);
-                intReset = (byte)(((intReset & (byte)~Mask.INT_RESET) | (byte)value) << 6);
+                intReset = (byte)((intReset & (byte)~Mask.INT_RESET) | (byte)value << 6);
 
                 Write8BitsToRegister((byte)Register.SYSTEM_CONTROL, intReset);
             }
@@ -109,7 +106,7 @@ namespace Iot.Device.Bh1745
             set
             {
                 var active = Read8BitsFromRegister((byte)Register.MODE_CONTROL2);
-                active = (byte)(((active & (byte)~Mask.RGBC_EN) | Convert.ToByte(value)) << 4);
+                active = (byte)((active & (byte)~Mask.RGBC_EN) | Convert.ToByte(value) << 4);
 
                 Write8BitsToRegister((byte)Register.MODE_CONTROL2, active);
             }
@@ -153,7 +150,7 @@ namespace Iot.Device.Bh1745
             set
             {
                 var intStatus = Read8BitsFromRegister((byte)Register.INTERRUPT);
-                intStatus = (byte)(((intStatus & (byte)~Mask.INT_STATUS) | Convert.ToByte(value)) << 7);
+                intStatus = (byte)((intStatus & (byte)~Mask.INT_STATUS) | Convert.ToByte(value) << 7);
 
                 Write8BitsToRegister((byte)Register.INTERRUPT, intStatus);
             }
@@ -177,7 +174,7 @@ namespace Iot.Device.Bh1745
                     throw new ArgumentOutOfRangeException();
 
                 var intLatch = Read8BitsFromRegister((byte)Register.INTERRUPT);
-                intLatch = (byte)(((intLatch & (byte)~Mask.INT_LATCH) | (byte)value) << 4);
+                intLatch = (byte)((intLatch & (byte)~Mask.INT_LATCH) | (byte)value << 4);
 
                 Write8BitsToRegister((byte)Register.INTERRUPT, intLatch);
             }
@@ -197,7 +194,7 @@ namespace Iot.Device.Bh1745
             set
             {
                 var intSource = Read8BitsFromRegister((byte)Register.INTERRUPT);
-                intSource = (byte)(((intSource & (byte)~Mask.INT_SOURCE) | (byte)value) << 2);
+                intSource = (byte)((intSource & (byte)~Mask.INT_SOURCE) | (byte)value << 2);
 
                 Write8BitsToRegister((byte)Register.INTERRUPT, intSource);
             }
