@@ -3,20 +3,21 @@
 // See the LICENSE file in the project root for more information.
 
 #nullable enable
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace System.Device.I2c
 {
     public sealed partial class I2cController : II2cController
     {
-        private readonly Dictionary<(int, int), I2cDevice> _openDevices;
+        private readonly ConcurrentDictionary<(int, int), I2cDevice> _openDevices;
 
         /// <summary>
         /// Initializes new instance of I2cController.
         /// </summary>
         public I2cController()
         {
-            _openDevices = new Dictionary<(int, int), I2cDevice>();
+            _openDevices = new ConcurrentDictionary<(int, int), I2cDevice>();
         }
 
         /// <summary>
@@ -52,7 +53,11 @@ namespace System.Device.I2c
 
             I2cDevice device = I2cController.Create(new I2cConnectionSettings(busId, address));
             device.ShouldDispose = shouldDispose;
-            _openDevices.Add((busId, address), device);
+
+            if (!_openDevices.TryAdd((busId, address), device))
+            {
+                throw new InvalidOperationException($"The device could not be added using specified bus ID ({busId}) and address ({address}).");
+            }
         }
 
         /// <summary>
@@ -86,7 +91,11 @@ namespace System.Device.I2c
             int address = settings.DeviceAddress;
 
             I2cDevice device = GetDevice(busId, address);
-            _openDevices.Remove((busId, address));
+
+            if (!_openDevices.TryRemove((busId, address), out _))
+            {
+                throw new InvalidOperationException($"The device could not be removed using specified bus ID ({busId}) and address ({address}).");
+            }
 
             if (device.ShouldDispose)
             {
@@ -103,7 +112,10 @@ namespace System.Device.I2c
             int busId = device.ConnectionSettings.BusId;
             int address = device.ConnectionSettings.DeviceAddress;
 
-            _openDevices.Remove((busId, address));
+            if (!_openDevices.TryRemove((busId, address), out _))
+            {
+                throw new InvalidOperationException($"The device could not be removed using specified bus ID ({busId}) and address ({address}).");
+            }
 
             if (device.ShouldDispose)
             {
