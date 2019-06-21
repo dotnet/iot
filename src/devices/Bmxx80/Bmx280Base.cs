@@ -8,6 +8,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.IO;
 using System.Threading.Tasks;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.PowerMode;
@@ -77,12 +78,18 @@ namespace Iot.Device.Bmxx80
         /// Read the <see cref="Bmx280PowerMode"/> state.
         /// </summary>
         /// <returns>The current <see cref="Bmx280PowerMode"/>.</returns>
+        /// <exception cref="IOException">Thrown when the power mode does not match a defined mode in <see cref="Bmx280PowerMode"/>.</exception>
         public Bmx280PowerMode ReadPowerMode()
         {
             byte read = Read8BitsFromRegister(_controlRegister);
 
             // Get only the power mode bits.
             var powerMode = (byte)(read & 0b_0000_0011);
+
+            if (Enum.IsDefined(typeof(Bmx280PowerMode), powerMode) == false)
+            {
+                throw new IOException("Read unexpected power mode");
+            }
 
             return (Bmx280PowerMode)powerMode;
         }
