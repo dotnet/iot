@@ -41,11 +41,11 @@ namespace Iot.Device.Samples
                     }
 
                     // This prevent us from reading old data from the sensor.
-                    if (bme680.HasNewData)
+                    if (bme680.ReadHasNewData())
                     {
-                        var temperature = Math.Round(bme680.Temperature.Celsius, 2).ToString("N2");
-                        var pressure = Math.Round(bme680.Pressure / 100, 2).ToString("N2");
-                        var humidity = Math.Round(bme680.Humidity, 2).ToString("N2");
+                        var temperature = Math.Round(bme680.ReadTemperature().Celsius, 2).ToString("N2");
+                        var pressure = Math.Round(bme680.ReadPressure() / 100, 2).ToString("N2");
+                        var humidity = Math.Round(bme680.ReadHumidity(), 2).ToString("N2");
 
                         Console.WriteLine($"{temperature} °c | {pressure} hPa | {humidity} %rH");
 

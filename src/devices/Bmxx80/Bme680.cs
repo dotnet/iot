@@ -18,26 +18,6 @@ namespace Iot.Device.Bmxx80
     public class Bme680 : Bmxx80Base
     {
         /// <summary>
-        /// Gets a value indicating whether new data is available.
-        /// </summary>
-        public bool HasNewData => ReadHasNewData();
-
-        /// <summary>
-        /// Gets the humidity in %rH (percentage relative humidity).
-        /// </summary>
-        public double Humidity => ReadHumidity();
-
-        /// <summary>
-        /// Get the pressure in Pa (Pascal).
-        /// </summary>
-        public double Pressure => ReadPressure();
-
-        /// <summary>
-        /// Gets the <see cref="Temperature"/>.
-        /// </summary>
-        public Temperature Temperature => ReadTemperature();
-
-        /// <summary>
         /// Default I2C bus address.
         /// </summary>
         public const byte DefaultI2cAddress = 0x76;
@@ -92,6 +72,90 @@ namespace Iot.Device.Bmxx80
             var cleared = (byte)(read & 0b_1111_1100);
 
             _i2cDevice.Write(new[] { _controlRegister, (byte)(cleared | (byte)powerMode) });
+        }
+
+        /// <summary>
+        /// Read a value indicating whether or not new sensor data is available.
+        /// </summary>
+        /// <returns>True if new data is available.</returns>
+        public bool ReadHasNewData()
+        {
+            byte read = Read8BitsFromRegister((byte)Bme680Register.STATUS);
+
+            // Get only the power mode bit.
+            var hasNewData = (byte)(read & 0b_1000_0000);
+
+            return (hasNewData >> 7) == 1;
+        }
+
+        /// <summary>
+        /// Read the humidity.
+        /// </summary>
+        /// <returns>Calculated humidity.</returns>
+        public double ReadHumidity()
+        {
+            // Read humidity data.
+            byte msb = Read8BitsFromRegister((byte)Bme680Register.HUMIDITYDATA_MSB);
+            byte lsb = Read8BitsFromRegister((byte)Bme680Register.HUMIDITYDATA_LSB);
+
+            // Convert to a 32bit integer.
+            var adcHumidity = (msb << 8) + lsb;
+
+            return CompensateHumidity(ReadTemperature().Celsius, adcHumidity);
+        }
+
+        /// <summary>
+        /// Read the <see cref="Bme680PowerMode"/> state.
+        /// </summary>
+        /// <returns>The current <see cref="Bme680PowerMode"/>.</returns>
+        /// <exception cref="IOException">Thrown when the power mode does not match a defined mode in <see cref="Bmx280PowerMode"/>.</exception>
+        public Bme680PowerMode ReadPowerMode()
+        {
+            byte read = Read8BitsFromRegister(_controlRegister);
+
+            // Get only the power mode bits.
+            var powerMode = (byte)(read & 0b_0000_0011);
+
+            if (Enum.IsDefined(typeof(Bmx280PowerMode), powerMode) == false)
+            {
+                throw new IOException("Read unexpected power mode");
+            }
+
+            return (Bme680PowerMode)(powerMode);
+        }
+
+        /// <summary>
+        /// Read the pressure.
+        /// </summary>
+        /// <returns>Calculated pressure in Pa.</returns>
+        public double ReadPressure()
+        {
+            // Read pressure data.
+            byte lsb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_LSB);
+            byte msb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_MSB);
+            byte xlsb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_XLSB);
+
+            // Convert to a 32bit integer.
+            var adcPressure = (msb << 12) + (lsb << 4) + (xlsb >> 4);
+
+            return CompensatePressure(adcPressure);
+        }
+
+        /// <summary>
+        /// Read the temperature.
+        /// </summary>
+        /// <returns>Calculated temperature.</returns>
+        public Temperature ReadTemperature()
+        {
+            // Read temperature data.
+            byte lsb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_LSB);
+            byte msb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_MSB);
+            byte xlsb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_XLSB);
+
+            // Convert to a 32bit integer.
+            var adcTemperature = (msb << 12) + (lsb << 4) + (xlsb >> 4);
+
+            return CompensateTemperature(adcTemperature);
         }
 
         /// <summary>
@@ -154,90 +218,6 @@ namespace Iot.Device.Bmxx80
             }
 
             return calculatedPressure;
-        }
-
-        /// <summary>
-        /// Read a value indicating whether or not new sensor data is available.
-        /// </summary>
-        /// <returns>True if new data is available.</returns>
-        private bool ReadHasNewData()
-        {
-            byte read = Read8BitsFromRegister((byte)Bme680Register.STATUS);
-
-            // Get only the power mode bit.
-            var hasNewData = (byte)(read & 0b_1000_0000);
-
-            return (hasNewData >> 7) == 1;
-        }
-
-        /// <summary>
-        /// Read the humidity.
-        /// </summary>
-        /// <returns>Calculated humidity.</returns>
-        private double ReadHumidity()
-        {
-            // Read humidity data.
-            byte msb = Read8BitsFromRegister((byte)Bme680Register.HUMIDITYDATA_MSB);
-            byte lsb = Read8BitsFromRegister((byte)Bme680Register.HUMIDITYDATA_LSB);
-
-            // Convert to a 32bit integer.
-            var adcHumidity = (msb << 8) + lsb;
-
-            return CompensateHumidity(Temperature.Celsius, adcHumidity);
-        }
-
-        /// <summary>
-        /// Read the <see cref="Bme680PowerMode"/> state.
-        /// </summary>
-        /// <returns>The current <see cref="Bme680PowerMode"/>.</returns>
-        /// <exception cref="IOException">Thrown when the power mode does not match a defined mode in <see cref="Bmx280PowerMode"/>.</exception>
-        public Bme680PowerMode ReadPowerMode()
-        {
-            byte read = Read8BitsFromRegister(_controlRegister);
-
-            // Get only the power mode bits.
-            var powerMode = (byte)(read & 0b_0000_0011);
-
-            if (Enum.IsDefined(typeof(Bmx280PowerMode), powerMode) == false)
-            {
-                throw new IOException("Read unexpected power mode");
-            }
-
-            return (Bme680PowerMode)(powerMode);
-        }
-
-        /// <summary>
-        /// Read the pressure.
-        /// </summary>
-        /// <returns>Calculated pressure in Pa.</returns>
-        private double ReadPressure()
-        {
-            // Read pressure data.
-            byte lsb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_LSB);
-            byte msb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_MSB);
-            byte xlsb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_XLSB);
-
-            // Convert to a 32bit integer.
-            var adcPressure = (msb << 12) + (lsb << 4) + (xlsb >> 4);
-
-            return CompensatePressure(adcPressure);
-        }
-
-        /// <summary>
-        /// Read the temperature.
-        /// </summary>
-        /// <returns>Calculated temperature.</returns>
-        private Temperature ReadTemperature()
-        {
-            // Read temperature data.
-            byte lsb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_LSB);
-            byte msb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_MSB);
-            byte xlsb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_XLSB);
-
-            // Convert to a 32bit integer.
-            var adcTemperature = (msb << 12) + (lsb << 4) + (xlsb >> 4);
-
-            return CompensateTemperature(adcTemperature);
         }
     }
 }
