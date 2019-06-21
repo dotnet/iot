@@ -265,8 +265,8 @@ namespace Iot.Device.Bmxx80
         /// </remarks>
         private long CompensatePressure(int adcPressure)
         {
-            //Formula from the datasheet
-            //The pressure is calculated using the compensation formula in the BMP280 datasheet
+            // Formula from the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
+            // The pressure is calculated using the compensation formula in the BMP280 datasheet
             long var1 = TemperatureFine - 128000;
             long var2 = var1 * var1 * (long)_calibrationData.DigP6;
             var2 = var2 + ((var1 * (long)_calibrationData.DigP5) << 17);
