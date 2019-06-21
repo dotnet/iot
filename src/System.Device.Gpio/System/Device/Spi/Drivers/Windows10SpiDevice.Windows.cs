@@ -115,6 +115,7 @@ namespace System.Device.Spi.Drivers
             }
             byte[] byteArray = new byte[readBuffer.Length];
             _winDevice.TransferFullDuplex(writeBuffer.ToArray(), byteArray);
+            byteArray.CopyTo(readBuffer);
         }
 
         public override void Dispose(bool disposing)

@@ -17,10 +17,10 @@ namespace System.Device.Gpio
 
         protected override bool ReleaseHandle()
         {
-            Interop.ReleaseGpiodLine(handle);
+            Interop.libgpiod.gpiod_line_release(handle);
             return true;
         }
 
-        public override bool IsInvalid => handle == IntPtr.Zero || handle == Interop.InvalidHandleValue;
+        public override bool IsInvalid => handle == IntPtr.Zero || handle == Interop.libgpiod.InvalidHandleValue;
     }
 }

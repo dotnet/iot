@@ -31,6 +31,7 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
+        [Trait("SkipOnTestRun", "Windows_NT")] // The WindowsDriver is kept as High when disposed.
         public void PinValueReturnsToLowAfterDispose()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
@@ -116,6 +117,7 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
+        [Trait("SkipOnTestRun", "Windows_NT")] // Currently, the Windows Driver is defaulting to InputPullDown instead of Input when Closed/Opened.
         public void OpenPinDefaultsModeToInput()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
@@ -272,6 +274,7 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
+        [Trait("SkipOnTestRun", "Windows_NT")] // The windows driver is returning none as the event type.
         public void WaitForEventCancelAfter10MilliSecondsTest()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
