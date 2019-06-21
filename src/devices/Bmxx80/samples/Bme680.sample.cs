@@ -27,6 +27,9 @@ namespace Iot.Device.Samples
 
             using (var bme680 = new Bme680(unixI2cDevice))
             {
+                // Prevents reading old data from the sensor's registers.
+                bme680.Reset();
+
                 bme680.SetHumiditySampling(Sampling.UltraLowPower);
                 bme680.SetTemperatureSampling(Sampling.LowPower);
                 bme680.SetPressureSampling(Sampling.UltraHighResolution);

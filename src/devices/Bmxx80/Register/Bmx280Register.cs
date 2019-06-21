@@ -5,11 +5,11 @@
 namespace Iot.Device.Bmxx80.Register
 {
     /// <summary>
-    ///  Register
+    /// Register shared by the Bmx280 family.
     /// </summary>
     public enum Bmx280Register : byte
     {
-        CONTROL = 0xF4,
+        CTRL_MEAS = 0xF4,
 
         DIG_T1 = 0x88,
         DIG_T2 = 0x8A,
@@ -28,7 +28,7 @@ namespace Iot.Device.Bmxx80.Register
         VERSION = 0xD1,
         SOFTRESET = 0xE0,
 
-        CAL26 = 0xE1,  // R calibration stored in 0xE1-0xF0
+        CAL26 = 0xE1, // R calibration stored in 0xE1-0xF0
 
         STATUS = 0xF3,
         CONFIG = 0xF5,
@@ -39,6 +39,6 @@ namespace Iot.Device.Bmxx80.Register
 
         TEMPDATA_MSB = 0xFA,
         TEMPDATA_LSB = 0xFB,
-        TEMPDATA_XLSB = 0xFC, // bits <7:4>=
+        TEMPDATA_XLSB = 0xFC, // bits <7:4>
     }
 }

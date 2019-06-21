@@ -5,41 +5,48 @@
 namespace Iot.Device.Bmxx80
 {
     /// <summary>
-    /// Oversampling settings.
+    /// Controls the inactive duration in normal mode.
     /// </summary>
-    /// <remarks>
-    /// Maximum of x2 is recommended for temperature.
-    /// </remarks>
-    public enum Sampling : byte
+    public enum StandbyTime : byte
     {
         /// <summary>
-        /// Skipped (output set to 0x80000).
+        /// 0.5 ms.
         /// </summary>
-        Skipped = 0b000,
+        Ms0_5 = 0b000,
 
         /// <summary>
-        /// Oversampling x1.
+        /// 62.5 ms.
         /// </summary>
-        UltraLowPower = 0b001,
+        Ms62_5 = 0b001,
 
         /// <summary>
-        /// Oversampling x2.
+        /// 125 ms.
         /// </summary>
-        LowPower = 0b010,
+        Ms125 = 0b010,
 
         /// <summary>
-        /// Oversampling x4.
+        /// 250 ms.
         /// </summary>
-        Standard = 0b011,
+        Ms250 = 0b011,
 
         /// <summary>
-        /// Oversampling x8.
+        /// 500 ms.
         /// </summary>
-        HighResolution = 0b100,
+        Ms500 = 0b100,
 
         /// <summary>
-        /// Oversampling x16.
+        /// 1,000 ms.
         /// </summary>
-        UltraHighResolution = 0b101,
+        Ms1000 = 0b101,
+
+        /// <summary>
+        /// 10 ms.
+        /// </summary>
+        Ms10 = 0b110,
+
+        /// <summary>
+        /// 20 ms.
+        /// </summary>
+        Ms20 = 0b111,
     }
 }

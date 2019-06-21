@@ -103,6 +103,15 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
+        /// When called, the device is reset using the complete power-on-reset procedure.
+        /// </summary>
+        public void Reset()
+        {
+            const byte resetCommand = 0xB6;
+            _i2cDevice.Write(new[] { (byte)Bmxx80Register.RESET, resetCommand });
+        }
+
+        /// <summary>
         /// Compensates the temperature.
         /// </summary>
         /// <param name="adcTemperature">The temperature value read from the device.</param>
@@ -186,7 +195,7 @@ namespace Iot.Device.Bmxx80
 
         protected Sampling ByteToSampling(byte value)
         {
-            //Values >=5 equals UltraHighResolution.
+            // Values >=5 equals UltraHighResolution.
             if (value >= 5)
             {
                 return Sampling.UltraHighResolution;

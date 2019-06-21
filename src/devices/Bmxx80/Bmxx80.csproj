@@ -9,18 +9,23 @@
   <ItemGroup>
     <Compile Include="Bme280.cs" />
     <Compile Include="Bme680.cs" />
-    <Compile Include="CalibrationData/Bme680CalibrationData.cs" />
-    <Compile Include="CalibrationData/Bmx280CalibrationData.cs" />
-    <Compile Include="CalibrationData/Bmxx80CalibrationData.cs" />
     <Compile Include="Bmp280.cs" />
     <Compile Include="Bmx280Base.cs" />
     <Compile Include="Bmxx80Base.cs" />
-    <Compile Include="PowerMode/Bme680PowerMode.cs" />
-    <Compile Include="PowerMode/Bmx280PowerMode.cs" />
-    <Compile Include="Register/Bme680Register.cs" />
-    <Compile Include="Register/Bmx280Register.cs" />
-    <Compile Include="Register/Bmxx80Register.cs" />
+    <Compile Include="CalibrationData\Bme680CalibrationData.cs" />
+    <Compile Include="CalibrationData\Bme280CalibrationData.cs" />
+    <Compile Include="CalibrationData\Bmp280CalibrationData.cs" />
+    <Compile Include="CalibrationData\Bmxx80CalibrationData.cs" />
+    <Compile Include="DeviceStatus.cs" />
+    <Compile Include="FilteringMode.cs" />
+    <Compile Include="PowerMode\Bme680PowerMode.cs" />
+    <Compile Include="PowerMode\Bmx280PowerMode.cs" />
+    <Compile Include="Register\Bme680Register.cs" />
+    <Compile Include="Register\Bmx280Register.cs" />
+    <Compile Include="Register\Bmxx80Register.cs" />
+    <Compile Include="Register\Bme280Register.cs" />
     <Compile Include="Sampling.cs" />
+    <Compile Include="StandbyTime.cs" />
     <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <ProjectReference Include="..\Units\Units.csproj" />
   </ItemGroup>

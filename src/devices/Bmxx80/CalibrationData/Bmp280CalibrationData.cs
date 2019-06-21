@@ -7,9 +7,9 @@ using Iot.Device.Bmxx80.Register;
 namespace Iot.Device.Bmxx80.CalibrationData
 {
     /// <summary>
-    /// Calibration data for the Bmx280 family.
+    /// Calibration data for the BMP280.
     /// </summary>
-    internal class Bmx280CalibrationData : Bmxx80CalibrationData
+    internal class Bmp280CalibrationData : Bmxx80CalibrationData
     {
         /// <summary>
         /// Read coefficient data from device.

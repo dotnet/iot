@@ -28,9 +28,14 @@ namespace Iot.Device.Bmxx80
         public const byte SecondaryI2cAddress = 0x77;
 
         /// <summary>
-        /// The expected chip ID of the BME68x product family.
+        /// The expected chip ID of the BME680.
         /// </summary>
         private const byte DeviceId = 0x61;
+
+        /// <summary>
+        /// Calibration data for the <see cref="Bme680"/>.
+        /// </summary>
+        private readonly Bme680CalibrationData _bme680Calibration;
 
         /// <summary>
         /// Initialize a new instance of the <see cref="Bme680"/> class.
@@ -39,10 +44,13 @@ namespace Iot.Device.Bmxx80
         public Bme680(I2cDevice i2cDevice)
             : base(DeviceId, i2cDevice)
         {
-            _calibrationData = new Bme680CalibrationData();
-            _calibrationData.ReadFromDevice(this);
+            var bme680CalibrationData = new Bme680CalibrationData();
+            bme680CalibrationData.ReadFromDevice(this);
+            _bme680Calibration = bme680CalibrationData;
+            _calibrationData = bme680CalibrationData;
+
             _communicationProtocol = CommunicationProtocol.I2c;
-            _controlRegister = (byte)Bme680Register.CONTROL;
+            _controlRegister = (byte)Bme680Register.CTRL_MEAS;
         }
 
         /// <summary>
@@ -51,7 +59,7 @@ namespace Iot.Device.Bmxx80
         /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
         public void SetHumiditySampling(Sampling sampling)
         {
-            var register = (byte)Bme680Register.CONTROL_HUM;
+            var register = (byte)Bme680Register.CTRL_HUM;
             byte read = Read8BitsFromRegister(register);
 
             // Clear first 3 bits.
@@ -108,7 +116,7 @@ namespace Iot.Device.Bmxx80
         /// Read the <see cref="Bme680PowerMode"/> state.
         /// </summary>
         /// <returns>The current <see cref="Bme680PowerMode"/>.</returns>
-        /// <exception cref="IOException">Thrown when the power mode does not match a defined mode in <see cref="Bmx280PowerMode"/>.</exception>
+        /// <exception cref="NotImplementedException">Thrown when the power mode does not match a defined mode in <see cref="Bme680PowerMode"/>.</exception>
         public Bme680PowerMode ReadPowerMode()
         {
             byte read = Read8BitsFromRegister(_controlRegister);
@@ -116,12 +124,12 @@ namespace Iot.Device.Bmxx80
             // Get only the power mode bits.
             var powerMode = (byte)(read & 0b_0000_0011);
 
-            if (Enum.IsDefined(typeof(Bmx280PowerMode), powerMode) == false)
+            return powerMode switch
             {
-                throw new IOException("Read unexpected power mode");
-            }
-
-            return (Bme680PowerMode)(powerMode);
+                0b00 => Bme680PowerMode.Sleep,
+                0b01 => Bme680PowerMode.Forced,
+                _ => throw new NotImplementedException($"Read power mode not defined by specification.")
+            };
         }
 
         /// <summary>
@@ -167,11 +175,11 @@ namespace Iot.Device.Bmxx80
         private double CompensateHumidity(double temperature, int adcHumidity)
         {
             // Calculate the humidity.
-            var var1 = adcHumidity - ((_calibrationData.DigH1 * 16.0) + ((_calibrationData.DigH3 / 2.0) * temperature));
-            var var2 = var1 * ((_calibrationData.DigH2 / 262144.0) * (1.0 + ((_calibrationData.DigH4 / 16384.0) * temperature)
-                + ((_calibrationData.DigH5 / 1048576.0) * temperature * temperature)));
-            var var3 = _calibrationData.DigH6 / 16384.0;
-            var var4 = _calibrationData.DigH7 / 2097152.0;
+            var var1 = adcHumidity - ((_bme680Calibration.DigH1 * 16.0) + ((_bme680Calibration.DigH3 / 2.0) * temperature));
+            var var2 = var1 * ((_bme680Calibration.DigH2 / 262144.0) * (1.0 + ((_bme680Calibration.DigH4 / 16384.0) * temperature)
+                + ((_bme680Calibration.DigH5 / 1048576.0) * temperature * temperature)));
+            var var3 = _bme680Calibration.DigH6 / 16384.0;
+            var var4 = _bme680Calibration.DigH7 / 2097152.0;
             var calculatedHumidity = var2 + ((var3 + (var4 * temperature)) * var2 * var2);
 
             if (calculatedHumidity > 100.0)

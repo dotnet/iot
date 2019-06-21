@@ -10,10 +10,10 @@ namespace Iot.Device.Bmxx80.Register
     /// <remarks>
     /// See section 5.2 Memory map.
     /// </remarks>
-    internal enum Bme680Register
+    internal enum Bme680Register : byte
     {
-        CONTROL = 0x74,
-        CONTROL_HUM = 0x72,
+        CTRL_MEAS = 0x74,
+        CTRL_HUM = 0x72,
 
         DIG_H1_LSB = 0xE2,
         DIG_H1_MSB = 0xE3,
