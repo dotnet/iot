@@ -27,11 +27,10 @@ The samples expect the device pins to be connected in particular way to function
 
 You need to use at least [.NET Core 2.1](https://www.microsoft.com/net/download/archives). [.NET Core 3.0](https://github.com/dotnet/announcements/issues/82) is required for ARM64 devices.
 
-Many of these samples use the [Raspberry Pi](https://www.raspberrypi.org/), however, .NET Core can be used for other devices. A [Raspberry Pi Starter Pack](https://www.adafruit.com/product/3058) contains enough electronics to get started on many projects.
+Many of these samples use the [Raspberry Pi](https://www.raspberrypi.org/), however, .NET Core can be used with other devices. A [Raspberry Pi Starter Pack](https://www.adafruit.com/product/3058) contains enough electronics to get started on many projects.
 
-.NET Core is supported on Raspberry Pi 2 and 3. Raspberry Pi 3 B+ is recommended, based on the faster CPU. .NET Core is not supported on Raspberry Pi Zero or any of the Raspberry Pi model A devices. .NET Core does is not supported on ARMv6 chips, only ARMv7 and ARMv8. It is not supported on Arduino.
+.NET Core is supported on Raspberry Pi 2B and 3A+/B/B+ models (ARMv7/v8). .NET Core is not supported on Raspberry Pi Zero or Arduino.
 
 ## Resources
 
-* [How to Use a Breadboard](https://www.youtube.com/watch?v=6WReFkfrUIk)
-* [Collin's Lab: Breadboards & Perfboards](https://www.youtube.com/watch?v=w0c3t0fJhXU)
+See the [Documentation page](https://github.com/dotnet/iot/tree/master/Documentation) for more references to devices, component vendors, and general IoT topics.

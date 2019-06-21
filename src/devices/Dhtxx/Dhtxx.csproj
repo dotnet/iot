@@ -8,6 +8,9 @@
 
   <ItemGroup>
     <Compile Include="CommunicationProtocol.cs" />
+    <Compile Include="Devices\Dht11Device.cs" />
+    <Compile Include="Devices\Dht22Device.cs" />
+    <Compile Include="Devices\IDhtDevice.cs" />
     <Compile Include="DhtType.cs" />
     <Compile Include="DhtSensor.cs" />
     <Compile Include="..\Common\System\Device\DelayHelper.cs" />
