@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Device.I2c.Drivers;
-using System.Runtime.InteropServices;
-
 namespace System.Device.I2c
 {
     /// <summary>
@@ -12,11 +9,6 @@ namespace System.Device.I2c
     /// </summary>
     public abstract class I2cDevice : IDisposable
     {
-        /// <summary>
-        /// Determines if this should be disposed.
-        /// </summary>
-        public bool ShouldDispose { get; set; } = true;
-
         /// <summary>
         /// The connection settings of a device on an I2C bus.
         /// </summary>
