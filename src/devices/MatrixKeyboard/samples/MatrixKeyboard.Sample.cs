@@ -9,7 +9,7 @@ using System.Linq;
 namespace Iot.Device.MatrixKeyboard.Samples
 {
     /// <summary>
-    /// This sample is for Raspberry Pi Model 3B+
+    /// This sample is for Raspberry Pi Model 3B+ with 4x4 keyboard
     /// </summary>
     class Program
     {
