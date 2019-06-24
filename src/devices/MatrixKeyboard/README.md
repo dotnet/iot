@@ -1,6 +1,6 @@
 # Matrix Keyboard
 
-M×N matrix keyboard driver.
+An M×N matrix keyboard driver.
 
 ## Summary
 
