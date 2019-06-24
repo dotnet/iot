@@ -11,22 +11,22 @@ using System.Timers;
 namespace Iot.Device.MatrixKeyboard
 {
     /// <summary>
-    /// GPIO 矩阵键盘驱动
+    /// GPIO Matrix Keyboard Driver
     /// </summary>
     public class MatrixKeyboard : IDisposable
     {
         /// <summary>
-        /// 获取行扫描针脚
+        /// Get row pins
         /// </summary>
         public IEnumerable<int> RowPins => rowPins;
 
         /// <summary>
-        /// 获取列扫描针脚
+        /// Get column pins
         /// </summary>
         public IEnumerable<int> ColPins => colPins;
 
         /// <summary>
-        /// 获取或设置扫描频率
+        /// Get or set scanning frequency in Hertz
         /// </summary>
         public double ScanFreq
         {
@@ -35,12 +35,12 @@ namespace Iot.Device.MatrixKeyboard
         }
 
         /// <summary>
-        /// 创建矩阵键盘实例
+        /// Initialize keyboard
         /// </summary>
-        /// <param name="gpioController">GPIO 控制器</param>
-        /// <param name="rowPins">行扫描针脚</param>
-        /// <param name="colPins">列扫描针脚</param>
-        /// <param name="scanFreq">扫描频率</param>
+        /// <param name="gpioController">GPIO controller</param>
+        /// <param name="rowPins">Row pins</param>
+        /// <param name="colPins">Column pins</param>
+        /// <param name="scanFreq">Scanning frequency</param>
         public MatrixKeyboard(IGpioController gpioController, IEnumerable<int> rowPins, IEnumerable<int> colPins, double scanFreq = 50)
         {
             gpio = gpioController;
@@ -54,7 +54,7 @@ namespace Iot.Device.MatrixKeyboard
         }
 
         /// <summary>
-        /// 开启 GPIO 针脚并开始键盘扫描
+        /// Open GPIO pins then start keyboard scanning
         /// </summary>
         public void StartScan()
         {
@@ -70,7 +70,7 @@ namespace Iot.Device.MatrixKeyboard
         }
 
         /// <summary>
-        /// 停止键盘扫描并关闭 GPIO 针脚
+        /// Stop keyboard scanning then close GPIO pins
         /// </summary>
         public void StopScan()
         {
@@ -86,39 +86,32 @@ namespace Iot.Device.MatrixKeyboard
         }
 
         /// <summary>
-        /// 获取键盘所有按钮的状态
+        /// Get all buttons' values
         /// </summary>
-        /// <returns>按钮状态列表，按行下标升序输出每一行</returns>
         public ReadOnlySpan<PinValue> Values => buttonValues.AsSpan();
 
         /// <summary>
-        /// 获取指定行按钮的状态
+        /// Get buttons' values by row
         /// </summary>
-        /// <param name="row">行下标</param>
-        /// <returns>按钮的状态列表，按列下标升序输出选中的行</returns>
+        /// <param name="row">Row index</param>
         public ReadOnlySpan<PinValue> RowValues(int row) => buttonValues.AsSpan(row * rowPins.Length, colPins.Length);
 
         /// <summary>
-        /// 按钮事件
+        /// Keyboard event
         /// </summary>
         public event PinChangeEventHandler PinChangeEvent;
 
         /// <summary>
-        /// 按钮事件委托
+        /// Delegate of keyboard event
         /// </summary>
-        /// <param name="sender">事件发起方（本实例）</param>
-        /// <param name="pinValueChangedEventArgs">事件参数</param>
         public delegate void PinChangeEventHandler(object sender, MatrixKeyboardEventArgs pinValueChangedEventArgs);
 
-        /// <summary>
-        /// 释放资源
-        /// </summary>
         public void Dispose()
         {
-            scanTimer.Dispose();
-            gpio.Dispose();
-
+            scanTimer?.Dispose();
             scanTimer = null;
+
+            gpio?.Dispose();
             gpio = null;
         }
 

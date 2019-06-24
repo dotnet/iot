@@ -11,22 +11,22 @@ using System.Timers;
 namespace Iot.Device.MatrixKeyboard
 {
     /// <summary>
-    /// 按钮事件
+    /// Keyboard event
     /// </summary>
     public class MatrixKeyboardEventArgs : EventArgs
     {
         /// <summary>
-        /// 按钮事件类型。Rising 为按钮按下，Falling 为按钮弹起
+        /// Event type of current button. PinEventTypes.Rising is pressed，PinEventTypes.Falling is released
         /// </summary>
         public PinEventTypes EventType;
 
         /// <summary>
-        /// 按钮所在行下标
+        /// Current button's row index
         /// </summary>
         public int Row;
 
         /// <summary>
-        /// 按钮所在列下标
+        /// Current button's column index
         /// </summary>
         public int Column;
 

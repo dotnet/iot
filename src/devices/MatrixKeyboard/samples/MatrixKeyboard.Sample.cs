@@ -15,7 +15,7 @@ namespace Iot.Device.MatrixKeyboard.Samples
     {
         public static void Main(string[] args)
         {
-            //  获取初始化参数
+            // get arguments
             Console.Write("input row pins(eg. 27,23,24,10) ");
             var r = Console.ReadLine().Split(',').Select(m => int.Parse(m));
             Console.Write("input column pins(eg. 15,14,3,2) ");
@@ -23,8 +23,17 @@ namespace Iot.Device.MatrixKeyboard.Samples
             Console.Write("input scaning frequency(eg. 50) ");
             var f = double.Parse(Console.ReadLine());
 
-            //  初始化矩阵键盘
+            // get GPIO controller
             var gpio = new GpioController();
+
+            // you can also use other GPIO controller
+            /*
+                var settings = new System.Device.I2c.I2cConnectionSettings(1, 0x20);
+                var i2cDevice = new System.Device.I2c.Drivers.UnixI2cDevice(settings);
+                var gpio = new Iot.Device.Mcp23xxx.Mcp23017(i2cDevice);
+            */
+
+            // initialize keyboard
             var mk = new MatrixKeyboard(gpio, r, c, f);
             mk.PinChangeEvent += Mk_PinChangeEvent;
 
@@ -32,40 +41,38 @@ namespace Iot.Device.MatrixKeyboard.Samples
             Console.WriteLine();
             Console.WriteLine("Press any key to start. Then stop. Then dispose. Then exit. ");
 
-            //  启动键盘扫描
+            // start scanning
             Console.ReadKey();
             mk.StartScan();
             Console.WriteLine("MatrixKeyboard.StartScan() ");
 
-            //  终止键盘扫描
+            // stop scanning
             Console.ReadKey();
             mk.StopScan();
             Console.WriteLine("MatrixKeyboard.StopScan() ");
 
-            //  释放资源
+            // dispose
             Console.ReadKey();
             mk.Dispose();
             Console.WriteLine("MatrixKeyboard.Dispose() ");
 
-            //  退出程序
+            // quit
             Console.ReadKey();
         }
 
         /// <summary>
-        /// 键盘事件处理
+        /// Keyboard event
         /// </summary>
-        /// <param name="sender">事件发起方（键盘实例）</param>
-        /// <param name="pinValueChangedEventArgs">事件参数</param>
         private static void Mk_PinChangeEvent(object sender, MatrixKeyboardEventArgs pinValueChangedEventArgs)
         {
-            //  清空屏幕
+            // clear screen
             Console.Clear();
 
-            //  输出事件
+            // print event
             Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff")} {pinValueChangedEventArgs.Row}, {pinValueChangedEventArgs.Column}, {pinValueChangedEventArgs.EventType}");
             Console.WriteLine();
 
-            //  输出键盘状态
+            // print keyboard status
             var s = (MatrixKeyboard)sender;
             for (var r = 0; r < s.RowPins.Count(); r++)
             {
