@@ -16,6 +16,10 @@ You can connect any M×N Matrix Keyboard, theoretically, by using M+N GPIO pins,
 
 You can also use any compatible GPIO controller like [Mcp23xxx](../Mcp23xxx) instead of native controller.
 
+* The pull-down resistors is optional if your MCU already have it in column pins.
+
+* If your keyboard has diode for each button and doesn't work well, try to exchange row and column pins, and resistors of course.
+
 ## References
 
 http://pcbheaven.com/wikipages/How_Key_Matrices_Works/
