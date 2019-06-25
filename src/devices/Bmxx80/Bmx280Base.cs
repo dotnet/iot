@@ -136,7 +136,7 @@ namespace Iot.Device.Bmxx80
             long pres = CompensatePressure(t);
 
             //Return the temperature as a float value.
-            return (pres) / 256;
+            return (double)pres / 256;
         }
 
         /// <summary>
