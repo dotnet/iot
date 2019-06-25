@@ -4,13 +4,13 @@
 
 namespace System.Device.I2c
 {
-    public sealed partial class I2cController
+    public partial class I2cDevice
     {
         /// <summary>
-        /// Creates a communications channel to a device on an I2C bus running on Unix.
+        /// Creates a communications channel to a device on an I2C bus running on Windows 10 IoT.
         /// </summary>
         /// <param name="settings">The connection settings of a device on an I2C bus.</param>
-        /// <returns>A communications channel to a device on an I2C bus running on Unix.</returns>
-        public static I2cDevice Create(I2cConnectionSettings settings) => new Drivers.UnixI2cDevice(settings);
+        /// <returns>A communications channel to a device on an I2C bus running on Windows 10 IoT.</returns>
+        public static I2cDevice Create(I2cConnectionSettings settings) => new Drivers.Windows10I2cDevice(settings);
     }
 }
