@@ -77,7 +77,7 @@ namespace Iot.Device.MatrixKeyboard.Samples
             for (var r = 0; r < s.RowPins.Count(); r++)
             {
                 var rv = s.RowValues(r);
-                for (var c = 0; c < s.ColPins.Count(); c++)
+                for (var c = 0; c < s.ColumnPins.Count(); c++)
                 {
                     Console.Write(rv[c] == PinValue.Low ? " ." : " #");
                 }
