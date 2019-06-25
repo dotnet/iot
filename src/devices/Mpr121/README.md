@@ -15,7 +15,7 @@ The binding provides different options of device configuration. The device can b
 #### Default configuration with manually updating of channel statuses
 
 ```csharp
-var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
+var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
 var mpr121 = new Mpr121(device: i2cDevice);
 
 var statuses = mpr121.ReadChannelStatuses();
@@ -29,7 +29,7 @@ Console.WriteLine($"The 1st channel is {status}");
 #### Channel statuses auto refresh
 
 ```csharp
-var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
+var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
 
 // Initialize controller with default configuration and auto-refresh the channel statuses every 100 ms.
 var mpr121 = new Mpr121(device: i2cDevice, periodRefresh: 100);
@@ -45,7 +45,7 @@ mpr121.ChannelStatusesChanged += (object sender, ChannelStatusesChangedEventArgs
 #### Custom MPR121 registers configuration
 
 ```csharp
-var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
+var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
 var config = new Mpr121Configuration
 {
     MaxHalfDeltaRising = 0x01,

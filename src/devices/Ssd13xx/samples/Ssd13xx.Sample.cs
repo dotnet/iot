@@ -50,11 +50,12 @@ namespace Iot.Device.Ssd13xx.Samples
 #endif
         }
 
-        private static UnixI2cDevice GetI2CDevice(){
+        private static I2cDevice GetI2CDevice()
+        {
             Console.WriteLine("Using I2C protocol");
 
             var connectionSettings = new I2cConnectionSettings(1, 0x3C);
-            return new UnixI2cDevice(connectionSettings);
+            return I2cDevice.Create(connectionSettings);
         }
 
         private static Ssd1327 GetSsd1327WithI2c()
@@ -66,7 +67,7 @@ namespace Iot.Device.Ssd13xx.Samples
         {
             return new Ssd1306(GetI2CDevice());
         }
-        
+
         // Display size 128x32.
         private static void Initialize(Ssd1306 device)
         {
@@ -91,7 +92,7 @@ namespace Iot.Device.Ssd13xx.Samples
         }
 
         // Display size 96x96.
-        private static void Initialize(Ssd1327 device) 
+        private static void Initialize(Ssd1327 device)
         {
             device.SendCommand(new Ssd1327Cmnds.SetUnlockDriver(true));
             device.SendCommand(new SetDisplayOff());
@@ -187,8 +188,8 @@ namespace Iot.Device.Ssd13xx.Samples
         }
 
         private static void DisplayImages(Ssd1306 ssd1306)
-        {   
-            Console.WriteLine("Display Images"); 
+        {
+            Console.WriteLine("Display Images");
             foreach(var image_name in Directory.GetFiles("images", "*.bmp").OrderBy(f => f))
             {
                 using (Image<Gray16> image = Image.Load<Gray16>(image_name))
@@ -208,7 +209,7 @@ namespace Iot.Device.Ssd13xx.Samples
             var y = 0;
 
             foreach(var i in Enumerable.Range(0,100))
-            {   
+            {
                 using (Image<Rgba32> image  = new Image<Rgba32>(128, 32))
                 {
                     image.Mutate(ctx => ctx
@@ -225,11 +226,11 @@ namespace Iot.Device.Ssd13xx.Samples
                     if(y >= image.Height) y = 0;
 
                     Thread.Sleep(100);
-                }       
+                }
             }
         }
-        
-        // Referencing https://stackoverflow.com/questions/6803073/get-local-ip-address   
+
+        // Referencing https://stackoverflow.com/questions/6803073/get-local-ip-address
         private static string GetIpAddress()
         {
             // Get a list of all network interfaces (usually one per network card, dialup, and VPN connection).
@@ -268,8 +269,8 @@ namespace Iot.Device.Ssd13xx.Samples
         public static void DisplayImage(this Ssd1306 s, Image<Gray16> image)
         {
             Int16 width = 128;
-            Int16 pages = 4; 
-            List<byte> buffer = new List<byte>(); 
+            Int16 pages = 4;
+            List<byte> buffer = new List<byte>();
 
             for (int page = 0; page < pages; page++)
                 {
@@ -277,15 +278,15 @@ namespace Iot.Device.Ssd13xx.Samples
                     {
                         int bits = 0;
                         for (byte bit = 0; bit < 8; bit++)
-                        {                            
+                        {
                             bits = bits << 1;
-                            bits |= image[x, page * 8 + 7 - bit].PackedValue > 0 ? 1 : 0;                                                                                        
-                        } 
+                            bits |= image[x, page * 8 + 7 - bit].PackedValue > 0 ? 1 : 0;
+                        }
 
-                        buffer.Add((byte)bits);          
+                        buffer.Add((byte)bits);
                     }
                 }
-            
+
             int chunk_size = 16;
             for(int i = 0; i < buffer.Count; i += chunk_size)
             {

@@ -21,7 +21,7 @@ Only DHT12 can use I2C protocol.
 
 ```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, DhtSensor.DefaultI2cAddressDht12);
-UnixI2cDevice device = new UnixI2cDevice(settings);
+I2cDevice device = I2cDevice.Create(settings);
 
 using (DhtSensor dht = new DhtSensor(device))
 {

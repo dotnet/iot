@@ -24,7 +24,7 @@ namespace Iot.Device.Samples
             const double defaultSeaLevelPressure = 1033.00;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bme280.DefaultI2cAddress);
-            var i2cDevice = new UnixI2cDevice(i2cSettings);
+            var i2cDevice = I2cDevice.Create(i2cSettings);
             var i2CBmpe80 = new Bme280(i2cDevice);
 
             using (i2CBmpe80)

@@ -14,7 +14,7 @@ namespace Iot.Device.Bh1750fvi.Samples
         static void Main(string[] args)
         {
             I2cConnectionSettings settings = new I2cConnectionSettings(busId: 1, (int)I2cAddress.AddPinLow);
-            UnixI2cDevice device = new UnixI2cDevice(settings);
+            I2cDevice device = I2cDevice.Create(settings);
 
             using (Bh1750fvi sensor = new Bh1750fvi(device))
             {

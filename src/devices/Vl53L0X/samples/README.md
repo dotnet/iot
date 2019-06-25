@@ -11,7 +11,7 @@ This sensor is an I2C sensor. So you need to connect the pins of your board to t
 The usage is straight forward, just initiate a class and start reading the data. Calibration is done automatically in the background. Be aware that first data may  not be valid.
 
 ```csharp
-Vl53L0X vL53L0X = new Vl53L0X(new UnixI2cDevice(new I2cConnectionSettings(1, Vl53L0X.DefaultI2cAddress)));
+Vl53L0X vL53L0X = new Vl53L0X(I2cDevice.Create(new I2cConnectionSettings(1, Vl53L0X.DefaultI2cAddress)));
 Console.WriteLine($"Rev: {vL53L0X.Info.Revision}, Prod: {vL53L0X.Info.ProductId}, Mod: {vL53L0X.Info.ModuleId}");
 // Set high precision mode
 vL53L0X.Precision = Precision.HighPrecision;
@@ -37,4 +37,4 @@ while (!Console.KeyAvailable)
     }
     Thread.Sleep(500);
 }
-``` 
+```
