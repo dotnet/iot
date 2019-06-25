@@ -7,7 +7,7 @@ namespace System.Device.Spi
     /// <summary>
     /// The communications channel to a device on a SPI bus.
     /// </summary>
-    public abstract class SpiDevice : IDisposable
+    public abstract partial class SpiDevice : IDisposable
     {
         /// <summary>
         /// The connection settings of a device on a SPI bus.
