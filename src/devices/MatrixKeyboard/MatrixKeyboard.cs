@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
+using System.Threading;
 using System.Timers;
 
 namespace Iot.Device.MatrixKeyboard
