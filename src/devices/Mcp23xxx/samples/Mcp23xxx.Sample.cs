@@ -75,7 +75,7 @@ namespace Iot.Device.Mcp23xxx.Samples
                 Mode = SpiMode.Mode0
             };
 
-            var spiDevice = new UnixSpiDevice(spiConnectionSettings);
+            var spiDevice = SpiDevice.Create(spiConnectionSettings);
 
             // SPI.
             switch (mcp23xxxDevice)

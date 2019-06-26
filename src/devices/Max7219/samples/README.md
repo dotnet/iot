@@ -16,7 +16,7 @@ var connectionSettings = new SpiConnectionSettings(0, 0)
     ClockFrequency = 10_000_000,
     Mode = SpiMode.Mode0
 };
-var spi = new UnixSpiDevice(connectionSettings);
+var spi = SpiDevice.Create(connectionSettings);
 var devices = new Max7219(spi, cascadedDevices: 4);
 ```
 

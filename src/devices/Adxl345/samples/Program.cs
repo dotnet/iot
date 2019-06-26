@@ -21,9 +21,9 @@ namespace Adxl345.Samples
                 Mode = Iot.Device.Adxl345.Adxl345.SpiMode
             };
             // get SpiDevice(In Linux)
-            UnixSpiDevice device = new UnixSpiDevice(settings);
+            var device = SpiDevice.Create(settings);
             // get SpiDevice(In Win10)
-            // Windows10SpiDevice device = new Windows10SpiDevice(settings);
+            // var device = SpiDevice.Create(settings);
 
             // pass in a SpiDevice
             // set gravity measurement range ±4G

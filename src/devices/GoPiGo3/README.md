@@ -55,7 +55,7 @@ var settings = new SpiConnectionSettings(0, 1)
     Mode = SpiMode.Mode0,
     DataBitLength = 8
 };
-_goPiGo3 = new GoPiGo(new UnixSpiDevice(settings));
+_goPiGo3 = new GoPiGo(SpiDevice.Create(settings));
 // Do whatever you want, read sensors, set motors, etc
 // once finished, and class will be disposed, all motors will be floated and sensors reinitialized
 // The SpiDevice will the disposed when GoPiGo will be disposed
