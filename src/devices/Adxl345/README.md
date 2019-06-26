@@ -12,13 +12,8 @@ SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
     Mode = Adxl345.SpiMode
 };
 
-// get SpiDevice(In Linux)
 var device = SpiDevice.Create(settings);
 
-// get SpiDevice(In Win10)
-// var device = SpiDevice.Create(settings);
-
-// pass in a SpiDevice
 // set gravity measurement range ±4G
 using (Adxl345 sensor = new Adxl345(device, GravityRange.Range04))
 {

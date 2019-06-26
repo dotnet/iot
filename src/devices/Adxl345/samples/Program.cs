@@ -20,12 +20,9 @@ namespace Adxl345.Samples
                 ClockFrequency = Iot.Device.Adxl345.Adxl345.SpiClockFrequency,
                 Mode = Iot.Device.Adxl345.Adxl345.SpiMode
             };
-            // get SpiDevice(In Linux)
+            
             var device = SpiDevice.Create(settings);
-            // get SpiDevice(In Win10)
-            // var device = SpiDevice.Create(settings);
-
-            // pass in a SpiDevice
+            
             // set gravity measurement range ±4G
             using (Iot.Device.Adxl345.Adxl345 sensor = new Iot.Device.Adxl345.Adxl345(device, GravityRange.Range04))
             {
