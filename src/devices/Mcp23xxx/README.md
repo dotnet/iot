@@ -33,7 +33,7 @@ var connectionSettings = new SpiConnectionSettings(0, 0)
     Mode = SpiMode.Mode0
 };
 
-var spiDevice = new UnixSpiDevice(connectionSettings);
+var spiDevice = SpiDevice.Create(connectionSettings);
 
 // 0x20 is the device address in this example.
 var mcp23S17 = new Mcp23S17(spiDevice, 0x20);

@@ -17,7 +17,7 @@ namespace DeviceApiTester.Commands.Spi
         /// <remarks>
         ///     NOTE: This test app uses the base class's <see cref="CreateSpiDevice"/> method to create a device.<br/>
         ///     Real-world usage would simply create an instance of a <see cref="SpiDevice"/> implementation:
-        ///     <code>using (var spi = new UnixSpiDevice(connectionSettings))</code>
+        ///     <code>using (var spi = SpiDevice.Create(connectionSettings))</code>
         /// </remarks>
         public int Execute()
         {

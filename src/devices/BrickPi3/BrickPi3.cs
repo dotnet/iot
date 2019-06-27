@@ -78,7 +78,7 @@ namespace Iot.Device.BrickPi3
                 // as the SPI is a static, checking if it has already be initialised
                 if (_brickPiSPI == null)
                 {
-                    _brickPiSPI = new UnixSpiDevice(settings);
+                    _brickPiSPI = SpiDevice.Create(settings);
                 }
                 BrickPi3Info = new BrickPiInfo();
                 BrickPi3Info.Manufacturer = GetManufacturer();
