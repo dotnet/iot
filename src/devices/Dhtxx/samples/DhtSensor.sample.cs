@@ -15,7 +15,7 @@ class Program
 
         // Init DHT12 through I2C
         //I2cConnectionSettings settings = new I2cConnectionSettings(1, DhtSensor.Dht12DefaultI2cAddress);
-        //UnixI2cDevice device = new UnixI2cDevice(settings);
+        //I2cDevice device = I2cDevice.Create(settings);
         //DhtSensor dht = new DhtSensor(device);
 
         using (DhtSensor dht = new DhtSensor(4, DhtType.Dht11))

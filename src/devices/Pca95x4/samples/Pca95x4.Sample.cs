@@ -29,7 +29,7 @@ namespace Iot.Device.Pca95x4.Samples
         private static Pca95x4 GetPca95x4Device()
         {
             var i2cConnectionSettings = new I2cConnectionSettings(1, s_deviceAddress);
-            var i2cDevice = new UnixI2cDevice(i2cConnectionSettings);
+            var i2cDevice = I2cDevice.Create(i2cConnectionSettings);
             return new Pca95x4(i2cDevice);
         }
 
