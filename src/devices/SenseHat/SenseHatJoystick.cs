@@ -6,9 +6,9 @@ using System;
 using System.IO;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Device.I2c.Devices;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Device.I2c.Drivers;
 
 namespace Iot.Device.SenseHat
 {
