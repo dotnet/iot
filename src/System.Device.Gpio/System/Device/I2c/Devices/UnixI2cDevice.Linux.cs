@@ -5,7 +5,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace System.Device.I2c.Drivers
+namespace System.Device.I2c.Devices
 {
     /// <summary>
     /// Represents an I2C communication channel running on Unix.
