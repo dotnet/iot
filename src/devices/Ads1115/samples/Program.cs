@@ -5,7 +5,7 @@
 using System;
 using System.Threading;
 using System.Device.I2c;
-using System.Device.I2c.Devices;
+using System.Device.I2c.Drivers;
 using Iot.Device.Ads1115;
 
 namespace Ads1115.Samples

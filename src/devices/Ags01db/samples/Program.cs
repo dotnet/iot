@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Device.I2c;
-using System.Device.I2c.Devices;
+using System.Device.I2c.Drivers;
 using System.Threading;
 
 namespace Iot.Device.Ags01db.Samples

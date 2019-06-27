@@ -8,7 +8,7 @@ using Iot.Device.GrovePiDevice.Models;
 using Iot.Device.GrovePiDevice;
 using Iot.Device.GrovePiDevice.Sensors;
 using System.Device.I2c;
-using System.Device.I2c.Devices;
+using System.Device.I2c.Drivers;
 using System.Device.Gpio;
 
 namespace GrovePisample

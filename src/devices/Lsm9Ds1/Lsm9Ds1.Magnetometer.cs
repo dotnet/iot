@@ -8,7 +8,7 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Device.I2c.Devices;
+using System.Device.I2c.Drivers;
 using System.Buffers.Binary;
 using System.Numerics;
 
