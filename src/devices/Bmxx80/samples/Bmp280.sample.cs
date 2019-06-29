@@ -32,7 +32,7 @@ namespace Iot.Device.Samples
             {
                 while (true)
                 {
-                    ////set mode forced so device sleeps after read
+                    //set mode forced so device sleeps after read
                     i2CBmp280.SetPowerMode(Bmx280PowerMode.Forced);
 
                     //set samplings
