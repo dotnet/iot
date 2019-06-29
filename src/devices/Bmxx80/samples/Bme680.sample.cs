@@ -22,8 +22,8 @@ namespace Iot.Device.Samples
             // The I2C bus ID on the Raspberry Pi 3.
             const int busId = 1;
 
-            var i2cConnectionSettings = new I2cConnectionSettings(busId, Bme680.DefaultI2cAddress);
-            var unixI2cDevice = new UnixI2cDevice(i2cConnectionSettings);
+            var i2cSettings = new I2cConnectionSettings(busId, Bme680.DefaultI2cAddress);
+            var unixI2cDevice = I2cDevice.Create(i2cSettings);
 
             using (var bme680 = new Bme680(unixI2cDevice))
             {
