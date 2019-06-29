@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.I2c;
+using System.Device.I2c.Devices;
 using System.Text;
 using CommandLine;
 using DeviceApiTester.Infrastructure;
@@ -27,7 +28,7 @@ namespace DeviceApiTester.Commands.I2c
         /// <remarks>
         ///     NOTE: This test app uses the base class's <see cref="CreateI2cDevice"/> method to create a device.<br/>
         ///     Real-world usage would simply create an instance of an <see cref="I2cDevice"/> implementation:
-        ///     <code>using (var i2cDevice = new UnixI2cDevice(connectionSettings))</code>
+        ///     <code>using (var i2cDevice = I2cDevice.Create(connectionSettings))</code>
         /// </remarks>
         public int Execute()
         {
@@ -52,7 +53,7 @@ namespace DeviceApiTester.Commands.I2c
             stringBuilder.Append(Environment.NewLine);
 
             var connectionSettings = new I2cConnectionSettings(BusId, DeviceAddress);
-            using (var i2cDevice = new System.Device.I2c.Drivers.UnixI2cDevice(connectionSettings))
+            using (var i2cDevice = I2cDevice.Create(connectionSettings))
             {
                 for (int startingRowAddress = 0; startingRowAddress < 255; startingRowAddress += 16)
                 {

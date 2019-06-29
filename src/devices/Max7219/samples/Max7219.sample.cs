@@ -41,7 +41,7 @@ namespace Iot.Device.Samples
                 ClockFrequency = Max7219.SpiClockFrequency,
                 Mode = Max7219.SpiMode
             };
-            var spi = new UnixSpiDevice(connectionSettings);
+            var spi = SpiDevice.Create(connectionSettings);
             using (var devices = new Max7219(spi, cascadedDevices: 4))
             {
                 //initialize the devices

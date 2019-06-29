@@ -2,23 +2,22 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Device.I2c.Drivers
+namespace System.Device.I2c.Devices
 {
-    public class UnixI2cDevice : I2cDevice
+    public class Windows10I2cDevice : I2cDevice
     {
-        public UnixI2cDevice(I2cConnectionSettings settings) => throw new PlatformNotSupportedException($"The {GetType().Name} class is not available on Windows.");
-
-        public string DevicePath { get; set; }
+        public Windows10I2cDevice(I2cConnectionSettings settings) =>
+            throw new PlatformNotSupportedException($"The {GetType().Name} class is not available on Linux.");
 
         public override I2cConnectionSettings ConnectionSettings => throw new PlatformNotSupportedException();
 
-        public override void Read(Span<byte> buffer) => throw new PlatformNotSupportedException();
-
         public override byte ReadByte() => throw new PlatformNotSupportedException();
 
-        public override void Write(ReadOnlySpan<byte> buffer) => throw new PlatformNotSupportedException();
+        public override void Read(Span<byte> buffer) => throw new PlatformNotSupportedException();
 
         public override void WriteByte(byte value) => throw new PlatformNotSupportedException();
+
+        public override void Write(ReadOnlySpan<byte> buffer) => throw new PlatformNotSupportedException();
 
         public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer) => throw new PlatformNotSupportedException();
     }

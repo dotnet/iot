@@ -21,7 +21,7 @@ This binding includes an `Mcp23xxx` abstract class and derived abstract classes 
 ```csharp
 // 0x20 is the device address in this example.
 var connectionSettings = new I2cConnectionSettings(1, 0x20);
-var i2cDevice = new UnixI2cDevice(connectionSettings);
+var i2cDevice = I2cDevice.Create(connectionSettings);
 var mcp23S17 = new Mcp23017(i2cDevice);
 ```
 
@@ -33,7 +33,7 @@ var connectionSettings = new SpiConnectionSettings(0, 0)
     Mode = SpiMode.Mode0
 };
 
-var spiDevice = new UnixSpiDevice(connectionSettings);
+var spiDevice = SpiDevice.Create(connectionSettings);
 
 // 0x20 is the device address in this example.
 var mcp23S17 = new Mcp23S17(spiDevice, 0x20);
@@ -88,6 +88,6 @@ PinValue interruptA = mcp23S17.ReadInterruptA();
 PinValue interruptB = mcp23S17.ReadInterruptB();
 ```
 
-## References 
+## References
 https://www.adafruit.com/product/732
 https://learn.adafruit.com/using-mcp23008-mcp23017-with-circuitpython/overview
