@@ -30,7 +30,7 @@ namespace Iot.Device.CharacterLcd.Samples
         /// </summary>
         static void UsingMcp()
         {
-            UnixI2cDevice i2CDevice = new UnixI2cDevice(new I2cConnectionSettings(1, 0x21));
+            I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x21));
             Mcp23008 mcpDevice = new Mcp23008(i2CDevice);
             int[] dataPins = { 3, 4, 5, 6 };
             int registerSelectPin = 1;

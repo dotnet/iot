@@ -1,5 +1,5 @@
 # DS1307 - Realtime Clock
-The DS1307 serial real-time clock (RTC) is a lowpower, full binary-coded decimal (BCD) clock/calendar plus 56 bytes of NV SRAM. Address and data are transferred serially through an I2C, bidirectional bus. 
+The DS1307 serial real-time clock (RTC) is a lowpower, full binary-coded decimal (BCD) clock/calendar plus 56 bytes of NV SRAM. Address and data are transferred serially through an I2C, bidirectional bus.
 
 ## Sensor Image
 ![](sensor.jpg)
@@ -7,10 +7,7 @@ The DS1307 serial real-time clock (RTC) is a lowpower, full binary-coded decimal
 ## Usage
 ```C#
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Ds1307.DefaultI2cAddress);
-// get I2cDevice (in Linux)
-UnixI2cDevice device = new UnixI2cDevice(settings);
-// get I2cDevice (in Win10)
-//Windows10I2cDevice device = new Windows10I2cDevice(settings);
+I2cDevice device = I2cDevice.Create(settings);
 
 using (Ds1307 rtc = new Ds1307(device))
 {

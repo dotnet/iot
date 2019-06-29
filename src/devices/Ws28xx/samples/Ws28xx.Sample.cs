@@ -23,7 +23,7 @@ namespace Iot.Device.Ws28xx.Samples
             };
             
 		    // Create a Neo Pixel x8 stick on spi 0.0
-            var spi = new UnixSpiDevice(settings);
+            var spi = SpiDevice.Create(settings);
             
 #if WS2808
             var neo = new Ws2808(spi, count);

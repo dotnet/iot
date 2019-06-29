@@ -5,7 +5,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace System.Device.I2c.Drivers
+namespace System.Device.I2c.Devices
 {
     /// <summary>
     /// Represents an I2C communication channel running on Unix.
@@ -188,29 +188,29 @@ namespace System.Device.I2c.Drivers
         /// <summary>
         /// Writes a byte to the I2C device.
         /// </summary>
-        /// <param name="data">The byte to be written to the I2C device.</param>
-        public override unsafe void WriteByte(byte data)
+        /// <param name="value">The byte to be written to the I2C device.</param>
+        public override unsafe void WriteByte(byte value)
         {
             Initialize();
 
             int length = sizeof(byte);
-            Transfer(&data, null, length, 0);
+            Transfer(&value, null, length, 0);
         }
 
         /// <summary>
         /// Writes data to the I2C device.
         /// </summary>
-        /// <param name="data">
+        /// <param name="value">
         /// The buffer that contains the data to be written to the I2C device.
         /// The data should not include the I2C device address.
         /// </param>
-        public override unsafe void Write(ReadOnlySpan<byte> data)
+        public override unsafe void Write(ReadOnlySpan<byte> value)
         {
             Initialize();
 
-            fixed (byte* dataPointer = data)
+            fixed (byte* dataPointer = value)
             {
-                Transfer(dataPointer, null, data.Length, 0);
+                Transfer(dataPointer, null, value.Length, 0);
             }
         }
 

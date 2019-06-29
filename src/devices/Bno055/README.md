@@ -19,7 +19,7 @@ You will find this device as ["Inertial Measurement Unit"](https://www.dexterind
 Create a ```Bno055Sensor``` class and pass the I2C device. The default I2C address is provided in the class.
 
 ```csharp
-I2cDevice i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(1, Bno055Sensor.DefaultI2cAddress));
+I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Bno055Sensor.DefaultI2cAddress));
 Bno055Sensor bno055Sensor = new Bno055Sensor(i2cDevice);
 Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
 Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");

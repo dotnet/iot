@@ -22,7 +22,7 @@ namespace Iot.Device.Pca9685.Samples
             var deviceAddress = deviceAddress_fixed | deviceAddress_selectable;
 
             var settings = new I2cConnectionSettings(busId, deviceAddress);
-            var device = new UnixI2cDevice(settings);
+            var device = I2cDevice.Create(settings);
 
             using (var pca9685 = new Pca9685(device))
             {

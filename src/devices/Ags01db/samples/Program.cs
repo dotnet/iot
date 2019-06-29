@@ -10,7 +10,7 @@ namespace Iot.Device.Ags01db.Samples
         static void Main(string[] args)
         {
             I2cConnectionSettings settings = new I2cConnectionSettings(1, Ags01db.DefaultI2cAddress);
-            UnixI2cDevice device = new UnixI2cDevice(settings);
+            I2cDevice device = I2cDevice.Create(settings);
 
             using (Ags01db sensor = new Ags01db(device))
             {

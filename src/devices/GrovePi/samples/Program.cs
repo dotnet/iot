@@ -21,7 +21,7 @@ namespace GrovePisample
             Console.WriteLine("Hello GrovePi!");
             PinValue relay = PinValue.Low;
             I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, GrovePi.DefaultI2cAddress);
-            grovePi = new GrovePi(new UnixI2cDevice(i2CConnectionSettings));
+            grovePi = new GrovePi(I2cDevice.Create(i2CConnectionSettings));
             Console.WriteLine($"Manufacturer :{grovePi.GrovePiInfo.Manufacturer}");
             Console.WriteLine($"Board: {grovePi.GrovePiInfo.Board}");
             Console.WriteLine($"Firmware version: {grovePi.GrovePiInfo.SoftwareVersion}");
@@ -42,13 +42,13 @@ namespace GrovePisample
                 relay = (relay == PinValue.Low) ? PinValue.High : PinValue.Low;
                 grovePi.DigitalWrite(GrovePort.DigitalPin2, relay);
                 Console.WriteLine($"Relay: {relay}");
-                grovePi.AnalogWrite(GrovePort.DigitalPin3, (byte)(poten * 100 / 1023));              
+                grovePi.AnalogWrite(GrovePort.DigitalPin3, (byte)(poten * 100 / 1023));
                 Console.WriteLine($"Button: {grovePi.DigitalRead(GrovePort.DigitalPin4)}");
                 Console.WriteLine($"Ultrasonic: {ultrasonic}");
                 dhtSensor.Read();
                 Console.WriteLine($"{dhtSensor.DhtType}: {dhtSensor}");
-                Thread.Sleep(2000);                
-            }            
+                Thread.Sleep(2000);
+            }
         }
     }
 }

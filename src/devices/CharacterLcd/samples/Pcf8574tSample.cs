@@ -26,7 +26,7 @@ namespace Iot.Device.CharacterLcd.Samples
             Console.WriteLine("Starting...");
             //for PCF8574T i2c addresses can be between 0x27 and 0x20 depending on bridged solder jumpers
             //for PCF8574AT i2c addresses can be between 0x3f and 0x38 depending on bridged solder jumpers
-            var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x27));
+            var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x27));
             var controller = new Pcf8574(i2cDevice);
             var lcd = new Lcd1602(registerSelectPin: 0, enablePin: 2, dataPins: new int[] { 4, 5, 6, 7 }, backlightPin: 3, readWritePin: 1, controller: controller);
 

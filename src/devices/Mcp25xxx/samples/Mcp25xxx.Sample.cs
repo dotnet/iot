@@ -44,7 +44,7 @@ namespace Iot.Device.Mcp25xxx.Samples
         private static Mcp25xxx GetMcp25xxxDevice()
         {
             var spiConnectionSettings = new SpiConnectionSettings(0, 0);
-            var spiDevice = new UnixSpiDevice(spiConnectionSettings);
+            var spiDevice = SpiDevice.Create(spiConnectionSettings);
             return new Mcp25625(spiDevice);
         }
 

@@ -25,8 +25,8 @@ Grove LCD RGB Backlight uses two i2c devices:
 
 Here is a Hello World example of how to consume Grove LCD RGB Backlight binding:
 ```c#
-var i2cLcdDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x3E));
-var i2cRgbDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x62));
+var i2cLcdDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x3E));
+var i2cRgbDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x62));
 using (var lcd = new LcdRgb1602(i2cLcdDevice, i2cRgbDevice))
 {
     lcd.Write("Hello World!");
@@ -37,14 +37,14 @@ using (var lcd = new LcdRgb1602(i2cLcdDevice, i2cRgbDevice))
 PCF8574T/PCF8574AT Sample
 The I2C backpack based on the PCF8574T/AT IC uses specific pin mapping, to consume this device binding on this backpack use like so
 ```c#
-var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x27)); 
+var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x27));
 var controller = new Pcf8574(i2cDevice);
 var lcd = new Lcd1602(registerSelectPin: 0, enablePin: 2, dataPins: new int[] { 4, 5, 6, 7}, backlightPin: 3, readWritePin: 1, controller: controller);
 ```
 there is a full working example in the samples directory called Pcf8574tSample.cs
 For PCF8574T i2c addresses can be between 0x27 and 0x20 depending on bridged solder jumpers and for PCF8574AT i2c addresses can be between 0x3f and 0x38 depending on bridged solder jumpers
 
-## References 
+## References
 - Very complete tutorial on how to connect and work with one of these displays: https://learn.adafruit.com/drive-a-16x2-lcd-directly-with-a-raspberry-pi/overview
 - Good guide explaining how the device works internally: http://www.site2241.net/november2014.htm
 - Seeedstudio, Grove - LCD RGB Backlight library: https://github.com/Seeed-Studio/Grove_LCD_RGB_Backlight
