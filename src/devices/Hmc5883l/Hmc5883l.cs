@@ -4,8 +4,7 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.Device.I2c;
+using System.Device.I2c.Devices;
 using System.Numerics;
 
 namespace Iot.Device.Hmc5883l

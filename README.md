@@ -10,20 +10,20 @@ The repository also contains [IoT.Device.Bindings](https://www.nuget.org/package
 
 # How to Install
 
-You can install the latest daily pre-release build of the .NET Core System.Device.Gpio and IoT.Device.Bindings NuGet packages from the [dotnet.myget.org feed](https://dotnet.myget.org/feed/dotnet-core/package/nuget/System.Device.Gpio).
+You can install the latest daily pre-release build of the .NET Core System.Device.Gpio and IoT.Device.Bindings NuGet packages from the blob feed.
   
 ## NuGet.exe
 ~~~~
-nuget install System.Device.Gpio -PreRelease -Source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
-nuget install IoT.Device.Bindings -PreRelease -Source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
+nuget install System.Device.Gpio -PreRelease -Source https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json
+nuget install IoT.Device.Bindings -PreRelease -Source https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json
 ~~~~
 ### Official Build Status
 ![BuildStatus](https://dev.azure.com/dnceng/internal/_apis/build/status/dotnet/iot/dotnet.iot-official?branchName=master)
 
 ## .NET CLI
 ~~~~
-dotnet add package System.Device.Gpio --source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
-dotnet add package IoT.Device.Bindings --source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
+dotnet add package System.Device.Gpio --source https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json
+dotnet add package IoT.Device.Bindings --source https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json
 ~~~~
 
 # Getting Started

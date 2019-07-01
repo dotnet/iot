@@ -3,12 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.IO;
-using System.Device.Gpio;
-using System.Device.I2c;
-using System.Diagnostics;
-using System.Device.I2c.Drivers;
 using System.Buffers.Binary;
+using System.Device.I2c.Devices;
 using Iot.Units;
 
 namespace Iot.Device.Hts221
