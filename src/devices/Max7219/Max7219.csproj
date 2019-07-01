@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <Compile Include="Max7219.cs" />
     <Compile Include="MatrixGraphics.cs" />
     <Compile Include="IFont.cs" />

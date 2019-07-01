@@ -20,12 +20,14 @@ The following fritzing diagram illustrates one way to wire up the BMP280 with a 
 ![Raspberry Pi Breadboard diagram](samples/rpi-bmp280_i2c.png)
 
 General:
+
 | Bmp280 | Raspberry |
 |--------|:---------:|
 |Vin| Power pin|
 |GND| Ground|
 
 I2C:
+
 | Bmp280 | Raspberry |
 |--------|:---------:|
 |SCK| I2C clock pin|

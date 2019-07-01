@@ -165,7 +165,6 @@ namespace Iot.Device.Mcp23xxx
         /// </remarks>
         public void WriteByte(Register register, byte value) => InternalWriteByte(register, value, Port.PortA);
 
-
         protected ushort InternalReadUInt16(Register register)
         {
             Span<byte> buffer = stackalloc byte[2];
@@ -439,11 +438,19 @@ namespace Iot.Device.Mcp23xxx
             return port == Port.PortA ? address : address += 0x10;
         }
 
+        public void OpenPin(int pinNumber) => throw new NotImplementedException();
+
         public void OpenPin(int pinNumber, PinMode mode) => SetPinMode(pinNumber, mode);
 
         public void ClosePin(int pinNumber)
         {
             // No-op
         }
+
+        public bool IsPinOpen(int pinNumber) => throw new NotImplementedException();
+
+        public PinMode GetPinMode(int pinNumber) => throw new NotImplementedException();
+
+        public bool IsPinModeSupported(int pinNumber, PinMode mode) => throw new NotImplementedException();
     }
 }

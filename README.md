@@ -17,6 +17,8 @@ You can install the latest daily pre-release build of the .NET Core System.Devic
 nuget install System.Device.Gpio -PreRelease -Source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
 nuget install IoT.Device.Bindings -PreRelease -Source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
 ~~~~
+### Official Build Status
+![BuildStatus](https://dev.azure.com/dnceng/internal/_apis/build/status/dotnet/iot/dotnet.iot-official?branchName=master)
 
 ## .NET CLI
 ~~~~

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>    
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Bmp180.cs" />
+    <Compile Include="CalibrationData.cs" />
+    <Compile Include="Register.cs" />
+    <Compile Include="Sampling.cs" />
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="..\Units\Units.csproj" />
+    <None Include="README.md"/>
+  </ItemGroup>
+
+</Project>

@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RuntimeIdentifiers>win-arm;linux-arm</RuntimeIdentifiers>
@@ -22,5 +21,4 @@
     <!--Excluding Linux implementations-->
     <Compile Remove="**\*.Linux.cs" />
   </ItemGroup>
-
 </Project>

@@ -14,23 +14,23 @@ namespace Iot.Device.Bmx280
         /// </summary>
         Skipped = 0b000,
         /// <summary>
-        /// oversampling x1
+        /// Oversampling x1
         /// </summary>
         UltraLowPower = 0b001,
         /// <summary>
-        /// oversampling x2
+        /// Oversampling x2
         /// </summary>
         LowPower = 0b010,
         /// <summary>
-        /// oversampling x4
+        /// Oversampling x4
         /// </summary>
         Standard = 0b011,
         /// <summary>
-        /// oversampling x8
+        /// Oversampling x8
         /// </summary>
         HighResolution = 0b100,
         /// <summary>
-        /// oversampling x16
+        /// Oversampling x16
         /// </summary>
         UltraHighResolution = 0b101,
     }

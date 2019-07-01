@@ -5,20 +5,21 @@
 namespace Iot.Device.Bmx280
 {
     /// <summary>
-    /// BMP280s power modes
+    /// Bmx280s power modes.
     /// </summary>
     public enum PowerMode : byte
     {
         /// <summary>
-        /// Power saving mode, does not do new measurements
+        /// No operations, all registers accessible, lowest power mode, selected after startup.
         /// </summary>
         Sleep = 0b00,
         /// <summary>
-        /// Device goes to sleep mode after one measurement
+        /// Perform one measurement, store results, and return to sleep mode.
         /// </summary>
         Forced = 0b10,
         /// <summary>
-        /// Device does continuous measurements
+        /// Perpetual cycling of measurements and inactive periods.
+        /// This interval is determined by the combination of IIR filter and standby time options.
         /// </summary>
         Normal = 0b11
     }

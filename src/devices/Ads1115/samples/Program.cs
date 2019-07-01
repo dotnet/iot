@@ -18,9 +18,7 @@ namespace Ads1115.Samples
             // ADS1115 Addr Pin connect to GND
             I2cConnectionSettings settings = new I2cConnectionSettings(1, (int)I2cAddress.GND);
             // get I2cDevice (in Linux)
-            UnixI2cDevice device = new UnixI2cDevice(settings);
-            // get I2cDevice (in Win10)
-            //Windows10I2cDevice device = new Windows10I2cDevice(settings);
+            I2cDevice device = I2cDevice.Create(settings);
 
             // pass in I2cDevice
             // measure the voltage AIN0
