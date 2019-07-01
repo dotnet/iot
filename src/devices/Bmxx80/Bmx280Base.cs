@@ -6,7 +6,7 @@
 //Formulas and code examples can also be found in the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
 
 using System;
-using System.Device.I2c;
+using System.Device.I2c.Devices;
 using System.IO;
 using System.Threading.Tasks;
 using Iot.Device.Bmxx80.PowerMode;
