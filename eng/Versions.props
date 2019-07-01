@@ -6,6 +6,17 @@
     <SystemDeviceGpioPackageVersion>0.1.0-prerelease.19327.1</SystemDeviceGpioPackageVersion>
     <IotDeviceBindingsPackageVersion>0.1.0-prerelease.19327.1</IotDeviceBindingsPackageVersion>
     <!-- dotnet/arcade dependencies -->
-    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19326.2</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19330.1</MicrosoftDotNetGenAPIPackageVersion>
+  </PropertyGroup>
+  <!-- Restore sources -->
+  <PropertyGroup>
+    <RestoreSources>
+      $(RestoreSources);
+      https://dotnetfeed.blob.core.windows.net/dotnet-tools-internal/index.json;
+      https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json;
+      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
+      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
+      https://api.nuget.org/v3/index.json;
+    </RestoreSources>
   </PropertyGroup>
 </Project>
