@@ -52,6 +52,7 @@ namespace Iot.Device.Servo
         /// <param name="minimumDurationMicroseconds">Minimum duration of pulse in microseconds</param>
         /// <param name="maximumDurationMicroseconds">Maximum duration of pulse in microseconds</param>
         /// <param name="periodMicroseconds">Period length in microseconds, by default 20000 so 50Hz</param>
+        /// <param name="maxAngle"></param>
         public ServoMotorDefinition(uint minimumDurationMicroseconds, uint maximumDurationMicroseconds, uint periodMicroseconds, double maxAngle)
         {
             MinimumDurationMicroseconds = minimumDurationMicroseconds;

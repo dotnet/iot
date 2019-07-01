@@ -33,6 +33,7 @@ namespace Iot.Device.BrickPi3.Movement
         /// <summary>
         /// Create a motor
         /// </summary>
+        /// <param name="brick">The brick controlling the motor</param>
         /// <param name="port">Motor port</param>
         public Motor(Brick brick, BrickPortMotor port) : this(brick, port, 1000) { }
 
