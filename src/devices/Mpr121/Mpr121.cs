@@ -4,10 +4,9 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Device.I2c;
+using System.Device.I2c.Devices;
 using System.Threading;
 
 namespace Iot.Device.Mpr121

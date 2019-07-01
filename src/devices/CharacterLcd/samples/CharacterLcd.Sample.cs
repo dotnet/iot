@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
+using System.Device.I2c.Devices;
 using Iot.Device.Mcp23xxx;
 
 namespace Iot.Device.CharacterLcd.Samples

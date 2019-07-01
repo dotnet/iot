@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Threading;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
+using System.Device.I2c.Devices;
+using System.Threading;
 using Iot.Device.Ads1115;
 
 namespace Ads1115.Samples

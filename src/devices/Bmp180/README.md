@@ -1,4 +1,4 @@
-# Using BMP180 
+# BMP180 - barometer, altitude and temperature sensor
 
 BMP180 is a device that read barometic pressure, altitude and temperature. I2C can be used to communicate with the device.
 

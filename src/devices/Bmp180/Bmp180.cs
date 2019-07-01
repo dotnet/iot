@@ -6,8 +6,8 @@
 // Formulas and code examples can also be found in the datasheet https://cdn-shop.adafruit.com/datasheets/BST-BMP180-DS000-09.pdf
 
 using System;
-using System.Device.I2c;
 using System.Buffers.Binary;
+using System.Device.I2c.Devices;
 using System.Threading;
 using Iot.Units;
 
