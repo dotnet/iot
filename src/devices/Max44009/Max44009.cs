@@ -27,7 +27,7 @@ namespace Iot.Device.Max44009
         /// <summary>
         /// Creates a new instance of the MAX44009, MAX44009 working mode is default. (Consume lowest power)
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Max44009(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;
@@ -41,7 +41,7 @@ namespace Iot.Device.Max44009
         /// <summary>
         /// Creates a new instance of the MAX44009, MAX44009 working mode is continuous. (Consume slightly higher power than in the default mode)
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="integrationTime">Measurement Cycle</param>
         public Max44009(I2cDevice i2cDevice, IntegrationTime integrationTime)
         {

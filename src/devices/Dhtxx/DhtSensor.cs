@@ -90,7 +90,7 @@ namespace Iot.Device.DHTxx
         /// <summary>
         /// Create a DHT sensor through I2C (Only DHT12)
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         public DhtSensor(I2cDevice i2cDevice)
         {
             _protocol = CommunicationProtocol.I2C;

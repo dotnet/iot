@@ -40,7 +40,7 @@ namespace Iot.Device.Ags01db
         /// <summary>
         /// Creates a new instance of the ASG01DB
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Ags01db(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;

@@ -64,7 +64,7 @@ namespace Iot.Device.Sht3x
         /// <summary>
         /// Creates a new instance of the SHT3x
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="resolution">SHT3x Read Resolution</param>
         public Sht3x(I2cDevice i2cDevice, Resolution resolution = Resolution.High)
         {

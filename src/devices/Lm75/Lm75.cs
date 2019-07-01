@@ -38,7 +38,7 @@ namespace Iot.Device.Lm75
         /// <summary>
         /// Creates a new instance of the LM75
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Lm75(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;

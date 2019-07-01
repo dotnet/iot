@@ -19,7 +19,7 @@ namespace Iot.Device.Ssd13xx
         /// A single-chip CMOS OLED/PLED driver with controller for organic/polymer
         /// light emitting diode dot-matrix graphic display system. 
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Ssd1306(I2cDevice i2cDevice)
         : base(i2cDevice)
         {

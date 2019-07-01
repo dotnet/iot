@@ -27,7 +27,7 @@ namespace Iot.Device.Ds1307
         /// <summary>
         /// Creates a new instance of the DS1307
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Ds1307(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;

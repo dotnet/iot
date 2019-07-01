@@ -45,7 +45,7 @@ namespace Iot.Device.Hmc5883l
         /// <summary>
         /// Initialize a new HMC5883L device connected through I2C
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="gain">Gain Setting</param>
         /// <param name="measuringMode">The Mode of Measuring</param>
         /// <param name="outputRate">Typical Data Output Rate (Hz)</param>

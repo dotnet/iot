@@ -45,7 +45,7 @@ namespace Iot.Device.Bh1750fvi
         /// <summary>
         /// Creates a new instance of the BH1750FVI
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="measuringMode">The measuring mode of BH1750FVI</param>
         /// <param name="lightTransmittance">BH1750FVI Light Transmittance, from 27.20% to 222.50%</param>
         public Bh1750fvi(I2cDevice i2cDevice, MeasuringMode measuringMode = MeasuringMode.ContinuouslyHighResolutionMode, double lightTransmittance = 1)

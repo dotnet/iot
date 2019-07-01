@@ -18,7 +18,7 @@ namespace Iot.Device.Ssd13xx
         /// <summary>
         /// Initializes new instance of Ssd1327 device that will communicate using I2C bus.
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Ssd1327(I2cDevice i2cDevice)
             : base(i2cDevice)
         {

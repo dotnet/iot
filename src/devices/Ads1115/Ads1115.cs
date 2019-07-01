@@ -61,7 +61,7 @@ namespace Iot.Device.Ads1115
         /// <summary>
         /// Initialize a new Ads1115 device connected through I2C
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="inputMultiplexer">Input Multiplexer</param>
         /// <param name="measuringRange">Programmable Gain Amplifier</param>
         /// <param name="dataRate">Data Rate</param>
