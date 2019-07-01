@@ -5,12 +5,12 @@
 using Windows.Devices.Enumeration;
 using WinI2c = Windows.Devices.I2c;
 
-namespace System.Device.I2c.Devices
+namespace System.Device.I2c
 {
     /// <summary>
     /// Represents an I2C communication channel running on Windows 10 IoT.
     /// </summary>
-    public class Windows10I2cDevice : I2cDevice
+    internal class Windows10I2cDevice : I2cDevice
     {
         private readonly I2cConnectionSettings _settings;
         private WinI2c.I2cDevice _winI2cDevice;
