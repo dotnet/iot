@@ -1,4 +1,4 @@
-﻿# SocketCan
+﻿# SocketCan - CAN BUS library (Linux only)
 
 Controller Area Network Protocol Family bindings (SocketCAN).
 

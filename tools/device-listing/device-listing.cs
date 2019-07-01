@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -21,11 +22,11 @@ namespace Iot.Tools.DeviceListing
                 return;
             }
 
-            string devices = Path.Combine(repoRoot, "src", "devices");
+            string devicesPath = Path.Combine(repoRoot, "src", "devices");
 
-            var deviceListing = new StringBuilder();
+            List<DeviceInfo> devices = new List<DeviceInfo>();
 
-            foreach (string directory in Directory.EnumerateDirectories(devices))
+            foreach (string directory in Directory.EnumerateDirectories(devicesPath))
             {
                 if (IsIgnoredDevice(directory))
                 {
@@ -35,22 +36,37 @@ namespace Iot.Tools.DeviceListing
                 string readme = Path.Combine(directory, "README.md");
                 if (File.Exists(readme))
                 {
-                    string title = GetTitle(readme);
-                    if (title == null)
+                    var device = new DeviceInfo(readme);
+
+                    if (device.Title == null)
                     {
-                        Console.WriteLine($"Directory `{directory}` contains readme file without title on the first line.");
+                        Console.WriteLine($"Warning: Directory `{directory}` contains readme file without title on the first line.");
                         continue;
                     }
 
-                    deviceListing.AppendLine($"* [{title}]({GetRelativePathSimple(readme, devices)})");
+                    devices.Add(device);
                 }
                 else
                 {
-                    Console.WriteLine($"Directory `{directory}` does not have a README.md file.");
+                    Console.WriteLine($"Warning: Directory `{directory}` does not have a README.md file.");
                 }
             }
 
-            ReplacePlaceholder(Path.Combine(devices, "README.md"), "devices", deviceListing.ToString());
+            devices.Sort();
+
+            string deviceListing = GetDeviceListing(devicesPath, devices);
+            ReplacePlaceholder(Path.Combine(devicesPath, "README.md"), "devices", deviceListing);
+        }
+
+        private static string GetDeviceListing(string devicesPath, IEnumerable<DeviceInfo> devices)
+        {
+            var deviceListing = new StringBuilder();
+            foreach (DeviceInfo device in devices)
+            {
+                deviceListing.AppendLine($"* [{device.Title}]({GetRelativePathSimple(device.ReadmePath, devicesPath)})");
+            }
+
+            return deviceListing.ToString();
         }
 
         private static string FindRepoRoot(string dir)
@@ -66,17 +82,6 @@ namespace Iot.Tools.DeviceListing
                     DirectoryInfo parentDir = new DirectoryInfo(dir).Parent;
                     return parentDir == null ? null : FindRepoRoot(parentDir.FullName);
                 }
-            }
-
-            return null;
-        }
-
-        private static string GetTitle(string readmePath)
-        {
-            string[] lines = File.ReadAllLines(readmePath);
-            if (lines[0].StartsWith("# "))
-            {
-                return lines[0].Substring(2);
             }
 
             return null;
@@ -104,7 +109,7 @@ namespace Iot.Tools.DeviceListing
         private static bool IsIgnoredDevice(string path)
         {
             string dirName = new DirectoryInfo(path).Name;
-            return dirName == "Common" || dirName == "Units";
+            return dirName == "Common" || dirName == "Units" || dirName == "Interop";
         }
 
         private static void ReplacePlaceholder(string filePath, string placeholderName, string newContent)

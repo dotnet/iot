@@ -1,4 +1,4 @@
-﻿# Mcp23xxx - I/O Expander
+﻿# Mcp23xxx - I/O Expander device family
 
 ## Summary
 The MCP23XXX device family provides 8/16-bit, general purpose parallel I/O expansion for I2C or SPI applications.  These devices include a range of addressing schemes and I/O configurations including pull-up resistors, polarity inverting, and interrupts.

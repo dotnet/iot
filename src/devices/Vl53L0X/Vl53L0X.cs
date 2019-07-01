@@ -9,10 +9,9 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Device.I2c;
+using System.Device.I2c.Devices;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Threading;
 
 namespace Iot.Device.Vl53L0X
