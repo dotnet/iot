@@ -40,7 +40,7 @@ namespace Iot.Tools.DeviceListing
 
                     if (device.Title == null)
                     {
-                        Console.WriteLine($"Directory `{directory}` contains readme file without title on the first line.");
+                        Console.WriteLine($"Warning: Directory `{directory}` contains readme file without title on the first line.");
                         continue;
                     }
 
@@ -48,7 +48,7 @@ namespace Iot.Tools.DeviceListing
                 }
                 else
                 {
-                    Console.WriteLine($"Directory `{directory}` does not have a README.md file.");
+                    Console.WriteLine($"Warning: Directory `{directory}` does not have a README.md file.");
                 }
             }
 
@@ -109,7 +109,7 @@ namespace Iot.Tools.DeviceListing
         private static bool IsIgnoredDevice(string path)
         {
             string dirName = new DirectoryInfo(path).Name;
-            return dirName == "Common" || dirName == "Units";
+            return dirName == "Common" || dirName == "Units" || dirName == "Interop";
         }
 
         private static void ReplacePlaceholder(string filePath, string placeholderName, string newContent)
