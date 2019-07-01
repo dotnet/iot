@@ -20,18 +20,13 @@ namespace DeviceApiTester.Commands.I2c
 
         /// <summary>Executes the command.</summary>
         /// <returns>The command's exit code.</returns>
-        /// <remarks>
-        ///     NOTE: This test app uses the base class's <see cref="CreateI2cDevice"/> method to create a device.<br/>
-        ///     Real-world usage would simply create an instance of an <see cref="I2cDevice"/> implementation:
-        ///     <code>using (var i2cDevice = I2cDevice.Create(connectionSettings))</code>
-        /// </remarks>
         public int Execute()
         {
-            Console.WriteLine($"Device={Device}, BusId={BusId}, DeviceAddress={DeviceAddress} (0x{DeviceAddress:X2}), ByteCount={ByteCount}");
+            Console.WriteLine($"BusId={BusId}, DeviceAddress={DeviceAddress} (0x{DeviceAddress:X2}), ByteCount={ByteCount}");
 
             var connectionSettings = new I2cConnectionSettings(BusId, DeviceAddress);
 
-            using (var i2cDevice = CreateI2cDevice(connectionSettings))
+            using (var i2cDevice = I2cDevice.Create(connectionSettings))
             {
                 // Write random bytes of data
                 var buffer = new byte[ByteCount];
