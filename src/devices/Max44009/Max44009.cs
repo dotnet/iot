@@ -12,7 +12,7 @@ namespace Iot.Device.Max44009
     /// </summary>
     public class Max44009 : IDisposable
     {
-        private I2cDevice _sensor;
+        private I2cDevice _i2cDevice;
 
         /// <summary>
         /// MAX44009 Default I2C Address
@@ -27,30 +27,30 @@ namespace Iot.Device.Max44009
         /// <summary>
         /// Creates a new instance of the MAX44009, MAX44009 working mode is default. (Consume lowest power)
         /// </summary>
-        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
-        public Max44009(I2cDevice sensor)
+        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        public Max44009(I2cDevice i2cDevice)
         {
-            _sensor = sensor;
+            _i2cDevice = i2cDevice;
 
             // Details in the Datasheet P8
             Span<byte> writeBuff = stackalloc byte[2] { (byte)Register.MAX_CONFIG, 0b_0000_0000 };
 
-            _sensor.Write(writeBuff);
+            _i2cDevice.Write(writeBuff);
         }
 
         /// <summary>
         /// Creates a new instance of the MAX44009, MAX44009 working mode is continuous. (Consume slightly higher power than in the default mode)
         /// </summary>
-        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
+        /// <param name="i2cDevice">>The I2C device used for communication.</param>
         /// <param name="integrationTime">Measurement Cycle</param>
-        public Max44009(I2cDevice sensor, IntegrationTime integrationTime)
+        public Max44009(I2cDevice i2cDevice, IntegrationTime integrationTime)
         {
-            _sensor = sensor;
+            _i2cDevice = i2cDevice;
 
             // Details in the Datasheet P8
             Span<byte> writeBuff = stackalloc byte[2] { (byte)Register.MAX_CONFIG, (byte)(0b_1100_0000 | (byte)integrationTime) };
 
-            _sensor.Write(writeBuff);
+            _i2cDevice.Write(writeBuff);
         }
 
         /// <summary>
@@ -58,8 +58,8 @@ namespace Iot.Device.Max44009
         /// </summary>
         public void Dispose()
         {
-            _sensor?.Dispose();
-            _sensor = null;
+            _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
 
         /// <summary>
@@ -70,8 +70,8 @@ namespace Iot.Device.Max44009
         {
             Span<byte> readBuff = stackalloc byte[2];
 
-            _sensor.WriteByte((byte)Register.MAX_LUX_HIGH);
-            _sensor.Read(readBuff);
+            _i2cDevice.WriteByte((byte)Register.MAX_LUX_HIGH);
+            _i2cDevice.Read(readBuff);
 
             // Details in the Datasheet P9-10
             byte exponent = (byte)((readBuff[0] & 0b_1111_0000) >> 4);

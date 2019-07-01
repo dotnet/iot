@@ -28,7 +28,7 @@ namespace Iot.Device.DHTxx
         private readonly byte[] _readBuff = new byte[5];
         private readonly CommunicationProtocol _protocol;
         private readonly int _pin;
-        private readonly I2cDevice _sensor;
+        private readonly I2cDevice _i2cDevice;
         private readonly GpioController _controller;
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private int _lastMeasurement = 0;
@@ -90,11 +90,11 @@ namespace Iot.Device.DHTxx
         /// <summary>
         /// Create a DHT sensor through I2C (Only DHT12)
         /// </summary>
-        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
-        public DhtSensor(I2cDevice sensor)
+        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        public DhtSensor(I2cDevice i2cDevice)
         {
             _protocol = CommunicationProtocol.I2C;
-            _sensor = sensor;
+            _i2cDevice = i2cDevice;
             SetDevice(DhtType.Dht12);
         }
 
@@ -239,9 +239,9 @@ namespace Iot.Device.DHTxx
         private bool ReadThroughI2c()
         {
             // DHT12 Humidity Register
-            _sensor.WriteByte(0x00);
+            _i2cDevice.WriteByte(0x00);
             // humidity int, humidity decimal, temperature int, temperature decimal, checksum
-            _sensor.Read(_readBuff);
+            _i2cDevice.Read(_readBuff);
 
             _lastMeasurement = Environment.TickCount;
 
@@ -281,7 +281,7 @@ namespace Iot.Device.DHTxx
         public void Dispose()
         {
             _controller?.Dispose();
-            _sensor?.Dispose();
+            _i2cDevice?.Dispose();
         }
     }
 }
