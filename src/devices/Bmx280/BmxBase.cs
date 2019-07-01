@@ -7,7 +7,7 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Device.I2c;
+using System.Device.I2c.Devices;
 using System.Threading.Tasks;
 using Iot.Units;
 
