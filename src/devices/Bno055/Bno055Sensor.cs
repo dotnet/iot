@@ -26,7 +26,7 @@ namespace Iot.Device.Bno055
 
         private const byte DeviceId = 0xA0;
         private readonly bool _autoDispoable;
-        private readonly I2cDevice _i2cDevice;
+        private I2cDevice _i2cDevice;
         private OperationMode _operationMode;
         private Units _units;
 
