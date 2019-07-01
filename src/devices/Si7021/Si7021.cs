@@ -59,7 +59,7 @@ namespace Iot.Device.Si7021
         /// <summary>
         /// Creates a new instance of the Si7021
         /// </summary>
-        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="resolution">Si7021 Read Resolution</param>
         public Si7021(I2cDevice i2cDevice, Resolution resolution = Resolution.Resolution1)
         {

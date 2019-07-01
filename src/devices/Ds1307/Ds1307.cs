@@ -17,7 +17,7 @@ namespace Iot.Device.Ds1307
         /// </summary>
         public const byte DefaultI2cAddress = 0x68;
 
-        private I2cDevice _sensor = null;
+        private I2cDevice _i2cDevice = null;
 
         /// <summary>
         /// DS1307 DateTime
@@ -27,10 +27,10 @@ namespace Iot.Device.Ds1307
         /// <summary>
         /// Creates a new instance of the DS1307
         /// </summary>
-        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
-        public Ds1307(I2cDevice sensor)
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
+        public Ds1307(I2cDevice i2cDevice)
         {
-            _sensor = sensor;
+            _i2cDevice = i2cDevice;
         }
 
         /// <summary>
@@ -42,8 +42,8 @@ namespace Iot.Device.Ds1307
             Span<byte> readBuffer = stackalloc byte[7];
 
             // Read all registers at the same time
-            _sensor.WriteByte((byte)Register.RTC_SEC_REG_ADDR);
-            _sensor.Read(readBuffer);
+            _i2cDevice.WriteByte((byte)Register.RTC_SEC_REG_ADDR);
+            _i2cDevice.Read(readBuffer);
 
             // Details in the Datasheet P8
             return new DateTime(2000 + Bcd2Int(readBuffer[6]), 
@@ -75,7 +75,7 @@ namespace Iot.Device.Ds1307
             writeBuffer[6] = Int2Bcd(time.Month);
             writeBuffer[7] = Int2Bcd(time.Year - 2000);
 
-            _sensor.Write(writeBuffer);
+            _i2cDevice.Write(writeBuffer);
         }
 
         /// <summary>
@@ -83,8 +83,8 @@ namespace Iot.Device.Ds1307
         /// </summary>
         public void Dispose()
         {
-            _sensor?.Dispose();
-            _sensor = null;
+            _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
 
         /// <summary>
