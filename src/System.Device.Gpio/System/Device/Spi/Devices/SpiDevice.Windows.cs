@@ -14,6 +14,6 @@ namespace System.Device.Spi
         /// </summary>
         /// <param name="settings">The connection settings of a device on a SPI bus.</param>
         /// <returns>A communications channel to a device on a SPI bus running on Windows 10 IoT.</returns>
-        public static SpiDevice Create(SpiConnectionSettings settings) => new Drivers.Windows10SpiDevice(settings);
+        public static SpiDevice Create(SpiConnectionSettings settings) => new Windows10SpiDevice(settings);
     }
 }
