@@ -1089,7 +1089,8 @@ namespace Iot.Device.Vl53L0X
         {
             if (_autoDisposable)
             {
-                _i2cDevice.Dispose();
+                _i2cDevice?.Dispose();
+                _i2cDevice = null;
             }
         }
 

@@ -510,7 +510,7 @@ namespace Iot.Device.Bmx280
         {
             if (_i2cDevice != null)
             {
-                _i2cDevice.Dispose();
+                _i2cDevice?.Dispose();
                 _i2cDevice = null;
             }
         }

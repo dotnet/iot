@@ -470,7 +470,8 @@ namespace Iot.Device.Bno055
         {
             if (_autoDispoable)
             {
-                _i2cDevice.Dispose();
+                _i2cDevice?.Dispose();
+                _i2cDevice = null;
             }
         }
 

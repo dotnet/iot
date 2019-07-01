@@ -133,7 +133,7 @@ namespace Iot.Device.Hmc5883l
         {
             if (_i2cDevice != null)
             {
-                _i2cDevice.Dispose();
+                _i2cDevice?.Dispose();
                 _i2cDevice = null;
             }
         }

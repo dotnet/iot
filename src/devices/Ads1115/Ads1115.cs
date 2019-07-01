@@ -170,7 +170,7 @@ namespace Iot.Device.Ads1115
         {
             if (_i2cDevice != null)
             {
-                _i2cDevice.Dispose();
+                _i2cDevice?.Dispose();
                 _i2cDevice = null;
             }
         }
