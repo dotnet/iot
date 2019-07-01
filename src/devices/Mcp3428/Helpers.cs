@@ -8,18 +8,48 @@ namespace Iot.Device.Mcp3428
 {
     internal static class Helpers
     {
-        public static double LSBValue(ResolutionEnum res)
+        /// <summary>
+        /// Gets the voltage value corresponding to the least significant bit based on resolution.
+        /// </summary>
+        /// <param name="res">The resolution.</param>
+        /// <returns>System.Double.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">res - null</exception>
+        public static double LSBValue(AdcResolution res)
         {
             switch (res)
             {
-                case ResolutionEnum.Bit12:
+                case AdcResolution.Bit12:
                     return 1e-3;
 
-                case ResolutionEnum.Bit14:
+                case AdcResolution.Bit14:
                     return 250e-6;
 
-                case ResolutionEnum.Bit16:
+                case AdcResolution.Bit16:
                     return 62.5e-6;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(res), res, null);
+            }
+        }
+
+        /// <summary>
+        /// Gets the divisor to scale raw data based on resolution. = 1/LSB
+        /// </summary>
+        /// <param name="res">The resolution.</param>
+        /// <returns>System.UInt16.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">res - null</exception>
+        public static ushort LsbDivisor(AdcResolution res)
+        {
+            switch (res)
+            {
+                case AdcResolution.Bit12:
+                    return 1000;
+
+                case AdcResolution.Bit14:
+                    return 4000;
+
+                case AdcResolution.Bit16:
+                    return 16000;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(res), res, null);
@@ -29,16 +59,15 @@ namespace Iot.Device.Mcp3428
         /// <summary>
         /// Determine device I2C address based on the configuration pin states. Based on documentation TABLE 5-3-
         /// </summary>
-        /// <param name="Adr0">The adr0 pin state</param>
-        /// <param name="Adr1">The adr1 pin state</param>
+        /// <param name="adr0">The adr0 pin state</param>
+        /// <param name="adr1">The adr1 pin state</param>
         /// <returns>System.Int32.</returns>
-        public static byte I2CAddressFromPins(PinState Adr0, PinState Adr1)
+        public static byte I2CAddressFromPins(PinState adr0, PinState adr1)
         {
             byte addr = 0b1101000; // Base value from doc
 
-            var idx = (byte)Adr0 << 4 + (byte)Adr1;
+            var idx = (byte)adr0 << 4 + (byte)adr1;
 
-            // switch (new ValueTuple<PinState, PinState>(Adr0, Adr1))
             switch (idx)
             {
                 case 0:
@@ -87,12 +116,12 @@ namespace Iot.Device.Mcp3428
             return (byte)((configByte & ~Helpers.Masks.ChannelMask) | ((byte)channel << 5));
         }
 
-        public static byte SetGainBits(byte configByte, GainEnum gain)
+        public static byte SetGainBits(byte configByte, AdcGain gain)
         {
             return (byte)((configByte & ~Helpers.Masks.GainMask) | (byte)gain);
         }
 
-        public static byte SetModeBit(byte configByte, ModeEnum mode)
+        public static byte SetModeBit(byte configByte, AdcMode mode)
         {
             return (byte)((configByte & ~Helpers.Masks.ModeMask) | (byte)mode);
         }
@@ -102,22 +131,22 @@ namespace Iot.Device.Mcp3428
             return (byte)(ready ? configByte & ~Helpers.Masks.ReadyMask : configByte | Helpers.Masks.ReadyMask);
         }
 
-        public static byte SetResolutionBits(byte configByte, ResolutionEnum resolution)
+        public static byte SetResolutionBits(byte configByte, AdcResolution resolution)
         {
             return (byte)((configByte & ~Helpers.Masks.ResolutionMask) | (byte)resolution);
         }
 
-        public static int UpdateFrequency(ResolutionEnum res)
+        public static int UpdateFrequency(AdcResolution res)
         {
             switch (res)
             {
-                case ResolutionEnum.Bit12:
+                case AdcResolution.Bit12:
                     return 240;
 
-                case ResolutionEnum.Bit14:
+                case AdcResolution.Bit14:
                     return 60;
 
-                case ResolutionEnum.Bit16:
+                case AdcResolution.Bit16:
                     return 15;
 
                 default:

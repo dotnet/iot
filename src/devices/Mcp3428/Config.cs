@@ -7,12 +7,13 @@ namespace Iot.Device.Mcp3428
     /// <summary>
     /// Possible gain values of the ADC
     /// </summary>
-    public enum GainEnum : byte { X1 = 0, X2 = 1, X4 = 2, X8 = 3 }
+    public enum AdcGain : byte { X1 = 0, X2 = 1, X4 = 2, X8 = 3 }
 
     /// <summary>
     /// Possible operation modes of the ADC
     /// </summary>
-    public enum ModeEnum : byte { OneShot = 0, Continuous = 16 }
+    [System.Flags]
+    public enum AdcMode : byte { OneShot = 0, Continuous = 16 }
 
     /// <summary>
     /// Possible connection states for the address pins
@@ -22,6 +23,6 @@ namespace Iot.Device.Mcp3428
     /// <summary>
     /// Possible resolution values of the ADC
     /// </summary>
-    public enum ResolutionEnum : byte { Bit12 = 0, Bit14 = 4, Bit16 = 8 }
-
+    [System.Flags]
+    public enum AdcResolution : byte { Bit12 = 0, Bit14 = 4, Bit16 = 8 }
 }

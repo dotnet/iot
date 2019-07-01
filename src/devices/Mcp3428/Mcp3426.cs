@@ -22,7 +22,7 @@ namespace Iot.Device.Mcp3428
         }
 
         /// <inheritdoc />
-        public Mcp3426(I2cDevice i2CDevice, ModeEnum mode = ModeEnum.Continuous, ResolutionEnum resolution = ResolutionEnum.Bit12, GainEnum pgaGain = GainEnum.X1) : this(i2CDevice)
+        public Mcp3426(I2cDevice i2CDevice, AdcMode mode = AdcMode.Continuous, AdcResolution resolution = AdcResolution.Bit12, AdcGain pgaGain = AdcGain.X1) : this(i2CDevice)
         {
             SetConfig(0, mode: mode, resolution: resolution, pgaGain: pgaGain);
         }

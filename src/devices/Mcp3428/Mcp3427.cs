@@ -4,9 +4,9 @@
 
 using System.Device.I2c;
 
-namespace Iot.Device.Mcp3428 
+namespace Iot.Device.Mcp3428
 {
-    public class Mcp3427 : Mcp342x 
+    public class Mcp3427 : Mcp342x
     {
         /// <summary>
         /// The number of channels
@@ -15,12 +15,12 @@ namespace Iot.Device.Mcp3428
         private const int NumChannels = 2;
 
         /// <inheritdoc />
-        public Mcp3427(I2cDevice i2CDevice) : base(i2CDevice, NumChannels) 
-        {        
+        public Mcp3427(I2cDevice i2CDevice) : base(i2CDevice, NumChannels)
+        {
         }
 
         /// <inheritdoc />
-        public Mcp3427(I2cDevice i2CDevice, ModeEnum mode = ModeEnum.Continuous, ResolutionEnum resolution = ResolutionEnum.Bit12, GainEnum pgaGain = GainEnum.X1) : this(i2CDevice) 
+        public Mcp3427(I2cDevice i2CDevice, AdcMode mode = AdcMode.Continuous, AdcResolution resolution = AdcResolution.Bit12, AdcGain pgaGain = AdcGain.X1) : this(i2CDevice)
         {
             SetConfig(0, mode: mode, resolution: resolution, pgaGain: pgaGain);
         }
@@ -28,9 +28,9 @@ namespace Iot.Device.Mcp3428
         /// <summary>
         /// Determine device I2C address based on the configuration pin states.
         /// </summary>
-        /// <param name="Adr0">The adr0 pin state</param>
-        /// <param name="Adr1">The adr1 pin state</param>
+        /// <param name="adr0">The adr0 pin state</param>
+        /// <param name="adr1">The adr1 pin state</param>
         /// <returns>System.Int32.</returns>
-        public static int I2CAddressFromPins(PinState Adr0, PinState Adr1) { return Helpers.I2CAddressFromPins(Adr0, Adr1); }
+        public static int I2CAddressFromPins(PinState adr0, PinState adr1) { return Helpers.I2CAddressFromPins(adr0, adr1); }
     }
 }

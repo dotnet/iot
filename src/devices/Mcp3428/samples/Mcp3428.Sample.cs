@@ -19,7 +19,7 @@ namespace Iot.Device.Mcp3428.Samples
                 Mcp3428.I2CAddressFromPins(PinState.Low, PinState.Low));
             using (var dev = new UnixI2cDevice(options))
             {
-                using (var adc = new Mcp3428(dev, ModeEnum.OneShot, resolution: ResolutionEnum.Bit16, pgaGain: GainEnum.X1))
+                using (var adc = new Mcp3428(dev, AdcMode.OneShot, resolution: AdcResolution.Bit16, pgaGain: AdcGain.X1))
                 {
                     var watch = new Stopwatch();
                     watch.Start();
@@ -38,7 +38,7 @@ namespace Iot.Device.Mcp3428.Samples
                             Console.WriteLine($"ADC Channel[{adc.LastChannel + 1}] read in {watch.ElapsedMilliseconds - last} ms, value: {value} V");
                             await Task.Delay(500);
                         }
-                        Console.WriteLine($"mode {adc.Mode}, gain {adc.PGAGain}, res {adc.Resolution}");
+                        Console.WriteLine($"mode {adc.Mode}, gain {adc.InputGain}, res {adc.Resolution}");
                         await Task.Delay(1000);
                     }
                 }
