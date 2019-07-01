@@ -6,12 +6,12 @@ using System.Device.Gpio;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace System.Device.Spi.Drivers
+namespace System.Device.Spi
 {
     /// <summary>
     /// Represents an SPI communication channel running on Unix.
     /// </summary>
-    public class UnixSpiDevice : SpiDevice
+    internal class UnixSpiDevice : SpiDevice
     {
         private const string DefaultDevicePath = "/dev/spidev";
         private const uint SPI_IOC_MESSAGE_1 = 0x40206b00;
