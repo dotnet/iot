@@ -14,6 +14,11 @@ namespace System.Device.Gpio.Drivers
             throw new PlatformNotSupportedException();
         }
 
+        public static UnixDriver Create()
+        {
+            throw new PlatformNotSupportedException();
+        }
+
         protected internal override int PinCount => throw new PlatformNotSupportedException();
 
         protected override void Dispose(bool disposing)

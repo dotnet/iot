@@ -25,7 +25,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [BMx280 - Digital Pressure Sensors BMP280/BME280](Bmx280/README.md)
 * [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
 * [Pca9685 - I2C PWM Driver](Pca9685/README.md)
-* [Solomon Systech Ssd1306](Ssd1306/README.md)
+* [Solomon Systech Ssd1306](Ssd13xx/README.md)
 * [HC-SR04 - Ultrasonic Ranging Module](Hcsr04/README.md)
 * [LM75 - Digital Temperature Sensor](Lm75/README.md)
 * [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)

@@ -90,6 +90,8 @@ namespace Iot.Device.Pcx857x
             Device.Dispose();
         }
 
+        public void OpenPin(int pinNumber) => throw new NotImplementedException();
+
         public void OpenPin(int pinNumber, PinMode mode) => SetPinMode(pinNumber, mode);
 
         public PinValue Read(int pinNumber)
@@ -199,5 +201,11 @@ namespace Iot.Device.Pcx857x
 
             WritePins(SetBits(_pinValues, (ushort)values, (ushort)pins));
         }
+
+        public bool IsPinOpen(int pinNumber) => throw new NotImplementedException();
+
+        public PinMode GetPinMode(int pinNumber) => throw new NotImplementedException();
+
+        public bool IsPinModeSupported(int pinNumber, PinMode mode) => throw new NotImplementedException();
     }
 }

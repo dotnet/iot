@@ -16,13 +16,13 @@ namespace System.Device.Gpio.Drivers
 
         public int FileDescriptor;
 
-        public void OnPinValueChanged(PinValueChangedEventArgs args, PinEventTypes detectionOfEventTypes)
+        public void OnPinValueChanged(PinValueChangedEventArgs args)
         {
-            if (detectionOfEventTypes.HasFlag(PinEventTypes.Rising) && args.ChangeType == PinEventTypes.Rising)
+            if (ValueRising != null && args.ChangeType == PinEventTypes.Rising)
             {
                 ValueRising?.Invoke(this, args);
             }
-            if (detectionOfEventTypes.HasFlag(PinEventTypes.Falling) && args.ChangeType == PinEventTypes.Falling)
+            if (ValueFalling != null && args.ChangeType == PinEventTypes.Falling)
             {
                 ValueFalling?.Invoke(this, args);
             }

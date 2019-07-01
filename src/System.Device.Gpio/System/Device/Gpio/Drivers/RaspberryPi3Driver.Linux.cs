@@ -201,21 +201,13 @@ namespace System.Device.Gpio.Drivers
         /// <param name="mode">The mode of a pin to set the resistor pull up/down mode.</param>
         private void SetInputPullMode(int pinNumber, PinMode mode)
         {
-            byte modeToPullMode;
-            switch (mode)
+            byte modeToPullMode = mode switch
             {
-                case PinMode.Input:
-                    modeToPullMode = 0;
-                    break;
-                case PinMode.InputPullDown:
-                    modeToPullMode = 1;
-                    break;
-                case PinMode.InputPullUp:
-                    modeToPullMode = 2;
-                    break;
-                default:
-                    throw new ArgumentException($"{mode} is not supported as a pull up/down mode.");
-            }
+                PinMode.Input => (byte)0,
+                PinMode.InputPullDown => (byte)1,
+                PinMode.InputPullUp => (byte)2,
+                _ => throw new ArgumentException($"{mode} is not supported as a pull up/down mode.")
+            };
 
             /*
              * This is the process outlined by the BCM2835 datasheet on how to set the pull mode.

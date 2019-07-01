@@ -115,6 +115,7 @@ namespace System.Device.Spi.Drivers
             }
             byte[] byteArray = new byte[readBuffer.Length];
             _winDevice.TransferFullDuplex(writeBuffer.ToArray(), byteArray);
+            byteArray.CopyTo(readBuffer);
         }
 
         public override void Dispose(bool disposing)
@@ -127,19 +128,14 @@ namespace System.Device.Spi.Drivers
 
         private static WinSpi.SpiMode ToWinMode(SpiMode mode)
         {
-            switch (mode)
+            return mode switch
             {
-                case SpiMode.Mode0:
-                    return WinSpi.SpiMode.Mode0;
-                case SpiMode.Mode1:
-                    return WinSpi.SpiMode.Mode1;
-                case SpiMode.Mode2:
-                    return WinSpi.SpiMode.Mode2;
-                case SpiMode.Mode3:
-                    return WinSpi.SpiMode.Mode3;
-                default:
-                    throw new ArgumentException($"SPI mode {mode} not supported.", nameof(mode));
-            }
+                SpiMode.Mode0 => WinSpi.SpiMode.Mode0,
+                SpiMode.Mode1 => WinSpi.SpiMode.Mode1,
+                SpiMode.Mode2 => WinSpi.SpiMode.Mode2,
+                SpiMode.Mode3 => WinSpi.SpiMode.Mode3,
+                _ => throw new ArgumentException($"SPI mode {mode} not supported.", nameof(mode))
+            };
         }
     }
 }

@@ -49,7 +49,7 @@ var settings = new SpiConnectionSettings(0, 1)
     Mode = SpiMode.Mode0,
     DataBitLength = 8
 };
-GoPiGo _goPiGo3 = new GoPiGo(new UnixSpiDevice(settings));
+GoPiGo _goPiGo3 = new GoPiGo(SpiDevice.Create(settings));
 SoundSensor soundSensor = new SoundSensor(_goPiGo3, GrovePort.Grove1);
 Console.WriteLine($"Test {soundSensor.SensorName} on port {soundSensor.Port}. Press a key to finish the test");
 while (!Console.KeyAvailable)

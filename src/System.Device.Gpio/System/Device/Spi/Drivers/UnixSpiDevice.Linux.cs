@@ -108,19 +108,14 @@ namespace System.Device.Spi.Drivers
 
         private UnixSpiMode SpiModeToUnixSpiMode(SpiMode mode)
         {
-            switch (mode)
+            return mode switch
             {
-                case SpiMode.Mode0:
-                    return UnixSpiMode.SPI_MODE_0;
-                case SpiMode.Mode1:
-                    return UnixSpiMode.SPI_MODE_1;
-                case SpiMode.Mode2:
-                    return UnixSpiMode.SPI_MODE_2;
-                case SpiMode.Mode3:
-                    return UnixSpiMode.SPI_MODE_3;
-                default:
-                    throw new ArgumentException("Invalid SPI mode.", nameof(mode));
-            }
+                SpiMode.Mode0 => UnixSpiMode.SPI_MODE_0,
+                SpiMode.Mode1 => UnixSpiMode.SPI_MODE_1,
+                SpiMode.Mode2 => UnixSpiMode.SPI_MODE_2,
+                SpiMode.Mode3 => UnixSpiMode.SPI_MODE_3,
+                _ => throw new ArgumentException("Invalid SPI mode.", nameof(mode))
+            };
         }
 
         /// <summary>

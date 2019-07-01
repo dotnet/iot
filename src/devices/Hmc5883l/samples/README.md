@@ -15,8 +15,7 @@
 ## Code
 ```C#
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Hmc5883l.DefaultI2cAddress);
-// get I2cDevice (in Linux)
-UnixI2cDevice device = new UnixI2cDevice(settings);
+I2cDevice device = I2cDevice.Create(settings);
 
 using (Hmc5883l sensor = new Hmc5883l(device))
 {
