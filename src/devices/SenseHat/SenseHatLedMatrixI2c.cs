@@ -3,13 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.IO;
-using System.Device.Gpio;
 using System.Device.I2c;
-using System.Diagnostics;
+using System.Device.I2c.Devices;
 using System.Drawing;
 using System.Runtime.CompilerServices;
-using System.Device.I2c.Drivers;
 
 namespace Iot.Device.SenseHat
 {

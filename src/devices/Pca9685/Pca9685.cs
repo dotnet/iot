@@ -3,11 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device.I2c;
+using System.Device.I2c.Devices;
 using System.Threading;
-using static Iot.Device.Pca9685.Register;
 using static Iot.Device.Pca9685.Mode1;
 using static Iot.Device.Pca9685.Mode2;
+using static Iot.Device.Pca9685.Register;
 
 namespace Iot.Device.Pca9685
 {

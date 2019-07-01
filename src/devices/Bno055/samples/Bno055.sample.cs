@@ -5,7 +5,7 @@
 using Iot.Device.Bno055;
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
+using System.Device.I2c.Devices;
 using System.Numerics;
 using System.Threading;
 
