@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Device.I2c.Devices;
 using System.Device.Spi;
 using Xunit;
 

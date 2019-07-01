@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio;
-using System.Device.I2c;
+using System.Device.I2c.Devices;
 
 namespace Iot.Device.Pcx857x
 {
