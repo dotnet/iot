@@ -4,8 +4,8 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Device.I2c.Devices;
 using System.Threading;
+using System.Device.I2c;
 
 namespace Iot.Device.Ads1115
 {

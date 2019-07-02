@@ -8,7 +8,6 @@ using System;
 using System.Threading;
 using System.Drawing;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 
 namespace GoPiGo3.sample
 {

@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Devices;
 
 namespace Iot.Device.SenseHat
 {

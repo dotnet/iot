@@ -4,7 +4,7 @@
 
 using System;
 using System.Device.Gpio;
-using System.Device.I2c.Devices;
+using System.Device.I2c;
 
 namespace Iot.Device.Pca95x4
 {

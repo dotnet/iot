@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using Iot.Device.Mcp3008;
 
 public class Volume : IDisposable
