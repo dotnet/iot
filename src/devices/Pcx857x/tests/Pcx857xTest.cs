@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
-using System.Device.I2c.Devices;
 using Xunit;
 
 namespace Iot.Device.Pcx857x.Tests

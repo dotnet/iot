@@ -6,7 +6,6 @@ using System;
 using System.Numerics;
 using System.Threading;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using Iot.Device.Adxl345;
 
 namespace Adxl345.Samples

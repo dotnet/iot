@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device.I2c.Devices;
+using System.Device.I2c;
 
 namespace Iot.Device.Max44009
 {
