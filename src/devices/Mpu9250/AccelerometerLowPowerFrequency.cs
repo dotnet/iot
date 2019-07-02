@@ -6,6 +6,7 @@ namespace Iot.Device.Mpu9250
 {
     /// <summary>
     /// Frequency used to measure data for the low power consumption mode
+    /// The chip will wake up to take a sample of accelerometer
     /// </summary>
     public enum AccelerometerLowPowerFrequency
     {

@@ -18,6 +18,5 @@ namespace Iot.Device.Ak8963
         ExternalTriggedMeasurement = 0b0100,
         SelfTest = 0b1000,
         FuseRomAccess = 0b1111,
-
     }
 }

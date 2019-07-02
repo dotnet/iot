@@ -5,11 +5,15 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.IO;
 using System.Numerics;
 using System.Threading;
 
 namespace Iot.Device.Ak8963
 {
+    /// <summary>
+    /// AK8963 class implementing a magnetometer
+    /// </summary>
     public class Ak8963 : IDisposable
     {
         private I2cDevice _i2cDevice;
@@ -17,7 +21,7 @@ namespace Iot.Device.Ak8963
         private MeasurementMode _measurementMode;
         private OutputBitMode _outputBitMode;
         private bool _selfTest = false;
-        private Vector3 _magnetometerBias = new Vector3();
+        private Vector3 _magnetometerBias = Vector3.Zero;
         private Ak8963Interface _ak8963Interface;
 
         public const byte DefaultI2cAddress = 0x0C;
@@ -35,6 +39,8 @@ namespace Iot.Device.Ak8963
             _outputBitMode = OutputBitMode.Output14bit;
             byte mode = (byte)((byte)_measurementMode | ((byte)_outputBitMode << 4));
             WriteRegister(Register.CNTL, mode);
+            if (!CheckVersion())
+                throw new IOException($"This device does not contain the correct signature 0x48 for a AK8963");
         }
 
         /// <summary>
@@ -43,7 +49,8 @@ namespace Iot.Device.Ak8963
         public void Reset()
         {
             WriteRegister(Register.RSV, 0x01);
-            Thread.Sleep(100);
+            // When powering the AK893, doc says 50 ms needed
+            Thread.Sleep(50);
         }
 
         /// <summary>
@@ -58,7 +65,11 @@ namespace Iot.Device.Ak8963
         /// <summary>
         /// Get the magnetometer bias
         /// </summary>
-        public Vector3 MagnometerBias => _magnetometerBias;
+        public Vector3 MagnometerBias
+        {
+            get { return _magnetometerBias; }
+            set { _magnetometerBias = value; }
+        }
 
         /// <summary>
         /// Calibrate the magnetometer. Make sure your sensor is as far as possible of magnet
@@ -96,13 +107,14 @@ namespace Iot.Device.Ak8963
             for (int reading = 0; reading < numberMeasurements; reading++)
             {
                 var bias = ReadMagnetometer(true);
-                minbias.X = bias.X < minbias.X ? bias.X : minbias.X;
-                minbias.Y = bias.Y < minbias.Y ? bias.Y : minbias.Y;
-                minbias.Z = bias.Z < minbias.Z ? bias.Z : minbias.Z;
-                maxbias.X = bias.X > maxbias.X ? bias.X : maxbias.X;
-                maxbias.Y = bias.Y > maxbias.Y ? bias.Y : maxbias.Y;
-                maxbias.Z = bias.Z > maxbias.Z ? bias.Z : maxbias.Z;
-                Thread.Sleep(12);
+                minbias.X = Math.Min(bias.X, minbias.X);
+                minbias.Y = Math.Min(bias.Y, minbias.Y);
+                minbias.Z = Math.Min(bias.Z, minbias.Z);
+                maxbias.X = Math.Max(bias.X, maxbias.X);
+                maxbias.Y = Math.Max(bias.Y, maxbias.Y);
+                maxbias.Z = Math.Max(bias.Z, maxbias.Z);
+                // 10 ms = 100Hz, so waiting to make sure we have new data
+                Thread.Sleep(10);
             }
             // Store the bias
             _magnetometerBias = ((maxbias + minbias) / 2) + calib;
@@ -113,7 +125,7 @@ namespace Iot.Device.Ak8963
         /// <summary>
         /// True if there is a data to read
         /// </summary>
-        public bool DataReady => (ReadByte(Register.ST1) & 0x01) == 0x01;
+        public bool WaitForDataReady => (ReadByte(Register.ST1) & 0x01) == 0x01;
 
         /// <summary>
         /// Check if the version is the correct one (0x48)
@@ -143,19 +155,23 @@ namespace Iot.Device.Ak8963
             // Wait for a data to be present
             if (waitForData)
             {
-                while (!DataReady)
+                while (!WaitForDataReady)
                     ;
             }
+
             ReadByteArray(Register.HXL, rawData);
             // In continous mode, make sure to read the ST2 data to clear up
             if ((_measurementMode == MeasurementMode.ContinousMeasurement100Hz) ||
                 (_measurementMode == MeasurementMode.ContinousMeasurement8Hz))
+            {
                 ReadByte(Register.ST2);
+            }
 
             Vector3 magneto = new Vector3();
             magneto.X = BinaryPrimitives.ReadInt16LittleEndian(rawData);
             magneto.Y = BinaryPrimitives.ReadInt16LittleEndian(rawData.Slice(2));
             magneto.Z = BinaryPrimitives.ReadInt16LittleEndian(rawData.Slice(4));
+
             if (OutputBitMode == OutputBitMode.Output16bit)
             {
                 // From the documentation range is from 32760 which does represent 4912 µT
@@ -217,8 +233,9 @@ namespace Iot.Device.Ak8963
                 byte mode = (byte)((byte)value | ((byte)_outputBitMode << 4));
                 WriteRegister(Register.CNTL, mode);
                 _measurementMode = value;
-                // Need to wait a little bit for the mode to change
-                Thread.Sleep(10);
+                // according to docuementation:
+                // After power-down mode is set, at least 100µs(Twat) is needed before setting another mode
+                Thread.Sleep(1);
             }
         }
 

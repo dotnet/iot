@@ -16,9 +16,7 @@ namespace DemoAk8963
         static void Main(string[] args)
         {
             I2cConnectionSettings mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Ak8963.DefaultI2cAddress);
-            Ak8963 ak8963 = new Ak8963(new UnixI2cDevice(mpui2CConnectionSettingmpus));
-            if (!ak8963.CheckVersion())
-                throw new IOException($"This device does not contain the correct signature 0x48 for a AK8963");
+            var ak8963 = new Ak8963(I2cDevice.Create(mpui2CConnectionSettingmpus));
             Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient!");
             var mag = ak8963.CalibrateMagnetometer();
             Console.WriteLine($"Bias:");
@@ -31,9 +29,9 @@ namespace DemoAk8963
             while (!Console.KeyAvailable)
             {
                 var magne = ak8963.Magnetometer;
-                Console.WriteLine($"Mag X = {magne.X}          ");
-                Console.WriteLine($"Mag Y = {magne.Y}          ");
-                Console.WriteLine($"Mag Z = {magne.Z}          ");
+                Console.WriteLine($"Mag X = {magne.X, 15}");
+                Console.WriteLine($"Mag Y = {magne.Y, 15}");
+                Console.WriteLine($"Mag Z = {magne.Z, 15}");
                 Thread.Sleep(200);
             }
             readKey = Console.ReadKey();

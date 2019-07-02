@@ -7,19 +7,18 @@ The AK8963 is a magnetometer that can be controlled either thru I2C either thru 
 You can find an example in the [sample](./samples/ak8963.sample.cs) directory. Usage is straight forward including the possibility to have a calibration.
 
 ```csharp
-// Create an I2C setting
-I2cConnectionSettings mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Ak8963.Ak8963.DefaultI2cAddress);
+var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Ak8963.Ak8963.DefaultI2cAddress);
 // This will use the default I2C interface
-Ak8963 ak8963 = new Ak8963(new UnixI2cDevice(mpui2CConnectionSettingmpus));
+Ak8963 ak8963 = new Ak8963(I2cDevice.Create(mpui2CConnectionSettingmpus));
 if (!ak8963.CheckVersion())
     throw new IOException($"This device does not contain the correct signature 0x48 for a AK8963");
 Console.Clear();
 while (!Console.KeyAvailable)
 {
     var magne = ak8963.Magnetometer;
-    Console.WriteLine($"Mag X = {magne.X}          ");
-    Console.WriteLine($"Mag Y = {magne.Y}          ");
-    Console.WriteLine($"Mag Z = {magne.Z}          ");
+    Console.WriteLine($"Mag X = {magne.X, 15}");
+    Console.WriteLine($"Mag Y = {magne.Y, 15}");
+    Console.WriteLine($"Mag Z = {magne.Z, 15}");
     Thread.Sleep(100);
 }
 ```

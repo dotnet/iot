@@ -4,8 +4,10 @@
 
 namespace Iot.Device.Mpu9250
 {
-        /// <summary>
-    /// Frequency used for normal measurement
+    /// <summary>
+    /// Bandwith used for normal measurement of the acceleromter
+    /// using filter block. This can be further reduced using 
+    /// SampleRateDivider with all modes except 1130Hz.
     /// </summary>
     public enum AccelerometerBandwidth
     {

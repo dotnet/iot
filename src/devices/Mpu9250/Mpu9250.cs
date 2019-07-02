@@ -59,7 +59,7 @@ namespace Iot.Device.Mpu9250
         /// <summary>
         /// True if there is a data to read
         /// </summary>
-        public bool DataReady => _wakeOnMotion ? false : _ak8963.DataReady;
+        public bool WaitForDataReady => !(_wakeOnMotion && _ak8963.WaitForDataReady);
 
         /// <summary>
         /// Check if the magnetometer version is the correct one (0x48)
@@ -133,7 +133,7 @@ namespace Iot.Device.Mpu9250
             set
             {
                 WriteRegister(Register.ACCEL_CONFIG, (byte)((byte)value << 3));
-                // We will cash the range to avoid i2c access everytime this data is requested
+                // We will cache the range to avoid i2c access everytime this data is requested
                 // This allow as well to make sure the stored data is the same as the one read
                 _accelerometerRange = (AccelerometerRange)(ReadByte(Register.ACCEL_CONFIG) >> 3);
                 if (_accelerometerRange != value)
@@ -161,7 +161,7 @@ namespace Iot.Device.Mpu9250
         /// Get the real accelerometer bandwith. This allows to calculate the real
         /// degree per second
         /// </summary>
-        private float AcceleromterConversion
+        public float AcceleromterConversion
         {
             get
             {
@@ -286,7 +286,7 @@ namespace Iot.Device.Mpu9250
         /// Get the real gyroscope bandwidth. This allows to calculate the real
         /// acceleration in G
         /// </summary>
-        private float GyroscopeConvertion
+        public float GyroscopeConvertion
         {
             get
             {
@@ -368,11 +368,11 @@ namespace Iot.Device.Mpu9250
         /// Setup the Wake On Motion. This mode generate a rising signal on pin INT
         /// You can catch it with a normal GPIO and place an interruption on it if supprted
         /// Reading the sensor won't give any value until it wakes up preriodically
-        /// Only Accelerometer data is available in this mode
+        /// Only Accelerator data is availablein this mode
         /// </summary>
         /// <param name="magnetometerThreshold"></param>
-        /// <param name="AccelerometerLowPowerFrequency"></param>
-        public void SetWakeOnMotion(uint magnetometerThreshold, AccelerometerLowPowerFrequency accelerometerLowPowerFrequency)
+        /// <param name="acceleratorLowPower"></param>
+        public void SetWakeOnMotion(uint magnetometerThreshold, AccelerometerLowPowerFrequency acceleratorLowPower)
         {
             // Using documentation page 31 of Product Specification to setup
             _wakeOnMotion = true;
@@ -390,7 +390,7 @@ namespace Iot.Device.Mpu9250
             // Remove the Gyroscope
             WriteRegister(Register.PWR_MGMT_2, (byte)(DisableModes.DisableGyroscopeX | DisableModes.DisableGyroscopeY | DisableModes.DisableGyroscopeZ));
             // ACCEL_CONFIG 2 (0x1D) set ACCEL_FCHOICE_B = 0 and A_DLPFCFG[2:0]=1(b001)
-            // Bandwidth for Accelerometer to 184Hz
+            // Bandwidth for Accelerator to 184Hz
             AccelerometerBandwidth = AccelerometerBandwidth.Bandwidth0184Hz;
             // Enable Motion Interrupt
             //  In INT_ENABLE (0x38), set the whole register to 0x40 to enable motion interrupt only
@@ -403,7 +403,7 @@ namespace Iot.Device.Mpu9250
             WriteRegister(Register.WOM_THR, (byte)magnetometerThreshold);
             // Set Frequency of Wake-up:
             // In LP_ACCEL_ODR (0x1E), set Lposc_clksel[3:0] = 0.24Hz ~ 500Hz
-            WriteRegister(Register.LP_ACCEL_ODR, (byte)accelerometerLowPowerFrequency);
+            WriteRegister(Register.LP_ACCEL_ODR, (byte)acceleratorLowPower);
             // Enable Cycle Mode (AccelLow Power Mode):
             // In PWR_MGMT_1 (0x6B) make CYCLE =1
             WriteRegister(Register.PWR_MGMT_1, 0b0010_0000);
@@ -446,6 +446,8 @@ namespace Iot.Device.Mpu9250
                     // Resetup again
                     WriteRegister(Register.USER_CTRL, (byte)UserControls.I2C_MST_EN);
                     WriteRegister(Register.I2C_MST_CTRL, (byte)I2cBussFrequency.Freqency400kHz);
+                    // Poorly documented time to wait after the I2C bus reset
+                    // Found out that waiting a little bit is needed. Exact time may be lower
                     Thread.Sleep(100);
                     // Try one more time
                     if (!_ak8963.CheckVersion())
@@ -598,7 +600,7 @@ namespace Iot.Device.Mpu9250
             Vector3 acceBias = new Vector3();
 
             Reset();
-            // Enable accelrometer and gyroscope
+            // Enable accelerator and gyroscope
             DisableModes = DisableModes.DisableNone;
             Thread.Sleep(200);
             // Disable all interrupts
@@ -790,7 +792,7 @@ namespace Iot.Device.Mpu9250
             Vector3 accSelfTest = new Vector3();
             Vector3 gyroFactoryTrim = new Vector3();
             Vector3 accFactoryTrim = new Vector3();
-            // Tests done with slower GyroScale and Accelerometer so 2G so value is 0 in both cases
+            // Tests done with slower GyroScale and Accelerator so 2G so value is 0 in both cases
             byte gyroAccScale = 0;
 
             // Setup the registers for Gyscope as in documentation 
@@ -810,7 +812,6 @@ namespace Iot.Device.Mpu9250
 
             for (int reading = 0; reading < numCycles; reading++)
             {
-
                 gyroAvegage = GetRawGyroscope();
                 accAverage = GetRawAccelerometer();
             }
@@ -868,6 +869,7 @@ namespace Iot.Device.Mpu9250
             {
                 gyroAvegage.X = Math.Abs(gyroSelfTestAverage.X - gyroAvegage.X);
             }
+
             if (gyroFactoryTrim.Y != 0)
             {
                 gyroAvegage.Y = (gyroSelfTestAverage.Y - gyroAvegage.Y) / gyroFactoryTrim.Y;
@@ -876,6 +878,7 @@ namespace Iot.Device.Mpu9250
             {
                 gyroAvegage.Y = Math.Abs(gyroSelfTestAverage.Y - gyroAvegage.Y);
             }
+
             if (gyroFactoryTrim.Z != 0)
             {
                 gyroAvegage.Z = (gyroSelfTestAverage.Z - gyroAvegage.Z) / gyroFactoryTrim.Z;
@@ -884,7 +887,8 @@ namespace Iot.Device.Mpu9250
             {
                 gyroAvegage.Z = Math.Abs(gyroSelfTestAverage.Z - gyroAvegage.Z);
             }
-            // Accelerometer
+
+            // Accelerator
             if (accFactoryTrim.X != 0)
             {
                 accAverage.X = (accSelfTestAverage.X - accAverage.X) / accFactoryTrim.X;
@@ -893,6 +897,7 @@ namespace Iot.Device.Mpu9250
             {
                 accAverage.X = Math.Abs(accSelfTestAverage.X - accSelfTestAverage.X);
             }
+
             if (accFactoryTrim.Y != 0)
             {
                 accAverage.Y = (accSelfTestAverage.Y - accAverage.Y) / accFactoryTrim.Y;
@@ -901,6 +906,7 @@ namespace Iot.Device.Mpu9250
             {
                 accAverage.Y = Math.Abs(accSelfTestAverage.Y - accSelfTestAverage.Y);
             }
+
             if (accFactoryTrim.Z != 0)
             {
                 accAverage.Z = (accSelfTestAverage.Z - accAverage.Z) / accFactoryTrim.Z;
@@ -909,6 +915,7 @@ namespace Iot.Device.Mpu9250
             {
                 accAverage.Z = Math.Abs(accSelfTestAverage.Z - accSelfTestAverage.Z);
             }
+
             return new Tuple<Vector3, Vector3>(gyroAvegage, accAverage);
         }
 

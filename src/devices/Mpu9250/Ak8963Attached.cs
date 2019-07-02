@@ -11,7 +11,6 @@ namespace Iot.Device.Mpu9250
 {
     internal class Ak8963Attached : Ak8963Interface
     {
-
         public override void WriteRegister(I2cDevice i2cDevice, Ak8963.Register reg, byte data)
         {
             Span<byte> dataout = stackalloc byte[2] { (byte)Register.I2C_SLV0_ADDR, Ak8963.Ak8963.DefaultI2cAddress };
@@ -47,10 +46,8 @@ namespace Iot.Device.Mpu9250
             // Just need to wait a very little bit
             // For data transfer to happen and process on the MPU9250 side
             DelayHelper.DelayMicroseconds(200, false);
-            //Thread.Sleep(1);
             i2cDevice.WriteByte((byte)Register.EXT_SENS_DATA_00);
             i2cDevice.Read(readBytes);
         }
-
     }
 }

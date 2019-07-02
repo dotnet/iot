@@ -7,7 +7,9 @@ using System;
 namespace Iot.Device.Mpu9250
 {
     /// <summary>
-    /// FIFO modes used to select which data from accelerometer, gyroscope and I2C slaves
+    /// You can select the sensors from which you want data
+    /// FIFO modes used to select the accelerometer, gyroscope axies, temperature and I2C slaves
+    /// You can combine any of those modes. 
     /// </summary>
     [Flags]
     public enum FifoModes

@@ -16,8 +16,8 @@ namespace DemoMpu9250
         {
             Console.WriteLine("Hello MPU9250!");
 
-            I2cConnectionSettings mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
-            Mpu9250 mpu9250 = new Mpu9250(new UnixI2cDevice(mpui2CConnectionSettingmpus));
+            var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
+            Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
             Console.WriteLine($"Check version: {mpu9250.CheckVersion()}");
             var resSelfTest = mpu9250.RunGyroscopeAccelerometerSelfTest();
             Console.WriteLine($"Self test:");
@@ -53,18 +53,18 @@ namespace DemoMpu9250
             {
                 Console.CursorTop = 0;
                 var gyro = mpu9250.Gyroscope;
-                Console.WriteLine($"Gyro X = {gyro.X}          ");
-                Console.WriteLine($"Gyro Y = {gyro.Y}          ");
-                Console.WriteLine($"Gyro Z = {gyro.Z}          ");
+                Console.WriteLine($"Gyro X = {gyro.X, 15}");
+                Console.WriteLine($"Gyro Y = {gyro.Y, 15}");
+                Console.WriteLine($"Gyro Z = {gyro.Z, 15}");
                 var acc = mpu9250.Accelerometer;
-                Console.WriteLine($"Acc X = {acc.X}          ");
-                Console.WriteLine($"Acc Y = {acc.Y}          ");
-                Console.WriteLine($"Acc Z = {acc.Z}          ");
+                Console.WriteLine($"Acc X = {acc.X, 15}");
+                Console.WriteLine($"Acc Y = {acc.Y, 15}");
+                Console.WriteLine($"Acc Z = {acc.Z, 15}");
                 Console.WriteLine($"Temp = {mpu9250.Temperature.Celsius.ToString("0.00")} °C");
                 var magne = mpu9250.Magnetometer;
-                Console.WriteLine($"Mag X = {magne.X}          ");
-                Console.WriteLine($"Mag Y = {magne.Y}          ");
-                Console.WriteLine($"Mag Z = {magne.Z}          ");
+                Console.WriteLine($"Mag X = {magne.X, 15}");
+                Console.WriteLine($"Mag Y = {magne.Y, 15}");
+                Console.WriteLine($"Mag Z = {magne.Z, 15}");
                 Thread.Sleep(100);
             }
             

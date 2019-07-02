@@ -9,22 +9,22 @@ The Magnetometer used is an [AK8963](../Ak8963/README.md). It is managed thru th
 You can find an example in the [sample](./samples/Mpu9250.sample.cs) directory. Usage is straightforward including the possibility to have a calibration for all sub sensors.
 
 ```csharp
-I2cConnectionSettings mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
-Mpu9250 mpu9250 = new Mpu9250(new UnixI2cDevice(mpui2CConnectionSettingmpus));
+var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
+Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
 Console.WriteLine($"Check version: {mpu9250.CheckVersion()}");
 var gyro = mpu9250.Gyroscope;
-Console.WriteLine($"Gyro X = {gyro.X}          ");
-Console.WriteLine($"Gyro Y = {gyro.Y}          ");
-Console.WriteLine($"Gyro Z = {gyro.Z}          ");
+Console.WriteLine($"Gyro X = {gyro.X, 15}");
+Console.WriteLine($"Gyro Y = {gyro.Y, 15}");
+Console.WriteLine($"Gyro Z = {gyro.Z, 15}");
 var acc = mpu9250.Accelerometer;
-Console.WriteLine($"Acc X = {acc.X}          ");
-Console.WriteLine($"Acc Y = {acc.Y}          ");
-Console.WriteLine($"Acc Z = {acc.Z}          ");
+Console.WriteLine($"Acc X = {acc.X, 15}");
+Console.WriteLine($"Acc Y = {acc.Y, 15}");
+Console.WriteLine($"Acc Z = {acc.Z, 15}");
 Console.WriteLine($"Temp = {mpu9250.Temperature.Celsius.ToString("0.00")} °C");
 var magne = mpu9250.Magnetometer;
-Console.WriteLine($"Mag X = {magne.X}          ");
-Console.WriteLine($"Mag Y = {magne.Y}          ");
-Console.WriteLine($"Mag Z = {magne.Z}          ");
+Console.WriteLine($"Mag X = {magne.X, 15}");
+Console.WriteLine($"Mag Y = {magne.Y, 15}");
+Console.WriteLine($"Mag Z = {magne.Z, 15}");
 ```
 
 ## Self-test
@@ -129,9 +129,9 @@ while (!Console.KeyAvailable)
 {
     Console.CursorTop = 0;
     var acc = mpu9250.Accelerometer;
-    Console.WriteLine($"Acc X = {acc.X}          ");
-    Console.WriteLine($"Acc Y = {acc.Y}          ");
-    Console.WriteLine($"Acc Z = {acc.Z}          ");
+    Console.WriteLine($"Acc X = {acc.X, 15}");
+    Console.WriteLine($"Acc Y = {acc.Y, 15}");
+    Console.WriteLine($"Acc Z = {acc.Z, 15}");
     Thread.Sleep(100);
 }
 ```
