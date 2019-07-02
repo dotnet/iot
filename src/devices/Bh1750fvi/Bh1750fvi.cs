@@ -4,6 +4,7 @@
 
 using System;
 using System.Buffers.Binary;
+using System.Device.I2c;
 
 namespace Iot.Device.Bh1750fvi
 {
