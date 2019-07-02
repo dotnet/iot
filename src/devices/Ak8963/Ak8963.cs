@@ -209,7 +209,7 @@ namespace Iot.Device.Ak8963
         ///          | HX[15:0]          | HY[15:0]          | HZ[15:0] 
         /// Criteria | -200 =< HX =< 200 | -200 =< HY =< 200 | -3200 =< HZ =< -800 
         /// </summary>
-        public bool SelfTest
+        public bool MageneticFieldGeneratorEnabled
         {
             get => _selfTest;
 

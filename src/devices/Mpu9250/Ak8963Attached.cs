@@ -43,8 +43,7 @@ namespace Iot.Device.Mpu9250
             dataout[0] = (byte)Register.I2C_SLV0_CTRL;
             dataout[1] = (byte)(0x80 | readBytes.Length);
             i2cDevice.Write(dataout);
-            // Just need to wait a very little bit
-            // For data transfer to happen and process on the MPU9250 side
+            // TODO: delay found empirically, spec does not mention delay but it is observable it is required
             DelayHelper.DelayMicroseconds(200, false);
             i2cDevice.WriteByte((byte)Register.EXT_SENS_DATA_00);
             i2cDevice.Read(readBytes);
