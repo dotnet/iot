@@ -45,7 +45,6 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Servomotor](Servo/README.md)
 * [ADXL345 - Accelerometer](Adxl345/README.md)
 * [DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
-* [M×N Matrix Keyboard](MatrixKeyboard/README.md)
 </devices>
 
 ## Binding Distribution
