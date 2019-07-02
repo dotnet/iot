@@ -5,7 +5,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.Gpio;
-using System.Device.I2c.Devices;
+using System.Device.I2c;
 using System.IO;
 using System.Threading;
 using Iot.Device.GrovePiDevice.Models;

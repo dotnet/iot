@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using System.Threading;
 
 namespace Iot.Device.Samples
