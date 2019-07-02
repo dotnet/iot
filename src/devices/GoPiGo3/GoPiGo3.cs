@@ -6,7 +6,6 @@ using Iot.Device.GoPiGo3.Models;
 using System;
 using System.Buffers.Binary;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;

@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using Iot.Device.Mcp25xxx.Register;
 using Iot.Device.Mcp25xxx.Register.AcceptanceFilter;
 using Iot.Device.Mcp25xxx.Register.BitTimeConfiguration;
