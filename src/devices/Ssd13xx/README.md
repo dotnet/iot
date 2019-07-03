@@ -1,4 +1,4 @@
-﻿# Solomon Systech Ssd1306
+﻿# Solomon Systech Ssd1306 OLED display
 
 ## Summary
 The SSD1306 is a single-chip CMOS OLED/PLED driver with controller for organic/polymer light emitting diode dot-matrix graphic display system. It consists of 128 segments and 64 commons. This IC is designed for Common Cathode type OLED panel.
@@ -24,7 +24,7 @@ The following connection types are supported by this binding.
 - [X] I2C
 - [ ] SPI
 
-## References 
-[Adafruit Python SSD1306](https://github.com/adafruit/Adafruit_Python_SSD1306)  
-https://github.com/adafruit/Adafruit_Python_SSD1306/blob/master/examples/stats.py  
-https://github.com/stefangordon/IoTCore-SSD1306-Driver  
+## References
+[Adafruit Python SSD1306](https://github.com/adafruit/Adafruit_Python_SSD1306)
+https://github.com/adafruit/Adafruit_Python_SSD1306/blob/master/examples/stats.py
+https://github.com/stefangordon/IoTCore-SSD1306-Driver
