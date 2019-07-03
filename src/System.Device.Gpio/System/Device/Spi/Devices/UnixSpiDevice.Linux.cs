@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace System.Device.Spi
 {
     /// <summary>
-    /// Represents an SPI communication channel running on Unix.
+    /// Represents a SPI communication channel running on Unix.
     /// </summary>
     internal class UnixSpiDevice : SpiDevice
     {

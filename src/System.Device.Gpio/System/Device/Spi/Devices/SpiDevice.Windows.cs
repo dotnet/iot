@@ -5,7 +5,7 @@
 namespace System.Device.Spi
 {
     /// <summary>
-    /// Represents an SPI communication channel running on Windows 10 IoT.
+    /// Represents a SPI communication channel running on Windows 10 IoT.
     /// </summary>
     public abstract partial class SpiDevice : IDisposable
     {
