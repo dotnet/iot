@@ -160,7 +160,11 @@ namespace System.Device.Gpio.Drivers
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
             ValidatePinNumber(pinNumber);
-            IsPinModeSupported(pinNumber, mode);
+
+            if (!IsPinModeSupported(pinNumber, mode))
+            {
+                throw new InvalidOperationException($"The pin {pinNumber} does not support the selected mode {mode}.");
+            }
 
             /*
              * There are 6 registers(4-byte ints) that control the mode for all pins. Each
