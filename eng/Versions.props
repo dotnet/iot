@@ -3,8 +3,8 @@
   <PropertyGroup>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
     <!-- dotnet/iot dependencies -->
-    <SystemDeviceGpioPackageVersion>0.1.0-prerelease.19351.6</SystemDeviceGpioPackageVersion>
-    <IotDeviceBindingsPackageVersion>0.1.0-prerelease.19351.6</IotDeviceBindingsPackageVersion>
+    <SystemDeviceGpioPackageVersion>0.1.0-prerelease.19352.2</SystemDeviceGpioPackageVersion>
+    <IotDeviceBindingsPackageVersion>0.1.0-prerelease.19352.2</IotDeviceBindingsPackageVersion>
     <!-- dotnet/arcade dependencies -->
     <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19330.1</MicrosoftDotNetGenAPIPackageVersion>
   </PropertyGroup>
