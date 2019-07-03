@@ -5,7 +5,7 @@
 namespace System.Device.Spi
 {
     /// <summary>
-    /// Represents an SPI communication channel running on Unix.
+    /// Represents a SPI communication channel running on Unix.
     /// </summary>
     public abstract partial class SpiDevice : IDisposable
     {
