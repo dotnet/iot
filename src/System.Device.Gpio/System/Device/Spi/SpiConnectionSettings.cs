@@ -42,7 +42,7 @@ namespace System.Device.Spi
         /// <summary>
         /// The length of the data to be transfered.
         /// </summary>
-        public int DataBitLength { get; set; } = 8;
+        public int DataBitLength { get; set; } = 8;  // 1 byte
 
         /// <summary>
         /// The frequency in which the data will be transferred.
