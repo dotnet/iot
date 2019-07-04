@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device.I2c.Devices;
+using System.Device.I2c;
 using Iot.Device.Ssd13xx.Commands;
 using Ssd1327Cmnds = Iot.Device.Ssd13xx.Commands.Ssd1327Commands;
 
@@ -18,7 +18,7 @@ namespace Iot.Device.Ssd13xx
         /// <summary>
         /// Initializes new instance of Ssd1327 device that will communicate using I2C bus.
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Ssd1327(I2cDevice i2cDevice)
             : base(i2cDevice)
         {

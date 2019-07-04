@@ -4,7 +4,7 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Device.I2c.Devices;
+using System.Device.I2c;
 
 namespace Iot.Device.Bh1750fvi
 {
@@ -15,7 +15,7 @@ namespace Iot.Device.Bh1750fvi
     {
         private const byte DefaultLightTransmittance = 0b_0100_0101;
 
-        private I2cDevice _sensor;
+        private I2cDevice _i2cDevice;
 
         private double _lightTransmittance;
 
@@ -45,15 +45,15 @@ namespace Iot.Device.Bh1750fvi
         /// <summary>
         /// Creates a new instance of the BH1750FVI
         /// </summary>
-        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="measuringMode">The measuring mode of BH1750FVI</param>
         /// <param name="lightTransmittance">BH1750FVI Light Transmittance, from 27.20% to 222.50%</param>
-        public Bh1750fvi(I2cDevice sensor, MeasuringMode measuringMode = MeasuringMode.ContinuouslyHighResolutionMode, double lightTransmittance = 1)
+        public Bh1750fvi(I2cDevice i2cDevice, MeasuringMode measuringMode = MeasuringMode.ContinuouslyHighResolutionMode, double lightTransmittance = 1)
         {
-            _sensor = sensor;
+            _i2cDevice = i2cDevice;
 
-            _sensor.WriteByte((byte)Command.PowerOn);
-            _sensor.WriteByte((byte)Command.Reset);
+            _i2cDevice.WriteByte((byte)Command.PowerOn);
+            _i2cDevice.WriteByte((byte)Command.Reset);
 
             LightTransmittance = lightTransmittance;
             MeasuringMode = measuringMode;
@@ -64,8 +64,8 @@ namespace Iot.Device.Bh1750fvi
         /// </summary>
         public void Dispose()
         {
-            _sensor?.Dispose();
-            _sensor = null;
+            _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
 
         /// <summary>
@@ -81,8 +81,8 @@ namespace Iot.Device.Bh1750fvi
 
             byte val = (byte)(DefaultLightTransmittance / transmittance);
 
-            _sensor.WriteByte((byte)((byte)Command.MeasurementTimeHigh | (val >> 5)));
-            _sensor.WriteByte((byte)((byte)Command.MeasurementTimeLow | (val & 0b_0001_1111)));
+            _i2cDevice.WriteByte((byte)((byte)Command.MeasurementTimeHigh | (val >> 5)));
+            _i2cDevice.WriteByte((byte)((byte)Command.MeasurementTimeLow | (val & 0b_0001_1111)));
         }
 
         /// <summary>
@@ -92,12 +92,12 @@ namespace Iot.Device.Bh1750fvi
         private double GetIlluminance()
         {
             if (MeasuringMode == MeasuringMode.OneTimeHighResolutionMode || MeasuringMode == MeasuringMode.OneTimeHighResolutionMode2 || MeasuringMode == MeasuringMode.OneTimeLowResolutionMode)
-                _sensor.WriteByte((byte)Command.PowerOn);
+                _i2cDevice.WriteByte((byte)Command.PowerOn);
 
             Span<byte> readBuff = stackalloc byte[2];
 
-            _sensor.WriteByte((byte)MeasuringMode);
-            _sensor.Read(readBuff);
+            _i2cDevice.WriteByte((byte)MeasuringMode);
+            _i2cDevice.Read(readBuff);
 
             ushort raw = BinaryPrimitives.ReadUInt16BigEndian(readBuff);
 

@@ -4,8 +4,8 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Device.I2c.Devices;
 using System.Threading;
+using System.Device.I2c;
 
 namespace Iot.Device.Ads1115
 {
@@ -14,7 +14,7 @@ namespace Iot.Device.Ads1115
     /// </summary>
     public class Ads1115 : IDisposable
     {
-        private I2cDevice _sensor = null;
+        private I2cDevice _i2cDevice = null;
 
         private InputMultiplexer _inputMultiplexer;
         /// <summary>
@@ -61,13 +61,13 @@ namespace Iot.Device.Ads1115
         /// <summary>
         /// Initialize a new Ads1115 device connected through I2C
         /// </summary>
-        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="inputMultiplexer">Input Multiplexer</param>
         /// <param name="measuringRange">Programmable Gain Amplifier</param>
         /// <param name="dataRate">Data Rate</param>
-        public Ads1115(I2cDevice sensor, InputMultiplexer inputMultiplexer = InputMultiplexer.AIN0, MeasuringRange measuringRange = MeasuringRange.FS4096, DataRate dataRate = DataRate.SPS128)
+        public Ads1115(I2cDevice i2cDevice, InputMultiplexer inputMultiplexer = InputMultiplexer.AIN0, MeasuringRange measuringRange = MeasuringRange.FS4096, DataRate dataRate = DataRate.SPS128)
         {
-            _sensor = sensor;
+            _i2cDevice = i2cDevice;
             _inputMultiplexer = inputMultiplexer;
             _measuringRange = measuringRange;
             _dataRate = dataRate;
@@ -93,7 +93,7 @@ namespace Iot.Device.Ads1115
 
             Span<byte> writeBuff = stackalloc byte[3] { (byte)Register.ADC_CONFIG_REG_ADDR, configHi, configLo };
 
-            _sensor.Write(writeBuff);
+            _i2cDevice.Write(writeBuff);
 
             // waiting for the sensor stability
             Thread.Sleep(10);
@@ -108,8 +108,8 @@ namespace Iot.Device.Ads1115
             short val;
             Span<byte> readBuff = stackalloc byte[2];
 
-            _sensor.WriteByte((byte)Register.ADC_CONVERSION_REG_ADDR);
-            _sensor.Read(readBuff);
+            _i2cDevice.WriteByte((byte)Register.ADC_CONVERSION_REG_ADDR);
+            _i2cDevice.Read(readBuff);
 
             val = BinaryPrimitives.ReadInt16BigEndian(readBuff);
 
@@ -168,10 +168,10 @@ namespace Iot.Device.Ads1115
         /// </summary>
         public void Dispose()
         {
-            if (_sensor != null)
+            if (_i2cDevice != null)
             {
-                _sensor.Dispose();
-                _sensor = null;
+                _i2cDevice?.Dispose();
+                _i2cDevice = null;
             }
         }
     }

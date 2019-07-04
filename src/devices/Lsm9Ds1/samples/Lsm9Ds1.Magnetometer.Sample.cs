@@ -6,7 +6,6 @@ using System;
 using System.Numerics;
 using System.Threading;
 using System.Device.I2c;
-using System.Device.I2c.Devices;
 using System.Diagnostics;
 using System.Collections.Generic;
 

@@ -8,7 +8,6 @@ using Ssd1327Cmnds = Iot.Device.Ssd13xx.Commands.Ssd1327Commands;
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
-using System.Device.I2c.Devices;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;

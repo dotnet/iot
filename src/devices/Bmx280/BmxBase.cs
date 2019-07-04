@@ -7,7 +7,7 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Device.I2c.Devices;
+using System.Device.I2c;
 using System.Threading.Tasks;
 using Iot.Units;
 
@@ -510,7 +510,7 @@ namespace Iot.Device.Bmx280
         {
             if (_i2cDevice != null)
             {
-                _i2cDevice.Dispose();
+                _i2cDevice?.Dispose();
                 _i2cDevice = null;
             }
         }

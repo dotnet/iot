@@ -4,8 +4,8 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Device.I2c.Devices;
 using System.Threading;
+using System.Device.I2c;
 
 namespace Iot.Device.Ags01db
 {
@@ -14,7 +14,7 @@ namespace Iot.Device.Ags01db
     /// </summary>
     public class Ags01db : IDisposable
     {
-        private I2cDevice _sensor;
+        private I2cDevice _i2cDevice;
 
         private int _lastMeasurment = 0;
 
@@ -40,10 +40,10 @@ namespace Iot.Device.Ags01db
         /// <summary>
         /// Creates a new instance of the ASG01DB
         /// </summary>
-        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
-        public Ags01db(I2cDevice sensor)
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
+        public Ags01db(I2cDevice i2cDevice)
         {
-            _sensor = sensor;
+            _i2cDevice = i2cDevice;
         }
 
         /// <summary>
@@ -51,8 +51,8 @@ namespace Iot.Device.Ags01db
         /// </summary>
         public void Dispose()
         {
-            _sensor?.Dispose();
-            _sensor = null;
+            _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
 
         /// <summary>
@@ -73,8 +73,8 @@ namespace Iot.Device.Ags01db
             // Return data MSB, LSB, CRC checksum
             Span<byte> readBuff = stackalloc byte[3];
 
-            _sensor.Write(writeBuff);
-            _sensor.Read(readBuff);
+            _i2cDevice.Write(writeBuff);
+            _i2cDevice.Read(readBuff);
 
             _lastMeasurment = Environment.TickCount;
 
@@ -101,8 +101,8 @@ namespace Iot.Device.Ags01db
             // Return version, CRC checksum
             Span<byte> readBuff = stackalloc byte[2];
 
-            _sensor.Write(writeBuff);
-            _sensor.Read(readBuff);
+            _i2cDevice.Write(writeBuff);
+            _i2cDevice.Read(readBuff);
 
             // CRC check error
             if (!CheckCrc8(readBuff.Slice(0, 1), 1, readBuff[1]))

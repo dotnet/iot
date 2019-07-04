@@ -160,7 +160,11 @@ namespace System.Device.Gpio.Drivers
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
             ValidatePinNumber(pinNumber);
-            IsPinModeSupported(pinNumber, mode);
+
+            if (!IsPinModeSupported(pinNumber, mode))
+            {
+                throw new InvalidOperationException($"The pin {pinNumber} does not support the selected mode {mode}.");
+            }
 
             /*
              * There are 6 registers(4-byte ints) that control the mode for all pins. Each
@@ -355,13 +359,13 @@ namespace System.Device.Gpio.Drivers
                 }
 
                 int fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
-                if (fileDescriptor < 0)
+                if (fileDescriptor == -1)
                 {
                     throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
                 }
 
                 IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, GpioRegisterOffset);
-                if (mapPointer.ToInt32() < 0)
+                if (mapPointer.ToInt32() == -1)
                 {
                     throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
                 }
