@@ -4,59 +4,9 @@ This directory is intended for device bindings, sensors, displays, human interfa
 
 Our vision: the majority of .NET bindings are written completely in .NET languages to enable portability, use of a single tool chain and complete debugability from application to binding to driver.
 
-## Binding Index
-
-<devices>
-
-* [28BYJ-48 Stepper Motor 5V 4-Phase 5-Wire & ULN2003 Driver Board](Uln2003/README.md)
-* [ADS1115 - Analog to Digital Converter](Ads1115/README.md)
-* [ADXL345 - Accelerometer](Adxl345/README.md)
-* [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
-* [BH1750FVI - Ambient Light Sensor](Bh1750fvi/README.md)
-* [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
-* [BMx280 - Digital Pressure Sensors BMP280/BME280](Bmx280/README.md)
-* [BNO055 - inertial measurement unit](Bno055/README.md)
-* [BrickPi3](BrickPi3/README.md)
-* [Buzzer - Piezo Buzzer Controller](Buzzer/README.md)
-* [Character LCD (Liquid Crystal Display)](CharacterLcd/README.md)
-* [Cpu Temperature](CpuTemperature/README.md)
-* [DC Motor Controller](DCMotor/README.md)
-* [DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
-* [DS1307 - Realtime Clock](Ds1307/README.md)
-* [DS3231 - Realtime Clock](Ds3231/README.md)
-* [GoPiGo3](GoPiGo3/README.md)
-* [GrovePi](GrovePi/README.md)
-* [HC-SR04 - Ultrasonic Ranging Module](Hcsr04/README.md)
-* [HC-SR501 - PIR Motion Sensor](Hcsr501/README.md)
-* [HMC5883L - 3 Axis Digital Compass](Hmc5883l/README.md)
-* [HTS221 - Capacitive digital sensor for relative humidity and temperature](Hts221/README.md)
-* [LM75 - Digital Temperature Sensor](Lm75/README.md)
-* [LPS25H - Piezoresistive pressure and thermometer sensor](Lps25h/README.md)
-* [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
-* [MAX44009 - Ambient Light Sensor](Max44009/README.md)
-* [Max7219 (LED Matrix driver)](Max7219/README.md)
-* [Mcp23xxx - I/O Expander device family](Mcp23xxx/README.md)
-* [Mcp25xxx device family - CAN bus](Mcp25xxx/README.md)
-* [MCP3008 - 10-bit Analog to Digital Converter](Mcp3008/README.md)
-* [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
-* [nRF24L01 - Single Chip 2.4 GHz Transceiver](Nrf24l01/README.md)
-* [NXP/TI PCx857x](Pcx857x/README.md)
-* [Pca95x4 - I2C GPIO Expander](Pca95x4/README.md)
-* [Pca9685 - I2C PWM Driver](Pca9685/README.md)
-* [RGBLedMatrix - RGB LED Matrix](RGBLedMatrix/README.md)
-* [Sense HAT](SenseHat/README.md)
-* [Servomotor](Servo/README.md)
-* [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
-* [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
-* [SocketCan - CAN BUS library (Linux only)](SocketCan/README.md)
-* [Software PWM](SoftPwm/README.md)
-* [Solomon Systech Ssd1306 OLED display](Ssd13xx/README.md)
-* [TCS3472x Sensors](Tcs3472x/README.md)
-* [VL53L0X - distance sensor](Vl53L0X/README.md)
-* [Ws28xx LED drivers](Ws28xx/README.md)
-</devices>
-
 ## Bindings by category
+
+[Alphabetical device index can be found here](Device-Index.md)
 
 <categorizedDevices>
 

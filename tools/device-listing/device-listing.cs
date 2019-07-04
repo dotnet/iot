@@ -148,11 +148,12 @@ namespace Iot.Tools.DeviceListing
                 }
             }
 
-            string devicesReadme = Path.Combine(devicesPath, "README.md");
+            string alphabeticalDevicesIndex = Path.Combine(devicesPath, "Device-Index.md");
             string deviceListing = GetDeviceListing(devicesPath, devices);
-            ReplacePlaceholder(devicesReadme, "devices", deviceListing);
+            ReplacePlaceholder(alphabeticalDevicesIndex, "devices", deviceListing);
 
             string categorizedDeviceListing = GetCategorizedDeviceListing(devicesPath, devices);
+            string devicesReadme = Path.Combine(devicesPath, "README.md");
             ReplacePlaceholder(devicesReadme, "categorizedDevices", categorizedDeviceListing);
         }
 
