@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device.I2c.Devices;
+using System.Device.I2c;
 using Iot.Device.Ssd13xx.Commands;
 
 namespace Iot.Device.Ssd13xx
@@ -19,7 +19,7 @@ namespace Iot.Device.Ssd13xx
         /// A single-chip CMOS OLED/PLED driver with controller for organic/polymer
         /// light emitting diode dot-matrix graphic display system. 
         /// </summary>
-        /// <param name="i2cDevice">>The I2C device used for communication.</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Ssd1306(I2cDevice i2cDevice)
         : base(i2cDevice)
         {

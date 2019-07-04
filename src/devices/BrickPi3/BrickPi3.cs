@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using System.Linq;
 using System.IO;
 

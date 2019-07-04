@@ -64,7 +64,7 @@ Each of the commands has an `ExecuteAsync` or `Execute` method at the top of the
     {
         public int Execute()
         {
-            Console.WriteLine($"BusId={BusId}, DeviceAddress={DeviceAddress}, Device={Device}");
+            Console.WriteLine($"BusId={BusId}, DeviceAddress={DeviceAddress}");
             return 0;
         }
     }
@@ -75,7 +75,7 @@ Each of the commands has an `ExecuteAsync` or `Execute` method at the top of the
     {
         public async Task<int> ExecuteAsync()
         {
-            Console.WriteLine($"BusId={BusId}, DeviceAddress={DeviceAddress}, Device={Device}");
+            Console.WriteLine($"BusId={BusId}, DeviceAddress={DeviceAddress}");
             await Task.Delay(500);
             return 0;
         }
@@ -92,7 +92,7 @@ Each of the commands has an `ExecuteAsync` or `Execute` method at the top of the
     ```csharp
     public int Execute()
     {
-        Console.WriteLine($"CoolOption={CoolOption}, BusId={BusId}, DeviceAddress={DeviceAddress}, Device={Device}");
+        Console.WriteLine($"CoolOption={CoolOption}, BusId={BusId}, DeviceAddress={DeviceAddress}");
         ...
     }
     ```
@@ -103,4 +103,3 @@ Each of the commands has an `ExecuteAsync` or `Execute` method at the top of the
     DeviceApiTester help i2c-my-command
     DeviceApiTester i2c-my-command --cool-option 42
     ```
-    

@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device.I2c.Devices;
+using System.Device.I2c;
 using System.IO;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.PowerMode;

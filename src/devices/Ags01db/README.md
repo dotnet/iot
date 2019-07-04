@@ -7,10 +7,7 @@ AGS01DB is a MEMS VOC gas sensor with calibrated digital signal output. It uses 
 ## Usage
 ```C#
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Ags01db.DefaultI2cAddress);
-// get I2cDevice (in Linux)
 I2cDevice device = I2cDevice.Create(settings);
-// get I2cDevice (in Win10)
-//Windows10I2cDevice device = new Windows10I2cDevice(settings);
 
 using (Ags01db sensor = new Ags01db(device))
 {

@@ -9,7 +9,7 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Device.I2c.Devices;
+using System.Device.I2c;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -24,7 +24,7 @@ namespace Iot.Device.Vl53L0X
         public const byte DefaultI2cAddress = 0x29;
         // Default address can be found in documentation
         // page 18 with value 0x52 >> 1 = 0x29
-        private readonly I2cDevice _i2cDevice;
+        private I2cDevice _i2cDevice;
         private readonly bool _autoDisposable;
         private byte _stopData;
         private readonly int _operationTimeout;
@@ -1089,7 +1089,8 @@ namespace Iot.Device.Vl53L0X
         {
             if (_autoDisposable)
             {
-                _i2cDevice.Dispose();
+                _i2cDevice?.Dispose();
+                _i2cDevice = null;
             }
         }
 

@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device.I2c.Devices;
+using System.Device.I2c;
 using System.Threading;
 using Iot.Units;
 
@@ -14,7 +14,7 @@ namespace Iot.Device.Sht3x
     /// </summary>
     public class Sht3x : IDisposable
     {
-        private I2cDevice _sensor;
+        private I2cDevice _i2cDevice;
 
         // CRC const
         private const byte CRC_POLYNOMIAL = 0x31;
@@ -64,11 +64,11 @@ namespace Iot.Device.Sht3x
         /// <summary>
         /// Creates a new instance of the SHT3x
         /// </summary>
-        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="resolution">SHT3x Read Resolution</param>
-        public Sht3x(I2cDevice sensor, Resolution resolution = Resolution.High)
+        public Sht3x(I2cDevice i2cDevice, Resolution resolution = Resolution.High)
         {
-            _sensor = sensor;
+            _i2cDevice = i2cDevice;
 
             Resolution = resolution;
 
@@ -80,8 +80,8 @@ namespace Iot.Device.Sht3x
         /// </summary>
         public void Dispose()
         {
-            _sensor?.Dispose();
-            _sensor = null;
+            _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
 
         /// <summary>
@@ -112,10 +112,10 @@ namespace Iot.Device.Sht3x
             Span<byte> writeBuff = stackalloc byte[] { (byte)Register.SHT_MEAS, (byte)Resolution };
             Span<byte> readBuff = stackalloc byte[6];
 
-            _sensor.Write(writeBuff);
+            _i2cDevice.Write(writeBuff);
             // wait SCL free
             Thread.Sleep(20);
-            _sensor.Read(readBuff);
+            _i2cDevice.Read(readBuff);
 
             // Details in the Datasheet P13
             int st = (readBuff[0] << 8) | readBuff[1];      // Temp
@@ -167,7 +167,7 @@ namespace Iot.Device.Sht3x
 
             Span<byte> writeBuff = stackalloc byte[] { msb, lsb };
 
-            _sensor.Write(writeBuff);
+            _i2cDevice.Write(writeBuff);
 
             // wait SCL free
             Thread.Sleep(20);

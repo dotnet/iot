@@ -5,12 +5,12 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace System.Device.I2c.Devices
+namespace System.Device.I2c
 {
     /// <summary>
     /// Represents an I2C communication channel running on Unix.
     /// </summary>
-    public class UnixI2cDevice : I2cDevice
+    internal class UnixI2cDevice : I2cDevice
     {
         private readonly I2cConnectionSettings _settings;
         private const string DefaultDevicePath = "/dev/i2c";
