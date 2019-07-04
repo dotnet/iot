@@ -3,8 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio.Drivers;
+using System.Device.Gpio.Tests;
 
-namespace System.Device.Gpio.Tests
+namespace System.Device.Gpio.Drivers.Tests
 {
     public class SysFsDriverTests : GpioControllerTestBase
     {
