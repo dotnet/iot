@@ -14,7 +14,7 @@ namespace System.Device.Pwm.Drivers
         private readonly Dictionary<int, Windows10PwmDriverChannel> _channelMap = new Dictionary<int, Windows10PwmDriverChannel>();
 
         /// <summary>
-        /// Initializes new instance of Windows10PwmDriverChip
+        /// Initializes a new instance of the <see cref="Windows10PwmDriverChip"/> class.
         /// </summary>
         /// <param name="pwmChip">The PWM chip.</param>
         /// <param name="useDefaultChip">Use the default chip.</param>

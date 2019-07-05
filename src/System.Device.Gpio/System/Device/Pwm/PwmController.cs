@@ -15,7 +15,7 @@ namespace System.Device.Pwm
         private readonly HashSet<(int, int)> _openChannels;
 
         /// <summary>
-        /// Initializes new instance of PwmController that will use the specified driver.
+        /// Initializes a new instance of the <see cref="PwmController"/> class that will use the specified driver.
         /// </summary>
         /// <param name="driver">The driver that manages all of the channel operations for the controller.</param>
         public PwmController(PwmDriver driver)

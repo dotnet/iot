@@ -14,7 +14,7 @@ namespace System.Device.Spi
         private SpiConnectionSettings() { }
 
         /// <summary>
-        /// Initializes new instance of SpiConnectionSettings.
+        /// Initializes a new instance of the <see cref="SpiConnectionSettings"/> class.
         /// </summary>
         /// <param name="busId">The bus ID the device is connected to.</param>
         /// <param name="chipSelectLine">The chip select line used on the bus.</param>

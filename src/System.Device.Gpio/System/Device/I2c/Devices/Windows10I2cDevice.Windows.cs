@@ -16,7 +16,7 @@ namespace System.Device.I2c
         private WinI2c.I2cDevice _winI2cDevice;
 
         /// <summary>
-        /// Initializes new instance of Windows10I2cDevice that will use the specified settings to communicate with the I2C device.
+        /// Initializes a new instance of the <see cref="Windows10I2cDevice"/> class that will use the specified settings to communicate with the I2C device.
         /// </summary>
         /// <param name="settings">The connection settings of a device on an I2C bus.</param>
         public Windows10I2cDevice(I2cConnectionSettings settings)
