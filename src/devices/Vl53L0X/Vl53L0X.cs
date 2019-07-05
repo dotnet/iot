@@ -365,7 +365,6 @@ namespace Iot.Device.Vl53L0X
         /// <summary>
         /// Set the type of precision needed for measurement
         /// </summary>
-        /// <param name="precision">The type of precision needed</param>
         public Precision Precision
         {
             get { return _precision; }

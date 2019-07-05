@@ -18,30 +18,30 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
             bool comRemap = false,
             bool comSplitOddEven = true)
         {
-            config = 0b_0000_0000;
+            Config = 0b_0000_0000;
             if (columnAddressRemap)
             {
-                config |= 0b_0000_0001;
+                Config |= 0b_0000_0001;
             }
             
             if (nibbleRemap)
             {
-                config |= 0b_0000_0010;
+                Config |= 0b_0000_0010;
             }
 
             if (verticalMode)
             {
-                config |= 0b_0000_0100;
+                Config |= 0b_0000_0100;
             }
 
             if (comRemap)
             {
-                config |= 0b_0001_0000;
+                Config |= 0b_0001_0000;
             }
 
             if (comSplitOddEven)
             {
-                config |= 0b_0100_0000;
+                Config |= 0b_0100_0000;
             }
         }
 
@@ -50,10 +50,10 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         /// </summary>
         public byte Id => 0xA0;
 
-        // <summary>
-        /// ReMap config.
+        /// <summary>
+        /// ReMap Config.
         /// </summary>
-        public byte config { get; set; }
+        public byte Config { get; set; }
 
         /// <summary>
         /// Gets the bytes that represent the command.
@@ -61,7 +61,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         /// <returns>The bytes that represent the command.</returns>
         public byte[] GetBytes()
         {
-            return new byte[] { Id, config };
+            return new byte[] { Id, Config };
         }
     }
 }
