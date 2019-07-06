@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -17,7 +16,7 @@ namespace Iot.Device.Mcp3428.Samples
             Console.WriteLine("Hello Mcp3428 Sample!");
             var options = new I2cConnectionSettings(1,
                 Mcp3428.I2CAddressFromPins(PinState.Low, PinState.Low));
-            using (var dev = new UnixI2cDevice(options))
+            using (var dev = I2cDevice.Create(options))
             {
                 using (var adc = new Mcp3428(dev, AdcMode.OneShot, resolution: AdcResolution.Bit16, pgaGain: AdcGain.X1))
                 {
