@@ -14,6 +14,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [ADS1115 - Analog to Digital Converter](Ads1115/README.md)
 * [MCP3008 - 10-bit Analog to Digital Converter](Mcp3008/README.md)
+* [Mcp3428 - Analog to Digital Converter (I2C)](Mcp3428/README.md)
 
 ### Accelerometers
 
