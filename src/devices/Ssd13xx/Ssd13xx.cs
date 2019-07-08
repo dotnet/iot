@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Ssd13xx.Commands;
 using System;
 using System.Device.I2c;
+using Iot.Device.Ssd13xx.Commands;
 
 namespace Iot.Device.Ssd13xx
 {

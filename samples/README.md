@@ -29,7 +29,7 @@ You need to use at least [.NET Core 2.1](https://www.microsoft.com/net/download/
 
 Many of these samples use the [Raspberry Pi](https://www.raspberrypi.org/), however, .NET Core can be used with other devices. A [Raspberry Pi Starter Pack](https://www.adafruit.com/product/3058) contains enough electronics to get started on many projects.
 
-.NET Core is supported on Raspberry Pi 2B and 3A+/B/B+ models (ARMv7/v8). .NET Core is not supported on Raspberry Pi Zero or Arduino.
+.NET Core is supported on Raspberry Pi 2B as well as 3 and 4 models (ARMv7/v8). .NET Core is not supported on Raspberry Pi Zero or Arduino.
 
 ## Resources
 

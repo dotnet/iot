@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using System.Linq;
 using System.IO;
 
@@ -62,7 +61,9 @@ namespace Iot.Device.BrickPi3
         /// <summary>
         /// Initialize the brick including SPI communication
         /// </summary>
-        /// <param name="spiAddress"></param>
+        /// <param name="spiAddress">The Spi Address of the brick</param>
+        /// <param name="busId">The bus id that the device is connected to</param>
+        /// <param name="ChipSelectLine">The chip select line that the device is connected to</param>
         public Brick(byte spiAddress = 1, int busId = 0, int ChipSelectLine = 1)
         {
             try

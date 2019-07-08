@@ -4,7 +4,6 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.Device.I2c;
 using System.Numerics;
 
@@ -20,7 +19,7 @@ namespace Iot.Device.Hmc5883l
         /// </summary>
         public const byte DefaultI2cAddress = 0x1E;
 
-        private I2cDevice _sensor;
+        private I2cDevice _i2cDevice;
 
         private readonly byte _measuringMode;
         private readonly byte _outputRate;
@@ -46,21 +45,21 @@ namespace Iot.Device.Hmc5883l
         /// <summary>
         /// Initialize a new HMC5883L device connected through I2C
         /// </summary>
-        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="gain">Gain Setting</param>
         /// <param name="measuringMode">The Mode of Measuring</param>
         /// <param name="outputRate">Typical Data Output Rate (Hz)</param>
         /// <param name="samplesAmount">Number of samples averaged per measurement output</param>
         /// <param name="measurementConfig">Measurement configuration</param>
         public Hmc5883l(
-            I2cDevice sensor, 
+            I2cDevice i2cDevice, 
             Gain gain = Gain.Gain1090, 
             MeasuringMode measuringMode = MeasuringMode.Continuous, 
             OutputRate outputRate = OutputRate.Rate15,
             SamplesAmount samplesAmount = SamplesAmount.One,
             MeasurementConfiguration measurementConfig = MeasurementConfiguration.Normal)
         {
-            _sensor = sensor;
+            _i2cDevice = i2cDevice;
             _gain = (byte)gain;
             _measuringMode = (byte)measuringMode;
             _outputRate = (byte)outputRate;
@@ -83,9 +82,9 @@ namespace Iot.Device.Hmc5883l
             Span<byte> commandB = stackalloc byte[] { (byte)Register.HMC_CONFIG_REG_B_ADDR, configB };
             Span<byte> commandMode = stackalloc byte[] { (byte)Register.HMC_MODE_REG_ADDR, _measuringMode };
 
-            _sensor.Write(commandA);
-            _sensor.Write(commandB);
-            _sensor.Write(commandMode);
+            _i2cDevice.Write(commandA);
+            _i2cDevice.Write(commandB);
+            _i2cDevice.Write(commandMode);
         }
 
         /// <summary>
@@ -98,12 +97,12 @@ namespace Iot.Device.Hmc5883l
             Span<byte> yRead = stackalloc byte[2];
             Span<byte> zRead = stackalloc byte[2];
 
-            _sensor.WriteByte((byte)Register.HMC_X_MSB_REG_ADDR);
-            _sensor.Read(xRead);
-            _sensor.WriteByte((byte)Register.HMC_Y_MSB_REG_ADDR);
-            _sensor.Read(yRead);
-            _sensor.WriteByte((byte)Register.HMC_Z_MSB_REG_ADDR);
-            _sensor.Read(zRead);
+            _i2cDevice.WriteByte((byte)Register.HMC_X_MSB_REG_ADDR);
+            _i2cDevice.Read(xRead);
+            _i2cDevice.WriteByte((byte)Register.HMC_Y_MSB_REG_ADDR);
+            _i2cDevice.Read(yRead);
+            _i2cDevice.WriteByte((byte)Register.HMC_Z_MSB_REG_ADDR);
+            _i2cDevice.Read(zRead);
 
             short x = BinaryPrimitives.ReadInt16BigEndian(xRead);
             short y = BinaryPrimitives.ReadInt16BigEndian(yRead);
@@ -132,10 +131,10 @@ namespace Iot.Device.Hmc5883l
         /// </summary>
         public void Dispose()
         {
-            if (_sensor != null)
+            if (_i2cDevice != null)
             {
-                _sensor.Dispose();
-                _sensor = null;
+                _i2cDevice?.Dispose();
+                _i2cDevice = null;
             }
         }
 
@@ -145,8 +144,8 @@ namespace Iot.Device.Hmc5883l
         /// <returns>Device statuses</returns>
         private Status GetStatus()
         {
-            _sensor.WriteByte((byte)Register.HMC_STATUS_REG_ADDR);
-            byte status = _sensor.ReadByte();
+            _i2cDevice.WriteByte((byte)Register.HMC_STATUS_REG_ADDR);
+            byte status = _i2cDevice.ReadByte();
 
             return (Status)status;
         }

@@ -5,7 +5,6 @@
 using System;
 using System.Threading;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 
 namespace Iot.Device.Lsm9Ds1.Samples
 {

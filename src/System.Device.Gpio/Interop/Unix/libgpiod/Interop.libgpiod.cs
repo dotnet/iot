@@ -121,7 +121,7 @@ internal partial class Interop
         /// <summary>
         /// Release a previously reserved line.
         /// </summary>
-        /// <param name="line">GPIO line handle</param>
+        /// <param name="lineHandle">GPIO line handle</param>
         [DllImport(LibgpiodLibrary)]
         internal static extern void gpiod_line_release(IntPtr lineHandle);
 
@@ -138,6 +138,7 @@ internal partial class Interop
         /// Wait for an event on a single line.
         /// </summary>
         /// <param name="line">GPIO line handle</param>
+        /// <param name="timeout">The TimeSpec to wait for before timing out</param>
         /// <returns>0 if wait timed out, -1 if an error occurred, 1 if an event occurred.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern WaitEventResult gpiod_line_event_wait(SafeLineHandle line, ref TimeSpec timeout);
@@ -146,6 +147,7 @@ internal partial class Interop
         /// Read the last event from the GPIO line.
         /// </summary>
         /// <param name="line">GPIO line handle</param>
+        /// <param name="gpioEvent">Reference to the gpio event that was detected</param>
         /// <returns>1 if rising edge event occured, 2 on falling edge, -1 on error.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern int gpiod_line_event_read(SafeLineHandle line, ref GpioLineEvent gpioEvent);
