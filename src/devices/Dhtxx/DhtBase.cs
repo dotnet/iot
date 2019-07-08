@@ -8,7 +8,6 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Diagnostics;
 using System.Threading;
-using Dhtxx.Devices;
 using Iot.Units;
 
 namespace Iot.Device.DHTxx
@@ -16,28 +15,24 @@ namespace Iot.Device.DHTxx
     /// <summary>
     /// Temperature and Humidity Sensor DHTxx
     /// </summary>
-    public class DhtSensor : IDisposable
+    public abstract class DhtBase : IDisposable
     {
-        /// <summary>
-        /// DHT12 Default I2C Address
-        /// </summary>
-        public const byte Dht12DefaultI2cAddress = 0x5C;
+        protected byte[] _readBuff = new byte[5];
+
+        private readonly CommunicationProtocol _protocol;
+        protected readonly int _pin;
+        protected readonly I2cDevice _i2cDevice;
+        protected readonly GpioController _controller;
 
         // wait about 1 ms
         private readonly uint _loopCount = 10000;
-        private readonly byte[] _readBuff = new byte[5];
-        private readonly CommunicationProtocol _protocol;
-        private readonly int _pin;
-        private readonly I2cDevice _i2cDevice;
-        private readonly GpioController _controller;
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private int _lastMeasurement = 0;
-        private IDhtDevice _device;
 
         /// <summary>
         /// How last read went, <c>true</c> for success, <c>false</c> for failure
         /// </summary>
-        public bool IsLastReadSuccessful { get; private set; }
+        public bool IsLastReadSuccessful { get; internal set; }
 
         /// <summary>
         /// Get the last read temperature
@@ -45,12 +40,12 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.NaN
         /// </remarks>
-        public Temperature Temperature
+        public virtual Temperature Temperature
         {
             get
             {
                 ReadData();
-                return IsLastReadSuccessful ? _device.GetTemperature(_readBuff) : Temperature.FromCelsius(double.NaN);
+                return IsLastReadSuccessful ? GetTemperature(_readBuff) : Temperature.FromCelsius(double.NaN);
             }
         }
 
@@ -60,12 +55,12 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.NaN
         /// </remarks>
-        public double Humidity
+        public virtual double Humidity
         {
             get
             {
                 ReadData();
-                return IsLastReadSuccessful ? _device.GetHumidity(_readBuff) : double.NaN;
+                return IsLastReadSuccessful ? GetHumidity(_readBuff) : double.NaN;
             }
         }
 
@@ -75,12 +70,11 @@ namespace Iot.Device.DHTxx
         /// <param name="pin">The pin number (GPIO number)</param>
         /// <param name="dhtType">The DHT Type, either Dht11 or Dht22</param>
         /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
-        public DhtSensor(int pin, DhtType dhtType, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+        public DhtBase(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
         {
             _protocol = CommunicationProtocol.OneWire;
             _controller = new GpioController(pinNumberingScheme);
             _pin = pin;
-            SetDevice(dhtType);
 
             _controller.OpenPin(_pin);
             // delay 1s to make sure DHT stable
@@ -91,44 +85,31 @@ namespace Iot.Device.DHTxx
         /// Create a DHT sensor through I2C (Only DHT12)
         /// </summary>
         /// <param name="i2cDevice">The I2C device used for communication.</param>
-        public DhtSensor(I2cDevice i2cDevice)
+        public DhtBase(I2cDevice i2cDevice)
         {
             _protocol = CommunicationProtocol.I2C;
             _i2cDevice = i2cDevice;
-            SetDevice(DhtType.Dht12);
         }
 
         /// <summary>
         /// Start a reading
         /// </summary>
-        /// <returns>
-        /// <c>true</c> if read is successfull, otherwise <c>false</c>.
-        /// </returns>
-        private void ReadData()
+        internal virtual void ReadData()
         {
             // The time of two measurements should be more than 1s.
             if (Environment.TickCount - _lastMeasurement < 1000)
-            {
                 return;
-            }
 
             if (_protocol == CommunicationProtocol.OneWire)
-            {
                 ReadThroughOneWire();
-            }
             else
-            {
                 ReadThroughI2c();
-            }
         }
 
         /// <summary>
         /// Read through One-Wire
         /// </summary>
-        /// <returns>
-        /// <c>true</c> if read is successfull, otherwise <c>false</c>.
-        /// </returns>
-        private bool ReadThroughOneWire()
+        internal virtual void ReadThroughOneWire()
         {
             byte readVal = 0;
             uint count;
@@ -158,7 +139,7 @@ namespace Iot.Device.DHTxx
                 if (count-- == 0)
                 {
                     IsLastReadSuccessful = false;
-                    return IsLastReadSuccessful;
+                    return;
                 }
             }
 
@@ -169,7 +150,7 @@ namespace Iot.Device.DHTxx
                 if (count-- == 0)
                 {
                     IsLastReadSuccessful = false;
-                    return IsLastReadSuccessful;
+                    return;
                 }
             }
 
@@ -183,7 +164,7 @@ namespace Iot.Device.DHTxx
                     if (count-- == 0)
                     {
                         IsLastReadSuccessful = false;
-                        return IsLastReadSuccessful;
+                        return;
                     }
                 }
 
@@ -196,7 +177,7 @@ namespace Iot.Device.DHTxx
                     if (count-- == 0)
                     {
                         IsLastReadSuccessful = false;
-                        return IsLastReadSuccessful;
+                        return;
                     }
                 }
                 _stopwatch.Stop();
@@ -226,17 +207,12 @@ namespace Iot.Device.DHTxx
             {
                 IsLastReadSuccessful = false;
             }
-
-            return IsLastReadSuccessful;
         }
 
         /// <summary>
         /// Read through I2C
         /// </summary>
-        /// <returns>
-        /// <c>true</c> if read is successfull, otherwise <c>false</c>.
-        /// </returns>
-        private bool ReadThroughI2c()
+        internal virtual void ReadThroughI2c()
         {
             // DHT12 Humidity Register
             _i2cDevice.WriteByte(0x00);
@@ -253,27 +229,21 @@ namespace Iot.Device.DHTxx
             {
                 IsLastReadSuccessful = false;
             }
-
-            return IsLastReadSuccessful;
         }
 
         /// <summary>
-        /// Initialise the sensor instance with the corresponding device based on DhtType.
+        /// Converting data to humidity
         /// </summary>
-        private void SetDevice(DhtType type)
-        {
-            switch (type)
-            {
-                case DhtType.Dht11:
-                    _device = new Dht11Device();
-                    break;
-                case DhtType.Dht12:
-                case DhtType.Dht21:
-                case DhtType.Dht22:
-                    _device = new Dht22Device();
-                    break;
-            }
-        }
+        /// <param name="readBuff">Data</param>
+        /// <returns>Humidity</returns>
+        internal abstract double GetHumidity(byte[] readBuff);
+
+        /// <summary>
+        /// Converting data to Temperature
+        /// </summary>
+        /// <param name="readBuff">Data</param>
+        /// <returns>Temperature</returns>
+        internal abstract Temperature GetTemperature(byte[] readBuff);
 
         /// <summary>
         /// Cleanup
