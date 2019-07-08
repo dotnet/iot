@@ -68,7 +68,6 @@ namespace Iot.Device.DHTxx
         /// Create a DHT sensor
         /// </summary>
         /// <param name="pin">The pin number (GPIO number)</param>
-        /// <param name="dhtType">The DHT Type, either Dht11 or Dht22</param>
         /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
         public DhtBase(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
         {
