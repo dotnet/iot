@@ -47,20 +47,20 @@ namespace Iot.Device.Pcf8563
 
             writeBuffer[0] = (byte)Register.PCF_SEC_ADDR;
             // Set bit8 as 0 to guarantee clock integrity
-            writeBuffer[1] = (byte)(Int2Bcd(time.Second) & 0b_0111_1111);
-            writeBuffer[2] = Int2Bcd(time.Minute);
-            writeBuffer[3] = Int2Bcd(time.Hour);
-            writeBuffer[4] = Int2Bcd(time.Day);
-            writeBuffer[5] = Int2Bcd((int)time.DayOfWeek);
+            writeBuffer[1] = (byte)(NumberTool.Dec2Bcd(time.Second) & 0b_0111_1111);
+            writeBuffer[2] = NumberTool.Dec2Bcd(time.Minute);
+            writeBuffer[3] = NumberTool.Dec2Bcd(time.Hour);
+            writeBuffer[4] = NumberTool.Dec2Bcd(time.Day);
+            writeBuffer[5] = NumberTool.Dec2Bcd((int)time.DayOfWeek);
             if (time.Year >= 2000)
             {
-                writeBuffer[6] = (byte)(Int2Bcd(time.Month) | 0b_1000_0000);
-                writeBuffer[7] = Int2Bcd(time.Year - 2000);
+                writeBuffer[6] = (byte)(NumberTool.Dec2Bcd(time.Month) | 0b_1000_0000);
+                writeBuffer[7] = NumberTool.Dec2Bcd(time.Year - 2000);
             }
             else
             {
-                writeBuffer[6] = Int2Bcd(time.Month);
-                writeBuffer[7] = Int2Bcd(time.Year - 1900);
+                writeBuffer[6] = NumberTool.Dec2Bcd(time.Month);
+                writeBuffer[7] = NumberTool.Dec2Bcd(time.Year - 1900);
             }
 
             _sensor.Write(writeBuffer);
@@ -78,12 +78,12 @@ namespace Iot.Device.Pcf8563
             _sensor.WriteByte((byte)Register.PCF_SEC_ADDR);
             _sensor.Read(readBuffer);
 
-            return new DateTime(readBuffer[5] >> 7 == 1 ? 2000 + Bcd2Int(readBuffer[6]) : 1900 + Bcd2Int(readBuffer[6]),
-                                Bcd2Int((byte)(readBuffer[5] & 0b_0001_1111)),
-                                Bcd2Int((byte)(readBuffer[3] & 0b_0011_1111)),
-                                Bcd2Int((byte)(readBuffer[2] & 0b_0011_1111)),
-                                Bcd2Int((byte)(readBuffer[1] & 0b_0111_1111)),
-                                Bcd2Int((byte)(readBuffer[0] & 0b_0111_1111)));
+            return new DateTime(readBuffer[5] >> 7 == 1 ? 2000 + NumberTool.Bcd2Dec(readBuffer[6]) : 1900 + NumberTool.Bcd2Dec(readBuffer[6]),
+                                NumberTool.Bcd2Dec((byte)(readBuffer[5] & 0b_0001_1111)),
+                                NumberTool.Bcd2Dec((byte)(readBuffer[3] & 0b_0011_1111)),
+                                NumberTool.Bcd2Dec((byte)(readBuffer[2] & 0b_0011_1111)),
+                                NumberTool.Bcd2Dec((byte)(readBuffer[1] & 0b_0111_1111)),
+                                NumberTool.Bcd2Dec((byte)(readBuffer[0] & 0b_0111_1111)));
         }
 
         /// <summary>
@@ -93,26 +93,6 @@ namespace Iot.Device.Pcf8563
         {
             _sensor?.Dispose();
             _sensor = null;
-        }
-
-        /// <summary>
-        /// BCD To Int
-        /// </summary>
-        /// <param name="bcd">BCD Code</param>
-        /// <returns>int</returns>
-        private int Bcd2Int(byte bcd)
-        {
-            return ((bcd >> 4) * 10) + (bcd % 16);
-        }
-
-        /// <summary>
-        /// Int To BCD
-        /// </summary>
-        /// <param name="dec">int</param>
-        /// <returns>BCD Code</returns>
-        private byte Int2Bcd(int dec)
-        {
-            return (byte)(((dec / 10) << 4) + (dec % 10));
         }
     }
 }

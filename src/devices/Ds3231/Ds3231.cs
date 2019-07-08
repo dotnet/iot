@@ -51,12 +51,12 @@ namespace Iot.Device.Ds3231
             _sensor.WriteByte((byte)Register.RTC_SEC_REG_ADDR);
             _sensor.Read(rawData);
 
-            return new DateTime(rawData[5] >> 7 == 1 ? 2000 + Bcd2Int(rawData[6]) : 1900 + Bcd2Int(rawData[6]),
-                                Bcd2Int((byte)(rawData[5] & 0b_0001_1111)),
-                                Bcd2Int(rawData[4]),
-                                Bcd2Int(rawData[2]),
-                                Bcd2Int(rawData[1]),
-                                Bcd2Int(rawData[0]));
+            return new DateTime(rawData[5] >> 7 == 1 ? 2000 + NumberTool.Bcd2Dec(rawData[6]) : 1900 + NumberTool.Bcd2Dec(rawData[6]),
+                                NumberTool.Bcd2Dec((byte)(rawData[5] & 0b_0001_1111)),
+                                NumberTool.Bcd2Dec(rawData[4]),
+                                NumberTool.Bcd2Dec(rawData[2]),
+                                NumberTool.Bcd2Dec(rawData[1]),
+                                NumberTool.Bcd2Dec(rawData[0]));
         }
 
         /// <summary>
@@ -69,20 +69,20 @@ namespace Iot.Device.Ds3231
 
             setData[0] = (byte)Register.RTC_SEC_REG_ADDR;
 
-            setData[1] = Int2Bcd(time.Second);
-            setData[2] = Int2Bcd(time.Minute);
-            setData[3] = Int2Bcd(time.Hour);
-            setData[4] = Int2Bcd((int)time.DayOfWeek + 1);
-            setData[5] = Int2Bcd(time.Day);
+            setData[1] = NumberTool.Dec2Bcd(time.Second);
+            setData[2] = NumberTool.Dec2Bcd(time.Minute);
+            setData[3] = NumberTool.Dec2Bcd(time.Hour);
+            setData[4] = NumberTool.Dec2Bcd((int)time.DayOfWeek + 1);
+            setData[5] = NumberTool.Dec2Bcd(time.Day);
             if (time.Year >= 2000)
             {
-                setData[6] = (byte)(Int2Bcd(time.Month) | 0b_1000_0000);
-                setData[7] = Int2Bcd(time.Year - 2000);
+                setData[6] = (byte)(NumberTool.Dec2Bcd(time.Month) | 0b_1000_0000);
+                setData[7] = NumberTool.Dec2Bcd(time.Year - 2000);
             }
             else
             {
-                setData[6] = Int2Bcd(time.Month);
-                setData[7] = Int2Bcd(time.Year - 1900);
+                setData[6] = NumberTool.Dec2Bcd(time.Month);
+                setData[7] = NumberTool.Dec2Bcd(time.Year - 1900);
             }
 
             _sensor.Write(setData);
@@ -110,26 +110,6 @@ namespace Iot.Device.Ds3231
         {
             _sensor?.Dispose();
             _sensor = null;
-        }
-
-        /// <summary>
-        /// BCD To Int
-        /// </summary>
-        /// <param name="bcd">BCD Code</param>
-        /// <returns>int</returns>
-        private int Bcd2Int(byte bcd)
-        {
-            return ((bcd >> 4) * 10) + (bcd % 16);
-        }
-
-        /// <summary>
-        /// Int To BCD
-        /// </summary>
-        /// <param name="dec">int</param>
-        /// <returns>BCD Code</returns>
-        private byte Int2Bcd(int dec)
-        {
-            return (byte)(((dec / 10) << 4) + (dec % 10));
         }
     }
 }

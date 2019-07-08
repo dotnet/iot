@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <ProjectReference Include="..\Units\Units.csproj" />
+    <Compile Include="..\Common\Iot\Device\NumberTool.cs" />
     <Compile Include="Ds3231.cs" />
     <Compile Include="Register.cs" />
   </ItemGroup>

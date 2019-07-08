@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <Compile Include="..\Common\Iot\Device\NumberTool.cs" />
     <Compile Include="Pcf8563.cs" />
     <Compile Include="Register.cs" />
   </ItemGroup>

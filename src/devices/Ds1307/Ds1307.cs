@@ -46,12 +46,12 @@ namespace Iot.Device.Ds1307
             _sensor.Read(readBuffer);
 
             // Details in the Datasheet P8
-            return new DateTime(2000 + Bcd2Int(readBuffer[6]), 
-                                Bcd2Int(readBuffer[5]), 
-                                Bcd2Int(readBuffer[4]), 
-                                Bcd2Int(readBuffer[2]),
-                                Bcd2Int(readBuffer[1]), 
-                                Bcd2Int((byte)(readBuffer[0] & 0b_0111_1111)));
+            return new DateTime(2000 + NumberTool.Bcd2Dec(readBuffer[6]), 
+                                NumberTool.Bcd2Dec(readBuffer[5]), 
+                                NumberTool.Bcd2Dec(readBuffer[4]), 
+                                NumberTool.Bcd2Dec(readBuffer[2]),
+                                NumberTool.Bcd2Dec(readBuffer[1]), 
+                                NumberTool.Bcd2Dec((byte)(readBuffer[0] & 0b_0111_1111)));
         }
 
         /// <summary>
@@ -66,14 +66,14 @@ namespace Iot.Device.Ds1307
 
             // Details in the Datasheet P8
             // | bit 7: CH | bit 6-0: sec |
-            writeBuffer[1] = (byte)(Int2Bcd(time.Second) & 0b_0111_1111);
-            writeBuffer[2] = Int2Bcd(time.Minute);
+            writeBuffer[1] = (byte)(NumberTool.Dec2Bcd(time.Second) & 0b_0111_1111);
+            writeBuffer[2] = NumberTool.Dec2Bcd(time.Minute);
             // | bit 7: 0 | bit 6: 12/24 hour | bit 5-0: hour |
-            writeBuffer[3] = (byte)(Int2Bcd(time.Hour) & 0b_0011_1111);
-            writeBuffer[4] = Int2Bcd((int)time.DayOfWeek + 1);
-            writeBuffer[5] = Int2Bcd(time.Day);
-            writeBuffer[6] = Int2Bcd(time.Month);
-            writeBuffer[7] = Int2Bcd(time.Year - 2000);
+            writeBuffer[3] = (byte)(NumberTool.Dec2Bcd(time.Hour) & 0b_0011_1111);
+            writeBuffer[4] = NumberTool.Dec2Bcd((int)time.DayOfWeek + 1);
+            writeBuffer[5] = NumberTool.Dec2Bcd(time.Day);
+            writeBuffer[6] = NumberTool.Dec2Bcd(time.Month);
+            writeBuffer[7] = NumberTool.Dec2Bcd(time.Year - 2000);
 
             _sensor.Write(writeBuffer);
         }
@@ -85,26 +85,6 @@ namespace Iot.Device.Ds1307
         {
             _sensor?.Dispose();
             _sensor = null;
-        }
-
-        /// <summary>
-        /// BCD To Int
-        /// </summary>
-        /// <param name="bcd">BCD Code</param>
-        /// <returns>int</returns>
-        private int Bcd2Int(byte bcd)
-        {
-            return ((bcd >> 4) * 10) + (bcd % 16);
-        }
-
-        /// <summary>
-        /// Int To BCD
-        /// </summary>
-        /// <param name="dec">int</param>
-        /// <returns>BCD Code</returns>
-        private byte Int2Bcd(int dec)
-        {
-            return (byte)(((dec / 10) << 4) + (dec % 10));
         }
     }
 }
