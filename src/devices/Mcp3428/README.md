@@ -1,4 +1,4 @@
-﻿# Mcp3428
+﻿# Mcp3428 - Analog to Digital Converter (I2C)
 
 ## Summary
 
@@ -32,5 +32,5 @@ using (var adc = new Mcp3428(dev)) // Default settings
 
 The library provides an async API as reading with 16 bit resolution can take up to 60-80ms. It's in a separate class called `Mcp3428Async`.
 
-## References 
+## References
 Provide any references to other tutorials, blogs and hardware related to the component that could help others get started.

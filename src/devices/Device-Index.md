@@ -32,6 +32,7 @@
 * [Mcp23xxx - I/O Expander device family](Mcp23xxx/README.md)
 * [Mcp25xxx device family - CAN bus](Mcp25xxx/README.md)
 * [MCP3008 - 10-bit Analog to Digital Converter](Mcp3008/README.md)
+* [Mcp3428 - Analog to Digital Converter (I2C)](Mcp3428/README.md)
 * [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
 * [nRF24L01 - Single Chip 2.4 GHz Transceiver](Nrf24l01/README.md)
 * [NXP/TI PCx857x](Pcx857x/README.md)
