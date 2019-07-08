@@ -12,7 +12,7 @@ namespace Iot.Device.Pcf8563
     /// </summary>
     public class Pcf8563 : IDisposable
     {
-        private I2cDevice _sensor = null;
+        private I2cDevice _i2cDevice = null;
 
         /// <summary>
         /// PCF8563 Default I2C Address
@@ -27,14 +27,14 @@ namespace Iot.Device.Pcf8563
         /// <summary>
         /// Creates a new instance of the PCF8563
         /// </summary>
-        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
-        public Pcf8563(I2cDevice sensor)
+        /// <param name="i2cDevice">The <c>System.Device.I2c.I2cDevice</c></param>
+        public Pcf8563(I2cDevice i2cDevice)
         {
-            _sensor = sensor;
+            _i2cDevice = i2cDevice;
 
             // Set "Normal Mode"
             Span<byte> ctrl1Config = stackalloc byte[] { (byte)Register.PCF_CTRL1_ADDR, 0x00 };
-            _sensor.Write(ctrl1Config);
+            _i2cDevice.Write(ctrl1Config);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Iot.Device.Pcf8563
                 writeBuffer[7] = NumberTool.Dec2Bcd(time.Year - 1900);
             }
 
-            _sensor.Write(writeBuffer);
+            _i2cDevice.Write(writeBuffer);
         }
 
         /// <summary>
@@ -75,8 +75,8 @@ namespace Iot.Device.Pcf8563
             // Sec, Min, Hour, Date, Day, Month & Century, Year
             Span<byte> readBuffer = stackalloc byte[7];
 
-            _sensor.WriteByte((byte)Register.PCF_SEC_ADDR);
-            _sensor.Read(readBuffer);
+            _i2cDevice.WriteByte((byte)Register.PCF_SEC_ADDR);
+            _i2cDevice.Read(readBuffer);
 
             return new DateTime(readBuffer[5] >> 7 == 1 ? 2000 + NumberTool.Bcd2Dec(readBuffer[6]) : 1900 + NumberTool.Bcd2Dec(readBuffer[6]),
                                 NumberTool.Bcd2Dec((byte)(readBuffer[5] & 0b_0001_1111)),
@@ -91,8 +91,8 @@ namespace Iot.Device.Pcf8563
         /// </summary>
         public void Dispose()
         {
-            _sensor?.Dispose();
-            _sensor = null;
+            _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
     }
 }
