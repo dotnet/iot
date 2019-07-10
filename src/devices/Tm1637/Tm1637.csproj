@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
+    <Compile Include="..\Common\System\Device\DelayHelper.cs" />
     <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
   </ItemGroup>
 

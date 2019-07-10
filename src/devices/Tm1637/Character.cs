@@ -12,6 +12,5 @@ namespace Iot.Device.Tm1637
     {
         public Display Char { get; set; }
         public bool Dot { get; set; }
-
     }
 }

@@ -140,7 +140,7 @@ namespace Iot.Device.Tm1637
             _controller.SetPinMode(_pinDio, PinMode.Input);
 
             // Wait 1 µs, it's the waiting time between clk up and down
-            // That's according to the docuementation
+            // That's according to the documentation
             DelayHelper.DelayMicroseconds(ClockWidthMicroseconds, true);
 
             var ack = _controller.Read(_pinDio);

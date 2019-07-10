@@ -13,23 +13,23 @@ namespace Iot.Device.Tm1637
     /// </summary>
     public enum Display
     {
-        Car0 = 0,
-        Car1 = 1,
-        Car2 = 2,
-        Car3 = 3,
-        Car4 = 4,
-        Car5 = 5,
-        Car6 = 6,
-        Car7 = 7,
-        Car8 = 8,
-        Car9 = 9,
-        CarA = 10,
-        CarB = 11,
-        CarC = 12,
-        CarD = 13,
-        CarE = 14,
-        CarF = 15,
-        CarNothin = 16,
-        CarMinus = 17
+        Char0 = 0,
+        Char1 = 1,
+        Char2 = 2,
+        Char3 = 3,
+        Char4 = 4,
+        Char5 = 5,
+        Char6 = 6,
+        Char7 = 7,
+        Char8 = 8,
+        Char9 = 9,
+        CharA = 10,
+        CharB = 11,
+        CharC = 12,
+        CharD = 13,
+        CharE = 14,
+        CharF = 15,
+        CharNothing = 16,
+        CharMinus = 17
     }
 }

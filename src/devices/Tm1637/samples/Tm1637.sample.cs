@@ -4,8 +4,6 @@
 
 using Iot.Device.Tm1637;
 using System;
-using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using System.Threading;
 
 namespace Tm1637Sample
@@ -19,13 +17,13 @@ namespace Tm1637Sample
             tm1637.Brightness = 7;
             tm1637.ScreenOn = true;
             tm1637.ClearDisplay();
-            // Displays 4 haracters
+            // Displays 4 Characters
             // If you have a 4 display, all 4 will be displayed as well as on a 6
             Character[] toDisplay = new Character[4] {
-                new Character() { Char = Display.Car4, Dot = false },
-                new Character() { Char = Display.Car2, Dot = true},
-                new Character() { Char = Display.Car3, Dot = false },
-                new Character() { Char = Display.Car8, Dot = false },
+                new Character() { Char = Display.Char4, Dot = false },
+                new Character() { Char = Display.Char2, Dot = true},
+                new Character() { Char = Display.Char3, Dot = false },
+                new Character() { Char = Display.Char8, Dot = false },
             };
             tm1637.Display(toDisplay);
             Thread.Sleep(3000);

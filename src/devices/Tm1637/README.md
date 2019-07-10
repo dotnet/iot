@@ -1,4 +1,4 @@
-# TM1637
+# TM1637 - Segment Display
 
 # Summary
 
@@ -53,10 +53,10 @@ Characters are prebuild from 0 to F to facilitate hexadecimal displays on the se
 
 ```csharp
 Character[] toDisplay = new Character[4] {
-    new Character() { Char = Display.Car4, Dot = false },
-    new Character() { Char = Display.Car2, Dot = true},
-    new Character() { Char = Display.CarA, Dot = false },
-    new Character() { Char = Display.CarF, Dot = false },
+    new Character() { Char = Display.Char4, Dot = false },
+    new Character() { Char = Display.Char2, Dot = true},
+    new Character() { Char = Display.CharA, Dot = false },
+    new Character() { Char = Display.CharF, Dot = false },
 };
 tm1637.Display(toDisplay);
 ```
