@@ -20,6 +20,7 @@
     <!-- Generate snupkg package -->
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GenerateNuspecDependsOn>$(GenerateNuspecDependsOn);_GetSymbolsForSnupkg</GenerateNuspecDependsOn>
     <!-- Collect package assets from builds -->
     <IncludeRIDSpecificBuildOutput Condition="'$(IncludeRIDSpecificBuildOutput)' == '' And '$(RuntimeIdentifiers)' != ''">true</IncludeRIDSpecificBuildOutput>
     <TargetsForTfmSpecificContentInPackage Condition="'$(IncludeRIDSpecificBuildOutput)' == 'true'">
@@ -32,6 +33,28 @@
   <ItemGroup>
     <_RuntimeIdentifiers Include="$(RuntimeIdentifiers)" />
   </ItemGroup>
+
+  <Target Name="_GetSymbolsForSnupkg" DependsOnTargets="_WalkEachTargetPerFramework" Inputs="%(_RuntimeIdentifiers.Identity)" Outputs="_unused">
+    <MSBuild
+      Condition="'$(IncludeRIDSpecificBuildOutput)' == 'true'"
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="_GetDebugSymbolsWithTfm"
+      Properties="RuntimeIdentifier=%(_RuntimeIdentifiers.Identity)">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_DebugSymbolsWithTfm" />
+    </MSBuild>
+    <PropertyGroup>
+      <!-- Need to set this back to True so that the snupkg will contain symbols. -->
+      <IncludeBuildOutput>true</IncludeBuildOutput>
+    </PropertyGroup>
+    <ItemGroup>
+      <_TargetPathsToSymbols Include="@(_DebugSymbolsWithTfm)">
+        <TargetFramework>$(TargetFramework)-%(_RuntimeIdentifiers.Identity)</TargetFramework>
+      </_TargetPathsToSymbols>
+    </ItemGroup>
+  </Target>
 
   <Target Name="_WalkEachRIDForBuildOutput">
     <MSBuild
