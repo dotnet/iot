@@ -336,9 +336,7 @@ namespace Iot.Device.GoPiGo3
         /// Set the led color
         /// </summary>
         /// <param name="led">The led, either Left, Right, Blinky Left, Blinky Right and Wifi. Note you should only control the wifi one if you are sure to be connected to wifi</param>
-        /// <param name="red">The red component</param>
-        /// <param name="green">The green component</param>
-        /// <param name="blue">The blue component</param>
+        /// <param name="ledColor">The Color of the <paramref name="led"/></param>
         public void SetLed(byte led, Color ledColor)
         {
 

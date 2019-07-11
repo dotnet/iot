@@ -43,12 +43,14 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize a NXT Light Sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         public NXTLightSensor(Brick brick, SensorPort port) : this(brick, port, LightMode.Relection, 1000) { }
 
         /// <summary>
         /// Initialize a NXT Light Sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">Light mode</param>
         public NXTLightSensor(Brick brick, SensorPort port, LightMode mode) : this(brick, port, mode, 1000) { }
@@ -56,6 +58,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize a NXT Light Sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">Light mode</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>

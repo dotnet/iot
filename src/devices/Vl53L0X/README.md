@@ -1,4 +1,4 @@
-# VL53L0X Sensor
+# VL53L0X - distance sensor
 
 ## Summary
 

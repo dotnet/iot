@@ -61,7 +61,6 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <summary>
         /// Initializes a new instance of the TxRtsCtrl class.
         /// </summary>
-        /// <param name="txBufferNumber">Transmit Buffer Number.</param>
         /// <param name="value">The value that represents the register contents.</param>
         public TxRtsCtrl(byte value)
         {

@@ -9,9 +9,9 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
     public class SetColumnAddress : ISsd1327Command
     {
         /// <summary>
-        // Set column address.
-        // Start from 8th column of driver IC. This is 0th column for OLED.
-        // End at  (8 + 47)th column. Each column has 2 pixels(or segments).
+        /// Set column address.
+        /// Start from 8th column of driver IC. This is 0th column for OLED.
+        /// End at  (8 + 47)th column. Each column has 2 pixels(or segments).
         /// </summary>
         /// <param name="startAddress">Column start address with a range of 8-55.</param>
         /// <param name="endAddress">Column end address with a range of 8-55.</param>

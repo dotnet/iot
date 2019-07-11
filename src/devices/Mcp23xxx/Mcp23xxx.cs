@@ -121,7 +121,7 @@ namespace Iot.Device.Mcp23xxx
         /// Writes a number of bytes to registers.
         /// </summary>
         /// <param name="register">The register address to write to.</param>
-        /// <param name="buffer">The data to write to the registers.</param>
+        /// <param name="data">The data to write to the registers.</param>
         /// <param name="port">The I/O port used with the registers.</param>
         protected void InternalWrite(Register register, Span<byte> data, Port port)
         {
