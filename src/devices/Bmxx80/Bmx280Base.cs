@@ -33,6 +33,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Initializes a new instance of the <see cref="Bmx280Base"/> class.
         /// </summary>
+        /// <param name="deviceId">The ID of the device.</param>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
         protected Bmx280Base(byte deviceId, I2cDevice i2cDevice)
             : base(deviceId, i2cDevice)
