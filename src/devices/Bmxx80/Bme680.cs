@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using System.IO;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
