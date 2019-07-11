@@ -9,7 +9,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
     public class SetRowAddress : ISsd1327Command
     {
         /// <summary>
-        // Set row address 
+        /// Set row address 
         /// </summary>
         /// <param name="startAddress">Column start address with a range of 0-95.</param>
         /// <param name="endAddress">Column end address with a range of 0-95.</param>

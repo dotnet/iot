@@ -23,6 +23,7 @@ namespace Iot.Device.BrickPi3.Movement
         /// <summary>
         /// Create a vehicule with 2 motors, one left and one right
         /// </summary>
+        /// <param name="brick">The main brick controlling the motor</param>
         /// <param name="left">Motor port for left motor</param>
         /// <param name="right">Motor port for right motor</param>
         public Vehicle(Brick brick, BrickPortMotor left, BrickPortMotor right)

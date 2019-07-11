@@ -27,12 +27,14 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize a NXT Sound Sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor Port</param>
         public NXTSoundSensor(Brick brick, SensorPort port) : this(brick, port, 1000) { }
 
         /// <summary>
         /// Initialize a NXT Sound Sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>
         public NXTSoundSensor(Brick brick, SensorPort port, int timeout)

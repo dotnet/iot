@@ -1,4 +1,4 @@
-﻿# Mcp25xxx device family
+﻿# Mcp25xxx device family - CAN bus
 
 ## Summary
 The MCP25XXX is a stand-alone CAN controller and includes features like faster throughput, databyte filtering, and support for time-triggered protocols.

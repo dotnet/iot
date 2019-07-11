@@ -16,14 +16,10 @@ namespace Iot.Device.Mcp23xxx
         /// Initializes a new instance of the Mcp23s18 device.
         /// </summary>
         /// <param name="spiDevice">The SPI device used for communication.</param>
-        /// <param name="reset">
-        /// The output pin number that is connected to the hardware reset, if any. If specified the device
-        /// will start in a disabled state.
+        /// <param name="reset">The output pin number that is connected to the hardware reset, if any. If specified the device will start in a disabled state.</param>
         /// <param name="interruptA">The input pin number that is connected to the interrupt for Port A (INTA), if any.</param>
         /// <param name="interruptB">The input pin number that is connected to the interrupt for Port B (INTB), if any.</param>
-        /// <param name="masterController">
-        /// The controller for the reset and interrupt pins. If not specified, the default controller will be used.
-        /// </param>
+        /// <param name="masterController">The controller for the reset and interrupt pins. If not specified, the default controller will be used.</param>
         public Mcp23s18(SpiDevice spiDevice, int reset = -1, int interruptA = -1, int interruptB = -1, IGpioController masterController = null)
             : base(new SpiAdapter(spiDevice, 0x20), reset, interruptA, interruptB, masterController)
         {

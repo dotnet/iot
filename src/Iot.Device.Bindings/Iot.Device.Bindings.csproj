@@ -6,8 +6,9 @@
     <EnableDefaultItems>false</EnableDefaultItems>
     <IsPackable>true</IsPackable>
     <DeviceRoot>$(MSBuildThisFileDirectory)../devices/</DeviceRoot>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackageRefAssembly</TargetsForTfmSpecificContentInPackage>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackageRefAssemblyAndDocXml</TargetsForTfmSpecificContentInPackage>
     <LangVersion>8</LangVersion>
     <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
@@ -26,9 +27,12 @@
     </ProjectReference>
   </ItemGroup>
 
-  <Target Name="PackageRefAssembly">
+  <Target Name="PackageRefAssemblyAndDocXml">
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(TargetRefPath)">
+        <PackagePath>ref/$(TargetFramework)</PackagePath>
+      </TfmSpecificPackageFile>
+      <TfmSpecificPackageFile Include="$(DocumentationFile)">
         <PackagePath>ref/$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
