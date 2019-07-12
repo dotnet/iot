@@ -22,13 +22,13 @@ namespace System.Device.Pwm.Channels
         public Windows10PwmChannel(
             int chip,
             int channel,
-            int frequency,
+            int frequency = 400,
             double dutyCyclePercentage = 0.5)
         {
             // TODO: This is just a placeholder to complete later.
         }
 
-        public override int Frequency => throw new NotImplementedException();
+        public override int Frequency { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public override double DutyCyclePercentage { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 

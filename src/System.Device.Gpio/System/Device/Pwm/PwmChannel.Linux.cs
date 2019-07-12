@@ -17,7 +17,7 @@ namespace System.Device.Pwm
         public static PwmChannel Create(
             int chip,
             int channel,
-            int frequency,
+            int frequency = 400,
             double dutyCyclePercentage = 0.5) =>
                 new Channels.UnixPwmChannel(
                     chip,

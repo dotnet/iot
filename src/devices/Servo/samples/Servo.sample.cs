@@ -3,10 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using Iot.Device.Servo;
-using System.Diagnostics;
-using System.Device.Gpio;
 using System.Threading;
+using Iot.Device.Servo;
 
 class Program
 {

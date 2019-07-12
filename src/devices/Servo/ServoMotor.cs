@@ -18,8 +18,6 @@ namespace Iot.Device.Servo
 {
     public class ServoMotor : IDisposable
     {
-        private int _servoPin;
-        private int _pwmChannel;
         private double _pulseFrequency = 20.0;
         private double _angle;
         double _currentPulseWidth = 0;
@@ -27,7 +25,7 @@ namespace Iot.Device.Servo
         /// <summary>
         /// Are we running on hardware or software PWM? True for hardware, false for sofware
         /// </summary>
-        public bool IsRunningHardwarePwm { get; set; }
+        public bool IsRunningHardwarePwm { get; private set; }
 
         /// <summary>
         /// Servo motor definition.
@@ -37,7 +35,7 @@ namespace Iot.Device.Servo
         /// The duration per angle's degree.
         /// </summary>
         private double _rangePerDegree;
-        private PwmController _pwmController;
+        private PwmChannel _pwmChannel;
 
         /// <summary>
         /// Initialize a ServoMotor class
@@ -46,32 +44,41 @@ namespace Iot.Device.Servo
         /// <param name="pwmChannel">The channel to use in case of a hardware PWM.</param>
         /// <param name="definition">The definition of a ServoMotor</param>
         /// <remarks>Use -1 for pwmChannel to force using software PWM</remarks>
-        public ServoMotor(int pinNumber, int pwmChannel, ServoMotorDefinition definition)
+        public ServoMotor(PwmChannel pwmChannel, ServoMotorDefinition definition)
         {
             this._definition = definition;
             _pulseFrequency = definition.PeriodMicroseconds / 1000.0;
 
             UpdateRange();
-
-            _servoPin = pinNumber;
             this._pwmChannel = pwmChannel;
-            // try hardware PWM first
-            try
+
+            _pwmChannel.DutyCyclePercentage = (1 - (_pulseFrequency - _currentPulseWidth) / _pulseFrequency) * 100;
+            _pwmChannel.Start();
+
+        }
+
+        public ServoMotor(int pinNumber, ServoMotorDefinition definition)
+            : this(CreatePwmChannel(pinNumber, 0, 0, definition, false), definition)
+        {
+            IsRunningHardwarePwm = false;
+        }
+
+        public ServoMotor(int chip, int channel, ServoMotorDefinition definition)
+            : this(CreatePwmChannel(-1, chip, channel, definition, true), definition)
+        {
+            IsRunningHardwarePwm = true;
+        }
+
+        private static PwmChannel CreatePwmChannel(int pinNumber, int chip, int channel, ServoMotorDefinition definition, bool useHardwarePwm)
+        {
+            if (useHardwarePwm)
             {
-                _pwmController = new PwmController();
-                _pwmController.OpenChannel(pinNumber, pwmChannel);
-                IsRunningHardwarePwm = true;
-
+                return PwmChannel.Create(chip, channel, (int)(1000000 / definition.PeriodMicroseconds));
             }
-            catch (Exception ex) when (ex is ArgumentException || ex is IOException)
+            else
             {
-                _pwmController = new PwmController(new SoftPwm(true));
-                _pwmController.OpenChannel(pinNumber, pwmChannel);
-                IsRunningHardwarePwm = false;
+                return new SoftwarePwmChannel(pinNumber, (int)(1000000 / definition.PeriodMicroseconds));
             }
-
-            _pwmController.StartWriting(_servoPin, pwmChannel, 1000 / _pulseFrequency, (1 - (_pulseFrequency - _currentPulseWidth) / _pulseFrequency) * 100);
-
         }
 
         /// <summary>
@@ -81,7 +88,7 @@ namespace Iot.Device.Servo
         public void SetPulse(uint durationMicroSec)
         {
             _currentPulseWidth = durationMicroSec / 1000.0;
-            _pwmController.ChangeDutyCycle(_servoPin, _pwmChannel, (1 - (_pulseFrequency - _currentPulseWidth) / _pulseFrequency) * 100);
+            _pwmChannel.DutyCyclePercentage = (1 - (_pulseFrequency - _currentPulseWidth) / _pulseFrequency) * 100;
         }
 
         /// <summary>
@@ -95,7 +102,7 @@ namespace Iot.Device.Servo
             _definition.PeriodMicroseconds = periodMicroSec;
             _pulseFrequency = periodMicroSec / 1000.0;
             _currentPulseWidth = durationMicroSec / 1000.0;
-            _pwmController.ChangeDutyCycle(_servoPin, _pwmChannel, (1 - (_pulseFrequency - _currentPulseWidth) / _pulseFrequency) * 100);
+            _pwmChannel.DutyCyclePercentage = (1 - (_pulseFrequency - _currentPulseWidth) / _pulseFrequency) * 100;
         }
 
         /// <summary>
@@ -135,7 +142,7 @@ namespace Iot.Device.Servo
         {
             double duration = (_definition.MinimumDurationMicroseconds + _rangePerDegree * Angle) / 1000.0;
             _currentPulseWidth = duration;
-            _pwmController.ChangeDutyCycle(_servoPin, _pwmChannel, (1 - (_pulseFrequency - _currentPulseWidth) / _pulseFrequency) * 100);
+            _pwmChannel.DutyCyclePercentage = (1 - (_pulseFrequency - _currentPulseWidth) / _pulseFrequency) * 100;
         }
 
         /// <summary>
@@ -149,8 +156,8 @@ namespace Iot.Device.Servo
 
         public void Dispose()
         {
-            _pwmController.StopWriting(_servoPin, _pwmChannel);
-            _pwmController.CloseChannel(_servoPin, _pwmChannel);
+            _pwmChannel?.Dispose();
+            _pwmChannel = null;
         }
 
         /// <summary>

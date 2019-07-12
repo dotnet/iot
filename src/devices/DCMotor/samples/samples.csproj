@@ -9,7 +9,7 @@
     <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <!-- Normally you will use following package reference instead  -->
     <!-- <PackageReference Include="IoT.Device.Bindings" Version="$(IotDeviceBindingsPackageVersion)" /> -->
-    <ProjectReference Include="..\..\SoftPwm\SoftPwm.csproj" />
+    <ProjectReference Include="..\..\SoftPwm\SoftwarePwm.csproj" />
     <ProjectReference Include="..\DCMotor.csproj" />
   </ItemGroup>
 

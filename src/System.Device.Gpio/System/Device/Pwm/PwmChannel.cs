@@ -12,7 +12,7 @@ namespace System.Device.Pwm
         /// <summary>
         /// The frequency in hertz.
         /// </summary>
-        public abstract int Frequency { get; }
+        public abstract int Frequency { get; set; }
 
         /// <summary>
         /// The duty cycle percentage represented as a value between 0.0 and 1.0.

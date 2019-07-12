@@ -29,7 +29,7 @@ namespace System.Device.Pwm.Channels
         public UnixPwmChannel(
             int chip,
             int channel,
-            int frequency,
+            int frequency = 400,
             double dutyCyclePercentage = 0.5)
         {
             _chipPath = $"/sys/class/pwm/pwmchip{_chip}";
@@ -47,7 +47,17 @@ namespace System.Device.Pwm.Channels
         /// <summary>
         /// The frequency in hertz.
         /// </summary>
-        public override int Frequency =>_frequency;
+        public override int Frequency
+        {
+            get
+            {
+                return _frequency;
+            }
+            set
+            {
+                SetFrequency(value);
+            }
+        }
 
         /// <summary>
         /// The duty cycle percentage represented as a value between 0.0 and 1.0.
