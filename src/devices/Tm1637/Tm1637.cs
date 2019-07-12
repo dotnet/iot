@@ -7,6 +7,7 @@ using System.Device;
 using System.Device.Gpio;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Iot.Device.Tm1637
@@ -17,8 +18,6 @@ namespace Iot.Device.Tm1637
         /// The number of segments that the TM1637 can handle
         /// </summary>
         public byte MaxSegments => 6;
-        // Used for the space or to display blank on a segment
-        private const int Nothing = 16;
         // According to the doc, the clock pulse width minimum is 400 ns
         // And waiting time between clk up and down is 1 µs
         private const byte ClockWidthMicroseconds = 1;
@@ -34,14 +33,6 @@ namespace Iot.Device.Tm1637
         private byte[] _lastDisplay = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         private bool _secrrenOn;
 
-        // All numbers 0~9, plus letters "A","b","C","d","E","F", nothing/space and "-"
-        // Prebuild characters
-        private static byte[] _displayMatrix = {0x3f, 0x06, 0x5b, 0x4f,
-                            0x66, 0x6d, 0x7d, 0x07,
-                            0x7f, 0x6f, 0x77, 0x7c,
-                            0x39, 0x5e, 0x79, 0x71,
-                            0x00, 0x40};
-
         /// <summary>
         /// Initialize a TM1637
         /// </summary>
@@ -56,7 +47,6 @@ namespace Iot.Device.Tm1637
             _controller.OpenPin(_pinClk, PinMode.Output);
             _controller.OpenPin(_pinDio, PinMode.Output);
             _brightness = 7;
-
         }
 
         /// <summary>
@@ -197,7 +187,7 @@ namespace Iot.Device.Tm1637
         /// Representation of the number 0 so lighting segments a, b, c, d, e and F is then 0x3f
         /// </summary>
         /// <param name="rawData">The raw data array to display, size of the array has to be 6 maximum</param>
-        public void Display(ReadOnlySpan<byte> rawData)
+        private void Display(ReadOnlySpan<byte> rawData)
         {
             if (rawData.Length > MaxSegments)
                 throw new ArgumentException($"Maximum number of segments for TM1637 is {MaxSegments}");
@@ -209,7 +199,7 @@ namespace Iot.Device.Tm1637
                 toTransfer[_segmentOrder[i]] = rawData[i];
 
             for (int j = rawData.Length; j < MaxSegments; j++)
-                toTransfer[_segmentOrder[j]] = _displayMatrix[Nothing];
+                toTransfer[_segmentOrder[j]] = (byte)SegmentDisplay.Nothing;
             _lastDisplay = toTransfer;
 
             StartTransmission();
@@ -232,15 +222,14 @@ namespace Iot.Device.Tm1637
 
         /// <summary>
         /// Displays a series of prebuild characters including the dot or not
+        /// You can build your won characters with the primitives like Bottom, Top, Dot
         /// </summary>
-        /// <param name="character">The Character to display</param>
-        public void Display(Character[] character)
+        /// <param name="rawData">The Character to display</param>
+        public void Display(ReadOnlySpan<SegmentDisplay> rawData)
         {
-            Span<byte> segData = stackalloc byte[character.Length];
-            for (int i = 0; i < segData.Length; i++)
-                segData[i] = Encode((byte)character[i].Char, character[i].Dot);
-            Display(segData);
+            Display(MemoryMarshal.AsBytes(rawData));
         }
+
 
         /// <summary>
         /// Displays a raw data at a specific segment address from 0 to 6
@@ -257,15 +246,15 @@ namespace Iot.Device.Tm1637
         /// Representation of the number 0 so lighting segments a, b, c, d, e and F is then 0x3f
         /// </summary>
         /// <param name="segmentAddress">The segment address from 0 to 6</param>
-        /// <param name="rawData">The raw data to display</param>
-        public void Display(byte segmentAddress, byte rawData)
+        /// <param name="rawData">The rsegemnets to display</param>
+        public void Display(byte segmentAddress, SegmentDisplay rawData)
         {
             if (segmentAddress > MaxSegments)
                 throw new ArgumentException($"Maximum number of segments for TM1637 is {MaxSegments}");
 
             // Recreate the buffer in correct order
-            _lastDisplay[_segmentOrder[segmentAddress]] = rawData;
-            DisplayRaw(_segmentOrder[segmentAddress], rawData);
+            _lastDisplay[_segmentOrder[segmentAddress]] = (byte)rawData;
+            DisplayRaw(_segmentOrder[segmentAddress], (byte)rawData);
         }
 
         private void DisplayRaw(byte segmentAddress, byte rawData)
@@ -287,17 +276,6 @@ namespace Iot.Device.Tm1637
         }
 
         /// <summary>
-        /// Displays a prebuild characters including the dot or not
-        /// </summary>
-        /// <param name="segmentAddress">The segment address from 0 to 6</param>
-        /// <param name="charecter">The Character to display</param>
-        public void Display(byte segmentAddress, Character charecter)
-        {
-            byte data = Encode((byte)charecter.Char, charecter.Dot);
-            Display(segmentAddress, data);
-        }
-
-        /// <summary>
         /// Clear the display
         /// </summary>
         public void ClearDisplay()
@@ -305,21 +283,14 @@ namespace Iot.Device.Tm1637
             // 6 segments with nothing/space displayed
             Span<byte> clearDisplay = stackalloc byte[]
             {
-                _displayMatrix[Nothing],
-                _displayMatrix[Nothing],
-                _displayMatrix[Nothing],
-                _displayMatrix[Nothing],
-                _displayMatrix[Nothing],
-                _displayMatrix[Nothing]
+                (byte)SegmentDisplay.Nothing,
+                (byte)SegmentDisplay.Nothing,
+                (byte)SegmentDisplay.Nothing,
+                (byte)SegmentDisplay.Nothing,
+                (byte)SegmentDisplay.Nothing,
+                (byte)SegmentDisplay.Nothing,
             };
             Display(clearDisplay);
-        }
-
-        private byte Encode(byte data, bool dot)
-        {
-            data = _displayMatrix[data];
-            data += dot ? (byte)0x80 : (byte)0x00;
-            return data;
         }
 
         /// <summary>
