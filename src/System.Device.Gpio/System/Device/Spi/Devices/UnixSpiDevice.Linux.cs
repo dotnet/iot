@@ -20,7 +20,7 @@ namespace System.Device.Spi
         private static readonly object s_initializationLock = new object();
 
         /// <summary>
-        /// Initializes new instance of UnixSpiDevice that will use the specified settings to communicate with the SPI device.
+        /// Initializes a new instance of the <see cref="UnixSpiDevice"/> class that will use the specified settings to communicate with the SPI device.
         /// </summary>
         /// <param name="settings">
         /// The connection settings of a device on a SPI bus.

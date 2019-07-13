@@ -19,7 +19,7 @@ namespace System.Device.I2c
         private static readonly object s_initializationLock = new object();
 
         /// <summary>
-        /// Initializes new instance of UnixI2cDevice that will use the specified settings to communicate with the I2C device.
+        /// Initializes a new instance of the <see cref="UnixI2cDevice"/> class that will use the specified settings to communicate with the I2C device.
         /// </summary>
         /// <param name="settings">
         /// The connection settings of a device on an I2C bus.
