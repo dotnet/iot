@@ -21,7 +21,7 @@ namespace Iot.Device.Tm1637
     /// 
     /// </summary>
     [Flags]
-    public enum SegmentDisplay : byte
+    public enum Character : byte
     {
         Nothing = 0b0000_0000,
         /// <summary>
@@ -59,43 +59,43 @@ namespace Iot.Device.Tm1637
         /// <summary>
         /// Character 0
         /// </summary>
-        Char0 = SegmentTop | SegmentTopRight | SegmentBottomRight | SegmentBottom | SegmentBottomLeft | SegmentTopLeft,
+        Digit0 = SegmentTop | SegmentTopRight | SegmentBottomRight | SegmentBottom | SegmentBottomLeft | SegmentTopLeft,
         /// <summary>
         /// Character 1
         /// </summary>
-        Char1 = SegmentTopRight | SegmentBottomRight,
+        Digit1 = SegmentTopRight | SegmentBottomRight,
         /// <summary>
         /// Character 2
         /// </summary>
-        Char2 = SegmentTop | SegmentTopRight | SegmentMiddle | SegmentBottomLeft | SegmentBottom,
+        Digit2 = SegmentTop | SegmentTopRight | SegmentMiddle | SegmentBottomLeft | SegmentBottom,
         /// <summary>
         /// Character 3
         /// </summary>
-        Char3 = SegmentTop | SegmentTopRight | SegmentMiddle | SegmentBottomRight | SegmentBottom,
+        Digit3 = SegmentTop | SegmentTopRight | SegmentMiddle | SegmentBottomRight | SegmentBottom,
         /// <summary>
         /// Character 4
         /// </summary>
-        Char4 = SegmentTopLeft | SegmentMiddle | SegmentTopRight | SegmentBottomRight,
+        Digit4 = SegmentTopLeft | SegmentMiddle | SegmentTopRight | SegmentBottomRight,
         /// <summary>
         /// Character 5
         /// </summary>
-        Char5 = SegmentTop | SegmentTopLeft | SegmentMiddle | SegmentBottomRight | SegmentBottom,
+        Digit5 = SegmentTop | SegmentTopLeft | SegmentMiddle | SegmentBottomRight | SegmentBottom,
         /// <summary>
         /// Character 6
         /// </summary>
-        Char6 = SegmentTop | SegmentTopLeft | SegmentMiddle | SegmentBottomRight | SegmentBottom | SegmentBottomLeft,
+        Digit6 = SegmentTop | SegmentTopLeft | SegmentMiddle | SegmentBottomRight | SegmentBottom | SegmentBottomLeft,
         /// <summary>
         /// Character 7
         /// </summary>
-        Char7 = SegmentTop | SegmentTopRight | SegmentBottomRight,
+        Digit7 = SegmentTop | SegmentTopRight | SegmentBottomRight,
         /// <summary>
         /// Character 8
         /// </summary>
-        Char8 = SegmentTop | SegmentTopLeft | SegmentTopRight | SegmentMiddle | SegmentBottom | SegmentBottomLeft | SegmentBottomRight,
+        Digit8 = SegmentTop | SegmentTopLeft | SegmentTopRight | SegmentMiddle | SegmentBottom | SegmentBottomLeft | SegmentBottomRight,
         /// <summary>
         /// Character 9
         /// </summary>
-        Char9 = SegmentTop | SegmentTopLeft | SegmentTopRight | SegmentMiddle | SegmentBottom | SegmentBottomRight,
+        Digit9 = SegmentTop | SegmentTopLeft | SegmentTopRight | SegmentMiddle | SegmentBottom | SegmentBottomRight,
         /// <summary>
         /// Character A
         /// </summary>
@@ -123,7 +123,6 @@ namespace Iot.Device.Tm1637
         /// <summary>
         /// Character -
         /// </summary>
-        Minus = SegmentMiddle,
-        
+        Minus = SegmentMiddle,       
     }
 }

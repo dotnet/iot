@@ -31,7 +31,7 @@ namespace Iot.Device.Tm1637
         // To store what has been displayed last. Used when change on brightness or
         // screen on/off is used
         private byte[] _lastDisplay = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-        private bool _secrrenOn;
+        private bool _screenOn;
 
         /// <summary>
         /// Initialize a TM1637
@@ -70,7 +70,7 @@ namespace Iot.Device.Tm1637
                 }
                 if (!allExist)
                     throw new ArgumentException($"{nameof(SegmentOrder)} needs to have all existing segments from 0 to 5");
-                _segmentOrder = value;
+                value.CopyTo(_segmentOrder, 0);
             }
         }
 
@@ -79,11 +79,11 @@ namespace Iot.Device.Tm1637
         /// </summary>
         public bool ScreenOn
         {
-            get { return _secrrenOn; }
+            get { return _screenOn; }
 
             set
             {
-                _secrrenOn = value;
+                _screenOn = value;
                 DisplayRaw(0, _lastDisplay[0]);
             }
         }
@@ -145,11 +145,7 @@ namespace Iot.Device.Tm1637
             _controller.Write(_pinClk, PinValue.Low);
             DelayHelper.DelayMicroseconds(ClockWidthMicroseconds, true);
 
-            // Wait 50 Microseconds
-            //DelayHelper.DelayMicroseconds(50, true);
             _controller.SetPinMode(_pinDio, PinMode.Output);
-            //DelayHelper.DelayMicroseconds(50, true);
-
             return ack;
         }
 
@@ -159,8 +155,6 @@ namespace Iot.Device.Tm1637
             _controller.Write(_pinDio, PinValue.High);
             DelayHelper.DelayMicroseconds(ClockWidthMicroseconds, true);
             _controller.Write(_pinDio, PinValue.Low);
-            //_controller.Write(_pinClk, PinValue.Low);
-            //DelayHelper.DelayMicroseconds(5, true);
         }
 
         private void StopTransmission()
@@ -199,7 +193,7 @@ namespace Iot.Device.Tm1637
                 toTransfer[_segmentOrder[i]] = rawData[i];
 
             for (int j = rawData.Length; j < MaxSegments; j++)
-                toTransfer[_segmentOrder[j]] = (byte)SegmentDisplay.Nothing;
+                toTransfer[_segmentOrder[j]] = (byte)Character.Nothing;
             _lastDisplay = toTransfer;
 
             StartTransmission();
@@ -225,7 +219,7 @@ namespace Iot.Device.Tm1637
         /// You can build your won characters with the primitives like Bottom, Top, Dot
         /// </summary>
         /// <param name="rawData">The Character to display</param>
-        public void Display(ReadOnlySpan<SegmentDisplay> rawData)
+        public void Display(ReadOnlySpan<Character> rawData)
         {
             Display(MemoryMarshal.AsBytes(rawData));
         }
@@ -247,7 +241,7 @@ namespace Iot.Device.Tm1637
         /// </summary>
         /// <param name="segmentAddress">The segment address from 0 to 6</param>
         /// <param name="rawData">The rsegemnets to display</param>
-        public void Display(byte segmentAddress, SegmentDisplay rawData)
+        public void Display(byte segmentAddress, Character rawData)
         {
             if (segmentAddress > MaxSegments)
                 throw new ArgumentException($"Maximum number of segments for TM1637 is {MaxSegments}");
@@ -283,12 +277,12 @@ namespace Iot.Device.Tm1637
             // 6 segments with nothing/space displayed
             Span<byte> clearDisplay = stackalloc byte[]
             {
-                (byte)SegmentDisplay.Nothing,
-                (byte)SegmentDisplay.Nothing,
-                (byte)SegmentDisplay.Nothing,
-                (byte)SegmentDisplay.Nothing,
-                (byte)SegmentDisplay.Nothing,
-                (byte)SegmentDisplay.Nothing,
+                (byte)Character.Nothing,
+                (byte)Character.Nothing,
+                (byte)Character.Nothing,
+                (byte)Character.Nothing,
+                (byte)Character.Nothing,
+                (byte)Character.Nothing,
             };
             Display(clearDisplay);
         }
