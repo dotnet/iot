@@ -2,16 +2,22 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Threading;
+using Windows.Devices.Enumeration;
+using Windows.Security.ExchangeActiveSyncProvisioning;
+using WinPwm = Windows.Devices.Pwm;
 
 namespace System.Device.Pwm.Channels
 {
     /// <summary>
     /// Represents a PWM channel running on Windows 10 IoT.
     /// </summary>
-    internal class Windows10PwmChannel : PwmChannel
+    internal partial class Windows10PwmChannel : PwmChannel
     {
+        private WinPwm.PwmController _winController;
+        private WinPwm.PwmPin _winPin;
+        private int _frequency;
+        private double _dutyCyclePercentage;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Windows10PwmChannel"/> class.
         /// </summary>
@@ -25,21 +31,95 @@ namespace System.Device.Pwm.Channels
             int frequency = 400,
             double dutyCyclePercentage = 0.5)
         {
-            // TODO: This is just a placeholder to complete later.
+            // When running on Hummingboard we require to use the default chip.
+            var deviceInfo = new EasClientDeviceInformation();
+            bool useDefaultChip = false;
+            if (deviceInfo.SystemProductName.IndexOf("Hummingboard", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                useDefaultChip = true;
+            }
+
+            // Open the Windows PWM controller for the specified PWM chip.
+            string deviceSelector = useDefaultChip ? WinPwm.PwmController.GetDeviceSelector() : WinPwm.PwmController.GetDeviceSelector($"PWM{chip}");
+
+            DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
+            if (deviceInformationCollection.Count == 0)
+            {
+                throw new ArgumentException($"No PWM device exists for PWM chip at index {chip}.", $"{nameof(chip)}");
+            }
+
+            string deviceId = deviceInformationCollection[0].Id;
+            _winController = WinPwm.PwmController.FromIdAsync(deviceId).WaitForCompletion();
+
+            _winPin = _winController.OpenPin(channel);
+            if (_winPin == null)
+            {
+                throw new ArgumentOutOfRangeException($"The PWM chip is unable to open a channel at index {channel}.", nameof(channel));
+            }
+
+            Frequency = frequency;
+            DutyCyclePercentage = dutyCyclePercentage;
         }
 
-        public override int Frequency { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        /// <summary>
+        /// The frequency in hertz.
+        /// </summary>
+        public override int Frequency
+        {
+            get => _frequency;
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "Value must note be negative.");
+                }
+                _winController.SetDesiredFrequency(value);
+                _frequency = value;
+            }
+        }
 
-        public override double DutyCyclePercentage { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        /// <summary>
+        /// The duty cycle percentage represented as a value between 0.0 and 1.0.
+        /// </summary>
+        public override double DutyCyclePercentage
+        {
+            get => _dutyCyclePercentage;
+            set
+            {
+                if (value < 0.0 || value > 1.0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "Value must be between 0.0 and 1.0.");
+                }
+                _winPin.SetActiveDutyCyclePercentage(value);
+                _dutyCyclePercentage = value;
+            }
+        }
 
+        /// <summary>
+        /// Starts the PWM channel.
+        /// </summary>
         public override void Start()
         {
-            throw new NotImplementedException();
+            _winPin.Start();
+            // This extra call is required to generate PWM output - remove when the underlying issue is fixed. See issue #109
+            DutyCyclePercentage = _dutyCyclePercentage;
         }
 
+        /// <summary>
+        /// Stops the PWM channel.
+        /// </summary>
         public override void Stop()
         {
-            throw new NotImplementedException();
+            _winPin.Stop();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            Stop();
+            _winPin?.Dispose();
+            _winPin = null;
+            _winController = null;
+            base.Dispose(disposing);
         }
     }
 }
