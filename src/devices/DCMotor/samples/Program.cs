@@ -7,6 +7,7 @@ using System.Device.Gpio;
 using System.Device.Pwm;
 using System.Device.Pwm.Drivers;
 using System.Diagnostics;
+using System.Threading;
 using Iot.Device.DCMotor;
 
 namespace samples
@@ -18,8 +19,8 @@ namespace samples
             // this will use software PWM on one of the pins
             return new DCMotorSettings()
             {
-                Pin0 = 24,
-                Pin1 = 23, // for 1 pin mode don't set this and connect your pin to the ground
+                Pin0 = 5,
+                Pin1 = 6, // for 1 pin mode don't set this and connect your pin to the ground
                 UseEnableAsPwm = false,
             };
         }
@@ -28,38 +29,62 @@ namespace samples
         {
             return new DCMotorSettings()
             {
-                Pin0 = 23,
+                Pin0 = 5,
                 UseEnableAsPwm = false,
-                PwmController = new PwmController(new SoftPwm()),
-                PwmChip = 24,
-                // PwmChannel = 0, // use for hardware PWM
-                PwmFrequency = 50, // optional, defaults to 50
+                PwmChannel = new SoftwarePwmChannel(6, 50),
             };
         }
 
-        static DCMotorSettings ThreePinMode()
+        static DCMotorSettings ThreePinModeSoftware()
         {
             return new DCMotorSettings()
             {
-                Pin0 = 27,
-                Pin1 = 22,
-                PwmController = new PwmController(new SoftPwm()),
-                PwmChip = 17,
-                //PwmChannel = 1, // use for hardware PWM
-                PwmFrequency = 50, // optional, defaults to 50
+                Pin0 = 5,
+                Pin1 = 6,
+                PwmChannel = new SoftwarePwmChannel(23, 50),
+            };
+        }
+
+        static DCMotorSettings ThreePinModeHardware()
+        {
+            return new DCMotorSettings()
+            {
+                Pin0 = 5,
+                Pin1 = 6,
+                PwmChannel = PwmChannel.Create(0, 0, 50),
             };
         }
 
         static void Main(string[] args)
         {
             const double Period = 10.0;
-            DCMotorSettings settings = ThreePinMode();
+            DCMotorSettings settings = ThreePinModeHardware();
             Stopwatch sw = Stopwatch.StartNew();
             using (DCMotor motor = DCMotor.Create(settings))
             {
-                double time = sw.ElapsedMilliseconds / 1000.0;
-                // Note: range is from -1 .. 1 (for 1 pin setup 0 .. 1)
-                motor.Speed = Math.Sin(2.0 * Math.PI * time / Period);
+                bool done = false;
+                Console.CancelKeyPress += (o, e) =>
+                {
+                    done = true;
+                    e.Cancel = true;
+                };
+
+                string lastSpeedDisp = null;
+                while (!done)
+                {
+                    double time = sw.ElapsedMilliseconds / 1000.0;
+
+                    // Note: range is from -1 .. 1 (for 1 pin setup 0 .. 1)
+                    motor.Speed = Math.Sin(2.0 * Math.PI * time / Period);
+                    string disp = $"Speed = {motor.Speed:0.00}";
+                    if (disp != lastSpeedDisp)
+                    {
+                        lastSpeedDisp = disp;
+                        Console.WriteLine(disp);
+                    }
+
+                    Thread.Sleep(1);
+                }
             }
         }
     }

@@ -16,12 +16,11 @@ class Program
         using (var pwmChannel = new SoftwarePwmChannel(17, 200, 0))
         {
             pwmChannel.Start();
-            for (int i = 0; i < 100; i++)
+            for (double fill = 0.0; fill <= 1.0; fill += 0.01)
             {
-                pwmChannel.DutyCyclePercentage = i;
+                pwmChannel.DutyCyclePercentage = fill;
                 Thread.Sleep(500);
             }
         }
-
     }
 }

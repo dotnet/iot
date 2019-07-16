@@ -14,10 +14,10 @@ namespace Iot.Device.Buzzer
     /// </summary>
     public class Buzzer : IDisposable
     {
-        private readonly PwmChannel _pwmChannel;
+        private PwmChannel _pwmChannel;
 
         public Buzzer(int pinNumber)
-            : this(CreatePwmChannel(pinNumber, -1, -1, false)) { }
+            : this(new SoftwarePwmChannel(pinNumber)) { }
 
         /// <summary>
         /// Create Buzzer class instance with output on specified pin with specified channel.
@@ -25,7 +25,7 @@ namespace Iot.Device.Buzzer
         /// <param name="chip">The GPIO pin number in case of a software PWM. The chip in case of a hardware PWM.</param>
         /// <param name="channel">The channel to use in case of a hardware PWM.</param>
         public Buzzer(int chip, int channel)
-            : this(CreatePwmChannel(-1, chip, channel, true)) { }
+            : this(PwmChannel.Create(chip, channel)) { }
 
         /// <summary>
         /// Create Buzzer class instance with output on specified pin with specified channel using passed PWM controller.
@@ -34,18 +34,6 @@ namespace Iot.Device.Buzzer
         public Buzzer(PwmChannel pwmChannel)
         {
             _pwmChannel = pwmChannel;
-        }
-
-        private static PwmChannel CreatePwmChannel(int pinNumber, int chip, int channel, bool useHardwarePwm)
-        {
-            if (useHardwarePwm)
-            {
-                return PwmChannel.Create(chip, channel);
-            }
-            else
-            {
-                return new SoftwarePwmChannel(pinNumber);
-            }
         }
 
         /// <summary>

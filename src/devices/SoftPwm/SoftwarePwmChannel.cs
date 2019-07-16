@@ -54,9 +54,9 @@ namespace System.Device.Pwm.Drivers
             }
         }
 
-        public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCyclePercentage = 0.5)
+        public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCyclePercentage = 0.5, bool precisionTimer = false, GpioController controller = null)
         {
-            _controller = new GpioController();
+            _controller = controller ?? new GpioController();
             if (_controller == null)
             {
                 Debug.WriteLine("GPIO does not exist on the current system.");
@@ -74,20 +74,18 @@ namespace System.Device.Pwm.Drivers
             DutyCyclePercentage = dutyCyclePercentage;
         }
 
-        public SoftwarePwmChannel(int pinNumber, int frequency, double dutyCyclePercentage, bool preceisionTimer) : this(pinNumber, frequency, dutyCyclePercentage)
-        {
-            _precisionPWM = preceisionTimer;
-        }
-
         private void UpdateRange()
         {
-            _currentPulseWidth = _percentage * _pulseFrequency / 100;
+            _currentPulseWidth = _percentage * _pulseFrequency;
         }
 
         private void RunSoftPWM()
         {
             if (_precisionPWM)
+            {
                 Thread.CurrentThread.Priority = ThreadPriority.Highest;
+            }
+
             while (_runThread)
             {
                 // Write the pin high for the appropriate length of time
@@ -98,17 +96,28 @@ namespace System.Device.Pwm.Drivers
                         _controller.Write(_servoPin, PinValue.High);
                         _isStopped = false;
                     }
+
                     // Use the wait helper method to wait for the length of the pulse
                     if (_precisionPWM)
+                    {
                         Wait(_currentPulseWidth);
+                    }
                     else
+                    {
                         Task.Delay(TimeSpan.FromMilliseconds(_currentPulseWidth)).Wait();
+                    }
+
                     // The pulse if over and so set the pin to low and then wait until it's time for the next pulse
                     _controller.Write(_servoPin, PinValue.Low);
+
                     if (_precisionPWM)
+                    {
                         Wait(_pulseFrequency - _currentPulseWidth);
+                    }
                     else
+                    {
                         Task.Delay(TimeSpan.FromMilliseconds(_pulseFrequency - _currentPulseWidth)).Wait();
+                    }
                 }
                 else
                 {
@@ -153,8 +162,8 @@ namespace System.Device.Pwm.Drivers
         {
             _isRunning = false;
             _runThread = false;
-            while (_runningThread.ThreadState == Threading.ThreadState.Running)
-                Thread.Sleep(100);
+            _runningThread?.Join();
+            _runningThread = null;
             _controller?.Dispose();
             _controller = null;
             base.Dispose(disposing);

@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
-    <!-- Normally you will use following package reference instead  -->
-    <!-- <PackageReference Include="IoT.Device.Bindings" Version="$(IotDeviceBindingsPackageVersion)" /> -->
+    <ProjectReference Include="..\..\..\System.Device.Gpio/System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
     <ProjectReference Include="..\..\SoftPwm\SoftwarePwm.csproj" />
     <ProjectReference Include="..\DCMotor.csproj" />
   </ItemGroup>
