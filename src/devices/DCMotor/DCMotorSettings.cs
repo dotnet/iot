@@ -40,25 +40,10 @@ namespace Iot.Device.DCMotor
         public GpioController Controller { get; set; }
 
         /// <summary>
-        /// PwmController class related to enable pin (3-pin setting).
+        /// PwmChannel class related to enable pin (3-pin setting).
         /// For 2- or 1-pin mode this allows changing PWM settings
         /// instead of automatically picked SoftPwm.
         /// </summary>
-        public PwmController PwmController { get; set; }
-
-        /// <summary>
-        /// PWM chip number. For SoftPwm this will be a pin number.
-        /// </summary>
-        public int PwmChip { get; set; } = 0;
-
-        /// <summary>
-        /// PWM channel. For SoftPwm this value is ignored.
-        /// </summary>
-        public int PwmChannel { get; set; } = 0;
-
-        /// <summary>
-        /// PWM frequency. This value will default to 50Hz if not set.
-        /// </summary>
-        public double PwmFrequency { get; set; } = 50;
+        public PwmChannel PwmChannel { get; set; }
     }
 }
