@@ -33,27 +33,49 @@ namespace System.Device.Pwm.Drivers
         private GpioController _controller;
         private bool _runThread = true;
 
+        /// <summary>
+        /// The frequency in hertz.
+        /// </summary>
         public override int Frequency
         {
             get => _frequency;
             set
             {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "Value must note be negative.");
+                }
                 _frequency = value;
                 _pulseFrequency = (_frequency > 0) ? 1 / _frequency * 1000.0 : 0.0;
                 UpdateRange();
             }
         }
 
+        /// <summary>
+        /// The duty cycle percentage represented as a value between 0.0 and 1.0.
+        /// </summary>
         public override double DutyCyclePercentage
         {
             get => _percentage;
             set
             {
+                if (value < 0.0 || value > 1.0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "Value must be between 0.0 and 1.0.");
+                }
                 _percentage = value;
                 UpdateRange();
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SoftwarePwmChannel"/> class.
+        /// </summary>
+        /// <param name="pinNumber">The GPIO pin number to be used</param>
+        /// <param name="frequency">The frequency in hertz. Defaults to 400</param>
+        /// <param name="dutyCyclePercentage">The duty cycle percentage represented as a value between 0.0 and 1.0</param>
+        /// <param name="precisionTimer"><see langword="true"/> to use a precision timer. <see langword="false"/> otherwise</param>
+        /// <param name="controller">The <see cref="GpioController"/> to which <paramref name="pinNumber"/> belongs to. Null defaults to board GpioController</param>
         public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCyclePercentage = 0.5, bool precisionTimer = false, GpioController controller = null)
         {
             _controller = controller ?? new GpioController();
@@ -147,12 +169,17 @@ namespace System.Device.Pwm.Drivers
                 //nothing than waiting
             }
         }
-
+        /// <summary>
+        /// Starts the PWM channel.
+        /// </summary>
         public override void Start()
         {
             _isRunning = true;
         }
 
+        /// <summary>
+        /// Stops the PWM channel.
+        /// </summary>
         public override void Stop()
         {
             _isRunning = false;

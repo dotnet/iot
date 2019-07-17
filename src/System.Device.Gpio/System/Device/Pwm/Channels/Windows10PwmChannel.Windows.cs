@@ -45,7 +45,7 @@ namespace System.Device.Pwm.Channels
             DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
             if (deviceInformationCollection.Count == 0)
             {
-                throw new ArgumentException($"No PWM device exists for PWM chip at index {chip}.", $"{nameof(chip)}");
+                throw new ArgumentException($"No PWM device exists for PWM chip at index {chip}.", nameof(chip));
             }
 
             string deviceId = deviceInformationCollection[0].Id;
@@ -71,7 +71,7 @@ namespace System.Device.Pwm.Channels
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, "Value must note be negative.");
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "Value must not be negative.");
                 }
                 _winController.SetDesiredFrequency(value);
                 _frequency = value;

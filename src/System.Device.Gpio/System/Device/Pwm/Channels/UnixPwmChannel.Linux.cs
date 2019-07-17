@@ -38,7 +38,6 @@ namespace System.Device.Pwm.Channels
             _channel = channel;
             Validate();
             Open();
-            //Thread.Sleep(100);  // TODO: Need a better solution to delay for available file.
             SetFrequency(frequency);
             DutyCyclePercentage = dutyCyclePercentage;
         }
@@ -90,6 +89,11 @@ namespace System.Device.Pwm.Channels
         /// <param name="frequency">The frequency in hertz to set.</param>
         private void SetFrequency(int frequency)
         {
+            if (frequency < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(frequency), frequency, "Value must not be negative.");
+            }
+            
             int periodInNanoSeconds = GetPeriodInNanoSeconds(frequency);
             File.WriteAllText($"{_channelPath}/period", Convert.ToString(periodInNanoSeconds));
             _frequency = frequency;

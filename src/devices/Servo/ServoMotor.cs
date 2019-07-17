@@ -31,6 +31,7 @@ namespace Iot.Device.Servo
         /// Servo motor definition.
         /// </summary>
         private ServoMotorDefinition _definition;
+
         /// <summary>
         /// The duration per angle's degree.
         /// </summary>
@@ -38,30 +39,40 @@ namespace Iot.Device.Servo
         private PwmChannel _pwmChannel;
 
         /// <summary>
-        /// Initialize a ServoMotor class
+        /// Initialize a <see cref="ServoMotor"/> using a specified PwmChannel
         /// </summary>
-        /// <param name="pwmChannel">The PWM channel to use.</param>
-        /// <param name="definition">The definition of a ServoMotor</param>
-        /// <remarks>Use -1 for pwmChannel to force using software PWM</remarks>
+        /// <param name="pwmChannel">The <see cref="PwmChannel"/> to be used to control this servo.</param>
+        /// <param name="definition">The <see cref="ServoMotorDefinition"/> to be used</param>
         public ServoMotor(PwmChannel pwmChannel, ServoMotorDefinition definition)
         {
-            this._definition = definition;
+            _definition = definition;
             _pulseFrequency = definition.PeriodMicroseconds / 1000.0;
 
             UpdateRange();
-            this._pwmChannel = pwmChannel;
+            _pwmChannel = pwmChannel;
 
             _pwmChannel.DutyCyclePercentage = (1 - (_pulseFrequency - _currentPulseWidth) / _pulseFrequency) * 100;
             _pwmChannel.Start();
 
         }
 
+        /// <summary>
+        /// Initialize a <see cref="ServoMotor"/> using <see cref="SoftwarePwmChannel"/> on <paramref name="pinNumber"/>
+        /// </summary>
+        /// <param name="pinNumber">The pin that will be used for the software pwm</param>
+        /// <param name="definition">The <see cref="ServoMotorDefinition"/> to be used</param>
         public ServoMotor(int pinNumber, ServoMotorDefinition definition)
             : this(CreatePwmChannel(pinNumber, 0, 0, definition, false), definition)
         {
             IsRunningHardwarePwm = false;
         }
 
+        /// <summary>
+        /// Initialize a <see cref="ServoMotor"/> using Hardware Pwm on <paramref name="chip"/> and <paramref name="channel"/>
+        /// </summary>
+        /// <param name="chip">The chip number for Hardware Pwm</param>
+        /// <param name="channel">The channel number for Hardware Pwm</param>
+        /// <param name="definition">The <see cref="ServoMotorDefinition"/> to be used</param>
         public ServoMotor(int chip, int channel, ServoMotorDefinition definition)
             : this(CreatePwmChannel(-1, chip, channel, definition, true), definition)
         {

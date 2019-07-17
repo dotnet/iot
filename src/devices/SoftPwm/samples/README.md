@@ -8,7 +8,7 @@ This example shows how to use the software PWM with a Led. Simply connect the Le
 
 ## Code
 
-To initialize the software with frequency of 200 on pin 17 and duty cycle of 50% (optional, duty cycle is value from 0.0 to 1.0 where 0.0 is 0% and 1.0 is 100%), you need to add ```using System.Device.Pwm``` and use following code:
+To initialize the software with frequency of 200 on pin 17 and duty cycle of 50% (optional, duty cycle is value from 0.0 to 1.0 where 0.0 is 0% and 1.0 is 100%), you need to use following code:
 
 ```csharp
 var channel = new SoftwarePwmChannel(17, 200, 0.5);
