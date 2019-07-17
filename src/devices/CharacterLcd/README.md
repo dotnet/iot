@@ -31,7 +31,7 @@ var i2cRgbDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAd
 using (var lcd = new LcdRgb1602(i2cLcdDevice, i2cRgbDevice))
 {
     lcd.Write("Hello World!");
-    lcd.SetBacklightcolor(Color.Azure);
+    lcd.SetBacklightColor(Color.Azure);
 }
 ```
 
