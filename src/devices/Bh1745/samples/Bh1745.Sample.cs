@@ -16,15 +16,15 @@ namespace Iot.Device.Bh1745.Samples
             // bus id on the raspberry pi 3
             const int busId = 1;
 
-			// create device
+            // create device
             var i2cSettings = new I2cConnectionSettings(busId, Bh1745.DefaultI2cAddress);
             var i2cDevice = new UnixI2cDevice(i2cSettings);
             var i2CBh1745 = new Bh1745(i2cDevice);
-			
-			// Init device and wait for first measurement
-			i2CBh1745.Init();
-			Task.Delay(i2CBh1745.MeasurementTime.ToMilliseconds()).Wait();		
-			
+            
+            // Init device and wait for first measurement
+            i2CBh1745.Init();
+            Task.Delay(i2CBh1745.MeasurementTime.ToMilliseconds()).Wait();		
+            
 
             while (true)
             {                
