@@ -40,8 +40,7 @@ namespace Iot.Device.Servo
         /// <summary>
         /// Initialize a ServoMotor class
         /// </summary>
-        /// <param name="pinNumber">The GPIO pin number in case of a software PWM. The chip in case of a hardware PWM</param>
-        /// <param name="pwmChannel">The channel to use in case of a hardware PWM.</param>
+        /// <param name="pwmChannel">The PWM channel to use.</param>
         /// <param name="definition">The definition of a ServoMotor</param>
         /// <remarks>Use -1 for pwmChannel to force using software PWM</remarks>
         public ServoMotor(PwmChannel pwmChannel, ServoMotorDefinition definition)
