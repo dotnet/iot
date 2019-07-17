@@ -23,6 +23,7 @@ Grove LCD RGB Backlight uses two i2c devices:
 - the device to control LCD (address 0x3E)
 - the device to control RGB backlight (address 0x62)
 
+(Make sure the Grove-LCD RGB Backlight is connected to a I2C port. Not the Digital port!)
 Here is a Hello World example of how to consume Grove LCD RGB Backlight binding:
 ```c#
 var i2cLcdDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x3E));
@@ -30,7 +31,7 @@ var i2cRgbDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAd
 using (var lcd = new LcdRgb1602(i2cLcdDevice, i2cRgbDevice))
 {
     lcd.Write("Hello World!");
-    lcd.SetColor(Color.Azure);
+    lcd.SetBacklightcolor(Color.Azure);
 }
 ```
 
