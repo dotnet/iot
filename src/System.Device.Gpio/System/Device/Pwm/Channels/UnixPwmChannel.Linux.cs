@@ -39,7 +39,6 @@ namespace System.Device.Pwm.Channels
             Validate();
             Open();
             //Thread.Sleep(100);  // TODO: Need a better solution to delay for available file.
-            Console.WriteLine("Set Frequency");
             SetFrequency(frequency);
             DutyCyclePercentage = dutyCyclePercentage;
         }
