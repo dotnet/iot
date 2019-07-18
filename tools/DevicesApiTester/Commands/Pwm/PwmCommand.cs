@@ -10,28 +10,16 @@ namespace DeviceApiTester.Commands.Pwm
 {
     public abstract class PwmCommand : DebuggableCommand
     {
-        [Option('d', "driver", HelpText = "The PwmDriver to use: { Windows | Unix }", Required = false, Default = PwmDriverType.Windows)]
-        public PwmDriverType Driver { get; set; }
+        [Option("chip", HelpText = "The PWM chip number.", Required = false, Default = 0)]
+        public int Chip { get; set; }
 
-        [Option("chip", HelpText = "The PWM chip (controller) to use", Required = false, Default = 0)]
-        public int PwmChip { get; set; }
+        [Option("channel", HelpText = "The PWM channel number.", Required = false, Default = 0)]
+        public int Channel { get; set; }
 
-        [Option("channel", HelpText = "The PWM channel (pin) to use", Required = false, Default = 0)]
-        public int PwmChannel { get; set; }
+        [Option('f', "frequency", HelpText = "The frequency in hertz.", Required = false, Default = 400)]
+        public int Frequency { get; set; }
 
-        [Option('c', "dutycycle", HelpText = "The duty cycle for PWM output from 1.0-100.0", Required = false, Default = 50.0)]
-        public double DutyCycle { get; set; }
-
-        [Option('f', "frequency", HelpText = "The frequency in hertz", Required = false, Default = 400.0)]
-        public double Frequency { get; set; }
-
-        protected PwmController CreatePwmController()
-        {
-            PwmDriver pwmDriver = DriverFactory.CreateFromEnum<PwmDriver, PwmDriverType>(this.Driver);
-
-            return pwmDriver != null
-                ? new PwmController(pwmDriver)
-                : new PwmController();
-        }
+        [Option('d', "dutycycle", HelpText = "The duty cycle percentage for PWM output from 0.0 - 1.0.", Required = false, Default = 0.5)]
+        public double DutyCyclePercentage { get; set; }
     }
 }

@@ -3,10 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using Iot.Device.Servo;
-using System.Diagnostics;
-using System.Device.Gpio;
 using System.Threading;
+using Iot.Device.Servo;
 
 class Program
 {
@@ -16,7 +14,7 @@ class Program
         Console.WriteLine("Hello Servo!");
 
         // example of software PWM piloted Servo on GPIO 21
-        ServoMotor servo = new ServoMotor(21, -1, new ServoMotorDefinition(540, 2470, 20000, 100));
+        ServoMotor servo = new ServoMotor(21, new ServoMotorDefinition(540, 2470, 20000, 100));
         // example of hardware PWM piloted Servo on chip 0 channel 0
         // ServoMotor servo = new ServoMotor(0, 0, new ServoMotorDefinition(540, 2470));
         if (servo.IsRunningHardwarePwm)

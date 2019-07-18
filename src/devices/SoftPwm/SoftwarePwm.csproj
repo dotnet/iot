@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="SoftPwm.cs" />
+    <Compile Include="SoftwarePwmChannel.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../../System.Device.Gpio/System.Device.Gpio.csproj">
+      <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
     <None Include="README.md" />
   </ItemGroup>
 

@@ -8,11 +8,12 @@
 
   <ItemGroup>
     <Compile Include="CommunicationProtocol.cs" />
-    <Compile Include="Devices\Dht11Device.cs" />
-    <Compile Include="Devices\Dht22Device.cs" />
-    <Compile Include="Devices\IDhtDevice.cs" />
-    <Compile Include="DhtType.cs" />
-    <Compile Include="DhtSensor.cs" />
+    <Compile Include="Devices\Dht10.cs" />
+    <Compile Include="Devices\Dht11.cs" />
+    <Compile Include="Devices\Dht12.cs" />
+    <Compile Include="Devices\Dht21.cs" />
+    <Compile Include="Devices\Dht22.cs" />
+    <Compile Include="DhtBase.cs" />
     <Compile Include="..\Common\System\Device\DelayHelper.cs" />
   </ItemGroup>
 

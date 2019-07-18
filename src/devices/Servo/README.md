@@ -14,14 +14,14 @@ All servomotors have specific minimum and maximum pulse frequency for their oper
 
 The ```ServoMotor``` class can use either software either hardware PWM. this is done fully transparently by the initialization.
 
-If you want to use the software PWM, you have to specify the GPIO pin you want to use as the first parameter in the constructor. Use the value -1 for the second one. This will force usage of the software PWM as it is not a valid value for hardware PWM.
+If you want to use the software PWM, you have to specify the GPIO pin you want to use as the first parameter in the constructor. 
 
-To use the hardware PWM, make sure you reference correctly the chip and channel you want to use. The ```ServoMotor``` class will always try first to open a hardware PWM then a software PWM. 
+To use the hardware PWM, make sure you reference correctly the chip and channel you want to use.
 
 ```csharp
-// example of software PWM piloted Servo
-ServoMotor servoSoft = new ServoMotor(21, -1, new ServoMotorDefinition(540, 2470));
-// example of hardware PWM piloted Servo
+// example of software PWM piloted Servo using pin 21
+ServoMotor servoSoft = new ServoMotor(21, new ServoMotorDefinition(540, 2470));
+// example of hardware PWM piloted Servo using chip 0 channel 0
 ServoMotor servoHard = new ServoMotor(0, 0, new ServoMotorDefinition(540, 2470));
 ```
 
@@ -60,8 +60,4 @@ servo.SetPulse(2000);
 ```
 
 This will turn the servo motor using a 2 milliseconds pulse.
-
-## Dependencies
-
-This class has a dependency on ```SoftPwm```. Please make sure you add this software PWM in your project.
 
