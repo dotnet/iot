@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../../../System.Device.Gpio/System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../../SoftPwm\SoftwarePwm.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../DCMotor.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -11,11 +11,11 @@
 * SDA - SDA
 * VCC - 5V
 * GND - GND
-  
+
 ## Code
 ```C#
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Max44009.DefaultI2cAddress);
-UnixI2cDevice device = new UnixI2cDevice(settings);
+I2cDevice device = I2cDevice.Create(settings);
 
 // integration time is 100ms
 using (Max44009 sensor = new Max44009(device, IntegrationTime.Time100))

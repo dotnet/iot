@@ -8,7 +8,6 @@ using System;
 using System.Threading;
 using System.Drawing;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 
 namespace GoPiGo3.sample
 {
@@ -28,7 +27,7 @@ namespace GoPiGo3.sample
                 Mode = SpiMode.Mode0,
                 DataBitLength = 8
             };
-            _goPiGo3 = new GoPiGo(new UnixSpiDevice(settings));
+            _goPiGo3 = new GoPiGo(SpiDevice.Create(settings));
             Console.WriteLine("Choose a test by entering the number and press enter:");
             Console.WriteLine("  1. Basic GoPiGo3 info and embedded led test");
             Console.WriteLine("  2. Control left motor from motor right position");

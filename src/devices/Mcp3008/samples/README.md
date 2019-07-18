@@ -14,7 +14,7 @@ You can use the following code to [access the MCP3008 via SPI](Mcp3008.Sample.cs
 var connection = new SpiConnectionSettings(0,0);
 connection.ClockFrequency = 1000000;
 connection.Mode = SpiMode.Mode0;
-var spi = new UnixSpiDevice(connection);
+var spi = SpiDevice.Create(connection);
 var mcp = new Mcp3008(spi);
 ```
 

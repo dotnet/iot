@@ -3,22 +3,21 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device.I2c;
 using System.Threading;
 using Iot.Device.DHTxx;
 
 class Program
 {
-
     static void Main(string[] args)
     {
         Console.WriteLine("Hello DHT!");
 
-        // Init DHT12 through I2C
-        //I2cConnectionSettings settings = new I2cConnectionSettings(1, DhtSensor.Dht12DefaultI2cAddress);
-        //UnixI2cDevice device = new UnixI2cDevice(settings);
-        //DhtSensor dht = new DhtSensor(device);
+        // Init DHT10 through I2C
+        I2cConnectionSettings settings = new I2cConnectionSettings(1, Dht10.DefaultI2cAddress);
+        I2cDevice device = I2cDevice.Create(settings);
 
-        using (DhtSensor dht = new DhtSensor(4, DhtType.Dht11))
+        using (Dht10 dht = new Dht10(device))
         {
             while (true)
             {

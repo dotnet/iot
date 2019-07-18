@@ -24,13 +24,5 @@ namespace DeviceApiTester.Commands.Spi
 
         [Option('f', "clock-frequency", HelpText = "the clock frequency in Hz for the connection", Required = false, Default = 500_000)]
         public int ClockFrequency { get; set; }
-
-        [Option('d', "device", HelpText = "The SpiDevice to use: { Windows | UnixSysFs }", Required = true)]
-        public SpiDriverType Device { get; set; }
-
-        protected SpiDevice CreateSpiDevice(SpiConnectionSettings connectionSettings)
-        {
-            return DriverFactory.CreateFromEnum<SpiDevice, SpiDriverType>(Device, connectionSettings);
-        }
     }
 }

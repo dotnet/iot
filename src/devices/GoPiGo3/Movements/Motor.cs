@@ -28,6 +28,7 @@ namespace Iot.Device.GoPiGo3.Movements
         /// <summary>
         /// Create a motor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Motor port</param>
         public Motor(GoPiGo brick, MotorPort port) : this(brick, port, 1000) { }
 

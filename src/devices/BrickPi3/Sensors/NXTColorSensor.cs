@@ -89,12 +89,14 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize a NXT Color Sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         public NXTColorSensor(Brick brick, SensorPort port) : this(brick, port, ColorSensorMode.Color, 1000) { }
 
         /// <summary>
         /// Initialize a NXT Color Sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">Color mode</param>
         public NXTColorSensor(Brick brick, SensorPort port, ColorSensorMode mode) : this(brick, port, mode, 1000) { }
@@ -102,6 +104,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize a NXT Color Sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">Color mode</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>

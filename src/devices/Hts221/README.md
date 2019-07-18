@@ -1,4 +1,4 @@
-﻿# HTS221 - Capacitive digital sensor for relative humidity and temperature 
+﻿# HTS221 - Capacitive digital sensor for relative humidity and temperature
 
 Some of the applications mentioned by the datasheet:
 - Air conditioning, heating and ventilation

@@ -17,7 +17,7 @@
 Console.WriteLine("Hello, Realtime Clock DS1307!");
 
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Ds1307.DefaultI2cAddress);
-UnixI2cDevice device = new UnixI2cDevice(settings);
+I2cDevice device = I2cDevice.Create(settings);
 
 using (Ds1307 rtc = new Ds1307(device))
 {

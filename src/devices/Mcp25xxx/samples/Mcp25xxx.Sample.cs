@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using Iot.Device.Mcp25xxx.Register;
 using Iot.Device.Mcp25xxx.Register.AcceptanceFilter;
 using Iot.Device.Mcp25xxx.Register.BitTimeConfiguration;
@@ -44,7 +43,7 @@ namespace Iot.Device.Mcp25xxx.Samples
         private static Mcp25xxx GetMcp25xxxDevice()
         {
             var spiConnectionSettings = new SpiConnectionSettings(0, 0);
-            var spiDevice = new UnixSpiDevice(spiConnectionSettings);
+            var spiDevice = SpiDevice.Create(spiConnectionSettings);
             return new Mcp25625(spiDevice);
         }
 

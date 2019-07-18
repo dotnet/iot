@@ -16,7 +16,7 @@
 ## Code
 ```C#
 I2cConnectionSettings settings = new I2cConnectionSettings(1, (byte)I2cAddress.AddrLow);
-UnixI2cDevice device = new UnixI2cDevice(settings);
+I2cDevice device = I2cDevice.Create(settings);
 
 using (Sht3x sensor = new Sht3x(device))
 {

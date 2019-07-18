@@ -160,7 +160,11 @@ namespace System.Device.Gpio.Drivers
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
             ValidatePinNumber(pinNumber);
-            IsPinModeSupported(pinNumber, mode);
+
+            if (!IsPinModeSupported(pinNumber, mode))
+            {
+                throw new InvalidOperationException($"The pin {pinNumber} does not support the selected mode {mode}.");
+            }
 
             /*
              * There are 6 registers(4-byte ints) that control the mode for all pins. Each
@@ -272,7 +276,7 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="eventTypes">The event types to wait for.</param>
-        /// <param name="token">The cancellation token of when the operation should stop waiting for an event.</param>
+        /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
         protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
@@ -355,13 +359,13 @@ namespace System.Device.Gpio.Drivers
                 }
 
                 int fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
-                if (fileDescriptor < 0)
+                if (fileDescriptor == -1)
                 {
                     throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
                 }
 
                 IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, GpioRegisterOffset);
-                if (mapPointer.ToInt32() < 0)
+                if (mapPointer.ToInt64() == -1)
                 {
                     throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
                 }

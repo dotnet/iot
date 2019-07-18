@@ -15,7 +15,7 @@ namespace System.Device.Gpio
         private const string HummingBoardProduct = "HummingBoard-Edge";
 
         /// <summary>
-        /// Initializes new instance of GpioController that will use the specified numbering scheme.
+        /// Initializes a new instance of the <see cref="GpioController"/> class that will use the specified numbering scheme.
         /// The controller will default to use the driver that best applies given the platform the program is executing on.
         /// </summary>
         /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>

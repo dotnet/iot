@@ -12,7 +12,6 @@ using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Threading;
 
 namespace Iot.Device.Vl53L0X
@@ -25,7 +24,7 @@ namespace Iot.Device.Vl53L0X
         public const byte DefaultI2cAddress = 0x29;
         // Default address can be found in documentation
         // page 18 with value 0x52 >> 1 = 0x29
-        private readonly I2cDevice _i2cDevice;
+        private I2cDevice _i2cDevice;
         private readonly bool _autoDisposable;
         private byte _stopData;
         private readonly int _operationTimeout;
@@ -366,7 +365,6 @@ namespace Iot.Device.Vl53L0X
         /// <summary>
         /// Set the type of precision needed for measurement
         /// </summary>
-        /// <param name="precision">The type of precision needed</param>
         public Precision Precision
         {
             get { return _precision; }
@@ -1090,7 +1088,8 @@ namespace Iot.Device.Vl53L0X
         {
             if (_autoDisposable)
             {
-                _i2cDevice.Dispose();
+                _i2cDevice?.Dispose();
+                _i2cDevice = null;
             }
         }
 

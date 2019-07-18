@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Bmx280;
@@ -24,27 +23,30 @@ namespace Iot.Device.Samples
             const double defaultSeaLevelPressure = 1033.00;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bme280.DefaultI2cAddress);
-            var i2cDevice = new UnixI2cDevice(i2cSettings);
+            var i2cDevice = I2cDevice.Create(i2cSettings);
             var i2CBmpe80 = new Bme280(i2cDevice);
 
             using (i2CBmpe80)
             {
                 while (true)
                 {
-                    ////set mode forced so device sleeps after read
+                    //set mode forced so device sleeps after read
                     i2CBmpe80.SetPowerMode(PowerMode.Forced);
 
                     //set samplings
                     i2CBmpe80.SetTemperatureSampling(Sampling.UltraLowPower);
                     i2CBmpe80.SetPressureSampling(Sampling.UltraLowPower);
+                    i2CBmpe80.SetHumiditySampling(Sampling.UltraLowPower);
 
                     //read values
                     Temperature tempValue = await i2CBmpe80.ReadTemperatureAsync();
-                    Console.WriteLine($"Temperature {tempValue.Celsius}");
+                    Console.WriteLine($"Temperature: {tempValue.Celsius} C");
                     double preValue = await i2CBmpe80.ReadPressureAsync();
-                    Console.WriteLine($"Pressure {preValue}");
+                    Console.WriteLine($"Pressure: {preValue} Pa");
                     double altValue = await i2CBmpe80.ReadAltitudeAsync(defaultSeaLevelPressure);
-                    Console.WriteLine($"Altitude: {altValue}");
+                    Console.WriteLine($"Altitude: {altValue} meters");
+                    double humValue = await i2CBmpe80.ReadHumidityAsync();
+                    Console.WriteLine($"Humidity: {humValue} %");
                     Thread.Sleep(1000);
 
                     //set higher sampling
@@ -52,17 +54,24 @@ namespace Iot.Device.Samples
                     Console.WriteLine(i2CBmpe80.ReadTemperatureSampling());
                     i2CBmpe80.SetPressureSampling(Sampling.UltraHighResolution);
                     Console.WriteLine(i2CBmpe80.ReadPressureSampling());
+                    i2CBmpe80.SetHumiditySampling(Sampling.Standard);
+                    Console.WriteLine(i2CBmpe80.ReadHumiditySampling());
+
+                    i2CBmpe80.SetFilterMode(FilteringMode.Off);
+                    Console.WriteLine(i2CBmpe80.ReadFilterMode());
 
                     //set mode forced and read again
                     i2CBmpe80.SetPowerMode(PowerMode.Forced);
 
                     //read values
                     tempValue = await i2CBmpe80.ReadTemperatureAsync();
-                    Console.WriteLine($"Temperature {tempValue}");
+                    Console.WriteLine($"Temperature: {tempValue.Celsius} C");
                     preValue = await i2CBmpe80.ReadPressureAsync();
-                    Console.WriteLine($"Pressure {preValue}");
+                    Console.WriteLine($"Pressure: {preValue} Pa");
                     altValue = await i2CBmpe80.ReadAltitudeAsync(defaultSeaLevelPressure);
-                    Console.WriteLine($"Altitude: {altValue}");
+                    Console.WriteLine($"Altitude: {altValue} meters");
+                    humValue = await i2CBmpe80.ReadHumidityAsync();
+                    Console.WriteLine($"Humidity: {humValue} %");
                     Thread.Sleep(5000);
 
                     //set sampling to higher
@@ -70,6 +79,11 @@ namespace Iot.Device.Samples
                     Console.WriteLine(i2CBmpe80.ReadTemperatureSampling());
                     i2CBmpe80.SetPressureSampling(Sampling.UltraLowPower);
                     Console.WriteLine(i2CBmpe80.ReadPressureSampling());
+                    i2CBmpe80.SetHumiditySampling(Sampling.UltraLowPower);
+                    Console.WriteLine(i2CBmpe80.ReadHumiditySampling());
+
+                    i2CBmpe80.SetFilterMode(FilteringMode.X2);
+                    Console.WriteLine(i2CBmpe80.ReadFilterMode());
                 }
             }
         }

@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <!--Disabling default items so samples source won't get build by the main library-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Commands\*.cs" />
+    <Compile Include="Commands\Ssd1327Commands\*.cs" />
+    <Compile Include="Commands\Ssd1306Commands\*.cs" />
+    <Compile Include="*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+  </ItemGroup>
+
+</Project>

@@ -17,7 +17,7 @@ namespace System.Device.Gpio
         private readonly HashSet<int> _openPins;
 
         /// <summary>
-        /// Initializes new instance of GpioController that will use the logical pin numbering scheme as default.
+        /// Initializes a new instance of the <see cref="GpioController"/> class that will use the logical pin numbering scheme as default.
         /// </summary>
         public GpioController()
             : this(PinNumberingScheme.Logical)
@@ -25,7 +25,7 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
-        /// Initializes new instance of GpioController that will use the specified numbering scheme and driver.
+        /// Initializes a new instance of the <see cref="GpioController"/> class that will use the specified numbering scheme and driver.
         /// </summary>
         /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
         /// <param name="driver">The driver that manages all of the pin operations for the controller.</param>
