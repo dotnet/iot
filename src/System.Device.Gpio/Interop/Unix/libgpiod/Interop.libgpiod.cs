@@ -19,7 +19,7 @@ internal partial class Interop
         /// Create a new gpiochip iterator.
         /// </summary>
         /// <returns>Pointer to a new chip iterator object or a SafeChipIteratorHandle pointing to 0 which will return <see langword="true" /> for IsInvalid.</returns>
-        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        [DllImport(LibgpiodLibrary)]
         internal static extern SafeChipIteratorHandle gpiod_chip_iter_new();
 
         /// <summary>
@@ -40,7 +40,7 @@ internal partial class Interop
         /// Get the next gpiochip handle.
         /// </summary>
         /// <param name="iter">The gpiochip iterator object</param>
-        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        [DllImport(LibgpiodLibrary)]
         internal static extern SafeChipHandle gpiod_chip_iter_next(SafeChipIteratorHandle iter);
 
         /// <summary>
@@ -81,7 +81,7 @@ internal partial class Interop
         /// <param name="line">GPIO line handle</param>
         /// <param name="consumer">Name of the consumer.</param>
         /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
-        [DllImport(LibgpiodLibrary)]
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern int gpiod_line_request_input(SafeLineHandle line, string consumer);
 
         /// <summary>
@@ -90,7 +90,7 @@ internal partial class Interop
         /// <param name="line">GPIO line handle</param>
         /// <param name="consumer">Name of the consumer.</param>
         /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
-        [DllImport(LibgpiodLibrary)]
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern int gpiod_line_request_output(SafeLineHandle line, string consumer);
 
         /// <summary>

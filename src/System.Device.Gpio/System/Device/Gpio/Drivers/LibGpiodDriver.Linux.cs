@@ -38,15 +38,15 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
-            if (eventTypes.HasFlag(PinEventTypes.Rising) || eventTypes.HasFlag(PinEventTypes.Falling))
+            if ((eventTypes & PinEventTypes.Rising) != 0 || (eventTypes & PinEventTypes.Falling) != 0)
             {
                 LibGpiodDriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
 
-                if (eventTypes.HasFlag(PinEventTypes.Rising))
+                if ((eventTypes & PinEventTypes.Rising) != 0)
                 {
                     eventHandler.ValueRising += callback;
                 }
-                else if (eventTypes.HasFlag(PinEventTypes.Falling))
+                else if ((eventTypes & PinEventTypes.Falling) != 0)
                 {
                     eventHandler.ValueFalling += callback;
                 }
@@ -173,15 +173,15 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
-            if (eventTypes.HasFlag(PinEventTypes.Rising) || eventTypes.HasFlag(PinEventTypes.Falling))
+            if ((eventTypes & PinEventTypes.Rising) != 0 || (eventTypes & PinEventTypes.Falling) != 0)
             {
                 LibGpiodDriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
 
-                if (eventTypes.HasFlag(PinEventTypes.Rising))
+                if ((eventTypes & PinEventTypes.Rising) != 0)
                 {
                     eventHandler.ValueRising += callback;
                 }
-                else if (eventTypes.HasFlag(PinEventTypes.Falling))
+                else if ((eventTypes & PinEventTypes.Falling) != 0)
                 {
                     eventHandler.ValueFalling += callback;
                 }
