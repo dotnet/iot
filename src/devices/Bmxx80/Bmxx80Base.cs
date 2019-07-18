@@ -208,6 +208,12 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
             _i2cDevice?.Dispose();
             _i2cDevice = null;
         }
