@@ -222,20 +222,8 @@ namespace Iot.Device.Bmxx80
         public StandbyTime ReadStandbyTime()
         {
             byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
-            var time = (byte)((current & 0b_1110_0000) >> 5);
 
-            return time switch
-            {
-                0b000 => StandbyTime.Ms0_5,
-                0b001 => StandbyTime.Ms62_5,
-                0b010 => StandbyTime.Ms125,
-                0b011 => StandbyTime.Ms250,
-                0b100 => StandbyTime.Ms500,
-                0b101 => StandbyTime.Ms1000,
-                0b110 => StandbyTime.Ms10,
-                0b111 => StandbyTime.Ms20,
-                _ => throw new NotImplementedException($"Value read from registers {time:x2} was not defined by specifications.")
-            };
+            return (StandbyTime)((current & 0b_1110_0000) >> 5);
         }
 
         /// <summary>
