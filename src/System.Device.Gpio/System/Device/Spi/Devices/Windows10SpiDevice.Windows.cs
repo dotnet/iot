@@ -17,7 +17,7 @@ namespace System.Device.Spi
         private WinSpi.SpiDevice _winDevice;
 
         /// <summary>
-        /// Initializes new instance of Windows10SpiDevice that will use the specified settings to communicate with the SPI device.
+        /// Initializes a new instance of the <see cref="Windows10SpiDevice"/> class that will use the specified settings to communicate with the SPI device.
         /// </summary>
         /// <param name="settings">
         /// The connection settings of a device on a SPI bus.

@@ -6,8 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
-    <ProjectReference Include="..\SoftPwm\SoftPwm.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../../System.Device.Gpio/System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../SoftPwm/SoftwarePwm.csproj" />
     <Compile Include="DCMotor.cs" />
     <Compile Include="DCMotor3Pin.cs" />
     <Compile Include="DCMotor2PinNoEnable.cs" />
