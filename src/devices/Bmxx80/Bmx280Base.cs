@@ -196,13 +196,12 @@ namespace Iot.Device.Bmxx80
         /// <param name="powerMode">The <see cref="Bmx280PowerMode"/> to set.</param>
         public void SetPowerMode(Bmx280PowerMode powerMode)
         {
-            byte status = Read8BitsFromRegister(_controlRegister);
+            byte read = Read8BitsFromRegister(_controlRegister);
 
-            // Clear last two bits.
-            status = (byte)(status & 0b_1111_1100);
+            // Clear last 2 bits.
+            var cleared = (byte)(read & 0b_1111_1100);
 
-            status = (byte)(status | (byte)powerMode);
-            _i2cDevice.Write(new[] { _controlRegister, status });
+            _i2cDevice.Write(new[] { _controlRegister, (byte)(cleared | (byte)powerMode) });
         }
 
         /// <summary>
