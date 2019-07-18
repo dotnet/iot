@@ -18,12 +18,12 @@ namespace Iot.Device.Ds3231
         /// </summary>
         public const byte DefaultI2cAddress = 0x68;
 
-        private I2cDevice _sensor = null;
+        private I2cDevice _i2cDevice = null;
 
         /// <summary>
         /// DS3231 DateTime
         /// </summary>
-        public DateTime DateTime { get => ReadTime(); set => SetTime(DateTime); }
+        public DateTime DateTime { get => ReadTime(); set => SetTime(value); }
 
         /// <summary>
         /// DS3231 Temperature
@@ -33,10 +33,10 @@ namespace Iot.Device.Ds3231
         /// <summary>
         /// Creates a new instance of the DS3231
         /// </summary>
-        /// <param name="sensor">I2C Device, like UnixI2cDevice or Windows10I2cDevice</param>
-        public Ds3231(I2cDevice sensor)
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
+        public Ds3231(I2cDevice i2cDevice)
         {
-            _sensor = sensor;
+            _i2cDevice = i2cDevice;
         }
 
         /// <summary>
@@ -48,8 +48,8 @@ namespace Iot.Device.Ds3231
             // Sec, Min, Hour, Day, Date, Month & Century, Year
             Span<byte> rawData = stackalloc byte[7];
 
-            _sensor.WriteByte((byte)Register.RTC_SEC_REG_ADDR);
-            _sensor.Read(rawData);
+            _i2cDevice.WriteByte((byte)Register.RTC_SEC_REG_ADDR);
+            _i2cDevice.Read(rawData);
 
             return new DateTime(rawData[5] >> 7 == 1 ? 2000 + NumberTool.Bcd2Dec(rawData[6]) : 1900 + NumberTool.Bcd2Dec(rawData[6]),
                                 NumberTool.Bcd2Dec((byte)(rawData[5] & 0b_0001_1111)),
@@ -85,7 +85,7 @@ namespace Iot.Device.Ds3231
                 setData[7] = NumberTool.Dec2Bcd(time.Year - 1900);
             }
 
-            _sensor.Write(setData);
+            _i2cDevice.Write(setData);
         }
 
         /// <summary>
@@ -96,8 +96,8 @@ namespace Iot.Device.Ds3231
         {
             Span<byte> data = stackalloc byte[2];
 
-            _sensor.WriteByte((byte)Register.RTC_TEMP_MSB_REG_ADDR);
-            _sensor.Read(data);
+            _i2cDevice.WriteByte((byte)Register.RTC_TEMP_MSB_REG_ADDR);
+            _i2cDevice.Read(data);
 
             // datasheet Temperature part
             return data[0] + (data[1] >> 6) * 0.25;
@@ -108,8 +108,8 @@ namespace Iot.Device.Ds3231
         /// </summary>
         public void Dispose()
         {
-            _sensor?.Dispose();
-            _sensor = null;
+            _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
     }
 }

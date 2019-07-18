@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using Iot.Device.Mcp3008;
 
 public class Volume : IDisposable
@@ -15,7 +14,7 @@ public class Volume : IDisposable
         var connection = new SpiConnectionSettings(0,0);
         connection.ClockFrequency = 1000000;
         connection.Mode = SpiMode.Mode0;
-        var spi = new UnixSpiDevice(connection);
+        var spi = SpiDevice.Create(connection);
         var mcp3008 = new Mcp3008(spi);
         var volume = new Volume(mcp3008);
         volume.Init();

@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using System.Text;
 using System.Threading;
 
@@ -26,8 +25,8 @@ namespace Iot.Device.Nrf24l01.Samples
                 ClockFrequency = Nrf24l01.SpiClockFrequency,
                 Mode = Nrf24l01.SpiMode
             };
-            UnixSpiDevice senderDevice = new UnixSpiDevice(senderSettings);
-            UnixSpiDevice receiverDevice = new UnixSpiDevice(receiverSettings);
+            var senderDevice = SpiDevice.Create(senderSettings);
+            var receiverDevice = SpiDevice.Create(receiverSettings);
 
             // SPI Device, CE Pin, IRQ Pin, Receive Packet Size
             using (Nrf24l01 sender = new Nrf24l01(senderDevice, 23, 24, 20))

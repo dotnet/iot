@@ -1,4 +1,4 @@
-# VL53L0X Sensor
+# VL53L0X - distance sensor
 
 ## Summary
 
@@ -17,12 +17,12 @@ You will find this device as ["Distance Sensor"](https://www.dexterindustries.co
 All calibration and all setup of the sensor is done fully transparently for you. Just create a class and read either once the distance, either using the continuous measurement method.
 
 ```csharp
-Vl53L0X vL53L0X = new Vl53L0X(new UnixI2cDevice(new I2cConnectionSettings(1, Vl53L0X.DefaultI2cAddress)));
+Vl53L0X vL53L0X = new Vl53L0X(I2cDevice.Create(new I2cConnectionSettings(1, Vl53L0X.DefaultI2cAddress)));
 Console.WriteLine($"Rev: {vL53L0X.Info.Revision}, Prod: {vL53L0X.Info.ProductId}, Mod: {vL53L0X.Info.ModuleId}");
 while (!Console.KeyAvailable)
 {
     try
-    {        
+    {
         Console.WriteLine($"Distance: {vL53L0X.Distance}");
     }
     catch (Exception ex)
@@ -37,7 +37,7 @@ Be aware that when reading a distance using the Continuous or Single measurement
 
 You can as well get a single measurement, in this case, the precision can be lower. Use the property ```MeasurementMode``` to change the mode.
 
-You can adjust the type of measurement you want. By default, the sensor is put into long range. This does allow to have a quite accurate (+-5%) precision within 2 meters but still can measure distances up to 8 meters (accuracy much less correct). You can switch to short range using the ```SetPrecision``` function. If you want to setup your own mode, you should use in conjunction the ```SetSignalRateLimit``` and the ```SetVcselPulsePeriod``` functions plus the ```HighResolution``` property like in the below example: 
+You can adjust the type of measurement you want. By default, the sensor is put into long range. This does allow to have a quite accurate (+-5%) precision within 2 meters but still can measure distances up to 8 meters (accuracy much less correct). You can switch to short range using the ```SetPrecision``` function. If you want to setup your own mode, you should use in conjunction the ```SetSignalRateLimit``` and the ```SetVcselPulsePeriod``` functions plus the ```HighResolution``` property like in the below example:
 
 ```csharp
 HighResolution = false;
@@ -46,4 +46,4 @@ SetVcselPulsePeriod(VcselType.VcselPeriodPreRange, PeriodPulse.Period14);
 SetVcselPulsePeriod(VcselType.VcselPeriodFinalRange, PeriodPulse.Period10);
 ```
 
-Please refer to the documentation to understand the impact of changing the various pulses as well as using the high resolution precision measurement. The sensor can't be precise in long range and in general, the longer it can see, the less precise are the data. High resolution will return a more precise measurement but mainly in short distance. 
+Please refer to the documentation to understand the impact of changing the various pulses as well as using the high resolution precision measurement. The sensor can't be precise in long range and in general, the longer it can see, the less precise are the data. High resolution will return a more precise measurement but mainly in short distance.

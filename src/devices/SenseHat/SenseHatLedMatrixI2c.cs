@@ -3,13 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.IO;
-using System.Device.Gpio;
 using System.Device.I2c;
-using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.CompilerServices;
-using System.Device.I2c.Drivers;
 
 namespace Iot.Device.SenseHat
 {
@@ -139,7 +135,7 @@ namespace Iot.Device.SenseHat
         private static I2cDevice CreateDefaultI2cDevice()
         {
             var settings = new I2cConnectionSettings(1, I2cAddress);
-            return new UnixI2cDevice(settings);
+            return I2cDevice.Create(settings);
         }
 
         public override void Dispose()

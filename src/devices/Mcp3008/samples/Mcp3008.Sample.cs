@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using System.Threading;
 
 namespace Iot.Device.Samples
@@ -32,7 +31,7 @@ namespace Iot.Device.Samples
                     Mode = SpiMode.Mode0
                 };
 
-                var spi = new UnixSpiDevice(connection);
+                var spi = SpiDevice.Create(connection);
                 var mcp3008 = new Mcp3008.Mcp3008(spi);
                 return mcp3008;
             }

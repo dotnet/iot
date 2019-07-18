@@ -48,19 +48,16 @@ namespace Iot.Device.DCMotor
         {
             if (settings.UseEnableAsPwm)
             {
-                if (settings.Pin0.HasValue && settings.Pin1.HasValue && settings.PwmController != null)
+                if (settings.Pin0.HasValue && settings.Pin1.HasValue && settings.PwmChannel != null)
                 {
                     return new DCMotor3Pin(
-                        settings.PwmController,
-                        settings.PwmFrequency,
-                        settings.PwmChip,
                         settings.PwmChannel,
                         settings.Pin0.Value,
                         settings.Pin1.Value,
                         settings.Controller);
                 }
 
-                throw new ArgumentException("When enable pin is used for PWM all pins and PwmController must be set.");
+                throw new ArgumentException("When enable pin is used for PWM all pins and PwmChannel must be set.");
             }
             else
             {
@@ -73,7 +70,7 @@ namespace Iot.Device.DCMotor
                     pin1 = null;
                 }
 
-                if (settings.PwmController != null)
+                if (settings.PwmChannel != null)
                 {
                     if (pin0.HasValue == pin1.HasValue)
                     {
@@ -81,9 +78,6 @@ namespace Iot.Device.DCMotor
                     }
 
                     return new DCMotor2PinNoEnable(
-                        settings.PwmController,
-                        settings.PwmFrequency,
-                        settings.PwmChip,
                         settings.PwmChannel,
                         pin0,
                         settings.Controller);
@@ -96,7 +90,7 @@ namespace Iot.Device.DCMotor
                         throw new ArgumentException("Pin0 or Pin1 must be set when PWM is not specified.");
                     }
 
-                    return new DCMotor2PinNoEnable(settings.PwmFrequency, pin0.Value, pin1, settings.Controller);
+                    return new DCMotor2PinNoEnable(new SoftwarePwmChannel(pin0.Value, 50, 0.0, controller: settings.Controller), pin1, settings.Controller);
                 }
             }
         }

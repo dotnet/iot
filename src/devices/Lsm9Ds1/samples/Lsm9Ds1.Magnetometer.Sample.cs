@@ -6,7 +6,6 @@ using System;
 using System.Numerics;
 using System.Threading;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using System.Diagnostics;
 using System.Collections.Generic;
 
@@ -85,7 +84,7 @@ namespace Iot.Device.Lsm9Ds1.Samples
         private static I2cDevice CreateI2cDevice()
         {
             var settings = new I2cConnectionSettings(1, I2cAddress);
-            return new UnixI2cDevice(settings);
+            return I2cDevice.Create(settings);
         }
     }
 }
