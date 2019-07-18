@@ -124,9 +124,9 @@ namespace Iot.Device.Rfid
                 ApplicationType = (ApplicationType)(atqb[11] & 0b0000_1100);
                 // Ignore the 2 last bytes. They are CRC
             }
-            catch (Exception)
+            catch (ArgumentOutOfRangeException ex)
             {
-                throw new Exception($"Can't create a 106 kbpd card type B");
+                throw new ArgumentOutOfRangeException($"Can't create a 106 kbpd card type B", ex.InnerException);
             }
         }
     }

@@ -45,6 +45,5 @@ namespace Iot.Device.Pn532
         TgGetInitiatorCommand = 0x88,
         TgResponseToInitiator = 0x90,
         TgGetTargetStatus = 0x8A,
-
     }
 }

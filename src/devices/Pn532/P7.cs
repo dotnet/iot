@@ -7,7 +7,9 @@ using System;
 namespace Iot.Device.Pn532
 {
     /// <summary>
-    /// The P7 state
+    /// The GPIO state of the GPIO located on the P7 port
+    /// Those ports can be used as external GPIO ports when SPI is not used
+    /// Refer to the detailed documentation page 79 and 80
     /// </summary>
     [Flags]
     public enum P7

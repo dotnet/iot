@@ -7,7 +7,9 @@ using System;
 namespace Iot.Device.Pn532
 {
     /// <summary>
-    /// The P3 statte
+    /// The GPIO state of the GPIO located on the P3 port
+    /// Most of those ports can be used as external GPIO ports
+    /// Refer to the detailed documentation page 79 and 80
     /// </summary>
     [Flags]
     public enum P3

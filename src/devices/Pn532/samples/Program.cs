@@ -8,12 +8,8 @@ using System.Runtime.Serialization;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using System.Device.Gpio;
 using System.Globalization;
-using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using Iot.Device.Rfid;
 
 namespace Pn532Demo
@@ -83,7 +79,7 @@ namespace Pn532Demo
             }
             if (retData == null)
                 return;
-            var decrypted = pn532.Decode106kbpsTypeA(retData.AsSpan().Slice(1));
+            var decrypted = pn532.TryDecode106kbpsTypeA(retData.AsSpan().Slice(1));
             if (decrypted != null)
             {
                 Console.WriteLine($"Tg: {decrypted.TargetNumber}, ATQA: {decrypted.Atqa} SAK: {decrypted.Sak}, NFCID: {BitConverter.ToString(decrypted.NfcId)}");

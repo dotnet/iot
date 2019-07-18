@@ -24,7 +24,6 @@ namespace Iot.Device.Pn532
     public class Pn532 : RfidWriteRead, IDisposable
     {
         // Timeout 
-        private const int ReadTimeOut = 500;
         private const int SerialReadTimeOut = 500;
         // Communication way
         private const byte ToHostCheckSumD5 = 0xD5;
@@ -53,6 +52,14 @@ namespace Iot.Device.Pn532
         private int _pin = 18;
         private SecurityAccessModuleMode _securityAccessModuleMode;
         private uint _virtualCardTimeout = 20;
+
+        /// <summary>
+        /// Set or get the read timeout
+        /// Please refer to the documentation to set the right
+        /// timeout value depending on the communication
+        /// mode you are using
+        /// </summary>
+        public int ReadTimeOut { get; set; } = 500;
 
         /// <summary>
         /// The Log level
@@ -91,11 +98,9 @@ namespace Iot.Device.Pn532
         /// Create a PN532 using Serial Port
         /// </summary>
         /// <param name="portName">The port name</param>
-        public Pn532(string portName)
+        public Pn532(string portName, LogLevel logLevel = LogLevel.None)
         {
-#if DEBUG
-            LogLevel = LogLevel.Debug;
-#endif
+            LogLevel = logLevel;
 
             // Data bit : 8 bits,
             // Parity bit : none,
@@ -107,20 +112,20 @@ namespace Iot.Device.Pn532
             _serialPort.WriteTimeout = SerialReadTimeOut;
             _serialPort.Open();
             // Setting up internals as default version
-            _parametersFlags = ParametersFlags.fAutomaticATR_RES | ParametersFlags.fAutomaticRATS | ParametersFlags.fISO14443_4_PICC;
+            _parametersFlags = ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS | ParametersFlags.ISO14443_4_PICC;
             _securityAccessModuleMode = SecurityAccessModuleMode.Normal;
             _virtualCardTimeout = 20;
 
             WakeUp();
             // Set the SAM
-            var ret = SetSecurityAccessModule();
+            bool ret = SetSecurityAccessModule();
             //var ret = SetSAM();
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
             // Check the version
-            if (!CheckVersion())
+            if (!IsPn532())
                 throw new Exception("Can't find a PN532");
             // Apply default parameters
-            ret = SetParameters(ParametersFlags.fAutomaticATR_RES | ParametersFlags.fAutomaticRATS);
+            ret = SetParameters(ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS);
             LogInfo.Log($"Setting Parameters Falgs changed: {ret}", LogLevel.Info);
         }
 
@@ -128,12 +133,9 @@ namespace Iot.Device.Pn532
         /// Create a PN532 using SPI
         /// </summary>
         /// <param name="spiDevice"></param>
-        public Pn532(SpiDevice spiDevice)
+        public Pn532(SpiDevice spiDevice, LogLevel logLevel = LogLevel.None)
         {
-#if DEBUG
-            LogLevel = LogLevel.Debug;
-#endif
-
+            LogLevel = logLevel;
             _spiDevice = spiDevice;
             _controller = new GpioController();
             _controller.OpenPin(_pin, PinMode.Output);
@@ -141,14 +143,15 @@ namespace Iot.Device.Pn532
             Thread.Sleep(2);
             LogLevel = LogLevel.Debug;
             WakeUp();
-            var ret = SetSecurityAccessModule();
-            //var ret = SetSAM();
+            // The first time we apply SAM after waking up the device, it always 
+            // returns false, some timeout appear. So we will need to apply a second time
+            bool ret = SetSecurityAccessModule();
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
             // Check the version
-            if (!CheckVersion())
+            if (!IsPn532())
                 throw new Exception("Can't find a PN532");
             // Apply default parameters
-            ret = SetParameters(ParametersFlags.fAutomaticATR_RES | ParametersFlags.fAutomaticRATS);
+            ret = SetParameters(ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS);
             LogInfo.Log($"Setting Parameters Falgs changed: {ret}", LogLevel.Info);
             ret = SetSecurityAccessModule();
             //var ret = SetSAM();
@@ -159,22 +162,19 @@ namespace Iot.Device.Pn532
         /// Create a PN532 using I2C
         /// </summary>
         /// <param name="i2CDevice"></param>
-        public Pn532(I2cDevice i2CDevice)
-        {            
-#if DEBUG
-            LogLevel = LogLevel.Debug;
-#endif
-
+        public Pn532(I2cDevice i2CDevice, LogLevel logLevel = LogLevel.None)
+        {
+            LogLevel = logLevel;
             _i2cDevice = i2CDevice;
             WakeUp();
-            var ret = SetSecurityAccessModule();
+            bool ret = SetSecurityAccessModule();
             //var ret = SetSAM();
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
             // Check the version
-            if (!CheckVersion())
+            if (!IsPn532())
                 throw new Exception("Can't find a PN532");
             // Apply default parameters
-            ret = SetParameters(ParametersFlags.fAutomaticATR_RES | ParametersFlags.fAutomaticRATS);
+            ret = SetParameters(ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS);
             LogInfo.Log($"Setting Parameters Falgs changed: {ret}", LogLevel.Info);
             ret = SetSecurityAccessModule();
             //var ret = SetSAM();
@@ -348,7 +348,8 @@ namespace Iot.Device.Pn532
                 if (value / 50 > 0xFF)
                     throw new ArgumentException($"{nameof(VirtualCardTimeout)} can't be more than 12750 milliseconds.");
                 _virtualCardTimeout = value / 50;
-                LogInfo.Log($"{nameof(VirtualCardTimeout)} changed: {SetSecurityAccessModule()}", LogLevel.Debug);
+                bool ret = SetSecurityAccessModule();
+                LogInfo.Log($"{nameof(VirtualCardTimeout)} changed: {ret}", LogLevel.Debug);
             }
         }
 
@@ -358,7 +359,9 @@ namespace Iot.Device.Pn532
         public SecurityAccessModuleMode SecurityAccessModuleMode
         {
             get { return _securityAccessModuleMode; }
-            set { LogInfo.Log($"{nameof(SecurityAccessModuleMode)} changed: {SetSecurityAccessModule()}", LogLevel.Debug); }
+            set {
+                bool ret = SetSecurityAccessModule();
+                LogInfo.Log($"{nameof(SecurityAccessModuleMode)} changed: {ret}", LogLevel.Debug); }
         }
 
 
@@ -375,7 +378,7 @@ namespace Iot.Device.Pn532
             return ret >= 0;
         }
 
-        private bool CheckVersion()
+        private bool IsPn532()
         {
             var ret = WriteCommand(CommandSet.GetFirmwareVersion);
             LogInfo.Log($"GetFirmwareVersion write command returned: {ret}", LogLevel.Info);
@@ -442,7 +445,7 @@ namespace Iot.Device.Pn532
         /// As the type identified is returned
         /// </summary>
         /// <param name="maxTarget">The maximum number of targets</param>
-        /// <param name="targetBaudRate">The baud rate to use</param>
+        /// <param name="targetBaudRate">The baud rate to use to find cards</param>
         /// <param name="initiatorData">Specific initialization data</param>
         /// <returns>A raw byte array with the data of the targets if any has been identified</returns>
         public byte[] ListPassiveTarget(MaxTarget maxTarget, TargetBaudRate targetBaudRate, ReadOnlySpan<byte> initiatorData)
@@ -469,7 +472,7 @@ namespace Iot.Device.Pn532
         /// </summary>
         /// <param name="toDecode">The raw byte array</param>
         /// <returns>A decoded card of null if it cant't</returns>
-        public Data106kbpsTypeA Decode106kbpsTypeA(Span<byte> toDecode)
+        public Data106kbpsTypeA TryDecode106kbpsTypeA(Span<byte> toDecode)
         {
             try
             {
@@ -488,7 +491,7 @@ namespace Iot.Device.Pn532
                 }
                 return data;
             }
-            catch (Exception)
+            catch (ArgumentOutOfRangeException)
             {
                 return null;
             }
@@ -500,7 +503,7 @@ namespace Iot.Device.Pn532
         /// </summary>
         /// <param name="toDecode">The raw byte array</param>
         /// <returns>A decoded card of null if it cant't</returns>
-        public Data106kbpsTypeB DecodeData106kbpsTypeB(Span<byte> toDecode)
+        public Data106kbpsTypeB TryDecodeData106kbpsTypeB(Span<byte> toDecode)
         {
             try
             {
@@ -508,7 +511,7 @@ namespace Iot.Device.Pn532
                 data.TargetNumber = toDecode[0];
                 return data;
             }
-            catch (Exception)
+            catch (ArgumentOutOfRangeException)
             {
                 return null;
             }
@@ -520,7 +523,7 @@ namespace Iot.Device.Pn532
         /// </summary>
         /// <param name="toDecode">The raw byte array</param>
         /// <returns>A decoded card of null if it cant't</returns>
-        public Data212_424kbps DecodeData212_424Kbps(Span<byte> toDecode)
+        public Data212_424kbps TryDecodeData212_424Kbps(Span<byte> toDecode)
         {
             try
             {
@@ -540,7 +543,7 @@ namespace Iot.Device.Pn532
                 }
                 return data;
             }
-            catch (Exception)
+            catch (ArgumentOutOfRangeException)
             {
                 return null;
             }
@@ -552,7 +555,7 @@ namespace Iot.Device.Pn532
         /// </summary>
         /// <param name="toDecode">The raw byte array</param>
         /// <returns>A decoded card of null if it cant't</returns>
-        public Data106kbpsInnovisionJewel DecodeData106kbpsInnovisionJewel(Span<byte> toDecode)
+        public Data106kbpsInnovisionJewel TryDecodeData106kbpsInnovisionJewel(Span<byte> toDecode)
         {
             try
             {
@@ -564,7 +567,7 @@ namespace Iot.Device.Pn532
                 };
                 return data;
             }
-            catch (Exception)
+            catch (ArgumentOutOfRangeException)
             {
                 return null;
             }
@@ -686,7 +689,7 @@ namespace Iot.Device.Pn532
         }
 
 
-#region RFConfiguration
+        #region RFConfiguration
 
         /// <summary>
         /// Set the Radio Frequence Field Mode
@@ -695,7 +698,7 @@ namespace Iot.Device.Pn532
         /// <returns>True is success</returns>
         public bool SetRfField(RfFieldMode rfFieldMode)
         {
-            return RfConfiguration(RfConfigurationMode.RfField, new byte[1] { (byte)rfFieldMode });
+            return SetRfConfiguration(RfConfigurationMode.RfField, new byte[1] { (byte)rfFieldMode });
         }
 
         /// <summary>
@@ -705,7 +708,7 @@ namespace Iot.Device.Pn532
         /// <returns>True is success</returns>
         public bool SetVariousTimings(VariousTimingsMode variousTimingsMode)
         {
-            return RfConfiguration(RfConfigurationMode.VariousTimings, variousTimingsMode.Serialize());
+            return SetRfConfiguration(RfConfigurationMode.VariousTimings, variousTimingsMode.Serialize());
         }
 
         /// <summary>
@@ -715,7 +718,7 @@ namespace Iot.Device.Pn532
         /// <returns>True is success</returns>
         public bool SetMaxRetryWriteRead(byte numberRetries = 0x00)
         {
-            return RfConfiguration(RfConfigurationMode.MaxRtyCOM, new byte[1] { numberRetries });
+            return SetRfConfiguration(RfConfigurationMode.MaxRtyCOM, new byte[1] { numberRetries });
         }
 
         /// <summary>
@@ -725,7 +728,7 @@ namespace Iot.Device.Pn532
         /// <returns>True is success</returns>
         public bool SetMaxRetriesInitialization(MaxRetriesMode maxRetriesMode)
         {
-            return RfConfiguration(RfConfigurationMode.MaxRetries, maxRetriesMode.Serialize());
+            return SetRfConfiguration(RfConfigurationMode.MaxRetries, maxRetriesMode.Serialize());
         }
 
         /// <summary>
@@ -735,7 +738,7 @@ namespace Iot.Device.Pn532
         /// <returns>True is success</returns>
         public bool SetAnalog106kbpsTypeA(Analog106kbpsTypeAMode analog106Kbps)
         {
-            return RfConfiguration(RfConfigurationMode.AnalogSettingsB106kbpsTypeA, analog106Kbps.Serialize());
+            return SetRfConfiguration(RfConfigurationMode.AnalogSettingsB106kbpsTypeA, analog106Kbps.Serialize());
         }
 
         /// <summary>
@@ -745,7 +748,7 @@ namespace Iot.Device.Pn532
         /// <returns>True is success</returns>
         public bool SetAnalog212_424Kbps(Analog212_424kbpsMode analog212_424)
         {
-            return RfConfiguration(RfConfigurationMode.AnalogSettingsB212_424kbps, analog212_424.Serialize());
+            return SetRfConfiguration(RfConfigurationMode.AnalogSettingsB212_424kbps, analog212_424.Serialize());
         }
 
         /// <summary>
@@ -755,7 +758,7 @@ namespace Iot.Device.Pn532
         /// <returns>True is success</returns>
         public bool SetAnalogTypeB(AnalogSettingsTypeBMode analogSettings)
         {
-            return RfConfiguration(RfConfigurationMode.AnalogSettingsTypeB, analogSettings.Serialize());
+            return SetRfConfiguration(RfConfigurationMode.AnalogSettingsTypeB, analogSettings.Serialize());
         }
 
         /// <summary>
@@ -765,10 +768,10 @@ namespace Iot.Device.Pn532
         /// <returns>True is success</returns>
         public bool SetAnalog212_424_848kbps(Analog212_424_848kbpsMode analog212_424_848Kbps)
         {
-            return RfConfiguration(RfConfigurationMode.AnalogSettingsB212_424_848ISO_IEC14443_4, analog212_424_848Kbps.Serialize());
+            return SetRfConfiguration(RfConfigurationMode.AnalogSettingsB212_424_848ISO_IEC14443_4, analog212_424_848Kbps.Serialize());
         }
 
-        private bool RfConfiguration(RfConfigurationMode rfConfigurationMode, byte[] configurationData)
+        private bool SetRfConfiguration(RfConfigurationMode rfConfigurationMode, byte[] configurationData)
         {
             Span<byte> toSend = stackalloc byte[configurationData.Length + 1];
             toSend[0] = (byte)rfConfigurationMode;
@@ -780,9 +783,9 @@ namespace Iot.Device.Pn532
             return ret >= 0;
         }
 
-#endregion
+        #endregion
 
-#region Read/Write registers
+        #region Read/Write registers
 
         /// <summary>
         /// Read an array of SFR registers
@@ -879,9 +882,9 @@ namespace Iot.Device.Pn532
             return ret >= 0;
         }
 
-#endregion
+        #endregion
 
-#region Read/Wriet GPIO
+        #region Read/Wriet GPIO
 
         /// <summary>
         /// Read the PN532 GPIO
@@ -921,9 +924,9 @@ namespace Iot.Device.Pn532
             return ret >= 0;
         }
 
-#endregion
+        #endregion
 
-#region Power management
+        #region Power management
 
         /// <summary>
         /// Power down the PN532
@@ -1018,9 +1021,9 @@ namespace Iot.Device.Pn532
             }
         }
 
-#endregion
+        #endregion
 
-#region Communication
+        #region Communication
 
         /// <summary>
         /// Setup the baud rate communication when using the HSU Serial Port mode
@@ -1141,7 +1144,7 @@ namespace Iot.Device.Pn532
             int correctionPreamble = 2;
             int correctionIndex = 0;
             int correctionLArgeSizeBuffer = writeData.Length < 250 ? 0 : 2;
-            if (!((_parametersFlags & ParametersFlags.fRemovePrePostAmble) == ParametersFlags.fRemovePrePostAmble))
+            if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
             {
                 correctionPreamble = 0;
                 correctionIndex = 1;
@@ -1290,7 +1293,7 @@ namespace Iot.Device.Pn532
                     return -1;
             }
             // PREAMBULE
-            if (!((_parametersFlags & ParametersFlags.fRemovePrePostAmble) == ParametersFlags.fRemovePrePostAmble))
+            if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
                 if (!(_serialPort.ReadByte() == Preamble))
                     return -1;
             // STARTCODE1
@@ -1338,7 +1341,7 @@ namespace Iot.Device.Pn532
             var checkSumReal = _serialPort.ReadByte();
             if ((byte)(checkSum + checkSumReal) != 0)
                 return -1;
-            if (!((_parametersFlags & ParametersFlags.fRemovePrePostAmble) == ParametersFlags.fRemovePrePostAmble))
+            if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
                 if (!(_serialPort.ReadByte() == Postamble))
                     return -1;
             return length - 2;
@@ -1358,7 +1361,7 @@ namespace Iot.Device.Pn532
             Thread.Sleep(1);
             _spiDevice.WriteByte(ReverseByte(ReadData));
             // PREAMBULE
-            if (!((_parametersFlags & ParametersFlags.fRemovePrePostAmble) == ParametersFlags.fRemovePrePostAmble))
+            if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
                 if (!(ReverseByte(_spiDevice.ReadByte()) == Preamble))
                     return -1;
             // STARTCODE1
@@ -1399,7 +1402,7 @@ namespace Iot.Device.Pn532
                 _spiDevice.Read(buff);
                 ReverseByte(buff.AsSpan());
                 buff.AsSpan().CopyTo(readData);
-                
+
             }
             // Almost finished, we need to calculate the checksum
             var checkSum = ToHostCheckSumD5 + (byte)commandSet + 1;
@@ -1408,7 +1411,7 @@ namespace Iot.Device.Pn532
             var checkSumReal = ReverseByte(_spiDevice.ReadByte());
             if ((byte)(checkSum + checkSumReal) != 0)
                 return -1;
-            if (!((_parametersFlags & ParametersFlags.fRemovePrePostAmble) == ParametersFlags.fRemovePrePostAmble))
+            if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
                 if (!(ReverseByte(_spiDevice.ReadByte()) == Postamble))
                     return -1;
             return length - 2;
@@ -1433,7 +1436,7 @@ namespace Iot.Device.Pn532
             if (preamb[idxPreamb] == 0x01)
                 idxPreamb++;
             // PREAMBULE
-            if (!((_parametersFlags & ParametersFlags.fRemovePrePostAmble) == ParametersFlags.fRemovePrePostAmble))
+            if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
                 if (!(preamb[idxPreamb++] == Preamble))
                     return -1;
             // STARTCODE1
@@ -1483,7 +1486,7 @@ namespace Iot.Device.Pn532
             var checkSumReal = preamb[idxPreamb++];
             if ((byte)(checkSum + checkSumReal) != 0)
                 return -1;
-            if (!((_parametersFlags & ParametersFlags.fRemovePrePostAmble) == ParametersFlags.fRemovePrePostAmble))
+            if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
                 if (!(preamb[idxPreamb++] == Postamble))
                     return -1;
             return length - 2;
@@ -1603,7 +1606,7 @@ namespace Iot.Device.Pn532
                 span[i] = ReverseByte(span[i]);
         }
 
-#endregion
+        #endregion
 
         public void Dispose()
         {

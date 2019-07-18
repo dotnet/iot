@@ -37,6 +37,5 @@ namespace IoT.Device.Pn532
         OverCurrentDetected = 0x2D,
         NADMissing = 0x2E,
         Unknown = 0xFF,
-
     }
 }
