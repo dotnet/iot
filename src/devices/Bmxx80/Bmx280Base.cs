@@ -39,6 +39,7 @@ namespace Iot.Device.Bmxx80
             : base(deviceId, i2cDevice)
         {
             _controlRegister = (byte)Bmx280Register.CTRL_MEAS;
+            TemperatureFine = int.MinValue;
         }
 
         /// <summary>
