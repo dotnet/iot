@@ -120,15 +120,7 @@ namespace Iot.Device.Bmxx80
         {
             byte read = Read8BitsFromRegister(_controlRegister);
 
-            // Get only the power mode bits.
-            var powerMode = (byte)(read & 0b_0000_0011);
-
-            return powerMode switch
-            {
-                0b00 => Bme680PowerMode.Sleep,
-                0b01 => Bme680PowerMode.Forced,
-                _ => throw new NotImplementedException($"Read power mode not defined by specification.")
-            };
+            return (Bme680PowerMode)(read & 0b_0000_0011);
         }
 
         /// <summary>
