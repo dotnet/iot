@@ -1,11 +1,13 @@
-# DS3231 - Samples
+# RealtimeClock - Samples
 
 ## Hardware Required
-* DS3231
+* DS1307/DS3231/PCF8563
 * Male/Female Jumper Wires
 
 ## Circuit
-![](DS3231_circuit_bb.png)
+### I2C Devices
+
+![](Circuit_DS1307_bb.png)
 
 * SCL - SCL
 * SDA - SDA
@@ -14,31 +16,29 @@
 
 ## Code
 ```C#
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Ds3231.DefaultI2cAddress);
+Console.WriteLine("Hello, Realtime Clock DS1307!");
+
+I2cConnectionSettings settings = new I2cConnectionSettings(1, Ds1307.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 
-using (Ds3231 rtc = new Ds3231(device))
+using (Ds1307 rtc = new Ds1307(device))
 {
-    // set DS3231 time
+    // set DS1307 time
     rtc.DateTime = DateTime.Now;
 
     // loop
     while (true)
     {
-        // read temperature
-        double temp = rtc.Temperature.Celsius;
         // read time
         DateTime dt = rtc.DateTime;
 
         Console.WriteLine($"Time: {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
-        Console.WriteLine($"Temperature: {temp} ℃");
         Console.WriteLine();
 
         // wait for a second
         Thread.Sleep(1000);
     }
 }
-
 ```
 
 ## Result

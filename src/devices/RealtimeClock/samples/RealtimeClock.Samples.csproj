@@ -1,15 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
-    <Compile Include="..\Common\Iot\Device\NumberTool.cs" />
-    <Compile Include="Ds1307.cs" />
-    <Compile Include="Register.cs" />
+    <ProjectReference Include="..\RealtimeClock.csproj" />
   </ItemGroup>
 
 </Project>

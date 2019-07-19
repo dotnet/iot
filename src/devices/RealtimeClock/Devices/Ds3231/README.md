@@ -19,6 +19,3 @@ using (Ds3231 rtc = new Ds3231(device))
     double temp = rtc.Temperature.Celsius;
 }
 ```
-
-## References
-https://datasheets.maximintegrated.com/en/ds/DS3231.pdf

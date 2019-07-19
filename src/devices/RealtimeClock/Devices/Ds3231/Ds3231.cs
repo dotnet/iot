@@ -6,24 +6,20 @@ using System;
 using System.Device.I2c;
 using Iot.Units;
 
-namespace Iot.Device.Ds3231
+namespace Iot.Device.Rtc
 {
     /// <summary>
     /// Realtime Clock DS3231
     /// </summary>
-    public class Ds3231 : IDisposable
+    public class Ds3231 : RtcBase
     {
         /// <summary>
         /// DS3231 Default I2C Address
         /// </summary>
         public const byte DefaultI2cAddress = 0x68;
 
-        private I2cDevice _i2cDevice = null;
-
-        /// <summary>
-        /// DS3231 DateTime
-        /// </summary>
-        public DateTime DateTime { get => ReadTime(); set => SetTime(value); }
+        private I2cDevice _i2cDevice;
+        private bool _disposedValue = false;
 
         /// <summary>
         /// DS3231 Temperature
@@ -43,12 +39,12 @@ namespace Iot.Device.Ds3231
         /// Read Time from DS3231
         /// </summary>
         /// <returns>DS3231 Time</returns>
-        private DateTime ReadTime()
+        protected override DateTime ReadTime()
         {
             // Sec, Min, Hour, Day, Date, Month & Century, Year
             Span<byte> rawData = stackalloc byte[7];
 
-            _i2cDevice.WriteByte((byte)Register.RTC_SEC_REG_ADDR);
+            _i2cDevice.WriteByte((byte)Ds3231Register.RTC_SEC_REG_ADDR);
             _i2cDevice.Read(rawData);
 
             return new DateTime(rawData[5] >> 7 == 1 ? 2000 + NumberTool.Bcd2Dec(rawData[6]) : 1900 + NumberTool.Bcd2Dec(rawData[6]),
@@ -63,11 +59,11 @@ namespace Iot.Device.Ds3231
         /// Set DS3231 Time
         /// </summary>
         /// <param name="time">Time</param>
-        private void SetTime(DateTime time)
+        protected override void SetTime(DateTime time)
         {
             Span<byte> setData = stackalloc byte[8];
 
-            setData[0] = (byte)Register.RTC_SEC_REG_ADDR;
+            setData[0] = (byte)Ds3231Register.RTC_SEC_REG_ADDR;
 
             setData[1] = NumberTool.Dec2Bcd(time.Second);
             setData[2] = NumberTool.Dec2Bcd(time.Minute);
@@ -92,11 +88,11 @@ namespace Iot.Device.Ds3231
         /// Read DS3231 Temperature
         /// </summary>
         /// <returns>Temperature</returns>
-        private double ReadTemperature()
+        protected double ReadTemperature()
         {
             Span<byte> data = stackalloc byte[2];
 
-            _i2cDevice.WriteByte((byte)Register.RTC_TEMP_MSB_REG_ADDR);
+            _i2cDevice.WriteByte((byte)Ds3231Register.RTC_TEMP_MSB_REG_ADDR);
             _i2cDevice.Read(data);
 
             // datasheet Temperature part
@@ -106,10 +102,18 @@ namespace Iot.Device.Ds3231
         /// <summary>
         /// Cleanup
         /// </summary>
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _i2cDevice?.Dispose();
+                }
+
+                _i2cDevice = null;
+                _disposedValue = true;
+            }
         }
     }
 }

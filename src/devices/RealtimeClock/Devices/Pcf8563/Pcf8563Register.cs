@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Pcf8563
+namespace Iot.Device.Rtc
 {
-    internal enum Register : byte
+    internal enum Pcf8563Register : byte
     {
         PCF_CTRL1_ADDR = 0x00,
         PCF_CTRL2_ADDR = 0x01,

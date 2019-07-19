@@ -5,24 +5,20 @@
 using System;
 using System.Device.I2c;
 
-namespace Iot.Device.Ds1307
+namespace Iot.Device.Rtc
 {
     /// <summary>
     /// Realtime Clock DS1307
     /// </summary>
-    public class Ds1307 : IDisposable
+    public class Ds1307 : RtcBase
     {
         /// <summary>
         /// DS1307 Default I2C Address
         /// </summary>
         public const byte DefaultI2cAddress = 0x68;
 
-        private I2cDevice _i2cDevice = null;
-
-        /// <summary>
-        /// DS1307 DateTime
-        /// </summary>
-        public DateTime DateTime { get => ReadTime(); set => SetTime(value); }
+        private I2cDevice _i2cDevice;
+        private bool _disposedValue = false;
 
         /// <summary>
         /// Creates a new instance of the DS1307
@@ -37,12 +33,12 @@ namespace Iot.Device.Ds1307
         /// Read Time from DS1307
         /// </summary>
         /// <returns>DS1307 Time</returns>
-        private DateTime ReadTime()
+        protected override DateTime ReadTime()
         {
             Span<byte> readBuffer = stackalloc byte[7];
 
             // Read all registers at the same time
-            _i2cDevice.WriteByte((byte)Register.RTC_SEC_REG_ADDR);
+            _i2cDevice.WriteByte((byte)Ds1307Register.RTC_SEC_REG_ADDR);
             _i2cDevice.Read(readBuffer);
 
             // Details in the Datasheet P8
@@ -58,11 +54,11 @@ namespace Iot.Device.Ds1307
         /// Set DS1307 Time
         /// </summary>
         /// <param name="time">Time</param>
-        private void SetTime(DateTime time)
+        protected override void SetTime(DateTime time)
         {
             Span<byte> writeBuffer = stackalloc byte[8];
 
-            writeBuffer[0] = (byte)Register.RTC_SEC_REG_ADDR;
+            writeBuffer[0] = (byte)Ds1307Register.RTC_SEC_REG_ADDR;
 
             // Details in the Datasheet P8
             // | bit 7: CH | bit 6-0: sec |
@@ -81,10 +77,18 @@ namespace Iot.Device.Ds1307
         /// <summary>
         /// Cleanup
         /// </summary>
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _i2cDevice?.Dispose();  
+                }
+
+                _i2cDevice = null;
+                _disposedValue = true;
+            }
         }
     }
 }

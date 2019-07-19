@@ -17,6 +17,3 @@ using (Pcf8563 rtc = new Pcf8563(device))
     DateTime dt = rtc.DateTime;
 }
 ```
-
-## References
-https://cdn.datasheetspdf.com/pdf-down/P/C/F/PCF-856.pdf
