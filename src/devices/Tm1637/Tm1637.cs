@@ -12,7 +12,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Iot.Device.Tm1637
 {
-    public class Tm1637 : IDisposable
+    public sealed class Tm1637 : IDisposable
     {
         /// <summary>
         /// The number of segments that the TM1637 can handle
@@ -39,11 +39,11 @@ namespace Iot.Device.Tm1637
         /// <param name="pinClk">The clock pin</param>
         /// <param name="pinDio">The data pin</param>
         /// <param name="pinNumberingScheme">Use the logical or physical pin layout</param>
-        public Tm1637(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+        public Tm1637(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, IGpioController gpioController = null)
         {
             _pinClk = pinClk;
             _pinDio = pinDio;
-            _controller = new GpioController(pinNumberingScheme);
+            _controller = gpioController != null ? (GpioController)gpioController : new GpioController(pinNumberingScheme);
             _controller.OpenPin(_pinClk, PinMode.Output);
             _controller.OpenPin(_pinDio, PinMode.Output);
             _brightness = 7;
@@ -108,7 +108,6 @@ namespace Iot.Device.Tm1637
             // We send data by 8 bits
             for (byte i = 0; i < 8; i++)
             {
-
                 _controller.Write(_pinClk, PinValue.Low);
                 DelayHelper.DelayMicroseconds(ClockWidthMicroseconds, true);
                 // LSB first
@@ -136,6 +135,7 @@ namespace Iot.Device.Tm1637
             var ack = _controller.Read(_pinDio);
             if (ack == PinValue.Low)
             {
+                // We get acknoledge from the device
                 _controller.SetPinMode(_pinDio, PinMode.Output);
                 _controller.Write(_pinDio, PinValue.Low);
             }
@@ -226,7 +226,7 @@ namespace Iot.Device.Tm1637
 
 
         /// <summary>
-        /// Displays a raw data at a specific segment address from 0 to 6
+        /// Displays a raw data at a specific segment position from 0 to 5
         /// 
         /// bit 0 = a       _a_
         /// bit 1 = b      |   |
@@ -239,16 +239,16 @@ namespace Iot.Device.Tm1637
         /// 
         /// Representation of the number 0 so lighting segments a, b, c, d, e and F is then 0x3f
         /// </summary>
-        /// <param name="segmentAddress">The segment address from 0 to 6</param>
-        /// <param name="rawData">The rsegemnets to display</param>
-        public void Display(byte segmentAddress, Character rawData)
+        /// <param name="segmentPosition">The segment position from 0 to 5</param>
+        /// <param name="rawData">The segemnet characters to display</param>
+        public void Display(byte segmentPosition, Character rawData)
         {
-            if (segmentAddress > MaxSegments)
+            if (segmentPosition > MaxSegments)
                 throw new ArgumentException($"Maximum number of segments for TM1637 is {MaxSegments}");
 
             // Recreate the buffer in correct order
-            _lastDisplay[_segmentOrder[segmentAddress]] = (byte)rawData;
-            DisplayRaw(_segmentOrder[segmentAddress], (byte)rawData);
+            _lastDisplay[_segmentOrder[segmentPosition]] = (byte)rawData;
+            DisplayRaw(_segmentOrder[segmentPosition], (byte)rawData);
         }
 
         private void DisplayRaw(byte segmentAddress, byte rawData)
