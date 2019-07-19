@@ -7,6 +7,6 @@ using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
-    [DllImport(LibcLibrary, SetLastError = true)]
+    [DllImport(LibcLibrary)]
     internal static extern int munmap(IntPtr addr, int length);
 }

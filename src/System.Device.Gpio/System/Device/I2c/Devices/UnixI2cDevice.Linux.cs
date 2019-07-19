@@ -73,7 +73,7 @@ namespace System.Device.I2c
 
         private unsafe void Transfer(byte* writeBuffer, byte* readBuffer, int writeBufferLength, int readBufferLength)
         {
-            if (_functionalities.HasFlag(I2cFunctionalityFlags.I2C_FUNC_I2C))
+            if ((_functionalities & I2cFunctionalityFlags.I2C_FUNC_I2C) != 0)
             {
                 ReadWriteInterfaceTransfer(writeBuffer, readBuffer, writeBufferLength, readBufferLength);
             }

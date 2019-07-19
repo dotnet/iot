@@ -16,32 +16,11 @@ internal partial class Interop
         internal static IntPtr InvalidHandleValue = new IntPtr(-1);
 
         /// <summary>
-        /// Create a new gpiochip iterator.
-        /// </summary>
-        /// <returns>Pointer to a new chip iterator object or a SafeChipIteratorHandle pointing to 0 which will return <see langword="true" /> for IsInvalid.</returns>
-        [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern SafeChipIteratorHandle gpiod_chip_iter_new();
-
-        /// <summary>
         /// Release all resources allocated for the gpiochip iterator and close the most recently opened gpiochip(if any).
         /// </summary>
         /// <param name="iter">The gpiochip iterator object</param>
         [DllImport(LibgpiodLibrary)]
         internal static extern void gpiod_chip_iter_free(IntPtr iter);
-
-        /// <summary>
-        /// Release all resources allocated for the gpiochip iterator but don't close the most recently opened gpiochip (if any).
-        /// </summary>
-        /// <param name="iter">The gpiochip iterator object</param>
-        [DllImport(LibgpiodLibrary)]
-        internal static extern void gpiod_chip_iter_free_noclose(SafeChipIteratorHandle iter);
-
-        /// <summary>
-        /// Get the next gpiochip handle.
-        /// </summary>
-        /// <param name="iter">The gpiochip iterator object</param>
-        [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern SafeChipHandle gpiod_chip_iter_next(SafeChipIteratorHandle iter);
 
         /// <summary>
         /// Close a GPIO chip handle and release all allocated resources.
@@ -68,20 +47,12 @@ internal partial class Interop
         internal static extern SafeLineHandle gpiod_chip_get_line(SafeChipHandle chip, int offset);
 
         /// <summary>
-        /// Read the GPIO line direction setting.
-        /// </summary>
-        /// <param name="line">GPIO line handle</param>
-        /// <returns>1 if INPUT otherwise 2 (OUTPUT).</returns>
-        [DllImport(LibgpiodLibrary)]
-        internal static extern int gpiod_line_direction(SafeLineHandle line);
-
-        /// <summary>
         /// Reserve a single line, set the direction to input.
         /// </summary>
         /// <param name="line">GPIO line handle</param>
         /// <param name="consumer">Name of the consumer.</param>
         /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
-        [DllImport(LibgpiodLibrary)]
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern int gpiod_line_request_input(SafeLineHandle line, string consumer);
 
         /// <summary>
@@ -90,7 +61,7 @@ internal partial class Interop
         /// <param name="line">GPIO line handle</param>
         /// <param name="consumer">Name of the consumer.</param>
         /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
-        [DllImport(LibgpiodLibrary)]
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern int gpiod_line_request_output(SafeLineHandle line, string consumer);
 
         /// <summary>
