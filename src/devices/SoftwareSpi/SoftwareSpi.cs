@@ -18,6 +18,15 @@ namespace Iot.Device.Spi
         private readonly int _cs;
         private readonly SpiConnectionSettings _settings;
 
+        /// <summary>
+        /// Software implementation of the SPI
+        /// </summary>
+        /// <param name="clk">Clock pin</param>
+        /// <param name="miso">Master Input Slave Output pin</param>
+        /// <param name="mosi">Master Output Slave Input pin</param>
+        /// <param name="cs">Chip select pin (or negated chip select)</param>
+        /// <param name="settings">Settings of the SPI connection</param>
+        /// <param name="controller">GPIO controller used for pins</param>
         public SoftwareSpi(int clk, int miso, int mosi, int cs, SpiConnectionSettings settings = null, GpioController controller = null)
         {
             _controller = controller ?? new GpioController();
@@ -34,11 +43,11 @@ namespace Iot.Device.Spi
             _controller.OpenPin(_mosi, PinMode.Output);
             _controller.OpenPin(_cs, PinMode.Output);
 
-            // aka. CPOL
-            bool idle = ((int)_settings.Mode & 1) == 1;
+            // aka. CPOL - tells us which state of the clock means idle (false means 'low' or 'ground' or '0')
+            bool idle = ((int)_settings.Mode & 0b10) == 0b10;
 
-            // aka. CPHA
-            bool cpha = ((int)_settings.Mode & 0b10) == 0b10;
+            // aka. CPHA - tells us when read/write is 'captured'
+            bool onPulseEnd = ((int)_settings.Mode & 1) == 1;
 
             _controller.Write(_cs,!(bool)_settings.ChipSelectLineActiveState);
             _controller.Write(_clk, idle);
@@ -46,8 +55,21 @@ namespace Iot.Device.Spi
             // TODO: To respect ClockFrequency we need to inject the right delays here
             //       and have some very accurate way to measure time.
             //       Ideally we should verify the output with an oscilloscope.
-            if (cpha)
+
+            // pulse start   pulse end
+            //       v       v
+            //       ---------
+            //       |       |
+            // ------         ------
+            //  idle   !idle   idle
+            // note: vertical axis represents idle or !idle (pulse) state and is orthogonal
+            //       to low/high related with GPIO - that part is defined by SPI Mode which
+            //       tells us what GPIO state represents idle and also if the measurement happens
+            //       on pulse start or end
+            if (onPulseEnd)
             {
+                // When we capture onPulseEnd then we need to start pulse before we send the data
+                // and then trigger the capture on exit
                 _bitTransfer = new ScopeData(
                     enter: () => {
                         _controller.Write(_clk, !idle);
@@ -74,8 +96,10 @@ namespace Iot.Device.Spi
                 });
         }
 
+        /// <inheritdoc />
         public override SpiConnectionSettings ConnectionSettings => _settings;
 
+        /// <inheritdoc />
         public override void TransferFullDuplex(ReadOnlySpan<byte> dataToWrite, Span<byte> dataToRead)
         {
             if (dataToRead.Length != dataToRead.Length)
@@ -86,14 +110,14 @@ namespace Iot.Device.Spi
             int bitLen = _settings.DataBitLength;
             int lastBit = bitLen - 1;
 
-            using (ChipSelect)
+            using (StartChipSelect())
             {
                 for (int i = 0; i < dataToRead.Length; i++)
                 {
                     byte readByte = 0;
                     for (int j = 0; j < bitLen; j++)
                     {
-                        using (BitTransfer)
+                        using (StartBitTransfer())
                         {
                             int bit = _settings.DataFlow == DataFlow.MsbFirst ? lastBit - j : j;
                             bool bitToWrite = ((dataToWrite[i] >> bit) & 1) == 1;
@@ -109,25 +133,28 @@ namespace Iot.Device.Spi
             }
         }
 
+        /// <inheritdoc />
         private bool ReadWriteBit(bool bitToWrite)
         {
             _controller.Write(_mosi, bitToWrite);
             return (bool)_controller.Read(_miso);
         }
 
+        /// <inheritdoc />
         public override void Read(Span<byte> data)
         {
             Span<byte> dataToWrite = stackalloc byte[data.Length];
-            dataToWrite.Fill(0);
             TransferFullDuplex(dataToWrite, data);
         }
 
+        /// <inheritdoc />
         public override void Write(ReadOnlySpan<byte> data)
         {
             Span<byte> dataToRead = stackalloc byte[data.Length];
             TransferFullDuplex(data, dataToRead);
         }
 
+        /// <inheritdoc />
         public override void WriteByte(byte data)
         {
             Span<byte> outData = stackalloc byte[1];
@@ -135,6 +162,7 @@ namespace Iot.Device.Spi
             Write(outData);
         }
 
+        /// <inheritdoc />
         public override byte ReadByte()
         {
             Span<byte> data = stackalloc byte[1];
@@ -142,7 +170,8 @@ namespace Iot.Device.Spi
             return data[0];
         }
 
-        public new void Dispose()
+        /// <inheritdoc />
+        public override void Dispose(bool disposing)
         {
             _controller?.Dispose();
             _controller = null;
@@ -151,8 +180,8 @@ namespace Iot.Device.Spi
 
         private ScopeData _bitTransfer;
         private ScopeData _chipSelect;
-        private Scope BitTransfer => new Scope(_bitTransfer);
-        private Scope ChipSelect => new Scope(_chipSelect);
+        private Scope StartBitTransfer() => new Scope(_bitTransfer);
+        private Scope StartChipSelect() => new Scope(_chipSelect);
 
         private class ScopeData
         {
@@ -180,6 +209,7 @@ namespace Iot.Device.Spi
                 }
             }
         }
+
         private struct Scope : IDisposable
         {
             ScopeData _data;
