@@ -168,6 +168,8 @@ namespace Iot.Device.Tm1637
 
         /// <summary>
         /// Displays segments starting at first segment with byte array containing raw data for each segment including the dot
+        /// <remarks>
+        /// Segment representation:
         /// 
         /// bit 0 = a       _a_
         /// bit 1 = b      |   |
@@ -179,6 +181,7 @@ namespace Iot.Device.Tm1637
         /// bit 7 = dp
         /// 
         /// Representation of the number 0 so lighting segments a, b, c, d, e and F is then 0x3f
+        /// </remarks>
         /// </summary>
         /// <param name="rawData">The raw data array to display, size of the array has to be 6 maximum</param>
         private void Display(ReadOnlySpan<byte> rawData)
@@ -227,6 +230,9 @@ namespace Iot.Device.Tm1637
 
         /// <summary>
         /// Displays a raw data at a specific segment position from 0 to 5
+        /// </summary>
+        /// <remarks>
+        /// Segment representation:
         /// 
         /// bit 0 = a       _a_
         /// bit 1 = b      |   |
@@ -238,7 +244,7 @@ namespace Iot.Device.Tm1637
         /// bit 7 = dp
         /// 
         /// Representation of the number 0 so lighting segments a, b, c, d, e and F is then 0x3f
-        /// </summary>
+        /// </remarks>
         /// <param name="segmentPosition">The segment position from 0 to 5</param>
         /// <param name="rawData">The segemnet characters to display</param>
         public void Display(byte segmentPosition, Character rawData)
