@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Device.I2c;
 using System.Threading;
+using System.Threading.Tasks;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
 
@@ -14,7 +15,7 @@ namespace Iot.Device.Samples
         /// <summary>
         /// Main entry point for the program.
         /// </summary>
-        static async void Main()
+        static async Task Main()
         {
             Console.WriteLine("Hello BME680!");
 
