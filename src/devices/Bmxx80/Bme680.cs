@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.I2c;
+using System.Threading.Tasks;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
@@ -99,7 +100,7 @@ namespace Iot.Device.Bmxx80
         /// Read the humidity.
         /// </summary>
         /// <returns>Calculated humidity.</returns>
-        public double ReadHumidity()
+        public Task<double> ReadHumidityAsync()
         {
             // Read humidity data.
             byte msb = Read8BitsFromRegister((byte)Bme680Register.HUMIDITYDATA_MSB);
@@ -108,7 +109,7 @@ namespace Iot.Device.Bmxx80
             // Convert to a 32bit integer.
             var adcHumidity = (msb << 8) + lsb;
 
-            return CompensateHumidity(ReadTemperature().Celsius, adcHumidity);
+            return Task.FromResult(CompensateHumidity(ReadTemperatureAsync().Celsius, adcHumidity));
         }
 
         /// <summary>
@@ -127,7 +128,7 @@ namespace Iot.Device.Bmxx80
         /// Read the pressure.
         /// </summary>
         /// <returns>Calculated pressure in Pa.</returns>
-        public double ReadPressure()
+        public Task<double> ReadPressureAsync()
         {
             // Read pressure data.
             byte lsb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_LSB);
@@ -137,14 +138,14 @@ namespace Iot.Device.Bmxx80
             // Convert to a 32bit integer.
             var adcPressure = (msb << 12) + (lsb << 4) + (xlsb >> 4);
 
-            return CompensatePressure(adcPressure);
+            return Task.FromResult(CompensatePressure(adcPressure));
         }
 
         /// <summary>
         /// Read the temperature.
         /// </summary>
         /// <returns>Calculated temperature.</returns>
-        public Temperature ReadTemperature()
+        public Task<Temperature> ReadTemperatureAsync()
         {
             // Read temperature data.
             byte lsb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_LSB);
@@ -154,7 +155,7 @@ namespace Iot.Device.Bmxx80
             // Convert to a 32bit integer.
             var adcTemperature = (msb << 12) + (lsb << 4) + (xlsb >> 4);
 
-            return CompensateTemperature(adcTemperature);
+            return Task.FromResult(CompensateTemperature(adcTemperature));
         }
 
         /// <summary>

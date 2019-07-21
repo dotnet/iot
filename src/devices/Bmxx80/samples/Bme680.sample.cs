@@ -14,7 +14,7 @@ namespace Iot.Device.Samples
         /// <summary>
         /// Main entry point for the program.
         /// </summary>
-        static void Main()
+        static async void Main()
         {
             Console.WriteLine("Hello BME680!");
 
@@ -45,9 +45,9 @@ namespace Iot.Device.Samples
                     // This prevent us from reading old data from the sensor.
                     if (bme680.ReadHasNewData())
                     {
-                        var temperature = Math.Round(bme680.ReadTemperature().Celsius, 2).ToString("N2");
-                        var pressure = Math.Round(bme680.ReadPressure() / 100, 2).ToString("N2");
-                        var humidity = Math.Round(bme680.ReadHumidity(), 2).ToString("N2");
+                        var temperature = Math.Round((await bme680.ReadTemperatureAsync()).Celsius, 2).ToString("N2");
+                        var pressure = Math.Round(await bme680.ReadPressureAsync() / 100, 2).ToString("N2");
+                        var humidity = Math.Round(await bme680.ReadHumidityAsync(), 2).ToString("N2");
 
                         Console.WriteLine($"{temperature} °c | {pressure} hPa | {humidity} %rH");
 
