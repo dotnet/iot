@@ -100,7 +100,7 @@ namespace Iot.Device.Bmxx80
         /// Read the humidity.
         /// </summary>
         /// <returns>Calculated humidity.</returns>
-        public Task<double> ReadHumidityAsync()
+        public async Task<double> ReadHumidityAsync()
         {
             // Read humidity data.
             byte msb = Read8BitsFromRegister((byte)Bme680Register.HUMIDITYDATA_MSB);
@@ -109,7 +109,7 @@ namespace Iot.Device.Bmxx80
             // Convert to a 32bit integer.
             var adcHumidity = (msb << 8) + lsb;
 
-            return Task.FromResult(CompensateHumidity(ReadTemperatureAsync().Celsius, adcHumidity));
+            return CompensateHumidity((await ReadTemperatureAsync()).Celsius, adcHumidity);
         }
 
         /// <summary>
