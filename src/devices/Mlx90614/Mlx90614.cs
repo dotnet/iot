@@ -10,11 +10,16 @@ using Iot.Units;
 namespace Iot.Device.Mlx90614
 {
     /// <summary>
-    /// Infra Red thermometer Sensor MLX90614
+    /// Infra Red Thermometer MLX90614
     /// </summary>
     public class Mlx90614 : IDisposable
     {
         private I2cDevice _i2cDevice;
+
+        /// <summary>
+        /// MLX90614 Default I2C Address
+        /// </summary>
+        public const byte DefaultI2cAddress = 0x5A;
 
         /// <summary>
         /// MLX90614's Ambient Temperature
@@ -47,7 +52,9 @@ namespace Iot.Device.Mlx90614
             _i2cDevice.WriteRead(writeBuffer, readBuffer);
 
             // The formula is on the datasheet P30.
-            return BinaryPrimitives.ReadInt16LittleEndian(readBuffer) * 0.02 - 273.15;
+            double temp = BinaryPrimitives.ReadInt16LittleEndian(readBuffer) * 0.02 - 273.15;
+
+            return Math.Round(temp, 2);
         }
 
         /// <summary>
@@ -61,7 +68,9 @@ namespace Iot.Device.Mlx90614
 
             _i2cDevice.WriteRead(writeBuffer, readBuffer);
 
-            return BinaryPrimitives.ReadInt16LittleEndian(readBuffer) * 0.02 - 273.15;
+            double temp = BinaryPrimitives.ReadInt16LittleEndian(readBuffer) * 0.02 - 273.15;
+
+            return Math.Round(temp, 2);
         }
 
         /// <summary>
