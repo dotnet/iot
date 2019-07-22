@@ -16,7 +16,6 @@ using (Mlx90614 sensor = new Mlx90614(i2cDevice))
     // read object temperature
     double object = sensor.ObjectTemperature.Celsius;
 }
-
 ```
 
 ## References
