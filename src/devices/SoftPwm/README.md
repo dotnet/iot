@@ -13,10 +13,10 @@ var softwarePwmChannel = new SoftwarePwmChannel(17, 200, 0);
 
 By default SoftwarePwmChannel is using a low priority clock to emulate the PWM. It is ok if you have leds and other non time sensitive elements attached.
 
-**Important:** if you have clock sensitive elements attached to this software PWM, you need to use a high precision timer. In order to make it happen, you need to select it at creation time by passing ```true``` to the precisionTimer parameter in the constructor:
+**Important:** if you have clock sensitive elements attached to this software PWM, you need to use a high precision timer. In order to make it happen, you need to select it at creation time by passing ```true``` to the usePrecisionTimer parameter in the constructor:
 
 ```csharp
-var softwarePwmChannelWithPrecisionTimer = new SoftwarePwmChannel(17, frequency: 50, dutyCyclePercentage = 0.5, precisionTimer: true);
+var softwarePwmChannelWithPrecisionTimer = new SoftwarePwmChannel(17, frequency: 50, dutyCyclePercentage = 0.5, usePrecisionTimer: true);
 ```
 
 ### Starting the PWM
