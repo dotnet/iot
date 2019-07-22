@@ -39,7 +39,6 @@ namespace Iot.Device.Bmxx80
             : base(deviceId, i2cDevice)
         {
             _controlRegister = (byte)Bmx280Register.CTRL_MEAS;
-            TemperatureFine = int.MinValue;
         }
 
         /// <summary>
@@ -120,11 +119,8 @@ namespace Iot.Device.Bmxx80
                 await Task.Delay(GetMeasurementTimeForForcedMode(ReadPressureSampling()));
             }
 
-            //Read the temperature first to load the t_fine value for compensation
-            if (TemperatureFine == int.MinValue)
-            {
-                await ReadTemperatureAsync();
-            }
+            // Read the temperature first to load the t_fine value for compensation.
+            await ReadTemperatureAsync();
 
             // Read pressure data.
             byte msb = Read8BitsFromRegister((byte)Bmx280Register.PRESSUREDATA_MSB);

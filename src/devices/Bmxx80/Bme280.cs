@@ -79,10 +79,7 @@ namespace Iot.Device.Bmxx80
             }
 
             // Read the temperature first to load the t_fine value for compensation.
-            if (TemperatureFine == int.MinValue)
-            {
-                await ReadTemperatureAsync();
-            }
+            await ReadTemperatureAsync();
 
             byte msb = Read8BitsFromRegister((byte)Bme280Register.HUMIDDATA_MSB);
             byte lsb = Read8BitsFromRegister((byte)Bme280Register.HUMIDDATA_LSB);
