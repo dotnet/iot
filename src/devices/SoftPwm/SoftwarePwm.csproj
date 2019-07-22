@@ -2,18 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="SoftwarePwmChannel.cs" />
+    <Compile Include="../Interop/Unix/ThreadHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)../../System.Device.Gpio/System.Device.Gpio.csproj">
-      <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <None Include="README.md" />
   </ItemGroup>
 
