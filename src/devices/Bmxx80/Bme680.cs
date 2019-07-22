@@ -128,7 +128,7 @@ namespace Iot.Device.Bmxx80
         /// Read the pressure.
         /// </summary>
         /// <returns>Calculated pressure in Pa.</returns>
-        public Task<double> ReadPressureAsync()
+        public async Task<double> ReadPressureAsync()
         {
             // Read pressure data.
             byte lsb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_LSB);
@@ -138,7 +138,10 @@ namespace Iot.Device.Bmxx80
             // Convert to a 32bit integer.
             var adcPressure = (msb << 12) + (lsb << 4) + (xlsb >> 4);
 
-            return Task.FromResult(CompensatePressure(adcPressure));
+            // Read the temperature first to load the t_fine value for compensation.
+            await ReadTemperatureAsync();
+
+            return CompensatePressure(adcPressure);
         }
 
         /// <summary>
