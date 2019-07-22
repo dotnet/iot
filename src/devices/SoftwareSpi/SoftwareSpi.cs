@@ -19,14 +19,14 @@ namespace Iot.Device.Spi
         private readonly SpiConnectionSettings _settings;
 
         /// <summary>
-        /// Software implementation of the SPI
+        /// Software implementation of the SPI.
         /// </summary>
-        /// <param name="clk">Clock pin</param>
-        /// <param name="miso">Master Input Slave Output pin</param>
-        /// <param name="mosi">Master Output Slave Input pin</param>
-        /// <param name="cs">Chip select pin (or negated chip select)</param>
-        /// <param name="settings">Settings of the SPI connection</param>
-        /// <param name="controller">GPIO controller used for pins</param>
+        /// <param name="clk">Clock pin.</param>
+        /// <param name="miso">Master Input Slave Output pin.</param>
+        /// <param name="mosi">Master Output Slave Input pin.</param>
+        /// <param name="cs">Chip select pin (or negated chip select).</param>
+        /// <param name="settings">Settings of the SPI connection.</param>
+        /// <param name="controller">GPIO controller used for pins.</param>
         public SoftwareSpi(int clk, int miso, int mosi, int cs, SpiConnectionSettings settings = null, GpioController controller = null)
         {
             _controller = controller ?? new GpioController();
