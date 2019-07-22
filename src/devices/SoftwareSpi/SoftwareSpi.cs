@@ -49,7 +49,7 @@ namespace Iot.Device.Spi
             // aka. CPHA - tells us when read/write is 'captured'
             bool onPulseEnd = ((int)_settings.Mode & 1) == 1;
 
-            _controller.Write(_cs,!(bool)_settings.ChipSelectLineActiveState);
+            _controller.Write(_cs, !(bool)_settings.ChipSelectLineActiveState);
             _controller.Write(_clk, idle);
 
             // TODO: To respect ClockFrequency we need to inject the right delays here
