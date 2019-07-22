@@ -133,7 +133,6 @@ namespace Iot.Device.Spi
             }
         }
 
-        /// <inheritdoc />
         private bool ReadWriteBit(bool bitToWrite)
         {
             _controller.Write(_mosi, bitToWrite);
