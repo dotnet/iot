@@ -56,9 +56,9 @@ namespace System.Device.Spi
             GC.SuppressFinalize(this);
         }
 
-        public virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
-            //Nothing to do in base class.
+            // Nothing to do in base class.
         }
     }
 }
