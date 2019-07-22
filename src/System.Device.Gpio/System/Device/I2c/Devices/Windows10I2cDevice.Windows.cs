@@ -115,7 +115,7 @@ namespace System.Device.I2c
             new Span<byte>(byteArray).CopyTo(readBuffer);
         }
 
-        public override void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             _winI2cDevice?.Dispose();
             _winI2cDevice = null;

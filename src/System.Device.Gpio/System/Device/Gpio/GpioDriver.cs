@@ -113,7 +113,7 @@ namespace System.Device.Gpio
 
         protected virtual void Dispose(bool disposing)
         {
-            // Nothing to do in the base class.
+            // Nothing to do in base class.
         }
     }
 }

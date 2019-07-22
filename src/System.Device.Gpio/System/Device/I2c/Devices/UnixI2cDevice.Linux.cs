@@ -241,13 +241,14 @@ namespace System.Device.I2c
             }
         }
 
-        public override void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (_deviceFileDescriptor >= 0)
             {
                 Interop.close(_deviceFileDescriptor);
                 _deviceFileDescriptor = -1;
             }
+
             base.Dispose(disposing);
         }
     }

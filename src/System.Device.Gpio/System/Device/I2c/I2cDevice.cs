@@ -63,7 +63,7 @@ namespace System.Device.I2c
             GC.SuppressFinalize(this);
         }
 
-        public virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             // Nothing to do in base class.
         }

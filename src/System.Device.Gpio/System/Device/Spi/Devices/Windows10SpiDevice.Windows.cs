@@ -118,7 +118,7 @@ namespace System.Device.Spi
             byteArray.CopyTo(readBuffer);
         }
 
-        public override void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             _winDevice?.Dispose();
             _winDevice = null;
