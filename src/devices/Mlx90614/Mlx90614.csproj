@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <LangVersion>Latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Mlx90614.cs" />
+    <Compile Include="Register.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="..\Units\Units.csproj" />
+  </ItemGroup>
+</Project>
