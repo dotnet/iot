@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
     <Compile Include="..\Common\System\Device\Gpio\PinVector32.cs" Link="PinVector32.cs" />
     <Compile Include="..\Common\System\Device\Gpio\PinVector64.cs" Link="PinVector64.cs" />
     <Compile Include="Pca8574.cs" />

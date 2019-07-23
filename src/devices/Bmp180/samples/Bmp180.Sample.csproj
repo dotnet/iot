@@ -12,6 +12,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bmp180.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
