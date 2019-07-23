@@ -170,7 +170,7 @@ namespace Iot.Device.Spi
         }
 
         /// <inheritdoc />
-        public override void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             _controller?.Dispose();
             _controller = null;
