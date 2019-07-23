@@ -6,7 +6,7 @@
     <SystemDeviceGpioPackageVersion>0.1.0-prerelease.19371.1</SystemDeviceGpioPackageVersion>
     <IotDeviceBindingsPackageVersion>0.1.0-prerelease.19371.1</IotDeviceBindingsPackageVersion>
     <!-- dotnet/arcade dependencies -->
-    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19369.2</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19372.10</MicrosoftDotNetGenAPIPackageVersion>
   </PropertyGroup>
   <!-- Restore sources -->
   <PropertyGroup>
