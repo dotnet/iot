@@ -2,10 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
-    <!-- dotnet/iot dependencies -->
-    <SystemDeviceGpioPackageVersion>0.1.0-prerelease.19372.3</SystemDeviceGpioPackageVersion>
-    <IotDeviceBindingsPackageVersion>0.1.0-prerelease.19372.3</IotDeviceBindingsPackageVersion>
-    <!-- dotnet/arcade dependencies -->
     <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19372.10</MicrosoftDotNetGenAPIPackageVersion>
   </PropertyGroup>
   <!-- Restore sources -->
