@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <EnableDefaultItems>false</EnableDefaultItems>
-    <!--Disabling default items so samples source won't get build by the main library-->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDefaultItems>false</EnableDefaultItems>    
   </PropertyGroup>
 
   <ItemGroup>
