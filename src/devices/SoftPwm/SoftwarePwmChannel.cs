@@ -108,7 +108,6 @@ namespace System.Device.Pwm.Drivers
             if (_usePrecisionTimer)
             {
                 Thread.CurrentThread.Priority = ThreadPriority.Highest;
-                System.Interop.ThreadHelper.SetCurrentThreadHighPriority();
             }
 
             while (_runThread)

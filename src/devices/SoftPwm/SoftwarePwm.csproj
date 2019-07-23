@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Compile Include="SoftwarePwmChannel.cs" />
-    <Compile Include="../Interop/Unix/ThreadHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>
