@@ -49,6 +49,7 @@
     </Reference>
   </ItemGroup>
 
+  <!-- Targets for building the notsupported assembly -->
   <Target Name="SetupEnvironmentForNotSupportedAssembly">
     <PropertyGroup>
       <OutDir>$(OutDir)notsupported\</OutDir>
@@ -70,4 +71,41 @@
           Condition="'$(RuntimeIdentifier)' == ''"
           AfterTargets="Build"
           DependsOnTargets="SetupEnvironmentForNotSupportedAssembly;$(BuildDependsOn)" />
+
+  <!-- Remove all the default content to be includded in the package as we have custom logic that handles that. -->
+  <PropertyGroup>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);RemoveBuildOutputBeforePackaging</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <Target Name="RemoveBuildOutputBeforePackaging" DependsOnTargets="BuiltProjectOutputGroup">
+    <ItemGroup>
+      <BuiltProjectOutputGroupOutput Remove="@(BuiltProjectOutputGroupOutput)" />
+      <DocumentationProjectOutputGroupOutput Remove="@(DocumentationProjectOutputGroupOutput)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Set the path to the symbols that will go into the snupkg -->
+  <Target Name="GetSymbolsForSnupkg" Condition="'$(DebugType)' == 'Portable'" BeforeTargets="GenerateNuspec">
+    <!-- First we remove the calculated location for pdbs since it is wrong. -->
+    <ItemGroup>
+      <_TargetPathsToSymbols Remove="@(_TargetPathsToSymbols)" />
+    </ItemGroup>
+
+    <!-- Add the linux and windows specific pdbs -->
+    <ItemGroup>
+      <!-- _TargetPathsToSymbols doesn't support PackagePath and instead the output path is set to lib/$(TargetFramework)/$(TargetPath) 
+           Setting TargetPath to ./../../ will get us back to the root of the package, so now we are able to place the pdbs inside
+           the runtimes folder.
+      -->
+      <_TargetPathsToSymbols Include="$(OutputPath)linux/$(AssemblyName).pdb">
+        <TargetPath>./../../runtimes/linux/lib/$(TargetFramework)/$(AssemblyName).pdb</TargetPath>
+        <TargetFramework>$(TargetFramework)</TargetFramework>
+      </_TargetPathsToSymbols>
+      <_TargetPathsToSymbols Include="$(OutputPath)win/$(AssemblyName).pdb">
+        <TargetPath>./../../runtimes/win/lib/$(TargetFramework)/$(AssemblyName).pdb</TargetPath>
+        <TargetFramework>$(TargetFramework)</TargetFramework>
+      </_TargetPathsToSymbols>
+    </ItemGroup>
+  </Target>
+
 </Project>
