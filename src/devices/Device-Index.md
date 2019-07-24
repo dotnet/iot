@@ -8,7 +8,7 @@
 * [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
 * [BH1750FVI - Ambient Light Sensor](Bh1750fvi/README.md)
 * [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
-* [BMx280 - Digital Pressure Sensors BMP280/BME280](Bmx280/README.md)
+* [BMxx80 - Digital Temperature, Pressure and Humidity Sensors BMP280/BME280/BME680](Bmxx80/README.md)
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [BrickPi3](BrickPi3/README.md)
 * [Buzzer - Piezo Buzzer Controller](Buzzer/README.md)

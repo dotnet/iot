@@ -10,19 +10,7 @@ namespace Iot.Device.Mcp3008
 {
     public class Mcp3008 : IDisposable
     {
-        private readonly SpiDevice _spiDevice;
-        private GpioController _controller;
-        private readonly CommunicationProtocol _protocol;
-        private readonly int _clk;
-        private readonly int _miso;
-        private readonly int _mosi;
-        private readonly int _cs;
-
-        private enum CommunicationProtocol
-        {
-            Gpio,
-            Spi
-        }
+        private SpiDevice _spiDevice;
 
         public enum InputConfiguration
         {
@@ -33,31 +21,12 @@ namespace Iot.Device.Mcp3008
         public Mcp3008(SpiDevice spiDevice)
         {
             _spiDevice = spiDevice;
-            _protocol = CommunicationProtocol.Spi;
-        }
-
-        public Mcp3008(int clk, int miso, int mosi, int cs)
-        {
-            _controller = new GpioController();
-            _clk = clk;
-            _miso = miso;
-            _mosi = mosi;
-            _cs = cs;
-
-            _controller.OpenPin(_clk, PinMode.Output);
-            _controller.OpenPin(_miso, PinMode.Input);
-            _controller.OpenPin(_mosi, PinMode.Output);
-            _controller.OpenPin(_cs, PinMode.Output);
-            _protocol = CommunicationProtocol.Gpio;
         }
 
         public void Dispose()
         {
-            if (_controller != null)
-            {
-                _controller.Dispose();
-                _controller = null;
-            }
+            _spiDevice?.Dispose();
+            _spiDevice = null;
         }
 
         public int Read(int channel, InputConfiguration inputConfiguration = InputConfiguration.SingleEnded)
@@ -67,14 +36,7 @@ namespace Iot.Device.Mcp3008
                 throw new ArgumentException("ADC channel must be within 0-7 range.");
             }
 
-            if (_protocol == CommunicationProtocol.Spi)
-            {
-                return ReadSpi(channel, inputConfiguration);
-            }
-            else
-            {
-                return ReadGpio(channel, inputConfiguration);
-            }
+            return ReadSpi(channel, inputConfiguration);
         }
 
         private static byte GetConfigurationBits(int channel, InputConfiguration inputConfiguration)
@@ -83,57 +45,10 @@ namespace Iot.Device.Mcp3008
 
             if (inputConfiguration == InputConfiguration.Differential)
             {
-                configurationBits &= 0b1011_1111;  // Clear mode bit.
+                configurationBits &= 0b1011_1111; // Clear mode bit.
             }
 
             return (byte)configurationBits;
-        }
-
-        // Ported: https://gist.github.com/ladyada/3151375
-        private int ReadGpio(int channel, InputConfiguration inputConfiguration)
-        {
-            while (true)
-            {
-                int result = 0;
-                byte command = GetConfigurationBits(channel, inputConfiguration);
-
-                _controller.Write(_cs, PinValue.High);
-                _controller.Write(_clk, PinValue.Low);
-                _controller.Write(_cs, PinValue.Low);
-
-                for (int cnt = 0; cnt < 5; cnt++)
-                {
-                    if ((command & 0b1000_0000) > 0)
-                    {
-                        _controller.Write(_mosi, PinValue.High);
-                    }
-                    else
-                    {
-                        _controller.Write(_mosi, PinValue.Low);
-                    }
-
-                    command <<= 1;
-                    _controller.Write(_clk, PinValue.High);
-                    _controller.Write(_clk, PinValue.Low);
-                }
-
-                for (int cnt = 0; cnt < 12; cnt++)
-                {
-                    _controller.Write(_clk, PinValue.High);
-                    _controller.Write(_clk, PinValue.Low);
-                    result <<= 1;
-
-                    if (_controller.Read(_miso) == PinValue.High)
-                    {
-                        result |= 0b0000_0001;
-                    }
-                }
-
-                _controller.Write(_cs, PinValue.High);
-
-                result >>= 1;
-                return result;
-            }
         }
 
         // Ported: https://github.com/adafruit/Adafruit_Python_MCP3008/blob/master/Adafruit_MCP3008/MCP3008.py

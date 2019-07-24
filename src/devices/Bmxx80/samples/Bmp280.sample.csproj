@@ -13,7 +13,13 @@
 
   <ItemGroup>
     <Compile Include="Bmp280.sample.cs" />
-    <ProjectReference Include="..\Bmx280.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bmxx80.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>

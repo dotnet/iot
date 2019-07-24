@@ -6,7 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
     <PackageReference Include="SixLabors.Fonts" Version="1.0.0-*" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-*" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-*" />

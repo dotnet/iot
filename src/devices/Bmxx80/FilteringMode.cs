@@ -2,37 +2,43 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Bmx280
+namespace Iot.Device.Bmxx80
 {
     /// <summary>
     /// Bmx280 devices feature an internal IIR filter.
+    /// </summary>
+    /// <remarks>
     /// This filter effectively reduces the bandwidth of the temperature and pressure output signals
     /// and increases the resolution of the pressure and temperature output data to 20 bits.
     ///
     /// The higher the coefficient, the slower the sensors respond to external inputs.
     ///
     /// See the data sheet with recommended settings for different scenarios.
-    /// </summary>
+    /// </remarks>
     public enum FilteringMode : byte
     {
         /// <summary>
-        /// Filter off
+        /// Filter off.
         /// </summary>
         Off = 0b000,
+
         /// <summary>
-        /// Coefficient x2
+        /// Coefficient x2.
         /// </summary>
         X2 = 0b001,
+
         /// <summary>
-        /// Coefficient x4
+        /// Coefficient x4.
         /// </summary>
         X4 = 0b010,
+
         /// <summary>
-        /// Coefficient x8
+        /// Coefficient x8.
         /// </summary>
         X8 = 0b011,
+
         /// <summary>
-        /// Coefficient x16
+        /// Coefficient x16.
         /// </summary>
         X16 = 0b100
     }

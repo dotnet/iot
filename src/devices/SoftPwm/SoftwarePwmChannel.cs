@@ -20,8 +20,9 @@ namespace System.Device.Pwm.Drivers
         // Use to determine the length of the pulse
         // 100 % = full output. 0%= nothing as output
         private double _percentage;
-        // Use to determine if we are using a high precision timer or not
-        private bool _precisionPWM = false;
+      
+        // Determines if a high precision timer should be used.
+        private bool _usePrecisionTimer = false;
 
         private bool _isRunning;
         private bool _isStopped = true;
@@ -74,9 +75,9 @@ namespace System.Device.Pwm.Drivers
         /// <param name="pinNumber">The GPIO pin number to be used</param>
         /// <param name="frequency">The frequency in hertz. Defaults to 400</param>
         /// <param name="dutyCyclePercentage">The duty cycle percentage represented as a value between 0.0 and 1.0</param>
-        /// <param name="precisionTimer"><see langword="true"/> to use a precision timer. <see langword="false"/> otherwise</param>
+        /// <param name="usePrecisionTimer">Determines if a high precision timer should be used.</param>
         /// <param name="controller">The <see cref="GpioController"/> to which <paramref name="pinNumber"/> belongs to. Null defaults to board GpioController</param>
-        public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCyclePercentage = 0.5, bool precisionTimer = false, GpioController controller = null)
+        public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCyclePercentage = 0.5, bool usePrecisionTimer = false, GpioController controller = null)
         {
             _controller = controller ?? new GpioController();
             if (_controller == null)
@@ -86,6 +87,7 @@ namespace System.Device.Pwm.Drivers
             }
             _servoPin = pinNumber;
             _controller.OpenPin(_servoPin, PinMode.Output);
+            _usePrecisionTimer = usePrecisionTimer;
             _isRunning = false;
             _runningThread = new Thread(RunSoftPWM);
             _runningThread.Start();
@@ -103,7 +105,7 @@ namespace System.Device.Pwm.Drivers
 
         private void RunSoftPWM()
         {
-            if (_precisionPWM)
+            if (_usePrecisionTimer)
             {
                 Thread.CurrentThread.Priority = ThreadPriority.Highest;
             }
@@ -120,7 +122,7 @@ namespace System.Device.Pwm.Drivers
                     }
 
                     // Use the wait helper method to wait for the length of the pulse
-                    if (_precisionPWM)
+                    if (_usePrecisionTimer)
                     {
                         Wait(_currentPulseWidth);
                     }
@@ -132,7 +134,7 @@ namespace System.Device.Pwm.Drivers
                     // The pulse if over and so set the pin to low and then wait until it's time for the next pulse
                     _controller.Write(_servoPin, PinValue.Low);
 
-                    if (_precisionPWM)
+                    if (_usePrecisionTimer)
                     {
                         Wait(_pulseFrequency - _currentPulseWidth);
                     }
