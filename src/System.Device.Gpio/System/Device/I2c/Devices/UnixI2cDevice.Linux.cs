@@ -73,7 +73,7 @@ namespace System.Device.I2c
 
         private unsafe void Transfer(byte* writeBuffer, byte* readBuffer, int writeBufferLength, int readBufferLength)
         {
-            if (_functionalities.HasFlag(I2cFunctionalityFlags.I2C_FUNC_I2C))
+            if ((_functionalities & I2cFunctionalityFlags.I2C_FUNC_I2C) != 0)
             {
                 ReadWriteInterfaceTransfer(writeBuffer, readBuffer, writeBufferLength, readBufferLength);
             }
@@ -241,13 +241,14 @@ namespace System.Device.I2c
             }
         }
 
-        public override void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (_deviceFileDescriptor >= 0)
             {
                 Interop.close(_deviceFileDescriptor);
                 _deviceFileDescriptor = -1;
             }
+
             base.Dispose(disposing);
         }
     }
