@@ -1,22 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
-    <ProjectReference Include="..\Units\Units.csproj" />
-    <Compile Include="Ds3231.cs" />
-    <Compile Include="Register.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="README.md" />
-    <None Remove="sensor.jpg" />
+    <ProjectReference Include="..\Rtc.csproj" />
   </ItemGroup>
 
 </Project>

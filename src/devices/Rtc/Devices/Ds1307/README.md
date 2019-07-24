@@ -17,6 +17,3 @@ using (Ds1307 rtc = new Ds1307(device))
     DateTime dt = rtc.DateTime;
 }
 ```
-
-## References
-https://cdn.datasheetspdf.com/pdf-down/D/S/1/DS1307-Maxim.pdf
