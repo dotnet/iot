@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.I2c;
+using Iot.Device.Common;
 
 namespace Iot.Device.Rtc
 {
@@ -18,7 +19,6 @@ namespace Iot.Device.Rtc
         public const byte DefaultI2cAddress = 0x51;
 
         private I2cDevice _i2cDevice;
-        private bool _disposedValue = false;
 
         /// <summary>
         /// Creates a new instance of the PCF8563
@@ -45,12 +45,12 @@ namespace Iot.Device.Rtc
             _i2cDevice.WriteByte((byte)Pcf8563Register.PCF_SEC_ADDR);
             _i2cDevice.Read(readBuffer);
 
-            return new DateTime(readBuffer[5] >> 7 == 1 ? 2000 + NumberTool.Bcd2Dec(readBuffer[6]) : 1900 + NumberTool.Bcd2Dec(readBuffer[6]),
-                                NumberTool.Bcd2Dec((byte)(readBuffer[5] & 0b_0001_1111)),
-                                NumberTool.Bcd2Dec((byte)(readBuffer[3] & 0b_0011_1111)),
-                                NumberTool.Bcd2Dec((byte)(readBuffer[2] & 0b_0011_1111)),
-                                NumberTool.Bcd2Dec((byte)(readBuffer[1] & 0b_0111_1111)),
-                                NumberTool.Bcd2Dec((byte)(readBuffer[0] & 0b_0111_1111)));
+            return new DateTime(1900 + (readBuffer[5] >> 7) * 100 + NumberHelper.Bcd2Dec(readBuffer[6]),
+                                NumberHelper.Bcd2Dec((byte)(readBuffer[5] & 0b_0001_1111)),
+                                NumberHelper.Bcd2Dec((byte)(readBuffer[3] & 0b_0011_1111)),
+                                NumberHelper.Bcd2Dec((byte)(readBuffer[2] & 0b_0011_1111)),
+                                NumberHelper.Bcd2Dec((byte)(readBuffer[1] & 0b_0111_1111)),
+                                NumberHelper.Bcd2Dec((byte)(readBuffer[0] & 0b_0111_1111)));
         }
 
         /// <summary>
@@ -63,20 +63,20 @@ namespace Iot.Device.Rtc
 
             writeBuffer[0] = (byte)Pcf8563Register.PCF_SEC_ADDR;
             // Set bit8 as 0 to guarantee clock integrity
-            writeBuffer[1] = (byte)(NumberTool.Dec2Bcd(time.Second) & 0b_0111_1111);
-            writeBuffer[2] = NumberTool.Dec2Bcd(time.Minute);
-            writeBuffer[3] = NumberTool.Dec2Bcd(time.Hour);
-            writeBuffer[4] = NumberTool.Dec2Bcd(time.Day);
-            writeBuffer[5] = NumberTool.Dec2Bcd((int)time.DayOfWeek);
+            writeBuffer[1] = (byte)(NumberHelper.Dec2Bcd(time.Second) & 0b_0111_1111);
+            writeBuffer[2] = NumberHelper.Dec2Bcd(time.Minute);
+            writeBuffer[3] = NumberHelper.Dec2Bcd(time.Hour);
+            writeBuffer[4] = NumberHelper.Dec2Bcd(time.Day);
+            writeBuffer[5] = NumberHelper.Dec2Bcd((int)time.DayOfWeek);
             if (time.Year >= 2000)
             {
-                writeBuffer[6] = (byte)(NumberTool.Dec2Bcd(time.Month) | 0b_1000_0000);
-                writeBuffer[7] = NumberTool.Dec2Bcd(time.Year - 2000);
+                writeBuffer[6] = (byte)(NumberHelper.Dec2Bcd(time.Month) | 0b_1000_0000);
+                writeBuffer[7] = NumberHelper.Dec2Bcd(time.Year - 2000);
             }
             else
             {
-                writeBuffer[6] = NumberTool.Dec2Bcd(time.Month);
-                writeBuffer[7] = NumberTool.Dec2Bcd(time.Year - 1900);
+                writeBuffer[6] = NumberHelper.Dec2Bcd(time.Month);
+                writeBuffer[7] = NumberHelper.Dec2Bcd(time.Year - 1900);
             }
 
             _i2cDevice.Write(writeBuffer);
@@ -87,16 +87,10 @@ namespace Iot.Device.Rtc
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    _i2cDevice?.Dispose();
-                }
+            _i2cDevice?.Dispose();
+            _i2cDevice = null;
 
-                _i2cDevice = null;
-                _disposedValue = true;
-            }
+            base.Dispose(disposing);
         }
     }
 }

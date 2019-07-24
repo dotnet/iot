@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.I2c;
+using Iot.Device.Common;
 using Iot.Units;
 
 namespace Iot.Device.Rtc
@@ -19,7 +20,6 @@ namespace Iot.Device.Rtc
         public const byte DefaultI2cAddress = 0x68;
 
         private I2cDevice _i2cDevice;
-        private bool _disposedValue = false;
 
         /// <summary>
         /// DS3231 Temperature
@@ -47,12 +47,12 @@ namespace Iot.Device.Rtc
             _i2cDevice.WriteByte((byte)Ds3231Register.RTC_SEC_REG_ADDR);
             _i2cDevice.Read(rawData);
 
-            return new DateTime(rawData[5] >> 7 == 1 ? 2000 + NumberTool.Bcd2Dec(rawData[6]) : 1900 + NumberTool.Bcd2Dec(rawData[6]),
-                                NumberTool.Bcd2Dec((byte)(rawData[5] & 0b_0001_1111)),
-                                NumberTool.Bcd2Dec(rawData[4]),
-                                NumberTool.Bcd2Dec(rawData[2]),
-                                NumberTool.Bcd2Dec(rawData[1]),
-                                NumberTool.Bcd2Dec(rawData[0]));
+            return new DateTime(1900 + (rawData[5] >> 7) * 100 + NumberHelper.Bcd2Dec(rawData[6]),
+                                NumberHelper.Bcd2Dec((byte)(rawData[5] & 0b_0001_1111)),
+                                NumberHelper.Bcd2Dec(rawData[4]),
+                                NumberHelper.Bcd2Dec(rawData[2]),
+                                NumberHelper.Bcd2Dec(rawData[1]),
+                                NumberHelper.Bcd2Dec(rawData[0]));
         }
 
         /// <summary>
@@ -65,20 +65,20 @@ namespace Iot.Device.Rtc
 
             setData[0] = (byte)Ds3231Register.RTC_SEC_REG_ADDR;
 
-            setData[1] = NumberTool.Dec2Bcd(time.Second);
-            setData[2] = NumberTool.Dec2Bcd(time.Minute);
-            setData[3] = NumberTool.Dec2Bcd(time.Hour);
-            setData[4] = NumberTool.Dec2Bcd((int)time.DayOfWeek + 1);
-            setData[5] = NumberTool.Dec2Bcd(time.Day);
+            setData[1] = NumberHelper.Dec2Bcd(time.Second);
+            setData[2] = NumberHelper.Dec2Bcd(time.Minute);
+            setData[3] = NumberHelper.Dec2Bcd(time.Hour);
+            setData[4] = NumberHelper.Dec2Bcd((int)time.DayOfWeek + 1);
+            setData[5] = NumberHelper.Dec2Bcd(time.Day);
             if (time.Year >= 2000)
             {
-                setData[6] = (byte)(NumberTool.Dec2Bcd(time.Month) | 0b_1000_0000);
-                setData[7] = NumberTool.Dec2Bcd(time.Year - 2000);
+                setData[6] = (byte)(NumberHelper.Dec2Bcd(time.Month) | 0b_1000_0000);
+                setData[7] = NumberHelper.Dec2Bcd(time.Year - 2000);
             }
             else
             {
-                setData[6] = NumberTool.Dec2Bcd(time.Month);
-                setData[7] = NumberTool.Dec2Bcd(time.Year - 1900);
+                setData[6] = NumberHelper.Dec2Bcd(time.Month);
+                setData[7] = NumberHelper.Dec2Bcd(time.Year - 1900);
             }
 
             _i2cDevice.Write(setData);
@@ -104,16 +104,10 @@ namespace Iot.Device.Rtc
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    _i2cDevice?.Dispose();
-                }
+            _i2cDevice?.Dispose();
+            _i2cDevice = null;
 
-                _i2cDevice = null;
-                _disposedValue = true;
-            }
+            base.Dispose(disposing);
         }
     }
 }
