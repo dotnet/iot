@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Device.Gpio.Drivers;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -220,10 +221,17 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void AddCallbackRemoveAllCallbackTest()
         {
+            GpioDriver testDriver = GetTestDriver();
+            // Skipping the test for now when using the SysFsDriver or the RaspberryPi3Driver given that this test is flaky for those drivers.
+            // Issue tracking this problem is https://github.com/dotnet/iot/issues/629
+            if (testDriver is SysFsDriver || testDriver is RaspberryPi3Driver)
+            {
+                return;
+            }
             RetryHelper.Execute(() =>
             {
                 int risingEventOccuredCount = 0, fallingEventOccuredCount = 0;
-                using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+                using (GpioController controller = new GpioController(GetTestNumberingScheme(), testDriver))
                 {
                     controller.OpenPin(InputPin, PinMode.Input);
                     controller.OpenPin(OutputPin, PinMode.Output);
