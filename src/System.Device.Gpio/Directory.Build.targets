@@ -40,11 +40,6 @@
   </PropertyGroup>
 
   <Target Name="GetSymbolsForSnupkg" Condition="'$(DebugType)' == 'Portable'">
-    <!-- First we remove the calculated location for pdbs since it is wrong. -->
-    <ItemGroup>
-      <DebugSymbolsProjectOutputGroupOutput Remove="@(DebugSymbolsProjectOutputGroupOutput)" />
-    </ItemGroup>
-
     <!-- Add the linux and windows specific pdbs -->
     <ItemGroup>
       <!-- DebugSymbolsProjectOutputGroupOutput doesn't support PackagePath and instead the output path is set to lib/$(TargetFramework)/$(TargetPath) 
