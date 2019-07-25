@@ -18,7 +18,7 @@ variables:
   - name: _PublishUsingPipelines
     value: true
   - name: _DotNetArtifactsCategory
-    value: .NETCore
+    value: IOT
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - name: OfficialBuildId
       value: $(Build.BuildNumber)
