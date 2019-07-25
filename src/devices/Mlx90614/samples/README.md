@@ -23,8 +23,8 @@ using (Mlx90614 sensor = new Mlx90614(i2cDevice))
 {
     while (true)
     {
-        Console.WriteLine($"Ambient: {sensor.AmbientTemperature.Celsius} ℃");
-        Console.WriteLine($"Object: {sensor.ObjectTemperature.Celsius} ℃");
+        Console.WriteLine($"Ambient: {sensor.ReadAmbientTemperature().Celsius} ℃");
+        Console.WriteLine($"Object: {sensor.ReadObjectTemperature().Celsius} ℃");
         Console.WriteLine();
 
         Thread.Sleep(1000);

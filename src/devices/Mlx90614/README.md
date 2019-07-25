@@ -12,9 +12,9 @@ I2cDevice i2cDevice = I2cDevice.Create(settings);
 using (Mlx90614 sensor = new Mlx90614(i2cDevice))
 {
     // read ambient temperature
-    double ambient = sensor.AmbientTemperature.Celsius;
+    double ambient = sensor.ReadAmbientTemperature().Celsius;
     // read object temperature
-    double object = sensor.ObjectTemperature.Celsius;
+    double object = sensor.ReadObjectTemperature().Celsius;
 }
 ```
 

@@ -8,8 +8,6 @@ namespace Iot.Device.Mlx90614.Sample
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello MLX90614!");
-
             I2cConnectionSettings settings = new I2cConnectionSettings(1, Mlx90614.DefaultI2cAddress);
             I2cDevice i2cDevice = I2cDevice.Create(settings);
 
@@ -17,8 +15,8 @@ namespace Iot.Device.Mlx90614.Sample
             {
                 while (true)
                 {
-                    Console.WriteLine($"Ambient: {sensor.AmbientTemperature.Celsius} ℃");
-                    Console.WriteLine($"Object: {sensor.ObjectTemperature.Celsius} ℃");
+                    Console.WriteLine($"Ambient: {sensor.ReadAmbientTemperature().Celsius} ℃");
+                    Console.WriteLine($"Object: {sensor.ReadObjectTemperature().Celsius} ℃");
                     Console.WriteLine();
 
                     Thread.Sleep(1000);

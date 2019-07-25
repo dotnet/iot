@@ -22,16 +22,6 @@ namespace Iot.Device.Mlx90614
         public const byte DefaultI2cAddress = 0x5A;
 
         /// <summary>
-        /// MLX90614's Ambient Temperature
-        /// </summary>
-        public Temperature AmbientTemperature => Temperature.FromCelsius(GetAmbientTemperature());
-
-        /// <summary>
-        /// MLX90614's Object Temperature
-        /// </summary>
-        public Temperature ObjectTemperature => Temperature.FromCelsius(GetObjectTemperature());
-
-        /// <summary>
         /// Creates a new instance of the MLX90614
         /// </summary>
         /// <param name="i2cDevice">The I2C device used for communication.</param>
@@ -43,8 +33,8 @@ namespace Iot.Device.Mlx90614
         /// <summary>
         /// Read ambient temperature from MLX90614
         /// </summary>
-        /// <returns>Temperature in celsius</returns>
-        private double GetAmbientTemperature()
+        /// <returns>Temperature</returns>
+        public Temperature ReadAmbientTemperature()
         {
             Span<byte> writeBuffer = stackalloc byte[] { (byte)Register.MLX_AMBIENT_TEMP };
             Span<byte> readBuffer = stackalloc byte[2];
@@ -54,14 +44,14 @@ namespace Iot.Device.Mlx90614
             // The formula is on the datasheet P30.
             double temp = BinaryPrimitives.ReadInt16LittleEndian(readBuffer) * 0.02 - 273.15;
 
-            return Math.Round(temp, 2);
+            return Temperature.FromCelsius(Math.Round(temp, 2));
         }
 
         /// <summary>
         /// Read object temperature from MLX90614
         /// </summary>
-        /// <returns>Temperature in celsius</returns>
-        private double GetObjectTemperature()
+        /// <returns>Temperature</returns>
+        public Temperature ReadObjectTemperature()
         {
             Span<byte> writeBuffer = stackalloc byte[] { (byte)Register.MLX_OBJECT1_TEMP };
             Span<byte> readBuffer = stackalloc byte[2];
@@ -70,7 +60,7 @@ namespace Iot.Device.Mlx90614
 
             double temp = BinaryPrimitives.ReadInt16LittleEndian(readBuffer) * 0.02 - 273.15;
 
-            return Math.Round(temp, 2);
+            return Temperature.FromCelsius(Math.Round(temp, 2));
         }
 
         /// <summary>

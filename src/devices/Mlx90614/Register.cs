@@ -7,7 +7,6 @@ namespace Iot.Device.Mlx90614
     internal enum Register
     {
         MLX_AMBIENT_TEMP = 0x06,
-        MLX_OBJECT1_TEMP = 0x07,
-        MLX_OBJECT2_TEMP = 0x08
+        MLX_OBJECT1_TEMP = 0x07
     }
 }
