@@ -46,6 +46,7 @@ namespace Iot.Tools.DeviceListing
             "joystick",
             "color",
             "led",
+            "spi",
         };
 
         static Dictionary<string, string> s_categoriesDescriptions = new Dictionary<string, string>()
@@ -79,6 +80,7 @@ namespace Iot.Tools.DeviceListing
             { "touch", "Touch sensors" },
             { "wireless", "Wireless communication modules" },
             { "pwm", "PWM libraries/modules" },
+            { "spi", "SPI libraries/modules" },
             { "joystick", "Joysticks" },
             { "color", "Color sensors" },
             { "led", "LED drivers" },
