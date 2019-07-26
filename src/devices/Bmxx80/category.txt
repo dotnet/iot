@@ -1,3 +1,6 @@
 barometer
 altimeter
 thermometer
+voc
+gas
+hygrometer
