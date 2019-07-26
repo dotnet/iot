@@ -17,9 +17,6 @@
 
   <!-- Packaging Targets -->
   <PropertyGroup>
-    <!-- Generate snupkg package -->
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <!-- Collect package assets from builds -->
     <IncludeRIDSpecificBuildOutput Condition="'$(IncludeRIDSpecificBuildOutput)' == '' And '$(RuntimeIdentifiers)' != ''">true</IncludeRIDSpecificBuildOutput>
     <TargetsForTfmSpecificContentInPackage Condition="'$(IncludeRIDSpecificBuildOutput)' == 'true'">

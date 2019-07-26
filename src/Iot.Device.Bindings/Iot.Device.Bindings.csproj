@@ -8,7 +8,7 @@
     <DeviceRoot>$(MSBuildThisFileDirectory)../devices/</DeviceRoot>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackageRefAssemblyAndDocXml</TargetsForTfmSpecificContentInPackage>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage)</TargetsForTfmSpecificContentInPackage>
     <LangVersion>8</LangVersion>
     <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
@@ -26,16 +26,5 @@
       <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
   </ItemGroup>
-
-  <Target Name="PackageRefAssemblyAndDocXml">
-    <ItemGroup>
-      <TfmSpecificPackageFile Include="$(TargetRefPath)">
-        <PackagePath>ref/$(TargetFramework)</PackagePath>
-      </TfmSpecificPackageFile>
-      <TfmSpecificPackageFile Include="$(DocumentationFile)">
-        <PackagePath>ref/$(TargetFramework)</PackagePath>
-      </TfmSpecificPackageFile>
-    </ItemGroup>
-  </Target>
 
 </Project>
