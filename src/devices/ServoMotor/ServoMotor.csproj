@@ -1,9 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <EnableDefaultItems>false</EnableDefaultItems>
-    <!--Disabling default items so samples source won't get build by the main library-->
+    <EnableDefaultItems>false</EnableDefaultItems>    
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,9 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)../SoftPwm/SoftwarePwm.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
