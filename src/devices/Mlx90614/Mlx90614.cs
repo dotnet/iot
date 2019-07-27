@@ -12,7 +12,7 @@ namespace Iot.Device.Mlx90614
     /// <summary>
     /// Infra Red Thermometer MLX90614
     /// </summary>
-    public class Mlx90614 : IDisposable
+    public sealed class Mlx90614 : IDisposable
     {
         private I2cDevice _i2cDevice;
 
@@ -34,33 +34,29 @@ namespace Iot.Device.Mlx90614
         /// Read ambient temperature from MLX90614
         /// </summary>
         /// <returns>Temperature</returns>
-        public Temperature ReadAmbientTemperature()
-        {
-            Span<byte> writeBuffer = stackalloc byte[] { (byte)Register.MLX_AMBIENT_TEMP };
-            Span<byte> readBuffer = stackalloc byte[2];
-
-            _i2cDevice.WriteRead(writeBuffer, readBuffer);
-
-            // The formula is on the datasheet P30.
-            double temp = BinaryPrimitives.ReadInt16LittleEndian(readBuffer) * 0.02 - 273.15;
-
-            return Temperature.FromCelsius(Math.Round(temp, 2));
-        }
+        public Temperature ReadAmbientTemperature() => Temperature.FromCelsius(ReadTemperature((byte)Register.MLX_AMBIENT_TEMP));
 
         /// <summary>
-        /// Read object temperature from MLX90614
+        /// Read surface temperature of object from MLX90614
         /// </summary>
         /// <returns>Temperature</returns>
-        public Temperature ReadObjectTemperature()
+        public Temperature ReadObjectTemperature() => Temperature.FromCelsius(ReadTemperature((byte)Register.MLX_OBJECT1_TEMP));
+
+        /// <summary>
+        /// Read temperature form specified register
+        /// </summary>
+        /// <param name="register">Register</param>
+        /// <returns>Temperature in celsius</returns>
+        private double ReadTemperature(byte register)
         {
-            Span<byte> writeBuffer = stackalloc byte[] { (byte)Register.MLX_OBJECT1_TEMP };
+            Span<byte> writeBuffer = stackalloc byte[] { register };
             Span<byte> readBuffer = stackalloc byte[2];
 
             _i2cDevice.WriteRead(writeBuffer, readBuffer);
 
             double temp = BinaryPrimitives.ReadInt16LittleEndian(readBuffer) * 0.02 - 273.15;
 
-            return Temperature.FromCelsius(Math.Round(temp, 2));
+            return Math.Round(temp, 2);
         }
 
         /// <summary>
@@ -69,6 +65,7 @@ namespace Iot.Device.Mlx90614
         public void Dispose()
         {
             _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
     }
 }
