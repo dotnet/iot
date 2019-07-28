@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <Compile Include="ServoMotor.cs" />
-    <Compile Include="ServoMotorDefinition.cs" />
   </ItemGroup>
 
   <ItemGroup>
