@@ -49,25 +49,6 @@ namespace Iot.Device.ServoMotor
             _pwmChannel = pwmChannel;
         }
 
-        /// <summary>
-        ///  Initializes a new instance of the <see cref="ServoMotor"/> class.
-        /// </summary>
-        /// <param name="chip">The PWM chip number used to control the servo motor.</param>
-        /// <param name="channel">The PWM channel number used to control the servo motor.</param>
-        /// <param name="maximumAngle">The maximum angle the servo motor can move.</param>
-        /// <param name="minimumPulseWidthMicroseconds">The minimum pulse width, in microseconds, that represent an angle for 0 degrees.</param>
-        /// <param name="maximumPulseWidthMicroseconds">The maxnimum pulse width, in microseconds, that represent an angle for maximum angle.</param>
-        public ServoMotor(
-            int chip,
-            int channel,
-            int maximumAngle = 180,
-            int minimumPulseWidthMicroseconds = 1_000,
-            int maximumPulseWidthMicroseconds = 2_000)
-            : this(maximumAngle, minimumPulseWidthMicroseconds, maximumPulseWidthMicroseconds)
-        {
-            _pwmChannel = PwmChannel.Create(chip, channel, 50);  // Default 50Hz
-        }
-
         private static double CalculateAngleToMicroseconds(int maximumAngle, int minimumPulseWidthMicroseconds, int maximumPulseWidthMicroseconds)
         {
             if (maximumAngle < 0 || maximumAngle > 360)
