@@ -6,12 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease.19310.5" />
+    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Rfid\CreditCard\CreditCardProcessing.csproj" />
-    <ProjectReference Include="..\..\Rfid\Mifare\Mifare.csproj" />
+    <ProjectReference Include="..\..\Card\CreditCard\CreditCardProcessing.csproj" />
+    <ProjectReference Include="..\..\Card\Mifare\Mifare.csproj" />
     <ProjectReference Include="..\Pn532.csproj" />
   </ItemGroup>
 

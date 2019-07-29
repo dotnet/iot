@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Rfid.Mifare
+namespace Iot.Device.Card.Mifare
 {
     /// <summary>
     /// List of commands available for the Mifare cards

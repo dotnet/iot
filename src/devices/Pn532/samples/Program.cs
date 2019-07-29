@@ -1,6 +1,7 @@
 ﻿
 using Iot.Device.Pn532;
-using Iot.Device.Rfid.Mifare;
+using Iot.Device.Card.Mifare;
+using Iot.Device.Card.CreditCardProcessing;
 using Iot.Device.Pn532.ListPassive;
 using System;
 using System.Threading;
@@ -10,7 +11,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Device.Gpio;
 using System.Globalization;
-using Iot.Device.Rfid;
+using Iot.Device.Card;
+using System.Linq;
 
 namespace Pn532Demo
 {
@@ -36,9 +38,12 @@ namespace Pn532Demo
                     //DumpAllRegisters(pn532);
 
                     // To run tests, uncomment the next line
-                    //RunTests(pn532);
+                    // RunTests(pn532);
 
                     ReadMiFare(pn532);
+
+                    // To read Credit Cards, uncomment the next line
+                    //ReadCreditCard(pn532);
                 }
                 else
                     Console.WriteLine($"Error");
@@ -135,7 +140,7 @@ namespace Pn532Demo
             }
         }
 
-         static void RunTests(Pn532 pn532)
+        static void RunTests(Pn532 pn532)
         {
             Console.WriteLine($"{DiagnoseMode.CommunicationLineTest}: {pn532.RunSelfTest(DiagnoseMode.CommunicationLineTest)}");
             Console.WriteLine($"{DiagnoseMode.ROMTest}: {pn532.RunSelfTest(DiagnoseMode.ROMTest)}");
@@ -154,10 +159,82 @@ namespace Pn532Demo
                 Console.WriteLine($"Readregisters: {regus[i]}, value: {BitConverter.ToString(redSfrus.ToArray(), i, 1)} ");
             Console.WriteLine($"Are results same: {redSfrus.SequenceEqual(redSfrs)}");
             // Access GPIO
-            ret = pn532.ReadGpio(out P7 p7, out P3 p3, out OperatingMode l0L1);
+            ret = pn532.ReadGpio(out Port7 p7, out Port3 p3, out OperatingMode l0L1);
             Console.WriteLine($"P7: {p7}");
             Console.WriteLine($"P3: {p3}");
             Console.WriteLine($"L0L1: {l0L1} ");
+        }
+
+        static void ReadCreditCard(Pn532 pn532)
+        {
+            byte[] retData = null;
+            while ((!Console.KeyAvailable))
+            {
+                retData = pn532.AutoPoll(5, 300, new PollingType[] { PollingType.Passive106kbpsISO144443_4B });
+                if (retData != null)
+                    if (retData.Length >= 3)
+                        break;
+                // Give time to PN532 to process
+                Thread.Sleep(200);
+            }
+
+            if (retData == null)
+                return;
+
+            //Check how many tags and the type
+            Console.WriteLine($"Num tags: {retData[0]}, Type: {(PollingType)retData[1]}");
+            var decrypted = pn532.TryDecodeData106kbpsTypeB(retData.AsSpan().Slice(3));
+            if (decrypted != null)
+            {
+                Console.WriteLine($"{decrypted.TargetNumber}, Serial: {BitConverter.ToString(decrypted.NfcId)}, App Data: {BitConverter.ToString(decrypted.ApplicationData)}, " +
+                    $"{decrypted.ApplicationType}, Bit Rates: {decrypted.BitRates}, CID {decrypted.CidSupported}, Command: {decrypted.Command}, FWT: {decrypted.FrameWaitingTime}, " +
+                    $"ISO144443 compliance: {decrypted.ISO14443_4Compliance}, Max Frame size: {decrypted.MaxFrameSize}, NAD: {decrypted.NadSupported}");
+
+                CreditCard creditCard = new CreditCard(pn532, decrypted.TargetNumber);
+                creditCard.FillCreditCardInformation();
+
+                Console.WriteLine("All Tags for the Credit Card:");
+                DisplayTags(creditCard.Tags, 0);
+
+            }
+        }
+
+        static string AddSpace(int level)
+        {
+            string space = "";
+            for (int i = 0; i < level; i++)
+                space += "  ";
+
+            return space;
+        }
+
+        static void DisplayTags(List<Tag> tagToDisplay, int levels)
+        {
+            foreach (var tagparent in tagToDisplay)
+            {
+                Console.Write(AddSpace(levels) + $"{tagparent.TagNumber.ToString("X4")}-{TagList.Tags.Where(m => m.TagNumber == tagparent.TagNumber).FirstOrDefault()?.Description}");
+                var isTemplate = TagList.Tags.Where(m => m.TagNumber == tagparent.TagNumber).FirstOrDefault();
+                if ((isTemplate?.IsTemplate == true) || (isTemplate?.IsConstructed == true))
+                {
+                    Console.WriteLine();
+                    DisplayTags(tagparent.Tags, levels + 1);
+                }
+                else if (isTemplate?.IsDol == true)
+                {
+                    //In this case, all the data inside are 1 byte only
+                    Console.WriteLine(", Data Object Length elements:");
+                    foreach (var dt in tagparent.Tags)
+                    {
+                        Console.Write(AddSpace(levels + 1) + $"{dt.TagNumber.ToString("X4")}-{TagList.Tags.Where(m => m.TagNumber == dt.TagNumber).FirstOrDefault()?.Description}");
+                        Console.WriteLine($", data length: {dt.Data[0]}");
+                    }
+                }
+                else
+                {
+                    TagDetails tg = new TagDetails(tagparent);
+                    Console.WriteLine($": {tg.ToString()}");
+                }
+            }
         }
     }
 }

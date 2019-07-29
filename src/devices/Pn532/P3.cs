@@ -12,7 +12,7 @@ namespace Iot.Device.Pn532
     /// Refer to the detailed documentation page 79 and 80
     /// </summary>
     [Flags]
-    public enum P3
+    public enum Port3
     {
         P35 = 0b0010_0000,
         P34 = 0b0001_0000,

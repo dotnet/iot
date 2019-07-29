@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Iot.Device.Rfid.Mifare
+namespace Iot.Device.Card.Mifare
 {
     /// <summary>
     /// All access sectors rights for the keys and the access bits

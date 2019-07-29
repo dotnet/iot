@@ -2,17 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Rfid.Mifare
+namespace Iot.Device.Card.CreditCardProcessing
 {
     /// <summary>
-    /// Different storage capacity for Minefare cards
+    /// Additional data that can be extracted from the Credit Card
     /// </summary>
-    public enum MifareCardCapacity
+    public enum DataType
     {
-        Unkown,
-        Mifare300,
-        Mifare1K,
-        Mifare2K,
-        Mifare4K
+        ApplicationTransactionCounter,
+        PinTryCounter,
+        LastOnlineAtcRegister,
+        LogFormat
     }
 }

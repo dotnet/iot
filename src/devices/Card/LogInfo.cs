@@ -5,7 +5,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Iot.Device.Rfid
+namespace Iot.Device.Card
 {
     /// <summary>
     /// The log level

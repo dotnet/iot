@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Iot.Device.Rfid
+namespace Iot.Device.Card
 {
     /// <summary>
     /// Abstract class implementing a specific Write and Read function
     /// This class has to be implemented in all RFID/NFC readers
     /// So Mifare cards can be used the same way independant of any reader
     /// </summary>
-    public abstract class RfidWriteRead
+    public abstract class CardWriteRead
     {
         /// <summary>
         /// This function has to be implemented by all NFC/RFID readers. This function is used in exchange of data with

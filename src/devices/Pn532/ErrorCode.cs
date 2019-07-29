@@ -31,7 +31,7 @@ namespace IoT.Device.Pn532
         OperationNotAllowed = 0x26,
         CommandNotAcceptable = 0x27,
         ConfiguredTargetBeenReleased = 0x29,
-        IDCardDoesNotMAtch = 0x2A,
+        IDCardDoesNotMatch = 0x2A,
         CardDisappeared = 0x2B,
         MismatchDEPPassive = 0x2C,
         OverCurrentDetected = 0x2D,

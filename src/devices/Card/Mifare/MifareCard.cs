@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Iot.Device.Rfid.Mifare
+namespace Iot.Device.Card.Mifare
 {
     /// <summary>
     /// A Mifare card class
@@ -13,7 +13,7 @@ namespace Iot.Device.Rfid.Mifare
     public class MifareCard
     {
 
-        private RfidWriteRead _rfid;
+        private CardWriteRead _rfid;
 
         /// <summary>
         /// The tag number detected by the reader, only 1 or 2
@@ -56,7 +56,7 @@ namespace Iot.Device.Rfid.Mifare
         public byte[] Data { get; set; }
 
 
-        public MifareCard(RfidWriteRead rfid, byte target)
+        public MifareCard(CardWriteRead rfid, byte target)
         {
             _rfid = rfid;
             Target = target;
@@ -509,7 +509,6 @@ namespace Iot.Device.Rfid.Mifare
                     ser[1] = BlockNumber;
                     return ser;
             }
-
         }
     }
 }

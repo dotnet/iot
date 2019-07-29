@@ -2,16 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Pn532
+namespace Iot.Device.Pn532.AsTarget
 {
     /// <summary>
-    /// The operation mode
-    /// 0b0000_0011 is reserved for future usage
+    /// When PN532 is acting as a target, the baud rate
+    /// it is engaged to
     /// </summary>
-    public enum OperatingMode
+    public enum TargetBaudRateInialized
     {
-        HighSpeedUart = 0b0000_0000,
-        I2c = 0b0000_0010,
-        Spi = 0b0000_0001,        
+        B106kbps = 0b0000_0000,
+        B212kbps = 0b0001_0000,
+        B424kbps = 0b0010_0000,
     }
 }

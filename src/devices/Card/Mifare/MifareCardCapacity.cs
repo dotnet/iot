@@ -2,16 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Pn532
+namespace Iot.Device.Card.Mifare
 {
     /// <summary>
-    /// The operation mode
-    /// 0b0000_0011 is reserved for future usage
+    /// Different storage capacity for Minefare cards
     /// </summary>
-    public enum OperatingMode
+    public enum MifareCardCapacity
     {
-        HighSpeedUart = 0b0000_0000,
-        I2c = 0b0000_0010,
-        Spi = 0b0000_0001,        
+        Unkown,
+        Mifare300,
+        Mifare1K,
+        Mifare2K,
+        Mifare4K
     }
 }

@@ -34,7 +34,7 @@ while ((!Console.KeyAvailable))
 }
 if (retData == null)
 	return;
-var decrypted = pn532.TryDecode106kbpsTypeA(retData.AsSpan().Slice(1));
+var decrypted = pn532.Decode106kbpsTypeA(retData.AsSpan().Slice(1));
 ```
 
 Example pooling a 14443 type B card like a credit card:
@@ -54,7 +54,7 @@ if (retData == null)
 	return;
 //Check how many tags and the type
 Console.WriteLine($"Num tags: {retData[0]}, Type: {(PollingType)retData[1]}");
-var decrypted = pn532.TryDecodeData106kbpsTypeB(retData.AsSpan().Slice(3));
+var decrypted = pn532.DecodeData106kbpsTypeB(retData.AsSpan().Slice(3));
 ```
 
 ## Reading or writing to cards
@@ -116,6 +116,51 @@ if (decrypted != null)
 	}
 ```
 
+## PN532 as a target
+
+It's possible to change the PN532 mode to be seen as a target byt another reader. A phone with NFC for example. The bellow example shows how to transform the PN532 into a Credit Card:
+
+```csharp
+static void AsTarget(Pn532 pn532)
+{
+	byte[] retData = null;
+	TargetModeInitialized modeInitialized = null;
+	while ((!Console.KeyAvailable))
+	{
+		(modeInitialized, retData) = pn532.InitAsTarget(
+			TargetModeInitialization.PiccOnly, 
+			new TargetMifareParameters() { Atqa = new byte[] { 0x08, 0x00 }, Sak = 0x60 },
+			new TargetFeliCaParameters() { NfcId2 = new byte[] { 0x01, 0xFE, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7 }, Pad = new byte[] { 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7 } },
+			new TargetPiccParameters() { NfcId3 = new byte[] { 0xAA, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11 }, GeneralTarget = new byte[0], HistoricalTarget = new byte[0] });
+		if (modeInitialized != null)
+			break;
+		// Give time to PN532 to process
+		Thread.Sleep(200);
+	}
+	if (modeInitialized == null)
+		return;
+
+	Console.WriteLine($"PN532 as a target: ISDep: {modeInitialized.IsDep}, IsPicc {modeInitialized.IsISO14443_4Picc}, {modeInitialized.TargetBaudRate}, {modeInitialized.TargetFramingType}");
+	Console.WriteLine($"Initiator: {BitConverter.ToString(retData)}");
+	// 25-D4-00-E8-11-6A-0A-69-1C-46-5D-2D-7C-00-00-00-32-46-66-6D-01-01-12-02-02-07-FF-03-02-00-13-04-01-64-07-01-03
+	// 11-D4-00-01-FE-A2-A3-A4-A5-A6-A7-00-00-00-00-00-30            
+	// E0-80
+
+	Span<byte> read = stackalloc byte[512];
+	int ret = -1;
+	while (ret<0)
+		ret = pn532.ReadDataAsTarget(read);
+
+	// For example: 00-00-A4-04-00-0E-32-50-41-59-2E-53-59-53-2E-44-44-46-30-31-00
+	Console.WriteLine($"Status: {read[0]}, Data: {BitConverter.ToString(read.Slice(1).ToArray())}");            
+}
+```
+
+Note that this is just the first phase showing how to initialize the process, get the first data and read data. In this specific case, the emulation have to understand the commands sent by the reader and emulate properly a card.
+
+It is possible to emulate any Type A, Type B and Felica cards. 
+
+
 ## Current implementation
 
 Communication support:
@@ -155,10 +200,10 @@ PN532 as an initiator (reader) commands:
 - [X] InAutoPoll 
   
 PN532 as a Target (acting like a card)
-- [ ] TgInitAsTarget
+- [X] TgInitAsTarget
 - [ ] TgSetGeneralBytes
-- [ ] TgGetData
-- [ ] TgSetData
+- [X] TgGetData
+- [X] TgSetData
 - [ ] TgSetMetaData
 - [ ] TgGetInitiatorCommand
 - [ ] TgResponseToInitiator

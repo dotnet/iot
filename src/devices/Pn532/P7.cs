@@ -12,7 +12,7 @@ namespace Iot.Device.Pn532
     /// Refer to the detailed documentation page 79 and 80
     /// </summary>
     [Flags]
-    public enum P7
+    public enum Port7
     {
         P72 = 0b0000_0100,
         P71 = 0b0000_0010,

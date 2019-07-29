@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Iot.Device.Rfid.Mifare
+namespace Iot.Device.Card.Mifare
 {
     /// <summary>
     /// The type of access for the data sectors

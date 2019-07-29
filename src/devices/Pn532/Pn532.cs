@@ -2,18 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Iot.Device.Card;
+using Iot.Device.Pn532.AsTarget;
 using Iot.Device.Pn532.ListPassive;
 using Iot.Device.Pn532.RfConfiguration;
 using Iot.Device.Rfid;
 using IoT.Device.Pn532;
 using System;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Spi;
 using System.IO;
 using System.IO.Ports;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Iot.Device.Pn532
@@ -21,10 +23,8 @@ namespace Iot.Device.Pn532
     /// <summary>
     /// PN532 RFID/NFC reader
     /// </summary>
-    public class Pn532 : RfidWriteRead, IDisposable
+    public class Pn532 : CardWriteRead, IDisposable
     {
-        // Timeout 
-        private const int SerialReadTimeOut = 500;
         // Communication way
         private const byte ToHostCheckSumD5 = 0xD5;
         private const byte FromHostCheckSumD4 = 0xD4;
@@ -50,11 +50,11 @@ namespace Iot.Device.Pn532
         private GpioController _controller = null;
         private SerialPort _serialPort = null;
         private int _pin = 18;
-        private SecurityAccessModuleMode _securityAccessModuleMode;
-        private uint _virtualCardTimeout = 20;
+        private SecurityAccessModuleMode _securityAccessModuleMode = SecurityAccessModuleMode.Normal;
+        private uint _virtualCardTimeout = 0x17;
 
         /// <summary>
-        /// Set or get the read timeout
+        /// Set or get the read timeout for I2C and SPI
         /// Please refer to the documentation to set the right
         /// timeout value depending on the communication
         /// mode you are using
@@ -98,6 +98,7 @@ namespace Iot.Device.Pn532
         /// Create a PN532 using Serial Port
         /// </summary>
         /// <param name="portName">The port name</param>
+        /// /// <param name="logLevel">The log level</param>
         public Pn532(string portName, LogLevel logLevel = LogLevel.None)
         {
             LogLevel = logLevel;
@@ -108,22 +109,23 @@ namespace Iot.Device.Pn532
             // Baud rate : 115 200 bauds,
             LogInfo.Log("Opening serial port 115200, Parity.None, 8 bits, StopBits.One", LogLevel.Debug);
             _serialPort = new SerialPort(portName, 115200, Parity.None, 8, StopBits.One);
-            _serialPort.ReadTimeout = SerialReadTimeOut;
-            _serialPort.WriteTimeout = SerialReadTimeOut;
+            // Documentation page 39, serial timeout is 89 ms for 115 200
+            _serialPort.ReadTimeout = 89;
+            _serialPort.WriteTimeout = 89;
             _serialPort.Open();
             // Setting up internals as default version
             _parametersFlags = ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS | ParametersFlags.ISO14443_4_PICC;
             _securityAccessModuleMode = SecurityAccessModuleMode.Normal;
-            _virtualCardTimeout = 20;
+            _virtualCardTimeout = 0x17;
 
             WakeUp();
             // Set the SAM
             bool ret = SetSecurityAccessModule();
-            //var ret = SetSAM();
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
             // Check the version
             if (!IsPn532())
                 throw new Exception("Can't find a PN532");
+
             // Apply default parameters
             ret = SetParameters(ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS);
             LogInfo.Log($"Setting Parameters Falgs changed: {ret}", LogLevel.Info);
@@ -132,7 +134,8 @@ namespace Iot.Device.Pn532
         /// <summary>
         /// Create a PN532 using SPI
         /// </summary>
-        /// <param name="spiDevice"></param>
+        /// <param name="spiDevice">The SPI Device</param>
+        /// <param name="logLevel">The log level</param>
         public Pn532(SpiDevice spiDevice, LogLevel logLevel = LogLevel.None)
         {
             LogLevel = logLevel;
@@ -141,7 +144,6 @@ namespace Iot.Device.Pn532
             _controller.OpenPin(_pin, PinMode.Output);
             _controller.Write(_pin, PinValue.High);
             Thread.Sleep(2);
-            LogLevel = LogLevel.Debug;
             WakeUp();
             // The first time we apply SAM after waking up the device, it always 
             // returns false, some timeout appear. So we will need to apply a second time
@@ -150,34 +152,34 @@ namespace Iot.Device.Pn532
             // Check the version
             if (!IsPn532())
                 throw new Exception("Can't find a PN532");
+
             // Apply default parameters
             ret = SetParameters(ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS);
             LogInfo.Log($"Setting Parameters Falgs changed: {ret}", LogLevel.Info);
             ret = SetSecurityAccessModule();
-            //var ret = SetSAM();
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
         }
 
         /// <summary>
         /// Create a PN532 using I2C
         /// </summary>
-        /// <param name="i2CDevice"></param>
+        /// <param name="i2CDevice">The I2C device</param>
+        /// /// <param name="logLevel">The log level</param>
         public Pn532(I2cDevice i2CDevice, LogLevel logLevel = LogLevel.None)
         {
             LogLevel = logLevel;
             _i2cDevice = i2CDevice;
             WakeUp();
-            bool ret = SetSecurityAccessModule();
-            //var ret = SetSAM();
+            bool ret = SetSecurityAccessModule();            
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
             // Check the version
             if (!IsPn532())
                 throw new Exception("Can't find a PN532");
+
             // Apply default parameters
             ret = SetParameters(ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS);
             LogInfo.Log($"Setting Parameters Falgs changed: {ret}", LogLevel.Info);
             ret = SetSecurityAccessModule();
-            //var ret = SetSAM();
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
         }
 
@@ -347,6 +349,7 @@ namespace Iot.Device.Pn532
                 // The maximum value for the timeout is 12.75 sec (Timeout = 0xFF). 
                 if (value / 50 > 0xFF)
                     throw new ArgumentException($"{nameof(VirtualCardTimeout)} can't be more than 12750 milliseconds.");
+
                 _virtualCardTimeout = value / 50;
                 bool ret = SetSecurityAccessModule();
                 LogInfo.Log($"{nameof(VirtualCardTimeout)} changed: {ret}", LogLevel.Debug);
@@ -359,11 +362,12 @@ namespace Iot.Device.Pn532
         public SecurityAccessModuleMode SecurityAccessModuleMode
         {
             get { return _securityAccessModuleMode; }
-            set {
+            set
+            {
                 bool ret = SetSecurityAccessModule();
-                LogInfo.Log($"{nameof(SecurityAccessModuleMode)} changed: {ret}", LogLevel.Debug); }
+                LogInfo.Log($"{nameof(SecurityAccessModuleMode)} changed: {ret}", LogLevel.Debug);
+            }
         }
-
 
         private bool SetSecurityAccessModule()
         {
@@ -688,6 +692,98 @@ namespace Iot.Device.Pn532
             return null;
         }
 
+        #region PN532 as Target
+
+        /// <summary>
+        /// Set the PN532 as a target, so as a card
+        /// </summary>
+        /// <param name="mode"></param>
+        /// <param name="mifare"></param>
+        /// <param name="feliCa"></param>
+        /// <param name="picc"></param>
+        /// <returns></returns>
+        public (TargetModeInitialized modeInialized, byte[] initiator) InitAsTarget(TargetModeInitialization mode, TargetMifareParameters mifare, TargetFeliCaParameters feliCa, TargetPiccParameters picc)
+        {
+            // First make sure we have the right mode in the paramters for the PICC only case
+            if (mode == TargetModeInitialization.PiccOnly)
+            {
+                LogInfo.Log($"{nameof(InitAsTarget)} - changing mode for Picc only", LogLevel.Debug);
+                ParametersFlags |= ParametersFlags.ISO14443_4_PICC;
+            }
+            else
+            {
+                if (ParametersFlags.HasFlag(ParametersFlags.ISO14443_4_PICC))
+                {
+                    LogInfo.Log($"{nameof(InitAsTarget)} - removing mode for Picc only", LogLevel.Debug);
+                    ParametersFlags = ParametersFlags & ~ParametersFlags.ISO14443_4_PICC;
+                }
+            }
+
+            // Then serialize all buffer and add them
+            List<byte> toSend = new List<byte>();
+            toSend.Add((byte)mode);
+            toSend.AddRange(mifare.Serialize());
+            toSend.AddRange(feliCa.Serialize());
+            toSend.AddRange(picc.Serialize());
+            var ret = WriteCommand(CommandSet.TgInitAsTarget, toSend.ToArray());
+            if (ret < 0) return (null, null);
+
+            Span<byte> receivedData = stackalloc byte[1024];
+            ret = ReadResponse(CommandSet.TgInitAsTarget, receivedData);
+            LogInfo.Log($"{nameof(InitAsTarget)}, success: {ret}", LogLevel.Debug);
+            if (ret >= 0)
+            {
+                TargetModeInitialized modeInitialized = new TargetModeInitialized();
+                modeInitialized.IsDep = (receivedData[0] & 0b0000_0100) == 0b0000_0100;
+                modeInitialized.IsISO14443_4Picc = (receivedData[0] & 0b0000_1000) == 0b0000_1000;
+                modeInitialized.TargetFramingType = (TargetFramingType)(receivedData[0] & 0b0000_0011);
+                modeInitialized.TargetBaudRate = (TargetBaudRateInialized)(receivedData[0] & 0b0111_0000);
+                return (modeInitialized, receivedData.Slice(1, ret - 1).ToArray());
+            }
+            return (null, null);
+        }
+
+        /// <summary>
+        /// read data from the reader when PN532 is a target
+        /// </summary>
+        /// <param name="receivedData">A Span byte array for the read data. Note the first byte contains the status</param>
+        /// <returns>Number of byte read</returns>
+        public int ReadDataAsTarget(Span<byte> receivedData)
+        {
+            var ret = WriteCommand(CommandSet.TgGetData);
+            if (ret < 0) return -1;
+            
+            ret = ReadResponse(CommandSet.TgGetData, receivedData);
+            LogInfo.Log($"{nameof(InitAsTarget)}, success: {ret}", LogLevel.Debug);
+            if (ret > 0)
+            {
+                LogInfo.Log($"{nameof(WriteDataAsTarget)} - error: {(ErrorCode)receivedData[0]}, received array: {BitConverter.ToString(receivedData.Slice(1, ret - 1).ToArray())}", LogLevel.Debug);
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// Write data to the reader when PN532 is a target
+        /// </summary>
+        /// <param name="dataToSend">The data to send</param>
+        /// <returns>True if success</returns>
+        public bool WriteDataAsTarget(ReadOnlySpan<byte> dataToSend)
+        {
+            var ret = WriteCommand(CommandSet.TgSetData, dataToSend);
+            if (ret < 0) return false;
+
+            Span<byte> receivedData = stackalloc byte[1];
+            ret = ReadResponse(CommandSet.TgSetData, receivedData);
+            LogInfo.Log($"{nameof(InitAsTarget)}, success: {ret}", LogLevel.Debug);
+            if (ret > 0)
+            {
+                LogInfo.Log($"{nameof(WriteDataAsTarget)} - error: {(ErrorCode)receivedData[0]}", LogLevel.Debug);
+                return receivedData[0] == (byte)ErrorCode.None;
+            }
+            return false;
+        }
+
+        #endregion
 
         #region RFConfiguration
 
@@ -805,6 +901,20 @@ namespace Iot.Device.Pn532
         }
 
         /// <summary>
+        /// Read a single register
+        /// </summary>
+        /// <param name="register">The register to read</param>
+        /// <param name="registerValue">The value of the register</param>
+        /// <returns>True if success</returns>
+        public bool ReadRegister(ushort register, out byte registerValue)
+        {
+            Span<byte> toRead = stackalloc byte[1];
+            var ret = ReadRegister(new ushort[] { register }, toRead);
+            registerValue = toRead[0];
+            return ret;
+        }
+
+        /// <summary>
         /// Read any register from the XRAM
         /// </summary>
         /// <param name="registers">Array of register to read</param>
@@ -846,6 +956,17 @@ namespace Iot.Device.Pn532
                 toSend[i * 3 + 2] = registerValue[i];
             }
             return WriteRegisterCore(toSend, registerValue);
+        }
+
+        /// <summary>
+        /// Write a single register
+        /// </summary>
+        /// <param name="register">The register to write</param>
+        /// <param name="registerValue">The value of the register</param>
+        /// <returns>True if success</returns>
+        public bool WriteRegister(ushort register, byte registerValue)
+        {
+            return WriteRegister(new ushort[] { register }, new byte[] { registerValue });
         }
 
         /// <summary>
@@ -893,7 +1014,7 @@ namespace Iot.Device.Pn532
         /// <param name="p3">The P3 GPIO</param>
         /// <param name="l0L1">The specific operation mode register</param>
         /// <returns>True if success</returns>
-        public bool ReadGpio(out P7 p7, out P3 p3, out OperatingMode l0L1)
+        public bool ReadGpio(out Port7 p7, out Port3 p3, out OperatingMode l0L1)
         {
             // No flag as default
             p7 = 0;
@@ -903,8 +1024,8 @@ namespace Iot.Device.Pn532
             if (ret < 0) return false;
             Span<byte> retGPIO = stackalloc byte[3];
             ret = ReadResponse(CommandSet.ReadGPIO, retGPIO);
-            p7 = (P7)retGPIO[0];
-            p3 = (P3)retGPIO[1];
+            p7 = (Port7)retGPIO[0];
+            p3 = (Port3)retGPIO[1];
             l0L1 = (OperatingMode)retGPIO[2];
             return ret >= 0;
         }
@@ -915,7 +1036,7 @@ namespace Iot.Device.Pn532
         /// <param name="p7">The P7 GPIO</param>
         /// <param name="p3">The P3 GPIO</param>
         /// <returns>True if success</returns>
-        public bool WriteGpio(P7 p7, P3 p3)
+        public bool WriteGpio(Port7 p7, Port3 p3)
         {
             Span<byte> toWrite = stackalloc byte[2] { (byte)p7, (byte)p3 };
             var ret = WriteCommand(CommandSet.WriteGPIO, toWrite);
@@ -1045,30 +1166,48 @@ namespace Iot.Device.Pn532
             {
                 case BaudRate.B0009600:
                     _serialPort.BaudRate = 9600;
+                    _serialPort.ReadTimeout = 1067;
+                    _serialPort.WriteTimeout = 1067;
                     break;
                 case BaudRate.B0019200:
                     _serialPort.BaudRate = 19200;
+                    _serialPort.ReadTimeout = 533;
+                    _serialPort.WriteTimeout = 533;
                     break;
                 case BaudRate.B0038400:
                     _serialPort.BaudRate = 38400;
+                    _serialPort.ReadTimeout = 267;
+                    _serialPort.WriteTimeout = 267;
                     break;
                 case BaudRate.B0057600:
                     _serialPort.BaudRate = 57600;
+                    _serialPort.ReadTimeout = 178;
+                    _serialPort.WriteTimeout = 178;
                     break;
                 case BaudRate.B0115200:
                     _serialPort.BaudRate = 115200;
+                    _serialPort.ReadTimeout = 89;
+                    _serialPort.WriteTimeout = 89;
                     break;
                 case BaudRate.B0230400:
                     _serialPort.BaudRate = 230400;
+                    _serialPort.ReadTimeout = 44;
+                    _serialPort.WriteTimeout = 44;
                     break;
                 case BaudRate.B0460800:
                     _serialPort.BaudRate = 460800;
+                    _serialPort.ReadTimeout = 22;
+                    _serialPort.WriteTimeout = 22;
                     break;
                 case BaudRate.B0921600:
                     _serialPort.BaudRate = 921600;
+                    _serialPort.ReadTimeout = 11;
+                    _serialPort.WriteTimeout = 11;
                     break;
                 case BaudRate.B1288000:
                     _serialPort.BaudRate = 1288000;
+                    _serialPort.ReadTimeout = 8;
+                    _serialPort.WriteTimeout = 8;
                     break;
                 default:
                     break;
@@ -1092,7 +1231,7 @@ namespace Iot.Device.Pn532
             return WriteCommand(commandSet, Span<byte>.Empty);
         }
 
-        private int WriteCommand(CommandSet commandSet, Span<byte> writeData)
+        private int WriteCommand(CommandSet commandSet, ReadOnlySpan<byte> writeData)
         {
             LogInfo.Log($"{nameof(WriteCommand)}: {nameof(CommandSet)} {commandSet} Bytes to send: {BitConverter.ToString(writeData.ToArray())}", LogLevel.Debug);
             if (_spiDevice != null)
@@ -1138,7 +1277,7 @@ namespace Iot.Device.Pn532
         /// <param name="commandSet">The command to use</param>
         /// <param name="writeData">The additional data to send</param>
         /// <returns></returns>
-        private byte[] CreateWriteMessage(CommandSet commandSet, Span<byte> writeData)
+        private byte[] CreateWriteMessage(CommandSet commandSet, ReadOnlySpan<byte> writeData)
         {
             // 7 bytes + writeData length + 2 bytes if preamble
             int correctionPreamble = 2;
@@ -1190,19 +1329,19 @@ namespace Iot.Device.Pn532
             return buff.ToArray();
         }
 
-        private int WriteCommandSerial(CommandSet commandSet, Span<byte> writeData)
+        private int WriteCommandSerial(CommandSet commandSet, ReadOnlySpan<byte> writeData)
         {
             // Always make sure we don't have anything waiting to be read
             DumpSerial();
             var toWrite = CreateWriteMessage(commandSet, writeData);
             _serialPort.Write(toWrite, 0, toWrite.Length);
             // Check if we have something to read
-            var timeout = ReadTimeOut;
+            var timeout = _serialPort.ReadTimeout;
             while (!IsReady())
             {
                 Thread.Sleep(1);
                 timeout--;
-                LogInfo.Log("Tiemout waiting for ACK Write Serial", LogLevel.Debug);
+                // LogInfo.Log("Tiemout waiting for ACK Write Serial", LogLevel.Debug);
                 if (timeout == 0)
                     return -1;
             }
@@ -1211,7 +1350,7 @@ namespace Iot.Device.Pn532
             return -1;
         }
 
-        private int WriteCommandI2C(CommandSet commandSet, Span<byte> writeData)
+        private int WriteCommandI2C(CommandSet commandSet, ReadOnlySpan<byte> writeData)
         {
             var toWrite = CreateWriteMessage(commandSet, writeData);
             try
@@ -1240,7 +1379,7 @@ namespace Iot.Device.Pn532
             return -1;
         }
 
-        private int WriteCommandSPI(CommandSet commandSet, Span<byte> writeData)
+        private int WriteCommandSPI(CommandSet commandSet, ReadOnlySpan<byte> writeData)
         {
             var message = CreateWriteMessage(commandSet, writeData);
             Span<byte> buff = stackalloc byte[message.Length + 1];
@@ -1258,7 +1397,7 @@ namespace Iot.Device.Pn532
             {
                 Thread.Sleep(1);
                 timeout--;
-                //Console.WriteLine("Timeout in write");
+                // LogInfo.Log("Tiemout waiting for ACK SPI", LogLevel.Debug);
                 if (timeout == 0)
                     return -1;
             }
@@ -1284,7 +1423,7 @@ namespace Iot.Device.Pn532
 
         private int ReadResponseSerial(CommandSet commandSet, Span<byte> readData)
         {
-            var timeout = ReadTimeOut;
+            var timeout = _serialPort.ReadTimeout;
             while (!IsReady())
             {
                 Thread.Sleep(1);
