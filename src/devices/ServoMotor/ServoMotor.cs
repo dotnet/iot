@@ -16,7 +16,7 @@ namespace Iot.Device.ServoMotor
         private readonly int _maximumAngle;
         private readonly int _maximumPulseWidthMicroseconds;
         private readonly int _minimumPulseWidthMicroseconds;
-        private readonly double _servoAngleSlope;
+        private readonly double _angleInMicroseconds;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServoMotor"/> class.
@@ -29,7 +29,7 @@ namespace Iot.Device.ServoMotor
             _maximumAngle = maximumAngle;
             _minimumPulseWidthMicroseconds = minimumPulseWidthMicroseconds;
             _maximumPulseWidthMicroseconds = maximumPulseWidthMicroseconds;
-            _servoAngleSlope = CalculateServoAngleSlope(maximumAngle, minimumPulseWidthMicroseconds, maximumPulseWidthMicroseconds);
+            _angleInMicroseconds = CalculateAngleToMicroseconds(maximumAngle, minimumPulseWidthMicroseconds, maximumPulseWidthMicroseconds);
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Iot.Device.ServoMotor
             _pwmChannel = PwmChannel.Create(chip, channel, 50);  // Default 50Hz
         }
 
-        private static double CalculateServoAngleSlope(int maximumAngle, int minimumPulseWidthMicroseconds, int maximumPulseWidthMicroseconds)
+        private static double CalculateAngleToMicroseconds(int maximumAngle, int minimumPulseWidthMicroseconds, int maximumPulseWidthMicroseconds)
         {
             if (maximumAngle < 0 || maximumAngle > 360)
             {
@@ -111,7 +111,7 @@ namespace Iot.Device.ServoMotor
                 throw new ArgumentOutOfRangeException(nameof(angle), angle, $"Value must be between 0 and {_maximumAngle}.");
             }
 
-            WritePulseWidth((int)(_servoAngleSlope * angle + _minimumPulseWidthMicroseconds));
+            WritePulseWidth((int)(_angleInMicroseconds * angle + _minimumPulseWidthMicroseconds));
         }
 
         /// <summary>
