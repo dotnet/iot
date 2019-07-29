@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.GrovePiDevice.Models;
 using System;
 using System.Buffers.Binary;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.IO;
 using System.Threading;
+using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice
 {

@@ -24,12 +24,14 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize a new NXT Touch sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         public NXTTouchSensor(Brick brick, SensorPort port) : this(brick, port, 1000) { }
 
         /// <summary>
         /// Initialize a new NXT Touch sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>
         public NXTTouchSensor(Brick brick, SensorPort port, int timeout)

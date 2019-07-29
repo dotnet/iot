@@ -5,7 +5,6 @@
 using Iot.Device.Bno055;
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using System.Numerics;
 using System.Threading;
 
@@ -16,7 +15,7 @@ namespace Bno055sample
         static void Main(string[] args)
         {
             Console.WriteLine("Hello BNO055!");
-            I2cDevice i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(1, Bno055Sensor.DefaultI2cAddress));
+            I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Bno055Sensor.DefaultI2cAddress));
             Bno055Sensor bno055Sensor = new Bno055Sensor(i2cDevice);
             Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
             Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");

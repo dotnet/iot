@@ -20,7 +20,7 @@ namespace System.Device.Gpio
         public PinValue PinValue { get; }
 
         /// <summary>
-        /// Initializes new instance of PinValuePair.
+        /// Initializes a new instance of the <see cref="PinValuePair"/> struct.
         /// </summary>
         /// <param name="pinNumber">The pin number.</param>
         /// <param name="pinValue">The pin value.</param>

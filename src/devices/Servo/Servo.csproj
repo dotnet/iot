@@ -12,11 +12,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\SoftPwm\SoftPwm.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../SoftPwm/SoftwarePwm.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
     <None Include="README.md" />
   </ItemGroup>
 

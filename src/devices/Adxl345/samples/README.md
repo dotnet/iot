@@ -21,11 +21,9 @@ SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
     ClockFrequency = Adxl345.SpiClockFrequency,
     Mode = Adxl345.SpiMode
 };
-// get SpiDevice(In Linux)
-UnixSpiDevice device = new UnixSpiDevice(settings);
+var device = SpiDevice.Create(settings);
 
-// pass in a SpiDevice
-// set gravity measurement range ±4G
+// Set gravity measurement range ±4G
 using (Adxl345 sensor = new Adxl345(device, GravityRange.Range04))
 {
     // loop

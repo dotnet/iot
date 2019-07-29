@@ -86,18 +86,22 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize an EV3 IR Sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         public EV3InfraredSensor(Brick brick, SensorPort port) : this(brick, port, IRMode.Proximity, 1000) { }
 
         /// <summary>
         /// Initializes an EV3 IS Sensor
         /// </summary>
+        /// <param name="brick"></param>
+        /// <param name="port"></param>
         /// <param name="mode">IR mode</param>
         public EV3InfraredSensor(Brick brick, SensorPort port, IRMode mode) : this(brick, port, mode, 1000) { }
 
         /// <summary>
         /// Initialize an EV3 IR Sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">IR mode</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>

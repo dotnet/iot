@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
+    <PackageReference Include="SixLabors.Fonts" Version="1.0.0-*" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-*" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-*" />
+    <PackageReference Include="SixLabors.Shapes.Text" Version="1.0.0-*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Ssd13xx.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="images\*.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

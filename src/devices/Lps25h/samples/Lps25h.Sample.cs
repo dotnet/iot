@@ -5,7 +5,6 @@
 using System;
 using System.Threading;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 
 namespace Iot.Device.Lps25h.Samples
 {
@@ -29,7 +28,7 @@ namespace Iot.Device.Lps25h.Samples
         private static I2cDevice CreateI2cDevice()
         {
             var settings = new I2cConnectionSettings(1, I2cAddress);
-            return new UnixI2cDevice(settings);
+            return I2cDevice.Create(settings);
         }
     }
 }

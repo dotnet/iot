@@ -11,41 +11,28 @@ namespace Iot.Device.DCMotor
 {
     internal class DCMotor2PinNoEnable : DCMotor
     {
-        private PwmController _pwm;
-        private int _chip;
-        private int _channel;
+        private PwmChannel _pwm;
         private int? _pin1;
         private double _speed;
 
         public DCMotor2PinNoEnable(
-            PwmController pwmController,
-            double pwmFrequency,
-            int pwmChip,
-            int pwmChannel,
+            PwmChannel pwmChannel,
             int? pin1,
             GpioController controller) : base(controller)
         {
-            _pwm = pwmController;
-            _chip = pwmChip;
-            _channel = pwmChannel;
+            _pwm = pwmChannel;
 
             _pin1 = pin1;
 
             _speed = 0;
 
-            _pwm.OpenChannel(_chip, _channel);
-            _pwm.StartWriting(_chip, _channel, pwmFrequency, 0);
+            _pwm.Start();
 
             if (_pin1.HasValue)
             {
                 Controller.OpenPin(_pin1.Value, PinMode.Output);
                 Controller.Write(_pin1.Value, PinValue.Low);
             }
-        }
-
-        public DCMotor2PinNoEnable(double pwmFrequency, int pin0, int? pin1, GpioController controller)
-            : this(new PwmController(new SoftPwm()), pwmFrequency, pin0, 0, pin1, controller)
-        {
         }
 
         /// <summary>
@@ -73,7 +60,7 @@ namespace Iot.Device.DCMotor
                         Controller.Write(_pin1.Value, PinValue.Low);
                     }
 
-                    SetPwmFill(val);
+                    _pwm.DutyCyclePercentage = val;
                 }
                 else
                 {
@@ -82,18 +69,12 @@ namespace Iot.Device.DCMotor
                         Controller.Write(_pin1.Value, PinValue.High);
                     }
 
-                    SetPwmFill(1.0 + val);
+                    _pwm.DutyCyclePercentage = 1.0 + val;
                 }
 
                 _speed = val;
             }
         }
-
-        private void SetPwmFill(double fill)
-        {
-            _pwm.ChangeDutyCycle(_chip, _channel, fill * 100.0);
-        }
-
         public override void Dispose()
         {
             base.Dispose();

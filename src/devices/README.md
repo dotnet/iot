@@ -4,48 +4,187 @@ This directory is intended for device bindings, sensors, displays, human interfa
 
 Our vision: the majority of .NET bindings are written completely in .NET languages to enable portability, use of a single tool chain and complete debugability from application to binding to driver.
 
-## Binding Index
+## Bindings by category
 
-<devices>
+[Alphabetical device index can be found here](Device-Index.md)
 
-* [Pca95x4 - I2C GPIO Expander](Pca95x4/README.md)
-* [Using MCP3008 (10-bit Analog to Digital Converter)](Mcp3008/README.md)
-* [BMO055 Sensors](Bno055/README.md)
-* [GoPiGo3](GoPiGo3/README.md)
-* [DS3231 - Realtime Clock](Ds3231/README.md)
-* [nRF24L01 - Single Chip 2.4 GHz Transceiver](Nrf24l01/README.md)
-* [Using Max7219 (LED Matrix driver)](Max7219/README.md)
-* [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
-* [Ws28xx LED drivers](Ws28xx/README.md)
-* [28BYJ-48 Stepper Motor 5V 4-Phase 5-Wire & ULN2003 Driver Board](Uln2003/README.md)
-* [LPS25H - Piezoresistive pressure and thermometer sensor](Lps25h/README.md)
-* [HTS221 - Capacitive digital sensor for relative humidity and temperature ](Hts221/README.md)
-* [Mcp23xxx - I/O Expander](Mcp23xxx/README.md)
-* [HC-SR501 - PIR Motion Sensor](Hcsr501/README.md)
-* [BMx280 - Digital Pressure Sensors BMP280/BME280](Bmx280/README.md)
-* [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
-* [Pca9685 - I2C PWM Driver](Pca9685/README.md)
-* [Solomon Systech Ssd1306](Ssd1306/README.md)
-* [HC-SR04 - Ultrasonic Ranging Module](Hcsr04/README.md)
-* [LM75 - Digital Temperature Sensor](Lm75/README.md)
-* [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
-* [Software PWM](SoftPwm/README.md)
-* [DC Motor Controller](DCMotor/README.md)
-* [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+<categorizedDevices>
+
+### Analog/Digital converters
+
 * [ADS1115 - Analog to Digital Converter](Ads1115/README.md)
-* [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
-* [Cpu Temperature](CpuTemperature/README.md)
-* [Sense HAT](SenseHat/README.md)
-* [BrickPi3](BrickPi3/README.md)
-* [NXP/TI PCx857x](Pcx857x/README.md)
-* [Character LCD (Liquid Crystal Display)](CharacterLcd/README.md)
-* [HMC5883L - 3 Axis Digital Compass](Hmc5883l/README.md)
-* [MAX44009 - Ambient Light Sensor](Max44009/README.md)
-* [Buzzer - Piezo Buzzer Controller](Buzzer/README.md)
-* [Servomotor](Servo/README.md)
+* [MCP3008 - 10-bit Analog to Digital Converter](Mcp3008/README.md)
+* [Mcp3428 - Analog to Digital Converter (I2C)](Mcp3428/README.md)
+
+### Accelerometers
+
 * [ADXL345 - Accelerometer](Adxl345/README.md)
+* [BNO055 - inertial measurement unit](Bno055/README.md)
+* [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+* [Sense HAT](SenseHat/README.md)
+
+### Volatile Organic Compound sensors
+
+* [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
+* [BMxx80 Device Family](Bmxx80/README.md)
+
+### Gas sensors
+
+* [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
+* [BMxx80 Device Family](Bmxx80/README.md)
+
+### Light sensor
+
+* [BH1750FVI - Ambient Light Sensor](Bh1750fvi/README.md)
+* [MAX44009 - Ambient Light Sensor](Max44009/README.md)
+* [TCS3472x Sensors](Tcs3472x/README.md)
+
+### Barometers
+
+* [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
+* [BMxx80 Device Family](Bmxx80/README.md)
+* [LPS25H - Piezoresistive pressure and thermometer sensor](Lps25h/README.md)
+* [Sense HAT](SenseHat/README.md)
+
+### Altimeters
+
+* [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
+* [BMxx80 Device Family](Bmxx80/README.md)
+
+### Thermometers
+
+* [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
+* [BMxx80 Device Family](Bmxx80/README.md)
+* [Cpu Temperature](CpuTemperature/README.md)
 * [DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
-</devices>
+* [HTS221 - Capacitive digital sensor for relative humidity and temperature](Hts221/README.md)
+* [LM75 - Digital Temperature Sensor](Lm75/README.md)
+* [LPS25H - Piezoresistive pressure and thermometer sensor](Lps25h/README.md)
+* [Sense HAT](SenseHat/README.md)
+* [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
+* [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
+
+### Gyroscopes
+
+* [BNO055 - inertial measurement unit](Bno055/README.md)
+* [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+* [Sense HAT](SenseHat/README.md)
+
+### Compasses
+
+* [BNO055 - inertial measurement unit](Bno055/README.md)
+* [HMC5883L - 3 Axis Digital Compass](Hmc5883l/README.md)
+
+### Lego related devices
+
+* [BrickPi3](BrickPi3/README.md)
+
+### Motor controllers/drivers
+
+* [28BYJ-48 Stepper Motor 5V 4-Phase 5-Wire & ULN2003 Driver Board](Uln2003/README.md)
+* [DC Motor Controller](DCMotor/README.md)
+* [Servomotor](Servo/README.md)
+
+### Inertial Measurement Units
+
+* [BNO055 - inertial measurement unit](Bno055/README.md)
+* [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+* [Sense HAT](SenseHat/README.md)
+
+### Magnetometers
+
+* [BNO055 - inertial measurement unit](Bno055/README.md)
+* [HMC5883L - 3 Axis Digital Compass](Hmc5883l/README.md)
+* [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+* [Sense HAT](SenseHat/README.md)
+
+### Liquid Crystal Displays
+
+* [Character LCD (Liquid Crystal Display)](CharacterLcd/README.md)
+
+### Hygrometers
+
+* [BMxx80 Device Family](Bmxx80/README.md)
+* [DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
+* [HTS221 - Capacitive digital sensor for relative humidity and temperature](Hts221/README.md)
+* [Sense HAT](SenseHat/README.md)
+* [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
+* [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
+
+### Clocks
+
+* [Realtime Clock](Rtc/README.md)
+
+### Sonars
+
+* [HC-SR04 - Ultrasonic Ranging Module](Hcsr04/README.md)
+
+### Distance sensors
+
+* [HC-SR04 - Ultrasonic Ranging Module](Hcsr04/README.md)
+* [VL53L0X - distance sensor](Vl53L0X/README.md)
+
+### Passive InfraRed (motion) sensors
+
+* [HC-SR501 - PIR Motion Sensor](Hcsr501/README.md)
+
+### Motion sensors
+
+* [HC-SR501 - PIR Motion Sensor](Hcsr501/README.md)
+
+### Displays
+
+* [Max7219 (LED Matrix driver)](Max7219/README.md)
+* [RGBLedMatrix - RGB LED Matrix](RGBLedMatrix/README.md)
+* [Sense HAT](SenseHat/README.md)
+* [Solomon Systech Ssd1306 OLED display](Ssd13xx/README.md)
+* [Ws28xx LED drivers](Ws28xx/README.md)
+
+### GPIO Expanders
+
+* [Mcp23xxx - I/O Expander device family](Mcp23xxx/README.md)
+* [NXP/TI PCx857x](Pcx857x/README.md)
+* [Pca95x4 - I2C GPIO Expander](Pca95x4/README.md)
+
+### CAN BUS libraries/modules
+
+* [Mcp25xxx device family - CAN bus](Mcp25xxx/README.md)
+* [SocketCan - CAN BUS library (Linux only)](SocketCan/README.md)
+
+### Proximity sensors
+
+* [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
+
+### Touch sensors
+
+* [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
+
+### Wireless communication modules
+
+* [nRF24L01 - Single Chip 2.4 GHz Transceiver](Nrf24l01/README.md)
+
+### PWM libraries/modules
+
+* [Pca9685 - I2C PWM Driver](Pca9685/README.md)
+* [Software PWM](SoftPwm/README.md)
+
+### Joysticks
+
+* [Sense HAT](SenseHat/README.md)
+
+### Color sensors
+
+* [TCS3472x Sensors](Tcs3472x/README.md)
+
+### LED drivers
+
+* [Ws28xx LED drivers](Ws28xx/README.md)
+
+### SPI libraries/modules
+
+* [Software implementation of SPI](SoftwareSpi/README.md)
+
+</categorizedDevices>
 
 ## Binding Distribution
 

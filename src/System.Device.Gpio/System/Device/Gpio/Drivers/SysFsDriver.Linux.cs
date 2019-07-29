@@ -23,7 +23,7 @@ namespace System.Device.Gpio.Drivers
         private int _pollFileDescriptor = -1;
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
-        private readonly static CancellationTokenSource s_eventThreadCancellationTokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource s_eventThreadCancellationTokenSource;
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
         private readonly int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
@@ -50,6 +50,14 @@ namespace System.Device.Gpio.Drivers
                 }
             }
             return 0;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SysFsDriver"/> class.
+        /// </summary>
+        public SysFsDriver()
+        {
+            s_eventThreadCancellationTokenSource = new CancellationTokenSource();
         }
 
         /// <summary>
@@ -199,22 +207,12 @@ namespace System.Device.Gpio.Drivers
 
         private PinValue ConvertSysFsValueToPinValue(string value)
         {
-            PinValue result;
-            value = value.Trim();
-
-            switch (value)
+            return value.Trim() switch
             {
-                case "0":
-                    result = PinValue.Low;
-                    break;
-                case "1":
-                    result = PinValue.High;
-                    break;
-                default:
-                    throw new ArgumentException($"Invalid GPIO pin value {value}.");
-            }
-
-            return result;
+                "0" => PinValue.Low,
+                "1" => PinValue.High,
+                _ => throw new ArgumentException($"Invalid GPIO pin value {value}.")
+            };
         }
 
         /// <summary>
@@ -302,20 +300,14 @@ namespace System.Device.Gpio.Drivers
 
         private PinEventTypes StringValueToPinEventType(string value)
         {
-            value = value.Trim();
-            switch (value)
+            return value.Trim() switch
             {
-                case "none":
-                    return PinEventTypes.None;
-                case "both":
-                    return PinEventTypes.Falling | PinEventTypes.Rising;
-                case "rising":
-                    return PinEventTypes.Rising;
-                case "falling":
-                    return PinEventTypes.Falling;
-                default:
-                    throw new ArgumentException("Invalid pin event value.", value);
-            }
+                "none" => PinEventTypes.None,
+                "both" => PinEventTypes.Falling | PinEventTypes.Rising,
+                "rising" => PinEventTypes.Rising,
+                "falling" => PinEventTypes.Falling,
+                _ => throw new ArgumentException("Invalid pin event value.", value)
+            };
         }
 
         private string PinEventTypeToStringValue(PinEventTypes kind)
@@ -324,7 +316,7 @@ namespace System.Device.Gpio.Drivers
             {
                 return "none";
             }
-            if (kind.HasFlag(PinEventTypes.Falling) && kind.HasFlag(PinEventTypes.Rising))
+            if ((kind & PinEventTypes.Falling) != 0 && (kind & PinEventTypes.Rising) != 0)
             {
                 return "both";
             }
@@ -445,7 +437,10 @@ namespace System.Device.Gpio.Drivers
             {
                 if (cancelEventDetectionThread)
                 {
-                    s_eventThreadCancellationTokenSource.Cancel();
+                    try
+                    {
+                        s_eventThreadCancellationTokenSource.Cancel();
+                    } catch (ObjectDisposedException) { }
                     while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                     {
                         Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
@@ -462,8 +457,11 @@ namespace System.Device.Gpio.Drivers
             _pinsToDetectEventsCount = 0;
             if (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
             {
-                s_eventThreadCancellationTokenSource.Cancel();
-                s_eventThreadCancellationTokenSource.Dispose();
+                try
+                {
+                    s_eventThreadCancellationTokenSource.Cancel();
+                    s_eventThreadCancellationTokenSource.Dispose();
+                } catch (ObjectDisposedException) { } //The Cancellation Token source may already be disposed.
                 while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                 {
                     Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
@@ -500,11 +498,11 @@ namespace System.Device.Gpio.Drivers
                 _pinsToDetectEventsCount++;
                 AddPinToPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, out _);
             }
-            if (eventTypes.HasFlag(PinEventTypes.Rising))
+            if ((eventTypes & PinEventTypes.Rising) != 0)
             {
                 _devicePins[pinNumber].ValueRising += callback;
             }
-            if (eventTypes.HasFlag(PinEventTypes.Falling))
+            if ((eventTypes & PinEventTypes.Falling) != 0)
             {
                 _devicePins[pinNumber].ValueFalling += callback;
             }
@@ -528,12 +526,19 @@ namespace System.Device.Gpio.Drivers
         {
             while (_pinsToDetectEventsCount > 0)
             {
-                bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, s_eventThreadCancellationTokenSource.Token);
-                if (eventDetected)
+                try
                 {
-                    PinEventTypes eventTypes = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
-                    var args = new PinValueChangedEventArgs(eventTypes, pinNumber);
-                    _devicePins[pinNumber]?.OnPinValueChanged(args, GetPinEventsToDetect(pinNumber));
+                    bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, s_eventThreadCancellationTokenSource.Token);
+                    if (eventDetected)
+                    {
+                        Thread.Sleep(1); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
+                        PinEventTypes eventTypes = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                        var args = new PinValueChangedEventArgs(eventTypes, pinNumber);
+                        _devicePins[pinNumber]?.OnPinValueChanged(args);
+                    }
+                } catch (ObjectDisposedException)
+                {
+                    break; //If cancellation token source is dispossed then we need to exit this thread.
                 }
             }
 
