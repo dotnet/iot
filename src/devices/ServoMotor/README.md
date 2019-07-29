@@ -1,6 +1,7 @@
 ﻿# Servo Motor
 
 ## Summary
+
 This is a generic binding to control many servo motors using a hardware or software `PwmChannel`.  Servo motors are usually based on a signal frequency of 50Hz.  They also require a minimum/maximum pulse width to determine the position.  The pulse width is generally between 1 and 2 milliseconds, where 1ms is approximately 0 degrees, 1.5ms is the rest position, and 2ms is 180 degrees.  This information can be found in each servo motor's datasheet.  
 
 One thing to be aware of is the wiring as the servo motor connector is usually a 3-pin connector.  The pinout is shown below where colors can vary.
@@ -11,8 +12,8 @@ One thing to be aware of is the wiring as the servo motor connector is usually a
 | 2          | Power Supply   | Brown or Red              |
 | 3          | Control Signal | Orange or White or Yellow |
 
-
 ## Device Family
+
 There are many servo motor sizes available that offer both standard and continuous rotation.  Below are a few links where to purchase servo motors.
 
 [Adafruit Servo Motor Accessories](https://www.adafruit.com/?q=servo)  
@@ -62,6 +63,7 @@ servoMotor.Stop(); // Disable control signal.
 ```
 
 ## References
+
 [Wikipedia Servo Motor](https://en.wikipedia.org/wiki/Servomotor)  
 [Hobby Servo Tutorial](https://learn.sparkfun.com/tutorials/hobby-servo-tutorial/all)  
 [How Servo Motors Work & How To Control Servos Using Arduino](https://howtomechatronics.com/how-it-works/how-servo-motors-work-how-to-control-servos-using-arduino/)  
