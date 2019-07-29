@@ -126,7 +126,6 @@ namespace Iot.Device.ServoMotor
 
         public void Dispose()
         {
-            _pwmChannel?.Stop();
             _pwmChannel?.Dispose();
             _pwmChannel = null;
         }
