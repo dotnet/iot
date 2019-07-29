@@ -77,7 +77,7 @@ namespace System.Device.Pwm.Channels
         /// </summary>
         /// <param name="frequency">The frequency in hertz.</param>
         /// <returns>The frequency period in nanoseconds.</returns>
-        private static int GetPeriodInNanoSeconds(int frequency)
+        private static int GetPeriodInNanoseconds(int frequency)
         {
             // In Linux, the period needs to be a whole number and can't have a decimal point.
             return (int)((1.0 / frequency) * 1_000_000_000);
@@ -94,8 +94,8 @@ namespace System.Device.Pwm.Channels
                 throw new ArgumentOutOfRangeException(nameof(frequency), frequency, "Value must not be negative.");
             }
             
-            int periodInNanoSeconds = GetPeriodInNanoSeconds(frequency);
-            File.WriteAllText($"{_channelPath}/period", Convert.ToString(periodInNanoSeconds));
+            int periodInNanoseconds = GetPeriodInNanoseconds(frequency);
+            File.WriteAllText($"{_channelPath}/period", Convert.ToString(periodInNanoseconds));
             _frequency = frequency;
         }
 
@@ -111,8 +111,8 @@ namespace System.Device.Pwm.Channels
             }
 
             // In Linux, the period needs to be a whole number and can't have decimal point.
-            int dutyCycleInNanoSeconds = (int)(GetPeriodInNanoSeconds(_frequency) * dutyCyclePercentage);
-            File.WriteAllText($"{_channelPath}/duty_cycle", Convert.ToString(dutyCycleInNanoSeconds));
+            int dutyCycleInNanoseconds = (int)(GetPeriodInNanoseconds(_frequency) * dutyCyclePercentage);
+            File.WriteAllText($"{_channelPath}/duty_cycle", Convert.ToString(dutyCycleInNanoseconds));
             _dutyCyclePercentage = dutyCyclePercentage;
         }
 
