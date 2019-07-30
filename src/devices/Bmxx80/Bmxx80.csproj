@@ -9,6 +9,8 @@
   <ItemGroup>
     <Compile Include="Bme280.cs" />
     <Compile Include="Bme680.cs" />
+    <Compile Include="Bme680HeaterProfile.cs" />
+    <Compile Include="Bme680Mask.cs" />
     <Compile Include="Bmp280.cs" />
     <Compile Include="Bmx280Base.cs" />
     <Compile Include="Bmxx80Base.cs" />
