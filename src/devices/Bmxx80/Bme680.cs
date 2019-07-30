@@ -54,11 +54,136 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
+        /// Gets or sets whether the heater is enabled.
+        /// </summary>
+        public bool HeaterIsEnabled
+        {
+            get
+            {
+                var heaterStatus = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_0);
+                heaterStatus = (byte)((heaterStatus & (byte)Bme680Mask.HEAT_OFF) >> 3);
+                return !Convert.ToBoolean(heaterStatus);
+            }
+            set
+            {
+                var heaterStatus = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_0);
+                heaterStatus = (byte)((heaterStatus & (byte)~Bme680Mask.HEAT_OFF) | Convert.ToByte(!value) << 3);
+
+                _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_GAS_0, heaterStatus });
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether gas conversions are enabled.
+        /// </summary>
+        public bool GasConversionIsEnabled
+        {
+            get
+            {
+                var gasConversion = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_1);
+                gasConversion = (byte)((gasConversion & (byte)Bme680Mask.RUN_GAS) >> 4);
+                return Convert.ToBoolean(gasConversion);
+            }
+            set
+            {
+                var gasConversion = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_1);
+                gasConversion = (byte)((gasConversion & (byte)~Bme680Mask.RUN_GAS) | Convert.ToByte(value) << 4);
+
+                _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_GAS_1, gasConversion });
+            }
+        }
+
+        /// <summary>
+        /// Indicates whether new data is available.
+        /// </summary>
+        public bool NewDataIsAvailable
+        {
+            get
+            {
+                var newData = Read8BitsFromRegister((byte)Bme680Register.STATUS);
+                newData = (byte)(newData >> 7);
+                return Convert.ToBoolean(newData);
+            }
+        }
+
+        /// <summary>
+        /// Indicates whether a gas measurement is in process.
+        /// </summary>
+        public bool GasMeasurementInProcess
+        {
+            get
+            {
+                var gasMeasInProcess = Read8BitsFromRegister((byte)Bme680Register.STATUS);
+                gasMeasInProcess = (byte)((gasMeasInProcess & (byte)Bme680Mask.GAS_MEASURING) >> 6);
+                return Convert.ToBoolean(gasMeasInProcess);
+            }
+        }
+
+        /// <summary>
+        /// Indicates whether a measurement of any kind is in process.
+        /// </summary>
+        public bool MeasurementInProcess
+        {
+            get
+            {
+                var measInProcess = Read8BitsFromRegister((byte)Bme680Register.STATUS);
+                measInProcess = (byte)((measInProcess & (byte)Bme680Mask.MEASURING) >> 5);
+                return Convert.ToBoolean(measInProcess);
+            }
+        }
+
+        /// <summary>
+        /// Indicates whether a real gas conversion was performed (i.e. not a dummy one).
+        /// </summary>
+        public bool GasMeasurementIsValid
+        {
+            get
+            {
+                var gasMeasValid = Read8BitsFromRegister((byte)Bme680Register.GAS_RANGE);
+                gasMeasValid = (byte)((gasMeasValid & (byte)Bme680Mask.GAS_VALID) >> 5);
+                return Convert.ToBoolean(gasMeasValid);
+            }
+        }
+
+        /// <summary>
+        /// Indicates whether the target heater temperature is reached.
+        /// </summary>
+        public bool HeaterIsStable
+        {
+            get
+            {
+                var heaterStable = Read8BitsFromRegister((byte)Bme680Register.GAS_RANGE);
+                heaterStable = (byte)((heaterStable & (byte)Bme680Mask.HEAT_STAB) >> 4);
+                return Convert.ToBoolean(heaterStable);
+            }
+        }
+
+        /// <summary>
+        /// Sets the heater profile to be used for measurements.
+        /// </summary>
+        /// <param name="profile">The heater profile to be used.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the heater profile does not match a defined profile in <see cref="Bme680HeaterProfile"/>.</exception>
+        public void SetCurrentHeaterProfile(Bme680HeaterProfile profile)
+        {
+            if (!Enum.IsDefined(typeof(Bme680HeaterProfile), profile))
+                throw new ArgumentOutOfRangeException();
+
+            var heaterProfile = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_1);
+            heaterProfile = (byte)((heaterProfile & (byte)~Bme680Mask.NB_CONV) | (byte)profile);
+
+            _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_GAS_1, heaterProfile });
+        }
+
+        /// <summary>
         /// Set the humidity sampling.
         /// </summary>
         /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the sampling mode does not match a defined mode in <see cref="Sampling"/>.</exception>
         public void SetHumiditySampling(Sampling sampling)
         {
+            if (!Enum.IsDefined(typeof(Sampling), sampling))
+                throw new ArgumentOutOfRangeException();
+
             var register = (byte)Bme680Register.CTRL_HUM;
             byte read = Read8BitsFromRegister(register);
 
@@ -72,28 +197,18 @@ namespace Iot.Device.Bmxx80
         /// Sets the power mode to the given mode
         /// </summary>
         /// <param name="powerMode">The <see cref="Bme680PowerMode"/> to set.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the power mode does not match a defined mode in <see cref="Bme680PowerMode"/>.</exception>
         public void SetPowerMode(Bme680PowerMode powerMode)
         {
+            if (!Enum.IsDefined(typeof(Bme680PowerMode), powerMode))
+                throw new ArgumentOutOfRangeException();
+
             byte read = Read8BitsFromRegister(_controlRegister);
 
             // Clear first 2 bits.
             var cleared = (byte)(read & 0b_1111_1100);
 
             _i2cDevice.Write(new[] { _controlRegister, (byte)(cleared | (byte)powerMode) });
-        }
-
-        /// <summary>
-        /// Read a value indicating whether or not new sensor data is available.
-        /// </summary>
-        /// <returns>True if new data is available.</returns>
-        public bool ReadHasNewData()
-        {
-            byte read = Read8BitsFromRegister((byte)Bme680Register.STATUS);
-
-            // Get only the power mode bit.
-            var hasNewData = (byte)(read & 0b_1000_0000);
-
-            return (hasNewData >> 7) == 1;
         }
 
         /// <summary>
@@ -116,7 +231,6 @@ namespace Iot.Device.Bmxx80
         /// Read the <see cref="Bme680PowerMode"/> state.
         /// </summary>
         /// <returns>The current <see cref="Bme680PowerMode"/>.</returns>
-        /// <exception cref="NotImplementedException">Thrown when the power mode does not match a defined mode in <see cref="Bme680PowerMode"/>.</exception>
         public Bme680PowerMode ReadPowerMode()
         {
             byte read = Read8BitsFromRegister(_controlRegister);
@@ -223,11 +337,7 @@ namespace Iot.Device.Bmxx80
             return calculatedPressure;
         }
 
-        /// <summary>
-        /// Compensates the temperature.
-        /// </summary>
-        /// <param name="adcTemperature">The temperature value read from the device.</param>
-        /// <returns>The <see cref="Temperature"/>.</returns>
+        /// <inheritdoc cref="Bmxx80Base"/>
         protected override Temperature CompensateTemperature(int adcTemperature)
         {
             // Calculation for the Bme680 differs slightly from other sensors of this family!
