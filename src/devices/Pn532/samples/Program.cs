@@ -191,7 +191,7 @@ namespace Pn532Demo
                     $"ISO144443 compliance: {decrypted.ISO14443_4Compliance}, Max Frame size: {decrypted.MaxFrameSize}, NAD: {decrypted.NadSupported}");
 
                 CreditCard creditCard = new CreditCard(pn532, decrypted.TargetNumber);
-                creditCard.FillCreditCardInformation();
+                creditCard.ReadCreditCardInformation();
 
                 Console.WriteLine("All Tags for the Credit Card:");
                 DisplayTags(creditCard.Tags, 0);
