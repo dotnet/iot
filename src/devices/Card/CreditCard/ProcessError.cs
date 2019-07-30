@@ -74,6 +74,10 @@ namespace Iot.Device.Card.CreditCardProcessing
                 ErrorType = ErrorType.WrongLength;
                 CorrectLegnthOrBytesAvailable = errorToProcess[1];
             }
+            else if(errorToProcess[0] == 0x6D)
+            {
+                ErrorType = ErrorType.InstructionCodeNotSupportedOrInvalid;
+            }
             else
                 ErrorType = ErrorType.Unknown;
         }

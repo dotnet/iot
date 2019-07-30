@@ -25,6 +25,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         ReferenceDataNotFound,
         WrongLength,
         BytesStillAvailable,
+        InstructionCodeNotSupportedOrInvalid,
         Unknown
     }
 }
