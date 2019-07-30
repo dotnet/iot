@@ -12,9 +12,6 @@ namespace Iot.Device.Bmxx80.Register
     /// </remarks>
     internal enum Bme680Register : byte
     {
-        CTRL_MEAS = 0x74,
-        CTRL_HUM = 0x72,
-
         DIG_H1_LSB = 0xE2,
         DIG_H1_MSB = 0xE3,
         DIG_H2_LSB = 0xE2,
@@ -40,17 +37,35 @@ namespace Iot.Device.Bmxx80.Register
         DIG_P9_LSB = 0x9E,
         DIG_P10 = 0xA0,
 
-        HUMIDITYDATA_LSB = 0x26,
-        HUMIDITYDATA_MSB = 0x25,
+        DIG_GH1 = 0xED,
+        DIG_GH2 = 0xEB,
+        DIG_GH3 = 0xEE,
+
+        RES_HEAT_VAL = 0x00,
+        RES_HEAT_RANGE = 0x02,
+        RANGE_SW_ERR = 0x04,
+        STATUS = 0x1D,
 
         PRESSUREDATA_MSB = 0x1F,
         PRESSUREDATA_LSB = 0x20,
         PRESSUREDATA_XLSB = 0x21,
 
-        STATUS = 0x1D,
-
         TEMPDATA_MSB = 0x22,
         TEMPDATA_LSB = 0x23,
         TEMPDATA_XLSB = 0x24,
+
+        HUMIDITYDATA_MSB = 0x25,
+        HUMIDITYDATA_LSB = 0x26,
+
+        GAS_RES = 0x2A,
+        GAS_RANGE = 0x2B,
+        RES_HEAT_0 = 0x5A,
+        GAS_WAIT_0 = 0x64,
+
+        CTRL_GAS_0 = 0x70,
+        CTRL_GAS_1 = 0x71,
+        CTRL_HUM = 0x72,
+        CTRL_MEAS = 0x74,
+        CONFIG = 0x75
     }
 }
