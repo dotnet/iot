@@ -41,58 +41,130 @@ namespace Iot.Device.DCMotor
         }
 
         /// <summary>
-        /// Constructs DCMotor class.
-        /// Depending on the settings it will pick implementation suitable for the given connection.
+        /// Creates DCMotor instance which allows to control speed in one direction.
         /// </summary>
-        public static DCMotor Create(DCMotorSettings settings)
+        /// <param name="speedControlChannel">PWM channel used to control the speed of the motor</param>
+        /// <returns>DCMotor instance</returns>
+        public static DCMotor Create(PwmChannel speedControlChannel)
         {
-            if (settings.UseEnableAsPwm)
-            {
-                if (settings.Pin0.HasValue && settings.Pin1.HasValue && settings.PwmChannel != null)
-                {
-                    return new DCMotor3Pin(
-                        settings.PwmChannel,
-                        settings.Pin0.Value,
-                        settings.Pin1.Value,
-                        settings.Controller);
-                }
+            if (speedControlChannel == null)
+                throw new ArgumentNullException(nameof(speedControlChannel));
 
-                throw new ArgumentException("When enable pin is used for PWM all pins and PwmChannel must be set.");
-            }
-            else
-            {
-                int? pin0 = settings.Pin0;
-                int? pin1 = settings.Pin1;
+            return new DCMotor2PinNoEnable(speedControlChannel, -1, null);
+        }
 
-                if (!pin0.HasValue && pin1.HasValue)
-                {
-                    pin0 = pin1;
-                    pin1 = null;
-                }
+        /// <summary>
+        /// Creates DCMotor instance which allows to control speed in one direction.
+        /// </summary>
+        /// <param name="speedControlPin">Pin used to control the speed of the motor with software PWM</param>
+        /// <param name="controller">GPIO controller related to the pin</param>
+        /// <returns>DCMotor instance</returns>
+        public static DCMotor Create(int speedControlPin, GpioController controller = null)
+        {
+            if (speedControlPin == -1)
+                throw new ArgumentOutOfRangeException(nameof(speedControlPin));
 
-                if (settings.PwmChannel != null)
-                {
-                    if (pin0.HasValue == pin1.HasValue)
-                    {
-                        throw new ArgumentException("Only one of Pin0 and Pin1 must be set when PWM is specified.");
-                    }
+            controller = controller ?? new GpioController();
+            return new DCMotor2PinNoEnable(
+                new SoftwarePwmChannel(speedControlPin, 50, 0.0, controller: controller),
+                -1,
+                controller);
+        }
 
-                    return new DCMotor2PinNoEnable(
-                        settings.PwmChannel,
-                        pin0,
-                        settings.Controller);
-                }
-                else
-                {
-                    if (!pin0.HasValue)
-                    {
-                        // pin1 must be null now since we swap values earlier when pin0 == null
-                        throw new ArgumentException("Pin0 or Pin1 must be set when PWM is not specified.");
-                    }
+        /// <summary>
+        /// Creates DCMotor instance which allows to control speed in both directions.
+        /// </summary>
+        /// <param name="speedControlChannel">PWM channel used to control the speed of the motor</param>
+        /// <param name="directionPin">Pin used to control the direction of the motor</param>
+        /// <param name="controller">GPIO controller related to the pin</param>
+        /// <returns>DCMotor instance</returns>
+        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, GpioController controller = null)
+        {
+            if (speedControlChannel == null)
+                throw new ArgumentNullException(nameof(speedControlChannel));
 
-                    return new DCMotor2PinNoEnable(new SoftwarePwmChannel(pin0.Value, 50, 0.0, controller: settings.Controller), pin1, settings.Controller);
-                }
-            }
+            if (directionPin == -1)
+                throw new ArgumentOutOfRangeException(nameof(directionPin));
+
+            return new DCMotor2PinNoEnable(speedControlChannel, directionPin, controller);
+        }
+        
+        /// <summary>
+        /// Creates DCMotor instance which allows to control speed in both directions.
+        /// </summary>
+        /// <param name="speedControlPin">Pin used to control the speed of the motor with software PWM</param>
+        /// <param name="directionPin">Pin used to control the direction of the motor</param>
+        /// <param name="controller">GPIO controller related to the pins</param>
+        /// <returns>DCMotor instance</returns>
+        public static DCMotor Create(int speedControlPin, int directionPin, GpioController controller = null)
+        {
+            if (speedControlPin == -1)
+                throw new ArgumentOutOfRangeException(nameof(speedControlPin));
+
+            if (directionPin == -1)
+                throw new ArgumentOutOfRangeException(nameof(directionPin));
+
+            controller = controller ?? new GpioController();
+            return new DCMotor2PinNoEnable(
+                new SoftwarePwmChannel(speedControlPin, 50, 0.0, controller: controller),
+                directionPin,
+                controller);
+        }
+
+        /// <summary>
+        /// Creates DCMotor instance which allows to control speed in both directions.
+        /// </summary>
+        /// <param name="speedControlChannel">PWM channel used to control the speed of the motor</param>
+        /// <param name="directionPin">Pin used to control the direction of the motor</param>
+        /// <param name="otherDirectionPin">Pin used to control the direction of the motor</param>
+        /// <param name="controller">GPIO controller related to the pins</param>
+        /// <returns>DCMotor instance</returns>
+        /// <remarks>When speed is non-zero the value of otherDirectionPin will always be opposite to that of directionPin</remarks>
+        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, int otherDirectionPin, GpioController controller = null)
+        {
+            if (speedControlChannel == null)
+                throw new ArgumentNullException(nameof(speedControlChannel));
+
+            if (directionPin == -1)
+                throw new ArgumentOutOfRangeException(nameof(directionPin));
+
+            if (otherDirectionPin == -1)
+                throw new ArgumentOutOfRangeException(nameof(otherDirectionPin));
+
+            return new DCMotor3Pin(
+                speedControlChannel,
+                directionPin,
+                otherDirectionPin,
+                controller);
+        }
+
+        /// <summary>
+        /// Creates DCMotor instance which allows to control speed in both directions.
+        /// </summary>
+        /// <param name="speedControlPin">Pin used to control the speed of the motor with software PWM</param>
+        /// <param name="directionPin">Pin used to control the direction of the motor</param>
+        /// <param name="otherDirectionPin">Pin used to control the direction of the motor</param>
+        /// <param name="controller">GPIO controller related to the pins</param>
+        /// <returns>DCMotor instance</returns>
+        /// <remarks>When speed is non-zero the value of <paramref name="otherDirectionPin"/> will always be opposite to that of <paramref name="directionPin"/></remarks>
+        public static DCMotor Create(int speedControlPin, int directionPin, int otherDirectionPin, GpioController controller = null)
+        {
+            if (speedControlPin == -1)
+                throw new ArgumentOutOfRangeException(nameof(speedControlPin));
+
+            if (directionPin == -1)
+                throw new ArgumentOutOfRangeException(nameof(directionPin));
+
+            if (otherDirectionPin == -1)
+                throw new ArgumentOutOfRangeException(nameof(otherDirectionPin));
+
+            controller = controller ?? new GpioController();
+
+            return new DCMotor3Pin(
+                new SoftwarePwmChannel(speedControlPin, 50, 0.0, controller: controller),
+                directionPin,
+                otherDirectionPin,
+                controller);
         }
     }
 }

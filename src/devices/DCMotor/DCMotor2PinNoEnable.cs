@@ -12,12 +12,12 @@ namespace Iot.Device.DCMotor
     internal class DCMotor2PinNoEnable : DCMotor
     {
         private PwmChannel _pwm;
-        private int? _pin1;
+        private int _pin1;
         private double _speed;
 
         public DCMotor2PinNoEnable(
             PwmChannel pwmChannel,
-            int? pin1,
+            int pin1,
             GpioController controller) : base(controller)
         {
             _pwm = pwmChannel;
@@ -28,10 +28,10 @@ namespace Iot.Device.DCMotor
 
             _pwm.Start();
 
-            if (_pin1.HasValue)
+            if (_pin1 != -1)
             {
-                Controller.OpenPin(_pin1.Value, PinMode.Output);
-                Controller.Write(_pin1.Value, PinValue.Low);
+                Controller.OpenPin(_pin1, PinMode.Output);
+                Controller.Write(_pin1, PinValue.Low);
             }
         }
 
@@ -48,25 +48,25 @@ namespace Iot.Device.DCMotor
             }
             set
             {
-                double val = Math.Clamp(value, _pin1.HasValue ? -1.0 : 0.0, 1.0);
+                double val = Math.Clamp(value, _pin1 != -1 ? -1.0 : 0.0, 1.0);
 
                 if (_speed == val)
                     return;
 
                 if (val >= 0.0)
                 {
-                    if (_pin1.HasValue)
+                    if (_pin1 != -1)
                     {
-                        Controller.Write(_pin1.Value, PinValue.Low);
+                        Controller.Write(_pin1, PinValue.Low);
                     }
 
                     _pwm.DutyCyclePercentage = val;
                 }
                 else
                 {
-                    if (_pin1.HasValue)
+                    if (_pin1 != -1)
                     {
-                        Controller.Write(_pin1.Value, PinValue.High);
+                        Controller.Write(_pin1, PinValue.High);
                     }
 
                     _pwm.DutyCyclePercentage = 1.0 + val;
@@ -77,9 +77,9 @@ namespace Iot.Device.DCMotor
         }
         public override void Dispose()
         {
-            base.Dispose();
             _pwm?.Dispose();
             _pwm = null;
+            base.Dispose();
         }
     }
 }
