@@ -41,7 +41,7 @@ namespace System.Device.Pwm.Channels
             Validate();
             Open();
 
-            // avoid openning the file for operations changing relatively frequently
+            // avoid opening the file for operations changing relatively frequently
             _dutyCycleWriter = new StreamWriter(new FileStream($"{_channelPath}/duty_cycle", FileMode.Open, FileAccess.ReadWrite));
             _frequencyWriter = new StreamWriter(new FileStream($"{_channelPath}/period", FileMode.Open, FileAccess.ReadWrite));
 
