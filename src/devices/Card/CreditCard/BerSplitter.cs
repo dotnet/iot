@@ -11,7 +11,7 @@ namespace Iot.Device.Card.CreditCardProcessing
     /// <summary>
     /// A simple Basic Encoding Rules (defined in ISO/IEC 8825–1) decoder
     /// </summary>
-    public class BerSplitter
+    internal class BerSplitter
     {
         /// <summary>
         /// A list of Tag
@@ -28,17 +28,26 @@ namespace Iot.Device.Card.CreditCardProcessing
             int index = 0;
             while ((index < toSplit.Length) && (toSplit[index] != 0x00))
             {
-                var elem = new Tag();
-                var resTag = DecodeTag(toSplit.Slice(index));
-                elem.TagNumber = resTag.Item1;
-                // Need to move index depending on how many has been read
-                index += resTag.Item2;
-                var resSize = DecodeSize(toSplit.Slice(index));
-                elem.Data = new byte[resSize.Item1];
-                index += resSize.Item2;
-                toSplit.Slice(index, resSize.Item1).CopyTo(elem.Data);
-                Tags.Add(elem);
-                index += resSize.Item1;
+                try
+                {
+                    var elem = new Tag();
+                    var resTag = DecodeTag(toSplit.Slice(index));
+                    elem.TagNumber = resTag.Item1;
+                    // Need to move index depending on how many has been read
+                    index += resTag.Item2;
+                    var resSize = DecodeSize(toSplit.Slice(index));
+                    elem.Data = new byte[resSize.Item1];
+                    index += resSize.Item2;
+                    toSplit.Slice(index, resSize.Item1).CopyTo(elem.Data);
+                    Tags.Add(elem);
+                    index += resSize.Item1;
+
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    // We may have a non supported Tag
+                    break;
+                }
             }
         }
 
@@ -57,7 +66,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         {
             // Case infinite
             if (toSplit[0] == 0b1000_0000)
-                return (- 1, 1);
+                return (-1, 1);
             // Check how many bytes 
             if ((toSplit[0] & 0b1000_0000) == 0b1000_0000)
             {

@@ -12,7 +12,7 @@ namespace Iot.Device.Card.Mifare
     [Flags]
     public enum AccessSector
     {
-        Never = 0b0000_0000,
+        None = 0b0000_0000,
         WriteKeyAWithKeyA = 0b0000_0001,
         WriteKeyAWithKeyB = 0b0000_0010,
         ReadAccessBitsWithKeyA = 0b0000_0100,

@@ -251,7 +251,7 @@ namespace Iot.Device.Card.Mifare
                 C3 = 1;
             }
 
-            if (accessType == AccessType.Never)
+            if (accessType == AccessType.None)
             {
                 C1 = 1;
                 C2 = 1;
@@ -279,17 +279,17 @@ namespace Iot.Device.Card.Mifare
             // Cab a = access bit and b = block number
             blockNumber = (byte)(blockNumber % 4);
             if (blockNumber != 3)
-                return AccessSector.Never;
+                return AccessSector.None;
 
             var (C1a, C1b, C2a, C2b, C3a, C3b) = DecodeSectorTailer(blockNumber, sectorData);
             if (C1a != C1b)
-                return AccessSector.Never;
+                return AccessSector.None;
 
             if (C2a != C2b)
-                return AccessSector.Never;
+                return AccessSector.None;
 
             if (C3a != C3b)
-                return AccessSector.Never;
+                return AccessSector.None;
 
             // Table of truth
             if ((C1a == 0) && (C2a == 0) && (C3a == 0))
@@ -324,7 +324,7 @@ namespace Iot.Device.Card.Mifare
                 return AccessSector.ReadAccessBitsWithKeyA |
                     AccessSector.ReadAccessBitsWithKeyB;
 
-            return AccessSector.Never;
+            return AccessSector.None;
         }
 
         /// <summary>
@@ -342,17 +342,17 @@ namespace Iot.Device.Card.Mifare
             // Cab a = access bit and b = block number
             blockNumber = (byte)(blockNumber % 4);
             if (blockNumber == 3)
-                return AccessType.Never;
+                return AccessType.None;
 
             var (C1a, C1b, C2a, C2b, C3a, C3b) = DecodeSectorTailer(blockNumber, sectorData);
             if (C1a != C1b)
-                return AccessType.Never;
+                return AccessType.None;
 
             if (C2a != C2b)
-                return AccessType.Never;
+                return AccessType.None;
 
             if (C3a != C3b)
-                return AccessType.Never;
+                return AccessType.None;
 
             // Table of truth
             if ((C1a == 0) && (C2a == 0) && (C3a == 0))
@@ -381,7 +381,7 @@ namespace Iot.Device.Card.Mifare
             if ((C1a == 1) && (C2a == 0) && (C3a == 1))
                 return AccessType.ReadKeyB;
 
-            return AccessType.Never;
+            return AccessType.None;
         }
 
         /// <summary>

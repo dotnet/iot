@@ -7,9 +7,9 @@ namespace Iot.Device.Card.CreditCardProcessing
     /// <summary>
     /// The list of predefined commands to communicate with the card
     /// </summary>
-    public class ApduCommands
+    internal class ApduCommands
     {
-        static public byte[] ApplicaitonBlock = { 0x80, 0x1E };
+        static public byte[] ApplicationBlock = { 0x80, 0x1E };
         static public byte[] ApplicaitonUnBlock = { 0x80, 0x18 };
         static public byte[] CardBlock = { 0x80, 0x16 };
         static public byte[] ExternalAuthenticate = { 0x00, 0x82 };

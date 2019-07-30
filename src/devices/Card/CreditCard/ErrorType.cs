@@ -11,7 +11,7 @@ namespace Iot.Device.Card.CreditCardProcessing
     {
         ProcessCompletedNormal,
         ProcessCompletedWarning,
-        ProcessAbordedExecution,
+        ProcessAbortedExecution,
         ProcessAbordedChecking,
         StateNonVolatileMemoryUnchangedSelectedFileInvalidated,
         StateNonVolatileMemoryChangedAuthenticationFailed,

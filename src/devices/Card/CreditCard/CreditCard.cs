@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Iot.Device.Common;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
@@ -15,13 +16,16 @@ namespace Iot.Device.Card.CreditCardProcessing
     /// </summary>
     public class CreditCard
     {
+        // APDU commands are using 5 elements in this order
+        // Then the data are added
         private const byte Cla = 0x00;
         private const byte Ins = 0x01;
         private const byte P1 = 0x02;
         private const byte P2 = 0x03;
         private const byte Lc = 0x04;
 
-        private const int MaxBuffer = 260;
+        private const int MaxBufferSize = 260;
+        private const int TailerSize = 3;
 
         private CardWriteRead _nfc;
         private bool _alreadyReadSfi = false;
@@ -62,17 +66,17 @@ namespace Iot.Device.Card.CreditCardProcessing
             toSend[P2] = 0x00;
             toSend[Lc] = (byte)issuerAuthenticationData.Length;
             issuerAuthenticationData.CopyTo(toSend.Slice(Lc));
-            Span<byte> received = stackalloc byte[MaxBuffer];
+            Span<byte> received = stackalloc byte[MaxBufferSize];
             return RunSimpleCommand(toSend);
         }
 
         private ErrorType RunSimpleCommand(Span<byte> toSend)
         {
-            Span<byte> received = stackalloc byte[MaxBuffer];
+            Span<byte> received = stackalloc byte[MaxBufferSize];
             var ret = ReadFromCard(_target, toSend, received);
-            if (ret >= 0)
+            if (ret >= TailerSize)
             {
-                return new ProcessError(received.Slice(0, 2)).ErrorType;
+                return new ProcessError(received.Slice(0, TailerSize)).ErrorType;
             }
             return ErrorType.Unknown;
 
@@ -106,18 +110,18 @@ namespace Iot.Device.Card.CreditCardProcessing
             toSend[Lc] = (byte)toSelect.Length;
             toSelect.CopyTo(toSend.Slice(Lc + 1));
             toSend[toSend.Length - 1] = 0x00;
-            Span<byte> received = stackalloc byte[MaxBuffer];
+            Span<byte> received = stackalloc byte[MaxBufferSize];
             var ret = ReadFromCard(_target, toSend, received);
-            if (ret >= 0)
+            if (ret >= TailerSize)
             {
-                if (ret == 2)
+                if (ret == TailerSize)
                 {
                     // It's an error, process it
-                    var err = new ProcessError(received.Slice(0, 2));
+                    var err = new ProcessError(received.Slice(0, TailerSize));
                     return err.ErrorType;
                 }
 
-                FillTagList(Tags, received.Slice(0, ret - 3));
+                FillTagList(Tags, received.Slice(0, ret - TailerSize));
 
                 return ErrorType.ProcessCompletedNormal;
             }
@@ -175,9 +179,10 @@ namespace Iot.Device.Card.CreditCardProcessing
 
         /// <summary>
         /// Gather all the public information present in the credit card.
-        /// Fill then Tag list with all the found information
+        /// Fill then Tag list with all the found information. You can get
+        /// all the credit card information in the Tags property.
         /// </summary>
-        public void FillCreditCardInformation()
+        public void ReadCreditCardInformation()
         {
             // This is a string "2PAY.SYS.DDF01" (PPSE) to select the root directory
             var ret = Select(RootDirectory);
@@ -204,7 +209,10 @@ namespace Iot.Device.Card.CreditCardProcessing
                     {
 
                         // We need to select the Template 0x6F where the Tag 0x84 contains the same App Id and where we have a template A5 attached. 
-                        var templates = Tags.Where(m => m.TagNumber == 0x6F).Where(m => m.Tags.Where(t => t.TagNumber == 0x84).Where(t => t.Data.SequenceEqual(appIdentifier.Data)) != null).Where(m => m.Tags.Where(t => t.TagNumber == 0xA5) != null);
+                        var templates = Tags
+                            .Where(m => m.TagNumber == 0x6F)
+                            .Where(m => m.Tags.Where(t => t.TagNumber == 0x84).Where(t => t.Data.SequenceEqual(appIdentifier.Data)) != null)
+                            .Where(m => m.Tags.Where(t => t.TagNumber == 0xA5) != null);
                         // Only here we may find a PDOL tag 0X9F38
                         Tag pdol = null;
                         foreach (var temp in templates)
@@ -243,19 +251,16 @@ namespace Iot.Device.Card.CreditCardProcessing
                                 if (dol.TagNumber == 0x9F66)
                                 {
                                     // Select modes to get a maximum of data
-                                    TerminalTransactionQualifier ttq = TerminalTransactionQualifier.MagStripeSupported | TerminalTransactionQualifier.EmvModeSuypported | TerminalTransactionQualifier.EmvContachChipSupported |
+                                    TerminalTransactionQualifier ttq = TerminalTransactionQualifier.MagStripeSupported | TerminalTransactionQualifier.EmvModeSuypported | TerminalTransactionQualifier.EmvContactChipSupported |
                                         TerminalTransactionQualifier.OnlinePinSupported | TerminalTransactionQualifier.SignatureSupported | TerminalTransactionQualifier.ConstactChipOfflinePinSupported |
                                         TerminalTransactionQualifier.ConsumerDeviceCvmSupported | TerminalTransactionQualifier.IssuerUpdateProcessingSupported;
                                     // Encode the TTq
-                                    toSend[index] = (byte)((long)ttq >> 16);
-                                    toSend[index + 1] = (byte)((long)ttq >> 8);
-                                    toSend[index + 2] = (byte)ttq;
-                                    toSend[index + 3] = 0;
+                                    BinaryPrimitives.TryWriteUInt32BigEndian(toSend.Slice(index, 4), (uint)ttq);
                                 }
                                 // Transaction amount
                                 else if (dol.TagNumber == 0x9F02)
                                 {
-                                    // Ask authorisation for the minimum, just to make sure
+                                    // Ask authorization for the minimum, just to make sure
                                     // It's more than 0
                                     toSend[index + 5] = 1;
                                 }
@@ -269,9 +274,9 @@ namespace Iot.Device.Card.CreditCardProcessing
                                 // 009A-Transaction Date
                                 else if (dol.TagNumber == 0x9A)
                                 {
-                                    toSend[index] = Tag.ByteToBcd((byte)(DateTime.Now.Year % 100));
-                                    toSend[index + 1] = Tag.ByteToBcd((byte)(DateTime.Now.Month));
-                                    toSend[index + 2] = Tag.ByteToBcd((byte)(DateTime.Now.Day));
+                                    toSend[index] = NumberHelper.Dec2Bcd((DateTime.Now.Year % 100));
+                                    toSend[index + 1] = NumberHelper.Dec2Bcd((DateTime.Now.Month));
+                                    toSend[index + 2] = NumberHelper.Dec2Bcd((DateTime.Now.Day));
                                 }
                                 // 0x9F37 Unpredictable number
                                 else if (dol.TagNumber == 0x9F37)
@@ -293,8 +298,12 @@ namespace Iot.Device.Card.CreditCardProcessing
 
                         // Ask for all the process options
                         ret = GetProcessingOptions(toSend, received);
-                        // Check if we have an Applicaiton File Locator 0x94 in 0x77
-                        var appLocator = Tag.SearchTag(Tags, 0x77).Last().Tags.Where(t => t.TagNumber == 0x94).FirstOrDefault();
+                        Tag appLocator = null;
+                        if (ret == ErrorType.ProcessCompletedNormal)
+                        {
+                            // Check if we have an Applicaiton File Locator 0x94 in 0x77
+                            appLocator = Tag.SearchTag(Tags, 0x77).Last().Tags.Where(t => t.TagNumber == 0x94).FirstOrDefault();
+                        }
                         if ((ret == ErrorType.ProcessCompletedNormal) && (appLocator != null))
                         {
                             // Now decode the appLocator
@@ -307,7 +316,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                                     Sfi = (byte)(appLocator.Data[4 * i] >> 3),
                                     Start = appLocator.Data[4 * i + 1],
                                     End = appLocator.Data[4 * i + 2],
-                                    NumberRecords = appLocator.Data[4 * i + 3],
+                                    NumberOfRecords = appLocator.Data[4 * i + 3],
                                 };
                                 details.Add(detail);
                             }
@@ -366,19 +375,19 @@ namespace Iot.Device.Card.CreditCardProcessing
             toSend[P1] = record;
             toSend[P2] = (byte)((sfi << 3) | (0b0000_0100));
             toSend[P2 + 1] = 0x00;
-            Span<byte> received = stackalloc byte[MaxBuffer];
+            Span<byte> received = stackalloc byte[MaxBufferSize];
             var ret = ReadFromCard(_target, toSend, received);
-            if (ret >= 2)
+            if (ret >= TailerSize)
             {
-                if (ret == 2)
+                if (ret == TailerSize)
                 {
                     // It's an error, process it
-                    return new ProcessError(received.Slice(0, 2)).ErrorType;
+                    return new ProcessError(received.Slice(0, TailerSize)).ErrorType;
                 }
 
-                FillTagList(Tags, received.Slice(0, ret - 3));
+                FillTagList(Tags, received.Slice(0, ret - TailerSize));
 
-                return new ProcessError(received.Slice(ret - 3)).ErrorType;
+                return new ProcessError(received.Slice(ret - TailerSize)).ErrorType;
             }
             return ErrorType.Unknown;
         }
@@ -398,17 +407,17 @@ namespace Iot.Device.Card.CreditCardProcessing
             toSend[Lc] = (byte)(pdolToSend.Length);
             pdolToSend.CopyTo(toSend.Slice(Lc + 1));
             toSend[Lc + pdolToSend.Length] = 0x00;
-            Span<byte> received = stackalloc byte[MaxBuffer];
+            Span<byte> received = stackalloc byte[MaxBufferSize];
             var ret = ReadFromCard(_target, toSend, received);
-            if (ret >= 2)
+            if (ret >= TailerSize)
             {
-                if (ret == 2)
+                if (ret == TailerSize)
                 {
                     // It's an error, process it
-                    return new ProcessError(received.Slice(0, 2)).ErrorType;
+                    return new ProcessError(received.Slice(0, TailerSize)).ErrorType;
                 }
-                FillTagList(Tags, received.Slice(0, ret - 3));
-                received.Slice(0, ret - 3).CopyTo(pdol);
+                FillTagList(Tags, received.Slice(0, ret - TailerSize));
+                received.Slice(0, ret - TailerSize).CopyTo(pdol);
                 return ErrorType.ProcessCompletedNormal;
             }
             return ErrorType.Unknown;
@@ -448,25 +457,26 @@ namespace Iot.Device.Card.CreditCardProcessing
                 default:
                     break;
             }
+
             toSend[P2 + 1] = 0x00;
-            Span<byte> received = stackalloc byte[MaxBuffer];
+            Span<byte> received = stackalloc byte[MaxBufferSize];
             var ret = ReadFromCard(_target, toSend, received);
-            if (ret >= 2)
+            if (ret >= TailerSize)
             {
-                if (ret == 2)
+                if (ret == TailerSize)
                 {
                     // It's an error, process it
-                    return new ProcessError(received.Slice(0, 2)).ErrorType;
+                    return new ProcessError(received.Slice(0, TailerSize)).ErrorType;
                 }
 
-                FillTagList(Tags, received.Slice(0, ret - 3));
+                FillTagList(Tags, received.Slice(0, ret - TailerSize));
                 LogInfo.Log($"{BitConverter.ToString(received.Slice(0, ret).ToArray())}", LogLevel.Debug);
-                var ber = new BerSplitter(received.Slice(0, ret - 3));
+                var ber = new BerSplitter(received.Slice(0, ret - TailerSize));
                 foreach (var b in ber.Tags)
                 {
                     LogInfo.Log($"DataType: {dataType}, Tag: {b.TagNumber.ToString("X4")}, Data: {BitConverter.ToString(b.Data)}", LogLevel.Debug);
                 }
-                return new ProcessError(received.Slice(ret - 3)).ErrorType;
+                return new ProcessError(received.Slice(ret - TailerSize)).ErrorType;
             }
             return ErrorType.Unknown;
         }
@@ -474,19 +484,19 @@ namespace Iot.Device.Card.CreditCardProcessing
         private int ReadFromCard(byte target, ReadOnlySpan<byte> toSend, Span<byte> received)
         {
             var ret = _nfc.WriteRead(_target, toSend, received);
-            if (ret >= 2)
+            if (ret >= TailerSize)
             {
-                if (ret == 2)
+                if (ret == TailerSize)
                 {
                     // It's an error, process it
-                    var err = new ProcessError(received.Slice(0, 2));
+                    var err = new ProcessError(received.Slice(0, TailerSize));
                     if (err.ErrorType == ErrorType.BytesStillAvailable)
                     {
                         // Read the rest of the bytes
                         Span<byte> toGet = stackalloc byte[5];
                         ApduCommands.GetBytesToRead.CopyTo(toGet);
                         toGet[4] = err.CorrectLegnthOrBytesAvailable;
-                        ret = _nfc.WriteRead(_target, toGet, received);                        
+                        ret = _nfc.WriteRead(_target, toGet, received);
                     }
                 }
             }

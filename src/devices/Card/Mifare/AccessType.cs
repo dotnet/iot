@@ -12,7 +12,7 @@ namespace Iot.Device.Card.Mifare
     [Flags]
     public enum AccessType
     {        
-        Never = 0b0000_0000,
+        None = 0b0000_0000,
         ReadKeyA = 0b0000_0001,
         ReadKeyB = 0b0000_0010,
         WriteKeyA = 0b0000_0100,

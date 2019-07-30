@@ -7,7 +7,7 @@ using System;
 namespace Iot.Device.Card.CreditCardProcessing
 {
     /// <summary>
-    /// Th esourvce of a Tag
+    /// The source of a Tag
     /// </summary>
     [Flags]
     public enum Source

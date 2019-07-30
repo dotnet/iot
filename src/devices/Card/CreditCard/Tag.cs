@@ -50,14 +50,14 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// <summary>
         /// Search for a specific tag in a list of Tag including the sub Tags
         /// </summary>
-        /// <param name="tagToDSearch">The list of tags to search in</param>
+        /// <param name="tagToSearch">The list of tags to search in</param>
         /// <param name="tagNumber">The tag number to search for</param>
         /// <returns>A list of tags</returns>
-        public static List<Tag> SearchTag(List<Tag> tagToDSearch, ushort tagNumber)
+        public static List<Tag> SearchTag(List<Tag> tagToSearch, ushort tagNumber)
         {
             List<Tag> tags = new List<Tag>();
 
-            foreach (var tagparent in tagToDSearch)
+            foreach (var tagparent in tagToSearch)
             {
                 var isTemplate = TagList.Tags.Where(m => m.TagNumber == tagparent.TagNumber).FirstOrDefault();
                 if ((isTemplate?.IsTemplate == true) || (isTemplate?.IsConstructed == true))
@@ -71,46 +71,6 @@ namespace Iot.Device.Card.CreditCardProcessing
             }
 
             return tags;
-        }
-
-        /// <summary>
-        /// Convert BCD to Int
-        /// </summary>
-        /// <param name="bcd">The BCD encoded byte</param>
-        /// <returns>The decoded int</returns>
-        public static uint BcdToInt(byte bcd) => BcdToInt(new byte[] { bcd });
-
-        /// <summary>
-        /// Convert BCD to Int
-        /// </summary>
-        /// <param name="bcds">The BCD encoded byte array</param>
-        /// <returns>The decoded int</returns>
-        public static uint BcdToInt(byte[] bcds)
-        {
-            uint result = 0;
-            foreach (byte bcd in bcds)
-            {
-                result *= 100;
-                result += (uint)(10 * (bcd >> 4));
-                result += (uint)(bcd & 0xf);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Convert Byte to BCD encoded byte
-        /// </summary>
-        /// <param name="toEncode">The number to encode. Maximum number can only be 99</param>
-        /// <returns>A byte encoded into BCD</returns>
-        public static byte ByteToBcd(byte toEncode)
-        {
-            if (toEncode > 99)
-                throw new ArgumentException($"{nameof(ByteToBcd)}, encoding value can't be more than 99");
-            byte bcd = 0;
-            bcd = (byte)(toEncode % 10);
-            toEncode /= 10;
-            bcd = (byte)((toEncode % 10) <<4);
-            return bcd;
         }
     }
 }
