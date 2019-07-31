@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using System.IO;
 using System.Threading;
 using Iot.Device.Ak8963;

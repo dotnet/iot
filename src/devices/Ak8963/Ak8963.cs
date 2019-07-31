@@ -199,6 +199,7 @@ namespace Iot.Device.Ak8963
         public Vector3 Magnetometer => ReadMagnetometer(true);
 
         /// <summary>
+        /// <![CDATA[
         /// Get or set the device self test mode. 
         /// If set to true, this creates a magnetic field
         /// Once you read it, you will have the results of the self test
@@ -208,6 +209,7 @@ namespace Iot.Device.Ak8963
         /// 16-bit output(BIT=“1”)  
         ///          | HX[15:0]          | HY[15:0]          | HZ[15:0] 
         /// Criteria | -200 =< HX =< 200 | -200 =< HY =< 200 | -3200 =< HZ =< -800 
+        /// ]]>
         /// </summary>
         public bool MageneticFieldGeneratorEnabled
         {

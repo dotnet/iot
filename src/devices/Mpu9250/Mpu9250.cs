@@ -751,6 +751,7 @@ namespace Iot.Device.Mpu9250
         }
 
         /// <summary>
+        /// <![CDATA[
         /// Run a self test and returns the gyroscope and accelerometer vectores
         /// a. If factory Self-Test values ST_OTP≠0, compare the current Self-Test response (GXST, GYST, GZST, AXST, AYST and AZST) 
         /// to the factory Self-Test values (ST_OTP) and report Self-Test is passing if all the following criteria are fulfilled: 
@@ -776,6 +777,7 @@ namespace Iot.Device.Mpu9250
         /// X-gyro | |GXOFFSET| ≤ 20dps
         /// Y-gyro | |GYOFFSET| ≤ 20dps
         /// Z-gyro | |GZOFFSET| ≤ 20dps
+        /// ]]>
         /// </summary>
         /// <returns>the gyroscope and accelerometer vectors</returns>
         public Tuple<Vector3, Vector3> RunGyroscopeAccelerometerSelfTest()
