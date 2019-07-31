@@ -8,7 +8,9 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="..\Common\System\Device\DelayHelper.cs" />
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
