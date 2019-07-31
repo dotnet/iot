@@ -253,193 +253,206 @@ namespace Iot.Device.Card.CreditCardProcessing
             }
             if (ret == ErrorType.ProcessCompletedNormal)
             {
-                // Find all Application Template = 0x61
-                var appTemplates = Tag.SearchTag(Tags, 0x61);
-                if (appTemplates?.Count > 0)
+                if (!FillTags())
                 {
-                    LogInfo.Log($"Number of App Templates: {appTemplates?.Count}", LogLevel.Debug);
-                    foreach (var app in appTemplates)
-                    {
-                        // Find the Application Identifier 0x4F
-                        var appIdentifier = Tag.SearchTag(app.Tags, 0x4F).FirstOrDefault();
-                        // Find the Priority Identifier 0x87
-                        var appPriotity = Tag.SearchTag(app.Tags, 0x87).FirstOrDefault();
-                        // As it is not mandatory, some cards will have only 1
-                        // application and this may not be present
-                        if (appPriotity == null)
-                            appPriotity = new Tag() { Data = new byte[1] { 0 } };
-                        // do we have a PDOL tag 0x9F38 
+                    _alreadyReadSfi = false;
+                    FillTags();
+                }
+            }
+        }
 
-                        LogInfo.Log($"APPID: {BitConverter.ToString(appIdentifier.Data)}, Priority: {appPriotity.Data[0]}", LogLevel.Debug);
-                        ret = Select(appIdentifier.Data);
+        private bool FillTags()
+        {
+            // Find all Application Template = 0x61
+            var appTemplates = Tag.SearchTag(Tags, 0x61);
+            if (appTemplates?.Count > 0)
+            {
+                LogInfo.Log($"Number of App Templates: {appTemplates?.Count}", LogLevel.Debug);
+                foreach (var app in appTemplates)
+                {
+                    // Find the Application Identifier 0x4F
+                    var appIdentifier = Tag.SearchTag(app.Tags, 0x4F).FirstOrDefault();
+                    // Find the Priority Identifier 0x87
+                    var appPriotity = Tag.SearchTag(app.Tags, 0x87).FirstOrDefault();
+                    // As it is not mandatory, some cards will have only 1
+                    // application and this may not be present
+                    if (appPriotity == null)
+                        appPriotity = new Tag() { Data = new byte[1] { 0 } };
+                    // do we have a PDOL tag 0x9F38 
+
+                    LogInfo.Log($"APPID: {BitConverter.ToString(appIdentifier.Data)}, Priority: {appPriotity.Data[0]}", LogLevel.Debug);
+                    var ret = Select(appIdentifier.Data);
+                    if (ret == ErrorType.ProcessCompletedNormal)
+                    {
+
+                        // We need to select the Template 0x6F where the Tag 0x84 contains the same App Id and where we have a template A5 attached. 
+                        var templates = Tags
+                            .Where(m => m.TagNumber == 0x6F)
+                            .Where(m => m.Tags.Where(t => t.TagNumber == 0x84).Where(t => t.Data.SequenceEqual(appIdentifier.Data)) != null)
+                            .Where(m => m.Tags.Where(t => t.TagNumber == 0xA5) != null);
+                        // Only here we may find a PDOL tag 0X9F38
+                        Tag pdol = null;
+                        foreach (var temp in templates)
+                        {
+                            // We are sure to have 0xA5, so select it and search for PDOL
+                            pdol = Tag.SearchTag(temp.Tags, 0xA5).FirstOrDefault().Tags.Where(m => m.TagNumber == 0x9F38).FirstOrDefault();
+                            if (pdol != null)
+                                break;
+                        }
+
+                        Span<byte> received = stackalloc byte[260];
+                        byte sumDol = 0;
+                        // Do we have a PDOL?
+                        if (pdol != null)
+                        {
+                            // So we need to send as may bytes as it request
+                            foreach (var dol in pdol.Tags)
+                            {
+                                sumDol += dol.Data[0];
+                            }
+                        }
+
+                        // We send only 0 but the right number
+                        Span<byte> toSend = new byte[2 + sumDol];
+                        // Template command, Tag 83
+                        toSend[0] = 0x83;
+                        toSend[1] = sumDol;
+                        // If we have a PDOL, then we need to fill it properly
+                        // Some fields are mandatory
+                        int index = 2;
+                        if (pdol != null)
+                        {
+                            foreach (var dol in pdol.Tags)
+                            {
+                                // TerminalTransactionQualifier 
+                                if (dol.TagNumber == 0x9F66)
+                                {
+                                    // Select modes to get a maximum of data
+                                    TerminalTransactionQualifier ttq = TerminalTransactionQualifier.MagStripeSupported | TerminalTransactionQualifier.EmvModeSuypported | TerminalTransactionQualifier.EmvContactChipSupported |
+                                        TerminalTransactionQualifier.OnlinePinSupported | TerminalTransactionQualifier.SignatureSupported | TerminalTransactionQualifier.ConstactChipOfflinePinSupported |
+                                        TerminalTransactionQualifier.ConsumerDeviceCvmSupported | TerminalTransactionQualifier.IssuerUpdateProcessingSupported;
+                                    // Encode the TTq
+                                    BinaryPrimitives.TryWriteUInt32BigEndian(toSend.Slice(index, 4), (uint)ttq);
+                                }
+                                // Transaction amount
+                                else if (dol.TagNumber == 0x9F02)
+                                {
+                                    // Ask authorization for the minimum, just to make sure
+                                    // It's more than 0
+                                    toSend[index + 5] = 1;
+                                }
+                                // 9F1A-Terminal Country Code,
+                                else if (dol.TagNumber == 0x9F1A)
+                                {
+                                    // Let's say we are in France
+                                    toSend[index] = 0x02;
+                                    toSend[index + 1] = 0x50;
+                                }
+                                // 009A-Transaction Date
+                                else if (dol.TagNumber == 0x9A)
+                                {
+                                    toSend[index] = NumberHelper.Dec2Bcd((DateTime.Now.Year % 100));
+                                    toSend[index + 1] = NumberHelper.Dec2Bcd((DateTime.Now.Month));
+                                    toSend[index + 2] = NumberHelper.Dec2Bcd((DateTime.Now.Day));
+                                }
+                                // 0x9F37 Unpredictable number
+                                else if (dol.TagNumber == 0x9F37)
+                                {
+                                    var rand = new Random();
+                                    rand.NextBytes(toSend.Slice(index, dol.Data[0]));
+                                }
+                                // Currency
+                                else if (dol.TagNumber == 0x5F2A)
+                                {
+                                    // We will ask for Euros
+                                    toSend[index] = 0x09;
+                                    toSend[index + 1] = 0x78;
+                                }
+
+                                index += dol.Data[0];
+                            }
+                        }
+
+                        // Ask for all the process options
+                        ret = GetProcessingOptions(toSend, received);
+                        Tag appLocator = null;
                         if (ret == ErrorType.ProcessCompletedNormal)
                         {
-
-                            // We need to select the Template 0x6F where the Tag 0x84 contains the same App Id and where we have a template A5 attached. 
-                            var templates = Tags
-                                .Where(m => m.TagNumber == 0x6F)
-                                .Where(m => m.Tags.Where(t => t.TagNumber == 0x84).Where(t => t.Data.SequenceEqual(appIdentifier.Data)) != null)
-                                .Where(m => m.Tags.Where(t => t.TagNumber == 0xA5) != null);
-                            // Only here we may find a PDOL tag 0X9F38
-                            Tag pdol = null;
-                            foreach (var temp in templates)
-                            {
-                                // We are sure to have 0xA5, so select it and search for PDOL
-                                pdol = Tag.SearchTag(temp.Tags, 0xA5).FirstOrDefault().Tags.Where(m => m.TagNumber == 0x9F38).FirstOrDefault();
-                                if (pdol != null)
-                                    break;
-                            }
-
-                            Span<byte> received = stackalloc byte[260];
-                            byte sumDol = 0;
-                            // Do we have a PDOL?
-                            if (pdol != null)
-                            {
-                                // So we need to send as may bytes as it request
-                                foreach (var dol in pdol.Tags)
-                                {
-                                    sumDol += dol.Data[0];
-                                }
-                            }
-
-                            // We send only 0 but the right number
-                            Span<byte> toSend = new byte[2 + sumDol];
-                            // Template command, Tag 83
-                            toSend[0] = 0x83;
-                            toSend[1] = sumDol;
-                            // If we have a PDOL, then we need to fill it properly
-                            // Some fields are mandatory
-                            int index = 2;
-                            if (pdol != null)
-                            {
-                                foreach (var dol in pdol.Tags)
-                                {
-                                    // TerminalTransactionQualifier 
-                                    if (dol.TagNumber == 0x9F66)
-                                    {
-                                        // Select modes to get a maximum of data
-                                        TerminalTransactionQualifier ttq = TerminalTransactionQualifier.MagStripeSupported | TerminalTransactionQualifier.EmvModeSuypported | TerminalTransactionQualifier.EmvContactChipSupported |
-                                            TerminalTransactionQualifier.OnlinePinSupported | TerminalTransactionQualifier.SignatureSupported | TerminalTransactionQualifier.ConstactChipOfflinePinSupported |
-                                            TerminalTransactionQualifier.ConsumerDeviceCvmSupported | TerminalTransactionQualifier.IssuerUpdateProcessingSupported;
-                                        // Encode the TTq
-                                        BinaryPrimitives.TryWriteUInt32BigEndian(toSend.Slice(index, 4), (uint)ttq);
-                                    }
-                                    // Transaction amount
-                                    else if (dol.TagNumber == 0x9F02)
-                                    {
-                                        // Ask authorization for the minimum, just to make sure
-                                        // It's more than 0
-                                        toSend[index + 5] = 1;
-                                    }
-                                    // 9F1A-Terminal Country Code,
-                                    else if (dol.TagNumber == 0x9F1A)
-                                    {
-                                        // Let's say we are in France
-                                        toSend[index] = 0x02;
-                                        toSend[index + 1] = 0x50;
-                                    }
-                                    // 009A-Transaction Date
-                                    else if (dol.TagNumber == 0x9A)
-                                    {
-                                        toSend[index] = NumberHelper.Dec2Bcd((DateTime.Now.Year % 100));
-                                        toSend[index + 1] = NumberHelper.Dec2Bcd((DateTime.Now.Month));
-                                        toSend[index + 2] = NumberHelper.Dec2Bcd((DateTime.Now.Day));
-                                    }
-                                    // 0x9F37 Unpredictable number
-                                    else if (dol.TagNumber == 0x9F37)
-                                    {
-                                        var rand = new Random();
-                                        rand.NextBytes(toSend.Slice(index, dol.Data[0]));
-                                    }
-                                    // Currency
-                                    else if (dol.TagNumber == 0x5F2A)
-                                    {
-                                        // We will ask for Euros
-                                        toSend[index] = 0x09;
-                                        toSend[index + 1] = 0x78;
-                                    }
-
-                                    index += dol.Data[0];
-                                }
-                            }
-
-                            // Ask for all the process options
-                            ret = GetProcessingOptions(toSend, received);
-                            Tag appLocator = null;
-                            if (ret == ErrorType.ProcessCompletedNormal)
-                            {
-                                // Check if we have an Applicaiton File Locator 0x94 in 0x77
-                                appLocator = Tag.SearchTag(Tags, 0x77).Last().Tags.Where(t => t.TagNumber == 0x94).FirstOrDefault();
-                            }
-                            if ((ret == ErrorType.ProcessCompletedNormal) && (appLocator != null))
-                            {
-                                // Now decode the appLocator
-                                // Format is SFI - start - stop - number of records
-                                List<ApplicationDataDetail> details = new List<ApplicationDataDetail>();
-                                for (int i = 0; i < appLocator.Data.Length / 4; i++)
-                                {
-                                    ApplicationDataDetail detail = new ApplicationDataDetail()
-                                    {
-                                        Sfi = (byte)(appLocator.Data[4 * i] >> 3),
-                                        Start = appLocator.Data[4 * i + 1],
-                                        End = appLocator.Data[4 * i + 2],
-                                        NumberOfRecords = appLocator.Data[4 * i + 3],
-                                    };
-                                    details.Add(detail);
-                                }
-
-                                // Now get all the records
-                                foreach (var detail in details)
-                                {
-                                    for (byte record = detail.Start; record < detail.End + 1; record++)
-                                    {
-                                        ret = ReadRecord(detail.Sfi, record);
-                                        LogInfo.Log($"Read record {record}, SFI {detail.Sfi}, status: {ret}", LogLevel.Debug);
-                                    }
-
-                                }
-                                _alreadyReadSfi = true;
-                            }
-                            else if (!_alreadyReadSfi)
-                            {
-                                // We go thru all the SFI and first 5 records
-                                // According to the documentation, first 10 ones are supposed to 
-                                // contain the core infromation
-                                for (byte record = 1; record < 5; record++)
-                                {
-                                    // 1 fro 10 is for Application Elementary Files 
-                                    for (byte Sfi = 1; Sfi < 11; Sfi++)
-                                    {
-                                        ret = ReadRecord(Sfi, record);
-                                        LogInfo.Log($"Read record {record}, SFI {Sfi}, status: {ret}", LogLevel.Debug);
-                                    }
-                                }
-                                _alreadyReadSfi = true;
-                            }
+                            // Check if we have an Application File Locator 0x94 in 0x77
+                            var tg = Tag.SearchTag(Tags, 0x77);
+                            if (tg.Count > 0)
+                                appLocator = tg.Last().Tags.Where(t => t.TagNumber == 0x94).FirstOrDefault();
                         }
-
-                        // Get few additional data
-                        GetData(DataType.ApplicationTransactionCounter);
-                        GetData(DataType.LastOnlineAtcRegister);
-                        GetData(DataType.LogFormat);
-                        GetData(DataType.PinTryCounter);
-                    }
-                }
-                else
-                {
-                    // It's the old way, so looking for tag 0x88
-                    var appSfi = Tag.SearchTag(Tags, 0x88).FirstOrDefault();
-                    if (appSfi != null)
-                    {
-                        LogInfo.Log($"AppSFI: {appSfi.Data[0]}", LogLevel.Debug);
-                        for (byte record = 1; record < 10; record++)
+                        if ((ret == ErrorType.ProcessCompletedNormal) && (appLocator != null))
                         {
-                            ret = ReadRecord(appSfi.Data[0], record);
-                            LogInfo.Log($"Read record {record}, SFI {appSfi.Data[0]}, status: {ret}", LogLevel.Debug);
+                            // Now decode the appLocator
+                            // Format is SFI - start - stop - number of records
+                            List<ApplicationDataDetail> details = new List<ApplicationDataDetail>();
+                            for (int i = 0; i < appLocator.Data.Length / 4; i++)
+                            {
+                                ApplicationDataDetail detail = new ApplicationDataDetail()
+                                {
+                                    Sfi = (byte)(appLocator.Data[4 * i] >> 3),
+                                    Start = appLocator.Data[4 * i + 1],
+                                    End = appLocator.Data[4 * i + 2],
+                                    NumberOfRecords = appLocator.Data[4 * i + 3],
+                                };
+                                details.Add(detail);
+                            }
+
+                            // Now get all the records
+                            foreach (var detail in details)
+                            {
+                                for (byte record = detail.Start; record < detail.End + 1; record++)
+                                {
+                                    ret = ReadRecord(detail.Sfi, record);
+                                    LogInfo.Log($"Read record {record}, SFI {detail.Sfi}, status: {ret}", LogLevel.Debug);
+                                }
+
+                            }
+                            _alreadyReadSfi = true;
                         }
-                        _alreadyReadSfi = true;
+                        else if (!_alreadyReadSfi)
+                        {
+                            // We go thru all the SFI and first 5 records
+                            // According to the documentation, first 10 ones are supposed to 
+                            // contain the core information
+                            for (byte record = 1; record < 5; record++)
+                            {
+                                // 1 fro 10 is for Application Elementary Files 
+                                for (byte Sfi = 1; Sfi < 11; Sfi++)
+                                {
+                                    ret = ReadRecord(Sfi, record);
+                                    LogInfo.Log($"Read record {record}, SFI {Sfi}, status: {ret}", LogLevel.Debug);
+                                }
+                            }
+                            _alreadyReadSfi = true;
+                        }
                     }
+
+                    // Get few additional data
+                    GetData(DataType.ApplicationTransactionCounter);
+                    GetData(DataType.LastOnlineAtcRegister);
+                    GetData(DataType.LogFormat);
+                    GetData(DataType.PinTryCounter);
                 }
+                return true;
+            }
+            else
+            {
+                // It's the old way, so looking for tag 0x88
+                var appSfi = Tag.SearchTag(Tags, 0x88).FirstOrDefault();
+                if (appSfi != null)
+                {
+                    LogInfo.Log($"AppSFI: {appSfi.Data[0]}", LogLevel.Debug);
+                    for (byte record = 1; record < 10; record++)
+                    {
+                        var ret = ReadRecord(appSfi.Data[0], record);
+                        LogInfo.Log($"Read record {record}, SFI {appSfi.Data[0]}, status: {ret}", LogLevel.Debug);
+                    }
+                    _alreadyReadSfi = true;
+                }
+                return false;
             }
         }
 
@@ -457,7 +470,7 @@ namespace Iot.Device.Card.CreditCardProcessing
             ApduCommands.ReadRecord.CopyTo(toSend);
             toSend[P1] = record;
             toSend[P2] = (byte)((sfi << 3) | (0b0000_0100));
-            toSend[P2 + 1] = 0x00;
+            toSend[Lc] = 0x00;
             Span<byte> received = stackalloc byte[MaxBufferSize];
             var ret = ReadFromCard(_target, toSend, received);
             if (ret >= TailerSize)
@@ -465,7 +478,20 @@ namespace Iot.Device.Card.CreditCardProcessing
                 if (ret == TailerSize)
                 {
                     // It's an error, process it
-                    return new ProcessError(received.Slice(0, TailerSize)).ErrorType;
+                    var err = new ProcessError(received.Slice(0, TailerSize));
+                    if (err.ErrorType == ErrorType.WrongLength)
+                    {
+                        toSend[Lc] = err.CorrectLegnthOrBytesAvailable;
+                        ret = ReadFromCard(_target, toSend, received);
+                        if (ret == TailerSize)
+                        {
+                            return new ProcessError(received.Slice(0, TailerSize)).ErrorType;
+                        }
+                    }
+                    else
+                    {
+                        return err.ErrorType;
+                    }
                 }
 
                 FillTagList(Tags, received.Slice(0, ret - TailerSize));

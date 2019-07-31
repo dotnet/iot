@@ -1,16 +1,18 @@
 # Credit Card - Credit Card
 
-This CreditCard class allows to read thru a standard Near Field Communiction (NFC) or Smart Card (PC/SC) reader. Be aware that to read the data stored in the card, you need a compatible reader:
-- An ISO 14443-4 Type B for NFC. Keep in lind as well that the antena and the gain of your NFC reader need to be strong enough to read all kind of cards. Most of the popular PN532 NFC readers that you can find online does not allow to read all kind of card due to this issue
+This CreditCard class allows to read thru a standard Near Field Communication (NFC) or Smart Card (PC/SC) reader. Be aware that to read the data stored in the card, you need a compatible reader:
+- An ISO 14443-4 Type B for NFC. Keep in mind as well that the antenna and the gain of your NFC reader need to be strong enough to read all kind of cards. Most of the popular PN532 NFC readers that you can find online does not allow to read all kind of card due to this issue
 - A smart card reader compatible to read secured card
 
 Your credit card needs to be compatible with wireless payments for NFC reading. It needs to have a chip to be read by a smart card reader.
 
-You will need a reader with an implemetation of a WriteRead function from the class CardWriteRead. You will find an example with the PN532 below.
+You will need a reader with an implementation of a WriteRead function from the class CardWriteRead. You will find an example with the PN532 below.
+
+This class has been tested with various American Express, Visa and Mastercard, mainly from Europe. 
 
 ## Usage
 
-Here is a full example on how to read a Credit Card using a PN532. As mention above, the quality of your antena and gain of the antena may not allow you to read your card even if it's compatible.
+Here is a full example on how to read a Credit Card using a PN532. As mention above, the quality of your antenna and gain of the antenna may not allow you to read your card even if it's compatible.
 
 ```csharp
 static void Main(string[] args)
@@ -110,11 +112,21 @@ creditCard.FillCreditCardInformation();
 
 ### Accessing the information
 
-The Credit Card stores data in Tags. Those Tags have a specific number and data. The data format, the decription of those tags are available in the TagList class. You can use it to display those data.
+The Credit Card stores data in Tags. Those Tags have a specific number and data. The data format, the description of those tags are available in the TagList class. You can use it to display those data.
 
-Note as well that a ```ToString()``` converter has been implented. The function in the example above ```DisplayTags``` gives an example on how you can display all the Tags and their data.
+Note as well that a ```ToString()``` converter has been implemented. The function in the example above ```DisplayTags``` gives an example on how you can display all the Tags and their data.
 
 
 ## Limitations
 
-This Credit Card class allows you to gather all the public information present into your credit card. The class does not implement fully all what is necessary to initate a payment. Nothing prevent it as all the primary elements are present but you'll need to implement the Authentication.
+This Credit Card class allows you to gather all the public information present into your credit card. The class does not implement fully all what is necessary to initiate a payment. Nothing prevent it as all the primary elements are present but you'll need to implement the Authentication.
+
+## Resources
+
+Some resources to understand how to communicate with a Credit Card and how to get the data out of it:
+
+- [The EMV tutorial](https://www.openscdp.org/scripts/tutorial/emv/index.html) from the OpenSCDP web site
+- [A good list of EMV & NFC Tags](https://www.eftlab.co.uk/knowledge-base/145-emv-nfc-tags/) from EFTLab
+- [A complete list of APDU response](https://www.eftlab.co.uk/knowledge-base/complete-list-of-apdu-responses/) from EFTLab
+- [A simple TLV parser](https://www.emvlab.org/tlvutils/) from emvlab.org
+- [Book with all the contact card specifications](https://www.emvco.com/emv-technologies/contact/) and [contactless](https://www.emvco.com/emv-technologies/contactless/) from EMVCo. Note that those are the official specifications. Main book used for this decoder is the contactless EMV 4.3 book 3.
