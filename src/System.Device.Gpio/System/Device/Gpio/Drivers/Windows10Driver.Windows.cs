@@ -19,7 +19,7 @@ namespace System.Device.Gpio.Drivers
         private readonly Dictionary<int, Windows10DriverPin> _openPins = new Dictionary<int, Windows10DriverPin>();
 
         /// <summary>
-        /// Initializes new instance of Windows10Driver.
+        /// Initializes a new instance of the <see cref="Windows10Driver"/> class.
         /// </summary>
         public Windows10Driver()
         {

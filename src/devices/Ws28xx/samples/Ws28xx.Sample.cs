@@ -5,7 +5,6 @@
 using Iot.Device.Graphics;
 using System;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using System.Drawing;
 
 namespace Iot.Device.Ws28xx.Samples
@@ -23,7 +22,7 @@ namespace Iot.Device.Ws28xx.Samples
             };
             
 		    // Create a Neo Pixel x8 stick on spi 0.0
-            var spi = new UnixSpiDevice(settings);
+            var spi = SpiDevice.Create(settings);
             
 #if WS2808
             var neo = new Ws2808(spi, count);

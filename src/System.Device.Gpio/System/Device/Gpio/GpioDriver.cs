@@ -83,7 +83,7 @@ namespace System.Device.Gpio
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="eventTypes">The event types to wait for.</param>
-        /// <param name="token">The cancellation token of when the operation should stop waiting for an event.</param>
+        /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
         protected internal virtual ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
@@ -113,7 +113,7 @@ namespace System.Device.Gpio
 
         protected virtual void Dispose(bool disposing)
         {
-            // Nothing to do in the base class.
+            // Nothing to do in base class.
         }
     }
 }

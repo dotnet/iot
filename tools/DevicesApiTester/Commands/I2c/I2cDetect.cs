@@ -21,14 +21,9 @@ namespace DeviceApiTester.Commands.I2c
 
         /// <summary>Executes the command.</summary>
         /// <returns>The command's exit code.</returns>
-        /// <remarks>
-        ///     NOTE: This test app uses the base class's <see cref="CreateI2cDevice"/> method to create a device.<br/>
-        ///     Real-world usage would simply create an instance of an <see cref="I2cDevice"/> implementation:
-        ///     <code>using (var i2cDevice = new UnixI2cDevice(connectionSettings))</code>
-        /// </remarks>
         public int Execute()
         {
-            Console.WriteLine($"Device={Device}, BusId={BusId}, FirstAddress={FirstAddress} (0x{FirstAddress:X2}), LastAddress={LastAddress} (0x{LastAddress:X2})");
+            Console.WriteLine($"BusId={BusId}, FirstAddress={FirstAddress} (0x{FirstAddress:X2}), LastAddress={LastAddress} (0x{LastAddress:X2})");
 
             if (FirstAddress > LastAddress)
             {
@@ -64,7 +59,7 @@ namespace DeviceApiTester.Commands.I2c
                     }
 
                     var connectionSettings = new I2cConnectionSettings(BusId, deviceAddress);
-                    using (var i2cDevice = CreateI2cDevice(connectionSettings))
+                    using (var i2cDevice = I2cDevice.Create(connectionSettings))
                     {
                         try
                         {

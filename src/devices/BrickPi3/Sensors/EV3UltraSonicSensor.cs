@@ -26,12 +26,14 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize an EV3 Ulrasonic sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         public EV3UltraSonicSensor(Brick brick, SensorPort port) : this(brick, port, UltraSonicMode.Centimeter, 1000) { }
 
         /// <summary>
         /// Initialize an EV3 Ultrasonic sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor mode</param>
         /// <param name="usmode">Ultrasonic mode</param>
         public EV3UltraSonicSensor(Brick brick, SensorPort port, UltraSonicMode usmode) : this(brick, port, usmode, 1000) { }
@@ -39,6 +41,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize an EV3 Ultrasonic Sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         /// <param name="usmode">Ultrasonic mode</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>

@@ -25,12 +25,14 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialise an EV3 Touch sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         public EV3TouchSensor(Brick brick, SensorPort port) : this(brick, port, 1000) { }
 
         /// <summary>
         /// Initialize an EV3 Touch Sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>
         public EV3TouchSensor(Brick brick, SensorPort port, int timeout)

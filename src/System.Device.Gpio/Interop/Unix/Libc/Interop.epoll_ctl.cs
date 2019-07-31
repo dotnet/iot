@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
-    [DllImport(LibcLibrary, SetLastError = true)]
+    [DllImport(LibcLibrary)]
     internal static extern int epoll_ctl(int epfd, PollOperations op, int fd, ref epoll_event events);
 }
 

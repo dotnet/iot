@@ -13,7 +13,7 @@ class Program
         {
             while (true)
             {
-                Console.WriteLine($"Acceleration={ag.Acceleration}"); 
+                Console.WriteLine($"Acceleration={ag.Acceleration}");
                 Console.WriteLine($"AngularRate={ag.AngularRate}");
                 Thread.Sleep(100);
             }
@@ -23,7 +23,7 @@ class Program
     private static I2cDevice CreateI2cDevice()
     {
         var settings = new I2cConnectionSettings(1, I2cAddress);
-        return new UnixI2cDevice(settings);
+        return I2cDevice.Create(settings);
     }
 }
 ```
@@ -34,7 +34,7 @@ class Program
 class Magnetometer
 {
     public const int I2cAddress = 0x1C;
-    
+
     public static void Run()
     {
         using (var m = new Lsm9Ds1Magnetometer(CreateI2cDevice()))
@@ -95,7 +95,7 @@ class Magnetometer
     private static I2cDevice CreateI2cDevice()
     {
         var settings = new I2cConnectionSettings(1, I2cAddress);
-        return new UnixI2cDevice(settings);
+        return I2cDevice.Create(settings);
     }
 }
 ```

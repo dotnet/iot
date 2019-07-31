@@ -6,5 +6,7 @@
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>
+    <MainLibraryPath>$(MSBuildThisFileDirectory)../src/System.Device.Gpio/</MainLibraryPath>
+    <IotBindingsLibraryPath>$(MSBuildThisFileDirectory)../src/Iot.Device.Bindings/</IotBindingsLibraryPath>
   </PropertyGroup>
 </Project>

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)../System.Device.Gpio/System.Device.Gpio.csproj">
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties Condition="'$(RuntimeIdentifier)' != ''">RuntimeIdentifier=$(RuntimeIdentifier.SubString(0, $(RuntimeIdentifier.IndexOf('-'))))</AdditionalProperties>
     </ProjectReference>
   </ItemGroup>
@@ -21,16 +21,4 @@
     <!--Excluding Linux implementations-->
     <Compile Remove="**\*.Linux.cs" />
   </ItemGroup>
-
-  <!-- Make sure that we copy the native shim to the publish directory before sending the tests to Helix -->
-  <Target Name="AddNativeShimToCopyToPublishDirectory" Condition="'$(TargetsLinux)' == 'true'" BeforeTargets="_ComputeResolvedFilesToPublishTypes">
-    <ItemGroup>
-      <_nativeShimFiles Include="$(ArtifactsBinDir)Native\$(Configuration)\*.*" />
-
-      <ResolvedFileToPublish Include="@(_nativeShimFiles)">
-        <RelativePath>%(_nativeShimFiles.Filename)%(_nativeShimFiles.Extension)</RelativePath>
-        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-      </ResolvedFileToPublish>
-    </ItemGroup>
-  </Target>
 </Project>

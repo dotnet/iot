@@ -7,7 +7,7 @@ namespace System.Device.Spi
     /// <summary>
     /// The communications channel to a device on a SPI bus.
     /// </summary>
-    public abstract class SpiDevice : IDisposable
+    public abstract partial class SpiDevice : IDisposable
     {
         /// <summary>
         /// The connection settings of a device on a SPI bus.
@@ -56,9 +56,9 @@ namespace System.Device.Spi
             GC.SuppressFinalize(this);
         }
 
-        public virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
-            //Nothing to do in base class.
+            // Nothing to do in base class.
         }
     }
 }

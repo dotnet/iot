@@ -13,14 +13,13 @@ Note: servomotors are consumming quite a lot. Make sure you have powered enought
 You can create a servomotor with the following line:
 
 ```csharp
-ServoMotor servo = new ServoMotor(21, -1, new ServoMotorDefinition(540, 2470));
+ServoMotor servo = new ServoMotor(21, new ServoMotorDefinition(540, 2470));
 ```
 
 Make sure you are using the following namespace: ```Iot.Device.Servo```
 
 In the constructor, you will need to pass the following elements by order:
 - the GPIO pin you want to use for the sofware PWM, here 21
-- to force the usage of software PWM, use -1 as second parameter
 - a servomotor definition, refer to the main [servomotor documentation](../README.md) for more information
 
 To turn your servomotor, just setup an angle:
@@ -48,7 +47,7 @@ class Program
         Console.WriteLine("Hello Servo!");
 
         // example of software PWM piloted Servo on GPIO 21
-        ServoMotor servo = new ServoMotor(21, -1, new ServoMotorDefinition(540, 2470, 20000, 100));
+        ServoMotor servo = new ServoMotor(21, new ServoMotorDefinition(540, 2470, 20000, 100));
         // example of hardware PWM piloted Servo on chip 0 channel 0
         // ServoMotor servo = new ServoMotor(0, 0, new ServoMotorDefinition(540, 2470, 20000, 100));
         if (servo.IsRunningHardwarePwm)

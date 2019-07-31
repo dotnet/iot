@@ -4,8 +4,8 @@
 
 using System;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using System.Threading;
+using Iot.Device.Spi;
 
 namespace Iot.Device.Samples
 {
@@ -13,50 +13,22 @@ namespace Iot.Device.Samples
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello Mcp3008!");
-
-            // This sample implements two different ways of accessing the MCP3008.
-            // The SPI option is enabled in the sample by default, but you can switch
-            // to the GPIO bit-banging option by switching which one is commented out.
-            // The sample uses local functions to make it easier to switch between
-            // the two implementations.
-
-            // SPI implementation
-            Mcp3008.Mcp3008 GetMcp3008WithSpi()
+            var hardwareSpiSettings = new SpiConnectionSettings(0, 0)
             {
-                Console.WriteLine("Using SPI protocol.");
+                ClockFrequency = 1000000
+            };
 
-                var connection = new SpiConnectionSettings(0, 0)
-                {
-                    ClockFrequency = 1000000,
-                    Mode = SpiMode.Mode0
-                };
-
-                var spi = new UnixSpiDevice(connection);
-                var mcp3008 = new Mcp3008.Mcp3008(spi);
-                return mcp3008;
-            }
-
-            // GPIO (via bit banging) implementation
-            Mcp3008.Mcp3008 GetMcp3008WithGpio()
-            {
-                Console.WriteLine("Using GPIO pins.");
-                var mcp3008 = new Mcp3008.Mcp3008(18, 23, 24, 25);
-                return mcp3008;
-            }
-
-            Mcp3008.Mcp3008 mcp = GetMcp3008WithSpi();
-            // Uncomment next line to use GPIO instead.
-            // Mcp3008 mcp = GetMcp3008WithGpio();
-
-            using (mcp)
+            using (SpiDevice spi = new SoftwareSpi(clk: 6, miso: 23, mosi: 5, cs: 24))
+            // For hardware implementation replace it with following
+            // using (SpiDevice spi = SpiDevice.Create(hardwareSpiSettings))
+            using (Mcp3008.Mcp3008 mcp = new Mcp3008.Mcp3008(spi))
             {
                 while (true)
                 {
                     double value = mcp.Read(0, Mcp3008.Mcp3008.InputConfiguration.SingleEnded);
                     value = value / 10.24;
                     value = Math.Round(value);
-                    Console.WriteLine(value);
+                    Console.WriteLine($"{value}%");
                     Thread.Sleep(500);
                 }
             }

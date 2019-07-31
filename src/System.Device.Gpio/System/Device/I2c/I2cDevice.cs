@@ -7,7 +7,7 @@ namespace System.Device.I2c
     /// <summary>
     /// The communications channel to a device on an I2C bus.
     /// </summary>
-    public abstract class I2cDevice : IDisposable
+    public abstract partial class I2cDevice : IDisposable
     {
         /// <summary>
         /// The connection settings of a device on an I2C bus.
@@ -63,7 +63,7 @@ namespace System.Device.I2c
             GC.SuppressFinalize(this);
         }
 
-        public virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             // Nothing to do in base class.
         }

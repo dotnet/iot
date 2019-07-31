@@ -52,6 +52,9 @@ namespace System.Device.Gpio.Drivers
             return 0;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SysFsDriver"/> class.
+        /// </summary>
         public SysFsDriver()
         {
             s_eventThreadCancellationTokenSource = new CancellationTokenSource();
@@ -313,7 +316,7 @@ namespace System.Device.Gpio.Drivers
             {
                 return "none";
             }
-            if (kind.HasFlag(PinEventTypes.Falling) && kind.HasFlag(PinEventTypes.Rising))
+            if ((kind & PinEventTypes.Falling) != 0 && (kind & PinEventTypes.Rising) != 0)
             {
                 return "both";
             }
@@ -495,11 +498,11 @@ namespace System.Device.Gpio.Drivers
                 _pinsToDetectEventsCount++;
                 AddPinToPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, out _);
             }
-            if (eventTypes.HasFlag(PinEventTypes.Rising))
+            if ((eventTypes & PinEventTypes.Rising) != 0)
             {
                 _devicePins[pinNumber].ValueRising += callback;
             }
-            if (eventTypes.HasFlag(PinEventTypes.Falling))
+            if ((eventTypes & PinEventTypes.Falling) != 0)
             {
                 _devicePins[pinNumber].ValueFalling += callback;
             }
