@@ -27,7 +27,7 @@ namespace DemoAk8963
             Console.Clear();
             while (!Console.KeyAvailable)
             {
-                var magne = ak8963.Magnetometer;
+                var magne = ak8963.ReadMagnetometer(true);
                 Console.WriteLine($"Mag X = {magne.X, 15}");
                 Console.WriteLine($"Mag Y = {magne.Y, 15}");
                 Console.WriteLine($"Mag Z = {magne.Z, 15}");

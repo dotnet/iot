@@ -15,7 +15,7 @@ if (!ak8963.CheckVersion())
 Console.Clear();
 while (!Console.KeyAvailable)
 {
-    var magne = ak8963.Magnetometer;
+    var magne = ak8963.ReadMagnetometer(true);
     Console.WriteLine($"Mag X = {magne.X, 15}");
     Console.WriteLine($"Mag Y = {magne.Y, 15}");
     Console.WriteLine($"Mag Z = {magne.Z, 15}");
@@ -40,7 +40,7 @@ Console.WriteLine($"Mag Z = {ak8963.MagnometerBias.Z}");
 This sensor is used for example in the [MPU9250](../Mpu9250/README.md). The MPU9250 is in this case a master I2C controlling the slave AK8963 I2C sensor. An abstract class is available to implement basic I2C operation:
 
 ```csharp
-public abstract class Ak8963Interface
+public abstract class Ak8963I2cBase
 {
     public abstract void WriteRegister(I2cDevice i2CDevice, Register reg, byte data);
     public abstract byte ReadByte(I2cDevice i2CDevice, Register reg);
@@ -51,7 +51,7 @@ public abstract class Ak8963Interface
 For example the I2C basic implementation is the following:
 
 ```csharp
-public class Ak8963I2c : Ak8963Interface
+public class Ak8963I2c : Ak8963I2cBase
 {
     public override byte ReadByte(I2cDevice i2cDevice, Register reg)
     {
