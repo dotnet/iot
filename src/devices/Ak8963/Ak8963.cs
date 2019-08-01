@@ -17,7 +17,6 @@ namespace Iot.Device.Ak8963
     public class Ak8963 : IDisposable
     {
         private I2cDevice _i2cDevice;
-        private bool _autoDispose;
         private MeasurementMode _measurementMode;
         private OutputBitMode _outputBitMode;
         private bool _selfTest = false;
@@ -25,13 +24,12 @@ namespace Iot.Device.Ak8963
 
         public const byte DefaultI2cAddress = 0x0C;
 
-        public Ak8963(I2cDevice i2CDevice, bool autoDispose = true) : this(i2CDevice, new Ak8963I2c(), autoDispose)
+        public Ak8963(I2cDevice i2CDevice) : this(i2CDevice, new Ak8963I2c())
         { }
 
-        public Ak8963(I2cDevice i2CDevice, Ak8963I2cBase ak8963Interface, bool autoDispose = true)
+        public Ak8963(I2cDevice i2CDevice, Ak8963I2cBase ak8963Interface)
         {
             _i2cDevice = i2CDevice;
-            _autoDispose = autoDispose;
             _ak8963Interface = ak8963Interface;
             // Initialize the default modes
             _measurementMode = MeasurementMode.PowerDown;
@@ -252,11 +250,8 @@ namespace Iot.Device.Ak8963
         /// </summary>
         public void Dispose()
         {
-            if (_autoDispose)
-            {
-                _i2cDevice?.Dispose();
-                _i2cDevice = null;
-            }
+            _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
     }
 }

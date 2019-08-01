@@ -10,7 +10,7 @@ namespace Iot.Device.Ak8963
     /// <summary>
     /// Default I2C interface for the AK8963
     /// </summary>
-    public class Ak8963I2c : Ak8963Interface
+    public class Ak8963I2c : Ak8963I2cBase
     {
         public override byte ReadByte(I2cDevice i2cDevice, Register reg)
         {

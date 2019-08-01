@@ -13,7 +13,7 @@ namespace Iot.Device.Ak8963
     /// core I2C primitive are different. Use those 3 primitive to define the access to read
     /// and write bytes to the AK8963
     /// </summary>
-    public abstract class Ak8963Interface
+    public abstract class Ak8963I2cBase
     {
         /// <summary>
         /// Write a register of the AK8963
