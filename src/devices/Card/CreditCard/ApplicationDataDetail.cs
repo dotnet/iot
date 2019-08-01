@@ -5,7 +5,7 @@
 namespace Iot.Device.Card.CreditCardProcessing
 {
     /// <summary>
-    /// Applicaiton data details
+    /// Application data details
     /// </summary>
     public class ApplicationDataDetail
     {

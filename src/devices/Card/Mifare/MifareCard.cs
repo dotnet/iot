@@ -66,7 +66,7 @@ namespace Iot.Device.Card.Mifare
         /// <summary>
         /// Run the last setup command. In case of reading bytes, they are automatically pushed into the Data property
         /// </summary>
-        /// <returns>-1 if the process failes oherwise the number of bytes read</returns>
+        /// <returns>-1 if the process fails otherwise the number of bytes read</returns>
         public int RunMifiCardCommand()
         {            
             byte[] dataOut = new byte[0];
@@ -101,7 +101,7 @@ namespace Iot.Device.Card.Mifare
         /// <summary>
         /// Get the sector tailer bytes for a specific access sector configuration
         /// </summary>
-        /// <param name="accessSector">the acess sector</param>
+        /// <param name="accessSector">the access sector</param>
         /// <returns>the 3 bytes for configuration</returns>
         public (byte b6, byte b7, byte b8) EncodeSectorTailer(AccessSector accessSector)
         {
@@ -111,7 +111,7 @@ namespace Iot.Device.Card.Mifare
 
             // Ignore AccessSector.KeyBRead
             accessSector = accessSector & ~AccessSector.ReadKeyB;
-            // Find the table of thruth and the core Access Bits
+            // Find the table of truth and the core Access Bits
             if (accessSector == (AccessSector.WriteKeyAWithKeyA | AccessSector.ReadAccessBitsWithKeyA | AccessSector.ReadKeyBWithKeyA |
                     AccessSector.WriteKeyBWithKeyA))
             {
@@ -420,7 +420,7 @@ namespace Iot.Device.Card.Mifare
         /// <param name="SAK">The SAK response</param>
         public void SetCapacity(ushort ATAQ, byte SAK)
         {
-            // Type of Mifare can be partically determined by ATQA and SAK
+            // Type of Mifare can be partially determined by ATQA and SAK
             // https://www.nxp.com/docs/en/application-note/AN10833.pdf
             // Not complete
             if (ATAQ == 0x0004)

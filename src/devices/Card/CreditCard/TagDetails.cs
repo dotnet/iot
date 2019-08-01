@@ -61,10 +61,10 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// <summary>
         /// The type of encoding used by this Tag
         /// </summary>
-        public ConvertionType Decoder { get; set; } = ConvertionType.ByteArray;
+        public ConversionType Decoder { get; set; } = ConversionType.ByteArray;
 
         /// <summary>
-        /// The source of the tag, if it's from the card, the termnial or both
+        /// The source of the tag, if it's from the card, the terminal or both
         /// </summary>
         public Source Source { get; set; }
 
@@ -76,16 +76,16 @@ namespace Iot.Device.Card.CreditCardProcessing
         {
             switch (Decoder)
             {
-                case ConvertionType.BcdToString:
+                case ConversionType.BcdToString:
                     string ret = "";
                     for (int i = 0; i < Data.Length; i++)
                         ret += Data[i].ToString("X2") + (((i & 1) == 1) ? " " : "");
                     return ret;
-                case ConvertionType.RawString:
+                case ConversionType.RawString:
                     return Encoding.Default.GetString(Data);
-                case ConvertionType.Date:
+                case ConversionType.Date:
                     return ("20" + Data[0].ToString("X2") + "/" + Data[1].ToString("X2") + "/" + Data[2].ToString("X2"));
-                case ConvertionType.ByteArray:
+                case ConversionType.ByteArray:
                 default:
                     return (BitConverter.ToString(Data));
             }

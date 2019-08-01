@@ -5,7 +5,7 @@
 namespace Iot.Device.Card.Mifare
 {
     /// <summary>
-    /// Different storage capacity for Minefare cards
+    /// Different storage capacity for Mifare cards
     /// </summary>
     public enum MifareCardCapacity
     {

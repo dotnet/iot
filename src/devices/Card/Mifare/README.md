@@ -66,7 +66,7 @@ if (decrypted != null)
         }
         else
         {
-            Console.WriteLine($"Autentication error");
+            Console.WriteLine($"Authentication error");
         }
     }
 }

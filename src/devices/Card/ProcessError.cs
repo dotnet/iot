@@ -37,10 +37,21 @@ namespace Iot.Device.Card
                 ErrorType = ErrorType.ProcessCompletedWarning;
                 if ((errorToProcess[0] == 0x62) && (errorToProcess[1] == 0x83))
                     ErrorType = ErrorType.StateNonVolatileMemoryUnchangedSelectedFileInvalidated;
-                else if ((errorToProcess[0] == 0x63) && (errorToProcess[1] == 0x00))
-                    ErrorType = ErrorType.StateNonVolatileMemoryChangedAuthenticationFailed;
-                else if ((errorToProcess[0] == 0x63) && ((errorToProcess[1] & 0xC0) == 0xC0))
-                    ErrorType = ErrorType.StateNonVolatileMemoryChanged;
+                else if (errorToProcess[0] == 0x63)
+                {
+                    if (errorToProcess[1] == 0x00)
+                        ErrorType = ErrorType.StateNonVolatileMemoryChangedAuthenticationFailed;
+                    else if ((errorToProcess[1] & 0xC0) == 0xC0)
+                    {
+                        ErrorType = ErrorType.StateNonVolatileMemoryChanged;
+                        CorrectLegnthOrBytesAvailable = (byte)(errorToProcess[1] & 0x0F);
+                    }
+                    else if ((errorToProcess[1] & 0x0F) > 0)
+                    {
+                        ErrorType = ErrorType.StateNonVolatileMemoryChangedAuthenticationFailed;
+                        CorrectLegnthOrBytesAvailable = (byte)(errorToProcess[1] & 0x0F);
+                    }
+                }
             }
             else if ((errorToProcess[0] == 0x64) || (errorToProcess[0] == 0x65))
             {
@@ -77,7 +88,7 @@ namespace Iot.Device.Card
             {
                 ErrorType = ErrorType.BytesStillAvailable;
                 CorrectLegnthOrBytesAvailable = errorToProcess[1];
-            }            
+            }
             else
                 ErrorType = ErrorType.Unknown;
         }
