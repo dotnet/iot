@@ -9,7 +9,7 @@ using System.Device.I2c;
 
 namespace Iot.Device.Mpu9250
 {
-    internal class Ak8963Attached : Ak8963Interface
+    internal class Ak8963Attached : Ak8963I2cBase
     {
         public override void WriteRegister(I2cDevice i2cDevice, Ak8963.Register reg, byte data)
         {
