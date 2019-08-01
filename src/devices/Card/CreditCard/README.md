@@ -51,7 +51,10 @@ static void ReadCreditCard(Pn532 pn532)
 
         Console.WriteLine("All Tags for the Credit Card:");
         DisplayTags(creditCard.Tags, 0);
-
+		// Display Log Entries
+        var format = Tag.SearchTag(creditCard.Tags, 0x9F4F).FirstOrDefault();
+        if (format != null)
+            DisplayLogEntries(creditCard.LogEntries, format.Tags);
     }
 }
 
@@ -90,6 +93,26 @@ static void DisplayTags(List<Tag> tagToDisplay, int levels)
             TagDetails tg = new TagDetails(tagparent);
             Console.WriteLine($": {tg.ToString()}");
         }
+    }
+}
+
+static void DisplayLogEntries(List<byte[]> entries, List<Tag> format)
+{
+    for (int i = 0; i < format.Count; i++)
+        Console.Write($"{TagList.Tags.Where(m => m.TagNumber == format[i].TagNumber).FirstOrDefault()?.Description} | ");
+    Console.WriteLine();
+
+    foreach (var entry in entries)
+    {
+        int index = 0;
+        for (int i = 0; i < format.Count; i++)
+        {
+            var data = entry.AsSpan().Slice(index, format[i].Data[0]);
+            var tg = new TagDetails(new Tag() { TagNumber = format[i].TagNumber, Data = data.ToArray() });
+            Console.Write($"{tg.ToString()} | ");
+            index += format[i].Data[0];
+        }
+        Console.WriteLine();
     }
 }
 ```

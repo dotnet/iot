@@ -16,7 +16,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// <summary>
         /// The Tag number
         /// </summary>
-        public ushort TagNumber { get; set; }
+        public uint TagNumber { get; set; }
 
         /// <summary>
         /// The data of the Tag
@@ -26,7 +26,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// <summary>
         /// The Tag parent, 0 is it's a root Tag
         /// </summary>
-        public ushort Parent { get; set; }
+        public uint Parent { get; set; }
 
         /// <summary>
         /// True if the Tag is constructed, which means contains sub Tags

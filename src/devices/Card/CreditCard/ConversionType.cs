@@ -15,5 +15,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         ByteArray,
         RawString,
         Date,
+        DecimalNumber,
+        Time,
     }
 }

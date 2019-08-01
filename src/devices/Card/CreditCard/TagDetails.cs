@@ -79,12 +79,21 @@ namespace Iot.Device.Card.CreditCardProcessing
                 case ConversionType.BcdToString:
                     string ret = "";
                     for (int i = 0; i < Data.Length; i++)
-                        ret += Data[i].ToString("X2") + (((i & 1) == 1) ? " " : "");
+                        ret += Data[i].ToString("X2");
+                    ret = ret.TrimEnd('F');
                     return ret;
                 case ConversionType.RawString:
                     return Encoding.Default.GetString(Data);
                 case ConversionType.Date:
                     return ("20" + Data[0].ToString("X2") + "/" + Data[1].ToString("X2") + "/" + Data[2].ToString("X2"));
+                case ConversionType.DecimalNumber:
+                    string dec = "";
+                    for (int i = 0; i < Data.Length; i++)
+                        dec += Data[i].ToString("X2") + (i == Data.Length - 2 ? "." : "");
+                    dec = dec.TrimStart('0');
+                    return dec;
+                case ConversionType.Time:
+                    return (Data[0].ToString("X2") + ":" + Data[1].ToString("X2") + ":" + Data[2].ToString("X2"));
                 case ConversionType.ByteArray:
                 default:
                     return (BitConverter.ToString(Data));

@@ -47,6 +47,11 @@ namespace Iot.Device.Card.CreditCardProcessing
         public List<Tag> Tags { get; internal set; }
 
         /// <summary>
+        /// The list of log entries in binary format
+        /// </summary>
+        public List<byte[]> LogEntries { get; internal set; }
+
+        /// <summary>
         /// Create a Credit Card class
         /// </summary>
         /// <param name="nfc">A compatible Card reader</param>
@@ -56,6 +61,7 @@ namespace Iot.Device.Card.CreditCardProcessing
             _nfc = nfc;
             _target = target;
             Tags = new List<Tag>();
+            LogEntries = new List<byte[]>();
             TailerSize = tailerSize;
         }
 
@@ -216,8 +222,12 @@ namespace Iot.Device.Card.CreditCardProcessing
             return ErrorType.Unknown;
         }
 
-        private void FillTagList(List<Tag> theTags, ReadOnlySpan<byte> span, ushort parent = 0x00)
+        private void FillTagList(List<Tag> theTags, ReadOnlySpan<byte> span, uint parent = 0x00)
         {
+            // We don't decode template 0x80
+            if (span.Length == 0)
+                return;
+
             var elem = new BerSplitter(span);
             foreach (var tag in elem.Tags)
             {
@@ -237,33 +247,37 @@ namespace Iot.Device.Card.CreditCardProcessing
                     if (tag.Tags == null)
                         tag.Tags = new List<Tag>();
 
-                    var dolList = tag.Data;
-                    int index = 0;
-                    while (index < dolList.Length)
-                    {
-                        //Decode mono dimension (so 1 byte array) Ber elements but which can have ushort or byte tags
-                        var dol = new Tag();
-                        dol.Data = new byte[1];
-                        if ((dolList[index] & 0b0001_1111) == 0b0001_1111)
-                        {
-                            dol.TagNumber = BinaryPrimitives.ReadUInt16BigEndian(dolList.AsSpan().Slice(index, 2));
-                            index += 2;
-                            dolList.AsSpan().Slice(index++, 1).CopyTo(dol.Data);
-                        }
-                        else
-                        {
-                            dol.TagNumber = dolList[index++];
-                            dolList.AsSpan().Slice(index++, 1).CopyTo(dol.Data);
-                        }
-                        dol.Parent = tag.TagNumber;
-                        tag.Tags.Add(dol);
-                    }
+                    DecodeDol(tag);
                 }
                 tag.Parent = parent;
                 theTags.Add(tag);
             }
-
         }
+
+        private void DecodeDol(Tag tag)
+        {
+            int index = 0;
+            while (index < tag.Data.Length)
+            {
+                //Decode mono dimension (so 1 byte array) Ber elements but which can have ushort or byte tags
+                var dol = new Tag();
+                dol.Data = new byte[1];
+                if ((tag.Data[index] & 0b0001_1111) == 0b0001_1111)
+                {
+                    dol.TagNumber = BinaryPrimitives.ReadUInt16BigEndian(tag.Data.AsSpan().Slice(index, 2));
+                    index += 2;
+                    tag.Data.AsSpan().Slice(index++, 1).CopyTo(dol.Data);
+                }
+                else
+                {
+                    dol.TagNumber = tag.Data[index++];
+                    tag.Data.AsSpan().Slice(index++, 1).CopyTo(dol.Data);
+                }
+                dol.Parent = tag.TagNumber;
+                tag.Tags.Add(dol);
+            }
+        }
+
 
         /// <summary>
         /// Gather all the public information present in the credit card.
@@ -286,6 +300,13 @@ namespace Iot.Device.Card.CreditCardProcessing
                     _alreadyReadSfi = false;
                     FillTags();
                 }
+            }
+            // Search for all tags with entries
+            var entries = Tag.SearchTag(Tags, 0x9F4D).FirstOrDefault();
+            if (entries != null)
+            {
+                // SFI entries is first byte and number of records is second one
+                ReadLogEntries(entries.Data[0], entries.Data[1]);
             }
         }
 
@@ -485,12 +506,28 @@ namespace Iot.Device.Card.CreditCardProcessing
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sfi"></param>
+        /// <param name="numberNecords"></param>
+        /// <returns></returns>
+        public void ReadLogEntries(byte sfi, byte numberNecords)
+        {
+            for (byte record = 1; record < numberNecords + 1; record++)
+            {
+                var ret = ReadRecord(sfi, record, true);
+                LogInfo.Log($"Read record {record}, SFI {sfi},status: {ret}", LogLevel.Debug);
+            }
+        }
+
+        /// <summary>
         /// Read a specific record
         /// </summary>
         /// <param name="sfi">The Short File Identifier</param>
         /// <param name="record">The Record to read</param>
+        /// <param name="isLogEntry">Are we reading a log entry or something else?</param>
         /// <returns>The error status</returns>
-        public ErrorType ReadRecord(byte sfi, byte record)
+        public ErrorType ReadRecord(byte sfi, byte record, bool isLogEntry = false)
         {
             if (sfi > 31)
                 return ErrorType.WrongParameterP1P2FunctionNotSupported;
@@ -522,7 +559,14 @@ namespace Iot.Device.Card.CreditCardProcessing
                     }
                 }
 
-                FillTagList(Tags, received.Slice(0, ret - TailerSize));
+                if (isLogEntry)
+                {
+                    LogEntries.Add(received.Slice(0, ret - TailerSize).ToArray());
+                }
+                else
+                {
+                    FillTagList(Tags, received.Slice(0, ret - TailerSize));
+                }
 
                 return new ProcessError(received.Slice(ret - TailerSize)).ErrorType;
             }

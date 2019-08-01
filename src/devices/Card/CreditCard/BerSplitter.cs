@@ -51,15 +51,22 @@ namespace Iot.Device.Card.CreditCardProcessing
             }
         }
 
-        private (ushort tagNumber, byte numberElements) DecodeTag(ReadOnlySpan<byte> toSplit)
+        private (uint tagNumber, byte numberElements) DecodeTag(ReadOnlySpan<byte> toSplit)
         {
-            //  check if single or double element
+            uint tagValue = toSplit[0];
+            byte index = 1;
+            //  check if single or double triple or quadruple element
             if ((toSplit[0] & 0b0001_1111) == 0b0001_1111)
             {
-                // Double element               
-                return (BinaryPrimitives.ReadUInt16BigEndian(toSplit), 2);
+                              
+                do
+                {
+                    tagValue = tagValue<<8 | toSplit[index];
+                }
+                while ((toSplit[index++] & 0x80) == 0x80);
+
             }
-            return (toSplit[0], 1);
+            return (tagValue, index);
         }
 
         private (int size, byte numBytes) DecodeSize(ReadOnlySpan<byte> toSplit)
