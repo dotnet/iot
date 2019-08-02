@@ -18,6 +18,8 @@ namespace System.Device.Pwm.Channels
         private double _dutyCyclePercentage;
         private readonly string _chipPath;
         private readonly string _channelPath;
+        private StreamWriter _dutyCycleWriter;
+        private StreamWriter _frequencyWriter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnixPwmChannel"/> class.
@@ -38,6 +40,11 @@ namespace System.Device.Pwm.Channels
             _channel = channel;
             Validate();
             Open();
+
+            // avoid opening the file for operations changing relatively frequently
+            _dutyCycleWriter = new StreamWriter(new FileStream($"{_channelPath}/duty_cycle", FileMode.Open, FileAccess.ReadWrite));
+            _frequencyWriter = new StreamWriter(new FileStream($"{_channelPath}/period", FileMode.Open, FileAccess.ReadWrite));
+
             SetFrequency(frequency);
             DutyCyclePercentage = dutyCyclePercentage;
         }
@@ -95,7 +102,9 @@ namespace System.Device.Pwm.Channels
             }
             
             int periodInNanoseconds = GetPeriodInNanoseconds(frequency);
-            File.WriteAllText($"{_channelPath}/period", Convert.ToString(periodInNanoseconds));
+            _frequencyWriter.BaseStream.SetLength(0);
+            _frequencyWriter.Write(periodInNanoseconds);
+            _frequencyWriter.Flush();
             _frequency = frequency;
         }
 
@@ -112,7 +121,9 @@ namespace System.Device.Pwm.Channels
 
             // In Linux, the period needs to be a whole number and can't have decimal point.
             int dutyCycleInNanoseconds = (int)(GetPeriodInNanoseconds(_frequency) * dutyCyclePercentage);
-            File.WriteAllText($"{_channelPath}/duty_cycle", Convert.ToString(dutyCycleInNanoseconds));
+            _dutyCycleWriter.BaseStream.SetLength(0);
+            _dutyCycleWriter.Write(dutyCycleInNanoseconds);
+            _dutyCycleWriter.Flush();
             _dutyCyclePercentage = dutyCyclePercentage;
         }
 
@@ -184,6 +195,10 @@ namespace System.Device.Pwm.Channels
 
         protected override void Dispose(bool disposing)
         {
+            _dutyCycleWriter?.Dispose();
+            _dutyCycleWriter = null;
+            _frequencyWriter?.Dispose();
+            _frequencyWriter = null;
             Close();
             base.Dispose(disposing);
         }

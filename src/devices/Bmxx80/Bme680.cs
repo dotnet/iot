@@ -37,6 +37,8 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         private readonly Bme680CalibrationData _bme680Calibration;
 
+        protected override int _tempCalibrationFactor => 16;
+
         /// <summary>
         /// Initialize a new instance of the <see cref="Bme680"/> class.
         /// </summary>
@@ -335,20 +337,6 @@ namespace Iot.Device.Bmxx80
             }
 
             return calculatedPressure;
-        }
-
-        /// <inheritdoc cref="Bmxx80Base"/>
-        protected override Temperature CompensateTemperature(int adcTemperature)
-        {
-            // Calculation for the Bme680 differs slightly from other sensors of this family!
-            var var1 = (adcTemperature / 16384.0 - _calibrationData.DigT1 / 1024.0) * _calibrationData.DigT2;
-            var var2 = adcTemperature / 131072.0 - _calibrationData.DigT1 / 8192.0;
-            var2 *= var2 * _calibrationData.DigT3 * 16.0;
-
-            TemperatureFine = (int)(var1 + var2);
-
-            var temp = (var1 + var2) / 5120.0;
-            return Temperature.FromCelsius(temp);
         }
     }
 }
