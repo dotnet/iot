@@ -119,7 +119,7 @@ namespace Iot.Device.Ak8963
         /// <summary>
         /// True if there is a data to read
         /// </summary>
-        public bool WaitForDataReady => (ReadByte(Register.ST1) & 0x01) == 0x01;
+        public bool HasDataToRead => (ReadByte(Register.ST1) & 0x01) == 0x01;
 
         /// <summary>
         /// Check if the version is the correct one (0x48). This is fixed for this device
@@ -151,7 +151,7 @@ namespace Iot.Device.Ak8963
             // Wait for a data to be present
             if (waitForData)
             {
-                while (!WaitForDataReady)
+                while (!HasDataToRead)
                     ;
             }
 

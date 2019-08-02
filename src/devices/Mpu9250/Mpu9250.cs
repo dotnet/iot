@@ -42,7 +42,7 @@ namespace Iot.Device.Mpu9250
         /// </summary>
         public const byte SecondI2cAddress = 0x69;
 
-        #region Mgnetometer
+        #region Magnetometer
 
         /// <summary>
         /// Get the magnetometer bias
@@ -68,33 +68,11 @@ namespace Iot.Device.Mpu9250
         public bool MagnetometerCheckVersion() => _wakeOnMotion ? false : _ak8963.CheckVersion();
 
         /// <summary>
-        /// Read the magnetomer and can wait for new data to be present
+        /// Read the magnetometer and can wait for new data to be present
         /// </summary>
         /// <param name="waitForData">true to wait for new data</param>
         /// <returns>The data from the magnetometer</returns>
         public Vector3 ReadMagnetometer(bool waitForData = false) => _wakeOnMotion ? Vector3.Zero : _ak8963.ReadMagnetometer(waitForData);
-
-        /// <summary>
-        /// Get the Magetometer data and wait for them to be ready
-        ///    +Z   +Y
-        ///  \  |  /
-        ///   \ | /
-        ///    \|/
-        ///    /|\
-        ///   / | \
-        ///  /  |  \
-        ///         +X
-        /// </summary>
-        public Vector3 Magnetometer
-        {
-            get
-            {
-                if (_wakeOnMotion)
-                    return Vector3.Zero;
-                var mag = _ak8963.Magnetometer;
-                return new Vector3(mag.Y, mag.X, -mag.Z);
-            }
-        }
 
         /// <summary>
         /// Select the magnetometer measurement mode
