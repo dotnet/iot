@@ -19,7 +19,8 @@
     <Compile Include="CalibrationData\Bmp280CalibrationData.cs" />
     <Compile Include="CalibrationData\Bmxx80CalibrationData.cs" />
     <Compile Include="DeviceStatus.cs" />
-    <Compile Include="FilteringMode.cs" />
+    <Compile Include="FilteringMode\Bme680FilteringMode.cs" />
+    <Compile Include="FilteringMode\Bmx280FilteringMode.cs" />
     <Compile Include="PowerMode\Bme680PowerMode.cs" />
     <Compile Include="PowerMode\Bmx280PowerMode.cs" />
     <Compile Include="Register\Bme680Register.cs" />

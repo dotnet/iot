@@ -11,6 +11,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
+using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Units;
 
 namespace Iot.Device.Bmxx80
@@ -45,18 +46,18 @@ namespace Iot.Device.Bmxx80
         /// Reads the current IIR filter mode the device is running in.
         /// </summary>
         /// <returns>The current <see cref="FilteringMode"/>.</returns>
-        public FilteringMode ReadFilterMode()
+        public Bmx280FilteringMode ReadFilterMode()
         {
             byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
             var mode = (byte)((current & 0b_0001_1100) >> 2);
 
             return mode switch
             {
-                0b000 => FilteringMode.Off,
-                0b001 => FilteringMode.X2,
-                0b010 => FilteringMode.X4,
-                0b011 => FilteringMode.X8,
-                _ => FilteringMode.X16
+                0b000 => Bmx280FilteringMode.Off,
+                0b001 => Bmx280FilteringMode.X2,
+                0b010 => Bmx280FilteringMode.X4,
+                0b011 => Bmx280FilteringMode.X8,
+                _ => Bmx280FilteringMode.X16
             };
         }
 
@@ -179,7 +180,7 @@ namespace Iot.Device.Bmxx80
         /// Sets the IIR filter mode.
         /// </summary>
         /// <param name="filteringMode">The <see cref="FilteringMode"/> to set.</param>
-        public void SetFilterMode(FilteringMode filteringMode)
+        public void SetFilterMode(Bmx280FilteringMode filteringMode)
         {
             byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
             current = (byte)((current & 0b_1110_0011) | (byte)filteringMode << 2);
