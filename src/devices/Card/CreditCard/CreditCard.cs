@@ -56,6 +56,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// </summary>
         /// <param name="nfc">A compatible Card reader</param>
         /// <param name="target">The target number as some readers needs it</param>
+        /// /// <param name="tailerSize">Size of the tailer, most NFC readers add an extra byte 0x00</param>
         public CreditCard(CardWriteRead nfc, byte target, int tailerSize = 3)
         {
             _nfc = nfc;
