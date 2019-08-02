@@ -59,7 +59,7 @@ namespace Iot.Device.Mpu9250
         /// <summary>
         /// True if there is a data to read
         /// </summary>
-        public bool WaitForDataReady => !(_wakeOnMotion && _ak8963.WaitForDataReady);
+        public bool HasDataToRead => !(_wakeOnMotion && _ak8963.HasDataToRead);
 
         /// <summary>
         /// Check if the magnetometer version is the correct one (0x48)
