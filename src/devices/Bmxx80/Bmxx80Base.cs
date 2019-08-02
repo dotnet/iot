@@ -115,7 +115,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="adcTemperature">The temperature value read from the device.</param>
         /// <returns>The <see cref="Temperature"/>.</returns>
-        protected virtual Temperature CompensateTemperature(int adcTemperature)
+        protected Temperature CompensateTemperature(int adcTemperature)
         {
             // The temperature is calculated using the compensation formula in the BMP280 datasheet.
             // See: https://cdn-shop.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
