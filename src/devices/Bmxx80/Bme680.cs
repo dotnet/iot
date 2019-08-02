@@ -222,5 +222,7 @@ namespace Iot.Device.Bmxx80
 
             return calculatedPressure;
         }
+
+        protected override int _tempCalibrationFactor => 16;
     }
 }
