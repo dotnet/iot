@@ -39,6 +39,7 @@ namespace Iot.Device.Tm1637
         /// <param name="pinClk">The clock pin</param>
         /// <param name="pinDio">The data pin</param>
         /// <param name="pinNumberingScheme">Use the logical or physical pin layout</param>
+        /// <param name="gpioController">A Gpio Controller if you want to use a specific one</param>
         public Tm1637(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, IGpioController gpioController = null)
         {
             _pinClk = pinClk;
