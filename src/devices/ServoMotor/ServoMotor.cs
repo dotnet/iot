@@ -14,29 +14,14 @@ namespace Iot.Device.ServoMotor
     {
         private PwmChannel _pwmChannel;
         private readonly int _maximumAngle;
-        private readonly int _maximumPulseWidthMicroseconds;
         private readonly int _minimumPulseWidthMicroseconds;
-        private readonly double _angleInMicroseconds;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ServoMotor"/> class.
-        /// </summary>
-        /// <param name="maximumAngle">The maximum angle the servo motor can move.</param>
-        /// <param name="minimumPulseWidthMicroseconds">The minimum pulse width, in microseconds, that represent an angle for 0 degrees.</param>
-        /// <param name="maximumPulseWidthMicroseconds">The maxnimum pulse width, in microseconds, that represent an angle for maximum angle.</param>
-        private ServoMotor(int maximumAngle, int minimumPulseWidthMicroseconds, int maximumPulseWidthMicroseconds)
-        {
-            _maximumAngle = maximumAngle;
-            _minimumPulseWidthMicroseconds = minimumPulseWidthMicroseconds;
-            _maximumPulseWidthMicroseconds = maximumPulseWidthMicroseconds;
-            _angleInMicroseconds = CalculateAngleToMicroseconds(maximumAngle, minimumPulseWidthMicroseconds, maximumPulseWidthMicroseconds);
-        }
+        private readonly double _angleToMicroseconds;
 
         /// <summary>
         ///  Initializes a new instance of the <see cref="ServoMotor"/> class.
         /// </summary>
         /// <param name="pwmChannel">The PWM channel used to control the servo motor.</param>
-        /// <param name="maximumAngle">The maximum angle the servo motor can move.</param>
+        /// <param name="maximumAngle">The maximum angle the servo motor can move represented as a value between 0 and 360.</param>
         /// <param name="minimumPulseWidthMicroseconds">The minimum pulse width, in microseconds, that represent an angle for 0 degrees.</param>
         /// <param name="maximumPulseWidthMicroseconds">The maxnimum pulse width, in microseconds, that represent an angle for maximum angle.</param>
         public ServoMotor(
@@ -44,14 +29,12 @@ namespace Iot.Device.ServoMotor
             int maximumAngle = 180,
             int minimumPulseWidthMicroseconds = 1_000,
             int maximumPulseWidthMicroseconds = 2_000)
-            : this(maximumAngle, minimumPulseWidthMicroseconds, maximumPulseWidthMicroseconds)
         {
             _pwmChannel = pwmChannel;
-        }
+            _maximumAngle = maximumAngle;
+            _minimumPulseWidthMicroseconds = minimumPulseWidthMicroseconds;
 
-        private static double CalculateAngleToMicroseconds(int maximumAngle, int minimumPulseWidthMicroseconds, int maximumPulseWidthMicroseconds)
-        {
-            if (maximumAngle < 0 || maximumAngle > 360)
+            if (((uint)maximumAngle) > 360)
             {
                 throw new ArgumentOutOfRangeException(nameof(maximumAngle), maximumAngle, "Value must be between 0 and 360.");
             }
@@ -66,9 +49,15 @@ namespace Iot.Device.ServoMotor
                 throw new ArgumentOutOfRangeException(nameof(maximumPulseWidthMicroseconds), maximumPulseWidthMicroseconds, $"Value must be greater than or equal to {minimumPulseWidthMicroseconds}.");
             }
 
-            // slope = (y2 - y1) / (x2 - x1).  x1 is 0 in this case, so it is not subtracted.
-            double servoAngleSlope = (double)(maximumPulseWidthMicroseconds - minimumPulseWidthMicroseconds) / maximumAngle;
-            return servoAngleSlope;
+            if (maximumAngle > 0)
+            {
+                // slope = (y2 - y1) / (x2 - x1).  x1 is 0 in this case, so it is not subtracted.
+                _angleToMicroseconds = (double)(maximumPulseWidthMicroseconds - minimumPulseWidthMicroseconds) / maximumAngle;
+            }
+            else
+            {
+                _angleToMicroseconds = 0;
+            }
         }
 
         /// <summary>
@@ -87,12 +76,12 @@ namespace Iot.Device.ServoMotor
         /// <param name="angle">The angle to write to the servo motor.</param>
         public void WriteAngle(int angle)
         {
-            if (angle < 0 || angle > _maximumAngle)
+            if (((uint)angle) > _maximumAngle)
             {
                 throw new ArgumentOutOfRangeException(nameof(angle), angle, $"Value must be between 0 and {_maximumAngle}.");
             }
 
-            WritePulseWidth((int)(_angleInMicroseconds * angle + _minimumPulseWidthMicroseconds));
+            WritePulseWidth((int)(_angleToMicroseconds * angle + _minimumPulseWidthMicroseconds));
         }
 
         /// <summary>
