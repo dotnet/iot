@@ -10,7 +10,7 @@ namespace Iot.Device.ServoMotor
     /// <summary>
     /// Represents a rotary actuator or linear actuator that allows for precise control of angular or linear position.
     /// </summary>
-    public class ServoMotor : IDisposable
+    public sealed class ServoMotor : IDisposable
     {
         private PwmChannel _pwmChannel;
         private readonly int _maximumAngle;
