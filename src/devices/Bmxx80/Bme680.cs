@@ -194,22 +194,6 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Set the humidity sampling.
-        /// </summary>
-        /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when the sampling mode does not match a defined mode in <see cref="Sampling"/>.</exception>
-        public void SetHumiditySampling(Sampling sampling)
-        {
-            if (!Enum.IsDefined(typeof(Sampling), sampling))
-                throw new ArgumentOutOfRangeException();
-
-            var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_HUM);
-            status = (byte)((status & (byte)~Bme680Mask.HUMIDITY_SAMPLING) | (byte)sampling);
-
-            _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_HUM, status });
-        }
-
-        /// <summary>
         /// Sets the power mode to the given mode
         /// </summary>
         /// <param name="powerMode">The <see cref="Bme680PowerMode"/> to set.</param>
@@ -227,19 +211,21 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Read the humidity.
+        /// Configures a heater profile, making it ready for use.
         /// </summary>
-        /// <returns>Calculated humidity.</returns>
-        public async Task<double> ReadHumidityAsync()
+        /// <param name="profile">The <see cref="Bme680HeaterProfile"/> to configure.</param>
+        /// <param name="targetTemperature">The target temperature in °C. Ranging from 0-400.</param>
+        /// <param name="duration">The duration in ms. Ranging from 0-4032.</param>
+        /// <param name="ambientTemperature">The ambient temperature in °C.</param>
+        /// <returns></returns>
+        public void ConfigureHeatingProfile(Bme680HeaterProfile profile, ushort targetTemperature, ushort duration, double ambientTemperature)
         {
-            // Read humidity data.
-            byte msb = Read8BitsFromRegister((byte)Bme680Register.HUMIDITYDATA_MSB);
-            byte lsb = Read8BitsFromRegister((byte)Bme680Register.HUMIDITYDATA_LSB);
+            // read ambient temperature for resistance calculation
+            var heaterResistance = CalculateHeaterResistance(targetTemperature, (short)ambientTemperature);
+            var heaterDuration = CalculateHeaterDuration(duration);
 
-            // Convert to a 32bit integer.
-            var adcHumidity = (msb << 8) + lsb;
-
-            return CompensateHumidity((await ReadTemperatureAsync()).Celsius, adcHumidity);
+            _i2cDevice.Write(new[] { (byte)((byte)Bme680Register.RES_HEAT_0 + profile), heaterResistance });
+            _i2cDevice.Write(new[] { (byte)((byte)Bme680Register.GAS_WAIT_0 + profile), heaterDuration });
         }
 
         /// <summary>
@@ -248,9 +234,115 @@ namespace Iot.Device.Bmxx80
         /// <returns>The current <see cref="Bme680PowerMode"/>.</returns>
         public Bme680PowerMode ReadPowerMode()
         {
-            byte read = Read8BitsFromRegister(_controlRegister);
+            var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_MEAS);
 
-            return (Bme680PowerMode)(read & 0b_0000_0011);
+            return (Bme680PowerMode)(status & (byte)Bme680Mask.PWR_MODE);
+        }
+
+        /// <summary>
+        /// Gets the required time in ms to perform a measurement. The duration of the gas
+        /// measurement is not considered if <see cref="GasConversionIsEnabled"/> is set to false.
+        /// The precision of this duration is within 1ms of the actual measurement time.
+        /// </summary>
+        /// <param name="profile">The used <see cref="Bme680HeaterProfile"/>. </param>
+        /// <returns></returns>
+        public int GetMeasurementDuration(Bme680HeaterProfile profile)
+        {
+            var osToMeasCycles = new byte[] { 0, 1, 2, 4, 8, 16 };
+            var osToSwitchCount = new byte[] { 0, 1, 1, 1, 1, 1 };
+
+            var tempSampling = ReadTemperatureSampling();
+            var pressSampling = ReadPressureSampling();
+            var humidSampling = ReadHumiditySampling();
+
+            var measCycles = osToMeasCycles[(int)tempSampling];
+            measCycles += osToMeasCycles[(int)pressSampling];
+            measCycles += osToMeasCycles[(int)humidSampling];
+
+            var switchCount = osToSwitchCount[(int)tempSampling];
+            switchCount += osToSwitchCount[(int)pressSampling];
+            switchCount += osToSwitchCount[(int)humidSampling];
+
+            double measDuration = measCycles * 1963;
+            measDuration += 477 * switchCount;      // TPH switching duration
+
+            if (GasConversionIsEnabled)
+                measDuration += 477 * 5;            // Gas measurement duration
+            measDuration += 500;                    // get it to the closest whole number
+            measDuration /= 1000.0;                 // convert to ms
+            measDuration += 1;                      // wake up duration of 1ms
+
+            if (GasConversionIsEnabled)
+                measDuration += ReadHeaterConfig(profile).GetHeaterDurationInMilliseconds();
+
+            return (int)Math.Ceiling(measDuration);
+        }
+
+        /// <summary>
+        /// Reads the heater configuration associated with the <see cref="Bme680HeaterProfile"/>.
+        /// </summary>
+        /// <param name="profile">The desired heater profile for which to get the configuration.</param>
+        /// <returns>The configuration of the chosen set-point or null if invalid set-point was chosen.</returns>
+        public Bme680HeaterProfileConfig ReadHeaterConfig(Bme680HeaterProfile profile)
+        {
+            var heaterTemp = Read8BitsFromRegister((byte)((byte)Bme680Register.RES_HEAT_0 + profile));
+            var heaterDuration = Read8BitsFromRegister((byte)((byte)Bme680Register.GAS_WAIT_0 + profile));
+
+            return new Bme680HeaterProfileConfig(profile, heaterTemp, heaterDuration);
+        }
+
+        /// <summary>
+        /// Gets the currently used <see cref="Bme680HeaterProfile"/>.
+        /// </summary>
+        /// <returns>The current <see cref="Bme680HeaterProfile"/></returns>
+        public Bme680HeaterProfile ReadCurrentHeaterProfile()
+        {
+            var heaterProfile = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_1);
+            heaterProfile = (byte)(heaterProfile & (byte)Bme680Mask.NB_CONV);
+            return (Bme680HeaterProfile)heaterProfile;
+        }
+
+        /// <summary>
+        /// Set the humidity sampling.
+        /// </summary>
+        /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the sampling mode does not match a defined mode in <see cref="Sampling"/>.</exception>
+        public void SetHumiditySampling(Sampling sampling)
+        {
+            if (!Enum.IsDefined(typeof(Sampling), sampling))
+                throw new ArgumentOutOfRangeException();
+
+            var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_HUM);
+            status = (byte)((status & (byte)~Bme680Mask.HUMIDITY_SAMPLING) | (byte)sampling);
+
+            _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_HUM, status });
+        }
+
+        /// <summary>
+        /// Gets the current sample rate for humidity measurements.
+        /// </summary>
+        /// <returns>The humidity <see cref="Sampling"/>.</returns>
+        public Sampling ReadHumiditySampling()
+        {
+            var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_HUM);
+            status = (byte)(status & (byte)Bme680Mask.HUMIDITY_SAMPLING);
+            return ByteToSampling(status);
+        }
+
+        /// <summary>
+        /// Read the humidity.
+        /// </summary>
+        /// <returns>Calculated humidity.</returns>
+        public async Task<double> ReadHumidityAsync()
+        {
+            // Read humidity data.
+            var msb = Read8BitsFromRegister((byte)Bme680Register.HUMIDITYDATA_MSB);
+            var lsb = Read8BitsFromRegister((byte)Bme680Register.HUMIDITYDATA_LSB);
+
+            // Convert to a 32bit integer.
+            var adcHumidity = (msb << 8) + lsb;
+
+            return CompensateHumidity((await ReadTemperatureAsync()).Celsius, adcHumidity);
         }
 
         /// <summary>
@@ -288,6 +380,26 @@ namespace Iot.Device.Bmxx80
             var adcTemperature = (msb << 12) + (lsb << 4) + (xlsb >> 4);
 
             return Task.FromResult(CompensateTemperature(adcTemperature));
+        }
+
+        /// <summary>
+        /// Reads the gas resistance.
+        /// </summary>
+        /// <returns>Gas resistance in Ohm.</returns>
+        public Task<double> ReadGasResistance()
+        {
+            if (!GasMeasurementIsValid)
+                return Task.FromResult(double.NaN);
+
+            // Read 10 bit gas resistance value from registers
+            var g1 = Read8BitsFromRegister((byte)Bme680Register.GAS_RES);
+            var g2 = Read8BitsFromRegister((byte)Bme680Register.GAS_RES + sizeof(byte));
+            var gasRange = Read8BitsFromRegister((byte)Bme680Register.GAS_RANGE);
+
+            var gasResistance = (ushort)((ushort)(g1 << 2) + (byte)(g2 >> 6));
+            gasRange &= (byte)Bme680Mask.GAS_RANGE;
+
+            return Task.FromResult(CalculateGasResistance(gasResistance, gasRange));
         }
 
         /// <summary>
@@ -350,6 +462,61 @@ namespace Iot.Device.Bmxx80
             }
 
             return calculatedPressure;
+        }
+
+        private double CalculateGasResistance(ushort adcGasRes, byte gasRange)
+        {
+            var k1Lookup = new[] { 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -0.8, 0.0, 0.0, -0.2, -0.5, 0.0, -1.0, 0.0, 0.0 };
+            var k2Lookup = new[] { 0.0, 0.0, 0.0, 0.0, 0.1, 0.7, 0.0, -0.8, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+
+            var var1 = 1340.0 + 5.0 * _bme680Calibration.RangeSwErr;
+            var var2 = var1 * (1.0 + k1Lookup[gasRange] / 100.0);
+            var var3 = 1.0 + k2Lookup[gasRange] / 100.0;
+            var gasResistance = 1.0 / (var3 * 0.000000125 * (1 << gasRange) * ((adcGasRes - 512.0) / var2 + 1.0));
+
+            return gasResistance;
+        }
+
+        private byte CalculateHeaterResistance(ushort setTemp, short ambientTemp)
+        {
+            // limit maximum temperature to 400°C
+            if (setTemp > 400)
+                setTemp = 400;
+
+            var var1 = _bme680Calibration.DigGh1 / 16.0 + 49.0;
+            var var2 = _bme680Calibration.DigGh2 / 32768.0 * 0.0005 + 0.00235;
+            var var3 = _bme680Calibration.DigGh3 / 1024.0;
+            var var4 = var1 * (1.0 + var2 * setTemp);
+            var var5 = var4 + var3 * ambientTemp;
+            var heaterResistance = (byte)(3.4 * (var5 * (4.0 / (4.0 + _bme680Calibration.ResHeatRange)) * (1.0 / (1.0 + _bme680Calibration.ResHeatVal * 0.002)) - 25));
+
+            return heaterResistance;
+        }
+
+        // The duration is interpreted as follows:
+        // Byte [7:6]: multiplication factor of 1, 4, 16 or 64
+        // Byte [5:0]: 64 timer values, 1ms step size
+        // Values are rounded down
+        private byte CalculateHeaterDuration(ushort duration)
+        {
+            byte factor = 0;
+            byte durationValue;
+
+            // check if value exceeds maximum duration
+            if (duration > 0xFC0)
+                durationValue = 0xFF;
+            else
+            {
+                while (duration > 0x3F)
+                {
+                    duration = (ushort)(duration >> 2);
+                    factor += 1;
+                }
+
+                durationValue = (byte)(duration + factor * 64);
+            }
+
+            return durationValue;
         }
     }
 }
