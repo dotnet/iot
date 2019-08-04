@@ -6,6 +6,7 @@ using System;
 using System.Device.I2c;
 using System.Threading.Tasks;
 using Iot.Device.Bmxx80.CalibrationData;
+using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
 using Iot.Units;
@@ -163,7 +164,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Sets the heater profile to be used for measurements.
         /// </summary>
-        /// <param name="profile">The heater profile to be used.</param>
+        /// <param name="profile">The <see cref="Bme680HeaterProfile"/> to be used.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the heater profile does not match a defined profile in <see cref="Bme680HeaterProfile"/>.</exception>
         public void SetCurrentHeaterProfile(Bme680HeaterProfile profile)
         {
@@ -177,6 +178,22 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
+        /// Sets the filtering mode to be used for measurements.
+        /// </summary>
+        /// <param name="filterMode">The <see cref="Bme680FilteringMode"/> to be used.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the filter mode does not match a defined mode in <see cref="Bme680FilteringMode"/>.</exception>
+        public void SetFilterMode(Bme680FilteringMode filterMode)
+        {
+            if (!Enum.IsDefined(typeof(Bme680FilteringMode), filterMode))
+                throw new ArgumentOutOfRangeException();
+
+            var filter = Read8BitsFromRegister((byte)Bme680Register.CONFIG);
+            filter = (byte)((filter & (byte)~Bme680Mask.FILTER_COEFFICIENT) | (byte)filterMode << 2);
+
+            _i2cDevice.Write(new[] { (byte)Bme680Register.CONFIG, filter });
+        }
+
+        /// <summary>
         /// Set the humidity sampling.
         /// </summary>
         /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
@@ -186,13 +203,10 @@ namespace Iot.Device.Bmxx80
             if (!Enum.IsDefined(typeof(Sampling), sampling))
                 throw new ArgumentOutOfRangeException();
 
-            var register = (byte)Bme680Register.CTRL_HUM;
-            byte read = Read8BitsFromRegister(register);
+            var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_HUM);
+            status = (byte)((status & (byte)~Bme680Mask.HUMIDITY_SAMPLING) | (byte)sampling);
 
-            // Clear first 3 bits.
-            var cleared = (byte)(read & 0b_1111_1000);
-
-            _i2cDevice.Write(new[] { register, (byte)(cleared | (byte)sampling) });
+            _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_HUM, status });
         }
 
         /// <summary>
@@ -202,15 +216,14 @@ namespace Iot.Device.Bmxx80
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the power mode does not match a defined mode in <see cref="Bme680PowerMode"/>.</exception>
         public void SetPowerMode(Bme680PowerMode powerMode)
         {
+            // TODO: check if device is initialized with default configuration
             if (!Enum.IsDefined(typeof(Bme680PowerMode), powerMode))
                 throw new ArgumentOutOfRangeException();
 
-            byte read = Read8BitsFromRegister(_controlRegister);
+            var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_MEAS);
+            status = (byte)((status & (byte)~Bme680Mask.PWR_MODE) | (byte)powerMode);
 
-            // Clear first 2 bits.
-            var cleared = (byte)(read & 0b_1111_1100);
-
-            _i2cDevice.Write(new[] { _controlRegister, (byte)(cleared | (byte)powerMode) });
+            _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_MEAS, status });
         }
 
         /// <summary>
