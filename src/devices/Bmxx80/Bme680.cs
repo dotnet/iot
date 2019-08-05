@@ -97,68 +97,58 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Indicates whether new data is available.
+        /// Reads whether new data is available.
         /// </summary>
-        public bool NewDataIsAvailable
+        public bool ReadNewDataIsAvailable()
         {
-            get
-            {
-                var newData = Read8BitsFromRegister((byte)Bme680Register.STATUS);
-                newData = (byte)(newData >> 7);
-                return Convert.ToBoolean(newData);
-            }
+            var newData = Read8BitsFromRegister((byte)Bme680Register.STATUS);
+            newData = (byte)(newData >> 7);
+
+            return Convert.ToBoolean(newData);
         }
 
         /// <summary>
-        /// Indicates whether a gas measurement is in process.
+        /// Reads whether a gas measurement is in process.
         /// </summary>
-        public bool GasMeasurementInProcess
+        public bool ReadGasMeasurementInProcess()
         {
-            get
-            {
-                var gasMeasInProcess = Read8BitsFromRegister((byte)Bme680Register.STATUS);
-                gasMeasInProcess = (byte)((gasMeasInProcess & (byte)Bme680Mask.GAS_MEASURING) >> 6);
-                return Convert.ToBoolean(gasMeasInProcess);
-            }
+            var gasMeasInProcess = Read8BitsFromRegister((byte)Bme680Register.STATUS);
+            gasMeasInProcess = (byte)((gasMeasInProcess & (byte)Bme680Mask.GAS_MEASURING) >> 6);
+
+            return Convert.ToBoolean(gasMeasInProcess);
         }
 
         /// <summary>
-        /// Indicates whether a measurement of any kind is in process.
+        /// Reads whether a measurement of any kind is in process.
         /// </summary>
-        public bool MeasurementInProcess
+        public bool ReadMeasurementInProcess()
         {
-            get
-            {
-                var measInProcess = Read8BitsFromRegister((byte)Bme680Register.STATUS);
-                measInProcess = (byte)((measInProcess & (byte)Bme680Mask.MEASURING) >> 5);
-                return Convert.ToBoolean(measInProcess);
-            }
+            var measInProcess = Read8BitsFromRegister((byte)Bme680Register.STATUS);
+            measInProcess = (byte)((measInProcess & (byte)Bme680Mask.MEASURING) >> 5);
+
+            return Convert.ToBoolean(measInProcess);
         }
 
         /// <summary>
-        /// Indicates whether a real gas conversion was performed (i.e. not a dummy one).
+        /// Read whether a real gas conversion was performed last cycle (i.e. not a dummy one).
         /// </summary>
-        public bool GasMeasurementIsValid
+        public bool ReadGasMeasurementIsValid()
         {
-            get
-            {
-                var gasMeasValid = Read8BitsFromRegister((byte)Bme680Register.GAS_RANGE);
-                gasMeasValid = (byte)((gasMeasValid & (byte)Bme680Mask.GAS_VALID) >> 5);
-                return Convert.ToBoolean(gasMeasValid);
-            }
+            var gasMeasValid = Read8BitsFromRegister((byte)Bme680Register.GAS_RANGE);
+            gasMeasValid = (byte)((gasMeasValid & (byte)Bme680Mask.GAS_VALID) >> 5);
+
+            return Convert.ToBoolean(gasMeasValid);
         }
 
         /// <summary>
-        /// Indicates whether the target heater temperature is reached.
+        /// Reads whether the target heater temperature is reached.
         /// </summary>
-        public bool HeaterIsStable
+        public bool ReadHeaterIsStable()
         {
-            get
-            {
                 var heaterStable = Read8BitsFromRegister((byte)Bme680Register.GAS_RANGE);
                 heaterStable = (byte)((heaterStable & (byte)Bme680Mask.HEAT_STAB) >> 4);
+
                 return Convert.ToBoolean(heaterStable);
-            }
         }
 
         /// <summary>
@@ -352,9 +342,9 @@ namespace Iot.Device.Bmxx80
         public async Task<double> ReadPressureAsync()
         {
             // Read pressure data.
-            byte lsb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_LSB);
-            byte msb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_MSB);
-            byte xlsb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_XLSB);
+            var lsb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_LSB);
+            var msb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_MSB);
+            var xlsb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_XLSB);
 
             // Convert to a 32bit integer.
             var adcPressure = (msb << 12) + (lsb << 4) + (xlsb >> 4);
@@ -372,9 +362,9 @@ namespace Iot.Device.Bmxx80
         public Task<Temperature> ReadTemperatureAsync()
         {
             // Read temperature data.
-            byte lsb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_LSB);
-            byte msb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_MSB);
-            byte xlsb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_XLSB);
+            var lsb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_LSB);
+            var msb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_MSB);
+            var xlsb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_XLSB);
 
             // Convert to a 32bit integer.
             var adcTemperature = (msb << 12) + (lsb << 4) + (xlsb >> 4);
@@ -388,7 +378,7 @@ namespace Iot.Device.Bmxx80
         /// <returns>Gas resistance in Ohm.</returns>
         public Task<double> ReadGasResistance()
         {
-            if (!GasMeasurementIsValid)
+            if (!ReadGasMeasurementIsValid())
                 return Task.FromResult(double.NaN);
 
             // Read 10 bit gas resistance value from registers

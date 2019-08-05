@@ -27,9 +27,6 @@ namespace Iot.Device.Samples
 
             using (var bme680 = new Bme680(unixI2cDevice))
             {
-                // Prevents reading old data from the sensor's registers.
-                bme680.Reset();
-
                 bme680.SetHumiditySampling(Sampling.UltraLowPower);
                 bme680.SetTemperatureSampling(Sampling.LowPower);
                 bme680.SetPressureSampling(Sampling.UltraHighResolution);
@@ -43,17 +40,19 @@ namespace Iot.Device.Samples
                         bme680.SetPowerMode(Bme680PowerMode.Forced);
                     }
 
-                    // This prevent us from reading old data from the sensor.
-                    if (bme680.ReadHasNewData())
-                    {
-                        var temperature = Math.Round((await bme680.ReadTemperatureAsync()).Celsius, 2).ToString("N2");
-                        var pressure = Math.Round(await bme680.ReadPressureAsync() / 100, 2).ToString("N2");
-                        var humidity = Math.Round(await bme680.ReadHumidityAsync(), 2).ToString("N2");
+                    // wait while measurement is being taken
+                    var time = bme680.GetMeasurementDuration(bme680.ReadCurrentHeaterProfile());
+                    Task.Delay(time).Wait();
 
-                        Console.WriteLine($"{temperature} °c | {pressure} hPa | {humidity} %rH");
+                    // Print out the measured data
+                    var temperature = Math.Round((await bme680.ReadTemperatureAsync()).Celsius, 2).ToString("N2");
+                    var pressure = Math.Round(await bme680.ReadPressureAsync() / 100, 2).ToString("N2");
+                    var humidity = Math.Round(await bme680.ReadHumidityAsync(), 2).ToString("N2");
+                    var gasResistance = Math.Round(await bme680.ReadGasResistance(), 2).ToString("N2");
 
-                        Thread.Sleep(1000);
-                    }
+                    Console.WriteLine($"{temperature} °c | {pressure} hPa | {humidity} %rH | {gasResistance} Ohm");
+
+                    Thread.Sleep(1000);
                 }
             }
         }
