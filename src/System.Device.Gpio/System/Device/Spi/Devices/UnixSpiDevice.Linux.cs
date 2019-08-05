@@ -37,9 +37,10 @@ namespace System.Device.Spi
         public string DevicePath { get; set; }
 
         /// <summary>
-        /// The connection settings of a device on a SPI bus.
+        /// The connection settings of a device on a SPI bus. The connection settings are immutable after the device is created
+        /// so the object returned will be a clone of the settings object.
         /// </summary>
-        public override SpiConnectionSettings ConnectionSettings => _settings;
+        public override SpiConnectionSettings ConnectionSettings => new SpiConnectionSettings(_settings);
 
         private unsafe void Initialize()
         {
