@@ -7,6 +7,7 @@ using System.Device.I2c;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Bmxx80;
+using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Units;
 
@@ -58,7 +59,7 @@ namespace Iot.Device.Samples
                     i2CBmpe80.SetHumiditySampling(Sampling.Standard);
                     Console.WriteLine(i2CBmpe80.ReadHumiditySampling());
 
-                    i2CBmpe80.SetFilterMode(FilteringMode.Off);
+                    i2CBmpe80.SetFilterMode(Bmx280FilteringMode.Off);
                     Console.WriteLine(i2CBmpe80.ReadFilterMode());
 
                     //set mode forced and read again
@@ -83,7 +84,7 @@ namespace Iot.Device.Samples
                     i2CBmpe80.SetHumiditySampling(Sampling.UltraLowPower);
                     Console.WriteLine(i2CBmpe80.ReadHumiditySampling());
 
-                    i2CBmpe80.SetFilterMode(FilteringMode.X2);
+                    i2CBmpe80.SetFilterMode(Bmx280FilteringMode.X2);
                     Console.WriteLine(i2CBmpe80.ReadFilterMode());
                 }
             }

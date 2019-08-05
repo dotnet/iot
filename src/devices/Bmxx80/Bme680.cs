@@ -130,7 +130,7 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Read whether a real gas conversion was performed last cycle (i.e. not a dummy one).
+        /// Reads whether a real gas conversion was performed last cycle (i.e. not a dummy one).
         /// </summary>
         public bool ReadGasMeasurementIsValid()
         {
