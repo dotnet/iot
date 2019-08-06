@@ -104,7 +104,7 @@ namespace Iot.Device.DCMotor
         /// <param name="controller"><see cref="IGpioController"/> related to the <paramref name="directionPin"/></param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
-        /// <paramref name="speedControlPin"/> can be connected to either enable pin of the H-bridge.
+        /// <paramref name="speedControlChannel"/> can be connected to either enable pin of the H-bridge.
         /// or directly to the input related with the motor (if H-bridge allows inputs to change frequently).
         /// <paramref name="directionPin"/> should be connected to H-bridge input corresponding to one of the motor inputs.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
