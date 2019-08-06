@@ -83,7 +83,7 @@ namespace Iot.Device.DCMotor
                 _pwm = null;
             }
 
-            base.Dispose();
+            base.Dispose(disposing);
         }
     }
 }
