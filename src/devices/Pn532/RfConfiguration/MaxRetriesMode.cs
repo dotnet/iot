@@ -18,7 +18,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// retry, only one try). The default value of this parameter is 0xFF (infinitely).
         /// For passive mode, the value is always overruled with 0x02 (two retries). 
         /// </summary>
-        public byte MxRtyATR { get; set; } = 0x02;
+        public byte MaxRetryAnswerToReset { get; set; } = 0x02;
 
         /// <summary>
         /// MxRtyPSL is a byte containing the number of times that:
@@ -49,7 +49,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// <returns></returns>
         public byte[] Serialize()
         {
-            return new byte[3] { MxRtyATR, MxRtyPSL, MxRtyPassiveActivation };
+            return new byte[3] { MaxRetryAnswerToReset, MxRtyPSL, MxRtyPassiveActivation };
         }
     }
 }

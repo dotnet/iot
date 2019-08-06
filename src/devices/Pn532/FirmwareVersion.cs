@@ -17,7 +17,7 @@ namespace Iot.Device.Pn532
         public byte IdentificationCode { get; set; }
 
         /// <summary>
-        /// The version, lastest know one is 1.6
+        /// The version, latest know one is 1.6
         /// </summary>
         public Version Version { get; set; }
 

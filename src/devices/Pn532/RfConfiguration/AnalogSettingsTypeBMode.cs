@@ -14,8 +14,19 @@ namespace Iot.Device.Pn532.RfConfiguration
     /// </summary>
     public class AnalogSettingsTypeBMode
     {
+        /// <summary>
+        /// GcNOn, cf page 105 documentation 141520.pdf
+        /// </summary>
         public byte CIU_GsNOn { get; set; } = 0xFF;
+
+        /// <summary>
+        /// ModGsP, cf page 105 documentation 141520.pdf
+        /// </summary>
         public byte CIU_ModGsP { get; set; } = 0x17;
+
+        /// <summary>
+        /// RxThreshold, cf page 105 documentation 141520.pdf
+        /// </summary>
         public byte CIU_RxThreshold { get; set; } = 0x85;
 
         /// <summary>

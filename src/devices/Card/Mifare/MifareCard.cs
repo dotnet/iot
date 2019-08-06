@@ -13,7 +13,7 @@ namespace Iot.Device.Card.Mifare
     public class MifareCard
     {
 
-        private CardWriteRead _rfid;
+        private CardTransceiver _rfid;
 
         /// <summary>
         /// The tag number detected by the reader, only 1 or 2
@@ -56,7 +56,7 @@ namespace Iot.Device.Card.Mifare
         public byte[] Data { get; set; }
 
 
-        public MifareCard(CardWriteRead rfid, byte target)
+        public MifareCard(CardTransceiver rfid, byte target)
         {
             _rfid = rfid;
             Target = target;
@@ -72,7 +72,7 @@ namespace Iot.Device.Card.Mifare
             byte[] dataOut = new byte[0];
             if (Command == MifareCardCommand.Read16Bytes)
                 dataOut = new byte[16];
-            var ret = _rfid.WriteRead(Target, Serialize(), dataOut.AsSpan());
+            var ret = _rfid.Transceive(Target, Serialize(), dataOut.AsSpan());
             LogInfo.Log($"{nameof(RunMifiCardCommand)}: {Command}, Target: {Target}, Data: {BitConverter.ToString(Serialize())}, Success: {ret}, Dataout: {BitConverter.ToString(dataOut)}", LogLevel.Debug);
             if ((ret > 0) && (Command == MifareCardCommand.Read16Bytes))
                 Data = dataOut;

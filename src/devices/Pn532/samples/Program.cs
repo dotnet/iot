@@ -1,4 +1,7 @@
-﻿
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using Iot.Device.Pn532;
 using Iot.Device.Card.Mifare;
 using Iot.Device.Card.CreditCardProcessing;
@@ -75,21 +78,23 @@ namespace Pn532Demo
             byte[] retData = null;
             while ((!Console.KeyAvailable))
             {
-                retData = pn532.ListPassiveTarget(MaxTarget.One, TargetBaudRate.B106kbpsTypeA);
-                //retData = pn532.AutoPoll(2, 300, new PollingType[] { PollingType.DepActive106kbps, PollingType.DepPassive106kbps, PollingType.GenericPassive106kbps, PollingType.InnovisionJewel, PollingType.MifareCard, PollingType.Passive106kbps, PollingType.Passive106kbpsISO144443_4A, PollingType.Passive106kbpsISO144443_4B });
+                retData = pn532.ListPassiveTarget(MaxTarget.One, TargetBaudRate.B106kbpsTypeA);                
                 if (retData != null)
                     break;
                 // Give time to PN532 to process
                 Thread.Sleep(200);
             }
+
             if (retData == null)
                 return;
+
             var decrypted = pn532.TryDecode106kbpsTypeA(retData.AsSpan().Slice(1));
             if (decrypted != null)
             {
                 Console.WriteLine($"Tg: {decrypted.TargetNumber}, ATQA: {decrypted.Atqa} SAK: {decrypted.Sak}, NFCID: {BitConverter.ToString(decrypted.NfcId)}");
                 if (decrypted.Ats != null)
                     Console.WriteLine($", ATS: {BitConverter.ToString(decrypted.Ats)}");
+                
                 MifareCard mifareCard = new MifareCard(pn532, decrypted.TargetNumber) { BlockNumber = 0, Command = MifareCardCommand.AuthenticationA };
                 mifareCard.SetCapacity(decrypted.Atqa, decrypted.Sak);
                 mifareCard.SerialNumber = decrypted.NfcId;
@@ -118,6 +123,7 @@ namespace Pn532Demo
                         {
                             Console.WriteLine($"Error reading bloc: {block}, Data: {BitConverter.ToString(mifareCard.Data)}");
                         }
+
                         if (block % 4 == 3)
                         {
                             // Check what are the permissions
@@ -133,7 +139,6 @@ namespace Pn532Demo
                     else
                     {
                         Console.WriteLine($"Autentication error");
-
                     }
                 };
 
@@ -167,13 +172,16 @@ namespace Pn532Demo
 
         static void ReadCreditCard(Pn532 pn532)
         {
-            byte[] retData = null;
+                        byte[] retData = null;
             while ((!Console.KeyAvailable))
             {
                 retData = pn532.AutoPoll(5, 300, new PollingType[] { PollingType.Passive106kbpsISO144443_4B });
                 if (retData != null)
+                {
                     if (retData.Length >= 3)
                         break;
+                }
+
                 // Give time to PN532 to process
                 Thread.Sleep(200);
             }
@@ -195,7 +203,6 @@ namespace Pn532Demo
 
                 Console.WriteLine("All Tags for the Credit Card:");
                 DisplayTags(creditCard.Tags, 0);
-
             }
         }
 

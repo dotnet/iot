@@ -9,7 +9,7 @@ using System.Text;
 namespace Iot.Device.Pn532.RfConfiguration
 {
     /// <summary>
-    /// The radio frequence timing modes
+    /// The radio frequency timing modes
     /// </summary>
     public class VariousTimingsMode
     {
@@ -22,7 +22,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// easily detect non TPE target in passive 212-424 kbps mode.
         /// The default value for this parameter is 0x0B (102.4 ms). 
         /// </summary>
-        public RfTimeout fATR_RESTimeout { get; set; } = RfTimeout.T102400µs;
+        public RfTimeout AnsweToRequestResponseTimeout { get; set; } = RfTimeout.T102400MicroSeconds;
 
         /// <summary>
         /// The third byte defines the timeout value that the PN532 uses in the
@@ -30,9 +30,9 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// target in case of no answer.
         /// The default value for this parameter is 0x0A (51.2 ms).
         /// This timeout definition is also used with InDataExchange(§7.3.8, p: 127) when
-        /// the target is a FeliCa or a Mifare card(Ultralight, Standard …). 
+        /// the target is a FeliCa or a Mifare card(Ultralight, Standard…). 
         /// </summary>
-        public RfTimeout fRetryTimeout { get; set; } = RfTimeout.T51200µs;
+        public RfTimeout RetryTimeout { get; set; } = RfTimeout.T51200MicroSeconds;
 
         /// <summary>
         /// Get the byte array to send
@@ -40,7 +40,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// <returns></returns>
         public byte[] Serialize()
         {
-            return new byte[3] { RFU, (byte)fATR_RESTimeout, (byte)fRetryTimeout };
+            return new byte[3] { RFU, (byte)AnsweToRequestResponseTimeout, (byte)RetryTimeout };
         }
     }
 }

@@ -12,8 +12,8 @@ namespace Iot.Device.Card.CreditCardProcessing
     [Flags]
     public enum Source
     {
-        Icc,
-        Terminal,
-        Issuer
+        Icc = 0b0000_0001,
+        Terminal = 0b0000_0010,
+        Issuer = 0b0000_0100
     }
 }

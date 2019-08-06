@@ -53,7 +53,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// <param name="tagToSearch">The list of tags to search in</param>
         /// <param name="tagNumber">The tag number to search for</param>
         /// <returns>A list of tags</returns>
-        public static List<Tag> SearchTag(List<Tag> tagToSearch, ushort tagNumber)
+        public static List<Tag> SearchTag(List<Tag> tagToSearch, uint tagNumber)
         {
             List<Tag> tags = new List<Tag>();
 

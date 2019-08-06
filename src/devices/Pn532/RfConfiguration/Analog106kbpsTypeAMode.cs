@@ -16,20 +16,63 @@ namespace Iot.Device.Pn532.RfConfiguration
     /// during a reception i.e.initiator passive mode,
     /// • CIU_Demod when own RF is Off defines a setting when its RF field is off
     /// during a reception i.e.initiator active mode.
-    /// Please refer to docuement for detailed documentation
+    /// Please refer to document for detailed documentation
     /// </summary>
     public class Analog106kbpsTypeAMode
     {
-        public byte CIU_RFCfg { get; set; } = 0x59;
+        /// <summary>
+        /// RFCfg, cf page 104 documentation 141520.pdf
+        /// </summary>
+        public byte CIU_RfConfiguration { get; set; } = 0x59;
+
+        /// <summary>
+        /// GsNOn, cf page 104 documentation 141520.pdf
+        /// </summary>
         public byte CIU_GsNOn { get; set; } = 0xF4;
+
+        /// <summary>
+        /// CWGsP, cf page 104 documentation 141520.pdf
+        /// </summary>
         public byte CIU_CWGsP { get; set; } = 0x3F;
+
+        /// <summary>
+        /// ModGsP, cf page 104 documentation 141520.pdf
+        /// </summary>
         public byte CIU_ModGsP { get; set; } = 0x11;
+
+        /// <summary>
+        /// DemodWhenRfOn, cf page 104 documentation 141520.pdf
+        /// </summary>
         public byte CIU_DemodWhenRfOn { get; set; } = 0x4D;
+
+        /// <summary>
+        /// RxThreshold, cf page 104 documentation 141520.pdf
+        /// </summary>
         public byte CIU_RxThreshold { get; set; } = 0x85;
+
+        /// <summary>
+        /// DemodWhenRfOff, cf page 104 documentation 141520.pdf
+        /// </summary>
         public byte CIU_DemodWhenRfOff { get; set; } = 0x61;
+
+        /// <summary>
+        /// GsNOff, cf page 104 documentation 141520.pdf
+        /// </summary>
         public byte CIU_GsNOff { get; set; } = 0x6F;
+
+        /// <summary>
+        /// ModWidth, cf page 104 documentation 141520.pdf
+        /// </summary>
         public byte CIU_ModWidth { get; set; } = 0x26;
+
+        /// <summary>
+        /// MifNFC, cf page 104 documentation 141520.pdf
+        /// </summary>
         public byte CIU_MifNFC { get; set; } = 0x62;
+
+        /// <summary>
+        /// TxBitPhase, cf page 104 documentation 141520.pdf
+        /// </summary>
         public byte CIU_TxBitPhase { get; set; } = 0x87;
 
         /// <summary>
@@ -39,7 +82,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         public byte[] Serialize()
         {
             return new byte[11] {
-                CIU_RFCfg, CIU_GsNOn, CIU_CWGsP,
+                CIU_RfConfiguration, CIU_GsNOn, CIU_CWGsP,
                 CIU_ModGsP, CIU_DemodWhenRfOn,
                 CIU_RxThreshold, CIU_DemodWhenRfOff,
                 CIU_GsNOff, CIU_ModWidth,

@@ -8,6 +8,7 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.PortableExecutable;
+using System.Text;
 
 namespace Iot.Device.Card.CreditCardProcessing
 {
@@ -26,14 +27,16 @@ namespace Iot.Device.Card.CreditCardProcessing
 
         private const int MaxBufferSize = 260;
 
-        private CardWriteRead _nfc;
+        private CardTransceiver _nfc;
         private bool _alreadyReadSfi = false;
         private byte _target;
 
         // This is a string "1PAY.SYS.DDF01" (PPSE) to select the root directory
-        private readonly byte[] RootDirectory1 = { 0x31, 0x50, 0x41, 0x59, 0x2e, 0x53, 0x59, 0x53, 0x2e, 0x44, 0x44, 0x46, 0x30, 0x31 };
+        // This is usually represented as { 0x31, 0x50, 0x41, 0x59, 0x2e, 0x53, 0x59, 0x53, 0x2e, 0x44, 0x44, 0x46, 0x30, 0x31 }
+        private readonly byte[] RootDirectory1 = Encoding.ASCII.GetBytes("1PAY.SYS.DDF01");
         // This is a string "2PAY.SYS.DDF01" (PPSE) to select the root directory
-        private readonly byte[] RootDirectory2 = { 0x32, 0x50, 0x41, 0x59, 0x2e, 0x53, 0x59, 0x53, 0x2e, 0x44, 0x44, 0x46, 0x30, 0x31 };
+        // this is usually represented  as { 0x32, 0x50, 0x41, 0x59, 0x2e, 0x53, 0x59, 0x53, 0x2e, 0x44, 0x44, 0x46, 0x30, 0x31 }
+        private readonly byte[] RootDirectory2 = Encoding.ASCII.GetBytes("2PAY.SYS.DDF01");
 
         /// <summary>
         /// The size of the tailer elements. Some readers add an extra byte
@@ -56,8 +59,10 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// </summary>
         /// <param name="nfc">A compatible Card reader</param>
         /// <param name="target">The target number as some readers needs it</param>
-        /// /// <param name="tailerSize">Size of the tailer, most NFC readers add an extra byte 0x00</param>
-        public CreditCard(CardWriteRead nfc, byte target, int tailerSize = 3)
+        /// <param name="tailerSize">Size of the tailer, most NFC readers add an extra byte 0x00</param>
+        /// <remarks>The target number can be found with the NFC/Card reader you are using. For example the PN532 require a target number,
+        /// the normal smart card readers usually don't as they only support 1 card at a time.</remarks>
+        public CreditCard(CardTransceiver nfc, byte target, int tailerSize = 3)
         {
             _nfc = nfc;
             _target = target;
@@ -93,8 +98,8 @@ namespace Iot.Device.Card.CreditCardProcessing
             {
                 return new ProcessError(received.Slice(0, TailerSize)).ErrorType;
             }
-            return ErrorType.Unknown;
 
+            return ErrorType.Unknown;
         }
 
         /// <summary>
@@ -311,6 +316,12 @@ namespace Iot.Device.Card.CreditCardProcessing
             }
         }
 
+        /// <summary>
+        /// Please refer to EMV 4.3 Book 3, Integrated Circuit Card Specifications for Payment Systems. 
+        /// https://www.emvco.com/emv-technologies/contact/. The file system and how to access it is mainly 
+        /// explained on chapter 5 and chapter 7.
+        /// </summary>
+        /// <returns></returns>
         private bool FillTags()
         {
             // Find all Application Template = 0x61
@@ -470,10 +481,10 @@ namespace Iot.Device.Card.CreditCardProcessing
                             for (byte record = 1; record < 5; record++)
                             {
                                 // 1 fro 10 is for Application Elementary Files 
-                                for (byte Sfi = 1; Sfi < 11; Sfi++)
+                                for (byte sfi = 1; sfi < 11; sfi++)
                                 {
-                                    ret = ReadRecord(Sfi, record);
-                                    LogInfo.Log($"Read record {record}, SFI {Sfi}, status: {ret}", LogLevel.Debug);
+                                    ret = ReadRecord(sfi, record);
+                                    LogInfo.Log($"Read record {record}, SFI {sfi}, status: {ret}", LogLevel.Debug);
                                 }
                             }
                             _alreadyReadSfi = true;
@@ -673,7 +684,7 @@ namespace Iot.Device.Card.CreditCardProcessing
 
         private int ReadFromCard(byte target, ReadOnlySpan<byte> toSend, Span<byte> received)
         {
-            var ret = _nfc.WriteRead(_target, toSend, received);
+            var ret = _nfc.Transceive(_target, toSend, received);
             if (ret >= TailerSize)
             {
                 if (ret == TailerSize)
@@ -686,7 +697,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                         Span<byte> toGet = stackalloc byte[5];
                         ApduCommands.GetBytesToRead.CopyTo(toGet);
                         toGet[4] = err.CorrectLegnthOrBytesAvailable;
-                        ret = _nfc.WriteRead(_target, toGet, received);
+                        ret = _nfc.Transceive(_target, toGet, received);
                     }
                 }
             }

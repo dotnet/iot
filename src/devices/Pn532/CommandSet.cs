@@ -5,7 +5,7 @@
 namespace Iot.Device.Pn532
 {
     /// <summary>
-    /// All cupported command for the PN532
+    /// All supported commands for the PN532
     /// </summary>
     internal enum CommandSet
     {

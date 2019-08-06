@@ -8,7 +8,7 @@ You'll need first to get the card from an RFID reader. The example below shows h
 
 ```csharp
 byte[] retData = null;
-while ((!Console.KeyAvailable))
+while (!Console.KeyAvailable)
 {
     retData = pn532.ListPassiveTarget(MaxTarget.One, TargetBaudRate.B106kbpsTypeA);
     if (retData != null)

@@ -8,7 +8,7 @@ namespace Iot.Device.Pn532
 {
     /// <summary>
     /// Parameters complementary of the Security Module Parameters
-    /// Allows to change the behavior of the hadshake with the card
+    /// Allows to change the behavior of the handshake with the card
     /// </summary>
     [Flags]
     public enum ParametersFlags

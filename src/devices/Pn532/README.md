@@ -32,29 +32,36 @@ while ((!Console.KeyAvailable))
 	// Give time to PN532 to process
 	Thread.Sleep(200);
 }
+
 if (retData == null)
 	return;
-var decrypted = pn532.Decode106kbpsTypeA(retData.AsSpan().Slice(1));
+
+var decrypted = pn532.TryDecode106kbpsTypeA(retData.AsSpan().Slice(1));
 ```
 
 Example pooling a 14443 type B card like a credit card:
 
 ```csharp
- byte[] retData = null;
+byte[] retData = null;
 while ((!Console.KeyAvailable))
 {
-	// PollingType.InnovisionJewel, PollingType.DepActive106kbps, PollingType.DepPassive106kbps,PollingType.Passive106kbpsISO144443_4A
-	retData = pn532.AutoPoll(2, 300, new PollingType[] { PollingType.GenericPassive106kbps, PollingType.MifareCard, PollingType.Passive106kbps, PollingType.Passive106kbpsISO144443_4B });
+	retData = pn532.AutoPoll(5, 300, new PollingType[] { PollingType.Passive106kbpsISO144443_4B });
 	if (retData != null)
-		break;
+	{
+		if (retData.Length >= 3)
+			break;
+	}
+
 	// Give time to PN532 to process
 	Thread.Sleep(200);
 }
+
 if (retData == null)
 	return;
+
 //Check how many tags and the type
 Console.WriteLine($"Num tags: {retData[0]}, Type: {(PollingType)retData[1]}");
-var decrypted = pn532.DecodeData106kbpsTypeB(retData.AsSpan().Slice(3));
+var decrypted = pn532.TryDecodeData106kbpsTypeB(retData.AsSpan().Slice(3));
 ```
 
 ## Reading or writing to cards
@@ -69,6 +76,7 @@ if (decrypted != null)
 	Console.WriteLine($"Tg: {decrypted.TargetNumber}, ATQA: {decrypted.Atqa} SAK: {decrypted.Sak}, NFCID: {BitConverter.ToString(decrypted.NfcId)}");
 	if (decrypted.Ats != null)
 		Console.WriteLine($", ATS: {BitConverter.ToString(decrypted.Ats)}");
+	
 	MifareCard mifareCard = new MifareCard(pn532, decrypted.TargetNumber) { BlockNumber = 0, Command = MifareCardCommand.AuthenticationA };
 	mifareCard.SetCapacity(decrypted.Atqa, decrypted.Sak);
 	mifareCard.SerialNumber = decrypted.NfcId;
@@ -84,7 +92,8 @@ if (decrypted != null)
 			// Try another one
 			mifareCard.Command = MifareCardCommand.AuthenticationA;
 			ret = mifareCard.RunMifiCardCommand();
-		}		
+		}
+
 		if (ret >= 0)
 		{
 			mifareCard.BlockNumber = block;
@@ -96,6 +105,7 @@ if (decrypted != null)
 			{
 				Console.WriteLine($"Error reading bloc: {block}, Data: {BitConverter.ToString(mifareCard.Data)}");
 			}
+
 			if (block % 4 == 3)
 			{
 				// Check what are the permissions
@@ -111,7 +121,6 @@ if (decrypted != null)
 		else
 		{
 			Console.WriteLine($"Autentication error");
-
 		}
 	}
 ```
@@ -134,6 +143,7 @@ static void AsTarget(Pn532 pn532)
 			new TargetPiccParameters() { NfcId3 = new byte[] { 0xAA, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11 }, GeneralTarget = new byte[0], HistoricalTarget = new byte[0] });
 		if (modeInitialized != null)
 			break;
+
 		// Give time to PN532 to process
 		Thread.Sleep(200);
 	}
@@ -159,7 +169,6 @@ static void AsTarget(Pn532 pn532)
 Note that this is just the first phase showing how to initialize the process, get the first data and read data. In this specific case, the emulation have to understand the commands sent by the reader and emulate properly a card.
 
 It is possible to emulate any Type A, Type B and Felica cards. 
-
 
 ## Current implementation
 

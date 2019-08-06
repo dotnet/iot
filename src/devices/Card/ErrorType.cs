@@ -26,6 +26,7 @@ namespace Iot.Device.Card
         WrongLength,
         BytesStillAvailable,
         InstructionCodeNotSupportedOrInvalid,
-        Unknown
+        Unknown,
+        Success = ProcessCompletedNormal
     }
 }

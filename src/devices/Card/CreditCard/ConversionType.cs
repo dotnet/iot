@@ -11,8 +11,8 @@ namespace Iot.Device.Card.CreditCardProcessing
     /// </summary>
     public enum ConversionType
     {
-        BcdToString,
-        ByteArray,
+        ByteArray = 0,
+        BcdToString,        
         RawString,
         Date,
         DecimalNumber,

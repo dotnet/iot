@@ -16,17 +16,48 @@ namespace Iot.Device.Pn532.RfConfiguration
     /// during a reception i.e.initiator passive mode,
     /// • CIU_Demod when own RF is Off defines a setting when its RF field is off
     /// during a reception i.e.initiator active mode.
-    /// Please refer to docuementation for more information
+    /// Please refer to documentation for more information
     /// </summary>
     public class Analog212_424kbpsMode
     {
-        public byte CIU_RFCfg { get; set; } = 0x69;
+        /// <summary>
+        /// RfCfg, cf page 105 documentation 141520.pdf
+        /// </summary>
+        public byte CIU_RfConfiguration { get; set; } = 0x69;
+
+        /// <summary>
+        /// GsNon, cf page 105 documentation 141520.pdf
+        /// </summary>
         public byte CIU_GsNOn { get; set; } = 0xFF;
+
+        /// <summary>
+        /// CWGsP, cf page 105 documentation 141520.pdf
+        /// </summary>
         public byte CIU_CWGsP { get; set; } = 0x3F;
+
+        /// <summary>
+        /// ModGsP, cf page 105 documentation 141520.pdf
+        /// </summary>
         public byte CIU_ModGsP { get; set; } = 0x11;
+
+        /// <summary>
+        /// DmodWhenRfOn, cf page 105 documentation 141520.pdf
+        /// </summary>
         public byte CIU_DemodWhenRfOn { get; set; } = 0x41;
+
+        /// <summary>
+        /// RxThreshold, cf page 105 documentation 141520.pdf
+        /// </summary>
         public byte CIU_RxThreshold { get; set; } = 0x85;
+
+        /// <summary>
+        /// DemodWhenRfOff, cf page 105 documentation 141520.pdf
+        /// </summary>
         public byte CIU_DemodWhenRfOff { get; set; } = 0x61;
+
+        /// <summary>
+        /// GsNOff, cf page 105 documentation 141520.pdf
+        /// </summary>
         public byte CIU_GsNOff { get; set; } = 0x6F;
 
         /// <summary>
@@ -36,7 +67,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         public byte[] Serialize()
         {
             return new byte[8] {
-                CIU_RFCfg, CIU_GsNOn, CIU_CWGsP,
+                CIU_RfConfiguration, CIU_GsNOn, CIU_CWGsP,
                 CIU_ModGsP, CIU_DemodWhenRfOn,
                 CIU_RxThreshold, CIU_DemodWhenRfOff,
                 CIU_GsNOff
