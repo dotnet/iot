@@ -9,5 +9,10 @@ DC motors are controlled by simply providing voltage on the inputs (inverted vol
 DC motors can be controlled with 1, 2 or 3 pins.
 Please refer to the [sample](samples/README.md) to see how to connect it.
 
-**Recommended setup is 3-pin mode, 1 and 2 pin mode may cause excessive heat or damage your H-bridge (larger engines are more likely to cause damage).**
-**Never connect DC motor directly to your board**
+**Never connect DC motor directly to your board, instead use i.e. H-bridge**
+
+## 3- vs 1/2-pin mode
+
+2/1-pin mode should be used only if H-bridge allows the inputs to be changed frequently
+otherwise excessive heat or damage may occur which may reduce life-time of the H-bridge.
+It may also cause increased energy consumption due to energy being converted into heat.
