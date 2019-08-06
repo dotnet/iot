@@ -193,6 +193,9 @@ namespace Iot.Device.Bmxx80
         /// <param name="powerMode">The <see cref="Bmx280PowerMode"/> to set.</param>
         public void SetPowerMode(Bmx280PowerMode powerMode)
         {
+            if (!_initialized)
+                SetDefaultConfiguration();
+
             byte read = Read8BitsFromRegister(_controlRegister);
 
             // Clear last 2 bits.
@@ -239,6 +242,15 @@ namespace Iot.Device.Bmxx80
                 Sampling.UltraHighResolution => 44,
                 _ => 0
             };
+        }
+
+        protected override void SetDefaultConfiguration()
+        {
+            base.SetDefaultConfiguration();
+            SetFilterMode(Bmx280FilteringMode.Off);
+            SetStandbyTime(StandbyTime.Ms125);
+
+            _initialized = true;
         }
 
         /// <summary>

@@ -12,10 +12,7 @@ namespace Iot.Device.Bmxx80
         HEAT_OFF = 0x08,
         RUN_GAS = 0x10,
 
-        TEMPERATURE_SAMPLING = 0xE0,
-        PRESSURE_SAMPLING = 0x1C,
         HUMIDITY_SAMPLING = 0x07,
-
         FILTER_COEFFICIENT = 0x1C,
         NB_CONV = 0x0F,
 

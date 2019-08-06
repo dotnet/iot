@@ -90,6 +90,12 @@ namespace Iot.Device.Bmxx80
             return CompensateHumidity(t);
         }
 
+        protected override void SetDefaultConfiguration()
+        {
+            base.SetDefaultConfiguration();
+            SetHumiditySampling(Sampling.UltraLowPower);
+        }
+
         /// <summary>
         /// Compensates the humidity.
         /// </summary>

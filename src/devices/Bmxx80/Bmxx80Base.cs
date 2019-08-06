@@ -21,6 +21,7 @@ namespace Iot.Device.Bmxx80
         protected I2cDevice _i2cDevice;
         protected CommunicationProtocol _communicationProtocol;
         protected byte _controlRegister;
+        protected bool _initialized = false;
 
         public enum CommunicationProtocol
         {
@@ -203,6 +204,12 @@ namespace Iot.Device.Bmxx80
             }
 
             return (Sampling)value;
+        }
+
+        protected virtual void SetDefaultConfiguration()
+        {
+            SetPressureSampling(Sampling.UltraLowPower);
+            SetTemperatureSampling(Sampling.UltraLowPower);
         }
 
         /// <summary>

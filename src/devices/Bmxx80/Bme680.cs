@@ -190,7 +190,9 @@ namespace Iot.Device.Bmxx80
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the power mode does not match a defined mode in <see cref="Bme680PowerMode"/>.</exception>
         public void SetPowerMode(Bme680PowerMode powerMode)
         {
-            // TODO: check if device is initialized with default configuration
+            if(!_initialized)
+                SetDefaultConfiguration();
+            
             if (!Enum.IsDefined(typeof(Bme680PowerMode), powerMode))
                 throw new ArgumentOutOfRangeException();
 
@@ -390,6 +392,22 @@ namespace Iot.Device.Bmxx80
             gasRange &= (byte)Bme680Mask.GAS_RANGE;
 
             return Task.FromResult(CalculateGasResistance(gasResistance, gasRange));
+        }
+
+        protected override async void SetDefaultConfiguration()
+        {
+            base.SetDefaultConfiguration();
+            SetHumiditySampling(Sampling.UltraLowPower);
+            SetFilterMode(Bme680FilteringMode.C0);
+
+            var currentTemp = await ReadTemperatureAsync();
+            ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, 320, 150, currentTemp.Celsius);
+            SetCurrentHeaterProfile(Bme680HeaterProfile.Profile1);
+
+            HeaterIsEnabled = true;
+            GasConversionIsEnabled = true;
+
+            _initialized = true;
         }
 
         /// <summary>

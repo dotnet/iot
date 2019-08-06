@@ -28,6 +28,6 @@ namespace Iot.Device.Bmxx80.CalibrationData
         /// Read coefficient data from device.
         /// </summary>
         /// <param name="bmxx80Base">The <see cref="Bmxx80Base"/> to read coefficient data from.</param>
-        protected internal virtual void ReadFromDevice(Bmxx80Base bmxx80Base) { }
+        protected internal abstract void ReadFromDevice(Bmxx80Base bmxx80Base);
     }
 }
