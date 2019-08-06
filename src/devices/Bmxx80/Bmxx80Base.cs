@@ -208,6 +208,8 @@ namespace Iot.Device.Bmxx80
 
         protected virtual void SetDefaultConfiguration()
         {
+            Reset();
+
             SetPressureSampling(Sampling.UltraLowPower);
             SetTemperatureSampling(Sampling.UltraLowPower);
         }

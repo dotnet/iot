@@ -35,11 +35,6 @@ namespace Iot.Device.Samples
                     //set mode forced so device sleeps after read
                     i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
 
-                    //set samplings
-                    i2CBmpe80.SetTemperatureSampling(Sampling.UltraLowPower);
-                    i2CBmpe80.SetPressureSampling(Sampling.UltraLowPower);
-                    i2CBmpe80.SetHumiditySampling(Sampling.UltraLowPower);
-
                     //read values
                     Temperature tempValue = await i2CBmpe80.ReadTemperatureAsync();
                     Console.WriteLine($"Temperature: {tempValue.Celsius} C");
@@ -58,9 +53,6 @@ namespace Iot.Device.Samples
                     Console.WriteLine(i2CBmpe80.ReadPressureSampling());
                     i2CBmpe80.SetHumiditySampling(Sampling.Standard);
                     Console.WriteLine(i2CBmpe80.ReadHumiditySampling());
-
-                    i2CBmpe80.SetFilterMode(Bmx280FilteringMode.Off);
-                    Console.WriteLine(i2CBmpe80.ReadFilterMode());
 
                     //set mode forced and read again
                     i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);

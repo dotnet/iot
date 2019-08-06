@@ -42,7 +42,7 @@ namespace Iot.Device.Samples
 
                     // wait while measurement is being taken
                     var time = bme680.GetMeasurementDuration(bme680.ReadCurrentHeaterProfile());
-                    Task.Delay(time).Wait();
+                    Thread.Sleep(time);
 
                     // Print out the measured data
                     var temperature = Math.Round((await bme680.ReadTemperatureAsync()).Celsius, 2).ToString("N2");
