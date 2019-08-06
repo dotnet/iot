@@ -13,7 +13,7 @@ namespace Iot.Device.Bmxx80
     /// <summary>
     /// Represents a BME280 temperature, barometric pressure and humidity sensor.
     /// </summary>
-    public class Bme280 : Bmx280Base
+    public sealed class Bme280 : Bmx280Base
     {
         /// <summary>
         /// The expected chip ID of the BME280.
@@ -38,6 +38,7 @@ namespace Iot.Device.Bmxx80
             _calibrationData = bme280CalibrationData;
 
             _communicationProtocol = CommunicationProtocol.I2c;
+            SetDefaultConfiguration();
         }
 
         /// <summary>

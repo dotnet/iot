@@ -27,9 +27,8 @@ namespace Iot.Device.Samples
 
             using (var bme680 = new Bme680(unixI2cDevice))
             {
-                bme680.SetHumiditySampling(Sampling.UltraLowPower);
-                bme680.SetTemperatureSampling(Sampling.LowPower);
-                bme680.SetPressureSampling(Sampling.UltraHighResolution);
+                // get the time a measurement will take with the current settings
+                var measurementDuration = bme680.GetMeasurementDuration(bme680.ReadCurrentHeaterProfile());
 
                 while (true)
                 {
@@ -41,8 +40,7 @@ namespace Iot.Device.Samples
                     }
 
                     // wait while measurement is being taken
-                    var time = bme680.GetMeasurementDuration(bme680.ReadCurrentHeaterProfile());
-                    Thread.Sleep(time);
+                    Thread.Sleep(measurementDuration);
 
                     // Print out the measured data
                     var temperature = Math.Round((await bme680.ReadTemperatureAsync()).Celsius, 2).ToString("N2");
@@ -52,6 +50,9 @@ namespace Iot.Device.Samples
 
                     Console.WriteLine($"{temperature} °c | {pressure} hPa | {humidity} %rH | {gasResistance} Ohm");
 
+                    // when measuring the gas resistance on each cycle it is important to wait a certain interval
+                    // because a heating plate is activated which will heat up the sensor without sleep, this can
+                    // falsify all readings coming from the sensor
                     Thread.Sleep(1000);
                 }
             }

@@ -193,9 +193,6 @@ namespace Iot.Device.Bmxx80
         /// <param name="powerMode">The <see cref="Bmx280PowerMode"/> to set.</param>
         public void SetPowerMode(Bmx280PowerMode powerMode)
         {
-            if (!_initialized)
-                SetDefaultConfiguration();
-
             byte read = Read8BitsFromRegister(_controlRegister);
 
             // Clear last 2 bits.

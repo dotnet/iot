@@ -16,7 +16,7 @@ namespace Iot.Device.Bmxx80
     /// <summary>
     /// Represents a BME680 temperature, pressure, relative humidity and VOC gas sensor.
     /// </summary>
-    public class Bme680 : Bmxx80Base
+    public sealed class Bme680 : Bmxx80Base
     {
         /// <summary>
         /// Default I2C bus address.
@@ -54,6 +54,8 @@ namespace Iot.Device.Bmxx80
 
             _communicationProtocol = CommunicationProtocol.I2c;
             _controlRegister = (byte)Bme680Register.CTRL_MEAS;
+
+            SetDefaultConfiguration();
         }
 
         /// <summary>
@@ -190,9 +192,6 @@ namespace Iot.Device.Bmxx80
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the power mode does not match a defined mode in <see cref="Bme680PowerMode"/>.</exception>
         public void SetPowerMode(Bme680PowerMode powerMode)
         {
-            if(!_initialized)
-                SetDefaultConfiguration();
-            
             if (!Enum.IsDefined(typeof(Bme680PowerMode), powerMode))
                 throw new ArgumentOutOfRangeException();
 
@@ -394,13 +393,13 @@ namespace Iot.Device.Bmxx80
             return Task.FromResult(CalculateGasResistance(gasResistance, gasRange));
         }
 
-        protected override async void SetDefaultConfiguration()
+        protected override void SetDefaultConfiguration()
         {
             base.SetDefaultConfiguration();
             SetHumiditySampling(Sampling.UltraLowPower);
             SetFilterMode(Bme680FilteringMode.C0);
 
-            var currentTemp = await ReadTemperatureAsync();
+            var currentTemp = ReadTemperatureAsync().GetAwaiter().GetResult();
             ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, 320, 150, currentTemp.Celsius);
             SetCurrentHeaterProfile(Bme680HeaterProfile.Profile1);
 

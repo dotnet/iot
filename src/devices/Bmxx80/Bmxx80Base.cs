@@ -44,6 +44,8 @@ namespace Iot.Device.Bmxx80
         protected Bmxx80Base(byte deviceId, I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+
+            Reset();
             _i2cDevice.WriteByte((byte)Bmxx80Register.CHIPID);
 
             byte readSignature = _i2cDevice.ReadByte();
@@ -208,8 +210,6 @@ namespace Iot.Device.Bmxx80
 
         protected virtual void SetDefaultConfiguration()
         {
-            Reset();
-
             SetPressureSampling(Sampling.UltraLowPower);
             SetTemperatureSampling(Sampling.UltraLowPower);
         }
