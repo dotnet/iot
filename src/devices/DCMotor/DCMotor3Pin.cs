@@ -20,8 +20,8 @@ namespace Iot.Device.DCMotor
             PwmChannel pwmChannel,
             int pin0,
             int pin1,
-            GpioController controller)
-            : base(controller)
+            IGpioController controller)
+            : base(controller ?? new GpioController())
         {
             if (pwmChannel == null)
                 throw new ArgumentNullException(nameof(pwmChannel));
@@ -82,12 +82,16 @@ namespace Iot.Device.DCMotor
             }
         }
 
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            _speed = 0.0;
-            _pwm?.Dispose();
-            _pwm = null;
-            base.Dispose();
+            if (disposing)
+            {
+                _speed = 0.0;
+                _pwm?.Dispose();
+                _pwm = null;
+            }
+
+            base.Dispose(disposing);
         }
     }
 }
