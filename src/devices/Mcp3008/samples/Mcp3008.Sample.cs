@@ -25,7 +25,7 @@ namespace Iot.Device.Samples
             {
                 while (true)
                 {
-                    double value = mcp.Read(0, Mcp3008.Mcp3008.InputConfiguration.SingleEnded);
+                    double value = mcp.Read(0);
                     value = value / 10.24;
                     value = Math.Round(value);
                     Console.WriteLine($"{value}%");

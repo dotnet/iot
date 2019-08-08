@@ -12,7 +12,7 @@ namespace Iot.Device.Mcp3008
     {
         private SpiDevice _spiDevice;
 
-        public enum InputConfiguration
+        internal enum InputConfiguration
         {
             Differential = 0,
             SingleEnded = 1
@@ -29,14 +29,14 @@ namespace Iot.Device.Mcp3008
             _spiDevice = null;
         }
 
-        public int Read(int channel, InputConfiguration inputConfiguration = InputConfiguration.SingleEnded)
+        public int Read(int channel)
         {
             if (channel < 0 || channel > 7)
             {
                 throw new ArgumentException("ADC channel must be within 0-7 range.");
             }
 
-            return ReadSpi(channel, inputConfiguration);
+            return ReadSpi(channel, InputConfiguration.SingleEnded);
         }
 
         private static byte GetConfigurationBits(int channel, InputConfiguration inputConfiguration)
