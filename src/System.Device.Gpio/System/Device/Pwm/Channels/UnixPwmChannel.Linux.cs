@@ -38,7 +38,7 @@ namespace System.Device.Pwm.Channels
             _channel = channel;
             _chipPath = $"/sys/class/pwm/pwmchip{_chip}";
             _channelPath = $"{_chipPath}/pwm{_channel}";
-			Validate();
+            Validate();
             Open();
 
             // avoid opening the file for operations changing relatively frequently
