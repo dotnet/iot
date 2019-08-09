@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device.Media;
+using Iot.Device.Media;
 using System.Runtime.InteropServices;
 
 internal struct V4l2FrameBuffer
@@ -75,7 +75,7 @@ internal struct v4l2_fmtdesc
     public uint flags;
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
     public string description;
-    public uint pixelformat;
+    public PixelFormat pixelformat;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
     public uint[] reserved;
 }
@@ -134,7 +134,7 @@ internal struct v4l2_pix_format
 {
     public uint width;
     public uint height;
-    public uint pixelformat;
+    public PixelFormat pixelformat;
     public v4l2_field field;
     public uint bytesperline;
     public uint sizeimage;
@@ -200,7 +200,7 @@ internal struct v4l2_sliced_vbi_format
 [StructLayout(LayoutKind.Sequential)]
 internal struct v4l2_sdr_format
 {
-    public uint pixelformat;
+    public PixelFormat pixelformat;
     public uint buffersize;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 24)]
     public byte[] reserved;
@@ -334,7 +334,7 @@ internal struct v4l2_buffer
 internal struct v4l2_frmsizeenum
 {
     public uint index;
-    public uint pixel_format;
+    public PixelFormat pixel_format;
     public v4l2_frmsizetypes type;
     public v4l2_frmsize_discrete discrete;
     public v4l2_frmsize_stepwise stepwise;

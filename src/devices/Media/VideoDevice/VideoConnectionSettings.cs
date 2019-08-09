@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Device.Media
+namespace Iot.Device.Media
 {
     /// <summary>
     /// The connection settings of a video device.
@@ -66,6 +66,46 @@ namespace System.Device.Media
         /// The saturation of video device.
         /// </summary>
         public int Saturation { get; set; }
+
+        /// <summary>
+        /// The gamma of video device.
+        /// </summary>
+        public int Gamma { get; set; }
+
+        /// <summary>
+        /// The gain of video device.
+        /// </summary>
+        public int Gain { get; set; }
+
+        /// <summary>
+        /// The rotate of video device.
+        /// </summary>
+        public int Rotate { get; set; }
+
+        /// <summary>
+        /// The white balance effect of video device.
+        /// </summary>
+        public WhiteBalanceEffect WhiteBalanceEffect { get; set; }
+
+        /// <summary>
+        /// The white balance temperature of video device.
+        /// </summary>
+        public int WhiteBalanceTemperature { get; set; }
+
+        /// <summary>
+        /// The color effect of video device.
+        /// </summary>
+        public ColorEffect ColorEffect { get; set; }
+
+        /// <summary>
+        /// The scene mode of video device.
+        /// </summary>
+        public SceneMode SceneMode { get; set; }
+
+        /// <summary>
+        /// The power line frequency of video device.
+        /// </summary>
+        public PowerLineFrequency PowerLineFrequency { get; set; }
 
         /// <summary>
         /// Whether horizontal flip the captured image.

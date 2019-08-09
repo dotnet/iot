@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace System.Device.Media
+namespace Iot.Device.Media
 {
     /// <summary>
     /// The default and current values of a video device's control.

@@ -10,10 +10,6 @@ internal partial class Interop
     [DllImport(LibcLibrary, SetLastError = true)]
     internal static extern int ioctl(int fd, uint request, IntPtr argp);
 
-
-    [DllImport(LibcLibrary, SetLastError = true)]
-    internal static extern int ioctl(int fd, int request, IntPtr argp);
-
     [DllImport(LibcLibrary, SetLastError = true)]
     internal static extern int ioctl(int fd, uint request, ulong argp);
 }
