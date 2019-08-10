@@ -21,7 +21,6 @@ namespace Iot.Device.Bmxx80
         protected I2cDevice _i2cDevice;
         protected CommunicationProtocol _communicationProtocol;
         protected byte _controlRegister;
-        protected bool _initialized = false;
 
         public enum CommunicationProtocol
         {
@@ -56,11 +55,43 @@ namespace Iot.Device.Bmxx80
             }
         }
 
+        private Sampling _pressureSampling = Sampling.UltraLowPower;
+
+        /// <summary>
+        /// Gets or sets the pressure sampling.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
+        public Sampling PressureSampling
+        {
+            get => _pressureSampling;
+            set
+            {
+                SetPressureSampling(value);
+                _pressureSampling = value;
+            }
+        }
+
+        private Sampling _temperatureSampling = Sampling.UltraLowPower;
+
+        /// <summary>
+        /// Gets or sets the temperature sampling.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
+        public Sampling TemperatureSampling
+        {
+            get => _temperatureSampling;
+            set
+            {
+                SetTemperatureSampling(value);
+                _temperatureSampling = value;
+            }
+        }
+
         /// <summary>
         /// Sets the pressure sampling.
         /// </summary>
         /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
-        public void SetPressureSampling(Sampling sampling)
+        private void SetPressureSampling(Sampling sampling)
         {
             byte status = Read8BitsFromRegister(_controlRegister);
             status = (byte)(status & 0b1110_0011);
@@ -72,7 +103,7 @@ namespace Iot.Device.Bmxx80
         /// Set the temperature oversampling.
         /// </summary>
         /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
-        public void SetTemperatureSampling(Sampling sampling)
+        private void SetTemperatureSampling(Sampling sampling)
         {
             byte status = Read8BitsFromRegister(_controlRegister);
             status = (byte)(status & 0b0001_1111);
@@ -81,36 +112,15 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Get the current sample rate for pressure measurements
-        /// </summary>
-        /// <returns>The current pressure <see cref="Sampling"/> rate.</returns>
-        public Sampling ReadPressureSampling()
-        {
-            byte status = Read8BitsFromRegister(_controlRegister);
-            status = (byte)((status & 0b0001_1100) >> 2);
-
-            return ByteToSampling(status);
-        }
-
-        /// <summary>
-        /// Get the sample rate for temperature measurements.
-        /// </summary>
-        /// <returns>The current temperature <see cref="Sampling"/> rate.</returns>
-        public Sampling ReadTemperatureSampling()
-        {
-            byte status = Read8BitsFromRegister(_controlRegister);
-            status = (byte)((status & 0b1110_0000) >> 5);
-
-            return ByteToSampling(status);
-        }
-
-        /// <summary>
         /// When called, the device is reset using the complete power-on-reset procedure.
+        /// The device will reset to the default configuration.
         /// </summary>
         public void Reset()
         {
             const byte resetCommand = 0xB6;
             _i2cDevice.Write(new[] { (byte)Bmxx80Register.RESET, resetCommand });
+
+            SetDefaultConfiguration();
         }
 
         /// <summary>
@@ -210,8 +220,8 @@ namespace Iot.Device.Bmxx80
 
         protected virtual void SetDefaultConfiguration()
         {
-            SetPressureSampling(Sampling.UltraLowPower);
-            SetTemperatureSampling(Sampling.UltraLowPower);
+            SetPressureSampling(PressureSampling);
+            SetTemperatureSampling(TemperatureSampling);
         }
 
         /// <summary>

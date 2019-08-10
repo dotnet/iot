@@ -42,23 +42,36 @@ namespace Iot.Device.Bmxx80
             _controlRegister = (byte)Bmx280Register.CTRL_MEAS;
         }
 
-        /// <summary>
-        /// Reads the current IIR filter mode the device is running in.
-        /// </summary>
-        /// <returns>The current <see cref="FilteringMode"/>.</returns>
-        public Bmx280FilteringMode ReadFilterMode()
-        {
-            byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
-            var mode = (byte)((current & 0b_0001_1100) >> 2);
+        private Bmx280FilteringMode _filteringMode = Bmx280FilteringMode.Off;
 
-            return mode switch
+        /// <summary>
+        /// Gets or sets the IIR filter mode.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Bmx280FilteringMode"/> is set to an undefined mode.</exception>
+        public Bmx280FilteringMode FilterMode
+        {
+            get => _filteringMode;
+            set
             {
-                0b000 => Bmx280FilteringMode.Off,
-                0b001 => Bmx280FilteringMode.X2,
-                0b010 => Bmx280FilteringMode.X4,
-                0b011 => Bmx280FilteringMode.X8,
-                _ => Bmx280FilteringMode.X16
-            };
+                SetFilterMode(value);
+                _filteringMode = value;
+            }
+        }
+
+        private StandbyTime _standbyTime = StandbyTime.Ms125;
+
+        /// <summary>
+        /// Gets or sets the standby time between two consecutive measurements.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Bmxx80.StandbyTime"/> is set to an undefined mode.</exception>
+        public StandbyTime StandbyTime
+        {
+            get => _standbyTime;
+            set
+            {
+                SetStandbyTime(value);
+                _standbyTime = value;
+            }
         }
 
         /// <summary>
@@ -69,7 +82,7 @@ namespace Iot.Device.Bmxx80
         {
             if (ReadPowerMode() == Bmx280PowerMode.Forced)
             {
-                await Task.Delay(GetMeasurementTimeForForcedMode(ReadTemperatureSampling()));
+                await Task.Delay(GetMeasurementTimeForForcedMode(TemperatureSampling));
             }
 
             //Read the MSB, LSB and bits 7:4 (XLSB) of the temperature from the BMP280 registers
@@ -117,7 +130,7 @@ namespace Iot.Device.Bmxx80
         {
             if (ReadPowerMode() == Bmx280PowerMode.Forced)
             {
-                await Task.Delay(GetMeasurementTimeForForcedMode(ReadPressureSampling()));
+                await Task.Delay(GetMeasurementTimeForForcedMode(PressureSampling));
             }
 
             // Read the temperature first to load the t_fine value for compensation.
@@ -180,7 +193,7 @@ namespace Iot.Device.Bmxx80
         /// Sets the IIR filter mode.
         /// </summary>
         /// <param name="filteringMode">The <see cref="FilteringMode"/> to set.</param>
-        public void SetFilterMode(Bmx280FilteringMode filteringMode)
+        private void SetFilterMode(Bmx280FilteringMode filteringMode)
         {
             byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
             current = (byte)((current & 0b_1110_0011) | (byte)filteringMode << 2);
@@ -205,7 +218,7 @@ namespace Iot.Device.Bmxx80
         /// Sets the standby time mode the device will used when operating in normal mode.
         /// </summary>
         /// <param name="standbyTime">The <see cref="StandbyTime"/> to set.</param>
-        public void SetStandbyTime(StandbyTime standbyTime)
+        private void SetStandbyTime(StandbyTime standbyTime)
         {
             byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
             current = (byte)((current & 0b_0001_1111) | (byte)standbyTime << 5);
@@ -213,22 +226,11 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Reads the currently configured standby time mode the device will used when operating in normal mode.
-        /// </summary>
-        /// <returns>The current <see cref="StandbyTime"/>.</returns>
-        public StandbyTime ReadStandbyTime()
-        {
-            byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
-
-            return (StandbyTime)((current & 0b_1110_0000) >> 5);
-        }
-
-        /// <summary>
         /// Recommended wait timings from the datasheet.
         /// </summary>
         /// <param name="sampleMode">The <see cref="Sampling"/> to get for.</param>
         /// <returns>The time it takes for the chip to read data in milliseconds rounded up.</returns>
-        internal int GetMeasurementTimeForForcedMode(Sampling sampleMode)
+        internal static int GetMeasurementTimeForForcedMode(Sampling sampleMode)
         {
             return sampleMode switch
             {
@@ -244,10 +246,8 @@ namespace Iot.Device.Bmxx80
         protected override void SetDefaultConfiguration()
         {
             base.SetDefaultConfiguration();
-            SetFilterMode(Bmx280FilteringMode.Off);
-            SetStandbyTime(StandbyTime.Ms125);
-
-            _initialized = true;
+            SetFilterMode(FilterMode);
+            SetStandbyTime(StandbyTime);
         }
 
         /// <summary>

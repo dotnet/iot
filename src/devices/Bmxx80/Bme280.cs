@@ -41,22 +41,22 @@ namespace Iot.Device.Bmxx80
             SetDefaultConfiguration();
         }
 
-        /// <summary>
-        /// Get the current sample rate for humidity measurements.
-        /// </summary>
-        /// <returns>The humidity <see cref="Sampling"/>.</returns>
-        public Sampling ReadHumiditySampling()
+        private Sampling _humiditySampling = Sampling.UltraLowPower;
+        public Sampling HumidSampling
         {
-            byte status = Read8BitsFromRegister((byte)Bme280Register.CTRL_HUM);
-            status = (byte)(status & 0b_0000_0111);
-            return ByteToSampling(status);
+            get => _humiditySampling;
+            set
+            {
+                SetHumiditySampling(value);
+                _humiditySampling = value;
+            }
         }
 
         /// <summary>
         /// Sets the humidity sampling to the given value.
         /// </summary>
         /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
-        public void SetHumiditySampling(Sampling sampling)
+        private void SetHumiditySampling(Sampling sampling)
         {
             byte status = Read8BitsFromRegister((byte)Bme280Register.CTRL_HUM);
             status = (byte)(status & 0b_1111_1000);
@@ -76,7 +76,7 @@ namespace Iot.Device.Bmxx80
         {
             if (ReadPowerMode() == Bmx280PowerMode.Forced)
             {
-                await Task.Delay(GetMeasurementTimeForForcedMode(ReadHumiditySampling()));
+                await Task.Delay(GetMeasurementTimeForForcedMode(HumidSampling));
             }
 
             // Read the temperature first to load the t_fine value for compensation.
@@ -94,7 +94,7 @@ namespace Iot.Device.Bmxx80
         protected override void SetDefaultConfiguration()
         {
             base.SetDefaultConfiguration();
-            SetHumiditySampling(Sampling.UltraLowPower);
+            SetHumiditySampling(HumidSampling);
         }
 
         /// <summary>

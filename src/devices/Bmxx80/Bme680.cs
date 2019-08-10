@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Device.I2c;
+using System.Linq;
 using System.Threading.Tasks;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.FilteringMode;
@@ -38,6 +40,8 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         private readonly Bme680CalibrationData _bme680Calibration;
 
+        private List<Bme680HeaterProfileConfig> _heaterConfigs = new List<Bme680HeaterProfileConfig>();
+
         protected override int _tempCalibrationFactor => 16;
 
         /// <summary>
@@ -56,6 +60,58 @@ namespace Iot.Device.Bmxx80
             _controlRegister = (byte)Bme680Register.CTRL_MEAS;
 
             SetDefaultConfiguration();
+        }
+
+        private Sampling _humiditySampling = Sampling.UltraLowPower;
+
+        /// <summary>
+        /// Gets or sets the humidity sampling.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
+        public Sampling HumiditySampling
+        {
+            get => _humiditySampling;
+            set
+            {
+                SetHumiditySampling(value);
+                _humiditySampling = value;
+            }
+        }
+
+        private Bme680HeaterProfile _currentHeaterProfile = Bme680HeaterProfile.Profile1;
+
+        /// <summary>
+        /// Gets or sets the heater profile to be used for measurements.
+        /// Current heater profile is only set if the chosen profile is configured.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Bme680HeaterProfile"/> is set to an undefined profile.</exception>
+        public Bme680HeaterProfile CurrentHeaterProfile
+        {
+            get => _currentHeaterProfile;
+            set
+            {
+                if (_heaterConfigs.Exists(config => config.HeaterProfile == value))
+                {
+                    SetCurrentHeaterProfile(value);
+                    _currentHeaterProfile = value;
+                }
+            }
+        }
+
+        private Bme680FilteringMode _filterMode = Bme680FilteringMode.C0;
+
+        /// <summary>
+        /// Gets or sets the filtering mode to be used for measurements.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Bme680FilteringMode"/> is set to an undefined mode.</exception>
+        public Bme680FilteringMode FilterMode
+        {
+            get => _filterMode;
+            set
+            {
+                SetFilterMode(value);
+                _filterMode = value;
+            }
         }
 
         /// <summary>
@@ -158,7 +214,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="profile">The <see cref="Bme680HeaterProfile"/> to be used.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the heater profile does not match a defined profile in <see cref="Bme680HeaterProfile"/>.</exception>
-        public void SetCurrentHeaterProfile(Bme680HeaterProfile profile)
+        private void SetCurrentHeaterProfile(Bme680HeaterProfile profile)
         {
             if (!Enum.IsDefined(typeof(Bme680HeaterProfile), profile))
                 throw new ArgumentOutOfRangeException();
@@ -174,7 +230,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="filterMode">The <see cref="Bme680FilteringMode"/> to be used.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the filter mode does not match a defined mode in <see cref="Bme680FilteringMode"/>.</exception>
-        public void SetFilterMode(Bme680FilteringMode filterMode)
+        private void SetFilterMode(Bme680FilteringMode filterMode)
         {
             if (!Enum.IsDefined(typeof(Bme680FilteringMode), filterMode))
                 throw new ArgumentOutOfRangeException();
@@ -208,15 +264,24 @@ namespace Iot.Device.Bmxx80
         /// <param name="targetTemperature">The target temperature in °C. Ranging from 0-400.</param>
         /// <param name="duration">The duration in ms. Ranging from 0-4032.</param>
         /// <param name="ambientTemperature">The ambient temperature in °C.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the heating profile does not match a defined profile in <see cref="Bme680HeaterProfile"/>.</exception>
         /// <returns></returns>
         public void ConfigureHeatingProfile(Bme680HeaterProfile profile, ushort targetTemperature, ushort duration, double ambientTemperature)
         {
+            if (!Enum.IsDefined(typeof(Bme680HeaterProfile), profile))
+                throw new ArgumentOutOfRangeException();
+
             // read ambient temperature for resistance calculation
             var heaterResistance = CalculateHeaterResistance(targetTemperature, (short)ambientTemperature);
             var heaterDuration = CalculateHeaterDuration(duration);
 
             _i2cDevice.Write(new[] { (byte)((byte)Bme680Register.RES_HEAT_0 + profile), heaterResistance });
             _i2cDevice.Write(new[] { (byte)((byte)Bme680Register.GAS_WAIT_0 + profile), heaterDuration });
+
+            // cache heater configuration
+            if (_heaterConfigs.Exists(config => config.HeaterProfile == profile))
+                _heaterConfigs.Remove(_heaterConfigs.Single(config => config.HeaterProfile == profile));
+            _heaterConfigs.Add(new Bme680HeaterProfileConfig(profile, heaterResistance, duration));
         }
 
         /// <summary>
@@ -232,7 +297,8 @@ namespace Iot.Device.Bmxx80
 
         /// <summary>
         /// Gets the required time in ms to perform a measurement. The duration of the gas
-        /// measurement is not considered if <see cref="GasConversionIsEnabled"/> is set to false.
+        /// measurement is not considered if <see cref="GasConversionIsEnabled"/> is set to false
+        /// or the chosen <see cref="Bme680HeaterProfile"/> is not configured.
         /// The precision of this duration is within 1ms of the actual measurement time.
         /// </summary>
         /// <param name="profile">The used <see cref="Bme680HeaterProfile"/>. </param>
@@ -242,17 +308,13 @@ namespace Iot.Device.Bmxx80
             var osToMeasCycles = new byte[] { 0, 1, 2, 4, 8, 16 };
             var osToSwitchCount = new byte[] { 0, 1, 1, 1, 1, 1 };
 
-            var tempSampling = ReadTemperatureSampling();
-            var pressSampling = ReadPressureSampling();
-            var humidSampling = ReadHumiditySampling();
+            var measCycles = osToMeasCycles[(int)TemperatureSampling];
+            measCycles += osToMeasCycles[(int)PressureSampling];
+            measCycles += osToMeasCycles[(int)HumiditySampling];
 
-            var measCycles = osToMeasCycles[(int)tempSampling];
-            measCycles += osToMeasCycles[(int)pressSampling];
-            measCycles += osToMeasCycles[(int)humidSampling];
-
-            var switchCount = osToSwitchCount[(int)tempSampling];
-            switchCount += osToSwitchCount[(int)pressSampling];
-            switchCount += osToSwitchCount[(int)humidSampling];
+            var switchCount = osToSwitchCount[(int)TemperatureSampling];
+            switchCount += osToSwitchCount[(int)PressureSampling];
+            switchCount += osToSwitchCount[(int)HumiditySampling];
 
             double measDuration = measCycles * 1963;
             measDuration += 477 * switchCount;      // TPH switching duration
@@ -263,61 +325,10 @@ namespace Iot.Device.Bmxx80
             measDuration /= 1000.0;                 // convert to ms
             measDuration += 1;                      // wake up duration of 1ms
 
-            if (GasConversionIsEnabled)
-                measDuration += ReadHeaterConfig(profile).GetHeaterDurationInMilliseconds();
+            if (GasConversionIsEnabled && _heaterConfigs.Exists(config => config.HeaterProfile == profile))
+                measDuration += _heaterConfigs.Single(config => config.HeaterProfile == profile).HeaterDuration;
 
             return (int)Math.Ceiling(measDuration);
-        }
-
-        /// <summary>
-        /// Reads the heater configuration associated with the <see cref="Bme680HeaterProfile"/>.
-        /// </summary>
-        /// <param name="profile">The desired heater profile for which to get the configuration.</param>
-        /// <returns>The configuration of the chosen set-point or null if invalid set-point was chosen.</returns>
-        public Bme680HeaterProfileConfig ReadHeaterConfig(Bme680HeaterProfile profile)
-        {
-            var heaterTemp = Read8BitsFromRegister((byte)((byte)Bme680Register.RES_HEAT_0 + profile));
-            var heaterDuration = Read8BitsFromRegister((byte)((byte)Bme680Register.GAS_WAIT_0 + profile));
-
-            return new Bme680HeaterProfileConfig(profile, heaterTemp, heaterDuration);
-        }
-
-        /// <summary>
-        /// Gets the currently used <see cref="Bme680HeaterProfile"/>.
-        /// </summary>
-        /// <returns>The current <see cref="Bme680HeaterProfile"/></returns>
-        public Bme680HeaterProfile ReadCurrentHeaterProfile()
-        {
-            var heaterProfile = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_1);
-            heaterProfile = (byte)(heaterProfile & (byte)Bme680Mask.NB_CONV);
-            return (Bme680HeaterProfile)heaterProfile;
-        }
-
-        /// <summary>
-        /// Set the humidity sampling.
-        /// </summary>
-        /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when the sampling mode does not match a defined mode in <see cref="Sampling"/>.</exception>
-        public void SetHumiditySampling(Sampling sampling)
-        {
-            if (!Enum.IsDefined(typeof(Sampling), sampling))
-                throw new ArgumentOutOfRangeException();
-
-            var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_HUM);
-            status = (byte)((status & (byte)~Bme680Mask.HUMIDITY_SAMPLING) | (byte)sampling);
-
-            _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_HUM, status });
-        }
-
-        /// <summary>
-        /// Gets the current sample rate for humidity measurements.
-        /// </summary>
-        /// <returns>The humidity <see cref="Sampling"/>.</returns>
-        public Sampling ReadHumiditySampling()
-        {
-            var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_HUM);
-            status = (byte)(status & (byte)Bme680Mask.HUMIDITY_SAMPLING);
-            return ByteToSampling(status);
         }
 
         /// <summary>
@@ -396,17 +407,31 @@ namespace Iot.Device.Bmxx80
         protected override void SetDefaultConfiguration()
         {
             base.SetDefaultConfiguration();
-            SetHumiditySampling(Sampling.UltraLowPower);
-            SetFilterMode(Bme680FilteringMode.C0);
+            SetHumiditySampling(HumiditySampling);
+            SetFilterMode(FilterMode);
 
             var currentTemp = ReadTemperatureAsync().GetAwaiter().GetResult();
-            ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, 320, 150, currentTemp.Celsius);
-            SetCurrentHeaterProfile(Bme680HeaterProfile.Profile1);
+            ConfigureHeatingProfile(CurrentHeaterProfile, 320, 150, currentTemp.Celsius);
+            SetCurrentHeaterProfile(CurrentHeaterProfile);
 
             HeaterIsEnabled = true;
             GasConversionIsEnabled = true;
+        }
 
-            _initialized = true;
+        /// <summary>
+        /// Set the humidity sampling.
+        /// </summary>
+        /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the sampling mode does not match a defined mode in <see cref="Sampling"/>.</exception>
+        private void SetHumiditySampling(Sampling sampling)
+        {
+            if (!Enum.IsDefined(typeof(Sampling), sampling))
+                throw new ArgumentOutOfRangeException();
+
+            var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_HUM);
+            status = (byte)((status & (byte)~Bme680Mask.HUMIDITY_SAMPLING) | (byte)sampling);
+
+            _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_HUM, status });
         }
 
         /// <summary>
