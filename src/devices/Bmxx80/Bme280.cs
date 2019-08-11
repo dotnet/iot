@@ -36,36 +36,27 @@ namespace Iot.Device.Bmxx80
             bme280CalibrationData.ReadFromDevice(this);
             _bme280Calibration = bme280CalibrationData;
             _calibrationData = bme280CalibrationData;
-
             _communicationProtocol = CommunicationProtocol.I2c;
+
             SetDefaultConfiguration();
         }
 
-        private Sampling _humiditySampling = Sampling.UltraLowPower;
+        private Sampling _humiditySampling;
         public Sampling HumidSampling
         {
             get => _humiditySampling;
             set
             {
-                SetHumiditySampling(value);
+                byte status = Read8BitsFromRegister((byte)Bme280Register.CTRL_HUM);
+                status = (byte)(status & 0b_1111_1000);
+                status = (byte)(status | (byte)value);
+                _i2cDevice.Write(new[] { (byte)Bme280Register.CTRL_HUM, status });
+
+                // Changes to the above register only become effective after a write operation to "CTRL_MEAS".
+                byte measureState = Read8BitsFromRegister((byte)Bmx280Register.CTRL_MEAS);
+                _i2cDevice.Write(new[] { (byte)Bmx280Register.CTRL_MEAS, measureState });
                 _humiditySampling = value;
             }
-        }
-
-        /// <summary>
-        /// Sets the humidity sampling to the given value.
-        /// </summary>
-        /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
-        private void SetHumiditySampling(Sampling sampling)
-        {
-            byte status = Read8BitsFromRegister((byte)Bme280Register.CTRL_HUM);
-            status = (byte)(status & 0b_1111_1000);
-            status = (byte)(status | (byte)sampling);
-            _i2cDevice.Write(new[] { (byte)Bme280Register.CTRL_HUM, status });
-
-            // Changes to the above register only become effective after a write operation to "CTRL_MEAS".
-            byte measureState = Read8BitsFromRegister((byte)Bmx280Register.CTRL_MEAS);
-            _i2cDevice.Write(new[] { (byte)Bmx280Register.CTRL_MEAS, measureState });
         }
 
         /// <summary>
@@ -74,6 +65,9 @@ namespace Iot.Device.Bmxx80
         /// <returns>Returns a percentage from 0 to 100.</returns>
         public async Task<double> ReadHumidityAsync()
         {
+            if (HumidSampling == Sampling.Skipped)
+                return double.NaN;
+
             if (ReadPowerMode() == Bmx280PowerMode.Forced)
             {
                 await Task.Delay(GetMeasurementTimeForForcedMode(HumidSampling));
@@ -94,7 +88,7 @@ namespace Iot.Device.Bmxx80
         protected override void SetDefaultConfiguration()
         {
             base.SetDefaultConfiguration();
-            SetHumiditySampling(HumidSampling);
+            HumidSampling = Sampling.UltraLowPower;
         }
 
         /// <summary>

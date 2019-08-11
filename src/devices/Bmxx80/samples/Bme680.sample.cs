@@ -27,33 +27,63 @@ namespace Iot.Device.Samples
 
             using (var bme680 = new Bme680(unixI2cDevice))
             {
-                // get the time a measurement will take with the current settings
-                var measurementDuration = bme680.GetMeasurementDuration(bme680.ReadCurrentHeaterProfile());
-
                 while (true)
                 {
-                    // Once a reading has been taken, the sensor goes back to sleep mode.
-                    if (bme680.ReadPowerMode() == Bme680PowerMode.Sleep)
+                    // get the time a measurement will take with the current settings
+                    var measurementDuration = bme680.GetMeasurementDuration(bme680.CurrentHeaterProfile);
+
+                    // 10 consecutive measurement with default settings
+                    for (var i = 0; i < 10; i++)
                     {
                         // This instructs the sensor to take a measurement.
                         bme680.SetPowerMode(Bme680PowerMode.Forced);
+
+                        // wait while measurement is being taken
+                        Thread.Sleep(measurementDuration);
+
+                        // Print out the measured data
+                        var temperature = await bme680.ReadTemperatureAsync();
+                        var pressure = await bme680.ReadPressureAsync() / 100;
+                        var humidity = await bme680.ReadHumidityAsync();
+                        var gasResistance = await bme680.ReadGasResistanceAsync();
+
+                        Console.WriteLine($"{temperature.Celsius:N2} °c | {pressure:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
+
+                        // when measuring the gas resistance on each cycle it is important to wait a certain interval
+                        // because a heating plate is activated which will heat up the sensor without sleep, this can
+                        // falsify all readings coming from the sensor
+                        Thread.Sleep(1000);
                     }
 
-                    // wait while measurement is being taken
-                    Thread.Sleep(measurementDuration);
+                    // change the settings
+                    bme680.TemperatureSampling = Sampling.HighResolution;
+                    bme680.HumiditySampling = Sampling.UltraHighResolution;
+                    bme680.PressureSampling = Sampling.Skipped;
 
-                    // Print out the measured data
-                    var temperature = Math.Round((await bme680.ReadTemperatureAsync()).Celsius, 2).ToString("N2");
-                    var pressure = Math.Round(await bme680.ReadPressureAsync() / 100, 2).ToString("N2");
-                    var humidity = Math.Round(await bme680.ReadHumidityAsync(), 2).ToString("N2");
-                    var gasResistance = Math.Round(await bme680.ReadGasResistance(), 2).ToString("N2");
+                    bme680.ConfigureHeatingProfile(Bme680HeaterProfile.Profile2, 280, 18, 24);
+                    bme680.CurrentHeaterProfile = Bme680HeaterProfile.Profile2;
 
-                    Console.WriteLine($"{temperature} °c | {pressure} hPa | {humidity} %rH | {gasResistance} Ohm");
+                    measurementDuration = bme680.GetMeasurementDuration(bme680.CurrentHeaterProfile);
 
-                    // when measuring the gas resistance on each cycle it is important to wait a certain interval
-                    // because a heating plate is activated which will heat up the sensor without sleep, this can
-                    // falsify all readings coming from the sensor
-                    Thread.Sleep(1000);
+                    // 10 consecutive measurements with custom settings
+                    for (int i = 0; i < 10; i++)
+                    {
+                        // perform the measurement
+                        bme680.SetPowerMode(Bme680PowerMode.Forced);
+                        Thread.Sleep(measurementDuration);
+
+                        // Print out the measured data
+                        var temperature = await bme680.ReadTemperatureAsync();
+                        var pressure = await bme680.ReadPressureAsync() / 100;
+                        var humidity = await bme680.ReadHumidityAsync();
+                        var gasResistance = await bme680.ReadGasResistanceAsync();
+
+                        Console.WriteLine($"{temperature.Celsius:N2} °c | {pressure:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
+                        Thread.Sleep(1000);
+                    }
+
+                    // reset will change settings back to default
+                    bme680.Reset();
                 }
             }
         }

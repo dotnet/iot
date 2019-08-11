@@ -43,8 +43,6 @@ namespace Iot.Device.Bmxx80
         protected Bmxx80Base(byte deviceId, I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
-
-            Reset();
             _i2cDevice.WriteByte((byte)Bmxx80Register.CHIPID);
 
             byte readSignature = _i2cDevice.ReadByte();
@@ -55,7 +53,7 @@ namespace Iot.Device.Bmxx80
             }
         }
 
-        private Sampling _pressureSampling = Sampling.UltraLowPower;
+        private Sampling _pressureSampling;
 
         /// <summary>
         /// Gets or sets the pressure sampling.
@@ -66,12 +64,15 @@ namespace Iot.Device.Bmxx80
             get => _pressureSampling;
             set
             {
-                SetPressureSampling(value);
+                byte status = Read8BitsFromRegister(_controlRegister);
+                status = (byte)(status & 0b1110_0011);
+                status = (byte)(status | (byte)value << 2);
+                _i2cDevice.Write(new[] { _controlRegister, status });
                 _pressureSampling = value;
             }
         }
 
-        private Sampling _temperatureSampling = Sampling.UltraLowPower;
+        private Sampling _temperatureSampling;
 
         /// <summary>
         /// Gets or sets the temperature sampling.
@@ -82,33 +83,12 @@ namespace Iot.Device.Bmxx80
             get => _temperatureSampling;
             set
             {
-                SetTemperatureSampling(value);
+                byte status = Read8BitsFromRegister(_controlRegister);
+                status = (byte)(status & 0b0001_1111);
+                status = (byte)(status | (byte)value << 5);
+                _i2cDevice.Write(new[] { _controlRegister, status });
                 _temperatureSampling = value;
             }
-        }
-
-        /// <summary>
-        /// Sets the pressure sampling.
-        /// </summary>
-        /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
-        private void SetPressureSampling(Sampling sampling)
-        {
-            byte status = Read8BitsFromRegister(_controlRegister);
-            status = (byte)(status & 0b1110_0011);
-            status = (byte)(status | (byte)sampling << 2);
-            _i2cDevice.Write(new[] { _controlRegister, status });
-        }
-
-        /// <summary>
-        /// Set the temperature oversampling.
-        /// </summary>
-        /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
-        private void SetTemperatureSampling(Sampling sampling)
-        {
-            byte status = Read8BitsFromRegister(_controlRegister);
-            status = (byte)(status & 0b0001_1111);
-            status = (byte)(status | (byte)sampling << 5);
-            _i2cDevice.Write(new[] { _controlRegister, status });
         }
 
         /// <summary>
@@ -220,8 +200,8 @@ namespace Iot.Device.Bmxx80
 
         protected virtual void SetDefaultConfiguration()
         {
-            SetPressureSampling(PressureSampling);
-            SetTemperatureSampling(TemperatureSampling);
+            PressureSampling = Sampling.UltraLowPower;
+            TemperatureSampling = Sampling.UltraLowPower;
         }
 
         /// <summary>

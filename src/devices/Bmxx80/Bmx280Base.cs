@@ -42,7 +42,7 @@ namespace Iot.Device.Bmxx80
             _controlRegister = (byte)Bmx280Register.CTRL_MEAS;
         }
 
-        private Bmx280FilteringMode _filteringMode = Bmx280FilteringMode.Off;
+        private Bmx280FilteringMode _filteringMode;
 
         /// <summary>
         /// Gets or sets the IIR filter mode.
@@ -53,12 +53,14 @@ namespace Iot.Device.Bmxx80
             get => _filteringMode;
             set
             {
-                SetFilterMode(value);
+                byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
+                current = (byte)((current & 0b_1110_0011) | (byte)value << 2);
+                _i2cDevice.Write(new[] { (byte)Bmx280Register.CONFIG, current });
                 _filteringMode = value;
             }
         }
 
-        private StandbyTime _standbyTime = StandbyTime.Ms125;
+        private StandbyTime _standbyTime;
 
         /// <summary>
         /// Gets or sets the standby time between two consecutive measurements.
@@ -69,7 +71,9 @@ namespace Iot.Device.Bmxx80
             get => _standbyTime;
             set
             {
-                SetStandbyTime(value);
+                byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
+                current = (byte)((current & 0b_0001_1111) | (byte)value << 5);
+                _i2cDevice.Write(new[] { (byte)Bmx280Register.CONFIG, current });
                 _standbyTime = value;
             }
         }
@@ -80,6 +84,9 @@ namespace Iot.Device.Bmxx80
         /// <returns>Calculated temperature.</returns>
         public async Task<Temperature> ReadTemperatureAsync()
         {
+            if (TemperatureSampling == Sampling.Skipped)
+                return Temperature.FromCelsius(double.NaN);
+
             if (ReadPowerMode() == Bmx280PowerMode.Forced)
             {
                 await Task.Delay(GetMeasurementTimeForForcedMode(TemperatureSampling));
@@ -128,6 +135,9 @@ namespace Iot.Device.Bmxx80
         /// <returns>Atmospheric pressure in Pa.</returns>
         public async Task<double> ReadPressureAsync()
         {
+            if (PressureSampling == Sampling.Skipped)
+                return double.NaN;
+
             if (ReadPowerMode() == Bmx280PowerMode.Forced)
             {
                 await Task.Delay(GetMeasurementTimeForForcedMode(PressureSampling));
@@ -190,17 +200,6 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Sets the IIR filter mode.
-        /// </summary>
-        /// <param name="filteringMode">The <see cref="FilteringMode"/> to set.</param>
-        private void SetFilterMode(Bmx280FilteringMode filteringMode)
-        {
-            byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
-            current = (byte)((current & 0b_1110_0011) | (byte)filteringMode << 2);
-            _i2cDevice.Write(new[] { (byte)Bmx280Register.CONFIG, current });
-        }
-
-        /// <summary>
         /// Sets the power mode to the given mode
         /// </summary>
         /// <param name="powerMode">The <see cref="Bmx280PowerMode"/> to set.</param>
@@ -212,17 +211,6 @@ namespace Iot.Device.Bmxx80
             var cleared = (byte)(read & 0b_1111_1100);
 
             _i2cDevice.Write(new[] { _controlRegister, (byte)(cleared | (byte)powerMode) });
-        }
-
-        /// <summary>
-        /// Sets the standby time mode the device will used when operating in normal mode.
-        /// </summary>
-        /// <param name="standbyTime">The <see cref="StandbyTime"/> to set.</param>
-        private void SetStandbyTime(StandbyTime standbyTime)
-        {
-            byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
-            current = (byte)((current & 0b_0001_1111) | (byte)standbyTime << 5);
-            _i2cDevice.Write(new[] { (byte)Bmx280Register.CONFIG, current });
         }
 
         /// <summary>
@@ -246,8 +234,8 @@ namespace Iot.Device.Bmxx80
         protected override void SetDefaultConfiguration()
         {
             base.SetDefaultConfiguration();
-            SetFilterMode(FilterMode);
-            SetStandbyTime(StandbyTime);
+            FilterMode = Bmx280FilteringMode.Off;
+            StandbyTime = StandbyTime.Ms125;
         }
 
         /// <summary>
