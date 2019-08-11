@@ -35,7 +35,7 @@ namespace Iot.Device.Samples
                     //set higher sampling
                     i2CBmpe80.TemperatureSampling = Sampling.LowPower;
                     i2CBmpe80.PressureSampling = Sampling.UltraHighResolution;
-                    i2CBmpe80.HumidSampling = Sampling.Standard;
+                    i2CBmpe80.HumiditySampling = Sampling.Standard;
 
                     //set mode forced so device sleeps after read
                     i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
@@ -54,7 +54,7 @@ namespace Iot.Device.Samples
                     //change sampling and filter
                     i2CBmpe80.TemperatureSampling = Sampling.UltraHighResolution;
                     i2CBmpe80.PressureSampling = Sampling.UltraLowPower;
-                    i2CBmpe80.HumidSampling = Sampling.UltraLowPower;
+                    i2CBmpe80.HumiditySampling = Sampling.UltraLowPower;
                     i2CBmpe80.FilterMode = Bmx280FilteringMode.X2;
 
                     //set mode forced and read again
