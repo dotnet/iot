@@ -42,7 +42,7 @@ namespace Iot.Device.Bmxx80
         }
 
         private Sampling _humiditySampling;
-        public Sampling HumidSampling
+        public Sampling HumiditySampling
         {
             get => _humiditySampling;
             set
@@ -65,12 +65,12 @@ namespace Iot.Device.Bmxx80
         /// <returns>Returns a percentage from 0 to 100.</returns>
         public async Task<double> ReadHumidityAsync()
         {
-            if (HumidSampling == Sampling.Skipped)
+            if (HumiditySampling == Sampling.Skipped)
                 return double.NaN;
 
             if (ReadPowerMode() == Bmx280PowerMode.Forced)
             {
-                await Task.Delay(GetMeasurementTimeForForcedMode(HumidSampling));
+                await Task.Delay(GetMeasurementTimeForForcedMode(HumiditySampling));
             }
 
             // Read the temperature first to load the t_fine value for compensation.
@@ -88,7 +88,7 @@ namespace Iot.Device.Bmxx80
         protected override void SetDefaultConfiguration()
         {
             base.SetDefaultConfiguration();
-            HumidSampling = Sampling.UltraLowPower;
+            HumiditySampling = Sampling.UltraLowPower;
         }
 
         /// <summary>
