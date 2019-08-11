@@ -40,7 +40,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         private readonly Bme680CalibrationData _bme680Calibration;
 
-        private List<Bme680HeaterProfileConfig> _heaterConfigs = new List<Bme680HeaterProfileConfig>();
+        private readonly List<Bme680HeaterProfileConfig> _heaterConfigs = new List<Bme680HeaterProfileConfig>();
 
         protected override int _tempCalibrationFactor => 16;
 
@@ -132,43 +132,39 @@ namespace Iot.Device.Bmxx80
             }
         }
 
+        private bool _heaterIsEnabled;
+
         /// <summary>
         /// Gets or sets whether the heater is enabled.
         /// </summary>
         public bool HeaterIsEnabled
         {
-            get
-            {
-                var heaterStatus = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_0);
-                heaterStatus = (byte)((heaterStatus & (byte)Bme680Mask.HEAT_OFF) >> 3);
-                return !Convert.ToBoolean(heaterStatus);
-            }
+            get => _heaterIsEnabled;
             set
             {
                 var heaterStatus = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_0);
                 heaterStatus = (byte)((heaterStatus & (byte)~Bme680Mask.HEAT_OFF) | Convert.ToByte(!value) << 3);
 
                 _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_GAS_0, heaterStatus });
+                _heaterIsEnabled = value;
             }
         }
+
+        private bool _gasConversionIsEnabled;
 
         /// <summary>
         /// Gets or sets whether gas conversions are enabled.
         /// </summary>
         public bool GasConversionIsEnabled
         {
-            get
-            {
-                var gasConversion = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_1);
-                gasConversion = (byte)((gasConversion & (byte)Bme680Mask.RUN_GAS) >> 4);
-                return Convert.ToBoolean(gasConversion);
-            }
+            get => _gasConversionIsEnabled;
             set
             {
                 var gasConversion = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_1);
                 gasConversion = (byte)((gasConversion & (byte)~Bme680Mask.RUN_GAS) | Convert.ToByte(value) << 4);
 
                 _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_GAS_1, gasConversion });
+                _gasConversionIsEnabled = value;
             }
         }
 
