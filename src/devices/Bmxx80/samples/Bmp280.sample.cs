@@ -7,6 +7,7 @@ using System.Device.I2c;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Bmxx80;
+using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Units;
 
@@ -31,6 +32,10 @@ namespace Iot.Device.Samples
             {
                 while (true)
                 {
+                    //set higher sampling
+                    i2CBmp280.TemperatureSampling = Sampling.LowPower;
+                    i2CBmp280.PressureSampling = Sampling.UltraHighResolution;
+
                     //set mode forced so device sleeps after read
                     i2CBmp280.SetPowerMode(Bmx280PowerMode.Forced);
 
@@ -43,11 +48,10 @@ namespace Iot.Device.Samples
                     Console.WriteLine($"Altitude: {altValue}");
                     Thread.Sleep(1000);
 
-                    //set higher sampling
-                    i2CBmp280.SetTemperatureSampling(Sampling.LowPower);
-                    Console.WriteLine(i2CBmp280.ReadTemperatureSampling());
-                    i2CBmp280.SetPressureSampling(Sampling.UltraHighResolution);
-                    Console.WriteLine(i2CBmp280.ReadPressureSampling());
+                    //change sampling rate
+                    i2CBmp280.TemperatureSampling = Sampling.UltraHighResolution;
+                    i2CBmp280.PressureSampling = Sampling.UltraLowPower;
+                    i2CBmp280.FilterMode = Bmx280FilteringMode.X4;
 
                     //set mode forced and read again
                     i2CBmp280.SetPowerMode(Bmx280PowerMode.Forced);
@@ -60,12 +64,6 @@ namespace Iot.Device.Samples
                     altValue = await i2CBmp280.ReadAltitudeAsync(defaultSeaLevelPressure);
                     Console.WriteLine($"Altitude: {altValue}");
                     Thread.Sleep(5000);
-
-                    //set sampling to higher
-                    i2CBmp280.SetTemperatureSampling(Sampling.UltraHighResolution);
-                    Console.WriteLine(i2CBmp280.ReadTemperatureSampling());
-                    i2CBmp280.SetPressureSampling(Sampling.UltraLowPower);
-                    Console.WriteLine(i2CBmp280.ReadPressureSampling());
                 }
             }
         }
