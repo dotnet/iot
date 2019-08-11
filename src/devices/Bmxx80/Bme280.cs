@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Device.I2c;
 using System.Threading.Tasks;
 using Iot.Device.Bmxx80.CalibrationData;
@@ -42,11 +43,19 @@ namespace Iot.Device.Bmxx80
         }
 
         private Sampling _humiditySampling;
+
+        /// <summary>
+        /// Gets or sets the humidity sampling.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
         public Sampling HumiditySampling
         {
             get => _humiditySampling;
             set
             {
+                if (!Enum.IsDefined(typeof(Sampling), value))
+                    throw new ArgumentOutOfRangeException();
+
                 byte status = Read8BitsFromRegister((byte)Bme280Register.CTRL_HUM);
                 status = (byte)(status & 0b_1111_1000);
                 status = (byte)(status | (byte)value);
