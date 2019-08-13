@@ -34,7 +34,7 @@ namespace Iot.Device.Samples
                 while (true)
                 {
                     // get the time a measurement will take with the current settings
-                    var measurementDuration = bme680.GetMeasurementDuration(bme680.CurrentHeaterProfile);
+                    var measurementDuration = bme680.GetMeasurementDuration(bme680.HeaterProfile);
 
                     // 10 consecutive measurement with default settings
                     for (var i = 0; i < 10; i++)
