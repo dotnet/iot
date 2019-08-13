@@ -4,8 +4,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Iot.Device.Media
 {
@@ -62,28 +65,65 @@ namespace Iot.Device.Media
         /// Capture a picture from the video device.
         /// </summary>
         /// <param name="path">Picture save path</param>
-        public override void Capture(string path)
+        public override async Task CaptureAsync(string path)
         {
-            SetVideoConnectionSettings();
-            byte[] dataBuffer = ProcessCaptureData();
-
-            using (FileStream fs = new FileStream(path, FileMode.Create))
+            using (CancellationTokenSource cts = new CancellationTokenSource())
             {
-                fs.Write(dataBuffer, 0, dataBuffer.Length);
-                fs.Flush();
-            }  
+                await CaptureAsync(path, cts.Token);
+            }
+        }
+
+        /// <summary>
+        /// Capture a picture from the video device.
+        /// </summary>
+        /// <param name="path">Picture save path</param>
+        /// <param name="token">A cancellation token that can be used to cancel the work</param>
+        public override async Task CaptureAsync(string path, CancellationToken token)
+        {
+            await Task.Run(() =>
+            {
+                Initialize();
+                SetVideoConnectionSettings();
+                byte[] dataBuffer = ProcessCaptureData();
+                Close();
+
+                using (FileStream fs = new FileStream(path, FileMode.Create))
+                {
+                    fs.Write(dataBuffer, 0, dataBuffer.Length);
+                    fs.Flush();
+                }    
+            }, token);
         }
 
         /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
         /// <returns>Picture stream</returns>
-        public override MemoryStream Capture()
+        /// <param name="token">A cancellation token that can be used to cancel the work</param>
+        public override async Task<MemoryStream> CaptureAsync()
         {
-            SetVideoConnectionSettings();
-            byte[] dataBuffer = ProcessCaptureData();
+            using (CancellationTokenSource cts = new CancellationTokenSource())
+            {
+                return  await CaptureAsync(cts.Token);
+            }
+        }
 
-            return new MemoryStream(dataBuffer);
+        /// <summary>
+        /// Capture a picture from the video device.
+        /// </summary>
+        /// <returns>Picture stream</returns>
+        /// <param name="token">A cancellation token that can be used to cancel the work</param>
+        public override async Task<MemoryStream> CaptureAsync(CancellationToken token)
+        {
+            return await Task.Run(() =>
+            {
+                Initialize();
+                SetVideoConnectionSettings();
+                byte[] dataBuffer = ProcessCaptureData();
+                Close();
+
+                return new MemoryStream(dataBuffer);
+            }, token);
         }
 
         /// <summary>
@@ -133,7 +173,7 @@ namespace Iot.Device.Media
             List<PixelFormat> result = new List<PixelFormat>();
             while (V4l2Struct(VideoSettings.VIDIOC_ENUM_FMT, ref fmtdesc) != -1)
             {
-                result.Add((PixelFormat)fmtdesc.pixelformat);
+                result.Add(fmtdesc.pixelformat);
                 fmtdesc.index++;
             }
 
@@ -165,6 +205,46 @@ namespace Iot.Device.Media
 
         private unsafe byte[] ProcessCaptureData()
         {
+            fixed (V4l2FrameBuffer* buffers = &ApplyFrameBuffers()[0])
+            {
+                // Start data stream
+                v4l2_buf_type type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE;
+                Interop.ioctl(_deviceFileDescriptor, (int)VideoSettings.VIDIOC_STREAMON, new IntPtr(&type));
+
+                byte[] dataBuffer = GetFrameData(buffers);
+
+                // Close data stream
+                Interop.ioctl(_deviceFileDescriptor, (int)VideoSettings.VIDIOC_STREAMOFF, new IntPtr(&type));
+
+                UnmappingFrameBuffers(buffers);
+
+                return dataBuffer;
+            }
+        }
+
+        private unsafe byte[] GetFrameData(V4l2FrameBuffer* buffers)
+        {
+            // Get one frame from the buffer
+            v4l2_buffer frame = new v4l2_buffer
+            {
+                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                memory = v4l2_memory.V4L2_MEMORY_MMAP,
+            };
+            V4l2Struct(VideoSettings.VIDIOC_DQBUF, ref frame);
+
+            // Get data from pointer
+            IntPtr intptr = buffers[frame.index].Start;
+            byte[] dataBuffer = new byte[buffers[frame.index].Length];
+            Marshal.Copy(source: intptr, destination: dataBuffer, startIndex: 0, length: (int)buffers[frame.index].Length);
+
+            // Requeue the buffer
+            V4l2Struct(VideoSettings.VIDIOC_QBUF, ref frame);
+
+            return dataBuffer;
+        }
+
+        private unsafe V4l2FrameBuffer[] ApplyFrameBuffers()
+        {
             // Apply for buffers, use memory mapping
             v4l2_requestbuffers req = new v4l2_requestbuffers
             {
@@ -175,7 +255,7 @@ namespace Iot.Device.Media
             V4l2Struct(VideoSettings.VIDIOC_REQBUFS, ref req);
 
             // Mapping the applied buffer to user space
-            V4l2FrameBuffer* buffers = stackalloc V4l2FrameBuffer[4];
+            V4l2FrameBuffer[] buffers = new V4l2FrameBuffer[BufferCount];
             for (uint i = 0; i < BufferCount; i++)
             {
                 v4l2_buffer buffer = new v4l2_buffer
@@ -202,42 +282,21 @@ namespace Iot.Device.Media
                 V4l2Struct(VideoSettings.VIDIOC_QBUF, ref buffer);
             }
 
-            // Start data stream
-            v4l2_buf_type type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE;
-            Interop.ioctl(_deviceFileDescriptor, (int)VideoSettings.VIDIOC_STREAMON, new IntPtr(&type));
+            return buffers;
+        }
 
-            // Get one frame from the buffer
-            v4l2_buffer frame = new v4l2_buffer
-            {
-                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                memory = v4l2_memory.V4L2_MEMORY_MMAP,
-            };
-            V4l2Struct(VideoSettings.VIDIOC_DQBUF, ref frame);
-
-            // Get data from pointer
-            IntPtr intptr = buffers[frame.index].Start;
-            byte[] dataBuffer = new byte[buffers[frame.index].Length];
-            Marshal.Copy(source: intptr, destination: dataBuffer, startIndex: 0, length: (int)buffers[frame.index].Length);
-
-            // Requeue the buffer
-            V4l2Struct(VideoSettings.VIDIOC_QBUF, ref frame);
-
-            // Close data stream
-            Interop.ioctl(_deviceFileDescriptor, (int)VideoSettings.VIDIOC_STREAMOFF, new IntPtr(&type));
-
+        private static unsafe void UnmappingFrameBuffers(V4l2FrameBuffer* buffers)
+        {
             // Unmapping the applied buffer to user space
             for (uint i = 0; i < BufferCount; i++)
             {
                 Interop.munmap(buffers[i].Start, (int)buffers[i].Length);
             }
-
-            return dataBuffer;
         }
 
         private unsafe void SetVideoConnectionSettings()
         {
             FillVideoConnectionSettings();
-
             // Set capture format
             v4l2_format format = new v4l2_format
             {
@@ -252,8 +311,8 @@ namespace Iot.Device.Media
                     }
                 }
             };
-            V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
-            
+            var res = V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
+
             // Set exposure type
             v4l2_control ctrl = new v4l2_control
             {
@@ -450,6 +509,15 @@ namespace Iot.Device.Media
             }
         }
 
+        private void Close()
+        {
+            if (_deviceFileDescriptor >= 0)
+            {
+                Interop.close(_deviceFileDescriptor);
+                _deviceFileDescriptor = -1;
+            }
+        }
+
         /// <summary>
         /// Get and set v4l2 struct.
         /// </summary>
@@ -471,11 +539,7 @@ namespace Iot.Device.Media
 
         protected override void Dispose(bool disposing)
         {
-            if (_deviceFileDescriptor >= 0)
-            {
-                Interop.close(_deviceFileDescriptor);
-                _deviceFileDescriptor = -1;
-            }
+            Close();
 
             base.Dispose(disposing);
         }

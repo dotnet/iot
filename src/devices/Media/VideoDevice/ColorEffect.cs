@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Iot.Device.Media
+﻿namespace Iot.Device.Media
 {
     /// <summary>
     /// The color effect of a video device.

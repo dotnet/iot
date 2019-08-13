@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview7.19362.9" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="Interop/**/*.cs" />
     <Compile Include="Devices/**/*.cs" />
     <Compile Include="*.cs" />
