@@ -26,6 +26,8 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         private readonly Bme280CalibrationData _bme280Calibration;
 
+        private Sampling _humiditySampling;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Bme280"/> class.
         /// </summary>
@@ -41,8 +43,6 @@ namespace Iot.Device.Bmxx80
 
             SetDefaultConfiguration();
         }
-
-        private Sampling _humiditySampling;
 
         /// <summary>
         /// Gets or sets the humidity sampling.

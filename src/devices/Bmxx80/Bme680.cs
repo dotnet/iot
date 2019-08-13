@@ -40,9 +40,15 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         private readonly Bme680CalibrationData _bme680Calibration;
 
-        private readonly List<Bme680HeaterProfileConfig> _heaterConfigs = new List<Bme680HeaterProfileConfig>();
-
         protected override int _tempCalibrationFactor => 16;
+        
+        private readonly List<Bme680HeaterProfileConfig> _heaterConfigs = new List<Bme680HeaterProfileConfig>();
+        private bool _gasConversionIsEnabled;
+        private bool _heaterIsEnabled;
+
+        private Bme680HeaterProfile _currentHeaterProfile;
+        private Bme680FilteringMode _filterMode;
+        private Sampling _humiditySampling;
 
         /// <summary>
         /// Initialize a new instance of the <see cref="Bme680"/> class.
@@ -61,8 +67,6 @@ namespace Iot.Device.Bmxx80
 
             SetDefaultConfiguration();
         }
-
-        private Sampling _humiditySampling;
 
         /// <summary>
         /// Gets or sets the humidity sampling.
@@ -83,8 +87,6 @@ namespace Iot.Device.Bmxx80
                 _humiditySampling = value;
             }
         }
-
-        private Bme680HeaterProfile _currentHeaterProfile;
 
         /// <summary>
         /// Gets or sets the heater profile to be used for measurements.
@@ -110,8 +112,6 @@ namespace Iot.Device.Bmxx80
             }
         }
 
-        private Bme680FilteringMode _filterMode;
-
         /// <summary>
         /// Gets or sets the filtering mode to be used for measurements.
         /// </summary>
@@ -132,8 +132,6 @@ namespace Iot.Device.Bmxx80
             }
         }
 
-        private bool _heaterIsEnabled;
-
         /// <summary>
         /// Gets or sets whether the heater is enabled.
         /// </summary>
@@ -149,8 +147,6 @@ namespace Iot.Device.Bmxx80
                 _heaterIsEnabled = value;
             }
         }
-
-        private bool _gasConversionIsEnabled;
 
         /// <summary>
         /// Gets or sets whether gas conversions are enabled.

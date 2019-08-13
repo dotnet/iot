@@ -31,6 +31,9 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         public const byte SecondaryI2cAddress = 0x76;
 
+        private Bmx280FilteringMode _filteringMode;
+        private StandbyTime _standbyTime;
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="Bmx280Base"/> class.
         /// </summary>
@@ -41,9 +44,7 @@ namespace Iot.Device.Bmxx80
         {
             _controlRegister = (byte)Bmx280Register.CTRL_MEAS;
         }
-
-        private Bmx280FilteringMode _filteringMode;
-
+        
         /// <summary>
         /// Gets or sets the IIR filter mode.
         /// </summary>
@@ -59,8 +60,6 @@ namespace Iot.Device.Bmxx80
                 _filteringMode = value;
             }
         }
-
-        private StandbyTime _standbyTime;
 
         /// <summary>
         /// Gets or sets the standby time between two consecutive measurements.
@@ -218,7 +217,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="sampleMode">The <see cref="Sampling"/> to get for.</param>
         /// <returns>The time it takes for the chip to read data in milliseconds rounded up.</returns>
-        internal static int GetMeasurementTimeForForcedMode(Sampling sampleMode)
+        internal int GetMeasurementTimeForForcedMode(Sampling sampleMode)
         {
             return sampleMode switch
             {

@@ -32,7 +32,11 @@ namespace Iot.Device.Bmxx80
         /// pressure compensation formula and could be implemented as a global variable.
         /// </summary>
         protected int TemperatureFine;
+        protected virtual int _tempCalibrationFactor => 1;
 
+        private Sampling _temperatureSampling;
+        private Sampling _pressureSampling;
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="Bmxx80Base"/> class.
         /// </summary>
@@ -52,9 +56,7 @@ namespace Iot.Device.Bmxx80
                 throw new IOException($"Unable to find a chip with id {deviceId}");
             }
         }
-
-        private Sampling _pressureSampling;
-
+        
         /// <summary>
         /// Gets or sets the pressure sampling.
         /// </summary>
@@ -71,8 +73,6 @@ namespace Iot.Device.Bmxx80
                 _pressureSampling = value;
             }
         }
-
-        private Sampling _temperatureSampling;
 
         /// <summary>
         /// Gets or sets the temperature sampling.
@@ -121,8 +121,6 @@ namespace Iot.Device.Bmxx80
             double temp = (var1 + var2) / 5120.0;
             return Temperature.FromCelsius(temp);
         }
-
-        protected virtual int _tempCalibrationFactor => 1;
 
         /// <summary>
         /// Reads an 8 bit value from a register.
