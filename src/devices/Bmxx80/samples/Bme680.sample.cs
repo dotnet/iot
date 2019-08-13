@@ -65,9 +65,9 @@ namespace Iot.Device.Samples
                     bme680.PressureSampling = Sampling.Skipped;
 
                     bme680.ConfigureHeatingProfile(Bme680HeaterProfile.Profile2, 280, 18, 24);
-                    bme680.CurrentHeaterProfile = Bme680HeaterProfile.Profile2;
+                    bme680.HeaterProfile = Bme680HeaterProfile.Profile2;
 
-                    measurementDuration = bme680.GetMeasurementDuration(bme680.CurrentHeaterProfile);
+                    measurementDuration = bme680.GetMeasurementDuration(bme680.HeaterProfile);
 
                     // 10 consecutive measurements with custom settings
                     for (int i = 0; i < 10; i++)
