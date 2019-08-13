@@ -46,7 +46,7 @@ namespace Iot.Device.Bmxx80
         private bool _gasConversionIsEnabled;
         private bool _heaterIsEnabled;
 
-        private Bme680HeaterProfile _currentHeaterProfile;
+        private Bme680HeaterProfile _heaterProfile;
         private Bme680FilteringMode _filterMode;
         private Sampling _humiditySampling;
 
@@ -93,9 +93,9 @@ namespace Iot.Device.Bmxx80
         /// Current heater profile is only set if the chosen profile is configured.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Bme680HeaterProfile"/> is set to an undefined profile.</exception>
-        public Bme680HeaterProfile CurrentHeaterProfile
+        public Bme680HeaterProfile HeaterProfile
         {
-            get => _currentHeaterProfile;
+            get => _heaterProfile;
             set
             {
                 if (_heaterConfigs.Exists(config => config.HeaterProfile == value))
@@ -107,7 +107,7 @@ namespace Iot.Device.Bmxx80
                     heaterProfile = (byte)((heaterProfile & (byte)~Bme680Mask.NB_CONV) | (byte)value);
 
                     _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_GAS_1, heaterProfile });
-                    _currentHeaterProfile = value;
+                    _heaterProfile = value;
                 }
             }
         }
@@ -388,7 +388,7 @@ namespace Iot.Device.Bmxx80
 
             var currentTemp = ReadTemperatureAsync().GetAwaiter().GetResult();
             ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, 320, 150, currentTemp.Celsius);
-            CurrentHeaterProfile = Bme680HeaterProfile.Profile1;
+            HeaterProfile = Bme680HeaterProfile.Profile1;
 
             HeaterIsEnabled = true;
             GasConversionIsEnabled = true;
