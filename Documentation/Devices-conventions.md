@@ -2,7 +2,8 @@
 
 ## Value returned by sensor
 
-- Prefer property (i.e. Temperature) rather than method (i.e. GetTemperature)
+- Methods (i.e. `ReadTemperature`) should be used for anything which may change between the calls
+- Properties (i.e. `SomeRegister`) should be used when value does not change between the calls (except when changed by setter)
 - Use `double` when you need to return any floating point value
 - Use `Vector2/3/4` for returning vectors`*`
 - Value should conform to units conventions (see below)
