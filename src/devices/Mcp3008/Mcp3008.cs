@@ -8,21 +8,36 @@ using System.Device.Spi;
 
 namespace Iot.Device.Mcp3008
 {
+    /// <summary>
+    /// MCP3008 Analog to Digital Converter (ADC)
+    /// </summary>
     public class Mcp3008 : IDisposable
     {
         private SpiDevice _spiDevice;
 
+        /// <summary>
+        /// Constructs Mcp3008 instance
+        /// </summary>
+        /// <param name="spiDevice">Device used for SPI communication</param>
         public Mcp3008(SpiDevice spiDevice)
         {
             _spiDevice = spiDevice;
         }
 
+        /// <summary>
+        /// Disposes Mcp3008 instances
+        /// </summary>
         public void Dispose()
         {
             _spiDevice?.Dispose();
             _spiDevice = null;
         }
 
+        /// <summary>
+        /// Reads 10-bit (0..1023) value from the device
+        /// </summary>
+        /// <param name="channel">Channel which value should be read from (valid values: 0-7)</param>
+        /// <returns>10-bit value corresponding to relative voltage level on specified device channel</returns>
         public int Read(int channel)
         {
             if (channel < 0 || channel > 7)
