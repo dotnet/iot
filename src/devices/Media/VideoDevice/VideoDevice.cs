@@ -71,14 +71,14 @@ namespace Iot.Device.Media
         /// Get all the pixel formats supported by the device.
         /// </summary>
         /// <returns>Supported pixel formats</returns>
-        public abstract List<PixelFormat> GetSupportedPixelFormats();
+        public abstract IEnumerable<PixelFormat> GetSupportedPixelFormats();
 
         /// <summary>
         /// Get all the resolutions supported by the specified pixel format.
         /// </summary>
         /// <param name="format">Pixel format</param>
         /// <returns>Supported resolution</returns>
-        public abstract List<(uint Width, uint Height)> GetPixelFormatResolutions(PixelFormat format);
+        public abstract IEnumerable<(uint Width, uint Height)> GetPixelFormatResolutions(PixelFormat format);
 
         public void Dispose()
         {

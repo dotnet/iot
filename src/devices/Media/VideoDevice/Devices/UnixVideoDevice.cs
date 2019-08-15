@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -67,10 +66,7 @@ namespace Iot.Device.Media
         /// <param name="path">Picture save path</param>
         public override async Task CaptureAsync(string path)
         {
-            using (CancellationTokenSource cts = new CancellationTokenSource())
-            {
-                await CaptureAsync(path, cts.Token);
-            }
+            await CaptureAsync(path, CancellationToken.None);
         }
 
         /// <summary>
@@ -87,11 +83,9 @@ namespace Iot.Device.Media
                 byte[] dataBuffer = ProcessCaptureData();
                 Close();
 
-                using (FileStream fs = new FileStream(path, FileMode.Create))
-                {
-                    fs.Write(dataBuffer, 0, dataBuffer.Length);
-                    fs.Flush();
-                }    
+                using FileStream fs = new FileStream(path, FileMode.Create);
+                fs.Write(dataBuffer, 0, dataBuffer.Length);
+                fs.Flush();
             }, token);
         }
 
@@ -99,12 +93,10 @@ namespace Iot.Device.Media
         /// Capture a picture from the video device.
         /// </summary>
         /// <returns>Picture stream</returns>
+        /// <param name="token">A cancellation token that can be used to cancel the work</param>
         public override async Task<MemoryStream> CaptureAsync()
         {
-            using (CancellationTokenSource cts = new CancellationTokenSource())
-            {
-                return  await CaptureAsync(cts.Token);
-            }
+            return await CaptureAsync(CancellationToken.None);
         }
 
         /// <summary>
@@ -161,7 +153,7 @@ namespace Iot.Device.Media
         /// Get all the pixel formats supported by the device.
         /// </summary>
         /// <returns>Supported pixel formats</returns>
-        public override List<PixelFormat> GetSupportedPixelFormats()
+        public override IEnumerable<PixelFormat> GetSupportedPixelFormats()
         {
             v4l2_fmtdesc fmtdesc = new v4l2_fmtdesc
             {
@@ -184,7 +176,7 @@ namespace Iot.Device.Media
         /// </summary>
         /// <param name="format">Pixel format</param>
         /// <returns>Supported resolution</returns>
-        public override List<(uint Width, uint Height)> GetPixelFormatResolutions(PixelFormat format)
+        public override IEnumerable<(uint Width, uint Height)> GetPixelFormatResolutions(PixelFormat format)
         {
             v4l2_frmsizeenum size = new v4l2_frmsizeenum()
             {
@@ -310,7 +302,7 @@ namespace Iot.Device.Media
                     }
                 }
             };
-            var res = V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
+            V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
 
             // Set exposure type
             v4l2_control ctrl = new v4l2_control
