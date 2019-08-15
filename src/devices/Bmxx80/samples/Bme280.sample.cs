@@ -5,7 +5,6 @@
 using System;
 using System.Device.I2c;
 using System.Threading;
-using System.Threading.Tasks;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
@@ -15,7 +14,7 @@ namespace Iot.Device.Samples
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             Console.WriteLine("Hello Bme280!");
 

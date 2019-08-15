@@ -19,7 +19,7 @@ namespace Iot.Device.Samples
         /// <summary>
         /// Main entry point for the program.
         /// </summary>
-        static async Task Main()
+        static void Main()
         {
             Console.WriteLine("Hello BME680!");
 
