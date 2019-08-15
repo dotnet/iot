@@ -8,7 +8,6 @@
 using System;
 using System.Device.I2c;
 using System.IO;
-using System.Threading.Tasks;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
 using Iot.Device.Bmxx80.FilteringMode;
@@ -31,6 +30,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         public const byte SecondaryI2cAddress = 0x76;
 
+        protected static int[] _osToMeasCycles = { 0, 7, 9, 14, 23, 44 };
         private Bmx280FilteringMode _filteringMode;
         private StandbyTime _standbyTime;
         
@@ -85,15 +85,10 @@ namespace Iot.Device.Bmxx80
         /// Read the temperature.
         /// </summary>
         /// <returns>Calculated temperature.</returns>
-        public async Task<Temperature> ReadTemperatureAsync()
+        public override Temperature ReadTemperature()
         {
             if (TemperatureSampling == Sampling.Skipped)
                 return Temperature.FromCelsius(double.NaN);
-
-            if (ReadPowerMode() == Bmx280PowerMode.Forced)
-            {
-                await Task.Delay(GetMeasurementTimeForForcedMode(TemperatureSampling));
-            }
 
             //Read the MSB, LSB and bits 7:4 (XLSB) of the temperature from the BMP280 registers
             byte msb = Read8BitsFromRegister((byte)Bmx280Register.TEMPDATA_MSB);
@@ -136,18 +131,13 @@ namespace Iot.Device.Bmxx80
         /// Reads the pressure from the sensor.
         /// </summary>
         /// <returns>Atmospheric pressure in Pa.</returns>
-        public async Task<double> ReadPressureAsync()
+        public override double ReadPressure()
         {
             if (PressureSampling == Sampling.Skipped)
                 return double.NaN;
 
-            if (ReadPowerMode() == Bmx280PowerMode.Forced)
-            {
-                await Task.Delay(GetMeasurementTimeForForcedMode(PressureSampling));
-            }
-
             // Read the temperature first to load the t_fine value for compensation.
-            await ReadTemperatureAsync();
+            ReadTemperature();
 
             // Read pressure data.
             byte msb = Read8BitsFromRegister((byte)Bmx280Register.PRESSUREDATA_MSB);
@@ -169,10 +159,10 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="seaLevelPressure">Sea-level pressure in hPa.</param>
         /// <returns>Height in meters from sea-level.</returns>
-        public async Task<double> ReadAltitudeAsync(double seaLevelPressure)
+        public double ReadAltitude(double seaLevelPressure)
         {
             // Read the pressure first.
-            double pressure = await ReadPressureAsync();
+            double pressure = ReadPressure();
 
             // Convert the pressure to Hectopascals (hPa).
             pressure /= 100;
@@ -218,21 +208,12 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Recommended wait timings from the datasheet.
+        /// Gets the required time in ms to perform a measurement with the current sampling modes.
         /// </summary>
-        /// <param name="sampleMode">The <see cref="Sampling"/> to get for.</param>
         /// <returns>The time it takes for the chip to read data in milliseconds rounded up.</returns>
-        internal int GetMeasurementTimeForForcedMode(Sampling sampleMode)
+        public virtual int GetMeasurementDuration()
         {
-            return sampleMode switch
-            {
-                Sampling.UltraLowPower => 7,
-                Sampling.LowPower => 9,
-                Sampling.Standard => 14,
-                Sampling.HighResolution => 23,
-                Sampling.UltraHighResolution => 44,
-                _ => 0
-            };
+            return _osToMeasCycles[(int)PressureSampling] + _osToMeasCycles[(int)TemperatureSampling];
         }
 
         protected override void SetDefaultConfiguration()

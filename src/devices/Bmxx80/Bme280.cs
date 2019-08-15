@@ -4,9 +4,7 @@
 
 using System;
 using System.Device.I2c;
-using System.Threading.Tasks;
 using Iot.Device.Bmxx80.CalibrationData;
-using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
 
 namespace Iot.Device.Bmxx80
@@ -76,18 +74,13 @@ namespace Iot.Device.Bmxx80
         /// Reads the Humidity from the sensor as %rH.
         /// </summary>
         /// <returns>Returns a percentage from 0 to 100.</returns>
-        public async Task<double> ReadHumidityAsync()
+        public double ReadHumidity()
         {
             if (HumiditySampling == Sampling.Skipped)
                 return double.NaN;
 
-            if (ReadPowerMode() == Bmx280PowerMode.Forced)
-            {
-                await Task.Delay(GetMeasurementTimeForForcedMode(HumiditySampling));
-            }
-
             // Read the temperature first to load the t_fine value for compensation.
-            await ReadTemperatureAsync();
+            ReadTemperature();
 
             byte msb = Read8BitsFromRegister((byte)Bme280Register.HUMIDDATA_MSB);
             byte lsb = Read8BitsFromRegister((byte)Bme280Register.HUMIDDATA_LSB);
@@ -96,6 +89,15 @@ namespace Iot.Device.Bmxx80
             int t = (msb << 8) | lsb;
 
             return CompensateHumidity(t);
+        }
+
+        /// <summary>
+        /// Gets the required time in ms to perform a measurement with the current sampling modes.
+        /// </summary>
+        /// <returns>The time it takes for the chip to read data in milliseconds rounded up.</returns>
+        public override int GetMeasurementDuration()
+        {
+            return _osToMeasCycles[(int)PressureSampling] + _osToMeasCycles[(int)TemperatureSampling] + _osToMeasCycles[(int)HumiditySampling];
         }
 
         protected override void SetDefaultConfiguration()

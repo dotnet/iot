@@ -39,12 +39,16 @@ namespace Iot.Device.Samples
                     //set mode forced so device sleeps after read
                     i2CBmp280.SetPowerMode(Bmx280PowerMode.Forced);
 
+                    // wait for measurement to be performed
+                    var measurementTime = i2CBmp280.GetMeasurementDuration();
+                    Thread.Sleep(measurementTime);
+
                     //read values
-                    Temperature tempValue = await i2CBmp280.ReadTemperatureAsync();
+                    Temperature tempValue = i2CBmp280.ReadTemperature();
                     Console.WriteLine($"Temperature {tempValue.Celsius}");
-                    double preValue = await i2CBmp280.ReadPressureAsync();
+                    double preValue = i2CBmp280.ReadPressure();
                     Console.WriteLine($"Pressure {preValue}");
-                    double altValue = await i2CBmp280.ReadAltitudeAsync(defaultSeaLevelPressure);
+                    double altValue = i2CBmp280.ReadAltitude(defaultSeaLevelPressure);
                     Console.WriteLine($"Altitude: {altValue}");
                     Thread.Sleep(1000);
 
@@ -56,12 +60,16 @@ namespace Iot.Device.Samples
                     //set mode forced and read again
                     i2CBmp280.SetPowerMode(Bmx280PowerMode.Forced);
 
+                    // wait for measurement to be performed
+                    measurementTime = i2CBmp280.GetMeasurementDuration();
+                    Thread.Sleep(measurementTime);
+
                     //read values
-                    tempValue = await i2CBmp280.ReadTemperatureAsync();
+                    tempValue = i2CBmp280.ReadTemperature();
                     Console.WriteLine($"Temperature {tempValue.Celsius}");
-                    preValue = await i2CBmp280.ReadPressureAsync();
+                    preValue = i2CBmp280.ReadPressure();
                     Console.WriteLine($"Pressure {preValue}");
-                    altValue = await i2CBmp280.ReadAltitudeAsync(defaultSeaLevelPressure);
+                    altValue = i2CBmp280.ReadAltitude(defaultSeaLevelPressure);
                     Console.WriteLine($"Altitude: {altValue}");
                     Thread.Sleep(5000);
                 }

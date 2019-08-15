@@ -40,14 +40,18 @@ namespace Iot.Device.Samples
                     //set mode forced so device sleeps after read
                     i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
 
+                    // wait for measurement to be performed
+                    var measurementTime = i2CBmpe80.GetMeasurementDuration();
+                    Thread.Sleep(measurementTime);
+
                     //read values
-                    Temperature tempValue = await i2CBmpe80.ReadTemperatureAsync();
+                    Temperature tempValue = i2CBmpe80.ReadTemperature();
                     Console.WriteLine($"Temperature: {tempValue.Celsius} C");
-                    double preValue = await i2CBmpe80.ReadPressureAsync();
+                    double preValue = i2CBmpe80.ReadPressure();
                     Console.WriteLine($"Pressure: {preValue} Pa");
-                    double altValue = await i2CBmpe80.ReadAltitudeAsync(defaultSeaLevelPressure);
+                    double altValue = i2CBmpe80.ReadAltitude(defaultSeaLevelPressure);
                     Console.WriteLine($"Altitude: {altValue} meters");
-                    double humValue = await i2CBmpe80.ReadHumidityAsync();
+                    double humValue = i2CBmpe80.ReadHumidity();
                     Console.WriteLine($"Humidity: {humValue} %");
                     Thread.Sleep(1000);
 
@@ -60,14 +64,18 @@ namespace Iot.Device.Samples
                     //set mode forced and read again
                     i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
 
+                    // wait for measurement to be performed
+                    measurementTime = i2CBmpe80.GetMeasurementDuration();
+                    Thread.Sleep(measurementTime);
+
                     //read values
-                    tempValue = await i2CBmpe80.ReadTemperatureAsync();
+                    tempValue = i2CBmpe80.ReadTemperature();
                     Console.WriteLine($"Temperature: {tempValue.Celsius} C");
-                    preValue = await i2CBmpe80.ReadPressureAsync();
+                    preValue = i2CBmpe80.ReadPressure();
                     Console.WriteLine($"Pressure: {preValue} Pa");
-                    altValue = await i2CBmpe80.ReadAltitudeAsync(defaultSeaLevelPressure);
+                    altValue = i2CBmpe80.ReadAltitude(defaultSeaLevelPressure);
                     Console.WriteLine($"Altitude: {altValue} meters");
-                    humValue = await i2CBmpe80.ReadHumidityAsync();
+                    humValue = i2CBmpe80.ReadHumidity();
                     Console.WriteLine($"Humidity: {humValue} %");
                     Thread.Sleep(5000);
                 }

@@ -109,6 +109,18 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
+        /// Read the temperature.
+        /// </summary>
+        /// <returns>Calculated temperature.</returns>
+        public abstract Temperature ReadTemperature();
+
+        /// <summary>
+        /// Read the pressure.
+        /// </summary>
+        /// <returns>Calculated pressure in Pa.</returns>
+        public abstract double ReadPressure();
+
+        /// <summary>
         /// Compensates the temperature.
         /// </summary>
         /// <param name="adcTemperature">The temperature value read from the device.</param>

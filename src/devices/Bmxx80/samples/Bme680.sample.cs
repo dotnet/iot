@@ -46,10 +46,10 @@ namespace Iot.Device.Samples
                         Thread.Sleep(measurementDuration);
 
                         // Print out the measured data
-                        var temperature = await bme680.ReadTemperatureAsync();
-                        var pressure = await bme680.ReadPressureAsync() / 100;
-                        var humidity = await bme680.ReadHumidityAsync();
-                        var gasResistance = await bme680.ReadGasResistanceAsync();
+                        var temperature = bme680.ReadTemperature();
+                        var pressure = bme680.ReadPressure() / 100;
+                        var humidity = bme680.ReadHumidity();
+                        var gasResistance = bme680.ReadGasResistance();
 
                         Console.WriteLine($"{temperature.Celsius:N2} °c | {pressure:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
 
@@ -77,10 +77,10 @@ namespace Iot.Device.Samples
                         Thread.Sleep(measurementDuration);
 
                         // Print out the measured data
-                        var temperature = await bme680.ReadTemperatureAsync();
-                        var pressure = await bme680.ReadPressureAsync() / 100;
-                        var humidity = await bme680.ReadHumidityAsync();
-                        var gasResistance = await bme680.ReadGasResistanceAsync();
+                        var temperature = bme680.ReadTemperature();
+                        var pressure = bme680.ReadPressure() / 100;
+                        var humidity = bme680.ReadHumidity();
+                        var gasResistance = bme680.ReadGasResistance();
 
                         Console.WriteLine($"{temperature.Celsius:N2} °c | {pressure:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
                         Thread.Sleep(1000);

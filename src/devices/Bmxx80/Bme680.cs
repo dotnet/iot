@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Device.I2c;
 using System.Linq;
-using System.Threading.Tasks;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
@@ -312,7 +311,7 @@ namespace Iot.Device.Bmxx80
         /// Read the humidity.
         /// </summary>
         /// <returns>Calculated humidity.</returns>
-        public async Task<double> ReadHumidityAsync()
+        public double ReadHumidity()
         {
             if (HumiditySampling == Sampling.Skipped)
                 return double.NaN;
@@ -324,14 +323,14 @@ namespace Iot.Device.Bmxx80
             // Convert to a 32bit integer.
             var adcHumidity = (msb << 8) + lsb;
 
-            return CompensateHumidity((await ReadTemperatureAsync()).Celsius, adcHumidity);
+            return CompensateHumidity(ReadTemperature().Celsius, adcHumidity);
         }
 
         /// <summary>
         /// Read the pressure.
         /// </summary>
         /// <returns>Calculated pressure in Pa.</returns>
-        public async Task<double> ReadPressureAsync()
+        public override double ReadPressure()
         {
             if (PressureSampling == Sampling.Skipped)
                 return double.NaN;
@@ -345,7 +344,7 @@ namespace Iot.Device.Bmxx80
             var adcPressure = (msb << 12) + (lsb << 4) + (xlsb >> 4);
 
             // Read the temperature first to load the t_fine value for compensation.
-            await ReadTemperatureAsync();
+            ReadTemperature();
 
             return CompensatePressure(adcPressure);
         }
@@ -354,10 +353,10 @@ namespace Iot.Device.Bmxx80
         /// Read the temperature.
         /// </summary>
         /// <returns>Calculated temperature.</returns>
-        public Task<Temperature> ReadTemperatureAsync()
+        public override Temperature ReadTemperature()
         {
             if (TemperatureSampling == Sampling.Skipped)
-                return Task.FromResult(Temperature.FromCelsius(double.NaN));
+                return Temperature.FromCelsius(double.NaN);
 
             // Read temperature data.
             var lsb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_LSB);
@@ -367,17 +366,17 @@ namespace Iot.Device.Bmxx80
             // Convert to a 32bit integer.
             var adcTemperature = (msb << 12) + (lsb << 4) + (xlsb >> 4);
 
-            return Task.FromResult(CompensateTemperature(adcTemperature));
+            return CompensateTemperature(adcTemperature);
         }
 
         /// <summary>
         /// Reads the gas resistance.
         /// </summary>
         /// <returns>Gas resistance in Ohm. NaN if last gas measurement is invalid.</returns>
-        public Task<double> ReadGasResistanceAsync()
+        public double ReadGasResistance()
         {
             if (!ReadGasMeasurementIsValid() || !ReadHeaterIsStable())
-                return Task.FromResult(double.NaN);
+                return double.NaN;
 
             // Read 10 bit gas resistance value from registers
             var g1 = Read8BitsFromRegister((byte)Bme680Register.GAS_RES);
@@ -387,7 +386,7 @@ namespace Iot.Device.Bmxx80
             var gasResistance = (ushort)((ushort)(g1 << 2) + (byte)(g2 >> 6));
             gasRange &= (byte)Bme680Mask.GAS_RANGE;
 
-            return Task.FromResult(CalculateGasResistance(gasResistance, gasRange));
+            return CalculateGasResistance(gasResistance, gasRange);
         }
 
         protected override void SetDefaultConfiguration()
@@ -396,8 +395,7 @@ namespace Iot.Device.Bmxx80
             HumiditySampling = Sampling.UltraLowPower;
             FilterMode = Bme680FilteringMode.C0;
 
-            var currentTemp = ReadTemperatureAsync().GetAwaiter().GetResult();
-            ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, 320, 150, currentTemp.Celsius);
+            ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, 320, 150, ReadTemperature().Celsius);
             HeaterProfile = Bme680HeaterProfile.Profile1;
 
             HeaterIsEnabled = true;
