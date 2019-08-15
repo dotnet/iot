@@ -41,7 +41,7 @@ namespace Iot.Device.Bmxx80
         private readonly Bme680CalibrationData _bme680Calibration;
 
         protected override int _tempCalibrationFactor => 16;
-        
+
         private readonly List<Bme680HeaterProfileConfig> _heaterConfigs = new List<Bme680HeaterProfileConfig>();
         private bool _gasConversionIsEnabled;
         private bool _heaterIsEnabled;
@@ -49,6 +49,11 @@ namespace Iot.Device.Bmxx80
         private Bme680HeaterProfile _heaterProfile;
         private Bme680FilteringMode _filterMode;
         private Sampling _humiditySampling;
+
+        private static readonly byte[] _osToMeasCycles = { 0, 1, 2, 4, 8, 16 };
+        private static readonly byte[] _osToSwitchCount = { 0, 1, 1, 1, 1, 1 };
+        private static readonly double[] _k1Lookup = { 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -0.8, 0.0, 0.0, -0.2, -0.5, 0.0, -1.0, 0.0, 0.0 };
+        private static readonly double[] _k2Lookup = { 0.0, 0.0, 0.0, 0.0, 0.1, 0.7, 0.0, -0.8, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
         /// <summary>
         /// Initialize a new instance of the <see cref="Bme680"/> class.
@@ -83,7 +88,8 @@ namespace Iot.Device.Bmxx80
                 var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_HUM);
                 status = (byte)((status & (byte)~Bme680Mask.HUMIDITY_SAMPLING) | (byte)value);
 
-                _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_HUM, status });
+                Span<byte> command = stackalloc[] { (byte)Bme680Register.CTRL_HUM, status };
+                _i2cDevice.Write(command);
                 _humiditySampling = value;
             }
         }
@@ -106,7 +112,8 @@ namespace Iot.Device.Bmxx80
                     var heaterProfile = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_1);
                     heaterProfile = (byte)((heaterProfile & (byte)~Bme680Mask.NB_CONV) | (byte)value);
 
-                    _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_GAS_1, heaterProfile });
+                    Span<byte> command = stackalloc[] { (byte)Bme680Register.CTRL_GAS_1, heaterProfile };
+                    _i2cDevice.Write(command);
                     _heaterProfile = value;
                 }
             }
@@ -127,7 +134,8 @@ namespace Iot.Device.Bmxx80
                 var filter = Read8BitsFromRegister((byte)Bme680Register.CONFIG);
                 filter = (byte)((filter & (byte)~Bme680Mask.FILTER_COEFFICIENT) | (byte)value << 2);
 
-                _i2cDevice.Write(new[] { (byte)Bme680Register.CONFIG, filter });
+                Span<byte> command = stackalloc[] { (byte)Bme680Register.CONFIG, filter };
+                _i2cDevice.Write(command);
                 _filterMode = value;
             }
         }
@@ -143,7 +151,8 @@ namespace Iot.Device.Bmxx80
                 var heaterStatus = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_0);
                 heaterStatus = (byte)((heaterStatus & (byte)~Bme680Mask.HEAT_OFF) | Convert.ToByte(!value) << 3);
 
-                _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_GAS_0, heaterStatus });
+                Span<byte> command = stackalloc[] { (byte)Bme680Register.CTRL_GAS_0, heaterStatus };
+                _i2cDevice.Write(command);
                 _heaterIsEnabled = value;
             }
         }
@@ -159,7 +168,8 @@ namespace Iot.Device.Bmxx80
                 var gasConversion = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_1);
                 gasConversion = (byte)((gasConversion & (byte)~Bme680Mask.RUN_GAS) | Convert.ToByte(value) << 4);
 
-                _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_GAS_1, gasConversion });
+                Span<byte> command = stackalloc[] { (byte)Bme680Register.CTRL_GAS_1, gasConversion };
+                _i2cDevice.Write(command);
                 _gasConversionIsEnabled = value;
             }
         }
@@ -202,10 +212,10 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         public bool ReadHeaterIsStable()
         {
-                var heaterStable = Read8BitsFromRegister((byte)Bme680Register.GAS_RANGE);
-                heaterStable = (byte)((heaterStable & (byte)Bme680Mask.HEAT_STAB) >> 4);
+            var heaterStable = Read8BitsFromRegister((byte)Bme680Register.GAS_RANGE);
+            heaterStable = (byte)((heaterStable & (byte)Bme680Mask.HEAT_STAB) >> 4);
 
-                return Convert.ToBoolean(heaterStable);
+            return Convert.ToBoolean(heaterStable);
         }
 
         /// <summary>
@@ -221,7 +231,8 @@ namespace Iot.Device.Bmxx80
             var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_MEAS);
             status = (byte)((status & (byte)~Bme680Mask.PWR_MODE) | (byte)powerMode);
 
-            _i2cDevice.Write(new[] { (byte)Bme680Register.CTRL_MEAS, status });
+            Span<byte> command = stackalloc[] { (byte)Bme680Register.CTRL_MEAS, status };
+            _i2cDevice.Write(command);
         }
 
         /// <summary>
@@ -242,8 +253,10 @@ namespace Iot.Device.Bmxx80
             var heaterResistance = CalculateHeaterResistance(targetTemperature, (short)ambientTemperature);
             var heaterDuration = CalculateHeaterDuration(duration);
 
-            _i2cDevice.Write(new[] { (byte)((byte)Bme680Register.RES_HEAT_0 + profile), heaterResistance });
-            _i2cDevice.Write(new[] { (byte)((byte)Bme680Register.GAS_WAIT_0 + profile), heaterDuration });
+            Span<byte> resistanceCommand = stackalloc[] { (byte)((byte)Bme680Register.RES_HEAT_0 + profile), heaterResistance };
+            Span<byte> durationCommand = stackalloc[] { (byte)((byte)Bme680Register.GAS_WAIT_0 + profile), heaterDuration };
+            _i2cDevice.Write(resistanceCommand);
+            _i2cDevice.Write(durationCommand);
 
             // cache heater configuration
             if (_heaterConfigs.Exists(config => config.HeaterProfile == profile))
@@ -272,16 +285,13 @@ namespace Iot.Device.Bmxx80
         /// <returns></returns>
         public int GetMeasurementDuration(Bme680HeaterProfile profile)
         {
-            var osToMeasCycles = new byte[] { 0, 1, 2, 4, 8, 16 };
-            var osToSwitchCount = new byte[] { 0, 1, 1, 1, 1, 1 };
+            var measCycles = _osToMeasCycles[(int)TemperatureSampling];
+            measCycles += _osToMeasCycles[(int)PressureSampling];
+            measCycles += _osToMeasCycles[(int)HumiditySampling];
 
-            var measCycles = osToMeasCycles[(int)TemperatureSampling];
-            measCycles += osToMeasCycles[(int)PressureSampling];
-            measCycles += osToMeasCycles[(int)HumiditySampling];
-
-            var switchCount = osToSwitchCount[(int)TemperatureSampling];
-            switchCount += osToSwitchCount[(int)PressureSampling];
-            switchCount += osToSwitchCount[(int)HumiditySampling];
+            var switchCount = _osToSwitchCount[(int)TemperatureSampling];
+            switchCount += _osToSwitchCount[(int)PressureSampling];
+            switchCount += _osToSwitchCount[(int)HumiditySampling];
 
             double measDuration = measCycles * 1963;
             measDuration += 477 * switchCount;      // TPH switching duration
@@ -466,12 +476,9 @@ namespace Iot.Device.Bmxx80
 
         private double CalculateGasResistance(ushort adcGasRes, byte gasRange)
         {
-            var k1Lookup = new[] { 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -0.8, 0.0, 0.0, -0.2, -0.5, 0.0, -1.0, 0.0, 0.0 };
-            var k2Lookup = new[] { 0.0, 0.0, 0.0, 0.0, 0.1, 0.7, 0.0, -0.8, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-
             var var1 = 1340.0 + 5.0 * _bme680Calibration.RangeSwErr;
-            var var2 = var1 * (1.0 + k1Lookup[gasRange] / 100.0);
-            var var3 = 1.0 + k2Lookup[gasRange] / 100.0;
+            var var2 = var1 * (1.0 + _k1Lookup[gasRange] / 100.0);
+            var var3 = 1.0 + _k2Lookup[gasRange] / 100.0;
             var gasResistance = 1.0 / (var3 * 0.000000125 * (1 << gasRange) * ((adcGasRes - 512.0) / var2 + 1.0));
 
             return gasResistance;

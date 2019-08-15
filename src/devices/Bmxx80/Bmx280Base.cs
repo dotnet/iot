@@ -56,7 +56,9 @@ namespace Iot.Device.Bmxx80
             {
                 byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
                 current = (byte)((current & 0b_1110_0011) | (byte)value << 2);
-                _i2cDevice.Write(new[] { (byte)Bmx280Register.CONFIG, current });
+
+                Span<byte> command = stackalloc[] {(byte)Bmx280Register.CONFIG, current};
+                _i2cDevice.Write(command);
                 _filteringMode = value;
             }
         }
@@ -72,7 +74,9 @@ namespace Iot.Device.Bmxx80
             {
                 byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
                 current = (byte)((current & 0b_0001_1111) | (byte)value << 5);
-                _i2cDevice.Write(new[] { (byte)Bmx280Register.CONFIG, current });
+
+                Span<byte> command = stackalloc[] {(byte)Bmx280Register.CONFIG, current};
+                _i2cDevice.Write(command);
                 _standbyTime = value;
             }
         }
@@ -209,7 +213,8 @@ namespace Iot.Device.Bmxx80
             // Clear last 2 bits.
             var cleared = (byte)(read & 0b_1111_1100);
 
-            _i2cDevice.Write(new[] { _controlRegister, (byte)(cleared | (byte)powerMode) });
+            Span<byte> command = stackalloc[] {_controlRegister, (byte)(cleared | (byte)powerMode)};
+            _i2cDevice.Write(command);
         }
 
         /// <summary>

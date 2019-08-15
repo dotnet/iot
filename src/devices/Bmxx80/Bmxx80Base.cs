@@ -69,7 +69,9 @@ namespace Iot.Device.Bmxx80
                 byte status = Read8BitsFromRegister(_controlRegister);
                 status = (byte)(status & 0b1110_0011);
                 status = (byte)(status | (byte)value << 2);
-                _i2cDevice.Write(new[] { _controlRegister, status });
+
+                Span<byte> command = stackalloc[] {_controlRegister, status};
+                _i2cDevice.Write(command);
                 _pressureSampling = value;
             }
         }
@@ -86,7 +88,9 @@ namespace Iot.Device.Bmxx80
                 byte status = Read8BitsFromRegister(_controlRegister);
                 status = (byte)(status & 0b0001_1111);
                 status = (byte)(status | (byte)value << 5);
-                _i2cDevice.Write(new[] { _controlRegister, status });
+
+                Span<byte> command = stackalloc[] {_controlRegister, status};
+                _i2cDevice.Write(command);
                 _temperatureSampling = value;
             }
         }
@@ -98,7 +102,8 @@ namespace Iot.Device.Bmxx80
         public void Reset()
         {
             const byte resetCommand = 0xB6;
-            _i2cDevice.Write(new[] { (byte)Bmxx80Register.RESET, resetCommand });
+            Span<byte> command = stackalloc[] {(byte)Bmxx80Register.RESET, resetCommand};
+            _i2cDevice.Write(command);
 
             SetDefaultConfiguration();
         }
