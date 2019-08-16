@@ -43,3 +43,10 @@ sudo apt-get install v4l-utils
     // Query v4l2 controls default and current value
     VideoDeviceValue value = device.GetVideoDeviceValue(VideoDeviceValueType.Rotate);
     ```
+
+## Run the sample with Docker
+```
+cd VideoDevice
+docker build -t video-sample -f samples/Dockerfile .
+docker run --rm -it --device /dev/video0 -v /home/pi/images:/home/pi/images video-sample
+```
