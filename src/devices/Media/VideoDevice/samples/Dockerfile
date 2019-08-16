@@ -12,10 +12,6 @@ FROM mcr.microsoft.com/dotnet/core/runtime:2.1-stretch-slim-arm32v7 AS runtime
 WORKDIR /app
 COPY --from=build /app/samples/out ./
 
-RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak && \
-    echo "deb http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ stretch main non-free contrib" >/etc/apt/sources.list && \
-    echo "deb-src http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ stretch main non-free contrib" >>/etc/apt/sources.list
-
 # install System.Drawing native dependencies
 RUN apt-get update && \
     apt-get install -y --allow-unauthenticated libc6-dev libgdiplus libx11-dev && \
