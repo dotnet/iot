@@ -1,13 +1,13 @@
 # VideoDevice
 
 ## Getting Started
-Before that, please make sure you install `v4l-utils`.
+Install `v4l-utils`.
 ```
 sudo apt-get update
 sudo apt-get install v4l-utils
 ```
 
-1. First you need to create a `VideoConnectionSettings` and set the parameters for capture.
+1. Create a `VideoConnectionSettings` and set the parameters for capture.
     ```C#
     VideoConnectionSettings settings = new VideoConnectionSettings(busId: 0)
     {
@@ -16,7 +16,7 @@ sudo apt-get install v4l-utils
         ExposureType = ExposureType.Auto
     };
     ```
-2. Creates a communications channel to a video device.
+2. Create a communications channel to a video device.
     ```C#
     using VideoDevice device = VideoDevice.Create(settings);
     ```
