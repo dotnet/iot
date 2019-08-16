@@ -90,15 +90,9 @@ namespace Iot.Device.Bmxx80
             if (TemperatureSampling == Sampling.Skipped)
                 return Temperature.FromCelsius(double.NaN);
 
-            //Read the MSB, LSB and bits 7:4 (XLSB) of the temperature from the BMP280 registers
-            byte msb = Read8BitsFromRegister((byte)Bmx280Register.TEMPDATA_MSB);
-            byte lsb = Read8BitsFromRegister((byte)Bmx280Register.TEMPDATA_LSB);
-            byte xlsb = Read8BitsFromRegister((byte)Bmx280Register.TEMPDATA_XLSB); // bits 7:4
+            var temperature = (int)Read24BitsFromRegister((byte)Bmx280Register.TEMPDATA_MSB, Endianness.BigEndian);
 
-            //Combine the values into a 32-bit integer
-            int t = (msb << 12) + (lsb << 4) + (xlsb >> 4);
-
-            return CompensateTemperature(t);
+            return CompensateTemperature(temperature >> 4);
         }
 
         /// <summary>
@@ -140,15 +134,10 @@ namespace Iot.Device.Bmxx80
             ReadTemperature();
 
             // Read pressure data.
-            byte msb = Read8BitsFromRegister((byte)Bmx280Register.PRESSUREDATA_MSB);
-            byte lsb = Read8BitsFromRegister((byte)Bmx280Register.PRESSUREDATA_LSB);
-            byte xlsb = Read8BitsFromRegister((byte)Bmx280Register.PRESSUREDATA_XLSB); // bits 7:4
-
-            //Combine the values into a 32-bit integer.
-            int t = (msb << 12) + (lsb << 4) + (xlsb >> 4);
+            var pressure = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
 
             //Convert the raw value to the pressure in Pa.
-            long pres = CompensatePressure(t);
+            long pres = CompensatePressure(pressure >> 4);
 
             //Return the temperature as a float value.
             return (double)pres / 256;

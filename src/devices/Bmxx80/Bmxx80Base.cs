@@ -52,15 +52,13 @@ namespace Iot.Device.Bmxx80
             byte readSignature = _i2cDevice.ReadByte();
 
             if (readSignature != deviceId)
-            {
                 throw new IOException($"Unable to find a chip with id {deviceId}");
-            }
         }
         
         /// <summary>
         /// Gets or sets the pressure sampling.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined endianness.</exception>
         public Sampling PressureSampling
         {
             get => _pressureSampling;
@@ -79,7 +77,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Gets or sets the temperature sampling.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined endianness.</exception>
         public Sampling TemperatureSampling
         {
             get => _temperatureSampling;
@@ -153,31 +151,34 @@ namespace Iot.Device.Bmxx80
                 return value;
             }
             else
-            {
                 throw new NotImplementedException();
-            }
         }
 
         /// <summary>
         /// Reads a 16 bit value over I2C.
         /// </summary>
         /// <param name="register">Register to read from.</param>
+        /// <param name="endianness">Interpretation of the bytes (big or little endian).</param>
         /// <returns>Value from register.</returns>
-        protected internal ushort Read16BitsFromRegister(byte register)
+        protected internal ushort Read16BitsFromRegister(byte register, Endianness endianness = Endianness.LittleEndian)
         {
-            if (_communicationProtocol == CommunicationProtocol.I2c)
+            Span<byte> bytes = stackalloc byte[2];
+            switch (_communicationProtocol)
             {
-                Span<byte> bytes = stackalloc byte[2];
-
-                _i2cDevice.WriteByte(register);
-                _i2cDevice.Read(bytes);
-
-                return BinaryPrimitives.ReadUInt16LittleEndian(bytes);
+                case CommunicationProtocol.I2c:
+                    _i2cDevice.WriteByte(register);
+                    _i2cDevice.Read(bytes);
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
-            else
+
+            return endianness switch
             {
-                throw new NotImplementedException();
-            }
+                Endianness.LittleEndian => BinaryPrimitives.ReadUInt16LittleEndian(bytes),
+                Endianness.BigEndian => BinaryPrimitives.ReadUInt16BigEndian(bytes),
+                _ => throw new ArgumentOutOfRangeException(nameof(endianness), endianness, null)
+            };
         }
 
         /// <summary>
@@ -185,30 +186,32 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="register">Register to read from.</param>
         /// <returns>Value from register.</returns>
-        protected internal uint Read24BitsFromRegister(byte register)
+        protected internal uint Read24BitsFromRegister(byte register, Endianness endianness = Endianness.LittleEndian)
         {
-            if (_communicationProtocol == CommunicationProtocol.I2c)
+            Span<byte> bytes = stackalloc byte[4];
+            switch (_communicationProtocol)
             {
-                Span<byte> bytes = stackalloc byte[4];
-
-                _i2cDevice.WriteByte(register);
-                _i2cDevice.Read(bytes.Slice(1));
-
-                return BinaryPrimitives.ReadUInt32LittleEndian(bytes);
+                case CommunicationProtocol.I2c:
+                    _i2cDevice.WriteByte(register);
+                    _i2cDevice.Read(bytes.Slice(1));
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
-            else
+
+            return endianness switch
             {
-                throw new NotImplementedException();
-            }
+                Endianness.LittleEndian => BinaryPrimitives.ReadUInt32LittleEndian(bytes),
+                Endianness.BigEndian => BinaryPrimitives.ReadUInt32BigEndian(bytes),
+                _ => throw new ArgumentOutOfRangeException(nameof(endianness), endianness, null)
+            };
         }
 
         protected Sampling ByteToSampling(byte value)
         {
             // Values >=5 equals UltraHighResolution.
             if (value >= 5)
-            {
                 return Sampling.UltraHighResolution;
-            }
 
             return (Sampling)value;
         }
@@ -217,6 +220,12 @@ namespace Iot.Device.Bmxx80
         {
             PressureSampling = Sampling.UltraLowPower;
             TemperatureSampling = Sampling.UltraLowPower;
+        }
+
+        protected internal enum Endianness
+        {
+            LittleEndian,
+            BigEndian
         }
 
         /// <summary>

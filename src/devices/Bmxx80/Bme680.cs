@@ -317,13 +317,9 @@ namespace Iot.Device.Bmxx80
                 return double.NaN;
 
             // Read humidity data.
-            var msb = Read8BitsFromRegister((byte)Bme680Register.HUMIDITYDATA_MSB);
-            var lsb = Read8BitsFromRegister((byte)Bme680Register.HUMIDITYDATA_LSB);
+            var hum = Read16BitsFromRegister((byte)Bme680Register.HUMIDITYDATA, Endianness.BigEndian);
 
-            // Convert to a 32bit integer.
-            var adcHumidity = (msb << 8) + lsb;
-
-            return CompensateHumidity(ReadTemperature().Celsius, adcHumidity);
+            return CompensateHumidity(ReadTemperature().Celsius, hum);
         }
 
         /// <summary>
@@ -336,17 +332,12 @@ namespace Iot.Device.Bmxx80
                 return double.NaN;
 
             // Read pressure data.
-            var lsb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_LSB);
-            var msb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_MSB);
-            var xlsb = Read8BitsFromRegister((byte)Bme680Register.PRESSUREDATA_XLSB);
-
-            // Convert to a 32bit integer.
-            var adcPressure = (msb << 12) + (lsb << 4) + (xlsb >> 4);
+            var pressure = (int)Read24BitsFromRegister((byte)Bme680Register.PRESSUREDATA, Endianness.BigEndian);
 
             // Read the temperature first to load the t_fine value for compensation.
             ReadTemperature();
 
-            return CompensatePressure(adcPressure);
+            return CompensatePressure(pressure >> 4);
         }
 
         /// <summary>
@@ -358,15 +349,9 @@ namespace Iot.Device.Bmxx80
             if (TemperatureSampling == Sampling.Skipped)
                 return Temperature.FromCelsius(double.NaN);
 
-            // Read temperature data.
-            var lsb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_LSB);
-            var msb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_MSB);
-            var xlsb = Read8BitsFromRegister((byte)Bme680Register.TEMPDATA_XLSB);
+            var pressure = (int)Read24BitsFromRegister((byte)Bme680Register.TEMPDATA, Endianness.BigEndian);
 
-            // Convert to a 32bit integer.
-            var adcTemperature = (msb << 12) + (lsb << 4) + (xlsb >> 4);
-
-            return CompensateTemperature(adcTemperature);
+            return CompensateTemperature(pressure >> 4);
         }
 
         /// <summary>
@@ -379,11 +364,10 @@ namespace Iot.Device.Bmxx80
                 return double.NaN;
 
             // Read 10 bit gas resistance value from registers
-            var g1 = Read8BitsFromRegister((byte)Bme680Register.GAS_RES);
-            var g2 = Read8BitsFromRegister((byte)Bme680Register.GAS_RES + sizeof(byte));
+            var gasResRaw = Read8BitsFromRegister((byte)Bme680Register.GAS_RES);
             var gasRange = Read8BitsFromRegister((byte)Bme680Register.GAS_RANGE);
-
-            var gasResistance = (ushort)((ushort)(g1 << 2) + (byte)(g2 >> 6));
+            
+            var gasResistance = (ushort)((ushort)(gasResRaw << 2) + (byte)(gasRange >> 6));
             gasRange &= (byte)Bme680Mask.GAS_RANGE;
 
             return CalculateGasResistance(gasResistance, gasRange);

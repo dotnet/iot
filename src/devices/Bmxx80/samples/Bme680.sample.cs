@@ -5,7 +5,6 @@
 using System;
 using System.Device.I2c;
 using System.Threading;
-using System.Threading.Tasks;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
 

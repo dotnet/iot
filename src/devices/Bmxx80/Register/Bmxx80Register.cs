@@ -10,6 +10,6 @@ namespace Iot.Device.Bmxx80.Register
     public enum Bmxx80Register : byte
     {
         CHIPID = 0xD0,
-        RESET = 0xE0,
+        RESET = 0xE0
     }
 }

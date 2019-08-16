@@ -82,13 +82,9 @@ namespace Iot.Device.Bmxx80
             // Read the temperature first to load the t_fine value for compensation.
             ReadTemperature();
 
-            byte msb = Read8BitsFromRegister((byte)Bme280Register.HUMIDDATA_MSB);
-            byte lsb = Read8BitsFromRegister((byte)Bme280Register.HUMIDDATA_LSB);
+            var humidity = Read16BitsFromRegister((byte)Bme280Register.HUMIDDATA, Endianness.BigEndian);
 
-            // Combine the values into a 32-bit integer.
-            int t = (msb << 8) | lsb;
-
-            return CompensateHumidity(t);
+            return CompensateHumidity(humidity);
         }
 
         /// <summary>

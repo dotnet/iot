@@ -46,16 +46,9 @@ namespace Iot.Device.Bmxx80.Register
         RANGE_SW_ERR = 0x04,
         STATUS = 0x1D,
 
-        PRESSUREDATA_MSB = 0x1F,
-        PRESSUREDATA_LSB = 0x20,
-        PRESSUREDATA_XLSB = 0x21,
-
-        TEMPDATA_MSB = 0x22,
-        TEMPDATA_LSB = 0x23,
-        TEMPDATA_XLSB = 0x24,
-
-        HUMIDITYDATA_MSB = 0x25,
-        HUMIDITYDATA_LSB = 0x26,
+        PRESSUREDATA = 0x1F,
+        TEMPDATA = 0x22,
+        HUMIDITYDATA = 0x25,
 
         GAS_RES = 0x2A,
         GAS_RANGE = 0x2B,

@@ -18,7 +18,6 @@ namespace Iot.Device.Bmxx80.Register
         DIG_H5 = 0xE5,
         DIG_H6 = 0xE7,
 
-        HUMIDDATA_LSB = 0xFE,
-        HUMIDDATA_MSB = 0xFD,
+        HUMIDDATA = 0xFD
     }
 }
