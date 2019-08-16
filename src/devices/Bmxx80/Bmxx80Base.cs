@@ -58,7 +58,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Gets or sets the pressure sampling.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined endianness.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
         public Sampling PressureSampling
         {
             get => _pressureSampling;
@@ -77,7 +77,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Gets or sets the temperature sampling.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined endianness.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
         public Sampling TemperatureSampling
         {
             get => _temperatureSampling;
@@ -185,6 +185,7 @@ namespace Iot.Device.Bmxx80
         /// Reads a 24 bit value over I2C.
         /// </summary>
         /// <param name="register">Register to read from.</param>
+        /// <param name="endianness">Interpretation of the bytes (big or little endian).</param>
         /// <returns>Value from register.</returns>
         protected internal uint Read24BitsFromRegister(byte register, Endianness endianness = Endianness.LittleEndian)
         {
