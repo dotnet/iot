@@ -13,7 +13,7 @@ namespace Iot.Device.Media
     public abstract partial class VideoDevice : IDisposable
     {
         /// <summary>
-        /// Creates a communications channel to a video device running on Unix.
+        /// Create a communications channel to a video device running on Unix.
         /// </summary>
         /// <param name="settings">The connection settings of a video device.</param>
         /// <returns>A communications channel to a video device running on Unix.</returns>
