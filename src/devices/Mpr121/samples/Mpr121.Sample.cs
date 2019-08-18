@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 
 namespace Iot.Device.Mpr121.Samples
 {
@@ -12,7 +11,7 @@ namespace Iot.Device.Mpr121.Samples
     {
         static void Main(string[] args)
         {
-            var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
+            var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
 
             // Initialize controller with default configuration and auto-refresh the channel statuses every 100 ms.
             var mpr121 = new Mpr121(device: i2cDevice, periodRefresh: 100);

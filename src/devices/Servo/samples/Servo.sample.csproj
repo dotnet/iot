@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,10 +7,12 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Servo.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\..\..\System.Device.Gpio\System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
     <None Include="README.md" />
   </ItemGroup>
 

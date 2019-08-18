@@ -31,7 +31,7 @@ namespace System.Device.Gpio.Drivers
 
         private void SubscribeForEvent(SafeLineHandle pinHandle)
         {
-            int eventSuccess = Interop.RequestBothEdgesEventForLine(pinHandle, $"Listen {_pinNumber} for both edge event");
+            int eventSuccess = Interop.libgpiod.gpiod_line_request_both_edges_events(pinHandle, $"Listen {_pinNumber} for both edge event");
 
             if (eventSuccess < 0)
             {
@@ -47,7 +47,13 @@ namespace System.Device.Gpio.Drivers
                 while (!(token.IsCancellationRequested || _disposing))
                 {
                     // WaitEventResult can be TimedOut, EventOccured or Error, in case of TimedOut will continue waiting
-                    WaitEventResult waitResult = Interop.WaitForEventOnLine(pinHandle);
+                    TimeSpec timeout = new TimeSpec
+                    {
+                        TvSec = new IntPtr(0),
+                        TvNsec = new IntPtr(1000000)
+                    };
+
+                    WaitEventResult waitResult = Interop.libgpiod.gpiod_line_event_wait(pinHandle, ref timeout);
                     if (waitResult == WaitEventResult.Error)
                     {
                         throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, Marshal.GetLastWin32Error(), _pinNumber);
@@ -55,13 +61,14 @@ namespace System.Device.Gpio.Drivers
 
                     if (waitResult == WaitEventResult.EventOccured)
                     {
-                        int readResult = Interop.ReadEventForLine(pinHandle);
-                        if (readResult == -1)
+                        GpioLineEvent eventResult = new GpioLineEvent();
+                        int checkForEvent = Interop.libgpiod.gpiod_line_event_read(pinHandle, ref eventResult);
+                        if (checkForEvent == -1)
                         {
                             throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, Marshal.GetLastWin32Error());
                         }
 
-                        PinEventTypes eventType = (readResult == 1) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                        PinEventTypes eventType = (eventResult.event_type == 1) ? PinEventTypes.Rising : PinEventTypes.Falling;
                         this?.OnPinValueChanged(new PinValueChangedEventArgs(eventType, _pinNumber), eventType);
                     }
                 }

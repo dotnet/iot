@@ -19,7 +19,6 @@ This binding includes an `Pcx857x` abstract base class and derived abstract clas
 ```csharp
  // 0x20 is the device address in this example.
 var connectionSettings = new I2cConnectionSettings(1, 0x20);
-var i2cDevice = new UnixI2cDevice(connectionSettings);
+var i2cDevice = I2cDevice.Create(connectionSettings);
 var pcf8574 = new Pcf8574(i2cDevice);
 ```
-

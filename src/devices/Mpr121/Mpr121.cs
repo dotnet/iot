@@ -4,7 +4,6 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Device.I2c;

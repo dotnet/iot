@@ -8,6 +8,7 @@
     <ProduceReferenceAssembly Condition="'$(TargetsLinux)' == 'true'">true</ProduceReferenceAssembly>
     <TargetRefPath>$(OutputPath)$(TargetFramework)\ref\$(MSBuildProjectName).dll</TargetRefPath>
     <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePlatformNotSupportedAssembly Condition="'$(RuntimeIdentifier)' == ''">true</GeneratePlatformNotSupportedAssembly>
     <Configurations>Debug;Release;Windows-Debug;Linux-Debug</Configurations>
   </PropertyGroup>

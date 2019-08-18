@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using System.Diagnostics;
 using System.Drawing;
 using System.Text;
@@ -25,12 +24,12 @@ namespace Iot.Device.CharacterLcd.Samples
             Console.WriteLine("Starting...");
 
 #if USEI2C
-            var i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x21));
+            var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x21));
             var controller = new Mcp23008(i2cDevice);
             var lcd = new Lcd1602(registerSelectPin: 1, enablePin: 2, dataPins: new int[] { 3, 4, 5, 6 }, backlightPin: 7, controller: controller);
 #elif USERGB
-            var i2cLcdDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x3E));
-            var i2cRgbDevice = new UnixI2cDevice(new I2cConnectionSettings(busId: 1, deviceAddress: 0x62));
+            var i2cLcdDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x3E));
+            var i2cRgbDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x62));
             var lcd = new LcdRgb1602(i2cLcdDevice, i2cRgbDevice);
 #else
             Hd44780 lcd = new Hd44780(new Size(20, 4), LcdInterface.CreateGpio(12, 26, new int[] { 16, 17, 18, 19, 20, 21, 22, 23 }, readWritePin: 13));
@@ -359,4 +358,3 @@ namespace Iot.Device.CharacterLcd.Samples
         }
     }
 }
-

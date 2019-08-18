@@ -47,12 +47,14 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize a NXT Ultrasonic sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         public NXTUltraSonicSensor(Brick brick, SensorPort port) : this(brick, port, UltraSonicMode.Centimeter, 1000) { }
 
         /// <summary>
         /// Initialize a NXT Ultrasonic sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">Ultrasonic mode</param>
         public NXTUltraSonicSensor(Brick brick, SensorPort port, UltraSonicMode mode) : this(brick, port, mode, 1000) { }
@@ -60,6 +62,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize a NXT Ultrasonic sensor
         /// </summary>
+        /// <param name="brick"></param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">Ultrasonic mode</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>

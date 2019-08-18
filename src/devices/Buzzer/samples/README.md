@@ -25,7 +25,7 @@ This sample contains a wrapper on a Buzzer called `MelodyPlayer`.
 To create an instance of a MelodyPlayer use following line:
 
 ```csharp
-MelodyPlayer player  =  new  MelodyPlayer(new  Buzzer(26, -1));
+MelodyPlayer player  =  new  MelodyPlayer(new  Buzzer(26));
 ```
 
 Constructor takes a single parameter type of `Buzzer`.
@@ -49,7 +49,7 @@ IList<MelodyElement> sequence =  new  List<MelodyElement>()
 	new  NoteElement(Note.C, Octave.Fourth, Duration.Quarter)
 };
 
-using (var  player  =  new  MelodyPlayer(new  Buzzer(21, -1)))
+using (var  player  =  new  MelodyPlayer(new  Buzzer(21)))
 {
 	player.Play(sequence, 100);
 }
@@ -71,8 +71,8 @@ player.Play(sequence, 100, -12);
 As far as `MelodyPlayer.Play` method is not asynchronous, calls of this method are wrapped by task like this: 
 
 ```csharp
-using (var  player1  =  new  MelodyPlayer(new  Buzzer(21, -1)))
-using (var  player2  =  new  MelodyPlayer(new  Buzzer(26, -1)))
+using (var  player1  =  new  MelodyPlayer(new  Buzzer(21)))
+using (var  player2  =  new  MelodyPlayer(new  Buzzer(26)))
 {
 	Task.WaitAll(
 		Task.Run(() =>  player1.Play(AlphabetSong, 100, -12)),

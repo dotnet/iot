@@ -52,6 +52,9 @@ namespace System.Device.Gpio.Drivers
             return 0;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SysFsDriver"/> class.
+        /// </summary>
         public SysFsDriver()
         {
             s_eventThreadCancellationTokenSource = new CancellationTokenSource();

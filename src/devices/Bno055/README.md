@@ -1,16 +1,16 @@
-# BMO055 Sensors
+# BNO055 - inertial measurement unit
 
 ## Summary
 
 Those sensors are intelligent 9-axis absolute orientation sensors. Most of the implementations are using I2C sensors but the sensor supports as well HID over I2C and serial port communication. This class only supports I2C.
 
-All operations for a current usage has been developped. The individual interruption level settings for each sensor has not been implemented. If needed, they are quite straight forward to implement.
+All operations for a current usage has been developed. The individual interruption level settings for each sensor has not been implemented. If needed, they are quite straight forward to implement.
 
 ## Device Family
 
 ![BNO055](./BNO055.jpg)
 
-**BMO055** [datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BNO055-DS000.pdf)
+**BNO055** [datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BNO055-DS000.pdf)
 
 You will find this device as ["Inertial Measurement Unit"](https://www.dexterindustries.com/product/imu-sensor/) or ["Adafruit BNO055 Absolute Orientation Sensor"](https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor/overview)
 
@@ -19,7 +19,7 @@ You will find this device as ["Inertial Measurement Unit"](https://www.dexterind
 Create a ```Bno055Sensor``` class and pass the I2C device. The default I2C address is provided in the class.
 
 ```csharp
-I2cDevice i2cDevice = new UnixI2cDevice(new I2cConnectionSettings(1, Bno055Sensor.DefaultI2cAddress));
+I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Bno055Sensor.DefaultI2cAddress));
 Bno055Sensor bno055Sensor = new Bno055Sensor(i2cDevice);
 Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
 Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");

@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using System.Threading;
 
 namespace Iot.Device.Hmc5883l.Samples
@@ -14,10 +13,7 @@ namespace Iot.Device.Hmc5883l.Samples
         static void Main(string[] args)
         {
             I2cConnectionSettings settings = new I2cConnectionSettings(1, Hmc5883l.DefaultI2cAddress);
-            // get I2cDevice (in Linux)
-            UnixI2cDevice device = new UnixI2cDevice(settings);
-            // get I2cDevice (in Win10)
-            //Windows10I2cDevice device = new Windows10I2cDevice(settings);
+            I2cDevice device = I2cDevice.Create(settings);
 
             using (Hmc5883l sensor = new Hmc5883l(device))
             {

@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Bmx280;
@@ -24,7 +23,7 @@ namespace Iot.Device.Samples
             const double defaultSeaLevelPressure = 1033.00;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bmp280.DefaultI2cAddress);
-            var i2cDevice = new UnixI2cDevice(i2cSettings);
+            var i2cDevice = I2cDevice.Create(i2cSettings);
             var i2CBmp280 = new Bmp280(i2cDevice);
 
             using (i2CBmp280)

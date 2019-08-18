@@ -476,7 +476,6 @@ namespace Iot.Device.LEDMatrix
         }
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         /// <summary>
         /// Write a text at specific position to the display using the input font and the colors
         /// </summary>
@@ -491,6 +490,7 @@ namespace Iot.Device.LEDMatrix
         /// <param name="bkG">text background green color</param>
         /// <param name="bkB">text background blue color</param>
         /// <param name="backBuffer">true if want use back buffer, false otherwise</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DrawText(int x, int y, string text, BdfFont font, byte textR, byte textG, byte textB, byte bkR, byte bkG, byte bkB, bool backBuffer = false)
         {
             DrawText(x, y, text.AsSpan(), font, textR, textG, textB, bkR, bkG, bkB, backBuffer);

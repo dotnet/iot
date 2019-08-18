@@ -2,7 +2,7 @@
 
 ## Hardware Required
 
-* DHT11/DHT12/DHT21/DHT22
+* DHT10/DHT11/DHT12/DHT21/DHT22
 * Male/Female Jumper Wires
 
 ## Circuit
@@ -27,7 +27,7 @@ Some sensors are already sold with the 10K resistor. Connect the GPIO26 to the *
 ## Code
 
 ```csharp
-using (DhtSensor dht = new DhtSensor(26, DhtType.DHT22))
+using (Dht11 dht = new Dht11(26))
 {
     while (true)
     {

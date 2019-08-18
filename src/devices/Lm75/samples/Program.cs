@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using System.Threading;
 
 namespace Iot.Device.Lm75.Samples
@@ -14,7 +13,7 @@ namespace Iot.Device.Lm75.Samples
         static void Main(string[] args)
         {
             I2cConnectionSettings settings = new I2cConnectionSettings(1, Lm75.DefaultI2cAddress);
-            UnixI2cDevice device = new UnixI2cDevice(settings);
+            I2cDevice device = I2cDevice.Create(settings);
 
             using (Lm75 sensor = new Lm75(device))
             {

@@ -12,7 +12,7 @@ SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
     ClockFrequency = Nrf24l01.SpiClockFrequency,
     Mode = Nrf24l01.SpiMode
 };
-UnixSpiDevice device = new UnixSpiDevice(settings);
+var device = SpiDevice.Create(settings);
 
 // Creates a new instance of the nRF24L01
 using (Nrf24l01 sensor = new Nrf24l01(receiverDevice, 5, 6, 20))

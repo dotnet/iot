@@ -8,7 +8,7 @@ Create a ```Tcs3472xSensor``` class and pass the I2C device. Please see above fo
 
 ```csharp
 var i2cSettings = new I2cConnectionSettings(1, Tcs3472xSensor.DefaultAddress);
-I2cDevice i2cDevice = new UnixI2cDevice(i2cSettings);
+I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
 Tcs3472xSensor tcs3472X = new Tcs3472xSensor(i2cDevice);
 while(!Console.KeyAvailable)
 {
@@ -20,6 +20,6 @@ while(!Console.KeyAvailable)
 }
 ```
 
-You can as well adjust the time for integration, so the time needed to read the data either in the constructor either later one. Minimum time is 0.0024 seconds and maximum time is 7.4 seconds. This is not a linear function and it will be set to the closest lower value supported byt the system. 
+You can as well adjust the time for integration, so the time needed to read the data either in the constructor either later one. Minimum time is 0.0024 seconds and maximum time is 7.4 seconds. This is not a linear function and it will be set to the closest lower value supported byt the system.
 
 when calling ```tcs3472X.GetColor()``` you get a ```Color``` type with RGB as the normal RGB. A contains the *Clear* value of the sensor.
