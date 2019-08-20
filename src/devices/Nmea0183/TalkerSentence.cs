@@ -48,11 +48,11 @@ namespace Iot.Device.Nmea0183
         public override string ToString() => $"${TalkerId}{Id},{string.Join(",", Fields)}*{CalculateChecksum():X2}";
 
         /// <summary>
-        /// Constructs NMEA0183 sentence identifier
+        /// Constructs NMEA0183 talker identifier
         /// </summary>
-        /// <param name="id1">first character identifying the sentence</param>
-        /// <param name="id2">second character identifying the sentence</param>
-        /// <param name="id3">third character identifying the sentence</param>
+        /// <param name="talkerId">NMEA0183 talker identifier of the device sending the sentence</param>
+        /// <param name="sentenceId">NMEA0183 sentence identifier</param>
+        /// <param name="fields">fields related to the sentence</param>
         public TalkerSentence(TalkerId talkerId, SentenceId sentenceId, IEnumerable<string> fields)
         {
             TalkerId = talkerId;
@@ -143,10 +143,10 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
-        /// Registers sentence identifier as known. Registered sentences are used by <cref="TryGetTypedValue()"/>.
+        /// Registers sentence identifier as known. Registered sentences are used by <see cref="TryGetTypedValue()"/>.
         /// </summary>
         /// <param name="id">NMEA0183 sentence identifier</param>
-        /// <param name="producer">Function which produces typed object given <cref="TalkerSentence"/>.</param>
+        /// <param name="producer">Function which produces typed object given <see cref="TalkerSentence"/>.</param>
         public static void RegisterSentence(SentenceId id, Func<TalkerSentence, object> producer)
         {
             s_registeredSentences[id] = producer;
