@@ -426,7 +426,6 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Compensates the humidity.
         /// </summary>
-        /// <param name="temperature">The temperature to use.</param>
         /// <param name="adcHumidity">The humidity value read from the device.</param>
         /// <returns>The percentage relative humidity.</returns>
         private double CompensateHumidity(int adcHumidity)
