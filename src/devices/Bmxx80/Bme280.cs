@@ -71,20 +71,28 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Reads the Humidity from the sensor as %rH.
+        /// Reads the humidity. A return value indicates whether the reading succeeded.
         /// </summary>
-        /// <returns>Returns a percentage from 0 to 100.</returns>
-        public double ReadHumidity()
+        /// <param name="humidity">
+        /// Contains the measured humidity as %rH if the <see cref="HumiditySampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains <see cref="double.NaN"/> otherwise.
+        /// </param>
+        /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
+        public bool TryReadHumidity(out double humidity)
         {
             if (HumiditySampling == Sampling.Skipped)
-                return double.NaN;
+            {
+                humidity = double.NaN;
+                return false;
+            }
 
             // Read the temperature first to load the t_fine value for compensation.
-            ReadTemperature();
+            TryReadTemperature(out _);
 
-            var humidity = Read16BitsFromRegister((byte)Bme280Register.HUMIDDATA, Endianness.BigEndian);
+            var hum = Read16BitsFromRegister((byte)Bme280Register.HUMIDDATA, Endianness.BigEndian);
 
-            return CompensateHumidity(humidity);
+            humidity = CompensateHumidity(hum);
+            return true;
         }
 
         /// <summary>

@@ -110,13 +110,13 @@ namespace Iot.Device.Bmxx80
         /// Read the temperature.
         /// </summary>
         /// <returns>Calculated temperature.</returns>
-        public abstract Temperature ReadTemperature();
+        public abstract bool TryReadTemperature(out Temperature temperature);
 
         /// <summary>
         /// Read the pressure.
         /// </summary>
         /// <returns>Calculated pressure in Pa.</returns>
-        public abstract double ReadPressure();
+        public abstract bool TryReadPressure(out double pressure);
 
         /// <summary>
         /// Compensates the temperature.

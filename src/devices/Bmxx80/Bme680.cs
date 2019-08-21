@@ -307,70 +307,106 @@ namespace Iot.Device.Bmxx80
             return (int)Math.Ceiling(measDuration);
         }
 
+        // TODO: what happens if temp measurement is skipped and humidity is read
         /// <summary>
-        /// Read the humidity.
+        /// Reads the humidity. A return value indicates whether the reading succeeded.
         /// </summary>
-        /// <returns>Calculated humidity.</returns>
-        public double ReadHumidity()
+        /// <param name="humidity">
+        /// Contains the measured humidity as %rH if the <see cref="HumiditySampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains <see cref="double.NaN"/> otherwise.
+        /// </param>
+        /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
+        public bool TryReadHumidity(out double humidity)
         {
             if (HumiditySampling == Sampling.Skipped)
-                return double.NaN;
+            {
+                humidity = double.NaN;
+                return false;
+            }
 
             // Read humidity data.
             var hum = Read16BitsFromRegister((byte)Bme680Register.HUMIDITYDATA, Endianness.BigEndian);
 
-            return CompensateHumidity(ReadTemperature().Celsius, hum);
+            TryReadTemperature(out var temp);
+            humidity = CompensateHumidity(temp.Celsius, hum);
+            return true;
         }
 
         /// <summary>
-        /// Read the pressure.
+        /// Reads the pressure. A return value indicates whether the reading succeeded.
         /// </summary>
-        /// <returns>Calculated pressure in Pa.</returns>
-        public override double ReadPressure()
+        /// <param name="pressure">
+        /// Contains the measured pressure in Pa if the <see cref="Bmxx80Base.PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains <see cref="double.NaN"/> otherwise.
+        /// </param>
+        /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
+        public override bool TryReadPressure(out double pressure)
         {
             if (PressureSampling == Sampling.Skipped)
-                return double.NaN;
+            {
+                pressure = double.NaN;
+                return false;
+            }
+                
 
             // Read pressure data.
-            var pressure = (int)Read24BitsFromRegister((byte)Bme680Register.PRESSUREDATA, Endianness.BigEndian);
+            var press = (int)Read24BitsFromRegister((byte)Bme680Register.PRESSUREDATA, Endianness.BigEndian);
 
             // Read the temperature first to load the t_fine value for compensation.
-            ReadTemperature();
+            TryReadTemperature(out _);
 
-            return CompensatePressure(pressure >> 4);
+            pressure = CompensatePressure(press >> 4);
+            return true;
         }
 
         /// <summary>
-        /// Read the temperature.
+        /// Reads the temperature. A return value indicates whether the reading succeeded.
         /// </summary>
-        /// <returns>Calculated temperature.</returns>
-        public override Temperature ReadTemperature()
+        /// <param name="temperature">
+        /// Contains the measured temperature if the <see cref="Bmxx80Base.TemperatureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains <see cref="double.NaN"/> otherwise.
+        /// </param>
+        /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
+        public override bool TryReadTemperature(out Temperature temperature)
         {
             if (TemperatureSampling == Sampling.Skipped)
-                return Temperature.FromCelsius(double.NaN);
+            {
+                temperature = Temperature.FromCelsius(double.NaN);
+                return false;
+            }
+                
 
             var pressure = (int)Read24BitsFromRegister((byte)Bme680Register.TEMPDATA, Endianness.BigEndian);
 
-            return CompensateTemperature(pressure >> 4);
+            temperature = CompensateTemperature(pressure >> 4);
+            return true;
         }
 
         /// <summary>
-        /// Reads the gas resistance.
+        /// Reads the gas resistance. A return value indicates whether the reading succeeded.
         /// </summary>
-        /// <returns>Gas resistance in Ohm. NaN if last gas measurement is invalid.</returns>
-        public double ReadGasResistance()
+        /// <param name="gasResistance">
+        /// Contains the measured gas resistance in Ohm if the heater module reached the target temperature and
+        /// the measurement was valid. Contains <see cref="double.NaN"/> otherwise.
+        /// </param>
+        /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
+        public bool TryReadGasResistance(out double gasResistance)
         {
             if (!ReadGasMeasurementIsValid() || !ReadHeaterIsStable())
-                return double.NaN;
+            {
+                gasResistance = double.NaN;
+                return false;
+            }
 
             // Read 10 bit gas resistance value from registers
             var gasResRaw = Read8BitsFromRegister((byte)Bme680Register.GAS_RES);
             var gasRange = Read8BitsFromRegister((byte)Bme680Register.GAS_RANGE);
             
-            var gasResistance = (ushort)((ushort)(gasResRaw << 2) + (byte)(gasRange >> 6));
+            var gasRes = (ushort)((ushort)(gasResRaw << 2) + (byte)(gasRange >> 6));
             gasRange &= (byte)Bme680Mask.GAS_RANGE;
 
-            return CalculateGasResistance(gasResistance, gasRange);
+            gasResistance = CalculateGasResistance(gasRes, gasRange);
+            return true;
         }
 
         protected override void SetDefaultConfiguration()
@@ -379,7 +415,8 @@ namespace Iot.Device.Bmxx80
             HumiditySampling = Sampling.UltraLowPower;
             FilterMode = Bme680FilteringMode.C0;
 
-            ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, 320, 150, ReadTemperature().Celsius);
+            TryReadTemperature(out var temp);
+            ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, 320, 150, temp.Celsius);
             HeaterProfile = Bme680HeaterProfile.Profile1;
 
             HeaterIsEnabled = true;

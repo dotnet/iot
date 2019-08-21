@@ -45,12 +45,12 @@ namespace Iot.Device.Samples
                         Thread.Sleep(measurementDuration);
 
                         // Print out the measured data
-                        var temperature = bme680.ReadTemperature();
-                        var pressure = bme680.ReadPressure() / 100;
-                        var humidity = bme680.ReadHumidity();
-                        var gasResistance = bme680.ReadGasResistance();
+                        bme680.TryReadTemperature(out var temperature);
+                        bme680.TryReadPressure(out var pressure);
+                        bme680.TryReadHumidity(out var humidity);
+                        bme680.TryReadGasResistance(out var gasResistance);
 
-                        Console.WriteLine($"{temperature.Celsius:N2} °c | {pressure:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
+                        Console.WriteLine($"{temperature.Celsius:N2} °c | {pressure / 100:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
 
                         // when measuring the gas resistance on each cycle it is important to wait a certain interval
                         // because a heating plate is activated which will heat up the sensor without sleep, this can
@@ -63,7 +63,7 @@ namespace Iot.Device.Samples
                     bme680.HumiditySampling = Sampling.UltraHighResolution;
                     bme680.PressureSampling = Sampling.Skipped;
 
-                    bme680.ConfigureHeatingProfile(Bme680HeaterProfile.Profile2, 280, 18, 24);
+                    bme680.ConfigureHeatingProfile(Bme680HeaterProfile.Profile2, 280, 80, 24);
                     bme680.HeaterProfile = Bme680HeaterProfile.Profile2;
 
                     measurementDuration = bme680.GetMeasurementDuration(bme680.HeaterProfile);
@@ -76,12 +76,12 @@ namespace Iot.Device.Samples
                         Thread.Sleep(measurementDuration);
 
                         // Print out the measured data
-                        var temperature = bme680.ReadTemperature();
-                        var pressure = bme680.ReadPressure() / 100;
-                        var humidity = bme680.ReadHumidity();
-                        var gasResistance = bme680.ReadGasResistance();
+                        bme680.TryReadTemperature(out var temperature);
+                        bme680.TryReadPressure(out var pressure);
+                        bme680.TryReadHumidity(out var humidity);
+                        bme680.TryReadGasResistance(out var gasResistance);
 
-                        Console.WriteLine($"{temperature.Celsius:N2} °c | {pressure:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
+                        Console.WriteLine($"{temperature.Celsius:N2} °c | {pressure / 100:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
                         Thread.Sleep(1000);
                     }
 

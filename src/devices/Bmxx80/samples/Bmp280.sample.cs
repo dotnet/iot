@@ -43,11 +43,11 @@ namespace Iot.Device.Samples
                     Thread.Sleep(measurementTime);
 
                     //read values
-                    Temperature tempValue = i2CBmp280.ReadTemperature();
+                    i2CBmp280.TryReadTemperature(out var tempValue);
                     Console.WriteLine($"Temperature {tempValue.Celsius}");
-                    double preValue = i2CBmp280.ReadPressure();
+                    i2CBmp280.TryReadPressure(out var preValue);
                     Console.WriteLine($"Pressure {preValue}");
-                    double altValue = i2CBmp280.ReadAltitude(defaultSeaLevelPressure);
+                    i2CBmp280.TryReadAltitude(defaultSeaLevelPressure, out var altValue);
                     Console.WriteLine($"Altitude: {altValue}");
                     Thread.Sleep(1000);
 
@@ -64,11 +64,11 @@ namespace Iot.Device.Samples
                     Thread.Sleep(measurementTime);
 
                     //read values
-                    tempValue = i2CBmp280.ReadTemperature();
+                    i2CBmp280.TryReadTemperature(out tempValue);
                     Console.WriteLine($"Temperature {tempValue.Celsius}");
-                    preValue = i2CBmp280.ReadPressure();
+                    i2CBmp280.TryReadPressure(out preValue);
                     Console.WriteLine($"Pressure {preValue}");
-                    altValue = i2CBmp280.ReadAltitude(defaultSeaLevelPressure);
+                    i2CBmp280.TryReadAltitude(defaultSeaLevelPressure, out altValue);
                     Console.WriteLine($"Altitude: {altValue}");
                     Thread.Sleep(5000);
                 }

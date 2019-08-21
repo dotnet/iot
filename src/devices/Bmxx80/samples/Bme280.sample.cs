@@ -44,13 +44,13 @@ namespace Iot.Device.Samples
                     Thread.Sleep(measurementTime);
 
                     //read values
-                    Temperature tempValue = i2CBmpe80.ReadTemperature();
+                    i2CBmpe80.TryReadTemperature(out var tempValue);
                     Console.WriteLine($"Temperature: {tempValue.Celsius} C");
-                    double preValue = i2CBmpe80.ReadPressure();
+                    i2CBmpe80.TryReadPressure(out var preValue);
                     Console.WriteLine($"Pressure: {preValue} Pa");
-                    double altValue = i2CBmpe80.ReadAltitude(defaultSeaLevelPressure);
+                    i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out var altValue);
                     Console.WriteLine($"Altitude: {altValue} meters");
-                    double humValue = i2CBmpe80.ReadHumidity();
+                    i2CBmpe80.TryReadHumidity(out var humValue);
                     Console.WriteLine($"Humidity: {humValue} %");
                     Thread.Sleep(1000);
 
@@ -68,13 +68,13 @@ namespace Iot.Device.Samples
                     Thread.Sleep(measurementTime);
 
                     //read values
-                    tempValue = i2CBmpe80.ReadTemperature();
+                    i2CBmpe80.TryReadTemperature(out tempValue);
                     Console.WriteLine($"Temperature: {tempValue.Celsius} C");
-                    preValue = i2CBmpe80.ReadPressure();
+                    i2CBmpe80.TryReadPressure(out preValue);
                     Console.WriteLine($"Pressure: {preValue} Pa");
-                    altValue = i2CBmpe80.ReadAltitude(defaultSeaLevelPressure);
+                    i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out altValue);
                     Console.WriteLine($"Altitude: {altValue} meters");
-                    humValue = i2CBmpe80.ReadHumidity();
+                    i2CBmpe80.TryReadHumidity(out humValue);
                     Console.WriteLine($"Humidity: {humValue} %");
                     Thread.Sleep(5000);
                 }

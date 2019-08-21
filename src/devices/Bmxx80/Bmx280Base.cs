@@ -82,17 +82,25 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Read the temperature.
+        /// Reads the temperature. A return value indicates whether the reading succeeded.
         /// </summary>
-        /// <returns>Calculated temperature.</returns>
-        public override Temperature ReadTemperature()
+        /// <param name="temperature">
+        /// Contains the measured temperature if the <see cref="Bmxx80Base.TemperatureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains <see cref="double.NaN"/> otherwise.
+        /// </param>
+        /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
+        public override bool TryReadTemperature(out Temperature temperature)
         {
             if (TemperatureSampling == Sampling.Skipped)
-                return Temperature.FromCelsius(double.NaN);
+            {
+                temperature = Temperature.FromCelsius(double.NaN);
+                return false;
+            }
 
-            var temperature = (int)Read24BitsFromRegister((byte)Bmx280Register.TEMPDATA_MSB, Endianness.BigEndian);
+            var temp = (int)Read24BitsFromRegister((byte)Bmx280Register.TEMPDATA_MSB, Endianness.BigEndian);
 
-            return CompensateTemperature(temperature >> 4);
+            temperature = CompensateTemperature(temp >> 4);
+            return true;
         }
 
         /// <summary>
@@ -122,42 +130,60 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Reads the pressure from the sensor.
+        /// Reads the pressure. A return value indicates whether the reading succeeded.
         /// </summary>
-        /// <returns>Atmospheric pressure in Pa.</returns>
-        public override double ReadPressure()
+        /// <param name="pressure">
+        /// Contains the measured pressure in Pa if the <see cref="Bmxx80Base.PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains <see cref="double.NaN"/> otherwise.
+        /// </param>
+        /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
+        public override bool TryReadPressure(out double pressure)
         {
             if (PressureSampling == Sampling.Skipped)
-                return double.NaN;
+            {
+                pressure = double.NaN;
+                return false;
+            }
 
             // Read the temperature first to load the t_fine value for compensation.
-            ReadTemperature();
+            TryReadTemperature(out _);
 
             // Read pressure data.
-            var pressure = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
+            var press = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
 
             //Convert the raw value to the pressure in Pa.
-            long pres = CompensatePressure(pressure >> 4);
+            long pressPa = CompensatePressure(press >> 4);
 
             //Return the temperature as a float value.
-            return (double)pres / 256;
+            pressure = (double) pressPa / 256;
+            return true;
         }
 
         /// <summary>
         /// Calculates the altitude in meters from the specified sea-level pressure(in hPa).
         /// </summary>
         /// <param name="seaLevelPressure">Sea-level pressure in hPa.</param>
-        /// <returns>Height in meters from sea-level.</returns>
-        public double ReadAltitude(double seaLevelPressure)
+        /// <param name="altitude">
+        /// Contains the calculated metres above sea-level if the <see cref="Bmxx80Base.PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains <see cref="double.NaN"/> otherwise.
+        /// </param>
+        /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
+        public bool TryReadAltitude(double seaLevelPressure, out double altitude)
         {
             // Read the pressure first.
-            double pressure = ReadPressure();
+            var success = TryReadPressure(out var pressure);
+            if (!success)
+            {
+                altitude = double.NaN;
+                return false;
+            }
 
             // Convert the pressure to Hectopascals (hPa).
             pressure /= 100;
 
             // Calculate and return the altitude using the international barometric formula.
-            return 44330.0 * (1.0 - Math.Pow((pressure / seaLevelPressure), 0.1903));
+            altitude = 44330.0 * (1.0 - Math.Pow(pressure / seaLevelPressure, 0.1903));
+            return true;
         }
 
         /// <summary>
