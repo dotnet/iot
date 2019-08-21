@@ -429,9 +429,10 @@ namespace Iot.Device.Bmxx80
         /// <param name="temperature">The temperature to use.</param>
         /// <param name="adcHumidity">The humidity value read from the device.</param>
         /// <returns>The percentage relative humidity.</returns>
-        private double CompensateHumidity(double temperature, int adcHumidity)
+        private double CompensateHumidity(int adcHumidity)
         {
             // Calculate the humidity.
+            var temperature = TemperatureFine / 5120.0;
             var var1 = adcHumidity - ((_bme680Calibration.DigH1 * 16.0) + ((_bme680Calibration.DigH3 / 2.0) * temperature));
             var var2 = var1 * ((_bme680Calibration.DigH2 / 262144.0) * (1.0 + ((_bme680Calibration.DigH4 / 16384.0) * temperature)
                 + ((_bme680Calibration.DigH5 / 1048576.0) * temperature * temperature)));
