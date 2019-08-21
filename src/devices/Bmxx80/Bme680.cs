@@ -327,8 +327,8 @@ namespace Iot.Device.Bmxx80
             // Read humidity data.
             var hum = Read16BitsFromRegister((byte)Bme680Register.HUMIDITYDATA, Endianness.BigEndian);
 
-            TryReadTemperature(out var temp);
-            humidity = CompensateHumidity(temp.Celsius, hum);
+            TryReadTemperature(out _);
+            humidity = CompensateHumidity(hum);
             return true;
         }
 
