@@ -30,7 +30,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         public const byte SecondaryI2cAddress = 0x76;
 
-        protected static int[] _osToMeasCycles = { 0, 7, 9, 14, 23, 44 };
+        protected static readonly int[] s_osToMeasCycles = { 0, 7, 9, 14, 23, 44 };
         private Bmx280FilteringMode _filteringMode;
         private StandbyTime _standbyTime;
         
@@ -228,7 +228,7 @@ namespace Iot.Device.Bmxx80
         /// <returns>The time it takes for the chip to read data in milliseconds rounded up.</returns>
         public virtual int GetMeasurementDuration()
         {
-            return _osToMeasCycles[(int)PressureSampling] + _osToMeasCycles[(int)TemperatureSampling];
+            return s_osToMeasCycles[(int)PressureSampling] + s_osToMeasCycles[(int)TemperatureSampling];
         }
 
         protected override void SetDefaultConfiguration()

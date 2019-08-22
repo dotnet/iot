@@ -49,10 +49,10 @@ namespace Iot.Device.Bmxx80
         private Bme680FilteringMode _filterMode;
         private Sampling _humiditySampling;
 
-        private static readonly byte[] _osToMeasCycles = { 0, 1, 2, 4, 8, 16 };
-        private static readonly byte[] _osToSwitchCount = { 0, 1, 1, 1, 1, 1 };
-        private static readonly double[] _k1Lookup = { 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -0.8, 0.0, 0.0, -0.2, -0.5, 0.0, -1.0, 0.0, 0.0 };
-        private static readonly double[] _k2Lookup = { 0.0, 0.0, 0.0, 0.0, 0.1, 0.7, 0.0, -0.8, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+        private static readonly byte[] s_osToMeasCycles = { 0, 1, 2, 4, 8, 16 };
+        private static readonly byte[] s_osToSwitchCount = { 0, 1, 1, 1, 1, 1 };
+        private static readonly double[] s_k1Lookup = { 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -0.8, 0.0, 0.0, -0.2, -0.5, 0.0, -1.0, 0.0, 0.0 };
+        private static readonly double[] s_k2Lookup = { 0.0, 0.0, 0.0, 0.0, 0.1, 0.7, 0.0, -0.8, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
         /// <summary>
         /// Initialize a new instance of the <see cref="Bme680"/> class.
@@ -284,13 +284,13 @@ namespace Iot.Device.Bmxx80
         /// <returns></returns>
         public int GetMeasurementDuration(Bme680HeaterProfile profile)
         {
-            var measCycles = _osToMeasCycles[(int)TemperatureSampling];
-            measCycles += _osToMeasCycles[(int)PressureSampling];
-            measCycles += _osToMeasCycles[(int)HumiditySampling];
+            var measCycles = s_osToMeasCycles[(int)TemperatureSampling];
+            measCycles += s_osToMeasCycles[(int)PressureSampling];
+            measCycles += s_osToMeasCycles[(int)HumiditySampling];
 
-            var switchCount = _osToSwitchCount[(int)TemperatureSampling];
-            switchCount += _osToSwitchCount[(int)PressureSampling];
-            switchCount += _osToSwitchCount[(int)HumiditySampling];
+            var switchCount = s_osToSwitchCount[(int)TemperatureSampling];
+            switchCount += s_osToSwitchCount[(int)PressureSampling];
+            switchCount += s_osToSwitchCount[(int)HumiditySampling];
 
             double measDuration = measCycles * 1963;
             measDuration += 477 * switchCount;      // TPH switching duration
@@ -307,7 +307,6 @@ namespace Iot.Device.Bmxx80
             return (int)Math.Ceiling(measDuration);
         }
 
-        // TODO: what happens if temp measurement is skipped and humidity is read
         /// <summary>
         /// Reads the humidity. A return value indicates whether the reading succeeded.
         /// </summary>
@@ -496,8 +495,8 @@ namespace Iot.Device.Bmxx80
         private double CalculateGasResistance(ushort adcGasRes, byte gasRange)
         {
             var var1 = 1340.0 + 5.0 * _bme680Calibration.RangeSwErr;
-            var var2 = var1 * (1.0 + _k1Lookup[gasRange] / 100.0);
-            var var3 = 1.0 + _k2Lookup[gasRange] / 100.0;
+            var var2 = var1 * (1.0 + s_k1Lookup[gasRange] / 100.0);
+            var var3 = 1.0 + s_k2Lookup[gasRange] / 100.0;
             var gasResistance = 1.0 / (var3 * 0.000000125 * (1 << gasRange) * ((adcGasRes - 512.0) / var2 + 1.0));
 
             return gasResistance;

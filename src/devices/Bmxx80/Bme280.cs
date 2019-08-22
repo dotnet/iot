@@ -101,7 +101,7 @@ namespace Iot.Device.Bmxx80
         /// <returns>The time it takes for the chip to read data in milliseconds rounded up.</returns>
         public override int GetMeasurementDuration()
         {
-            return _osToMeasCycles[(int)PressureSampling] + _osToMeasCycles[(int)TemperatureSampling] + _osToMeasCycles[(int)HumiditySampling];
+            return s_osToMeasCycles[(int)PressureSampling] + s_osToMeasCycles[(int)TemperatureSampling] + s_osToMeasCycles[(int)HumiditySampling];
         }
 
         protected override void SetDefaultConfiguration()
