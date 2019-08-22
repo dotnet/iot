@@ -31,7 +31,7 @@ namespace System.Device.Pwm.Drivers
         private Stopwatch _stopwatch = Stopwatch.StartNew();
 
         private Thread _runningThread;
-        private IGpioController _controller;
+        private GpioController _controller;
         private bool _runThread = true;
 
         /// <summary>
@@ -76,8 +76,8 @@ namespace System.Device.Pwm.Drivers
         /// <param name="frequency">The frequency in hertz. Defaults to 400</param>
         /// <param name="dutyCyclePercentage">The duty cycle percentage represented as a value between 0.0 and 1.0</param>
         /// <param name="usePrecisionTimer">Determines if a high precision timer should be used.</param>
-        /// <param name="controller">The <see cref="IGpioController"/> to which <paramref name="pinNumber"/> belongs to. Null defaults to board GpioController</param>
-        public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCyclePercentage = 0.5, bool usePrecisionTimer = false, IGpioController controller = null)
+        /// <param name="controller">The <see cref="GpioController"/> to which <paramref name="pinNumber"/> belongs to. Null defaults to board GpioController</param>
+        public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCyclePercentage = 0.5, bool usePrecisionTimer = false, GpioController controller = null)
         {
             _controller = controller ?? new GpioController();
             if (_controller == null)

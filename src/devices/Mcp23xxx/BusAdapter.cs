@@ -7,7 +7,7 @@ using System.Device.Gpio;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public abstract partial class Mcp23xxx : IGpioController
+    public abstract partial class Mcp23xxx
     {
         protected abstract class BusAdapter : IDisposable
         {

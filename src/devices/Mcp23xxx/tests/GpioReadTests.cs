@@ -14,9 +14,9 @@ namespace Iot.Device.Mcp23xxx.Tests
         [MemberData(nameof(TestDevices))]
         public void Read_InvalidPin(TestDevice testDevice)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Read(-1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Read(testDevice.Device.PinCount));
-            Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Read(testDevice.Device.PinCount + 1));
+            Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Read(-1));
+            Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Read(testDevice.Controller.PinCount));
+            Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Read(testDevice.Controller.PinCount + 1));
         }
 
         [Theory]
@@ -24,20 +24,22 @@ namespace Iot.Device.Mcp23xxx.Tests
         public void Read_GoodPin(TestDevice testDevice)
         {
             Mcp23xxx device = testDevice.Device;
-            for (int pin = 0; pin < testDevice.Device.PinCount; pin++)
+            for (int pin = 0; pin < testDevice.Controller.PinCount; pin++)
             {
                 bool first = pin < 8;
-                int register = testDevice.Device.PinCount == 16
+                int register = testDevice.Controller.PinCount == 16
                     ? (first ? 0x12 : 0x13)
                     : 0x09;
 
+                testDevice.Controller.OpenPin(pin, PinMode.Input);
+
                 // Flip the bit on (set the backing buffer directly to simulate incoming data)
                 testDevice.ChipMock.Registers[register] = (byte)(1 << (first ? pin : pin - 8));
-                Assert.Equal(PinValue.High, device.Read(pin));
+                Assert.Equal(PinValue.High, testDevice.Controller.Read(pin));
 
                 // Clear the register
                 testDevice.ChipMock.Registers[register] = 0x00;
-                Assert.Equal(PinValue.Low, device.Read(pin));
+                Assert.Equal(PinValue.Low, testDevice.Controller.Read(pin));
             }
         }
     }

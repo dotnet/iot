@@ -78,7 +78,7 @@ namespace Iot.Device.Mcp23xxx.Tests
 
             public byte Read(Register register, Port port) => InternalReadByte(register, port);
 
-            public override int PinCount => 16;
+            protected override int PinCount => 16;
         }
     }
 }

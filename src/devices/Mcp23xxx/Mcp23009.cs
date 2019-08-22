@@ -25,7 +25,7 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="masterController">
         /// The controller for the reset and interrupt pins. If not specified, the default controller will be used.
         /// </param>
-        public Mcp23009(I2cDevice i2cDevice, int reset = -1, int interrupt = -1, IGpioController masterController = null)
+        public Mcp23009(I2cDevice i2cDevice, int reset = -1, int interrupt = -1, GpioController masterController = null)
             : base(CreateAdapter(i2cDevice),  reset, interrupt, masterController)
         {
         }
