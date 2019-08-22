@@ -17,4 +17,4 @@ using (Kt0803 radio = new Kt0803(device, 106.6, Country.China))
 ```
 
 ## References
-http://www.sintech.com.tw/datasheet/cfp/KT0803M_V1.1.pdf
+https://cdn.datasheetspdf.com/pdf-down/K/T/0/KT0803L-KTMicro.pdf
