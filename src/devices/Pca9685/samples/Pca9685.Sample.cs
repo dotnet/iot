@@ -3,114 +3,237 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Device.I2c;
+using System.Device.Pwm;
+using System.Diagnostics;
+using Iot.Device.ServoMotor;
+using System.Threading;
+using System.Linq;
 
-namespace Iot.Device.Pca9685.Samples
+namespace Iot.Device.Pwm.Pca9685Samples
 {
     /// <summary>
     /// This sample is for Raspberry Pi Model 3B+
     /// </summary>
     class Program
     {
+        // Some SG90s can do 180 angle range but some other will be oscillating on the edge values
+        // Max angle which doesn't cause any issues found experimentally was as below.
+        // The ones which can do 180 will have the minimum pulse width at around 520uS.
+        const int AngleRange = 173;
+        const int MinPulseWidthMicroseconds = 600;
+        const int MaxPulseWidthMicroseconds = 2590;
+
+        static void PrintHelp()
+        {
+            Console.WriteLine("Command:");
+            Console.WriteLine("    F {freq_hz}          set PWM frequency (Hz)");
+            Console.WriteLine("    D {value}            set duty cycle (0.0 .. 1.0) for all channels");
+            Console.WriteLine("    S {channel} {value}  set duty cycle (0.0 .. 1.0) for specific channel");
+            Console.WriteLine("    T {channel}          servo test (defaults to SG90 params)");
+            Console.WriteLine("    H                    prints help");
+            Console.WriteLine("    Q                    quit");
+            Console.WriteLine();
+        }
+
         static void Main(string[] args)
         {
-            var busId = 1;  // /dev/i2c-1
-
-            var deviceAddress_fixed = 0x40;
-            var deviceAddress_selectable = 0b000000;    // A5 A4 A3 A2 A1 A0
-            var deviceAddress = deviceAddress_fixed | deviceAddress_selectable;
+            var busId = 1;
+            var selectedI2cAddress = 0b000000;     // A5 A4 A3 A2 A1 A0
+            var deviceAddress = Pca9685.I2cAddressBase + selectedI2cAddress;
 
             var settings = new I2cConnectionSettings(busId, deviceAddress);
             var device = I2cDevice.Create(settings);
 
-            using (var pca9685 = new Pca9685(device))
+            using (var pca9685 = new Pca9685(device, pwmFrequency: 50))
             {
-                Console.WriteLine();
-                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"PCA9685 is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
-
+                Console.WriteLine($"PWM Frequency: {pca9685.PwmFrequency}Hz");
                 Console.WriteLine();
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("Command:  F {freq_hz}             set PWM frequency");
-                Console.WriteLine("          P {prescale}            set PRE_SCALE register");
-                Console.WriteLine("          S {off}                 set off step with on step is 0 to all channels");
-                Console.WriteLine("          S {on} {off}            set on step and off step to all channels");
-                Console.WriteLine("          S {on} {off} {channel}  set on step and off step to specified channel");
+                PrintHelp();
 
-                Console.WriteLine();
                 while (true)
                 {
-                    try
+                    var command = Console.ReadLine().ToLower().Split(' ');
+                    if (string.IsNullOrEmpty(command[0]))
                     {
-                        Console.ResetColor();
-                        Console.Write("> ");
-                        var command = Console.ReadLine().ToLower().Split(' ');
+                        return;
+                    }
 
-                        switch (command[0][0])
+                    switch (command[0][0])
+                    {
+                        case 'q':
+                            pca9685.SetDutyCycleAllChannels(0.0);
+                            return;
+                        case 'f':
                         {
-                            case 'f':   // set PWM frequency
-                                {
-                                    var freq = double.Parse(command[1]);
-                                    pca9685.PwmFrequency = freq;
-
-                                    Console.ForegroundColor = ConsoleColor.Green;
-                                    Console.WriteLine($"PWM Frequency has been set to about {pca9685.PwmFrequency}Hz with prescale is {pca9685.Prescale}");
-                                    break;
-                                }
-                            case 'p':   // set PRE_SCALE register
-                                {
-                                    var prescale = (byte)int.Parse(command[1]);
-                                    pca9685.Prescale = prescale;
-
-                                    Console.ForegroundColor = ConsoleColor.Green;
-                                    Console.WriteLine($"PWM Frequency has been set to about {pca9685.PwmFrequency}Hz with prescale is {pca9685.Prescale}");
-                                    break;
-                                }
-                            case 's':   // set PWM steps
-                                {
-                                    switch (command.Length)
+                            var freq = double.Parse(command[1]);
+                            pca9685.PwmFrequency = freq;
+                            Console.WriteLine($"PWM Frequency has been set to {pca9685.PwmFrequency}Hz");
+                            break;
+                        }
+                        case 'd':
+                        {
+                            switch (command.Length)
+                            {
+                                case 2:
                                     {
-                                        case 2: // 1 parameter : set off step with on step is 0 to all channels
-                                            {
-                                                var off = int.Parse(command[1]);
-                                                pca9685.SetPwm(0, off);
-
-                                                Console.ForegroundColor = ConsoleColor.Green;
-                                                Console.WriteLine($"PWM pulse width has been set to {off}/4096");
-                                                break;
-                                            }
-                                        case 3: // 2 parametes : set on step and off step to all channels
-                                            {
-                                                var on = int.Parse(command[1]);
-                                                var off = int.Parse(command[2]);
-                                                pca9685.SetPwm(on, off);
-
-                                                Console.ForegroundColor = ConsoleColor.Green;
-                                                Console.WriteLine($"PWM pulse pull up at step {on} and pull down at step {off} on all channels");
-                                                break;
-                                            }
-                                        case 4: // 3 parametes : set on step and off step to specified channel
-                                            {
-                                                var on = int.Parse(command[1]);
-                                                var off = int.Parse(command[2]);
-                                                var channel = int.Parse(command[3]);
-                                                pca9685.SetPwm(on, off, channel);
-
-                                                Console.ForegroundColor = ConsoleColor.Green;
-                                                Console.WriteLine($"PWM pulse pull up at step {on} and pull down at step {off} on channel {channel}");
-                                                break;
-                                            }
+                                        double value = double.Parse(command[1]);
+                                        pca9685.SetDutyCycleAllChannels(value);
+                                        Console.WriteLine($"PWM duty cycle has been set to {value}");
+                                        break;
                                     }
-                                    break;
-                                }
+                                case 3:
+                                    {
+                                        int channel = int.Parse(command[1]);
+                                        double value = double.Parse(command[2]);
+                                        pca9685.SetDutyCycle(channel, value);
+                                        Console.WriteLine($"PWM duty cycle has been set to {value}");
+                                        break;
+                                    }
+                            }
+                            break;
+                        }
+                        case 'h':
+                        {
+                            PrintHelp();
+                            break;
+                        }
+                        case 't':
+                        {
+                            int channel = int.Parse(command[1]);
+                            ServoDemo(pca9685, channel);
+                            PrintHelp();
+                            break;
                         }
                     }
-                    catch (Exception ex)
+                }
+            }
+        }
+
+        static ServoMotor.ServoMotor CreateServo(Pca9685 pca9685, int channel)
+        {
+            return new ServoMotor.ServoMotor(
+                pca9685.CreatePwmChannel(channel),
+                AngleRange, MinPulseWidthMicroseconds, MaxPulseWidthMicroseconds);
+        }
+
+        static void PrintServoDemoHelp()
+        {
+            Console.WriteLine("Q                   return to previous menu");
+            Console.WriteLine("C                   calibrate");
+            Console.WriteLine("{angle}             set angle (0 - 180)");
+            Console.WriteLine();
+        }
+
+        static void ServoDemo(Pca9685 pca9685, int channel)
+        {
+            using (var servo = CreateServo(pca9685, channel))
+            {
+                PrintServoDemoHelp();
+
+                while (true)
+                {
+                    var command = Console.ReadLine().ToLower();
+                    if (string.IsNullOrEmpty(command) || command[0] == 'q')
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(ex.GetBaseException().Message);
-                        Console.ResetColor();
+                        return;
                     }
+
+                    if (command[0] == 'c')
+                    {
+                        CalibrateServo(servo);
+                        PrintServoDemoHelp();
+                    }
+                    else
+                    {
+                        double value = double.Parse(command);
+                        servo.WriteAngle(value);
+                        Console.WriteLine($"Angle set to {value}. PWM duty cycle = {pca9685.GetDutyCycle(channel)}");
+                    }
+                }
+            }
+        }
+
+        static void CalibrateServo(ServoMotor.ServoMotor servo)
+        {
+            int maximumAngle = 180;
+            int minimumPulseWidthMicroseconds = 520;
+            int maximumPulseWidthMicroseconds = 2590;
+
+            Console.WriteLine("Searching for minimum pulse width");
+            CalibratePulseWidth(servo, ref minimumPulseWidthMicroseconds);
+            Console.WriteLine();
+
+            Console.WriteLine("Searching for maximum pulse width");
+            CalibratePulseWidth(servo, ref maximumPulseWidthMicroseconds);
+
+            Console.WriteLine("Searching for angle range");
+            Console.WriteLine("What is the angle range? (type integer with your angle range or enter to move to MIN/MAX)");
+
+            while (true)
+            {
+                servo.WritePulseWidth(maximumPulseWidthMicroseconds);
+                Console.WriteLine("Servo is now at MAX");
+                if (int.TryParse(Console.ReadLine(), out maximumAngle))
+                {
+                    break;
+                }
+
+                servo.WritePulseWidth(minimumPulseWidthMicroseconds);
+                Console.WriteLine("Servo is now at MIN");
+
+                if (int.TryParse(Console.ReadLine(), out maximumAngle))
+                {
+                    break;
+                }
+            }
+
+            servo.Calibrate(maximumAngle, minimumPulseWidthMicroseconds, maximumPulseWidthMicroseconds);
+            Console.WriteLine($"Angle range: {maximumAngle}");
+            Console.WriteLine($"Min PW [uS]: {minimumPulseWidthMicroseconds}");
+            Console.WriteLine($"Max PW [uS]: {maximumPulseWidthMicroseconds}");
+        }
+
+        static void CalibratePulseWidth(ServoMotor.ServoMotor servo, ref int pulseWidthMicroSeconds)
+        {
+            void SetPulseWidth(ref int pulseWidth)
+            {
+                pulseWidth = Math.Max(pulseWidth, 0);
+                servo.WritePulseWidth(pulseWidth);
+            }
+
+            Console.WriteLine("Use A/Z (1x); S/X (10x); D/C (100x)");
+            Console.WriteLine("Press enter to accept value");
+
+            while (true)
+            {
+                SetPulseWidth(ref pulseWidthMicroSeconds);
+                Console.WriteLine($"Current value: {pulseWidthMicroSeconds}");
+
+                switch (Console.ReadKey().Key)
+                {
+                    case ConsoleKey.A:
+                        pulseWidthMicroSeconds++;
+                        break;
+                    case ConsoleKey.Z:
+                        pulseWidthMicroSeconds--;
+                        break;
+                    case ConsoleKey.S:
+                        pulseWidthMicroSeconds += 10;
+                        break;
+                    case ConsoleKey.X:
+                        pulseWidthMicroSeconds -= 10;
+                        break;
+                    case ConsoleKey.D:
+                        pulseWidthMicroSeconds += 100;
+                        break;
+                    case ConsoleKey.C:
+                        pulseWidthMicroSeconds -= 100;
+                        break;
+                    case ConsoleKey.Enter:
+                        return;
                 }
             }
         }

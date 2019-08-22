@@ -62,6 +62,13 @@ servoMotor.WritePulseWidth(180); // ~2.1ms; Approximately 180 degrees.
 servoMotor.Stop(); // Disable control signal.
 ```
 
+## Calibration
+
+Calibration or finding minimum and maximum pulse width and angle range `WritePulseWidth` method should be used.
+To make it easier to write applications which allow calibration method `Calibrate` can be used to change calibration parameters.
+
+You can refer to [servo sample](../Pca9685/samples/Pca9685.Sample.cs) for example usage (i.e. `CalibrateServo` utility).
+
 ## References
 
 [Wikipedia Servo Motor](https://en.wikipedia.org/wiki/Servomotor)  
