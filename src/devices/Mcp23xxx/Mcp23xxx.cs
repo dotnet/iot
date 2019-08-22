@@ -16,7 +16,7 @@ namespace Iot.Device.Mcp23xxx
         private readonly int _interruptA;
         private readonly int _interruptB;
         private BankStyle _bankStyle;
-        protected readonly BusAdapter _bus;
+        protected BusAdapter _bus;
         private bool _increments = true;
 
         private ushort _gpioCache;
@@ -202,6 +202,7 @@ namespace Iot.Device.Mcp23xxx
             _masterGpioController?.Dispose();
             _masterGpioController = null;
             _bus?.Dispose();
+            _bus = null;
             base.Dispose(disposing);
         }
 
@@ -472,6 +473,6 @@ namespace Iot.Device.Mcp23xxx
 
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => throw new NotImplementedException();
 
-        protected override bool IsPinModeSupported(int pinNumber, PinMode mode) => true;
+        protected override bool IsPinModeSupported(int pinNumber, PinMode mode) => (mode == PinMode.Input || mode == PinMode.Output);
     }
 }
