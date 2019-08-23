@@ -6,26 +6,27 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Threading;
 
 namespace Iot.Device.Seesaw
 {
-    public class SeesawGpioController : IGpioController
+    public class SeesawGpioDriver : GpioDriver
     {
         private readonly Dictionary<int, PinMode> _openPins;
 
         private Seesaw _seesawDevice;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SeesawGpioController"/> class that will use the specified I2cDevice to communicate with the Seesaw device.
+        /// Initializes a new instance of the <see cref="SeesawGpioDriver"/> class that will use the specified I2cDevice to communicate with the Seesaw device.
         /// </summary>
         /// <param name="i2cDevice">The I2cDevice used for communicating with the Seesaw device.</param>
-        public SeesawGpioController(I2cDevice i2cDevice) : this(new Seesaw(i2cDevice)) { }
+        public SeesawGpioDriver(I2cDevice i2cDevice) : this(new Seesaw(i2cDevice)) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SeesawGpioController"/> class that will use the specified Seesaw device.
+        /// Initializes a new instance of the <see cref="SeesawGpioDriver"/> class that will use the specified Seesaw device.
         /// </summary>
         /// <param name="seesawDevice">The Seesaw device used fir communicating with the Gpio.</param>
-        public SeesawGpioController(Seesaw seesawDevice)
+        public SeesawGpioDriver(Seesaw seesawDevice)
         {
             _seesawDevice = seesawDevice;
 
@@ -42,13 +43,13 @@ namespace Iot.Device.Seesaw
         /// </summary>
         /// <remarks>Hardcoded to 64 pins as the Seesaw devices do not describe the number of pins.</remarks>
         /// <value>Number of Gpio pins available</value>
-        public int PinCount => 64;
+        protected override int PinCount => 64;
 
         /// <summary>
         /// Closes an open pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        public void ClosePin(int pinNumber)
+        protected override void ClosePin(int pinNumber)
         {
             if (pinNumber < 0 || pinNumber > 63)
             {
@@ -68,7 +69,7 @@ namespace Iot.Device.Seesaw
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <returns>The mode of the pin.</returns>        
-        public PinMode GetPinMode(int pinNumber)
+        protected override PinMode GetPinMode(int pinNumber)
         {
             if (pinNumber < 0 || pinNumber > 63)
             {
@@ -90,7 +91,7 @@ namespace Iot.Device.Seesaw
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <param name="mode">The mode to check.</param>
         /// <returns>The status if the pin supports the mode.</returns>
-        public bool IsPinModeSupported(int pinNumber, PinMode mode)
+        protected override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
             if (pinNumber < 0 || pinNumber > 63)
             {
@@ -119,7 +120,7 @@ namespace Iot.Device.Seesaw
         /// Opens a pin and in Input mode.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        public void OpenPin(int pinNumber) => OpenPin(pinNumber, PinMode.Input);
+        protected override void OpenPin(int pinNumber) => OpenPin(pinNumber, PinMode.Input);
 
         /// <summary>
         /// Opens a pin and sets it to a specific mode.
@@ -147,7 +148,7 @@ namespace Iot.Device.Seesaw
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <returns>The value of the pin.</returns>
-        public PinValue Read(int pinNumber)
+        protected override PinValue Read(int pinNumber)
         {
             if (pinNumber < 0 || pinNumber > 63)
             {
@@ -179,7 +180,7 @@ namespace Iot.Device.Seesaw
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <param name="mode">The mode to be set.</param>
-        public void SetPinMode(int pinNumber, PinMode mode)
+        protected override void SetPinMode(int pinNumber, PinMode mode)
         {
             if (pinNumber < 0 || pinNumber > 63)
             {
@@ -192,6 +193,7 @@ namespace Iot.Device.Seesaw
             }
 
             _seesawDevice.SetGpioPinMode((byte)pinNumber, mode);
+            _openPins[pinNumber] = mode;
         }
 
         /// <summary>
@@ -199,7 +201,7 @@ namespace Iot.Device.Seesaw
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <param name="value">The value to be written to the pin.</param>
-        public void Write(int pinNumber, PinValue value)
+        protected override void Write(int pinNumber, PinValue value)
         {
             if (pinNumber < 0 || pinNumber > 63)
             {
@@ -226,7 +228,15 @@ namespace Iot.Device.Seesaw
             }
         }
 
-        private void Dispose(bool disposing)
+        protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => throw new NotImplementedException();
+
+        protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) => throw new NotImplementedException();
+
+        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
+
+        protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => throw new NotImplementedException();
+
+        protected override void Dispose(bool disposing)
         {
             foreach (int pinNumber in _openPins.Keys)
             {
@@ -236,11 +246,7 @@ namespace Iot.Device.Seesaw
             _openPins.Clear();
             _seesawDevice?.Dispose();
             _seesawDevice = null;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
+            base.Dispose(disposing);
         }
     }
 }

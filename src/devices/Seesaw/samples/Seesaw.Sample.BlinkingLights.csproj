@@ -12,8 +12,8 @@
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
     <Compile Include="Seesaw.Sample.BlinkingLights.cs" />
+    <Compile Include="../../../../samples/led-more-blinking-lights/TimeEnvelope.cs" />
     <Compile Include="Volume.cs" />
-    <Compile Include="../../../../samples/led-more-blinking-lights/TimeEnvelope.cs" />    
   </ItemGroup>
 
 </Project>

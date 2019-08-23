@@ -54,11 +54,11 @@ namespace Iot.Device.Seesaw
         /// with the host device and dispose the current I2cDevice.
         /// </summary>
         /// <param name="i2cAddress">The new I2C address to be used.</param>
-        public void SetI2CAddress(byte i2cAddress)
+        public void SetI2cAddress(byte i2cAddress)
         {
             I2cConnectionSettings oldSsettings = I2cDevice.ConnectionSettings;
 
-            if (i2cAddress != GetI2CAddress())
+            if (i2cAddress != GetI2cAddress())
             {
                 WriteEEPromByte((byte)SeesawFunction.EepromI2cAddr, i2cAddress);
 
@@ -72,6 +72,6 @@ namespace Iot.Device.Seesaw
         /// Read the address configured to be used as the I2C address.
         /// </summary>
         /// <returns>The data byte representing the I2C address.</returns>
-        private byte GetI2CAddress() => ReadEEPromByte((byte)SeesawFunction.EepromI2cAddr);
+        private byte GetI2cAddress() => ReadEEPromByte((byte)SeesawFunction.EepromI2cAddr);
     }
 }

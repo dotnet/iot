@@ -85,7 +85,7 @@ namespace Iot.Device.Seesaw
         /// </summary>
         /// <param name="pins">A 64bit integer containing 1 bit for each pin. If a bit is set to 1 then the pin value is set for the associated pin.</param>
         /// <param name="value">The pin value to be set.</param>
-        public void WriteGpioDigitalBulk(UInt64 pins, bool value)
+        public void WriteGpioDigitalBulk(ulong pins, bool value)
         {
             if (!HasModule(SeesawModule.Gpio))
             {

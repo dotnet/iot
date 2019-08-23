@@ -135,7 +135,6 @@ namespace Iot.Device.Seesaw
         /// <returns>Returns the byte array representaing values from the Seesaw device.</returns>
         protected byte[] Read(SeesawModule moduleAddress, SeesawFunction functionAddress, int length, short readDelayMicroSeconds = 0)
         {
-
             byte[] retval = new byte[length];
 
             Span<byte> bytesToWrite = stackalloc byte[2] { (byte)moduleAddress, (byte)functionAddress };

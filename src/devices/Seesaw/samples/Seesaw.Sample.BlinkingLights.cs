@@ -34,7 +34,8 @@ namespace Iot.Device.Seesaw.Samples
             Console.WriteLine($"Let's blink some LEDs!");
 
             using (Seesaw seesawDevice = new Seesaw(I2cDevice.Create(new I2cConnectionSettings(1, 0x49))))
-            using (SeesawGpioController controller = new SeesawGpioController(seesawDevice))
+            using (SeesawGpioDriver seesawGpioDevice = new SeesawGpioDriver(seesawDevice))
+            using (GpioController controller = new GpioController(PinNumberingScheme.Logical, seesawGpioDevice))
             {
                 // this line should only be enabled if a trimpot is connected
                 volume = Volume.EnableVolume(seesawDevice);
@@ -95,7 +96,7 @@ namespace Iot.Device.Seesaw.Samples
                         var value = 0;
                         while (update)
                         {
-                            (update, value) = volume.GetSleepforVolume(initialSleep);
+                            (update, value) = volume.GetSleepForVolume(initialSleep);
                             if (update)
                             {
                                 sleep = value;

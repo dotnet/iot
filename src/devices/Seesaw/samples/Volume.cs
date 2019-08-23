@@ -7,12 +7,9 @@ using Iot.Device.Seesaw;
 
 public class Volume
 {
-
     public static Volume EnableVolume(Seesaw seesawDevice)
     {
-        var volume = new Volume(seesawDevice);
-        volume.Init();
-        return volume;
+        return new Volume(seesawDevice);
     }
 
     private Seesaw _seesawDevice;
@@ -21,6 +18,7 @@ public class Volume
     public Volume(Seesaw seesawDevice)
     {
         _seesawDevice = seesawDevice;
+        Init();
     }
 
     public int GetVolumeValue()
@@ -31,16 +29,12 @@ public class Volume
         return (int) value;
     }
 
-    public void Dispose()
-    {
-    }
-
     private void Init()
     {
         _lastValue = GetVolumeValue();
     }
 
-    public (bool update, int value) GetSleepforVolume(int sleep)
+    public (bool update, int value) GetSleepForVolume(int sleep)
     {
         var value = GetVolumeValue();
         if (value > _lastValue - 2 && value < _lastValue + 2)
