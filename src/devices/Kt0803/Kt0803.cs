@@ -58,6 +58,7 @@ namespace Iot.Device.Kt0803
         /// <summary>
         /// Creates a new instance of the Kt0803
         /// </summary>
+        /// <param name="i2cDevice">The I2C device used for communication</param>
         /// <param name="mHz">FM Channel (Range from 70Mhz to 108Mhz)</param>
         /// <param name="country">Country</param>
         /// <param name="power">Transmission Power</param>
