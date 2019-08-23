@@ -40,10 +40,9 @@ namespace V4l2.Samples
             var value = device.GetVideoDeviceValue(VideoDeviceValueType.Rotate);
             Console.WriteLine($"{value.Name} Min: {value.Minimum} Max: {value.Maximum} Step: {value.Step} Default: {value.DefaultValue} Current: {value.CurrentValue}");
 
-            string path = "/home/pi/images";
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
+            string path = Directory.GetCurrentDirectory();
 
+            // Take photos
             await device.CaptureAsync($"{path}/jpg_direct_output.jpg");
 
             // Change capture setting
