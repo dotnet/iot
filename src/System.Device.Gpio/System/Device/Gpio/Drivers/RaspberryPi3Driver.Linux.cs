@@ -13,11 +13,14 @@ namespace System.Device.Gpio.Drivers
 {
     public unsafe partial class RaspberryPi3Driver : GpioDriver
     {
+        private const int Linux_Enoent = 2; // error indicates that an entity doesn't exist
         private RegisterView* _registerViewPointer = null;
-        private const int GpioRegisterOffset = 0x00;
         private static readonly object s_initializationLock = new object();
         private static readonly object s_sysFsInitializationLock = new object();
+        private const uint GpioPeripheralOffset = 0x0020_0000; // offset from the peripheral base address of the GPIO registers
         private const string GpioMemoryFilePath = "/dev/gpiomem";
+        private const string MemoryFilePath = "/dev/mem";
+        private const string DeviceTreeRanges = "/proc/device-tree/soc/ranges";
         private UnixDriver _sysFSDriver = null;
         private readonly IDictionary<int, PinMode> _sysFSModes = new Dictionary<int, PinMode>();
 
@@ -328,6 +331,48 @@ namespace System.Device.Gpio.Drivers
             set {  *(ulong*)(_registerViewPointer->GPCLR) = value; }
         }
 
+        /// <summary>
+        /// Returns the peripheral base address of the raspberry pi based on the ranges set within the device tree.
+        /// The return value is 32bit even on 64 bit operating systems (debian / ubuntu tested) but may change in the future
+        /// 
+        /// Based on file at https://github.com/RPi-Distro/raspi-gpio/blob/master/raspi-gpio.c
+        /// </summary>
+        /// <returns>This returns the peripheral base address as a 32 bit address.</returns>
+        private uint GetPeripheralBaseAddress()
+        {
+            uint retval = 0xFFFFFFF;
+            byte[] buffer;
+            uint firstRange;
+
+            using (BinaryReader rdr = new BinaryReader(File.Open(DeviceTreeRanges, FileMode.Open, FileAccess.Read)))
+            {
+                // get the first bigendian range... this seems to allways be 0x7E000000
+                buffer = rdr.ReadBytes(4);
+                firstRange = ((uint)buffer[0] << 24) | (uint)(buffer[1] << 16) | (uint)(buffer[2] << 8) | buffer[3];
+
+                // read the next range into a buffer....
+                buffer = rdr.ReadBytes(4);
+
+                // if the next range is 0 then assume that the base address is in the next 32 bits so read again.
+                if ((buffer[0] | buffer[1] | buffer[2] | buffer[3]) == 0)
+                {
+                    buffer = rdr.ReadBytes(4);
+                }
+
+                // convert the read data into big endian
+                retval = (uint)(buffer[0] << 24) | (uint)(buffer[1] << 16) | (uint)(buffer[2] << 8) | buffer[3];
+
+                // if the values don't look correct then assume an error and return 0
+                if (firstRange != 0x7E000000 || !(retval == 0x20000000 || retval == 0x3F000000 || retval == 0xFE000000))
+                {
+                    retval = 0xFFFFFFFF;
+                }
+
+            }
+
+            return retval;
+        }
+
         private void InitializeSysFS()
         {
             if (_sysFSDriver != null)
@@ -346,6 +391,10 @@ namespace System.Device.Gpio.Drivers
 
         private void Initialize()
         {
+            uint gpioRegisterOffset;
+            int fileDescriptor;
+            int win32Error;
+
             if (_registerViewPointer != null)
             {
                 return;
@@ -358,13 +407,42 @@ namespace System.Device.Gpio.Drivers
                     return;
                 }
 
-                int fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
+                // try and open /dev/gpiomem
+                fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
                 if (fileDescriptor == -1)
                 {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
-                }
+                    win32Error = Marshal.GetLastWin32Error();
 
-                IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, GpioRegisterOffset);
+                    // if the failure is NOT because /dev/gpiomem doesn't exist then throw an exception at this point.
+                    // if it were anything else then it is probably best not to try and use /dev/mem on the basis that
+                    // it would be better to solve the issue rather than use a method that requires root privileges
+                    if (win32Error != Linux_Enoent)
+                    {
+                        throw new IOException($"Error {win32Error} initializing the Gpio driver.");
+                    }
+
+                    // if /dev/gpiomem doesn't seem to be available then let's try /dev/mem
+                    fileDescriptor = Interop.open(MemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
+                    if (fileDescriptor == -1)
+                    {
+                        throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
+                    }
+                    else // success so set the offset into memory of the gpio registers
+                    {
+                        gpioRegisterOffset = GetPeripheralBaseAddress();
+
+                        if(gpioRegisterOffset == ~0U)
+                        {
+                            throw new Exception($"Error - Unable to determine peripheral base address.");
+                        }
+
+                        // add on the offset from the peripheral base address to point to the gpio registers
+                        gpioRegisterOffset += GpioPeripheralOffset;
+                    }
+
+                }
+                    
+                IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)gpioRegisterOffset);
                 if (mapPointer.ToInt64() == -1)
                 {
                     throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
