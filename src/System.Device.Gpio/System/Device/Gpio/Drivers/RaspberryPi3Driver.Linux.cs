@@ -2,12 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
 
 namespace System.Device.Gpio.Drivers
 {
@@ -332,45 +333,42 @@ namespace System.Device.Gpio.Drivers
         }
 
         /// <summary>
-        /// Returns the peripheral base address of the raspberry pi based on the ranges set within the device tree.
-        /// The return value is 32bit even on 64 bit operating systems (debian / ubuntu tested) but may change in the future
-        /// 
-        /// Based on file at https://github.com/RPi-Distro/raspi-gpio/blob/master/raspi-gpio.c
+        /// Returns the peripheral base address on the CPU bus of the raspberry pi based on the ranges set within the device tree.
         /// </summary>
-        /// <returns>This returns the peripheral base address as a 32 bit address.</returns>
+        /// <remarks>
+        /// The range examined in this method is essentially a mapping between where the peripheral base address on the videocore bus and its
+        /// address on the cpu bus. The return value is 32bit (is in the first 4GB) even on 64 bit operating systems (debian / ubuntu tested) but may change in the future
+        /// This method is based on bcm_host_get_peripheral_address() in libbcm_host which may not exist in all linux distributions.
+        /// </remarks>
+        /// <returns>This returns the peripheral base address as a 32 bit address or 0xFFFFFFFF when in error.</returns>
         private uint GetPeripheralBaseAddress()
         {
-            uint retval = 0xFFFFFFF;
-            byte[] buffer;
-            uint firstRange;
+            uint cpuBusPeripheralBaseAddress = 0xFFFFFFF;
+            uint vcBusPeripheralBaseAddress;
 
             using (BinaryReader rdr = new BinaryReader(File.Open(DeviceTreeRanges, FileMode.Open, FileAccess.Read)))
             {
-                // get the first bigendian range... this seems to allways be 0x7E000000
-                buffer = rdr.ReadBytes(4);
-                firstRange = ((uint)buffer[0] << 24) | (uint)(buffer[1] << 16) | (uint)(buffer[2] << 8) | buffer[3];
+                // get the Peripheral Base Address on the VC bus from the device tree this is to be used to verify that
+                // the right thing is being read and should always be 0x7E000000
+                vcBusPeripheralBaseAddress = BinaryPrimitives.ReadUInt32BigEndian(rdr.ReadBytes(4));
 
-                // read the next range into a buffer....
-                buffer = rdr.ReadBytes(4);
+                // get the Peripheral Base Address on the CPU bus from the device tree.
+                cpuBusPeripheralBaseAddress = BinaryPrimitives.ReadUInt32BigEndian(rdr.ReadBytes(4));
 
-                // if the next range is 0 then assume that the base address is in the next 32 bits so read again.
-                if ((buffer[0] | buffer[1] | buffer[2] | buffer[3]) == 0)
+                // if the CPU bus Peripheral Base Address is 0 then assume that this is a 64 bit address and so read the next 32 bits.
+                if (cpuBusPeripheralBaseAddress == 0)
                 {
-                    buffer = rdr.ReadBytes(4);
+                    cpuBusPeripheralBaseAddress = BinaryPrimitives.ReadUInt32BigEndian(rdr.ReadBytes(4));
                 }
 
-                // convert the read data into big endian
-                retval = (uint)(buffer[0] << 24) | (uint)(buffer[1] << 16) | (uint)(buffer[2] << 8) | buffer[3];
-
-                // if the values don't look correct then assume an error and return 0
-                if (firstRange != 0x7E000000 || !(retval == 0x20000000 || retval == 0x3F000000 || retval == 0xFE000000))
+                // if the address values don't fall withing known values then assume an error
+                if (vcBusPeripheralBaseAddress != 0x7E000000 || !(cpuBusPeripheralBaseAddress == 0x20000000 || cpuBusPeripheralBaseAddress == 0x3F000000 || cpuBusPeripheralBaseAddress == 0xFE000000))
                 {
-                    retval = 0xFFFFFFFF;
+                    cpuBusPeripheralBaseAddress = 0xFFFFFFFF;
                 }
-
             }
 
-            return retval;
+            return cpuBusPeripheralBaseAddress;
         }
 
         private void InitializeSysFS()
@@ -391,7 +389,7 @@ namespace System.Device.Gpio.Drivers
 
         private void Initialize()
         {
-            uint gpioRegisterOffset;
+            uint gpioRegisterOffset = 0;
             int fileDescriptor;
             int win32Error;
 
@@ -429,9 +427,28 @@ namespace System.Device.Gpio.Drivers
                     }
                     else // success so set the offset into memory of the gpio registers
                     {
-                        gpioRegisterOffset = GetPeripheralBaseAddress();
+                        gpioRegisterOffset = ~0U;
 
-                        if(gpioRegisterOffset == ~0U)
+                        try
+                        {
+                            // get the periphal base address from the libbcm_host library which is the reccomended way
+                            // according to the RasperryPi website
+                            gpioRegisterOffset = Interop.libbcmhost.bcm_host_get_peripheral_address();
+
+                            // if we get zero back then we use our own internal method. This can happen 
+                            // on a Pi4 if the userland libraries haven't been updated and was fixed in Jul/Aug 2019.
+                            if(gpioRegisterOffset == 0)
+                            {
+                                gpioRegisterOffset = GetPeripheralBaseAddress();
+                            }
+                        }
+                        catch(DllNotFoundException)
+                        {
+                            // if the code gets here then then use our internal method as libbcm_host isn't available.
+                            gpioRegisterOffset = GetPeripheralBaseAddress();
+                        }
+
+                        if (gpioRegisterOffset == ~0U)
                         {
                             throw new Exception($"Error - Unable to determine peripheral base address.");
                         }
@@ -439,7 +456,6 @@ namespace System.Device.Gpio.Drivers
                         // add on the offset from the peripheral base address to point to the gpio registers
                         gpioRegisterOffset += GpioPeripheralOffset;
                     }
-
                 }
                     
                 IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)gpioRegisterOffset);
