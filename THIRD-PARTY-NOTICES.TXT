@@ -38,6 +38,8 @@ THE SOFTWARE.
 License notice for raspi-gpio
 -------------------------------
 
+https://github.com/RPi-Distro/raspi-gpio/blob/master/LICENSE
+
 Copyright (c) 2015, Raspberry Pi Foundation
 
 Author: James Adams <james@raspberrypi.org>
