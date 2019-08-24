@@ -5,7 +5,7 @@
 using System;
 using System.Device.I2c;
 
-namespace Iot.Device.Kt0803
+namespace Iot.Device.Radio
 {
     /// <summary>
     /// FM Radio Modulator Module KT0803
@@ -44,11 +44,11 @@ namespace Iot.Device.Kt0803
         /// </summary>
         public TransmissionPower TransmissionPower { get => GetTransmissionPower(); set => SetTransmissionPower(value); }
 
-        private Country _country;
+        private Region _region;
         /// <summary>
-        /// Kt0803 Country
+        /// Kt0803 Region
         /// </summary>
-        public Country Country { get => _country; set { SetCountry(value); _country = value; } }
+        public Region Region { get => _region; set { SetRegion(value); _region = value; } }
 
         /// <summary>
         /// Kt0803 Bass Boost
@@ -59,17 +59,17 @@ namespace Iot.Device.Kt0803
         /// Creates a new instance of the Kt0803
         /// </summary>
         /// <param name="i2cDevice">The I2C device used for communication</param>
-        /// <param name="mHz">FM Channel (Range from 70Mhz to 108Mhz)</param>
-        /// <param name="country">Country</param>
+        /// <param name="mHz">FM Channel (Range from 70MHz to 108MHz)</param>
+        /// <param name="region">Region</param>
         /// <param name="power">Transmission Power</param>
         /// <param name="pga">PGA (Programmable Gain Amplifier) Gain</param>
-        public Kt0803(I2cDevice i2cDevice, double mHz, Country country, TransmissionPower power = TransmissionPower.Power_108dBuV, PgaGain pga = PgaGain.PGA_00dB)
+        public Kt0803(I2cDevice i2cDevice, double mHz, Region region, TransmissionPower power = TransmissionPower.Power_108dBuV, PgaGain pga = PgaGain.PGA_00dB)
         {
             _i2cDevice = i2cDevice;
             Channel = mHz;
             TransmissionPower = power;
             PgaGain = pga;
-            Country = country;
+            Region = region;
             Mute = false;
             Standby = false;
         }
@@ -86,22 +86,22 @@ namespace Iot.Device.Kt0803
         /// <summary>
         /// Set Kt0803 FM Channel
         /// </summary>
-        /// <param name="mhz">MHz ( Range from 70Mhz to 108Mhz )</param>
-        private void SetChannel(double mhz)
+        /// <param name="mHz">MHz (Range from 70MHz to 108MHz)</param>
+        private void SetChannel(double mHz)
         {
             // Details in Datasheet P7
-            if (mhz < 70 || mhz > 108)
+            if (mHz < 70 || mHz > 108)
             {
                 throw new ArgumentOutOfRangeException("Range from 70MHz to 108MHz.");
             }
 
             int freq, reg0, reg1, reg2;
 
-            reg1 = ReadByte(Register.KT_CONFIG1);
-            reg2 = ReadByte(Register.KT_CONFIG2);
+            reg1 = ReadByte(Register.KT_CONFIG01);
+            reg2 = ReadByte(Register.KT_CONFIG02);
 
             // 3 bytes
-            freq = (int)(mhz * 20);
+            freq = (int)(mHz * 20);
             freq &= 0b_1111_1111_1111;
 
             if ((freq & 0b_0001) > 0)
@@ -115,9 +115,9 @@ namespace Iot.Device.Kt0803
             reg0 = freq >> 1;
             reg1 = (reg1 & 0b_1111_1000) | (freq >> 9);
 
-            WriteByte(Register.KT_CONFIG2, (byte)reg2);
+            WriteByte(Register.KT_CONFIG02, (byte)reg2);
             WriteByte(Register.KT_CHSEL, (byte)reg0);
-            WriteByte(Register.KT_CONFIG1, (byte)reg1);
+            WriteByte(Register.KT_CONFIG01, (byte)reg1);
         }
 
         /// <summary>
@@ -127,8 +127,8 @@ namespace Iot.Device.Kt0803
         private double GetChannel()
         {
             int reg0 = ReadByte(Register.KT_CHSEL);
-            int reg1 = ReadByte(Register.KT_CONFIG1);
-            int reg2 = ReadByte(Register.KT_CONFIG2);
+            int reg1 = ReadByte(Register.KT_CONFIG01);
+            int reg2 = ReadByte(Register.KT_CONFIG02);
 
             int freq = ((reg1 & 0b_0111) << 9) | (reg0 << 1) | (reg2 & 0b_1000_0000 >> 7);
 
@@ -142,8 +142,8 @@ namespace Iot.Device.Kt0803
         private void SetPga(PgaGain pgaGain)
         {
             // Details in Datasheet P9
-            int reg1 = ReadByte(Register.KT_CONFIG1);
-            int reg3 = ReadByte(Register.KT_CONFIG3);
+            int reg1 = ReadByte(Register.KT_CONFIG01);
+            int reg3 = ReadByte(Register.KT_CONFIG04);
 
             int pgaVal = (byte)pgaGain << 3;
 
@@ -166,8 +166,8 @@ namespace Iot.Device.Kt0803
                     break;
             }
 
-            WriteByte(Register.KT_CONFIG1, (byte)reg1);
-            WriteByte(Register.KT_CONFIG3, (byte)reg3);
+            WriteByte(Register.KT_CONFIG01, (byte)reg1);
+            WriteByte(Register.KT_CONFIG04, (byte)reg3);
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace Iot.Device.Kt0803
         /// <returns>PGA Gain</returns>
         private PgaGain GetPga()
         {
-            int reg1 = ReadByte(Register.KT_CONFIG1);
+            int reg1 = ReadByte(Register.KT_CONFIG01);
 
             return (PgaGain)((reg1 & 0b_0011_1000) >> 3);
         }
@@ -188,9 +188,9 @@ namespace Iot.Device.Kt0803
         private void SetTransmissionPower(TransmissionPower power)
         {
             // Details in Datasheet P8 Table4
-            int reg1 = ReadByte(Register.KT_CONFIG1);
-            int reg2 = ReadByte(Register.KT_CONFIG2);
-            int reg10 = ReadByte(Register.KT_CONFIG10);
+            int reg1 = ReadByte(Register.KT_CONFIG01);
+            int reg2 = ReadByte(Register.KT_CONFIG02);
+            int reg10 = ReadByte(Register.KT_CONFIG13);
 
             int powerVal = (byte)power;
 
@@ -216,16 +216,16 @@ namespace Iot.Device.Kt0803
 
             if (powerVal >= 8)
             {
-                WriteByte(Register.KT_CONFIG6, 0b_0010);
+                WriteByte(Register.KT_CONFIG0E, 0b_0010);
             }
             else
             {
-                WriteByte(Register.KT_CONFIG6, 0b_0000);
+                WriteByte(Register.KT_CONFIG0E, 0b_0000);
             }
 
-            WriteByte(Register.KT_CONFIG1, (byte)reg1);
-            WriteByte(Register.KT_CONFIG2, (byte)reg2);
-            WriteByte(Register.KT_CONFIG10, (byte)reg10);
+            WriteByte(Register.KT_CONFIG01, (byte)reg1);
+            WriteByte(Register.KT_CONFIG02, (byte)reg2);
+            WriteByte(Register.KT_CONFIG13, (byte)reg10);
         }
 
         /// <summary>
@@ -234,38 +234,39 @@ namespace Iot.Device.Kt0803
         /// <returns>Transmission Power</returns>
         private TransmissionPower GetTransmissionPower()
         {
-            int reg1 = ReadByte(Register.KT_CONFIG1);
-            int reg2 = ReadByte(Register.KT_CONFIG2);
-            int reg10 = ReadByte(Register.KT_CONFIG10);
+            int reg1 = ReadByte(Register.KT_CONFIG01);
+            int reg2 = ReadByte(Register.KT_CONFIG02);
+            int reg10 = ReadByte(Register.KT_CONFIG13);
 
             return (TransmissionPower)(((reg2 & 0b_0100_0000) >> 3) | (reg10 >> 5) | ((reg1 & 0b_1100_0000) >> 6));
         }
 
         /// <summary>
-        /// Set Kt0803 Country
+        /// Set Kt0803 Region
         /// </summary>
-        /// <param name="country">Country</param>
-        private void SetCountry(Country country)
+        /// <param name="region">Region</param>
+        private void SetRegion(Region region)
         {
             // Details in Datasheet P8
-            int reg2 = ReadByte(Register.KT_CONFIG2);
+            int reg2 = ReadByte(Register.KT_CONFIG02);
 
-            switch (country)
+            switch (region)
             {
-                case Country.America:
-                case Country.Japan:
+                case Region.America:
+                case Region.Japan:
                     reg2 &= ~0b_0001;
                     break;
-                case Country.Europe:
-                case Country.Australia:
-                case Country.China:
+                case Region.Europe:
+                case Region.Australia:
+                case Region.China:
+                case Region.Other:
                     reg2 |= 0b_0001;
                     break;
                 default:
                     break;
             }
 
-            WriteByte(Register.KT_CONFIG2, (byte)reg2);
+            WriteByte(Register.KT_CONFIG02, (byte)reg2);
         }
 
         /// <summary>
@@ -275,7 +276,7 @@ namespace Iot.Device.Kt0803
         private void SetMute(bool isMute)
         {
             // Details in Datasheet P8
-            int reg2 = ReadByte(Register.KT_CONFIG2);
+            int reg2 = ReadByte(Register.KT_CONFIG02);
 
             if (isMute)
             {
@@ -286,7 +287,7 @@ namespace Iot.Device.Kt0803
                 reg2 &= ~0b_1000;
             }
 
-            WriteByte(Register.KT_CONFIG2, (byte)reg2);
+            WriteByte(Register.KT_CONFIG02, (byte)reg2);
         }
 
         /// <summary>
@@ -295,7 +296,7 @@ namespace Iot.Device.Kt0803
         /// <returns>Mute when value is true</returns>
         private bool GetMute()
         {
-            int reg2 = ReadByte(Register.KT_CONFIG2);
+            int reg2 = ReadByte(Register.KT_CONFIG02);
 
             return (reg2 & 0b_1000) >> 3 == 1 ? true : false;
         }
@@ -307,7 +308,7 @@ namespace Iot.Device.Kt0803
         private void SetStandby(bool isStandby)
         {
             // Details in Datasheet P10
-            int reg4 = ReadByte(Register.KT_CONFIG4);
+            int reg4 = ReadByte(Register.KT_CONFIG0B);
 
             if (isStandby)
             {
@@ -318,7 +319,7 @@ namespace Iot.Device.Kt0803
                 reg4 &= ~0b_1000_0000;
             }
 
-            WriteByte(Register.KT_CONFIG4, (byte)reg4);
+            WriteByte(Register.KT_CONFIG0B, (byte)reg4);
         }
 
         /// <summary>
@@ -327,7 +328,7 @@ namespace Iot.Device.Kt0803
         /// <returns>Standby when value is true</returns>
         private bool GetStandby()
         {
-            int reg4 = ReadByte(Register.KT_CONFIG4);
+            int reg4 = ReadByte(Register.KT_CONFIG0B);
 
             return reg4  >> 7 == 1 ? true : false;
         }
@@ -339,12 +340,12 @@ namespace Iot.Device.Kt0803
         private void SetBassBoost(BassBoost bassBoost)
         {
             // Details in Datasheet P9
-            int reg3 = ReadByte(Register.KT_CONFIG3);
+            int reg3 = ReadByte(Register.KT_CONFIG04);
 
             reg3 &= 0b_1111_1100;
             reg3 |= (byte)bassBoost;
 
-            WriteByte(Register.KT_CONFIG3, (byte)reg3);
+            WriteByte(Register.KT_CONFIG04, (byte)reg3);
         }
 
         /// <summary>
@@ -353,7 +354,7 @@ namespace Iot.Device.Kt0803
         /// <returns>Bass Boost</returns>
         private BassBoost GetBassBoost()
         {
-            byte reg3 = ReadByte(Register.KT_CONFIG3);
+            byte reg3 = ReadByte(Register.KT_CONFIG04);
 
             return (BassBoost)((reg3 << 6) >> 6);
         }

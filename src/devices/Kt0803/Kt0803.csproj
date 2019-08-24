@@ -10,7 +10,7 @@
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
     <Compile Include="BassBoost.cs" />
-    <Compile Include="Country.cs" />
+    <Compile Include="Region.cs" />
     <Compile Include="Kt0803.cs" />
     <Compile Include="PgaGain.cs" />
     <Compile Include="Register.cs" />

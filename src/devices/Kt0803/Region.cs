@@ -5,43 +5,38 @@
 namespace Iot.Device.Radio
 {
     /// <summary>
-    /// PGA ( Programmable Gain Amplifier ) Gain
+    /// Region (Pre-Emphasis time constant)
     /// </summary>
-    public enum PgaGain : byte
+    public enum Region
     {
         /// <summary>
-        /// 0 dB
+        /// Pre-Emphasis time constant is 75μs
         /// </summary>
-        PGA_00dB = 4,
+        America,
 
         /// <summary>
-        /// 4 dB
+        /// Pre-Emphasis time constant is 75μs
         /// </summary>
-        PGA_04dB = 5,
+        Japan,
 
         /// <summary>
-        /// 8 dB
+        /// Pre-Emphasis time constant is 50μs
         /// </summary>
-        PGA_08dB = 6,
+        Europe,
 
         /// <summary>
-        /// 12 dB
+        /// Pre-Emphasis time constant is 50μs
         /// </summary>
-        PGA_12dB = 7,
+        Australia,
 
         /// <summary>
-        /// -4 dB
+        /// Pre-Emphasis time constant is 50μs
         /// </summary>
-        PGA_N04dB = 1,
+        China,
 
         /// <summary>
-        /// -8 dB
+        /// Pre-Emphasis time constant is 50μs
         /// </summary>
-        PGA_N08dB = 2,
-
-        /// <summary>
-        /// -12 dB
-        /// </summary>
-        PGA_N12dB = 3,
+        Other
     }
 }
