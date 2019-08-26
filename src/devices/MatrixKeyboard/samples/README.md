@@ -1,6 +1,6 @@
 # Matrix Keyboard Samples
 
-## Connection using on-board gpio
+## Connection using on-board GPIO
 
 ![](4x4kb.png)
 
