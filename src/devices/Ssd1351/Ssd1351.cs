@@ -36,8 +36,9 @@ namespace Iot.Device.Ssd1351
         /// A single-chip CMOS OLED/PLED driver with controller for organic/polymer
         /// light emitting diode dot-matrix graphic display system. 
         /// </summary>
-        /// <param name="spiDevice">The SPI device used for communication.</param>
-        /// <param name="gpioController">The GPIO controller used for communication and controls the the <paramref name="resetPin"/> and the <paramref name="dataCommandPin"/>.</param>
+        /// <param name="spiDevice">The SPI device used for communication. This Spi device will be displed along with the Ssd1351 device.</param>
+        /// <param name="gpioController">The GPIO controller used for communication and controls the the <paramref name="resetPin"/> and the <paramref name="dataCommandPin"/>
+        /// If no Gpio controller is passed in then a default one will be created and disposed when Ssd1351 device is disposed.</param>
         /// <param name="dataCommandPin">The id of the GPIO pin used to control the DC line (data/command).</param>
         /// <param name="resetPin">The id of the GPIO pin used to control the /RESET line (data/command).</param>
         /// <param name="spiBufferSize">The size of the SPI buffer. If data larger than the buffer is sent then it is split up into multiple transmissions. The default value is 4096.</param>
@@ -74,6 +75,20 @@ namespace Iot.Device.Ssd1351
         /// Convert a color structure to a byte tuple represening the colour in 565 format.
         /// </summary>
         /// <param name="color">The color to be converted.</param>
+        /// <returns>
+        /// This method returns the low byte and the high byte of the 16bit value representing RGB565 or BGR565 value
+        /// 
+        /// byte    11111111 00000000
+        /// bit     76543210 76543210
+        /// 
+        /// For ColorSequence.RGB
+        ///         RRRRRGGG GGGBBBBB
+        ///         43210543 21043210
+        ///         
+        /// For ColorSequence.BGR
+        ///         BBBBBGGG GGGRRRRR
+        ///         43210543 21043210
+        /// </returns>
         private (byte, byte) Color565(Color color)
         {
             // get the top 5 MSB of the blue or red value
@@ -93,8 +108,8 @@ namespace Iot.Device.Ssd1351
         /// Send filled rectangle to the ssd1351 display.
         /// </summary>
         /// <param name="color">The color to fill the rectangle with.</param>
-        /// <param name="x">The x co-ordinate of the point to start the rectangle at in pixels (0..126 for the Ssd1351).</param>
-        /// <param name="y">The y co-ordinate of the point to start the rectangle at in pixles (0..126 for the Ssd1351) .</param>
+        /// <param name="x">The x co-ordinate of the point to start the rectangle at in pixels (0..126 for the Ssd1351 where 0 represents the leftmost pixel).</param>
+        /// <param name="y">The y co-ordinate of the point to start the rectangle at in pixles (0..126 for the Ssd1351 where 0 represents the topmost pixel).</param>
         /// <param name="w">The width of the rectangle in pixels (1..127 for the Ssd1351).</param>
         /// <param name="h">The height of the rectangle in pixels (1..127 for the Ssd1351).</param>
         public void FillRect(Color color, byte x, byte y, byte w, byte h)
@@ -138,7 +153,6 @@ namespace Iot.Device.Ssd1351
 
             // write out the pixel data
             SendCommand(Ssd1351Command.WriteRam, displayBytes);
-
         }
 
         public void ClearScreen()
@@ -172,7 +186,7 @@ namespace Iot.Device.Ssd1351
         /// <returns>Determines if value is within range.</returns>
         internal static bool InRange(uint value, uint start, uint end)
         {
-            return (value - start) <= (end - start);
+            return value >= start && value <= end;
         }
 
         /// <summary>
@@ -212,9 +226,7 @@ namespace Iot.Device.Ssd1351
                         _colorDepth = (ColorDepth)((data[0] >> 6) & 0x03);
                         break;
                 }
-
             }
-
         }
 
         /// <summary>

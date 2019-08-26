@@ -82,14 +82,14 @@ namespace Iot.Device.Ssd1351
 
     public enum VComHDeslectLevel
     {
-        VCCx0_72 = 0x00,
-        VCCx0_74 = 0x01,
-        VCCx0_76 = 0x02,
-        VCCx0_78 = 0x03,
-        VCCx0_80 = 0x04,
-        VCCx0_82 = 0x05,
-        VCCx0_84 = 0x06,
-        VCCx0_86 = 0x07
+        VccX072 = 0x00,
+        VccX074 = 0x01,
+        VccX076 = 0x02,
+        VccX078 = 0x03,
+        VccX080 = 0x04,
+        VccX082 = 0x05,
+        VccX084 = 0x06,
+        VccX086 = 0x07
     }
 
     public enum VDDSource
@@ -165,7 +165,7 @@ namespace Iot.Device.Ssd1351
         /// <summary>
         /// This command enhances display performance. 
         /// </summary>
-        /// <param name="enhanceDisplay">When set to true turns on enhanced display mode.</param>
+        /// <param name="enhanceDisplay">When set to true turns on enhanced display mode. (defaults to not enhanced)</param>
         public void SetDisplayEnhancement(bool enhanceDisplay = false)
         {
             SendCommand(Ssd1351Command.SetDisplayEnhancement, (byte)(enhanceDisplay ? 0xA4 : 0x00), 0x00, 0x00);
@@ -174,7 +174,7 @@ namespace Iot.Device.Ssd1351
         /// <summary>
         /// This double byte command is used to set the phase 3 second pre-charge period.  The period of phase 3 is ranged from 1 to 15 DCLK's.
         /// </summary>
-        /// <param name="phase3Period">Phase 3 period with a range of 1-15.</param>
+        /// <param name="phase3Period">Phase 3 period with a range of 1-15. (defaults to 8 DCLKs)</param>
         public void Set3rdPreChargePeriod(byte phase3Period = 0x08)
         {
             if (!Ssd1351.InRange(phase3Period, 0x01, 0x0F))
@@ -189,7 +189,7 @@ namespace Iot.Device.Ssd1351
         /// This double byte command is used to set the pre-charge voltage level. The precharge
         /// voltage level ranges from 0.20 x Vcc -> 0.60 x Vcc.
         /// </summary>
-        /// <param name="prechargeLevel">Pre-charge voltage level with a range of 0-31 that represents 0.20 x Vcc -> 0.60 x Vcc.</param>
+        /// <param name="prechargeLevel">Pre-charge voltage level with a range of 0-31 that represents 0.20 x Vcc -> 0.60 x Vcc. (defaults to 0.38 x Vcc)</param>
         public void SetPreChargeVoltageLevel(byte prechargeLevel = 0x17)
         {
             if (!Ssd1351.InRange(prechargeLevel, 0x00, 0x1F))
@@ -209,8 +209,8 @@ namespace Iot.Device.Ssd1351
         /// accessing the end column address, it is reset back to start column address and the row address
         /// is incremented to the next row.  This command is only for horizontal or vertical addressing modes.
         /// </summary>
-        /// <param name="startColumn">Column start address with a range of 0-127.</param>
-        /// <param name="endColumn">Column end address with a range of 0-127.</param>
+        /// <param name="startColumn">Column start address with a range of 0-127. (defaults to 0)</param>
+        /// <param name="endColumn">Column end address with a range of 0-127. (defaults to 127)</param>
         public void SetColumnAddress(byte startColumn = 0x00, byte endColumn = 0x7F)
         {
             if (startColumn > 0x7F)
@@ -221,6 +221,11 @@ namespace Iot.Device.Ssd1351
             if (endColumn > 0x7F)
             {
                 throw new ArgumentException("The column end address is invalid.", nameof(endColumn));
+            }
+
+            if (endColumn < startColumn)
+            {
+                throw new ArgumentException("The column end address must be greater or equal to the row start address.", nameof(endColumn));
             }
 
             SendCommand(Ssd1351Command.SetColumn, startColumn, endColumn);
@@ -235,8 +240,8 @@ namespace Iot.Device.Ssd1351
         /// Whenever the row address pointer finishes accessing the end row address, it is 
         /// reset back to start row address.
         /// </summary>
-        /// <param name="startRow">Row start address with a range of 0-127.</param>
-        /// <param name="endRow">Row end address with a range of 0-127.</param>
+        /// <param name="startRow">Row start address with a range of 0-127. (defaults to 0)</param>
+        /// <param name="endRow">Row end address with a range of 0-127. (defaults to 127)</param>
         public void SetRowAddress(byte startRow = 0x00, byte endRow = 0x7F)
         {
             if (startRow > 0x7F)
@@ -249,6 +254,11 @@ namespace Iot.Device.Ssd1351
                 throw new ArgumentException("The row end address is invalid.", nameof(endRow));
             }
 
+            if (endRow < startRow)
+            {
+                throw new ArgumentException("The row end address must be greater or equal to the row start address.", nameof(endRow));
+            }
+
             SendCommand(Ssd1351Command.SetRow, startRow, endRow);
         }
 
@@ -256,8 +266,8 @@ namespace Iot.Device.Ssd1351
         /// This command sets the divide ratio to generate DCLK (Display Clock) from CLK and
         /// programs the oscillator frequency Fosc that is the source of CLK if CLS pin is pulled high.
         /// </summary>
-        /// <param name="displayClockDivideRatio">Display clock divide ratio with a range of 0-15.</param>
-        /// <param name="oscillatorFrequency">Oscillator frequency with a range of 0-15.</param>
+        /// <param name="displayClockDivideRatio">Display clock divide ratio with a range of 0-15. (defaults to 1)</param>
+        /// <param name="oscillatorFrequency">Oscillator frequency with a range of 0-15. (defaults to 13)</param>
         public void SetDisplayClockDivideRatioOscillatorFrequency(byte displayClockDivideRatio = 0x01, byte oscillatorFrequency = 0x0D)
         {
             if (displayClockDivideRatio > 0x0F)
@@ -279,9 +289,9 @@ namespace Iot.Device.Ssd1351
         /// output current ISEG increases linearly with the contrast step,
         /// which results in brighter display.
         /// </summary>
-        /// <param name="colorAContrast">Contrast level for color A.</param>
-        /// <param name="colorBContrast">Contrast level for color B.</param>
-        /// <param name="colorCContrast">Contrast level for color C.</param>
+        /// <param name="colorAContrast">Contrast level for color A. (defaults to 0x86)</param>
+        /// <param name="colorBContrast">Contrast level for color B. (defaults to 0x51)</param>
+        /// <param name="colorCContrast">Contrast level for color C. (defaults to 0x86)</param>
         public void SetContrastABC(byte colorAContrast = 0x86, byte colorBContrast = 0x51, byte colorCContrast = 0x86)
         {
             SendCommand(Ssd1351Command.SetContrastABC, colorAContrast, colorBContrast, colorCContrast);
@@ -291,7 +301,7 @@ namespace Iot.Device.Ssd1351
         /// This command specifies the mapping of the display start line to one of COM0-COM127
         /// (assuming that COM0 is the display start line then the display start line register is equal to 0).
         /// </summary>
-        /// <param name="displayOffset">Display offset with a range of 0-127.</param>
+        /// <param name="displayOffset">Display offset with a range of 0-127. (defaults to 0x60)</param>
         public void SetDisplayOffset(byte displayOffset = 0x60)
         {
             if (displayOffset > 0x7F)
@@ -307,7 +317,7 @@ namespace Iot.Device.Ssd1351
         /// by selecting a value from 0 to 127. With value equal to 0, RAM row 0 is mapped to COM0.
         /// With value equal to 1, RAM row 1 is mapped to COM0 and so on.
         /// </summary>
-        /// <param name="displayStartLine">Display start line with a range of 0-127.</param>
+        /// <param name="displayStartLine">Display start line with a range of 0-127. (defaults to 0)</param>
         public void SetDisplayStartLine(byte displayStartLine = 0x00)
         {
             if (displayStartLine > 0x7F)
@@ -321,8 +331,8 @@ namespace Iot.Device.Ssd1351
         /// <summary>
         /// This double byte command is used to set the states of GPIO0 and GPIO1 pins
         /// </summary>
-        /// <param name="pin0Mode">The GpioMode of Pin0.</param>
-        /// <param name="pin1Mode">The GpioMode of Pin1.</param>
+        /// <param name="pin0Mode">The GpioMode of Pin0. (defaults to Output/Low)</param>
+        /// <param name="pin1Mode">The GpioMode of Pin1. (defaults to Output/Low)</param>
         public void SetGpio(GpioMode pin0Mode = GpioMode.OutputLow, GpioMode pin1Mode = GpioMode.OutputLow)
         {
             SendCommand(Ssd1351Command.SetGPIO, (byte)(((int) pin1Mode << 2) + pin0Mode));
@@ -392,7 +402,7 @@ namespace Iot.Device.Ssd1351
         /// display is set.   For example, if original segment output current is 160uA at
         /// scale factor = 16, setting scale factor to 8 would reduce the current to 80uA
         /// </summary>
-        /// <param name="masterContrast">Master Contrast 0 -> 15.</param>
+        /// <param name="masterContrast">Master Contrast 0 -> 15.(defaults to 15)</param>
         public void SetMasterContrast(byte masterContrast = 0x0F)
         {
             if (!Ssd1351.InRange(masterContrast, 0x00, 0x0F))
@@ -407,7 +417,7 @@ namespace Iot.Device.Ssd1351
         /// This command switches the default 63 multiplex mode to any multiplex ratio, ranging from 15 to 127.
         /// The output pads COM0-COM127 will be switched to the corresponding COM signal.
         /// </summary>
-        /// <param name="multiplexRatio">Multiplex ratio with a range of 15-127.</param>
+        /// <param name="multiplexRatio">Multiplex ratio with a range of 15-127. (defaults to 127)</param>
         public void SetMultiplexRatio(byte multiplexRatio = 127)
         {
             if (!Ssd1351.InRange(multiplexRatio, 0x0F, 0x7F))
@@ -425,8 +435,8 @@ namespace Iot.Device.Ssd1351
         /// Phase 2 (A[7:4]): Set the period from 3 to 15 in the unit of DCLKs.  A longer period 
         /// is needed to charge up a larger capacitance of the OLED pixel to the target voltage.
         /// </summary>
-        /// <param name="phase1Period">Phase 1 period with a range of 2-15.</param>
-        /// <param name="phase2Period">Phase 2 period with a range of 3-15.</param>
+        /// <param name="phase1Period">Phase 1 period with a range of 2-15. (defaults to 2 x 2 DCLKs)</param>
+        /// <param name="phase2Period">Phase 2 period with a range of 3-15. (defaults to 8 DCLKs)</param>
         public void SetPreChargePeriods(byte phase1Period = 0x02, byte phase2Period = 0x08)
         {
             if (!Ssd1351.InRange(phase1Period, 0x02, 0x0F))
@@ -447,11 +457,10 @@ namespace Iot.Device.Ssd1351
         /// It allows flexibility in OLED module design. This command only affects subsequent data input.
         /// Data already stored in GDDRAM will have no changes.
         /// </summary>
-        /// <param name="colorDepth">Number of colors displayed.</param>
-        /// <param name="commonSplit">Defines if to split commons odd then even columns.</param>
-        /// <param name="seg0Common">Column address 0 is mapped to SEG0 when set to Column0. Column address 127 is mapped to SEG0 when set to Column127.</param>
-        /// <param name="colorSequence">Colors are ordered R->G->B when set to RGB. Colors are ordered B->G->A when set to BGA.</param>
-        // Color Depth = 64K, Enable COM Split Odd Even, Scan from COM[N-1] to COM0. Where N is the Multiplex ratio., Color sequence is swapped: C -> B -> A
+        /// <param name="colorDepth">Number of colors displayed. (defaults to 0x65K)</param>
+        /// <param name="commonSplit">Defines if to split commons odd then even columns. (defaults to odd/even)</param>
+        /// <param name="seg0Common">Column address 0 is mapped to SEG0 when set to Column0. Column address 127 is mapped to SEG0 when set to Column127. (defaults to Segment0 = Column0)</param>
+        /// <param name="colorSequence">Colors are ordered R->G->B when set to RGB. Colors are ordered B->G->A when set to BGR. (defaults to BGR)</param>
         public void SetSegmentReMapColorDepth(ColorDepth colorDepth = ColorDepth.ColourDepth65K, CommonSplit commonSplit = CommonSplit.OddEven, Seg0Common seg0Common = Seg0Common.Column0, ColorSequence colorSequence = ColorSequence.BGR)
         {
             if (colorDepth == ColorDepth.ColourDepth262K16Bit)
@@ -471,8 +480,8 @@ namespace Iot.Device.Ssd1351
         /// This double byte command sets the high voltage level of common pins, VCOMH.
         /// The level of VCOMH is programmed with reference to VC. 
         /// </summary>
-        /// <param name="level">Vcomh deselect level.</param>
-        public void SetVcomhDeselectLevel(VComHDeslectLevel level = VComHDeslectLevel.VCCx0_82)
+        /// <param name="level">Vcomh deselect level. (defaults to 0.82 x Vcc)</param>
+        public void SetVcomhDeselectLevel(VComHDeslectLevel level = VComHDeslectLevel.VccX082)
         {
             SendCommand(Ssd1351Command.SetDeselectVoltageLevel, (byte)level);
         }
@@ -480,7 +489,7 @@ namespace Iot.Device.Ssd1351
         /// <summary>
         /// This double byte command is used to enable or disable the VDD regulator
         /// </summary>
-        /// <param name="vddSource">The source of VDD.</param>
+        /// <param name="vddSource">The source of VDD. (defaults to Internal)</param>
         public void SetVDDSource(VDDSource vddSource = VDDSource.Internal)
         {
             SendCommand(Ssd1351Command.SelectFunction, (byte)vddSource);
@@ -490,9 +499,9 @@ namespace Iot.Device.Ssd1351
         /// Set the segment voltage reference values. Note that for the Adafruit board then use the defaults
         /// (in fact not sure if you can use anything but the defaults accoring to the datasheet)
         /// </summary>
-        /// <param name="vslValue0">VSL Value 0.</param>
-        /// <param name="vslValue1">VSL Value 1.</param>
-        /// <param name="vslValue2">VSL Value 2.</param>
+        /// <param name="vslValue0">VSL Value 0. (defaults to 0xA0)</param>
+        /// <param name="vslValue1">VSL Value 1. (defaults to 0xB5)</param>
+        /// <param name="vslValue2">VSL Value 2. (defaults to 0x55)</param>
         public void SetVSL(byte vslValue0 = 0xA0, byte vslValue1 = 0xB5, byte vslValue2 = 0x55)
         {
             SendCommand(Ssd1351Command.SetVSL, vslValue0, vslValue1, vslValue2);
