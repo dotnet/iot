@@ -12,12 +12,12 @@ namespace Iot.Device.Pcx857x
     /// </summary>
     public abstract class Pcx8575 : Pcx857x
     {
-        public Pcx8575(I2cDevice device, int interrupt = -1, IGpioController gpioController = null)
+        public Pcx8575(I2cDevice device, int interrupt = -1, GpioController gpioController = null)
             : base(device, interrupt, gpioController)
         {
         }
 
-        public override int PinCount => 16;
+        protected override int PinCount => 16;
 
         public void WriteUInt16(ushort value) => InternalWriteUInt16(value);
 

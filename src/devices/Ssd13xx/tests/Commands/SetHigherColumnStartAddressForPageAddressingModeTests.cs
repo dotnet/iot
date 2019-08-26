@@ -36,7 +36,7 @@ namespace Iot.Device.Ssd13xx.Tests
         [InlineData(0xFF)]
         public void Invalid_HigherColumnStartAddress(byte higherColumnStartAddress)
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 SetHigherColumnStartAddressForPageAddressingMode setHigherColumnStartAddressForPageAddressingMode =
                 new SetHigherColumnStartAddressForPageAddressingMode(higherColumnStartAddress);

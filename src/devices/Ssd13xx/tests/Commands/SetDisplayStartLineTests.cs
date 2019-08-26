@@ -34,7 +34,7 @@ namespace Iot.Device.Ssd13xx.Tests
         [InlineData(0xFF)]
         public void Invalid_DisplayStartLine(byte displayStartLine)
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 SetDisplayStartLine setDisplayStartLine = new SetDisplayStartLine(displayStartLine);
             });

@@ -14,9 +14,9 @@ namespace Iot.Device.Mcp23xxx.Tests
         [MemberData(nameof(TestDevices))]
         public void Write_InvalidPin(TestDevice testDevice)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Write(-1, PinValue.High));
-            Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Write(testDevice.Device.PinCount, PinValue.Low));
-            Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Write(testDevice.Device.PinCount + 1, PinValue.High));
+            Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Write(-1, PinValue.High));
+            Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Write(testDevice.Controller.PinCount, PinValue.Low));
+            Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Write(testDevice.Controller.PinCount + 1, PinValue.High));
         }
 
         [Theory]
@@ -24,17 +24,18 @@ namespace Iot.Device.Mcp23xxx.Tests
         public void Write_GoodPin(TestDevice testDevice)
         {
             Mcp23xxx device = testDevice.Device;
-            for (int pin = 0; pin < testDevice.Device.PinCount; pin++)
+            for (int pin = 0; pin < testDevice.Controller.PinCount; pin++)
             {
                 bool first = pin < 8;
 
-                device.Write(pin, PinValue.High);
+                testDevice.Controller.OpenPin(pin, PinMode.Output);
+                testDevice.Controller.Write(pin, PinValue.High);
                 byte expected = (byte)(1 << (first ? pin : pin - 8));
 
                 Assert.Equal(expected,
                     first ? device.ReadByte(Register.OLAT) : ((Mcp23x1x)device).ReadByte(Register.OLAT, Port.PortB));
 
-                device.Write(pin, PinValue.Low);
+                testDevice.Controller.Write(pin, PinValue.Low);
                 Assert.Equal(0,
                     first ? device.ReadByte(Register.OLAT) : ((Mcp23x1x)device).ReadByte(Register.OLAT, Port.PortB));
             }

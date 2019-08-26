@@ -16,7 +16,7 @@ namespace Iot.Device.Mcp23xxx.Tests
         {
             // All pins should be set to input, all output latches should be low, and pullups should be disabled.
             Mcp23xxx device = testDevice.Device;
-            if (device.PinCount == 8)
+            if (testDevice.Controller.PinCount == 8)
             {
                 Assert.Equal(0xFF, device.ReadByte(Register.IODIR));
                 Assert.Equal(0x00, device.ReadByte(Register.OLAT));

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Device.Gpio;
 using System.Device.I2c;
 using Iot.Device.Mcp23xxx;
 
@@ -30,13 +31,13 @@ namespace Iot.Device.CharacterLcd.Samples
         static void UsingMcp()
         {
             I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x21));
-            Mcp23008 mcpDevice = new Mcp23008(i2CDevice);
+            Mcp23008 driver = new Mcp23008(i2CDevice);
             int[] dataPins = { 3, 4, 5, 6 };
             int registerSelectPin = 1;
             int enablePin = 2;
             int backlight = 7;
-            using (mcpDevice)
-            using (Lcd1602 lcd = new Lcd1602(registerSelectPin, enablePin, dataPins, backlight, controller: mcpDevice))
+            using (driver)
+            using (Lcd1602 lcd = new Lcd1602(registerSelectPin, enablePin, dataPins, backlight, controller: new GpioController(PinNumberingScheme.Logical, driver)))
             {
                 lcd.Clear();
 

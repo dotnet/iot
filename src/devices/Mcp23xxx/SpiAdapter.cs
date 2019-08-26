@@ -8,7 +8,7 @@ using System.Device.Spi;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public abstract partial class Mcp23xxx : IGpioController
+    public abstract partial class Mcp23xxx
     {
         protected class SpiAdapter : BusAdapter
         {

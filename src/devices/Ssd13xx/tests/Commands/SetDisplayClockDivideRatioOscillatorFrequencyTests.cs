@@ -49,7 +49,7 @@ namespace Iot.Device.Ssd13xx.Tests
         [InlineData(0xFF, 0xFF)]
         public void Invalid_DisplayClockDivideRatioOscillatorFrequency(byte displayClockDivideRatio, byte oscillatorFrequency)
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 SetDisplayClockDivideRatioOscillatorFrequency setDisplayClockDivideRatioOscillatorFrequency =
                     new SetDisplayClockDivideRatioOscillatorFrequency(displayClockDivideRatio, oscillatorFrequency);

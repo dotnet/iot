@@ -11,12 +11,12 @@ namespace Iot.Device.Mcp23xxx
     /// </summary>
     public abstract class Mcp23x1x : Mcp23xxx
     {
-        protected Mcp23x1x(BusAdapter device, int reset, int interruptA, int interruptB, IGpioController masterController)
+        protected Mcp23x1x(BusAdapter device, int reset, int interruptA, int interruptB, GpioController masterController)
             : base(device, reset, interruptA, interruptB, masterController)
         {
         }
 
-        public override int PinCount => 16;
+        protected override int PinCount => 16;
 
         /// <summary>
         /// Read a byte from the given register on the given port.

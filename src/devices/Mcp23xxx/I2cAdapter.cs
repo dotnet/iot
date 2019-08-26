@@ -8,7 +8,7 @@ using System.Device.I2c;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public abstract partial class Mcp23xxx : IGpioController
+    public abstract partial class Mcp23xxx
     {
         protected class I2cAdapter : BusAdapter
         {

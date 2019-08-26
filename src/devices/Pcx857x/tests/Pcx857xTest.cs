@@ -3,9 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Threading;
 using Xunit;
 
 namespace Iot.Device.Pcx857x.Tests
@@ -35,11 +37,13 @@ namespace Iot.Device.Pcx857x.Tests
         {
             public Pcx857x Device { get; }
             public Pcx857xChipMock ChipMock { get; }
+            public GpioController Controller { get; }
 
             public TestDevice(Pcx857x device, Pcx857xChipMock chipMock)
             {
                 Device = device;
                 ChipMock = chipMock;
+                Controller = new GpioController(PinNumberingScheme.Logical, Device);
             }
         }
 
@@ -122,27 +126,26 @@ namespace Iot.Device.Pcx857x.Tests
         }
 
 
-        public class GpioControllerMock : IGpioController
+        public class GpioControllerMock : GpioDriver
         {
             private Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
+            private ConcurrentDictionary<int, PinMode> _pinModes = new ConcurrentDictionary<int, PinMode>();
 
-            public int PinCount => 10;
+            protected override int PinCount => 10;
 
             public void Reset() => _pinValues = new Dictionary<int, PinValue>();
 
-            public void ClosePin(int pinNumber)
+            protected override void ClosePin(int pinNumber)
             {
+                _pinModes.TryRemove(pinNumber, out _);
             }
 
-            public void Dispose()
+            protected override void Dispose(bool disposing)
             {
+                base.Dispose(disposing);
             }
 
-            public void OpenPin(int pinNumber, PinMode mode)
-            {
-            }
-
-            public PinValue Read(int pinNumber)
+            protected override PinValue Read(int pinNumber)
             {
                 if (_pinValues.TryGetValue(pinNumber, out PinValue value))
                     return value;
@@ -159,11 +162,12 @@ namespace Iot.Device.Pcx857x.Tests
                 }
             }
 
-            public void SetPinMode(int pinNumber, PinMode mode)
+            protected override void SetPinMode(int pinNumber, PinMode mode)
             {
+                _pinModes.AddOrUpdate(pinNumber, mode, (key, value) => mode);
             }
 
-            public void Write(int pinNumber, PinValue value)
+            protected override void Write(int pinNumber, PinValue value)
             {
                 _pinValues[pinNumber] = value;
             }
@@ -176,15 +180,21 @@ namespace Iot.Device.Pcx857x.Tests
                 }
             }
 
-            public void OpenPin(int pinNumber)
+            protected override void OpenPin(int pinNumber)
             {
             }
 
-            public bool IsPinOpen(int pinNumber) => true;
+            protected override PinMode GetPinMode(int pinNumber) => _pinModes.TryGetValue(pinNumber, out PinMode value) ? value : throw new InvalidOperationException($"Failed to get mode for pin {pinNumber} since it is not opened.");
 
-            public PinMode GetPinMode(int pinNumber) => PinMode.Input;
+            protected override bool IsPinModeSupported(int pinNumber, PinMode mode) => true;
 
-            public bool IsPinModeSupported(int pinNumber, PinMode mode) => true;
+            protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new NotImplementedException();
+
+            protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => throw new NotImplementedException();
+
+            protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => throw new NotImplementedException();
+
+            protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) => throw new NotImplementedException();
         }
     }
 }

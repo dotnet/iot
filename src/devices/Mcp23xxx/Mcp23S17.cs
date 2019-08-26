@@ -22,7 +22,7 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="interruptA">The input pin number that is connected to the interrupt for Port A (INTA), if any.</param>
         /// <param name="interruptB">The input pin number that is connected to the interrupt for Port B (INTB), if any.</param>
         /// <param name="masterController">The controller for the reset and interrupt pins. If not specified, the default controller will be used.</param>
-        public Mcp23s17(SpiDevice spiDevice, int deviceAddress, int reset = -1, int interruptA = -1, int interruptB = -1, IGpioController masterController = null)
+        public Mcp23s17(SpiDevice spiDevice, int deviceAddress, int reset = -1, int interruptA = -1, int interruptB = -1, GpioController masterController = null)
             : base(CreateAdapter(spiDevice, deviceAddress), reset, interruptA, interruptB, masterController)
         {
         }
