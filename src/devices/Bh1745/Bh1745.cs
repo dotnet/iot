@@ -372,7 +372,8 @@ namespace Iot.Device.Bh1745
 
         private void Write8BitsToRegister(byte register, byte data)
         {
-            _i2cDevice.Write(stackalloc[] { register, data });
+            Span<byte> command = stackalloc[] {register, data};
+            _i2cDevice.Write(command);
         }
 
         /// <summary>
