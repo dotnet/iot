@@ -8,7 +8,9 @@
   <ItemGroup>
     <ProjectReference Include="../../Mcp23xxx/Mcp23xxx.csproj" />
     <ProjectReference Include="../../Pcx857x/Pcx857x.csproj" />
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
     <ProjectReference Include="..\CharacterLcd.csproj" />
   </ItemGroup>
 

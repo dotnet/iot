@@ -6,14 +6,16 @@
   <PropertyGroup>
     <Copyright>$(CopyrightNetFoundation)</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <MainLibraryPath>$(MSBuildThisFileDirectory)src/System.Device.Gpio/</MainLibraryPath>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PublishWindowsPdb>false</PublishWindowsPdb>
     <Language>C#</Language>
     <TargetsWindows Condition="$(RuntimeIdentifier.StartsWith('win'))">true</TargetsWindows>
     <TargetsLinux Condition="$(RuntimeIdentifier.StartsWith('linux'))">true</TargetsLinux>
     <LangVersion>Latest</LangVersion>
+    <!-- Generate snupkg package -->
+    <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
   <ItemGroup>

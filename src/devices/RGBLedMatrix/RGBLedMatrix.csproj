@@ -4,11 +4,12 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <RuntimeIdentifier>linux-arm</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
     <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview4.19164.7" />
   </ItemGroup>
 

@@ -18,7 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
     <ProjectReference Include="..\Units\Units.csproj" />
     <None Include="README.md" />
   </ItemGroup>

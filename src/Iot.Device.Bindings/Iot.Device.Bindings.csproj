@@ -8,8 +8,8 @@
     <DeviceRoot>$(MSBuildThisFileDirectory)../devices/</DeviceRoot>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-	  <LangVersion>8</LangVersion>
-    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackageRefAssemblyAndDocXml</TargetsForTfmSpecificContentInPackage>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage)</TargetsForTfmSpecificContentInPackage>
+    <LangVersion>8</LangVersion>
     <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
 
@@ -22,20 +22,9 @@
 
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview4.19164.7" />
-    <ProjectReference Include="$(MSBuildThisFileDirectory)../System.Device.Gpio/System.Device.Gpio.csproj">
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
   </ItemGroup>
-
-  <Target Name="PackageRefAssemblyAndDocXml">
-    <ItemGroup>
-      <TfmSpecificPackageFile Include="$(TargetRefPath)">
-        <PackagePath>ref/$(TargetFramework)</PackagePath>
-      </TfmSpecificPackageFile>
-      <TfmSpecificPackageFile Include="$(DocumentationFile)">
-        <PackagePath>ref/$(TargetFramework)</PackagePath>
-      </TfmSpecificPackageFile>
-    </ItemGroup>
-  </Target>
 
 </Project>

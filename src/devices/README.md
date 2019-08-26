@@ -26,10 +26,12 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Volatile Organic Compound sensors
 
 * [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
+* [BMxx80 Device Family](Bmxx80/README.md)
 
 ### Gas sensors
 
 * [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
+* [BMxx80 Device Family](Bmxx80/README.md)
 
 ### Light sensor
 
@@ -40,17 +42,19 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Barometers
 
 * [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
-* [BMx280 - Digital Pressure Sensors BMP280/BME280](Bmx280/README.md)
+* [BMxx80 Device Family](Bmxx80/README.md)
 * [LPS25H - Piezoresistive pressure and thermometer sensor](Lps25h/README.md)
 * [Sense HAT](SenseHat/README.md)
 
 ### Altimeters
 
 * [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
+* [BMxx80 Device Family](Bmxx80/README.md)
 
 ### Thermometers
 
 * [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
+* [BMxx80 Device Family](Bmxx80/README.md)
 * [Cpu Temperature](CpuTemperature/README.md)
 * [DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
 * [HTS221 - Capacitive digital sensor for relative humidity and temperature](Hts221/README.md)
@@ -100,6 +104,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ### Hygrometers
 
+* [BMxx80 Device Family](Bmxx80/README.md)
 * [DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
 * [HTS221 - Capacitive digital sensor for relative humidity and temperature](Hts221/README.md)
 * [Sense HAT](SenseHat/README.md)
@@ -108,8 +113,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ### Clocks
 
-* [DS1307 - Realtime Clock](Ds1307/README.md)
-* [DS3231 - Realtime Clock](Ds3231/README.md)
+* [Realtime Clock](Rtc/README.md)
 
 ### Sonars
 
@@ -175,6 +179,10 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### LED drivers
 
 * [Ws28xx LED drivers](Ws28xx/README.md)
+
+### SPI libraries/modules
+
+* [Software implementation of SPI](SoftwareSpi/README.md)
 
 </categorizedDevices>
 

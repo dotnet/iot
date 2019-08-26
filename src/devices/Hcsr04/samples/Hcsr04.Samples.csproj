@@ -7,7 +7,9 @@
 
   <ItemGroup>
     <ProjectReference Include="../Hcsr04.csproj" />
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
