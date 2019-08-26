@@ -7,10 +7,11 @@ namespace System.Device.Spi
     /// <summary>
     /// The communications channel to a device on a SPI bus.
     /// </summary>
-    public abstract class SpiDevice : IDisposable
+    public abstract partial class SpiDevice : IDisposable
     {
         /// <summary>
-        /// The connection settings of a device on a SPI bus.
+        /// The connection settings of a device on a SPI bus. The connection settings are immutable after the device is created
+        /// so the object returned will be a clone of the settings object.
         /// </summary>
         public abstract SpiConnectionSettings ConnectionSettings { get; }
 
@@ -56,9 +57,9 @@ namespace System.Device.Spi
             GC.SuppressFinalize(this);
         }
 
-        public virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
-            //Nothing to do in base class.
+            // Nothing to do in base class.
         }
     }
 }

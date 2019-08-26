@@ -9,11 +9,13 @@
   <ItemGroup>
     <Compile Include="Buzzer.cs" />
     <None Include="README.md" />
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\SoftPwm\SoftPwm.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../SoftPwm/SoftwarePwm.csproj" />
   </ItemGroup>
 
 </Project>

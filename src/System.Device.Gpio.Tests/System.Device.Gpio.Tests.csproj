@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RuntimeIdentifiers>win-arm;linux-arm</RuntimeIdentifiers>
@@ -8,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)../System.Device.Gpio/System.Device.Gpio.csproj">
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties Condition="'$(RuntimeIdentifier)' != ''">RuntimeIdentifier=$(RuntimeIdentifier.SubString(0, $(RuntimeIdentifier.IndexOf('-'))))</AdditionalProperties>
     </ProjectReference>
   </ItemGroup>
@@ -22,5 +21,4 @@
     <!--Excluding Linux implementations-->
     <Compile Remove="**\*.Linux.cs" />
   </ItemGroup>
-
 </Project>

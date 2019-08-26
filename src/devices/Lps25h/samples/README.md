@@ -21,7 +21,7 @@ class Program
     private static I2cDevice CreateI2cDevice()
     {
         var settings = new I2cConnectionSettings(1, I2cAddress);
-        return new UnixI2cDevice(settings);
+        return I2cDevice.Create(settings);
     }
 }
 ```

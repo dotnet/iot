@@ -2,21 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
     <Compile Include="MatrixKeyboard.cs" />
     <Compile Include="MatrixKeyboardEventArgs.cs" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup>    
     <None Include="README.md" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
   </ItemGroup>
 
 </Project>

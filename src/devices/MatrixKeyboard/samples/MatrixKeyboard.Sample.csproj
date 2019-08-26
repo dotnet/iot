@@ -6,11 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="$(SystemDeviceGpioPackageVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)\..\MatrixKeyboard.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>

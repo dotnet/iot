@@ -2,5 +2,17 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
+    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19420.8</MicrosoftDotNetGenAPIPackageVersion>
+  </PropertyGroup>
+  <!-- Restore sources -->
+  <PropertyGroup>
+    <RestoreSources>
+      $(RestoreSources);
+      https://dotnetfeed.blob.core.windows.net/dotnet-tools-internal/index.json;
+      https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json;
+      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
+      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
+      https://api.nuget.org/v3/index.json;
+    </RestoreSources>
   </PropertyGroup>
 </Project>

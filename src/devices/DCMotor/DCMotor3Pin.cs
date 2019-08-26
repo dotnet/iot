@@ -11,37 +11,29 @@ namespace Iot.Device.DCMotor
 {
     internal class DCMotor3Pin : DCMotor
     {
-        private PwmController _pwm;
-        private int _chip;
-        private int _channel;
+        private PwmChannel _pwm;
         private int _pin0;
         private int _pin1;
         private double _speed;
 
         public DCMotor3Pin(
-            PwmController pwmController,
-            double pwmFrequency,
-            int pwmChip,
-            int pwmChannel,
+            PwmChannel pwmChannel,
             int pin0,
             int pin1,
-            GpioController controller)
-            : base(controller)
+            IGpioController controller)
+            : base(controller ?? new GpioController())
         {
-            if (pwmController == null)
-                throw new ArgumentNullException(nameof(pwmController));
+            if (pwmChannel == null)
+                throw new ArgumentNullException(nameof(pwmChannel));
 
-            _pwm = pwmController;
-            _chip = pwmChip;
-            _channel = pwmChannel;
+            _pwm = pwmChannel;
 
             _pin0 = pin0;
             _pin1 = pin1;
 
             _speed = 0;
 
-            _pwm.OpenChannel(_chip, _channel);
-            _pwm.StartWriting(_chip, _channel, pwmFrequency, 0);
+            _pwm.Start();
 
             Controller.OpenPin(_pin0, PinMode.Output);
             Controller.Write(_pin0, PinValue.Low);
@@ -68,7 +60,12 @@ namespace Iot.Device.DCMotor
                 if (_speed == val)
                     return;
 
-                if (val >= 0.0)
+                if (val == 0.0)
+                {
+                    Controller.Write(_pin0, PinValue.Low);
+                    Controller.Write(_pin1, PinValue.Low);
+                }
+                else if (val > 0.0)
                 {
                     Controller.Write(_pin0, PinValue.Low);
                     Controller.Write(_pin1, PinValue.High);
@@ -79,22 +76,22 @@ namespace Iot.Device.DCMotor
                     Controller.Write(_pin1, PinValue.Low);
                 }
 
-                SetPwmFill(Math.Abs(val));
+                _pwm.DutyCyclePercentage = Math.Abs(val);
 
                 _speed = val;
             }
         }
 
-        private void SetPwmFill(double fill)
+        protected override void Dispose(bool disposing)
         {
-            _pwm.ChangeDutyCycle(_chip, _channel, fill * 100.0);
-        }
+            if (disposing)
+            {
+                _speed = 0.0;
+                _pwm?.Dispose();
+                _pwm = null;
+            }
 
-        public override void Dispose()
-        {
-            _pwm?.Dispose();
-            _pwm = null;
-            base.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

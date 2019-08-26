@@ -8,14 +8,26 @@ The Raspberry Pi cannot read analog values directly so relies on an analog to di
 
 The Raspberry Pi has support for SPI. You need to [enable the SPI interface on the Raspberry Pi](https://www.raspberrypi-spy.co.uk/2014/08/enabling-the-spi-interface-on-the-raspberry-pi/) since it is not enabled by default.
 
-You can use the following code to [access the MCP3008 via SPI](Mcp3008.Sample.cs#L17-L22):
+You can use the following code to [access the MCP3008 via hardware SPI](Mcp3008.Sample.cs):
 
 ```csharp
-var connection = new SpiConnectionSettings(0,0);
-connection.ClockFrequency = 1000000;
-connection.Mode = SpiMode.Mode0;
-var spi = new UnixSpiDevice(connection);
-var mcp = new Mcp3008(spi);
+var hardwareSpiSettings = new SpiConnectionSettings(0, 0)
+{
+    ClockFrequency = 1000000
+};
+
+using (SpiDevice spi = SpiDevice.Create(hardwareSpiSettings))
+using (Mcp3008.Mcp3008 mcp = new Mcp3008.Mcp3008(spi))
+{
+    while (true)
+    {
+        double value = mcp.Read(0);
+        value = value / 10.24;
+        value = Math.Round(value);
+        Console.WriteLine($"{value}%");
+        Thread.Sleep(500);
+    }
+}
 ```
 
 The following pin layout can be used (also shown in a [fritzing diagram](rpi-trimpot-spi.fzz)):
@@ -36,11 +48,21 @@ The following pin layout can be used (also shown in a [fritzing diagram](rpi-tri
 
 You can also access the MCP3008 via GPIO pins, implementing SPI manually. This method is referred to as [bit-banging](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface#Example_of_bit-banging_the_master_protocol).
 
-You can use the following code to [access the MCP3008 via GPIO](Mcp3008.Sample.cs#L29-L30):
+You can use the following code to [access the MCP3008 via GPIO](Mcp3008.Sample.cs):
 
 ```csharp
-GpioController controller = new GpioController(PinNumberingScheme.Gpio);
-var mcp = new Mcp3008(controller, 18, 23, 24, 25);
+using (SpiDevice spi = new SoftwareSpi(clk: 18, miso: 23, mosi: 24, cs: 25))
+using (Mcp3008.Mcp3008 mcp = new Mcp3008.Mcp3008(spi))
+{
+    while (true)
+    {
+        double value = mcp.Read(0);
+        value = value / 10.24;
+        value = Math.Round(value);
+        Console.WriteLine($"{value}%");
+        Thread.Sleep(500);
+    }
+}
 ```
 
 The following pin layout can be used (also shown in a [fritzing diagram](rpi-trimpot-gpio.fzz)):

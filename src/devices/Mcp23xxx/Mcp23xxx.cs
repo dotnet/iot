@@ -121,7 +121,7 @@ namespace Iot.Device.Mcp23xxx
         /// Writes a number of bytes to registers.
         /// </summary>
         /// <param name="register">The register address to write to.</param>
-        /// <param name="buffer">The data to write to the registers.</param>
+        /// <param name="data">The data to write to the registers.</param>
         /// <param name="port">The I/O port used with the registers.</param>
         protected void InternalWrite(Register register, Span<byte> data, Port port)
         {
@@ -164,7 +164,6 @@ namespace Iot.Device.Mcp23xxx
         /// Writes to the A port registers on 16 bit devices.
         /// </remarks>
         public void WriteByte(Register register, byte value) => InternalWriteByte(register, value, Port.PortA);
-
 
         protected ushort InternalReadUInt16(Register register)
         {
@@ -439,11 +438,19 @@ namespace Iot.Device.Mcp23xxx
             return port == Port.PortA ? address : address += 0x10;
         }
 
+        public void OpenPin(int pinNumber) => throw new NotImplementedException();
+
         public void OpenPin(int pinNumber, PinMode mode) => SetPinMode(pinNumber, mode);
 
         public void ClosePin(int pinNumber)
         {
             // No-op
         }
+
+        public bool IsPinOpen(int pinNumber) => throw new NotImplementedException();
+
+        public PinMode GetPinMode(int pinNumber) => throw new NotImplementedException();
+
+        public bool IsPinModeSupported(int pinNumber, PinMode mode) => throw new NotImplementedException();
     }
 }

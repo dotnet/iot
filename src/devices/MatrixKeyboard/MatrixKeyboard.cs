@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Iot.Device.MatrixKeyboard
 {
@@ -26,32 +27,25 @@ namespace Iot.Device.MatrixKeyboard
         public IEnumerable<int> ColumnPins => _columnPins;
 
         /// <summary>
-        /// Get or set scanning frequency in Hertz
+        /// Get all buttons' values
         /// </summary>
-        public double ScanFrequency
-        {
-            get => _scanFrequency;
-            set
-            {
-                if (value <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), "Scanning frequency must be positive");
-                }
-                _scanFrequency = value;
-                _scanInterval = CalcScanInterval(_scanFrequency);
-            }
-        }
+        public ReadOnlySpan<PinValue> Values => _buttonValues.AsSpan();
 
         /// <summary>
-        /// Get whether this keyboard is scanning
+        /// Get or set interval in milliseconds
         /// </summary>
-        public bool IsScanning { get; private set; }
+        public int ScanInterval { get; set; }
 
-        private readonly int[] _rowPins;
-        private readonly int[] _columnPins;
+        /// <summary>
+        /// Delegate of keyboard event
+        /// </summary>
+        public delegate void PinChangeEventHandler(object sender, MatrixKeyboardEventArgs pinValueChangedEventArgs);
+
         private int _currentRow;
-        private readonly PinValue[] _buttonValues;
-        private double _scanFrequency;
+        private int[] _rowPins;
+        private int[] _columnPins;
+        private IGpioController _gpio;
+        private PinValue[] _buttonValues;
 
         /// <summary>
         /// Initialize keyboard
@@ -59,8 +53,8 @@ namespace Iot.Device.MatrixKeyboard
         /// <param name="gpioController">GPIO controller</param>
         /// <param name="rowPins">Row pins</param>
         /// <param name="colPins">Column pins</param>
-        /// <param name="scanFreq">Scanning frequency</param>
-        public MatrixKeyboard(IGpioController gpioController, IEnumerable<int> rowPins, IEnumerable<int> colPins, double scanFreq = 50)
+        /// <param name="scanInterval">Scanning interval in milliseconds</param>
+        public MatrixKeyboard(IGpioController gpioController, IEnumerable<int> rowPins, IEnumerable<int> colPins, int scanInterval)
         {
             _gpio = gpioController ?? throw new ArgumentNullException(nameof(gpioController));
 
@@ -68,7 +62,7 @@ namespace Iot.Device.MatrixKeyboard
             {
                 throw new ArgumentNullException(nameof(rowPins));
             }
-            if (rowPins.Count() < 1)
+            if (rowPins.Any())
             {
                 throw new ArgumentOutOfRangeException(nameof(rowPins), "The number of rows is at least 1");
             }
@@ -77,155 +71,146 @@ namespace Iot.Device.MatrixKeyboard
             {
                 throw new ArgumentNullException(nameof(colPins));
             }
-            if (colPins.Count() < 1)
+            if (colPins.Any())
             {
                 throw new ArgumentOutOfRangeException(nameof(colPins), "The number of columns is at least 1");
             }
 
-            if (scanFreq <= 0)
+            if (scanInterval <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(scanFreq), "Scanning frequency must be positive");
+                throw new ArgumentOutOfRangeException(nameof(scanInterval), "Scanning interval must be positive");
             }
 
             _rowPins = rowPins.ToArray();
             _columnPins = colPins.ToArray();
             _buttonValues = new PinValue[_rowPins.Length * _columnPins.Length];
 
-            _scanThread = new Thread(ScanThreadStart);
-            IsScanning = false;
-            ScanFrequency = scanFreq;
+            ScanInterval = scanInterval;
         }
 
         /// <summary>
-        /// Open GPIO pins then start keyboard scanning
+        /// Start a task to open GPIO pins then start keyboard scanning. Raises MatrixKeyboardEventArgs.
         /// </summary>
-        public void StartScan()
+        /// <param name="token">A cancellation token that can be used to cancel the work</param>
+        public Task ScanAsync(CancellationToken token)
         {
-            if (!IsScanning)
+            return Task.Run(() =>
             {
-                try
+                OpenPins();
+                while (!token.IsCancellationRequested)
                 {
-                    for (var i = 0; i < _rowPins.Length; i++)
+                    for (int i = 0; i < _columnPins.Length; i++)
                     {
-                        _gpio.OpenPin(_rowPins[i], PinMode.Output);
-                    }
-                    for (var i = 0; i < _columnPins.Length; i++)
-                    {
-                        _gpio.OpenPin(_columnPins[i], PinMode.Input);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    IsScanning = false;
-                    throw new Exception("Error while openning GPIO pins.", ex);
-                }
+                        int index = _currentRow * _columnPins.Length + i;
 
-                IsScanning = true;
-                try
-                {
-                    _scanThread.Start();
+                        PinValue oldValue = _buttonValues[index];
+                        PinValue newValue = _gpio.Read(_columnPins[i]);
+
+                        _buttonValues[index] = newValue;
+                        if (newValue != oldValue)
+                        {
+                            MatrixKeyboardEventArgs args = new MatrixKeyboardEventArgs(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, _currentRow, i);
+                            PinChangeEvent(this, args);
+                        }
+                    }
+
+                    _gpio.Write(_rowPins[_currentRow], PinValue.Low);
+                    _currentRow = (_currentRow + 1) % _rowPins.Length;
+                    _gpio.Write(_rowPins[_currentRow], PinValue.High);
+
+                    Thread.Sleep(ScanInterval);
                 }
-                catch (Exception ex)
-                {
-                    IsScanning = false;
-                    throw new Exception("Error while starting scanning thread.", ex);
-                }
-            }
+                ClosePins();
+            }, token);
         }
 
         /// <summary>
-        /// Stop keyboard scanning then close GPIO pins
+        /// Start a task to open GPIO pins then start keyboard scanning. End with a MatrixKeyboardEventArgs raises.
         /// </summary>
-        public void StopScan()
+        /// <param name="token">A cancellation token that can be used to cancel the work</param>
+        public Task<MatrixKeyboardEventArgs> ReadKeyAsync(CancellationToken token)
         {
-            if (IsScanning)
+            return Task.Run(() =>
             {
-                IsScanning = false;
-                Thread.Sleep(_scanInterval); // wait for thread ends
+                MatrixKeyboardEventArgs args = null;
 
-                try
+                OpenPins();
+                while (!token.IsCancellationRequested)
                 {
-                    for (var i = 0; i < _rowPins.Length; i++)
+                    for (int i = 0; i < _columnPins.Length; i++)
                     {
-                        _gpio.ClosePin(_rowPins[i]);
+                        int index = _currentRow * _columnPins.Length + i;
+
+                        PinValue oldValue = _buttonValues[index];
+                        PinValue newValue = _gpio.Read(_columnPins[i]);
+
+                        _buttonValues[index] = newValue;
+                        if (newValue != oldValue)
+                        {
+                            args = new MatrixKeyboardEventArgs(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, _currentRow, i);
+                        }
                     }
-                    for (var i = 0; i < _columnPins.Length; i++)
-                    {
-                        _gpio.ClosePin(_columnPins[i]);
-                    }
+
+                    _gpio.Write(_rowPins[_currentRow], PinValue.Low);
+                    _currentRow = (_currentRow + 1) % _rowPins.Length;
+                    _gpio.Write(_rowPins[_currentRow], PinValue.High);
+
+                    Thread.Sleep(ScanInterval);
                 }
-                catch (Exception ex)
-                {
-                    IsScanning = false;
-                    throw new Exception("Error while closing GPIO pins.", ex);
-                }
-            }
+                ClosePins();
+
+                return args;
+            }, token);
         }
-
-        /// <summary>
-        /// Get all buttons' values
-        /// </summary>
-        public ReadOnlySpan<PinValue> Values => _buttonValues.AsSpan();
 
         /// <summary>
         /// Get buttons' values by row
         /// </summary>
         /// <param name="row">Row index</param>
-        public ReadOnlySpan<PinValue> RowValues(int row) => _buttonValues.AsSpan(row * _rowPins.Length, _columnPins.Length);
+        public ReadOnlySpan<PinValue> RowValues(int row)
+        {
+            return _buttonValues.AsSpan(row * _rowPins.Length, _columnPins.Length);
+        }
 
         /// <summary>
         /// Keyboard event
         /// </summary>
         public event PinChangeEventHandler PinChangeEvent;
 
-        /// <summary>
-        /// Delegate of keyboard event
-        /// </summary>
-        public delegate void PinChangeEventHandler(object sender, MatrixKeyboardEventArgs pinValueChangedEventArgs);
-
         public void Dispose()
         {
-            IsScanning = false;
-            _scanThread = null;
-
-            _gpio?.Dispose();
+            _gpio.Dispose();
             _gpio = null;
+
+            _rowPins = null;
+            _columnPins = null;
+            _buttonValues = null;
         }
 
-        private IGpioController _gpio;
-        private Thread _scanThread;
-        private TimeSpan _scanInterval;
-        private TimeSpan CalcScanInterval(double scanFrequency)
+        private void OpenPins()
         {
-            // "scanFrequency * _rowPins.Length" is how many rows to scan per second
-            // it divide by 10000000(ticks) so we can get interval of the timer
-            return new TimeSpan((long)(10000000 / (scanFrequency * _rowPins.Length)));
-        }
-        private void ScanThreadStart()
-        {
-            while (IsScanning)
+            for (int i = 0; i < _rowPins.Length; i++)
             {
-                for (var i = 0; i < _columnPins.Length; i++)
-                {
-                    var index = _currentRow * _columnPins.Length + i;
-
-                    var oldValue = _buttonValues[index];
-                    var newValue = _gpio.Read(_columnPins[i]);
-
-                    _buttonValues[index] = newValue;
-                    if (newValue != oldValue)
-                    {
-                        var args = new MatrixKeyboardEventArgs(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, _currentRow, i);
-                        PinChangeEvent(this, args);
-                    }
-                }
-
-                _gpio.Write(_rowPins[_currentRow], PinValue.Low);
-                _currentRow = (_currentRow + 1) % _rowPins.Length;
-                _gpio.Write(_rowPins[_currentRow], PinValue.High);
-
-                Thread.Sleep(_scanInterval);
+                _gpio.OpenPin(_rowPins[i], PinMode.Output);
+            }
+            for (int i = 0; i < _columnPins.Length; i++)
+            {
+                _gpio.OpenPin(_columnPins[i], PinMode.Input);
             }
         }
+        private void ClosePins()
+        {
+            Thread.Sleep(ScanInterval); // wait for thread ends    
+
+            for (int i = 0; i < _rowPins.Length; i++)
+            {
+                _gpio.ClosePin(_rowPins[i]);
+            }
+            for (int i = 0; i < _columnPins.Length; i++)
+            {
+                _gpio.ClosePin(_columnPins[i]);
+            }
+        }
+
     }
 }

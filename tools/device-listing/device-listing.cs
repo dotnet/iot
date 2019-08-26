@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -11,6 +13,84 @@ namespace Iot.Tools.DeviceListing
 {
     class Program
     {
+        static string[] s_categoriesToDisplay = new string[]
+        {
+            "adc",
+            "accelerometer",
+            "voc",
+            "gas",
+            "light",
+            "barometer",
+            "altimeter",
+            "thermometer",
+            "gyroscope",
+            "compass",
+            "lego",
+            "motor",
+            "imu",
+            "magnetometer",
+            "lcd",
+            "hygrometer",
+            "clock",
+            "sonar",
+            "distance",
+            "pir",
+            "motion",
+            "display",
+            "io-expander",
+            "canbus",
+            "proximity",
+            "touch",
+            "wireless",
+            "pwm",
+            "joystick",
+            "color",
+            "led",
+            "spi",
+        };
+
+        static Dictionary<string, string> s_categoriesDescriptions = new Dictionary<string, string>()
+        {
+            { "adc", "Analog/Digital converters" },
+            { "accelerometer", "Accelerometers" },
+            { "voc", "Volatile Organic Compound sensors" },
+            { "gas", "Gas sensors" },
+            { "light", "Light sensor" },
+            { "barometer", "Barometers" },
+            { "altimeter", "Altimeters" },
+            { "thermometer", "Thermometers" },
+            { "gyroscope", "Gyroscopes" },
+            { "compass", "Compasses" },
+            { "lego", "Lego related devices" },
+            { "motor", "Motor controllers/drivers" },
+            { "imu", "Inertial Measurement Units" },
+            { "magnetometer", "Magnetometers" },
+            { "lcd", "Liquid Crystal Displays" },
+            { "hygrometer", "Hygrometers" },
+            { "rtc", "Real Time Clocks" },
+            { "clock", "Clocks" },
+            { "sonar", "Sonars" },
+            { "distance", "Distance sensors" },
+            { "pir", "Passive InfraRed (motion) sensors" },
+            { "motion", "Motion sensors" },
+            { "display", "Displays" },
+            { "io-expander", "GPIO Expanders" },
+            { "canbus", "CAN BUS libraries/modules" },
+            { "proximity", "Proximity sensors" },
+            { "touch", "Touch sensors" },
+            { "wireless", "Wireless communication modules" },
+            { "pwm", "PWM libraries/modules" },
+            { "spi", "SPI libraries/modules" },
+            { "joystick", "Joysticks" },
+            { "color", "Color sensors" },
+            { "led", "LED drivers" },
+            { "characterlcd", null },
+            { "brickpi3", null },
+            { "buzzer", null },
+            { "gopigo3", null },
+            { "grovepi", null },
+        };
+
         static void Main(string[] args)
         {
             string repoRoot = FindRepoRoot(Environment.CurrentDirectory);
@@ -21,11 +101,11 @@ namespace Iot.Tools.DeviceListing
                 return;
             }
 
-            string devices = Path.Combine(repoRoot, "src", "devices");
+            string devicesPath = Path.Combine(repoRoot, "src", "devices");
 
-            var deviceListing = new StringBuilder();
+            List<DeviceInfo> devices = new List<DeviceInfo>();
 
-            foreach (string directory in Directory.EnumerateDirectories(devices))
+            foreach (string directory in Directory.EnumerateDirectories(devicesPath))
             {
                 if (IsIgnoredDevice(directory))
                 {
@@ -33,24 +113,76 @@ namespace Iot.Tools.DeviceListing
                 }
 
                 string readme = Path.Combine(directory, "README.md");
+                string categories = Path.Combine(directory, "category.txt");
                 if (File.Exists(readme))
                 {
-                    string title = GetTitle(readme);
-                    if (title == null)
+                    var device = new DeviceInfo(readme, categories);
+
+                    if (device.Title == null)
                     {
-                        Console.WriteLine($"Directory `{directory}` contains readme file without title on the first line.");
+                        Console.WriteLine($"Warning: Directory `{directory}` contains readme file without title on the first line.");
                         continue;
                     }
 
-                    deviceListing.AppendLine($"* [{title}]({GetRelativePathSimple(readme, devices)})");
+                    devices.Add(device);
                 }
                 else
                 {
-                    Console.WriteLine($"Directory `{directory}` does not have a README.md file.");
+                    Console.WriteLine($"Warning: Directory `{directory}` does not have a README.md file.");
                 }
             }
 
-            ReplacePlaceholder(Path.Combine(devices, "README.md"), "devices", deviceListing.ToString());
+            devices.Sort();
+
+            var allCategories = new HashSet<string>();
+
+            foreach (DeviceInfo device in devices)
+            {
+                foreach (string category in device.Categories)
+                {
+                    if (allCategories.Add(category))
+                    {
+                        if (!s_categoriesDescriptions.ContainsKey(category))
+                        {
+                            Console.WriteLine($"Warning: Category `{category}` is missing description (`{device.Title}`).");
+                        }
+                    }
+                }
+            }
+
+            string alphabeticalDevicesIndex = Path.Combine(devicesPath, "Device-Index.md");
+            string deviceListing = GetDeviceListing(devicesPath, devices);
+            ReplacePlaceholder(alphabeticalDevicesIndex, "devices", deviceListing);
+
+            string categorizedDeviceListing = GetCategorizedDeviceListing(devicesPath, devices);
+            string devicesReadme = Path.Combine(devicesPath, "README.md");
+            ReplacePlaceholder(devicesReadme, "categorizedDevices", categorizedDeviceListing);
+        }
+
+        private static string GetDeviceListing(string devicesPath, IEnumerable<DeviceInfo> devices)
+        {
+            var deviceListing = new StringBuilder();
+            foreach (DeviceInfo device in devices)
+            {
+                deviceListing.AppendLine($"* [{device.Title}]({GetRelativePathSimple(device.ReadmePath, devicesPath)})");
+            }
+
+            return deviceListing.ToString();
+        }
+
+        private static string GetCategorizedDeviceListing(string devicesPath, IEnumerable<DeviceInfo> devices)
+        {
+            var deviceListing = new StringBuilder();
+            foreach (string categoryToDisplay in s_categoriesToDisplay)
+            {
+                deviceListing.AppendLine($"### {s_categoriesDescriptions[categoryToDisplay]}");
+                deviceListing.AppendLine();
+
+                string listingInCurrentCategory = GetDeviceListing(devicesPath, devices.Where((d) => d.Categories.Contains(categoryToDisplay)));
+                deviceListing.AppendLine(listingInCurrentCategory);
+            }
+
+            return deviceListing.ToString();
         }
 
         private static string FindRepoRoot(string dir)
@@ -66,17 +198,6 @@ namespace Iot.Tools.DeviceListing
                     DirectoryInfo parentDir = new DirectoryInfo(dir).Parent;
                     return parentDir == null ? null : FindRepoRoot(parentDir.FullName);
                 }
-            }
-
-            return null;
-        }
-
-        private static string GetTitle(string readmePath)
-        {
-            string[] lines = File.ReadAllLines(readmePath);
-            if (lines[0].StartsWith("# "))
-            {
-                return lines[0].Substring(2);
             }
 
             return null;
@@ -104,7 +225,7 @@ namespace Iot.Tools.DeviceListing
         private static bool IsIgnoredDevice(string path)
         {
             string dirName = new DirectoryInfo(path).Name;
-            return dirName == "Common" || dirName == "Units";
+            return dirName == "Common" || dirName == "Units" || dirName == "Interop";
         }
 
         private static void ReplacePlaceholder(string filePath, string placeholderName, string newContent)

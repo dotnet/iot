@@ -5,26 +5,27 @@
 using System;
 using System.Device.Gpio;
 using System.Linq;
+using System.Threading;
 
 namespace Iot.Device.MatrixKeyboard.Samples
 {
     /// <summary>
     /// This sample is for Raspberry Pi Model 3B+
     /// </summary>
-    class Program
+    internal class Program
     {
         public static void Main(string[] args)
         {
             // get arguments
             Console.Write("input row pins(eg. 27,23,24,10) ");
-            var r = Console.ReadLine().Split(',').Select(m => int.Parse(m));
+            System.Collections.Generic.IEnumerable<int> r = Console.ReadLine().Split(',').Select(m => int.Parse(m));
             Console.Write("input column pins(eg. 15,14,3,2) ");
-            var c = Console.ReadLine().Split(',').Select(m => int.Parse(m));
-            Console.Write("input scaning frequency(eg. 50) ");
-            var f = double.Parse(Console.ReadLine());
+            System.Collections.Generic.IEnumerable<int> c = Console.ReadLine().Split(',').Select(m => int.Parse(m));
+            Console.Write("input scaning interval(eg. 15) ");
+            int i = int.Parse(Console.ReadLine());
 
             // get GPIO controller
-            var gpio = new GpioController();
+            GpioController gpio = new GpioController();
 
             // you can also use other GPIO controller
             /*
@@ -34,21 +35,36 @@ namespace Iot.Device.MatrixKeyboard.Samples
             */
 
             // initialize keyboard
-            var mk = new MatrixKeyboard(gpio, r, c, f);
-            mk.PinChangeEvent += Mk_PinChangeEvent;
+            MatrixKeyboard mk = new MatrixKeyboard(gpio, r, c, i);
 
+            // define the cancellation token.
+            CancellationTokenSource source = new CancellationTokenSource();
+            CancellationToken token = source.Token;
+
+            // serial mode
             Console.WriteLine();
             Console.WriteLine();
-            Console.WriteLine("Press any key to start. Then stop. Then dispose. Then exit. ");
+            Console.WriteLine("Waiting for matrix keyboard pressed...");
+            MatrixKeyboardEventArgs key = mk.ReadKeyAsync(token).Result;
+            Mk_PinChangeEvent(mk, key);
+
+            // event mode
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Press any key to start. Then stop. Then dispose. Then exit.");
+
+            //  register event handler
+            mk.PinChangeEvent += Mk_PinChangeEvent;
 
             // start scanning
             Console.ReadKey();
-            mk.StartScan();
+            System.Threading.Tasks.Task task = mk.ScanAsync(token);
             Console.WriteLine("MatrixKeyboard.StartScan() ");
 
             // stop scanning
             Console.ReadKey();
-            mk.StopScan();
+            source.Cancel();
+            task.Wait();
             Console.WriteLine("MatrixKeyboard.StopScan() ");
 
             // dispose
@@ -73,11 +89,11 @@ namespace Iot.Device.MatrixKeyboard.Samples
             Console.WriteLine();
 
             // print keyboard status
-            var s = (MatrixKeyboard)sender;
-            for (var r = 0; r < s.RowPins.Count(); r++)
+            MatrixKeyboard s = (MatrixKeyboard)sender;
+            for (int r = 0; r < s.RowPins.Count(); r++)
             {
-                var rv = s.RowValues(r);
-                for (var c = 0; c < s.ColumnPins.Count(); c++)
+                ReadOnlySpan<PinValue> rv = s.RowValues(r);
+                for (int c = 0; c < s.ColumnPins.Count(); c++)
                 {
                     Console.Write(rv[c] == PinValue.Low ? " ." : " #");
                 }

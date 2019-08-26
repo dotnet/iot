@@ -3,40 +3,28 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using Iot.Device.DHTxx;
-using System.Diagnostics;
-using System.Device.Gpio;
+using System.Device.I2c;
 using System.Threading;
-using Iot.Units;
+using Iot.Device.DHTxx;
 
 class Program
 {
-
     static void Main(string[] args)
     {
         Console.WriteLine("Hello DHT!");
 
-        DHTSensor dht = new DHTSensor(26, DhtType.Dht22);
+        // Init DHT10 through I2C
+        I2cConnectionSettings settings = new I2cConnectionSettings(1, Dht10.DefaultI2cAddress);
+        I2cDevice device = I2cDevice.Create(settings);
 
-        while (true)
+        using (Dht10 dht = new Dht10(device))
         {
-            // You have 2 ways to read the data, both are equivalent
-            // First way to read the data
-            bool readret = dht.ReadData();
-            if (readret)
-                Console.WriteLine($"Temperature: {dht.Temperature.Celsius.ToString("0.00")} °C, Humidity: {dht.Humidity.ToString("0.00")} %");
-            else
-                Console.WriteLine("Error reading the sensor");
-            Thread.Sleep(1000);
-            
-            // Second way to read the data
-            Temperature Temp;
-            double Hum;
-            if (dht.TryGetTemperatureAndHumidity(out Temp, out Hum))
-                Console.WriteLine($"Temperature: {Temp.Celsius.ToString("0.00")} °C, Humidity: {Hum.ToString("0.00")} %");
-            else
-                Console.WriteLine("Error reading the sensor");
-            Thread.Sleep(1000);
+            while (true)
+            {
+                Console.WriteLine($"Temperature: {dht.Temperature.Celsius.ToString("0.0")} °C, Humidity: {dht.Humidity.ToString("0.0")} %");
+
+                Thread.Sleep(2000);
+            }
         }
     }
 }

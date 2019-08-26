@@ -5,9 +5,7 @@
 using System;
 using System.Device.Gpio;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using System.Device.Spi;
-using System.Device.Spi.Drivers;
 using System.Threading;
 
 namespace Iot.Device.Mcp23xxx.Samples
@@ -54,7 +52,7 @@ namespace Iot.Device.Mcp23xxx.Samples
         private static Mcp23xxx GetMcp23xxxDevice(Mcp23xxxDevice mcp23xxxDevice)
         {
             var i2cConnectionSettings = new I2cConnectionSettings(1, s_deviceAddress);
-            var i2cDevice = new UnixI2cDevice(i2cConnectionSettings);
+            var i2cDevice = I2cDevice.Create(i2cConnectionSettings);
 
             // I2C.
             switch (mcp23xxxDevice)
@@ -75,7 +73,7 @@ namespace Iot.Device.Mcp23xxx.Samples
                 Mode = SpiMode.Mode0
             };
 
-            var spiDevice = new UnixSpiDevice(spiConnectionSettings);
+            var spiDevice = SpiDevice.Create(spiConnectionSettings);
 
             // SPI.
             switch (mcp23xxxDevice)

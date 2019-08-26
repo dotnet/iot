@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <Import Project="../eng/Compilers.props" />
+  <Import Project="../eng/Versions.props" />
   <PropertyGroup>
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>
+    <MainLibraryPath>$(MSBuildThisFileDirectory)../src/System.Device.Gpio/</MainLibraryPath>
   </PropertyGroup>
 </Project>

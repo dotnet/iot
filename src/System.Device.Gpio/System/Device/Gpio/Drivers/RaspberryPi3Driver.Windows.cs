@@ -6,5 +6,16 @@ namespace System.Device.Gpio.Drivers
 {
     public partial class RaspberryPi3Driver : Windows10Driver
     {
+        protected ulong ClearRegister
+        {
+            get { throw new PlatformNotSupportedException(); }
+            set { throw new PlatformNotSupportedException(); }
+        }
+
+        protected ulong SetRegister
+        {
+            get { throw new PlatformNotSupportedException(); }
+            set { throw new PlatformNotSupportedException(); }
+        }
     }
 }

@@ -54,8 +54,8 @@ namespace Iot.Device.Buzzer.Samples
 
         static void Main(string[] args)
         {
-            using (var player1 = new MelodyPlayer(new Buzzer(21, -1)))
-            using (var player2 = new MelodyPlayer(new Buzzer(26, -1)))
+            using (var player1 = new MelodyPlayer(new Buzzer(21)))
+            using (var player2 = new MelodyPlayer(new Buzzer(26)))
             {
                 Task.WaitAll(
                     Task.Run(() => player1.Play(AlphabetSong, 100, -12)),

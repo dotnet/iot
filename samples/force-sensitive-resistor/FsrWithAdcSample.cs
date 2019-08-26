@@ -4,6 +4,7 @@
 
 using System;
 using Iot.Device.Mcp3008;
+using Iot.Device.Spi;
 
 namespace force_sensitive_resistor
 {
@@ -16,9 +17,8 @@ namespace force_sensitive_resistor
         public FsrWithAdcSample()
         {
             // Create a ADC convertor instance you are using depending how you wired ADC pins to controller
-            // in this example used ADC Mcp3008 with "bit-banging" wiring method.
-            // please refer https://github.com/dotnet/iot/tree/master/src/devices/Mcp3008/samples for more information
-            _adcConvertor = new Mcp3008(18, 23, 24, 25);
+            // in this example used ADC Mcp3008 with software spi method. If you want to do hardware spi, then call SoftwareSpi.Create()
+            _adcConvertor = new Mcp3008(new SoftwareSpi(18, 23, 24, 25));
         }
 
         public double CalculateVoltage(int readValue)

@@ -12,7 +12,7 @@ namespace System.Device.I2c
         private I2cConnectionSettings() { }
 
         /// <summary>
-        /// Initializes new instance of I2cConnectionSettings.
+        /// Initializes a new instance of the <see cref="I2cConnectionSettings"/> class.
         /// </summary>
         /// <param name="busId">The bus ID the I2C device is connected to.</param>
         /// <param name="deviceAddress">The bus address of the I2C device.</param>
@@ -20,6 +20,12 @@ namespace System.Device.I2c
         {
             BusId = busId;
             DeviceAddress = deviceAddress;
+        }
+
+        internal I2cConnectionSettings(I2cConnectionSettings other)
+        {
+            BusId = other.BusId;
+            DeviceAddress = other.DeviceAddress;
         }
 
         /// <summary>

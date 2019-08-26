@@ -8,147 +8,66 @@ using System.Device.Spi;
 
 namespace Iot.Device.Mcp3008
 {
+    /// <summary>
+    /// MCP3008 Analog to Digital Converter (ADC)
+    /// </summary>
     public class Mcp3008 : IDisposable
     {
-        private readonly SpiDevice _spiDevice;
-        private GpioController _controller;
-        private readonly CommunicationProtocol _protocol;
-        private readonly int _clk;
-        private readonly int _miso;
-        private readonly int _mosi;
-        private readonly int _cs;
+        private SpiDevice _spiDevice;
 
-        private enum CommunicationProtocol
-        {
-            Gpio,
-            Spi
-        }
-
-        public enum InputConfiguration
-        {
-            Differential = 0,
-            SingleEnded = 1
-        }
-
+        /// <summary>
+        /// Constructs Mcp3008 instance
+        /// </summary>
+        /// <param name="spiDevice">Device used for SPI communication</param>
         public Mcp3008(SpiDevice spiDevice)
         {
             _spiDevice = spiDevice;
-            _protocol = CommunicationProtocol.Spi;
         }
 
-        public Mcp3008(int clk, int miso, int mosi, int cs)
-        {
-            _controller = new GpioController();
-            _clk = clk;
-            _miso = miso;
-            _mosi = mosi;
-            _cs = cs;
-
-            _controller.OpenPin(_clk, PinMode.Output);
-            _controller.OpenPin(_miso, PinMode.Input);
-            _controller.OpenPin(_mosi, PinMode.Output);
-            _controller.OpenPin(_cs, PinMode.Output);
-            _protocol = CommunicationProtocol.Gpio;
-        }
-
+        /// <summary>
+        /// Disposes Mcp3008 instances
+        /// </summary>
         public void Dispose()
         {
-            if (_controller != null)
-            {
-                _controller.Dispose();
-                _controller = null;
-            }
+            _spiDevice?.Dispose();
+            _spiDevice = null;
         }
 
-        public int Read(int channel, InputConfiguration inputConfiguration = InputConfiguration.SingleEnded)
+        /// <summary>
+        /// Reads 10-bit (0..1023) value from the device
+        /// </summary>
+        /// <param name="channel">Channel which value should be read from (valid values: 0-7)</param>
+        /// <returns>10-bit value corresponding to relative voltage level on specified device channel</returns>
+        public int Read(int channel)
         {
             if (channel < 0 || channel > 7)
             {
                 throw new ArgumentException("ADC channel must be within 0-7 range.");
             }
 
-            if (_protocol == CommunicationProtocol.Spi)
-            {
-                return ReadSpi(channel, inputConfiguration);
-            }
-            else
-            {
-                return ReadGpio(channel, inputConfiguration);
-            }
-        }
+            Span<byte> writeBuffer = stackalloc byte[3];
+            Span<byte> readBuffer = stackalloc byte[3];
 
-        private static byte GetConfigurationBits(int channel, InputConfiguration inputConfiguration)
-        {
-            int configurationBits = (0b0001_1000 | channel) << 3;
-
-            if (inputConfiguration == InputConfiguration.Differential)
-            {
-                configurationBits &= 0b1011_1111;  // Clear mode bit.
-            }
-
-            return (byte)configurationBits;
-        }
-
-        // Ported: https://gist.github.com/ladyada/3151375
-        private int ReadGpio(int channel, InputConfiguration inputConfiguration)
-        {
-            while (true)
-            {
-                int result = 0;
-                byte command = GetConfigurationBits(channel, inputConfiguration);
-
-                _controller.Write(_cs, PinValue.High);
-                _controller.Write(_clk, PinValue.Low);
-                _controller.Write(_cs, PinValue.Low);
-
-                for (int cnt = 0; cnt < 5; cnt++)
-                {
-                    if ((command & 0b1000_0000) > 0)
-                    {
-                        _controller.Write(_mosi, PinValue.High);
-                    }
-                    else
-                    {
-                        _controller.Write(_mosi, PinValue.Low);
-                    }
-
-                    command <<= 1;
-                    _controller.Write(_clk, PinValue.High);
-                    _controller.Write(_clk, PinValue.Low);
-                }
-
-                for (int cnt = 0; cnt < 12; cnt++)
-                {
-                    _controller.Write(_clk, PinValue.High);
-                    _controller.Write(_clk, PinValue.Low);
-                    result <<= 1;
-
-                    if (_controller.Read(_miso) == PinValue.High)
-                    {
-                        result |= 0b0000_0001;
-                    }
-                }
-
-                _controller.Write(_cs, PinValue.High);
-
-                result >>= 1;
-                return result;
-            }
-        }
-
-        // Ported: https://github.com/adafruit/Adafruit_Python_MCP3008/blob/master/Adafruit_MCP3008/MCP3008.py
-        private int ReadSpi(int channel, InputConfiguration inputConfiguration)
-        {
-            byte configurationBits = GetConfigurationBits(channel, inputConfiguration);
-            byte[] writeBuffer = new byte[] { configurationBits, 0, 0 };
-            byte[] readBuffer = new byte[3];
-
+            // first we send 5 bits, rest is ignored
+            // start bit = 1
+            // conversion bit = 1 (single ended)
+            // next 3 bits are channel
+            writeBuffer[0] = (byte)((0b1_1000 | channel) << 3);
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
 
-            int result = (readBuffer[0] & 0b0000_0001) << 9;
-            result |= (readBuffer[1] & 0b1111_1111) << 1;
-            result |= (readBuffer[2] & 0b1000_0000) >> 7;
-            result = result & 0b0011_1111_1111;
+            // we ignore first 7 bits then read following 10
+            // 7 bits:
+            // - 5 are used for writing start bit, conversion bit and channel
+            // - next bit is ignored so device has time to sample
+            // - following bit should be 0
+            if ((readBuffer[0] & 0b10) != 0)
+            {
+                throw new InvalidOperationException("Invalid data was read from the sensor");
+            }
+
+            int result = (readBuffer[0] & 1) << 9;
+            result |= readBuffer[1] << 1;
+            result |= readBuffer[2] >> 7;
             return result;
         }
     }
