@@ -268,10 +268,6 @@ namespace Iot.Device.Bh1745
             AdcGain = AdcGain.X1;
             MeasurementIsActive = true;
 
-            // set default thresholds
-            LowerInterruptThreshold = 0xFFFF;
-            HigherInterruptThreshold = 0x0000;
-
             // write default value to Mode_Control3
             Write8BitsToRegister((byte)Register.MODE_CONTROL3, 0x02);
         }
