@@ -2,7 +2,7 @@
 
 An M×N matrix keyboard driver.
 
-(M is number of rows and N is number of columns.)
+(M is number of output pins and N is number of input pins.)
 
 ## Summary
 
@@ -12,13 +12,15 @@ These keyboards look like this:
 
 This is a 4×4 keyboard. And [here is the schematic](http://www.waveshare.net/w/upload/3/3d/4x4-Keypad_schematic.pdf)
 
-You can connect any M×N Matrix Keyboard, theoretically, by using M+N GPIO pins, N pull-down resistors (or similar network resistor), and a ground pin.
+You can connect any M×N Matrix Keyboard, theoretically, by using M+N GPIO pins.
 
 You can also use any compatible GPIO controller like [Mcp23xxx](../Mcp23xxx) instead of native controller.
 
-* The pull-down resistors is optional if your MCU already have it in column pins.
+* Using diodes(eg. 1N4148) for each button prevents "ghosting" or "masking" problem.
 
-* 'Rows' and 'columns' are logical, not physical. Which means if your keyboard has diode for each button and doesn't work well, try to exchange row and column pins, and resistors of course.
+* N pull-down resistors (or similar network resistor) and a ground pin is optional if your MCU already have it in input pins.
+
+* If your keyboard doesn't work well, try to swap output and input pins.
 
 ## References
 
