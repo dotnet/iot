@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using System.Device.I2c.Drivers;
 using System.Threading.Tasks;
 
 namespace Iot.Device.Bh1745.Samples
@@ -18,7 +17,7 @@ namespace Iot.Device.Bh1745.Samples
 
             // create device
             var i2cSettings = new I2cConnectionSettings(busId, Bh1745.DefaultI2cAddress);
-            var i2cDevice = new UnixI2cDevice(i2cSettings);
+            var i2cDevice = I2cDevice.Create(i2cSettings);
 
             using (var i2cBh1745 = new Bh1745(i2cDevice))
             {
@@ -29,7 +28,7 @@ namespace Iot.Device.Bh1745.Samples
                 {
                     var color = i2cBh1745.GetCompensatedColor();
                     Console.WriteLine("RGB color read: #{0:X2}{1:X2}{2:X2}", color.R, color.G, color.B);
-                    Console.WriteLine($"Raw illumination value: {i2cBh1745.ClearDataRegister}");
+                    Console.WriteLine($"Raw illumination value: {i2cBh1745.ReadClearDataRegister()}");
 
                     Task.Delay(i2cBh1745.MeasurementTime.ToMilliseconds()).Wait();
                 }
