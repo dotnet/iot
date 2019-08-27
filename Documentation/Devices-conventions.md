@@ -6,6 +6,8 @@
 - Properties (i.e. `SomeRegister`) should be used when value does not change between the calls (except when changed by setter)
 - Use `double` when you need to return any floating point value
 - Async methods can be added but the name of such method should have an `Async` suffix and there should also be synchronous equivalent method
+- When method may or not return the (valid) value use `bool TryGetTemperature(out Temperature temperature)` pattern (`TryRead` and any `TryVerb` is acceptable as well) rather than returning `double.NaN` or some other sentinel value
+  - exception to sentinel values are values which are not meant to be further processed and are not ambigious (i.e. lack of pin number can be represented as `-1`)
 - Use `Vector2/3/4` for returning vectors`*`
 - Value should conform to units conventions (see below)
 - Only the most useful APIs should be public, anything else which may be useful but will unlikely get used by most of the people should be protected (inheriting the class allows you to use it but it is not visible by default) or internal/private
