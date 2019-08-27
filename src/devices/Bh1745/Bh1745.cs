@@ -180,6 +180,9 @@ namespace Iot.Device.Bh1745
             get => _interruptSource;
             set
             {
+                if (!Enum.IsDefined(typeof(InterruptSource), value))
+                    throw new ArgumentOutOfRangeException();
+
                 var intSource = Read8BitsFromRegister((byte)Register.INTERRUPT);
                 intSource = (byte)((intSource & (byte)~Mask.INT_SOURCE) | (byte)value << 2);
 
@@ -213,6 +216,9 @@ namespace Iot.Device.Bh1745
             get => _interruptPersistence;
             set
             {
+                if (!Enum.IsDefined(typeof(InterruptPersistence), value))
+                    throw new ArgumentOutOfRangeException();
+
                 var intPersistence = Read8BitsFromRegister((byte)Register.PERSISTENCE);
                 intPersistence = (byte)((intPersistence & (byte)~Mask.PERSISTENCE) | (byte)value);
 
