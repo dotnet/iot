@@ -20,7 +20,7 @@ namespace Iot.Device.DCMotor
             PwmChannel pwmChannel,
             int pin0,
             int pin1,
-            IGpioController controller)
+            GpioController controller)
             : base(controller ?? new GpioController())
         {
             if (pwmChannel == null)

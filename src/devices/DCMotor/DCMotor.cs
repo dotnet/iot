@@ -14,15 +14,15 @@ namespace Iot.Device.DCMotor
         private const int DefaultPwmFrequency = 50;
 
         /// <summary>
-        /// <see cref="IGpioController"/> related with operations on pins
+        /// <see cref="GpioController"/> related with operations on pins
         /// </summary>
-        protected IGpioController Controller;
+        protected GpioController Controller;
 
         /// <summary>
         /// Constructs generic <see cref="DCMotor"/> instance
         /// </summary>
-        /// <param name="controller"><see cref="IGpioController"/> related with operations on pins</param>
-        protected DCMotor(IGpioController controller)
+        /// <param name="controller"><see cref="GpioController"/> related with operations on pins</param>
+        protected DCMotor(GpioController controller)
         {
             Controller = controller;
         }
@@ -77,14 +77,14 @@ namespace Iot.Device.DCMotor
         /// Creates <see cref="DCMotor"/> instance which allows to control speed in one direction.
         /// </summary>
         /// <param name="speedControlPin">Pin used to control the speed of the motor with software PWM (frequency will default to 50Hz)</param>
-        /// <param name="controller"><see cref="IGpioController"/> related to the <paramref name="speedControlPin"/></param>
+        /// <param name="controller"><see cref="GpioController"/> related to the <paramref name="speedControlPin"/></param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
         /// <paramref name="speedControlPin"/> can be connected to either enable pin of the H-bridge.
         /// or directly to the input related with the motor (if H-bridge allows inputs to change frequently).
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(int speedControlPin, IGpioController controller = null)
+        public static DCMotor Create(int speedControlPin, GpioController controller = null)
         {
             if (speedControlPin == -1)
                 throw new ArgumentOutOfRangeException(nameof(speedControlPin));
@@ -101,7 +101,7 @@ namespace Iot.Device.DCMotor
         /// </summary>
         /// <param name="speedControlChannel"><see cref="PwmChannel"/> used to control the speed of the motor</param>
         /// <param name="directionPin">Pin used to control the direction of the motor</param>
-        /// <param name="controller"><see cref="IGpioController"/> related to the <paramref name="directionPin"/></param>
+        /// <param name="controller"><see cref="GpioController"/> related to the <paramref name="directionPin"/></param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
         /// <paramref name="speedControlChannel"/> can be connected to either enable pin of the H-bridge.
@@ -109,7 +109,7 @@ namespace Iot.Device.DCMotor
         /// <paramref name="directionPin"/> should be connected to H-bridge input corresponding to one of the motor inputs.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, IGpioController controller = null)
+        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, GpioController controller = null)
         {
             if (speedControlChannel == null)
                 throw new ArgumentNullException(nameof(speedControlChannel));
@@ -133,7 +133,7 @@ namespace Iot.Device.DCMotor
         /// <paramref name="directionPin"/> should be connected to H-bridge input corresponding to one of the motor inputs.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(int speedControlPin, int directionPin, IGpioController controller = null)
+        public static DCMotor Create(int speedControlPin, int directionPin, GpioController controller = null)
         {
             if (speedControlPin == -1)
                 throw new ArgumentOutOfRangeException(nameof(speedControlPin));
@@ -154,7 +154,7 @@ namespace Iot.Device.DCMotor
         /// <param name="speedControlChannel"><see cref="PwmChannel"/> used to control the speed of the motor</param>
         /// <param name="directionPin">Pin used to control the direction of the motor</param>
         /// <param name="otherDirectionPin">Pin used to control the direction of the motor</param>
-        /// <param name="controller"><see cref="IGpioController"/> related to <paramref name="directionPin"/> and <paramref name="otherDirectionPin"/></param>
+        /// <param name="controller"><see cref="GpioController"/> related to <paramref name="directionPin"/> and <paramref name="otherDirectionPin"/></param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
         /// When speed is non-zero the value of <paramref name="otherDirectionPin"/> will always be opposite to that of <paramref name="directionPin"/>.
@@ -163,7 +163,7 @@ namespace Iot.Device.DCMotor
         /// <paramref name="otherDirectionPin"/> should be connected to H-bridge input corresponding to the remaining motor input.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, int otherDirectionPin, IGpioController controller = null)
+        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, int otherDirectionPin, GpioController controller = null)
         {
             if (speedControlChannel == null)
                 throw new ArgumentNullException(nameof(speedControlChannel));
@@ -187,7 +187,7 @@ namespace Iot.Device.DCMotor
         /// <param name="speedControlPin">Pin used to control the speed of the motor with software PWM (frequency will default to 50Hz)</param>
         /// <param name="directionPin">Pin used to control the direction of the motor</param>
         /// <param name="otherDirectionPin">Pin used to control the direction of the motor</param>
-        /// <param name="controller"><see cref="IGpioController"/> related to <paramref name="speedControlPin"/>, <paramref name="directionPin"/> and <paramref name="otherDirectionPin"/></param>
+        /// <param name="controller"><see cref="GpioController"/> related to <paramref name="speedControlPin"/>, <paramref name="directionPin"/> and <paramref name="otherDirectionPin"/></param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
         /// When speed is non-zero the value of <paramref name="otherDirectionPin"/> will always be opposite to that of <paramref name="directionPin"/>
@@ -196,7 +196,7 @@ namespace Iot.Device.DCMotor
         /// <paramref name="otherDirectionPin"/> should be connected to H-bridge input corresponding to the remaining motor input.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(int speedControlPin, int directionPin, int otherDirectionPin, IGpioController controller = null)
+        public static DCMotor Create(int speedControlPin, int directionPin, int otherDirectionPin, GpioController controller = null)
         {
             if (speedControlPin == -1)
                 throw new ArgumentOutOfRangeException(nameof(speedControlPin));
