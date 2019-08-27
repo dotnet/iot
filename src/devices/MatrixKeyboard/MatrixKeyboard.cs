@@ -17,14 +17,14 @@ namespace Iot.Device.MatrixKeyboard
     public class MatrixKeyboard : IDisposable
     {
         /// <summary>
-        /// Get row pins
+        /// Get output pins
         /// </summary>
-        public IEnumerable<int> RowPins => _rowPins;
+        public IEnumerable<int> OutputPins => _outputPins;
 
         /// <summary>
-        /// Get column pins
+        /// Get input pins
         /// </summary>
-        public IEnumerable<int> ColumnPins => _columnPins;
+        public IEnumerable<int> InputPins => _inputPins;
 
         /// <summary>
         /// Get all buttons' values
@@ -41,9 +41,9 @@ namespace Iot.Device.MatrixKeyboard
         /// </summary>
         public delegate void PinChangeEventHandler(object sender, MatrixKeyboardEventArgs pinValueChangedEventArgs);
 
-        private int _currentRow;
-        private int[] _rowPins;
-        private int[] _columnPins;
+        private int _currentOutput;
+        private int[] _outputPins;
+        private int[] _inputPins;
         private GpioController _masterGpioController;
         private PinValue[] _buttonValues;
 
@@ -51,20 +51,20 @@ namespace Iot.Device.MatrixKeyboard
         /// Initialize keyboard
         /// </summary>
         /// <param name="masterController">GPIO controller</param>
-        /// <param name="rowPins">Row pins</param>
-        /// <param name="colPins">Column pins</param>
+        /// <param name="outputPins">Output pins</param>
+        /// <param name="colPins">Input pins</param>
         /// <param name="scanInterval">Scanning interval in milliseconds</param>
-        public MatrixKeyboard(GpioController masterController, IEnumerable<int> rowPins, IEnumerable<int> colPins, int scanInterval)
+        public MatrixKeyboard(GpioController masterController, IEnumerable<int> outputPins, IEnumerable<int> colPins, int scanInterval)
         {
             _masterGpioController = masterController ?? throw new ArgumentNullException(nameof(masterController));
 
-            if (rowPins == null)
+            if (outputPins == null)
             {
-                throw new ArgumentNullException(nameof(rowPins));
+                throw new ArgumentNullException(nameof(outputPins));
             }
-            if (rowPins.Any())
+            if (outputPins.Any())
             {
-                throw new ArgumentOutOfRangeException(nameof(rowPins), "The number of rows is at least 1");
+                throw new ArgumentOutOfRangeException(nameof(outputPins), "The number of outputs is at least 1");
             }
 
             if (colPins == null)
@@ -73,7 +73,7 @@ namespace Iot.Device.MatrixKeyboard
             }
             if (colPins.Any())
             {
-                throw new ArgumentOutOfRangeException(nameof(colPins), "The number of columns is at least 1");
+                throw new ArgumentOutOfRangeException(nameof(colPins), "The number of inputs is at least 1");
             }
 
             if (scanInterval <= 0)
@@ -81,9 +81,9 @@ namespace Iot.Device.MatrixKeyboard
                 throw new ArgumentOutOfRangeException(nameof(scanInterval), "Scanning interval must be positive");
             }
 
-            _rowPins = rowPins.ToArray();
-            _columnPins = colPins.ToArray();
-            _buttonValues = new PinValue[_rowPins.Length * _columnPins.Length];
+            _outputPins = outputPins.ToArray();
+            _inputPins = colPins.ToArray();
+            _buttonValues = new PinValue[_outputPins.Length * _inputPins.Length];
 
             ScanInterval = scanInterval;
         }
@@ -99,24 +99,24 @@ namespace Iot.Device.MatrixKeyboard
                 OpenPins();
                 while (!token.IsCancellationRequested)
                 {
-                    for (int i = 0; i < _columnPins.Length; i++)
+                    for (int i = 0; i < _inputPins.Length; i++)
                     {
-                        int index = _currentRow * _columnPins.Length + i;
+                        int index = _currentOutput * _inputPins.Length + i;
 
                         PinValue oldValue = _buttonValues[index];
-                        PinValue newValue = _masterGpioController.Read(_columnPins[i]);
+                        PinValue newValue = _masterGpioController.Read(_inputPins[i]);
 
                         _buttonValues[index] = newValue;
                         if (newValue != oldValue)
                         {
-                            MatrixKeyboardEventArgs args = new MatrixKeyboardEventArgs(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, _currentRow, i);
+                            MatrixKeyboardEventArgs args = new MatrixKeyboardEventArgs(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, _currentOutput, i);
                             PinChangeEvent(this, args);
                         }
                     }
 
-                    _masterGpioController.Write(_rowPins[_currentRow], PinValue.Low);
-                    _currentRow = (_currentRow + 1) % _rowPins.Length;
-                    _masterGpioController.Write(_rowPins[_currentRow], PinValue.High);
+                    _masterGpioController.Write(_outputPins[_currentOutput], PinValue.Low);
+                    _currentOutput = (_currentOutput + 1) % _outputPins.Length;
+                    _masterGpioController.Write(_outputPins[_currentOutput], PinValue.High);
 
                     Thread.Sleep(ScanInterval);
                 }
@@ -137,23 +137,23 @@ namespace Iot.Device.MatrixKeyboard
                 OpenPins();
                 while (!token.IsCancellationRequested)
                 {
-                    for (int i = 0; i < _columnPins.Length; i++)
+                    for (int i = 0; i < _inputPins.Length; i++)
                     {
-                        int index = _currentRow * _columnPins.Length + i;
+                        int index = _currentOutput * _inputPins.Length + i;
 
                         PinValue oldValue = _buttonValues[index];
-                        PinValue newValue = _masterGpioController.Read(_columnPins[i]);
+                        PinValue newValue = _masterGpioController.Read(_inputPins[i]);
 
                         _buttonValues[index] = newValue;
                         if (newValue != oldValue)
                         {
-                            args = new MatrixKeyboardEventArgs(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, _currentRow, i);
+                            args = new MatrixKeyboardEventArgs(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, _currentOutput, i);
                         }
                     }
 
-                    _masterGpioController.Write(_rowPins[_currentRow], PinValue.Low);
-                    _currentRow = (_currentRow + 1) % _rowPins.Length;
-                    _masterGpioController.Write(_rowPins[_currentRow], PinValue.High);
+                    _masterGpioController.Write(_outputPins[_currentOutput], PinValue.Low);
+                    _currentOutput = (_currentOutput + 1) % _outputPins.Length;
+                    _masterGpioController.Write(_outputPins[_currentOutput], PinValue.High);
 
                     Thread.Sleep(ScanInterval);
                 }
@@ -164,12 +164,12 @@ namespace Iot.Device.MatrixKeyboard
         }
 
         /// <summary>
-        /// Get buttons' values by row
+        /// Get buttons' values by output
         /// </summary>
-        /// <param name="row">Row index</param>
-        public ReadOnlySpan<PinValue> RowValues(int row)
+        /// <param name="output">Output index</param>
+        public ReadOnlySpan<PinValue> ValuesByOutput(int output)
         {
-            return _buttonValues.AsSpan(row * _rowPins.Length, _columnPins.Length);
+            return _buttonValues.AsSpan(output * _outputPins.Length, _inputPins.Length);
         }
 
         /// <summary>
@@ -182,35 +182,34 @@ namespace Iot.Device.MatrixKeyboard
             _masterGpioController.Dispose();
             _masterGpioController = null;
 
-            _rowPins = null;
-            _columnPins = null;
+            _outputPins = null;
+            _inputPins = null;
             _buttonValues = null;
         }
 
         private void OpenPins()
         {
-            for (int i = 0; i < _rowPins.Length; i++)
+            for (int i = 0; i < _outputPins.Length; i++)
             {
-                _masterGpioController.OpenPin(_rowPins[i], PinMode.Output);
+                _masterGpioController.OpenPin(_outputPins[i], PinMode.Output);
             }
-            for (int i = 0; i < _columnPins.Length; i++)
+            for (int i = 0; i < _inputPins.Length; i++)
             {
-                _masterGpioController.OpenPin(_columnPins[i], PinMode.Input);
+                _masterGpioController.OpenPin(_inputPins[i], PinMode.Input);
             }
         }
         private void ClosePins()
         {
             Thread.Sleep(ScanInterval); // wait for thread ends    
 
-            for (int i = 0; i < _rowPins.Length; i++)
+            for (int i = 0; i < _outputPins.Length; i++)
             {
-                _masterGpioController.ClosePin(_rowPins[i]);
+                _masterGpioController.ClosePin(_outputPins[i]);
             }
-            for (int i = 0; i < _columnPins.Length; i++)
+            for (int i = 0; i < _inputPins.Length; i++)
             {
-                _masterGpioController.ClosePin(_columnPins[i]);
+                _masterGpioController.ClosePin(_inputPins[i]);
             }
         }
-
     }
 }

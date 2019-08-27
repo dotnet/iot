@@ -18,20 +18,20 @@ namespace Iot.Device.MatrixKeyboard
         public PinEventTypes EventType;
 
         /// <summary>
-        /// Current button's row index
+        /// Current button's output index
         /// </summary>
-        public int Row;
+        public int Output;
 
         /// <summary>
-        /// Current button's column index
+        /// Current button's input index
         /// </summary>
-        public int Column;
+        public int Input;
 
-        internal MatrixKeyboardEventArgs(PinEventTypes eventType, int row, int column)
+        internal MatrixKeyboardEventArgs(PinEventTypes eventType, int output, int input)
         {
             EventType = eventType;
-            Row = row;
-            Column = column;
+            Output = output;
+            Input = input;
         }
     }
 }

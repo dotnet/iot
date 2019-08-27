@@ -17,9 +17,9 @@ namespace Iot.Device.MatrixKeyboard.Samples
         public static void Main(string[] args)
         {
             // get arguments
-            Console.Write("input row pins(eg. 27,23,24,10) ");
+            Console.Write("input output pins(eg. 27,23,24,10) ");
             System.Collections.Generic.IEnumerable<int> r = Console.ReadLine().Split(',').Select(m => int.Parse(m));
-            Console.Write("input column pins(eg. 15,14,3,2) ");
+            Console.Write("input input pins(eg. 15,14,3,2) ");
             System.Collections.Generic.IEnumerable<int> c = Console.ReadLine().Split(',').Select(m => int.Parse(m));
             Console.Write("input scaning interval(eg. 15) ");
             int i = int.Parse(Console.ReadLine());
@@ -30,8 +30,9 @@ namespace Iot.Device.MatrixKeyboard.Samples
             // you can also use other GPIO controller
             /*
                 var settings = new System.Device.I2c.I2cConnectionSettings(1, 0x20);
-                var i2cDevice = new System.Device.I2c.Drivers.UnixI2cDevice(settings);
-                var gpio = new Iot.Device.Mcp23xxx.Mcp23017(i2cDevice);
+                var i2cDevice = System.Device.I2c.I2cDevice.Create(settings);
+                var mcp23017 = new Iot.Device.Mcp23xxx.Mcp23017(i2cDevice);
+                GpioController gpio = new GpioController(PinNumberingScheme.Logical, mcp23017);
             */
 
             // initialize keyboard
@@ -85,15 +86,15 @@ namespace Iot.Device.MatrixKeyboard.Samples
             Console.Clear();
 
             // print event
-            Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff")} {pinValueChangedEventArgs.Row}, {pinValueChangedEventArgs.Column}, {pinValueChangedEventArgs.EventType}");
+            Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff")} {pinValueChangedEventArgs.Output}, {pinValueChangedEventArgs.Input}, {pinValueChangedEventArgs.EventType}");
             Console.WriteLine();
 
             // print keyboard status
             MatrixKeyboard s = (MatrixKeyboard)sender;
-            for (int r = 0; r < s.RowPins.Count(); r++)
+            for (int r = 0; r < s.OutputPins.Count(); r++)
             {
-                ReadOnlySpan<PinValue> rv = s.RowValues(r);
-                for (int c = 0; c < s.ColumnPins.Count(); c++)
+                ReadOnlySpan<PinValue> rv = s.ValuesByOutput(r);
+                for (int c = 0; c < s.InputPins.Count(); c++)
                 {
                     Console.Write(rv[c] == PinValue.Low ? " ." : " #");
                 }
