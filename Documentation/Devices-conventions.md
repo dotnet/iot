@@ -2,9 +2,10 @@
 
 ## Value returned by sensor
 
-- Methods (i.e. `ReadTemperature`) should be used for anything which may change between the calls
+- Methods (i.e. `ReadTemperature`/`GetTemperature`) should be used for anything which may change between the calls
 - Properties (i.e. `SomeRegister`) should be used when value does not change between the calls (except when changed by setter)
 - Use `double` when you need to return any floating point value
+- Async methods can be added but the name of such method should have an `Async` suffix and there should also be synchronous equivalent method
 - Use `Vector2/3/4` for returning vectors`*`
 - Value should conform to units conventions (see below)
 - Only the most useful APIs should be public, anything else which may be useful but will unlikely get used by most of the people should be protected (inheriting the class allows you to use it but it is not visible by default) or internal/private
