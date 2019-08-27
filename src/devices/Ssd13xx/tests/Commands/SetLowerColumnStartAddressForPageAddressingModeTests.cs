@@ -36,7 +36,7 @@ namespace Iot.Device.Ssd13xx.Tests
         [InlineData(0xFF)]
         public void Invalid_LowerColumnStartAddress(byte lowerColumnStartAddress)
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 SetLowerColumnStartAddressForPageAddressingMode setLowerColumnStartAddressForPageAddressingMode =
                 new SetLowerColumnStartAddressForPageAddressingMode(lowerColumnStartAddress);

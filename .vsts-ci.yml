@@ -1,237 +1,201 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+    
+pr:
+  branches:
+    include:
+    - master
+    
 variables:
-  Build.Repository.Clean: true
-  _HelixType: build/product
-  _HelixSource: pr/dotnet/arcade-minimalci-sample/$(Build.SourceBranch)
-  _enableTelemetry: true
-  ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-    OfficialBuildId: $(Build.BuildNumber)
-    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-    DOTNET_MULTILEVEL_LOOKUP: 0
+  # Cannot use key:value syntax in root defined variables
+  - name: Build.Repository.Clean
+    value: true
+  - name: _TeamName
+    value: DotNetCore
+  - name: _PublishUsingPipelines
+    value: true
+  - name: _DotNetArtifactsCategory
+    value: IOT
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - name: OfficialBuildId
+      value: $(Build.BuildNumber)
+    - name: DOTNET_SKIP_FIRST_TIME_EXPERIENCE
+      value: 1
+    - name: DOTNET_MULTILEVEL_LOOKUP
+      value: 0
 
 resources:
   containers:
   - container: LinuxContainer
     image: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
 
-trigger:
-  batch: true
-  branches:
-    include:
-    - master
-
-pr:
-- master
-
-# Three phases for each of the three OSes we want to run on
-phases:
-- template: /eng/common/templates/phases/base.yml
-  parameters:
-    agentOs: Windows_NT
-    name: Windows_NT
-    enableTelemetry: $(_enableTelemetry)
-    queue:
-      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-        name: dotnet-internal-temp
-      ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-        name: dotnet-external-temp
-      parallel: 99
-      matrix:
-        debug_configuration:
-          _BuildConfig: Debug
-        release_configuration:
-          _BuildConfig: Release
-    ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+stages:
+- stage: build
+  displayName: Build
+  jobs:
+  - template: /eng/common/templates/jobs/jobs.yml
+    parameters:
       enableMicrobuild: true
-    steps:
-    - script: build.cmd -ci
-        -configuration $(_BuildConfig)
-        -prepareMachine
-      name: Build
-      displayName: Build
-      condition: succeeded()
-    - task: PublishBuildArtifacts@1
-      displayName: Publish Windows managed assets
-      inputs:
-        pathToPublish: $(Build.SourcesDirectory)/artifacts/bin
-        artifactName: bin
-        artifactType: container
-      condition: eq(variables['_BuildConfig'], 'Release')
-    variables:
-      _HelixBuildConfig: $(_BuildConfig)
-      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-        _TeamName: DotNetCore
-        _SignType: real
+      enablePublishBuildArtifacts: true
+      enablePublishBuildAssets: true
+      enablePublishUsingPipelines: ${{ variables._PublishUsingPipelines }}
+      enableTelemetry: true
+      graphFileGeneration:
+        enabled: true
+        includeToolset: true
+      helixRepo: dotnet/iot
+      jobs:
+      - job: Windows_NT
+        timeoutInMinutes: 90
+        pool:
+          # For public or PR jobs, use the hosted pool.  For internal jobs use the internal pool.
+          # Will eventually change this to two BYOC pools.
+          ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+            name: Hosted VS2017
+          ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+            name: NetCoreInternal-Int-Pool
+            queue: buildpool.windows.10.amd64.vs2017
+        variables:
+        - HelixApiAccessToken: ''
+        - _InternalBuildArgs: ''
 
-- template: /eng/common/templates/phases/base.yml
-  parameters:
-    agentOs: OSX
-    name: OSX
-    enableTelemetry: $(_enableTelemetry)
-    queue:
-      name: Hosted macOS Preview
-      parallel: 99
-      matrix:
-        debug_configuration:
-          _BuildConfig: Debug
-        release_configuration:
-          _BuildConfig: Release
-    steps:
-    - script: ./build.sh --ci
-        --configuration $(_BuildConfig)
-        --prepareMachine
-      name: Build
-      displayName: Build
-      condition: succeeded()
-    variables:
-      _HelixBuildConfig: $(_BuildConfig)
+        # Only enable publishing in non-public, non PR scenarios.
+        - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+          # DotNet-Blob-Feed provides: dotnetfeed-storage-access-key-1
+          # Publish-Build-Assets provides: MaestroAccessToken, BotAccount-dotnet-maestro-bot-PAT
+          # DotNet-HelixApi-Access provides: HelixApiAccessToken
+          - group: DotNet-Blob-Feed
+          - group: Publish-Build-Assets
+          - group: DotNet-HelixApi-Access
+          - _PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json
+          - _InternalBuildArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
+              /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
+              /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+              /p:DotNetPublishBlobFeedUrl=$(_PublishBlobFeedUrl)
+              /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
+              /p:DotNetArtifactsCategory=$(_DotNetArtifactsCategory)
+              /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
 
-- template: /eng/common/templates/phases/base.yml
-  parameters:
-    agentOs: Linux
-    name: Linux_libgpiod
-    enableTelemetry: $(_enableTelemetry)
-    queue:
-      name: Hosted Ubuntu 1604
-    steps:
-    - script: src/Native/copyLibgpiod.sh
-      name: CopyLibgpiod
-      displayName: Copy Libgpiod dependency from container
-      condition: succeeded()
-    - task: PublishBuildArtifacts@1
-      displayName: Publish Libgpiod lib assets
-      inputs:
-        pathToPublish: $(Build.SourcesDirectory)/artifacts/libgpiod/
-        artifactName: Libgpiod
-        artifactType: container
-    variables:
-      _HelixBuildConfig: $(_BuildConfig)
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              # PRs or external builds are not signed.
+              ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+                _SignType: test
+                _DotNetPublishToBlobFeed : false
+              ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+                _SignType: real
+                _DotNetPublishToBlobFeed : true
+            ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+              Build_Debug:
+                _BuildConfig: Debug
+                _SignType: test
+                _DotNetPublishToBlobFeed : false
+        steps:
+        - checkout: self
+          clean: true
+        # Use utility script to run script command dependent on agent OS.
+        - script: build.cmd -ci -sign
+            -configuration $(_BuildConfig)
+            -prepareMachine
+            -publish
+            /p:BuildPackages=true
+            $(_InternalBuildArgs)
+          displayName: Windows Build
 
-- template: /eng/common/templates/phases/base.yml
-  parameters:
-    dependsOn:
-    - Linux_libgpiod
-    agentOs: Linux
-    name: Linux
-    enableTelemetry: $(_enableTelemetry)
-    queue:
-      name: Hosted Ubuntu 1604
-      parallel: 99
-      container: LinuxContainer
-      matrix:
-        debug_configuration:
-          _BuildConfig: Debug
-        release_configuration:
-          _BuildConfig: Release
-    steps:
-    - task: DownloadBuildArtifacts@0
-      displayName: Download Libgpiod assets
-      inputs:
-        artifactName: Libgpiod
-        downloadPath: $(Build.SourcesDirectory)/artifacts/
-    - script: src/Native/moveLibgpiod.sh
-      name: MoveLibgpiod
-      displayName: Move Libgpiod into crossrootfs
-      condition: succeeded()
-    - script: ROOTFS_DIR=/crossrootfs/arm ./build.sh --ci
-        --configuration $(_BuildConfig)
-        --prepareMachine
-        /p:BuildNative=true
-      name: Build
-      displayName: Build
-      condition: succeeded()
-    - task: PublishBuildArtifacts@1
-      displayName: Publish Linux native assets
-      inputs:
-        pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Native
-        artifactName: Native
-        artifactType: container
-      condition: eq(variables['_BuildConfig'], 'Release')
-    variables:
-      _HelixBuildConfig: $(_BuildConfig)
+        - script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
+            eng/sendToHelix.proj
+            /t:Test
+            /p:TestOS=Windows_NT
+            /p:Configuration=$(_BuildConfig)
+            /p:HelixBuild=$(Build.BuildNumber)
+            /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
+          displayName: Run Helix Tests
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            HelixAccessToken: $(HelixApiAccessToken)
 
-- template: /eng/common/templates/phases/base.yml
-  parameters:
-    dependsOn:
-    - Windows_NT
-    - OSX
-    - Linux
-    agentOs: Windows_NT
-    name: BuildPackages
-    enableTelemetry: $(_enableTelemetry)
-    queue:
-      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-        name: dotnet-internal-temp
-      ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-        name: dotnet-external-temp
-      parallel: 99
-      matrix:
-        release_configuration:
-          _BuildConfig: Release
-    ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-      enableMicrobuild: true
-    steps:
-    - task: DownloadBuildArtifacts@0
-      displayName: Download Built Managed Assets
-      inputs:
-        artifactName: bin
-        downloadPath: $(Build.SourcesDirectory)/artifacts
-    - task: DownloadBuildArtifacts@0
-      displayName: Download Built Native Assets
-      inputs:
-        artifactName: Native
-        downloadPath: $(Build.SourcesDirectory)/artifacts/bin
-    - script: build.cmd -ci -sign
-        -configuration $(_BuildConfig)
-        -prepareMachine
-        /p:ProductBuild=false
-        /p:ToolsBuild=false
-        /p:SampleBuild=false
-        /p:BuildTests=false
-        /p:BuildPackages=true
-      name: Build
-      displayName: Build
-      condition: succeeded()
-    - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-      - task: PublishBuildArtifacts@1
-        displayName: Publish Windows package assets
-        inputs:
-          pathToPublish: $(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)/Shipping
-          artifactName: BuiltPackageOutputs
-          artifactType: container
-        condition: eq(variables['_BuildConfig'], 'Release')
-    variables:
-      _HelixBuildConfig: $(_BuildConfig)
-      ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-        _TeamName: DotNetCore
-        _SignType: real
+        - task: PublishBuildArtifacts@1
+          displayName: Publish Windows package assets
+          inputs:
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)/Shipping
+            artifactName: BuiltPackageOutputs
+            artifactType: container
+          condition: eq(variables['_BuildConfig'], 'Release')
+      
+      - job: Linux
+        container: LinuxContainer
+        pool:
+          name: Hosted Ubuntu 1604
+        variables:
+        - HelixApiAccessToken: ''
+        - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+          - group: DotNet-HelixApi-Access
+        strategy:
+          matrix:
+            ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+              Build_Debug:
+                _BuildConfig: Debug
+                _PublishType: none
+                _SignType: none
+                _DotNetPublishToBlobFeed : false
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: none
+              _DotNetPublishToBlobFeed : false
+        steps:
+        - checkout: self
+          clean: true
+        - script: ./build.sh --ci
+            --configuration $(_BuildConfig)
+            --prepareMachine
+          displayName: Unix Build
+        - script: ./eng/common/msbuild.sh --warnaserror false --ci
+            eng/sendToHelix.proj
+            /t:Test
+            /p:TestOS=Unix
+            /p:Configuration=$(_BuildConfig)
+            /p:HelixBuild=$(Build.BuildNumber)
+            /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
+            /p:HelixAccessToken=$(HelixApiAccessToken)
+          displayName: Run Helix Tests
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            HelixAccessToken: $(HelixApiAccessToken)
+
+      - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+        - job: OSX
+          pool:
+            Hosted macOS
+          strategy:
+            matrix:
+              Build_Debug:
+                _BuildConfig: Debug
+                _PublishType: none
+                _SignType: none
+                _DotNetPublishToBlobFeed : false
+              Build_Release:
+                _BuildConfig: Release
+                _PublishType: none
+                _SignType: none
+                _DotNetPublishToBlobFeed : false
+          steps:
+          - checkout: self
+            clean: true
+          - script: ./build.sh --ci
+              --configuration $(_BuildConfig)
+              --prepareMachine
+              /p:Test=false
+            displayName: OSX Build
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-  - template: /eng/common/templates/phases/base.yml
+  - template: eng\common\templates\post-build\post-build.yml
     parameters:
-      dependsOn:
-      - BuildPackages
-      agentOs: Windows_NT
-      name: PublishToMyGet
-      enableTelemetry: $(_enableTelemetry)
-      queue:
-        ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-          name: dotnet-internal-temp
-        ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-          name: dotnet-external-temp 
-      steps:
-      - task: DownloadBuildArtifacts@0
-        displayName: Download Built Packages
-        inputs:
-          artifactName: BuiltPackageOutputs
-          downloadPath: $(Build.SourcesDirectory)/artifacts/packages/pushToMyGet
-      - task: AzureKeyVault@1
-        displayName: Downloading MyGet Secret
-        inputs:
-          azureSubscription: 'DotNet-Engineering-Services_KeyVault'
-          KeyVaultName: EngKeyVault
-          SecretsFilter: 'dotnet-myget-org-api-key'
-      - script: powershell -ExecutionPolicy ByPass -NoProfile -command "& """$(Build.SourcesDirectory)\eng\common\Build.ps1""" -restore" &&
-          for /f %%x in ('dir /s /b $(Build.SourcesDirectory)\artifacts\packages\pushToMyGet\*.nupkg') do $(Build.SourcesDirectory)\.dotnet\dotnet.exe nuget push %%x -k $(dotnet-myget-org-api-key) -s https://dotnet.myget.org/F/dotnet-core/
-        name: PublishPackages
-        displayName: Publishing Packages to MyGet
-        condition: succeeded()
+      # Symbol validation isn't being very reliable lately. This should be enabled back
+      # once this issue is resolved: https://github.com/dotnet/arcade/issues/2871
+      enableSymbolValidation: false

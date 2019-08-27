@@ -14,9 +14,9 @@ namespace Iot.Device.Pcx857x.Tests
         [MemberData(nameof(TestDevices))]
         public void Read_InvalidPin(TestDevice testDevice)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Read(-1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Read(testDevice.Device.PinCount));
-            Assert.Throws<ArgumentOutOfRangeException>(() => testDevice.Device.Read(testDevice.Device.PinCount + 1));
+            Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Read(-1));
+            Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Read(testDevice.Controller.PinCount));
+            Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Read(testDevice.Controller.PinCount + 1));
         }
 
         [Theory]
@@ -24,21 +24,21 @@ namespace Iot.Device.Pcx857x.Tests
         public void Read_GoodPin(TestDevice testDevice)
         {
             Pcx857x device = testDevice.Device;
-            for (int pin = 0; pin < testDevice.Device.PinCount; pin++)
+            for (int pin = 0; pin < testDevice.Controller.PinCount; pin++)
             {
                 // Set pin to input
-                device.SetPinMode(pin, PinMode.Input);
+                testDevice.Controller.OpenPin(pin, PinMode.Input);
 
                 bool first = pin < 8;
                 int register = first ? 0x00 : 0x01;
 
                 // Flip the bit on (set the backing buffer directly to simulate incoming data)
                 testDevice.ChipMock.Registers[register] = (byte)(1 << (first ? pin : pin - 8));
-                Assert.Equal(PinValue.High, device.Read(pin));
+                Assert.Equal(PinValue.High, testDevice.Controller.Read(pin));
 
                 // Clear the register
                 testDevice.ChipMock.Registers[register] = 0x00;
-                Assert.Equal(PinValue.Low, device.Read(pin));
+                Assert.Equal(PinValue.Low, testDevice.Controller.Read(pin));
             }
         }
     }

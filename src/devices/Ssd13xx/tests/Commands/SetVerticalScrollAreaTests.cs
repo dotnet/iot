@@ -41,7 +41,7 @@ namespace Iot.Device.Ssd13xx.Tests
         [InlineData(0xAA, 0x99)]
         public void Invalid_HorizontalScrollSetup(byte topFixedAreaRows, byte scrollAreaRows)
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 SetVerticalScrollArea setVerticalScrollArea = new SetVerticalScrollArea(topFixedAreaRows, scrollAreaRows);
             });
