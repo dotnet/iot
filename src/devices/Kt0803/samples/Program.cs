@@ -13,7 +13,7 @@ namespace Kt0803Samples
 
             using (Kt0803 radio = new Kt0803(device, 106.6, Region.China))
             {
-                Console.WriteLine($"The radio is running on FM {radio.Channel.ToString("0.0")}MHz");
+                Console.WriteLine($"The radio is running on FM {radio.Frequency.ToString("0.0")}MHz");
 
                 Console.ReadKey();
             }
