@@ -30,9 +30,9 @@ namespace Iot.Device.Radio
         public bool Mute { get => GetMute(); set => SetMute(value); }
 
         /// <summary>
-        /// Kt0803 FM Channel (Range from 70Mhz to 108Mhz)
+        /// Kt0803 FM Frequency (Range from 70Mhz to 108Mhz)
         /// </summary>
-        public double Channel { get => GetChannel(); set => SetChannel(value); }
+        public double Frequency { get => GetFrequency(); set => SetFrequency(value); }
 
         /// <summary>
         /// Kt0803 PGA ( Programmable Gain Amplifier ) Gain
@@ -59,14 +59,14 @@ namespace Iot.Device.Radio
         /// Creates a new instance of the Kt0803
         /// </summary>
         /// <param name="i2cDevice">The I2C device used for communication</param>
-        /// <param name="mHz">FM Channel (Range from 70MHz to 108MHz)</param>
+        /// <param name="frequency">FM Frequency (Range from 70MHz to 108MHz)</param>
         /// <param name="region">Region</param>
         /// <param name="power">Transmission Power</param>
         /// <param name="pga">PGA (Programmable Gain Amplifier) Gain</param>
-        public Kt0803(I2cDevice i2cDevice, double mHz, Region region, TransmissionPower power = TransmissionPower.Power_108dBuV, PgaGain pga = PgaGain.PGA_00dB)
+        public Kt0803(I2cDevice i2cDevice, double frequency, Region region, TransmissionPower power = TransmissionPower.Power_108dBuV, PgaGain pga = PgaGain.PGA_00dB)
         {
             _i2cDevice = i2cDevice;
-            Channel = mHz;
+            Frequency = frequency;
             TransmissionPower = power;
             PgaGain = pga;
             Region = region;
@@ -86,11 +86,11 @@ namespace Iot.Device.Radio
         /// <summary>
         /// Set Kt0803 FM Channel
         /// </summary>
-        /// <param name="mHz">MHz (Range from 70MHz to 108MHz)</param>
-        private void SetChannel(double mHz)
+        /// <param name="frequency">Frequency (Range from 70MHz to 108MHz)</param>
+        private void SetFrequency(double frequency)
         {
             // Details in Datasheet P7
-            if (mHz < 70 || mHz > 108)
+            if (frequency < 70 || frequency > 108)
             {
                 throw new ArgumentOutOfRangeException("Range from 70MHz to 108MHz.");
             }
@@ -101,7 +101,7 @@ namespace Iot.Device.Radio
             reg2 = ReadByte(Register.KT_CONFIG02);
 
             // 3 bytes
-            freq = (int)(mHz * 20);
+            freq = (int)(frequency * 20);
             freq &= 0b_1111_1111_1111;
 
             if ((freq & 0b_0001) > 0)
@@ -121,10 +121,10 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Get Kt0803 FM Channel
+        /// Get Kt0803 FM Frequency
         /// </summary>
-        /// <returns>FM Channel</returns>
-        private double GetChannel()
+        /// <returns>FM Frequency</returns>
+        private double GetFrequency()
         {
             int reg0 = ReadByte(Register.KT_CHSEL);
             int reg1 = ReadByte(Register.KT_CONFIG01);
@@ -136,7 +136,7 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Set Kt0803 PGA ( Programmable Gain Amplifier ) Gain
+        /// Set Kt0803 PGA (Programmable Gain Amplifier) Gain
         /// </summary>
         /// <param name="pgaGain">PGA Gain</param>
         private void SetPga(PgaGain pgaGain)
@@ -171,7 +171,7 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Get Kt0803 PGA ( Programmable Gain Amplifier ) Gain
+        /// Get Kt0803 PGA (Programmable Gain Amplifier) Gain
         /// </summary>
         /// <returns>PGA Gain</returns>
         private PgaGain GetPga()
