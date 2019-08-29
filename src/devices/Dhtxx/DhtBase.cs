@@ -17,11 +17,26 @@ namespace Iot.Device.DHTxx
     /// </summary>
     public abstract class DhtBase : IDisposable
     {
+        /// <summary>
+        /// Read buffer
+        /// </summary>
         protected byte[] _readBuff = new byte[5];
 
         private readonly CommunicationProtocol _protocol;
+
+        /// <summary>
+        /// GPIO pin
+        /// </summary>
         protected readonly int _pin;
+
+        /// <summary>
+        /// I2C device used to communicate with the device
+        /// </summary>
         protected readonly I2cDevice _i2cDevice;
+
+        /// <summary>
+        /// <see cref="GpioController"/> related with the <see cref="_pin"/>.
+        /// </summary>
         protected readonly GpioController _controller;
 
         // wait about 1 ms
@@ -244,9 +259,7 @@ namespace Iot.Device.DHTxx
         /// <returns>Temperature</returns>
         internal abstract Temperature GetTemperature(byte[] readBuff);
 
-        /// <summary>
-        /// Cleanup
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             _controller?.Dispose();

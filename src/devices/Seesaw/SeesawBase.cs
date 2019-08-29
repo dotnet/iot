@@ -9,10 +9,17 @@ using System.Device.I2c;
 
 namespace Iot.Device.Seesaw
 {
+    /// <summary>
+    /// Represents Seesaw device
+    /// </summary>
     public partial class Seesaw : IDisposable
     {
         private const byte SessawHardwareId = 0x55;
 
+        /// <summary>
+        /// I2C device used for communication
+        /// </summary>
+        /// <value></value>
         public I2cDevice I2cDevice { get; private set; }
 
         private uint _options;
@@ -151,6 +158,7 @@ namespace Iot.Device.Seesaw
             return retval;
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             I2cDevice?.Dispose();

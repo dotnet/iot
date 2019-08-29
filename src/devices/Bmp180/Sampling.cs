@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Bmp180
 {
+    /// <summary>
+    /// BMP180 sampling
+    /// </summary>
     public enum Sampling : byte
     {
         /// <summary>

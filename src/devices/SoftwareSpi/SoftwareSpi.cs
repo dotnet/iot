@@ -9,6 +9,9 @@ using System.Device.Spi;
 
 namespace Iot.Device.Spi
 {
+    /// <summary>
+    /// Software SPI implementation
+    /// </summary>
     public class SoftwareSpi : SpiDevice
     {
         private GpioController _controller;

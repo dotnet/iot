@@ -297,6 +297,7 @@ namespace System.Device.Gpio
             _driver.Dispose();
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);

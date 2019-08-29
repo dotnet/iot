@@ -5,14 +5,15 @@
 namespace Iot.Device.Vl53L0X
 {
     /// <summary>
-    /// The minimum operation range is 5 millimeters
-    /// The maximum operation range is 8 meters, the sensor needs to be in long range mode
-    /// When out of range, the sensor will send 8190 
+    /// Operating range
     /// </summary>
     public enum OperationRange
     {
+        /// <summary>Minimum range: 5 millimeters</summary>
         Minimum = 5,
+        /// <summary>Maximum range: 8 millimeters</summary>
         Maximum = 8000,
+        /// <summary>Out of range</summary>
         OutOfRange = 8190
     }
 }

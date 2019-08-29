@@ -31,6 +31,7 @@ namespace Iot.Device.Buzzer.Samples
         /// </summary>
         /// <param name="sequence">Sequence of pauses and notes elements to be played.</param>
         /// <param name="tempo">Tempo of melody playing.</param>
+        /// <param name="tonesToTransponse">Tones to transpose</param>
         public void Play(IList<MelodyElement> sequence, int tempo, int tonesToTransponse = 0)
         {
             _wholeNoteDurationInMilliseconds = GetWholeNoteDurationInMilliseconds(tempo);

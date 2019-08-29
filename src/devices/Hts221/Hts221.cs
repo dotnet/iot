@@ -9,6 +9,9 @@ using Iot.Units;
 
 namespace Iot.Device.Hts221
 {
+    /// <summary>
+    /// HTS221 - Capacitive digital sensor for relative humidity and temperature
+    /// </summary>
     public class Hts221 : IDisposable
     {
         private const byte ReadMask = 0x80;
@@ -139,6 +142,7 @@ namespace Iot.Device.Hts221
             return (h0, h1);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             _i2c?.Dispose();

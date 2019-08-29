@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Represents SetHigherColumnStartAddressForPageAddressingMode command
+    /// </summary>
     public class SetHigherColumnStartAddressForPageAddressingMode : ISsd1306Command
     {
         /// <summary>

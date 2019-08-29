@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
+    /// <summary>
+    /// Represents SetDisplayStartLine command
+    /// </summary>
     public class SetDisplayStartLine : ISsd1327Command
     {
         /// <summary>

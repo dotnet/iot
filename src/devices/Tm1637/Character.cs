@@ -23,6 +23,9 @@ namespace Iot.Device.Tm1637
     [Flags]
     public enum Character : byte
     {
+        /// <summary>
+        /// Character representing nothing being displayed
+        /// </summary>
         Nothing = 0b0000_0000,
         /// <summary>
         /// Segment a

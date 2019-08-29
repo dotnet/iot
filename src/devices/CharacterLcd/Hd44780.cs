@@ -27,18 +27,38 @@ namespace Iot.Device.CharacterLcd
     {
         private bool _disposed;
 
+        /// <summary>
+        /// Command which can be used to clear the display
+        /// </summary>
         protected const byte ClearDisplayCommand = 0b_0001;
+
+        /// <summary>
+        /// Command which can be used to return (cursor) home
+        /// </summary>
         protected const byte ReturnHomeCommand = 0b_0010;
 
+        /// <summary>
+        /// Command which can be used to set CG RAM address
+        /// </summary>
         protected const byte SetCGRamAddressCommand = 0b_0100_0000;
+
+        /// <summary>
+        /// Command which can be used to set DD RAM address
+        /// </summary>
         protected const byte SetDDRamAddressCommand = 0b_1000_0000;
 
         internal DisplayFunction _displayFunction = DisplayFunction.Command;
         internal DisplayControl _displayControl = DisplayControl.Command;
         internal DisplayEntryMode _displayMode = DisplayEntryMode.Command;
 
+        /// <summary>
+        /// Offsets of the rows
+        /// </summary>
         protected readonly byte[] _rowOffsets;
 
+        /// <summary>
+        /// LCD interface used by the device
+        /// </summary>
         protected readonly LcdInterface _interface;
 
         /// <summary>
@@ -72,7 +92,7 @@ namespace Iot.Device.CharacterLcd
             // don't seem to be generally available. Supporting 5x10 would require extra
             // support for CreateCustomCharacter
 
-            if (SetTwoLineMode(rows))
+            if (GetTwoLineMode(rows))
                 _displayFunction |= DisplayFunction.TwoLine;
 
             _displayControl |= DisplayControl.DisplayOn;
@@ -101,14 +121,42 @@ namespace Iot.Device.CharacterLcd
             set => _interface.BacklightOn = value;
         }
 
+        /// <summary>
+        /// Sends byte to the device
+        /// </summary>
+        /// <param name="value">Byte to be sent to the device</param>
         protected void SendData(byte value) => _interface.SendData(value);
+
+        /// <summary>
+        /// Sends command to the device
+        /// </summary>
+        /// <param name="command">Byte representing the command to be sent</param>
         protected void SendCommand(byte command) => _interface.SendCommand(command);
+
+        /// <summary>
+        /// Sends data to the device
+        /// </summary>
+        /// <param name="values">Data to be send to the device</param>
         protected void SendData(ReadOnlySpan<byte> values) => _interface.SendData(values);
+
+        /// <summary>
+        /// Send commands to the device
+        /// </summary>
+        /// <param name="commands">Each byte represents command being sent to the device</param>
         protected void SendCommands(ReadOnlySpan<byte> commands) => _interface.SendCommands(commands);
 
-        protected virtual bool SetTwoLineMode(int rows) => rows > 1;
+        /// <summary>
+        /// Determines if device should use two line mode
+        /// </summary>
+        /// <param name="rows">Number of rows on the device</param>
+        /// <returns>True if device should use two line mode</returns>
+        protected virtual bool GetTwoLineMode(int rows) => rows > 1;
 
-
+        /// <summary>
+        /// Initializes row offsets
+        /// </summary>
+        /// <param name="rows">Rows to be initialized</param>
+        /// <returns>Array of offsets</returns>
         protected virtual byte[] InitializeRowOffsets(int rows)
         {
             // In one-line mode DDRAM addresses go from 0 - 79 [0x00 - 0x4F]
@@ -368,6 +416,11 @@ namespace Iot.Device.CharacterLcd
             ArrayPool<byte>.Shared.Return(buffer);
         }
 
+        /// <summary>
+        /// Releases unmanaged resources used by Hd44780
+        /// and optionally release managed resources
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -376,6 +429,7 @@ namespace Iot.Device.CharacterLcd
             }
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             if (!_disposed)

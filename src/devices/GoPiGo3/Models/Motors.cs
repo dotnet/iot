@@ -6,29 +6,32 @@ using System;
 
 namespace Iot.Device.GoPiGo3.Models
 {
-
     /// <summary>
-    /// flags -- 8-bits of bit-flags that indicate motor status:
-    /// bit 0 -- LowVoltageFloat - The motors are automatically disabled because the battery voltage is too low
-    /// bit 1 -- Overloaded - The motors aren't close to the target (applies to position control and dps speed control).
+    /// Flags that indicate motor status
     /// </summary> 
     public enum MotorStatusFlags
     {
+        /// <summary>No problems with motors detected</summary>
         AllOk = 0,
+        /// <summary>LowVoltageFloat - The motors are automatically disabled because the battery voltage is too low</summary>
         LowVoltageFloat = 0x01,
+        /// <summary>Overloaded - The motors aren't close to the target (applies to position control and dps speed control)</summary>
         Overloaded = 0x02
     }
 
     /// <summary>
-    /// Set quickly a speed for the motor
+    /// Set speed for the motor
     /// </summary>
     public enum MotorSpeed : byte
     {
+        /// <summary>Motor is stopped</summary>
         Stop = 0,
+        /// <summary>Motor is at full speed</summary>
         Full = 100,
+        /// <summary>Motor is at half speed</summary>
         Half = 50,
-        // Motors in float mode
         // Actually any value great than 100 will float motors
+        /// <summary>Motor is floating</summary>
         Float = 128
     }
 }

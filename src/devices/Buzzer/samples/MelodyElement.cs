@@ -7,7 +7,7 @@ namespace Iot.Device.Buzzer.Samples
     /// <summary>
     /// A base class for melody sequence elements.
     /// </summary>
-    public abstract class MelodyElement
+    internal abstract class MelodyElement
     {
         /// <summary>
         /// Duration which defines how long should element take on melody sequence timeline.

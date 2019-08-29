@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
+    /// <summary>
+    /// Represents SetColumnAddress command
+    /// </summary>
     public class SetColumnAddress : ISsd1327Command
     {
         /// <summary>

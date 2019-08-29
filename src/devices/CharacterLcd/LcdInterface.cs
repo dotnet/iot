@@ -16,11 +16,33 @@ namespace Iot.Device.CharacterLcd
     {
         private bool _disposed;
 
+        /// <summary>
+        /// Sends byte to LCD device
+        /// </summary>
+        /// <param name="value">Byte value to be sed</param>
         public abstract void SendData(byte value);
+
+        /// <summary>
+        /// Sends command to the LCD device
+        /// </summary>
+        /// <param name="command">Byte representing the command</param>
         public abstract void SendCommand(byte command);
+
+        /// <summary>
+        /// Sends data to the LCD device
+        /// </summary>
+        /// <param name="values">Bytes to be send to the device</param>
         public abstract void SendData(ReadOnlySpan<byte> values);
+
+        /// <summary>
+        /// Send commands to the LCD device
+        /// </summary>
+        /// <param name="values">Each byte represents command to be send</param>
         public abstract void SendCommands(ReadOnlySpan<byte> values);
 
+        /// <summary>
+        /// True if device uses 8-bits for communication, false if device uses 4-bits
+        /// </summary>
         public abstract bool EightBitMode { get; }
 
         /// <summary>
@@ -70,10 +92,16 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         public abstract bool BacklightOn { get; set; }
 
+        /// <summary>
+        /// Releases unmanaged resources used by LcdInterface
+        /// and optionally release managed resources
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources</param>
         protected virtual void Dispose(bool disposing)
         {
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             if (!_disposed)
