@@ -13,7 +13,7 @@ namespace Iot.Device.Graphics
     public abstract class BitmapImage
     {
         /// <summary>
-        /// Constructs BitmapImage instance
+        /// Initializes a <see cref="T:Iot.Device.Graphics.BitmapImage" /> instance with the specified data, width, height and stride.
         /// </summary>
         /// <param name="data">Data representing the image (derived class defines a specific format)</param>
         /// <param name="width">Width of the image</param>
