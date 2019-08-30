@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
+    /// <summary>
+    /// Represents SetInternalVddRegulator command
+    /// </summary>
     public class SetInternalVddRegulator : ISsd1327Command
     {
         /// <summary>

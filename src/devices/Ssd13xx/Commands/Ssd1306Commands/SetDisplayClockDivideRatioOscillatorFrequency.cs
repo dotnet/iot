@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Represents SetDisplayClockDivideRatioOscillatorFrequency command
+    /// </summary>
     public class SetDisplayClockDivideRatioOscillatorFrequency : ISsd1306Command
     {
         /// <summary>

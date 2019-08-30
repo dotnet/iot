@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.GoPiGo3.Models
 {
+    /// <summary>
+    /// Represents Grove sensor
+    /// </summary>
     public class GroveSensor
     {
         /// <summary>
@@ -20,8 +23,18 @@ namespace Iot.Device.GoPiGo3.Models
             Port = GrovePort;
         }
 
+        /// <summary>
+        /// Grove Port
+        /// </summary>
         public GrovePort Port { get; }
+
+        /// <summary>
+        /// Grove sensor type
+        /// </summary>
+        /// <value></value>
         public GroveSensorType SensorType { get; set; }
+
+        /// <summary>I2C data length</summary>
         public byte I2cDataLength { get; set; }
     }
 
@@ -30,11 +43,17 @@ namespace Iot.Device.GoPiGo3.Models
     /// </summary>
     public enum GroveSensorType
     {
+        /// <summary>None</summary>
         None = 0,
+        /// <summary>Custom</summary>
         Custom = 1,
+        /// <summary>Infrared remote</summary>
         InfraredRemote,
+        /// <summary>Infrared EV3 remote</summary>
         InfraredEV3Remote,
+        /// <summary>Ultrasonic</summary>
         Ultrasonic,
+        /// <summary>I2C</summary>
         I2c
     }
 
@@ -43,10 +62,15 @@ namespace Iot.Device.GoPiGo3.Models
     /// </summary>
     public enum GroveSensorState
     {
+        /// <summary>Valid data</summary>
         ValidData,
+        /// <summary>Not configured</summary>
         NotConfigured,
+        /// <summary>Configuring</summary>
         Configuring,
+        /// <summary>No data</summary>
         NoData,
+        /// <summary>I2C error</summary>
         I2cError
     }
 }

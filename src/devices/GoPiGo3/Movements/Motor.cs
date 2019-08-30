@@ -14,9 +14,17 @@ namespace Iot.Device.GoPiGo3.Movements
     /// </summary>
     public enum Polarity
     {
-        Backward = -1, Forward = 1, OppositeDirection = 0
-    };
+        /// <summary>Backward</summary>
+        Backward = -1,
+        /// <summary>Forward</summary>
+        Forward = 1,
+        /// <summary>Opposite direction</summary>
+        OppositeDirection = 0
+    }
 
+    /// <summary>
+    /// Represents GoPiGo3 motor
+    /// </summary>
     public class Motor
     {
         // represent the Brick
@@ -28,10 +36,16 @@ namespace Iot.Device.GoPiGo3.Movements
         /// <summary>
         /// Create a motor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">GoPiGo3 brick</param>
         /// <param name="port">Motor port</param>
         public Motor(GoPiGo brick, MotorPort port) : this(brick, port, 1000) { }
 
+        /// <summary>
+        /// Create a motor
+        /// </summary>
+        /// <param name="brick">GoPiGo3 brick</param>
+        /// <param name="port">Motor port</param>
+        /// <param name="timeout">Timeout in milliseconds</param>
         public Motor(GoPiGo brick, MotorPort port, int timeout)
         {
             if (port == MotorPort.Both)
@@ -153,6 +167,9 @@ namespace Iot.Device.GoPiGo3.Movements
             set { SetSpeed(value); }
         }
 
+        /// <summary>
+        /// Motor port
+        /// </summary>
         public MotorPort Port { get; internal set; }
 
         /// <summary>
@@ -198,6 +215,5 @@ namespace Iot.Device.GoPiGo3.Movements
                 _timer = null;
             }
         }
-
     }
 }

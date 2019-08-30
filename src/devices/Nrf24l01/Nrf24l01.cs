@@ -189,6 +189,11 @@ namespace Iot.Device.Nrf24l01
             _gpio = null;
         }
 
+        /// <summary>
+        /// Delegate representing event that data was received
+        /// </summary>
+        /// <param name="sender">Object sending the event</param>
+        /// <param name="e">Arguments for the event</param>
         public delegate void DataReceivedHandle(object sender, DataReceivedEventArgs e);
 
         /// <summary>

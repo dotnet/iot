@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands
 {
+    /// <summary>
+    /// Represents DeactivateScroll command
+    /// </summary>
     public class DeactivateScroll : ISharedCommand
     {
         /// <summary>

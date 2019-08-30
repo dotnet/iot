@@ -9,12 +9,22 @@ using Iot.Units;
 
 namespace Iot.Device.CpuTemperature
 {
+    /// <summary>
+    /// CPU temperature
+    /// </summary>
     public class CpuTemperature
     {
         private bool _isAvalable = false;
         private bool _checkedIfAvailable = false;
 
+        /// <summary>
+        /// Gets CPU temperature
+        /// </summary>
         public Temperature Temperature => Temperature.FromCelsius(ReadTemperature());
+
+        /// <summary>
+        /// Is CPU temperature available
+        /// </summary>
         public bool IsAvailable => CheckAvailable();
 
         private bool CheckAvailable()

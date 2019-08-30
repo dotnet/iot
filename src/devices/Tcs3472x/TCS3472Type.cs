@@ -4,11 +4,18 @@
 
 namespace Iot.Device.Tcs3472x
 {
+    /// <summary>
+    /// Type of TCS3472X
+    /// </summary>
     public enum TCS3472Type
     {
+        /// <summary>TCS34721</summary>
         TCS34721 = 0x44,
+        /// <summary>TCS34725</summary>
         TCS34725 = 0x44,
+        /// <summary>TCS34723</summary>
         TCS34723 = 0x4D,
+        /// <summary>TCS34727</summary>
         TCS34727 = 0x4D
     }
 }

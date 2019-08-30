@@ -94,6 +94,7 @@ namespace Iot.Device.ServoMotor
             _pwmChannel.DutyCyclePercentage = dutyCyclePercentage;
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             _pwmChannel?.Dispose();

@@ -16,7 +16,6 @@ namespace Iot.Device.Ssd1351
     /// </summary>
     public partial class Ssd1351 : IDisposable
     {
-
         private readonly int _dcPinId;
         private readonly int _resetPinId;
         private readonly int _spiBufferSize;
@@ -154,6 +153,9 @@ namespace Iot.Device.Ssd1351
             SendCommand(Ssd1351Command.WriteRam, displayBytes);
         }
 
+        /// <summary>
+        /// Clears screen
+        /// </summary>
         public void ClearScreen()
         {
             FillRect(Color.Black, 0, 0, SCREEN_HEIGHT_PX, SCREEN_WIDTH_PX);
@@ -272,6 +274,7 @@ namespace Iot.Device.Ssd1351
             } while (index < data.Length); // repeat until all data sent.
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             if(_disposeGpioController)

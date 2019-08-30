@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Mcp25xxx
 {
+    /// <summary>
+    /// MCP25xxx instruction format
+    /// </summary>
     public enum InstructionFormat : byte
     {
         /// <summary>

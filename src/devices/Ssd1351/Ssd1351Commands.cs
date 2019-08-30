@@ -9,7 +9,6 @@ using System.Runtime.InteropServices;
 
 namespace Iot.Device.Ssd1351
 {
-
     internal enum Ssd1351Command : byte
     {
         SetColumn = 0x15,
@@ -46,71 +45,132 @@ namespace Iot.Device.Ssd1351
         ReadRam = 0x5D, // Note that this is not used with an SPI interface as the SSD1351 cannot be read
     }
 
+    /// <summary>
+    /// Gpio mode
+    /// </summary>
     public enum GpioMode
     {
+        /// <summary>Disabled</summary>
         Disabled = 0x00,
+        /// <summary>Input enabled</summary>
         InputEnabled = 0x01,
+        /// <summary>Output low</summary>
         OutputLow = 0x10,
+        /// <summary>Output high</summary>
         OutputHigh = 0x11
     }
 
+    /// <summary>
+    /// Color depth
+    /// </summary>
     public enum ColorDepth
     {
+        /// <summary>Color depth: 256</summary>
         ColourDepth256 = 0x00,
+        /// <summary>Color depth: 65k</summary>
         ColourDepth65K = 0x01,
+        /// <summary>Color depth: 262k</summary>
         ColourDepth262K = 0x02,
+        /// <summary>Color depth: 262k 16-bit</summary>
         ColourDepth262K16Bit = 0x03
     }
 
+    /// <summary>
+    /// Common split
+    /// </summary>
     public enum CommonSplit
     {
+        /// <summary>None</summary>
         None = 0x00,
+        /// <summary>Parity split (odd and even numbers)</summary>
         OddEven = 0x01
     }
 
+    /// <summary>
+    /// SEG0 common
+    /// </summary>
     public enum Seg0Common
     {
+        /// <summary>Column 0</summary>
         Column0 = 0x00,
+        /// <summary>Column 127</summary>
         Column127 = 0x01
     }
 
+    /// <summary>
+    /// Color sequence
+    /// </summary>
     public enum ColorSequence
     {
+        /// <summary>BGR (blue, green, red)</summary>
         BGR = 0x00,
+        /// <summary>RGB (red, green, blue)</summary>
         RGB = 0x01
     }
 
-    public enum VComHDeslectLevel
+    /// <summary>
+    /// High voltage level (VCOMH) of common pins relative to VCC
+    /// </summary>
+    public enum VComHDeselectLevel
     {
+        /// <summary>0.72 of VCC level</summary>
         VccX072 = 0x00,
+        /// <summary>0.74 of VCC level</summary>
         VccX074 = 0x01,
+        /// <summary>0.76 of VCC level</summary>
         VccX076 = 0x02,
+        /// <summary>0.78 of VCC level</summary>
         VccX078 = 0x03,
+        /// <summary>0.80 of VCC level</summary>
         VccX080 = 0x04,
+        /// <summary>0.82 of VCC level</summary>
         VccX082 = 0x05,
+        /// <summary>0.84 of VCC level</summary>
         VccX084 = 0x06,
+        /// <summary>0.86 of VCC level</summary>
         VccX086 = 0x07
     }
 
+    /// <summary>
+    /// Source of VDD
+    /// </summary>
     public enum VDDSource
     {
+        /// <summary>External VDD source</summary>
         External = 0x00,
+        /// <summary>Internal VDD source</summary>
         Internal = 0x01
     }
 
+    /// <summary>
+    /// Horizontal scroll direction
+    /// </summary>
     public enum ScrollDirection : byte
     {
+        /// <summary>No scroll</summary>
         NoScroll = 0x00,
+        /// <summary>Scroll to segment 127</summary>
         Scroll2Seg127 = 0x01,
+        /// <summary>Scroll to segment 0</summary>
         Scroll2Seg0 = 0x40
     }
+
+    /// <summary>
+    /// Horizontal scroll speed
+    /// </summary>
     public enum ScrollSpeed : byte
     {
+        /// <summary>Normal speed</summary>
         Normal = 0x01,
+        /// <summary>Slow speed</summary>
         Slow = 0x02,
+        /// <summary>Slowest speed</summary>
         Slowest = 0x03
     }
 
+    /// <summary>
+    /// Constructs Ssd1351 instance
+    /// </summary>
     public partial class Ssd1351 : IDisposable
     {
 
@@ -481,7 +541,7 @@ namespace Iot.Device.Ssd1351
         /// The level of VCOMH is programmed with reference to VC. 
         /// </summary>
         /// <param name="level">Vcomh deselect level. (defaults to 0.82 x Vcc)</param>
-        public void SetVcomhDeselectLevel(VComHDeslectLevel level = VComHDeslectLevel.VccX082)
+        public void SetVcomhDeselectLevel(VComHDeselectLevel level = VComHDeselectLevel.VccX082)
         {
             SendCommand(Ssd1351Command.SetDeselectVoltageLevel, (byte)level);
         }

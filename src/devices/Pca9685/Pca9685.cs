@@ -132,6 +132,7 @@ namespace Iot.Device.Pca9685
             _device.Write(buffer);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             _device?.Dispose();

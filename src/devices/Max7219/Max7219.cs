@@ -7,6 +7,9 @@ using System.Device.Spi;
 
 namespace Iot.Device.Max7219
 {
+    /// <summary>
+    /// Max7219 LED matrix driver
+    /// </summary>
     public partial class Max7219 : IDisposable
     {
         private SpiDevice _spiDevice;
@@ -306,8 +309,10 @@ namespace Iot.Device.Max7219
         {
             if (end < 0 || end > CascadedDevices)
                 throw new ArgumentOutOfRangeException(nameof(end));
+
             if (start < 0 || start >= end)
                 throw new ArgumentOutOfRangeException(nameof(end));
+
             for (int deviceId = start; deviceId < end; deviceId++)
             {
                 for (int digit = 0; digit < NumDigits; digit++)
@@ -315,8 +320,11 @@ namespace Iot.Device.Max7219
                     this[deviceId, digit] = 0;
                 }
             }
+
             if (flush)
+            {
                 Flush();
+            }
         }
 
         /// <summary>
@@ -327,6 +335,7 @@ namespace Iot.Device.Max7219
             Clear(0, CascadedDevices, flush);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             if (_spiDevice != null)

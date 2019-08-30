@@ -38,6 +38,9 @@ namespace Iot.Device.Mcp25xxx
             FilterMatch = (FilterMatchType)(value & 0b0000_0111);
         }
 
+        /// <summary>
+        /// Filter match type
+        /// </summary>
         public FilterMatchType FilterMatch { get; }
 
         /// <summary>
@@ -96,15 +99,26 @@ namespace Iot.Device.Mcp25xxx
             ExtendedRemoteFrame = 3
         }
 
+        /// <summary>
+        /// Filter match type
+        /// </summary>
         public enum FilterMatchType
         {
+            /// <summary>RxF0</summary>
             RxF0 = 0,
+            /// <summary>RxF1</summary>
             RxF1 = 1,
+            /// <summary>RxF2</summary>
             RxF2 = 2,
+            /// <summary>RxF3</summary>
             RxF3 = 3,
+            /// <summary>RxF4</summary>
             RxF4 = 4,
+            /// <summary>RxF5</summary>
             RxF5 = 5,
+            /// <summary>RxF0RolloverToRxB1</summary>
             RxF0RolloverToRxB1 = 6,
+            /// <summary>RxF1RolloverToRxB1</summary>
             RxF1RolloverToRxB1 = 7,
         }
 

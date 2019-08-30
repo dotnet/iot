@@ -11,7 +11,9 @@ namespace Iot.Device.Vl53L0X
     /// </summary>
     public enum MeasurementMode
     {
+        /// <summary>Continuous mode</summary>
         Continuous = 0,
+        /// <summary>Single measurement mode</summary>
         Single
     }
 }

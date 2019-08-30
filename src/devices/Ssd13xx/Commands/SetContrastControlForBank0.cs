@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands
 {
+    /// <summary>
+    /// Represents SetContrastControlForBank0 command
+    /// </summary>
     public class SetContrastControlForBank0 : ISharedCommand
     {
         /// <summary>

@@ -10,6 +10,9 @@ using System.Threading;
 
 namespace Iot.Device.Seesaw
 {
+    /// <summary>
+    /// Seesaw GPIO driver
+    /// </summary>
     public class SeesawGpioDriver : GpioDriver
     {
         private readonly Dictionary<int, PinMode> _openPins;
@@ -228,14 +231,19 @@ namespace Iot.Device.Seesaw
             }
         }
 
+        /// <inheritdoc/>
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => throw new NotImplementedException();
 
+        /// <inheritdoc/>
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) => throw new NotImplementedException();
 
+        /// <inheritdoc/>
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
 
+        /// <inheritdoc/>
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => throw new NotImplementedException();
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             foreach (int pinNumber in _openPins.Keys)

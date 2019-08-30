@@ -18,6 +18,12 @@ namespace Iot.Device.Max7219
         private readonly int _bytesPerCharacter;
         private readonly byte[] _space;
  
+        /// <summary>
+        /// Constructs FixedSizeFont instance
+        /// </summary>
+        /// <param name="bytesPerCharacter">number of bytes per character</param>
+        /// <param name="data">Font data</param>
+        /// <param name="spaceWidth">Space width</param>
         public FixedSizeFont(int bytesPerCharacter, byte[] data, int spaceWidth = 3)
         {
             _data = data;
@@ -25,6 +31,9 @@ namespace Iot.Device.Max7219
             _space = new byte[spaceWidth];
         }
 
+        /// <summary>
+        /// Get character information
+        /// </summary>
         public IReadOnlyList<byte> this[char chr]
         {
             get

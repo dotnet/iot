@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands
 {
+    /// <summary>
+    /// Represents SetInverseDisplay command
+    /// </summary>
     public class SetInverseDisplay : ISharedCommand
     {
         /// <summary>
