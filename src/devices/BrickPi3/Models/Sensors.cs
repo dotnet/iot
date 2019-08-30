@@ -137,7 +137,7 @@ namespace Iot.Device.BrickPi3.Models
         Pin6_Out = 0x0100,
         /// <summary>
         /// If PIN6_OUT is set, this will set the state to output high, otherwise the state will
-        /// be output low.If PIN6_OUT is not set, this flag has no effect.
+        /// be output low. If PIN6_OUT is not set, this flag has no effect.
         /// </summary>
         Pin6_State = 0x0200,
         /// <summary>Enable the analog/digital converter on pin 1 (e.g. for NXT analog sensors).</summary>
