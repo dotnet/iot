@@ -23,7 +23,7 @@ namespace Iot.Device.CharacterLcd
         /// <param name="backlightBrightness">The brightness of the backlight. 0.0 for off, 1.0 for on.</param>
         /// <param name="readWritePin">The optional pin that controls the read and write switch.</param>
         /// <param name="controller">The controller to use with the LCD. If not specified, uses the platform default.</param>
-        public Lcd1602(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, IGpioController controller = null)
+        public Lcd1602(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController controller = null)
             : base(new Size(16, 2), LcdInterface.CreateGpio(registerSelectPin, enablePin, dataPins, backlightPin, backlightBrightness, readWritePin, controller))
         {
         }
@@ -32,7 +32,7 @@ namespace Iot.Device.CharacterLcd
         /// Constructs a new HD44780 based 16x2 LCD controller with integrated I2c support.
         /// </summary>
         /// <remarks>
-        /// This is for on-chip I2c support. For connecting via I2c GPIO expanders, use the GPIO constructor <see cref="Lcd1602(int, int, int[], int, float, int, IGpioController)"/>.
+        /// This is for on-chip I2c support. For connecting via I2c GPIO expanders, use the GPIO constructor <see cref="Lcd1602(int, int, int[], int, float, int, GpioController)"/>.
         /// </remarks>
         /// <param name="device">The I2c device for the LCD.</param>
         public Lcd1602(I2cDevice device)

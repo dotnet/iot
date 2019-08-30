@@ -9,6 +9,9 @@ using System.Threading;
 
 namespace Iot.Device.Hcsr04
 {
+    /// <summary>
+    /// HC-SR04 - Ultrasonic Ranging Module
+    /// </summary>
     public class Hcsr04 : IDisposable
     {
         private readonly int _echo;
@@ -79,6 +82,7 @@ namespace Iot.Device.Hcsr04
             return elapsed.TotalMilliseconds / 2.0 * 34.3;
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             if(_controller != null)

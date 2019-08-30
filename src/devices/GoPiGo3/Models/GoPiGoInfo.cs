@@ -7,6 +7,9 @@ using System.Collections.Generic;
 
 namespace Iot.Device.GoPiGo3.Models
 {
+    /// <summary>
+    /// Represents GoPiGo information
+    /// </summary>
     public class GoPiGoInfo
     {
         /// <summary>

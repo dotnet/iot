@@ -14,7 +14,7 @@ namespace Iot.Device.Mcp25xxx
     /// </summary>
     public abstract class Mcp25xxx : IDisposable
     {
-        internal IGpioController _gpioController;
+        internal GpioController _gpioController;
         private SpiDevice _spiDevice;
         private readonly int _reset;
         private readonly int _tx0rts;
@@ -50,7 +50,7 @@ namespace Iot.Device.Mcp25xxx
             int rx0bf = -1,
             int rx1bf = -1,
             int clkout = -1,
-            IGpioController gpioController = null)
+            GpioController gpioController = null)
         {
             _spiDevice = spiDevice;
 
@@ -378,6 +378,7 @@ namespace Iot.Device.Mcp25xxx
             _spiDevice.Write(writeBuffer);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             _gpioController?.Dispose();

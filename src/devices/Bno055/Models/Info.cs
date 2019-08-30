@@ -11,11 +11,34 @@ namespace Iot.Device.Bno055
     /// </summary>
     public class Info
     {
+        /// <summary>
+        /// Chip identifier
+        /// </summary>
         public byte ChipId { get; set; }
+
+        /// <summary>
+        /// Accelerometer identifier
+        /// </summary>
         public byte AcceleratorId { get; set; }
+
+        /// <summary>
+        /// Magnetometer identifier
+        /// </summary>
         public byte MagnetometerId { get; set; }
+
+        /// <summary>
+        /// Gyroscope identifier
+        /// </summary>
         public byte GyroscopeId { get; set; }
+
+        /// <summary>
+        /// Firmware version
+        /// </summary>
         public Version FirmwareVersion { get; set; }
+
+        /// <summary>
+        /// Bootloader version
+        /// </summary>
         public Version BootloaderVersion { get; set; }
     }
 }

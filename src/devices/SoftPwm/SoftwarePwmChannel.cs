@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace System.Device.Pwm.Drivers
 {
+    /// <summary>
+    /// Software PWM channel implementation
+    /// </summary>
     public class SoftwarePwmChannel : PwmChannel
     {
         // use to determine the freqncy of the PWM
@@ -187,6 +190,7 @@ namespace System.Device.Pwm.Drivers
             _isRunning = false;
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             _isRunning = false;

@@ -4,18 +4,32 @@
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Frame frequency type
+    /// </summary>
     public enum FrameFrequencyType
     {
+        /// <summary>Frames2</summary>
         Frames2 = 0x07,
+        /// <summary>Frames3</summary>
         Frames3 = 0x04,
+        /// <summary>Frames4</summary>
         Frames4 = 0x05,
+        /// <summary>Frames5</summary>
         Frames5 = 0x00,
+        /// <summary>Frames25</summary>
         Frames25 = 0x06,
+        /// <summary>Frames64</summary>
         Frames64 = 0x01,
+        /// <summary>Frames128</summary>
         Frames128 = 0x02,
+        /// <summary>Frames256</summary>
         Frames256 = 0x03
     }
 
+    /// <summary>
+    /// Represents HorizontalScrollSetup command
+    /// </summary>
     public class HorizontalScrollSetup : ISsd1306Command
     {
         /// <summary>
@@ -72,6 +86,9 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
             return new byte[] { Id, 0x00, (byte)StartPageAddress, (byte)FrameFrequencyType, (byte)EndPageAddress, 0x00, 0xFF };
         }
 
+        /// <summary>
+        /// Horizontal scroll type
+        /// </summary>
         public enum HorizontalScrollType
         {
             /// <summary>

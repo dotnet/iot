@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Represents SetChargePump command
+    /// </summary>
     public class SetChargePump : ISsd1306Command
     {
         /// <summary>

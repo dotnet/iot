@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device.Gpio;
 using System.Device.I2c;
 using System.Diagnostics;
 using System.Drawing;
@@ -26,8 +27,8 @@ namespace Iot.Device.CharacterLcd.Samples
             //for PCF8574T i2c addresses can be between 0x27 and 0x20 depending on bridged solder jumpers
             //for PCF8574AT i2c addresses can be between 0x3f and 0x38 depending on bridged solder jumpers
             var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x27));
-            var controller = new Pcf8574(i2cDevice);
-            var lcd = new Lcd1602(registerSelectPin: 0, enablePin: 2, dataPins: new int[] { 4, 5, 6, 7 }, backlightPin: 3, readWritePin: 1, controller: controller);
+            var driver = new Pcf8574(i2cDevice);
+            var lcd = new Lcd1602(registerSelectPin: 0, enablePin: 2, dataPins: new int[] { 4, 5, 6, 7 }, backlightPin: 3, readWritePin: 1, controller: new GpioController(PinNumberingScheme.Logical, driver));
 
             using (lcd)
             {

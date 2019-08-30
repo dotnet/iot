@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Represents SetComPinsHardwareConfiguration command
+    /// </summary>
     public class SetComPinsHardwareConfiguration : ISsd1306Command
     {
         /// <summary>

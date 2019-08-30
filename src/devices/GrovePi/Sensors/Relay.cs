@@ -7,6 +7,9 @@ using System.Device.Gpio;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
+    /// <summary>
+    /// Relay module
+    /// </summary>
     public class Relay : DigitalOutput
     {
         /// <summary>
@@ -49,6 +52,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
             Value = PinValue.High;
         }
 
+        /// <summary>
+        /// If inverted, the relay is on when output is low and off when output is high
+        /// </summary>
         public bool IsInverted { get; internal set; }
 
         /// <summary>

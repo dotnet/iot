@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Represents SetPageStartAddressForPageAddressingMode command
+    /// </summary>
     public class SetPageStartAddressForPageAddressingMode : ISsd1306Command
     {
         /// <summary>

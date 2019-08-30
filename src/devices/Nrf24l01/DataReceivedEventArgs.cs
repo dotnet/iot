@@ -15,6 +15,11 @@ namespace Iot.Device.Nrf24l01
         /// nRF24L01 Received Data
         /// </summary>
         public byte[] Data { get; }
+
+        /// <summary>
+        /// Constructs DataReceivedEventArgs instance
+        /// </summary>
+        /// <param name="data">Data received</param>
         public DataReceivedEventArgs(byte[] data)
         {
             Data = data;

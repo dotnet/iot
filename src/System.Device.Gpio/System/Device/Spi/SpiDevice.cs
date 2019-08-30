@@ -10,7 +10,8 @@ namespace System.Device.Spi
     public abstract partial class SpiDevice : IDisposable
     {
         /// <summary>
-        /// The connection settings of a device on a SPI bus.
+        /// The connection settings of a device on a SPI bus. The connection settings are immutable after the device is created
+        /// so the object returned will be a clone of the settings object.
         /// </summary>
         public abstract SpiConnectionSettings ConnectionSettings { get; }
 

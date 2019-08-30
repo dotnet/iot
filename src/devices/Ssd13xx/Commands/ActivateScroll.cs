@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands
 {
+    /// <summary>
+    /// Represents ActivateScroll command
+    /// </summary>
     public class ActivateScroll : ISharedCommand
     {
         /// <summary>

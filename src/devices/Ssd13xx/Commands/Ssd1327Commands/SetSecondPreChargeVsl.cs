@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
+    /// <summary>
+    /// Represents SetSecondPreChargeVsl command
+    /// </summary>
     public class SetSecondPreChargeVsl : ISsd1327Command
     {
         /// <summary>
@@ -24,6 +27,9 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         /// </summary>
         public byte Id => 0xD5;
 
+        /// <summary>
+        /// The value that represents configuration
+        /// </summary>
         public byte Config { get; }
 
         /// <summary>

@@ -13,7 +13,6 @@ namespace Iot.Device.GoPiGo3.Sensors
     /// </summary>
     public class Buzzer : ISensor
     {
-
         private GoPiGo _goPiGo;
         private readonly GrovePort _mode;
         private int _value;
@@ -99,6 +98,9 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// </summary>
         public override string ToString() => $"{Value} Hz";
 
+        /// <summary>
+        /// Grove port
+        /// </summary>
         public GrovePort Port { get; internal set; }
 
         /// <summary>
