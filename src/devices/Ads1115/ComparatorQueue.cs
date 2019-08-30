@@ -5,7 +5,7 @@
 namespace Iot.Device.Ads1115
 {
     /// <summary>
-    /// Comparator Queue
+    /// Comparator Queue.
     /// </summary>
     public enum ComparatorQueue
     {
