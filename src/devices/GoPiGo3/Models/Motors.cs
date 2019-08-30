@@ -15,7 +15,7 @@ namespace Iot.Device.GoPiGo3.Models
         AllOk = 0,
         /// <summary>LowVoltageFloat - The motors are automatically disabled because the battery voltage is too low</summary>
         LowVoltageFloat = 0x01,
-        /// <summary>Overloaded - The motors aren't close to the target (applies to position control and dps speed control)</summary>
+        /// <summary>The motors aren't close to the target (applies to position control and dps speed control).</summary>
         Overloaded = 0x02
     }
 
