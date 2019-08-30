@@ -20,7 +20,7 @@ namespace Iot.Device.GoPiGo3.Models
     }
 
     /// <summary>
-    /// Set speed for the motor
+    /// Sets the speed for the motor.
     /// </summary>
     public enum MotorSpeed : byte
     {
