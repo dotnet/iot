@@ -130,7 +130,7 @@ namespace Iot.Device.BrickPi3.Models
         Pin5_Out = 0x0010,
         /// <summary>
         /// If PIN5_OUT is set, this will set the state to output high, otherwise the state will
-        /// be output low.If PIN5_OUT is not set, this flag has no effect.
+        /// be output low. If PIN5_OUT is not set, this flag has no effect.
         /// </summary>
         Pin5_State = 0x0020,
         /// <summary>Set pin 6 state to output.Pin 6 will be set to input if this flag is not set.</summary>
