@@ -146,7 +146,7 @@ namespace Iot.Device.CharacterLcd
         protected void SendCommands(ReadOnlySpan<byte> commands) => _interface.SendCommands(commands);
 
         /// <summary>
-        /// Determines if device should use two line mode
+        /// Determines if the device should use two line mode
         /// </summary>
         /// <param name="rows">Number of rows on the device</param>
         /// <returns>True if device should use two line mode</returns>
