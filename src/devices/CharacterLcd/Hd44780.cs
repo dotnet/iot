@@ -420,7 +420,7 @@ namespace Iot.Device.CharacterLcd
         /// Releases unmanaged resources used by Hd44780
         /// and optionally release managed resources
         /// </summary>
-        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources</param>
+        /// <param name="disposing"><see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
