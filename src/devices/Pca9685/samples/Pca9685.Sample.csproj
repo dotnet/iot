@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Pca9685.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\..\..\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
   </ItemGroup>
 
 </Project>
