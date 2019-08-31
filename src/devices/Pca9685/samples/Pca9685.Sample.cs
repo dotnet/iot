@@ -46,7 +46,7 @@ namespace Iot.Device.Pwm.Pca9685Samples
             var settings = new I2cConnectionSettings(busId, deviceAddress);
             var device = I2cDevice.Create(settings);
 
-            using (var pca9685 = new Pca9685(device, pwmFrequency: 50))
+            using (var pca9685 = new Pca9685(device))
             {
                 Console.WriteLine($"PCA9685 is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
                 Console.WriteLine($"PWM Frequency: {pca9685.PwmFrequency}Hz");

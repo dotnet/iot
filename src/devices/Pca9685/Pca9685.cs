@@ -85,7 +85,11 @@ namespace Iot.Device.Pwm
         /// When true specifies that external clock is used.
         /// Use <see cref="ClockFrequency"/> to set frequency of an external clock
         /// </param>
-        public Pca9685(I2cDevice i2cDevice, double pwmFrequency = 100.0, double dutyCycleAllChannels = 0.0, bool usingExternalClock = false)
+        /// <remarks>
+        /// Default value for <paramref name="pwmFrequency"/> and <paramref name="dutyCycleAllChannels"/>
+        /// is -1 which means to not change value already set on the device.
+        /// </remarks>
+        public Pca9685(I2cDevice i2cDevice, double pwmFrequency = -1, double dutyCycleAllChannels = -1, bool usingExternalClock = false)
         {
             _device = i2cDevice;
             _usingExternalClock = usingExternalClock;
@@ -102,8 +106,19 @@ namespace Iot.Device.Pwm
             WriteByte(MODE1, (byte)mode1);
             WriteByte(MODE2, (byte)mode2);
 
-            PwmFrequency = pwmFrequency;
-            SetDutyCycleAllChannels(dutyCycleAllChannels);
+            if (pwmFrequency == -1)
+            {
+                _prescale = ReadByte(PRESCALE);
+            }
+            else
+            {
+                PwmFrequency = pwmFrequency;
+            }
+
+            if (dutyCycleAllChannels != -1)
+            {
+                SetDutyCycleAllChannels(dutyCycleAllChannels);
+            }
 
             mode1 &= ~SLEEP;
             WriteByte(MODE1, (byte)mode1);
