@@ -15,7 +15,7 @@ The implementation supports the following devices:
 
 ## Usage
 
-2 examples on how to use this device binding are available in the [samples](samples) folder.
+3 examples on how to use this device binding are available in the [samples](samples) folder.
 
 The following fritzing diagram illustrates one way to wire up the BMP280 with a Raspberry Pi using I2C.
 
