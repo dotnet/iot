@@ -104,6 +104,9 @@ namespace Iot.Device.Bmxx80
             return s_osToMeasCycles[(int)PressureSampling] + s_osToMeasCycles[(int)TemperatureSampling] + s_osToMeasCycles[(int)HumiditySampling];
         }
 
+        /// <summary>
+        /// Sets the default configuration for the sensor.
+        /// </summary>
         protected override void SetDefaultConfiguration()
         {
             base.SetDefaultConfiguration();

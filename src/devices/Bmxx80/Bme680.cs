@@ -409,6 +409,9 @@ namespace Iot.Device.Bmxx80
             return true;
         }
 
+        /// <summary>
+        /// Sets the default configuration for the sensor.
+        /// </summary>
         protected override void SetDefaultConfiguration()
         {
             base.SetDefaultConfiguration();

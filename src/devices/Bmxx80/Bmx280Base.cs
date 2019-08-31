@@ -30,7 +30,11 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         public const byte SecondaryI2cAddress = 0x76;
 
+        /// <summary>
+        /// Converts oversampling to needed measurement cycles for that oversampling.
+        /// </summary>
         protected static readonly int[] s_osToMeasCycles = { 0, 7, 9, 14, 23, 44 };
+
         private Bmx280FilteringMode _filteringMode;
         private StandbyTime _standbyTime;
         
@@ -231,6 +235,9 @@ namespace Iot.Device.Bmxx80
             return s_osToMeasCycles[(int)PressureSampling] + s_osToMeasCycles[(int)TemperatureSampling];
         }
 
+        /// <summary>
+        /// Sets the default configuration for the sensor.
+        /// </summary>
         protected override void SetDefaultConfiguration()
         {
             base.SetDefaultConfiguration();

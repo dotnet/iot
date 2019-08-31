@@ -20,7 +20,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Calibration data for the sensor.
         /// </summary>
-        protected Bmxx80CalibrationData _calibrationData;
+        internal Bmxx80CalibrationData _calibrationData;
 
         /// <summary>
         /// I2C device used to communicate with the device.
@@ -255,15 +255,28 @@ namespace Iot.Device.Bmxx80
             return (Sampling)value;
         }
 
+        /// <summary>
+        /// Sets the default configuration for the sensor.
+        /// </summary>
         protected virtual void SetDefaultConfiguration()
         {
             PressureSampling = Sampling.UltraLowPower;
             TemperatureSampling = Sampling.UltraLowPower;
         }
 
+        /// <summary>
+        /// Specifies the Endianness of a device.
+        /// </summary>
         protected internal enum Endianness
         {
+            /// <summary>
+            /// Indicates little endian.
+            /// </summary>
             LittleEndian,
+
+            /// <summary>
+            /// Indicates big endian.
+            /// </summary>
             BigEndian
         }
 
