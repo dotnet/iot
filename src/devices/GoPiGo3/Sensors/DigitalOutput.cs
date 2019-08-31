@@ -58,6 +58,9 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// </summary>
         public string SensorName => "Digital Output";
 
+        /// <summary>
+        /// Grove port
+        /// </summary>
         public GrovePort Port { get; internal set; }
 
         /// <summary>

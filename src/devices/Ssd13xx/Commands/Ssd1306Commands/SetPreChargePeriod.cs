@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Represents SetPreChargePeriod command
+    /// </summary>
     public class SetPreChargePeriod : ISsd1306Command
     {
         /// <summary>

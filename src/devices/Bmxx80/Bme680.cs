@@ -39,6 +39,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         private readonly Bme680CalibrationData _bme680Calibration;
 
+        /// <inheritdoc/>
         protected override int _tempCalibrationFactor => 16;
 
         private readonly List<Bme680HeaterProfileConfig> _heaterConfigs = new List<Bme680HeaterProfileConfig>();

@@ -10,11 +10,17 @@ namespace Iot.Device.Vl53L0X
     /// </summary>
     public enum PeriodPulse
     {
+        /// <summary>Period 8</summary>
         Period08 = 8,
+        /// <summary>Period 10</summary>
         Period10 = 10,
+        /// <summary>Period 12</summary>
         Period12 = 12,
+        /// <summary>Period 14</summary>
         Period14 = 14,
+        /// <summary>Period 16</summary>
         Period16 = 16,
+        /// <summary>Period 18</summary>
         Period18 = 18
     }
 }

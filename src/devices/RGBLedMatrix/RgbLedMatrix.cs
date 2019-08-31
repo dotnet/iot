@@ -16,6 +16,9 @@ using Iot.Device.Graphics;
 
 namespace Iot.Device.LEDMatrix
 {
+    /// <summary>
+    /// Represents RGB LED matrix
+    /// </summary>
     public class RGBLedMatrix
     {
         private GpioController _controller;
@@ -446,6 +449,20 @@ namespace Iot.Device.LEDMatrix
             }
         }
 
+        /// <summary>
+        /// Draws text on the display at a specified position
+        /// </summary>
+        /// <param name="x">X coordinate of the text position</param>
+        /// <param name="y">Y coordinate of the text position</param>
+        /// <param name="text">Text to draw</param>
+        /// <param name="font">Font to use to draw the text</param>
+        /// <param name="textR">Red channel of the text color</param>
+        /// <param name="textG">Green channel of the text color</param>
+        /// <param name="textB">Blue channel of the text color</param>
+        /// <param name="bkR">Red channel of the text background</param>
+        /// <param name="bkG">Green channel of the text background</param>
+        /// <param name="bkB">Blue channel of the text background</param>
+        /// <param name="backBuffer">Set to true if drawing on the backing buffer. Defaults to false.</param>
         public void DrawText(int x, int y, ReadOnlySpan<char> text, BdfFont font, byte textR, byte textG, byte textB, byte bkR, byte bkG, byte bkB, bool backBuffer = false)
         {
             int charWidth = font.Width;
@@ -456,7 +473,7 @@ namespace Iot.Device.LEDMatrix
                 return;
             }
 
-            byte [] buffer = backBuffer ? _colorsBackBuffer : _colorsBuffer;
+            byte[] buffer = backBuffer ? _colorsBackBuffer : _colorsBuffer;
 
             int index = 0;
             while (index < text.Length)

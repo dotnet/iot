@@ -7,10 +7,21 @@ using Iot.Device.Lsm9Ds1;
 
 namespace Iot.Device.SenseHat
 {
+    /// <summary>
+    /// SenseHAT - Magnetometer sensor
+    /// </summary>
     public class SenseHatMagnetometer : Lsm9Ds1Magnetometer
     {
+        /// <summary>
+        /// Default I2C address
+        /// </summary>
         public const int I2cAddress = 0x1C;
 
+        /// <summary>
+        /// Constructs SenseHatMagnetometer instance
+        /// </summary>
+        /// <param name="i2cDevice">I2C device used to communicate with the device</param>
+        /// <param name="magneticInduction">Magnetic induction</param>
         public SenseHatMagnetometer(
             I2cDevice i2cDevice = null,
             MagneticInductionScale magneticInduction = MagneticInductionScale.Scale04G)

@@ -10,7 +10,8 @@ namespace System.Device.I2c
     public abstract partial class I2cDevice : IDisposable
     {
         /// <summary>
-        /// The connection settings of a device on an I2C bus.
+        /// The connection settings of a device on an I2C bus. The connection settings are immutable after the device is created
+        /// so the object returned will be a clone of the settings object.
         /// </summary>
         public abstract I2cConnectionSettings ConnectionSettings { get; }
 

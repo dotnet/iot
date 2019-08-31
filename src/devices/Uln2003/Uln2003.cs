@@ -25,7 +25,7 @@ namespace Iot.Device.Uln2003
         private StepperMode _mode = StepperMode.HalfStep;
         private bool[,] _currentSwitchingSequence = _halfStepSequence;
         private bool _isClockwise = true;
-        private IGpioController _controller;
+        private GpioController _controller;
         private Stopwatch _stopwatch = new Stopwatch();
         private long _stepMicrosecondsDelay;
 
@@ -58,7 +58,7 @@ namespace Iot.Device.Uln2003
         /// <param name="pin3">The GPIO pin number which corresponds pin C on ULN2003 driver board.</param>
         /// <param name="pin4">The GPIO pin number which corresponds pin D on ULN2003 driver board.</param>
         /// <param name="controller">The controller.</param>
-        public Uln2003(int pin1, int pin2, int pin3, int pin4, IGpioController controller = null)
+        public Uln2003(int pin1, int pin2, int pin3, int pin4, GpioController controller = null)
         {
             _pin1 = pin1;
             _pin2 = pin2;
@@ -160,6 +160,7 @@ namespace Iot.Device.Uln2003
             _controller.Write(_pin4, _currentSwitchingSequence[3, _engineStep - 1]);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Stop();

@@ -17,13 +17,34 @@ namespace Iot.Device.Bmxx80
     /// </summary>
     public abstract class Bmxx80Base : IDisposable
     {
+        /// <summary>
+        /// Calibration data for the sensor.
+        /// </summary>
         protected Bmxx80CalibrationData _calibrationData;
+
+        /// <summary>
+        /// I2C device used to communicate with the device.
+        /// </summary>
         protected I2cDevice _i2cDevice;
+
+        /// <summary>
+        /// Chosen communication protocol.
+        /// </summary>
         protected CommunicationProtocol _communicationProtocol;
+
+        /// <summary>
+        /// The control register of the sensor.
+        /// </summary>
         protected byte _controlRegister;
 
+        /// <summary>
+        /// Bmxx80 communication protocol.
+        /// </summary>
         public enum CommunicationProtocol
         {
+            /// <summary>
+            /// I²C communication protocol.
+            /// </summary>
             I2c
         }
 
@@ -32,6 +53,10 @@ namespace Iot.Device.Bmxx80
         /// pressure compensation formula and could be implemented as a global variable.
         /// </summary>
         protected int TemperatureFine;
+
+        /// <summary>
+        /// The temperature calibration factor.
+        /// </summary>
         protected virtual int _tempCalibrationFactor => 1;
 
         private Sampling _temperatureSampling;
@@ -216,6 +241,11 @@ namespace Iot.Device.Bmxx80
             };
         }
 
+        /// <summary>
+        /// Converts byte to <see cref="Sampling"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><see cref="Sampling"/></returns>
         protected Sampling ByteToSampling(byte value)
         {
             // Values >=5 equals UltraHighResolution.
@@ -246,6 +276,10 @@ namespace Iot.Device.Bmxx80
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Releases the unmanaged resources used by the Bmxx80 and optionally releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             _i2cDevice?.Dispose();

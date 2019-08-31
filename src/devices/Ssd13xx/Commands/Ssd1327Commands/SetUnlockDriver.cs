@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
+    /// <summary>
+    /// Represents SetUnlockDriver command
+    /// </summary>
     public class SetUnlockDriver : ISsd1327Command
     {
         /// <summary>

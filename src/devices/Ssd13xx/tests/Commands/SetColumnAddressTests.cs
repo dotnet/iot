@@ -44,7 +44,7 @@ namespace Iot.Device.Ssd13xx.Tests
         [InlineData(0xFF, 0xFF)]
         public void Invalid_Addresses(byte startAddress, byte endAddress)
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 SetColumnAddress setColumnAddress = new SetColumnAddress(startAddress, endAddress);
             });

@@ -7,7 +7,7 @@ namespace Iot.Device.Buzzer.Samples
     /// <summary>
     /// Pause element to define silence duration between sounds in melody.
     /// </summary>
-    public class PauseElement : MelodyElement
+    internal class PauseElement : MelodyElement
     {
         /// <summary>
         /// Create Pause element.

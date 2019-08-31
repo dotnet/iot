@@ -43,10 +43,10 @@ namespace Iot.Device.CharacterLcd
             private bool _useLastByte;
 
             private readonly int[] _dataPins;
-            private IGpioController _controller;
+            private GpioController _controller;
             private PinValuePair[] _pinBuffer = new PinValuePair[8];
 
-            public Gpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, IGpioController controller = null)
+            public Gpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController controller = null)
             {
                 _rwPin = readWritePin;
                 _rsPin = registerSelectPin;

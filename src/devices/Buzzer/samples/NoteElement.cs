@@ -7,7 +7,7 @@ namespace Iot.Device.Buzzer.Samples
     /// <summary>
     /// Note element to define Note and Octave of sound in melody.
     /// </summary>
-    public class NoteElement : MelodyElement
+    internal class NoteElement : MelodyElement
     {
         /// <summary>
         /// Note of sound in melody sequence.

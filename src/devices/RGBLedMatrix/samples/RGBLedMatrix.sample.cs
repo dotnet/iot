@@ -19,7 +19,7 @@ using Iot.Device.Graphics;
 
 namespace dotnettest
 {
-    public class Program
+    class Program
     {
         private static bool play = false;
         private static int scenario = 2;

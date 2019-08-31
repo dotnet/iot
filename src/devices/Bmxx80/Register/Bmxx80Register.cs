@@ -7,7 +7,7 @@ namespace Iot.Device.Bmxx80.Register
     /// <summary>
     /// Registers shared in the Bmxx80 family.
     /// </summary>
-    public enum Bmxx80Register : byte
+    internal enum Bmxx80Register : byte
     {
         CHIPID = 0xD0,
         RESET = 0xE0

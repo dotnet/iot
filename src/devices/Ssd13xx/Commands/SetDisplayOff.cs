@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands
 {
+    /// <summary>
+    /// Represents SetDisplayOff command
+    /// </summary>
     public class SetDisplayOff : ISharedCommand
     {
         /// <summary>

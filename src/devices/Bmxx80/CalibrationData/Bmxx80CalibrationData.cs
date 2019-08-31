@@ -7,7 +7,7 @@ namespace Iot.Device.Bmxx80.CalibrationData
     /// <summary>
     /// Calibration data for the Bmxx80 family.
     /// </summary>
-    public abstract class Bmxx80CalibrationData
+    internal abstract class Bmxx80CalibrationData
     {
         public ushort DigT1 { get; set; }
         public short DigT2 { get; set; }

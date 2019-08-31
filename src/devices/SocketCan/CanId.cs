@@ -12,13 +12,22 @@ using System.Threading;
 
 namespace Iot.Device.SocketCan
 {
+    /// <summary>
+    /// Represents CAN identifier (11 or 29-bit)
+    /// </summary>
     public struct CanId
     {
         // Raw (can_id) includes EFF, RTR and ERR flags
         internal uint Raw { get; set; }
 
+        /// <summary>
+        /// Gets value of identifier (11 or 29-bit)
+        /// </summary>
         public uint Value => ExtendedFrameFormat ? Extended : Standard;
 
+        /// <summary>
+        /// Gets or sets standard (11-bit) identifier
+        /// </summary>
         public uint Standard
         {
             get
@@ -40,6 +49,9 @@ namespace Iot.Device.SocketCan
             }
         }
 
+        /// <summary>
+        /// Gets or sets extended (29-bit) identifier
+        /// </summary>
         public uint Extended
         {
             get
@@ -60,24 +72,36 @@ namespace Iot.Device.SocketCan
             }
         }
 
+        /// <summary>
+        /// Gets error (ERR) flag
+        /// </summary>
         public bool Error
         {
             get => ((CanFlags)Raw).HasFlag(CanFlags.Error);
             set => SetCanFlag(CanFlags.Error, value);
         }
 
+        /// <summary>
+        /// True if extended frame format (EFF) flag is set
+        /// </summary>
         public bool ExtendedFrameFormat
         {
             get => ((CanFlags)Raw).HasFlag(CanFlags.ExtendedFrameFormat);
             set => SetCanFlag(CanFlags.ExtendedFrameFormat, value);
         }
 
+        /// <summary>
+        /// Gets remote transimission request (RTR) flag
+        /// </summary>
         public bool RemoteTransmissionRequest
         {
             get => ((CanFlags)Raw).HasFlag(CanFlags.RemoteTransmissionRequest);
             set => SetCanFlag(CanFlags.RemoteTransmissionRequest, value);
         }
 
+        /// <summary>
+        /// Checks if identifier is valid: error flag is not set and if address can fit selected format (11/29 bit)
+        /// </summary>
         public bool IsValid
         {
             get

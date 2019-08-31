@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Mcp25xxx.Register
 {
+    /// <summary>
+    /// Mcp25xxx register interface
+    /// </summary>
     public interface IRegister
     {
         /// <summary>

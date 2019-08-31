@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.GrovePiDevice.Models
 {
+    /// <summary>
+    /// GrovePi info
+    /// </summary>
     public class Info
     {
         /// <summary>

@@ -36,9 +36,10 @@ namespace System.Device.I2c
         public string DevicePath { get; set; }
 
         /// <summary>
-        /// The connection settings of a device on an I2C bus.
+        /// The connection settings of a device on an I2C bus. The connection settings are immutable after the device is created
+        /// so the object returned will be a clone of the settings object.
         /// </summary>
-        public override I2cConnectionSettings ConnectionSettings => _settings;
+        public override I2cConnectionSettings ConnectionSettings => new I2cConnectionSettings(_settings);
 
         private unsafe void Initialize()
         {

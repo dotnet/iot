@@ -34,10 +34,10 @@ namespace System.Device.Pwm.Channels
             int frequency = 400,
             double dutyCyclePercentage = 0.5)
         {
-            _chipPath = $"/sys/class/pwm/pwmchip{_chip}";
-            _channelPath = $"{_chipPath}/pwm{_channel}";
             _chip = chip;
             _channel = channel;
+            _chipPath = $"/sys/class/pwm/pwmchip{_chip}";
+            _channelPath = $"{_chipPath}/pwm{_channel}";
             Validate();
             Open();
 

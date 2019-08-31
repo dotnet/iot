@@ -14,53 +14,19 @@ namespace samples
 {
     class Program
     {
-        static DCMotorSettings TwoPinModeAutoPwm()
-        {
-            // this will use software PWM on one of the pins
-            return new DCMotorSettings()
-            {
-                Pin0 = 5,
-                Pin1 = 6, // for 1 pin mode don't set this and connect your pin to the ground
-                UseEnableAsPwm = false,
-            };
-        }
-
-        static DCMotorSettings TwoPinModeManualPwm()
-        {
-            return new DCMotorSettings()
-            {
-                Pin0 = 5,
-                UseEnableAsPwm = false,
-                PwmChannel = new SoftwarePwmChannel(6, 50),
-            };
-        }
-
-        static DCMotorSettings ThreePinModeSoftware()
-        {
-            return new DCMotorSettings()
-            {
-                Pin0 = 5,
-                Pin1 = 6,
-                PwmChannel = new SoftwarePwmChannel(23, 50),
-            };
-        }
-
-        static DCMotorSettings ThreePinModeHardware()
-        {
-            return new DCMotorSettings()
-            {
-                Pin0 = 5,
-                Pin1 = 6,
-                PwmChannel = PwmChannel.Create(0, 0, 50),
-            };
-        }
-
         static void Main(string[] args)
         {
             const double Period = 10.0;
-            DCMotorSettings settings = ThreePinModeHardware();
             Stopwatch sw = Stopwatch.StartNew();
-            using (DCMotor motor = DCMotor.Create(settings))
+            // 1 pin mode
+            // using (DCMotor motor = DCMotor.Create(6))
+            // using (DCMotor motor = DCMotor.Create(PwmChannel.Create(0, 0, frequency: 50)))
+            // 2 pin mode
+            // using (DCMotor motor = DCMotor.Create(27, 22))
+            // using (DCMotor motor = DCMotor.Create(new SoftwarePwmChannel(27, frequency: 50), 22))
+            // 3 pin mode
+            // using (DCMotor motor = DCMotor.Create(PwmChannel.Create(0, 0, frequency: 50), 23, 24))
+            using (DCMotor motor = DCMotor.Create(6, 27, 22))
             {
                 bool done = false;
                 Console.CancelKeyPress += (o, e) =>

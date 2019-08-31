@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-public class TimeEnvelope
+internal class TimeEnvelope
 {
     private int _count;
     private int _time = 0;
@@ -19,10 +19,10 @@ public class TimeEnvelope
         }
     }
 
-    public TimeEnvelope(int count, bool throwOnOverthrow = true)
+    public TimeEnvelope(int count, bool throwOnOverflow = true)
     {
         _count = count;
-        _throwOnOverflow = throwOnOverthrow;
+        _throwOnOverflow = throwOnOverflow;
     }
 
     public int Count

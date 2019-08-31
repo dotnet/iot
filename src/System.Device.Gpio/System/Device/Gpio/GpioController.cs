@@ -11,7 +11,7 @@ namespace System.Device.Gpio
     /// <summary>
     /// Represents a general-purpose I/O (GPIO) controller.
     /// </summary>
-    public sealed partial class GpioController : IGpioController
+    public sealed partial class GpioController : IDisposable
     {
         private readonly GpioDriver _driver;
         private readonly HashSet<int> _openPins;
@@ -297,6 +297,7 @@ namespace System.Device.Gpio
             _driver.Dispose();
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);

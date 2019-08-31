@@ -6,11 +6,16 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
+    /// <summary>
+    /// Sets the length of phase 1 and 2 of segment waveform of the driver.
+    /// </summary>
     public class SetPhaseLength : ISsd1327Command
     {
         /// <summary>
-        /// This command sets the length of phase 1 and 2 of segment waveform of the driver.
+        /// Constructs instance of SetPhaseLength command
         /// </summary>
+        /// <param name="phase1Period">Phase 1 period</param>
+        /// <param name="phase2Period">Phase 2 period</param>
         public SetPhaseLength(byte phase1Period = 0x02, byte phase2Period = 0x02)
         {
             CheckPeriods(phase1Period, phase2Period);
@@ -19,7 +24,11 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
             Phase2Period = phase2Period;
             PhasePeriod = (byte)((Phase2Period << 4) | Phase1Period);
         }
-        
+
+        /// <summary>
+        /// Constructs instance of SetPhaseLength command
+        /// </summary>
+        /// <param name="phasePeriod">Phase period</param>
         public SetPhaseLength(byte phasePeriod)
         {
             byte phase1Period = (byte)(phasePeriod & 0x0F);

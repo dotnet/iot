@@ -12,11 +12,18 @@ namespace Iot.Device.Pcx857x
     /// </summary>
     public abstract class Pcx8574 : Pcx857x
     {
-        public Pcx8574(I2cDevice device, int interrupt = -1, IGpioController gpioController = null)
+        /// <summary>
+        /// Constructs Pcx8574 instance
+        /// </summary>
+        /// <param name="device">I2C device</param>
+        /// <param name="interrupt">Interrupt pin</param>
+        /// <param name="gpioController"><see cref="GpioController"/> related with <paramref name="interrupt"/> pin</param>
+        public Pcx8574(I2cDevice device, int interrupt = -1, GpioController gpioController = null)
             : base(device, interrupt, gpioController)
         {
         }
 
-        public override int PinCount => 8;
+        /// <inheritdoc/>
+        protected override int PinCount => 8;
     }
 }

@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
+    /// <summary>
+    /// Represents SetNormalDisplay command
+    /// </summary>
     public class SetNormalDisplay : ISsd1327Command
     {
         /// <summary>

@@ -9,7 +9,9 @@ namespace Iot.Device.Ads1115
     /// </summary>
     public enum DeviceMode
     {
+        /// <summary>Continuous mode</summary>
         Continuous = 0x00,
+        /// <summary>Power down mode</summary>
         PowerDown = 0x01
     }
 }

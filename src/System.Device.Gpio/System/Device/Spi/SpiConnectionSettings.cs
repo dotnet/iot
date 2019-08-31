@@ -24,6 +24,17 @@ namespace System.Device.Spi
             ChipSelectLine = chipSelectLine;
         }
 
+        internal SpiConnectionSettings(SpiConnectionSettings other)
+        {
+            BusId = other.BusId;
+            ChipSelectLine = other.ChipSelectLine;
+            Mode = other.Mode;
+            DataBitLength = other.DataBitLength;
+            ClockFrequency = other.ClockFrequency;
+            DataFlow = other.DataFlow;
+            ChipSelectLineActiveState = other.ChipSelectLineActiveState;
+        }
+
         /// <summary>
         /// The bus ID the device is connected to.
         /// </summary>

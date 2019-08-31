@@ -19,8 +19,11 @@ namespace Iot.Device.Bno055
     /// </summary>
     public enum AxisMap
     {
+        /// <summary>X coordinate</summary>
         X = 0x00,
+        /// <summary>Y coordinate</summary>
         Y = 0x01,
+        /// <summary>Z coordinate</summary>
         Z = 0x02,
     }
 
@@ -29,7 +32,9 @@ namespace Iot.Device.Bno055
     /// </summary>
     public enum AxisSign
     {
+        /// <summary>Positive axis sign</summary>
         Positive = 0x00,
+        /// <summary>Negative axis sign</summary>
         Negative = 0x01,
     }
 
@@ -38,7 +43,14 @@ namespace Iot.Device.Bno055
     /// </summary>
     public class AxisSetting
     {
+        /// <summary>
+        /// Axis map
+        /// </summary>
         public AxisMap Axis { get; set; }
+
+        /// <summary>
+        /// Axis sign
+        /// </summary>
         public AxisSign Sign { get; set; }
     }
 }

@@ -3,16 +3,25 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Iot.Device.Pcx857x
 {
-    public abstract class Pcx857x : IGpioController
+    /// <summary>
+    /// Base class for PCx857x GPIO expanders
+    /// </summary>
+    public abstract class Pcx857x : GpioDriver
     {
+        /// <summary>
+        /// I2C device used for communication with the device
+        /// </summary>
         protected I2cDevice Device { get; }
-        private readonly IGpioController _masterGpioController;
+        private readonly GpioController _masterGpioController;
         private readonly int _interrupt;
 
         // Pin mode bits- 0 for input, 1 for output to match PinMode
@@ -30,7 +39,7 @@ namespace Iot.Device.Pcx857x
         /// The GPIO controller for the <paramref name="interrupt"/>.
         /// If not specified, the default controller will be used.
         /// </param>
-        public Pcx857x(I2cDevice device, int interrupt = -1, IGpioController gpioController = null)
+        public Pcx857x(I2cDevice device, int interrupt = -1, GpioController gpioController = null)
         {
             Device = device ?? throw new ArgumentNullException(nameof(device));
             _interrupt = interrupt;
@@ -56,10 +65,22 @@ namespace Iot.Device.Pcx857x
             _pinModes = 0xFFFF;
         }
 
+        /// <summary>
+        /// Reads byte from the device
+        /// </summary>
+        /// <returns>Byte read from the device</returns>
         public byte ReadByte() => Device.ReadByte();
 
+        /// <summary>
+        /// Writes byte to the device
+        /// </summary>
+        /// <param name="value">Byte to be written to the device</param>
         public void WriteByte(byte value) => Device.WriteByte(value);
 
+        /// <summary>
+        /// Reads 16-bit unsigned integer from the device
+        /// </summary>
+        /// <returns>16-bit unsigned integer read from the device</returns>
         protected ushort InternalReadUInt16()
         {
             Span<byte> buffer = stackalloc byte[2];
@@ -67,6 +88,10 @@ namespace Iot.Device.Pcx857x
             return (ushort)(buffer[0] | buffer[1] << 8);
         }
 
+        /// <summary>
+        /// Writes 16-bit unsigned integer to the device
+        /// </summary>
+        /// <param name="value">16-vit unsigned integer to be written to the device</param>
         protected void InternalWriteUInt16(ushort value)
         {
             Span<byte> buffer = stackalloc byte[2];
@@ -75,32 +100,37 @@ namespace Iot.Device.Pcx857x
             Device.Write(buffer);
         }
 
-        /// <summary>
-        /// The I/O pin count of the device.
-        /// </summary>
-        public abstract int PinCount { get; }
-
-        public void ClosePin(int pinNumber)
+        /// <inheritdoc/>
+        protected override void ClosePin(int pinNumber)
         {
             // No-op
         }
 
-        public void Dispose()
+        /// <inheritdoc/>
+        protected override void Dispose(bool disposing)
         {
             Device.Dispose();
+            base.Dispose(disposing);
         }
 
-        public void OpenPin(int pinNumber) => throw new NotImplementedException();
+        /// <inheritdoc/>
+        protected override void OpenPin(int pinNumber)
+        {
+            // No-op
+        }
 
-        public void OpenPin(int pinNumber, PinMode mode) => SetPinMode(pinNumber, mode);
-
-        public PinValue Read(int pinNumber)
+        /// <inheritdoc/>
+        protected override PinValue Read(int pinNumber)
         {
             Span<PinValuePair> values = stackalloc PinValuePair[]{ new PinValuePair(pinNumber, default) };
             Read(values);
             return values[0].PinValue;
         }
 
+        /// <summary>
+        /// Reads multiple pins from the device
+        /// </summary>
+        /// <param name="pinValues">Pins and values to be read</param>
         public void Read(Span<PinValuePair> pinValues)
         {
             (uint pins, _) = new PinVector32(pinValues);
@@ -136,7 +166,8 @@ namespace Iot.Device.Pcx857x
                 ThrowInvalidPin(nameof(pinNumber));
         }
 
-        public void SetPinMode(int pinNumber, PinMode mode)
+        /// <inheritdoc/>
+        protected override void SetPinMode(int pinNumber, PinMode mode)
         {
             ValidatePinNumber(pinNumber);
 
@@ -174,12 +205,14 @@ namespace Iot.Device.Pcx857x
             }
         }
 
-        public void Write(int pinNumber, PinValue value)
+        /// <inheritdoc/>
+        protected override void Write(int pinNumber, PinValue value)
         {
             Span<PinValuePair> values = stackalloc PinValuePair[] { new PinValuePair(pinNumber, value) };
             Write(values);
         }
 
+        /// <inheritdoc/>
         public void Write(ReadOnlySpan<PinValuePair> pinValues)
         {
             (uint pins, uint values) = new PinVector32(pinValues);
@@ -202,10 +235,26 @@ namespace Iot.Device.Pcx857x
             WritePins(SetBits(_pinValues, (ushort)values, (ushort)pins));
         }
 
-        public bool IsPinOpen(int pinNumber) => throw new NotImplementedException();
+        /// <inheritdoc/>
+        protected override PinMode GetPinMode(int pinNumber) => ((_pinModes & (1 << pinNumber)) == 0) ? PinMode.Input : PinMode.Output;
 
-        public PinMode GetPinMode(int pinNumber) => throw new NotImplementedException();
+        /// <inheritdoc/>
+        protected override bool IsPinModeSupported(int pinNumber, PinMode mode) => (mode == PinMode.Output || mode == PinMode.Input);
 
-        public bool IsPinModeSupported(int pinNumber, PinMode mode) => throw new NotImplementedException();
+        /// <inheritdoc/>
+        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
+
+        // For now eventing APIs are not supported.
+        /// <inheritdoc/>
+        protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => throw new NotImplementedException();
+
+        /// <inheritdoc/>
+        protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) => throw new NotImplementedException();
+
+        /// <inheritdoc/>
+        protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => throw new NotImplementedException();
+
+        /// <inheritdoc/>
+        protected override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => throw new NotImplementedException();
     }
 }

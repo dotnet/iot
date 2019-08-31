@@ -34,7 +34,7 @@ namespace Iot.Device.Ssd13xx.Tests
         [InlineData(0xFF)]
         public void Invalid_DisplayOffset(byte displayOffset)
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 SetDisplayOffset setDisplayOffset = new SetDisplayOffset(displayOffset);
             });
