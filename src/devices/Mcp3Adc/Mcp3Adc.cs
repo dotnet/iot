@@ -6,26 +6,26 @@ using System;
 using System.Buffers.Binary;
 using System.Device.Spi;
 
-namespace Iot.Device.Mcp3Adc
+namespace Iot.Device.Adc
 {
-    /// <summary>
-    /// InputType the type of pin connection
-    /// </summary>
-    public enum InputType
-    {
-        ///<summary>The value is measured as the voltage on a single pin</summary>
-        SingleEnded = 0,
-        ///<summary>The value is the difference in voltage between two pins with the first pin being the positive one</summary>
-        Differential = 1,
-        ///<summary>The value is the difference in voltage between two pins with the second pin being the positive one</summary>
-        InvertedDifferential = 2
-    }
-
     /// <summary>
     /// Mcp3Adc Abstract class representing the MCP ADC devices.
     /// </summary>
     public abstract class Mcp3Adc : IDisposable
     {
+        /// <summary>
+        /// InputType: the type of pin connection
+        /// </summary>
+        protected enum InputType
+        {
+            ///<summary>The value is measured as the voltage on a single pin</summary>
+            SingleEnded = 0,
+            ///<summary>The value is the difference in voltage between two pins with the first pin being the positive one</summary>
+            Differential = 1,
+            ///<summary>The value is the difference in voltage between two pins with the second pin being the positive one</summary>
+            InvertedDifferential = 2
+        }
+
         private SpiDevice _spiDevice;
 
         /// <summary>

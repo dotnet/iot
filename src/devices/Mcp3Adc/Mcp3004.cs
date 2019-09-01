@@ -4,7 +4,7 @@
 
 using System.Device.Spi;
 
-namespace Iot.Device.Mcp3Adc
+namespace Iot.Device.Adc
 {
     /// <summary>
     /// MCP3004 Analog to Digital Converter (ADC)
@@ -18,14 +18,26 @@ namespace Iot.Device.Mcp3Adc
         public Mcp3004(SpiDevice spiDevice) : base(spiDevice, pinCount: 4) { }
 
         /// <summary>
-        /// Reads 10-bit (0..1023) value from the device
+        /// Reads a 10-bit (0..1023) value from the device using pseudo-differential inputs
         /// </summary>
-        /// <param name="channel">Channel which value should be read from (valid values: 0-3 or 0-1 with differential inputs)</param>
-        /// <param name="inputType">The type of input pin to read</param>
-        /// <returns>10-bit value corresponding to relative voltage level on specified device channel</returns>
-        public int Read(int channel, InputType inputType = InputType.SingleEnded)
+        /// <param name="channel">Channel which value should be read from (valid values: 0-1). Channel 0 is on inputs 0 and 1 and
+        /// Channel 1 is on inputs 2 and 3.</param>
+        /// <param name="polarityInverted">When false then then inputs 0 and 2 are positive and inputs 1 and 3 are negative
+        /// when true the polarity is swapped so that inputs 0 and 2 are negative and inputs 1 and 3 positive.</param>
+        /// <returns>10-bit value corresponding to relative voltage level on specified device channel.</returns>
+        public int ReadPseudoDifferential(int channel, bool polarityInverted = false)
         {
-            return Read(channel, inputType, adcResolutionBits: 10);
+            return Read(channel, polarityInverted ? InputType.InvertedDifferential : InputType.Differential, adcResolutionBits: 10);
+        }
+
+        /// <summary>
+        /// Reads a 10-bit (0..1023) value from the device
+        /// </summary>
+        /// <param name="channel">Channel which value should be read from (valid values: 0-3)</param>
+        /// <returns>10-bit value corresponding to relative voltage level on specified device channel</returns>
+        public int Read(int channel)
+        {
+            return Read(channel, InputType.SingleEnded, adcResolutionBits: 10);
         }
     }
 }

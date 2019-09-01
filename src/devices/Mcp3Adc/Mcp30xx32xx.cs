@@ -5,7 +5,7 @@
 using System;
 using System.Device.Spi;
 
-namespace Iot.Device.Mcp3Adc
+namespace Iot.Device.Adc
 {
     // MCP3001
     // Byte        0        1

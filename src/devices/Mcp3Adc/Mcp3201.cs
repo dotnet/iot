@@ -4,7 +4,7 @@
 
 using System.Device.Spi;
 
-namespace Iot.Device.Mcp3Adc
+namespace Iot.Device.Adc
 {
     /// <summary>
     /// MCP32001 Analog to Digital Converter (ADC)
@@ -18,7 +18,7 @@ namespace Iot.Device.Mcp3Adc
         public Mcp3201(SpiDevice spiDevice) : base(spiDevice, pinCount: 1) { }
 
         /// <summary>
-        /// Reads 12-bit (0..4096) value from the device
+        /// Reads a 12-bit (0..4096) value from the device
         /// </summary>
         /// <returns>12-bit value corresponding to relative voltage level on specified device channel</returns>
         public int Read()
