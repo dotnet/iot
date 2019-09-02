@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RadioTransmitter.csproj" />
+    <!--<ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="1.0.0-prerelease.19413.1" />
+  </ItemGroup>
+</Project>

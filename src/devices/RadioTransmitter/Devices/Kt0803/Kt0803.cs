@@ -5,64 +5,64 @@
 using System;
 using System.Device.I2c;
 
-namespace Iot.Device.Radio
+namespace Iot.Device.RadioTransmitter
 {
     /// <summary>
-    /// FM Radio Modulator Module KT0803
+    /// FM radio transmitter module KT0803.
     /// </summary>
-    public class Kt0803 : IDisposable
+    public class Kt0803 : RadioTransmitterBase
     {
         private I2cDevice _i2cDevice;
 
         /// <summary>
-        /// Kt0803 I2C Address
+        /// Kt0803 default I2C address.
         /// </summary>
-        public const byte I2cAddress = 0x3E;
+        public const byte DefaultI2cAddress = 0x3E;
 
         /// <summary>
-        /// Kt0803 Standby
+        /// Kt0803 FM frequency (range from 70Mhz to 108Mhz).
+        /// </summary>
+        public override double Frequency { get => GetFrequency(); set => SetFrequency(value); }
+
+        /// <summary>
+        /// Kt0803 standby.
         /// </summary>
         public bool Standby { get => GetStandby(); set => SetStandby(value); }
 
         /// <summary>
-        /// Kt0803 Mute
+        /// Kt0803 mute.
         /// </summary>
         public bool Mute { get => GetMute(); set => SetMute(value); }
-
+        
         /// <summary>
-        /// Kt0803 FM Frequency (Range from 70Mhz to 108Mhz)
-        /// </summary>
-        public double Frequency { get => GetFrequency(); set => SetFrequency(value); }
-
-        /// <summary>
-        /// Kt0803 PGA ( Programmable Gain Amplifier ) Gain
+        /// Kt0803 PGA ( Programmable Gain Amplifier ) gain.
         /// </summary>
         public PgaGain PgaGain { get => GetPga(); set => SetPga(value); }
 
         /// <summary>
-        /// Kt0803 Transmission Power
+        /// Kt0803 transmission power.
         /// </summary>
         public TransmissionPower TransmissionPower { get => GetTransmissionPower(); set => SetTransmissionPower(value); }
 
         private Region _region;
         /// <summary>
-        /// Kt0803 Region
+        /// Kt0803 region.
         /// </summary>
         public Region Region { get => _region; set { SetRegion(value); _region = value; } }
 
         /// <summary>
-        /// Kt0803 Bass Boost
+        /// Kt0803 bass boost.
         /// </summary>
         public BassBoost BassBoost { get => GetBassBoost(); set => SetBassBoost(value); }
 
         /// <summary>
-        /// Creates a new instance of the Kt0803
+        /// Creates a new instance of the Kt0803.
         /// </summary>
-        /// <param name="i2cDevice">The I2C device used for communication</param>
-        /// <param name="frequency">FM Frequency (Range from 70MHz to 108MHz)</param>
-        /// <param name="region">Region</param>
-        /// <param name="power">Transmission Power</param>
-        /// <param name="pga">PGA (Programmable Gain Amplifier) Gain</param>
+        /// <param name="i2cDevice">The I2C device used for communication.</param>
+        /// <param name="frequency">FM frequency (range from 70MHz to 108MHz).</param>
+        /// <param name="region">Region.</param>
+        /// <param name="power">Transmission power.</param>
+        /// <param name="pga">PGA (Programmable Gain Amplifier) gain.</param>
         public Kt0803(I2cDevice i2cDevice, double frequency, Region region, TransmissionPower power = TransmissionPower.Power_108dBuV, PgaGain pga = PgaGain.PGA_00dB)
         {
             _i2cDevice = i2cDevice;
@@ -77,16 +77,16 @@ namespace Iot.Device.Radio
         /// <summary>
         /// Cleanup
         /// </summary>
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
             _i2cDevice?.Dispose();
             _i2cDevice = null;
         }
 
         /// <summary>
-        /// Set Kt0803 FM Channel
+        /// Set Kt0803 FM frequency.
         /// </summary>
-        /// <param name="frequency">Frequency (Range from 70MHz to 108MHz)</param>
+        /// <param name="frequency">FM frequency (range from 70MHz to 108MHz).</param>
         private void SetFrequency(double frequency)
         {
             // Details in Datasheet P7
@@ -121,9 +121,9 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Get Kt0803 FM Frequency
+        /// Get Kt0803 FM frequency.
         /// </summary>
-        /// <returns>FM Frequency</returns>
+        /// <returns>FM frequency.</returns>
         private double GetFrequency()
         {
             int reg0 = ReadByte(Register.KT_CHSEL);
@@ -136,9 +136,9 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Set Kt0803 PGA (Programmable Gain Amplifier) Gain
+        /// Set Kt0803 PGA (Programmable Gain Amplifier) gain.
         /// </summary>
-        /// <param name="pgaGain">PGA Gain</param>
+        /// <param name="pgaGain">PGA gain.</param>
         private void SetPga(PgaGain pgaGain)
         {
             // Details in Datasheet P9
@@ -171,9 +171,9 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Get Kt0803 PGA (Programmable Gain Amplifier) Gain
+        /// Get Kt0803 PGA (Programmable Gain Amplifier) gain.
         /// </summary>
-        /// <returns>PGA Gain</returns>
+        /// <returns>PGA gain.</returns>
         private PgaGain GetPga()
         {
             int reg1 = ReadByte(Register.KT_CONFIG01);
@@ -182,9 +182,9 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Set Kt0803 Transmission Power
+        /// Set Kt0803 transmission power.
         /// </summary>
-        /// <param name="power">Transmission Power</param>
+        /// <param name="power">Transmission power.</param>
         private void SetTransmissionPower(TransmissionPower power)
         {
             // Details in Datasheet P8 Table4
@@ -229,9 +229,9 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Get Kt0803 Transmission Power
+        /// Get Kt0803 transmission power.
         /// </summary>
-        /// <returns>Transmission Power</returns>
+        /// <returns>Transmission power.</returns>
         private TransmissionPower GetTransmissionPower()
         {
             int reg1 = ReadByte(Register.KT_CONFIG01);
@@ -242,9 +242,9 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Set Kt0803 Region
+        /// Set Kt0803 region.
         /// </summary>
-        /// <param name="region">Region</param>
+        /// <param name="region">region.</param>
         private void SetRegion(Region region)
         {
             // Details in Datasheet P8
@@ -270,9 +270,9 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Set Kt0803 Mute
+        /// Set Kt0803 mute.
         /// </summary>
-        /// <param name="isMute">Mute when value is true</param>
+        /// <param name="isMute">Mute when value is true.</param>
         private void SetMute(bool isMute)
         {
             // Details in Datasheet P8
@@ -291,9 +291,9 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Get Kt0803 Mute
+        /// Get Kt0803 mute.
         /// </summary>
-        /// <returns>Mute when value is true</returns>
+        /// <returns>Mute when value is true.</returns>
         private bool GetMute()
         {
             int reg2 = ReadByte(Register.KT_CONFIG02);
@@ -302,9 +302,9 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Set Kt0803 Standby
+        /// Set Kt0803 standby.
         /// </summary>
-        /// <param name="isStandby">Standby when value is true</param>
+        /// <param name="isStandby">Standby when value is true.</param>
         private void SetStandby(bool isStandby)
         {
             // Details in Datasheet P10
@@ -323,9 +323,9 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Get Kt0803 Standby
+        /// Get Kt0803 standby.
         /// </summary>
-        /// <returns>Standby when value is true</returns>
+        /// <returns>Standby when value is true.</returns>
         private bool GetStandby()
         {
             int reg4 = ReadByte(Register.KT_CONFIG0B);
@@ -334,9 +334,9 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Set Kt0803 Bass Boost
+        /// Set Kt0803 bass boost.
         /// </summary>
-        /// <param name="bassBoost">Boost Mode</param>
+        /// <param name="bassBoost">Boost mode.</param>
         private void SetBassBoost(BassBoost bassBoost)
         {
             // Details in Datasheet P9
@@ -349,9 +349,9 @@ namespace Iot.Device.Radio
         }
 
         /// <summary>
-        /// Get Kt0803 Bass Boost
+        /// Get Kt0803 bass boost.
         /// </summary>
-        /// <returns>Bass Boost</returns>
+        /// <returns>Boost mode.</returns>
         private BassBoost GetBassBoost()
         {
             byte reg3 = ReadByte(Register.KT_CONFIG04);
