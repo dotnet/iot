@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--<ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>-->
+    </ProjectReference>
     <Compile Include="Devices\Kt0803\BassBoost.cs" />
     <Compile Include="RadioTransmitterBase.cs" />
     <Compile Include="Devices\Kt0803\Region.cs" />
@@ -16,10 +16,6 @@
     <Compile Include="Devices\Kt0803\PgaGain.cs" />
     <Compile Include="Devices\Kt0803\Register.cs" />
     <Compile Include="Devices\Kt0803\TransmissionPower.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="1.0.0-prerelease.19413.1" />
   </ItemGroup>
 
 </Project>

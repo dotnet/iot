@@ -7,12 +7,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RadioTransmitter.csproj" />
-    <!--<ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>-->
+    </ProjectReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="1.0.0-prerelease.19413.1" />
-  </ItemGroup>
 </Project>
