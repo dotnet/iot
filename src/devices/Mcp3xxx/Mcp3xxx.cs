@@ -9,9 +9,9 @@ using System.Device.Spi;
 namespace Iot.Device.Adc
 {
     /// <summary>
-    /// Mcp3Adc Abstract class representing the MCP ADC devices.
+    /// Mcp3xxx Abstract class representing the MCP ADC devices.
     /// </summary>
-    public abstract class Mcp3Adc : IDisposable
+    public abstract class Mcp3xxx : IDisposable
     {
         /// <summary>
         /// InputType: the type of pin connection
@@ -32,7 +32,7 @@ namespace Iot.Device.Adc
         /// Constructs Mcp3Adc instance
         /// </summary>
         /// <param name="spiDevice">Device used for SPI communication</param>
-        public Mcp3Adc(SpiDevice spiDevice)
+        public Mcp3xxx(SpiDevice spiDevice)
         {
             _spiDevice = spiDevice;
         }

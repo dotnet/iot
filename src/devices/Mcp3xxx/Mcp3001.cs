@@ -7,23 +7,23 @@ using System.Device.Spi;
 namespace Iot.Device.Adc
 {
     /// <summary>
-    /// MCP32001 Analog to Digital Converter (ADC)
+    /// MCP3001 Analog to Digital Converter (ADC)
     /// </summary>
-    public class Mcp3201 : Mcp30xx32xx
+    public class Mcp3001 : Mcp3xxx
     {
         /// <summary>
-        /// Constructs Mcp3201 instance
+        /// Constructs Mcp3008 instance
         /// </summary>
         /// <param name="spiDevice">Device used for SPI communication</param>
-        public Mcp3201(SpiDevice spiDevice) : base(spiDevice, pinCount: 1) { }
+        public Mcp3001(SpiDevice spiDevice) : base(spiDevice) { }
 
         /// <summary>
-        /// Reads a 12-bit (0..4096) value from the device
+        /// Reads a 10-bit (0..1023) value from the device
         /// </summary>
-        /// <returns>12-bit value corresponding to relative voltage level on specified device channel</returns>
+        /// <returns>10-bit value corresponding to relative voltage level on specified device channel</returns>
         public int Read()
         {
-            return Read(0, InputType.SingleEnded, adcResolutionBits: 12 + 1) >> 1;
+            return Read(adcRequest: 0, adcRequestLengthBytes: 2, 10 + 3, delayBits: 0) >> 3;
         }
     }
 }
