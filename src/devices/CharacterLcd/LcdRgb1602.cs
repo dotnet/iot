@@ -103,6 +103,7 @@ namespace Iot.Device.CharacterLcd
             _currentColor = color;
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             _rgbDevice?.Dispose();

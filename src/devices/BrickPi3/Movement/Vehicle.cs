@@ -12,7 +12,9 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.BrickPi3.Movement
 {
-
+    /// <summary>
+    /// Represents BrickPi Vehicle
+    /// </summary>
     public sealed class Vehicle
     {
         private Brick _brick = null;

@@ -16,6 +16,9 @@ namespace Iot.Device.GoPiGo3.Sensors
     {
         private GoPiGo _goPiGo;
 
+        /// <summary>
+        /// Grove port
+        /// </summary>
         public GrovePort Port { get; internal set; }
 
         /// <summary>

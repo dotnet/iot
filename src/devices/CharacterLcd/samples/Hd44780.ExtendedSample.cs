@@ -12,7 +12,7 @@ using Iot.Device.Mcp23xxx;
 
 namespace Iot.Device.CharacterLcd.Samples
 {
-    public class ExtendedSample
+    class ExtendedSample
     {
         const string Twenty = "123456789\u0008123456789\u0009";
         const string Thirty = Twenty + "123456789\u000a";

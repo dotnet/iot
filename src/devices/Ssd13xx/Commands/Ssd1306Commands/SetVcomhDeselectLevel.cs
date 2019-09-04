@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Represents SetVcomhDeselectLevel command
+    /// </summary>
     public class SetVcomhDeselectLevel : ISsd1306Command
     {
         /// <summary>
@@ -34,6 +37,9 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
             return new byte[] { Id, (byte)Level };
         }
 
+        /// <summary>
+        /// Deselect level
+        /// </summary>
         public enum DeselectLevel
         {
             /// <summary>

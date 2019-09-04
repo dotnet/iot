@@ -9,13 +9,13 @@ namespace Iot.Device.Tcs3472x
     /// </summary>
     public enum Gain
     {
-        //  1x gain
+        /// <summary>1x gain</summary>
         Gain01X = 0x00,
-        //  4x gain
+        /// <summary>4x gain</summary>
         Gain04X = 0x01,
-        // 16x gain
+        /// <summary>16x gain</summary>
         Gain16X = 0x02,
-        // 60x gain
+        /// <summary>60x gain</summary>
         Gain60X = 0x03,
     }
 }

@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Represents EntireDisplayOn command
+    /// </summary>
     public class EntireDisplayOn : ISsd1306Command
     {
         /// <summary>

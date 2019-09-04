@@ -11,11 +11,22 @@ namespace Iot.Device.Mcp23xxx
     /// </summary>
     public abstract class Mcp23x0x : Mcp23xxx
     {
-        protected Mcp23x0x(BusAdapter device, int reset, int interrupt, IGpioController masterController)
+        /// <summary>
+        /// Constructs Mcp23x0x instance
+        /// </summary>
+        /// <param name="device">I2C device used to communicate with the device</param>
+        /// <param name="reset">Reset pin</param>
+        /// <param name="interrupt">Interrupt pin</param>
+        /// <param name="masterController">
+        /// <see cref="GpioController"/> related with
+        /// <paramref name="reset"/> and <paramref name="interrupt"/> pins
+        /// </param>
+        protected Mcp23x0x(BusAdapter device, int reset, int interrupt, GpioController masterController)
             : base(device, reset, interrupt, masterController: masterController)
         {
         }
 
-        public override int PinCount => 8;
+        /// <inheritdoc/>
+        protected override int PinCount => 8;
     }
 }

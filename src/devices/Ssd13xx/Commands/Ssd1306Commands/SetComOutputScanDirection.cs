@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Represents SetComOutputScanDirection command
+    /// </summary>
     public class SetComOutputScanDirection : ISsd1306Command
     {
         /// <summary>

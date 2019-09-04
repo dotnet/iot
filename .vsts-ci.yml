@@ -41,7 +41,7 @@ stages:
       enableMicrobuild: true
       enablePublishBuildArtifacts: true
       enablePublishBuildAssets: true
-      enablePublishUsingPipelines: $(_PublishUsingPipelines)
+      enablePublishUsingPipelines: ${{ variables._PublishUsingPipelines }}
       enableTelemetry: true
       graphFileGeneration:
         enabled: true

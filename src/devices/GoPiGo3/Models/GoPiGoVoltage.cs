@@ -4,6 +4,9 @@
 
 namespace Iot.Device.GoPiGo3.Models
 {
+    /// <summary>
+    /// GoPiGo Voltage
+    /// </summary>
     public class GoPiGoVoltage
     {
         /// <summary>

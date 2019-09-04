@@ -13,7 +13,6 @@
     <Compile Include="DCMotor.cs" />
     <Compile Include="DCMotor3Pin.cs" />
     <Compile Include="DCMotor2PinNoEnable.cs" />
-    <Compile Include="DCMotorSettings.cs" />
     <None Include="README.md" />
   </ItemGroup>
 

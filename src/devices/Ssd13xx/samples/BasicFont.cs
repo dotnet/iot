@@ -9,7 +9,7 @@ namespace Iot.Device.Ssd13xx.Samples
     // NOTE: As mentioned in GitHub issue #189 (Need OLED Graphics API).
     // https://github.com/dotnet/iot/issues/189
     // Until then, this is a basic uppercase-only font library.
-    public class BasicFont
+    internal class BasicFont
     {
         private static IDictionary<char, byte[]> FontCharacterData =>
             new Dictionary<char, byte[]>

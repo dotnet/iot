@@ -4,8 +4,17 @@
 
 namespace Iot.Device.Mcp3428
 {
+    /// <summary>
+    /// Conversion result
+    /// </summary>
     public readonly struct ConversionResult
     {
+        /// <summary>
+        /// Constructs ConversionResult instance
+        /// </summary>
+        /// <param name="channel">ADC channel</param>
+        /// <param name="rawData">Raw ADC value</param>
+        /// <param name="resolution">ADC resolution</param>
         public ConversionResult(byte channel, short rawData, AdcResolution resolution)
         {
             Channel = channel;

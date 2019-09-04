@@ -17,13 +17,29 @@ namespace Iot.Device.Bmxx80
     /// </summary>
     public abstract class Bmxx80Base : IDisposable
     {
-        protected Bmxx80CalibrationData _calibrationData;
+        internal Bmxx80CalibrationData _calibrationData;
+
+        /// <summary>
+        /// I2C device used to communicate with the device
+        /// </summary>
         protected I2cDevice _i2cDevice;
+
+        /// <summary>
+        /// Communication protocol
+        /// </summary>
         protected CommunicationProtocol _communicationProtocol;
+
+        /// <summary>
+        /// Control register
+        /// </summary>
         protected byte _controlRegister;
 
+        /// <summary>
+        /// Bmxx80 communication protocol
+        /// </summary>
         public enum CommunicationProtocol
         {
+            /// <summary>Communication protocol</summary>
             I2c
         }
 
@@ -120,14 +136,19 @@ namespace Iot.Device.Bmxx80
             // The temperature is calculated using the compensation formula in the BMP280 datasheet.
             // See: https://cdn-shop.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
             double var1 = ((adcTemperature / 16384.0) - (_calibrationData.DigT1 / 1024.0)) * _calibrationData.DigT2;
-            double var2 = ((adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0)) * _calibrationData.DigT3;
-            var2 *= var2 * _calibrationData.DigT3;
+            double var2 = (adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0);
+            var2 *= var2 * _calibrationData.DigT3 * _tempCalibrationFactor;
 
             TemperatureFine = (int)(var1 + var2);
 
             double temp = (var1 + var2) / 5120.0;
             return Temperature.FromCelsius(temp);
         }
+
+        /// <summary>
+        /// Temperature calibration factor
+        /// </summary>
+        protected virtual int _tempCalibrationFactor => 1;
 
         /// <summary>
         /// Reads an 8 bit value from a register.
@@ -192,6 +213,11 @@ namespace Iot.Device.Bmxx80
             }
         }
 
+        /// <summary>
+        /// Convert byte to sampling
+        /// </summary>
+        /// <param name="value">Value to convert</param>
+        /// <returns>Sampling</returns>
         protected Sampling ByteToSampling(byte value)
         {
             // Values >=5 equals UltraHighResolution.
@@ -212,6 +238,10 @@ namespace Iot.Device.Bmxx80
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Releases the unmanaged resources used by the Bmxx80 and optionally releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             _i2cDevice?.Dispose();

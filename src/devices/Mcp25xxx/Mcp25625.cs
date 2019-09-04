@@ -42,7 +42,7 @@ namespace Iot.Device.Mcp25xxx
             int rx0bf = -1,
             int rx1bf = -1,
             int clkout = -1,
-            IGpioController gpioController = null)
+            GpioController gpioController = null)
             : base(
                   spiDevice,
                   reset,

@@ -46,6 +46,9 @@ namespace Iot.Device.GoPiGo3.Sensors
             Value = 0;
         }
 
+        /// <summary>
+        /// If inverted, the relay is on when output is low and off when output is high
+        /// </summary>
         public bool IsInverted { get; set; }
 
         /// <summary>

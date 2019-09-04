@@ -16,11 +16,33 @@ namespace Iot.Device.CharacterLcd
     {
         private bool _disposed;
 
+        /// <summary>
+        /// Sends byte to LCD device
+        /// </summary>
+        /// <param name="value">Byte value to be sed</param>
         public abstract void SendData(byte value);
+
+        /// <summary>
+        /// Sends command to the LCD device
+        /// </summary>
+        /// <param name="command">Byte representing the command</param>
         public abstract void SendCommand(byte command);
+
+        /// <summary>
+        /// Sends data to the LCD device
+        /// </summary>
+        /// <param name="values">Bytes to be send to the device</param>
         public abstract void SendData(ReadOnlySpan<byte> values);
+
+        /// <summary>
+        /// Send commands to the LCD device
+        /// </summary>
+        /// <param name="values">Each byte represents command to be send</param>
         public abstract void SendCommands(ReadOnlySpan<byte> values);
 
+        /// <summary>
+        /// True if device uses 8-bits for communication, false if device uses 4-bits
+        /// </summary>
         public abstract bool EightBitMode { get; }
 
         /// <summary>
@@ -70,10 +92,16 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         public abstract bool BacklightOn { get; set; }
 
+        /// <summary>
+        /// Releases unmanaged resources used by LcdInterface
+        /// and optionally release managed resources
+        /// </summary>
+        /// <param name="disposing"><see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             if (!_disposed)
@@ -93,7 +121,7 @@ namespace Iot.Device.CharacterLcd
         /// <param name="backlightBrightness">The brightness of the backlight. 0.0 for off, 1.0 for on.</param>
         /// <param name="readWritePin">The optional pin that controls the read and write switch.</param>
         /// <param name="controller">The controller to use with the LCD. If not specified, uses the platform default.</param>
-        public static LcdInterface CreateGpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, IGpioController controller = null)
+        public static LcdInterface CreateGpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController controller = null)
         {
             return new Gpio(registerSelectPin, enablePin, dataPins, backlightPin, backlightBrightness, readWritePin, controller);
         }
@@ -102,7 +130,7 @@ namespace Iot.Device.CharacterLcd
         /// Create an integrated I2c based interface for the LCD.
         /// </summary>
         /// <remarks>
-        /// This is for on-chip I2c support. For connecting via I2c GPIO expanders, use the GPIO interface <see cref="CreateGpio(int, int, int[], int, float, int, IGpioController)"/>.
+        /// This is for on-chip I2c support. For connecting via I2c GPIO expanders, use the GPIO interface <see cref="CreateGpio(int, int, int[], int, float, int, GpioController)"/>.
         /// </remarks>
         /// <param name="device">The I2c device for the LCD.</param>
         public static LcdInterface CreateI2c(I2cDevice device)

@@ -13,15 +13,28 @@ using System.Threading;
 
 namespace Iot.Device.SocketCan
 {
+    /// <summary>
+    /// Allows reading and writing raw frames to CAN Bus
+    /// </summary>
     public class CanRaw : IDisposable
     {
         private SafeCanRawSocketHandle _handle;
 
+        /// <summary>
+        /// Constructs CanRaw instance
+        /// </summary>
+        /// <param name="networkInterface">Name of the network interface</param>
         public CanRaw(string networkInterface = "can0")
         {
             _handle = new SafeCanRawSocketHandle(networkInterface);
         }
 
+        /// <summary>
+        /// Writes frame to the CAN Bus
+        /// </summary>
+        /// <param name="data">Data to write (at most 8 bytes)</param>
+        /// <param name="id">Recipient identifier</param>
+        /// <remarks><paramref name="id"/> can be ignored by recipient - anyone connected to the bus can read or write any frames</remarks>
         public void WriteFrame(ReadOnlySpan<byte> data, CanId id)
         {
             if (!id.IsValid)
@@ -46,11 +59,18 @@ namespace Iot.Device.SocketCan
             Interop.Write(_handle, buff);
         }
 
-        public bool TryReadFrame(Span<byte> buffer, out int frameLength, out CanId id)
+        /// <summary>
+        /// Reads frame from the bus
+        /// </summary>
+        /// <param name="data">Data where output data should be written to</param>
+        /// <param name="frameLength">Length of the data read</param>
+        /// <param name="id">Recipient identifier</param>
+        /// <returns></returns>
+        public bool TryReadFrame(Span<byte> data, out int frameLength, out CanId id)
         {
-            if (buffer.Length < CanFrame.MaxLength)
+            if (data.Length < CanFrame.MaxLength)
             {
-                throw new ArgumentException($"Buffer length must be at minimum {CanFrame.MaxLength} bytes", nameof(buffer));
+                throw new ArgumentException($"Buffer length must be at minimum {CanFrame.MaxLength} bytes", nameof(data));
             }
 
             CanFrame frame = new CanFrame();
@@ -75,7 +95,7 @@ namespace Iot.Device.SocketCan
             }
             
             // This is guaranteed by minimum buffer length and the fact that frame is valid
-            Debug.Assert(frame.Length <= buffer.Length);
+            Debug.Assert(frame.Length <= data.Length);
 
             unsafe
             {
@@ -86,12 +106,16 @@ namespace Iot.Device.SocketCan
                 // Considering there are at most 8 bytes to read it is cheaper
                 // to copy rather than doing multiple syscalls.
                 Span<byte> frameData = new Span<byte>(frame.Data, frame.Length);
-                frameData.CopyTo(buffer);
+                frameData.CopyTo(data);
             }
 
             return true;
         }
 
+        /// <summary>
+        /// Set filter on the bus to read only from specified recipient.
+        /// </summary>
+        /// <param name="id">Recipient identifier</param>
         public void Filter(CanId id)
         {
             if (!id.IsValid)
@@ -113,6 +137,7 @@ namespace Iot.Device.SocketCan
                 || (address & Interop.CAN_EFF_MASK) != (address & Interop.CAN_SFF_MASK);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             _handle.Dispose();

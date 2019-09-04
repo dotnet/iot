@@ -11,13 +11,39 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Graphics
 {
+    /// <summary>
+    /// Represents BDF font
+    /// </summary>
     public class BdfFont
     {
+        /// <summary>
+        /// Character width
+        /// </summary>
         public int Width  { private set; get; }
+
+        /// <summary>
+        /// Character height
+        /// </summary>
         public int Height { private set; get; }
+
+        /// <summary>
+        /// X displacement of the character
+        /// </summary>
         public int XDisplacement { private set; get; }
+
+        /// <summary>
+        /// Y Displacement of the character
+        /// </summary>
         public int YDisplacement { private set; get; }
+
+        /// <summary>
+        /// Default character
+        /// </summary>
         public int DefaultChar  { private set; get; }
+
+        /// <summary>
+        /// Number of characters
+        /// </summary>
         public int CharsCount   { private set; get; }
 
         // GlyphMapper is mapping from the character number to the index of the character bitmap data in the buffer GlyphUshortData.
@@ -41,6 +67,11 @@ namespace Iot.Device.Graphics
 
         private BdfFont() { }
 
+        /// <summary>
+        /// Loads BdfFont from a specified path
+        /// </summary>
+        /// <param name="fontFilePath">Path of the file representing the font</param>
+        /// <returns>BdfFont instance</returns>
         public static BdfFont Load(string fontFilePath)
         {
             using (StreamReader sr = new StreamReader(fontFilePath))
@@ -89,9 +120,14 @@ namespace Iot.Device.Graphics
             }
         }
 
-        public void GetCharData(char c, out ReadOnlySpan<ushort> charData)
+        /// <summary>
+        /// Get character data or data for default character
+        /// </summary>
+        /// <param name="character">Character whch data needs to be retrieved</param>
+        /// <param name="charData"></param>
+        public void GetCharData(char character, out ReadOnlySpan<ushort> charData)
         {
-            if (!GlyphMapper.TryGetValue((int)c, out int index))
+            if (!GlyphMapper.TryGetValue((int)character, out int index))
             {
                 if (!GlyphMapper.TryGetValue((int)DefaultChar, out index))
                 {
@@ -102,6 +138,10 @@ namespace Iot.Device.Graphics
             charData = GlyphUshortData.AsSpan().Slice(index, Height);
         }
 
+        /// <summary>
+        /// Characters supported by this font
+        /// </summary>
+        /// <value>Array of supported characters</value>
         public int[] SupportedChars
         {
             get
@@ -113,6 +153,13 @@ namespace Iot.Device.Graphics
             }
         }
 
+        /// <summary>
+        /// Get character data
+        /// </summary>
+        /// <param name="charOrdinal">Character ordinal</param>
+        /// <param name="data">Buffer to be sliced and filled with character data</param>
+        /// <param name="useDefaultChar">Use default character if not found</param>
+        /// <returns>True if data could be retrieved</returns>
         public bool GetCharData(int charOrdinal, ref Span<int> data, bool useDefaultChar = true)
         {
             if (data.Length < Height)

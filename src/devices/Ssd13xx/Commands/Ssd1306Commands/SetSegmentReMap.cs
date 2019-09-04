@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Represents SetSegmentReMap command
+    /// </summary>
     public class SetSegmentReMap : ISsd1306Command
     {
         /// <summary>

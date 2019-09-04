@@ -25,11 +25,19 @@ namespace Iot.Device.Ssd13xx
         {
         }
 
+        /// <summary>
+        /// Sends command to the device
+        /// </summary>
+        /// <param name="command">Command being send</param>
         public void SendCommand(ISsd1306Command command)
         {
             SendCommand((ICommand)command);
         }
 
+        /// <summary>
+        /// Sends command to the device
+        /// </summary>
+        /// <param name="command">Command being send</param>
         public override void SendCommand(ISharedCommand command)
         {
             SendCommand(command);

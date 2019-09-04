@@ -22,7 +22,7 @@ namespace Iot.Device.CharacterLcd
         /// <param name="backlightBrightness">The brightness of the backlight. 0.0 for off, 1.0 for on.</param>
         /// <param name="readWritePin">The optional pin that controls the read and write switch.</param>
         /// <param name="controller">The controller to use with the LCD. If not specified, uses the platform default.</param>
-        public Lcd2004(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, IGpioController controller = null)
+        public Lcd2004(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController controller = null)
             : base(new Size(20, 4), LcdInterface.CreateGpio(registerSelectPin, enablePin, dataPins, backlightPin, backlightBrightness, readWritePin, controller))
         {
         }
