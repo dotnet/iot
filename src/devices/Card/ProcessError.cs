@@ -59,7 +59,7 @@ namespace Iot.Device.Card
             }
             else if ((errorToProcess[0] >= 0x66) && (errorToProcess[0] <= 0x6F))
             {
-                ErrorType = ErrorType.ProcessAbordedChecking;
+                ErrorType = ErrorType.ProcessAbortedChecking;
                 if ((errorToProcess[0] == 0x69) && (errorToProcess[1] == 0x83))
                     ErrorType = ErrorType.CommandNotAllowedAuthenticationMethodBlocked;
                 else if ((errorToProcess[0] == 0x69) && (errorToProcess[1] == 0x84))

@@ -9,7 +9,13 @@ namespace Iot.Device.Rfid
     /// </summary>
     public enum ApplicationType
     {
+        /// <summary>
+        /// Proprietary application type
+        /// </summary>
         Proprietary = 0b0000_0000,
+        /// <summary>
+        /// Byte coded application type
+        /// </summary>
         ApplicationBytesCoded = 0b0000_0100,
     }
 }
