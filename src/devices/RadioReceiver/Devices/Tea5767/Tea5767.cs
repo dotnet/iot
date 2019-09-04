@@ -240,6 +240,8 @@ namespace Iot.Device.RadioReceiver
         {
             _i2cDevice?.Dispose();
             _i2cDevice = null;
+
+            base.Dispose(disposing);
         }
 
         private byte[] ReadRegisters()
