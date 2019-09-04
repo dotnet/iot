@@ -9,9 +9,24 @@ namespace Iot.Device.Media
     /// </summary>
     public enum PowerLineFrequency : int
     {
+        /// <summary>
+        /// Disabled
+        /// </summary>
         Disabled = 0,
+
+        /// <summary>
+        /// 50Hz
+        /// </summary>
         Frequency50Hz = 1,
+
+        /// <summary>
+        /// 60Hz
+        /// </summary>
         Frequency60Hz = 2,
+
+        /// <summary>
+        /// Auto
+        /// </summary>
         Auto = 3,
     }
 }
