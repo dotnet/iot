@@ -23,7 +23,7 @@ namespace Iot.Device.Adc
         /// <returns>Integer value corresponding to relative voltage level on specified device channel</returns>
         public int Read()
         {
-            int retval = Read(adcRequest: 0, adcRequestLengthBytes: 2, adcResolutionBits: 13, delayBits: 0);
+            int retval = ReadInternal(adcRequest: 0, adcRequestLengthBytes: 2, adcResolutionBits: 13, delayBits: 0);
 
             //convert 13 bit signed to 32 bit signed
             return (retval >> 12) == 0 ? retval : (int)(0xFFFFE000 | retval);

@@ -52,15 +52,15 @@ namespace Iot.Device.Adc
             // check if it is possible to use hardware differential
             if (positiveChannel / 2 == negativeChannel / 2)
             {
-                retval = Read(positiveChannel / 2, positiveChannel > negativeChannel ? InputType.InvertedDifferential : InputType.Differential, adcResolutionBits: 13);
+                retval = ReadInternal(positiveChannel / 2, positiveChannel > negativeChannel ? InputType.InvertedDifferential : InputType.Differential, adcResolutionBits: 13);
 
                 //convert 13 bit signed to 32 bit signed
                 retval = (retval >> 12) == 0 ? retval : (int)(0xFFFFE000 | retval);
             }
             else // otherwise just subtract two readings
             {
-                retval = Read(positiveChannel, InputType.SingleEnded, adcResolutionBits: 12) -
-                         Read(negativeChannel, InputType.SingleEnded, adcResolutionBits: 12);
+                retval = ReadInternal(positiveChannel, InputType.SingleEnded, adcResolutionBits: 12) -
+                         ReadInternal(negativeChannel, InputType.SingleEnded, adcResolutionBits: 12);
             }
 
             return retval;

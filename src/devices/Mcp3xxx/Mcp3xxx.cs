@@ -8,6 +8,82 @@ using System.Device.Spi;
 
 namespace Iot.Device.Adc
 {
+    // MCP3001
+    // Byte        0        1
+    // ==== ======== ========
+    // Req  xxxxxxxx xxxxxxxx
+    // Resp xxNRRRR RRRRRRxxx
+    //
+    // MCP3002
+    // Byte        0        1
+    // ==== ======== ========
+    // Req  01MC1xxx xxxxxxxx
+    // Resp 00xxxNRR RRRRRRRR
+    //
+    // MCP3004
+    // Byte        0        1        2
+    // ==== ======== ======== ========
+    // Req  0000000S MxCCxxxx xxxxxxxx
+    // Resp xxxxxxxx xxxxDNRR RRRRRRRR
+    //
+    // MCP3008
+    // Byte        0        1        2
+    // ==== ======== ======== ========
+    // Req  0000000S MCCCxxxx xxxxxxxx
+    // Resp xxxxxxxx xxxxDNRR RRRRRRRR
+    //
+    // MCP3201
+    // Byte        0        1
+    // ==== ======== ========
+    // Req  xxxxxxxx xxxxxxxx
+    // Resp xxNRRRR RRRRRRRRx
+    //
+    // MCP3202
+    // Byte        0        1        2
+    // ==== ======== ======== ========
+    // Req  00000001 MC1xxxxx xxxxxxxx
+    // Resp xxxxxxxx xxxNRRRR RRRRRRRR
+    //
+    // MCP3204
+    // Byte        0        1        2
+    // ==== ======== ======== ========
+    // Req  00000SMx CCxxxxxx xxxxxxxx
+    // Resp xxxxxxxx xxDNRRRR RRRRRRRR
+    //
+    // MCP3208
+    // Byte        0        1        2
+    // ==== ======== ======== ========
+    // Req  00000SMC CCxxxxxx xxxxxxxx
+    // Resp xxxxxxxx xxDNRRRR RRRRRRRR
+    //
+    // MCP3301
+    // Byte        0        1
+    // ==== ======== ========
+    // Req  xxxxxxxx xxxxxxxx
+    // Resp xxN-RRRR RRRRRRRR
+    //
+    // MCP3302
+    // Byte        0        1        2
+    // ==== ======== ======== ========
+    // Req  0000SMxC Cxxxxxxx xxxxxxxx
+    // Resp xxxxxxxx xDN-RRRR RRRRRRRR
+    //
+    // MCP3304
+    // Byte        0        1        2
+    // ==== ======== ======== ========
+    // Req  0000SMCC Cxxxxxxx xxxxxxxx
+    // Resp xxxxxxxx xDN-RRRR RRRRRRRR
+    //
+    // S = StartBit = 1
+    // C = Channel
+    // M = SingleEnded
+    // D = Delay
+    // N = Null Bit = 0
+    // R = Response
+    // - = Sign Bit
+    // x = Dont Care
+    //
+
     /// <summary>
     /// Mcp3xxx Abstract class representing the MCP ADC devices.
     /// </summary>
@@ -54,7 +130,7 @@ namespace Iot.Device.Adc
         /// <param name="adcResolutionBits">The number of bits in the returned value</param>
         /// <param name="delayBits">The number of bits to be delayed between the request and the response being read.</param>
         /// <returns>A value corresponding to a voltage level on the input pin described by the request.</returns>
-        protected int Read(int adcRequest, int adcRequestLengthBytes, int adcResolutionBits, int delayBits)
+        protected int ReadInternal(int adcRequest, int adcRequestLengthBytes, int adcResolutionBits, int delayBits)
         {
             int retval = 0;
 
@@ -74,7 +150,7 @@ namespace Iot.Device.Adc
             _spiDevice.TransferFullDuplex(requestBuffer, responseBuffer);
 
             // transfer the response from the ADC into the return value
-            for (int i=0; i < responseBuffer.Length; i++)
+            for (int i = 0; i < responseBuffer.Length; i++)
             {
                 retval <<= 8;
                 retval += responseBuffer[i];

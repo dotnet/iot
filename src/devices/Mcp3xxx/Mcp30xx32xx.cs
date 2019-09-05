@@ -7,62 +7,6 @@ using System.Device.Spi;
 
 namespace Iot.Device.Adc
 {
-    // MCP3001
-    // Byte        0        1
-    // ==== ======== ========
-    // Req  xxxxxxxx xxxxxxxx
-    // Resp xxNRRRR RRRRRRxxx
-    //
-    // MCP3002
-    // Byte        0        1
-    // ==== ======== ========
-    // Req  01MC1xxx xxxxxxxx
-    // Resp 00xxxNRR RRRRRRRR
-    //
-    // MCP3004
-    // Byte        0        1        2
-    // ==== ======== ======== ========
-    // Req  0000000S MxCCxxxx xxxxxxxx
-    // Resp xxxxxxxx xxxxDNRR RRRRRRRR
-    //
-    // MCP3008
-    // Byte        0        1        2
-    // ==== ======== ======== ========
-    // Req  0000000S MCCCxxxx xxxxxxxx
-    // Resp xxxxxxxx xxxxDNRR RRRRRRRR
-    //
-    // MCP3201
-    // Byte        0        1
-    // ==== ======== ========
-    // Req  xxxxxxxx xxxxxxxx
-    // Resp xxNRRRR RRRRRRRRx
-    //
-    // MCP3202
-    // Byte        0        1        2
-    // ==== ======== ======== ========
-    // Req  00000001 MC1xxxxx xxxxxxxx
-    // Resp xxxxxxxx xxxNRRRR RRRRRRRR
-    //
-    // MCP3204
-    // Byte        0        1        2
-    // ==== ======== ======== ========
-    // Req  00000SMx CCxxxxxx xxxxxxxx
-    // Resp xxxxxxxx xxDNRRRR RRRRRRRR
-    //
-    // MCP3208
-    // Byte        0        1        2
-    // ==== ======== ======== ========
-    // Req  00000SMC CCxxxxxx xxxxxxxx
-    // Resp xxxxxxxx xxDNRRRR RRRRRRRR
-    //
-    // S = StartBit
-    // C = Channel
-    // M = SingleEnded
-    // D = Delay
-    // N = Null Bit
-    // R = Response
-    //
-
     /// <summary>
     /// Mcp30xx32xx Abstract class representing the MCP 10 and 12 bit ADC devices.
     /// </summary>
@@ -123,15 +67,15 @@ namespace Iot.Device.Adc
         /// <summary>
         /// Reads a  value from the device using pseudo-differential inputs
         /// </summary>
-        /// <param name="positiveChannel">Channel which represents the signal (valid values: 0 to pincount - 1).</param>
-        /// <param name="negativeChannel">Channel which represents the signal ground (valid values: 0 to pincount - 1).</param>
+        /// <param name="valueChannel">Channel which represents the signal (valid values: 0 to pincount - 1).</param>
+        /// <param name="referenceChannel">Channel which represents the signal ground (valid values: 0 to pincount - 1).</param>
         /// <returns>A value corresponding to relative voltage level on specified device channels</returns>
-        public virtual int ReadPseudoDifferential(int positiveChannel, int negativeChannel)
+        public virtual int ReadPseudoDifferential(int valueChannel, int referenceChannel)
         {
             // ensure that the channels are part of the same pairing
-            CheckChannelPairing(positiveChannel, negativeChannel, PinCount / 2);
+            CheckChannelPairing(valueChannel, referenceChannel, PinCount / 2);
 
-            return Read(positiveChannel / 2, positiveChannel > negativeChannel ? InputType.InvertedDifferential : InputType.Differential, _adcResolutionBits);
+            return ReadInternal(valueChannel / 2, valueChannel > referenceChannel ? InputType.InvertedDifferential : InputType.Differential, _adcResolutionBits);
         }
 
         /// <summary>
@@ -150,8 +94,8 @@ namespace Iot.Device.Adc
                 throw new ArgumentException($"ADC differential channels must be different.", nameof(positiveChannel) + " " + nameof(negativeChannel));
             }
 
-            return Read(positiveChannel, InputType.SingleEnded, _adcResolutionBits) -
-                   Read(negativeChannel, InputType.SingleEnded, _adcResolutionBits);
+            return ReadInternal(positiveChannel, InputType.SingleEnded, _adcResolutionBits) -
+                   ReadInternal(negativeChannel, InputType.SingleEnded, _adcResolutionBits);
         }
 
         /// <summary>
@@ -161,7 +105,7 @@ namespace Iot.Device.Adc
         /// <returns>A value corresponding to relative voltage level on specified device channel</returns>
         public virtual int Read(int channel)
         {
-            return Read(channel, InputType.SingleEnded, _adcResolutionBits);
+            return ReadInternal(channel, InputType.SingleEnded, _adcResolutionBits);
         }
 
         /// <summary>
@@ -171,7 +115,7 @@ namespace Iot.Device.Adc
         /// <param name="inputType">The type of input pin to read</param>
         /// <param name="adcResolutionBits">The number of bits in the returned value</param>
         /// <returns>A value corresponding to relative voltage level on specified device channel</returns>
-        protected int Read(int channel, InputType inputType, int adcResolutionBits)
+        protected int ReadInternal(int channel, InputType inputType, int adcResolutionBits)
         {
             int channelVal;
             int requestVal;
@@ -199,7 +143,7 @@ namespace Iot.Device.Adc
             // read the data from the device...
             // the adcRequestLength bytes is 2 for the 3001, 3002 and 3201 otherwise it is 3 bytes
             // the delayBits is set to account for the extra sampling delay on the 3002, 3004, 3202 and 3204, 
-            return Read(requestVal, adcRequestLengthBytes: PinCount > 1 && adcResolutionBits > 10 ? 3 : 2, adcResolutionBits: adcResolutionBits, delayBits: PinCount > 2 ? 1 : 0);
+            return ReadInternal(requestVal, adcRequestLengthBytes: PinCount > 1 && adcResolutionBits > 10 ? 3 : 2, adcResolutionBits: adcResolutionBits, delayBits: PinCount > 2 ? 1 : 0);
         }
     }
 }

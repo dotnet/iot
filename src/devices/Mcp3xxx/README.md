@@ -1,18 +1,25 @@
-﻿# Mcp3Adc
+# MCP3000, MCP3200 and MCP3300 ranges of Analog to Digital Converters
 
-## Summary
-Provide a brief description on what the component is and its functonality.
+Some devices like the Raspberry Pi cannot read analog values directly so rely on  [analog to digital converters](https://en.wikipedia.org/wiki/Analog-to-digital_converter), like the ones available from Microchip in the Mcp3000, Mcp3200 and Mcp3300 ranges. These chips can be accessed as an [SPI device](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface) or manually via raw GPIO pins.
 
-## Device Family
-Provide a list of component names and link to datasheets (if available) the binding will work with.
+ You can use these converters in your project to access analog devices. The sample [Reading Analog Input from a Potentiometer](samples/README.md) demonstrates a concrete example using the Mcp3008 class.
 
-**[Family Name Here]**: [Datasheet link here]
+The following fritzing diagram illustrates one way to wire up the Mcp3008, with a Raspberry Pi and a potentiometer.
 
-## Binding Notes
+![Raspberry Pi Breadboard diagram](samples/rpi-trimpot_spi.png)
 
-Provide any specifics related to binding API.  This could include how to configure component for particular functions and example code.
+These bindings support the following ADC's
 
-**NOTE**:  Don't repeat the basics related to System.Device.API* (e.g. connection settings, etc.).  This helps keep text/steps down to a minimum for maintainability.
+- [Mcp3001](http://ww1.microchip.com/downloads/en/DeviceDoc/21293C.pdf)  10 bit resolution with a single pseudo-differential input.
+- [Mcp3002](http://ww1.microchip.com/downloads/en/DeviceDoc/21294E.pdf)  10 bit resolution with two single ended inputs or a single pseudo-differential input.
+- [Mcp3004](http://ww1.microchip.com/downloads/en/devicedoc/21295c.pdf)  10 bit resolution with four single ended inputs or two single pseudo-differential inputs.
+- [Mcp3008](http://ww1.microchip.com/downloads/en/devicedoc/21295c.pdf)  10 bit resolution with eight single ended inputs or four single pseudo-differential inputs.
 
-## References 
-Provide any references to other tutorials, blogs and hardware related to the component that could help others get started.
+- [Mcp3201](http://ww1.microchip.com/downloads/en/devicedoc/21290d.pdf)  12 bit resolution with a single pseudo-differential input.
+- [Mcp3202](http://ww1.microchip.com/downloads/en/devicedoc/21034d.pdf)  12 bit resolution with two single ended inputs or a single pseudo-differential input.
+- [Mcp3204](http://ww1.microchip.com/downloads/en/DeviceDoc/21298c.pdf)  12 bit resolution with four single ended inputs or two single pseudo-differential inputs.
+- [Mcp3208](http://ww1.microchip.com/downloads/en/DeviceDoc/21298c.pdf)  12 bit resolution with eight single ended inputs or four single pseudo-differential inputs.
+
+- [Mcp3301](http://ww1.microchip.com/downloads/en/devicedoc/21700d.pdf)  13 bit signed resolution with a single true differential input.
+- [Mcp3202](http://ww1.microchip.com/downloads/en/DeviceDoc/21697F.pdf)  12 bit resolution with four single ended inputs or 13 bit signed resolution with two true differential inputs.
+- [Mcp3304](http://ww1.microchip.com/downloads/en/DeviceDoc/21697F.pdf)  12 bit resolution with eight single ended inputs or 13 bit signed resolution with four true differential inputs.

@@ -23,7 +23,7 @@ namespace Iot.Device.Adc
         /// <returns>12-bit value corresponding to relative voltage level on specified device channel</returns>
         public int Read()
         {
-            return Read(adcRequest: 0, adcRequestLengthBytes: 2, 13 + 1, delayBits: 0) >> 1;
+            return ReadInternal(adcRequest: 0, adcRequestLengthBytes: 2, 13 + 1, delayBits: 0) >> 1;
         }
     }
 }
