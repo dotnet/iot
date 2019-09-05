@@ -100,7 +100,7 @@ namespace Iot.Device.RadioReceiver
                     _registers[3] &= 0b_1101_1111;
                     break;
                 default:
-                    break;
+                    throw new ArgumentOutOfRangeException(nameof(bandRange), bandRange, null);
             }
 
             SaveRegisters();
@@ -136,7 +136,7 @@ namespace Iot.Device.RadioReceiver
                     }
                     break;
                 default:
-                    break;
+                    throw new ArgumentOutOfRangeException(nameof(FrequencyRange), FrequencyRange, null);
             }
 
             int f = (int)((frequency * 1000000 + 225000) / 8192);
@@ -194,9 +194,9 @@ namespace Iot.Device.RadioReceiver
         /// <summary>
         /// Automatic search for effective radio.
         /// </summary>
-        /// <param name="isUp">If true, search up from the current frequency.</param>
+        /// <param name="searchDirection">Search up or down from the current frequency.</param>
         /// <param name="stopLevel">Stop search condition (range from 1 to 3).</param>
-        public void Search(bool isUp = true, int stopLevel = 3)
+        public void Search(SearchDirection searchDirection = SearchDirection.Up, int stopLevel = 3)
         {
             if (stopLevel < 1 || stopLevel > 3)
             {
@@ -211,13 +211,16 @@ namespace Iot.Device.RadioReceiver
             // set search stop level
             _registers[2] |= (byte)(stopLevel << 6);
 
-            if (isUp)
+            switch (searchDirection)
             {
-                _registers[2] |= 0b_1000_0000;
-            }
-            else
-            {
-                _registers[2] &= 0b_01111_1111;
+                case SearchDirection.Up:
+                    _registers[2] |= 0b_1000_0000;
+                    break;
+                case SearchDirection.Down:
+                    _registers[2] &= 0b_01111_1111;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(searchDirection), searchDirection, null);
             }
 
             SaveRegisters();
