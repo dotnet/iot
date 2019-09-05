@@ -165,7 +165,7 @@ namespace Iot.Device.RadioTransmitter
                     reg3 = (reg3 & 0b_1100_1111) | (0 << 4);
                     break;
                 default:
-                    break;
+                    throw new ArgumentOutOfRangeException(nameof(pgaGain), pgaGain, null);
             }
 
             WriteByte(Register.KT_CONFIG01, (byte)reg1);
@@ -265,7 +265,7 @@ namespace Iot.Device.RadioTransmitter
                     reg2 |= 0b_0001;
                     break;
                 default:
-                    break;
+                    throw new ArgumentOutOfRangeException(nameof(region), region, null);
             }
 
             WriteByte(Register.KT_CONFIG02, (byte)reg2);
