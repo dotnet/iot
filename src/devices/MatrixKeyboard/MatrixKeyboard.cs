@@ -176,7 +176,8 @@ namespace Iot.Device.MatrixKeyboard
         /// Keyboard event
         /// </summary>
         public event PinChangeEventHandler PinChangeEvent;
-
+        
+        /// <inheritdoc/>
         public void Dispose()
         {
             _masterGpioController.Dispose();
