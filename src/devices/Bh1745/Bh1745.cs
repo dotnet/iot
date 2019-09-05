@@ -19,11 +19,9 @@ namespace Iot.Device.Bh1745
         private byte PartId => (byte)(Read8BitsFromRegister((byte)Register.SYSTEM_CONTROL) & (byte)Mask.PART_ID);
 
         private I2cDevice _i2cDevice;
-        private InterruptStatus _interruptStatus;
         private MeasurementTime _measurementTime;
         private bool _measurementIsActive;
         private AdcGain _adcGain;
-        private bool _interruptSignalIsActive;
         private LatchBehavior _latchBehavior;
         private InterruptSource _interruptSource;
         private bool _interruptIsEnabled;
@@ -66,7 +64,12 @@ namespace Iot.Device.Bh1745
         /// <exception cref="ArgumentOutOfRangeException">Thrown if invalid InterruptStatus is set.</exception>
         public InterruptStatus InterruptReset
         {
-            get => _interruptStatus;
+            get
+            {
+                var intReset = Read8BitsFromRegister((byte)Register.SYSTEM_CONTROL);
+                intReset = (byte)((intReset & (byte)Mask.INT_RESET) >> 6);
+                return (InterruptStatus)intReset;
+            }
             set
             {
                 if (!Enum.IsDefined(typeof(InterruptStatus), value))
@@ -76,7 +79,6 @@ namespace Iot.Device.Bh1745
                 intReset = (byte)((intReset & (byte)~Mask.INT_RESET) | (byte)value << 6);
 
                 Write8BitsToRegister((byte)Register.SYSTEM_CONTROL, intReset);
-                _interruptStatus = value;
             }
         }
 
@@ -137,18 +139,15 @@ namespace Iot.Device.Bh1745
         }
 
         /// <summary>
-        /// Gets or sets whether the interrupt signal is active.
+        /// Gets whether the interrupt signal is active.
         /// </summary>
         public bool InterruptSignalIsActive
         {
-            get => _interruptSignalIsActive;
-            set
+            get
             {
                 var intStatus = Read8BitsFromRegister((byte)Register.INTERRUPT);
-                intStatus = (byte)((intStatus & (byte)~Mask.INT_STATUS) | Convert.ToByte(value) << 7);
-
-                Write8BitsToRegister((byte)Register.INTERRUPT, intStatus);
-                _interruptSignalIsActive = value;
+                intStatus = (byte)((intStatus & (byte)Mask.INT_STATUS) >> 7);
+                return Convert.ToBoolean(intStatus);
             }
         }
 
@@ -273,6 +272,16 @@ namespace Iot.Device.Bh1745
             MeasurementTime = MeasurementTime.Ms160;
             AdcGain = AdcGain.X1;
             MeasurementIsActive = true;
+            InterruptIsEnabled = true;
+
+            // set fields to reset state
+            _interruptPersistence = InterruptPersistence.UpdateMeasurementEnd;
+            _latchBehavior = LatchBehavior.LatchUntilReadOrInitialized;
+            _interruptSource = InterruptSource.RedChannel;
+            _interruptIsEnabled = false;
+            _lowerInterruptThreshold = 0x0000;
+            _higherInterruptThreshold = 0xFFFF;
+
 
             // write default value to Mode_Control3
             Write8BitsToRegister((byte)Register.MODE_CONTROL3, 0x02);
@@ -323,15 +332,15 @@ namespace Iot.Device.Bh1745
                 return Color.FromArgb(0, 0, 0);
 
             // apply channel multipliers and normalize
-            var compensatedRed = ReadRedDataRegister() * ChannelCompensationMultipliers.Red / MeasurementTime.ToMilliseconds() * 360;
-            var compensatedGreen = ReadGreenDataRegister() * ChannelCompensationMultipliers.Green / MeasurementTime.ToMilliseconds() * 360;
-            var compensatedBlue = ReadBlueDataRegister() * ChannelCompensationMultipliers.Blue / MeasurementTime.ToMilliseconds() * 360;
-            var compensatedClear = clearDataRaw * ChannelCompensationMultipliers.Clear / MeasurementTime.ToMilliseconds() * 360;
+            double compensatedRed = ReadRedDataRegister() * ChannelCompensationMultipliers.Red / MeasurementTime.ToMilliseconds() * 360;
+            double compensatedGreen = ReadGreenDataRegister() * ChannelCompensationMultipliers.Green / MeasurementTime.ToMilliseconds() * 360;
+            double compensatedBlue = ReadBlueDataRegister() * ChannelCompensationMultipliers.Blue / MeasurementTime.ToMilliseconds() * 360;
+            double compensatedClear = clearDataRaw * ChannelCompensationMultipliers.Clear / MeasurementTime.ToMilliseconds() * 360;
 
             // scale against clear channel
-            var redScaled = (int)Math.Min(255, compensatedRed / compensatedClear * 255);
-            var greenScaled = (int)Math.Min(255, compensatedGreen / compensatedClear * 255);
-            var blueScaled = (int)Math.Min(255, compensatedBlue / compensatedClear * 255);
+            int redScaled = (int)Math.Min(255, compensatedRed / compensatedClear * 255);
+            int greenScaled = (int)Math.Min(255, compensatedGreen / compensatedClear * 255);
+            int blueScaled = (int)Math.Min(255, compensatedBlue / compensatedClear * 255);
 
             return Color.FromArgb(redScaled, greenScaled, blueScaled);
         }
