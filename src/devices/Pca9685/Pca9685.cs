@@ -3,135 +3,180 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers.Binary;
+using System.Device;
 using System.Device.I2c;
+using System.Device.Pwm;
+using System.Diagnostics;
 using System.Threading;
-using static Iot.Device.Pca9685.Mode1;
-using static Iot.Device.Pca9685.Mode2;
-using static Iot.Device.Pca9685.Register;
 
-namespace Iot.Device.Pca9685
+namespace Iot.Device.Pwm
 {
+    using static Mode1;
+    using static Iot.Device.Pwm.Mode2;
+    using static Iot.Device.Pwm.Register;
+
     /// <summary>
     /// PCA9685 PWM LED/servo controller
     /// </summary>
     public class Pca9685 : IDisposable
     {
         /// <summary>
-        /// I2C Device
+        /// I2C address base. Equal to actual address when all selectable address bits are equal to 0.
         /// </summary>
+        public const byte I2cAddressBase = 0x40;
+
         private I2cDevice _device;
 
-        /// <summary>
-        /// Get default clock rate. Set if you are using external clock.
-        /// </summary>
-        public double ClockRate { get; set; } = 25000000;   // 25MHz
+        private bool _usingExternalClock;
+        private double _clockFrequency = 25_000_000;
 
         /// <summary>
-        /// Set PWM frequency or get effective value.
+        /// Get clock frequency (Hz). Only set if you are using external clock.
         /// </summary>
-        public double PwmFrequency
+        public double ClockFrequency
         {
-            get => _pwmFrequency;
+            get => _clockFrequency;
             set
             {
-                Prescale = GetPrescale(value);
+                if (!_usingExternalClock)
+                    throw new InvalidOperationException("Clock frequency can only be set when using external oscillator.");
+
+                _clockFrequency = value;
             }
         }
 
         /// <summary>
+        /// Set PWM frequency or get effective value.
+        /// </summary>
+        /// <remarks>
+        /// Value of the effective frequency may be different than desired frequency.
+        /// Read the property in order to get the actual value
+        /// </remarks>
+        public double PwmFrequency
+        {
+            get => PrescaleToFrequency(_prescale);
+            set => Prescale = FrequencyToPrescale(value);
+        }
+
+        private byte _prescale;
+
+        /// <summary>
         /// Set PWM frequency using prescale value or get the value.
         /// </summary>
-        public byte Prescale
+        protected byte Prescale
         {
             get => _prescale;
             set
             {
                 var v = value < 3 ? (byte)3 : value;  // min value is 3
-                SetPwmFrequency(v);
+                SetPrescale(v);
                 _prescale = v;
-                _pwmFrequency = GetFreq(v);
             }
         }
 
-        private double _pwmFrequency;
-        private byte _prescale;
-
         /// <summary>
-        /// Initialize PCA9685
+        /// Constructs Pca9685 instance
         /// </summary>
         /// <param name="i2cDevice">The I2C device to be used</param>
-        public Pca9685(I2cDevice i2cDevice)
+        /// <param name="pwmFrequency">Initial PWM frequency on all channels</param>
+        /// <param name="dutyCycleAllChannels">Duty cycle set on all channels after constructing</param>
+        /// <param name="usingExternalClock">
+        /// When true specifies that external clock is used.
+        /// Use <see cref="ClockFrequency"/> to set frequency of an external clock
+        /// </param>
+        /// <remarks>
+        /// Default value for <paramref name="pwmFrequency"/> and <paramref name="dutyCycleAllChannels"/>
+        /// is -1 which means to not change value already set on the device.
+        /// </remarks>
+        public Pca9685(I2cDevice i2cDevice, double pwmFrequency = -1, double dutyCycleAllChannels = -1, bool usingExternalClock = false)
         {
-            // Setup I2C interface for the device.
             _device = i2cDevice;
+            _usingExternalClock = usingExternalClock;
 
-            SetPwm(0, 0);
+            Mode1 mode1 = SLEEP | ALLCALL | AI;
 
-            Span<byte> buffer = stackalloc byte[2] { (byte)MODE2, (byte)OUTDRV };
-            _device.Write(buffer);
+            if (usingExternalClock)
+            {
+                mode1 |= EXTCLK;
+            }
 
-            buffer = stackalloc byte[2] { (byte)MODE1, (byte)ALLCALL };
-            _device.Write(buffer);
+            Mode2 mode2 = OUTDRV;
 
-            Thread.Sleep(5); // wait for oscillator
+            WriteByte(MODE1, (byte)mode1);
+            WriteByte(MODE2, (byte)mode2);
 
-            int mode1 = _device.ReadByte();
-            mode1 &= ~(byte)SLEEP; // wake up (reset sleep)
+            if (pwmFrequency == -1)
+            {
+                _prescale = ReadByte(PRESCALE);
+            }
+            else
+            {
+                PwmFrequency = pwmFrequency;
+            }
 
-            buffer = stackalloc byte[2] { (byte)MODE1, (byte)mode1 };
-            _device.Write(buffer);
+            if (dutyCycleAllChannels != -1)
+            {
+                SetDutyCycleAllChannels(dutyCycleAllChannels);
+            }
 
-            Thread.Sleep(5); // wait for oscillator
+            mode1 &= ~SLEEP;
+            WriteByte(MODE1, (byte)mode1);
+            DelayHelper.DelayMicroseconds(500, allowThreadYield: true);
         }
 
         /// <summary>
-        /// Set a single PWM channel
+        /// Sets duty cycle on specified channel.
         /// </summary>
-        /// <param name="on">The turn-on time of specfied channel</param>
-        /// <param name="off">The turn-off time of specfied channel</param>
-        /// <param name="channel">target channel</param>
-        public void SetPwm(int on, int off, int channel)
+        /// <param name="channel">Selected channel</param>
+        /// <param name="dutyCycle">Value to set duty cycle to</param>
+        /// <remarks>Throws <see cref="InvalidOperationException"/> if specified channel is created with <see cref="CreatePwmChannel"/></remarks>
+        public void SetDutyCycle(int channel, double dutyCycle)
         {
-            on &= 0xFFF;
-            off &= 0xFFF;
-            channel &= 0xF;
+            CheckChannel(channel);
 
-            Span<byte> buffer = stackalloc byte[2] { (byte)((byte)LED0_ON_L + 4 * channel), (byte)on };
-            _device.Write(buffer);
+            if (IsChannelCreated(channel))
+            {
+                throw new InvalidOperationException("Cannot set duty cycle directly when PwmChannel is created. Use PwmChannel instance instead.");
+            }
 
-            buffer = stackalloc byte[2] { (byte)((byte)LED0_ON_H + 4 * channel), (byte)(on >> 8) };
-            _device.Write(buffer);
-
-            buffer = stackalloc byte[2] { (byte)((byte)LED0_OFF_L + 4 * channel), (byte)off };
-            _device.Write(buffer);
-
-            buffer = stackalloc byte[2] { (byte)((byte)LED0_OFF_H + 4 * channel), (byte)(off >> 8) };
-            _device.Write(buffer);
+            SetDutyCycleInternal(channel, dutyCycle);
         }
 
         /// <summary>
-        /// Set all PWM channels
+        /// Gets duty cycle on specified channel
         /// </summary>
-        /// <param name="on">The turn-on time of all channels</param>
-        /// <param name="off">The turn-on time of all channels</param>
-        public void SetPwm(int on, int off)
+        /// <param name="channel">selected channel</param>
+        /// <returns>Value of duty cycle in 0.0 - 1.0 range</returns>
+        public double GetDutyCycle(int channel)
         {
-            on &= 0xFFF;
-            off &= 0xFFF;
+            CheckChannel(channel);
 
-            Span<byte> buffer = stackalloc byte[2] { (byte)ALL_LED_ON_L, (byte)on };
-            _device.Write(buffer);
+            int offset = 4 * channel;
 
-            buffer = stackalloc byte[2] { (byte)ALL_LED_ON_H, (byte)(on >> 8) };
-            _device.Write(buffer);
-
-            buffer = stackalloc byte[2] { (byte)ALL_LED_OFF_L, (byte)off };
-            _device.Write(buffer);
-
-            buffer = stackalloc byte[2] { (byte)ALL_LED_OFF_H, (byte)(off >> 8) };
-            _device.Write(buffer);
+            ushort on = ReadUInt16((Register)((byte)LED0_ON_L + offset));
+            ushort off = ReadUInt16((Register)((byte)LED0_OFF_L + offset));
+            return OnOffToDutyCycle(on, off);
         }
 
+        /// <summary>
+        /// Sets duty cycles on all channels
+        /// </summary>
+        /// <param name="dutyCycle">Duty cycle value (0.0 - 1.0)</param>
+        /// <remarks>Throws <see cref="InvalidOperationException"/> if any of the channels is created with <see cref="CreatePwmChannel"/></remarks>
+        public void SetDutyCycleAllChannels(double dutyCycle)
+        {
+            if (IsAnyChannelCreated())
+            {
+                throw new InvalidOperationException("Cannot set duty cycle directly when any of the channels has corresponding PwmChannel instance created.");
+            }
+
+            CheckDutyCycle(dutyCycle);
+            (ushort on, ushort off) = DutyCycleToOnOff(dutyCycle);
+            SetOnOffTimeAllChannels(on, off);
+        }
+
+        /// <inheritdoc/>
         public void Dispose()
         {
             _device?.Dispose();
@@ -139,50 +184,188 @@ namespace Iot.Device.Pca9685
         }
 
         /// <summary>
-        /// Get prescale of specified PWM frequency
+        /// Creates PwmChannel instance from selected channel
         /// </summary>
-        private byte GetPrescale(double freq_hz)
+        /// <param name="channel">Channel number (0-15)</param>
+        /// <returns>PwmChannel instance</returns>
+        /// <remarks>Channel is already started when constructed.</remarks>
+        public PwmChannel CreatePwmChannel(int channel)
         {
-            var prescaleval = ClockRate / 4096 / freq_hz - 1;
-            //Debug.Print($"Setting PWM frequency to {freq_hz} Hz");
-            //Debug.Print($"Estimated pre-scale: {prescaleval}");
+            CheckChannel(channel);
 
-            var prescale = (byte)Math.Round(prescaleval);
-            //Debug.Print($"Final pre-scale: {prescale}");
+            if (IsChannelCreated(channel))
+                throw new ArgumentException("Only one instance of the channel can be created at the same time.", nameof(channel));
 
-            return prescale;
+            SetChannelAsCreated(channel);
+
+            return new Pca9685PwmChannel(this, channel);
         }
 
-        /// <summary>
-        /// Get PWM frequency of specified prescale
-        /// </summary>
-        private double GetFreq(byte prescale)
+        internal void SetDutyCycleInternal(int channel, double dutyCycle)
         {
-            return ClockRate / 4096 / (prescale + 1);
+            CheckDutyCycle(dutyCycle);
+
+            (ushort on, ushort off) = DutyCycleToOnOff(dutyCycle);
+            SetOnOffTime(channel, on, off);
         }
 
-        /// <summary>
-        /// Set PWM frequency by using prescale
-        /// </summary>
-        private void SetPwmFrequency(byte prescale)
+        private void SetOnOffTime(int channel, ushort on, ushort off)
         {
-            var oldmode = _device.ReadByte();
-            var newmode = (sbyte)oldmode | (byte)SLEEP;
+            // on and off are 13-bit values (12 bit value + 1bit full on/off override)
+            Debug.Assert((on & 0b1111111111111) == on);
+            Debug.Assert((off & 0b1111111111111) == off);
+            Debug.Assert((channel & 0xF) == channel);
 
-            Span<byte> buffer = stackalloc byte[2] { (byte)MODE1, (byte)newmode };
-            _device.Write(buffer); // go to sleep
+            int offset = 4 * channel;
 
-            buffer = stackalloc byte[2] { (byte)PRESCALE, prescale };
-            _device.Write(buffer);
+            WriteUInt16((Register)((byte)LED0_ON_L + offset), on);
+            WriteUInt16((Register)((byte)LED0_OFF_L + offset), off);
+        }
 
+        private void SetOnOffTimeAllChannels(ushort on, ushort off)
+        {
+            // on and off are 13-bit values (12 bit value + 1bit full on/off override)
+            Debug.Assert((on & 0b1111111111111) == on);
+            Debug.Assert((off & 0b1111111111111) == off);
 
-            buffer = stackalloc byte[2] { (byte)MODE1, oldmode };
-            _device.Write(buffer);
+            WriteUInt16(ALL_LED_ON_L, on);
+            WriteUInt16(ALL_LED_OFF_L, off);
+        }
 
-            Thread.Sleep(5);
+        private byte FrequencyToPrescale(double freqHz)
+        {
+            var desiredPrescale = Math.Round(ClockFrequency / 4096 / freqHz - 1);
+            return (byte)Math.Clamp(desiredPrescale, byte.MinValue, byte.MaxValue);
+        }
 
-            buffer = stackalloc byte[2] { (byte)MODE1, (byte)(oldmode | (byte)RESTART) };
-            _device.Write(buffer);
+        private double PrescaleToFrequency(byte prescale)
+        {
+            return ClockFrequency / 4096 / (prescale + 1.0);
+        }
+
+        private void SetPrescale(byte prescale)
+        {
+            Mode1 oldmode = (Mode1)ReadByte(MODE1);
+
+            if (oldmode.HasFlag(SLEEP))
+            {
+                WriteByte(PRESCALE, prescale);
+            }
+            else
+            {
+                WriteByte(MODE1, (byte)(oldmode | SLEEP));
+                WriteByte(PRESCALE, prescale);
+                WriteByte(MODE1, (byte)oldmode);
+                DelayHelper.DelayMicroseconds(500, allowThreadYield: true);
+            }
+        }
+
+        private ushort _createdChannelsMask = 0;
+
+        private bool IsChannelCreated(int channel)
+            => (_createdChannelsMask & (1 << channel)) != 0;
+
+        private bool IsAnyChannelCreated()
+            => _createdChannelsMask != 0;
+
+        private void SetChannelAsCreated(int channel)
+            => _createdChannelsMask |= (ushort)(1 << channel);
+
+        internal void SetChannelAsDestroyed(int channel)
+            => _createdChannelsMask &= (ushort)(~(1 << channel));
+
+        private byte ReadByte(Register register)
+        {
+            _device.WriteByte((byte)register);
+            return _device.ReadByte();
+        }
+
+        private ushort ReadUInt16(Register register)
+        {
+            _device.WriteByte((byte)register);
+
+            Span<byte> bytes = stackalloc byte[2];
+            _device.Read(bytes);
+
+            return BinaryPrimitives.ReadUInt16LittleEndian(bytes);
+        }
+
+        private void WriteByte(Register register, byte data)
+        {
+            Span<byte> bytes = stackalloc byte[2];
+            bytes[0] = (byte)register;
+            bytes[1] = data;
+            _device.Write(bytes);
+        }
+
+        private void WriteUInt16(Register register, ushort value)
+        {
+            WriteByte(register, (byte)value);
+            WriteByte(register + 1, (byte)(value >> 8));
+
+            Span<byte> bytes = stackalloc byte[3];
+            bytes[0] = (byte)register;
+            BinaryPrimitives.WriteUInt16LittleEndian(bytes.Slice(1), value);
+            _device.Write(bytes);
+        }
+
+        private static (ushort on, ushort off) DutyCycleToOnOff(double dutyCycle)
+        {
+            Debug.Assert(dutyCycle >= 0.0 && dutyCycle <= 1.0);
+
+            // there are actually 4097 values in the set but we can do edge values
+            // using 13th bit which overrides to always on/off
+            ushort dutyCycleSampled = (ushort)Math.Round(dutyCycle * 4096);
+
+            if (dutyCycleSampled == 0)
+            {
+                return (0, 1 << 12);
+            }
+            else if (dutyCycleSampled == 4096)
+            {
+                return (1 << 12, 0);
+            }
+            else
+            {
+                return (0, dutyCycleSampled);
+            }
+        }
+
+        private static double OnOffToDutyCycle(ushort on, ushort off)
+        {
+            ushort OnOffToDutyCycleSampled(ushort onCycles, ushort offCycles)
+            {
+                const ushort Max = (ushort)(1 << 12);
+                if (onCycles == 0)
+                {
+                    return  (offCycles == Max) ? (ushort)0 : offCycles;
+                }
+                else if (onCycles == Max && offCycles == 0)
+                {
+                    return 4096;
+                }
+
+                // we didn't set this value anywhere in the code
+                throw new InvalidOperationException($"Unexpected value of duty cycle ({onCycles}, {offCycles})");
+            }
+
+            return OnOffToDutyCycleSampled(on, off) / 4096.0;
+        }
+
+        private static void CheckDutyCycle(double dutyCycle)
+        {
+            if (dutyCycle < 0.0 || dutyCycle > 1.0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(dutyCycle), dutyCycle, "Value must be between 0.0 and 1.0.");
+            }
+        }
+
+        private static void CheckChannel(int channel)
+        {
+            if (channel < 0 || channel >= 16)
+            {
+                throw new ArgumentOutOfRangeException(nameof(channel), channel, "Channel must be a value from 0 to 15.");
+            }
         }
     }
 }

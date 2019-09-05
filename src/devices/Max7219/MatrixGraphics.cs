@@ -9,7 +9,6 @@ using System.Threading;
 
 namespace Iot.Device.Max7219
 {
-
     /// <summary>
     /// Graphical functions for a MAX7219 device
     /// </summary>
@@ -17,6 +16,11 @@ namespace Iot.Device.Max7219
     {
         readonly Max7219 _device;
 
+        /// <summary>
+        /// Constructs MatrixGraphics instance
+        /// </summary>
+        /// <param name="device">Max7219 device</param>
+        /// <param name="font">Font to use for drawing text</param>
         public MatrixGraphics(Max7219 device, IFont font)
         {
             if (device == null)
@@ -27,6 +31,9 @@ namespace Iot.Device.Max7219
             Font = font;
         }
 
+        /// <summary>
+        /// Font used for drawing text
+        /// </summary>
         public IFont Font { get; set; }
 
         /// <summary>

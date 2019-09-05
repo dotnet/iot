@@ -9,6 +9,9 @@ using System.Numerics;
 
 namespace Iot.Device.Lsm9Ds1
 {
+    /// <summary>
+    /// LSM9DS1 magnetometer
+    /// </summary>
     public class Lsm9Ds1Magnetometer : IDisposable
     {
         private const byte ReadMask = 0x80;
@@ -111,6 +114,7 @@ namespace Iot.Device.Lsm9Ds1
             }
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             _i2c?.Dispose();

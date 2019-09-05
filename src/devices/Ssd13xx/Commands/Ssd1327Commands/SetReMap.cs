@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
+    /// <summary>
+    /// Represents SetReMap command
+    /// </summary>
     public class SetReMap : ISsd1327Command
     {
         /// <summary>

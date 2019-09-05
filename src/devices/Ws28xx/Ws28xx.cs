@@ -7,16 +7,33 @@ using System.Device.Spi;
 
 namespace Iot.Device.Ws28xx
 {
+    /// <summary>
+    /// Represents base class for WS28XX LED drivers (i.e. WS2812B or WS2808)
+    /// </summary>
     public class Ws28xx
     {
+        /// <summary>
+        /// SPI device used for communication with the LED driver
+        /// </summary>
         protected readonly SpiDevice _spiDevice;
+
+        /// <summary>
+        /// Backing image to be updated on the driver
+        /// </summary>
         public BitmapImage Image { get; protected set; }
 
-        public Ws28xx(SpiDevice spiDevice, int width, int height = 1)
+        /// <summary>
+        /// Constructs Ws28xx instance
+        /// </summary>
+        /// <param name="spiDevice">SPI device used for communication with the LED driver</param>
+        public Ws28xx(SpiDevice spiDevice)
         {
             _spiDevice = spiDevice;
         }
 
+        /// <summary>
+        /// Sends backing image to the LED driver
+        /// </summary>
         public void Update() => _spiDevice.Write(Image.Data);
     }
 }

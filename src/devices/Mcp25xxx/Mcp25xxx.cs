@@ -378,6 +378,7 @@ namespace Iot.Device.Mcp25xxx
             _spiDevice.Write(writeBuffer);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             _gpioController?.Dispose();

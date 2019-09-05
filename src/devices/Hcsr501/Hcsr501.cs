@@ -47,6 +47,11 @@ namespace Iot.Device.Hcsr501
             }
         }
 
+        /// <summary>
+        /// Delegate used for <see cref="Hcsr501ValueChanged"/> event
+        /// </summary>
+        /// <param name="sender">Object firing the event</param>
+        /// <param name="e">Event arguments</param>
         public delegate void Hcsr501ValueChangedHandle(object sender, Hcsr501ValueChangedEventArgs e);
 
         /// <summary>

@@ -5,7 +5,7 @@
 using System;
 using Iot.Device.Seesaw;
 
-public class Volume
+internal class Volume
 {
     public static Volume EnableVolume(Seesaw seesawDevice)
     {

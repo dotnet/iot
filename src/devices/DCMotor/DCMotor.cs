@@ -9,6 +9,9 @@ using System.Device.Pwm.Drivers;
 
 namespace Iot.Device.DCMotor
 {
+    /// <summary>
+    /// Direct current (DC) motor
+    /// </summary>
     public abstract class DCMotor : IDisposable
     {
         private const int DefaultPwmFrequency = 50;

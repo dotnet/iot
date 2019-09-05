@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Represents SetLowerColumnStartAddressForPageAddressingMode command
+    /// </summary>
     public class SetLowerColumnStartAddressForPageAddressingMode : ISsd1306Command
     {
         /// <summary>

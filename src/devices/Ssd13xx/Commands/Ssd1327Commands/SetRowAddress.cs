@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
+    /// <summary>
+    /// Represents SetRowAddress command
+    /// </summary>
     public class SetRowAddress : ISsd1327Command
     {
         /// <summary>

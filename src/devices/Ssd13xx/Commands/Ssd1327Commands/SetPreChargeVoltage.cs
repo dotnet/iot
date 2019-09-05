@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
+    /// <summary>
+    /// Represents SetPreChargeVoltage command
+    /// </summary>
     public class SetPreChargeVoltage : ISsd1327Command
     {
         /// <summary>
