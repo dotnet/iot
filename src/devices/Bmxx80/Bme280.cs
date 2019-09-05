@@ -22,7 +22,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Calibration data for the <see cref="Bme680"/>.
         /// </summary>
-        private readonly Bme280CalibrationData _bme280Calibration;
+        private Bme280CalibrationData _bme280Calibration;
 
         private Sampling _humiditySampling;
 
@@ -33,13 +33,8 @@ namespace Iot.Device.Bmxx80
         public Bme280(I2cDevice i2cDevice)
             : base(DeviceId, i2cDevice)
         {
-            var bme280CalibrationData = new Bme280CalibrationData();
-            bme280CalibrationData.ReadFromDevice(this);
-            _bme280Calibration = bme280CalibrationData;
-            _calibrationData = bme280CalibrationData;
+            _bme280Calibration = (Bme280CalibrationData)_calibrationData;
             _communicationProtocol = CommunicationProtocol.I2c;
-
-            SetDefaultConfiguration();
         }
 
         /// <summary>

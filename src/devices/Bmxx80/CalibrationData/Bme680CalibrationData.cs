@@ -11,6 +11,8 @@ namespace Iot.Device.Bmxx80.CalibrationData
     /// </summary>
     internal class Bme680CalibrationData : Bmxx80CalibrationData
     {
+        public byte DigP10 { get; set; }
+
         public ushort DigH1 { get; set; }
         public ushort DigH2 { get; set; }
         public sbyte DigH3 { get; set; }

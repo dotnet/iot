@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Device.I2c;
-using Iot.Device.Bmxx80.CalibrationData;
 
 namespace Iot.Device.Bmxx80
 {
@@ -25,10 +24,6 @@ namespace Iot.Device.Bmxx80
             : base(DeviceId, i2cDevice)
         {
             _communicationProtocol = CommunicationProtocol.I2c;
-            _calibrationData = new Bmp280CalibrationData();
-            _calibrationData.ReadFromDevice(this);
-
-            SetDefaultConfiguration();
         }
     }
 }

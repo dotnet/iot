@@ -37,18 +37,15 @@ namespace Iot.Device.Bmxx80
 
         private Bmx280FilteringMode _filteringMode;
         private StandbyTime _standbyTime;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Bmx280Base"/> class.
         /// </summary>
         /// <param name="deviceId">The ID of the device.</param>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
         protected Bmx280Base(byte deviceId, I2cDevice i2cDevice)
-            : base(deviceId, i2cDevice)
-        {
-            _controlRegister = (byte)Bmx280Register.CTRL_MEAS;
-        }
-        
+            : base(deviceId, i2cDevice) { }
+
         /// <summary>
         /// Gets or sets the IIR filter mode.
         /// </summary>
@@ -61,7 +58,7 @@ namespace Iot.Device.Bmxx80
                 byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
                 current = (byte)((current & 0b_1110_0011) | (byte)value << 2);
 
-                Span<byte> command = stackalloc[] {(byte)Bmx280Register.CONFIG, current};
+                Span<byte> command = stackalloc[] { (byte)Bmx280Register.CONFIG, current };
                 _i2cDevice.Write(command);
                 _filteringMode = value;
             }
@@ -79,7 +76,7 @@ namespace Iot.Device.Bmxx80
                 byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
                 current = (byte)((current & 0b_0001_1111) | (byte)value << 5);
 
-                Span<byte> command = stackalloc[] {(byte)Bmx280Register.CONFIG, current};
+                Span<byte> command = stackalloc[] { (byte)Bmx280Register.CONFIG, current };
                 _i2cDevice.Write(command);
                 _standbyTime = value;
             }
@@ -159,7 +156,7 @@ namespace Iot.Device.Bmxx80
             long pressPa = CompensatePressure(press >> 4);
 
             //Return the temperature as a float value.
-            pressure = (double) pressPa / 256;
+            pressure = (double)pressPa / 256;
             return true;
         }
 
@@ -222,7 +219,7 @@ namespace Iot.Device.Bmxx80
             // Clear last 2 bits.
             var cleared = (byte)(read & 0b_1111_1100);
 
-            Span<byte> command = stackalloc[] {_controlRegister, (byte)(cleared | (byte)powerMode)};
+            Span<byte> command = stackalloc[] { _controlRegister, (byte)(cleared | (byte)powerMode) };
             _i2cDevice.Write(command);
         }
 

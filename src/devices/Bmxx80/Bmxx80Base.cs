@@ -61,7 +61,7 @@ namespace Iot.Device.Bmxx80
 
         private Sampling _temperatureSampling;
         private Sampling _pressureSampling;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Bmxx80Base"/> class.
         /// </summary>
@@ -78,8 +78,11 @@ namespace Iot.Device.Bmxx80
 
             if (readSignature != deviceId)
                 throw new IOException($"Unable to find a chip with id {deviceId}");
+
+            ReadCalibrationData();
+            SetDefaultConfiguration();
         }
-        
+
         /// <summary>
         /// Gets or sets the pressure sampling.
         /// </summary>
@@ -93,7 +96,7 @@ namespace Iot.Device.Bmxx80
                 status = (byte)(status & 0b1110_0011);
                 status = (byte)(status | (byte)value << 2);
 
-                Span<byte> command = stackalloc[] {_controlRegister, status};
+                Span<byte> command = stackalloc[] { _controlRegister, status };
                 _i2cDevice.Write(command);
                 _pressureSampling = value;
             }
@@ -112,7 +115,7 @@ namespace Iot.Device.Bmxx80
                 status = (byte)(status & 0b0001_1111);
                 status = (byte)(status | (byte)value << 5);
 
-                Span<byte> command = stackalloc[] {_controlRegister, status};
+                Span<byte> command = stackalloc[] { _controlRegister, status };
                 _i2cDevice.Write(command);
                 _temperatureSampling = value;
             }
@@ -125,7 +128,7 @@ namespace Iot.Device.Bmxx80
         public void Reset()
         {
             const byte resetCommand = 0xB6;
-            Span<byte> command = stackalloc[] {(byte)Bmxx80Register.RESET, resetCommand};
+            Span<byte> command = stackalloc[] { (byte)Bmxx80Register.RESET, resetCommand };
             _i2cDevice.Write(command);
 
             SetDefaultConfiguration();
@@ -278,6 +281,27 @@ namespace Iot.Device.Bmxx80
             /// Indicates big endian.
             /// </summary>
             BigEndian
+        }
+
+        private void ReadCalibrationData()
+        {
+            switch (this)
+            {
+                case Bme280 _:
+                    _calibrationData = new Bme280CalibrationData();
+                    _controlRegister = (byte)Bmx280Register.CTRL_MEAS;
+                    break;
+                case Bmp280 _:
+                    _calibrationData = new Bmp280CalibrationData();
+                    _controlRegister = (byte)Bmx280Register.CTRL_MEAS;
+                    break;
+                case Bme680 _:
+                    _calibrationData = new Bme680CalibrationData();
+                    _controlRegister = (byte)Bme680Register.CTRL_MEAS;
+                    break;
+            }
+
+            _calibrationData.ReadFromDevice(this);
         }
 
         /// <summary>

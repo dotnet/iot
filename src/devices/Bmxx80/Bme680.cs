@@ -37,7 +37,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Calibration data for the <see cref="Bme680"/>.
         /// </summary>
-        private readonly Bme680CalibrationData _bme680Calibration;
+        private Bme680CalibrationData _bme680Calibration;
 
         /// <inheritdoc/>
         protected override int _tempCalibrationFactor => 16;
@@ -62,15 +62,7 @@ namespace Iot.Device.Bmxx80
         public Bme680(I2cDevice i2cDevice)
             : base(DeviceId, i2cDevice)
         {
-            var bme680CalibrationData = new Bme680CalibrationData();
-            bme680CalibrationData.ReadFromDevice(this);
-            _bme680Calibration = bme680CalibrationData;
-            _calibrationData = bme680CalibrationData;
-
             _communicationProtocol = CommunicationProtocol.I2c;
-            _controlRegister = (byte)Bme680Register.CTRL_MEAS;
-
-            SetDefaultConfiguration();
         }
 
         /// <summary>
@@ -376,9 +368,9 @@ namespace Iot.Device.Bmxx80
             }
                 
 
-            var pressure = (int)Read24BitsFromRegister((byte)Bme680Register.TEMPDATA, Endianness.BigEndian);
+            var temp = (int)Read24BitsFromRegister((byte)Bme680Register.TEMPDATA, Endianness.BigEndian);
 
-            temperature = CompensateTemperature(pressure >> 4);
+            temperature = CompensateTemperature(temp >> 4);
             return true;
         }
 
@@ -418,6 +410,7 @@ namespace Iot.Device.Bmxx80
             HumiditySampling = Sampling.UltraLowPower;
             FilterMode = Bme680FilteringMode.C0;
 
+            _bme680Calibration = (Bme680CalibrationData)_calibrationData;
             TryReadTemperature(out var temp);
             ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, 320, 150, temp.Celsius);
             HeaterProfile = Bme680HeaterProfile.Profile1;
@@ -463,22 +456,22 @@ namespace Iot.Device.Bmxx80
         {
             // Calculate the pressure.
             var var1 = (TemperatureFine / 2.0) - 64000.0;
-            var var2 = var1 * var1 * (_calibrationData.DigP6 / 131072.0);
-            var2 += (var1 * _calibrationData.DigP5 * 2.0);
-            var2 = (var2 / 4.0) + (_calibrationData.DigP4 * 65536.0);
-            var1 = ((_calibrationData.DigP3 * var1 * var1 / 16384.0) + (_calibrationData.DigP2 * var1)) / 524288.0;
-            var1 = (1.0 + (var1 / 32768.0)) * _calibrationData.DigP1;
+            var var2 = var1 * var1 * (_bme680Calibration.DigP6 / 131072.0);
+            var2 += (var1 * _bme680Calibration.DigP5 * 2.0);
+            var2 = (var2 / 4.0) + (_bme680Calibration.DigP4 * 65536.0);
+            var1 = ((_bme680Calibration.DigP3 * var1 * var1 / 16384.0) + (_bme680Calibration.DigP2 * var1)) / 524288.0;
+            var1 = (1.0 + (var1 / 32768.0)) * _bme680Calibration.DigP1;
             var calculatedPressure = 1048576.0 - adcPressure;
 
             // Avoid exception caused by division by zero.
             if (var1 != 0)
             {
                 calculatedPressure = (calculatedPressure - (var2 / 4096.0)) * 6250.0 / var1;
-                var1 = _calibrationData.DigP9 * calculatedPressure * calculatedPressure / 2147483648.0;
-                var2 = calculatedPressure * (_calibrationData.DigP8 / 32768.0);
+                var1 = _bme680Calibration.DigP9 * calculatedPressure * calculatedPressure / 2147483648.0;
+                var2 = calculatedPressure * (_bme680Calibration.DigP8 / 32768.0);
                 var var3 = (calculatedPressure / 256.0) * (calculatedPressure / 256.0) * (calculatedPressure / 256.0)
-                    * (_calibrationData.DigP10 / 131072.0);
-                calculatedPressure += (var1 + var2 + var3 + (_calibrationData.DigP7 * 128.0)) / 16.0;
+                    * (_bme680Calibration.DigP10 / 131072.0);
+                calculatedPressure += (var1 + var2 + var3 + (_bme680Calibration.DigP7 * 128.0)) / 16.0;
             }
             else
             {
