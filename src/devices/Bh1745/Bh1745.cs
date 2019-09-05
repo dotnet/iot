@@ -281,8 +281,7 @@ namespace Iot.Device.Bh1745
             _interruptIsEnabled = false;
             _lowerInterruptThreshold = 0x0000;
             _higherInterruptThreshold = 0xFFFF;
-
-
+            
             // write default value to Mode_Control3
             Write8BitsToRegister((byte)Register.MODE_CONTROL3, 0x02);
         }
@@ -387,7 +386,7 @@ namespace Iot.Device.Bh1745
 
         private void Write8BitsToRegister(byte register, byte data)
         {
-            Span<byte> command = stackalloc[] {register, data};
+            Span<byte> command = stackalloc[] { register, data };
             _i2cDevice.Write(command);
         }
 
