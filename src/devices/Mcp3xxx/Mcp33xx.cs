@@ -10,23 +10,23 @@ namespace Iot.Device.Adc
     /// <summary>
     /// MCP3304 Analog to Digital Converter (ADC)
     /// </summary>
-    public abstract class Mcp33xx : Mcp30xx32xx
+    public abstract class Mcp33xx : Mcp3xxx
     {
         /// <summary>
         /// Constructs Mcp33xx instance
         /// </summary>
         /// <param name="spiDevice">Device used for SPI communication</param>
-        /// <param name="pinCount">Value representing the number of pins on the device.</param>
+        /// <param name="channelCount">Value representing the number of single ended input channels on the device.</param>
         /// <param name="adcResolutionBits">The number of bits of resolution for the ADC.</param>
-        public Mcp33xx(SpiDevice spiDevice, byte pinCount, byte adcResolutionBits) : base(spiDevice, pinCount, adcResolutionBits) { }
+        public Mcp33xx(SpiDevice spiDevice, byte channelCount, byte adcResolutionBits) : base(spiDevice, channelCount, adcResolutionBits) { }
 
         /// <summary>
         /// Reads a  value from the device using pseudo-differential inputs
         /// </summary>
-        /// <param name="positiveChannel">Channel which represents the signal (valid values: 0 to pinCount - 1).</param>
-        /// <param name="negativeChannel">Channel which represents the signal ground (valid values: 0 to pinCount - 1).</param>
+        /// <param name="valueChannel">Channel which represents the signal (valid values: 0 to channelcount - 1).</param>
+        /// <param name="referenceChannel">Channel which represents the signal ground (valid values: 0 to channelcount - 1).</param>
         /// <returns>A value corresponding to relative voltage level on specified device channels</returns>
-        public override int ReadPseudoDifferential(int positiveChannel, int negativeChannel)
+        public override int ReadPseudoDifferential(int valueChannel, int referenceChannel)
         {
             throw new NotSupportedException("Mcp33xx device does not support ReadPseudoDifferential.");
         }
@@ -34,33 +34,39 @@ namespace Iot.Device.Adc
         /// <summary>
         /// Reads a 13 bit signed value from the device using differential inputs
         /// </summary>
-        /// <param name="positiveChannel">Channel which represents the positive signal (valid values: 0 to pinCount - 1).</param>
-        /// <param name="negativeChannel">Channel which represents the negative signal (valid values: 0 to pinCount - 1).</param>
+        /// <remarks>
+        /// The value that is read respresents the difference between the voltage on the value channel and the voltage on the reference channel (valueChannel Reading - referenceChannel Reading).
+        /// If the valueChannel and the referenceChannel are part of the same channel pairing then the ADC converter will internally subtract the two values. If not then the subtraction is
+        /// performed in software which may mean that errors are introduced with rapidly changing signals.
+        /// </remarks>
+        /// <param name="valueChannel">Channel which represents the signal driving the value in a positive direction (valid values: 0 to channelcount - 1).</param>
+        /// <param name="referenceChannel">Channel which represents the signal driving the value in a negative direction (valid values: 0 to channelcount - 1).</param>
         /// <returns>A 13 bit signed value corresponding to relative voltage level on specified device channels</returns>
-        public override int ReadDifferential(int positiveChannel, int negativeChannel)
+        public override int ReadDifferential(int valueChannel, int referenceChannel)
         {
             int retval;
 
-            CheckChannelRange(positiveChannel, PinCount);
-            CheckChannelRange(negativeChannel, PinCount);
+            CheckChannelRange(valueChannel, ChannelCount);
+            CheckChannelRange(referenceChannel, ChannelCount);
 
-            if (positiveChannel == negativeChannel)
+            if (valueChannel == referenceChannel)
             {
-                throw new ArgumentException($"ADC differential channels must be different.", nameof(positiveChannel) + " " + nameof(negativeChannel));
+                throw new ArgumentException($"ADC differential channels must be different.", nameof(valueChannel) + " " + nameof(referenceChannel));
             }
 
-            // check if it is possible to use hardware differential
-            if (positiveChannel / 2 == negativeChannel / 2)
+            // check if it is possible to use hardware differential because both input channels are in the same differential channel pairing
+            if (valueChannel / 2 == referenceChannel / 2)
             {
-                retval = ReadInternal(positiveChannel / 2, positiveChannel > negativeChannel ? InputType.InvertedDifferential : InputType.Differential, adcResolutionBits: 13);
+                // read a value from the ADC where the channel is the channel pairing
+                retval = ReadInternal(channel: valueChannel / 2, valueChannel > referenceChannel ? InputType.InvertedDifferential : InputType.Differential, adcResolutionBits: 13);
 
                 //convert 13 bit signed to 32 bit signed
                 retval = (retval >> 12) == 0 ? retval : (int)(0xFFFFE000 | retval);
             }
             else // otherwise just subtract two readings
             {
-                retval = ReadInternal(positiveChannel, InputType.SingleEnded, adcResolutionBits: 12) -
-                         ReadInternal(negativeChannel, InputType.SingleEnded, adcResolutionBits: 12);
+                retval = ReadInternal(valueChannel, InputType.SingleEnded, adcResolutionBits: 12) -
+                         ReadInternal(referenceChannel, InputType.SingleEnded, adcResolutionBits: 12);
             }
 
             return retval;

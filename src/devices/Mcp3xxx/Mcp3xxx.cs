@@ -3,167 +3,156 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Buffers.Binary;
 using System.Device.Spi;
 
 namespace Iot.Device.Adc
 {
-    // MCP3001
-    // Byte        0        1
-    // ==== ======== ========
-    // Req  xxxxxxxx xxxxxxxx
-    // Resp xxNRRRR RRRRRRxxx
-    //
-    // MCP3002
-    // Byte        0        1
-    // ==== ======== ========
-    // Req  01MC1xxx xxxxxxxx
-    // Resp 00xxxNRR RRRRRRRR
-    //
-    // MCP3004
-    // Byte        0        1        2
-    // ==== ======== ======== ========
-    // Req  0000000S MxCCxxxx xxxxxxxx
-    // Resp xxxxxxxx xxxxDNRR RRRRRRRR
-    //
-    // MCP3008
-    // Byte        0        1        2
-    // ==== ======== ======== ========
-    // Req  0000000S MCCCxxxx xxxxxxxx
-    // Resp xxxxxxxx xxxxDNRR RRRRRRRR
-    //
-    // MCP3201
-    // Byte        0        1
-    // ==== ======== ========
-    // Req  xxxxxxxx xxxxxxxx
-    // Resp xxNRRRR RRRRRRRRx
-    //
-    // MCP3202
-    // Byte        0        1        2
-    // ==== ======== ======== ========
-    // Req  00000001 MC1xxxxx xxxxxxxx
-    // Resp xxxxxxxx xxxNRRRR RRRRRRRR
-    //
-    // MCP3204
-    // Byte        0        1        2
-    // ==== ======== ======== ========
-    // Req  00000SMx CCxxxxxx xxxxxxxx
-    // Resp xxxxxxxx xxDNRRRR RRRRRRRR
-    //
-    // MCP3208
-    // Byte        0        1        2
-    // ==== ======== ======== ========
-    // Req  00000SMC CCxxxxxx xxxxxxxx
-    // Resp xxxxxxxx xxDNRRRR RRRRRRRR
-    //
-    // MCP3301
-    // Byte        0        1
-    // ==== ======== ========
-    // Req  xxxxxxxx xxxxxxxx
-    // Resp xxN-RRRR RRRRRRRR
-    //
-    // MCP3302
-    // Byte        0        1        2
-    // ==== ======== ======== ========
-    // Req  0000SMxC Cxxxxxxx xxxxxxxx
-    // Resp xxxxxxxx xDN-RRRR RRRRRRRR
-    //
-    // MCP3304
-    // Byte        0        1        2
-    // ==== ======== ======== ========
-    // Req  0000SMCC Cxxxxxxx xxxxxxxx
-    // Resp xxxxxxxx xDN-RRRR RRRRRRRR
-    //
-    // S = StartBit = 1
-    // C = Channel
-    // M = SingleEnded
-    // D = Delay
-    // N = Null Bit = 0
-    // R = Response
-    // - = Sign Bit
-    // x = Dont Care
-    //
-
     /// <summary>
-    /// Mcp3xxx Abstract class representing the MCP ADC devices.
+    /// Mcp3xxx Abstract class representing the MCP 10 and 12 bit ADC devices.
     /// </summary>
-    public abstract class Mcp3xxx : IDisposable
+    public abstract class Mcp3xxx : Mcp3Base
     {
         /// <summary>
-        /// InputType: the type of pin connection
+        /// the number of single ended input channel on the ADC
         /// </summary>
-        protected enum InputType
-        {
-            ///<summary>The value is measured as the voltage on a single pin</summary>
-            SingleEnded = 0,
-            ///<summary>The value is the difference in voltage between two pins with the first pin being the positive one</summary>
-            Differential = 1,
-            ///<summary>The value is the difference in voltage between two pins with the second pin being the positive one</summary>
-            InvertedDifferential = 2
-        }
+        protected byte ChannelCount;
 
-        private SpiDevice _spiDevice;
+        private byte _adcResolutionBits;
 
         /// <summary>
-        /// Constructs Mcp3Adc instance
+        /// Constructs Mcp3xxx instance
         /// </summary>
         /// <param name="spiDevice">Device used for SPI communication</param>
-        public Mcp3xxx(SpiDevice spiDevice)
+        /// <param name="channelCount">Value representing the number of single ended input channels available on the device.</param>
+        /// <param name="adcResolutionBits">The number of bits of resolution for the ADC.</param>
+        public Mcp3xxx(SpiDevice spiDevice, byte channelCount, byte adcResolutionBits) : base(spiDevice)
         {
-            _spiDevice = spiDevice;
+            ChannelCount = channelCount;
+            _adcResolutionBits = adcResolutionBits;
         }
 
         /// <summary>
-        /// Disposes Mcp3Adc instances
+        /// Checks that the channel is in range of the available channels channels and throws an exception if not.
         /// </summary>
-        public void Dispose()
+        /// <param name="channel">Channel to be checked</param>
+        /// <param name="channelCount">Value representing the number of channels on the device which may vary depending on the configuration.</param>
+        protected void CheckChannelRange(int channel, int channelCount)
         {
-            _spiDevice?.Dispose();
-            _spiDevice = null;
+            if (channel < 0 || channel > channelCount - 1)
+            {
+                throw new ArgumentOutOfRangeException($"ADC channel must be within the range 0-{channelCount - 1}.", nameof(channel));
+            }
+        }
+
+        /// <summary>
+        /// Checks that the channel is in range of the available input channels and that both channels are part of a valid pairing of input channels.
+        /// </summary>
+        /// <param name="valueChannel">Value channel to be checked</param>
+        /// <param name="referenceChannel">Reference channel to be checked</param>
+        protected void CheckChannelPairing(int valueChannel, int referenceChannel)
+        {
+            CheckChannelRange(valueChannel, ChannelCount);
+            CheckChannelRange(referenceChannel, ChannelCount);
+
+            // Check that the channels are in the differential pairing.
+            // When using differential inputs then then the single ended inputs are grouped into channel pairs such that for an 8 input deviice then the pairs
+            // would be CH0 and CH1, CH2 and CH3, CH4 and CH5, CH6 and CH7 and thus to work out which channel pairing a channel is in then the channel number can be divided by 2.
+            if (valueChannel / 2 != referenceChannel / 2 || valueChannel == referenceChannel)
+            {
+                throw new ArgumentException($"ADC differential channels must be different and part of the same channel pairing.", nameof(valueChannel) + " " + nameof(referenceChannel));
+            }
+        }
+
+        /// <summary>
+        /// Reads a  value from the device using pseudo-differential inputs
+        /// </summary>
+        /// <remarks>
+        /// Like a normal differential input the value that is read respresents the difference between the voltage on the value channel and the voltage on the reference channel (valueChannel Reading - referenceChannel Reading).
+        /// However the reference signal in a pseudo-differential input is expected to be connected to the signal ground. This is used to reduce the effect of external electrical noise on the on the inputs. If there is noise where
+        /// the noise is likey to impact both the value input and the reference input and the action of subtracting the values helps to cancel it out.
+        /// </remarks>
+        /// <param name="valueChannel">Channel which represents the signal (valid values: 0 to channelcount - 1).</param>
+        /// <param name="referenceChannel">Channel which represents the signal ground (valid values: 0 to channelcount - 1).</param>
+        /// <returns>A value corresponding to relative voltage level on specified device channels</returns>
+        public virtual int ReadPseudoDifferential(int valueChannel, int referenceChannel)
+        {
+            // ensure that the channels are part of the same pairing
+            CheckChannelPairing(valueChannel, referenceChannel);
+
+            // read and return the value. the value passsed to the channel represents the channel pair. 
+            return ReadInternal(channel: valueChannel / 2, valueChannel > referenceChannel ? InputType.InvertedDifferential : InputType.Differential, _adcResolutionBits);
+        }
+
+        /// <summary>
+        /// Reads a value from the device using differential inputs
+        /// </summary>
+        /// <remarks>
+        /// The value that is read respresents the difference between the voltage on the value channel and the voltage on the reference channel (valueChannel Reading - referenceChannel Reading).
+        /// This subtraction is performed in software which may mean that errors are introduced with rapidly changing signals.
+        /// </remarks>
+        /// <param name="valueChannel">Channel which represents the signal driving the value in a positive direction (valid values: 0 to channelcount - 1).</param>
+        /// <param name="referenceChannel">Channel which represents the signal driving the value in a negative direction (valid values: 0 to channelcount - 1).</param>
+        /// <returns>A value corresponding to relative voltage level on specified device channels</returns>
+        public virtual int ReadDifferential(int valueChannel, int referenceChannel)
+        {
+            CheckChannelRange(valueChannel, ChannelCount);
+            CheckChannelRange(referenceChannel, ChannelCount);
+
+            if (valueChannel == referenceChannel)
+            {
+                throw new ArgumentException($"ADC differential channels must be different.", nameof(valueChannel) + " " + nameof(referenceChannel));
+            }
+
+            return ReadInternal(valueChannel, InputType.SingleEnded, _adcResolutionBits) -
+                   ReadInternal(referenceChannel, InputType.SingleEnded, _adcResolutionBits);
         }
 
         /// <summary>
         /// Reads a value from the device
         /// </summary>
-        /// <param name="adcRequest">A bit pattern to be sent to the ADC.</param>
-        /// <param name="adcRequestLengthBytes">The number of bytes to be sent to the ADC containing the request and returning the response.</param>
-        /// <param name="adcResolutionBits">The number of bits in the returned value</param>
-        /// <param name="delayBits">The number of bits to be delayed between the request and the response being read.</param>
-        /// <returns>A value corresponding to a voltage level on the input pin described by the request.</returns>
-        protected int ReadInternal(int adcRequest, int adcRequestLengthBytes, int adcResolutionBits, int delayBits)
+        /// <param name="channel">Channel which value should be read from (valid values: 0 to channelcount - 1)</param>
+        /// <returns>A value corresponding to relative voltage level on specified device channel</returns>
+        public virtual int Read(int channel)
         {
-            int retval = 0;
+            return ReadInternal(channel, InputType.SingleEnded, _adcResolutionBits);
+        }
 
-            Span<byte> requestBuffer = stackalloc byte[adcRequestLengthBytes];
-            Span<byte> responseBuffer = stackalloc byte[adcRequestLengthBytes];
+        /// <summary>
+        /// Reads a value from the device
+        /// </summary>
+        /// <param name="channel">Channel which value should be read from. For diffential inputs this represents a channel pair (valid values: 0 - channelcount - 1 or 0 - channelcount / 2 - 1  with differential inputs)</param>
+        /// <param name="inputType">The type of input channel to read.</param>
+        /// <param name="adcResolutionBits">The number of bits in the returned value</param>
+        /// <returns>A value corresponding to relative voltage level on specified device channel</returns>
+        protected int ReadInternal(int channel, InputType inputType, int adcResolutionBits)
+        {
+            int channelVal;
+            int requestVal;
 
-            // shift the request left to make space in the response for the number of bits in the 
-            // response plus the conversion delay and plus 1 for a null bit.
-            adcRequest <<= (adcResolutionBits + delayBits + 1);
+            CheckChannelRange(channel, inputType == InputType.SingleEnded ? ChannelCount : ChannelCount / 2);
 
-            // take the resuest and put it in a byte array
-            for (int i = 0; i < requestBuffer.Length; i++)
+            // create a value that represents the channel value. For differental inputs
+            // then incorporate the lower bit which indicates if the channel is inverted or not.
+            channelVal = inputType switch
             {
-                requestBuffer[i] = (byte)(adcRequest >> (adcRequestLengthBytes - i - 1) * 8);
-            }
+                InputType.Differential => channel * 2,
+                InputType.InvertedDifferential => channel * 2 + 1,
+                _ => channel
+            };
 
-            _spiDevice.TransferFullDuplex(requestBuffer, responseBuffer);
-
-            // transfer the response from the ADC into the return value
-            for (int i = 0; i < responseBuffer.Length; i++)
+            // create a value to represent the request to the ADC 
+            requestVal = ChannelCount switch
             {
-                retval <<= 8;
-                retval += responseBuffer[i];
-            }
+                var x when (x == 4 || x == 8) => (inputType == InputType.SingleEnded ? 0b1_1000 : 0b1_0000) | channelVal,
+                2 => (inputType == InputType.SingleEnded ? 0b1101 : 0b1001) | channelVal << 1,
+                1 => 0,
+                _ => throw new ArgumentOutOfRangeException("Unsupported Channel Count")
+            };
 
-            // test the response from the ADC to check that the null bit is actually 0
-            if ((retval & (1 << adcResolutionBits)) != 0)
-            {
-                throw new InvalidOperationException("Invalid data was read from the sensor");
-            }
-
-            // return the ADC response with any possible higer bits masked out
-            return retval & (int)(0xFFFFFFFF >> (32 - adcResolutionBits));
+            // read the data from the device...
+            // the adcRequestLength bytes is 2 for the 3001, 3002 and 3201 otherwise it is 3 bytes
+            // the delayBits is set to account for the extra sampling delay on the 3002, 3004, 3202, 3204, 3302, 
+            return ReadInternal(requestVal, adcRequestLengthBytes: ChannelCount > 1 && adcResolutionBits > 10 ? 3 : 2, adcResolutionBits: adcResolutionBits, delayBits: ChannelCount > 2 ? 1 : 0);
         }
     }
 }

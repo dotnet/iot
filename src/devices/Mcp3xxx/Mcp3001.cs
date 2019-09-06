@@ -9,7 +9,7 @@ namespace Iot.Device.Adc
     /// <summary>
     /// MCP3001 Analog to Digital Converter (ADC)
     /// </summary>
-    public class Mcp3001 : Mcp3xxx
+    public class Mcp3001 : Mcp3Base
     {
         /// <summary>
         /// Constructs Mcp3008 instance

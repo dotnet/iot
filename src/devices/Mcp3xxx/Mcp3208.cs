@@ -10,12 +10,12 @@ namespace Iot.Device.Adc
     /// <summary>
     /// MCP3208 Analog to Digital Converter (ADC)
     /// </summary>
-    public class Mcp3208 : Mcp30xx32xx
+    public class Mcp3208 : Mcp3xxx
     {
         /// <summary>
         /// Constructs Mcp3008 instance
         /// </summary>
         /// <param name="spiDevice">Device used for SPI communication</param>
-        public Mcp3208(SpiDevice spiDevice) : base(spiDevice, pinCount: 8, adcResolutionBits: 12) { }
+        public Mcp3208(SpiDevice spiDevice) : base(spiDevice, channelCount: 8, adcResolutionBits: 12) { }
     }
 }
