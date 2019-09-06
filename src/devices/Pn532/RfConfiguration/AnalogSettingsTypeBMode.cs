@@ -10,35 +10,41 @@ namespace Iot.Device.Pn532.RfConfiguration
     /// When using this command, the host controller has to provide 3 new values
     /// (ConfigurationData[]) for the following internal registers:     /// Except for these two specific settings, the 8 remaining analog settings are the
     /// same as the CfgItem 106 kbps type A.
-    /// Please refer to documentation for more information
+    /// CIU = Contactless Interface Unit 
+    /// Please refer to https://www.nxp.com/docs/en/nxp/data-sheets/PN532_C1.pdf page 144
     /// </summary>
     public class AnalogSettingsTypeBMode
     {
         /// <summary>
-        /// GcNOn, cf page 105 documentation 141520.pdf
+        /// GsNOn, cf page 105 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Selects the conductance of the antenna driver pins TX1 and
+        /// TX2 for modulation, when own RF field is switched on
         /// </summary>
-        public byte CIU_GsNOn { get; set; } = 0xFF;
+        public byte GsNOn { get; set; } = 0xFF;
 
         /// <summary>
-        /// ModGsP, cf page 105 documentation 141520.pdf
+        /// ModGsP, cf page 105 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Selects the conductance of the antenna driver pins TX1 and
+        /// TX2 when in modulation phase
         /// </summary>
-        public byte CIU_ModGsP { get; set; } = 0x17;
+        public byte ModGsP { get; set; } = 0x17;
 
         /// <summary>
-        /// RxThreshold, cf page 105 documentation 141520.pdf
+        /// RxThreshold, cf page 105 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Selects thresholds for the bit decoder
         /// </summary>
-        public byte CIU_RxThreshold { get; set; } = 0x85;
+        public byte RxThreshold { get; set; } = 0x85;
 
         /// <summary>
         /// Get the byte array to send
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Serialized value</returns>
         public byte[] Serialize()
         {
             return new byte[3] {
-                CIU_GsNOn,
-                CIU_ModGsP,
-                CIU_RxThreshold,
+                GsNOn,
+                ModGsP,
+                RxThreshold,
             };
         }
     }

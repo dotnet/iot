@@ -13,6 +13,9 @@ namespace Iot.Device.Pn532.RfConfiguration
     /// </summary>
     public class VariousTimingsMode
     {
+        /// <summary>
+        /// Reserved for Further Usage
+        /// </summary>
         public const byte RFU = 0x00;
 
         /// <summary>
@@ -37,7 +40,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// <summary>
         /// Get the byte array to send
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Serialized value</returns>
         public byte[] Serialize()
         {
             return new byte[3] { RFU, (byte)AnsweToRequestResponseTimeout, (byte)RetryTimeout };

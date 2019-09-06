@@ -814,7 +814,7 @@ namespace Iot.Device.Pn532
         /// <returns>True is success</returns>
         public bool SetMaxRetryWriteRead(byte numberRetries = 0x00)
         {
-            return SetRfConfiguration(RfConfigurationMode.MaxRtyCOM, new byte[1] { numberRetries });
+            return SetRfConfiguration(RfConfigurationMode.MaxRetryCOM, new byte[1] { numberRetries });
         }
 
         /// <summary>
@@ -1741,6 +1741,9 @@ namespace Iot.Device.Pn532
 
         #endregion
 
+        /// <summary>
+        /// Dispose
+        /// </summary>
         public void Dispose()
         {
             _spiDevice?.Dispose();

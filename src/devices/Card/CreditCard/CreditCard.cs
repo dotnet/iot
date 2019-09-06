@@ -389,8 +389,8 @@ namespace Iot.Device.Card.CreditCardProcessing
                                 if (dol.TagNumber == 0x9F66)
                                 {
                                     // Select modes to get a maximum of data
-                                    TerminalTransactionQualifier ttq = TerminalTransactionQualifier.MagStripeSupported | TerminalTransactionQualifier.EmvModeSuypported | TerminalTransactionQualifier.EmvContactChipSupported |
-                                        TerminalTransactionQualifier.OnlinePinSupported | TerminalTransactionQualifier.SignatureSupported | TerminalTransactionQualifier.ConstactChipOfflinePinSupported |
+                                    TerminalTransactionQualifier ttq = TerminalTransactionQualifier.MagStripeSupported | TerminalTransactionQualifier.EmvModeSupported | TerminalTransactionQualifier.EmvContactChipSupported |
+                                        TerminalTransactionQualifier.OnlinePinSupported | TerminalTransactionQualifier.SignatureSupported | TerminalTransactionQualifier.ContactChipOfflinePinSupported |
                                         TerminalTransactionQualifier.ConsumerDeviceCvmSupported | TerminalTransactionQualifier.IssuerUpdateProcessingSupported;
                                     // Encode the TTq
                                     BinaryPrimitives.TryWriteUInt32BigEndian(toSend.Slice(index, 4), (uint)ttq);

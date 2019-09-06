@@ -5,20 +5,28 @@
 namespace Iot.Device.Pn532
 {
     /// <summary>
-    /// Securioty Access Module Mode
+    /// Security Access Module Mode
     /// </summary>
     public enum SecurityAccessModuleMode
     {
-        // 0x01: Normal mode, the SAM is not used; this is the default mode,
+        /// <summary>
+        /// 0x01: Normal mode, the SAM is not used; this is the default mode
+        /// </summary>
         Normal = 0x01,
-        // 0x02: Virtual Card, the couple PN532+SAM is seen as only one
-        // contactless SAM card from the external world,
+        /// <summary>
+        /// 0x02: Virtual Card, the couple PN532+SAM is seen as only one
+        /// contactless SAM card from the external world
+        /// </summary>
         VirtualCard = 0x02,
-        // 0x03: Wired Card, the host controller can access to the SAM with
-        // standard PCD commands (InListPassiveTarget,InDataExchange, …),
+        /// <summary>
+        /// 0x03: Wired Card, the host controller can access to the SAM with
+        /// standard PCD commands (InListPassiveTarget,InDataExchange, …)
+        /// </summary>
         WiredCard = 0x03,
-        // 0x04: Dual Card, both the PN532 and the SAM are visible from the
-        // external world as two separated targets. 
+        /// <summary>
+        /// 0x04: Dual Card, both the PN532 and the SAM are visible from the
+        /// external world as two separated targets
+        /// </summary>
         DualCard = 0x04
     }
 }

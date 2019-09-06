@@ -16,77 +16,91 @@ namespace Iot.Device.Pn532.RfConfiguration
     /// during a reception i.e.initiator passive mode,
     /// • CIU_Demod when own RF is Off defines a setting when its RF field is off
     /// during a reception i.e.initiator active mode.
-    /// Please refer to document for detailed documentation
+    /// CIU = Contactless Interface Unit 
+    /// Please refer to https://www.nxp.com/docs/en/nxp/data-sheets/PN532_C1.pdf page 144
     /// </summary>
     public class Analog106kbpsTypeAMode
     {
         /// <summary>
-        /// RFCfg, cf page 104 documentation 141520.pdf
+        /// RFCfg, cf page 104 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
         /// </summary>
-        public byte CIU_RfConfiguration { get; set; } = 0x59;
+        public byte RfConfiguration { get; set; } = 0x59;
 
         /// <summary>
-        /// GsNOn, cf page 104 documentation 141520.pdf
+        /// GsNOn, cf page 104 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Selects the conductance of the antenna driver pins TX1 and
+        /// TX2 for modulation, when own RF field is switched on
         /// </summary>
-        public byte CIU_GsNOn { get; set; } = 0xF4;
+        public byte GsNOn { get; set; } = 0xF4;
 
         /// <summary>
-        /// CWGsP, cf page 104 documentation 141520.pdf
+        /// CWGsP, cf page 104 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
         /// </summary>
-        public byte CIU_CWGsP { get; set; } = 0x3F;
+        public byte CWGsP { get; set; } = 0x3F;
 
         /// <summary>
-        /// ModGsP, cf page 104 documentation 141520.pdf
+        /// ModGsP, cf page 104 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Selects the conductance of the antenna driver pins TX1 and
+        /// TX2 when not in modulation phase
         /// </summary>
-        public byte CIU_ModGsP { get; set; } = 0x11;
+        public byte ModGsP { get; set; } = 0x11;
 
         /// <summary>
-        /// DemodWhenRfOn, cf page 104 documentation 141520.pdf
+        /// DemodWhenRfOn, cf page 104 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Defines demodulator settings when radio frequency is on
         /// </summary>
-        public byte CIU_DemodWhenRfOn { get; set; } = 0x4D;
+        public byte DemodWhenRfOn { get; set; } = 0x4D;
 
         /// <summary>
-        /// RxThreshold, cf page 104 documentation 141520.pdf
+        /// RxThreshold, cf page 104 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Selects thresholds for the bit decoder
         /// </summary>
-        public byte CIU_RxThreshold { get; set; } = 0x85;
+        public byte RxThreshold { get; set; } = 0x85;
 
         /// <summary>
-        /// DemodWhenRfOff, cf page 104 documentation 141520.pdf
+        /// DemodWhenRfOff, cf page 104 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Defines demodulator settings when radio frequency is off
         /// </summary>
-        public byte CIU_DemodWhenRfOff { get; set; } = 0x61;
+        public byte DemodWhenRfOff { get; set; } = 0x61;
 
         /// <summary>
-        /// GsNOff, cf page 104 documentation 141520.pdf
+        /// GsNOff, cf page 104 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Selects the conductance of the antenna driver pins TX1 and
+        /// TX2 for load modulation when own RF field is switched off
         /// </summary>
-        public byte CIU_GsNOff { get; set; } = 0x6F;
+        public byte GsNOff { get; set; } = 0x6F;
 
         /// <summary>
-        /// ModWidth, cf page 104 documentation 141520.pdf
+        /// ModWidth, cf page 104 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Controls the setting of the width of the Miller pause
         /// </summary>
-        public byte CIU_ModWidth { get; set; } = 0x26;
+        public byte ModWidth { get; set; } = 0x26;
 
         /// <summary>
-        /// MifNFC, cf page 104 documentation 141520.pdf
+        /// MifNFC, cf page 104 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Controls the communication in ISO/IEC 14443/MIFARE and
+        /// NFC target mode at 106 kbit/s
         /// </summary>
-        public byte CIU_MifNFC { get; set; } = 0x62;
+        public byte MifNFC { get; set; } = 0x62;
 
         /// <summary>
-        /// TxBitPhase, cf page 104 documentation 141520.pdf
+        /// TxBitPhase, cf page 104 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Bit synchronization at 106 kbit/s
         /// </summary>
-        public byte CIU_TxBitPhase { get; set; } = 0x87;
+        public byte TxBitPhase { get; set; } = 0x87;
 
         /// <summary>
         /// Get the byte array to send
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Serialized value</returns>
         public byte[] Serialize()
         {
             return new byte[11] {
-                CIU_RfConfiguration, CIU_GsNOn, CIU_CWGsP,
-                CIU_ModGsP, CIU_DemodWhenRfOn,
-                CIU_RxThreshold, CIU_DemodWhenRfOff,
-                CIU_GsNOff, CIU_ModWidth,
-                CIU_MifNFC, CIU_TxBitPhase
+                RfConfiguration, GsNOn, CWGsP,
+                ModGsP, DemodWhenRfOn,
+                RxThreshold, DemodWhenRfOff,
+                GsNOff, ModWidth,
+                MifNFC, TxBitPhase
             };
         }
     }

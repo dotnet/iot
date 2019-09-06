@@ -9,10 +9,25 @@ namespace Iot.Device.Card.Mifare
     /// </summary>
     public enum MifareCardCapacity
     {
-        Unkown,
+        /// <summary>
+        /// Unknown
+        /// </summary>
+        Unknown,
+        /// <summary>
+        /// Mifare 300
+        /// </summary>
         Mifare300,
+        /// <summary>
+        /// Mifare 1K
+        /// </summary>
         Mifare1K,
+        /// <summary>
+        /// Mifare 2K
+        /// </summary>
         Mifare2K,
+        /// <summary>
+        /// Mifare 4K
+        /// </summary>
         Mifare4K
     }
 }

@@ -16,61 +16,73 @@ namespace Iot.Device.Pn532.RfConfiguration
     /// during a reception i.e.initiator passive mode,
     /// • CIU_Demod when own RF is Off defines a setting when its RF field is off
     /// during a reception i.e.initiator active mode.
-    /// Please refer to documentation for more information
+    /// CIU = Contactless Interface Unit 
+    /// Please refer to https://www.nxp.com/docs/en/nxp/data-sheets/PN532_C1.pdf page 144
     /// </summary>
     public class Analog212_424kbpsMode
     {
         /// <summary>
-        /// RfCfg, cf page 105 documentation 141520.pdf
+        /// RfCfg, cf page 105 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
         /// </summary>
-        public byte CIU_RfConfiguration { get; set; } = 0x69;
+        public byte RfConfiguration { get; set; } = 0x69;
 
         /// <summary>
-        /// GsNon, cf page 105 documentation 141520.pdf
+        /// GsNon, cf page 105 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Selects the conductance of the antenna driver pins TX1 and
+        /// TX2 for modulation, when own RF field is switched on
         /// </summary>
-        public byte CIU_GsNOn { get; set; } = 0xFF;
+        public byte GsNOn { get; set; } = 0xFF;
 
         /// <summary>
-        /// CWGsP, cf page 105 documentation 141520.pdf
+        /// CWGsP, cf page 105 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Selects the conductance of the antenna driver pins TX1 and
+        /// TX2 when not in modulation phase
         /// </summary>
-        public byte CIU_CWGsP { get; set; } = 0x3F;
+        public byte CWGsP { get; set; } = 0x3F;
 
         /// <summary>
-        /// ModGsP, cf page 105 documentation 141520.pdf
+        /// ModGsP, cf page 105 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        ///  Selects the conductance of the antenna driver pins TX1 and
+        /// TX2 when in modulation phase
         /// </summary>
-        public byte CIU_ModGsP { get; set; } = 0x11;
+        public byte ModGsP { get; set; } = 0x11;
 
         /// <summary>
-        /// DmodWhenRfOn, cf page 105 documentation 141520.pdf
+        /// DmodWhenRfOn, cf page 105 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Defines demodulator settings when radio frequency is on
         /// </summary>
-        public byte CIU_DemodWhenRfOn { get; set; } = 0x41;
+        public byte DemodWhenRfOn { get; set; } = 0x41;
 
         /// <summary>
-        /// RxThreshold, cf page 105 documentation 141520.pdf
+        /// RxThreshold, cf page 105 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Selects thresholds for the bit decoder
         /// </summary>
-        public byte CIU_RxThreshold { get; set; } = 0x85;
+        public byte RxThreshold { get; set; } = 0x85;
 
         /// <summary>
-        /// DemodWhenRfOff, cf page 105 documentation 141520.pdf
+        /// DemodWhenRfOff, cf page 105 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Defines demodulator settings when radio frequency is off
         /// </summary>
-        public byte CIU_DemodWhenRfOff { get; set; } = 0x61;
+        public byte DemodWhenRfOff { get; set; } = 0x61;
 
         /// <summary>
-        /// GsNOff, cf page 105 documentation 141520.pdf
+        /// GsNOff, cf page 105 documentation 141520.pdf and page 144 documentation PN532_C1.pdf
+        /// Selects the conductance of the antenna driver pins TX1 and
+        /// TX2 for load modulation when own RF field is switched off
         /// </summary>
-        public byte CIU_GsNOff { get; set; } = 0x6F;
+        public byte GsNOff { get; set; } = 0x6F;
 
         /// <summary>
         /// Get the byte array to send
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Serialized value</returns>
         public byte[] Serialize()
         {
             return new byte[8] {
-                CIU_RfConfiguration, CIU_GsNOn, CIU_CWGsP,
-                CIU_ModGsP, CIU_DemodWhenRfOn,
-                CIU_RxThreshold, CIU_DemodWhenRfOff,
-                CIU_GsNOff
+                RfConfiguration, GsNOn, CWGsP,
+                ModGsP, DemodWhenRfOn,
+                RxThreshold, DemodWhenRfOff,
+                GsNOff
             };
         }
     }

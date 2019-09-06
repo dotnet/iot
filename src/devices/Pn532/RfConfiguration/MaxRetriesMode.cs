@@ -31,7 +31,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// try).The default value of this parameter is 0x01 (the PSL_REQ/PPS request is
         /// sent twice in case of need). 
         /// </summary>
-        public byte MxRtyPSL { get; set; } = 0x01;
+        public byte MaxRetryPSL { get; set; } = 0x01;
 
         /// <summary>
         /// MxRtyPassiveActivation is a byte containing the number of times that the
@@ -41,15 +41,15 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// try).
         /// The default value of this parameter is 0xFF (infinitely). 
         /// </summary>
-        public byte MxRtyPassiveActivation { get; set; }
+        public byte MaxRetryPassiveActivation { get; set; }
 
         /// <summary>
         /// Get the byte array to send
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Serialized value</returns>
         public byte[] Serialize()
         {
-            return new byte[3] { MaxRetryAnswerToReset, MxRtyPSL, MxRtyPassiveActivation };
+            return new byte[3] { MaxRetryAnswerToReset, MaxRetryPSL, MaxRetryPassiveActivation };
         }
     }
 }

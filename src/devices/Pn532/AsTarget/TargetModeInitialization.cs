@@ -5,7 +5,10 @@
 using System;
 
 namespace Iot.Device.Pn532.AsTarget
-{    
+{
+    /// <summary>
+    /// Target Mode Initialization
+    /// </summary>
     [Flags]
     public enum TargetModeInitialization
     {

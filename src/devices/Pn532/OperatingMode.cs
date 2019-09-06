@@ -10,8 +10,17 @@ namespace Iot.Device.Pn532
     /// </summary>
     public enum OperatingMode
     {
+        /// <summary>
+        /// High Speed UART
+        /// </summary>
         HighSpeedUart = 0b0000_0000,
+        /// <summary>
+        /// I2C
+        /// </summary>
         I2c = 0b0000_0010,
+        /// <summary>
+        /// SPI
+        /// </summary>
         Spi = 0b0000_0001,        
     }
 }

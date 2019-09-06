@@ -14,13 +14,16 @@ namespace Iot.Device.Card.CreditCardProcessing
     /// </summary>
     public class TagDetails : Tag
     {
+        /// <summary>
+        /// TagDetail constructor
+        /// </summary>
         public TagDetails()
         { }
 
         /// <summary>
         /// Constructor using an existing Tag
         /// </summary>
-        /// <param name="tag"></param>
+        /// <param name="tag">The tag</param>
         public TagDetails(Tag tag)
         {
             TagNumber = tag.TagNumber;

@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 namespace Iot.Device.Card.CreditCardProcessing
 {
+    /// <summary>
+    /// Class containing the tag list definitions, their types, sources and numbers
+    /// </summary>
     public class TagList
     {
         /// <summary>

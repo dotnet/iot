@@ -55,13 +55,16 @@ namespace Iot.Device.Card.Mifare
         /// </summary>
         public byte[] Data { get; set; }
 
-
+        /// <summary>
+        /// Constructor for Mifarecard
+        /// </summary>
+        /// <param name="rfid">A card transceiver class</param>
+        /// <param name="target">The target number as some card readers attribute one</param>
         public MifareCard(CardTransceiver rfid, byte target)
         {
             _rfid = rfid;
             Target = target;
         }
-
 
         /// <summary>
         /// Run the last setup command. In case of reading bytes, they are automatically pushed into the Data property
@@ -408,6 +411,10 @@ namespace Iot.Device.Card.Mifare
             return (b6, b7, b8);
         }
 
+        /// <summary>
+        /// Encode with default value the access sector and tailer blocks
+        /// </summary>
+        /// <returns></returns>
         public (byte b6, byte b7, byte b8) EncodeDefaultSectorAndBlockTailer()
         {
             return (0xFF, 0x07, 0x80);
