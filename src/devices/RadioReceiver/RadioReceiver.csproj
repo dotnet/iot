@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
+    <Compile Include="Devices\Tea5767\FrequencyRange.cs" />
+    <Compile Include="Devices\Tea5767\SearchDirection.cs" />
+    <Compile Include="Devices\Tea5767\Tea5767.cs" />
+    <Compile Include="RadioReceiverBase.cs" />
+  </ItemGroup>
+
+</Project>
