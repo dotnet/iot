@@ -12,21 +12,21 @@ namespace Iot.Device.RadioTransmitter
         /// <summary>
         /// Disable
         /// </summary>
-        Boost_Disable = 0,
+        BoostDisable = 0,
 
         /// <summary>
         /// 5 dB
         /// </summary>
-        Boost_5dB = 1,
+        Boost05dB = 1,
 
         /// <summary>
         /// 11 dB
         /// </summary>
-        Boost_11dB = 2,
+        Boost11dB = 2,
 
         /// <summary>
         /// 17 dB
         /// </summary>
-        Boost_17dB = 3
+        Boost17dB = 3
     }
 }

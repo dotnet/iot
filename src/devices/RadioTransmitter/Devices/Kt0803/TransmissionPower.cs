@@ -12,81 +12,81 @@ namespace Iot.Device.RadioTransmitter
         /// <summary>
         /// 95.5 dBuV
         /// </summary>
-        Power_095_5dBuV = 0,
+        Power095_5dBuV = 0,
 
         /// <summary>
         /// 96.5 dBuV
         /// </summary>
-        Power_096_5dBuV = 1,
+        Power096_5dBuV = 1,
 
         /// <summary>
         /// 97.5 dBuV
         /// </summary>
-        Power_097_5dBuV = 2,
+        Power097_5dBuV = 2,
 
         /// <summary>
         /// 98.2 dBuV
         /// </summary>
-        Power_098_2dBuV = 3,
+        Power098_2dBuV = 3,
 
         /// <summary>
         /// 98.9 dBuV
         /// </summary>
-        Power_098_9dBuV = 4,
+        Power098_9dBuV = 4,
 
         /// <summary>
         /// 100 dBuV
         /// </summary>
-        Power_100dBuV = 5,
+        Power100dBuV = 5,
 
         /// <summary>
         /// 101.5 dBuV
         /// </summary>
-        Power_101_5dBuV = 6,
+        Power101_5dBuV = 6,
 
         /// <summary>
         /// 102.8 dBuV
         /// </summary>
-        Power_102_8dBuV = 7,
+        Power102_8dBuV = 7,
 
         /// <summary>
         /// 105.1 dBuV
         /// </summary>
-        Power_105_1dBuV = 8,
+        Power105_1dBuV = 8,
 
         /// <summary>
         /// 105.6 dBuV
         /// </summary>
-        Power_105_6dBuV = 9,
+        Power105_6dBuV = 9,
 
         /// <summary>
         /// 106.2 dBuV
         /// </summary>
-        Power_106_2dBuV = 10,
+        Power106_2dBuV = 10,
 
         /// <summary>
         /// 106.5 dBuV
         /// </summary>
-        Power_106_5dBuV = 11,
+        Power106_5dBuV = 11,
 
         /// <summary>
         /// 107 dBuV
         /// </summary>
-        Power_107dBuV = 12,
+        Power107dBuV = 12,
 
         /// <summary>
         /// 107.4 dBuV
         /// </summary>
-        Power_107_4dBuV = 13,
+        Power107_4dBuV = 13,
 
         /// <summary>
         /// 107.7 dBuV
         /// </summary>
-        Power_107_7dBuV = 14,
+        Power107_7dBuV = 14,
 
         /// <summary>
         /// 108 dBuV
         /// </summary>
-        Power_108dBuV = 15,
+        Power108dBuV = 15,
     }
 }

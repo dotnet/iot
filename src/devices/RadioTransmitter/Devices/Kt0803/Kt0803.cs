@@ -35,7 +35,7 @@ namespace Iot.Device.RadioTransmitter
         public bool Mute { get => GetMute(); set => SetMute(value); }
         
         /// <summary>
-        /// Kt0803 PGA ( Programmable Gain Amplifier ) gain.
+        /// Kt0803 PGA (Programmable Gain Amplifier) gain.
         /// </summary>
         public PgaGain PgaGain { get => GetPga(); set => SetPga(value); }
 
@@ -63,7 +63,7 @@ namespace Iot.Device.RadioTransmitter
         /// <param name="region">Region.</param>
         /// <param name="power">Transmission power.</param>
         /// <param name="pga">PGA (Programmable Gain Amplifier) gain.</param>
-        public Kt0803(I2cDevice i2cDevice, double frequency, Region region, TransmissionPower power = TransmissionPower.Power_108dBuV, PgaGain pga = PgaGain.PGA_00dB)
+        public Kt0803(I2cDevice i2cDevice, double frequency, Region region, TransmissionPower power = TransmissionPower.Power108dBuV, PgaGain pga = PgaGain.Pga00dB)
         {
             _i2cDevice = i2cDevice;
             Frequency = frequency;
@@ -153,15 +153,15 @@ namespace Iot.Device.RadioTransmitter
 
             switch (pgaGain)
             {
-                case PgaGain.PGA_00dB:
-                case PgaGain.PGA_04dB:
-                case PgaGain.PGA_08dB:
-                case PgaGain.PGA_12dB:
+                case PgaGain.Pga00dB:
+                case PgaGain.Pga04dB:
+                case PgaGain.Pga08dB:
+                case PgaGain.Pga12dB:
                     reg3 = (reg3 & 0b_1100_1111) | (3 << 4);
                     break;
-                case PgaGain.PGA_N04dB:
-                case PgaGain.PGA_N08dB:
-                case PgaGain.PGA_N12dB:
+                case PgaGain.PgaN04dB:
+                case PgaGain.PgaN08dB:
+                case PgaGain.PgaN12dB:
                     reg3 = (reg3 & 0b_1100_1111) | (0 << 4);
                     break;
                 default:

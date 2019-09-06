@@ -5,43 +5,43 @@
 namespace Iot.Device.RadioTransmitter
 {
     /// <summary>
-    /// PGA ( Programmable Gain Amplifier ) Gain
+    /// PGA (Programmable Gain Amplifier) Gain
     /// </summary>
     public enum PgaGain : byte
     {
         /// <summary>
         /// 0 dB
         /// </summary>
-        PGA_00dB = 4,
+        Pga00dB = 4,
 
         /// <summary>
         /// 4 dB
         /// </summary>
-        PGA_04dB = 5,
+        Pga04dB = 5,
 
         /// <summary>
         /// 8 dB
         /// </summary>
-        PGA_08dB = 6,
+        Pga08dB = 6,
 
         /// <summary>
         /// 12 dB
         /// </summary>
-        PGA_12dB = 7,
+        Pga12dB = 7,
 
         /// <summary>
         /// -4 dB
         /// </summary>
-        PGA_N04dB = 1,
+        PgaN04dB = 1,
 
         /// <summary>
         /// -8 dB
         /// </summary>
-        PGA_N08dB = 2,
+        PgaN08dB = 2,
 
         /// <summary>
         /// -12 dB
         /// </summary>
-        PGA_N12dB = 3,
+        PgaN12dB = 3,
     }
 }
