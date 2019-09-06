@@ -14,6 +14,6 @@ using (Tea5767 radio = new Tea5767(device, FrequencyRange.Other, 103.3))
 {
     // Automatic search from current frequency up
     // The larger stopLevel, the fewer radio stations can be searched.
-    radio.Search(isUp: true, stopLevel: 3);
+    radio.Search(searchDirection: SearchDirection.Up, stopLevel: 3);
 }
 ```
