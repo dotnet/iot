@@ -5,9 +5,8 @@
 using System;
 using System.Device.Spi;
 using System.Threading;
-using Iot.Device.Spi;
-
 using Iot.Device.Adc;
+using Iot.Device.Spi;
 
 namespace Iot.Device.Samples
 {

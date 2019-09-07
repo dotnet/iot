@@ -8,7 +8,7 @@ using System.Device.Spi;
 namespace Iot.Device.Adc
 {
     /// <summary>
-    /// Mcp3xxx Abstract class representing the MCP 10 and 12 bit ADC devices.
+    /// MCP family of ADC devices
     /// </summary>
     public abstract class Mcp3xxx : Mcp3Base
     {
@@ -133,26 +133,44 @@ namespace Iot.Device.Adc
 
             // create a value that represents the channel value. For differental inputs
             // then incorporate the lower bit which indicates if the channel is inverted or not.
-            channelVal = inputType switch
+            switch (inputType)
             {
-                InputType.Differential => channel * 2,
-                InputType.InvertedDifferential => channel * 2 + 1,
-                _ => channel
-            };
+                case InputType.Differential:
+                    channelVal = channel * 2;
+                    break;
+
+                case InputType.InvertedDifferential:
+                    channelVal = channel * 2;
+                    break;
+
+                default:
+                    channelVal = channel;
+                    break;
+            }
 
             // create a value to represent the request to the ADC 
-            requestVal = ChannelCount switch
+            switch(ChannelCount)
             {
-                var x when (x == 4 || x == 8) => (inputType == InputType.SingleEnded ? 0b1_1000 : 0b1_0000) | channelVal,
-                2 => (inputType == InputType.SingleEnded ? 0b1101 : 0b1001) | channelVal << 1,
-                1 => 0,
-                _ => throw new ArgumentOutOfRangeException("Unsupported Channel Count")
-            };
+                case 4:
+                case 8:
+                    requestVal = (inputType == InputType.SingleEnded ? 0b1_1000 : 0b1_0000) | channelVal;
+                    break;
+
+                case 2:
+                    requestVal = (inputType == InputType.SingleEnded ? 0b1101 : 0b1001) | channelVal << 1;
+                    break;
+
+                case 1:
+                    requestVal = 0;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException("Unsupported Channel Count");
+            }
 
             // read the data from the device...
-            // the adcRequestLength bytes is 2 for the 3001, 3002 and 3201 otherwise it is 3 bytes
-            // the delayBits is set to account for the extra sampling delay on the 3002, 3004, 3202, 3204, 3302, 
-            return ReadInternal(requestVal, adcRequestLengthBytes: ChannelCount > 1 && adcResolutionBits > 10 ? 3 : 2, adcResolutionBits: adcResolutionBits, delayBits: ChannelCount > 2 ? 1 : 0);
+            // the delayBits is set to account for the extra sampling delay on the 3004, 3008, 3204, 3208, 3302 and 3304
+            return ReadInternal(requestVal, adcResolutionBits: adcResolutionBits, delayBits: ChannelCount > 2 ? 1 : 0);
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Device.Spi;
 namespace Iot.Device.Adc
 {
     /// <summary>
-    /// MCP3304 Analog to Digital Converter (ADC)
+    /// MCP33XX family of Analog to Digital Converters
     /// </summary>
     public abstract class Mcp33xx : Mcp3xxx
     {
@@ -28,7 +28,7 @@ namespace Iot.Device.Adc
         /// <returns>A value corresponding to relative voltage level on specified device channels</returns>
         public override int ReadPseudoDifferential(int valueChannel, int referenceChannel)
         {
-            throw new NotSupportedException("Mcp33xx device does not support ReadPseudoDifferential.");
+            throw new NotSupportedException($"Mcp33xx device does not support {nameof(ReadPseudoDifferential)}.");
         }
 
         /// <summary>
@@ -60,8 +60,8 @@ namespace Iot.Device.Adc
                 // read a value from the ADC where the channel is the channel pairing
                 retval = ReadInternal(channel: valueChannel / 2, valueChannel > referenceChannel ? InputType.InvertedDifferential : InputType.Differential, adcResolutionBits: 13);
 
-                //convert 13 bit signed to 32 bit signed
-                retval = (retval >> 12) == 0 ? retval : (int)(0xFFFFE000 | retval);
+                // convert 13 bit signed to 32 bit signed
+                retval = SignExtend(signedValue: retval, signingBit: 12);
             }
             else // otherwise just subtract two readings
             {
@@ -70,6 +70,18 @@ namespace Iot.Device.Adc
             }
 
             return retval;
+        }
+
+        /// <summary>
+        /// Convert a signed value with a sign bit at a particular location to an int.
+        /// </summary>
+        /// <param name="signedValue">Signed value with a sign bit at a particular location</param>
+        /// <param name="signingBit">Bit number that contains the sign bit</param>
+        /// <returns>A value corresponding to the signed value sign extended into an int</returns>
+        public static int SignExtend(int signedValue, int signingBit)
+        {
+            // if the sign bit is set then extend the signing bit to create a signed integer
+            return (signedValue >> signingBit) == 0 ? signedValue : signedValue - (2 << signingBit);
         }
     }
 }

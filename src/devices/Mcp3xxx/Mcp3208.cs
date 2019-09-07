@@ -13,7 +13,7 @@ namespace Iot.Device.Adc
     public class Mcp3208 : Mcp3xxx
     {
         /// <summary>
-        /// Constructs Mcp3008 instance
+        /// Constructs Mcp3208 instance
         /// </summary>
         /// <param name="spiDevice">Device used for SPI communication</param>
         public Mcp3208(SpiDevice spiDevice) : base(spiDevice, channelCount: 8, adcResolutionBits: 12) { }

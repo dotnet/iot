@@ -1,4 +1,6 @@
-# MCP3000, MCP3200 and MCP3300 ranges of Analog to Digital Converters
+# MCP3xxx family of Analog to Digital Converters
+
+Note: Currently untested on the Mcp33xx family.
 
 Some devices like the Raspberry Pi cannot read analog values directly so rely on  [analog to digital converters](https://en.wikipedia.org/wiki/Analog-to-digital_converter), like the ones available from Microchip in the Mcp3000, Mcp3200 and Mcp3300 ranges. These chips can be accessed as an [SPI device](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface) or manually via raw GPIO pins.
 

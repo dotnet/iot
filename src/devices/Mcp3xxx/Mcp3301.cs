@@ -18,15 +18,15 @@ namespace Iot.Device.Adc
         public Mcp3301(SpiDevice spiDevice) : base(spiDevice) { }
 
         /// <summary>
-        /// Reads a 13-bit signed value from the device
+        /// Reads a 13 bit signed value from the device using differential inputs
         /// </summary>
-        /// <returns>Integer value corresponding to relative voltage level on specified device channel</returns>
-        public int Read()
+        /// <returns>A 13 bit signed value corresponding to relative voltage level on specified device channels</returns>
+        public int ReadDifferential()
         {
-            int retval = ReadInternal(adcRequest: 0, adcRequestLengthBytes: 2, adcResolutionBits: 13, delayBits: 0);
+            int signedResult = ReadInternal(adcRequest: 0, adcResolutionBits: 13, delayBits: 0);
 
-            //convert 13 bit signed to 32 bit signed
-            return (retval >> 12) == 0 ? retval : (int)(0xFFFFE000 | retval);
+            // convert 13 bit signed to 32 bit signed
+            return Mcp33xx.SignExtend(signedValue: signedResult, signingBit: 12);
         }
     }
 }
