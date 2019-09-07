@@ -15,9 +15,9 @@ namespace System.Device.Pwm
         public abstract int Frequency { get; set; }
 
         /// <summary>
-        /// The duty cycle percentage represented as a value between 0.0 and 1.0.
+        /// The duty cycle represented as a value between 0.0 and 1.0.
         /// </summary>
-        public abstract double DutyCyclePercentage { get; set; }
+        public abstract double DutyCycle { get; set; }
 
         /// <summary>
         /// Starts the PWM channel.
