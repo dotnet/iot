@@ -21,10 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="C:\Users\kim\source\repos\hugener\iot\src\Iot.Device.Bindings\..\devices\Max9744\Max9744.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="MathEx.cs" />
   </ItemGroup>
 
