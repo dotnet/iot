@@ -99,13 +99,9 @@ namespace Iot.Device.SenseHat
             byte g = (byte)(color.G >> 2);
             byte b = (byte)(color.B >> 3);
             ushort col = (ushort)((r << 11) | (g << 5) | b);
-            Span<byte> encoded = stackalloc byte[2]
-            {
-                (byte)(col & 0xff),
-                (byte)(col >> 8)
-            };
 
-            _deviceFile.Write(encoded);
+            _deviceFile.WriteByte((byte)(col & 0xff));
+            _deviceFile.WriteByte((byte)(col >> 8));
         }
 
         private static string GetSenseHatDevice()

@@ -49,7 +49,7 @@ namespace Iot.Device.Graphics
                 while (!sr.EndOfStream)
                 {
                     ReadOnlySpan<char> span = sr.ReadLine().AsSpan().Trim();
-                    if (span.StartsWith(s_fontBoundingBox, StringComparison.Ordinal))
+                    if (span.StartsWith(s_fontBoundingBox.AsSpan(), StringComparison.Ordinal))
                     {
                         span = span.Slice(s_fontBoundingBox.Length).Trim();
                         font.Width = ReadNextDecimalNumber(ref span);
@@ -58,20 +58,20 @@ namespace Iot.Device.Graphics
                         font.YDisplacement = ReadNextDecimalNumber(ref span);
                         font.BytesPerGlyph = (int)Math.Ceiling(((double)font.Width) / 8);
                     }
-                    else if (span.StartsWith(s_charSet, StringComparison.Ordinal))
+                    else if (span.StartsWith(s_charSet.AsSpan(), StringComparison.Ordinal))
                     {
                         span = span.Slice(s_charSet.Length).Trim();
-                        if (span.CompareTo(s_isoCharset, StringComparison.Ordinal) != 0)
+                        if (span.CompareTo(s_isoCharset.AsSpan(), StringComparison.Ordinal) != 0)
                         {
                             throw new NotSupportedException("We only support ISO10646 for now.");
                         }
                     }
-                    else if (span.StartsWith(s_defaultChar, StringComparison.Ordinal))
+                    else if (span.StartsWith(s_defaultChar.AsSpan(), StringComparison.Ordinal))
                     {
                         span = span.Slice(s_defaultChar.Length).Trim();
                         font.DefaultChar = ReadNextDecimalNumber(ref span);
                     }
-                    else if (span.StartsWith(s_Chars, StringComparison.Ordinal))
+                    else if (span.StartsWith(s_Chars.AsSpan(), StringComparison.Ordinal))
                     {
                         span = span.Slice(s_Chars.Length).Trim();
                         font.CharsCount = ReadNextDecimalNumber(ref span);
@@ -155,13 +155,13 @@ namespace Iot.Device.Graphics
             for (int i = 0; i < CharsCount; i++)
             {
                 ReadOnlySpan<char> span = sr.ReadLine().AsSpan().Trim();
-                if (!span.StartsWith(s_startChar, StringComparison.Ordinal))
+                if (!span.StartsWith(s_startChar.AsSpan(), StringComparison.Ordinal))
                 {
                     throw new InvalidDataException("The font data is not well formed. expected STARTCHAR tag in the beginning of glyoh data.");
                 }
 
                 span = sr.ReadLine().AsSpan().Trim();
-                if (!span.StartsWith(s_encoding, StringComparison.Ordinal))
+                if (!span.StartsWith(s_encoding.AsSpan(), StringComparison.Ordinal))
                 {
                     throw new InvalidDataException("The font data is not well formed. expected ENCODING tag.");
                 }
@@ -172,7 +172,7 @@ namespace Iot.Device.Graphics
                 do
                 {
                     span = sr.ReadLine().AsSpan().Trim();
-                } while (!span.StartsWith(s_bbx, StringComparison.Ordinal));
+                } while (!span.StartsWith(s_bbx.AsSpan(), StringComparison.Ordinal));
 
                 span = span.Slice(s_bbx.Length).Trim();
                 if (ReadNextDecimalNumber(ref span) != Width ||
@@ -184,7 +184,7 @@ namespace Iot.Device.Graphics
                 }
 
                 span = sr.ReadLine().AsSpan().Trim();
-                if (span.CompareTo(s_bitmap, StringComparison.Ordinal) != 0)
+                if (span.CompareTo(s_bitmap.AsSpan(), StringComparison.Ordinal) != 0)
                 {
                     throw new InvalidDataException("The font data is not well formed. expected BITMAP tag.");
                 }
@@ -208,7 +208,7 @@ namespace Iot.Device.Graphics
                 }
 
                 span = sr.ReadLine().AsSpan().Trim();
-                if (!span.StartsWith(s_endChar, StringComparison.Ordinal))
+                if (!span.StartsWith(s_endChar.AsSpan(), StringComparison.Ordinal))
                 {
                     throw new InvalidDataException("The font data is not well formed. expected ENDCHAR tag in the beginning of glyoh data.");
                 }

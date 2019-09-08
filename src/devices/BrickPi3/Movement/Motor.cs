@@ -51,7 +51,7 @@ namespace Iot.Device.BrickPi3.Movement
         /// <param name="speed">speed is between -255 and +255</param>
         public void SetSpeed(int speed)
         {
-            speed = Math.Clamp(speed, -255, 255);
+            speed = MathEx.Clamp(speed, -255, 255);
             _brick.SetMotorPower((byte)Port, speed);
             OnPropertyChanged(nameof(Speed));
         }

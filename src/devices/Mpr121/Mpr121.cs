@@ -5,7 +5,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Device.I2c;
 using System.Threading;
 
@@ -71,7 +71,6 @@ namespace Iot.Device.Mpr121
         public Mpr121(I2cDevice device, int periodRefresh = -1, Mpr121Configuration configuration = null)
         {
             configuration = configuration ?? GetDefaultConfiguration();
-
             _device = device;
             _timer = new Timer(RefreshChannelStatuses, this, Timeout.Infinite, Timeout.Infinite);
 
@@ -108,7 +107,7 @@ namespace Iot.Device.Mpr121
         {
             RefreshChannelStatuses();
 
-            return _statuses.ToImmutableDictionary();
+            return new ReadOnlyDictionary<Channels, bool>(_statuses);
         }
 
         /// <summary>
@@ -232,7 +231,7 @@ namespace Iot.Device.Mpr121
 
         private void OnChannelStatusesChanged()
         {
-            ChannelStatusesChanged?.Invoke(this, new ChannelStatusesChangedEventArgs(_statuses.ToImmutableDictionary()));
+            ChannelStatusesChanged?.Invoke(this, new ChannelStatusesChangedEventArgs(new ReadOnlyDictionary<Channels, bool>(_statuses)));
         }
     }
 }

@@ -48,7 +48,7 @@ namespace Iot.Device.GoPiGo3.Movements
         /// <param name="speed">speed is between -255 and +255</param>
         public void SetSpeed(int speed)
         {
-            speed = Math.Clamp(speed, -255, 255);
+            speed = MathEx.Clamp(speed, -255, 255);
             _goPiGo.SetMotorPower(Port, speed);
         }
 

@@ -56,7 +56,7 @@ namespace Iot.Device.GoPiGo3.Sensors
             set
             {
                 var prev = _duty;
-                _duty = Math.Clamp(value, (byte)0, (byte)100);
+                _duty = MathEx.Clamp(value, (byte)0, (byte)100);
                 if (prev != _duty)
                 {
                     Start();
