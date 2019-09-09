@@ -45,7 +45,7 @@ namespace Iot.Device.ServoMotor.Samples
                 }
 
                 servoMotor.WritePulseWidth(pulseWidthValue);
-                Console.WriteLine($"Duty Cycle Percentage: {pwmChannel.DutyCyclePercentage}");
+                Console.WriteLine($"Duty Cycle: {pwmChannel.DutyCycle * 100.0}%");
             }
 
             servoMotor.Stop();
@@ -71,7 +71,7 @@ namespace Iot.Device.ServoMotor.Samples
                 }
 
                 servoMotor.WriteAngle(angleValue);
-                Console.WriteLine($"Duty Cycle Percentage: {pwmChannel.DutyCyclePercentage}");
+                Console.WriteLine($"Duty Cycle: {pwmChannel.DutyCycle * 100.0}%");
             }
 
             servoMotor.Stop();

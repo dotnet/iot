@@ -15,7 +15,7 @@ namespace System.Device.Pwm.Channels
         private readonly int _chip;
         private readonly int _channel;
         private int _frequency;
-        private double _dutyCyclePercentage;
+        private double _dutyCycle;
         private readonly string _chipPath;
         private readonly string _channelPath;
         private StreamWriter _dutyCycleWriter;
@@ -27,12 +27,12 @@ namespace System.Device.Pwm.Channels
         /// <param name="chip">The PWM chip number.</param>
         /// <param name="channel">The PWM channel number.</param>
         /// <param name="frequency">The frequency in hertz.</param>
-        /// <param name="dutyCyclePercentage">The duty cycle percentage represented as a value between 0.0 and 1.0.</param>
+        /// <param name="dutyCycle">The duty cycle represented as a value between 0.0 and 1.0.</param>
         public UnixPwmChannel(
             int chip,
             int channel,
             int frequency = 400,
-            double dutyCyclePercentage = 0.5)
+            double dutyCycle = 0.5)
         {
             _chip = chip;
             _channel = channel;
@@ -46,12 +46,10 @@ namespace System.Device.Pwm.Channels
             _frequencyWriter = new StreamWriter(new FileStream($"{_channelPath}/period", FileMode.Open, FileAccess.ReadWrite));
 
             SetFrequency(frequency);
-            DutyCyclePercentage = dutyCyclePercentage;
+            DutyCycle = dutyCycle;
         }
 
-        /// <summary>
-        /// The frequency in hertz.
-        /// </summary>
+        /// <inheritdoc/>
         public override int Frequency
         {
             get
@@ -64,18 +62,16 @@ namespace System.Device.Pwm.Channels
             }
         }
 
-        /// <summary>
-        /// The duty cycle percentage represented as a value between 0.0 and 1.0.
-        /// </summary>
-        public override double DutyCyclePercentage
+        /// <inheritdoc/>
+        public override double DutyCycle
         {
             get
             {
-                return _dutyCyclePercentage;
+                return _dutyCycle;
             }
             set
             {
-                SetDutyCyclePercentage(value);
+                SetDutyCycle(value);
             }
         }
 
@@ -100,7 +96,7 @@ namespace System.Device.Pwm.Channels
             {
                 throw new ArgumentOutOfRangeException(nameof(frequency), frequency, "Value must not be negative.");
             }
-            
+
             int periodInNanoseconds = GetPeriodInNanoseconds(frequency);
             _frequencyWriter.BaseStream.SetLength(0);
             _frequencyWriter.Write(periodInNanoseconds);
@@ -109,22 +105,22 @@ namespace System.Device.Pwm.Channels
         }
 
         /// <summary>
-        /// Sets the duty cycle percentage for the channel.
+        /// Sets the duty cycle for the channel.
         /// </summary>
-        /// <param name="dutyCyclePercentage">The duty cycle percentage to set represented as a value between 0.0 and 1.0.</param>
-        private void SetDutyCyclePercentage(double dutyCyclePercentage)
+        /// <param name="dutyCycle">The duty cycle to set represented as a value between 0.0 and 1.0.</param>
+        private void SetDutyCycle(double dutyCycle)
         {
-            if (dutyCyclePercentage < 0 || dutyCyclePercentage > 1)
+            if (dutyCycle < 0 || dutyCycle > 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(dutyCyclePercentage), dutyCyclePercentage, "Value must be between 0.0 and 1.0.");
+                throw new ArgumentOutOfRangeException(nameof(dutyCycle), dutyCycle, "Value must be between 0.0 and 1.0.");
             }
 
             // In Linux, the period needs to be a whole number and can't have decimal point.
-            int dutyCycleInNanoseconds = (int)(GetPeriodInNanoseconds(_frequency) * dutyCyclePercentage);
+            int dutyCycleInNanoseconds = (int)(GetPeriodInNanoseconds(_frequency) * dutyCycle);
             _dutyCycleWriter.BaseStream.SetLength(0);
             _dutyCycleWriter.Write(dutyCycleInNanoseconds);
             _dutyCycleWriter.Flush();
-            _dutyCyclePercentage = dutyCyclePercentage;
+            _dutyCycle = dutyCycle;
         }
 
         /// <summary>
@@ -175,18 +171,14 @@ namespace System.Device.Pwm.Channels
             }
         }
 
-        /// <summary>
-        /// Starts writing to the channel.
-        /// </summary>
+        /// <inheritdoc/>
         public override void Start()
         {
             string enablePath = $"{_channelPath}/enable";
             File.WriteAllText(enablePath, "1");
         }
 
-        /// <summary>
-        /// Stops writing to the channel.
-        /// </summary>
+        /// <inheritdoc/>
         public override void Stop()
         {
             string enablePath = $"{_channelPath}/enable";

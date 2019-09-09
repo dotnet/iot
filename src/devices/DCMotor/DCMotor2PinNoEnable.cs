@@ -60,7 +60,7 @@ namespace Iot.Device.DCMotor
                         Controller.Write(_pin1, PinValue.Low);
                     }
 
-                    _pwm.DutyCyclePercentage = val;
+                    _pwm.DutyCycle = val;
                 }
                 else
                 {
@@ -69,7 +69,7 @@ namespace Iot.Device.DCMotor
                         Controller.Write(_pin1, PinValue.High);
                     }
 
-                    _pwm.DutyCyclePercentage = 1.0 + val;
+                    _pwm.DutyCycle = 1.0 + val;
                 }
 
                 _speed = val;

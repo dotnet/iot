@@ -16,9 +16,9 @@ namespace DeviceApiTester.Commands.Pwm
         /// <returns>The command's exit code.</returns>
         public async Task<int> ExecuteAsync()
         {
-            using (var pwmChannel = System.Device.Pwm.PwmChannel.Create(Chip, Channel, Frequency, DutyCyclePercentage))
+            using (var pwmChannel = System.Device.Pwm.PwmChannel.Create(Chip, Channel, Frequency, DutyCycle))
             {
-                Console.WriteLine($"Chip={Chip}, Channel={Channel}, Frequency={Frequency}Hz, DC={DutyCyclePercentage}, Duration={Seconds}s");
+                Console.WriteLine($"Chip={Chip}, Channel={Channel}, Frequency={Frequency}Hz, DC={DutyCycle}, Duration={Seconds}s");
 
                 pwmChannel.Start();
                 await Task.Delay(TimeSpan.FromSeconds(Seconds));
