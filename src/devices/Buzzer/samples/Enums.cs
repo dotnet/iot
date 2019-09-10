@@ -7,7 +7,7 @@ namespace Iot.Device.Buzzer.Samples
     /// <summary>
     /// Represents all twelve notes.
     /// </summary>
-    public enum Note
+    internal enum Note
     {
         C = 1,
         Db = 2,
@@ -26,7 +26,7 @@ namespace Iot.Device.Buzzer.Samples
     /// <summary>
     /// Represents music octave.
     /// </summary>
-    public enum Octave
+    internal enum Octave
     {
         First = 1,
         Second = 2,
@@ -41,7 +41,7 @@ namespace Iot.Device.Buzzer.Samples
     /// <summary>
     /// Represents music note duration.
     /// </summary>
-    public enum Duration
+    internal enum Duration
     {
         Whole = 1,
         Half = 2,

@@ -18,7 +18,7 @@ class Program
             pwmChannel.Start();
             for (double fill = 0.0; fill <= 1.0; fill += 0.01)
             {
-                pwmChannel.DutyCyclePercentage = fill;
+                pwmChannel.DutyCycle = fill;
                 Thread.Sleep(500);
             }
         }

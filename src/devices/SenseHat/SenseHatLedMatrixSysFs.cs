@@ -11,6 +11,9 @@ using System.Runtime.CompilerServices;
 
 namespace Iot.Device.SenseHat
 {
+    /// <summary>
+    /// SenseHAT - LED matrix (using Linux driver)
+    /// </summary>
     public class SenseHatLedMatrixSysFs : SenseHatLedMatrix
     {
         private const string SenseHatDeviceName = "RPi-Sense FB";
@@ -20,6 +23,9 @@ namespace Iot.Device.SenseHat
 
         private FileStream _deviceFile;
 
+        /// <summary>
+        /// Constructs SenseHatLedMatrixSysFs instance
+        /// </summary>
         public SenseHatLedMatrixSysFs()
         {
             string device = GetSenseHatDevice();
@@ -33,6 +39,7 @@ namespace Iot.Device.SenseHat
             Fill(Color.Black);
         }
 
+        /// <inheritdoc/>
         public override void Write(ReadOnlySpan<Color> colors)
         {
             if (colors.Length != NumberOfPixels)
@@ -48,6 +55,7 @@ namespace Iot.Device.SenseHat
             EndWriting();
         }
 
+        /// <inheritdoc/>
         public override void Fill(Color color = default(Color))
         {
             StartWritingColors();
@@ -60,6 +68,7 @@ namespace Iot.Device.SenseHat
             EndWriting();
         }
 
+        /// <inheritdoc/>
         public override void SetPixel(int x, int y, Color color)
         {
             if (x < 0 || x >= NumberOfPixelsPerRow)
@@ -118,6 +127,7 @@ namespace Iot.Device.SenseHat
             return null;
         }
 
+        /// <inheritdoc/>
         public override void Dispose()
         {
             _deviceFile?.Dispose();

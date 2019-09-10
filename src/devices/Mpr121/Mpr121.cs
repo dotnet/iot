@@ -85,6 +85,7 @@ namespace Iot.Device.Mpr121
             PeriodRefresh = periodRefresh;
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             if (_device != null)

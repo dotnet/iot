@@ -34,6 +34,10 @@ After installing, please see the following areas to learn more:
 * [Samples](samples/README.md) - Step-by-step instructions on building your first app.
 * [Roadmap](Documentation/roadmap.md) - Areas planned or currently being worked on.
 
+## Tutorials
+
+* [Web service using SenseHat by Dawid Borycki (Aug 2019)](https://msdn.microsoft.com/magazine/mt833493)
+
 # Community 
 
 This project has adopted the code of conduct defined by the [Contributor Covenant](https://contributor-covenant.org/)

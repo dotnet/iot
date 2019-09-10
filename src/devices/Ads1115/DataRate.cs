@@ -5,7 +5,7 @@
 namespace Iot.Device.Ads1115
 {
     /// <summary>
-    ///  Control the Data Rate (SPS, sample per second)
+    /// Control the Data Rate (SPS, sample per second)
     /// </summary>
     public enum DataRate
     {

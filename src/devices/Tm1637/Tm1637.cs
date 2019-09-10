@@ -12,6 +12,9 @@ using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Iot.Device.Tm1637
 {
+    /// <summary>
+    /// Represents Tm1637 segment display
+    /// </summary>
     public sealed class Tm1637 : IDisposable
     {
         /// <summary>

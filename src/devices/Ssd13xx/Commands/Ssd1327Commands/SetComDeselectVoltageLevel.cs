@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
+    /// <summary>
+    /// Represents SetComDeselectVoltageLevel command
+    /// </summary>
     public class SetComDeselectVoltageLevel : ISsd1327Command
     {
         /// <summary>

@@ -37,6 +37,12 @@ namespace Iot.Device.BrickPi3.Movement
         /// <param name="port">Motor port</param>
         public Motor(Brick brick, BrickPortMotor port) : this(brick, port, 1000) { }
 
+        /// <summary>
+        /// Create a motor
+        /// </summary>
+        /// <param name="brick">The brick controlling the motor</param>
+        /// <param name="port">Motor port</param>
+        /// <param name="timeout">Timeout</param>
         public Motor(Brick brick, BrickPortMotor port, int timeout)
         {
             _brick = brick;
@@ -153,6 +159,10 @@ namespace Iot.Device.BrickPi3.Movement
         public int Speed
         { get { return GetSpeed(); } set { SetSpeed(value); } }
 
+        /// <summary>
+        /// Motor port
+        /// </summary>
+        /// <value></value>
         public BrickPortMotor Port { get; internal set; }
 
         private void OnPropertyChanged(string name)

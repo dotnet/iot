@@ -16,6 +16,10 @@ namespace Iot.Device.Buzzer
     {
         private PwmChannel _pwmChannel;
 
+        /// <summary>
+        /// Constructs Buzzer instance
+        /// </summary>
+        /// <param name="pinNumber">Pin connected to buzzer</param>
         public Buzzer(int pinNumber)
             : this(new SoftwarePwmChannel(pinNumber)) { }
 

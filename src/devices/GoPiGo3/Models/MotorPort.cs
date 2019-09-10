@@ -9,8 +9,11 @@ namespace Iot.Device.GoPiGo3.Models
     /// </summary>
     public enum MotorPort
     {
+        /// <summary>Left motor</summary>
         MotorLeft = 0x01,
+        /// <summary>Right motor</summary>
         MotorRight = 0x02,
+        /// <summary>Both motors</summary>
         Both = MotorLeft + MotorRight
     }
 }

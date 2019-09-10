@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
 {
+    /// <summary>
+    /// Represents SetDisplayOffset command
+    /// </summary>
     public class SetDisplayOffset : ISsd1327Command
     {
         /// <summary>

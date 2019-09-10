@@ -9,6 +9,9 @@ using System.Threading;
 
 namespace Iot.Device.GoPiGo3.Movements
 {
+    /// <summary>
+    /// Represents GoPiGo3 vehicle
+    /// </summary>
     public class Vehicle
     {
         private GoPiGo _goPiGo = null;

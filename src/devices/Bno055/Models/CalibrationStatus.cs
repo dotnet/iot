@@ -16,10 +16,13 @@ namespace Iot.Device.Bno055
     [Flags]
     public enum CalibrationStatus
     {
+        /// <summary>Magnetometer success</summary>
         MagnetometerSuccess = 0b0000_0011,
+        /// <summary>Accelerometer success</summary>
         AccelerometerSuccess = 0b0000_1100,
+        /// <summary>Gyroscope success</summary>
         GyroscopeSuccess = 0b0011_0000,
+        /// <summary>System success</summary>
         SystemSuccess = 0b1100_0000,
-
     }
 }

@@ -16,6 +16,9 @@ using System.Threading;
 
 namespace Iot.Device.Vl53L0X
 {
+    /// <summary>
+    /// Represents Vl53L0X
+    /// </summary>
     public class Vl53L0X : IDisposable
     {
         /// <summary>
@@ -250,9 +253,9 @@ namespace Iot.Device.Vl53L0X
         /// <param name="type">The type of VCSEL</param>
         /// <param name="periodPclks">The period part of the supported periods. Be aware periods are a bit different depending on the VCSEL you are targetting.</param>
         /// <returns></returns>
-        public bool SetVcselPulsePeriod(VcselType type, PeriodPulse periodPclks)
+        internal bool SetVcselPulsePeriod(VcselType type, PeriodPulse periodPclks)
         {
-            var vcselPeriodReg = EncoreVcselPeriod((byte)periodPclks);
+            var vcselPeriodReg = EncodeVcselPeriod((byte)periodPclks);
             var enables = GetSequenceStepEnables();
             var timeouts = GetSequenceStepTimeouts(enables.PreRange);
 
@@ -990,7 +993,7 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         /// <param name="periodPclks">The priod in PCLKs</param>
         /// <returns>the period encoded</returns>
-        private byte EncoreVcselPeriod(byte periodPclks) => (byte)((periodPclks >> 1) - 1);
+        private byte EncodeVcselPeriod(byte periodPclks) => (byte)((periodPclks >> 1) - 1);
 
         /// <summary>
         /// Decode sequence step timeout in MCLKs from register value 
@@ -1084,6 +1087,7 @@ namespace Iot.Device.Vl53L0X
             return true;
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             if (_autoDisposable)

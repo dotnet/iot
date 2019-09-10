@@ -13,13 +13,24 @@ using Iot.Units;
 
 namespace Iot.Device.Bmp180
 {
+    /// <summary>
+    /// BMP180 - barometer, altitude and temperature sensor
+    /// </summary>
     public class Bmp180 : IDisposable
     {
         private I2cDevice _i2cDevice;        
         private readonly CalibrationData _calibrationData;
         private Sampling _mode;
+
+        /// <summary>
+        /// Default I2C address
+        /// </summary>
         public const byte DefaultI2cAddress = 0x77;
 
+        /// <summary>
+        /// Constructs Bmp180 instance
+        /// </summary>
+        /// <param name="i2cDevice">I2C device used to communicate with the device</param>
         public Bmp180(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;            
@@ -226,7 +237,8 @@ namespace Iot.Device.Bmp180
 
             return BinaryPrimitives.ReadUInt16BigEndian(bytes);            
         }
-        
+
+        /// <inheritdoc/>
         public void Dispose()
         {
             _i2cDevice?.Dispose();

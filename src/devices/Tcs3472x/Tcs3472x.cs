@@ -10,6 +10,9 @@ using System.Threading;
 
 namespace Iot.Device.Tcs3472x
 {
+    /// <summary>
+    /// Represents Tcs3472x I2C color sensor
+    /// </summary>
     public class Tcs3472x : IDisposable
     {
         /// <summary>
@@ -229,6 +232,7 @@ namespace Iot.Device.Tcs3472x
             _i2cDevice.Write(new byte[] { (byte)(Registers.COMMAND_BIT | reg), data });
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             PowerOff();

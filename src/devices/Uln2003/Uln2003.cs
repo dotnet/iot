@@ -160,6 +160,7 @@ namespace Iot.Device.Uln2003
             _controller.Write(_pin4, _currentSwitchingSequence[3, _engineStep - 1]);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Stop();

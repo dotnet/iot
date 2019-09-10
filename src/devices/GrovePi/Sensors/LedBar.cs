@@ -13,7 +13,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
     /// </summary>
     public enum LedBarOrientation
     {
+        /// <summary>Red to green</summary>
         RedToGreen = 0,
+        /// <summary>Green to red</summary>
         GreenToRed = 1
     }
 

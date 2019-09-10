@@ -10,6 +10,9 @@ using Iot.Units;
 
 namespace Iot.Device.Lps25h
 {
+    /// <summary>
+    /// LPS25H - Piezoresistive pressure and thermometer sensor
+    /// </summary>
     public class Lps25h : IDisposable
     {
         private const byte ReadMask = 0x80;
@@ -104,6 +107,7 @@ namespace Iot.Device.Lps25h
             return _i2c.ReadByte();
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             _i2c?.Dispose();
