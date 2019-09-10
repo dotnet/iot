@@ -9,6 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+#if NETSTANDARD2_0
+using Math = System.MathExtension;
+#endif
 
 namespace Iot.Device.BrickPi3.Movement
 {
@@ -206,7 +209,7 @@ namespace Iot.Device.BrickPi3.Movement
 
         private void StartMotor(int port, int speed)
         {
-            speed = MathEx.Clamp(speed, -255, 255);
+            speed = Math.Clamp(speed, -255, 255);
             _brick.SetMotorPower((byte)port, speed);
         }
 

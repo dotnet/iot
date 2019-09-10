@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <IsPackable>true</IsPackable>
@@ -20,16 +20,18 @@
     <Compile Include="$(DeviceRoot)**/*.cs" Exclude="@(_ExcludeFromCompile)" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="MathEx.cs" />
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard2.0'))">
+    <Compile Include="MathExtension.cs" />
   </ItemGroup>
 
-
   <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview4.19164.7" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard2.0'))">
     <PackageReference Include="System.Buffers" Version="4.5.0" />
     <PackageReference Include="System.Memory" Version="4.5.3" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
-    <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview4.19164.7" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
   </ItemGroup>
 

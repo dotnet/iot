@@ -8,7 +8,9 @@ using System.Device;
 using System.Device.I2c;
 using System.Device.Pwm;
 using System.Diagnostics;
-using System.Threading;
+#if NETSTANDARD2_0
+using Math = System.MathExtension;
+#endif
 
 namespace Iot.Device.Pwm
 {

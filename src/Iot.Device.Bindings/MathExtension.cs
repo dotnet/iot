@@ -3,8 +3,20 @@ using System.Runtime.CompilerServices;
 
 namespace System
 {
-    public static class MathEx
+    public static class MathExtension
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Abs(double value)
+        {
+            return Math.Abs(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Round(double value)
+        {
+            return Math.Round(value);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte Clamp(byte value, byte min, byte max)
         {

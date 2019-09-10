@@ -6,6 +6,9 @@ using Iot.Device.GoPiGo3.Models;
 using System;
 using System.IO;
 using System.Threading;
+#if NETSTANDARD2_0
+using Math = System.MathExtension;
+#endif
 
 namespace Iot.Device.GoPiGo3.Movements
 {
@@ -191,7 +194,7 @@ namespace Iot.Device.GoPiGo3.Movements
 
         private void StartMotor(MotorPort port, int speed)
         {
-            speed = MathEx.Clamp(speed, -255, 255);
+            speed = Math.Clamp(speed, -255, 255);
             _goPiGo.SetMotorPower(port, speed);
         }
 
