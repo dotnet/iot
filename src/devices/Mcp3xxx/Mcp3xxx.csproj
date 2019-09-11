@@ -2,15 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <EnableDefaultItems>false</EnableDefaultItems> <!--Disabling default items so samples source won't get build by the main library-->
+    <!--Disabling default items so samples source won't get build by the main library-->
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="*.cs" />
+    <None Include="README.md" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
-    <Compile Include="Mcp3008.cs" />
-    <None Include="README.md" />
   </ItemGroup>
 
 </Project>
