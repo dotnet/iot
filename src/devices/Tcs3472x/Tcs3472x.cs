@@ -7,9 +7,6 @@ using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Drawing;
 using System.Threading;
-#if NETSTANDARD2_0
-using Math = System.MathExtension;
-#endif
 
 namespace Iot.Device.Tcs3472x
 {
@@ -78,7 +75,7 @@ namespace Iot.Device.Tcs3472x
             _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | Registers.ID));
             ChipId = (TCS3472Type)_i2cDevice.ReadByte();
             _isLongTime = false;
-            IntegrationTime = Math.Clamp(integrationTime, 0.0024, 0.7);
+            IntegrationTime = MathHelper.Clamp(integrationTime, 0.0024, 0.7);
             SetIntegrationTime(integrationTime);
             Gain = gain;
             PowerOn();
@@ -123,7 +120,7 @@ namespace Iot.Device.Tcs3472x
                     SetConfigLongTime(false);
                 }
                 _isLongTime = false;
-                var timeByte = Math.Clamp((int)(0x100 - (timeSeconds / 0.0024)), 0, 255);
+                var timeByte = MathHelper.Clamp((int)(0x100 - (timeSeconds / 0.0024)), 0, 255);
                 WriteRegister(Registers.ATIME, (byte)timeByte);
                 _integrationTimeByte = (byte)timeByte;
             }
@@ -135,7 +132,7 @@ namespace Iot.Device.Tcs3472x
                 }
                 _isLongTime = true;
                 var timeByte = (int)(0x100 - (timeSeconds / 0.029));
-                timeByte = Math.Clamp(timeByte, 0, 255);
+                timeByte = MathHelper.Clamp(timeByte, 0, 255);
                 WriteRegister(Registers.WTIME, (byte)timeByte);
                 _integrationTimeByte = (byte)timeByte;
             }
@@ -201,13 +198,13 @@ namespace Iot.Device.Tcs3472x
             if (_isLongTime)
                 divide *= 12;
             int r = (int)(I2cRead16(Registers.RDATAL) * 255 / divide);
-            r = Math.Clamp(r, 0, 255);
+            r = MathHelper.Clamp(r, 0, 255);
             int g = (int)(I2cRead16(Registers.GDATAL) * 255 / divide);
-            g = Math.Clamp(g, 0, 255);
+            g = MathHelper.Clamp(g, 0, 255);
             int b = (int)(I2cRead16(Registers.BDATAL) * 255 / divide);
-            b = Math.Clamp(b, 0, 255);
+            b = MathHelper.Clamp(b, 0, 255);
             int a = (int)(I2cRead16(Registers.CDATAL) * 255 / divide);
-            a = Math.Clamp(a, 0, 255);
+            a = MathHelper.Clamp(a, 0, 255);
             return Color.FromArgb(a, r, g, b);
         }
 

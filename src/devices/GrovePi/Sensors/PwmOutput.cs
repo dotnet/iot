@@ -6,9 +6,6 @@ using Iot.Device.GrovePiDevice.Models;
 using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
-#if NETSTANDARD2_0
-using Math = System.MathExtension;
-#endif
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -56,7 +53,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
             set
             {
                 var prev = _duty;
-                _duty = Math.Clamp(value, (byte)0, (byte)100);
+                _duty = MathHelper.Clamp(value, (byte)0, (byte)100);
                 if (prev != _duty)
                     Start();
             }

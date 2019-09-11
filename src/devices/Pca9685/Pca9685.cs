@@ -8,9 +8,6 @@ using System.Device;
 using System.Device.I2c;
 using System.Device.Pwm;
 using System.Diagnostics;
-#if NETSTANDARD2_0
-using Math = System.MathExtension;
-#endif
 
 namespace Iot.Device.Pwm
 {
@@ -237,7 +234,7 @@ namespace Iot.Device.Pwm
         private byte FrequencyToPrescale(double freqHz)
         {
             var desiredPrescale = Math.Round(ClockFrequency / 4096 / freqHz - 1);
-            return (byte)Math.Clamp(desiredPrescale, byte.MinValue, byte.MaxValue);
+            return (byte)MathHelper.Clamp(desiredPrescale, byte.MinValue, byte.MaxValue);
         }
 
         private double PrescaleToFrequency(byte prescale)

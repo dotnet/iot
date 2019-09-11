@@ -6,20 +6,9 @@ using System.Runtime.CompilerServices;
 
 namespace System
 {
-    public static class MathExtension
+    public static class MathHelper
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double Abs(double value)
-        {
-            return Math.Abs(value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double Round(double value)
-        {
-            return Math.Round(value);
-        }
-
+#if NETSTANDARD2_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte Clamp(byte value, byte min, byte max)
         {
@@ -125,5 +114,36 @@ namespace System
         {
             throw new ArgumentException($"Min {min} should be less than max {max}.");
         }
+#else
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte Clamp(byte value, byte min, byte max)
+        {
+            return Math.Clamp(value, min, max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Clamp(double value, double min, double max)
+        {
+            return Math.Clamp(value, min, max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Clamp(int value, int min, int max)
+        {
+            return Math.Clamp(value, min, max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint Clamp(uint value, uint min, uint max)
+        {
+            return Math.Clamp(value, min, max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long Clamp(long value, long min, long max)
+        {
+            return Math.Clamp(value, min, max);
+        }
+#endif
     }
 }

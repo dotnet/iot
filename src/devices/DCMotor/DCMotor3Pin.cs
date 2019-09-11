@@ -6,9 +6,6 @@ using System;
 using System.Device.Gpio;
 using System.Device.Pwm;
 using System.Device.Pwm.Drivers;
-#if NETSTANDARD2_0
-using Math = System.MathExtension;
-#endif
 
 namespace Iot.Device.DCMotor
 {
@@ -58,7 +55,7 @@ namespace Iot.Device.DCMotor
             }
             set
             {
-                double val = Math.Clamp(value, -1.0, 1.0);
+                double val = MathHelper.Clamp(value, -1.0, 1.0);
 
                 if (_speed == val)
                     return;

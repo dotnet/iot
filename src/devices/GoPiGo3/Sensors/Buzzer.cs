@@ -5,9 +5,6 @@
 using Iot.Device.GoPiGo3.Models;
 using System;
 using System.Collections.Generic;
-#if NETSTANDARD2_0
-using Math = System.MathExtension;
-#endif
 
 namespace Iot.Device.GoPiGo3.Sensors
 {
@@ -58,7 +55,7 @@ namespace Iot.Device.GoPiGo3.Sensors
             set
             {
                 var prev = _duty;
-                _duty = Math.Clamp(value, (byte)0, (byte)100);
+                _duty = MathHelper.Clamp(value, (byte)0, (byte)100);
                 if (prev != _duty)
                 {
                     Start();

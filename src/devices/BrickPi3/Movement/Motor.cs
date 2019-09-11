@@ -6,9 +6,6 @@ using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
 using System.Threading;
-#if NETSTANDARD2_0
-using Math = System.MathExtension;
-#endif
 
 namespace Iot.Device.BrickPi3.Movement
 {
@@ -60,7 +57,7 @@ namespace Iot.Device.BrickPi3.Movement
         /// <param name="speed">speed is between -255 and +255</param>
         public void SetSpeed(int speed)
         {
-            speed = Math.Clamp(speed, -255, 255);
+            speed = MathHelper.Clamp(speed, -255, 255);
             _brick.SetMotorPower((byte)Port, speed);
             OnPropertyChanged(nameof(Speed));
         }

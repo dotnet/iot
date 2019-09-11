@@ -20,8 +20,8 @@
     <Compile Include="$(DeviceRoot)**/*.cs" Exclude="@(_ExcludeFromCompile)" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
-    <Compile Include="MathExtension.cs" />
+  <ItemGroup>
+    <Compile Include="MathHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>

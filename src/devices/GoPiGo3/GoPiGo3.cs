@@ -12,9 +12,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-#if NETSTANDARD2_0
-using Math = System.MathExtension;
-#endif
 
 namespace Iot.Device.GoPiGo3
 {
@@ -389,7 +386,7 @@ namespace Iot.Device.GoPiGo3
         /// <param name="power">The power from - 100 to 100, or -128 for float</param>
         public void SetMotorPower(MotorPort port, int power)
         {
-            power = Math.Clamp(power, -128, 127);
+            power = MathHelper.Clamp(power, -128, 127);
             byte bPower = (byte)(power & 0xFF);
             byte[] outArray = { SpiAddress, (byte)SpiMessageType.SetMotorPower, (byte)port, bPower };
             var ret = SpiTransferArray(outArray);
@@ -571,7 +568,7 @@ namespace Iot.Device.GoPiGo3
         /// <param name="duty">The PWM duty cycle in percent from 0.0 to 100.0, 1 floating point precision</param>
         public void SetGrovePwmDuty(GrovePort port, double duty)
         {
-            duty = Math.Clamp(duty, (byte)0, (byte)100);
+            duty = MathHelper.Clamp(duty, (byte)0, (byte)100);
 
             var duty_value = (UInt16)(duty * 10.0);
             byte[] outArray = { SpiAddress, (byte)SpiMessageType.SetGrovePwmDuty, (byte)port, (byte)((duty_value >> 8) & 0xFF), (byte)(duty_value & 0xFF) };
@@ -585,7 +582,7 @@ namespace Iot.Device.GoPiGo3
         /// <param name="freq">The PWM frequency.Range is 3 through 48000Hz.Default is 24000(24kHz). Limit to 48000, which is the highest frequency supported for 0.1% resolution.</param>
         public void GetGrovePwmFrequency(GrovePort port, uint freq = 24000)
         {
-            freq = Math.Clamp(freq, 3, 48000);
+            freq = MathHelper.Clamp(freq, 3, 48000);
             byte[] outArray = { SpiAddress, (byte)SpiMessageType.SetGrovePwmFrequency, (byte)port, (byte)((freq >> 8) & 0xFF), (byte)(freq & 0xFF) };
             SpiTransferArray(outArray);
         }
@@ -627,7 +624,7 @@ namespace Iot.Device.GoPiGo3
             // but make sure we wait a minimum of 1 ms
             if (towait > 0)
             {
-                timeout = Math.Clamp(timeout, 1, 32);
+                timeout = MathHelper.Clamp(timeout, 1, 32);
                 Thread.Sleep((int)timeout);
             }
 
