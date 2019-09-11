@@ -17,7 +17,7 @@ var hardwareSpiSettings = new SpiConnectionSettings(0, 0)
 };
 
 using (SpiDevice spi = SpiDevice.Create(hardwareSpiSettings))
-using (Mcp3008.Mcp3008 mcp = new Mcp3008.Mcp3008(spi))
+using (Mcp3008 mcp = new Mcp3008(spi))
 {
     while (true)
     {
@@ -52,7 +52,7 @@ You can use the following code to [access the MCP3008 via GPIO](Mcp3008.Sample.c
 
 ```csharp
 using (SpiDevice spi = new SoftwareSpi(clk: 18, miso: 23, mosi: 24, cs: 25))
-using (Mcp3008.Mcp3008 mcp = new Mcp3008.Mcp3008(spi))
+using (Mcp3008 mcp = new Mcp3008(spi))
 {
     while (true)
     {

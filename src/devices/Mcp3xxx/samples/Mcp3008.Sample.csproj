@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Mcp3008.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Mcp3xxx.csproj" />
     <ProjectReference Include="$(MSBuildThisFileDirectory)\..\..\SoftwareSpi\SoftwareSpi.csproj" />
   </ItemGroup>
 

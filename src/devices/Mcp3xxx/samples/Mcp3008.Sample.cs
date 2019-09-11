@@ -5,6 +5,7 @@
 using System;
 using System.Device.Spi;
 using System.Threading;
+using Iot.Device.Adc;
 using Iot.Device.Spi;
 
 namespace Iot.Device.Samples
@@ -21,7 +22,7 @@ namespace Iot.Device.Samples
             using (SpiDevice spi = new SoftwareSpi(clk: 6, miso: 23, mosi: 5, cs: 24))
             // For hardware implementation replace it with following
             // using (SpiDevice spi = SpiDevice.Create(hardwareSpiSettings))
-            using (Mcp3008.Mcp3008 mcp = new Mcp3008.Mcp3008(spi))
+            using (Mcp3008 mcp = new Mcp3008(spi))
             {
                 while (true)
                 {

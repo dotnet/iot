@@ -4,7 +4,7 @@
 
 using System;
 using System.Threading;
-using Iot.Device.Mcp3008;
+using Iot.Device.Adc;
 
 namespace force_sensitive_resistor
 {
