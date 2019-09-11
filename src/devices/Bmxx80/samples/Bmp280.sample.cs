@@ -5,16 +5,15 @@
 using System;
 using System.Device.I2c;
 using System.Threading;
-using System.Threading.Tasks;
 using Iot.Device.Bmxx80;
+using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
-using Iot.Units;
 
 namespace Iot.Device.Samples
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             Console.WriteLine("Hello Bmp280!");
 
@@ -31,45 +30,46 @@ namespace Iot.Device.Samples
             {
                 while (true)
                 {
+                    //set higher sampling
+                    i2CBmp280.TemperatureSampling = Sampling.LowPower;
+                    i2CBmp280.PressureSampling = Sampling.UltraHighResolution;
+
                     //set mode forced so device sleeps after read
                     i2CBmp280.SetPowerMode(Bmx280PowerMode.Forced);
 
-                    //set samplings
-                    i2CBmp280.SetTemperatureSampling(Sampling.UltraLowPower);
-                    i2CBmp280.SetPressureSampling(Sampling.UltraLowPower);
+                    // wait for measurement to be performed
+                    var measurementTime = i2CBmp280.GetMeasurementDuration();
+                    Thread.Sleep(measurementTime);
 
                     //read values
-                    Temperature tempValue = await i2CBmp280.ReadTemperatureAsync();
+                    i2CBmp280.TryReadTemperature(out var tempValue);
                     Console.WriteLine($"Temperature {tempValue.Celsius}");
-                    double preValue = await i2CBmp280.ReadPressureAsync();
+                    i2CBmp280.TryReadPressure(out var preValue);
                     Console.WriteLine($"Pressure {preValue}");
-                    double altValue = await i2CBmp280.ReadAltitudeAsync(defaultSeaLevelPressure);
+                    i2CBmp280.TryReadAltitude(defaultSeaLevelPressure, out var altValue);
                     Console.WriteLine($"Altitude: {altValue}");
                     Thread.Sleep(1000);
 
-                    //set higher sampling
-                    i2CBmp280.SetTemperatureSampling(Sampling.LowPower);
-                    Console.WriteLine(i2CBmp280.ReadTemperatureSampling());
-                    i2CBmp280.SetPressureSampling(Sampling.UltraHighResolution);
-                    Console.WriteLine(i2CBmp280.ReadPressureSampling());
+                    //change sampling rate
+                    i2CBmp280.TemperatureSampling = Sampling.UltraHighResolution;
+                    i2CBmp280.PressureSampling = Sampling.UltraLowPower;
+                    i2CBmp280.FilterMode = Bmx280FilteringMode.X4;
 
                     //set mode forced and read again
                     i2CBmp280.SetPowerMode(Bmx280PowerMode.Forced);
 
+                    // wait for measurement to be performed
+                    measurementTime = i2CBmp280.GetMeasurementDuration();
+                    Thread.Sleep(measurementTime);
+
                     //read values
-                    tempValue = await i2CBmp280.ReadTemperatureAsync();
+                    i2CBmp280.TryReadTemperature(out tempValue);
                     Console.WriteLine($"Temperature {tempValue.Celsius}");
-                    preValue = await i2CBmp280.ReadPressureAsync();
+                    i2CBmp280.TryReadPressure(out preValue);
                     Console.WriteLine($"Pressure {preValue}");
-                    altValue = await i2CBmp280.ReadAltitudeAsync(defaultSeaLevelPressure);
+                    i2CBmp280.TryReadAltitude(defaultSeaLevelPressure, out altValue);
                     Console.WriteLine($"Altitude: {altValue}");
                     Thread.Sleep(5000);
-
-                    //set sampling to higher
-                    i2CBmp280.SetTemperatureSampling(Sampling.UltraHighResolution);
-                    Console.WriteLine(i2CBmp280.ReadTemperatureSampling());
-                    i2CBmp280.SetPressureSampling(Sampling.UltraLowPower);
-                    Console.WriteLine(i2CBmp280.ReadPressureSampling());
                 }
             }
         }
