@@ -265,7 +265,7 @@ namespace Iot.Device.Pn532
                     // 0x02 is 424 kbps.
                     // − Result Length : 1,
                     // − Result : Number of fails (Maximum 128). 
-                    throw new Exception($"Test {diagnoseMode} not implemented");
+                    throw new NotImplementedException($"Test {diagnoseMode} not implemented");
                 case DiagnoseMode.EchoBackTest:
                     // NumTst = 0x05 : Echo Back Test
                     // In this test, the PN532 is configured in target mode. The analog settings used are those
@@ -297,7 +297,7 @@ namespace Iot.Device.Pn532
                     // type. The frames are sent back immediately.
                     // The MSB bit (CRC enable) of CIU_TxMode and CIU_RxMode must be set to 1.
                     // D4 00 05 00 A2 A2 
-                    throw new Exception($"Test {diagnoseMode} not implemented");
+                    throw new NotImplementedException($"Test {diagnoseMode} not implemented");
                 case DiagnoseMode.AttentionRequestTest:
                     // NumTst = 0x06 : Attention Request Test or ISO/IEC14443-4 card presence detection
                     // This test can be used by an initiator to ensure that a target/card is still in the field:
@@ -313,7 +313,7 @@ namespace Iot.Device.Pn532
                     // − Result Length : 1,
                     // − Result : 0x00 is OK,
                     // different from 0x00 is Not OK, Status byte. 
-                    throw new Exception($"Test {diagnoseMode} not implemented");
+                    throw new NotImplementedException($"Test {diagnoseMode} not implemented");
                 case DiagnoseMode.SelfAntenaTest:
                     // NumTst = 0x07 : Self Antenna Test
                     // This test is used to check the continuity of the transmission paths of the antenna.
@@ -326,7 +326,7 @@ namespace Iot.Device.Pn532
                     // − Result Length : 1,
                     // − Result : 0x00 is OK (antenna is detected),
                     // different from 0x00 is not OK (no antenna is detected). 
-                    throw new Exception($"Test {diagnoseMode} not implemented");
+                    throw new NotImplementedException($"Test {diagnoseMode} not implemented");
                 default:
                     break;
             }
@@ -1161,56 +1161,50 @@ namespace Iot.Device.Pn532
             // Need to send an acknowledge
             _serialPort.Write(AckBuffer, 0, AckBuffer.Length);
             _serialPort.Close();
+            // See page 39 of the documentation for the baud rates
+            // It is approximately Math.Round(10252800.0 / BaudRate)
             switch (baudRate)
             {
                 case BaudRate.B0009600:
                     _serialPort.BaudRate = 9600;
                     _serialPort.ReadTimeout = 1067;
-                    _serialPort.WriteTimeout = 1067;
                     break;
                 case BaudRate.B0019200:
                     _serialPort.BaudRate = 19200;
                     _serialPort.ReadTimeout = 533;
-                    _serialPort.WriteTimeout = 533;
                     break;
                 case BaudRate.B0038400:
                     _serialPort.BaudRate = 38400;
                     _serialPort.ReadTimeout = 267;
-                    _serialPort.WriteTimeout = 267;
                     break;
                 case BaudRate.B0057600:
                     _serialPort.BaudRate = 57600;
                     _serialPort.ReadTimeout = 178;
-                    _serialPort.WriteTimeout = 178;
                     break;
                 case BaudRate.B0115200:
                     _serialPort.BaudRate = 115200;
                     _serialPort.ReadTimeout = 89;
-                    _serialPort.WriteTimeout = 89;
                     break;
                 case BaudRate.B0230400:
                     _serialPort.BaudRate = 230400;
                     _serialPort.ReadTimeout = 44;
-                    _serialPort.WriteTimeout = 44;
                     break;
                 case BaudRate.B0460800:
                     _serialPort.BaudRate = 460800;
                     _serialPort.ReadTimeout = 22;
-                    _serialPort.WriteTimeout = 22;
                     break;
                 case BaudRate.B0921600:
                     _serialPort.BaudRate = 921600;
                     _serialPort.ReadTimeout = 11;
-                    _serialPort.WriteTimeout = 11;
                     break;
                 case BaudRate.B1288000:
                     _serialPort.BaudRate = 1288000;
                     _serialPort.ReadTimeout = 8;
-                    _serialPort.WriteTimeout = 8;
                     break;
                 default:
                     break;
             }
+            _serialPort.WriteTimeout = _serialPort.ReadTimeout;
             _serialPort.Open();
             return ret >= 0;
         }
@@ -1413,6 +1407,7 @@ namespace Iot.Device.Pn532
                 return ReadResponseI2C(commandSet, readData);
             else if (_serialPort != null)
                 return ReadResponseSerial(commandSet, readData);
+
             return -1;
         }
 

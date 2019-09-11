@@ -8,7 +8,8 @@ namespace Iot.Device.Pn532.RfConfiguration
     /// This CfgItem is used to choose the analog settings that the PN532 will use for the
     /// type B when configured as PCD.
     /// When using this command, the host controller has to provide 3 new values
-    /// (ConfigurationData[]) for the following internal registers:     /// Except for these two specific settings, the 8 remaining analog settings are the
+    /// (ConfigurationData[]) for the following internal registers:
+    /// Except for these two specific settings, the 8 remaining analog settings are the
     /// same as the CfgItem 106 kbps type A.
     /// CIU = Contactless Interface Unit 
     /// Please refer to https://www.nxp.com/docs/en/nxp/data-sheets/PN532_C1.pdf page 144

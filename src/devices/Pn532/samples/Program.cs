@@ -2,20 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Pn532;
-using Iot.Device.Card.Mifare;
+using Iot.Device.Card;
 using Iot.Device.Card.CreditCardProcessing;
+using Iot.Device.Card.Mifare;
+using Iot.Device.Pn532;
 using Iot.Device.Pn532.ListPassive;
 using System;
-using System.Threading;
-using System.Runtime.Serialization;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Device.Gpio;
-using System.Globalization;
-using Iot.Device.Card;
 using System.Linq;
+using System.Threading;
 
 namespace Pn532Demo
 {

@@ -12,7 +12,6 @@ namespace Iot.Device.Card.Mifare
     /// </summary>
     public class MifareCard
     {
-
         private CardTransceiver _rfid;
 
         /// <summary>

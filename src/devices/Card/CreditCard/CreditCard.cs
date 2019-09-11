@@ -128,7 +128,9 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// <summary>
         /// Verify the pin. Note this command may not be supported for your specific credit card
         /// </summary>
-        /// <param name="pindigits">The pin in a byte array, between 4 and 8 array length</param>
+        /// <param name="pindigits">The pin in a byte array, between 4 and 8 array length. Pin numbers should be bytes like in the following example:
+        /// byte[] pin = new byte[] { 1, 2, 3, 4 };
+        /// </param>
         /// <returns>The error status</returns>
         public ErrorType VerifyPin(ReadOnlySpan<byte> pindigits)
         {
@@ -228,7 +230,7 @@ namespace Iot.Device.Card.CreditCardProcessing
             return ErrorType.Unknown;
         }
 
-        private void FillTagList(List<Tag> theTags, ReadOnlySpan<byte> span, uint parent = 0x00)
+        private void FillTagList(List<Tag> tags, ReadOnlySpan<byte> span, uint parent = 0x00)
         {
             // We don't decode template 0x80
             if (span.Length == 0)
@@ -256,7 +258,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                     DecodeDol(tag);
                 }
                 tag.Parent = parent;
-                theTags.Add(tag);
+                tags.Add(tag);
             }
         }
 
@@ -521,11 +523,11 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// 
         /// </summary>
         /// <param name="sfi"></param>
-        /// <param name="numberNecords"></param>
+        /// <param name="numberOfRecords"></param>
         /// <returns></returns>
-        public void ReadLogEntries(byte sfi, byte numberNecords)
+        public void ReadLogEntries(byte sfi, byte numberOfRecords)
         {
-            for (byte record = 1; record < numberNecords + 1; record++)
+            for (byte record = 1; record < numberOfRecords + 1; record++)
             {
                 var ret = ReadRecord(sfi, record, true);
                 LogInfo.Log($"Read record {record}, SFI {sfi},status: {ret}", LogLevel.Debug);
@@ -703,6 +705,5 @@ namespace Iot.Device.Card.CreditCardProcessing
             }
             return ret;
         }
-
     }
 }
