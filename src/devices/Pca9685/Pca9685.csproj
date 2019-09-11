@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="../Common/System/Device/DelayHelper.cs" />
+    <Compile Include="..\..\Iot.Device.Bindings\MathHelper.cs" Link="MathHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>

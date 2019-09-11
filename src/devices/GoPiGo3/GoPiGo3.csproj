@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\Iot.Device.Bindings\MathHelper.cs" Link="MathHelper.cs" />
     <Compile Include="GoPiGo3.cs" />
     <Compile Include="Models\*.cs" />
     <Compile Include="Movements\*.cs" />
