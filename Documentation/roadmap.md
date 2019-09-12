@@ -5,10 +5,11 @@ Our goal is to create a set of world-class APIs and tooling that will support a 
 The following deliverables are not in any particular order:
 * [ ] Add bindings for more devices
 * [ ] Add/Test support on more boards
-* [ ] Onboard more customers and work on making them succesfull
+* [ ] Onboard more customers and work on making them successful
 * [ ] Add infrastructure required for servicing bindings package
 * [ ] Improve documentation for onboarding, adding device bindings, working with samples
 * [ ] Improve the abstraction for devices in Iot.Device.Bindings package
+* [ ] Collaborate with IoT Plug and Play
 * [ ] Add E2E sample that leverages Azure IoT Hub to showcase the integration with Azure services
 * [ ] Add testing for I2C, SPI, PWM protocols
 * [ ] Add testing infrastructure for IoT.Device.Bindings
