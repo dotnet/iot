@@ -1,4 +1,4 @@
-﻿# Solomon Systech Ssd1351
+﻿# Solomon Systech Ssd1351 - CMOS OLED
 
 ## Summary
 The SSD1351 is a single-chip CMOS OLED driver with controller for organic/polymer light emitting diode dot-matrix graphic display system. It consists of 384 segments and 128 commons. This IC is designed for Common Cathode type OLED panel.

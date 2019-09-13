@@ -1,8 +1,8 @@
-﻿# Adafruit Seesaw
+﻿# Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)
 
 ## Summary
 
-Adafruit Seesaw is a near-universal converter framework which allows you to add add and extend hardware support to any I2C-capable microcontroller or microcomputer. Instead of getting separate I2C GPIO expanders, ADCs, PWM drivers, etc, seesaw can be configured to give a wide range of capabilities.
+Adafruit Seesaw is a near-universal converter framework which allows you to add and extend hardware support to any I2C-capable microcontroller or microcomputer. Instead of getting separate I2C GPIO expanders, ADCs, PWM drivers, etc, seesaw can be configured to give a wide range of capabilities.
 
 This binding provides an Api which is close to the one provided by Adafruit themselves but also implements IGpioController so that available Gpio pins can be used in place of any 'on board' ones but using the standard IoT API.
 
