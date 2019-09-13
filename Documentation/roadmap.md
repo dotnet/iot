@@ -6,6 +6,7 @@ The following deliverables are not in any particular order:
 * [ ] Add bindings for more devices
 * [ ] Add/Test support on more boards
 * [ ] Onboard more customers and work on making them successful
+* [ ] Improve the Eventing APIs for the SysFS driver for GPIO (#378)
 * [ ] Add infrastructure required for servicing bindings package
 * [ ] Improve documentation for onboarding, adding device bindings, working with samples
 * [ ] Improve the abstraction for devices in Iot.Device.Bindings package
