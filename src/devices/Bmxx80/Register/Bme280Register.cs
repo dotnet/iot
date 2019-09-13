@@ -1,4 +1,8 @@
-﻿namespace Iot.Device.Bmxx80.Register
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+namespace Iot.Device.Bmxx80.Register
 {
     /// <summary>
     /// General control registers for the BME280.
@@ -14,7 +18,6 @@
         DIG_H5 = 0xE5,
         DIG_H6 = 0xE7,
 
-        HUMIDDATA_LSB = 0xFE,
-        HUMIDDATA_MSB = 0xFD,
+        HUMIDDATA = 0xFD
     }
 }

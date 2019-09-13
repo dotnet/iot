@@ -3,14 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Device.I2c;
-using Iot.Device.Bmxx80.CalibrationData;
 
 namespace Iot.Device.Bmxx80
 {
     /// <summary>
     /// Represents a BME280 temperature and barometric pressure sensor.
     /// </summary>
-    public class Bmp280 : Bmx280Base
+    public sealed class Bmp280 : Bmx280Base
     {
         /// <summary>
         /// The expected chip ID of the BMP280.
@@ -25,8 +24,6 @@ namespace Iot.Device.Bmxx80
             : base(DeviceId, i2cDevice)
         {
             _communicationProtocol = CommunicationProtocol.I2c;
-            _calibrationData = new Bmp280CalibrationData();
-            _calibrationData.ReadFromDevice(this);
         }
     }
 }
