@@ -8,21 +8,34 @@ using System.Device.Spi;
 
 namespace Iot.Device.Mcp23xxx
 {
-    public abstract partial class Mcp23xxx : IGpioController
+    /// <summary>
+    /// Base class for Mcp23xxx GPIO expanders
+    /// </summary>
+    public abstract partial class Mcp23xxx
     {
+        /// <summary>
+        /// SPI adapter
+        /// </summary>
         protected class SpiAdapter : BusAdapter
         {
             private SpiDevice _device;
             private int _deviceAddress;
 
+            /// <summary>
+            /// Constructs SpiAdapter instance
+            /// </summary>
+            /// <param name="device">SPI device</param>
+            /// <param name="deviceAddress">device address</param>
             public SpiAdapter(SpiDevice device, int deviceAddress)
             {
                 _device = device;
                 _deviceAddress = deviceAddress;
             }
 
+            /// <inheritdoc/>
             public override void Dispose() => _device?.Dispose();
 
+            /// <inheritdoc/>
             public override void Read(byte registerAddress, Span<byte> buffer)
             {
                 // Include OpCode and Register Address.
@@ -43,6 +56,7 @@ namespace Iot.Device.Mcp23xxx
                 readBuffer.Slice(2).CopyTo(buffer);
             }
 
+            /// <inheritdoc/>
             public override void Write(byte registerAddress, Span<byte> data)
             {
                 // Include OpCode and Register Address.

@@ -21,7 +21,7 @@ namespace Iot.Device.DCMotor
             int pin0,
             int pin1,
             GpioController controller)
-            : base(controller)
+            : base(controller ?? new GpioController())
         {
             if (pwmChannel == null)
                 throw new ArgumentNullException(nameof(pwmChannel));
@@ -76,18 +76,22 @@ namespace Iot.Device.DCMotor
                     Controller.Write(_pin1, PinValue.Low);
                 }
 
-                _pwm.DutyCyclePercentage = Math.Abs(val);
+                _pwm.DutyCycle = Math.Abs(val);
 
                 _speed = val;
             }
         }
 
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            _speed = 0.0;
-            _pwm?.Dispose();
-            _pwm = null;
-            base.Dispose();
+            if (disposing)
+            {
+                _speed = 0.0;
+                _pwm?.Dispose();
+                _pwm = null;
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

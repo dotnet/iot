@@ -17,13 +17,34 @@ namespace Iot.Device.Bmxx80
     /// </summary>
     public abstract class Bmxx80Base : IDisposable
     {
-        protected Bmxx80CalibrationData _calibrationData;
+        /// <summary>
+        /// Calibration data for the sensor.
+        /// </summary>
+        internal Bmxx80CalibrationData _calibrationData;
+
+        /// <summary>
+        /// I2C device used to communicate with the device.
+        /// </summary>
         protected I2cDevice _i2cDevice;
+
+        /// <summary>
+        /// Chosen communication protocol.
+        /// </summary>
         protected CommunicationProtocol _communicationProtocol;
+
+        /// <summary>
+        /// The control register of the sensor.
+        /// </summary>
         protected byte _controlRegister;
 
+        /// <summary>
+        /// Bmxx80 communication protocol.
+        /// </summary>
         public enum CommunicationProtocol
         {
+            /// <summary>
+            /// I²C communication protocol.
+            /// </summary>
             I2c
         }
 
@@ -32,6 +53,14 @@ namespace Iot.Device.Bmxx80
         /// pressure compensation formula and could be implemented as a global variable.
         /// </summary>
         protected int TemperatureFine;
+
+        /// <summary>
+        /// The temperature calibration factor.
+        /// </summary>
+        protected virtual int _tempCalibrationFactor => 1;
+
+        private Sampling _temperatureSampling;
+        private Sampling _pressureSampling;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Bmxx80Base"/> class.
@@ -48,67 +77,82 @@ namespace Iot.Device.Bmxx80
             byte readSignature = _i2cDevice.ReadByte();
 
             if (readSignature != deviceId)
-            {
                 throw new IOException($"Unable to find a chip with id {deviceId}");
+
+            ReadCalibrationData();
+            SetDefaultConfiguration();
+        }
+
+        /// <summary>
+        /// Gets or sets the pressure sampling.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
+        public Sampling PressureSampling
+        {
+            get => _pressureSampling;
+            set
+            {
+                byte status = Read8BitsFromRegister(_controlRegister);
+                status = (byte)(status & 0b1110_0011);
+                status = (byte)(status | (byte)value << 2);
+
+                Span<byte> command = stackalloc[] { _controlRegister, status };
+                _i2cDevice.Write(command);
+                _pressureSampling = value;
             }
         }
 
         /// <summary>
-        /// Sets the pressure sampling.
+        /// Gets or sets the temperature sampling.
         /// </summary>
-        /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
-        public void SetPressureSampling(Sampling sampling)
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
+        public Sampling TemperatureSampling
         {
-            byte status = Read8BitsFromRegister(_controlRegister);
-            status = (byte)(status & 0b1110_0011);
-            status = (byte)(status | (byte)sampling << 2);
-            _i2cDevice.Write(new[] { _controlRegister, status });
-        }
+            get => _temperatureSampling;
+            set
+            {
+                byte status = Read8BitsFromRegister(_controlRegister);
+                status = (byte)(status & 0b0001_1111);
+                status = (byte)(status | (byte)value << 5);
 
-        /// <summary>
-        /// Set the temperature oversampling.
-        /// </summary>
-        /// <param name="sampling">The <see cref="Sampling"/> to set.</param>
-        public void SetTemperatureSampling(Sampling sampling)
-        {
-            byte status = Read8BitsFromRegister(_controlRegister);
-            status = (byte)(status & 0b0001_1111);
-            status = (byte)(status | (byte)sampling << 5);
-            _i2cDevice.Write(new[] { _controlRegister, status });
-        }
-
-        /// <summary>
-        /// Get the current sample rate for pressure measurements
-        /// </summary>
-        /// <returns>The current pressure <see cref="Sampling"/> rate.</returns>
-        public Sampling ReadPressureSampling()
-        {
-            byte status = Read8BitsFromRegister(_controlRegister);
-            status = (byte)((status & 0b0001_1100) >> 2);
-
-            return ByteToSampling(status);
-        }
-
-        /// <summary>
-        /// Get the sample rate for temperature measurements.
-        /// </summary>
-        /// <returns>The current temperature <see cref="Sampling"/> rate.</returns>
-        public Sampling ReadTemperatureSampling()
-        {
-            byte status = Read8BitsFromRegister(_controlRegister);
-            status = (byte)((status & 0b1110_0000) >> 5);
-
-            return ByteToSampling(status);
+                Span<byte> command = stackalloc[] { _controlRegister, status };
+                _i2cDevice.Write(command);
+                _temperatureSampling = value;
+            }
         }
 
         /// <summary>
         /// When called, the device is reset using the complete power-on-reset procedure.
+        /// The device will reset to the default configuration.
         /// </summary>
         public void Reset()
         {
             const byte resetCommand = 0xB6;
-            _i2cDevice.Write(new[] { (byte)Bmxx80Register.RESET, resetCommand });
+            Span<byte> command = stackalloc[] { (byte)Bmxx80Register.RESET, resetCommand };
+            _i2cDevice.Write(command);
+
+            SetDefaultConfiguration();
         }
+
+        /// <summary>
+        /// Reads the temperature. A return value indicates whether the reading succeeded.
+        /// </summary>
+        /// <param name="temperature">
+        /// Contains the measured temperature if the <see cref="TemperatureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains <see cref="double.NaN"/> otherwise.
+        /// </param>
+        /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
+        public abstract bool TryReadTemperature(out Temperature temperature);
+
+        /// <summary>
+        /// Reads the pressure. A return value indicates whether the reading succeeded.
+        /// </summary>
+        /// <param name="pressure">
+        /// Contains the measured pressure in Pa if the <see cref="PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains <see cref="double.NaN"/> otherwise.
+        /// </param>
+        /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
+        public abstract bool TryReadPressure(out double pressure);
 
         /// <summary>
         /// Compensates the temperature.
@@ -120,8 +164,8 @@ namespace Iot.Device.Bmxx80
             // The temperature is calculated using the compensation formula in the BMP280 datasheet.
             // See: https://cdn-shop.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
             double var1 = ((adcTemperature / 16384.0) - (_calibrationData.DigT1 / 1024.0)) * _calibrationData.DigT2;
-            double var2 = ((adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0)) * _calibrationData.DigT3;
-            var2 *= var2 * _calibrationData.DigT3;
+            double var2 = (adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0);
+            var2 *= var2 * _calibrationData.DigT3 * _tempCalibrationFactor;
 
             TemperatureFine = (int)(var1 + var2);
 
@@ -143,64 +187,121 @@ namespace Iot.Device.Bmxx80
                 return value;
             }
             else
-            {
                 throw new NotImplementedException();
-            }
         }
 
         /// <summary>
         /// Reads a 16 bit value over I2C.
         /// </summary>
         /// <param name="register">Register to read from.</param>
+        /// <param name="endianness">Interpretation of the bytes (big or little endian).</param>
         /// <returns>Value from register.</returns>
-        protected internal ushort Read16BitsFromRegister(byte register)
+        protected internal ushort Read16BitsFromRegister(byte register, Endianness endianness = Endianness.LittleEndian)
         {
-            if (_communicationProtocol == CommunicationProtocol.I2c)
+            Span<byte> bytes = stackalloc byte[2];
+            switch (_communicationProtocol)
             {
-                Span<byte> bytes = stackalloc byte[2];
-
-                _i2cDevice.WriteByte(register);
-                _i2cDevice.Read(bytes);
-
-                return BinaryPrimitives.ReadUInt16LittleEndian(bytes);
+                case CommunicationProtocol.I2c:
+                    _i2cDevice.WriteByte(register);
+                    _i2cDevice.Read(bytes);
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
-            else
+
+            return endianness switch
             {
-                throw new NotImplementedException();
-            }
+                Endianness.LittleEndian => BinaryPrimitives.ReadUInt16LittleEndian(bytes),
+                Endianness.BigEndian => BinaryPrimitives.ReadUInt16BigEndian(bytes),
+                _ => throw new ArgumentOutOfRangeException(nameof(endianness), endianness, null)
+            };
         }
 
         /// <summary>
         /// Reads a 24 bit value over I2C.
         /// </summary>
         /// <param name="register">Register to read from.</param>
+        /// <param name="endianness">Interpretation of the bytes (big or little endian).</param>
         /// <returns>Value from register.</returns>
-        protected internal uint Read24BitsFromRegister(byte register)
+        protected internal uint Read24BitsFromRegister(byte register, Endianness endianness = Endianness.LittleEndian)
         {
-            if (_communicationProtocol == CommunicationProtocol.I2c)
+            Span<byte> bytes = stackalloc byte[4];
+            switch (_communicationProtocol)
             {
-                Span<byte> bytes = stackalloc byte[4];
-
-                _i2cDevice.WriteByte(register);
-                _i2cDevice.Read(bytes.Slice(1));
-
-                return BinaryPrimitives.ReadUInt32LittleEndian(bytes);
+                case CommunicationProtocol.I2c:
+                    _i2cDevice.WriteByte(register);
+                    _i2cDevice.Read(bytes.Slice(1));
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
-            else
+
+            return endianness switch
             {
-                throw new NotImplementedException();
-            }
+                Endianness.LittleEndian => BinaryPrimitives.ReadUInt32LittleEndian(bytes),
+                Endianness.BigEndian => BinaryPrimitives.ReadUInt32BigEndian(bytes),
+                _ => throw new ArgumentOutOfRangeException(nameof(endianness), endianness, null)
+            };
         }
 
+        /// <summary>
+        /// Converts byte to <see cref="Sampling"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><see cref="Sampling"/></returns>
         protected Sampling ByteToSampling(byte value)
         {
             // Values >=5 equals UltraHighResolution.
             if (value >= 5)
-            {
                 return Sampling.UltraHighResolution;
-            }
 
             return (Sampling)value;
+        }
+
+        /// <summary>
+        /// Sets the default configuration for the sensor.
+        /// </summary>
+        protected virtual void SetDefaultConfiguration()
+        {
+            PressureSampling = Sampling.UltraLowPower;
+            TemperatureSampling = Sampling.UltraLowPower;
+        }
+
+        /// <summary>
+        /// Specifies the Endianness of a device.
+        /// </summary>
+        protected internal enum Endianness
+        {
+            /// <summary>
+            /// Indicates little endian.
+            /// </summary>
+            LittleEndian,
+
+            /// <summary>
+            /// Indicates big endian.
+            /// </summary>
+            BigEndian
+        }
+
+        private void ReadCalibrationData()
+        {
+            switch (this)
+            {
+                case Bme280 _:
+                    _calibrationData = new Bme280CalibrationData();
+                    _controlRegister = (byte)Bmx280Register.CTRL_MEAS;
+                    break;
+                case Bmp280 _:
+                    _calibrationData = new Bmp280CalibrationData();
+                    _controlRegister = (byte)Bmx280Register.CTRL_MEAS;
+                    break;
+                case Bme680 _:
+                    _calibrationData = new Bme680CalibrationData();
+                    _controlRegister = (byte)Bme680Register.CTRL_MEAS;
+                    break;
+            }
+
+            _calibrationData.ReadFromDevice(this);
         }
 
         /// <summary>
@@ -212,6 +313,10 @@ namespace Iot.Device.Bmxx80
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Releases the unmanaged resources used by the Bmxx80 and optionally releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             _i2cDevice?.Dispose();

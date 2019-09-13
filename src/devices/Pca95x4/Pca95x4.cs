@@ -163,6 +163,7 @@ namespace Iot.Device.Pca95x4
             WriteBit(Register.PolarityInversion, bitNumber, invert);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             _i2cDevice?.Dispose();

@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
+    /// <summary>
+    /// Represents ContinuousVerticalAndHorizontalScrollSetup command
+    /// </summary>
     public class ContinuousVerticalAndHorizontalScrollSetup : ISsd1306Command
     {
         /// <summary>
@@ -76,6 +79,9 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
             return new byte[] { Id, 0x00, (byte)StartPageAddress, (byte)FrameFrequencyType, (byte)EndPageAddress, VerticalScrollingOffset };
         }
 
+        /// <summary>
+        /// Vertical and horizontal scroll
+        /// </summary>
         public enum VerticalHorizontalScrollType
         {
             /// <summary>

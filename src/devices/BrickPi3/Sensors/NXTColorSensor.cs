@@ -16,10 +16,15 @@ namespace Iot.Device.BrickPi3.Sensors
     /// </summary>
     public enum ColorSensorMode
     {
+        /// <summary>Color mode</summary>
         Color = SensorType.NXTColorFull,
+        /// <summary>Reflection mode</summary>
         Reflection = SensorType.NXTColorRed,
+        /// <summary>Green mode</summary>
         Green = SensorType.NXTColorGreen,
+        /// <summary>Blue mode</summary>
         Blue = SensorType.NXTColorBlue,
+        /// <summary>Ambient mode</summary>
         Ambient = SensorType.NXTColorOff
     }
 
@@ -28,10 +33,22 @@ namespace Iot.Device.BrickPi3.Sensors
     /// </summary>
     public enum Color
     {
-#pragma warning disable
-        None = 0, Black = 1, Blue = 2, Green = 3,
-        Yellow = 4, Red = 5, White = 6, Brown = 7
-#pragma warning restore
+        /// <summary>No color was read</summary>
+        None = 0,
+        /// <summary>Black</summary>
+        Black = 1,
+        /// <summary>Blue</summary>
+        Blue = 2,
+        /// <summary>Green</summary>
+        Green = 3,
+        /// <summary>Yellow</summary>
+        Yellow = 4,
+        /// <summary>Red</summary>
+        Red = 5,
+        /// <summary>White</summary>
+        White = 6,
+        /// <summary>Brown</summary>
+        Brown = 7
     };
 
     /// <summary>
@@ -195,6 +212,9 @@ namespace Iot.Device.BrickPi3.Sensors
             ValueAsString = ReadAsString();
         }
 
+        /// <summary>
+        /// Color mode
+        /// </summary>
         public ColorSensorMode ColorMode
         {
             get { return _colorMode; }
@@ -209,8 +229,15 @@ namespace Iot.Device.BrickPi3.Sensors
             }
         }
 
+        /// <summary>
+        /// Sensor port
+        /// </summary>
         public SensorPort Port { get; }
 
+        /// <summary>
+        /// Gets sensor name
+        /// </summary>
+        /// <returns>Sensor name</returns>
         public string GetSensorName()
         {
             return "NXT Color Sensor";
@@ -228,6 +255,10 @@ namespace Iot.Device.BrickPi3.Sensors
             { }
         }
 
+        /// <summary>
+        /// Reads raw value from the sensor
+        /// </summary>
+        /// <returns>Value read from the sensor</returns>
         public int ReadRaw()
         {
             int val = 0;
@@ -300,6 +331,10 @@ namespace Iot.Device.BrickPi3.Sensors
             return (CalculateRawAverage() * 100) / 1023;
         }
 
+        /// <summary>
+        /// Reads value from sensor represented as string
+        /// </summary>
+        /// <returns>Sensor value as string</returns>
         public string ReadAsString()
         {
             string s = "";
@@ -353,21 +388,35 @@ namespace Iot.Device.BrickPi3.Sensors
             return new RGBColor((byte)_rawValues[RedIndex], (byte)_rawValues[GreenIndex], (byte)_rawValues[BlueIndex]);
         }
 
+        /// <summary>
+        /// Moves to next mode
+        /// </summary>
         public void SelectNextMode()
         {
             _colorMode = ColorMode.Next();
         }
 
+        /// <summary>
+        /// Moves to previous mode
+        /// </summary>
         public void SelectPreviousMode()
         {
             _colorMode = ColorMode.Previous();
         }
 
+        /// <summary>
+        /// Number of modes
+        /// </summary>
+        /// <returns>Number of modes</returns>
         public int NumberOfModes()
         {
             return Enum.GetNames(typeof(ColorSensorMode)).Length;
         }
 
+        /// <summary>
+        /// Selected mode
+        /// </summary>
+        /// <returns>String representing selected mode</returns>
         public string SelectedMode()
         {
             return ColorMode.ToString();

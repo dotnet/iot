@@ -9,7 +9,9 @@ namespace Iot.Device.Ads1115
     /// </summary>
     public enum ComparatorLatching
     {
+        /// <summary>Non-latching</summary>
         NonLatching = 0x00,
+        /// <summary>Latching</summary>
         Latching = 0x01
     }
 }

@@ -45,7 +45,7 @@ namespace Iot.Device.Ssd13xx.Tests
         [InlineData(0x10, 0x10)]
         public void Invalid_LowerColumnStartAddress(byte phase1Period, byte phase2Period)
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 SetPreChargePeriod setPreChargePeriod = new SetPreChargePeriod(phase1Period, phase2Period);
             });

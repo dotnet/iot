@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Mcp23xxx
 {
+    /// <summary>
+    /// Mcp23xxx Register
+    /// </summary>
     public enum Register : byte
     {
         /// <summary>

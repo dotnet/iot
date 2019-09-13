@@ -4,6 +4,9 @@
 
 namespace Iot.Device.Pca95x4
 {
+    /// <summary>
+    /// PCA95X4 register
+    /// </summary>
     public enum Register
     {
         /// <summary>

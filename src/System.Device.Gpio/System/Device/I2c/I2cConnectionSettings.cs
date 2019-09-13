@@ -22,6 +22,12 @@ namespace System.Device.I2c
             DeviceAddress = deviceAddress;
         }
 
+        internal I2cConnectionSettings(I2cConnectionSettings other)
+        {
+            BusId = other.BusId;
+            DeviceAddress = other.DeviceAddress;
+        }
+
         /// <summary>
         /// The bus ID the I2C device is connected to.
         /// </summary>

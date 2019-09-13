@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Rtc
 {
+    /// <summary>
+    /// Base class for real time clocks (RTC)
+    /// </summary>
     public abstract class RtcBase : IDisposable
     {
         /// <summary>
@@ -25,15 +28,17 @@ namespace Iot.Device.Rtc
         /// <returns>Time from the device</returns>
         protected abstract DateTime ReadTime();
 
-        /// <summary>
-        /// Cleanup
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Releases the unmanaged resources used by the RtcBase and optionally releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing) { }
     }
 }

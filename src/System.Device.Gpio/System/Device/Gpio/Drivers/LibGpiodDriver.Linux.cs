@@ -46,7 +46,8 @@ namespace System.Device.Gpio.Drivers
                 {
                     eventHandler.ValueRising += callback;
                 }
-                else if ((eventTypes & PinEventTypes.Falling) != 0)
+
+                if ((eventTypes & PinEventTypes.Falling) != 0)
                 {
                     eventHandler.ValueFalling += callback;
                 }
@@ -181,7 +182,8 @@ namespace System.Device.Gpio.Drivers
                 {
                     eventHandler.ValueRising += callback;
                 }
-                else if ((eventTypes & PinEventTypes.Falling) != 0)
+
+                if ((eventTypes & PinEventTypes.Falling) != 0)
                 {
                     eventHandler.ValueFalling += callback;
                 }

@@ -49,6 +49,7 @@ namespace Iot.Device.GrovePiDevice
             GrovePiInfo = new Info() { SoftwareVersion = GetFirmwareVerion() };
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             if (_autoDispose)

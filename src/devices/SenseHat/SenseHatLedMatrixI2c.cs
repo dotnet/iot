@@ -9,9 +9,16 @@ using System.Runtime.CompilerServices;
 
 namespace Iot.Device.SenseHat
 {
+    /// <summary>
+    /// SenseHAT - LED matrix (I2C)
+    /// </summary>
     public class SenseHatLedMatrixI2c : SenseHatLedMatrix
     {
+        /// <summary>
+        /// Default I2C address
+        /// </summary>
         public const int I2cAddress = 0x46;
+
         private const int PixelLength = 3;
         private const int FrameBufferLength = PixelLength * NumberOfPixelsPerRow * NumberOfPixelsPerColumn;
         private const int ROffset = 0;
@@ -19,12 +26,17 @@ namespace Iot.Device.SenseHat
         private const int BOffset = 16;
         private I2cDevice _i2c;
 
+        /// <summary>
+        /// Constructs instance of SenseHatLedMatrixI2c
+        /// </summary>
+        /// <param name="i2cDevice">I2C device used to communicate with the device</param>
         public SenseHatLedMatrixI2c(I2cDevice i2cDevice = null)
         {
             _i2c = i2cDevice ?? CreateDefaultI2cDevice();
             Fill(Color.Black);
         }
 
+        /// <inheritdoc/>
         public override void Write(ReadOnlySpan<Color> colors)
         {
             if (colors.Length != NumberOfPixels)
@@ -50,6 +62,7 @@ namespace Iot.Device.SenseHat
             _i2c.Write(buffer);
         }
 
+        /// <inheritdoc/>
         public override void Fill(Color color = default(Color))
         {
             Span<byte> buffer = stackalloc byte[FrameBufferLength + 1];
@@ -88,6 +101,7 @@ namespace Iot.Device.SenseHat
             _i2c.Write(buffer);
         }
 
+        /// <inheritdoc/>
         public override void SetPixel(int x, int y, Color color)
         {
             if (x < 0 || x >= NumberOfPixelsPerRow)
@@ -138,6 +152,7 @@ namespace Iot.Device.SenseHat
             return I2cDevice.Create(settings);
         }
 
+        /// <inheritdoc/>
         public override void Dispose()
         {
             _i2c?.Dispose();

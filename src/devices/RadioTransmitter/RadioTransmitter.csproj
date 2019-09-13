@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
+    <Compile Include="Devices\Kt0803\BassBoost.cs" />
+    <Compile Include="RadioTransmitterBase.cs" />
+    <Compile Include="Devices\Kt0803\Region.cs" />
+    <Compile Include="Devices\Kt0803\Kt0803.cs" />
+    <Compile Include="Devices\Kt0803\PgaGain.cs" />
+    <Compile Include="Devices\Kt0803\Register.cs" />
+    <Compile Include="Devices\Kt0803\TransmissionPower.cs" />
+  </ItemGroup>
+
+</Project>

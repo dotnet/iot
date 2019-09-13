@@ -4,7 +4,7 @@
 
 The PCA9685 is an I²C-bus controlled 16-channel LED controller optimized for Red/Green/Blue/Amber (RGBA) color backlighting applications.
 
-You can also use this to control servos.
+You can also use it to control servos.
 
 ## Data Sheets from NXP
 

@@ -8,10 +8,14 @@ namespace Iot.Device.BrickPi3.Models
     /// Port used to select the ports for motors
     /// </summary>
     public enum MotorPort: byte
-    {        
+    {
+        /// <summary>Port A</summary>
         PortA = 0x01,
+        /// <summary>Port B</summary>
         PortB = 0x02,
+        /// <summary>Port C</summary>
         PortC = 0x04,
+        /// <summary>Port D</summary>
         PortD = 0x08
     }
 
@@ -21,27 +25,34 @@ namespace Iot.Device.BrickPi3.Models
     public enum BrickPortMotor : byte
     {
         // Used to select the ports for motors
+        /// <summary>Port A</summary>
         PortA = 0x01,
+        /// <summary>Port B</summary>
         PortB = 0x02,
+        /// <summary>Port C</summary>
         PortC = 0x04,
+        /// <summary>Port D</summary>
         PortD = 0x08
     }
 
     /// <summary>
-    /// flags -- 8-bits of bit-flags that indicate motor status:
-    /// bit 0 -- LOW_VOLTAGE_FLOAT - The motors are automatically disabled because the battery voltage is too low
-    /// bit 1 -- OVERLOADED - The motors aren't close to the target (applies to position control and dps speed control).
+    /// Flags indicating motor status
     /// </summary> 
     public enum MotorStatusFlags
     {
-        AllOk = 0, LowVoltageFloat = 0x01, Overloaded = 0x02
+        /// <summary></summary>
+        AllOk = 0,
+        /// <summary>LOW_VOLTAGE_FLOAT - The motors are automatically disabled because the battery voltage is too low</summary>
+        LowVoltageFloat = 0x01,
+        /// <summary>OVERLOADED - The motors aren't close to the target (applies to position control and dps speed control).</summary>
+        Overloaded = 0x02
     }
+
     /// <summary>
     /// Get the full status of the motor
     /// </summary>
     public class MotorStatus
     {
-
         /// <summary>
         /// Status of the motor
         /// </summary>
@@ -68,11 +79,13 @@ namespace Iot.Device.BrickPi3.Models
     /// </summary>
     public enum MotorSpeed : byte
     {
+        /// <summary>Stop</summary>
         Stop = 0,
+        /// <summary>Full speed</summary>
         Full = 100,
+        /// <summary>Half speed</summary>
         Half = 50,
-        // Motros in float mode
-        // Actually any value great than 100 will float motors
+        /// <summary>Float motor</summary>
         Float = 128
     }
 }

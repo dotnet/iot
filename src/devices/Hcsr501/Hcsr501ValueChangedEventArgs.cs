@@ -16,6 +16,11 @@ namespace Iot.Device.Hcsr501
         /// HC-SR501 OUT Pin Value
         /// </summary>
         public PinValue PinValue { get; private set; }
+
+        /// <summary>
+        /// Constructs Hcsr501ValueChangedEventArgs instance
+        /// </summary>
+        /// <param name="value">New value of pin</param>
         public Hcsr501ValueChangedEventArgs(PinValue value)
         {
             PinValue = value;

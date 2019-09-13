@@ -30,7 +30,6 @@ namespace Iot.Device.Ssd13xx.Tests
 
         [Theory]
         [InlineData(0x0E)]
-        [InlineData(0x40)]
         public void Invalid_MultiplexRatio(byte multiplexRatio)
         {
             Assert.Throws<ArgumentException>(() =>

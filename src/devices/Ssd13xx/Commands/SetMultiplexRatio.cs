@@ -6,6 +6,9 @@ using System;
 
 namespace Iot.Device.Ssd13xx.Commands
 {
+    /// <summary>
+    /// Represents SetMultiplexRatio command
+    /// </summary>
     public class SetMultiplexRatio : ISharedCommand
     {
         /// <summary>

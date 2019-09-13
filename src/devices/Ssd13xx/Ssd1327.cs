@@ -9,6 +9,9 @@ using Ssd1327Cmnds = Iot.Device.Ssd13xx.Commands.Ssd1327Commands;
 
 namespace Iot.Device.Ssd13xx
 {
+    /// <summary>
+    /// Represents SSD1327 OLED display
+    /// </summary>
     public class Ssd1327 : Ssd13xx
     {
         private const byte Command_Mode = 0x80;
@@ -24,16 +27,29 @@ namespace Iot.Device.Ssd13xx
         {
         }
 
+        /// <summary>
+        /// Sets column address
+        /// </summary>
+        /// <param name="startAddress">Start address</param>
+        /// <param name="endAddress">End address</param>
         public void SetColumnAddress(byte startAddress = 0x08, byte endAddress = 0x37)
         {
             SendCommand(new Ssd1327Cmnds.SetColumnAddress(startAddress, endAddress));
         }
 
+        /// <summary>
+        /// Sets row address
+        /// </summary>
+        /// <param name="startAddress">Start address</param>
+        /// <param name="endAddress">End address</param>
         public void SetRowAddress(byte startAddress = 0x00, byte endAddress = 0x5f)
         {
             SendCommand(new Ssd1327Cmnds.SetRowAddress(startAddress, endAddress));
         }
 
+        /// <summary>
+        /// Clears the display
+        /// </summary>
         public void ClearDisplay()
         {
             SendCommand(new SetDisplayOff());
@@ -55,11 +71,19 @@ namespace Iot.Device.Ssd13xx
             _i2cDevice.Write(writeBuffer);
         }
 
+        /// <summary>
+        /// Sends command to the device
+        /// </summary>
+        /// <param name="command">Command being send</param>
         public void SendCommand(ISsd1327Command command)
         {
             SendCommand((ICommand)command);
         }
 
+        /// <summary>
+        /// Sends command to the device
+        /// </summary>
+        /// <param name="command">Command being send</param>
         public override void SendCommand(ISharedCommand command)
         {
             SendCommand(command);

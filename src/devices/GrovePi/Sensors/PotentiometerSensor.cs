@@ -6,6 +6,9 @@ using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
+    /// <summary>
+    /// Potentiometer sensor
+    /// </summary>
     public class PotentiometerSensor : AnalogSensor
     {
         /// <summary>

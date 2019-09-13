@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using Iot.Device.Mcp3008;
+using Iot.Device.Adc;
 using Iot.Device.Spi;
 
 namespace force_sensitive_resistor

@@ -10,37 +10,37 @@ namespace Iot.Device.Tcs3472x
     /// </summary>
     public enum InterruptState
     {
-        // Every RGBC cycle generates an interrupt
+        /// <summary>Every RGBC cycle generates an interrupt</summary>
         All = 0b0000,
-        // 1 clear channel value outside of threshold range
+        /// <summary>1 clear channel value outside of threshold range</summary>
         Percistence01Cycle = 0b0001,
-        // 2 clear channel consecutive values out of range 
+        /// <summary>2 clear channel consecutive values out of range </summary>
         Percistence02Cycle = 0b0010,
-        // 3 clear channel consecutive values out of range 
+        /// <summary>3 clear channel consecutive values out of range </summary>
         Percistence03Cycle = 0b0011,
-        // 5 clear channel consecutive values out of range
+        /// <summary>5 clear channel consecutive values out of range</summary>
         Percistence05Cycle = 0b0100,
-        // 10 clear channel consecutive values out of range
+        /// <summary>10 clear channel consecutive values out of range</summary>
         Percistence10Cycle = 0b0101,
-        // 15 clear channel consecutive values out of range
+        /// <summary>15 clear channel consecutive values out of range</summary>
         Percistence15Cycle = 0b0110,
-        // 20 clear channel consecutive values out of range
+        /// <summary>20 clear channel consecutive values out of range</summary>
         Percistence20Cycle = 0b0111,
-        // 25 clear channel consecutive values out of range
+        /// <summary>25 clear channel consecutive values out of range</summary>
         Percistence25Cycle = 0b1000,
-        // 30 clear channel consecutive values out of range
+        /// <summary>30 clear channel consecutive values out of range</summary>
         Percistence30Cycle = 0b1001,
-        // 35 clear channel consecutive values out of range
+        /// <summary>35 clear channel consecutive values out of range</summary>
         Percistence35Cycle = 0b1010,
-        // 40 clear channel consecutive values out of range
+        /// <summary>40 clear channel consecutive values out of range</summary>
         Percistence40Cycle = 0b1011,
-        // 45 clear channel consecutive values out of range
+        /// <summary>45 clear channel consecutive values out of range</summary>
         Percistence45Cycle = 0b1100,
-        // 50 clear channel consecutive values out of range
+        /// <summary>50 clear channel consecutive values out of range</summary>
         Percistence50Cycle = 0b1101,
-        // 55 clear channel consecutive values out of range
+        /// <summary>55 clear channel consecutive values out of range</summary>
         Percistence55Cycle = 0b1110,
-        // 60 clear channel consecutive values out of range
+        /// <summary>60 clear channel consecutive values out of range</summary>
         Percistence60Cycle = 0b1111,
     }
 }

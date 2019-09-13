@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Pca9685
+namespace Iot.Device.Pwm
 {
     /// <summary>
     /// Values for Mode2 register

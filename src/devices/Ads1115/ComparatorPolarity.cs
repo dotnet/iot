@@ -9,7 +9,9 @@ namespace Iot.Device.Ads1115
     /// </summary>
     public enum ComparatorPolarity
     {
+        /// <summary>Low</summary>
         Low = 0x00,
+        /// <summary>High</summary>
         High = 0x01
     }
 }
