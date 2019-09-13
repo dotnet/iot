@@ -7,7 +7,6 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.PortableExecutable;
 using System.Text;
 
 namespace Iot.Device.Card.CreditCardProcessing
@@ -422,7 +421,13 @@ namespace Iot.Device.Card.CreditCardProcessing
                                 else if (dol.TagNumber == 0x9F37)
                                 {
                                     var rand = new Random();
+#if NETSTANDARD2_0
+                                    var array = new byte[dol.Data[0]];
+                                    rand.NextBytes(array);
+                                    array.AsSpan().CopyTo(toSend.Slice(index, dol.Data[0]));
+#else
                                     rand.NextBytes(toSend.Slice(index, dol.Data[0]));
+#endif
                                 }
                                 // Currency
                                 else if (dol.TagNumber == 0x5F2A)
