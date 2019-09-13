@@ -14,7 +14,7 @@
   </ItemGroup>
 
 <ItemGroup>
-    <Compile Include="..\..\Iot.Device.Bindings\MathHelper.cs" Link="MathHelper.cs" />
+    <Compile Include="../Common/System/MathHelper.cs" Link="MathHelper.cs" />
     <Compile Include="GrovePi.cs" />
     <Compile Include="Models\*.cs" />    
     <Compile Include="Sensors\*.cs" />
