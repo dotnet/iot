@@ -83,12 +83,17 @@ namespace Iot.Device.Media
         /// <returns>Supported resolution</returns>
         public abstract IEnumerable<(uint Width, uint Height)> GetPixelFormatResolutions(PixelFormat format);
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Releases the unmanaged resources used by the VideoDevice and optionally releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing) { }
     }
 }
