@@ -8,6 +8,9 @@ using System.IO;
 
 namespace Iot.Device.Media
 {
+    /// <summary>
+    /// The communications channel to a video device.
+    /// </summary>
     public abstract partial class VideoDevice
     {
         /// <summary>

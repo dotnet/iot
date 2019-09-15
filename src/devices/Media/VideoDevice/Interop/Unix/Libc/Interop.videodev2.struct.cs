@@ -275,7 +275,7 @@ internal struct v4l2_requestbuffers
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct v4l2_timeval
+internal struct v4l2_timeval
 {
     public uint tv_sec;
     public uint tv_usec;
