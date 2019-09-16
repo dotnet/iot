@@ -40,27 +40,27 @@ namespace Iot.Device.Media
         /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
-        /// <param name="path">Picture save path</param>
+        /// <param name="path">Picture save path.</param>
         public abstract Task CaptureAsync(string path);
 
         /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
-        /// <param name="path">Picture save path</param>
-        /// <param name="token"> A cancellation token that can be used to cancel the work</param>
+        /// <param name="path">Picture save path.</param>
+        /// <param name="token"> A cancellation token that can be used to cancel the work.</param>
         public abstract Task CaptureAsync(string path, CancellationToken token);
 
         /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
-        /// <returns>Picture stream</returns>
+        /// <returns>Picture stream.</returns>
         public abstract Task<MemoryStream> CaptureAsync();
 
         /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
         /// <returns>Picture stream</returns>
-        /// <param name="token"> A cancellation token that can be used to cancel the work</param>
+        /// <param name="token"> A cancellation token that can be used to cancel the work.</param>
         public abstract Task<MemoryStream> CaptureAsync(CancellationToken token);
 
         /// <summary>
@@ -73,14 +73,14 @@ namespace Iot.Device.Media
         /// <summary>
         /// Get all the pixel formats supported by the device.
         /// </summary>
-        /// <returns>Supported pixel formats</returns>
+        /// <returns>Supported pixel formats.</returns>
         public abstract IEnumerable<PixelFormat> GetSupportedPixelFormats();
 
         /// <summary>
         /// Get all the resolutions supported by the specified pixel format.
         /// </summary>
-        /// <param name="format">Pixel format</param>
-        /// <returns>Supported resolution</returns>
+        /// <param name="format">Pixel format.</param>
+        /// <returns>Supported resolution.</returns>
         public abstract IEnumerable<(uint Width, uint Height)> GetPixelFormatResolutions(PixelFormat format);
 
         /// <inheritdoc/>
