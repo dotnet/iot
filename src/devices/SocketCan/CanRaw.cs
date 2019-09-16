@@ -52,11 +52,11 @@ namespace Iot.Device.SocketCan
             {
                 Span<byte> frameData = new Span<byte>(frame.Data, data.Length);
                 data.CopyTo(frameData);
-
-                ReadOnlySpan<CanFrame> frameSpan = new ReadOnlySpan<CanFrame>(&frame, 1);
-                ReadOnlySpan<byte> buff = MemoryMarshal.AsBytes(frameSpan);
-                Interop.Write(_handle, buff);
             }
+
+            ReadOnlySpan<CanFrame> frameSpan = MemoryMarshal.CreateReadOnlySpan(ref frame, 1);
+            ReadOnlySpan<byte> buff = MemoryMarshal.AsBytes(frameSpan);
+            Interop.Write(_handle, buff);
         }
 
         /// <summary>
@@ -74,16 +74,13 @@ namespace Iot.Device.SocketCan
             }
 
             CanFrame frame = new CanFrame();
-
-            unsafe
+            
+            Span<CanFrame> frameSpan = MemoryMarshal.CreateSpan(ref frame, 1);
+            Span<byte> buff = MemoryMarshal.AsBytes(frameSpan);
+            while (buff.Length > 0)
             {
-                Span<CanFrame> frameSpan = new Span<CanFrame>(&frame, 1);
-                Span<byte> buff = MemoryMarshal.AsBytes(frameSpan);
-                while (buff.Length > 0)
-                {
-                    int read = Interop.Read(_handle, buff);
-                    buff = buff.Slice(read);
-                }
+                int read = Interop.Read(_handle, buff);
+                buff = buff.Slice(read);
             }
 
             id = frame.Id;

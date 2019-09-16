@@ -130,7 +130,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// <param name="led">The led from 0 to 10</param>
         public void ToggleLeds(byte led)
         {
-            led = MathHelper.Clamp(led, (byte)0, (byte)10);
+            led = Math.Clamp(led, (byte)0, (byte)10);
             _grovePi.WriteCommand(GrovePiCommand.LedBarToggleOneLed, _port, led, 0);
         }
 

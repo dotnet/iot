@@ -191,7 +191,7 @@ namespace Iot.Device.GoPiGo3.Movements
 
         private void StartMotor(MotorPort port, int speed)
         {
-            speed = MathHelper.Clamp(speed, -255, 255);
+            speed = Math.Clamp(speed, -255, 255);
             _goPiGo.SetMotorPower(port, speed);
         }
 

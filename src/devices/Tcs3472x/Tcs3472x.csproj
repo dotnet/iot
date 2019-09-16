@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
-    <Compile Include="../Common/System/MathHelper.cs" Link="MathHelper.cs" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>

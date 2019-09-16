@@ -234,7 +234,7 @@ namespace Iot.Device.Pwm
         private byte FrequencyToPrescale(double freqHz)
         {
             var desiredPrescale = Math.Round(ClockFrequency / 4096 / freqHz - 1);
-            return (byte)MathHelper.Clamp(desiredPrescale, byte.MinValue, byte.MaxValue);
+            return (byte)Math.Clamp(desiredPrescale, byte.MinValue, byte.MaxValue);
         }
 
         private double PrescaleToFrequency(byte prescale)

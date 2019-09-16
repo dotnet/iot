@@ -7,7 +7,6 @@
   <ItemGroup>
     <PackageReference Include="System.Memory" Version="4.5.3" />
     <Compile Include="..\..\Common\Iot\Device\Common\NumberHelper.cs" />
-    <Compile Include="..\..\Common\System\RandomHelper.cs" Link="RandomHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>

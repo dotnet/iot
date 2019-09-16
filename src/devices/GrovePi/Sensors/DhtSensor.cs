@@ -67,8 +67,8 @@ namespace Iot.Device.GrovePiDevice.Sensors
             // Wait a little bit to read the result
             Thread.Sleep(50);
             var retArray = _grovePi.ReadCommand(GrovePiCommand.DhtTemp, _port);
-            _lastTemHum[0] = BitConverter.ToSingle(retArray, 1);
-            _lastTemHum[1] = BitConverter.ToSingle(retArray, 5);
+            _lastTemHum[0] = BitConverter.ToSingle(retArray.AsSpan(1, 4));
+            _lastTemHum[1] = BitConverter.ToSingle(retArray.AsSpan(5, 4));
         }
 
         /// <summary>

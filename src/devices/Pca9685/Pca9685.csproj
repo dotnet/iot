@@ -9,7 +9,6 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="../Common/System/Device/DelayHelper.cs" />
-    <Compile Include="../Common/System\MathHelper.cs" Link="MathHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>

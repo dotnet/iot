@@ -53,7 +53,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
             set
             {
                 var prev = _duty;
-                _duty = MathHelper.Clamp(value, (byte)0, (byte)100);
+                _duty = Math.Clamp(value, (byte)0, (byte)100);
                 if (prev != _duty)
                     Start();
             }

@@ -421,7 +421,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                                 else if (dol.TagNumber == 0x9F37)
                                 {
                                     var rand = new Random();
-                                    rand.NextSpan(toSend.Slice(index, dol.Data[0]));
+                                    rand.NextBytes(toSend.Slice(index, dol.Data[0]));
                                 }
                                 // Currency
                                 else if (dol.TagNumber == 0x5F2A)

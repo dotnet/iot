@@ -10,7 +10,6 @@
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
     <ProjectReference Include="$(MSBuildThisFileDirectory)../SoftPwm/SoftwarePwm.csproj" />
-    <Compile Include="../Common/System\MathHelper.cs" Link="MathHelper.cs" />
     <Compile Include="DCMotor.cs" />
     <Compile Include="DCMotor3Pin.cs" />
     <Compile Include="DCMotor2PinNoEnable.cs" />
