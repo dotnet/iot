@@ -16,7 +16,7 @@ namespace Sundew.Pi.IO.Devices.Amplifiers.Max9744
     /// I2C connection to the MAX 9744 amplifier.
     /// </summary>
     /// <seealso cref="T:System.IDisposable" />
-    public class Max9744Device : IDisposable
+    public class Max9744: IDisposable
     {
         private const byte MinVolume = 0;
         private const byte MaxVolume = 63;
@@ -26,21 +26,20 @@ namespace Sundew.Pi.IO.Devices.Amplifiers.Max9744
         private readonly int shutdownPin;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Max9744Device" /> class.
+        /// Initializes a new instance of the <see cref="Max9744" /> class.
         /// </summary>
-        /// <param name="i2cDevice">The i2c device.</param>
         /// <param name="gpioController">The gpioController.</param>
+        /// <param name="i2cConnectionSettings">The i2c connection settings.</param>
         /// <param name="mutePin">The mute pin.</param>
         /// <param name="shutdownPin">The shutdown pin.</param>
-        public Max9744Device(
-            I2cDevice i2cDevice,
+        public Max9744(
             GpioController gpioController,
+            I2cConnectionSettings i2cConnectionSettings,
             int mutePin,
             int shutdownPin)
         {
-            // connect volume via i2c
-            this.i2cDevice = i2cDevice;
             this.gpioController = gpioController;
+            this.i2cDevice = I2cDevice.Create(i2cConnectionSettings);
             this.mutePin = mutePin;
             this.shutdownPin = shutdownPin;
 
@@ -114,6 +113,7 @@ namespace Sundew.Pi.IO.Devices.Amplifiers.Max9744
         void IDisposable.Dispose()
         {
             this.SetShutdownState(true);
+            this.i2cDevice.Dispose();
             this.gpioController.ClosePin(this.mutePin);
             this.gpioController.ClosePin(this.shutdownPin);
         }
