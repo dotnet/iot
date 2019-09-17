@@ -10,8 +10,8 @@
 
   <!--Project Configurations properties for VS-->
   <PropertyGroup>
-    <RuntimeIdentifier Condition="'$(Configuration)' == 'Windows-Debug'">win</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(Configuration)' == 'Linux-Debug'">linux</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="$(Configuration.StartsWith('Windows'))">win</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="$(Configuration.StartsWith('Linux'))">linux</RuntimeIdentifier>
   </PropertyGroup>
 
   <Import Project="..\..\Directory.Build.props" />

@@ -26,6 +26,18 @@ dotnet add package System.Device.Gpio --source https://dotnetfeed.blob.core.wind
 dotnet add package IoT.Device.Bindings --source https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json
 ~~~~
 
+# Contributing
+
+For information on how to build this repository and to add new device bindings, please head out to [Contributing](Documentation/CONTRIBUTING.md).
+
+Please contribute. We are primarily interested in the following:
+
+* Improving quality and capability of the drivers for supported boards.
+* Implementations for additional boards.
+* [.NET device bindings](src/devices) for a wide variety of sensors, chips, displays and other components.
+* Request a device binding or protocol that you need for your project ([file an issue](https://github.com/dotnet/iot/issues)).
+* Links to blog posts or tweets that showcase .NET Core being used for great IoT scenarios ([file an issue](https://github.com/dotnet/iot/issues)).
+
 # Getting Started
 
 After installing, please see the following areas to learn more:
@@ -42,16 +54,6 @@ After installing, please see the following areas to learn more:
 
 This project has adopted the code of conduct defined by the [Contributor Covenant](https://contributor-covenant.org/)
 to clarify expected behavior in our community. For more information, see the [.NET Foundation Code of Conduct](https://www.dotnetfoundation.org/code-of-conduct).
-
-# Contributing
-
-Please contribute. We are primarily interested in the following:
-
-* Improving quality and capability of the drivers for supported boards.
-* Implementations for additional boards.
-* [.NET device bindings](src/devices) for a wide variety of sensors, chips, displays and other components.
-* Request a device binding or protocol that you need for your project ([file an issue](https://github.com/dotnet/iot/issues)).
-* Links to blog posts or tweets that showcase .NET Core being used for great IoT scenarios ([file an issue](https://github.com/dotnet/iot/issues)).
 
 # License
 

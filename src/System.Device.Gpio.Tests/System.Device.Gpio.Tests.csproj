@@ -3,7 +3,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RuntimeIdentifiers>win-arm;linux-arm</RuntimeIdentifiers>
     <IsPackable>false</IsPackable>
-    <Configurations>Debug;Release;Windows-Debug;Linux-Debug</Configurations>
+    <Configurations>Windows-Debug;Linux-Debug;Linux-Release;Windows-Release;Debug;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

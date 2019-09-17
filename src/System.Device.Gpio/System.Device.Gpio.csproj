@@ -10,7 +10,7 @@
     <IsPackable>true</IsPackable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePlatformNotSupportedAssembly Condition="'$(RuntimeIdentifier)' == ''">true</GeneratePlatformNotSupportedAssembly>
-    <Configurations>Debug;Release;Windows-Debug;Linux-Debug</Configurations>
+    <Configurations>Windows-Debug;Linux-Debug;Linux-Release;Windows-Release;Debug;Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="winmd\**" />
