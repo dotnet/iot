@@ -6,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Iot.Device.Media
 {
@@ -64,45 +62,16 @@ namespace Iot.Device.Media
         /// Capture a picture from the video device.
         /// </summary>
         /// <param name="path">Picture save path.</param>
-        public override async Task CaptureAsync(string path)
+        public override void Capture(string path)
         {
-            await CaptureAsync(path, CancellationToken.None);
-        }
+            Initialize();
+            SetVideoConnectionSettings();
+            byte[] dataBuffer = ProcessCaptureData();
+            Close();
 
-        /// <summary>
-        /// Capture a picture from the video device.
-        /// </summary>
-        /// <param name="path">Picture save path.</param>
-        /// <param name="token">A cancellation token that can be used to cancel the work.</param>
-        public override async Task CaptureAsync(string path, CancellationToken token)
-        {
-            try
-            {
-                await Task.Run(() =>
-                {
-                    Initialize();
-                    SetVideoConnectionSettings();
-                    byte[] dataBuffer = ProcessCaptureData();
-                    Close();
-
-                    using FileStream fs = new FileStream(path, FileMode.Create);
-                    fs.Write(dataBuffer, 0, dataBuffer.Length);
-                    fs.Flush();
-                }, token);
-            }
-            catch (TaskCanceledException)
-            {
-                Close();
-            }
-        }
-
-        /// <summary>
-        /// Capture a picture from the video device.
-        /// </summary>
-        /// <returns>Picture stream.</returns>
-        public override async Task<MemoryStream> CaptureAsync()
-        {
-            return await CaptureAsync(CancellationToken.None);
+            using FileStream fs = new FileStream(path, FileMode.Create);
+            fs.Write(dataBuffer, 0, dataBuffer.Length);
+            fs.Flush();
         }
 
         /// <summary>
@@ -110,26 +79,14 @@ namespace Iot.Device.Media
         /// </summary>
         /// <returns>Picture stream.</returns>
         /// <param name="token">A cancellation token that can be used to cancel the work.</param>
-        public override async Task<MemoryStream> CaptureAsync(CancellationToken token)
+        public override MemoryStream Capture()
         {
-            try
-            {
-                return await Task.Run(() =>
-                {
-                    Initialize();
-                    SetVideoConnectionSettings();
-                    byte[] dataBuffer = ProcessCaptureData();
-                    Close();
+            Initialize();
+            SetVideoConnectionSettings();
+            byte[] dataBuffer = ProcessCaptureData();
+            Close();
 
-                    return new MemoryStream(dataBuffer);
-                }, token);
-            }
-            catch (TaskCanceledException)
-            {
-                Close();
-
-                return new MemoryStream(0);
-            }
+            return new MemoryStream(dataBuffer);
         }
 
         /// <summary>

@@ -5,8 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Iot.Device.Media
 {
@@ -41,27 +39,13 @@ namespace Iot.Device.Media
         /// Capture a picture from the video device.
         /// </summary>
         /// <param name="path">Picture save path.</param>
-        public abstract Task CaptureAsync(string path);
-
-        /// <summary>
-        /// Capture a picture from the video device.
-        /// </summary>
-        /// <param name="path">Picture save path.</param>
-        /// <param name="token"> A cancellation token that can be used to cancel the work.</param>
-        public abstract Task CaptureAsync(string path, CancellationToken token);
+        public abstract void Capture(string path);
 
         /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
         /// <returns>Picture stream.</returns>
-        public abstract Task<MemoryStream> CaptureAsync();
-
-        /// <summary>
-        /// Capture a picture from the video device.
-        /// </summary>
-        /// <returns>Picture stream</returns>
-        /// <param name="token"> A cancellation token that can be used to cancel the work.</param>
-        public abstract Task<MemoryStream> CaptureAsync(CancellationToken token);
+        public abstract MemoryStream Capture();
 
         /// <summary>
         /// Query controls value from the video device.
