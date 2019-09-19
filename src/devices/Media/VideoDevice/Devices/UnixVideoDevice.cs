@@ -78,7 +78,6 @@ namespace Iot.Device.Media
         /// Capture a picture from the video device.
         /// </summary>
         /// <returns>Picture stream.</returns>
-        /// <param name="token">A cancellation token that can be used to cancel the work.</param>
         public override MemoryStream Capture()
         {
             Initialize();
