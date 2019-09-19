@@ -157,12 +157,12 @@ It is then up to you to transform them into the correct data. You can multiply y
 
 2 primitive functions allow to read and write any register in any of the slave devices. 
 
-* ```I2cWrite(I2cChannel i2cChannel, byte address, byte register, byte data)```
+* ```WriteByteToSlave(I2cChannel i2cChannel, byte address, byte register, byte data)```
     * i2cChannel: The slave channel to attached to the I2C device
     * address: The I2C address of the slave I2C element
     * register: The register to write to the slave I2C element
     * data: The byte data to write to the slave I2C element
-* ```I2cRead(I2cChannel i2cChannel, byte address, byte register, Span<byte> readBytes)```
+* ```ReadByteFromSlave(I2cChannel i2cChannel, byte address, byte register, Span<byte> readBytes)```
     * i2cChannel: The slave channel to attached to the I2C device
     * address: The I2C address of the slave I2C element
     * register: The register to write to the slave I2C element

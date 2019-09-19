@@ -11,6 +11,7 @@ using System.Device.I2c;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Numerics;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 
 namespace Iot.Device.Imu
@@ -28,6 +29,17 @@ namespace Iot.Device.Imu
         /// <summary>
         /// Get the magnetometer bias
         /// </summary>
+        /// <remarks>
+        /// Vector axes are the following:
+        ///    +Z   +Y
+        ///  \  |  /
+        ///   \ | /
+        ///    \|/
+        ///    /|\
+        ///   / | \
+        ///  /  |  \
+        ///         +X
+        /// </remarks>
         public Vector3 MagnometerBias => new Vector3(_ak8963.MagnometerBias.Y, _ak8963.MagnometerBias.X, -_ak8963.MagnometerBias.Z);
 
         /// <summary>
@@ -52,6 +64,17 @@ namespace Iot.Device.Imu
         /// <summary>
         /// Read the magnetometer and can wait for new data to be present
         /// </summary>
+        /// <remarks>
+        /// Vector axes are the following:
+        ///    +Z   +Y
+        ///  \  |  /
+        ///   \ | /
+        ///    \|/
+        ///    /|\
+        ///   / | \
+        ///  /  |  \
+        ///         +X
+        /// </remarks>
         /// <param name="waitForData">true to wait for new data</param>
         /// <returns>The data from the magnetometer</returns>
         public Vector3 ReadMagnetometer(bool waitForData = false)
@@ -78,7 +101,8 @@ namespace Iot.Device.Imu
                 default:
                     break;
             }
-            return _wakeOnMotion ? Vector3.Zero : _ak8963.ReadMagnetometer(waitForData, timeout);
+            var readMag = _ak8963.ReadMagnetometer(waitForData, timeout);
+            return _wakeOnMotion ? Vector3.Zero : new Vector3(readMag.Y, readMag.X, readMag.Z);
         }
 
         /// <summary>
