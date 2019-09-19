@@ -1,6 +1,8 @@
-# MPU9250 - 3 axis Gyroscope, 3 axis Accelerometer, 3 axis  Magnetometer and Temperature
+# MPU6500 - 3 axis Gyroscope, 3 axis Accelerometer and Temperature / MPU9250 - 3 axis Gyroscope, 3 axis Accelerometer, 3 axis Magnetometer and Temperature
 
-MPU9250 is a 3 axis Gyroscope, 3 axis Accelerometer, 3 axis  Magnetometer and Temperature sensor that can be accessed either thru I2C or SPI. This implementation is only for I2C. The sensor can be found in various implementation like [Grove](http://wiki.seeedstudio.com/Grove-IMU_9DOF_v2.0/) or [Sparkfun](https://www.sparkfun.com/products/13762). 
+MPU6500 is a 3 axis Gyroscope, 3 axis Accelerometer and Temperature sensor that can be accessed either thru I2C or SPI. This implementation is only for I2C. The sensor can be found in various implementation but its main usage is in the MPU9250. 
+
+MPU9250 is a 3 axis Gyroscope, 3 axis Accelerometer, 3 axis Magnetometer and Temperature sensor that can be accessed either thru I2C or SPI. This implementation is only for I2C. The sensor can be found in various implementation like [Grove](http://wiki.seeedstudio.com/Grove-IMU_9DOF_v2.0/) or [Sparkfun](https://www.sparkfun.com/products/13762). MPU9250 incorporate a MPU6500 and an AK8963. 
 
 The Magnetometer used is an [AK8963](../Ak8963/README.md). It is managed thru the main MPU9250 and setup as a slave I2C. All operations go thru the MPU9250.
 
@@ -11,12 +13,11 @@ You can find an example in the [sample](./samples/Mpu9250.sample.cs) directory. 
 ```csharp
 var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
 Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
-Console.WriteLine($"Check version: {mpu9250.CheckVersion()}");
-var gyro = mpu9250.Gyroscope;
+var gyro = mpu9250.GetGyroscope();
 Console.WriteLine($"Gyro X = {gyro.X, 15}");
 Console.WriteLine($"Gyro Y = {gyro.Y, 15}");
 Console.WriteLine($"Gyro Z = {gyro.Z, 15}");
-var acc = mpu9250.Accelerometer;
+var acc = mpu9250.GetAccelerometer();
 Console.WriteLine($"Acc X = {acc.X, 15}");
 Console.WriteLine($"Acc Y = {acc.Y, 15}");
 Console.WriteLine($"Acc Z = {acc.Z, 15}");
@@ -128,7 +129,7 @@ mpu9250.SetWakeOnMotion(300, AccelerometerLowPowerFrequency.Frequency0Dot24Hz);
 while (!Console.KeyAvailable)
 {
     Console.CursorTop = 0;
-    var acc = mpu9250.Accelerometer;
+    var acc = mpu9250.GetAccelerometer();
     Console.WriteLine($"Acc X = {acc.X, 15}");
     Console.WriteLine($"Acc Y = {acc.Y, 15}");
     Console.WriteLine($"Acc Z = {acc.Z, 15}");
@@ -175,6 +176,10 @@ The following fritzing diagram illustrates one way to wire up the MPU9250 with a
 
 ## Reference
 
+MPU9250
 * Registers: http://www.invensense.com/wp-content/uploads/2017/11/RM-MPU-9250A-00-v1.6.pdf
 * Product specifications: http://www.invensense.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf
 
+MPU6500
+* Registers: https://www.invensense.com/wp-content/uploads/2015/02/MPU-6500-Register-Map2.pdf
+* Product specifications: https://www.invensense.com/wp-content/uploads/2015/02/MPU-6500-Datasheet2.pdf

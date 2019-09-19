@@ -6,7 +6,7 @@ using System;
 using System.Device.I2c;
 using System.IO;
 using System.Threading;
-using Iot.Device.Ak8963;
+using Iot.Device.Magnometer;
 
 namespace DemoAk8963
 {
@@ -27,7 +27,7 @@ namespace DemoAk8963
             Console.Clear();
             while (!Console.KeyAvailable)
             {
-                var magne = ak8963.ReadMagnetometer(true);
+                var magne = ak8963.ReadMagnetometer(true, TimeSpan.FromMilliseconds(11));
                 Console.WriteLine($"Mag X = {magne.X, 15}");
                 Console.WriteLine($"Mag Y = {magne.Y, 15}");
                 Console.WriteLine($"Mag Z = {magne.Z, 15}");

@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Iot.Device.Mpu9250
+namespace Iot.Device.Imu
 {
     [Flags]
     internal enum UserControls

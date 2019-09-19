@@ -5,7 +5,7 @@
 using System;
 using System.Device.I2c;
 using System.Threading;
-using Iot.Device.Mpu9250;
+using Iot.Device.Imu;
 
 namespace DemoMpu9250
 {
@@ -17,7 +17,6 @@ namespace DemoMpu9250
 
             var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
             Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
-            Console.WriteLine($"Check version: {mpu9250.CheckVersion()}");
             var resSelfTest = mpu9250.RunGyroscopeAccelerometerSelfTest();
             Console.WriteLine($"Self test:");
             Console.WriteLine($"Gyro X = {resSelfTest.Item1.X} vs >0.005");
@@ -35,7 +34,7 @@ namespace DemoMpu9250
             Console.WriteLine($"Acc X bias = {mpu9250.AccelerometerBias.X}");
             Console.WriteLine($"Acc Y bias = {mpu9250.AccelerometerBias.Y}");
             Console.WriteLine($"Acc Z bias = {mpu9250.AccelerometerBias.Z}");
-            Console.WriteLine($"Check version magnetometer: {mpu9250.MagnetometerCheckVersion()}");
+            Console.WriteLine($"Check version magnetometer: {mpu9250.GetMagnetometerVersion()}");
             Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient!");
             var mag = mpu9250.CalibrateMagnetometer();
             Console.WriteLine($"Bias:");
@@ -51,15 +50,15 @@ namespace DemoMpu9250
             while (!Console.KeyAvailable)
             {
                 Console.CursorTop = 0;
-                var gyro = mpu9250.Gyroscope;
+                var gyro = mpu9250.GetGyroscope();
                 Console.WriteLine($"Gyro X = {gyro.X, 15}");
                 Console.WriteLine($"Gyro Y = {gyro.Y, 15}");
                 Console.WriteLine($"Gyro Z = {gyro.Z, 15}");
-                var acc = mpu9250.Accelerometer;
+                var acc = mpu9250.GetAccelerometer();
                 Console.WriteLine($"Acc X = {acc.X, 15}");
                 Console.WriteLine($"Acc Y = {acc.Y, 15}");
                 Console.WriteLine($"Acc Z = {acc.Z, 15}");
-                Console.WriteLine($"Temp = {mpu9250.Temperature.Celsius.ToString("0.00")} °C");
+                Console.WriteLine($"Temp = {mpu9250.GetTemperature().Celsius.ToString("0.00")} °C");
                 var magne = mpu9250.ReadMagnetometer(true);
                 Console.WriteLine($"Mag X = {magne.X, 15}");
                 Console.WriteLine($"Mag Y = {magne.Y, 15}");
@@ -79,7 +78,7 @@ namespace DemoMpu9250
             while (!Console.KeyAvailable)
             {
                 Console.CursorTop = 0;
-                var acc = mpu9250.Accelerometer;
+                var acc = mpu9250.GetAccelerometer();
                 Console.WriteLine($"Acc X = {acc.X}          ");
                 Console.WriteLine($"Acc Y = {acc.Y}          ");
                 Console.WriteLine($"Acc Z = {acc.Z}          ");

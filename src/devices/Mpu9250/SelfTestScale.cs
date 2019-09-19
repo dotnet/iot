@@ -2,13 +2,25 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Mpu9250
+namespace Iot.Device.Imu
 {
     internal enum SelfTestScale
     {
+        /// <summary>
+        /// Scale 250
+        /// </summary>
         Scale0250 = 0,
+        /// <summary>
+        /// Scale 500
+        /// </summary>
         Scale0500 = 1,
+        /// <summary>
+        /// Scale 1000
+        /// </summary>
         Scale1000 = 2,
+        /// <summary>
+        /// Scale 2000
+        /// </summary>
         Scale2000 = 3,
     }
 }

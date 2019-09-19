@@ -2,21 +2,40 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Ak8963
+namespace Iot.Device.Magnometer
 {
     /// <summary>
     /// Measurement used by the AK8963
     /// </summary>
     public enum MeasurementMode
-    {         
+    {       
+        /// <summary>
+        /// Power Down
+        /// </summary>
         PowerDown = 0b0000,
+        /// <summary>
+        /// Single Measurement
+        /// </summary>
         SingleMeasurement = 0b0001,
-        //  0010 for 8 Hz
-        ContinousMeasurement8Hz = 0b010,
-        // 0110 for 100 Hz sample rates
-        ContinousMeasurement100Hz = 0b0110,
+        /// <summary>
+        /// Continuous Measurement at 8Hz
+        /// </summary>
+        ContinuousMeasurement8Hz = 0b010,
+        /// <summary>
+        /// Continuous Measurement at 100Hz
+        /// </summary>
+        ContinuousMeasurement100Hz = 0b0110,
+        /// <summary>
+        /// External Trigged Measurement
+        /// </summary>
         ExternalTriggedMeasurement = 0b0100,
+        /// <summary>
+        /// Self Test
+        /// </summary>
         SelfTest = 0b1000,
+        /// <summary>
+        /// Fuse Rom Access
+        /// </summary>
         FuseRomAccess = 0b1111,
     }
 }

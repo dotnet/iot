@@ -9,33 +9,47 @@ using System.IO;
 using System.Numerics;
 using System.Threading;
 
-namespace Iot.Device.Ak8963
+namespace Iot.Device.Magnometer
 {
     /// <summary>
     /// AK8963 class implementing a magnetometer
     /// </summary>
-    public class Ak8963 : IDisposable
+    public sealed class Ak8963 : IDisposable
     {
         private I2cDevice _i2cDevice;
         private MeasurementMode _measurementMode;
         private OutputBitMode _outputBitMode;
         private bool _selfTest = false;
         private Ak8963I2cBase _ak8963Interface;
-        private bool _autoDispose;
+        private bool _autodispose = true;
 
+        /// <summary>
+        /// Default I2C address for the AK8963
+        /// </summary>
         public const byte DefaultI2cAddress = 0x0C;
 
+        /// <summary>
+        /// Default constructor for an independent AK8963
+        /// </summary>
+        /// <param name="i2CDevice">The I2C device</param>
         public Ak8963(I2cDevice i2CDevice) : this(i2CDevice, new Ak8963I2c())
         { }
 
+        /// <summary>
+        /// Constructor to use if AK8963 is behind another element and need a special I2C protocol like
+        /// when used with the MPU9250
+        /// </summary>
+        /// <param name="i2CDevice">The I2C device</param>
+        /// <param name="ak8963Interface">The specific interface to communicate with the AK8963</param>
+        /// <param name="autoDispose">True to dispose the I2C device when class is disposed</param>
         public Ak8963(I2cDevice i2CDevice, Ak8963I2cBase ak8963Interface, bool autoDispose = true)
         {
             _i2cDevice = i2CDevice;
             _ak8963Interface = ak8963Interface;
-            _autoDispose = autoDispose;
             // Initialize the default modes
             _measurementMode = MeasurementMode.PowerDown;
             _outputBitMode = OutputBitMode.Output14bit;
+            _autodispose = autoDispose;
             byte mode = (byte)((byte)_measurementMode | ((byte)_outputBitMode << 4));
             WriteRegister(Register.CNTL, mode);
             if (!CheckVersion())
@@ -84,7 +98,7 @@ namespace Iot.Device.Ak8963
             // Page 13 of documentation 
             MeasurementMode = MeasurementMode.FuseRomAccess;
             // Read the data
-            ReadByteArray(Register.ASAX, rawData);
+            ReadBytes(Register.ASAX, rawData);
             calib.X = (float)((rawData[0] - 128) / 256.0 + 1.0);
             calib.Y = (float)((rawData[1] - 128) / 256.0 + 1.0);
             calib.Z = (float)((rawData[2] - 128) / 256.0 + 1.0);
@@ -99,10 +113,11 @@ namespace Iot.Device.Ak8963
             int numberMeasurements = 1500;
 
             // Setup the 100Hz continuous mode
-            MeasurementMode = MeasurementMode.ContinousMeasurement100Hz;
+            MeasurementMode = MeasurementMode.ContinuousMeasurement100Hz;
             for (int reading = 0; reading < numberMeasurements; reading++)
             {
-                var bias = ReadMagnetometer(true);
+                // Timeout = 100Hz = 10 ms + 1 for security
+                var bias = ReadMagnetometer(true, TimeSpan.FromMilliseconds(20));
                 minbias.X = Math.Min(bias.X, minbias.X);
                 minbias.Y = Math.Min(bias.Y, minbias.Y);
                 minbias.Z = Math.Min(bias.Z, minbias.Z);
@@ -136,6 +151,9 @@ namespace Iot.Device.Ak8963
 
         /// <summary>
         /// Read the magnetometer and can wait for new data to be present
+        /// </summary>
+        /// <remarks>
+        /// Vector axes are the following:
         ///         +X
         ///  \  |  /
         ///   \ | /
@@ -144,23 +162,28 @@ namespace Iot.Device.Ak8963
         ///   / | \
         ///  /  |  \
         ///    +Z   +Y
-        /// </summary>
+        /// </remarks>
         /// <param name="waitForData">true to wait for new data</param>
+        /// <param name="timeout">timeout for waiting the data, ignored if waitForData is false</param>
         /// <returns>The data from the magnetometer</returns>
-        public Vector3 ReadMagnetometer(bool waitForData = false)
+        public Vector3 ReadMagnetometer(bool waitForData, TimeSpan timeout)
         {
             Span<byte> rawData = stackalloc byte[6];
             // Wait for a data to be present
             if (waitForData)
             {
+                DateTime dt = DateTime.Now.Add(timeout);
                 while (!HasDataToRead)
-                    ;
+                {
+                    if (DateTime.Now > dt)
+                        throw new Exception($"{nameof(ReadMagnetometer)} timeout reading value");
+                }
             }
 
-            ReadByteArray(Register.HXL, rawData);
+            ReadBytes(Register.HXL, rawData);
             // In continuous mode, make sure to read the ST2 data to clear up
-            if ((_measurementMode == MeasurementMode.ContinousMeasurement100Hz) ||
-                (_measurementMode == MeasurementMode.ContinousMeasurement8Hz))
+            if ((_measurementMode == MeasurementMode.ContinuousMeasurement100Hz) ||
+                (_measurementMode == MeasurementMode.ContinuousMeasurement8Hz))
             {
                 ReadByte(Register.ST2);
             }
@@ -173,11 +196,13 @@ namespace Iot.Device.Ak8963
             if (OutputBitMode == OutputBitMode.Output16bit)
             {
                 // From the documentation range is from 32760 which does represent 4912 µT
-                magneto *= 4912.0f / 32760.0f;
+                // result of 4912.0f / 32760.0f
+                magneto *= 0.1499389499389499f;
             }
             else
             {
-                magneto *= 4912.0f / 8192.0f;
+                // result of 4912.0f / 8192.0f
+                magneto *= 0.599609375f;
             }
             return magneto;
 
@@ -221,7 +246,7 @@ namespace Iot.Device.Ak8963
                 WriteRegister(Register.CNTL, mode);
                 _measurementMode = value;
                 // according to documentation:
-                // After power-down mode is set, at least 100µs(Twat) is needed before setting another mode
+                // After power-down mode is set, at least 100µs is needed before setting another mode
                 Thread.Sleep(1);
             }
         }
@@ -241,18 +266,18 @@ namespace Iot.Device.Ak8963
             }
         }
 
-        private void WriteRegister(Register reg, byte data) => _ak8963Interface.WriteRegister(_i2cDevice, reg, data);
+        private void WriteRegister(Register reg, byte data) => _ak8963Interface.WriteRegister(_i2cDevice, (byte)reg, data);
 
-        private byte ReadByte(Register reg) => _ak8963Interface.ReadByte(_i2cDevice, reg);
+        private byte ReadByte(Register reg) => _ak8963Interface.ReadByte(_i2cDevice, (byte)reg);
 
-        private void ReadByteArray(Register reg, Span<byte> readBytes) => _ak8963Interface.ReadByteArray(_i2cDevice, reg, readBytes);
+        private void ReadBytes(Register reg, Span<byte> readBytes) => _ak8963Interface.ReadBytes(_i2cDevice, (byte)reg, readBytes);
 
         /// <summary>
         /// Cleanup everything
         /// </summary>
         public void Dispose()
         {
-            if (_autoDispose)
+            if (_autodispose)
             {
                 _i2cDevice?.Dispose();
                 _i2cDevice = null;

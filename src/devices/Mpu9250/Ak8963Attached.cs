@@ -2,21 +2,27 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Ak8963;
+using Iot.Device.Magnometer;
 using System;
 using System.Device;
 using System.Device.I2c;
 
-namespace Iot.Device.Mpu9250
+namespace Iot.Device.Imu
 {
     internal class Ak8963Attached : Ak8963I2cBase
     {
-        public override void WriteRegister(I2cDevice i2cDevice, Ak8963.Register reg, byte data)
+        /// <summary>
+        /// Read a byte
+        /// </summary>
+        /// <param name="i2cDevice">An I2C device</param>
+        /// <param name="reg">The register to read</param>
+        /// <param name="data">A byte to write</param>        
+        public override void WriteRegister(I2cDevice i2cDevice, byte reg, byte data)
         {
-            Span<byte> dataout = stackalloc byte[2] { (byte)Register.I2C_SLV0_ADDR, Ak8963.Ak8963.DefaultI2cAddress };
+            Span<byte> dataout = stackalloc byte[2] { (byte)Register.I2C_SLV0_ADDR, Magnometer.Ak8963.DefaultI2cAddress };
             i2cDevice.Write(dataout);
             dataout[0] = (byte)Register.I2C_SLV0_REG;
-            dataout[1] = (byte)reg;
+            dataout[1] = reg;
             i2cDevice.Write(dataout);
             dataout[0] = (byte)Register.I2C_SLV0_DO;
             dataout[1] = data;
@@ -26,19 +32,31 @@ namespace Iot.Device.Mpu9250
             i2cDevice.Write(dataout);
         }
 
-        public override byte ReadByte(I2cDevice i2cDevice, Ak8963.Register reg)
+        /// <summary>
+        /// Read a byte array
+        /// </summary>
+        /// <param name="i2cDevice">An I2C device</param>
+        /// <param name="reg">>The register to read</param>
+        /// <returns>The register value</returns>
+        public override byte ReadByte(I2cDevice i2cDevice, byte reg)
         {
             Span<byte> read = stackalloc byte[1] { 0 };
-            ReadByteArray(i2cDevice, reg, read);
+            ReadBytes(i2cDevice, reg, read);
             return read[0];
         }
 
-        public override void ReadByteArray(I2cDevice i2cDevice, Ak8963.Register reg, Span<byte> readBytes)
+        /// <summary>
+        /// Write a byte
+        /// </summary>
+        /// <param name="i2cDevice">>An I2C device</param>
+        /// <param name="reg">The register to read</param>
+        /// <param name="readBytes">A span of bytes with the read values</param>
+        public override void ReadBytes(I2cDevice i2cDevice, byte reg, Span<byte> readBytes)
         {
-            Span<byte> dataout = stackalloc byte[2] { (byte)Register.I2C_SLV0_ADDR, Ak8963.Ak8963.DefaultI2cAddress | 0x80 };
+            Span<byte> dataout = stackalloc byte[2] { (byte)Register.I2C_SLV0_ADDR, Magnometer.Ak8963.DefaultI2cAddress | 0x80 };
             i2cDevice.Write(dataout);
             dataout[0] = (byte)Register.I2C_SLV0_REG;
-            dataout[1] = (byte)reg;
+            dataout[1] = reg;
             i2cDevice.Write(dataout);
             dataout[0] = (byte)Register.I2C_SLV0_CTRL;
             dataout[1] = (byte)(0x80 | readBytes.Length);
