@@ -5,14 +5,13 @@
 using System;
 using System.Drawing;
 using System.IO;
-using System.Threading.Tasks;
 using Iot.Device.Media;
 
 namespace V4l2.Samples
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             VideoConnectionSettings settings = new VideoConnectionSettings(0)
             {
@@ -23,33 +22,33 @@ namespace V4l2.Samples
             using VideoDevice device = VideoDevice.Create(settings);
 
             // Get the supported formats of the device
-            foreach (var item in device.GetSupportedPixelFormats())
+            foreach (PixelFormat item in device.GetSupportedPixelFormats())
             {
                 Console.Write($"{item} ");
             }
             Console.WriteLine();
 
             // Get the resolutions of the format
-            foreach (var item in device.GetPixelFormatResolutions(PixelFormat.YUYV))
+            foreach ((uint Width, uint Height) in device.GetPixelFormatResolutions(PixelFormat.YUYV))
             {
-                Console.Write($"{item.Width}x{item.Height} ");
+                Console.Write($"{Width}x{Height} ");
             }
             Console.WriteLine();
 
             // Query v4l2 controls default and current value
-            var value = device.GetVideoDeviceValue(VideoDeviceValueType.Rotate);
+            VideoDeviceValue value = device.GetVideoDeviceValue(VideoDeviceValueType.Rotate);
             Console.WriteLine($"{value.Name} Min: {value.Minimum} Max: {value.Maximum} Step: {value.Step} Default: {value.DefaultValue} Current: {value.CurrentValue}");
 
             string path = Directory.GetCurrentDirectory();
 
             // Take photos
-            await device.CaptureAsync($"{path}/jpg_direct_output.jpg");
+            device.Capture($"{path}/jpg_direct_output.jpg");
 
             // Change capture setting
             device.Settings.PixelFormat = PixelFormat.YUV420;
 
             // Convert pixel format
-            Color[] colors = VideoDevice.Yv12ToRgb(await device.CaptureAsync(), settings.CaptureSize);
+            Color[] colors = VideoDevice.Yv12ToRgb(device.Capture(), settings.CaptureSize);
             Bitmap bitmap = VideoDevice.RgbToBitmap(settings.CaptureSize, colors);
             bitmap.Save($"{path}/yuyv_to_jpg.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
         }

@@ -23,13 +23,13 @@ sudo apt-get install v4l-utils
 3. Capture static image
     ```C#
     // Capture static image
-    await device.CaptureAsync("/home/pi/jpg_direct_output.jpg");
+    device.Capture("/home/pi/jpg_direct_output.jpg");
 
     // Change capture setting
     device.Settings.PixelFormat = PixelFormat.YUV420;
 
     // Get image stream, convert pixel format and save to file
-    MemoryStream ms = await device.CaptureAsync();
+    MemoryStream ms = device.Capture();
     Color[] colors = VideoDevice.Yv12ToRgb(ms, settings.CaptureSize);
     Bitmap bitmap = VideoDevice.RgbToBitmap(settings.CaptureSize, colors);
     bitmap.Save("/home/pi/yuyv_to_jpg.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
