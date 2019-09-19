@@ -35,6 +35,7 @@ This repository mainly contains two different components:
 * [SPI Tutorial](https://learn.sparkfun.com/tutorials/serial-peripheral-interface-spi/all)
 
 ## Other Helpful links
+* [Configuring Remote Debugging from Dev machine to Raspberry Pi on ARM](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx)
 * [.NET Core Documentation](https://docs.microsoft.com/dotnet/)
 * [Install .NET Core on Raspberry Pi](https://github.com/dotnet/core/blob/master/samples/RaspberryPiInstructions.md)
 * [.NET Core ARM64 Status](https://github.com/dotnet/announcements/issues/82)
