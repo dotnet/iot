@@ -12,9 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Interop/**/*.cs" />
-    <Compile Include="Devices/**/*.cs" />
-    <Compile Include="*.cs" />
+    <Compile Include="../Interop/**/*.cs" />
+    <Compile Include="VideoDevice/*.cs" />
+    <Compile Include="VideoDevice/Devices/*.cs" />
   </ItemGroup>
 
 </Project>

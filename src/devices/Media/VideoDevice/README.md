@@ -1,11 +1,6 @@
 # VideoDevice
 
 ## Getting Started
-Install `v4l-utils`.
-```
-sudo apt-get update
-sudo apt-get install v4l-utils
-```
 
 1. Create a `VideoConnectionSettings` and set the parameters for capture.
     ```C#
