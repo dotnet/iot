@@ -9,7 +9,7 @@
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
-    <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview4.19164.7" />    
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />    
   </ItemGroup>
 
   <ItemGroup>

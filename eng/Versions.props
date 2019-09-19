@@ -3,6 +3,8 @@
   <PropertyGroup>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
     <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19461.7</MicrosoftDotNetGenAPIPackageVersion>
+    <!-- dotnet/corefx dependencies -->
+    <SystemDrawingCommonPackageVersion>4.6.0</SystemDrawingCommonPackageVersion>
   </PropertyGroup>
   <!-- Restore sources -->
   <PropertyGroup>
@@ -13,6 +15,7 @@
       https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
       https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
       https://api.nuget.org/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/darc-pub-dotnet-corefx-4ac4c036/nuget/v3/index.json;
     </RestoreSources>
   </PropertyGroup>
 </Project>
