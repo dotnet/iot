@@ -92,7 +92,7 @@ namespace Iot.Tools.DeviceListing
             { "buzzer", null },
             { "gopigo3", null },
             { "grovepi", null },
-            { "nfc", "RFID/NFC modules" },          
+            { "nfc", "RFID/NFC modules" },
         };
 
         static void Main(string[] args)
