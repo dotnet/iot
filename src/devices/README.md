@@ -196,11 +196,6 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [Software implementation of SPI](SoftwareSpi/README.md)
 
-### RFID/NFC modules
-
-* [PN532 - RFID and NFC reader](Pn532/README.md)
-* [RFID shared elements](Card/README.md)
-
 ### RFID modules
 
 * [PN532 - RFID and NFC reader](Pn532/README.md)
