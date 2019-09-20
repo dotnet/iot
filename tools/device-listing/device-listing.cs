@@ -47,7 +47,7 @@ namespace Iot.Tools.DeviceListing
             "color",
             "led",
             "spi",
-            "nfc",            
+            "nfc",
         };
 
         static Dictionary<string, string> s_categoriesDescriptions = new Dictionary<string, string>()
