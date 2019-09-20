@@ -213,7 +213,7 @@ namespace Iot.Tools.DeviceListing
             {
                 string fileName = Path.GetFileName(path);
                 string dirName = new DirectoryInfo(path).Parent.Name;                    
-                UriBuilder uriBuilder = new UriBuilder(){ Path = Path.Combine(dirName, fileName) };
+                UriBuilder uriBuilder = new UriBuilder() { Path = Path.Combine(dirName, fileName) };
 
                 return uriBuilder.Path;
             }
