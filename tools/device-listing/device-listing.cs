@@ -210,13 +210,11 @@ namespace Iot.Tools.DeviceListing
         {
             if (path.StartsWith(parentPath))
             {
-                int i = parentPath.Length;
-                if (path[i] == '/' || path[i] == '\\')
-                {
-                    i++;
-                }
+                string fileName = Path.GetFileName(path);
+                string dirName = new DirectoryInfo(path).Parent.Name;                    
+                UriBuilder uriBuilder = new UriBuilder(){Path = Path.Combine(dirName, fileName)};
 
-                return path.Substring(i);
+                return uriBuilder.Path;
             }
             else
             {
