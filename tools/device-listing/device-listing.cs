@@ -47,8 +47,7 @@ namespace Iot.Tools.DeviceListing
             "color",
             "led",
             "spi",
-            "nfc",
-            "rfid",
+            "nfc",            
         };
 
         static Dictionary<string, string> s_categoriesDescriptions = new Dictionary<string, string>()
@@ -93,8 +92,7 @@ namespace Iot.Tools.DeviceListing
             { "buzzer", null },
             { "gopigo3", null },
             { "grovepi", null },
-            { "nfc", "RFID/NFC modules" },
-            { "rfid", "RFID modules" },    
+            { "nfc", "RFID/NFC modules" },          
         };
 
         static void Main(string[] args)
