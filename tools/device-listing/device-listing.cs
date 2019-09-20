@@ -168,7 +168,7 @@ namespace Iot.Tools.DeviceListing
             var deviceListing = new StringBuilder();
             foreach (DeviceInfo device in devices)
             {
-                deviceListing.AppendLine($"* [{device.Title}]({GetRelativePathSimple(device.ReadmePath, devicesPath)})");
+                deviceListing.AppendLine($"* [{device.Title}]({CreateMarkdownLinkFromPath(device.ReadmePath, devicesPath)})");
             }
 
             return deviceListing.ToString();
@@ -206,15 +206,14 @@ namespace Iot.Tools.DeviceListing
 
             return null;
         }
-
-        // simple means it won't try to use ".."
-        private static string GetRelativePathSimple(string path, string parentPath)
+       
+        private static string CreateMarkdownLinkFromPath(string path, string parentPath)
         {
             if (path.StartsWith(parentPath))
             {
                 string fileName = Path.GetFileName(path);
                 string dirName = new DirectoryInfo(path).Parent.Name;                    
-                UriBuilder uriBuilder = new UriBuilder(){Path = Path.Combine(dirName, fileName)};
+                UriBuilder uriBuilder = new UriBuilder(){ Path = Path.Combine(dirName, fileName) };
 
                 return uriBuilder.Path;
             }
