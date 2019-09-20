@@ -36,6 +36,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ### Light sensor
 
+* [Bh1745 - RGB Sensor](Bh1745/README.md)
 * [BH1750FVI - Ambient Light Sensor](Bh1750fvi/README.md)
 * [MAX44009 - Ambient Light Sensor](Max44009/README.md)
 * [TCS3472x Sensors](Tcs3472x/README.md)
@@ -194,6 +195,16 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### SPI libraries/modules
 
 * [Software implementation of SPI](SoftwareSpi/README.md)
+
+### RFID/NFC modules
+
+* [PN532 - RFID and NFC reader](Pn532/README.md)
+* [RFID shared elements](Card/README.md)
+
+### RFID modules
+
+* [PN532 - RFID and NFC reader](Pn532/README.md)
+* [RFID shared elements](Card/README.md)
 
 </categorizedDevices>
 
