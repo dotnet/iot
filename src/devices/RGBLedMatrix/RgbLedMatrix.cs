@@ -468,7 +468,7 @@ namespace Iot.Device.LEDMatrix
             int charWidth = font.Width;
             int totalTextWith = charWidth * text.Length;
 
-            if (y < 0 || y >= Height || x >= Width || x + totalTextWith <= 0)
+            if (y <= -font.Height || y >= Height || x >= Width || x + totalTextWith <= 0)
             {
                 return;
             }
