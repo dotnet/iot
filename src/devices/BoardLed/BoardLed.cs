@@ -17,7 +17,7 @@ namespace Iot.Device.BoardLed
         private const string DefaultDevicePath = "/sys/class/leds";
 
         /// <summary>
-        /// The name of LED.
+        /// The name of the LED.
         /// </summary>
         public string Name { get; }
 
