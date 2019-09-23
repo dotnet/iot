@@ -18,11 +18,11 @@ namespace Iot.Device.MatrixKeyboard.Samples
         {
             // get arguments
             Console.Write("input output pins(eg. 27,23,24,10) ");
-            System.Collections.Generic.IEnumerable<int> r = Console.ReadLine().Split(',').Select(m => int.Parse(m));
+            System.Collections.Generic.IEnumerable<int> outputs = Console.ReadLine().Split(',').Select(m => int.Parse(m));
             Console.Write("input input pins(eg. 15,14,3,2) ");
-            System.Collections.Generic.IEnumerable<int> c = Console.ReadLine().Split(',').Select(m => int.Parse(m));
+            System.Collections.Generic.IEnumerable<int> inputs = Console.ReadLine().Split(',').Select(m => int.Parse(m));
             Console.Write("input scaning interval(eg. 15) ");
-            int i = int.Parse(Console.ReadLine());
+            int interval = int.Parse(Console.ReadLine());
 
             // get GPIO controller
             GpioController gpio = new GpioController();
@@ -36,18 +36,22 @@ namespace Iot.Device.MatrixKeyboard.Samples
             */
 
             // initialize keyboard
-            MatrixKeyboard mk = new MatrixKeyboard(gpio, r, c, i);
+            MatrixKeyboard mk = new MatrixKeyboard(gpio, outputs, inputs, interval);
 
             // define the cancellation token.
             CancellationTokenSource source = new CancellationTokenSource();
             CancellationToken token = source.Token;
 
             // serial mode
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("Waiting for matrix keyboard pressed...");
-            MatrixKeyboardEventArgs key = mk.ReadKeyAsync(token).Result;
-            Mk_PinChangeEvent(mk, key);
+            int count = 10;
+            for (int n = 0; n < count; n++)
+            {
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine($"Waiting for matrix keyboard event... {n}/{count}");
+                MatrixKeyboardEventArgs key = mk.ReadKeyAsync(token).Result;
+                Mk_PinChangeEvent(mk, key);
+            }
 
             // event mode
             Console.WriteLine();
