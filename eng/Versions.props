@@ -3,6 +3,11 @@
   <PropertyGroup>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
     <MicrosoftDotNetGenAPIPackageVersion>5.0.0-beta.19470.9</MicrosoftDotNetGenAPIPackageVersion>
+    <!-- dotnet/corefx dependencies -->
+    <SystemDrawingCommonPackageVersion>4.6.0</SystemDrawingCommonPackageVersion>
+    <SystemIOPortsPackageVersion>4.6.0</SystemIOPortsPackageVersion>
+    <MicrosoftWin32RegistryPackageVersion>4.6.0</MicrosoftWin32RegistryPackageVersion>
+    <SystemRuntimeWindowsRuntimePackageVersion>4.6.0</SystemRuntimeWindowsRuntimePackageVersion>
   </PropertyGroup>
   <!-- Restore sources -->
   <PropertyGroup>
