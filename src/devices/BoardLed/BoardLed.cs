@@ -60,7 +60,7 @@ namespace Iot.Device.BoardLed
         /// <summary>
         /// Get all BoardLed instances of on-board LEDs.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>BoardLed instances.</returns>
         public static IEnumerable<BoardLed> EnumerateLeds()
         {
             var infos = Directory.GetDirectories(DefaultDevicePath)
