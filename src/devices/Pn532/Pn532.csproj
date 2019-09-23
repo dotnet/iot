@@ -11,7 +11,7 @@
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
-    <PackageReference Include="System.IO.Ports" Version="4.6.0-preview8.19405.3" />
+    <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
     <PackageReference Include="System.Memory" Version="4.5.3" />
     <Compile Include="*.cs" />
     <Compile Include="RfConfiguration\*.cs" />
