@@ -38,12 +38,13 @@ namespace LedMatrixWeather
         {
             uv -= new Vector2(0.5f, 0.5f);
 
+            float len = uv.Length();
             float outerRadius = 0.47f;
-            float outerRadiusDist = Math.Abs(uv.Length() - outerRadius);
+            float outerRadiusDist = Math.Abs(len - outerRadius);
             float outerCircle = 1.0f - smoothstep(0f, 0.025f, outerRadiusDist);
 
             float innerRadius = 0.04f;
-            float innerRadiusDist = uv.Length() - innerRadius;
+            float innerRadiusDist = len - innerRadius;
 
             float secondsAngle = 2f * pi * ((float)time.Second + time.Millisecond / 1000f) / 60f;
             float minutesAngle = 2f * pi * (float)time.Minute / 60f + secondsAngle / 60f;
@@ -53,9 +54,16 @@ namespace LedMatrixWeather
             float minutesLine = 1.0f - smoothstep(0f, 0.025f, Line(Rot(uv, minutesAngle), 0.35f));
             float hoursLine = 1.0f - smoothstep(0f, 2f * 0.025f, Line(Rot(uv, hoursAngle), 0.2f));
 
+            int ticks = 12;
+            float tickSize = 1.0f / ticks;
+            float halfTickSize = tickSize / 2;
+            float tickDist = Math.Abs(mod(0.5f + ticks * (float)Math.Atan2(uv.Y, uv.X) / 2 / pi, 1.0f) - 0.5f) * 2 * pi / ticks * len;
+            float tickCircleDist = Math.Abs(len - 0.4f);
+            float dots = 1.0f - smoothstep(0f, 0.02f, Math.Max(tickDist, tickCircleDist));
+
             return mix(
                 new Vector3(1, 0, 0),
-                new Vector3(Math.Max(outerCircle, secondsLine), minutesLine, hoursLine),
+                new Vector3(Math.Max(dots, Math.Max(outerCircle, secondsLine)), minutesLine, hoursLine),
                 smoothstep(0f, 0.01f, innerRadiusDist));
         }
 
