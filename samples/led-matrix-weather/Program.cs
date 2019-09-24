@@ -18,17 +18,17 @@ using System.Net.NetworkInformation;
 
 namespace LedMatrixWeather
 {
-    partial class Program
+    internal partial class Program
     {
-        static Action<RGBLedMatrix> s_scenario = WeatherDemo;
-        static Stopwatch s_showLocalIp = null;
-        static string[] s_ips;
-        static bool s_networkAvailable = false;
-        static Weather s_client;
-        static OpenWeatherResponse s_weatherResponse;
-        static TimeZoneInfo s_timeZonePst = TimeZoneInfo.FindSystemTimeZoneById("America/Los_Angeles");
+        private static Action<RGBLedMatrix> s_scenario = WeatherDemo;
+        private static Stopwatch s_showLocalIp = null;
+        private static string[] s_ips;
+        private static bool s_networkAvailable = false;
+        private static Weather s_client;
+        private static OpenWeatherResponse s_weatherResponse;
+        private static readonly TimeZoneInfo s_timeZonePst = TimeZoneInfo.FindSystemTimeZoneById("America/Los_Angeles");
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             if (args.Length != 1)
             {
@@ -97,16 +97,16 @@ namespace LedMatrixWeather
             }
         }
 
-        static void WeatherUpdater()
+        private static void WeatherUpdater()
         {
             while (true)
             {
                 UpdateWeather();
-                Thread.Sleep(5000);
+                Thread.Sleep(60000);
             }
         }
 
-        static void IpsGetter()
+        private static void IpsGetter()
         {
             try
             {
@@ -123,7 +123,7 @@ namespace LedMatrixWeather
             s_showLocalIp = Stopwatch.StartNew();
         }
 
-        static void UpdateWeather()
+        private static void UpdateWeather()
         {
             try
             {
@@ -140,7 +140,7 @@ namespace LedMatrixWeather
             }
         }
 
-        static IEnumerable<string> GetLocalNetworkIPAddresses()
+        private static IEnumerable<string> GetLocalNetworkIPAddresses()
         {
             var networks = NetworkInterface
                 .GetAllNetworkInterfaces()
@@ -166,7 +166,7 @@ namespace LedMatrixWeather
             }
         }
 
-        static IEnumerable<string> NetConf2019Feed()
+        private static IEnumerable<string> WeatherFeed()
         {
             if (s_showLocalIp != null && s_ips != null && s_ips.Length > 0 && s_showLocalIp.ElapsedMilliseconds < 30000)
             {
@@ -194,7 +194,7 @@ namespace LedMatrixWeather
             }
         }
 
-        static void WeatherDemo(RGBLedMatrix matrix)
+        private static void WeatherDemo(RGBLedMatrix matrix)
         {
             BdfFont font = BdfFont.Load(@"fonts/10x20.bdf");
             BdfFont font1 = BdfFont.Load(@"fonts/8x13B.bdf");
@@ -218,7 +218,7 @@ namespace LedMatrixWeather
             Stopwatch sw = Stopwatch.StartNew();
             while (s_scenario != null)
             {
-                text = " * " + string.Join(" * ", NetConf2019Feed());
+                text = " * " + string.Join(" * ", WeatherFeed());
                 fullTextWidth = text.Length * font.Width;
 
                 for (int i = 0; i < iterations && s_scenario != null; i++, textLeft --)

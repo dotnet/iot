@@ -12,13 +12,15 @@ using Iot.Device.Graphics;
 using System.Drawing;
 using System.Numerics;
 
+using static LedMatrixWeather.MathUtils;
+
 namespace LedMatrixWeather
 {
-    using static MathUtils;
-    
-    partial class Program
+    internal partial class Program
     {
-        static float Line(Vector2 uv, float len)
+        private static readonly Vector3 s_cloudsColor = new Vector3(0.3f, 0.3f, 0.3f);
+
+        private static float Line(Vector2 uv, float len)
         {
             if (uv.Y < 0)
             {
@@ -34,7 +36,7 @@ namespace LedMatrixWeather
             }
         }
 
-        static Vector3 Clock(Vector2 uv, DateTimeOffset time)
+        private static Vector3 Clock(Vector2 uv, DateTimeOffset time)
         {
             uv -= new Vector2(0.5f, 0.5f);
 
@@ -46,7 +48,8 @@ namespace LedMatrixWeather
             float innerRadius = 0.04f;
             float innerRadiusDist = len - innerRadius;
 
-            float secondsAngle = 2f * pi * ((float)time.Second + time.Millisecond / 1000f) / 60f;
+            float ftime = (float)time.Second + time.Millisecond / 1000f;
+            float secondsAngle = 2f * pi * ftime / 60f;
             float minutesAngle = 2f * pi * (float)time.Minute / 60f + secondsAngle / 60f;
             float hoursAngle = 2f * pi * (float)(time.Hour % 12) / 12f + minutesAngle / 60f;
 
@@ -54,12 +57,25 @@ namespace LedMatrixWeather
             float minutesLine = 1.0f - smoothstep(0f, 0.025f, Line(Rot(uv, minutesAngle), 0.35f));
             float hoursLine = 1.0f - smoothstep(0f, 2f * 0.025f, Line(Rot(uv, hoursAngle), 0.2f));
 
+            const float dotsSize = 0.02f;
+            float extraDotsSize = 0.0f; // 0 means original size, 1 means double the size
+#if TWIST_ON_TICK_TOCK
+            // this currently works but doesn't improve visual
+            // it needs a bit more experimenting to make it look better
+            // T = 2s because tick tock
+            float effectRatio = Math.Clamp((1 + 1.5f * (float)Math.Sin(2 * pi * ftime / 2.0f)) / 2f, 0, 1);
+            uv /= 1f - 0.25f * effectRatio;
+            len = uv.Length();
+            uv = Rot(uv, - len * effectRatio / 0.4f * 2 * pi / 6);
+            extraDotsSize = 0.32f * effectRatio;
+#endif
+
             int ticks = 12;
             float tickSize = 1.0f / ticks;
             float halfTickSize = tickSize / 2;
             float tickDist = Math.Abs(mod(0.5f + ticks * (float)Math.Atan2(uv.Y, uv.X) / 2 / pi, 1.0f) - 0.5f) * 2 * pi / ticks * len;
             float tickCircleDist = Math.Abs(len - 0.4f);
-            float dots = 1.0f - smoothstep(0f, 0.02f, Math.Max(tickDist, tickCircleDist));
+            float dots = 1.0f - smoothstep(0f, dotsSize * (1 + extraDotsSize), Math.Max(tickDist, tickCircleDist));
 
             return mix(
                 new Vector3(1, 0, 0),
@@ -67,7 +83,7 @@ namespace LedMatrixWeather
                 smoothstep(0f, 0.01f, innerRadiusDist));
         }
 
-        static Vector3 OpenWeatherIcon(Vector2 uv, string icon, float time)
+        private static Vector3 OpenWeatherIcon(Vector2 uv, string icon, float time)
         {
             uv -= new Vector2(0.5f, 0.5f);
 
@@ -107,7 +123,7 @@ namespace LedMatrixWeather
             }
         }
 
-        static Vector3 IconSunny(Vector2 uv, float time)
+        private static Vector3 IconSunny(Vector2 uv, float time)
         {
             const int NumberOfRays = 10;
             const float OuterRadius = 0.45f;
@@ -130,7 +146,7 @@ namespace LedMatrixWeather
                 smoothstep(0f, 0.02f, radiusDist));
         }
 
-        static float Clouds(Vector2 uv, float time)
+        private static float Clouds(Vector2 uv, float time)
         {
             float r0 = 0.15f;
             Vector2 p0 = new Vector2(-0.2f, 0.1f + 0.05f * (float)Math.Sin(2 * pi * time / 7f + 0.1f));
@@ -148,8 +164,7 @@ namespace LedMatrixWeather
             return smoothstep(0f, 0.2f, clouds + 0.05f);
         }
 
-        static readonly Vector3 s_cloudsColor = new Vector3(0.3f, 0.3f, 0.3f);
-        static Vector3 IconClouds(Vector2 uv, float time)
+        private static Vector3 IconClouds(Vector2 uv, float time)
         {
             float clouds = Clouds(uv, time);
 
@@ -159,7 +174,7 @@ namespace LedMatrixWeather
                 clouds);
         }
 
-        static Vector3 Rain(Vector2 uv, float time)
+        private static Vector3 Rain(Vector2 uv, float time)
         {
             if (uv.Y < -0.1 || uv.X <= -0.4 || uv.X >= 0.4)
             {
@@ -179,7 +194,7 @@ namespace LedMatrixWeather
                 rain);
         }
 
-        static Vector3 IconRain(Vector2 uv, float time)
+        private static Vector3 IconRain(Vector2 uv, float time)
         {
             float clouds = Clouds(uv - new Vector2(0f, -0.3f), time);
             return mix(
@@ -188,7 +203,7 @@ namespace LedMatrixWeather
                 clouds);
         }
 
-        static Vector3 IconMoon(Vector2 uv, float time)
+        private static Vector3 IconMoon(Vector2 uv, float time)
         {
             uv -= new Vector2(0.3f, 0.0f);
             uv = Rot(uv, 2 * pi / 128 * (float)Math.Sin(2 * pi * time / 3f));
@@ -207,10 +222,9 @@ namespace LedMatrixWeather
                 new Vector3(0.5f, 0.5f, 0.5f),
                 new Vector3(0, 0, 0),
                 smoothstep(0f, 0.07f, moon));
-            //return IconRain(uv, time);//new Vector3(0, 0, 0);
         }
 
-        static Vector3 IconPartiallySunny(Vector2 uv, float time)
+        private static Vector3 IconPartiallySunny(Vector2 uv, float time)
         {
             float clouds = Clouds(uv * 0.85f - new Vector2(0f, 0.15f), time);
             return mix(

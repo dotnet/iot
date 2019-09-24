@@ -14,7 +14,7 @@ using System.Numerics;
 
 namespace LedMatrixWeather
 {
-    static class MathUtils
+    internal static class MathUtils
     {
         public const float pi = (float)Math.PI;
 

@@ -3,7 +3,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <RootNamespace>led_matrix_weather</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,10 +10,6 @@
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
     <ProjectReference Include="../../src/Iot.Device.Bindings/Iot.Device.Bindings.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Protobuf Include="weather.proto" />
   </ItemGroup>
 
   <ItemGroup>
