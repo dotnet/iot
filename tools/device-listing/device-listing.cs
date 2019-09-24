@@ -47,6 +47,7 @@ namespace Iot.Tools.DeviceListing
             "color",
             "led",
             "spi",
+            "nfc",
         };
 
         static Dictionary<string, string> s_categoriesDescriptions = new Dictionary<string, string>()
@@ -91,6 +92,7 @@ namespace Iot.Tools.DeviceListing
             { "buzzer", null },
             { "gopigo3", null },
             { "grovepi", null },
+            { "nfc", "RFID/NFC modules" },
         };
 
         static void Main(string[] args)
@@ -166,7 +168,7 @@ namespace Iot.Tools.DeviceListing
             var deviceListing = new StringBuilder();
             foreach (DeviceInfo device in devices)
             {
-                deviceListing.AppendLine($"* [{device.Title}]({GetRelativePathSimple(device.ReadmePath, devicesPath)})");
+                deviceListing.AppendLine($"* [{device.Title}]({CreateMarkdownLinkFromPath(device.ReadmePath, devicesPath)})");
             }
 
             return deviceListing.ToString();
@@ -204,19 +206,16 @@ namespace Iot.Tools.DeviceListing
 
             return null;
         }
-
-        // simple means it won't try to use ".."
-        private static string GetRelativePathSimple(string path, string parentPath)
+       
+        private static string CreateMarkdownLinkFromPath(string path, string parentPath)
         {
             if (path.StartsWith(parentPath))
             {
-                int i = parentPath.Length;
-                if (path[i] == '/' || path[i] == '\\')
-                {
-                    i++;
-                }
+                string fileName = Path.GetFileName(path);
+                string dirName = new DirectoryInfo(path).Parent.Name;                    
+                UriBuilder uriBuilder = new UriBuilder() { Path = Path.Combine(dirName, fileName) };
 
-                return path.Substring(i);
+                return uriBuilder.Path;
             }
             else
             {

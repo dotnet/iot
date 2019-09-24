@@ -1,4 +1,4 @@
-﻿# Bh1745
+﻿# Bh1745 - RGB Sensor
 
 ## Summary
 
