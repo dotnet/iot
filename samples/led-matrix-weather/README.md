@@ -15,3 +15,11 @@ To setup autostart refer to [these instructions](../../Documentation/How-to-star
 - [Displaying rain](rain.jpg)
 - [Chaining matrices](chaining-matrices.jpg)
 - [Raspberry PI with bonnet](pi-with-bonnet.jpg)
+
+## Videos
+
+- [Rain](https://youtu.be/77mvUjvwDyk)
+- [Sun](https://youtu.be/Qgp0_x6hhy4)
+- [Moon](https://youtu.be/Fwl2raXm7q4)
+- [Partially clouded](https://youtu.be/Fx4vf2mUvSs)
+- [Clouded](https://youtu.be/bKvKFaCce24)
