@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-[assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace System.Device.Gpio.Tests
 {
@@ -17,19 +16,6 @@ namespace System.Device.Gpio.Tests
         private const int OutputPin = 5;
         private const int InputPin = 6;
         private static readonly int WaitMilliseconds = 1000;
-
-        [Fact]
-        public void ControllerCanTurnOnLEDs()
-        {
-            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
-            {
-                controller.OpenPin(LedPin, PinMode.Output);
-                Thread.Sleep(1_000);
-                controller.Write(LedPin, PinValue.High);
-                Thread.Sleep(TimeSpan.FromSeconds(1));
-                controller.Write(LedPin, PinValue.Low);
-            }
-        }
 
         [Fact]
         [Trait("SkipOnTestRun", "Windows_NT")] // The WindowsDriver is kept as High when disposed.
