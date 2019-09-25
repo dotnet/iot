@@ -30,23 +30,6 @@ namespace Iot.Device.Media
         public override VideoConnectionSettings Settings { get; }
 
         /// <summary>
-        /// The max capture size of the video device.
-        /// </summary>
-        public override (uint Width, uint Height) MaxSize
-        {
-            get
-            {
-                v4l2_cropcap cropcap = new v4l2_cropcap()
-                {
-                    type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE
-                };
-                V4l2Struct(VideoSettings.VIDIOC_CROPCAP, ref cropcap);
-
-                return (cropcap.bounds.width, cropcap.bounds.height);
-            }
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="UnixVideoDevice"/> class that will use the specified settings to communicate with the video device.
         /// </summary>
         /// <param name="settings">The connection settings of a video device.</param>
@@ -54,8 +37,6 @@ namespace Iot.Device.Media
         {
             Settings = settings;
             DevicePath = DefaultDevicePath;
-
-            Initialize();
         }
 
         /// <summary>
@@ -78,7 +59,7 @@ namespace Iot.Device.Media
         /// Capture a picture from the video device.
         /// </summary>
         /// <returns>Picture stream.</returns>
-        public override MemoryStream Capture()
+        public override Stream Capture()
         {
             Initialize();
             SetVideoConnectionSettings();
@@ -95,6 +76,8 @@ namespace Iot.Device.Media
         /// <returns>The default and current values of a video device's control.</returns>
         public override VideoDeviceValue GetVideoDeviceValue(VideoDeviceValueType type)
         {
+            Initialize();
+
             // Get default value
             v4l2_queryctrl query = new v4l2_queryctrl
             {
@@ -126,6 +109,8 @@ namespace Iot.Device.Media
         /// <returns>Supported pixel formats.</returns>
         public override IEnumerable<PixelFormat> GetSupportedPixelFormats()
         {
+            Initialize();
+
             v4l2_fmtdesc fmtdesc = new v4l2_fmtdesc
             {
                 index = 0,
@@ -149,6 +134,8 @@ namespace Iot.Device.Media
         /// <returns>Supported resolution.</returns>
         public override IEnumerable<(uint Width, uint Height)> GetPixelFormatResolutions(PixelFormat format)
         {
+            Initialize();
+
             v4l2_frmsizeenum size = new v4l2_frmsizeenum()
             {
                 index = 0,
@@ -259,6 +246,7 @@ namespace Iot.Device.Media
         private unsafe void SetVideoConnectionSettings()
         {
             FillVideoConnectionSettings();
+
             // Set capture format
             v4l2_format format = new v4l2_format
             {
@@ -362,11 +350,6 @@ namespace Iot.Device.Media
 
         private void FillVideoConnectionSettings()
         {
-            if (Settings.CaptureSize.Equals(default))
-            {
-                Settings.CaptureSize = MaxSize;
-            }
-
             if (Settings.ExposureType.Equals(default))
             {
                 Settings.ExposureType = (ExposureType)GetVideoDeviceValue(VideoDeviceValueType.ExposureType).DefaultValue;
@@ -495,6 +478,8 @@ namespace Iot.Device.Media
 
             int result = Interop.ioctl(_deviceFileDescriptor, (int)request, ptr);
             @struct = Marshal.PtrToStructure<T>(ptr);
+
+            Marshal.FreeHGlobal(ptr);
 
             return result;
         }

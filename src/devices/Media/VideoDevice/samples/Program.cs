@@ -13,12 +13,7 @@ namespace V4l2.Samples
     {
         static void Main(string[] args)
         {
-            VideoConnectionSettings settings = new VideoConnectionSettings(0)
-            {
-                CaptureSize = (2560, 1920),
-                PixelFormat = PixelFormat.JPEG,
-                ExposureType = ExposureType.Auto
-            };
+            VideoConnectionSettings settings = new VideoConnectionSettings(0, (2560, 1920), PixelFormat.JPEG);
             using VideoDevice device = VideoDevice.Create(settings);
 
             // Get the supported formats of the device

@@ -18,7 +18,7 @@ namespace Iot.Device.Media
         /// </summary>
         /// <param name="stream">YUV stream.</param>
         /// <returns>RGB format colors.</returns>
-        public static Color[] YuvToRgb(MemoryStream stream)
+        public static Color[] YuvToRgb(Stream stream)
         {
             int y, u, v;
 
@@ -40,7 +40,7 @@ namespace Iot.Device.Media
         /// </summary>
         /// <param name="stream">YUYV stream.</param>
         /// <returns>RGB format colors.</returns>
-        public static Color[] YuyvToRgb(MemoryStream stream)
+        public static Color[] YuyvToRgb(Stream stream)
         {
             int y0, u, y1, v;
 
@@ -65,14 +65,15 @@ namespace Iot.Device.Media
         /// <param name="stream">YV12 stream.</param>
         /// <param name="size">Image size in the stream.</param>
         /// <returns>RGB format colors.</returns>
-        public static Color[] Yv12ToRgb(MemoryStream stream, (uint Width, uint Height) size)
+        public static Color[] Yv12ToRgb(Stream stream, (uint Width, uint Height) size)
         {
             int y0, u, v;
             int width = (int)size.Width, height = (int)size.Height;
             int total = width * height;
             int shift, vShift = total / 4;
 
-            byte[] yuv = stream.ToArray();
+            byte[] yuv = new byte[stream.Length];
+            stream.Read(yuv, 0, yuv.Length);
 
             List<Color> colors = new List<Color>();
             for (int y = 0; y < height; y++)
@@ -98,14 +99,15 @@ namespace Iot.Device.Media
         /// <param name="stream">NV12 stream.</param>
         /// <param name="size">Image size in the stream.</param>
         /// <returns>RGB format colors.</returns>
-        public static Color[] Nv12ToRgb(MemoryStream stream, (uint Width, uint Height) size)
+        public static Color[] Nv12ToRgb(Stream stream, (uint Width, uint Height) size)
         {
             int y0, u, v;
             int width = (int)size.Width, height = (int)size.Height;
             int total = width * height;
             int shift;
 
-            byte[] yuv = stream.ToArray();
+            byte[] yuv = new byte[stream.Length];
+            stream.Read(yuv, 0, yuv.Length);
 
             List<Color> colors = new List<Color>();
             for (int y = 0; y < height; y++)

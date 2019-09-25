@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -8,7 +8,27 @@ using System.Runtime.InteropServices;
 internal partial class Interop
 {
     [DllImport(LibcLibrary, SetLastError = true)]
+    internal static extern int ioctl(int fd, int request, IntPtr argp);
+
+    [DllImport(LibcLibrary, SetLastError = true)]
+    internal static extern int open([MarshalAs(UnmanagedType.LPStr)] string pathname, FileOpenFlags flags);
+
+    [DllImport(LibcLibrary)]
+    internal static extern int close(int fd);
+
+    [DllImport(LibcLibrary, SetLastError = true)]
     internal static extern IntPtr mmap(IntPtr addr, int length, MemoryMappedProtections prot, MemoryMappedFlags flags, int fd, int offset);
+
+    [DllImport(LibcLibrary)]
+    internal static extern int munmap(IntPtr addr, int length);
+}
+
+internal enum FileOpenFlags
+{
+    O_RDONLY = 0x00,
+    O_RDWR = 0x02,
+    O_NONBLOCK = 0x800,
+    O_SYNC = 0x101000
 }
 
 [Flags]

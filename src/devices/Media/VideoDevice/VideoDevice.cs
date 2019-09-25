@@ -31,11 +31,6 @@ namespace Iot.Device.Media
         public abstract VideoConnectionSettings Settings { get; }
 
         /// <summary>
-        /// The max capture size of the video device.
-        /// </summary>
-        public abstract (uint Width, uint Height) MaxSize { get; }
-
-        /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
         /// <param name="path">Picture save path.</param>
@@ -45,7 +40,7 @@ namespace Iot.Device.Media
         /// Capture a picture from the video device.
         /// </summary>
         /// <returns>Picture stream.</returns>
-        public abstract MemoryStream Capture();
+        public abstract Stream Capture();
 
         /// <summary>
         /// Query controls value from the video device.
