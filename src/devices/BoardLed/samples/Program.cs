@@ -12,7 +12,7 @@ namespace BoardLedSample
         static void Main(string[] args)
         {
             // Open the green led on Raspberry Pi.
-            BoardLed led = new BoardLed("led0");
+            using BoardLed led = new BoardLed("led0");
 
             string defaultTrigger = led.Trigger;
 
