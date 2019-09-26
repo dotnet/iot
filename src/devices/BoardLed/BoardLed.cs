@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Iot.Device.BoardLed
@@ -35,6 +36,7 @@ namespace Iot.Device.BoardLed
         /// The kernel provides some triggers which let the kernel control the LED.
         /// For example, the red light of Raspberry Pi, whose trigger is "default-on", which makes it keep lighting up.
         /// If you want to operate the LED, you need to remove the trigger, which is to set its trigger to none.
+        /// Use <see cref="EnumerateTriggers()"/> to get all triggers.
         /// </remarks>
         public string Trigger { get => GetTrigger(); set => SetTrigger(value); }
 
@@ -63,8 +65,14 @@ namespace Iot.Device.BoardLed
         /// Get all triggers of current LED.
         /// </summary>
         /// <returns>The name of triggers.</returns>
-        public IEnumerable<string> EnumerateTriggers() => Regex.Replace(_triggerReader.ReadToEnd(), @"\[|\]", "")      // remove selected chars
+        public IEnumerable<string> EnumerateTriggers()
+        {
+            _triggerReader.DiscardBufferedData();
+            _triggerReader.BaseStream.Position = 0;
+
+            return Regex.Replace(_triggerReader.ReadToEnd(), @"\[|\]", "")      // remove selected chars
                 .Split(' ');
+        }
 
         /// <summary>
         /// Get all BoardLed instances of on-board LEDs.
@@ -97,9 +105,21 @@ namespace Iot.Device.BoardLed
             _maxBrightnessReader = null;
         }
 
-        private int GetBrightness() => int.Parse(_brightnessReader.ReadToEnd());
+        private int GetBrightness()
+        {
+            _brightnessReader.DiscardBufferedData();
+            _brightnessReader.BaseStream.Position = 0;
 
-        private int GetMaxBrightness() => int.Parse(_maxBrightnessReader.ReadToEnd());
+            return int.Parse(_brightnessReader.ReadToEnd());
+        }
+
+        private int GetMaxBrightness()
+        {
+            _maxBrightnessReader.DiscardBufferedData();
+            _maxBrightnessReader.BaseStream.Position = 0;
+
+            return int.Parse(_maxBrightnessReader.ReadToEnd());
+        }
 
         private void SetBrightness(int value)
         {
@@ -112,24 +132,38 @@ namespace Iot.Device.BoardLed
                 value = 0;
             }
 
+            _brightnessWriter.BaseStream.Position = 0;
+
             _brightnessWriter.Write(value);
             _brightnessWriter.Flush();
         }
 
-        private string GetTrigger() => Regex.Match(_triggerReader.ReadToEnd(), @"(?<=\[)(.*)(?=\])").Value;
+        private string GetTrigger()
+        {
+            _triggerReader.DiscardBufferedData();
+            _triggerReader.BaseStream.Position = 0;
+
+            return Regex.Match(_triggerReader.ReadToEnd(), @"(?<=\[)(.*)(?=\])").Value;
+        }
 
         private void SetTrigger(string name)
         {
+            _triggerWriter.BaseStream.Position = 0;
+
             _triggerWriter.Write(name);
             _triggerWriter.Flush();
         }
 
         private void Initialize()
         {
-            _brightnessReader = new StreamReader(File.Open($"{DefaultDevicePath}/{Name}/brightness", FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-            _brightnessWriter = new StreamWriter(File.Open($"{DefaultDevicePath}/{Name}/brightness", FileMode.Open, FileAccess.Write, FileShare.ReadWrite));
-            _triggerReader = new StreamReader(File.Open($"{DefaultDevicePath}/{Name}/trigger", FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-            _triggerWriter = new StreamWriter(File.Open($"{DefaultDevicePath}/{Name}/trigger", FileMode.Open, FileAccess.Write, FileShare.ReadWrite));
+            FileStream brightnessStream = File.Open($"{DefaultDevicePath}/{Name}/brightness", FileMode.Open);
+            _brightnessReader = new StreamReader(brightnessStream, Encoding.ASCII, false, 2, true);
+            _brightnessWriter = new StreamWriter(brightnessStream, Encoding.ASCII, 2, false);
+
+            FileStream triggerStream = File.Open($"{DefaultDevicePath}/{Name}/trigger", FileMode.Open);
+            _triggerReader = new StreamReader(triggerStream, Encoding.ASCII, false, 512, true);
+            _triggerWriter = new StreamWriter(triggerStream, Encoding.ASCII, 512, false);
+
             _maxBrightnessReader = new StreamReader(File.Open($"{DefaultDevicePath}/{Name}/max_brightness", FileMode.Open, FileAccess.Read));
         }
     }
