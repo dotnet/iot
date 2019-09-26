@@ -4,12 +4,7 @@
 
 1. Create a `VideoConnectionSettings` and set the parameters for capture.
     ```C#
-    VideoConnectionSettings settings = new VideoConnectionSettings(busId: 0)
-    {
-        CaptureSize = (2560, 1920),
-        PixelFormat = PixelFormat.JPEG,
-        ExposureType = ExposureType.Auto
-    };
+    VideoConnectionSettings settings = new VideoConnectionSettings(busId: 0, captureSize: (2560, 1920), pixelFormat: PixelFormat.YUYV);
     ```
 2. Create a communications channel to a video device.
     ```C#
