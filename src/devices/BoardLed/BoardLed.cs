@@ -69,7 +69,8 @@ namespace Iot.Device.BoardLed
         {
             _triggerReader.BaseStream.Position = 0;
 
-            return Regex.Replace(_triggerReader.ReadToEnd(), @"\[|\]", "")      // remove selected chars
+            // Remove selected chars
+            return Regex.Replace(_triggerReader.ReadToEnd(), @"\[|\]", "")
                 .Split(' ');
         }
 
@@ -79,11 +80,12 @@ namespace Iot.Device.BoardLed
         /// <returns>BoardLed instances.</returns>
         public static IEnumerable<BoardLed> EnumerateLeds()
         {
-            var infos = Directory.GetDirectories(DefaultDevicePath)
-                .Where(x => !x.Contains(':'))       // remove items like "mmc0::"
+            IEnumerable<DirectoryInfo> infos = Directory.GetDirectories(DefaultDevicePath)
                 .Select(x => new DirectoryInfo(x));
-            
-            return infos.Select(x => new BoardLed(x.Name));
+
+            // Make sure it's a real LED
+            return infos.Where(x => x.EnumerateFiles().Select(f => f.Name).Contains("brightness"))
+                .Select(x => new BoardLed(x.Name));
         }
 
         /// <summary>
@@ -137,6 +139,13 @@ namespace Iot.Device.BoardLed
 
         private void SetTrigger(string name)
         {
+            IEnumerable<string> triggers = EnumerateTriggers();
+
+            if (!triggers.Contains(name))
+            {
+                throw new ArgumentException($"System does not contain a trigger called {name}.");
+            }
+
             _triggerWriter.BaseStream.SetLength(0);
 
             _triggerWriter.Write(name);
