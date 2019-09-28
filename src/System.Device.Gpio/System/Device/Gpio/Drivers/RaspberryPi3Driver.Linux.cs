@@ -14,7 +14,7 @@ namespace System.Device.Gpio.Drivers
 {
     public unsafe partial class RaspberryPi3Driver : GpioDriver
     {
-        private const int Linux_Enoent = 2; // error indicates that an entity doesn't exist
+        private const int ENOENT = 2; // error indicates that an entity doesn't exist
         private RegisterView* _registerViewPointer = null;
         private static readonly object s_initializationLock = new object();
         private static readonly object s_sysFsInitializationLock = new object();
@@ -414,7 +414,7 @@ namespace System.Device.Gpio.Drivers
                     // if the failure is NOT because /dev/gpiomem doesn't exist then throw an exception at this point.
                     // if it were anything else then it is probably best not to try and use /dev/mem on the basis that
                     // it would be better to solve the issue rather than use a method that requires root privileges
-                    if (win32Error != Linux_Enoent)
+                    if (win32Error != ENOENT)
                     {
                         throw new IOException($"Error {win32Error} initializing the Gpio driver.");
                     }
@@ -437,18 +437,18 @@ namespace System.Device.Gpio.Drivers
 
                             // if we get zero back then we use our own internal method. This can happen 
                             // on a Pi4 if the userland libraries haven't been updated and was fixed in Jul/Aug 2019.
-                            if(gpioRegisterOffset == 0)
+                            if (gpioRegisterOffset == 0)
                             {
                                 gpioRegisterOffset = GetPeripheralBaseAddress();
                             }
                         }
-                        catch(DllNotFoundException)
+                        catch (DllNotFoundException)
                         {
                             // if the code gets here then then use our internal method as libbcm_host isn't available.
                             gpioRegisterOffset = GetPeripheralBaseAddress();
                         }
 
-                        if (gpioRegisterOffset == ~0U)
+                        if (gpioRegisterOffset == 0xFFFFFFFF)
                         {
                             throw new Exception($"Error - Unable to determine peripheral base address.");
                         }
@@ -457,7 +457,7 @@ namespace System.Device.Gpio.Drivers
                         gpioRegisterOffset += GpioPeripheralOffset;
                     }
                 }
-                    
+
                 IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)gpioRegisterOffset);
                 if (mapPointer.ToInt64() == -1)
                 {
