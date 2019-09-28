@@ -67,7 +67,6 @@ namespace Iot.Device.BoardLed
         /// <returns>The name of triggers.</returns>
         public IEnumerable<string> EnumerateTriggers()
         {
-            _triggerReader.DiscardBufferedData();
             _triggerReader.BaseStream.Position = 0;
 
             return Regex.Replace(_triggerReader.ReadToEnd(), @"\[|\]", "")      // remove selected chars
@@ -83,7 +82,7 @@ namespace Iot.Device.BoardLed
             var infos = Directory.GetDirectories(DefaultDevicePath)
                 .Where(x => !x.Contains(':'))       // remove items like "mmc0::"
                 .Select(x => new DirectoryInfo(x));
-
+            
             return infos.Select(x => new BoardLed(x.Name));
         }
 
@@ -107,7 +106,6 @@ namespace Iot.Device.BoardLed
 
         private int GetBrightness()
         {
-            _brightnessReader.DiscardBufferedData();
             _brightnessReader.BaseStream.Position = 0;
 
             return int.Parse(_brightnessReader.ReadToEnd());
@@ -115,7 +113,6 @@ namespace Iot.Device.BoardLed
 
         private int GetMaxBrightness()
         {
-            _maxBrightnessReader.DiscardBufferedData();
             _maxBrightnessReader.BaseStream.Position = 0;
 
             return int.Parse(_maxBrightnessReader.ReadToEnd());
@@ -123,16 +120,9 @@ namespace Iot.Device.BoardLed
 
         private void SetBrightness(int value)
         {
-            if (value > 255)
-            {
-                value = 255;
-            }
-            else if (value < 0)
-            {
-                value = 0;
-            }
+            value = Math.Clamp(value, 0, 255);
 
-            _brightnessWriter.BaseStream.Position = 0;
+            _brightnessWriter.BaseStream.SetLength(0);
 
             _brightnessWriter.Write(value);
             _brightnessWriter.Flush();
@@ -140,7 +130,6 @@ namespace Iot.Device.BoardLed
 
         private string GetTrigger()
         {
-            _triggerReader.DiscardBufferedData();
             _triggerReader.BaseStream.Position = 0;
 
             return Regex.Match(_triggerReader.ReadToEnd(), @"(?<=\[)(.*)(?=\])").Value;
@@ -148,7 +137,7 @@ namespace Iot.Device.BoardLed
 
         private void SetTrigger(string name)
         {
-            _triggerWriter.BaseStream.Position = 0;
+            _triggerWriter.BaseStream.SetLength(0);
 
             _triggerWriter.Write(name);
             _triggerWriter.Flush();
@@ -157,12 +146,12 @@ namespace Iot.Device.BoardLed
         private void Initialize()
         {
             FileStream brightnessStream = File.Open($"{DefaultDevicePath}/{Name}/brightness", FileMode.Open);
-            _brightnessReader = new StreamReader(brightnessStream, Encoding.ASCII, false, 2, true);
-            _brightnessWriter = new StreamWriter(brightnessStream, Encoding.ASCII, 2, false);
+            _brightnessReader = new StreamReader(stream: brightnessStream, encoding: Encoding.ASCII, detectEncodingFromByteOrderMarks: false, bufferSize: 4, leaveOpen: true);
+            _brightnessWriter = new StreamWriter(stream: brightnessStream, encoding: Encoding.ASCII, bufferSize: 4, leaveOpen: false);
 
             FileStream triggerStream = File.Open($"{DefaultDevicePath}/{Name}/trigger", FileMode.Open);
-            _triggerReader = new StreamReader(triggerStream, Encoding.ASCII, false, 512, true);
-            _triggerWriter = new StreamWriter(triggerStream, Encoding.ASCII, 512, false);
+            _triggerReader = new StreamReader(stream: triggerStream, encoding: Encoding.ASCII, detectEncodingFromByteOrderMarks: false, bufferSize: 512, leaveOpen: true);
+            _triggerWriter = new StreamWriter(stream: triggerStream, encoding: Encoding.ASCII, bufferSize: 512, leaveOpen: false);
 
             _maxBrightnessReader = new StreamReader(File.Open($"{DefaultDevicePath}/{Name}/max_brightness", FileMode.Open, FileAccess.Read));
         }
