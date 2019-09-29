@@ -9,12 +9,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Iot.Device.MatrixKeyboard
+namespace Iot.Device.KeyMatrix
 {
     /// <summary>
-    /// GPIO Matrix Keyboard Driver
+    /// GPIO key matrix Driver
     /// </summary>
-    public class MatrixKeyboard : IDisposable
+    public class KeyMatrix : IDisposable
     {
         /// <summary>
         /// Get output pins
@@ -37,23 +37,24 @@ namespace Iot.Device.MatrixKeyboard
         public int ScanInterval { get; set; }
 
         /// <summary>
-        /// Delegate of keyboard event
+        /// Delegate of key matrix event
         /// </summary>
-        public delegate void PinChangeEventHandler(object sender, MatrixKeyboardEventArgs pinValueChangedEventArgs);
+        public delegate void PinChangeEventHandler(object sender, KeyMatrixEventArgs pinValueChangedEventArgs);
 
         private int[] _outputPins;
         private int[] _inputPins;
         private GpioController _masterGpioController;
         private PinValue[] _buttonValues;
+        private bool _pinsOpened;
 
         /// <summary>
-        /// Initialize keyboard
+        /// Initialize key matrix
         /// </summary>
         /// <param name="masterController">GPIO controller</param>
         /// <param name="outputPins">Output pins</param>
         /// <param name="inputPins">Input pins</param>
         /// <param name="scanInterval">Scanning interval in milliseconds</param>
-        public MatrixKeyboard(GpioController masterController, IEnumerable<int> outputPins, IEnumerable<int> inputPins, int scanInterval)
+        public KeyMatrix(GpioController masterController, IEnumerable<int> outputPins, IEnumerable<int> inputPins, int scanInterval)
         {
             _masterGpioController = masterController ?? throw new ArgumentNullException(nameof(masterController));
 
@@ -83,38 +84,35 @@ namespace Iot.Device.MatrixKeyboard
             _outputPins = outputPins.ToArray();
             _inputPins = inputPins.ToArray();
             _buttonValues = new PinValue[_outputPins.Length * _inputPins.Length];
+            _pinsOpened = false;
 
             ScanInterval = scanInterval;
+
+            OpenPins();
         }
 
         /// <summary>
-        /// Start a task to open GPIO pins then start keyboard scanning. Raises MatrixKeyboardEventArgs.
+        /// Start a task to open GPIO pins then start keyboard scanning. Raises KeyMatrixEventArgs.
         /// </summary>
         /// <param name="token">A cancellation token that can be used to cancel the work</param>
         public Task ScanAsync(CancellationToken token)
         {
             return Task.Run(() =>
             {
-                OpenPins();
-                MatrixKeyboardEventArgs args = Scan(token, false);
-                ClosePins();
-
+                KeyMatrixEventArgs args = Scan(token, false);
                 return args;
             }, token);
         }
 
         /// <summary>
-        /// Start a task to open GPIO pins then start keyboard scanning. End with a MatrixKeyboardEventArgs raises.
+        /// Start a task to open GPIO pins then start keyboard scanning. End with a KeyMatrixEventArgs raises.
         /// </summary>
         /// <param name="token">A cancellation token that can be used to cancel the work</param>
-        public Task<MatrixKeyboardEventArgs> ReadKeyAsync(CancellationToken token)
+        public Task<KeyMatrixEventArgs> ReadKeyAsync(CancellationToken token)
         {
             return Task.Run(() =>
             {
-                OpenPins();
-                MatrixKeyboardEventArgs args = Scan(token, true);
-                ClosePins();
-
+                KeyMatrixEventArgs args = Scan(token, true);
                 return args;
             }, token);
         }
@@ -136,6 +134,8 @@ namespace Iot.Device.MatrixKeyboard
         /// <inheritdoc/>
         public void Dispose()
         {
+            ClosePins();
+
             _masterGpioController.Dispose();
             _masterGpioController = null;
 
@@ -154,10 +154,12 @@ namespace Iot.Device.MatrixKeyboard
             {
                 _masterGpioController.OpenPin(_inputPins[i], PinMode.Input);
             }
+
+            _pinsOpened = true;
         }
         private void ClosePins()
         {
-            Thread.Sleep(ScanInterval); // wait for thread ends    
+            _pinsOpened = false;
 
             for (int i = 0; i < _outputPins.Length; i++)
             {
@@ -169,13 +171,13 @@ namespace Iot.Device.MatrixKeyboard
             }
         }
 
-        private MatrixKeyboardEventArgs Scan(CancellationToken token, bool readKey)
+        private KeyMatrixEventArgs Scan(CancellationToken token, bool readKey)
         {
-            MatrixKeyboardEventArgs args = null;
+            KeyMatrixEventArgs args = null;
             int currentOutput = 0;
             _masterGpioController.Write(_outputPins[currentOutput], PinValue.High);
 
-            while (!token.IsCancellationRequested)
+            while (_pinsOpened && !token.IsCancellationRequested)
             {
                 for (int i = 0; i < _outputPins.Length; i++)
                 {
@@ -187,7 +189,7 @@ namespace Iot.Device.MatrixKeyboard
 
                     if (newValue != oldValue)
                     {
-                        args = new MatrixKeyboardEventArgs(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, currentOutput, i);
+                        args = new KeyMatrixEventArgs(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, currentOutput, i);
                         PinChangeEvent?.Invoke(this, args);
                         if (readKey)
                         {

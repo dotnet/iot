@@ -7,7 +7,7 @@ using System.Device.Gpio;
 using System.Linq;
 using System.Threading;
 
-namespace Iot.Device.MatrixKeyboard.Samples
+namespace Iot.Device.KeyMatrix.Samples
 {
     /// <summary>
     /// This sample is for Raspberry Pi Model 3B+
@@ -36,7 +36,7 @@ namespace Iot.Device.MatrixKeyboard.Samples
             */
 
             // initialize keyboard
-            MatrixKeyboard mk = new MatrixKeyboard(gpio, outputs, inputs, interval);
+            KeyMatrix mk = new KeyMatrix(gpio, outputs, inputs, interval);
 
             // define the cancellation token.
             CancellationTokenSource source = new CancellationTokenSource();
@@ -49,7 +49,7 @@ namespace Iot.Device.MatrixKeyboard.Samples
                 Console.WriteLine();
                 Console.WriteLine();
                 Console.WriteLine($"Waiting for matrix keyboard event... {n}/{count}");
-                MatrixKeyboardEventArgs key = mk.ReadKeyAsync(token).Result;
+                KeyMatrixEventArgs key = mk.ReadKeyAsync(token).Result;
                 Mk_PinChangeEvent(mk, key);
             }
 
@@ -64,18 +64,18 @@ namespace Iot.Device.MatrixKeyboard.Samples
             // start scanning
             Console.ReadKey();
             System.Threading.Tasks.Task task = mk.ScanAsync(token);
-            Console.WriteLine("MatrixKeyboard.StartScan() ");
+            Console.WriteLine("KeyMatrix.StartScan() ");
 
             // stop scanning
             Console.ReadKey();
             source.Cancel();
             task.Wait();
-            Console.WriteLine("MatrixKeyboard.StopScan() ");
+            Console.WriteLine("KeyMatrix.StopScan() ");
 
             // dispose
             Console.ReadKey();
             mk.Dispose();
-            Console.WriteLine("MatrixKeyboard.Dispose() ");
+            Console.WriteLine("KeyMatrix.Dispose() ");
 
             // quit
             Console.ReadKey();
@@ -84,7 +84,7 @@ namespace Iot.Device.MatrixKeyboard.Samples
         /// <summary>
         /// Keyboard event
         /// </summary>
-        private static void Mk_PinChangeEvent(object sender, MatrixKeyboardEventArgs pinValueChangedEventArgs)
+        private static void Mk_PinChangeEvent(object sender, KeyMatrixEventArgs pinValueChangedEventArgs)
         {
             // clear screen
             Console.Clear();
@@ -94,7 +94,7 @@ namespace Iot.Device.MatrixKeyboard.Samples
             Console.WriteLine();
 
             // print keyboard status
-            MatrixKeyboard s = (MatrixKeyboard)sender;
+            KeyMatrix s = (KeyMatrix)sender;
             for (int r = 0; r < s.OutputPins.Count(); r++)
             {
                 ReadOnlySpan<PinValue> rv = s.ValuesByOutput(r);

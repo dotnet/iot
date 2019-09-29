@@ -1,20 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\KeyMatrix.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\..\Mcp23xxx\Mcp23xxx.csproj" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
-    <Compile Include="MatrixKeyboard.cs" />
-    <Compile Include="MatrixKeyboardEventArgs.cs" />
-  </ItemGroup>
-
-  <ItemGroup>    
-    <None Include="README.md" />
   </ItemGroup>
 
 </Project>

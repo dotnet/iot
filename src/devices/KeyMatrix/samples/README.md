@@ -1,4 +1,4 @@
-# Matrix Keyboard Samples
+# Key Matrix Samples
 
 ## Connection using on-board GPIO
 

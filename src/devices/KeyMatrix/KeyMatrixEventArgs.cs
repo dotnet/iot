@@ -5,12 +5,12 @@
 using System;
 using System.Device.Gpio;
 
-namespace Iot.Device.MatrixKeyboard
+namespace Iot.Device.KeyMatrix
 {
     /// <summary>
     /// Keyboard event
     /// </summary>
-    public class MatrixKeyboardEventArgs : EventArgs
+    public class KeyMatrixEventArgs : EventArgs
     {
         /// <summary>
         /// Event type of current button. PinEventTypes.Rising is pressed，PinEventTypes.Falling is released
@@ -27,7 +27,7 @@ namespace Iot.Device.MatrixKeyboard
         /// </summary>
         public int Input;
 
-        internal MatrixKeyboardEventArgs(PinEventTypes eventType, int output, int input)
+        internal KeyMatrixEventArgs(PinEventTypes eventType, int output, int input)
         {
             EventType = eventType;
             Output = output;
