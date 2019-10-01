@@ -13,3 +13,10 @@ The project currently includes `VideoDevice`.
     ```
     sudo apt-get install libc6-dev libgdiplus libx11-dev
     ```
+
+### SoundDevice
+
+1. Install `libasound2-dev`.
+    ```
+    sudo apt-get install libasound2-dev
+    ```
