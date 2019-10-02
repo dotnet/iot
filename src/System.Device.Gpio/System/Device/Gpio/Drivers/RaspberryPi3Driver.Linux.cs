@@ -18,6 +18,11 @@ namespace System.Device.Gpio.Drivers
         private RegisterView* _registerViewPointer = null;
         private static readonly object s_initializationLock = new object();
         private static readonly object s_sysFsInitializationLock = new object();
+        private const uint PeripheralBaseAddressBcm2835 = 0x2000_0000;
+        private const uint PeripheralBaseAddressBcm2836 = 0x3F00_0000;
+        private const uint PeripheralBaseAddressBcm2838 = 0xFE00_0000;
+        private const uint PeripheralBaseAddressVideocore = 0x7E00_0000;
+        private const uint InvalidPeripheralBaseAddress = 0xFFFF_FFFF;
         private const uint GpioPeripheralOffset = 0x0020_0000; // offset from the peripheral base address of the GPIO registers
         private const string GpioMemoryFilePath = "/dev/gpiomem";
         private const string MemoryFilePath = "/dev/mem";
@@ -343,7 +348,7 @@ namespace System.Device.Gpio.Drivers
         /// <returns>This returns the peripheral base address as a 32 bit address or 0xFFFFFFFF when in error.</returns>
         private uint GetPeripheralBaseAddress()
         {
-            uint cpuBusPeripheralBaseAddress = 0xFFFFFFF;
+            uint cpuBusPeripheralBaseAddress = InvalidPeripheralBaseAddress;
             uint vcBusPeripheralBaseAddress;
 
             using (BinaryReader rdr = new BinaryReader(File.Open(DeviceTreeRanges, FileMode.Open, FileAccess.Read)))
@@ -361,10 +366,11 @@ namespace System.Device.Gpio.Drivers
                     cpuBusPeripheralBaseAddress = BinaryPrimitives.ReadUInt32BigEndian(rdr.ReadBytes(4));
                 }
 
-                // if the address values don't fall withing known values then assume an error
-                if (vcBusPeripheralBaseAddress != 0x7E000000 || !(cpuBusPeripheralBaseAddress == 0x20000000 || cpuBusPeripheralBaseAddress == 0x3F000000 || cpuBusPeripheralBaseAddress == 0xFE000000))
+                // if the address values don't fall withing known values for the chipsets associated with the Pi2, Pi3 and Pi4 then assume an error
+                // These addresses are coded into the device tree and the dts source for the device tree is within https://github.com/raspberrypi/linux/tree/rpi-4.19.y/arch/arm/boot/dts
+                if (vcBusPeripheralBaseAddress != PeripheralBaseAddressVideocore || !(cpuBusPeripheralBaseAddress == PeripheralBaseAddressBcm2835 || cpuBusPeripheralBaseAddress == PeripheralBaseAddressBcm2836 || cpuBusPeripheralBaseAddress == PeripheralBaseAddressBcm2838))
                 {
-                    cpuBusPeripheralBaseAddress = 0xFFFFFFFF;
+                    cpuBusPeripheralBaseAddress = InvalidPeripheralBaseAddress;
                 }
             }
 
@@ -427,7 +433,7 @@ namespace System.Device.Gpio.Drivers
                     }
                     else // success so set the offset into memory of the gpio registers
                     {
-                        gpioRegisterOffset = ~0U;
+                        gpioRegisterOffset = InvalidPeripheralBaseAddress;
 
                         try
                         {
@@ -448,9 +454,9 @@ namespace System.Device.Gpio.Drivers
                             gpioRegisterOffset = GetPeripheralBaseAddress();
                         }
 
-                        if (gpioRegisterOffset == 0xFFFFFFFF)
+                        if (gpioRegisterOffset == InvalidPeripheralBaseAddress)
                         {
-                            throw new Exception($"Error - Unable to determine peripheral base address.");
+                            throw new InvalidOperationException("Error - Unable to determine peripheral base address.");
                         }
 
                         // add on the offset from the peripheral base address to point to the gpio registers
