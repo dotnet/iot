@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.Magnometer
+namespace Iot.Device.Magnetometer
 {
     /// <summary>
-    /// Registers of the AK8963. This class is public as 
-    /// need to be accessed when this device is embedded into another one
-    /// like in the MPU9250
+    /// Registers of the AK8963. 
     /// </summary>
     internal enum Register
     {

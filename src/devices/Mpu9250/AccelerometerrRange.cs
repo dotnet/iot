@@ -22,8 +22,8 @@ namespace Iot.Device.Imu
         /// </summary>
         Range08G = 2,
         /// <summary>
-        /// range 16G
+        /// Range 16G
         /// </summary>
-        range16G = 3
+        Range16G = 3
     }
 }

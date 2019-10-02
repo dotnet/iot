@@ -5,7 +5,7 @@
 using System;
 using System.Device.I2c;
 
-namespace Iot.Device.Magnometer
+namespace Iot.Device.Magnetometer
 {
     /// <summary>
     /// Abstract class for AK8963 the I2C interface. This sensor can be found as a sub 

@@ -6,7 +6,7 @@ MPU9250 is a 3 axis Gyroscope, 3 axis Accelerometer, 3 axis Magnetometer and Tem
 
 The Magnetometer used is an [AK8963](../Ak8963/README.md). It is managed thru the main MPU9250 and setup as a slave I2C. All operations go thru the MPU9250.
 
-## Uage
+## Usage
 
 You can find an example in the [sample](./samples/Mpu9250.sample.cs) directory. Usage is straightforward including the possibility to have a calibration for all sub sensors.
 
@@ -66,7 +66,7 @@ Console.WriteLine($"Acc Z bias = {mpu9250.AccelerometerBias.Z}");
 Calibration is as well available for the magnetometer (the AK8963). For this sensor, no correction is done.
 
 ```csharp
-Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient!");
+Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient and don't touch the sensor! Please make sure you are not close to any magnetic field like magnet or phone.");
 var mag = mpu9250.CalibrateMagnetometer();
 Console.WriteLine($"Bias:");
 Console.WriteLine($"Mag X = {mpu9250.MagnometerBias.X}");
@@ -106,14 +106,14 @@ The Temperature is a normalized Units.Temperature which can provide Celsius, Kel
 
 The MPU9250 offers a large variety of measurement modes. They can be changed and adjusted thru the properties like:
 
-* ```MagnetometerMeasurementMode``` to adjust the type of measurement for the magnetometer
-* ```MagnetometerOutputBitMode``` to select between 14 and 16 bits precision of the magnetometer
-* ```AccelerometerRange``` to adjust the range of the accelerometer between 2, 4, 8 or 16 G
-* ```AccelerometerBandwidth``` to adjust the frequency of measurement from 5 Hz to 1130 Hz
-* ```GyroscopeRange``` to adjust the range of the gyroscope from 250, 500, 1000 and 2000 degrees per second
-* ```GyroscopeBandwidth``` to adjust the frequency of measurement from 5 Hz to 8800 Hz
-* ```SampleRateDivider``` allows you to reduce the number of samples for the gyroscope and the accelerometer. This feature is only available for some of the bandwidth modes.
-* ```DisableModes``` allows you to disable any of the gyroscope and accelerometer axis
+- ```MagnetometerMeasurementMode``` to adjust the type of measurement for the magnetometer
+- ```MagnetometerOutputBitMode``` to select between 14 and 16 bits precision of the magnetometer
+- ```AccelerometerRange``` to adjust the range of the accelerometer between 2, 4, 8 or 16 G
+- ```AccelerometionScale``` to adjust the frequency of measurement from 5 Hz to 1130 Hz
+- ```GyroscopeRange``` to adjust the range of the gyroscope from 250, 500, 1000 and 2000 degrees per second
+- ```GyroscopeScale``` to adjust the frequency of measurement from 5 Hz to 8800 Hz
+- ```SampleRateDivider``` allows you to reduce the number of samples for the gyroscope and the accelerometer. This feature is only available for some of the bandwidth modes.
+- ```DisableModes``` allows you to disable any of the gyroscope and accelerometer axis
 
 ### Wake on motion
 
@@ -151,18 +151,18 @@ Data are in the order of the Register from 0x3B to 0x60 so you'll get your data 
 * GYRO_ZOUT_H and GYRO_ZOUT_L
 * EXT_SENS_DATA_00 to EXT_SENS_DATA_24
 
-It is then up to you to transform them into the correct data. You can multiply your raw data by ```AccelerometerConversion``` and ```GyroscopeConvertion``` to convert them properly. 
+It is then up to you to transform them into the correct data. You can multiply your raw data by ```AccelerometionScale``` and ```GyroscopeScale``` to convert them properly. 
 
 ### I2C Slave primitives
 
 2 primitive functions allow to read and write any register in any of the slave devices. 
 
-* ```WriteByteToSlave(I2cChannel i2cChannel, byte address, byte register, byte data)```
+* ```I2cWrite(I2cChannel i2cChannel, byte address, byte register, byte data)```
     * i2cChannel: The slave channel to attached to the I2C device
     * address: The I2C address of the slave I2C element
     * register: The register to write to the slave I2C element
     * data: The byte data to write to the slave I2C element
-* ```ReadByteFromSlave(I2cChannel i2cChannel, byte address, byte register, Span<byte> readBytes)```
+* ```I2cRead(I2cChannel i2cChannel, byte address, byte register, Span<byte> readBytes)```
     * i2cChannel: The slave channel to attached to the I2C device
     * address: The I2C address of the slave I2C element
     * register: The register to write to the slave I2C element
@@ -176,10 +176,6 @@ The following fritzing diagram illustrates one way to wire up the MPU9250 with a
 
 ## Reference
 
-MPU9250
 * Registers: http://www.invensense.com/wp-content/uploads/2017/11/RM-MPU-9250A-00-v1.6.pdf
 * Product specifications: http://www.invensense.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf
 
-MPU6500
-* Registers: https://www.invensense.com/wp-content/uploads/2015/02/MPU-6500-Register-Map2.pdf
-* Product specifications: https://www.invensense.com/wp-content/uploads/2015/02/MPU-6500-Datasheet2.pdf

@@ -6,7 +6,7 @@ using System;
 using System.Device.I2c;
 using System.IO;
 using System.Threading;
-using Iot.Device.Magnometer;
+using Iot.Device.Magnetometer;
 
 namespace DemoAk8963
 {

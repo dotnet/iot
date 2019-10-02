@@ -44,7 +44,7 @@ public abstract class Ak8963I2cBase
 {
     public abstract void WriteRegister(I2cDevice i2CDevice, Register reg, byte data);
     public abstract byte ReadByte(I2cDevice i2CDevice, Register reg);
-    public abstract void ReadByteArray(I2cDevice i2CDevice, Register reg, Span<byte> readBytes);
+    public abstract void ReadBytes(I2cDevice i2CDevice, Register reg, Span<byte> readBytes);
 }
 ```
 
@@ -59,7 +59,7 @@ public class Ak8963I2c : Ak8963I2cBase
         return i2cDevice.ReadByte();
     }
 
-    public override void ReadByteArray(I2cDevice i2cDevice, Register reg, Span<byte> readBytes)
+    public override void ReadBytes(I2cDevice i2cDevice, Register reg, Span<byte> readBytes)
     {
         i2cDevice.WriteByte((byte)reg);
         i2cDevice.Read(readBytes);

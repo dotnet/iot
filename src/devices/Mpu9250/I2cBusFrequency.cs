@@ -7,7 +7,7 @@ namespace Iot.Device.Imu
     /// <summary>
     /// Frequency of the slave I2C bus
     /// </summary>
-    public enum I2cBussFrequency
+    public enum I2cBusFrequency
     {
         /// <summary>
         /// Frequency 348kHz

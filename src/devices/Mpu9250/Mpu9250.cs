@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Magnometer;
+using Iot.Device.Magnetometer;
 using Iot.Units;
 using System;
 using System.Buffers.Binary;
@@ -40,7 +40,7 @@ namespace Iot.Device.Imu
         ///  /  |  \
         ///         +X
         /// </remarks>
-        public Vector3 MagnometerBias => new Vector3(_ak8963.MagnometerBias.Y, _ak8963.MagnometerBias.X, -_ak8963.MagnometerBias.Z);
+        public Vector3 MagnometerBias => new Vector3(_ak8963.MagnetometerBias.Y, _ak8963.MagnetometerBias.X, -_ak8963.MagnetometerBias.Z);
 
         /// <summary>
         /// Calibrate the magnetometer. Make sure your sensor is as far as possible of magnet
@@ -135,7 +135,7 @@ namespace Iot.Device.Imu
             // Setup I2C for the AK8963
             WriteRegister(Register.USER_CTRL, (byte)UserControls.I2C_MST_EN);
             // Speed of 400 kHz
-            WriteRegister(Register.I2C_MST_CTRL, (byte)I2cBussFrequency.Frequency400kHz);
+            WriteRegister(Register.I2C_MST_CTRL, (byte)I2cBusFrequency.Frequency400kHz);
             _autoDispose = autoDispose;
             _ak8963 = new Ak8963(i2cDevice, new Ak8963Attached(), false);
             if (!_ak8963.CheckVersion())
@@ -150,7 +150,7 @@ namespace Iot.Device.Imu
                     Thread.Sleep(100);
                     // Resetup again
                     WriteRegister(Register.USER_CTRL, (byte)UserControls.I2C_MST_EN);
-                    WriteRegister(Register.I2C_MST_CTRL, (byte)I2cBussFrequency.Frequency400kHz);
+                    WriteRegister(Register.I2C_MST_CTRL, (byte)I2cBusFrequency.Frequency400kHz);
                     // Poorly documented time to wait after the I2C bus reset
                     // Found out that waiting a little bit is needed. Exact time may be lower
                     Thread.Sleep(100);

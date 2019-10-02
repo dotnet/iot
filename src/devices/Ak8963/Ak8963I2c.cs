@@ -5,7 +5,7 @@
 using System;
 using System.Device.I2c;
 
-namespace Iot.Device.Magnometer
+namespace Iot.Device.Magnetometer
 {
     /// <summary>
     /// Default I2C interface for the AK8963

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Magnometer;
+using Iot.Device.Magnetometer;
 using Iot.Units;
 using System;
 using System.Buffers.Binary;
@@ -21,6 +21,16 @@ namespace Iot.Device.Imu
     /// </summary>
     public class Mpu6500 : IDisposable
     {
+        /// <summary>
+        /// Default address for MPU9250
+        /// </summary>
+        public const byte DefaultI2cAddress = 0x68;
+
+        /// <summary>
+        /// Second address for MPU9250
+        /// </summary>
+        public const byte SecondI2cAddress = 0x69;
+
         private const float Adc = 0x8000;
         private const float Gravity = 9.807f;
         internal I2cDevice _i2cDevice;
@@ -31,16 +41,6 @@ namespace Iot.Device.Imu
         private AccelerometerBandwidth _accelerometerBandwidth;
         private GyroscopeBandwidth _gyroscopeBandwidth;
         internal bool _wakeOnMotion;
-
-        /// <summary>
-        /// Default address for MPU9250
-        /// </summary>
-        public const byte DefaultI2cAddress = 0x68;
-
-        /// <summary>
-        /// Second address for MPU9250
-        /// </summary>
-        public const byte SecondI2cAddress = 0x69;
 
         /// <summary>
         /// Initialize the MPU6500
@@ -104,7 +104,7 @@ namespace Iot.Device.Imu
         /// Get the real accelerometer bandwidth. This allows to calculate the real
         /// degree per second
         /// </summary>
-        public float AcceleromterConversion
+        public float AccelerationScale
         {
             get
             {
@@ -120,7 +120,7 @@ namespace Iot.Device.Imu
                     case AccelerometerRange.Range08G:
                         val = 8.0f;
                         break;
-                    case AccelerometerRange.range16G:
+                    case AccelerometerRange.Range16G:
                         val = 16.0f;
                         break;
                     default:
@@ -146,7 +146,7 @@ namespace Iot.Device.Imu
         ///  /  |  \
         ///         +X
         /// </remarks>
-        public Vector3 GetAccelerometer() => GetRawAccelerometer() * AcceleromterConversion;
+        public Vector3 GetAccelerometer() => GetRawAccelerometer() * AccelerationScale;
 
         private Vector3 GetRawAccelerometer()
         {
@@ -230,9 +230,9 @@ namespace Iot.Device.Imu
 
         /// <summary>
         /// Get the real gyroscope bandwidth. This allows to calculate the real
-        /// acceleration in G
+        /// angular rate in degree per second
         /// </summary>
-        public float GyroscopeConvertion
+        public float GyroscopeScale
         {
             get
             {
@@ -278,7 +278,7 @@ namespace Iot.Device.Imu
         ///  /  |  \
         ///         +X
         /// </remarks>
-        public Vector3 GetGyroscope() => GetRawGyroscope() * GyroscopeConvertion;
+        public Vector3 GetGyroscopeReading() => GetRawGyroscope() * GyroscopeScale;
 
         private Vector3 GetRawGyroscope()
         {
@@ -353,6 +353,7 @@ namespace Iot.Device.Imu
             WriteRegister(Register.PWR_MGMT_1, 0b0010_0000);
             // Motion Interrupt Configuration Completed
         }
+
         internal void Reset()
         {
             WriteRegister(Register.PWR_MGMT_1, 0x80);
@@ -474,7 +475,8 @@ namespace Iot.Device.Imu
         /// It will automatically adjust as well the offset stored in the device
         /// The result bias will be stored in the AcceloremeterBias and GyroscopeBias
         /// </summary>
-        public (Vector3 gyroscopeBias, Vector3 AccelerometerBias) CalibrateGyroscopeAccelerometer()
+        /// <returns>Gyroscope and accelerometer bias</returns>
+        public (Vector3 gyroscopeBias, Vector3 accelerometerBias) CalibrateGyroscopeAccelerometer()
         {
             // = 131 LSB/degrees/sec
             const int GyroSensitivity = 131;
@@ -626,7 +628,7 @@ namespace Iot.Device.Imu
 
             // Restore the previous modes
             WriteRegister(Register.USER_CTRL, (byte)(userControls | (byte)UserControls.I2C_MST_EN));
-            i2cMaster = (byte)(i2cMaster & (~(byte)(I2cBussFrequency.Frequency348kHz) | (byte)I2cBussFrequency.Frequency400kHz));
+            i2cMaster = (byte)(i2cMaster & (~(byte)(I2cBusFrequency.Frequency348kHz) | (byte)I2cBusFrequency.Frequency400kHz));
             WriteRegister(Register.I2C_MST_CTRL, i2cMaster);
             DelayHelper.DelayMilliseconds(10, false);
 
@@ -818,7 +820,7 @@ namespace Iot.Device.Imu
         /// <param name="address">The I2C address of the slave I2C element</param>
         /// <param name="register">The register to write to the slave I2C element</param>
         /// <param name="data">The byte data to write to the slave I2C element</param>
-        public void WriteByteToSlave(I2cChannel i2cChannel, byte address, byte register, byte data)
+        public void WriteByteToSlaveDevice(I2cChannel i2cChannel, byte address, byte register, byte data)
         {
             // I2C_SLVx_ADDR += 3 * i2cChannel
             byte slvAddress = (byte)((byte)Register.I2C_SLV0_ADDR + 3 * (byte)i2cChannel);
@@ -847,7 +849,7 @@ namespace Iot.Device.Imu
         /// <param name="address">The I2C address of the slave I2C element</param>
         /// <param name="register">The register to read from the slave I2C element</param>
         /// <param name="readBytes">The read data</param>
-        public void ReadByteFromSlave(I2cChannel i2cChannel, byte address, byte register, Span<byte> readBytes)
+        public void ReadByteFromSlaveDevice(I2cChannel i2cChannel, byte address, byte register, Span<byte> readBytes)
         {
             if (readBytes.Length > 24)
                 throw new ArgumentException($"Can't read more than 24 bytes at once");

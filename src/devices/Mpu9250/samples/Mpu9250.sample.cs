@@ -35,7 +35,7 @@ namespace DemoMpu9250
             Console.WriteLine($"Acc Y bias = {mpu9250.AccelerometerBias.Y}");
             Console.WriteLine($"Acc Z bias = {mpu9250.AccelerometerBias.Z}");
             Console.WriteLine($"Check version magnetometer: {mpu9250.GetMagnetometerVersion()}");
-            Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient!");
+            Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient and don't touch the sensor! Please make sure you are not close to any magnetic field like magnet or phone.");
             var mag = mpu9250.CalibrateMagnetometer();
             Console.WriteLine($"Bias:");
             Console.WriteLine($"Mag X = {mpu9250.MagnometerBias.X}");
@@ -50,7 +50,7 @@ namespace DemoMpu9250
             while (!Console.KeyAvailable)
             {
                 Console.CursorTop = 0;
-                var gyro = mpu9250.GetGyroscope();
+                var gyro = mpu9250.GetGyroscopeReading();
                 Console.WriteLine($"Gyro X = {gyro.X, 15}");
                 Console.WriteLine($"Gyro Y = {gyro.Y, 15}");
                 Console.WriteLine($"Gyro Z = {gyro.Z, 15}");
@@ -79,12 +79,11 @@ namespace DemoMpu9250
             {
                 Console.CursorTop = 0;
                 var acc = mpu9250.GetAccelerometer();
-                Console.WriteLine($"Acc X = {acc.X}          ");
-                Console.WriteLine($"Acc Y = {acc.Y}          ");
-                Console.WriteLine($"Acc Z = {acc.Z}          ");
+                Console.WriteLine($"Acc X = {acc.X, 15}");
+                Console.WriteLine($"Acc Y = {acc.Y, 15}");
+                Console.WriteLine($"Acc Z = {acc.Z, 15}");
                 Thread.Sleep(100);
             }
-
         }
     }
 }

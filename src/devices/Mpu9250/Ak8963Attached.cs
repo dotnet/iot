@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Magnometer;
+using Iot.Device.Magnetometer;
 using System;
 using System.Device;
 using System.Device.I2c;
@@ -19,7 +19,7 @@ namespace Iot.Device.Imu
         /// <param name="data">A byte to write</param>        
         public override void WriteRegister(I2cDevice i2cDevice, byte reg, byte data)
         {
-            Span<byte> dataout = stackalloc byte[2] { (byte)Register.I2C_SLV0_ADDR, Magnometer.Ak8963.DefaultI2cAddress };
+            Span<byte> dataout = stackalloc byte[2] { (byte)Register.I2C_SLV0_ADDR, Magnetometer.Ak8963.DefaultI2cAddress };
             i2cDevice.Write(dataout);
             dataout[0] = (byte)Register.I2C_SLV0_REG;
             dataout[1] = reg;
@@ -53,7 +53,7 @@ namespace Iot.Device.Imu
         /// <param name="readBytes">A span of bytes with the read values</param>
         public override void ReadBytes(I2cDevice i2cDevice, byte reg, Span<byte> readBytes)
         {
-            Span<byte> dataout = stackalloc byte[2] { (byte)Register.I2C_SLV0_ADDR, Magnometer.Ak8963.DefaultI2cAddress | 0x80 };
+            Span<byte> dataout = stackalloc byte[2] { (byte)Register.I2C_SLV0_ADDR, Magnetometer.Ak8963.DefaultI2cAddress | 0x80 };
             i2cDevice.Write(dataout);
             dataout[0] = (byte)Register.I2C_SLV0_REG;
             dataout[1] = reg;

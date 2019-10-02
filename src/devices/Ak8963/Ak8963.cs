@@ -9,7 +9,7 @@ using System.IO;
 using System.Numerics;
 using System.Threading;
 
-namespace Iot.Device.Magnometer
+namespace Iot.Device.Magnetometer
 {
     /// <summary>
     /// AK8963 class implementing a magnetometer
@@ -78,14 +78,15 @@ namespace Iot.Device.Magnometer
         /// <summary>
         /// Get the magnetometer bias
         /// </summary>
-        public Vector3 MagnometerBias { get; set; } = Vector3.Zero;
+        public Vector3 MagnetometerBias { get; set; } = Vector3.Zero;
 
         /// <summary>
         /// Calibrate the magnetometer. Make sure your sensor is as far as possible of magnet
         /// Calculate as well the magnetometer bias
         /// </summary>
+        /// <param name="numberMeasurements">Number of measurement for the calibration, default is 1500</param>
         /// <returns>Returns the factory calibration data</returns>
-        public Vector3 CalibrateMagnetometer()
+        public Vector3 CalibrateMagnetometer(int numberMeasurements = 1500)
         {
             Vector3 calib = new Vector3();
             Span<byte> rawData = stackalloc byte[3];
@@ -110,13 +111,13 @@ namespace Iot.Device.Magnometer
             var oldMode = MeasurementMode;
             Vector3 minbias = new Vector3();
             Vector3 maxbias = new Vector3();
-            int numberMeasurements = 1500;
 
             // Setup the 100Hz continuous mode
             MeasurementMode = MeasurementMode.ContinuousMeasurement100Hz;
             for (int reading = 0; reading < numberMeasurements; reading++)
             {
-                // Timeout = 100Hz = 10 ms + 1 for security
+                // Timeout = 100Hz = 10 ms but during calibration, it seems that a larger value must be used
+                // TODO: find out why a higher value is needed
                 var bias = ReadMagnetometer(true, TimeSpan.FromMilliseconds(20));
                 minbias.X = Math.Min(bias.X, minbias.X);
                 minbias.Y = Math.Min(bias.Y, minbias.Y);
@@ -128,7 +129,7 @@ namespace Iot.Device.Magnometer
                 Thread.Sleep(10);
             }
             // Store the bias
-            MagnometerBias = ((maxbias + minbias) / 2) + calib;
+            MagnetometerBias = ((maxbias + minbias) / 2) + calib;
 
             return calib;
         }
