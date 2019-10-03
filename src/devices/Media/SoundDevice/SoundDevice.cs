@@ -59,16 +59,16 @@ namespace Iot.Device.Media
         /// <summary>
         /// Sound recording.
         /// </summary>
-        /// <param name="second">Recording duration(In seconds).</param>
-        /// <param name="savePath">Recording save path.</param>
-        public abstract void Record(uint second, string savePath);
+        /// <param name="recordTimeSeconds">Recording duration(In seconds).</param>
+        /// <param name="outputFilePath">Recording save path.</param>
+        public abstract void Record(uint recordTimeSeconds, string outputFilePath);
 
         /// <summary>
         /// Sound recording.
         /// </summary>
-        /// <param name="second">Recording duration(In seconds).</param>
-        /// <param name="saveStream">Recording save stream.</param>
-        public abstract void Record(uint second, Stream saveStream);
+        /// <param name="recordTimeSeconds">Recording duration(In seconds).</param>
+        /// <param name="outputStream">Recording save stream.</param>
+        public abstract void Record(uint recordTimeSeconds, Stream outputStream);
 
         /// <inheritdoc/>
         public void Dispose()

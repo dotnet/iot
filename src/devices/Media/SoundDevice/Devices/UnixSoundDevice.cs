@@ -107,7 +107,7 @@ namespace Iot.Device.Media
         {
             IntPtr @params = new IntPtr();
             int dir = 0;
-            WavHeader header = GetWavHeader(wavStream);
+            WavHeader header = ReadWavHeader(wavStream);
 
             OpenPlaybackPcm();
             PcmInitialize(_playbackPcm, header, ref @params, ref dir);
@@ -118,157 +118,165 @@ namespace Iot.Device.Media
         /// <summary>
         /// Sound recording.
         /// </summary>
-        /// <param name="second">Recording duration(In seconds).</param>
-        /// <param name="savePath">Recording save path.</param>
-        public override void Record(uint second, string savePath)
+        /// <param name="recordTimeSeconds">Recording duration(In seconds).</param>
+        /// <param name="outputFilePath">Recording save path.</param>
+        public override void Record(uint recordTimeSeconds, string outputFilePath)
         {
-            using FileStream fs = File.Open(savePath, FileMode.Create);
+            using FileStream fs = File.Open(outputFilePath, FileMode.Create);
 
-            Record(second, fs);
+            Record(recordTimeSeconds, fs);
         }
 
         /// <summary>
         /// Sound recording.
         /// </summary>
-        /// <param name="second">Recording duration(In seconds).</param>
-        /// <param name="saveStream">Recording save stream.</param>
-        public override void Record(uint second, Stream saveStream)
+        /// <param name="recordTimeSeconds">Recording duration(In seconds).</param>
+        /// <param name="outputStream">Recording save stream.</param>
+        public override void Record(uint recordTimeSeconds, Stream outputStream)
         {
             IntPtr @params = new IntPtr();
             int dir = 0;
-            WavHeader header = new WavHeader
+
+            WavHeaderChunk chunk = new WavHeaderChunk
             {
                 ChunkId = new[] { 'R', 'I', 'F', 'F' },
-                ChunkSize = second * Settings.RecordingSampleRate * Settings.RecordingBitsPerSample * Settings.RecordingChannels / 8 + 36,
+                ChunkSize = recordTimeSeconds * Settings.RecordingSampleRate * Settings.RecordingBitsPerSample * Settings.RecordingChannels / 8 + 36
+            };
+            WavHeaderChunk subChunk1 = new WavHeaderChunk
+            {
+                ChunkId = new[] { 'f', 'm', 't', ' ' },
+                ChunkSize = 16
+            };
+            WavHeaderChunk subChunk2 = new WavHeaderChunk
+            {
+                ChunkId = new[] { 'd', 'a', 't', 'a' },
+                ChunkSize = recordTimeSeconds * Settings.RecordingSampleRate * Settings.RecordingBitsPerSample * Settings.RecordingChannels / 8
+            };
+
+            WavHeader header = new WavHeader
+            {
+                Chunk = chunk,     
                 Format = new[] { 'W', 'A', 'V', 'E' },
-                Subchunk1ID = new[] { 'f', 'm', 't', ' ' },
-                Subchunk1Size = 16,
+                Subchunk1 = subChunk1,
                 AudioFormat = 1,
                 NumChannels = Settings.RecordingChannels,
                 SampleRate = Settings.RecordingSampleRate,
                 ByteRate = Settings.RecordingSampleRate * Settings.RecordingBitsPerSample * Settings.RecordingChannels / 8,
                 BlockAlign = (ushort)(Settings.RecordingBitsPerSample * Settings.RecordingChannels / 8),
                 BitsPerSample = Settings.RecordingBitsPerSample,
-                Subchunk2Id = new[] { 'd', 'a', 't', 'a' },
-                Subchunk2Size = second * Settings.RecordingSampleRate * Settings.RecordingBitsPerSample * Settings.RecordingChannels / 8
+                Subchunk2 = subChunk2
             };
 
-            SetWavHeader(saveStream, header);
+            WriteWavHeader(outputStream, header);
 
             OpenRecordingPcm();
             PcmInitialize(_recordingPcm, header, ref @params, ref dir);
-            ReadStream(saveStream, header, ref @params, ref dir);
+            ReadStream(outputStream, header, ref @params, ref dir);
             CloseRecordingPcm();
         }
 
-        private void SetWavHeader(Stream wavStream, WavHeader header)
+        private void WriteWavHeader(Stream wavStream, WavHeader header)
         {
             Span<byte> writeBuffer2 = stackalloc byte[2];
             Span<byte> writeBuffer4 = stackalloc byte[4];
 
             wavStream.Position = 0;
 
-            try
-            {
-                Encoding.ASCII.GetBytes(header.ChunkId, writeBuffer4);
-                wavStream.Write(writeBuffer4);
+            Encoding.ASCII.GetBytes(header.Chunk.ChunkId, writeBuffer4);
+            wavStream.Write(writeBuffer4);
 
-                BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.ChunkSize);
-                wavStream.Write(writeBuffer4);
+            BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.Chunk.ChunkSize);
+            wavStream.Write(writeBuffer4);
 
-                Encoding.ASCII.GetBytes(header.Format, writeBuffer4);
-                wavStream.Write(writeBuffer4);
+            Encoding.ASCII.GetBytes(header.Format, writeBuffer4);
+            wavStream.Write(writeBuffer4);
 
-                Encoding.ASCII.GetBytes(header.Subchunk1ID, writeBuffer4);
-                wavStream.Write(writeBuffer4);
+            Encoding.ASCII.GetBytes(header.Subchunk1.ChunkId, writeBuffer4);
+            wavStream.Write(writeBuffer4);
 
-                BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.Subchunk1Size);
-                wavStream.Write(writeBuffer4);
+            BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.Subchunk1.ChunkSize);
+            wavStream.Write(writeBuffer4);
 
-                BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.AudioFormat);
-                wavStream.Write(writeBuffer2);
+            BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.AudioFormat);
+            wavStream.Write(writeBuffer2);
 
-                BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.NumChannels);
-                wavStream.Write(writeBuffer2);
+            BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.NumChannels);
+            wavStream.Write(writeBuffer2);
 
-                BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.SampleRate);
-                wavStream.Write(writeBuffer4);
+            BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.SampleRate);
+            wavStream.Write(writeBuffer4);
 
-                BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.ByteRate);
-                wavStream.Write(writeBuffer4);
+            BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.ByteRate);
+            wavStream.Write(writeBuffer4);
 
-                BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.BlockAlign);
-                wavStream.Write(writeBuffer2);
+            BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.BlockAlign);
+            wavStream.Write(writeBuffer2);
 
-                BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.BitsPerSample);
-                wavStream.Write(writeBuffer2);
+            BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.BitsPerSample);
+            wavStream.Write(writeBuffer2);
 
-                Encoding.ASCII.GetBytes(header.Subchunk2Id, writeBuffer4);
-                wavStream.Write(writeBuffer4);
+            Encoding.ASCII.GetBytes(header.Subchunk2.ChunkId, writeBuffer4);
+            wavStream.Write(writeBuffer4);
 
-                BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.Subchunk2Size);
-                wavStream.Write(writeBuffer4);
-            }
-            catch
-            {
-                throw new Exception("Write WAV header error.");
-            }
+            BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.Subchunk2.ChunkSize);
+            wavStream.Write(writeBuffer4);
         }
 
-        private WavHeader GetWavHeader(Stream wavStream)
+        private WavHeader ReadWavHeader(Stream wavStream)
         {
             Span<byte> readBuffer2 = stackalloc byte[2];
             Span<byte> readBuffer4 = stackalloc byte[4];
 
             wavStream.Position = 0;
 
+            WavHeaderChunk chunk = new WavHeaderChunk();
+            WavHeaderChunk subChunk1 = new WavHeaderChunk();
+            WavHeaderChunk subChunk2 = new WavHeaderChunk();
+
             WavHeader header = new WavHeader();
 
-            try
-            {
-                wavStream.Read(readBuffer4);
-                header.ChunkId = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
+            wavStream.Read(readBuffer4);
+            chunk.ChunkId = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
 
-                wavStream.Read(readBuffer4);
-                header.ChunkSize = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
+            wavStream.Read(readBuffer4);
+            chunk.ChunkSize = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
 
-                wavStream.Read(readBuffer4);
-                header.Format = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
+            wavStream.Read(readBuffer4);
+            header.Format = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
 
-                wavStream.Read(readBuffer4);
-                header.Subchunk1ID = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
+            wavStream.Read(readBuffer4);
+            subChunk1.ChunkId = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
 
-                wavStream.Read(readBuffer4);
-                header.Subchunk1Size = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
+            wavStream.Read(readBuffer4);
+            subChunk1.ChunkSize = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
 
-                wavStream.Read(readBuffer2);
-                header.AudioFormat = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
+            wavStream.Read(readBuffer2);
+            header.AudioFormat = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
 
-                wavStream.Read(readBuffer2);
-                header.NumChannels = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
+            wavStream.Read(readBuffer2);
+            header.NumChannels = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
 
-                wavStream.Read(readBuffer4);
-                header.SampleRate = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
+            wavStream.Read(readBuffer4);
+            header.SampleRate = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
 
-                wavStream.Read(readBuffer4);
-                header.ByteRate = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
+            wavStream.Read(readBuffer4);
+            header.ByteRate = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
 
-                wavStream.Read(readBuffer2);
-                header.BlockAlign = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
+            wavStream.Read(readBuffer2);
+            header.BlockAlign = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
 
-                wavStream.Read(readBuffer2);
-                header.BitsPerSample = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
+            wavStream.Read(readBuffer2);
+            header.BitsPerSample = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
 
-                wavStream.Read(readBuffer4);
-                header.Subchunk2Id = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
+            wavStream.Read(readBuffer4);
+            subChunk2.ChunkId = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
 
-                wavStream.Read(readBuffer4);
-                header.Subchunk2Size = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
-            }
-            catch
-            {
-                throw new Exception("Non-standard WAV file.");
-            }
+            wavStream.Read(readBuffer4);
+            subChunk2.ChunkSize = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
+
+            header.Chunk = chunk;
+            header.Subchunk1 = subChunk1;
+            header.Subchunk2 = subChunk2;
 
             return header;
         }
@@ -299,7 +307,7 @@ namespace Iot.Device.Media
             }
         }
 
-        private unsafe void ReadStream(Stream saveStream, WavHeader header, ref IntPtr @params, ref int dir)
+        private unsafe void ReadStream(Stream outputStream, WavHeader header, ref IntPtr @params, ref int dir)
         {
             ulong frames, bufferSize;
 
@@ -311,19 +319,19 @@ namespace Iot.Device.Media
 
             bufferSize = frames * header.BlockAlign;
             byte[] readBuffer = new byte[(int)bufferSize];
-            saveStream.Position = 44;
+            outputStream.Position = 44;
 
             fixed (byte* buffer = readBuffer)
             {
-                for (int i = 0; i < (int)(header.Subchunk2Size / bufferSize); i++)
+                for (int i = 0; i < (int)(header.Subchunk2.ChunkSize / bufferSize); i++)
                 {
                     _errorNum = Interop.snd_pcm_readi(_recordingPcm, (IntPtr)buffer, frames);
                     ThrowErrorMessage("Can not read data from the device.");
 
-                    saveStream.Write(readBuffer);
+                    outputStream.Write(readBuffer);
                 }
             }
-            saveStream.Flush();
+            outputStream.Flush();
         }
 
         private unsafe void PcmInitialize(IntPtr pcm, WavHeader header, ref IntPtr @params, ref int dir)

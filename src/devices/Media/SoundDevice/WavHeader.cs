@@ -6,15 +6,11 @@ namespace Iot.Device.Media
 {
     internal struct WavHeader
     {
-        public char[] ChunkId { get; set; }
-
-        public uint ChunkSize { get; set; }
+        public WavHeaderChunk Chunk { get; set; }
 
         public char[] Format { get; set; }
 
-        public char[] Subchunk1ID { get; set; }
-
-        public uint Subchunk1Size { get; set; }
+        public WavHeaderChunk Subchunk1 { get; set; }
 
         public ushort AudioFormat { get; set; }
 
@@ -28,8 +24,6 @@ namespace Iot.Device.Media
 
         public ushort BitsPerSample { get; set; }
 
-        public char[] Subchunk2Id { get; set; }
-
-        public uint Subchunk2Size { get; set; }
+        public WavHeaderChunk Subchunk2 { get; set; }
     }
 }
