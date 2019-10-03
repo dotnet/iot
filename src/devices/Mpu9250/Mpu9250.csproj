@@ -9,7 +9,7 @@
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
-    <PackageReference Include="System.Memory" Version="4.5.2" />
+    <PackageReference Include="System.Memory" Version="4.5.3" />
     <Compile Include="*.cs" />
     <None Include="README.md" />
     <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />

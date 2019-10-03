@@ -7,8 +7,10 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
-    <PackageReference Include="System.Device.Gpio" Version="1.0.0-prerelease.19413.1" />
-    <PackageReference Include="System.Memory" Version="4.5.2" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
+    <PackageReference Include="System.Memory" Version="4.5.3" />
     <None Include="README.md" />
   </ItemGroup>
 
