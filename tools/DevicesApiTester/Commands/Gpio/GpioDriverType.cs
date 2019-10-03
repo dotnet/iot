@@ -23,5 +23,7 @@ namespace DeviceApiTester.Commands.Gpio
 
         [ImplementationType(typeof(RaspberryPi3Driver))]
         RPi3,
+        [ImplementationType(typeof(RaspberryPiComputeModule3Driver))]
+        RPiCM3,
     }
 }
