@@ -16,7 +16,7 @@ namespace Alsa.Samples
 
             Console.WriteLine("Recording...");
             device.Record(10, "/home/pi/record.wav");
-            
+
             Console.WriteLine("Playing...");
             device.Play("/home/pi/record.wav");
         }

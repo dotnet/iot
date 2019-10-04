@@ -7,6 +7,7 @@ using System.Buffers.Binary;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace Iot.Device.Media
 {
@@ -180,8 +181,6 @@ namespace Iot.Device.Media
             Span<byte> writeBuffer2 = stackalloc byte[2];
             Span<byte> writeBuffer4 = stackalloc byte[4];
 
-            wavStream.Position = 0;
-
             Encoding.ASCII.GetBytes(header.Chunk.ChunkId, writeBuffer4);
             wavStream.Write(writeBuffer4);
 
@@ -226,8 +225,6 @@ namespace Iot.Device.Media
         {
             Span<byte> readBuffer2 = stackalloc byte[2];
             Span<byte> readBuffer4 = stackalloc byte[4];
-
-            wavStream.Position = 0;
 
             WavHeaderChunk chunk = new WavHeaderChunk();
             WavHeaderChunk subChunk1 = new WavHeaderChunk();
@@ -294,8 +291,6 @@ namespace Iot.Device.Media
             bufferSize = frames * header.BlockAlign;
             // In Interop, the frames is defined as ulong. But actucally, the value of bufferSize won't be too big.
             byte[] readBuffer = new byte[(int)bufferSize];
-            // Jump wav header.
-            wavStream.Position = 44;
 
             fixed (byte* buffer = readBuffer)
             {
@@ -319,7 +314,6 @@ namespace Iot.Device.Media
 
             bufferSize = frames * header.BlockAlign;
             byte[] readBuffer = new byte[(int)bufferSize];
-            outputStream.Position = 44;
 
             fixed (byte* buffer = readBuffer)
             {
@@ -336,7 +330,7 @@ namespace Iot.Device.Media
 
         private unsafe void PcmInitialize(IntPtr pcm, WavHeader header, ref IntPtr @params, ref int dir)
         {
-            _errorNum = Interop.snd_pcm_hw_params_malloc(ref @params);
+            _errorNum = Interop.snd_pcm_hw_params_malloc(out @params);
             ThrowErrorMessage("Can not allocate parameters object.");
 
             _errorNum = Interop.snd_pcm_hw_params_any(pcm, @params);
@@ -451,7 +445,7 @@ namespace Iot.Device.Media
 
             lock (playbackInitializationLock)
             {
-                _errorNum = Interop.snd_pcm_open(ref _playbackPcm, Settings.PlaybackDeviceName, snd_pcm_stream_t.SND_PCM_STREAM_PLAYBACK, 0);
+                _errorNum = Interop.snd_pcm_open(out _playbackPcm, Settings.PlaybackDeviceName, snd_pcm_stream_t.SND_PCM_STREAM_PLAYBACK, 0);
                 ThrowErrorMessage("Can not open playback device.");
             }
         }
@@ -460,7 +454,7 @@ namespace Iot.Device.Media
         {
             if (_playbackPcm != default)
             {
-                _errorNum = Interop.snd_pcm_drop(_playbackPcm);
+                _errorNum = Interop.snd_pcm_drain(_playbackPcm);
                 ThrowErrorMessage("Drop playback device error.");
 
                 _errorNum = Interop.snd_pcm_close(_playbackPcm);
@@ -479,7 +473,7 @@ namespace Iot.Device.Media
 
             lock (recordingInitializationLock)
             {
-                _errorNum = Interop.snd_pcm_open(ref _recordingPcm, Settings.RecordingDeviceName, snd_pcm_stream_t.SND_PCM_STREAM_CAPTURE, 0);
+                _errorNum = Interop.snd_pcm_open(out _recordingPcm, Settings.RecordingDeviceName, snd_pcm_stream_t.SND_PCM_STREAM_CAPTURE, 0);
                 ThrowErrorMessage("Can not open recording device.");
             }
         }
@@ -488,7 +482,7 @@ namespace Iot.Device.Media
         {
             if (_recordingPcm != default)
             {
-                _errorNum = Interop.snd_pcm_drop(_recordingPcm);
+                _errorNum = Interop.snd_pcm_drain(_recordingPcm);
                 ThrowErrorMessage("Drop recording device error.");
 
                 _errorNum = Interop.snd_pcm_close(_recordingPcm);
@@ -507,7 +501,7 @@ namespace Iot.Device.Media
 
             lock (mixerInitializationLock)
             {
-                _errorNum = Interop.snd_mixer_open(ref _mixer, 0);
+                _errorNum = Interop.snd_mixer_open(out _mixer, 0);
                 ThrowErrorMessage("Can not open sound device mixer.");
 
                 _errorNum = Interop.snd_mixer_attach(_mixer, Settings.MixerDeviceName);

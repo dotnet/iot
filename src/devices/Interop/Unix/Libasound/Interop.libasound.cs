@@ -12,7 +12,7 @@ internal partial class Interop
 
     // <param name="pcm">snd_pcm_t**</param>
     [DllImport(AlsaLibrary)]
-    internal static extern int snd_pcm_open(ref IntPtr pcm, string name, snd_pcm_stream_t stream, int mode);
+    internal static extern int snd_pcm_open(out IntPtr pcm, string name, snd_pcm_stream_t stream, int mode);
 
     [DllImport(AlsaLibrary)]
     internal static extern int snd_pcm_start(IntPtr pcm);
@@ -46,7 +46,7 @@ internal partial class Interop
 
     // <param name="params">snd_pcm_hw_params_t**</param>
     [DllImport(AlsaLibrary)]
-    internal static extern int snd_pcm_hw_params_malloc(ref IntPtr @params);
+    internal static extern int snd_pcm_hw_params_malloc(out IntPtr @params);
 
     [DllImport(AlsaLibrary)]
     internal static extern int snd_pcm_hw_params_any(IntPtr pcm, IntPtr @params);
@@ -76,7 +76,7 @@ internal partial class Interop
 
     // <param name="mixer">snd_mixer_t**</param>
     [DllImport(AlsaLibrary)]
-    internal static extern int snd_mixer_open(ref IntPtr mixer, int mode);
+    internal static extern int snd_mixer_open(out IntPtr mixer, int mode);
 
     [DllImport(AlsaLibrary)]
     internal static extern int snd_mixer_close(IntPtr mixer);
