@@ -31,25 +31,27 @@ namespace System.Device.Gpio
         /// <returns>A driver that works with the board the program is executing on.</returns>
         private static GpioDriver GetBestDriverForBoard()
         {
-            string[] cpuInfoLines = File.ReadAllLines(CpuInfoPath);
-            Regex regex = new Regex(@"Hardware\s*:\s*(.*)");
+            string[] cpuInfoLines;
+            Regex regex;
+
+            // a first chance of finding a raspberry pi..... perhaps not on Raspbian. note
+            // that we want this to fail quietly if something goes wrong with the test and continue
+            // with detecting a PI usiing /dev/cpuinfo
+            try
+            {
+                if (File.ReadAllText(ModelInfoPath).StartsWith("Raspberry Pi"))
+                {
+                    return new RaspberryPi3Driver();
+                }
+            }
+            catch { }
+
+            regex = new Regex(@"Hardware\s*:\s*(.*)");
+            cpuInfoLines = File.ReadAllLines(CpuInfoPath);
+
             foreach (string cpuInfoLine in cpuInfoLines)
             {
-                Match match;
-
-                // a first chance of finding a raspberry pi..... perhaps not on Raspbian. note
-                // that we want this to fail quietly if something goes wrong with the test and continue
-                // with detecing a PI usiing /dev/cpuinfo
-                try
-                {
-                    if (File.ReadAllText(ModelInfoPath).StartsWith("Raspberry Pi"))
-                    {
-                        return new RaspberryPi3Driver();
-                    }
-                }
-                catch { }
-
-                match = regex.Match(cpuInfoLine);
+                Match match = regex.Match(cpuInfoLine);
 
                 if (match.Success)
                 {
