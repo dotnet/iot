@@ -11,6 +11,7 @@ namespace System.Device.Gpio
     public sealed partial class GpioController
     {
         private const string CpuInfoPath = "/proc/cpuinfo";
+        private const string ModelInfoPath = "/proc/device-tree/model";
         private const string RaspberryPiHardware = "BCM2835";
         private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
 
@@ -34,7 +35,22 @@ namespace System.Device.Gpio
             Regex regex = new Regex(@"Hardware\s*:\s*(.*)");
             foreach (string cpuInfoLine in cpuInfoLines)
             {
-                Match match = regex.Match(cpuInfoLine);
+                Match match;
+
+                // a first chance of finding a raspberry pi..... perhaps not on Raspbian. note
+                // that we want this to fail quietly if something goes wrong with the test and continue
+                // with detecing a PI usiing /dev/cpuinfo
+                try
+                {
+                    if (File.ReadAllText(ModelInfoPath).StartsWith("Raspberry Pi"))
+                    {
+                        return new RaspberryPi3Driver();
+                    }
+                }
+                catch { }
+
+                match = regex.Match(cpuInfoLine);
+
                 if (match.Success)
                 {
                     if (match.Groups.Count > 1)
