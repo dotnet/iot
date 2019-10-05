@@ -169,7 +169,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadAltitude(double seaLevelPressure = Iot.Units.Pressure.MeanSeaLevelPressure, out double altitude)
+        public bool TryReadAltitude(double seaLevelPressure, out double altitude)
         {
             // Read the pressure first.
             var success = TryReadPressure(out var pressure);
@@ -185,6 +185,19 @@ namespace Iot.Device.Bmxx80
             // Calculate and return the altitude using the international barometric formula.
             altitude = 44330.0 * (1.0 - Math.Pow(pressure / seaLevelPressure, 0.1903));
             return true;
+        }        
+        
+        /// <summary>
+        /// Calculates the altitude in meters from the mean sea-level pressure(in hPa).
+        /// </summary>
+        /// <param name="altitude">
+        /// Contains the calculated metres above sea-level if the <see cref="Bmxx80Base.PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains <see cref="double.NaN"/> otherwise.
+        /// </param>
+        /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
+        public bool TryReadAltitude(out double altitude)
+        {
+            return TryReadAltitude(Iot.Units.Pressure.MeanSeaLevelPressure, out altitude);
         }
 
         /// <summary>
