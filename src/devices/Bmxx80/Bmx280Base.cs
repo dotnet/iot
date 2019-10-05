@@ -188,7 +188,7 @@ namespace Iot.Device.Bmxx80
         }        
         
         /// <summary>
-        /// Calculates the altitude in meters from the mean sea-level pressure(in hPa).
+        /// Calculates the altitude in meters from the mean sea-level pressure.
         /// </summary>
         /// <param name="altitude">
         /// Contains the calculated metres above sea-level if the <see cref="Bmxx80Base.PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
