@@ -9,6 +9,9 @@ namespace Iot.Units
     /// </summary>
     public static class Pressure
     {
+        /// <summary>
+        /// The mean sea-level pressure (MSLP) is the average atmospheric pressure at mean sea level.
+        /// </summary>
         public const double MeanSeaLevelPressure = 1013.25;
     }
 }
