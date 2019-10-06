@@ -19,7 +19,7 @@ namespace Iot.Device.Lps25h.Samples
             {
                 while (true)
                 {
-                    Console.WriteLine($"Temperature: {th.Temperature.Celsius}°C   Pressure: {th.Pressure}hPa");
+                    Console.WriteLine($"Temperature: {th.Temperature.Celsius}°C   Pressure: {th.Pressure.Hpa}hPa");
                     Thread.Sleep(1000);
                 }
             }
