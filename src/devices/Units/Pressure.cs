@@ -16,6 +16,7 @@ namespace Iot.Units
         
         private const double MbarRatio = 1.0;
         private const double KpaRatio = 0.1;
+        private const double PaRatio = 0.01;
         private const double InhgRatio = 0.0295301;
         private const double MmhgRatio = 0.750062;
         private double _hpa;
@@ -39,6 +40,11 @@ namespace Iot.Units
         /// Pressure in kPa
         /// </summary>
         public double Kpa => KpaRatio * _hpa;
+        
+        /// <summary>
+        /// Pressure in Pa
+        /// </summary>
+        public double Pa => PaRatio * _hpa;
         
         /// <summary>
         /// Pressure in inHg
@@ -78,6 +84,16 @@ namespace Iot.Units
         public static Pressure FromKpa(double value)
         {
             return new Pressure(value / KpaRatio);
+        }
+        
+        /// <summary>
+        /// Creates Pressure instance from pressure in Pa
+        /// </summary>
+        /// <param name="value">Pressure value in Pa</param>
+        /// <returns>Pressure instance</returns>
+        public static Pressure FromPa(double value)
+        {
+            return new Pressure(value / PaRatio);
         }
         
         /// <summary>
