@@ -153,7 +153,7 @@ namespace Iot.Device.Bmxx80
             var press = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
 
             //Convert the raw value to the pressure in Pa.
-            var pressPa = CompensatePressure(press >> 4);
+            var pressPa = CompensatePressure(Pressure.FromPa(press >> 4));
 
             //Return the pressure as a Pressure instance.
             pressure = Pressure.FromHpa(pressPa.Hpa / 256);
