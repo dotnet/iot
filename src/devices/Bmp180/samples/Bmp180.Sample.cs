@@ -31,8 +31,8 @@ namespace Iot.Device.Bmp180.Samples
                 //read values
                 Temperature tempValue = i2cBmp280.ReadTemperature();
                 Console.WriteLine($"Temperature {tempValue.Celsius} °C");
-                double preValue = i2cBmp280.ReadPressure();
-                Console.WriteLine($"Pressure {preValue} Pa");
+                var preValue = i2cBmp280.ReadPressure();
+                Console.WriteLine($"Pressure {preValue.Pa} Pa");
                 double altValue = i2cBmp280.ReadAltitude();
                 Console.WriteLine($"Altitude {altValue:0.##} m");
                 Thread.Sleep(1000);
@@ -44,7 +44,7 @@ namespace Iot.Device.Bmp180.Samples
                 tempValue = i2cBmp280.ReadTemperature();
                 Console.WriteLine($"Temperature {tempValue.Celsius} °C");
                 preValue = i2cBmp280.ReadPressure();
-                Console.WriteLine($"Pressure {preValue} Pa");
+                Console.WriteLine($"Pressure {preValue.Pa} Pa");
                 altValue = i2cBmp280.ReadAltitude();
                 Console.WriteLine($"Altitude {altValue:0.##} m");
             }
