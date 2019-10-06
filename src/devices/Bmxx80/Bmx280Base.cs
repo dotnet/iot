@@ -153,10 +153,10 @@ namespace Iot.Device.Bmxx80
             var press = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
 
             //Convert the raw value to the pressure in Pa.
-            long pressPa = CompensatePressure(press >> 4);
+            var pressPa = CompensatePressure(press >> 4);
 
-            //Return the temperature as a float value.
-            pressure = Pressure.FromHpa((double)pressPa / 256);
+            //Return the pressure as a Pressure instance.
+            pressure = Pressure.FromPa(pressPa.Pa / 256);
             return true;
         }
 
@@ -169,7 +169,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadAltitude(double seaLevelPressure, out double altitude)
+        public bool TryReadAltitude(Pressure seaLevelPressure, out double altitude)
         {
             // Read the pressure first.
             var success = TryReadPressure(out var pressure);
@@ -179,11 +179,8 @@ namespace Iot.Device.Bmxx80
                 return false;
             }
 
-            // Convert the pressure to Hectopascals (hPa).
-            pressure /= 100;
-
             // Calculate and return the altitude using the international barometric formula.
-            altitude = 44330.0 * (1.0 - Math.Pow(pressure / seaLevelPressure, 0.1903));
+            altitude = 44330.0 * (1.0 - Math.Pow(pressure.Hpa / seaLevelPressure.Hpa, 0.1903));
             return true;
         }        
         
@@ -197,7 +194,7 @@ namespace Iot.Device.Bmxx80
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
         public bool TryReadAltitude(out double altitude)
         {
-            return TryReadAltitude((new Iot.Units.Pressure()).MeanSeaLevel.Hpa, out altitude);
+            return TryReadAltitude(Pressure.MeanSeaLevel.Hpa, out altitude);
         }
 
         /// <summary>
@@ -263,7 +260,7 @@ namespace Iot.Device.Bmxx80
         /// <remarks>
         /// Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa.
         /// </remarks>
-        private long CompensatePressure(int adcPressure)
+        private Pressure CompensatePressure(int adcPressure)
         {
             // Formula from the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
             // The pressure is calculated using the compensation formula in the BMP280 datasheet
@@ -284,7 +281,7 @@ namespace Iot.Device.Bmxx80
             var2 = ((long)_calibrationData.DigP8 * p) >> 19;
             p = ((p + var1 + var2) >> 8) + ((long)_calibrationData.DigP7 << 4);
 
-            return p;
+            return Pressure.FromPa(p);
         }
     }
 }
