@@ -156,7 +156,7 @@ namespace Iot.Device.Bmxx80
             var pressPa = CompensatePressure(press >> 4);
 
             //Return the pressure as a Pressure instance.
-            pressure = Pressure.FromPa(pressPa.Pa / 256);
+            pressure = Pressure.FromHpa(pressPa.Pa / 25600);
             return true;
         }
 
