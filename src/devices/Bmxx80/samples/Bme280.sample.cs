@@ -8,7 +8,7 @@ using System.Threading;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
-using IoT.Units;
+using Iot.Units;
 
 namespace Iot.Device.Samples
 {
