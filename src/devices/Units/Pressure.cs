@@ -97,16 +97,6 @@ namespace Iot.Units
         }
         
         /// <summary>
-        /// Creates Pressure instance from pressure in Pa
-        /// </summary>
-        /// <param name="value">Pressure value in Pa</param>
-        /// <returns>Pressure instance</returns>
-        public static Pressure FromPa(double value)
-        {
-            return new Pressure(value / PaRatio);
-        }
-        
-        /// <summary>
         /// Creates Pressure instance from pressure in inHg
         /// </summary>
         /// <param name="value">Pressure value in inHg</param>
