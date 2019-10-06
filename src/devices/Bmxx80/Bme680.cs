@@ -347,7 +347,7 @@ namespace Iot.Device.Bmxx80
             // Read the temperature first to load the t_fine value for compensation.
             TryReadTemperature(out _);
 
-            pressure = CompensatePressure(press >> 4);
+            pressure = Pressure.FromPa(CompensatePressure(press >> 4));
             return true;
         }
 
