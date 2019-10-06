@@ -93,9 +93,23 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Height in meters from the sensor
         /// </returns>
-        public double ReadAltitude(Pressure seaLevelPressure = Pressure.MeanSeaLevel)
+        public double ReadAltitude(Pressure seaLevelPressure)
         {
             return 44330.0 * (1.0 - Math.Pow((ReadPressure().Pa / seaLevelPressure.Pa), (1.0 / 5.255)));
+        }
+        
+        /// <summary>
+        ///  Calculates the altitude in meters from the mean sea-level pressure.
+        /// </summary>
+        /// <param name="seaLevelPressure"> 
+        ///  Sea-level pressure
+        /// </param>
+        /// <returns>
+        ///  Height in meters from the sensor
+        /// </returns>
+        public double ReadAltitude()
+        {
+            return ReadAltitude(Pressure.MeanSeaLevel);
         }
 
         /// <summary>
