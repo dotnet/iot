@@ -328,15 +328,15 @@ namespace Iot.Device.Bmxx80
         /// Reads the pressure. A return value indicates whether the reading succeeded.
         /// </summary>
         /// <param name="pressure">
-        /// Contains the measured pressure in Pa if the <see cref="Bmxx80Base.PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains the measured pressure if the <see cref="Bmxx80Base.PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public override bool TryReadPressure(out double pressure)
+        public override bool TryReadPressure(out Pressure pressure)
         {
             if (PressureSampling == Sampling.Skipped)
             {
-                pressure = double.NaN;
+                pressure = Pressure.FromPa(double.NaN);
                 return false;
             }
                 
@@ -452,7 +452,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="adcPressure">The pressure value read from the device.</param>
         /// <returns>The pressure in Pa.</returns>
-        private double CompensatePressure(int adcPressure)
+        private double CompensatePressure(Pressure adcPressure)
         {
             // Calculate the pressure.
             var var1 = (TemperatureFine / 2.0) - 64000.0;
@@ -461,7 +461,7 @@ namespace Iot.Device.Bmxx80
             var2 = (var2 / 4.0) + (_bme680Calibration.DigP4 * 65536.0);
             var1 = ((_bme680Calibration.DigP3 * var1 * var1 / 16384.0) + (_bme680Calibration.DigP2 * var1)) / 524288.0;
             var1 = (1.0 + (var1 / 32768.0)) * _bme680Calibration.DigP1;
-            var calculatedPressure = 1048576.0 - adcPressure;
+            var calculatedPressure = 1048576.0 - adcPressure.Pa;
 
             // Avoid exception caused by division by zero.
             if (var1 != 0)
@@ -478,7 +478,7 @@ namespace Iot.Device.Bmxx80
                 calculatedPressure = 0;
             }
 
-            return calculatedPressure;
+            return Pressure.FromPa(calculatedPressure);
         }
 
         private bool ReadGasMeasurementIsValid()
