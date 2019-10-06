@@ -142,7 +142,7 @@ namespace Iot.Device.Bmxx80
         {
             if (PressureSampling == Sampling.Skipped)
             {
-                pressure = double.NaN;
+                pressure = Pressure.FromPa(double.NaN);
                 return false;
             }
 
