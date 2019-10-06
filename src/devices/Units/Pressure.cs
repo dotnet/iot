@@ -14,9 +14,9 @@ namespace Iot.Units
         private const double HpaRatio = 0.01;
         private const double InhgRatio = 0.000295301;
         private const double MmhgRatio = 0.00750062;
-        private long _pa;
+        private double _pa;
         
-        private Pressure(long pa)
+        private Pressure(double pa)
         {
             _pa = pa;
         }
@@ -29,7 +29,7 @@ namespace Iot.Units
         /// <summary>
         /// Pressure in Pa
         /// </summary>
-        public long Pa => _pa;
+        public double Pa => _pa;
         
         /// <summary>
         /// Pressure in mbar
@@ -61,7 +61,7 @@ namespace Iot.Units
         /// </summary>
         /// <param name="value">Pressure value in Pa</param>
         /// <returns>Pressure instance</returns>
-        public static Pressure FromPa(long value)
+        public static Pressure FromPa(double value)
         {
             return new Pressure(value);
         }
