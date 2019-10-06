@@ -138,7 +138,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public override bool TryReadPressure(out double pressure)
+        public override bool TryReadPressure(out Pressure pressure)
         {
             if (PressureSampling == Sampling.Skipped)
             {
@@ -156,7 +156,7 @@ namespace Iot.Device.Bmxx80
             long pressPa = CompensatePressure(press >> 4);
 
             //Return the temperature as a float value.
-            pressure = (double)pressPa / 256;
+            pressure = Pressure.FromHpa((double)pressPa / 256);
             return true;
         }
 
@@ -197,7 +197,7 @@ namespace Iot.Device.Bmxx80
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
         public bool TryReadAltitude(out double altitude)
         {
-            return TryReadAltitude(Iot.Units.Pressure.MeanSeaLevelPressure, out altitude);
+            return TryReadAltitude((new Iot.Units.Pressure()).MeanSeaLevel.Hpa, out altitude);
         }
 
         /// <summary>
