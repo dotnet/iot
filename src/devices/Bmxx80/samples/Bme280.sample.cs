@@ -8,6 +8,7 @@ using System.Threading;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
+using IoT.Units;
 
 namespace Iot.Device.Samples
 {
@@ -20,7 +21,7 @@ namespace Iot.Device.Samples
             //bus id on the raspberry pi 3
             const int busId = 1;
             //set this to the current sea level pressure in the area for correct altitude readings
-            const double defaultSeaLevelPressure = Iot.Units.Pressure.MeanSeaLevelPressure;
+            var defaultSeaLevelPressure = Pressure.MeanSeaLevel;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bme280.DefaultI2cAddress);
             var i2cDevice = I2cDevice.Create(i2cSettings);
@@ -46,7 +47,7 @@ namespace Iot.Device.Samples
                     i2CBmpe80.TryReadTemperature(out var tempValue);
                     Console.WriteLine($"Temperature: {tempValue.Celsius} C");
                     i2CBmpe80.TryReadPressure(out var preValue);
-                    Console.WriteLine($"Pressure: {preValue} Pa");
+                    Console.WriteLine($"Pressure: {preValue.Pa} Pa");
                     i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out var altValue);
                     Console.WriteLine($"Altitude: {altValue} meters");
                     i2CBmpe80.TryReadHumidity(out var humValue);
@@ -70,7 +71,7 @@ namespace Iot.Device.Samples
                     i2CBmpe80.TryReadTemperature(out tempValue);
                     Console.WriteLine($"Temperature: {tempValue.Celsius} C");
                     i2CBmpe80.TryReadPressure(out preValue);
-                    Console.WriteLine($"Pressure: {preValue} Pa");
+                    Console.WriteLine($"Pressure: {preValue.Pa} Pa");
                     i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out altValue);
                     Console.WriteLine($"Altitude: {altValue} meters");
                     i2CBmpe80.TryReadHumidity(out humValue);
