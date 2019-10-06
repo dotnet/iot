@@ -12,7 +12,7 @@ namespace Iot.Units
         /// <summary>
         /// The mean sea-level pressure (MSLP), in hPa, is the average atmospheric pressure at mean sea level.
         /// </summary>
-        public const double MeanSeaLevel = 1013.25;
+        public Pressure MeanSeaLevel => Pressure.FromHpa(1013.25);
         
         private const double MbarRatio = 1.0;
         private const double KpaRatio = 0.1;
