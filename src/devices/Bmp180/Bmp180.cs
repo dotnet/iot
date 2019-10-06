@@ -101,9 +101,6 @@ namespace Iot.Device.Bmp180
         /// <summary>
         ///  Calculates the altitude in meters from the mean sea-level pressure.
         /// </summary>
-        /// <param name="seaLevelPressure"> 
-        ///  Sea-level pressure
-        /// </param>
         /// <returns>
         ///  Height in meters from the sensor
         /// </returns>
