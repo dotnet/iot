@@ -153,7 +153,7 @@ namespace Iot.Device.Bmxx80
             var press = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
 
             //Convert the raw value to the pressure in Pa.
-            var pressPa = CompensatePressure(Pressure.FromPa(press >> 4));
+            var pressPa = CompensatePressure(press >> 4);
 
             //Return the pressure as a Pressure instance.
             pressure = Pressure.FromHpa(pressPa.Hpa / 256);
@@ -260,7 +260,7 @@ namespace Iot.Device.Bmxx80
         /// <remarks>
         /// Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa.
         /// </remarks>
-        private Pressure CompensatePressure(Pressure adcPressure)
+        private Pressure CompensatePressure(long adcPressure)
         {
             // Formula from the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
             // The pressure is calculated using the compensation formula in the BMP280 datasheet
@@ -275,7 +275,7 @@ namespace Iot.Device.Bmxx80
                 return 0; //Avoid exception caused by division by zero
             }
             //Perform calibration operations
-            long p = 1048576 - Convert.ToInt64(adcPressure.Pa);
+            long p = 1048576 - adcPressure;
             p = (((p << 31) - var2) * 3125) / var1;
             var1 = ((long)_calibrationData.DigP9 * (p >> 13) * (p >> 13)) >> 25;
             var2 = ((long)_calibrationData.DigP8 * p) >> 19;
