@@ -452,7 +452,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="adcPressure">The pressure value read from the device.</param>
         /// <returns>The pressure in Pa.</returns>
-        private double CompensatePressure(Pressure adcPressure)
+        private double CompensatePressure(long adcPressure)
         {
             // Calculate the pressure.
             var var1 = (TemperatureFine / 2.0) - 64000.0;
@@ -461,7 +461,7 @@ namespace Iot.Device.Bmxx80
             var2 = (var2 / 4.0) + (_bme680Calibration.DigP4 * 65536.0);
             var1 = ((_bme680Calibration.DigP3 * var1 * var1 / 16384.0) + (_bme680Calibration.DigP2 * var1)) / 524288.0;
             var1 = (1.0 + (var1 / 32768.0)) * _bme680Calibration.DigP1;
-            var calculatedPressure = 1048576.0 - adcPressure.Pa;
+            var calculatedPressure = 1048576.0 - adcPressure;
 
             // Avoid exception caused by division by zero.
             if (var1 != 0)
