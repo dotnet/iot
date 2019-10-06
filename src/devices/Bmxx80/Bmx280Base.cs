@@ -156,7 +156,7 @@ namespace Iot.Device.Bmxx80
             var pressPa = CompensatePressure(press >> 4);
 
             //Return the pressure as a Pressure instance.
-            pressure = Pressure.FromHpa(pressPa.Pa / 25600);
+            pressure = Pressure.FromHpa(pressPa.Hpa / 256);
             return true;
         }
 
@@ -275,7 +275,7 @@ namespace Iot.Device.Bmxx80
                 return 0; //Avoid exception caused by division by zero
             }
             //Perform calibration operations
-            long p = 1048576 - adcPressure.Pa;
+            long p = 1048576 - Convert.ToInt64(adcPressure.Pa);
             p = (((p << 31) - var2) * 3125) / var1;
             var1 = ((long)_calibrationData.DigP9 * (p >> 13) * (p >> 13)) >> 25;
             var2 = ((long)_calibrationData.DigP8 * p) >> 19;
