@@ -163,7 +163,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Calculates the altitude in meters from the specified sea-level pressure(in hPa).
         /// </summary>
-        /// <param name="seaLevelPressure">Sea-level pressure in hPa.</param>
+        /// <param name="seaLevelPressure">Sea-level pressure</param>
         /// <param name="altitude">
         /// Contains the calculated metres above sea-level if the <see cref="Bmxx80Base.PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
         /// Contains <see cref="double.NaN"/> otherwise.
@@ -194,7 +194,7 @@ namespace Iot.Device.Bmxx80
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
         public bool TryReadAltitude(out double altitude)
         {
-            return TryReadAltitude(Pressure.MeanSeaLevel.Hpa, out altitude);
+            return TryReadAltitude(Pressure.MeanSeaLevel, out altitude);
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace Iot.Device.Bmxx80
         /// <remarks>
         /// Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa.
         /// </remarks>
-        private Pressure CompensatePressure(int adcPressure)
+        private Pressure CompensatePressure(Pressure adcPressure)
         {
             // Formula from the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
             // The pressure is calculated using the compensation formula in the BMP280 datasheet
@@ -275,7 +275,7 @@ namespace Iot.Device.Bmxx80
                 return 0; //Avoid exception caused by division by zero
             }
             //Perform calibration operations
-            long p = 1048576 - adcPressure;
+            long p = 1048576 - adcPressure.Pa;
             p = (((p << 31) - var2) * 3125) / var1;
             var1 = ((long)_calibrationData.DigP9 * (p >> 13) * (p >> 13)) >> 25;
             var2 = ((long)_calibrationData.DigP8 * p) >> 19;
