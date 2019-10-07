@@ -89,31 +89,8 @@ namespace Iot.Device.Imu
         /// <param name="waitForData">true to wait for new data</param>
         /// <returns>The data from the magnetometer</returns>
         public Vector3 ReadMagnetometerWithoutCorrection(bool waitForData = true)
-        {
-            TimeSpan timeout = TimeSpan.Zero;
-            switch (_ak8963.MeasurementMode)
-            {
-                // TODO: find what is the value in the documentation, it should be pretty fast
-                // But taking the same value as for the slowest one so th 8Hz one
-                case MeasurementMode.SingleMeasurement:
-                case MeasurementMode.ExternalTriggedMeasurement:
-                case MeasurementMode.SelfTest:
-                case MeasurementMode.ContinuousMeasurement8Hz:
-                    // 8Hz measurement period plus 2 milliseconds
-                    timeout = TimeSpan.FromMilliseconds(127);
-                    break;
-                case MeasurementMode.ContinuousMeasurement100Hz:
-                    // 100Hz measurement period plus 2 milliseconds
-                    // When switching to this mode, the first read can be longer than 10 ms. Tests shows up to 30 ms
-                    timeout = _firstContinuousRead ? TimeSpan.FromMilliseconds(30) : TimeSpan.FromMilliseconds(12);
-                    break;
-                // Those cases are not measurement and should be 0 then                
-                case MeasurementMode.FuseRomAccess:
-                case MeasurementMode.PowerDown:
-                default:
-                    break;
-            }
-            var readMag = _ak8963.ReadMagnetometer(waitForData, timeout);
+        {            
+            var readMag = _ak8963.ReadMagnetometerWithoutCorrection(waitForData, GetTimeout());
             _firstContinuousRead = false;
             return _wakeOnMotion ? Vector3.Zero : new Vector3(readMag.Y, readMag.X, -readMag.Z);
         }
@@ -134,7 +111,39 @@ namespace Iot.Device.Imu
         /// </remarks>
         /// <param name="waitForData">true to wait for new data</param>
         /// <returns>The data from the magnetometer</returns>
-        public Vector3 ReadMagnetometer(bool waitForData = true) => ReadMagnetometerWithoutCorrection(waitForData) - MagnometerBias;
+        public Vector3 ReadMagnetometer(bool waitForData = true)
+        {
+            var magn = _ak8963.ReadMagnetometer(waitForData, GetTimeout());
+            return new Vector3(magn.Y, magn.X, -magn.Z);
+        }
+
+        private TimeSpan GetTimeout()
+        {
+            TimeSpan timeout = TimeSpan.Zero;
+            switch (_ak8963.MeasurementMode)
+            {
+                // TODO: find what is the value in the documentation, it should be pretty fast
+                // But taking the same value as for the slowest one so th 8Hz one
+                case MeasurementMode.SingleMeasurement:
+                case MeasurementMode.ExternalTriggedMeasurement:
+                case MeasurementMode.SelfTest:
+                case MeasurementMode.ContinuousMeasurement8Hz:
+                    // 8Hz measurement period plus 2 milliseconds
+                    timeout = TimeSpan.FromMilliseconds(127);
+                    break;
+                case MeasurementMode.ContinuousMeasurement100Hz:
+                    // 100Hz measurement period plus 2 milliseconds
+                    // When switching to this mode, the first read can be longer than 10 ms. Tests shows up to 100 ms
+                    timeout = _firstContinuousRead ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromMilliseconds(12);
+                    break;
+                // Those cases are not measurement and should be 0 then                
+                case MeasurementMode.FuseRomAccess:
+                case MeasurementMode.PowerDown:
+                default:
+                    break;
+            }
+            return timeout;
+        }
 
         /// <summary>
         /// Select the magnetometer measurement mode
@@ -204,6 +213,7 @@ namespace Iot.Device.Imu
                         throw new IOException($"This device does not contain the correct signature 0x48 for a AK8963 embedded into the MPU9250");
                 }
             }
+            _ak8963.MeasurementMode = MeasurementMode.SingleMeasurement;
         }
 
         /// <summary>

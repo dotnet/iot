@@ -81,6 +81,11 @@ namespace Iot.Device.Magnetometer
         public Vector3 MagnetometerBias { get; set; } = Vector3.Zero;
 
         /// <summary>
+        /// Get the magnetometer hardware adjustment bias
+        /// </summary>
+        public Vector3 MagnetometerHardwareAdjustmeent { get; set; } = Vector3.One;
+
+        /// <summary>
         /// Calibrate the magnetometer. Make sure your sensor is as far as possible of magnet
         /// Calculate as well the magnetometer bias. Please make sure you are moving the magnetometer all over space, rotating it.
         /// Please make sure you are not close to any magnetic field like magnet or phone
@@ -100,23 +105,14 @@ namespace Iot.Device.Magnetometer
             // Page 13 of documentation 
             MeasurementMode = MeasurementMode.FuseRomAccess;
             // Read the data
+            // See http://www.invensense.com/wp-content/uploads/2017/11/RM-MPU-9250A-00-v1.6.pdf
+            // Page 53
             ReadBytes(Register.ASAX, rawData);
-            calib.X = (float)((rawData[0] - 128) / 256.0);
-            calib.Y = (float)((rawData[1] - 128) / 256.0);
-            calib.Z = (float)((rawData[2] - 128) / 256.0);
+            calib.X = (float)(((rawData[0] - 128) / 256.0 + 1.0));
+            calib.Y = (float)(((rawData[1] - 128) / 256.0 + 1.0));
+            calib.Z = (float)(((rawData[2] - 128) / 256.0 + 1.0));
             MeasurementMode = MeasurementMode.PowerDown;
             MeasurementMode = oldPower;
-            if (OutputBitMode == OutputBitMode.Output16bit)
-            {
-                // From the documentation range is from 32760 which does represent 4912 µT
-                // result of 4912.0f / 32760.0f
-                calib *= 0.1499389499389499f;
-            }
-            else
-            {
-                // result of 4912.0f / 8192.0f
-                calib *= 0.599609375f;
-            }
 
             // Now calculate the bias
             // Store old mode to restore after
@@ -146,10 +142,15 @@ namespace Iot.Device.Magnetometer
                 {
                     // We skip the reading
                 }
-                
+
             }
             // Store the bias
-            MagnetometerBias = ((maxbias + minbias) / 2) + calib;
+            var magBias = (maxbias + minbias) / 2;
+            magBias.X = calib.X;
+            magBias.Y *= calib.Y;
+            magBias.Z *= calib.Z;
+            MagnetometerBias = magBias;
+            MagnetometerHardwareAdjustmeent = calib;
 
             return calib;
         }
@@ -246,7 +247,15 @@ namespace Iot.Device.Magnetometer
         /// <param name="waitForData">true to wait for new data</param>
         /// <param name="timeout">timeout for waiting the data, ignored if waitForData is false</param>
         /// <returns>The data from the magnetometer</returns>
-        public Vector3 ReadMagnetometer(bool waitForData, TimeSpan timeout) => ReadMagnetometerWithoutCorrection(waitForData, timeout) - MagnetometerBias;     
+        public Vector3 ReadMagnetometer(bool waitForData, TimeSpan timeout)
+        {
+            var magn = ReadMagnetometerWithoutCorrection(waitForData, timeout);
+            magn.X *= MagnetometerHardwareAdjustmeent.X;
+            magn.Y *= MagnetometerHardwareAdjustmeent.Y;
+            magn.Z *= MagnetometerHardwareAdjustmeent.Z;
+            magn -= MagnetometerBias;
+            return magn;
+        }
 
         /// <summary>
         /// <![CDATA[
