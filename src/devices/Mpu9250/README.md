@@ -77,6 +77,8 @@ Console.WriteLine($"Mag Z = {mpu9250.MagnometerBias.Z}");
 
 See [AK8963](../Ak8963/README.md#Calibration_and_bias) calibration for more information on how Magnetometer calibration is working. Please note that you have a full code sample to read and save data in a file to go deeper into the Magnetometer calibration.
 
+**Note: AK8963 calibration must be performed before other calibrations and before using any other part of the sensors**
+
 ## Units
 
 Al axis are oriented this way:

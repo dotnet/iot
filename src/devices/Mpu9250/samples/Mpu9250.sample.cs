@@ -92,6 +92,19 @@ namespace DemoMpu9250
         {           
             var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
             Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
+            Console.WriteLine($"Check version magnetometer: {mpu9250.GetMagnetometerVersion()}");
+            Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient! Please make sure you are not close to any magnetic field like magnet or phone.");
+            Console.WriteLine("Please move your sensor as much as possible in all direction in space to get as many points in space as possible");
+            var mag = mpu9250.CalibrateMagnetometer();
+            Console.WriteLine($"Hardware bias multiplicative:");
+            Console.WriteLine($"Mag X = {mag.X}");
+            Console.WriteLine($"Mag Y = {mag.Y}");
+            Console.WriteLine($"Mag Z = {mag.Z}");
+            Console.WriteLine($"Calculated corrected bias:");
+            Console.WriteLine($"Mag X = {mpu9250.MagnometerBias.X}");
+            Console.WriteLine($"Mag Y = {mpu9250.MagnometerBias.Y}");
+            Console.WriteLine($"Mag Z = {mpu9250.MagnometerBias.Z}");
+
             var resSelfTest = mpu9250.RunGyroscopeAccelerometerSelfTest();
             Console.WriteLine($"Self test:");
             Console.WriteLine($"Gyro X = {resSelfTest.Item1.X} vs >0.005");
@@ -109,14 +122,6 @@ namespace DemoMpu9250
             Console.WriteLine($"Acc X bias = {mpu9250.AccelerometerBias.X}");
             Console.WriteLine($"Acc Y bias = {mpu9250.AccelerometerBias.Y}");
             Console.WriteLine($"Acc Z bias = {mpu9250.AccelerometerBias.Z}");
-            Console.WriteLine($"Check version magnetometer: {mpu9250.GetMagnetometerVersion()}");
-            Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient! Please make sure you are not close to any magnetic field like magnet or phone.");
-            Console.WriteLine("Please move your sensor as much as possible in all direction in space to get as many points in space as possible");
-            var mag = mpu9250.CalibrateMagnetometer();
-            Console.WriteLine($"Bias:");
-            Console.WriteLine($"Mag X = {mpu9250.MagnometerBias.X}");
-            Console.WriteLine($"Mag Y = {mpu9250.MagnometerBias.Y}");
-            Console.WriteLine($"Mag Z = {mpu9250.MagnometerBias.Z}");
             Console.WriteLine("Press a key to continue");
             var readKey = Console.ReadKey();
             mpu9250.GyroscopeBandwidth = GyroscopeBandwidth.Bandwidth0250Hz;

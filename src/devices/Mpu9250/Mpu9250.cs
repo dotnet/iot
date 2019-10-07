@@ -57,7 +57,9 @@ namespace Iot.Device.Imu
                 return Vector3.Zero;
             // Run the calibration
             var calib = _ak8963.CalibrateMagnetometer(calibrationCounts);
-            return new Vector3(calib.Y, calib.X, -calib.Z);
+            // Invert X and Y, don't change Z, this is a multiplication factor only
+            // it should stay positive
+            return new Vector3(calib.Y, calib.X, calib.Z);
         }
 
         /// <summary>
