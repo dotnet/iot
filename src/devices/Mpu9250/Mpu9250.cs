@@ -43,11 +43,20 @@ namespace Iot.Device.Imu
         public Vector3 MagnometerBias => new Vector3(_ak8963.MagnetometerBias.Y, _ak8963.MagnetometerBias.X, -_ak8963.MagnetometerBias.Z);
 
         /// <summary>
-        /// Calibrate the magnetometer. Make sure your sensor is as far as possible of magnet
+        /// Calibrate the magnetometer. Make sure your sensor is as far as possible of magnet.
+        /// Move your sensor in all direction to make sure it will get enough data in all points of space
         /// Calculate as well the magnetometer bias
         /// </summary>
+        /// <param name="calibrationCounts">number of points to read during calibration, default is 1000</param>
         /// <returns>Returns the factory calibration data</returns>
-        public Vector3 CalibrateMagnetometer() => _wakeOnMotion ? Vector3.Zero : _ak8963.CalibrateMagnetometer();
+        public Vector3 CalibrateMagnetometer(int calibrationCounts = 1000)
+        {
+            if (_wakeOnMotion)
+                return Vector3.Zero;
+            // Run the calibration
+            var calib = _ak8963.CalibrateMagnetometer(calibrationCounts);
+            return new Vector3(calib.Y, calib.X, -calib.Z);
+        }
 
         /// <summary>
         /// True if there is a data to read
@@ -62,7 +71,7 @@ namespace Iot.Device.Imu
         public byte GetMagnetometerVersion() => _wakeOnMotion ? (byte)0 : _ak8963.GetDeviceInfo();
 
         /// <summary>
-        /// Read the magnetometer and can wait for new data to be present
+        /// Read the magnetometer without bias correction and can wait for new data to be present
         /// </summary>
         /// <remarks>
         /// Vector axes are the following:
@@ -77,7 +86,7 @@ namespace Iot.Device.Imu
         /// </remarks>
         /// <param name="waitForData">true to wait for new data</param>
         /// <returns>The data from the magnetometer</returns>
-        public Vector3 ReadMagnetometer(bool waitForData = false)
+        public Vector3 ReadMagnetometerWithoutCorrection(bool waitForData = true)
         {
             TimeSpan timeout = TimeSpan.Zero;
             switch (_ak8963.MeasurementMode)
@@ -88,12 +97,12 @@ namespace Iot.Device.Imu
                 case MeasurementMode.ExternalTriggedMeasurement:
                 case MeasurementMode.SelfTest:
                 case MeasurementMode.ContinuousMeasurement8Hz:
-                    // 8Hz measurement period plus 1 millisecond
-                    timeout = TimeSpan.FromMilliseconds(126);
+                    // 8Hz measurement period plus 2 milliseconds
+                    timeout = TimeSpan.FromMilliseconds(127);
                     break;
                 case MeasurementMode.ContinuousMeasurement100Hz:
-                    // 100Hz measurement period plus 1 millisecond
-                    timeout = TimeSpan.FromMilliseconds(11);
+                    // 100Hz measurement period plus 2 milliseconds
+                    timeout = TimeSpan.FromMilliseconds(12);
                     break;
                 // Those cases are not measurement and should be 0 then                
                 case MeasurementMode.FuseRomAccess:
@@ -102,8 +111,26 @@ namespace Iot.Device.Imu
                     break;
             }
             var readMag = _ak8963.ReadMagnetometer(waitForData, timeout);
-            return _wakeOnMotion ? Vector3.Zero : new Vector3(readMag.Y, readMag.X, readMag.Z);
+            return _wakeOnMotion ? Vector3.Zero : new Vector3(readMag.Y, readMag.X, -readMag.Z);
         }
+
+        /// <summary>
+        /// Read the magnetometer with bias correction and can wait for new data to be present
+        /// </summary>
+        /// <remarks>
+        /// Vector axes are the following:
+        ///    +Z   +Y
+        ///  \  |  /
+        ///   \ | /
+        ///    \|/
+        ///    /|\
+        ///   / | \
+        ///  /  |  \
+        ///         +X
+        /// </remarks>
+        /// <param name="waitForData">true to wait for new data</param>
+        /// <returns>The data from the magnetometer</returns>
+        public Vector3 ReadMagnetometer(bool waitForData = true) => ReadMagnetometerWithoutCorrection(waitForData) - MagnometerBias;
 
         /// <summary>
         /// Select the magnetometer measurement mode
@@ -130,8 +157,17 @@ namespace Iot.Device.Imu
         /// </summary>
         /// <param name="i2cDevice">The I2C device</param>
         /// <param name="autoDispose">Will automatically dispose the I2C device if true</param>
-        public Mpu9250(I2cDevice i2cDevice, bool autoDispose = true) : base(i2cDevice)
+        public Mpu9250(I2cDevice i2cDevice, bool autoDispose = true) : base()
         {
+            _i2cDevice = i2cDevice;
+            Reset();
+            PowerOn();
+            if (!CheckVersion())
+                throw new IOException($"This device does not contain the correct signature 0x71 for a MPU9250");
+            GyroscopeBandwidth = GyroscopeBandwidth.Bandwidth0250Hz;
+            GyroscopeRange = GyroscopeRange.Range0250Dps;
+            AccelerometerBandwidth = AccelerometerBandwidth.Bandwidth1130Hz;
+            AccelerometerRange = AccelerometerRange.Range02G;
             // Setup I2C for the AK8963
             WriteRegister(Register.USER_CTRL, (byte)UserControls.I2C_MST_EN);
             // Speed of 400 kHz

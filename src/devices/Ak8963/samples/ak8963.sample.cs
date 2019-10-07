@@ -16,7 +16,7 @@ namespace DemoAk8963
         {
             I2cConnectionSettings mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Ak8963.DefaultI2cAddress);
             var ak8963 = new Ak8963(I2cDevice.Create(mpui2CConnectionSettingmpus));
-            Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient!");
+            Console.WriteLine("Magnetometer calibration is taking couple of seconds, move your sensor in all possible directions! Make sure you don't have a magnet or phone close by.");
             var mag = ak8963.CalibrateMagnetometer();
             Console.WriteLine($"Bias:");
             Console.WriteLine($"Mag X = {mag.X}");

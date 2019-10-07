@@ -4,6 +4,8 @@
 
 using System;
 using System.Device.I2c;
+using System.IO;
+using System.Net;
 using System.Threading;
 using Iot.Device.Imu;
 
@@ -15,6 +17,78 @@ namespace DemoMpu9250
         {
             Console.WriteLine("Hello MPU9250!");
 
+            if (args.Length != 0)
+            {
+                MagnetometerCalibrationDeepDive(Convert.ToInt32(args[0]));
+            }
+            else
+            {
+                Console.WriteLine("If you want to run a deep dive calibration data export, run this sample with an argument for the number of calibration cycles you want:");
+                Console.WriteLine("To run a calibration with 1000 sample and exporting all data: ./Mpu9250.sample 1000");
+                MainTest();
+            }            
+        }
+
+        static void MagnetometerCalibrationDeepDive(int calibrationCount)
+        {
+            var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
+            Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
+            mpu9250.MagnetometerMeasurementMode = Iot.Device.Magnetometer.MeasurementMode.ContinuousMeasurement100Hz;
+            Console.WriteLine("Please move the magnetometer during calibration");
+            using (var ioWriter = new StreamWriter("mag.csv"))
+            {
+                // First we read the data without calibration at all
+                Console.WriteLine("Reading magnetometer data without calibration");
+                ioWriter.WriteLine($"X;Y;Z");
+                for (int i = 0; i < calibrationCount; i++)
+                {
+                    try
+                    {
+                        var magne = mpu9250.ReadMagnetometerWithoutCorrection();
+                        ioWriter.WriteLine($"{magne.X};{magne.Y};{magne.Z}");
+                        // 10 ms = 100Hz, so waiting to make sure we have new data
+                        Thread.Sleep(10);
+                    }
+                    catch (TimeoutException)
+                    {
+                        Console.WriteLine("Error reading");
+                    }
+                }
+                Console.WriteLine("Performing calibration");
+                // then we calibrate
+                var magnetoBias = mpu9250.CalibrateMagnetometer(calibrationCount);
+                ioWriter.WriteLine();
+                ioWriter.WriteLine("Factory calibration data");
+                ioWriter.WriteLine($"X;Y;Z");
+                ioWriter.WriteLine($"{magnetoBias.X};{magnetoBias.Y};{magnetoBias.Z}");
+                ioWriter.WriteLine();
+                ioWriter.WriteLine("Magnetometer bias calibration data");
+                ioWriter.WriteLine($"X;Y;Z");
+                ioWriter.WriteLine($"{mpu9250.MagnometerBias.X};{mpu9250.MagnometerBias.Y};{mpu9250.MagnometerBias.Z}");
+                ioWriter.WriteLine();
+                // Finally we read the data again
+                Console.WriteLine("Reading magnetometer data including calibration");
+                ioWriter.WriteLine($"X corr;Y corr;Z corr");
+                for (int i = 0; i < calibrationCount; i++)
+                {
+                    try
+                    {
+                        var magne = mpu9250.ReadMagnetometer();
+                        ioWriter.WriteLine($"{magne.X};{magne.Y};{magne.Z}");
+                        // 10 ms = 100Hz, so waiting to make sure we have new data
+                        Thread.Sleep(10);
+                    }
+                    catch (TimeoutException)
+                    {
+                        Console.WriteLine("Error reading");
+                    }
+                }
+            }
+            Console.WriteLine("Calibration deep dive over, file name is mag.csv");
+        }
+
+        static void MainTest()
+        {           
             var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
             Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
             var resSelfTest = mpu9250.RunGyroscopeAccelerometerSelfTest();
@@ -35,7 +109,8 @@ namespace DemoMpu9250
             Console.WriteLine($"Acc Y bias = {mpu9250.AccelerometerBias.Y}");
             Console.WriteLine($"Acc Z bias = {mpu9250.AccelerometerBias.Z}");
             Console.WriteLine($"Check version magnetometer: {mpu9250.GetMagnetometerVersion()}");
-            Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient and don't touch the sensor! Please make sure you are not close to any magnetic field like magnet or phone.");
+            Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient! Please make sure you are not close to any magnetic field like magnet or phone.");
+            Console.WriteLine("Please move your sensor as much as possible in all direction in space to get as many points in space as possible");
             var mag = mpu9250.CalibrateMagnetometer();
             Console.WriteLine($"Bias:");
             Console.WriteLine($"Mag X = {mpu9250.MagnometerBias.X}");
@@ -51,21 +126,21 @@ namespace DemoMpu9250
             {
                 Console.CursorTop = 0;
                 var gyro = mpu9250.GetGyroscopeReading();
-                Console.WriteLine($"Gyro X = {gyro.X, 15}");
-                Console.WriteLine($"Gyro Y = {gyro.Y, 15}");
-                Console.WriteLine($"Gyro Z = {gyro.Z, 15}");
+                Console.WriteLine($"Gyro X = {gyro.X,15}");
+                Console.WriteLine($"Gyro Y = {gyro.Y,15}");
+                Console.WriteLine($"Gyro Z = {gyro.Z,15}");
                 var acc = mpu9250.GetAccelerometer();
-                Console.WriteLine($"Acc X = {acc.X, 15}");
-                Console.WriteLine($"Acc Y = {acc.Y, 15}");
-                Console.WriteLine($"Acc Z = {acc.Z, 15}");
+                Console.WriteLine($"Acc X = {acc.X,15}");
+                Console.WriteLine($"Acc Y = {acc.Y,15}");
+                Console.WriteLine($"Acc Z = {acc.Z,15}");
                 Console.WriteLine($"Temp = {mpu9250.GetTemperature().Celsius.ToString("0.00")} °C");
-                var magne = mpu9250.ReadMagnetometer(true);
-                Console.WriteLine($"Mag X = {magne.X, 15}");
-                Console.WriteLine($"Mag Y = {magne.Y, 15}");
-                Console.WriteLine($"Mag Z = {magne.Z, 15}");
+                var magne = mpu9250.ReadMagnetometer();
+                Console.WriteLine($"Mag X = {magne.X,15}");
+                Console.WriteLine($"Mag Y = {magne.Y,15}");
+                Console.WriteLine($"Mag Z = {magne.Z,15}");
                 Thread.Sleep(100);
             }
-            
+
             readKey = Console.ReadKey();
             // SetWakeOnMotion
             mpu9250.SetWakeOnMotion(300, AccelerometerLowPowerFrequency.Frequency0Dot24Hz);
@@ -79,9 +154,9 @@ namespace DemoMpu9250
             {
                 Console.CursorTop = 0;
                 var acc = mpu9250.GetAccelerometer();
-                Console.WriteLine($"Acc X = {acc.X, 15}");
-                Console.WriteLine($"Acc Y = {acc.Y, 15}");
-                Console.WriteLine($"Acc Z = {acc.Z, 15}");
+                Console.WriteLine($"Acc X = {acc.X,15}");
+                Console.WriteLine($"Acc Y = {acc.Y,15}");
+                Console.WriteLine($"Acc Z = {acc.Z,15}");
                 Thread.Sleep(100);
             }
         }

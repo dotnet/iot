@@ -63,16 +63,19 @@ Console.WriteLine($"Acc Y bias = {mpu9250.AccelerometerBias.Y}");
 Console.WriteLine($"Acc Z bias = {mpu9250.AccelerometerBias.Z}");
 ```
 
-Calibration is as well available for the magnetometer (the AK8963). For this sensor, no correction is done.
+Calibration is as well available for the magnetometer (the AK8963). For this sensor.
 
 ```csharp
-Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient and don't touch the sensor! Please make sure you are not close to any magnetic field like magnet or phone.");
+Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient!");
+Console.WriteLine("Please make sure you are not close to any magnetic field like magnet or phone. Move the sensor in all possible directions");
 var mag = mpu9250.CalibrateMagnetometer();
-Console.WriteLine($"Bias:");
+Console.WriteLine($"Coorection factor bias:");
 Console.WriteLine($"Mag X = {mpu9250.MagnometerBias.X}");
 Console.WriteLine($"Mag Y = {mpu9250.MagnometerBias.Y}");
 Console.WriteLine($"Mag Z = {mpu9250.MagnometerBias.Z}");
 ```
+
+See [AK8963](../Ak8963/README.md#Calibration_and_bias) calibration for more information on how Magnetometer calibration is working. Please note that you have a full code sample to read and save data in a file to go deeper into the Magnetometer calibration.
 
 ## Units
 

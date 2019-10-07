@@ -52,12 +52,18 @@ namespace Iot.Device.Imu
             Reset();
             PowerOn();
             if (!CheckVersion())
-                throw new IOException($"This device does not contain the correct signature 0x71 for a MPU6500");
+                throw new IOException($"This device does not contain the correct signature 0x70 for a MPU6500");
             GyroscopeBandwidth = GyroscopeBandwidth.Bandwidth0250Hz;
             GyroscopeRange = GyroscopeRange.Range0250Dps;
             AccelerometerBandwidth = AccelerometerBandwidth.Bandwidth1130Hz;
             AccelerometerRange = AccelerometerRange.Range02G;
         }
+
+        /// <summary>
+        /// Used to create the class for the MPU9250. Initialization is a bit different than for the MPU65000
+        /// </summary>
+        internal Mpu6500()
+        { }
 
         #region Accelerometer
 

@@ -82,11 +82,12 @@ namespace Iot.Device.Magnetometer
 
         /// <summary>
         /// Calibrate the magnetometer. Make sure your sensor is as far as possible of magnet
-        /// Calculate as well the magnetometer bias
+        /// Calculate as well the magnetometer bias. Please make sure you are moving the magnetometer all over space, rotating it.
+        /// Please make sure you are not close to any magnetic field like magnet or phone
         /// </summary>
-        /// <param name="numberMeasurements">Number of measurement for the calibration, default is 1500</param>
+        /// <param name="numberMeasurements">Number of measurement for the calibration, default is 1000</param>
         /// <returns>Returns the factory calibration data</returns>
-        public Vector3 CalibrateMagnetometer(int numberMeasurements = 1500)
+        public Vector3 CalibrateMagnetometer(int numberMeasurements = 1000)
         {
             Vector3 calib = new Vector3();
             Span<byte> rawData = stackalloc byte[3];
@@ -100,11 +101,22 @@ namespace Iot.Device.Magnetometer
             MeasurementMode = MeasurementMode.FuseRomAccess;
             // Read the data
             ReadBytes(Register.ASAX, rawData);
-            calib.X = (float)((rawData[0] - 128) / 256.0 + 1.0);
-            calib.Y = (float)((rawData[1] - 128) / 256.0 + 1.0);
-            calib.Z = (float)((rawData[2] - 128) / 256.0 + 1.0);
+            calib.X = (float)((rawData[0] - 128) / 256.0);
+            calib.Y = (float)((rawData[1] - 128) / 256.0);
+            calib.Z = (float)((rawData[2] - 128) / 256.0);
             MeasurementMode = MeasurementMode.PowerDown;
             MeasurementMode = oldPower;
+            if (OutputBitMode == OutputBitMode.Output16bit)
+            {
+                // From the documentation range is from 32760 which does represent 4912 µT
+                // result of 4912.0f / 32760.0f
+                calib *= 0.1499389499389499f;
+            }
+            else
+            {
+                // result of 4912.0f / 8192.0f
+                calib *= 0.599609375f;
+            }
 
             // Now calculate the bias
             // Store old mode to restore after
@@ -116,17 +128,25 @@ namespace Iot.Device.Magnetometer
             MeasurementMode = MeasurementMode.ContinuousMeasurement100Hz;
             for (int reading = 0; reading < numberMeasurements; reading++)
             {
-                // Timeout = 100Hz = 10 ms but during calibration, it seems that a larger value must be used
-                // TODO: find out why a higher value is needed
-                var bias = ReadMagnetometer(true, TimeSpan.FromMilliseconds(20));
-                minbias.X = Math.Min(bias.X, minbias.X);
-                minbias.Y = Math.Min(bias.Y, minbias.Y);
-                minbias.Z = Math.Min(bias.Z, minbias.Z);
-                maxbias.X = Math.Max(bias.X, maxbias.X);
-                maxbias.Y = Math.Max(bias.Y, maxbias.Y);
-                maxbias.Z = Math.Max(bias.Z, maxbias.Z);
-                // 10 ms = 100Hz, so waiting to make sure we have new data
-                Thread.Sleep(10);
+                // Timeout = 100Hz = 10 ms + 2 ms for propagation
+                // First read may not go thru correctly
+                try
+                {
+                    var bias = ReadMagnetometerWithoutCorrection(true, TimeSpan.FromMilliseconds(12));
+                    minbias.X = Math.Min(bias.X, minbias.X);
+                    minbias.Y = Math.Min(bias.Y, minbias.Y);
+                    minbias.Z = Math.Min(bias.Z, minbias.Z);
+                    maxbias.X = Math.Max(bias.X, maxbias.X);
+                    maxbias.Y = Math.Max(bias.Y, maxbias.Y);
+                    maxbias.Z = Math.Max(bias.Z, maxbias.Z);
+                    // 10 ms = 100Hz, so waiting to make sure we have new data
+                    Thread.Sleep(10);
+                }
+                catch (TimeoutException)
+                {
+                    // We skip the reading
+                }
+                
             }
             // Store the bias
             MagnetometerBias = ((maxbias + minbias) / 2) + calib;
@@ -151,7 +171,7 @@ namespace Iot.Device.Magnetometer
         }
 
         /// <summary>
-        /// Read the magnetometer and can wait for new data to be present
+        /// Read the magnetometer without Bias correction and can wait for new data to be present
         /// </summary>
         /// <remarks>
         /// Vector axes are the following:
@@ -167,7 +187,7 @@ namespace Iot.Device.Magnetometer
         /// <param name="waitForData">true to wait for new data</param>
         /// <param name="timeout">timeout for waiting the data, ignored if waitForData is false</param>
         /// <returns>The data from the magnetometer</returns>
-        public Vector3 ReadMagnetometer(bool waitForData, TimeSpan timeout)
+        public Vector3 ReadMagnetometerWithoutCorrection(bool waitForData, TimeSpan timeout)
         {
             Span<byte> rawData = stackalloc byte[6];
             // Wait for a data to be present
@@ -177,7 +197,7 @@ namespace Iot.Device.Magnetometer
                 while (!HasDataToRead)
                 {
                     if (DateTime.Now > dt)
-                        throw new Exception($"{nameof(ReadMagnetometer)} timeout reading value");
+                        throw new TimeoutException($"{nameof(ReadMagnetometer)} timeout reading value");
                 }
             }
 
@@ -208,6 +228,25 @@ namespace Iot.Device.Magnetometer
             return magneto;
 
         }
+
+        /// <summary>
+        /// Read the magnetometer with bias correction and can wait for new data to be present
+        /// </summary>
+        /// <remarks>
+        /// Vector axes are the following:
+        ///         +X
+        ///  \  |  /
+        ///   \ | /
+        ///    \|/
+        ///    /|\
+        ///   / | \
+        ///  /  |  \
+        ///    +Z   +Y
+        /// </remarks>
+        /// <param name="waitForData">true to wait for new data</param>
+        /// <param name="timeout">timeout for waiting the data, ignored if waitForData is false</param>
+        /// <returns>The data from the magnetometer</returns>
+        public Vector3 ReadMagnetometer(bool waitForData, TimeSpan timeout) => ReadMagnetometerWithoutCorrection(waitForData, timeout) - MagnetometerBias;     
 
         /// <summary>
         /// <![CDATA[
