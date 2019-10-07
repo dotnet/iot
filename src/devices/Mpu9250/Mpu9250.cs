@@ -23,6 +23,8 @@ namespace Iot.Device.Imu
     {
         private Ak8963 _ak8963;
         private bool _autoDispose;
+        // Use for the first magnetometer read when switch to continuous 100 Hz
+        private bool _firstContinuousRead = true;
 
         #region Magnetometer
 
@@ -102,7 +104,8 @@ namespace Iot.Device.Imu
                     break;
                 case MeasurementMode.ContinuousMeasurement100Hz:
                     // 100Hz measurement period plus 2 milliseconds
-                    timeout = TimeSpan.FromMilliseconds(12);
+                    // When switching to this mode, the first read can be longer than 10 ms. Tests shows up to 30 ms
+                    timeout = _firstContinuousRead ? TimeSpan.FromMilliseconds(30) : TimeSpan.FromMilliseconds(12);
                     break;
                 // Those cases are not measurement and should be 0 then                
                 case MeasurementMode.FuseRomAccess:
@@ -111,6 +114,7 @@ namespace Iot.Device.Imu
                     break;
             }
             var readMag = _ak8963.ReadMagnetometer(waitForData, timeout);
+            _firstContinuousRead = false;
             return _wakeOnMotion ? Vector3.Zero : new Vector3(readMag.Y, readMag.X, -readMag.Z);
         }
 
@@ -138,7 +142,12 @@ namespace Iot.Device.Imu
         public MeasurementMode MagnetometerMeasurementMode
         {
             get { return _ak8963.MeasurementMode; }
-            set { _ak8963.MeasurementMode = value; }
+            set
+            {
+                _ak8963.MeasurementMode = value;
+                if (value == MeasurementMode.ContinuousMeasurement100Hz)
+                    _firstContinuousRead = true;
+            }
         }
 
         /// <summary>

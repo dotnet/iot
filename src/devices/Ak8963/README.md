@@ -33,7 +33,7 @@ Console.WriteLine($"Factory Bias:");
 Console.WriteLine($"Mag X = {magBias.X}");
 Console.WriteLine($"Mag Y = {magBias.Y}");
 Console.WriteLine($"Mag Z = {magBias.Z}");
-Console.WriteLine($"Bias from calibraiton:");
+Console.WriteLine($"Bias from calibration:");
 Console.WriteLine($"Mag X = {ak8963.MagnometerBias.X}");
 Console.WriteLine($"Mag Y = {ak8963.MagnometerBias.Y}");
 Console.WriteLine($"Mag Z = {ak8963.MagnometerBias.Z}");
@@ -45,13 +45,13 @@ If no calibration is performed, you will get a raw data cloud which looks like t
 
 ![raw data](./rawcalib.png)
 
-Running the calibration properly require to **move the sensor in all the possible directions** while performing the calibration. You should consider running it with enough samples, at least few hundreds. The default is set to 1000. While moving the sensor in all direction, far from any magnetic field, you will get the previous clouds. Calculating the average from those clouds and substracting it from the read value will give you a centered cloud of data like this:
+Running the calibration properly require to **move the sensor in all the possible directions** while performing the calibration. You should consider running it with enough samples, at least few hundreds. The default is set to 1000. While moving the sensor in all direction, far from any magnetic field, you will get the previous clouds. Calculating the average from those clouds and subtracting it from the read value will give you a centered cloud of data like this:
 
 ![raw data](./corrcalib.png)
 
 To create those cloud point graphs, every cloud is a coordinate of X-Y, Y-Z and Z-X. 
 
-Once the calibration is done, you will be able to read the data with the bias corrected using the ```ReadMagnetometer``` function. You will still be able to read the data without any calibration using the ```ReadMagnetometerWithoutCalibraiton``` function.
+Once the calibration is done, you will be able to read the data with the bias corrected using the ```ReadMagnetometer``` function. You will still be able to read the data without any calibration using the ```ReadMagnetometerWithoutCalibration``` function.
 
 ## Using a different I2C interface
 
