@@ -14,7 +14,7 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         protected internal override int PinCount => 28;
 
-        private void ValidatePinNumber(int pinNumber)
+        protected void ValidatePinNumber(int pinNumber)
         {
             if (pinNumber < 0 || pinNumber > 27)
             {

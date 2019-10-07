@@ -44,6 +44,14 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        internal RegisterView* RegisterViewPointer
+        {
+            get
+            {
+                return _registerViewPointer;
+            }
+        }
+
         /// <summary>
         /// Gets the mode of a pin for Unix.
         /// </summary>
@@ -212,7 +220,7 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="mode">The mode of a pin to set the resistor pull up/down mode.</param>
-        private void SetInputPullMode(int pinNumber, PinMode mode)
+        protected virtual void SetInputPullMode(int pinNumber, PinMode mode)
         {
             byte modeToPullMode = mode switch
             {
