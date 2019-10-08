@@ -26,9 +26,9 @@ namespace Iot.Device.Samples
             const int busId = 1;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bme680.DefaultI2cAddress);
-            var unixI2cDevice = I2cDevice.Create(i2cSettings);
+            var i2cDevice = I2cDevice.Create(i2cSettings);
 
-            using (var bme680 = new Bme680(unixI2cDevice))
+            using (var bme680 = new Bme680(i2cDevice))
             {
                 while (true)
                 {
