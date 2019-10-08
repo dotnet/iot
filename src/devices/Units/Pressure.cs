@@ -18,7 +18,7 @@ namespace Iot.Units
         
         private Pressure(double pascal)
         {
-            _pasccal = pascal;
+            _pascal = pascal;
         }
         
         /// <summary>
