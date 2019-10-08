@@ -156,7 +156,7 @@ namespace Iot.Device.Bmxx80
             var pressPa = CompensatePressure(press >> 4);
 
             //Return the pressure as a Pressure instance.
-            pressure = Pressure.FromHectoPascal(pressPa.HectoPascal / 256);
+            pressure = Pressure.FromHectopascal(pressPa.Hectopascal / 256);
             return true;
         }
 
@@ -180,7 +180,7 @@ namespace Iot.Device.Bmxx80
             }
 
             // Calculate and return the altitude using the international barometric formula.
-            altitude = 44330.0 * (1.0 - Math.Pow(pressure.HectoPascal / seaLevelPressure.HectoPascal, 0.1903));
+            altitude = 44330.0 * (1.0 - Math.Pow(pressure.Hectopascal / seaLevelPressure.Hectopascal, 0.1903));
             return true;
         }        
         
