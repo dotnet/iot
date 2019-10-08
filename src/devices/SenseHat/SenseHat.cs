@@ -125,7 +125,7 @@ namespace Iot.Device.SenseHat
         /// <summary>
         /// Gets pressure from pressure and temperature sensor
         /// </summary>
-        public float Pressure => _press.Pressure;
+        public Pressure Pressure => _press.Pressure;
 
         /// <summary>
         /// Gets temperature from pressure and temperature sensor

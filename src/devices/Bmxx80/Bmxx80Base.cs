@@ -148,11 +148,11 @@ namespace Iot.Device.Bmxx80
         /// Reads the pressure. A return value indicates whether the reading succeeded.
         /// </summary>
         /// <param name="pressure">
-        /// Contains the measured pressure in Pa if the <see cref="PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains the measured pressure if the <see cref="PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public abstract bool TryReadPressure(out double pressure);
+        public abstract bool TryReadPressure(out Pressure pressure);
 
         /// <summary>
         /// Compensates the temperature.

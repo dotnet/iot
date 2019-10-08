@@ -328,15 +328,15 @@ namespace Iot.Device.Bmxx80
         /// Reads the pressure. A return value indicates whether the reading succeeded.
         /// </summary>
         /// <param name="pressure">
-        /// Contains the measured pressure in Pa if the <see cref="Bmxx80Base.PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains the measured pressure if the <see cref="Bmxx80Base.PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public override bool TryReadPressure(out double pressure)
+        public override bool TryReadPressure(out Pressure pressure)
         {
             if (PressureSampling == Sampling.Skipped)
             {
-                pressure = double.NaN;
+                pressure = Pressure.FromPascal(double.NaN);
                 return false;
             }
                 
@@ -452,7 +452,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="adcPressure">The pressure value read from the device.</param>
         /// <returns>The pressure in Pa.</returns>
-        private double CompensatePressure(int adcPressure)
+        private Pressure CompensatePressure(long adcPressure)
         {
             // Calculate the pressure.
             var var1 = (TemperatureFine / 2.0) - 64000.0;
@@ -478,7 +478,7 @@ namespace Iot.Device.Bmxx80
                 calculatedPressure = 0;
             }
 
-            return calculatedPressure;
+            return Pressure.FromPascal(calculatedPressure);
         }
 
         private bool ReadGasMeasurementIsValid()

@@ -26,9 +26,9 @@ namespace Iot.Device.Samples
             const int busId = 1;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bme680.DefaultI2cAddress);
-            var unixI2cDevice = I2cDevice.Create(i2cSettings);
+            var i2cDevice = I2cDevice.Create(i2cSettings);
 
-            using (var bme680 = new Bme680(unixI2cDevice))
+            using (var bme680 = new Bme680(i2cDevice))
             {
                 while (true)
                 {
@@ -50,7 +50,7 @@ namespace Iot.Device.Samples
                         bme680.TryReadHumidity(out var humidity);
                         bme680.TryReadGasResistance(out var gasResistance);
 
-                        Console.WriteLine($"{temperature.Celsius:N2} °c | {pressure / 100:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
+                        Console.WriteLine($"{temperature.Celsius:N2} \u00B0C | {pressure.Hectopascal:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
 
                         // when measuring the gas resistance on each cycle it is important to wait a certain interval
                         // because a heating plate is activated which will heat up the sensor without sleep, this can
@@ -81,7 +81,7 @@ namespace Iot.Device.Samples
                         bme680.TryReadHumidity(out var humidity);
                         bme680.TryReadGasResistance(out var gasResistance);
 
-                        Console.WriteLine($"{temperature.Celsius:N2} °c | {pressure / 100:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
+                        Console.WriteLine($"{temperature.Celsius:N2} \u00B0C | {pressure.Hectopascal:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
                         Thread.Sleep(1000);
                     }
 
