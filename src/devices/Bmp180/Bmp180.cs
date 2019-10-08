@@ -81,7 +81,7 @@ namespace Iot.Device.Bmp180
             int p = (B7 < 0x80000000) ? (int)((B7 * 2) / B4) : (int)((B7 / B4) * 2);
             X1 = (((p * p) / 65536 ) * 3038) / 65536;
             
-            return Pressure.FromPa(p + ( ((((p * p) / 65536 ) * 3038) / 65536) + ((-7357 * p) / 65536) + 3791) / 8);
+            return Pressure.FromPascal(p + ( ((((p * p) / 65536 ) * 3038) / 65536) + ((-7357 * p) / 65536) + 3791) / 8);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Iot.Device.Bmp180
         /// </returns>
         public double ReadAltitude(Pressure seaLevelPressure)
         {
-            return 44330.0 * (1.0 - Math.Pow((ReadPressure().Pa / seaLevelPressure.Pa), (1.0 / 5.255)));
+            return 44330.0 * (1.0 - Math.Pow((ReadPressure().Pascal / seaLevelPressure.Pascal), (1.0 / 5.255)));
         }
         
         /// <summary>
@@ -120,7 +120,7 @@ namespace Iot.Device.Bmp180
         /// </returns>
         public Pressure ReadSeaLevelPressure(double altitude = 0.0)
         {
-            return Pressure.FromPa(ReadPressure().Pa / Math.Pow((1.0 - (altitude / 44333.0)), 5.255));
+            return Pressure.FromPascal(ReadPressure().Pascal / Math.Pow((1.0 - (altitude / 44333.0)), 5.255));
         }
 
         /// <summary>
