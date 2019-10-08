@@ -336,7 +336,7 @@ namespace Iot.Device.Bmxx80
         {
             if (PressureSampling == Sampling.Skipped)
             {
-                pressure = Pressure.FromPa(double.NaN);
+                pressure = Pressure.FromPascal(double.NaN);
                 return false;
             }
                 
@@ -478,7 +478,7 @@ namespace Iot.Device.Bmxx80
                 calculatedPressure = 0;
             }
 
-            return Pressure.FromPa(calculatedPressure);
+            return Pressure.FromPascal(calculatedPressure);
         }
 
         private bool ReadGasMeasurementIsValid()
