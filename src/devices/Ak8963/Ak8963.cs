@@ -49,10 +49,11 @@ namespace Iot.Device.Magnetometer
             // Initialize the default modes
             _measurementMode = MeasurementMode.PowerDown;
             _outputBitMode = OutputBitMode.Output14bit;
+            _selfTest = false;
             _autodispose = autoDispose;
             byte mode = (byte)((byte)_measurementMode | ((byte)_outputBitMode << 4));
             WriteRegister(Register.CNTL, mode);
-            if (!CheckVersion())
+            if (!IsVersionCorrect())
                 throw new IOException($"This device does not contain the correct signature 0x48 for a AK8963");
         }
 
@@ -62,6 +63,9 @@ namespace Iot.Device.Magnetometer
         public void Reset()
         {
             WriteRegister(Register.RSV, 0x01);
+            _measurementMode = MeasurementMode.PowerDown;
+            _outputBitMode = OutputBitMode.Output14bit;
+            _selfTest = false;
             // When powering the AK893, doc says 50 ms needed
             Thread.Sleep(50);
         }
@@ -83,16 +87,16 @@ namespace Iot.Device.Magnetometer
         /// <summary>
         /// Get the magnetometer hardware adjustment bias
         /// </summary>
-        public Vector3 MagnetometerHardwareAdjustmeent { get; set; } = Vector3.One;
+        public Vector3 MagnetometerAdjustment { get; set; } = Vector3.One;
 
         /// <summary>
         /// Calibrate the magnetometer. Make sure your sensor is as far as possible of magnet
         /// Calculate as well the magnetometer bias. Please make sure you are moving the magnetometer all over space, rotating it.
         /// Please make sure you are not close to any magnetic field like magnet or phone
         /// </summary>
-        /// <param name="numberMeasurements">Number of measurement for the calibration, default is 1000</param>
+        /// <param name="numberOfMeasurements">Number of measurement for the calibration, default is 1000</param>
         /// <returns>Returns the factory calibration data</returns>
-        public Vector3 CalibrateMagnetometer(int numberMeasurements = 1000)
+        public Vector3 CalibrateMagnetometer(int numberOfMeasurements = 1000)
         {
             Vector3 calib = new Vector3();
             Span<byte> rawData = stackalloc byte[3];
@@ -122,7 +126,7 @@ namespace Iot.Device.Magnetometer
 
             // Setup the 100Hz continuous mode
             MeasurementMode = MeasurementMode.ContinuousMeasurement100Hz;
-            for (int reading = 0; reading < numberMeasurements; reading++)
+            for (int reading = 0; reading < numberOfMeasurements; reading++)
             {
                 // Timeout = 100Hz = 10 ms + 2 ms for propagation
                 // First read may not go thru correctly
@@ -146,11 +150,9 @@ namespace Iot.Device.Magnetometer
             }
             // Store the bias
             var magBias = (maxbias + minbias) / 2;
-            magBias.X = calib.X;
-            magBias.Y *= calib.Y;
-            magBias.Z *= calib.Z;
+            magBias *= calib;
             MagnetometerBias = magBias;
-            MagnetometerHardwareAdjustmeent = calib;
+            MagnetometerAdjustment = calib;
 
             return calib;
         }
@@ -166,7 +168,7 @@ namespace Iot.Device.Magnetometer
         /// Device ID of AKM. It is described in one byte and fixed value.  48H: fixed 
         /// </summary>
         /// <returns>Returns true if the version match</returns>
-        public bool CheckVersion()
+        public bool IsVersionCorrect()
         {
             return ReadByte(Register.WIA) == 0x48;
         }
@@ -250,9 +252,7 @@ namespace Iot.Device.Magnetometer
         public Vector3 ReadMagnetometer(bool waitForData, TimeSpan timeout)
         {
             var magn = ReadMagnetometerWithoutCorrection(waitForData, timeout);
-            magn.X *= MagnetometerHardwareAdjustmeent.X;
-            magn.Y *= MagnetometerHardwareAdjustmeent.Y;
-            magn.Z *= MagnetometerHardwareAdjustmeent.Z;
+            magn *= MagnetometerAdjustment;
             magn -= MagnetometerBias;
             return magn;
         }

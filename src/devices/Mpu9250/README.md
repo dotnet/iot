@@ -69,7 +69,7 @@ Calibration is as well available for the magnetometer (the AK8963). For this sen
 Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient!");
 Console.WriteLine("Please make sure you are not close to any magnetic field like magnet or phone. Move the sensor in all possible directions");
 var mag = mpu9250.CalibrateMagnetometer();
-Console.WriteLine($"Coorection factor bias:");
+Console.WriteLine($"Correction factor bias:");
 Console.WriteLine($"Mag X = {mpu9250.MagnometerBias.X}");
 Console.WriteLine($"Mag Y = {mpu9250.MagnometerBias.Y}");
 Console.WriteLine($"Mag Z = {mpu9250.MagnometerBias.Z}");

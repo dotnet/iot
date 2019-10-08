@@ -170,6 +170,11 @@ namespace Iot.Device.Imu
             set { _ak8963.OutputBitMode = value; }
         }
 
+        /// <summary>
+        /// Get the magnetometer hardware adjustment bias
+        /// </summary>
+        public Vector3 MagnetometerAdjustment => _ak8963.MagnetometerAdjustment;
+
         #endregion
 
         /// <summary>
@@ -194,12 +199,12 @@ namespace Iot.Device.Imu
             WriteRegister(Register.I2C_MST_CTRL, (byte)I2cBusFrequency.Frequency400kHz);
             _autoDispose = autoDispose;
             _ak8963 = new Ak8963(i2cDevice, new Ak8963Attached(), false);
-            if (!_ak8963.CheckVersion())
+            if (!_ak8963.IsVersionCorrect())
             {
                 // Try to reset the device first
                 _ak8963.Reset();
                 // Wait a bit
-                if (!_ak8963.CheckVersion())
+                if (!_ak8963.IsVersionCorrect())
                 {
                     // Try to reset the I2C Bus
                     WriteRegister(Register.USER_CTRL, (byte)UserControls.I2C_MST_RST);
@@ -211,7 +216,7 @@ namespace Iot.Device.Imu
                     // Found out that waiting a little bit is needed. Exact time may be lower
                     Thread.Sleep(100);
                     // Try one more time
-                    if (!_ak8963.CheckVersion())
+                    if (!_ak8963.IsVersionCorrect())
                         throw new IOException($"This device does not contain the correct signature 0x48 for a AK8963 embedded into the MPU9250");
                 }
             }
