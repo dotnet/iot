@@ -50,7 +50,7 @@ namespace Iot.Device.Samples
                         bme680.TryReadHumidity(out var humidity);
                         bme680.TryReadGasResistance(out var gasResistance);
 
-                        Console.WriteLine($"{temperature.Celsius:N2} °c | {pressure.Hectopascal:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
+                        Console.WriteLine($"{temperature.Celsius:N2} \u00B0C | {pressure.Hectopascal:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
 
                         // when measuring the gas resistance on each cycle it is important to wait a certain interval
                         // because a heating plate is activated which will heat up the sensor without sleep, this can
@@ -81,7 +81,7 @@ namespace Iot.Device.Samples
                         bme680.TryReadHumidity(out var humidity);
                         bme680.TryReadGasResistance(out var gasResistance);
 
-                        Console.WriteLine($"{temperature.Celsius:N2} °c | {pressure.Hectopascal:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
+                        Console.WriteLine($"{temperature.Celsius:N2} \u00B0C | {pressure.Hectopascal:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
                         Thread.Sleep(1000);
                     }
 
