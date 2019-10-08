@@ -52,7 +52,7 @@ namespace Iot.Device.Lps25h
         /// <summary>
         /// Pressure
         /// </summary>
-        public Pressure Pressure => Pressure.FromHpa(ReadInt24(Register.Pressure) / 4096.0);
+        public Pressure Pressure => Pressure.FromHectoPascal(ReadInt24(Register.Pressure) / 4096.0);
 
         private void WriteByte(Register register, byte data)
         {
