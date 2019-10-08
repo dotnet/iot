@@ -272,7 +272,7 @@ namespace Iot.Device.Bmxx80
             var1 = (((((long)1 << 47) + var1)) * (long)_calibrationData.DigP1) >> 33;
             if (var1 == 0)
             {
-                return Pressure.FromPa(0); //Avoid exception caused by division by zero
+                return Pressure.FromPascal(0); //Avoid exception caused by division by zero
             }
             //Perform calibration operations
             long p = 1048576 - adcPressure;
