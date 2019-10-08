@@ -142,7 +142,7 @@ namespace Iot.Device.Bmxx80
         {
             if (PressureSampling == Sampling.Skipped)
             {
-                pressure = Pressure.FromPa(double.NaN);
+                pressure = Pressure.FromPascal(double.NaN);
                 return false;
             }
 
@@ -156,7 +156,7 @@ namespace Iot.Device.Bmxx80
             var pressPa = CompensatePressure(press >> 4);
 
             //Return the pressure as a Pressure instance.
-            pressure = Pressure.FromHpa(pressPa.Hpa / 256);
+            pressure = Pressure.FromHectoPascal(pressPa.HectoPascal / 256);
             return true;
         }
 
@@ -180,7 +180,7 @@ namespace Iot.Device.Bmxx80
             }
 
             // Calculate and return the altitude using the international barometric formula.
-            altitude = 44330.0 * (1.0 - Math.Pow(pressure.Hpa / seaLevelPressure.Hpa, 0.1903));
+            altitude = 44330.0 * (1.0 - Math.Pow(pressure.HectoPascal / seaLevelPressure.HectoPascal, 0.1903));
             return true;
         }        
         
@@ -281,7 +281,7 @@ namespace Iot.Device.Bmxx80
             var2 = ((long)_calibrationData.DigP8 * p) >> 19;
             p = ((p + var1 + var2) >> 8) + ((long)_calibrationData.DigP7 << 4);
 
-            return Pressure.FromPa(p);
+            return Pressure.FromPascal(p);
         }
     }
 }
