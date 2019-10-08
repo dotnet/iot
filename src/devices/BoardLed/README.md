@@ -1,4 +1,4 @@
-# Board LEDs
+# On-board LED driver
 
 This binding is used to control on-board LEDs.
 
