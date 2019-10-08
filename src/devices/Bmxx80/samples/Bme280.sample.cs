@@ -47,7 +47,7 @@ namespace Iot.Device.Samples
                     i2CBmpe80.TryReadTemperature(out var tempValue);
                     Console.WriteLine($"Temperature: {tempValue.Celsius} C");
                     i2CBmpe80.TryReadPressure(out var preValue);
-                    Console.WriteLine($"Pressure: {preValue.Pa} Pa");
+                    Console.WriteLine($"Pressure: {preValue.Pascal} Pa");
                     i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out var altValue);
                     Console.WriteLine($"Altitude: {altValue} meters");
                     i2CBmpe80.TryReadHumidity(out var humValue);
@@ -71,7 +71,7 @@ namespace Iot.Device.Samples
                     i2CBmpe80.TryReadTemperature(out tempValue);
                     Console.WriteLine($"Temperature: {tempValue.Celsius} C");
                     i2CBmpe80.TryReadPressure(out preValue);
-                    Console.WriteLine($"Pressure: {preValue.Pa} Pa");
+                    Console.WriteLine($"Pressure: {preValue.Pascal} Pa");
                     i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out altValue);
                     Console.WriteLine($"Altitude: {altValue} meters");
                     i2CBmpe80.TryReadHumidity(out humValue);
