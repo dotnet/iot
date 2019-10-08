@@ -22,7 +22,7 @@ namespace Iot.Units
         }
         
         /// <summary>
-        /// The mean sea-level pressure (MSLP) is the average atmospheric pressure at mean sea level.
+        /// The mean sea-level pressure (MSLP) is the average atmospheric pressure at mean sea level
         /// </summary>
         public static Pressure MeanSeaLevel => Pressure.FromPascal(101325);
         
