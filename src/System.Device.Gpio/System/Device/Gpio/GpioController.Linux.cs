@@ -11,6 +11,7 @@ namespace System.Device.Gpio
     public sealed partial class GpioController
     {
         private const string CpuInfoPath = "/proc/cpuinfo";
+        private const string ModelInfoPath = "/proc/device-tree/model";
         private const string RaspberryPiHardware = "BCM2835";
         private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
 
@@ -30,6 +31,22 @@ namespace System.Device.Gpio
         /// <returns>A driver that works with the board the program is executing on.</returns>
         private static GpioDriver GetBestDriverForBoard()
         {
+            try
+            {
+                string modelInfo = File.ReadAllText(ModelInfoPath);
+
+                if (modelInfo.StartsWith("Xunlong Orange Pi Zero"))
+                {
+                    return new OrangePiZeroDriver();
+                }
+
+                if (modelInfo.StartsWith("Xunlong Orange Pi Lite 2"))
+                {
+                    return new OrangePiLite2Driver();
+                }
+            }
+            catch { }
+
             string[] cpuInfoLines = File.ReadAllLines(CpuInfoPath);
             Regex regex = new Regex(@"Hardware\s*:\s*(.*)");
             foreach (string cpuInfoLine in cpuInfoLines)
