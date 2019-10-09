@@ -31,16 +31,34 @@ namespace System.Device.Gpio
         private static GpioDriver GetBestDriverForBoard()
         {
             string[] cpuInfoLines = File.ReadAllLines(CpuInfoPath);
-            Regex regex = new Regex(@"Hardware\s*:\s*(.*)");
-            foreach (string cpuInfoLine in cpuInfoLines)
+            Regex regexHw = new Regex(@"Hardware\s*:\s*(.*)");
+            Regex regexRev = new Regex(@"Revision\s*:\s*(.*)");
+            for (int i = 0; i < cpuInfoLines.Length; i++)
             {
-                Match match = regex.Match(cpuInfoLine);
+                string cpuInfoLine = cpuInfoLines[i];
+                Match match = regexHw.Match(cpuInfoLine);
                 if (match.Success)
                 {
                     if (match.Groups.Count > 1)
                     {
                         if (match.Groups[1].Value == RaspberryPiHardware)
                         {
+                            if (i + 1 < cpuInfoLines.Length)
+                            {
+                                string revisionLine = cpuInfoLines[i + 1];
+                                match = regexRev.Match(revisionLine);
+                                if (match.Success && match.Groups.Count > 1)
+                                {
+                                    string rev = match.Groups[1].Value;
+                                    if (rev.EndsWith("03111"))
+                                    {
+                                        // The Pi4 reports the same CPU (although that's technically wrong) but different board revisions.
+                                        // The currently known revisions are 0xa03111, 0xb0311, 0xc03111 for the models with 1GB, 2GB and 4GB of ram, respectively. 
+                                        return new RaspberryPi4Driver();
+                                    }
+                                }
+                            }
+                            // Assume Pi3 otherwise
                             return new RaspberryPi3Driver();
                         }
                         // Commenting out as HummingBoard driver is not implemented yet, will be added back after implementation 
