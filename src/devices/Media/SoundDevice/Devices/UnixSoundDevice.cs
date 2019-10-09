@@ -158,14 +158,14 @@ namespace Iot.Device.Media
             {
                 Chunk = chunk,     
                 Format = new[] { 'W', 'A', 'V', 'E' },
-                Subchunk1 = subChunk1,
+                SubChunk1 = subChunk1,
                 AudioFormat = 1,
                 NumChannels = Settings.RecordingChannels,
                 SampleRate = Settings.RecordingSampleRate,
                 ByteRate = Settings.RecordingSampleRate * Settings.RecordingBitsPerSample * Settings.RecordingChannels / 8,
                 BlockAlign = (ushort)(Settings.RecordingBitsPerSample * Settings.RecordingChannels / 8),
                 BitsPerSample = Settings.RecordingBitsPerSample,
-                Subchunk2 = subChunk2
+                SubChunk2 = subChunk2
             };
 
             WriteWavHeader(outputStream, header);
@@ -190,10 +190,10 @@ namespace Iot.Device.Media
             Encoding.ASCII.GetBytes(header.Format, writeBuffer4);
             wavStream.Write(writeBuffer4);
 
-            Encoding.ASCII.GetBytes(header.Subchunk1.ChunkId, writeBuffer4);
+            Encoding.ASCII.GetBytes(header.SubChunk1.ChunkId, writeBuffer4);
             wavStream.Write(writeBuffer4);
 
-            BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.Subchunk1.ChunkSize);
+            BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.SubChunk1.ChunkSize);
             wavStream.Write(writeBuffer4);
 
             BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.AudioFormat);
@@ -214,10 +214,10 @@ namespace Iot.Device.Media
             BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.BitsPerSample);
             wavStream.Write(writeBuffer2);
 
-            Encoding.ASCII.GetBytes(header.Subchunk2.ChunkId, writeBuffer4);
+            Encoding.ASCII.GetBytes(header.SubChunk2.ChunkId, writeBuffer4);
             wavStream.Write(writeBuffer4);
 
-            BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.Subchunk2.ChunkSize);
+            BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.SubChunk2.ChunkSize);
             wavStream.Write(writeBuffer4);
         }
 
@@ -272,8 +272,8 @@ namespace Iot.Device.Media
             subChunk2.ChunkSize = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
 
             header.Chunk = chunk;
-            header.Subchunk1 = subChunk1;
-            header.Subchunk2 = subChunk2;
+            header.SubChunk1 = subChunk1;
+            header.SubChunk2 = subChunk2;
 
             return header;
         }
@@ -317,7 +317,7 @@ namespace Iot.Device.Media
 
             fixed (byte* buffer = readBuffer)
             {
-                for (int i = 0; i < (int)(header.Subchunk2.ChunkSize / bufferSize); i++)
+                for (int i = 0; i < (int)(header.SubChunk2.ChunkSize / bufferSize); i++)
                 {
                     _errorNum = Interop.snd_pcm_readi(_recordingPcm, (IntPtr)buffer, frames);
                     ThrowErrorMessage("Can not read data from the device.");

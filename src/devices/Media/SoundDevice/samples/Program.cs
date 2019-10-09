@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.IO;
 using Iot.Device.Media;
 
 namespace Alsa.Samples
@@ -14,11 +15,13 @@ namespace Alsa.Samples
             SoundConnectionSettings settings = new SoundConnectionSettings();
             using SoundDevice device = SoundDevice.Create(settings);
 
+            string path = Directory.GetCurrentDirectory();
+
             Console.WriteLine("Recording...");
-            device.Record(10, "/home/pi/record.wav");
+            device.Record(10, $"{path}/record.wav");
 
             Console.WriteLine("Playing...");
-            device.Play("/home/pi/record.wav");
+            device.Play($"{path}/record.wav");
         }
     }
 }

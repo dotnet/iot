@@ -10,7 +10,7 @@ namespace Iot.Device.Media
 
         public char[] Format { get; set; }
 
-        public WavHeaderChunk Subchunk1 { get; set; }
+        public WavHeaderChunk SubChunk1 { get; set; }
 
         public ushort AudioFormat { get; set; }
 
@@ -24,6 +24,6 @@ namespace Iot.Device.Media
 
         public ushort BitsPerSample { get; set; }
 
-        public WavHeaderChunk Subchunk2 { get; set; }
+        public WavHeaderChunk SubChunk2 { get; set; }
     }
 }
