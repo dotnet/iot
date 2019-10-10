@@ -8,7 +8,7 @@ using System;
 namespace Iot.Device.Common
 {
     /// <summary>
-    /// Helpers for weather.
+    /// Helpers for weather. Formulas taken from http://www.reahvac.com/tools/humidity-formulas/.
     /// </summary>
     public class WeatherHelper
     {
@@ -25,15 +25,17 @@ namespace Iot.Device.Common
         {
             double tf = airTemperature.Fahrenheit;
             double rh = relativeHumidity;
+            double tf2 = Math.Pow(tf, 2);
+            double rh2 = Math.Pow(rh, 2);
             return Temperature.FromFahrenheit((-42.379)
                 + (2.04901523 * tf)
                 + (10.14333127 * rh)
                 - (0.22475541 * tf * rh)
-                - (6.83783 * Math.Pow(10, -3) * Math.Pow(tf, 2))
-                - (5.481717 * Math.Pow(10, -2) * Math.Pow(rh, 2))
-                + (1.22874 * Math.Pow(10, -3) * Math.Pow(tf, 2) * (rh))
-                + (8.5282 * Math.Pow(10, -4) * tf * Math.Pow(rh, 2))
-                - (1.99 * Math.Pow(10, -6) * Math.Pow(tf, 2) * Math.Pow(rh, 2)));
+                - (6.83783 * Math.Pow(10, -3) * tf2)
+                - (5.481717 * Math.Pow(10, -2) * rh2)
+                + (1.22874 * Math.Pow(10, -3) * tf2 * (rh))
+                + (8.5282 * Math.Pow(10, -4) * tf * rh2)
+                - (1.99 * Math.Pow(10, -6) * tf2 * rh2));
         }
 
         /// <summary>
