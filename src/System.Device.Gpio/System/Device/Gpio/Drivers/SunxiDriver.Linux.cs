@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 namespace System.Device.Gpio.Drivers
 {
     /// <summary>
-    /// A general GPIO driver for Allwinner SoCs.
+    /// A generic GPIO driver for Allwinner SoCs.
     /// </summary>
     /// <remarks>
-    /// This is a general GPIO driver for Allwinner SoCs.
+    /// This is a generic GPIO driver for Allwinner SoCs.
     /// It can even drive the internal pins that are not drawn out.
     /// Before you operate, you must be clear about what you are doing.
     /// </remarks>
