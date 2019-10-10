@@ -1,8 +1,8 @@
-# MPU6500 - 3 axis Gyroscope, 3 axis Accelerometer and Temperature / MPU9250 - 3 axis Gyroscope, 3 axis Accelerometer, 3 axis Magnetometer and Temperature
+# MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)
 
-MPU6500 is a 3 axis Gyroscope, 3 axis Accelerometer and Temperature sensor that can be accessed either thru I2C or SPI. This implementation is only for I2C. The sensor can be found in various implementation but its main usage is in the MPU9250. 
+MPU6500 is a 3 axis Gyroscope, 3 axis Accelerometer and Temperature sensor that can be accessed either thru I2C or SPI. This implementation is only for I2C. The sensor can be found in various implementation but its main usage is in the MPU9250.
 
-MPU9250 is a 3 axis Gyroscope, 3 axis Accelerometer, 3 axis Magnetometer and Temperature sensor that can be accessed either thru I2C or SPI. This implementation is only for I2C. The sensor can be found in various implementation like [Grove](http://wiki.seeedstudio.com/Grove-IMU_9DOF_v2.0/) or [Sparkfun](https://www.sparkfun.com/products/13762). MPU9250 incorporate a MPU6500 and an AK8963. 
+MPU9250 is a 3 axis Gyroscope, 3 axis Accelerometer, 3 axis Magnetometer and Temperature sensor that can be accessed either thru I2C or SPI. This implementation is only for I2C. The sensor can be found in various implementation like [Grove](http://wiki.seeedstudio.com/Grove-IMU_9DOF_v2.0/) or [Sparkfun](https://www.sparkfun.com/products/13762). MPU9250 incorporate a MPU6500 and an AK8963.
 
 The Magnetometer used is an [AK8963](../Ak8963/README.md). It is managed thru the main MPU9250 and setup as a slave I2C. All operations go thru the MPU9250.
 
@@ -122,11 +122,11 @@ The MPU9250 offers a large variety of measurement modes. They can be changed and
 
 ### Wake on motion
 
-A unique ```SetWakeOnMotion``` mode is available. It puts the MPU9250 in a low consumption, low measurement rate mode and trigger an interruption on the INT pin. 
+A unique ```SetWakeOnMotion``` mode is available. It puts the MPU9250 in a low consumption, low measurement rate mode and trigger an interruption on the INT pin.
 
 ```csharp
 mpu9250.SetWakeOnMotion(300, AccelerometerLowPowerFrequency.Frequency0Dot24Hz);
-// You'll need to attach the INT pin to a GPIO and read the level. Once going up, you have 
+// You'll need to attach the INT pin to a GPIO and read the level. Once going up, you have
 // some data and the sensor is awake
 // In order to simulate this without a GPIO pin, you will see that the refresh rate is very low
 // Setup here at 0.24Hz which means, about every 4 seconds
@@ -148,7 +148,7 @@ The Fifo mode allows you to get the data by batch. You can select the mode thru 
 
 Data are in the order of the Register from 0x3B to 0x60 so you'll get your data in this order:
 * ACCEL_XOUT_H and ACCEL_XOUT_L
-* ACCEL_YOUT_H and ACCEL_YOUT_L 
+* ACCEL_YOUT_H and ACCEL_YOUT_L
 * ACCEL_ZOUT_H and ACCEL_ZOUT_L
 * TEMP_OUT_H and TEMP_OUT_L
 * GYRO_XOUT_H and GYRO_XOUT_L
@@ -156,11 +156,11 @@ Data are in the order of the Register from 0x3B to 0x60 so you'll get your data 
 * GYRO_ZOUT_H and GYRO_ZOUT_L
 * EXT_SENS_DATA_00 to EXT_SENS_DATA_24
 
-It is then up to you to transform them into the correct data. You can multiply your raw data by ```AccelerometionScale``` and ```GyroscopeScale``` to convert them properly. 
+It is then up to you to transform them into the correct data. You can multiply your raw data by ```AccelerometionScale``` and ```GyroscopeScale``` to convert them properly.
 
 ### I2C Slave primitives
 
-2 primitive functions allow to read and write any register in any of the slave devices. 
+2 primitive functions allow to read and write any register in any of the slave devices.
 
 * ```I2cWrite(I2cChannel i2cChannel, byte address, byte register, byte data)```
     * i2cChannel: The slave channel to attached to the I2C device
@@ -183,4 +183,3 @@ The following fritzing diagram illustrates one way to wire up the MPU9250 with a
 
 * Registers: http://www.invensense.com/wp-content/uploads/2017/11/RM-MPU-9250A-00-v1.6.pdf
 * Product specifications: http://www.invensense.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf
-

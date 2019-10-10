@@ -1,4 +1,5 @@
-# Media
+# Still image recording library
+
 The project currently includes `VideoDevice`.
 
 ## Precondition

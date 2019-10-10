@@ -1,0 +1,5 @@
+gyroscope
+accelerometer
+thermometer
+magnetometer
+imu
