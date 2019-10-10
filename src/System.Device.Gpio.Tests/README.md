@@ -10,15 +10,13 @@ cd src/System.Device.Gpio
 dotnet build System.Device.Gpio.sln
 ```
 This builds the main System.Device.Gpio assembly together with its test assembly. Before running the tests, you need to:
-- Connect an LED in series with a matching resistor to BCM Pin 18 (physical Pin 12) 
-- Connect BCM Pins 12 and 16 (physical Pins 32 and 36) with a cable
+- Connect BCM Pins 12 and 16 (physical Pins 32 and 36) with a 10kΩ resistor between them. 
 
 ## Raspberry Pi driver tests
 After that, you can run the tests with the RaspberryPiDriver (which is the default low-level driver for the Raspberry Pi) like:
 ```
 dotnet test --filter RaspberryPiDriverTests System.Device.Gpio.sln 
 ```
-During the tests, you should see the LED light up for a second. 
 
 If everything went smoothly, the output should end with a success message. 
 
