@@ -111,11 +111,11 @@ namespace Iot.Device.Common
         /// <summary>
         /// Calculates the altitude in metres
         /// </summary>
-        /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
+        /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
         /// <param name="seaLevelPressure">The sea-level pressure</param>
         /// <returns>The altitude in metres</returns>
-        public static double Altitude(Temperature airTemperature, Pressure pressure, Pressure seaLevelPressure = Pressure.MeanSeaLevel)
+        public static double Altitude(Pressure pressure, Temperature airTemperature = 15, Pressure seaLevelPressure = Pressure.MeanSeaLevel)
         {
             return ((Math.Pow(seaLevelPressure.Hectopascal / pressure.Hectopascal, 1 / 5.257) - 1) * airTemperature.Kelvin) / 0.0065;
         }
