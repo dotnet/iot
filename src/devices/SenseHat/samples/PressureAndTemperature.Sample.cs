@@ -26,7 +26,7 @@ namespace Iot.Device.SenseHat.Samples
                 {
                     var tempValue = th.Temperature;
                     var preValue = th.Pressure;
-                    var altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
+                    var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
                     
                     Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
                     Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
