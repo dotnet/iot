@@ -38,11 +38,11 @@ namespace Iot.Device.Bmp180.Samples
 
                 // read values
                 Temperature tempValue = i2cBmp280.ReadTemperature();
-                Console.WriteLine($"Temperature {tempValue.Celsius} \u00B0C");
+                Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
                 var preValue = i2cBmp280.ReadPressure();
-                Console.WriteLine($"Pressure {preValue.Hectopascal} hPa");
-                double altValue = WeatherHelper.Altitude(preValue, Pressure.MeanSeaLevel, tempValue);
-                Console.WriteLine($"Altitude {altValue:0.##} m");
+                Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
+                var altValue = WeatherHelper.Altitude(preValue, Pressure.MeanSeaLevel, tempValue);
+                Console.WriteLine($"Altitude: {altValue:0.##}m");
                 Thread.Sleep(1000);
 
                 // set higher sampling
@@ -50,11 +50,11 @@ namespace Iot.Device.Bmp180.Samples
 
                 // read values
                 tempValue = i2cBmp280.ReadTemperature();
-                Console.WriteLine($"Temperature {tempValue.Celsius} \u00B0C");
+                Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
                 preValue = i2cBmp280.ReadPressure();
-                Console.WriteLine($"Pressure {preValue.Hectopascal} hPa");
+                Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
                 altValue = WeatherHelper.Altitude(preValue, Pressure.MeanSeaLevel, tempValue);
-                Console.WriteLine($"Altitude {altValue:0.##} m");
+                Console.WriteLine($"Altitude: {altValue:0.##}m");
             }
         }
     }
