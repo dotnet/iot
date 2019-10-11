@@ -66,7 +66,7 @@
     <XUnitProject Include="..\src\devices\**\*.Tests.csproj">
       <TargetFramework>netcoreapp2.1</TargetFramework>
       <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
-      <AdditionalProperties>RuntimeIdentifier=ubuntu.18.04-x64</AdditionalProperties>
+      <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
     </XUnitProject>
     <!-- Target queues -->
     <HelixTargetQueue Condition="'$(HelixAccessToken)' != ''" Include="Ubuntu.1804.Amd64"/>
