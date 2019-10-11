@@ -92,9 +92,10 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Height in meters from the sensor
         /// </returns>
+        [Obsolete("ReadAltitude is obsolete. Please use Iot.Device.Common.WeatherHelper instead.")]
         public double ReadAltitude(Pressure seaLevelPressure)
         {
-            return 44330.0 * (1.0 - Math.Pow((ReadPressure().Pascal / seaLevelPressure.Pascal), (1.0 / 5.255)));
+            return WeatherHelper.Altitude(ReadPressure(), seaLevelPressure, ReadTemperature());
         }
 
         /// <summary>
