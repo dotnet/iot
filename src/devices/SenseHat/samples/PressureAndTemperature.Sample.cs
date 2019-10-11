@@ -19,7 +19,7 @@ namespace Iot.Device.SenseHat.Samples
             {
                 while (true)
                 {
-                    Console.WriteLine($"Temperature: {th.Temperature.Celsius}\u00B0C   Humidity: {th.Pressure.Hectopascal}hPa");
+                    Console.WriteLine($"Temperature: {th.Temperature.Celsius}\u00B0C   Pressure: {th.Pressure.Hectopascal}hPa");
                     Thread.Sleep(1000);
                 }
             }
