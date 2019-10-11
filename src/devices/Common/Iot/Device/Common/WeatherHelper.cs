@@ -109,16 +109,52 @@ namespace Iot.Device.Common
         // Formula taken from https://keisan.casio.com/has10/SpecExec.cgi?path=06000000.Science%252F02100100.Earth%2520science%252F12000300.Altitude%2520from%2520atmospheric%2520pressure%252Fdefault.xml&charset=utf-8
             
         /// <summary>
-        /// Calculates the altitude in metres
+        /// Calculates the altitude in metres from the given pressure, sea-level pressure and air temperature
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
         /// <param name="seaLevelPressure">The sea-level pressure</param>
         /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
         /// <returns>The altitude in metres</returns>
-        public static double Altitude(Pressure pressure, Pressure seaLevelPressure = Pressure.MeanSeaLevel, Temperature airTemperature = 15)
+        public static double Altitude(Pressure pressure, Pressure seaLevelPressure, Temperature airTemperature)
         {
             return ((Math.Pow(seaLevelPressure.Pascal / pressure.Pascal, 1 / 5.257) - 1) * airTemperature.Kelvin) / 0.0065;
         }
+        
+        /// <summary>
+        /// Calculates the altitude in metres from the given pressure and air temperature. Assumes mean sea-level pressure.
+        /// </summary>
+        /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
+        /// <param name="seaLevelPressure">The sea-level pressure</param>
+        /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
+        /// <returns>The altitude in metres</returns>
+        public static double Altitude(Pressure pressure, Temperature airTemperature)
+        {
+            return Altitude(pressure, Pressure.MeanSeaLevel, airTemperature);
+        }
+        
+        /// <summary>
+        /// Calculates the altitude in metres from the given pressure and sea-level pressure. Assumes temperature of 15C.
+        /// </summary>
+        /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
+        /// <param name="seaLevelPressure">The sea-level pressure</param>
+        /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
+        /// <returns>The altitude in metres</returns>
+        public static double Altitude(Pressure pressure, Pressure seaLevelPressure)
+        {
+            return Altitude(pressure, seaLevelPressure, Temperature.FromCelsius(15));
+        }
+        
+        /// <summary>
+        /// Calculates the altitude in metres from the given pressure. Assumes mean sea-level pressure and temperature of 15C.
+        /// </summary>
+        /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
+        /// <param name="seaLevelPressure">The sea-level pressure</param>
+        /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
+        /// <returns>The altitude in metres</returns>
+        public static double Altitude(Pressure pressure)
+        {
+            return Altitude(pressure, Pressure.MeanSeaLevel, Temperature.FromCelsius(15));
+        }        
         #endregion
     }
 }
