@@ -43,6 +43,8 @@ namespace Iot.Device.Common.Tests
 
         [Theory]
         [InlineData(1058, 30, 25)]
+        [InlineData(1612, 25, 51)]
+        [InlineData(1900, 22, 72)]
         public void ActualVaporPressureIsCalculatedCorrectly(double expected, double celsius, double relativeHumidity)
         {
             var actualVaporPressure = WeatherHelper.ActualVaporPressure(Temperature.FromCelsius(celsius), relativeHumidity);
@@ -60,11 +62,13 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
-        [InlineData(22.7, 100, 50)]
+        [InlineData(23, 100, 50)]
+        [InlineData(15, 80, 59)]
+        [InlineData(5, 40, 75)]
         public void AbsoluteHumidityIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
             var absoluteHumidity = WeatherHelper.AbsoluteHumidity(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
-            Assert.AreEqual(Math.Round(absoluteHumidity, 1), expected);
+            Assert.AreEqual(Math.Round(absoluteHumidity, 0), expected);
         }
     }
 }
