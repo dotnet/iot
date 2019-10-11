@@ -124,7 +124,6 @@ namespace Iot.Device.Common
         /// Calculates the altitude in metres from the given pressure and air temperature. Assumes mean sea-level pressure.
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
-        /// <param name="seaLevelPressure">The sea-level pressure</param>
         /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
         /// <returns>The altitude in metres</returns>
         public static double Altitude(Pressure pressure, Temperature airTemperature)
@@ -137,7 +136,6 @@ namespace Iot.Device.Common
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
         /// <param name="seaLevelPressure">The sea-level pressure</param>
-        /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
         /// <returns>The altitude in metres</returns>
         public static double Altitude(Pressure pressure, Pressure seaLevelPressure)
         {
@@ -148,8 +146,6 @@ namespace Iot.Device.Common
         /// Calculates the altitude in metres from the given pressure. Assumes mean sea-level pressure and temperature of 15C.
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
-        /// <param name="seaLevelPressure">The sea-level pressure</param>
-        /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
         /// <returns>The altitude in metres</returns>
         public static double Altitude(Pressure pressure)
         {
