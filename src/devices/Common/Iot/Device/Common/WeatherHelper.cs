@@ -24,7 +24,7 @@ namespace Iot.Device.Common
         /// <param name="airTemperature">The dry air temperature</param>
         /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
         /// <returns>The heat index, also known as the apparent temperature</returns>
-        public static Temperature HeatIndex(Temperature airTemperature, double relativeHumidity)
+        public static Temperature CalculateHeatIndex(Temperature airTemperature, double relativeHumidity)
         {
             double tf = airTemperature.Fahrenheit;
             double rh = relativeHumidity;
@@ -50,7 +50,7 @@ namespace Iot.Device.Common
         /// <param name="airTemperature">The dry air temperature</param>
         /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
         /// <returns>The summer simmer index</returns>
-        public static Temperature SummerSimmerIndex(Temperature airTemperature, double relativeHumidity)
+        public static Temperature CalculateSummerSimmerIndex(Temperature airTemperature, double relativeHumidity)
         {
             double tf = airTemperature.Fahrenheit;
             double rh = relativeHumidity;
@@ -62,7 +62,7 @@ namespace Iot.Device.Common
         /// </summary>
         /// <param name="airTemperature">The dry air temperature</param>
         /// <returns>The saturated vapor pressure</returns>
-        public static Pressure SaturatedVaporPressure(Temperature airTemperature)
+        public static Pressure CalculateSaturatedVaporPressure(Temperature airTemperature)
         {
             double tc = airTemperature.Celsius;
             return Pressure.FromHectopascal(6.11 * Math.Pow(10, ((7.5 * tc) / (237.7 + tc))));
@@ -74,7 +74,7 @@ namespace Iot.Device.Common
         /// <param name="airTemperature">The dry air temperature</param>
         /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
         /// <returns>The actual vapor pressure</returns>
-        public static Pressure ActualVaporPressure(Temperature airTemperature, double relativeHumidity)
+        public static Pressure CalculateActualVaporPressure(Temperature airTemperature, double relativeHumidity)
         {
             return Pressure.FromHectopascal((relativeHumidity * SaturatedVaporPressure(airTemperature).Hectopascal) / 100);
         }
@@ -85,7 +85,7 @@ namespace Iot.Device.Common
         /// <param name="airTemperature">The dry air temperature</param>
         /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
         /// <returns>The dew point</returns>
-        public static Temperature DewPoint(Temperature airTemperature, double relativeHumidity)
+        public static Temperature CalculateDewPoint(Temperature airTemperature, double relativeHumidity)
         {
             var avp = ActualVaporPressure(airTemperature, relativeHumidity).Hectopascal;
             var lavp = Math.Log(avp);
@@ -98,7 +98,7 @@ namespace Iot.Device.Common
         /// <param name="airTemperature">The dry air temperature</param>
         /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
         /// <returns>The absolute humidity in g/m³</returns>
-        public static double AbsoluteHumidity(Temperature airTemperature, double relativeHumidity)
+        public static double CalculateAbsoluteHumidity(Temperature airTemperature, double relativeHumidity)
         {
             var avp = ActualVaporPressure(airTemperature, relativeHumidity).Pascal;
             return avp / (airTemperature.Kelvin * 461.5) * 1000;
@@ -115,7 +115,7 @@ namespace Iot.Device.Common
         /// <param name="seaLevelPressure">The sea-level pressure</param>
         /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
         /// <returns>The altitude in metres</returns>
-        public static double Altitude(Pressure pressure, Pressure seaLevelPressure, Temperature airTemperature)
+        public static double CalculateAltitude(Pressure pressure, Pressure seaLevelPressure, Temperature airTemperature)
         {
             return ((Math.Pow(seaLevelPressure.Pascal / pressure.Pascal, 1 / 5.257) - 1) * airTemperature.Kelvin) / 0.0065;
         }
@@ -126,9 +126,9 @@ namespace Iot.Device.Common
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
         /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
         /// <returns>The altitude in metres</returns>
-        public static double Altitude(Pressure pressure, Temperature airTemperature)
+        public static double CalculateAltitude(Pressure pressure, Temperature airTemperature)
         {
-            return Altitude(pressure, Pressure.MeanSeaLevel, airTemperature);
+            return CalculateAltitude(pressure, Pressure.MeanSeaLevel, airTemperature);
         }
         
         /// <summary>
@@ -137,9 +137,9 @@ namespace Iot.Device.Common
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
         /// <param name="seaLevelPressure">The sea-level pressure</param>
         /// <returns>The altitude in metres</returns>
-        public static double Altitude(Pressure pressure, Pressure seaLevelPressure)
+        public static double CalculateAltitude(Pressure pressure, Pressure seaLevelPressure)
         {
-            return Altitude(pressure, seaLevelPressure, Temperature.FromCelsius(15));
+            return CalculateAltitude(pressure, seaLevelPressure, Temperature.FromCelsius(15));
         }
         
         /// <summary>
@@ -147,9 +147,9 @@ namespace Iot.Device.Common
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
         /// <returns>The altitude in metres</returns>
-        public static double Altitude(Pressure pressure)
+        public static double CalculateAltitude(Pressure pressure)
         {
-            return Altitude(pressure, Pressure.MeanSeaLevel, Temperature.FromCelsius(15));
+            return CalculateAltitude(pressure, Pressure.MeanSeaLevel, Temperature.FromCelsius(15));
         }
         
         /// <summary>
@@ -159,7 +159,7 @@ namespace Iot.Device.Common
         /// <param name="altitude">The altitude in metres</param>
         /// <param name="temperature">The air temperature</param>
         /// <returns>The sea-level pressure</returns>
-        public static Pressure SeaLevelPressure(Pressure pressure, double altitude, Temperature airTemperature)
+        public static Pressure CalculateSeaLevelPressure(Pressure pressure, double altitude, Temperature airTemperature)
         {
             return Pressure.FromPascal(Math.Pow((((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257) * pressure.Pascal);
         }
@@ -171,7 +171,7 @@ namespace Iot.Device.Common
         /// <param name="altitude">The altitude in metres at the point for which pressure is being calculated</param>
         /// <param name="temperature">The air temperature at the point for which pressure is being calculated</param>
         /// <returns>The air pressure</returns>
-        public static Pressure Pressure(Pressure seaLevelPressure, double altitude, Temperature airTemperature)
+        public static Pressure CalculatePressure(Pressure seaLevelPressure, double altitude, Temperature airTemperature)
         {
             return Pressure.FromPascal(seaLevelPressure.Pascal / Math.Pow((((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257));
         }
@@ -183,7 +183,7 @@ namespace Iot.Device.Common
         /// <param name="seaLevelPressure">The sea-level pressure</param>
         /// <param name="altitude">The altitude in metres at the point for which temperature is being calculated</param>
         /// <returns>The temperature</returns>
-        public static Temperature Temperature(Pressure pressure, Pressure seaLevelPressure, double altitude)
+        public static Temperature CalculateTemperature(Pressure pressure, Pressure seaLevelPressure, double altitude)
         {
             return Temperature.FromKelvin((0.0065 * altitude) / (Math.Pow(seaLevelPressure.Pascal / pressure.Pascal, 1 / 5.257) - 1));
         }
