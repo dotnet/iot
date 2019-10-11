@@ -6,6 +6,7 @@ using System;
 using System.Device.I2c;
 using System.Threading;
 using Iot.Device.DHTxx;
+using Iot.Device.Common;
 
 namespace Iot.Device.DHTxx.Samples
 {
@@ -13,22 +14,31 @@ namespace Iot.Device.DHTxx.Samples
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello DHT!");
+        Console.WriteLine("Hello DHT!");
 
-            // Init DHT10 through I2C
-            I2cConnectionSettings settings = new I2cConnectionSettings(1, Dht10.DefaultI2cAddress);
-            I2cDevice device = I2cDevice.Create(settings);
+        // Init DHT10 through I2C
+        I2cConnectionSettings settings = new I2cConnectionSettings(1, Dht10.DefaultI2cAddress);
+        I2cDevice device = I2cDevice.Create(settings);
 
-            using (Dht10 dht = new Dht10(device))
+        using (Dht10 dht = new Dht10(device))
+        {
+            while (true)
             {
-                while (true)
-                {
-                    Console.WriteLine(
-                        $"Temperature: {dht.Temperature.Celsius.ToString("0.0")} °C, Humidity: {dht.Humidity.ToString("0.0")} %");
+                var tempValue = dht.Temperature;
+                var humValue = dht.Humidity;
+                
+                Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");                    
+                Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+                Console.WriteLine($"Heat index: {WeatherHelper.HeatIndex(tempValue, humValue).Celsius} \u00B0C");
+                Console.WriteLine($"Summer simmer index: {WeatherHelper.SummerSimmerIndex(tempValue, humValue).Celsius} \u00B0C");
+                Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.SaturatedVaporPressure(tempValue).Hectopascal} hPa");
+                Console.WriteLine($"Actual vapor pressure: {WeatherHelper.ActualVaporPressure(tempValue, humValue).Hectopascal} hPa");
+                Console.WriteLine($"Dew point: {WeatherHelper.DewPoint(tempValue, humValue).Celsius} \u00B0C");
+                Console.WriteLine($"Absolute humidity: {WeatherHelper.AbsoluteHumidity(tempValue, humValue)} g/m\u0179");
 
-                    Thread.Sleep(2000);
-                }
+                Thread.Sleep(2000);
             }
         }
+    }
     }
 }
