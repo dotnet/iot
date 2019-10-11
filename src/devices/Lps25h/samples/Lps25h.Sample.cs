@@ -5,6 +5,7 @@
 using System;
 using System.Threading;
 using System.Device.I2c;
+using Iot.Device.Common;
 
 namespace Iot.Device.Lps25h.Samples
 {
@@ -12,14 +13,23 @@ namespace Iot.Device.Lps25h.Samples
     {
         // I2C address on SenseHat board
         public const int I2cAddress = 0x5c;
-
+        
         public static void Main(string[] args)
         {
+            //set this to the current sea level pressure in the area for correct altitude readings
+            var defaultSeaLevelPressure = Pressure.MeanSeaLevel;
+            
             using (var th = new Lps25h(CreateI2cDevice()))
             {
                 while (true)
                 {
-                    Console.WriteLine($"Temperature: {th.Temperature.Celsius}\u00B0C   Pressure: {th.Pressure.Hectopascal}hPa");
+                    var tempValue = th.Temperature;
+                    var preValue = th.Pressure;
+                    var altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
+                    
+                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
+                    Console.WriteLine($"Altitude: {altValue:0.##}m");
                     Thread.Sleep(1000);
                 }
             }
