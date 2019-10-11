@@ -157,7 +157,7 @@ namespace Iot.Device.Common
         /// </summary>
         /// <param name="pressure">The air pressure</param>
         /// <param name="altitude">The altitude in metres</param>
-        /// <param name="temperature">The air temperature</param>
+        /// <param name="airTemperature">The air temperature</param>
         /// <returns>The sea-level pressure</returns>
         public static Pressure CalculateSeaLevelPressure(Pressure pressure, double altitude, Temperature airTemperature)
         {
@@ -169,7 +169,7 @@ namespace Iot.Device.Common
         /// </summary>
         /// <param name="seaLevelPressure">The sea-level pressure</param>
         /// <param name="altitude">The altitude in metres at the point for which pressure is being calculated</param>
-        /// <param name="temperature">The air temperature at the point for which pressure is being calculated</param>
+        /// <param name="airTemperature">The air temperature at the point for which pressure is being calculated</param>
         /// <returns>The air pressure</returns>
         public static Pressure CalculatePressure(Pressure seaLevelPressure, double altitude, Temperature airTemperature)
         {
