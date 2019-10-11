@@ -7,6 +7,7 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
+using Iot.Device.Common;
 
 namespace Iot.Device.Samples
 {
@@ -45,12 +46,23 @@ namespace Iot.Device.Samples
                         Thread.Sleep(measurementDuration);
 
                         // Print out the measured data
-                        bme680.TryReadTemperature(out var temperature);
-                        bme680.TryReadPressure(out var pressure);
-                        bme680.TryReadHumidity(out var humidity);
-                        bme680.TryReadGasResistance(out var gasResistance);
-
-                        Console.WriteLine($"{temperature.Celsius:N2} \u00B0C | {pressure.Hectopascal:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
+                        bme680.TryReadTemperature(out var tempValue);
+                        bme680.TryReadPressure(out var preValue);
+                        bme680.TryReadHumidity(out var humValue);
+                        bme680.TryReadGasResistance(out var gasResistance);                        
+                        var altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
+                    
+                        Console.WriteLine($"Gas resistance: {gasResistance:0.##}Ohm");
+                        Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+                        Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");                    
+                        Console.WriteLine($"Altitude: {altValue:0.##}m");                    
+                        Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+                        Console.WriteLine($"Heat index: {WeatherHelper.HeatIndex(tempValue, humValue).Celsius} \u00B0C");
+                        Console.WriteLine($"Summer simmer index: {WeatherHelper.SummerSimmerIndex(tempValue, humValue).Celsius} \u00B0C");
+                        Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.SaturatedVaporPressure(tempValue).Hectopascal} hPa");
+                        Console.WriteLine($"Actual vapor pressure: {WeatherHelper.ActualVaporPressure(tempValue, humValue).Hectopascal} hPa");
+                        Console.WriteLine($"Dew point: {WeatherHelper.DewPoint(tempValue, humValue).Celsius} \u00B0C");
+                        Console.WriteLine($"Absolute humidity: {WeatherHelper.AbsoluteHumidity(tempValue, humValue)} g/m\u0179");  
 
                         // when measuring the gas resistance on each cycle it is important to wait a certain interval
                         // because a heating plate is activated which will heat up the sensor without sleep, this can
@@ -76,12 +88,23 @@ namespace Iot.Device.Samples
                         Thread.Sleep(measurementDuration);
 
                         // Print out the measured data
-                        bme680.TryReadTemperature(out var temperature);
-                        bme680.TryReadPressure(out var pressure);
-                        bme680.TryReadHumidity(out var humidity);
-                        bme680.TryReadGasResistance(out var gasResistance);
-
-                        Console.WriteLine($"{temperature.Celsius:N2} \u00B0C | {pressure.Hectopascal:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
+                        bme680.TryReadTemperature(out var tempValue);
+                        bme680.TryReadPressure(out var preValue);
+                        bme680.TryReadHumidity(out var humValue);
+                        bme680.TryReadGasResistance(out var gasResistance);                        
+                        var altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
+                    
+                        Console.WriteLine($"Gas resistance: {gasResistance:0.##}Ohm");
+                        Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+                        Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");                    
+                        Console.WriteLine($"Altitude: {altValue:0.##}m");                    
+                        Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+                        Console.WriteLine($"Heat index: {WeatherHelper.HeatIndex(tempValue, humValue).Celsius} \u00B0C");
+                        Console.WriteLine($"Summer simmer index: {WeatherHelper.SummerSimmerIndex(tempValue, humValue).Celsius} \u00B0C");
+                        Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.SaturatedVaporPressure(tempValue).Hectopascal} hPa");
+                        Console.WriteLine($"Actual vapor pressure: {WeatherHelper.ActualVaporPressure(tempValue, humValue).Hectopascal} hPa");
+                        Console.WriteLine($"Dew point: {WeatherHelper.DewPoint(tempValue, humValue).Celsius} \u00B0C");
+                        Console.WriteLine($"Absolute humidity: {WeatherHelper.AbsoluteHumidity(tempValue, humValue)} g/m\u0179");  
                         Thread.Sleep(1000);
                     }
 
