@@ -10,6 +10,7 @@ using System.IO;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
 using Iot.Device.Bmxx80.FilteringMode;
+using Iot.Device.Common;
 using Iot.Units;
 
 namespace Iot.Device.Bmxx80
@@ -176,6 +177,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
+        [Obsolete("TryReadAltitude is obsolete. Please use Iot.Device.Common.WeatherHelper instead.")]
         public bool TryReadAltitude(Pressure seaLevelPressure, out double altitude)
         {
             // Read the pressure first.
@@ -185,9 +187,17 @@ namespace Iot.Device.Bmxx80
                 altitude = double.NaN;
                 return false;
             }
+            
+            // Then read the temperature.
+            success = TryReadTemperature(out var temperature);
+            if (!success)
+            {
+                altitude = double.NaN;
+                return false;
+            }
 
-            // Calculate and return the altitude using the international barometric formula.
-            altitude = 44330.0 * (1.0 - Math.Pow(pressure.Hectopascal / seaLevelPressure.Hectopascal, 0.1903));
+            // Calculate and return the altitude using the hypsometric formula.
+            altitude = WeatherHelper.Altitude(pressure, seaLevelPressure, temperature);
             return true;
         }
 
