@@ -6,6 +6,7 @@ using System;
 using System.Threading;
 using System.Device.I2c;
 using Iot.Device.Common;
+using Iot.Units;
 
 namespace Iot.Device.Lps25h.Samples
 {
