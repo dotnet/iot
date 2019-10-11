@@ -177,7 +177,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
-        [Obsolete("TryReadAltitude is obsolete. Please use Iot.Device.Common.WeatherHelper instead.")]
+        [ObsoleteAttribute("TryReadAltitude is obsolete. Please use Iot.Device.Common.WeatherHelper instead.")]
         public bool TryReadAltitude(Pressure seaLevelPressure, out double altitude)
         {
             // Read the pressure first.
@@ -209,6 +209,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
+        [ObsoleteAttribute("TryReadAltitude is obsolete. Please use Iot.Device.Common.WeatherHelper instead.")]
         public bool TryReadAltitude(out double altitude)
         {
             return TryReadAltitude(Pressure.MeanSeaLevel, out altitude);
