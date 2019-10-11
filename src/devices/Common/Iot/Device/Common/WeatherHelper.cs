@@ -12,6 +12,7 @@ namespace Iot.Device.Common
     /// </summary>
     public class WeatherHelper
     {
+        #region TemperatureAndRelativeHumidity
         // Formulas taken from http://www.reahvac.com/tools/humidity-formulas/
         
         /// <summary>
@@ -102,5 +103,6 @@ namespace Iot.Device.Common
             var avp = ActualVaporPressure(airTemperature, relativeHumidity).Pascal;
             return avp / (airTemperature.Kelvin * 461.5) * 1000;
         }
+        #endregion TemperatureAndRelativeHumidity
     }
 }
