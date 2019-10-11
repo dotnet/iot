@@ -161,7 +161,7 @@ namespace Iot.Device.Common
         /// <returns>The sea-level pressure</returns>
         public static Pressure SeaLevelPressure(Pressure pressure, double altitude, Temperature airTemperature)
         {
-            return Pressure.FromPascal(Math.Pow(((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257) * pressure.Pascal);
+            return Pressure.FromPascal(Math.Pow((((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257) * pressure.Pascal);
         }
         
         /// <summary>
@@ -173,7 +173,7 @@ namespace Iot.Device.Common
         /// <returns>The air pressure</returns>
         public static Pressure Pressure(Pressure seaLevelPressure, double altitude, Temperature airTemperature)
         {
-            return Pressure.FromPascal(seaLevelPressure.Pascal / Math.Pow(((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257));
+            return Pressure.FromPascal(seaLevelPressure.Pascal / Math.Pow((((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257));
         }
         
         /// <summary>
