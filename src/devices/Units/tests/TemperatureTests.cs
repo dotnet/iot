@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Iot.Units.Tests
 {
-    public class ConstructionTests
+    public class TemperatureTests
     {
         [Theory]
         [MemberData(nameof(TemperatureData))]
