@@ -11,46 +11,52 @@ namespace Iot.Device.Common.Tests
 {
     public class WeatherTests
     {
-        [Fact]
-        void HeatIndex()
+        [Theory]
+        [InlineData(35, 30, 70)]
+        public void HeatIndexIsCalculatedCorrectly(double expected, double celsius, double relativeHumidity)
         {
-            var heatIndex = WeatherHelper.HeatIndex(Temperature.FromCelsius(30), 70);
-            Assert.AreEqual(Math.Round(heatIndex.Celsius), 35);
+            var heatIndex = WeatherHelper.HeatIndex(Temperature.FromCelsius(celsius), relativeHumidity);
+            Assert.AreEqual(Math.Round(heatIndex.Celsius), expected);
         }
 
-        [Fact]
-        void SummerSimmerIndex()
+        [Theory]
+        [InlineData(11.06, 10, 8)]
+        public void SummerSimmerIndexIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
-            var summerSimmerIndex = WeatherHelper.SummerSimmerIndex(Temperature.FromFahrenheit(10), 8);
-            Assert.AreEqual(Math.Round(summerSimmerIndex.Fahrenheit, 2), 11.06);
+            var summerSimmerIndex = WeatherHelper.SummerSimmerIndex(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
+            Assert.AreEqual(Math.Round(summerSimmerIndex.Fahrenheit, 2), expected);
         }
 
-        [Fact]
-        void SaturatedVaporPressure()
+        [Theory]
+        [InlineData(4232, 30)]
+        public void SaturatedVaporPressureIsCalculatedCorrectly(double expected, double celsius)
         {
-            var saturatedVaporPressure = WeatherHelper.SaturatedVaporPressure(Temperature.FromCelsius(30));
-            Assert.AreEqual(Math.Round(saturatedVaporPressure.Pascal, 0), 4232);
+            var saturatedVaporPressure = WeatherHelper.SaturatedVaporPressure(Temperature.FromCelsius(celsius));
+            Assert.AreEqual(Math.Round(saturatedVaporPressure.Pascal, 0), expected);
         }
 
-        [Fact]
-        void ActualVaporPressure()
+        [Theory]
+        [InlineData(1058, 30, 25)]
+        public void ActualVaporPressureIsCalculatedCorrectly(double expected, double celsius, double relativeHumidity)
         {
-            var actualVaporPressure = WeatherHelper.ActualVaporPressure(Temperature.FromCelsius(30), 25);
-            Assert.AreEqual(Math.Round(actualVaporPressure.Pascal, 0), 1058);
+            var actualVaporPressure = WeatherHelper.ActualVaporPressure(Temperature.FromCelsius(celsius), relativeHumidity);
+            Assert.AreEqual(Math.Round(actualVaporPressure.Pascal, 0), expected);
         }
 
-        [Fact]
-        void DewPoint()
+        [Theory]
+        [InlineData(78, 100, 50)]
+        public void DewPointIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
-            var dewPoint = WeatherHelper.DewPoint(Temperature.FromFahrenheit(100), 50);
-            Assert.AreEqual(Math.Round(dewPoint.Fahrenheit, 0), 78);
+            var dewPoint = WeatherHelper.DewPoint(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
+            Assert.AreEqual(Math.Round(dewPoint.Fahrenheit, 0), expected);
         }
 
-        [Fact]
-        void AbsoluteHumidity()
+        [Theory]
+        [InlineData(22.7, 100, 50)]
+        public void AbsoluteHumidityIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
-            var absoluteHumidity = WeatherHelper.AbsoluteHumidity(Temperature.FromFahrenheit(100), 50);
-            Assert.AreEqual(Math.Round(absoluteHumidity, 1), 22.7);
+            var absoluteHumidity = WeatherHelper.AbsoluteHumidity(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
+            Assert.AreEqual(Math.Round(absoluteHumidity, 1), expected);
         }
     }
 }
