@@ -16,7 +16,7 @@
 
     <EnableAzurePipelinesReporter Condition="'$(SYSTEM_ACCESSTOKEN)' != ''">true</EnableAzurePipelinesReporter>
     <TestRunNamePrefix>$(AGENT_JOBNAME)</TestRunNamePrefix>
-    
+
     <EnableXUnitReporter>true</EnableXUnitReporter>
     <FailOnMissionControlTestFailure>true</FailOnMissionControlTestFailure>
   </PropertyGroup>
@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <!-- Windows-specific settings -->
-  <ItemGroup Condition="'$(TestOS)' == 'Windows_NT'">
+  <ItemGroup Condition="'$(TestOS)' == 'Windows_NT' AND '$(HardwareDependentProjects)' == 'true'">
     <!-- Xunit project to test -->
     <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
       <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -49,7 +49,7 @@
   </PropertyGroup>
 
   <!-- Linux-specific settings -->
-  <ItemGroup Condition="'$(TestOS)' == 'Unix'">
+  <ItemGroup Condition="'$(TestOS)' == 'Unix' AND '$(HardwareDependentProjects)' == 'true'">
     <!-- Xunit project to test -->
     <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
       <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -59,6 +59,18 @@
     <!-- Target queues -->
     <HelixTargetQueue Condition="'$(HelixAccessToken)' != ''" Include="Raspbian.9.Arm32.IoT"/>
     <HelixTargetQueue Condition="'$(HelixAccessToken)' == ''" Include="Raspbian.9.Arm32.IoT.Open"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TestOS)' == 'Unix' AND '$(HardwareDependentProjects)' != 'true'">
+    <!-- Xunit project to test -->
+    <XUnitProject Include="..\src\devices\**\*.Tests.csproj">
+      <TargetFramework>netcoreapp2.1</TargetFramework>
+      <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
+      <AdditionalProperties>RuntimeIdentifier=ubuntu.18.04-x64</AdditionalProperties>
+    </XUnitProject>
+    <!-- Target queues -->
+    <HelixTargetQueue Condition="'$(HelixAccessToken)' != ''" Include="Ubuntu.1804.Amd64"/>
+    <HelixTargetQueue Condition="'$(HelixAccessToken)' == ''" Include="Ubuntu.1804.Amd64.Open"/>
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TestOS)' == 'Unix'">
@@ -85,6 +97,11 @@
         <Command>$(_newCommand)</Command>
       </HelixWorkItem>
     </ItemGroup>
+  </Target>
+
+  <Target Name="TestToMultipleQueues">
+    <MSBuild Projects="$(MSBuildThisFileFullPath)" Target="Test" />
+    <MSBuild Projects="$(MSBuildThisFileFullPath)" Target="Test" Properties="HardwareDependentProjects=true" />
   </Target>
 
   <!-- Useless stuff to make Arcade SDK happy -->

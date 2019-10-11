@@ -10,6 +10,7 @@ namespace Iot.Units.Tests
 {
     public class ConstructionTests
     {
+        [Fact]public void RemoveMe() => Assert.True(false, "CI is working correctly");
         [Theory]
         [MemberData(nameof(TemperatureData))]
         public void FromCelsius(double celsius, double fahrenheit, double kelvin)
