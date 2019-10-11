@@ -17,6 +17,7 @@ namespace Iot.Device.Common.Tests
         [InlineData(26, 25, 80)]
         public void HeatIndexIsCalculatedCorrectly(double expected, double celsius, double relativeHumidity)
         {
+            Assert.True(false, "this should fail proving CI is running");
             var heatIndex = WeatherHelper.CalculateHeatIndex(Temperature.FromCelsius(celsius), relativeHumidity);
             Assert.AreEqual(Math.Round(heatIndex.Celsius), expected);
         }
