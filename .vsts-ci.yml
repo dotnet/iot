@@ -4,13 +4,13 @@ trigger:
     include:
     - master
     - release/3.0
-    
+
 pr:
   branches:
     include:
     - master
     - release/3.0
-    
+
 variables:
   # Cannot use key:value syntax in root defined variables
   - name: Build.Repository.Clean
@@ -111,7 +111,7 @@ stages:
 
         - script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
             eng/sendToHelix.proj
-            /t:Test
+            /t:TestToMultipleQueues
             /p:TestOS=Windows_NT
             /p:Configuration=$(_BuildConfig)
             /p:HelixBuild=$(Build.BuildNumber)
@@ -128,7 +128,7 @@ stages:
             artifactName: BuiltPackageOutputs
             artifactType: container
           condition: eq(variables['_BuildConfig'], 'Release')
-      
+
       - job: Linux
         container: LinuxContainer
         pool:
@@ -159,7 +159,7 @@ stages:
           displayName: Unix Build
         - script: ./eng/common/msbuild.sh --warnaserror false --ci
             eng/sendToHelix.proj
-            /t:Test
+            /t:TestToMultipleQueues
             /p:TestOS=Unix
             /p:Configuration=$(_BuildConfig)
             /p:HelixBuild=$(Build.BuildNumber)
