@@ -150,7 +150,43 @@ namespace Iot.Device.Common
         public static double Altitude(Pressure pressure)
         {
             return Altitude(pressure, Pressure.MeanSeaLevel, Temperature.FromCelsius(15));
-        }        
+        }
+        
+        /// <summary>
+        /// Calculates the sea-level pressure from given pressure, altitude and air temperature.
+        /// </summary>
+        /// <param name="pressure">The air pressure</param>
+        /// <param name="altitude">The altitude in metres</param>
+        /// <param name="temperature">The air temperature</param>
+        /// <returns>The sea-level pressure</returns>
+        public static Pressure SeaLevelPressure(Pressure pressure, double altitude, Temperature airTemperature)
+        {
+            return Pressure.FromPascal(Math.Pow(((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257) * pressure.Pascal);
+        }
+        
+        /// <summary>
+        /// Calculates the pressure from given sea-level pressure, altitude and air temperature.
+        /// </summary>
+        /// <param name="seaLevelPressure">The sea-level pressure</param>
+        /// <param name="altitude">The altitude in metres at the point for which pressure is being calculated</param>
+        /// <param name="temperature">The air temperature at the point for which pressure is being calculated</param>
+        /// <returns>The air pressure</returns>
+        public static Pressure SeaLevelPressure(Pressure seaLevelPressure, double altitude, Temperature airTemperature)
+        {
+            return Pressure.FromPascal(seaLevelPressure.Pascal / Math.Pow(((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257));
+        }
+        
+        /// <summary>
+        /// Calculates the temperature from given pressure, sea-level pressure and altitude.
+        /// </summary>
+        /// <param name="pressure">The air pressure at the point for which temperature is being calculated</param>
+        /// <param name="seaLevelPressure">The sea-level pressure</param>
+        /// <param name="altitude">The altitude in metres at the point for which temperature is being calculated</param>
+        /// <returns>The temperature</returns>
+        public static Temperature Temperature(Pressure pressure, Pressure seaLevelPressure, double altitude)
+        {
+            return Temperature.FromKelvin((0.0065 * altitude) / (Math.Pow(seaLevelPressure.Pascal / pressure.Pascal, 1 / 5.257) - 1));
+        }
         #endregion
     }
 }
