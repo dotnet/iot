@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Iot.Device.Common;
+using Iot.Units;
 using System;
 using System.Drawing;
 using System.Threading;
@@ -20,6 +21,10 @@ namespace Iot.Device.SenseHat.Samples
             // Magnetometer.Run();
             // TemperatureAndHumidity.Run();
             // PressureAndTemperature.Run();
+            
+            //set this to the current sea level pressure in the area for correct altitude readings
+            var defaultSeaLevelPressure = Pressure.MeanSeaLevel;
+
             using (var sh = new SenseHat())
             {
                 int n = 0;
