@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Iot.Device.Common;
+using Iot.Units;
 using System;
 using System.Collections.Generic;
 using Xunit;
