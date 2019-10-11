@@ -77,7 +77,7 @@ namespace Iot.Device.Common.Tests
         [InlineData(546.89, 950)]
         public void AltitudeIsCalculatedCorrectlyAtMslpAndDefaultTemp(double expected, double hpa)
         {
-            var altitude = WeatherHelper.Altitude(hpa);
+            var altitude = WeatherHelper.Altitude(Pressure.FromHectopascal(hpa));
             Assert.AreEqual(Math.Round(altitude, 2), expected);
         }        
 
@@ -87,7 +87,7 @@ namespace Iot.Device.Common.Tests
         [InlineData(546.89, 950, 1013.25)]
         public void AltitudeIsCalculatedCorrectlyAtDefaultTemp(double expected, double hpa, double seaLevelHpa)
         {
-            var altitude = WeatherHelper.Altitude(hpa, seaLevelHpa);
+            var altitude = WeatherHelper.Altitude(Pressure.FromHectopascal(hpa), Pressure.FromHectopascal(seaLevelHpa));
             Assert.AreEqual(Math.Round(altitude, 2), expected);
         }
 
@@ -97,8 +97,38 @@ namespace Iot.Device.Common.Tests
         [InlineData(546.89, 950, 1013.25, 15)]
         public void AltitudeIsCalculatedCorrectly(double expected, double hpa, double seaLevelHpa, double celsius)
         {
-            var altitude = WeatherHelper.Altitude(hpa, seaLevelHpa, celsius);
+            var altitude = WeatherHelper.Altitude(Pressure.FromHectopascal(hpa), Pressure.FromHectopascal(seaLevelHpa), Temperature.FromCelsius(celsius));
             Assert.AreEqual(Math.Round(altitude, 2), expected);
-        }        
+        }
+        
+        [Theory]
+        [InlineData(1013.25, 900, 1010.83, 15)]
+        [InlineData(1013.25, 1000, 111.14, 15)]
+        [InlineData(1013.25, 950, 546.89, 15)]
+        public void SeaLevelPressureIsCalculatedCorrectly(double expected, double pressure, double altitude, double celsius)
+        {
+            var seaLevelPressure = WeatherHelper.SeaLevelPressure(Pressure.FromHectopascal(pressure), altitude, Temperature.FromCelsius(celsius));
+            Assert.AreEqual(Math.Round(seaLevelPressure.Hectopascal, 2), expected);
+        }
+        
+        [Theory]
+        [InlineData(900, 1013.25, 1010.83, 15)]
+        [InlineData(1000, 1013.25, 111.14, 15)]
+        [InlineData(950, 1013.25, 546.89, 15)]
+        public void PressureIsCalculatedCorrectly(double expected, double seaLevelPressure, double altitude, double celsius)
+        {
+            var pressure = WeatherHelper.Pressure(Pressure.FromHectopascal(seaLevelPressure), altitude, Temperature.FromCelsius(celsius));
+            Assert.AreEqual(Math.Round(pressure.Hectopascal, 2), expected);
+        }
+        
+        [Theory]
+        [InlineData(15, 900, 1013.25, 1010.83)]
+        [InlineData(15, 1000, 1013.25, 111.14)]
+        [InlineData(15, 950, 1013.25, 546.89)]
+        public void TemperatureIsCalculatedCorrectly(double expected, double pressure, double seaLevelPressure, double altitude)
+        {
+            var temperature = WeatherHelper.Temperature(Pressure.FromHectopascal(pressure), Pressure.FromHectopascal(seaLevelPressure), altitude);
+            Assert.AreEqual(Math.Round(temperature.Kelvin, 0), expected);
+        }
     }
 }
