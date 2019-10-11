@@ -117,7 +117,7 @@ namespace Iot.Device.Common
         /// <returns>The altitude in metres</returns>
         public static double Altitude(Pressure pressure, Pressure seaLevelPressure = Pressure.MeanSeaLevel, Temperature airTemperature = 15)
         {
-            return ((Math.Pow(seaLevelPressure.Hectopascal / pressure.Hectopascal, 1 / 5.257) - 1) * airTemperature.Kelvin) / 0.0065;
+            return ((Math.Pow(seaLevelPressure.Pascal / pressure.Pascal, 1 / 5.257) - 1) * airTemperature.Kelvin) / 0.0065;
         }
         #endregion
     }
