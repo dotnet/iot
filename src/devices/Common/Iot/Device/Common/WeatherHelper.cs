@@ -76,7 +76,7 @@ namespace Iot.Device.Common
         /// <returns>The actual vapor pressure</returns>
         public static Pressure CalculateActualVaporPressure(Temperature airTemperature, double relativeHumidity)
         {
-            return Pressure.FromHectopascal((relativeHumidity * SaturatedVaporPressure(airTemperature).Hectopascal) / 100);
+            return Pressure.FromHectopascal((relativeHumidity * CalculateSaturatedVaporPressure(airTemperature).Hectopascal) / 100);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace Iot.Device.Common
         /// <returns>The dew point</returns>
         public static Temperature CalculateDewPoint(Temperature airTemperature, double relativeHumidity)
         {
-            var avp = ActualVaporPressure(airTemperature, relativeHumidity).Hectopascal;
+            var avp = CalculateActualVaporPressure(airTemperature, relativeHumidity).Hectopascal;
             var lavp = Math.Log(avp);
             return Temperature.FromCelsius(((-430.22 + (237.7 * lavp)) / (19.08 - lavp)));
         }
@@ -100,7 +100,7 @@ namespace Iot.Device.Common
         /// <returns>The absolute humidity in g/m³</returns>
         public static double CalculateAbsoluteHumidity(Temperature airTemperature, double relativeHumidity)
         {
-            var avp = ActualVaporPressure(airTemperature, relativeHumidity).Pascal;
+            var avp = CalculateActualVaporPressure(airTemperature, relativeHumidity).Pascal;
             return avp / (airTemperature.Kelvin * 461.5) * 1000;
         }
         #endregion TemperatureAndRelativeHumidity
