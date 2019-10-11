@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Iot.Device.Common;
 using System;
 using System.Drawing;
 using System.Threading;
@@ -41,12 +42,29 @@ namespace Iot.Device.SenseHat.Samples
                     sh.Fill(n % 2 == 0 ? Color.DarkBlue : Color.DarkRed);
                     sh.SetPixel(x, y, Color.Yellow);
 
-                    Console.WriteLine($"Temperature: Sensor1: {sh.Temperature.Celsius} °C   Sensor2: {sh.Temperature2.Celsius} °C");
-                    Console.WriteLine($"Humidity: {sh.Humidity} %rH");
-                    Console.WriteLine($"Pressure: {sh.Pressure} hPa");
-                    Console.WriteLine($"Acceleration: {sh.Acceleration} g");
-                    Console.WriteLine($"Angular rate: {sh.AngularRate} DPS");
-                    Console.WriteLine($"Magnetic induction: {sh.MagneticInduction} gauss");
+                    var tempValue = sh.Temperature;
+                    var temp2Value = sh.Temperature2;
+                    var preValue = sh.Pressure;
+                    var humValue = sh.Humidity;
+                    var accValue = sh.Acceleration;
+                    var angValue = sh.AngularRate;
+                    var magValue = sh.MagneticInduction;
+                    var altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
+
+                    Console.WriteLine($"Temperature Sensor 1: {tempValue.Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Temperature Sensor 2: {temp2Value.Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Pressure: {preValue:0.##}hPa");
+                    Console.WriteLine($"Altitude: {altValue:0.##}m");
+                    Console.WriteLine($"Acceleration: {sh.Acceleration}g");
+                    Console.WriteLine($"Angular rate: {sh.AngularRate}DPS");
+                    Console.WriteLine($"Magnetic induction: {sh.MagneticInduction}gauss");
+                    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+                    Console.WriteLine($"Heat index: {WeatherHelper.HeatIndex(tempValue, humValue).Celsius} \u00B0C");
+                    Console.WriteLine($"Summer simmer index: {WeatherHelper.SummerSimmerIndex(tempValue, humValue).Celsius} \u00B0C");
+                    Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.SaturatedVaporPressure(tempValue).Hectopascal} hPa");
+                    Console.WriteLine($"Actual vapor pressure: {WeatherHelper.ActualVaporPressure(tempValue, humValue).Hectopascal} hPa");
+                    Console.WriteLine($"Dew point: {WeatherHelper.DewPoint(tempValue, humValue).Celsius} \u00B0C");
+                    Console.WriteLine($"Absolute humidity: {WeatherHelper.AbsoluteHumidity(tempValue, humValue)} g/m\u0179");                    
 
                     Thread.Sleep(1000);
                 }
