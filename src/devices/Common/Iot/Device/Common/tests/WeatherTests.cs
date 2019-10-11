@@ -13,6 +13,8 @@ namespace Iot.Device.Common.Tests
     {
         [Theory]
         [InlineData(35, 30, 70)]
+        [InlineData(20, 20, 60)]
+        [InlineData(26, 25, 80)]
         public void HeatIndexIsCalculatedCorrectly(double expected, double celsius, double relativeHumidity)
         {
             var heatIndex = WeatherHelper.HeatIndex(Temperature.FromCelsius(celsius), relativeHumidity);
@@ -21,6 +23,8 @@ namespace Iot.Device.Common.Tests
 
         [Theory]
         [InlineData(11.06, 10, 8)]
+        [InlineData(35.11, 40, 35)]
+        [InlineData(94.38, 80, 70)]
         public void SummerSimmerIndexIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
             var summerSimmerIndex = WeatherHelper.SummerSimmerIndex(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
@@ -29,6 +33,8 @@ namespace Iot.Device.Common.Tests
 
         [Theory]
         [InlineData(4232, 30)]
+        [InlineData(3161, 25)]
+        [InlineData(2639, 22)]
         public void SaturatedVaporPressureIsCalculatedCorrectly(double expected, double celsius)
         {
             var saturatedVaporPressure = WeatherHelper.SaturatedVaporPressure(Temperature.FromCelsius(celsius));
@@ -45,6 +51,8 @@ namespace Iot.Device.Common.Tests
 
         [Theory]
         [InlineData(78, 100, 50)]
+        [InlineData(46, 80, 30)]
+        [InlineData(27, 60, 29)]
         public void DewPointIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
             var dewPoint = WeatherHelper.DewPoint(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
