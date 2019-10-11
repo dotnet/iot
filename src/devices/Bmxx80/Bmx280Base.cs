@@ -197,7 +197,7 @@ namespace Iot.Device.Bmxx80
             }
 
             // Calculate and return the altitude using the hypsometric formula.
-            altitude = WeatherHelper.Altitude(pressure, seaLevelPressure, temperature);
+            altitude = WeatherHelper.CalculateAltitude(pressure, seaLevelPressure, temperature);
             return true;
         }
 
