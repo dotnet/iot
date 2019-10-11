@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Iot.Device.Common;
 
 namespace Iot.Device.SenseHat.Samples
 {
@@ -19,7 +20,13 @@ namespace Iot.Device.SenseHat.Samples
             {
                 while (true)
                 {
-                    Console.WriteLine($"Temperature: {th.Temperature.Celsius}\u00B0C   Pressure: {th.Pressure.Hectopascal}hPa");
+                    var tempValue = th.Temperature;
+                    var preValue = th.Pressure;
+                    var altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
+                    
+                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
+                    Console.WriteLine($"Altitude: {altValue:0.##}m");
                     Thread.Sleep(1000);
                 }
             }
