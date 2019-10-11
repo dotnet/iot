@@ -123,7 +123,7 @@ namespace Iot.Device.Bmp180
         [ObsoleteAttribute("ReadAltitude is obsolete. Please use Iot.Device.Common.WeatherHelper instead.")]
         public Pressure ReadSeaLevelPressure(double altitude = 0.0)
         {
-            return Pressure.FromPascal(WeatherHelper.SeaLevelPressure(ReadPressure(), altitude, ReadTemperature());
+            return Pressure.FromPascal(WeatherHelper.SeaLevelPressure(ReadPressure(), altitude, ReadTemperature()));
         }
 
         /// <summary>
