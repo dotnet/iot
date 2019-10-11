@@ -20,7 +20,7 @@ namespace Iot.Device.Common.Tests
         {
             Assert.True(false, "this should fail proving CI is running");
             var heatIndex = WeatherHelper.CalculateHeatIndex(Temperature.FromCelsius(celsius), relativeHumidity);
-            Assert.Equals(Math.Round(heatIndex.Celsius), expected);
+            Assert.Equal(Math.Round(heatIndex.Celsius), expected);
         }
 
         [Theory]
@@ -30,7 +30,7 @@ namespace Iot.Device.Common.Tests
         public void SummerSimmerIndexIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
             var summerSimmerIndex = WeatherHelper.CalculateSummerSimmerIndex(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
-            Assert.Equals(Math.Round(summerSimmerIndex.Fahrenheit, 2), expected);
+            Assert.Equal(Math.Round(summerSimmerIndex.Fahrenheit, 2), expected);
         }
 
         [Theory]
@@ -40,7 +40,7 @@ namespace Iot.Device.Common.Tests
         public void SaturatedVaporPressureIsCalculatedCorrectly(double expected, double celsius)
         {
             var saturatedVaporPressure = WeatherHelper.CalculateSaturatedVaporPressure(Temperature.FromCelsius(celsius));
-            Assert.Equals(Math.Round(saturatedVaporPressure.Pascal, 0), expected);
+            Assert.Equal(Math.Round(saturatedVaporPressure.Pascal, 0), expected);
         }
 
         [Theory]
@@ -50,7 +50,7 @@ namespace Iot.Device.Common.Tests
         public void ActualVaporPressureIsCalculatedCorrectly(double expected, double celsius, double relativeHumidity)
         {
             var actualVaporPressure = WeatherHelper.CalculateActualVaporPressure(Temperature.FromCelsius(celsius), relativeHumidity);
-            Assert.Equals(Math.Round(actualVaporPressure.Pascal, 0), expected);
+            Assert.Equal(Math.Round(actualVaporPressure.Pascal, 0), expected);
         }
 
         [Theory]
@@ -60,7 +60,7 @@ namespace Iot.Device.Common.Tests
         public void DewPointIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
             var dewPoint = WeatherHelper.CalculateDewPoint(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
-            Assert.Equals(Math.Round(dewPoint.Fahrenheit, 0), expected);
+            Assert.Equal(Math.Round(dewPoint.Fahrenheit, 0), expected);
         }
 
         [Theory]
@@ -70,7 +70,7 @@ namespace Iot.Device.Common.Tests
         public void AbsoluteHumidityIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
             var absoluteHumidity = WeatherHelper.CalculateAbsoluteHumidity(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
-            Assert.Equals(Math.Round(absoluteHumidity, 0), expected);
+            Assert.Equal(Math.Round(absoluteHumidity, 0), expected);
         }
 
         [Theory]
@@ -80,7 +80,7 @@ namespace Iot.Device.Common.Tests
         public void AltitudeIsCalculatedCorrectlyAtMslpAndDefaultTemp(double expected, double hpa)
         {
             var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascal(hpa));
-            Assert.Equals(Math.Round(altitude, 2), expected);
+            Assert.Equal(Math.Round(altitude, 2), expected);
         }        
 
         [Theory]
@@ -90,7 +90,7 @@ namespace Iot.Device.Common.Tests
         public void AltitudeIsCalculatedCorrectlyAtDefaultTemp(double expected, double hpa, double seaLevelHpa)
         {
             var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascal(hpa), Pressure.FromHectopascal(seaLevelHpa));
-            Assert.Equals(Math.Round(altitude, 2), expected);
+            Assert.Equal(Math.Round(altitude, 2), expected);
         }
 
         [Theory]
@@ -100,7 +100,7 @@ namespace Iot.Device.Common.Tests
         public void AltitudeIsCalculatedCorrectly(double expected, double hpa, double seaLevelHpa, double celsius)
         {
             var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascal(hpa), Pressure.FromHectopascal(seaLevelHpa), Temperature.FromCelsius(celsius));
-            Assert.Equals(Math.Round(altitude, 2), expected);
+            Assert.Equal(Math.Round(altitude, 2), expected);
         }
         
         [Theory]
@@ -110,7 +110,7 @@ namespace Iot.Device.Common.Tests
         public void SeaLevelPressureIsCalculatedCorrectly(double expected, double pressure, double altitude, double celsius)
         {
             var seaLevelPressure = WeatherHelper.CalculateSeaLevelPressure(Pressure.FromHectopascal(pressure), altitude, Temperature.FromCelsius(celsius));
-            Assert.Equals(Math.Round(seaLevelPressure.Hectopascal, 2), expected);
+            Assert.Equal(Math.Round(seaLevelPressure.Hectopascal, 2), expected);
         }
         
         [Theory]
@@ -120,7 +120,7 @@ namespace Iot.Device.Common.Tests
         public void PressureIsCalculatedCorrectly(double expected, double seaLevelPressure, double altitude, double celsius)
         {
             var pressure = WeatherHelper.CalculatePressure(Pressure.FromHectopascal(seaLevelPressure), altitude, Temperature.FromCelsius(celsius));
-            Assert.Equals(Math.Round(pressure.Hectopascal, 2), expected);
+            Assert.Equal(Math.Round(pressure.Hectopascal, 2), expected);
         }
         
         [Theory]
@@ -130,7 +130,7 @@ namespace Iot.Device.Common.Tests
         public void TemperatureIsCalculatedCorrectly(double expected, double pressure, double seaLevelPressure, double altitude)
         {
             var temperature = WeatherHelper.CalculateTemperature(Pressure.FromHectopascal(pressure), Pressure.FromHectopascal(seaLevelPressure), altitude);
-            Assert.Equals(Math.Round(temperature.Kelvin, 0), expected);
+            Assert.Equal(Math.Round(temperature.Kelvin, 0), expected);
         }
     }
 }
