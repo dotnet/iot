@@ -53,13 +53,14 @@ namespace Iot.Device.Samples
 
                     // read values
                     i2CBmpe80.TryReadTemperature(out var tempValue);
-                    Console.WriteLine($"Temperature: {tempValue.Celsius} \u00B0C");
                     i2CBmpe80.TryReadPressure(out var preValue);
-                    Console.WriteLine($"Pressure: {preValue.Hectopascal} hPa");
-                    double altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
-                    Console.WriteLine($"Altitude: {altValue} meters");
                     i2CBmpe80.TryReadHumidity(out var humValue);
-                    Console.WriteLine($"Relative humidity: {humValue} %");
+                    var altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
+                    
+                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");                    
+                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");                    
+                    Console.WriteLine($"Altitude: {altValue:0.##}m");                    
+                    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
                     Console.WriteLine($"Heat index: {WeatherHelper.HeatIndex(tempValue, humValue).Celsius} \u00B0C");
                     Console.WriteLine($"Summer simmer index: {WeatherHelper.SummerSimmerIndex(tempValue, humValue).Celsius} \u00B0C");
                     Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.SaturatedVaporPressure(tempValue).Hectopascal} hPa");
@@ -83,13 +84,14 @@ namespace Iot.Device.Samples
 
                     // read values
                     i2CBmpe80.TryReadTemperature(out tempValue);
-                    Console.WriteLine($"Temperature: {tempValue.Celsius} \u00B0C");
                     i2CBmpe80.TryReadPressure(out preValue);
-                    Console.WriteLine($"Pressure: {preValue.Hectopascal} hPa");
-                    altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
-                    Console.WriteLine($"Altitude: {altValue} meters");
                     i2CBmpe80.TryReadHumidity(out humValue);
-                    Console.WriteLine($"Relative humidity: {humValue} %");
+                    altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
+                    
+                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");                    
+                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");                    
+                    Console.WriteLine($"Altitude: {altValue:0.##}m");                    
+                    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
                     Console.WriteLine($"Heat index: {WeatherHelper.HeatIndex(tempValue, humValue).Celsius} \u00B0C");
                     Console.WriteLine($"Summer simmer index: {WeatherHelper.SummerSimmerIndex(tempValue, humValue).Celsius} \u00B0C");
                     Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.SaturatedVaporPressure(tempValue).Hectopascal} hPa");
