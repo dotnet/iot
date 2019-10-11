@@ -104,5 +104,21 @@ namespace Iot.Device.Common
             return avp / (airTemperature.Kelvin * 461.5) * 1000;
         }
         #endregion TemperatureAndRelativeHumidity
+            
+        #region Pressure
+        // Formula taken from https://keisan.casio.com/has10/SpecExec.cgi?path=06000000.Science%252F02100100.Earth%2520science%252F12000300.Altitude%2520from%2520atmospheric%2520pressure%252Fdefault.xml&charset=utf-8
+            
+        /// <summary>
+        /// Calculates the altitude in metres
+        /// </summary>
+        /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
+        /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
+        /// <param name="seaLevelPressure">The sea-level pressure</param>
+        /// <returns>The altitude in metres</returns>
+        public static double Altitude(Temperature airTemperature, Pressure pressure, Pressure seaLevelPressure = Pressure.MeanSeaLevel)
+        {
+            return ((Math.Pow(seaLevelPressure.Hectopascal / pressure.Hectopascal, 1 / 5.257) - 1) * airTemperature.Kelvin) / 0.0065;
+        }
+        #endregion
     }
 }
