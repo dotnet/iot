@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Units.csproj" />
-    <Compile Include="TemperatureTests.cs" />
   </ItemGroup>
 
 </Project>
