@@ -111,12 +111,13 @@ stages:
 
         - script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
             eng/sendToHelix.proj
-            /t:TestToMultipleQueues
+            /t:Test
+            /p:HardwareDependentProjects=true
             /p:TestOS=Windows_NT
             /p:Configuration=$(_BuildConfig)
             /p:HelixBuild=$(Build.BuildNumber)
             /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
-          displayName: Run Helix Tests
+          displayName: Run Helix Hardware Dependent Tests
           env:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
             HelixAccessToken: $(HelixApiAccessToken)
@@ -159,13 +160,26 @@ stages:
           displayName: Unix Build
         - script: ./eng/common/msbuild.sh --warnaserror false --ci
             eng/sendToHelix.proj
-            /t:TestToMultipleQueues
+            /t:Test
             /p:TestOS=Unix
             /p:Configuration=$(_BuildConfig)
             /p:HelixBuild=$(Build.BuildNumber)
             /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
             /p:HelixAccessToken=$(HelixApiAccessToken)
-          displayName: Run Helix Tests
+          displayName: Run Helix Unit Tests
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            HelixAccessToken: $(HelixApiAccessToken)
+        - script: ./eng/common/msbuild.sh --warnaserror false --ci
+            eng/sendToHelix.proj
+            /t:Test
+            /p:TestOS=Unix
+            /p:Configuration=$(_BuildConfig)
+            /p:HardwareDependentProjects=true
+            /p:HelixBuild=$(Build.BuildNumber)
+            /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
+            /p:HelixAccessToken=$(HelixApiAccessToken)
+          displayName: Run Helix Hardware Dependent Tests
           env:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
             HelixAccessToken: $(HelixApiAccessToken)

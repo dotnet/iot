@@ -98,11 +98,6 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="TestToMultipleQueues">
-    <MSBuild Condition="'$(TestOS)' == 'Unix'" Projects="$(MSBuildThisFileFullPath)" Targets="Test" />
-    <MSBuild Projects="$(MSBuildThisFileFullPath)" Targets="Test" Properties="HardwareDependentProjects=true" />
-  </Target>
-
   <!-- Useless stuff to make Arcade SDK happy -->
   <PropertyGroup>
     <Language>msbuild</Language>
