@@ -171,7 +171,7 @@ namespace Iot.Device.Common
         /// <param name="altitude">The altitude in metres at the point for which pressure is being calculated</param>
         /// <param name="temperature">The air temperature at the point for which pressure is being calculated</param>
         /// <returns>The air pressure</returns>
-        public static Pressure SeaLevelPressure(Pressure seaLevelPressure, double altitude, Temperature airTemperature)
+        public static Pressure Pressure(Pressure seaLevelPressure, double altitude, Temperature airTemperature)
         {
             return Pressure.FromPascal(seaLevelPressure.Pascal / Math.Pow(((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257));
         }
