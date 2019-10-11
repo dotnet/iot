@@ -28,7 +28,7 @@ namespace System.Device.Gpio
         /// Attempt to get the best applicable driver for the board the program is executing on.
         /// </summary>
         /// <returns>A driver that works with the board the program is executing on.</returns>
-        private static GpioDriver GetBestDriverForBoard()
+        public static GpioDriver GetBestDriverForBoard()
         {
             string[] cpuInfoLines = File.ReadAllLines(CpuInfoPath);
             Regex regexHw = new Regex(@"Hardware\s*:\s*(.*)");

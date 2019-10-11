@@ -34,7 +34,7 @@ namespace System.Device.Gpio
         ///     The GpioController could use reflection to find all GpioDriver-derived classes and call this
         ///     static method to determine if the driver considers itself to be the best match for the environment.
         /// </remarks>
-        private static GpioDriver GetBestDriverForBoard()
+        public static GpioDriver GetBestDriverForBoard()
         {
             string baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
 
