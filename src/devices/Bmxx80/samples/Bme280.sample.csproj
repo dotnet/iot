@@ -20,7 +20,6 @@
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
-    <Compile Include="..\..\Common\Iot\Device\Common\WeatherHelper.cs" />
   </ItemGroup>
 
 </Project>
