@@ -4,7 +4,6 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <RuntimeIdentifiers>linux</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
