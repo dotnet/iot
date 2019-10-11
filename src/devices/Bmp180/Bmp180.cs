@@ -9,6 +9,7 @@ using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Threading;
+using Iot.Device.Common;
 using Iot.Units;
 
 namespace Iot.Device.Bmp180
