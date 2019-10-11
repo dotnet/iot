@@ -52,11 +52,11 @@ namespace Iot.Device.Samples
 
                     // read values
                     i2CBmp280.TryReadTemperature(out var tempValue);
-                    Console.WriteLine($"Temperature: {tempValue.Celsius} \u00B0C");
+                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
                     i2CBmp280.TryReadPressure(out var preValue);
-                    Console.WriteLine($"Pressure: {preValue.Hectopascal} hPa");
+                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
                     double altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
-                    Console.WriteLine($"Altitude: {altValue} m");
+                    Console.WriteLine($"Altitude: {altValue:0.##}m");
                     Thread.Sleep(1000);
 
                     // change sampling rate
@@ -73,11 +73,11 @@ namespace Iot.Device.Samples
 
                     // read values
                     i2CBmp280.TryReadTemperature(out tempValue);
-                    Console.WriteLine($"Temperature {tempValue.Celsius} \u00B0C");
+                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
                     i2CBmp280.TryReadPressure(out preValue);
-                    Console.WriteLine($"Pressure {preValue.Hectopascal} hPa");
+                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
                     altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
-                    Console.WriteLine($"Altitude: {altValue} m");
+                    Console.WriteLine($"Altitude: {altValue:0.##}m");
                     Thread.Sleep(5000);
                 }
             }
