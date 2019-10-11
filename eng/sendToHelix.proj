@@ -100,7 +100,7 @@
   </Target>
 
   <Target Name="TestToMultipleQueues">
-    <MSBuild Projects="$(MSBuildThisFileFullPath)" Targets="Test" />
+    <MSBuild Condition="'$(TestOS)' == 'Unix'" Projects="$(MSBuildThisFileFullPath)" Targets="Test" />
     <MSBuild Projects="$(MSBuildThisFileFullPath)" Targets="Test" Properties="HardwareDependentProjects=true" />
   </Target>
 
