@@ -54,7 +54,7 @@ namespace Iot.Device.SenseHat.Samples
                     var accValue = sh.Acceleration;
                     var angValue = sh.AngularRate;
                     var magValue = sh.MagneticInduction;
-                    var altValue = WeatherHelper.Altitude(preValue, defaultSeaLevelPressure, tempValue);
+                    var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
 
                     Console.WriteLine($"Temperature Sensor 1: {tempValue.Celsius:0.#}\u00B0C");
                     Console.WriteLine($"Temperature Sensor 2: {temp2Value.Celsius:0.#}\u00B0C");
@@ -64,12 +64,12 @@ namespace Iot.Device.SenseHat.Samples
                     Console.WriteLine($"Angular rate: {sh.AngularRate}DPS");
                     Console.WriteLine($"Magnetic induction: {sh.MagneticInduction}gauss");
                     Console.WriteLine($"Relative humidity: {humValue:0.#}%");
-                    Console.WriteLine($"Heat index: {WeatherHelper.HeatIndex(tempValue, humValue).Celsius} \u00B0C");
-                    Console.WriteLine($"Summer simmer index: {WeatherHelper.SummerSimmerIndex(tempValue, humValue).Celsius} \u00B0C");
-                    Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.SaturatedVaporPressure(tempValue).Hectopascal} hPa");
-                    Console.WriteLine($"Actual vapor pressure: {WeatherHelper.ActualVaporPressure(tempValue, humValue).Hectopascal} hPa");
-                    Console.WriteLine($"Dew point: {WeatherHelper.DewPoint(tempValue, humValue).Celsius} \u00B0C");
-                    Console.WriteLine($"Absolute humidity: {WeatherHelper.AbsoluteHumidity(tempValue, humValue)} g/m\u0179");                    
+                    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius} \u00B0C");
+                    Console.WriteLine($"Summer simmer index: {WeatherHelper.CalculateSummerSimmerIndex(tempValue, humValue).Celsius} \u00B0C");
+                    Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.CalculateSaturatedVaporPressure(tempValue).Hectopascal} hPa");
+                    Console.WriteLine($"Actual vapor pressure: {WeatherHelper.CalculateActualVaporPressure(tempValue, humValue).Hectopascal} hPa");
+                    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius} \u00B0C");
+                    Console.WriteLine($"Absolute humidity: {WeatherHelper.CalculateAbsoluteHumidity(tempValue, humValue)} g/m\u0179");                    
 
                     Thread.Sleep(1000);
                 }
