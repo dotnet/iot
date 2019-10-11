@@ -70,5 +70,35 @@ namespace Iot.Device.Common.Tests
             var absoluteHumidity = WeatherHelper.AbsoluteHumidity(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
             Assert.AreEqual(Math.Round(absoluteHumidity, 0), expected);
         }
+
+        [Theory]
+        [InlineData(1010.83, 900)]
+        [InlineData(111.14, 1000)]
+        [InlineData(546.89, 950)]
+        public void AltitudeIsCalculatedCorrectlyAtMslpAndDefaultTemp(double expected, double hpa)
+        {
+            var altitude = WeatherHelper.Altitude(hpa);
+            Assert.AreEqual(Math.Round(altitude, 2), expected);
+        }        
+
+        [Theory]
+        [InlineData(1010.83, 900, 1013.25)]
+        [InlineData(111.14, 1000, 1013.25)]
+        [InlineData(546.89, 950, 1013.25)]
+        public void AltitudeIsCalculatedCorrectlyAtDefaultTemp(double expected, double hpa, double seaLevelHpa)
+        {
+            var altitude = WeatherHelper.Altitude(hpa, seaLevelHpa);
+            Assert.AreEqual(Math.Round(altitude, 2), expected);
+        }
+
+        [Theory]
+        [InlineData(1010.83, 900, 1013.25, 15)]
+        [InlineData(111.14, 1000, 1013.25, 15)]
+        [InlineData(546.89, 950, 1013.25, 15)]
+        public void AltitudeIsCalculatedCorrectly(double expected, double hpa, double seaLevelHpa, double celsius)
+        {
+            var altitude = WeatherHelper.Altitude(hpa, seaLevelHpa, celsius);
+            Assert.AreEqual(Math.Round(altitude, 2), expected);
+        }        
     }
 }
