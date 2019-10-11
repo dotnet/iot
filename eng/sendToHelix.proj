@@ -100,8 +100,8 @@
   </Target>
 
   <Target Name="TestToMultipleQueues">
-    <MSBuild Projects="$(MSBuildThisFileFullPath)" Target="Test" />
-    <MSBuild Projects="$(MSBuildThisFileFullPath)" Target="Test" Properties="HardwareDependentProjects=true" />
+    <MSBuild Projects="$(MSBuildThisFileFullPath)" Targets="Test" />
+    <MSBuild Projects="$(MSBuildThisFileFullPath)" Targets="Test" Properties="HardwareDependentProjects=true" />
   </Target>
 
   <!-- Useless stuff to make Arcade SDK happy -->
