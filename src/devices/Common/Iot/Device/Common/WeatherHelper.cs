@@ -8,10 +8,12 @@ using System;
 namespace Iot.Device.Common
 {
     /// <summary>
-    /// Helpers for weather. Formulas taken from http://www.reahvac.com/tools/humidity-formulas/.
+    /// Helpers for weather
     /// </summary>
     public class WeatherHelper
     {
+        // Formulas taken from http://www.reahvac.com/tools/humidity-formulas/
+        
         /// <summary>
         /// The heat index (or apparent temperature) is used to measure the amount of discomfort
         /// during the summer months when heat and humidity often combine to make it feel hotter
@@ -31,11 +33,11 @@ namespace Iot.Device.Common
                 + (2.04901523 * tf)
                 + (10.14333127 * rh)
                 - (0.22475541 * tf * rh)
-                - (6.83783 * Math.Pow(10, -3) * tf2)
-                - (5.481717 * Math.Pow(10, -2) * rh2)
-                + (1.22874 * Math.Pow(10, -3) * tf2 * (rh))
-                + (8.5282 * Math.Pow(10, -4) * tf * rh2)
-                - (1.99 * Math.Pow(10, -6) * tf2 * rh2));
+                - (6.83783 * 0.001 * tf2)
+                - (5.481717 * 0.01 * rh2)
+                + (1.22874 * 0.001 * tf2 * (rh))
+                + (8.5282 * 0.0001 * tf * rh2)
+                - (1.99 * 0.000001 * tf2 * rh2));
         }
 
         /// <summary>
