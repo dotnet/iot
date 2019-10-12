@@ -14,6 +14,7 @@ namespace Iot.Units
         private const double HectopascalRatio = 0.01;
         private const double InchOfMercuryRatio = 0.000295301;
         private const double MillimeterOfMercuryRatio = 0.00750062;
+        private const double MeanSeaLevelPascal = 101325;
         private double _pascal;
 
         private Pressure(double pascal)
@@ -24,7 +25,7 @@ namespace Iot.Units
         /// <summary>
         /// The mean sea-level pressure (MSLP) is the average atmospheric pressure at mean sea level
         /// </summary>
-        public static Pressure MeanSeaLevel => Pressure.FromPascal(101325);
+        public static Pressure MeanSeaLevel => Pressure.FromPascal(MeanSeaLevelPascal);
 
         /// <summary>
         /// Pressure in Pa
