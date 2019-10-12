@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Units\Units.csproj" />
-    <Compile Include="..\Iot\Device\Common\WeatherHelper.cs" />
+    <ProjectReference Include="..\Iot\Device\Common\CommonHelpers.csproj" />
   </ItemGroup>
 
 </Project>
