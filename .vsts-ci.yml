@@ -164,7 +164,7 @@ stages:
             /p:TestOS=Unix
             /p:Configuration=$(_BuildConfig)
             /p:HelixBuild=$(Build.BuildNumber)
-            /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
+            /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.UnitTests.binlog
             /p:HelixAccessToken=$(HelixApiAccessToken)
           displayName: Run Helix Unit Tests
           env:
@@ -177,7 +177,7 @@ stages:
             /p:Configuration=$(_BuildConfig)
             /p:HardwareDependentProjects=true
             /p:HelixBuild=$(Build.BuildNumber)
-            /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
+            /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.HardwareDependent.binlog
             /p:HelixAccessToken=$(HelixApiAccessToken)
           displayName: Run Helix Hardware Dependent Tests
           env:
