@@ -9,7 +9,7 @@ namespace Iot.Device.Common
     /// <summary>
     /// Helpers for number.
     /// </summary>
-    internal static class NumberHelper
+    public class NumberHelper
     {
         /// <summary>
         /// BCD To decimal

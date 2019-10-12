@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Memory" Version="4.5.3" />
-    <Compile Include="..\..\Common\Iot\Device\Common\NumberHelper.cs" />
+    <ProjectReference Include="..\..\Common\Iot\Device\Common\CommonHelpers.csproj" />
   </ItemGroup>
 
   <ItemGroup>
