@@ -10,6 +10,7 @@
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
     <ProjectReference Include="..\Units\Units.csproj" />
+    <Compile Include="..\Common\Iot\Device\Common\WeatherHelper.cs" />
     <Compile Include="I2cAddress.cs" />
     <Compile Include="Resolution.cs" />
     <Compile Include="Register.cs" />
