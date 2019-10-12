@@ -7,11 +7,6 @@ using System.Threading;
 
 namespace System.Device.Gpio.Tests
 {
-    using Xunit;
-    public class RemoveMeTests
-    {
-                [Fact]public void RemoveMe() => Assert.True(false, "CI is working correctly");
-    }
     public static class RetryHelper
     {
         private static readonly Func<int, int> s_DefaultBackoffFunc = i => Math.Min(i * 100, 60_000);
