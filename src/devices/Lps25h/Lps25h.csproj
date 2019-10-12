@@ -12,7 +12,7 @@
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
     <ProjectReference Include="..\Units\Units.csproj" />
-    <ProjectReference Include="..\Iot\Device\Common\CommonHelpers.csproj" />
+    <ProjectReference Include="..\Common\Iot\Device\Common\CommonHelpers.csproj" />
   </ItemGroup>
 
 </Project>
