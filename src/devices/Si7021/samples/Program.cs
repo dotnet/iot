@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Iot.Device.Common;
+using Iot.Units;
 using System;
 using System.Device.I2c;
 using System.Threading;
@@ -19,8 +21,17 @@ namespace Iot.Device.Si7021.Samples
             {
                 while (true)
                 {
-                    Console.WriteLine($"Temperature: {sensor.Temperature.Celsius}℃");
-                    Console.WriteLine($"Humidity: {sensor.Humidity}%");
+                    var tempValue = sensor.Temperature;
+                    var humValue = sensor.Humidity;
+                    
+                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");                    
+                    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+                    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius} \u00B0C");
+                    Console.WriteLine($"Summer simmer index: {WeatherHelper.CalculateSummerSimmerIndex(tempValue, humValue).Celsius} \u00B0C");
+                    Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.CalculateSaturatedVaporPressure(tempValue).Hectopascal} hPa");
+                    Console.WriteLine($"Actual vapor pressure: {WeatherHelper.CalculateActualVaporPressure(tempValue, humValue).Hectopascal} hPa");
+                    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius} \u00B0C");
+                    Console.WriteLine($"Absolute humidity: {WeatherHelper.CalculateAbsoluteHumidity(tempValue, humValue)} g/m\u0179");
                     Console.WriteLine();
 
                     Thread.Sleep(1000);
