@@ -10,7 +10,7 @@ The repository also contains [Iot.Device.Bindings](https://www.nuget.org/package
 
 # How to Install
 
-You can install the latest daily pre-release build of the .NET Core System.Device.Gpio and IoT.Device.Bindings NuGet packages from the blob feed.
+You can install the latest daily pre-release build of the .NET Core System.Device.Gpio and Iot.Device.Bindings NuGet packages from the blob feed.
   
 ## NuGet.exe
 ~~~~
