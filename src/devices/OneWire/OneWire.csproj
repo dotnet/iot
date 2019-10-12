@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
-    <Compile Include="FamilyBindings\OneWireThermometerDevice.Linux.cs" />
     <Compile Include="FamilyBindings\OneWireThermometerDevice.cs" />
+    <Compile Include="FamilyBindings\OneWireThermometerDevice.Linux.cs" />
     <None Include="README.md" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Units\Units.csproj" />
