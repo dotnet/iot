@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Iot.Device.Common;
+using Iot.Device.DHTxx;
 using System;
 using System.Device.I2c;
 using System.Threading;
-using Iot.Device.DHTxx;
-using Iot.Device.Common;
 
 namespace Iot.Device.DHTxx.Samples
 {
