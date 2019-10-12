@@ -1,18 +1,23 @@
-﻿# OneWire
+﻿# 1-wire
 
-## Summary
-Provide a brief description on what the component is and its functonality.
+Allows using 1-wire devices such as digital thermometers (i.e. MAX31820, DS18B20). See [sample](samples/README.md) for how to use.
 
-## Device Family
-Provide a list of component names and link to datasheets (if available) the binding will work with.
+## How to setup 1-wire on Raspberry Pi
 
-**[Family Name Here]**: [Datasheet link here]
+Add the following to `/boot/config.txt` to enable 1-wire protocol. The default gpio is 4 (pin 7).
 
-## Binding Notes
+    dtoverlay=w1-gpio
 
-Provide any specifics related to binding API.  This could include how to configure component for particular functions and example code.
+Add this to specify gpio 17 (pin 11).
 
-**NOTE**:  Don't repeat the basics related to System.Device.API* (e.g. connection settings, etc.).  This helps keep text/steps down to a minimum for maintainability.
+    dtoverlay=w1-gpio,gpiopin=17
+
+## Supported devices
+
+All temperature devices with family id of 0x10, 0x28, 0x3B, or 0x42 supported.
+
+* [MAX31820](https://datasheets.maximintegrated.com/en/ds/MAX31820.pdf)
+* [DS18B20](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)
 
 ## References 
-Provide any references to other tutorials, blogs and hardware related to the component that could help others get started.
+* [dtoverlay](https://pinout.xyz/pinout/1_wire)

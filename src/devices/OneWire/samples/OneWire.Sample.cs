@@ -19,10 +19,10 @@ namespace Iot.Device.OneWire.Samples
                 await bus.ScanForDevicesAsync();
                 foreach (var dev in bus.EnumerateDevices())
                 {
-                    Console.WriteLine($"Found family '{dev.Family:x2}' device '{dev.DeviceId}' on master '{bus.DeviceId}'");
+                    Console.WriteLine($"Found family '{(int)dev.Family:x2}' device '{dev.DeviceId}' on master '{bus.DeviceId}'");
                     if (dev is OneWireThermometerDevice devTemp)
                     {
-                        Console.WriteLine("Temperature reported by device: " + (await devTemp.ReadTemperatureAsync()).ToString("F2") + "°C");
+                        Console.WriteLine("Temperature reported by device: " + (await devTemp.ReadTemperatureAsync()).Celsius.ToString("F2") + "°C");
                     }
                 }
             }

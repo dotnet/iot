@@ -6,14 +6,26 @@ using System.Collections.Generic;
 
 namespace Iot.Device.OneWire
 {
+    /// <summary>
+    /// Represents a 1-wire controller.
+    /// </summary>
     public static partial class OneWireController
     {
+        /// <summary>
+        /// Enumerate all 1-wire busses in the system.
+        /// </summary>
+        /// <returns>A list of discovered busses.</returns>
         public static IEnumerable<OneWireBus> EnumerateBuses()
         {
             return EnumerateBusesInternal();
         }
 
-        public static IEnumerable<OneWireDevice> EnumerateDevices(int family = -1)
+        /// <summary>
+        /// Enumerate all devices found on 1-wire busses in this system.
+        /// </summary>
+        /// <param name="family">Family id used to filter devices.</param>
+        /// <returns>A list of devices found.</returns>
+        public static IEnumerable<OneWireDevice> EnumerateDevices(OneWireBus.DeviceFamily family = OneWireBus.DeviceFamily.Any)
         {
             foreach (var bus in EnumerateBuses())
             {
@@ -24,9 +36,9 @@ namespace Iot.Device.OneWire
             }
         }
 
-        internal static OneWireDevice CreateDeviceByFamily(OneWireBus bus, string deviceId, int family)
+        internal static OneWireDevice CreateDeviceByFamily(OneWireBus bus, string deviceId, OneWireBus.DeviceFamily family)
         {
-            switch (family)
+            switch ((int)family)
             {
                 case 0x10:
                     goto case 0x42;

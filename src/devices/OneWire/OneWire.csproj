@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
     <LangVersion>Latest</LangVersion>
+    <RuntimeIdentifier>linux-arm</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,7 +13,8 @@
     <Compile Include="FamilyBindings\OneWireThermometerDevice.Linux.cs" />
     <Compile Include="FamilyBindings\OneWireThermometerDevice.cs" />
     <None Include="README.md" />
-    <PackageReference Include="System.Device.Gpio" Version="0.1.0-prerelease*" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Units\Units.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,8 +2,14 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <LangVersion>Latest</LangVersion>
+    <RuntimeIdentifier>linux-arm</RuntimeIdentifier>
   </PropertyGroup>
+
+  <Target Condition="$(BuildingInsideSshDeploy) ==''" Name="PostBuild" AfterTargets="PostBuildEvent">
+    <!--<Exec ConsoleToMSBuild="true" Command="C:\Progra~1\Git\usr\bin\scp.exe /c/Data/Projects/GitHub/iot/src/devices/OneWire/samples/bin/Release/netcoreapp3.0/linux-arm/* pi@192.168.1.114:/home/pi/w1" />-->
+  </Target>
 
   <ItemGroup>
     <ProjectReference Include="../OneWire.csproj" />

@@ -23,14 +23,26 @@ namespace Iot.Device.OneWire
             }
         }
 
-        internal static IEnumerable<OneWireDevice> EnumerateDevices(OneWireBus bus, int family)
+        internal static IEnumerable<OneWireDevice> EnumerateDevices(OneWireBus bus, OneWireBus.DeviceFamily family)
         {
             var devNames = File.ReadLines(Path.Combine(SysfsDevicesPath, bus.DeviceId, "w1_master_slaves"));
             foreach (var devName in devNames)
             {
                 int.TryParse(devName.AsSpan(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var devFamily);
-                if (family > 0 && devFamily == family || family == -1 && devFamily > 0 && devFamily <= 255)
-                    yield return CreateDeviceByFamily(bus, devName, devFamily);
+                switch (family)
+                {
+                    case OneWireBus.DeviceFamily.Any:
+                        yield return CreateDeviceByFamily(bus, devName, (OneWireBus.DeviceFamily)devFamily);
+                        break;
+                    case OneWireBus.DeviceFamily.DigitalThermometer:
+                        if (devFamily == 0x10 || devFamily == 0x28 || devFamily == 0x3B || devFamily == 0x42)
+                            yield return CreateDeviceByFamily(bus, devName, (OneWireBus.DeviceFamily)devFamily);
+                        break;
+                    default:
+                        if (devFamily == (int)family)
+                            yield return CreateDeviceByFamily(bus, devName, (OneWireBus.DeviceFamily)devFamily);
+                        break;
+                }
             }
         }
 
