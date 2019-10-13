@@ -36,7 +36,7 @@ Please contribute. We are primarily interested in the following:
 * Implementations for additional boards.
 * [.NET device bindings](src/devices) for a wide variety of sensors, chips, displays and other components.
 * Request a device binding or protocol that you need for your project ([file an issue](https://github.com/dotnet/iot/issues)).
-* Links to blog posts, articles or tweets that showcase .NET Core being used for great IoT scenarios ([file an issue](https://github.com/dotnet/iot/issues)).
+* Links to blog posts or tweets that showcase .NET Core being used for great IoT scenarios ([file an issue](https://github.com/dotnet/iot/issues)).
 
 # Getting Started
 
