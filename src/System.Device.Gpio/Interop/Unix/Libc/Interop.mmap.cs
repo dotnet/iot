@@ -89,9 +89,7 @@ internal unsafe struct RegisterView
     [FieldOffset(0x98)]
     public fixed uint GPPUDCLK[2];
 
-    /// <summary>
-    /// Pull-up/down Enable on the BCM2711, 4x32 bits, R/W (2 bits per Pin)
-    /// </summary>
+    /// <summary>Pull-up/down Enable on the BCM2711, 4x32 bits, R/W (2 bits per Pin)</summary>
     [FieldOffset(0xE4)]
     public fixed uint GPPUPPDN[4];
 }

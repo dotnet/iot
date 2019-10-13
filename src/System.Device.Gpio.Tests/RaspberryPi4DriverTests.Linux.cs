@@ -1,4 +1,8 @@
-﻿using System.Device.Gpio.Drivers;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Device.Gpio.Drivers;
 using System.Threading;
 using Xunit;
 
@@ -31,7 +35,6 @@ namespace System.Device.Gpio.Tests
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), bestDriver))
             {
                 controller.OpenPin(OpenPin, PinMode.InputPullUp);
-                Thread.Sleep(10);
                 Assert.Equal(PinValue.High, controller.Read(OpenPin));
                 controller.SetPinMode(OpenPin, PinMode.InputPullDown);
                 Assert.Equal(PinValue.Low, controller.Read(OpenPin));
