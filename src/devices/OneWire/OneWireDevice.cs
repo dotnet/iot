@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 
 namespace Iot.Device.OneWire
 {
@@ -17,7 +18,7 @@ namespace Iot.Device.OneWire
         /// <param name="bus">The 1-wire bus the device is found on</param>
         /// <param name="deviceId">The id of the device</param>
         /// <param name="family">The 1-wire fmily id</param>
-        protected internal OneWireDevice(OneWireBus bus, string deviceId, OneWireBus.DeviceFamily family)
+        protected internal OneWireDevice(OneWireBus bus, string deviceId, DeviceFamily family)
         {
             if (family <= 0 || (int)family > 0xff)
                 throw new ArgumentException(nameof(family));
@@ -27,16 +28,34 @@ namespace Iot.Device.OneWire
         }
 
         /// <summary>
+        /// Enumerate all devices found on 1-wire busses in this system.
+        /// </summary>
+        /// <param name="family">Family id used to filter devices.</param>
+        /// <returns>A list of devices found.</returns>
+        public static IEnumerable<OneWireDevice> EnumerateDevices(DeviceFamily family = DeviceFamily.Any)
+        {
+            foreach (var bus in OneWireBus.EnumerateBuses())
+            {
+                foreach (var dev in bus.EnumerateDevices(family))
+                {
+                    yield return dev;
+                }
+            }
+        }
+
+        /// <summary>
         /// The bus where this device is attached.
         /// </summary>
         public OneWireBus Bus { get; }
+
         /// <summary>
         /// The 1-wire id of this device.
         /// </summary>
         public string DeviceId { get; }
+
         /// <summary>
         /// The device family id of this device.
         /// </summary>
-        public OneWireBus.DeviceFamily Family { get; }
+        public DeviceFamily Family { get; }
     }
 }

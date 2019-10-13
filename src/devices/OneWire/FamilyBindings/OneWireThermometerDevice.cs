@@ -18,7 +18,7 @@ namespace Iot.Device.OneWire
         /// <param name="bus">The 1-wire bus the device is found on</param>
         /// <param name="deviceId">The id of the device</param>
         /// <param name="family">The 1-wire fmily id</param>
-        protected internal OneWireThermometerDevice(OneWireBus bus, string deviceId, OneWireBus.DeviceFamily family)
+        protected internal OneWireThermometerDevice(OneWireBus bus, string deviceId, DeviceFamily family)
             : base(bus, deviceId, family)
         {
         }

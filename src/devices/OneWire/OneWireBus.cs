@@ -11,7 +11,7 @@ namespace Iot.Device.OneWire
     /// <summary>
     /// Represents a 1-wire bus.
     /// </summary>
-    public class OneWireBus
+    public partial class OneWireBus
     {
         internal OneWireBus(string deviceId)
         {
@@ -24,26 +24,26 @@ namespace Iot.Device.OneWire
         public string DeviceId { get; }
 
         /// <summary>
-        /// Different device families supported by the driver.
+        /// Enumerate all 1-wire busses in the system.
         /// </summary>
-        public enum DeviceFamily : int
+        /// <returns>A list of discovered busses.</returns>
+        public static IEnumerable<OneWireBus> EnumerateBuses()
         {
-            /// <summary>
-            /// Special device family used when enumerating all devices on a bus.
-            /// </summary>
-            Any = -1,
-            /// <summary>
-            /// Family id of a DS18B20 temperature sensor.
-            /// </summary>
-            Ds18B20 = 0x28,
-            /// <summary>
-            /// Family id of a MAX31820 temperature sensor.
-            /// </summary>
-            Max31820 = 0x28,
-            /// <summary>
-            /// Special family id used to enumerate all temperature sensors.
-            /// </summary>
-            DigitalThermometer = 0x100,
+            return EnumerateBusesInternal();
+        }
+
+        internal static OneWireDevice CreateDeviceByFamily(OneWireBus bus, string deviceId, DeviceFamily family)
+        {
+            switch (family)
+            {
+                case DeviceFamily.DS18S20:
+                case DeviceFamily.Ds18B20: // or Max31820
+                case DeviceFamily.DS1825: // or Max31826, Max31850
+                case DeviceFamily.DS28EA00:
+                    return new OneWireThermometerDevice(bus, deviceId, family);
+                default:
+                    return new OneWireDevice(bus, deviceId, family);
+            }
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Iot.Device.OneWire
         /// <returns>A list of discovered devices.</returns>
         public IEnumerable<OneWireDevice> EnumerateDevices(DeviceFamily family = DeviceFamily.Any)
         {
-            return OneWireController.EnumerateDevices(this, family);
+            return EnumerateDevicesInternal(family);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Iot.Device.OneWire
         /// <returns>Task representing the async work.</returns>
         public Task ScanForDevicesAsync(int numDevices = 5, int numScans = -1)
         {
-            return OneWireController.ScanForDevicesInternal(this, numDevices, numScans);
+            return ScanForDevicesInternal(this, numDevices, numScans);
         }
     }
 }
