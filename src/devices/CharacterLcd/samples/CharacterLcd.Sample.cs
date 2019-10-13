@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Threading;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Globalization;
 using Iot.Device.Mcp23xxx;
 
 namespace Iot.Device.CharacterLcd.Samples
@@ -17,11 +20,12 @@ namespace Iot.Device.CharacterLcd.Samples
         static void Main(string[] args)
         {
             // Sets up a 16x2 character LCD with a hardwired or no backlight.
-            using (Lcd1602 lcd = new Lcd1602(registerSelectPin: 22, enablePin: 17, dataPins: new int[] { 25, 24, 23, 18 }))
-            {
-                lcd.Clear();
-                lcd.Write("Hello World");
-            }
+            //using (Lcd1602 lcd = new Lcd1602(registerSelectPin: 22, enablePin: 17, dataPins: new int[] { 25, 24, 23, 18 }))
+            //{
+            //    lcd.Clear();
+            //    lcd.Write("Hello World");
+            //}
+            UsingHd44780OverI2C();
         }
 
         /// <summary>
@@ -45,6 +49,24 @@ namespace Iot.Device.CharacterLcd.Samples
                 lcd.SetCursorPosition(0, 1);
                 lcd.Write(".NET Core");
             }
+        }
+
+        static void UsingHd44780OverI2C()
+        {
+            using (I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x27)))
+            {
+                LcdInterface lcdInterface = LcdInterface.CreateI2c(i2CDevice, false);
+                using (Hd44780 hd44780 = new Lcd2004(lcdInterface))
+                {
+                    hd44780.UnderlineCursorVisible = false;
+                    hd44780.BacklightOn = true;
+                    hd44780.DisplayOn = true;
+                    hd44780.Clear();
+                    ExtendedSample.Test(hd44780);
+                    
+                }
+            }
+
         }
     }
 }

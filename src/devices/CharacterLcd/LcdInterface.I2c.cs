@@ -59,7 +59,17 @@ namespace Iot.Device.CharacterLcd
 
             public override bool EightBitMode => true;
 
-            public override bool BacklightOn { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public override bool BacklightOn 
+            {
+                get
+                {
+                    // Not implemented / Not supported, but don't throw exceptions here
+                    return true;
+                }
+                set
+                {
+                }
+            }
 
             public override void SendCommand(byte command)
             {

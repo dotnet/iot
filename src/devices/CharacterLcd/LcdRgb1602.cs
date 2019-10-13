@@ -27,7 +27,20 @@ namespace Iot.Device.CharacterLcd
         /// <param name="lcdDevice">The I2C device to control LCD display.</param>
         /// <param name="rgbDevice">The I2C device to control RGB backlight.</param>
         public LcdRgb1602(I2cDevice lcdDevice, I2cDevice rgbDevice)
-            : base(lcdDevice)
+            : base(lcdDevice, true)
+        {
+            _rgbDevice = rgbDevice;
+
+            InitRgb();
+        }
+
+        /// <summary>
+        /// Initializes a new HD44780 LCD with an RGB Backlight.
+        /// </summary>
+        /// <param name="interface">Interface to the display.</param>
+        /// <param name="rgbDevice">The I2C device to control RGB backlight.</param>
+        public LcdRgb1602(LcdInterface @interface, I2cDevice rgbDevice)
+            : base(@interface)
         {
             _rgbDevice = rgbDevice;
 
