@@ -4,13 +4,13 @@ trigger:
     include:
     - master
     - release/3.0
-
+    
 pr:
   branches:
     include:
     - master
     - release/3.0
-
+    
 variables:
   # Cannot use key:value syntax in root defined variables
   - name: Build.Repository.Clean
@@ -112,12 +112,11 @@ stages:
         - script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
             eng/sendToHelix.proj
             /t:Test
-            /p:HardwareDependentProjects=true
             /p:TestOS=Windows_NT
             /p:Configuration=$(_BuildConfig)
             /p:HelixBuild=$(Build.BuildNumber)
             /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
-          displayName: Run Helix Hardware Dependent Tests
+          displayName: Run Helix Tests
           env:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
             HelixAccessToken: $(HelixApiAccessToken)
@@ -129,7 +128,7 @@ stages:
             artifactName: BuiltPackageOutputs
             artifactType: container
           condition: eq(variables['_BuildConfig'], 'Release')
-
+      
       - job: Linux
         container: LinuxContainer
         pool:
@@ -164,22 +163,9 @@ stages:
             /p:TestOS=Unix
             /p:Configuration=$(_BuildConfig)
             /p:HelixBuild=$(Build.BuildNumber)
-            /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.UnitTests.binlog
+            /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
             /p:HelixAccessToken=$(HelixApiAccessToken)
-          displayName: Run Helix Unit Tests
-          env:
-            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: $(HelixApiAccessToken)
-        - script: ./eng/common/msbuild.sh --warnaserror false --ci
-            eng/sendToHelix.proj
-            /t:Test
-            /p:TestOS=Unix
-            /p:Configuration=$(_BuildConfig)
-            /p:HardwareDependentProjects=true
-            /p:HelixBuild=$(Build.BuildNumber)
-            /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.HardwareDependent.binlog
-            /p:HelixAccessToken=$(HelixApiAccessToken)
-          displayName: Run Helix Hardware Dependent Tests
+          displayName: Run Helix Tests
           env:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
             HelixAccessToken: $(HelixApiAccessToken)
