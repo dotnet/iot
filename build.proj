@@ -62,8 +62,7 @@
 
   <Target Name="Test">
     <MSBuild Projects="@(UnitTestProjects)" Targets="VSTest"
-        ContinueOnError="ErrorAndContinue"
-        Properties="Verbosity=normal" />
+        ContinueOnError="ErrorAndContinue" />
     <Error Condition="$(MSBuildLastTaskResult) != 'true'"
         Text="Unit tests failed. Please check the detailed log to find out which ones failed." />
   </Target>
