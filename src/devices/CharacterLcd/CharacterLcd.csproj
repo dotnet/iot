@@ -15,7 +15,7 @@
     <Compile Include="LcdInterface.Gpio.cs" />
     <Compile Include="LcdInterface.I2c.cs" />
     <Compile Include="LcdInterface.I2c4Bit.cs" />
-    <Compile Include="LcdRgb1602.cs" />
+    <Compile Include="LcdRgb.cs" />
     <Compile Include="Registers.cs" />
   </ItemGroup>
 

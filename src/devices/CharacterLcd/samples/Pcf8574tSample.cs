@@ -208,7 +208,7 @@ namespace Iot.Device.CharacterLcd.Samples
             Console.WriteLine(result);
         }
 
-        static void SetBacklightColorTest(LcdRgb1602 lcd)
+        static void SetBacklightColorTest(LcdRgb lcd)
         {
             Color[] colors = { Color.Red, Color.Green, Color.Blue, Color.Aqua, Color.Azure,
                 Color.Brown, Color.Chocolate, Color.LemonChiffon, Color.Lime, Color.Tomato, Color.Yellow };

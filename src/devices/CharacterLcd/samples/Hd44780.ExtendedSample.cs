@@ -55,9 +55,7 @@ namespace Iot.Device.CharacterLcd.Samples
             TestPrompt("Wrap", lcd, l => l.Write(new string('*', 80) + ">>>>>"));
             TestPrompt("Perf", lcd, PerfTests);
 
-#if USERGB
             TestPrompt("Colors", lcd, SetBacklightColorTest);
-#endif
 
             // Now to something at least a bit usable...
             lcd.Clear();
@@ -217,8 +215,13 @@ namespace Iot.Device.CharacterLcd.Samples
             Console.WriteLine(result);
         }
 
-        static void SetBacklightColorTest(LcdRgb1602 lcd)
+        static void SetBacklightColorTest(Hd44780 lcd)
         {
+            var colorLcd = lcd as LcdRgb;
+            if (colorLcd == null)
+            {
+                Console.WriteLine("Color backlight not supported");
+            }
             Color[] colors = { Color.Red, Color.Green, Color.Blue, Color.Aqua, Color.Azure,
                 Color.Brown, Color.Chocolate, Color.LemonChiffon, Color.Lime, Color.Tomato, Color.Yellow };
 
@@ -227,12 +230,12 @@ namespace Iot.Device.CharacterLcd.Samples
                 lcd.Clear();
                 lcd.Write(color.Name);
 
-                lcd.SetBacklightColor(color);
+                colorLcd.SetBacklightColor(color);
                 System.Threading.Thread.Sleep(1000);
             }
 
             lcd.Clear();
-            lcd.SetBacklightColor(Color.White);
+            colorLcd.SetBacklightColor(Color.White);
         }
 
         static void TestPrompt<T>(string test, T lcd, Action<T> action) where T : Hd44780
