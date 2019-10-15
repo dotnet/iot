@@ -34,7 +34,7 @@ namespace Iot.Device.Common
 
             double steadman = 0.5 * (tf + 61 + ((tf - 68) * 1.2) + (rh * 0.094));
 
-            if (steadman < 80)
+            if (steadman + tf < 160) // if the average is lower than 80F, use Steadman, otherwise use Rothfusz.
                 return Temperature.FromFahrenheit(steadman);
 
             double rothfuszRegression = (-42.379)
