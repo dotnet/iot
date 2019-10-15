@@ -14,6 +14,7 @@ namespace Iot.Device.Common
     {
         #region TemperatureAndRelativeHumidity
         // Formulas taken from http://www.reahvac.com/tools/humidity-formulas/
+        // Extra notes for heat index taken from https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
         
         /// <summary>
         /// The heat index (or apparent temperature) is used to measure the amount of discomfort
@@ -30,7 +31,13 @@ namespace Iot.Device.Common
             double rh = relativeHumidity;
             double tf2 = Math.Pow(tf, 2);
             double rh2 = Math.Pow(rh, 2);
-            return Temperature.FromFahrenheit((-42.379)
+
+            var steadman = 0.5 * (tf + 61 + ((tf - 68) * 1.2) + (rh * 0.094));
+
+            if (steadman < 80)
+                return Temperature.FromFahrenheit(steadman);
+
+            var rothfuszRegression = (-42.379)
                 + (2.04901523 * tf)
                 + (10.14333127 * rh)
                 - (0.22475541 * tf * rh)
@@ -38,7 +45,18 @@ namespace Iot.Device.Common
                 - (5.481717 * 0.01 * rh2)
                 + (1.22874 * 0.001 * tf2 * (rh))
                 + (8.5282 * 0.0001 * tf * rh2)
-                - (1.99 * 0.000001 * tf2 * rh2));
+                - (1.99 * 0.000001 * tf2 * rh2);
+
+            if (rh < 13 && tf >= 80 && tf <= 112)
+            { // adjustment
+                rothfuszRegression += ((13 - rh) / 4) * Math.Sqrt((17 - Math.Abs(tf - 95)) / 17);
+            }
+            else if (rh > 85 && tf >= 80 && tf <= 87)
+            { // adjustment
+                rothfuszRegression += ((rh - 85) / 10) * ((87 - tf) / 5);
+            }
+
+            return Temperature.FromFahrenheit(rothfuszRegression);
         }
 
         /// <summary>
