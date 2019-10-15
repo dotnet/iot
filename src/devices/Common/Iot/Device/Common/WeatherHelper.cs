@@ -32,12 +32,12 @@ namespace Iot.Device.Common
             double tf2 = Math.Pow(tf, 2);
             double rh2 = Math.Pow(rh, 2);
 
-            var steadman = 0.5 * (tf + 61 + ((tf - 68) * 1.2) + (rh * 0.094));
+            double steadman = 0.5 * (tf + 61 + ((tf - 68) * 1.2) + (rh * 0.094));
 
             if (steadman < 80)
                 return Temperature.FromFahrenheit(steadman);
 
-            var rothfuszRegression = (-42.379)
+            double rothfuszRegression = (-42.379)
                 + (2.04901523 * tf)
                 + (10.14333127 * rh)
                 - (0.22475541 * tf * rh)
