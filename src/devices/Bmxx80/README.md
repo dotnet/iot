@@ -4,7 +4,7 @@
 
 BMxx80 is a device family that senses temperature, barometric pressure, altitude, humidity and VOC gas.
 
-SPI and I²C can be used to communicate with the device (only I²C implemented so far).
+SPI and I2C can be used to communicate with the device (only I2C implemented so far).
 
 ## Device Family
 The implementation supports the following devices:
@@ -17,7 +17,7 @@ The implementation supports the following devices:
 
 3 examples on how to use this device binding are available in the [samples](samples) folder.
 
-The following fritzing diagram illustrates one way to wire up the BMP280 with a Raspberry Pi using I²C:
+The following fritzing diagram illustrates one way to wire up the BMP280 with a Raspberry Pi using IÂ²C:
 
 ![Raspberry Pi Breadboard diagram](samples/rpi-bmp280_i2c.png)
 
@@ -32,13 +32,13 @@ I2C:
 
 | Bmp280 | Raspberry |
 |--------|:---------:|
-|SCK| I²C clock pin|
-|SDI| I²C data pin|
+|SCK| I2C clock pin|
+|SDI| I2C data pin|
 
 ### Connection Type
 
 The following connection types are supported by this binding.
 
-- [X] I²C
+- [X] I2C
 - [ ] SPI
 
