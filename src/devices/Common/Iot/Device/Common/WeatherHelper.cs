@@ -107,7 +107,7 @@ namespace Iot.Device.Common
         {
             var avp = CalculateActualVaporPressure(airTemperature, relativeHumidity).Hectopascal;
             var lavp = Math.Log(avp);
-            return Temperature.FromCelsius(((-430.22 + (237.7 * lavp)) / (19.08 - lavp)));
+            return Temperature.FromCelsius((-430.22 + (237.7 * lavp)) / (19.08 - lavp));
         }
 
         /// <summary>
