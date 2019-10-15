@@ -26,7 +26,7 @@ namespace Iot.Device.Samples
 
             // The I2C bus ID on the Raspberry Pi 3.
             const int busId = 1;
-            //set this to the current sea level pressure in the area for correct altitude readings
+            // set this to the current sea level pressure in the area for correct altitude readings
             var defaultSeaLevelPressure = Pressure.MeanSeaLevel;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bme680.DefaultI2cAddress);
