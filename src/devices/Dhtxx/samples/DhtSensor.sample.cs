@@ -16,7 +16,7 @@ namespace Iot.Device.DHTxx.Samples
         {
         Console.WriteLine("Hello DHT!");
 
-        // Init DHT10 through I²C
+        // Init DHT10 through I2C
         I2cConnectionSettings settings = new I2cConnectionSettings(1, Dht10.DefaultI2cAddress);
         I2cDevice device = I2cDevice.Create(settings);
 
