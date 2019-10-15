@@ -64,12 +64,12 @@ namespace Iot.Device.SenseHat.Samples
                     Console.WriteLine($"Angular rate: {sh.AngularRate}DPS");
                     Console.WriteLine($"Magnetic induction: {sh.MagneticInduction}gauss");
                     Console.WriteLine($"Relative humidity: {humValue:0.#}%");
-                    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius} \u00B0C");
-                    Console.WriteLine($"Summer simmer index: {WeatherHelper.CalculateSummerSimmerIndex(tempValue, humValue).Celsius} \u00B0C");
-                    Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.CalculateSaturatedVaporPressure(tempValue).Hectopascal} hPa");
-                    Console.WriteLine($"Actual vapor pressure: {WeatherHelper.CalculateActualVaporPressure(tempValue, humValue).Hectopascal} hPa");
-                    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius} \u00B0C");
-                    Console.WriteLine($"Absolute humidity: {WeatherHelper.CalculateAbsoluteHumidity(tempValue, humValue)} g/m\u0179");                    
+                    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Summer simmer index: {WeatherHelper.CalculateSummerSimmerIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.CalculateSaturatedVaporPressure(tempValue).Hectopascal:0.##}hPa");
+                    Console.WriteLine($"Actual vapor pressure: {WeatherHelper.CalculateActualVaporPressure(tempValue, humValue).Hectopascal:0.##}hPa");
+                    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Absolute humidity: {WeatherHelper.CalculateAbsoluteHumidity(tempValue, humValue):0.#}g/m\u0179");                    
 
                     Thread.Sleep(1000);
                 }
