@@ -13,15 +13,15 @@ namespace Iot.Device.OneWire
     /// </summary>
     public partial class OneWireBus
     {
-        internal OneWireBus(string deviceId)
+        internal OneWireBus(string busId)
         {
-            DeviceId = deviceId;
+            BusId = busId;
         }
 
         /// <summary>
         /// The 1-wire device id.
         /// </summary>
-        public string DeviceId { get; }
+        public string BusId { get; }
 
         /// <summary>
         /// Enumerate all 1-wire busses in the system.
@@ -32,17 +32,17 @@ namespace Iot.Device.OneWire
             return EnumerateBusesInternal();
         }
 
-        internal static OneWireDevice CreateDeviceByFamily(OneWireBus bus, string deviceId, DeviceFamily family)
+        internal OneWireDevice CreateDeviceByFamily(string deviceId, DeviceFamily family)
         {
             switch (family)
             {
-                case DeviceFamily.DS18S20:
+                case DeviceFamily.Ds18S20:
                 case DeviceFamily.Ds18B20: // or Max31820
-                case DeviceFamily.DS1825: // or Max31826, Max31850
-                case DeviceFamily.DS28EA00:
-                    return new OneWireThermometerDevice(bus, deviceId, family);
+                case DeviceFamily.Ds1825: // or Max31826, Max31850
+                case DeviceFamily.Ds28EA00:
+                    return new OneWireThermometerDevice(this, deviceId, family);
                 default:
-                    return new OneWireDevice(bus, deviceId, family);
+                    return new OneWireDevice(this, deviceId, family);
             }
         }
 
@@ -62,8 +62,11 @@ namespace Iot.Device.OneWire
         /// <param name="numDevices">Max number of devices to scan for before finishing.</param>
         /// <param name="numScans">Number of scans to do to find numDevices devices.</param>
         /// <returns>Task representing the async work.</returns>
-        public Task ScanForDevicesAsync(int numDevices = 5, int numScans = -1)
+        public Task ScanForDevicesAsync(int numDevices = 64, int numScans = -1)
         {
+            // Default 64 used to align with Linux driver
+            // https://github.com/torvalds/linux/blob/v5.3/drivers/w1/w1.c#L46
+
             return ScanForDevicesInternal(this, numDevices, numScans);
         }
     }

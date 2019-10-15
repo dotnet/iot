@@ -21,22 +21,22 @@ namespace Iot.Device.OneWire
 
         internal IEnumerable<OneWireDevice> EnumerateDevicesInternal(DeviceFamily family)
         {
-            var devNames = File.ReadLines(Path.Combine(SysfsDevicesPath, DeviceId, "w1_master_slaves"));
+            var devNames = File.ReadLines(Path.Combine(SysfsDevicesPath, BusId, "w1_master_slaves"));
             foreach (var devName in devNames)
             {
                 int.TryParse(devName.AsSpan(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var devFamily);
                 switch (family)
                 {
                     case DeviceFamily.Any:
-                        yield return CreateDeviceByFamily(this, devName, (DeviceFamily)devFamily);
+                        yield return CreateDeviceByFamily(devName, (DeviceFamily)devFamily);
                         break;
                     case DeviceFamily.DigitalThermometer:
                         if (devFamily == 0x10 || devFamily == 0x28 || devFamily == 0x3B || devFamily == 0x42)
-                            yield return CreateDeviceByFamily(this, devName, (DeviceFamily)devFamily);
+                            yield return CreateDeviceByFamily(devName, (DeviceFamily)devFamily);
                         break;
                     default:
                         if (devFamily == (int)family)
-                            yield return CreateDeviceByFamily(this, devName, (DeviceFamily)devFamily);
+                            yield return CreateDeviceByFamily(devName, (DeviceFamily)devFamily);
                         break;
                 }
             }
@@ -44,8 +44,8 @@ namespace Iot.Device.OneWire
 
         internal static async Task ScanForDevicesInternal(OneWireBus bus, int numDevices, int numScans)
         {
-            await File.WriteAllTextAsync(Path.Combine(SysfsDevicesPath, bus.DeviceId, "w1_master_max_slave_count"), numDevices.ToString());
-            await File.WriteAllTextAsync(Path.Combine(SysfsDevicesPath, bus.DeviceId, "w1_master_search"), numScans.ToString());
+            await File.WriteAllTextAsync(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_max_slave_count"), numDevices.ToString());
+            await File.WriteAllTextAsync(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_search"), numScans.ToString());
         }
     }
 }

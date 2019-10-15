@@ -16,7 +16,7 @@ namespace Iot.Device.OneWire
             // Expected data format:
             // 7f 01 4b 46 7f ff 01 10 33 : crc=33 YES
             // 7f 01 4b 46 7f ff 01 10 33 t=23937
-            var data = await File.ReadAllTextAsync(Path.Combine(OneWireBus.SysfsDevicesPath, Bus.DeviceId, DeviceId, "w1_slave"));
+            var data = await File.ReadAllTextAsync(Path.Combine(OneWireBus.SysfsDevicesPath, Bus.BusId, DeviceId, "w1_slave"));
             if (!data.Contains("YES"))
                 throw new IOException("Unable to read temperature from device.");
             var tempIdx = data.LastIndexOf("t=");

@@ -25,11 +25,11 @@ namespace Iot.Device.OneWire.Samples
                 // More advanced way, with rescanning the bus and iterating per 1-wire bus
                 foreach (var bus in OneWireBus.EnumerateBuses())
                 {
-                    Console.WriteLine($"Found bus '{bus.DeviceId}', scanning for devices ...");
+                    Console.WriteLine($"Found bus '{bus.BusId}', scanning for devices ...");
                     await bus.ScanForDevicesAsync();
                     foreach (var dev in bus.EnumerateDevices())
                     {
-                        Console.WriteLine($"Found family '{(int)dev.Family:x2}' device '{dev.DeviceId}' on master '{bus.DeviceId}'");
+                        Console.WriteLine($"Found family '{(int)dev.Family:x2}' device '{dev.DeviceId}' on master '{bus.BusId}'");
                         if (dev is OneWireThermometerDevice devTemp)
                         {
                             Console.WriteLine("Temperature reported by device: " + (await devTemp.ReadTemperatureAsync()).Celsius.ToString("F2") + "\u00B0C");
