@@ -22,7 +22,7 @@ After that, you can run the tests with the RaspberryPiDriver (which is the defau
 ```
 dotnet test --filter RaspberryPiDriverTests System.Device.Gpio.sln 
 ```
-Depending on the version of the Pi and the installed linux version, it may be required to run the tests as root:
+Depending on the version of the Pi and the installed Linux distribution, it may be required to run the tests as root:
 ```
 sudo dotnet test --filter RaspberryPiDriverTests System.Device.Gpio.sln 
 ```
