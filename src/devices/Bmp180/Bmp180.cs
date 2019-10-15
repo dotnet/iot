@@ -91,7 +91,7 @@ namespace Iot.Device.Bmp180
         ///  Sea-level pressure
         /// </param>
         /// <returns>
-        ///  Height in metres from the sensor
+        ///  Height in meters from the sensor
         /// </returns>
         [ObsoleteAttribute("ReadAltitude is obsolete. Please use Iot.Device.Common.WeatherHelper instead.")]
         public double ReadAltitude(Pressure seaLevelPressure)
@@ -103,7 +103,7 @@ namespace Iot.Device.Bmp180
         ///  Calculates the altitude in meters from the mean sea-level pressure.
         /// </summary>
         /// <returns>
-        ///  Height in metres from the sensor
+        ///  Height in meters from the sensor
         /// </returns>
         [ObsoleteAttribute("ReadAltitude is obsolete. Please use Iot.Device.Common.WeatherHelper instead.")]
         public double ReadAltitude()
@@ -115,7 +115,7 @@ namespace Iot.Device.Bmp180
         ///  Calculates the pressure at sea level when given a known altitude in meter
         /// </summary>
         /// <param name="altitude" >
-        ///  Altitude in metres
+        ///  Altitude in meters
         /// </param>
         /// <returns>
         ///  Pressure
