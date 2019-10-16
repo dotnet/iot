@@ -5,9 +5,14 @@ This shows how to run the tests on a Raspberry Pi. On other platforms, things sh
 (to be extended)
 
 ## Building directly on the Pi
-Prerequisites: 
-- Installed .NET SDK with the "dotnet" executable in the path
-- Locally cloned repository
+First, clone the repository on the pi: 
+```
+git clone https://github.com/dotnet/iot
+cd iot
+```
+Now you can 
+- Either download and install the NET Core SDK from https://get.dot.net/ (the Raspberry Pi with the default 32 Bit Raspbian Linux requires the ARM32 version) or 
+- run `./build.sh` in the checkout directory. This will install the correct NET Core SDK in the .dotnet subfolder of the working copy.
 
 Build System.Device.Gpio.dll:
 ```
