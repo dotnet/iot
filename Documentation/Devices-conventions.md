@@ -4,7 +4,7 @@ This document is meant to provide guidelines. If you think the guidelines don't 
 
 ## Expose everything device has vs. expose simple functionality
 
-All APIs should be as simple as they can be and simplicity is the most important when desiging APIs.
+All APIs should be as simple as they can be and simplicity is the most important when designing APIs.
 
 It is acceptable for the device to provide full functionality exposed by the device but if full functionality makes simple stuff hardly discoverable or harder to reason about then you should consider making advanced functionality `protected` or move it to a separate class.
 

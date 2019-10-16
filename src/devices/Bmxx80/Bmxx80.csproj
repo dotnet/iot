@@ -9,6 +9,9 @@
   <ItemGroup>
     <Compile Include="Bme280.cs" />
     <Compile Include="Bme680.cs" />
+    <Compile Include="Bme680HeaterProfile.cs" />
+    <Compile Include="Bme680HeaterProfileConfig.cs" />
+    <Compile Include="Bme680Mask.cs" />
     <Compile Include="Bmp280.cs" />
     <Compile Include="Bmx280Base.cs" />
     <Compile Include="Bmxx80Base.cs" />
@@ -17,7 +20,8 @@
     <Compile Include="CalibrationData\Bmp280CalibrationData.cs" />
     <Compile Include="CalibrationData\Bmxx80CalibrationData.cs" />
     <Compile Include="DeviceStatus.cs" />
-    <Compile Include="FilteringMode.cs" />
+    <Compile Include="FilteringMode\Bme680FilteringMode.cs" />
+    <Compile Include="FilteringMode\Bmx280FilteringMode.cs" />
     <Compile Include="PowerMode\Bme680PowerMode.cs" />
     <Compile Include="PowerMode\Bmx280PowerMode.cs" />
     <Compile Include="Register\Bme680Register.cs" />

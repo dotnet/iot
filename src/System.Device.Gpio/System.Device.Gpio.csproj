@@ -10,16 +10,16 @@
     <IsPackable>true</IsPackable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePlatformNotSupportedAssembly Condition="'$(RuntimeIdentifier)' == ''">true</GeneratePlatformNotSupportedAssembly>
-    <Configurations>Debug;Release;Windows-Debug;Linux-Debug</Configurations>
+    <Configurations>Windows-Debug;Linux-Debug;Linux-Release;Windows-Release;Debug;Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="winmd\**" />
     <EmbeddedResource Remove="winmd\**" />
     <None Remove="winmd\**" />
-    <PackageReference Include="Microsoft.Win32.Registry" Version="4.5.0" /> <!-- This is Windows specific -->
-    <PackageReference Include="System.Runtime.WindowsRuntime" Version="4.3.0" /> <!-- This is Windows specific -->
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.1" />
-    <PackageReference Include="System.Memory" Version="4.5.1" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="$(MicrosoftWin32RegistryPackageVersion)" /> <!-- This is Windows specific -->
+    <PackageReference Include="System.Runtime.WindowsRuntime" Version="$(SystemRuntimeWindowsRuntimePackageVersion)" /> <!-- This is Windows specific -->
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
+    <PackageReference Include="System.Memory" Version="4.5.3" />
     <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" /> <!-- This is Windows specific -->
     <PackageReference Include="Microsoft.DotNet.GenAPI" Version="$(MicrosoftDotNetGenApiPackageVersion)">
       <PrivateAssets>all</PrivateAssets>

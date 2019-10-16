@@ -19,7 +19,7 @@ namespace DeviceApiTester.Commands.Pwm
         [Option('f', "frequency", HelpText = "The frequency in hertz.", Required = false, Default = 400)]
         public int Frequency { get; set; }
 
-        [Option('d', "dutycycle", HelpText = "The duty cycle percentage for PWM output from 0.0 - 1.0.", Required = false, Default = 0.5)]
-        public double DutyCyclePercentage { get; set; }
+        [Option('d', "dutycycle", HelpText = "The duty cycle for PWM output from 0.0 - 1.0.", Required = false, Default = 0.5)]
+        public double DutyCycle { get; set; }
     }
 }

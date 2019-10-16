@@ -23,7 +23,7 @@ namespace System.Device.Pwm.Drivers
         // Use to determine the length of the pulse
         // 100 % = full output. 0%= nothing as output
         private double _percentage;
-      
+
         // Determines if a high precision timer should be used.
         private bool _usePrecisionTimer = false;
 
@@ -58,7 +58,7 @@ namespace System.Device.Pwm.Drivers
         /// <summary>
         /// The duty cycle percentage represented as a value between 0.0 and 1.0.
         /// </summary>
-        public override double DutyCyclePercentage
+        public override double DutyCycle
         {
             get => _percentage;
             set
@@ -77,10 +77,10 @@ namespace System.Device.Pwm.Drivers
         /// </summary>
         /// <param name="pinNumber">The GPIO pin number to be used</param>
         /// <param name="frequency">The frequency in hertz. Defaults to 400</param>
-        /// <param name="dutyCyclePercentage">The duty cycle percentage represented as a value between 0.0 and 1.0</param>
+        /// <param name="dutyCycle">The duty cycle percentage represented as a value between 0.0 and 1.0</param>
         /// <param name="usePrecisionTimer">Determines if a high precision timer should be used.</param>
         /// <param name="controller">The <see cref="GpioController"/> to which <paramref name="pinNumber"/> belongs to. Null defaults to board GpioController</param>
-        public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCyclePercentage = 0.5, bool usePrecisionTimer = false, GpioController controller = null)
+        public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCycle = 0.5, bool usePrecisionTimer = false, GpioController controller = null)
         {
             _controller = controller ?? new GpioController();
             if (_controller == null)
@@ -98,7 +98,7 @@ namespace System.Device.Pwm.Drivers
             _frequency = frequency;
             _pulseFrequency = (frequency > 0) ? 1.0 / frequency * 1000.0 : 0.0;
 
-            DutyCyclePercentage = dutyCyclePercentage;
+            DutyCycle = dutyCycle;
         }
 
         private void UpdateRange()

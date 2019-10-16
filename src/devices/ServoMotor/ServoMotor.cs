@@ -92,8 +92,8 @@ namespace Iot.Device.ServoMotor
         /// <param name="microseconds">The pulse width, in microseconds, to write to the servo motor.</param>
         public void WritePulseWidth(int microseconds)
         {
-            double dutyCyclePercentage = (double)microseconds / 1_000_000 * _pwmChannel.Frequency; // Convert to seconds 1st.
-            _pwmChannel.DutyCyclePercentage = dutyCyclePercentage;
+            double dutyCycle = (double)microseconds / 1_000_000 * _pwmChannel.Frequency; // Convert to seconds 1st.
+            _pwmChannel.DutyCycle = dutyCycle;
         }
 
         /// <inheritdoc/>

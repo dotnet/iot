@@ -12,21 +12,18 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ### Analog/Digital converters
 
+* [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [ADS1115 - Analog to Digital Converter](Ads1115/README.md)
-* [MCP3008 - 10-bit Analog to Digital Converter](Mcp3008/README.md)
 * [Mcp3428 - Analog to Digital Converter (I2C)](Mcp3428/README.md)
+* [MCP3xxx family of Analog to Digital Converters](Mcp3xxx/README.md)
 
 ### Accelerometers
 
 * [ADXL345 - Accelerometer](Adxl345/README.md)
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [Sense HAT](SenseHat/README.md)
-
-### Volatile Organic Compound sensors
-
-* [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
-* [BMxx80 Device Family](Bmxx80/README.md)
 
 ### Gas sensors
 
@@ -35,6 +32,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ### Light sensor
 
+* [Bh1745 - RGB Sensor](Bh1745/README.md)
 * [BH1750FVI - Ambient Light Sensor](Bh1750fvi/README.md)
 * [MAX44009 - Ambient Light Sensor](Max44009/README.md)
 * [TCS3472x Sensors](Tcs3472x/README.md)
@@ -60,6 +58,8 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [HTS221 - Capacitive digital sensor for relative humidity and temperature](Hts221/README.md)
 * [LM75 - Digital Temperature Sensor](Lm75/README.md)
 * [LPS25H - Piezoresistive pressure and thermometer sensor](Lps25h/README.md)
+* [MLX90614 - Infra Red Thermometer](Mlx90614/README.md)
+* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
 * [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
@@ -68,6 +68,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [Sense HAT](SenseHat/README.md)
 
 ### Compasses
@@ -83,19 +84,22 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [28BYJ-48 Stepper Motor 5V 4-Phase 5-Wire & ULN2003 Driver Board](Uln2003/README.md)
 * [DC Motor Controller](DCMotor/README.md)
-* [Servomotor](Servo/README.md)
+* [Servo Motor](ServoMotor/README.md)
 
 ### Inertial Measurement Units
 
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [Sense HAT](SenseHat/README.md)
 
 ### Magnetometers
 
+* [AK8963 - Magnetometer](Ak8963/README.md)
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [HMC5883L - 3 Axis Digital Compass](Hmc5883l/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [Sense HAT](SenseHat/README.md)
 
 ### Liquid Crystal Displays
@@ -134,14 +138,18 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ### Displays
 
+* [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [Max7219 (LED Matrix driver)](Max7219/README.md)
 * [RGBLedMatrix - RGB LED Matrix](RGBLedMatrix/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [Solomon Systech Ssd1306 OLED display](Ssd13xx/README.md)
+* [Solomon Systech Ssd1351 - CMOS OLED](Ssd1351/README.md)
+* [TM1637 - Segment Display](Tm1637/README.md)
 * [Ws28xx LED drivers](Ws28xx/README.md)
 
 ### GPIO Expanders
 
+* [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [Mcp23xxx - I/O Expander device family](Mcp23xxx/README.md)
 * [NXP/TI PCx857x](Pcx857x/README.md)
 * [Pca95x4 - I2C GPIO Expander](Pca95x4/README.md)
@@ -157,14 +165,18 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ### Touch sensors
 
+* [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
 
 ### Wireless communication modules
 
 * [nRF24L01 - Single Chip 2.4 GHz Transceiver](Nrf24l01/README.md)
+* [Radio Receiver](RadioReceiver/README.md)
+* [Radio Transmitter](RadioTransmitter/README.md)
 
 ### PWM libraries/modules
 
+* [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [Pca9685 - I2C PWM Driver](Pca9685/README.md)
 * [Software PWM](SoftPwm/README.md)
 
@@ -178,11 +190,22 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ### LED drivers
 
+* [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
+* [On-board LED driver](BoardLed/README.md)
 * [Ws28xx LED drivers](Ws28xx/README.md)
 
 ### SPI libraries/modules
 
 * [Software implementation of SPI](SoftwareSpi/README.md)
+
+### RFID/NFC modules
+
+* [PN532 - RFID and NFC reader](Pn532/README.md)
+* [RFID shared elements](Card/README.md)
+
+### Media libraries
+
+* [Still image recording library](Media/README.md)
 
 </categorizedDevices>
 
@@ -192,7 +215,7 @@ These bindings are distributed via the [Iot.Device.Bindings](https://www.nuget.o
 
 ## Contributing a binding
 
-Anyone can contribute a binding. Please do! Bindings should follow the model that is used for the [Mcp23xxx](Mcp23xxx/README.md) or [Mcp3008](Mcp3008/README.md) implementations.  There is a [Device Binding Template](../../tools/templates/DeviceBindingTemplate/README.md) that can help you get started, as well.
+Anyone can contribute a binding. Please do! Bindings should follow the model that is used for the [Mcp23xxx](Mcp23xxx/README.md) or [Mcp3xxx](Mcp3xxx/README.md) implementations.  There is a [Device Binding Template](../../tools/templates/DeviceBindingTemplate/README.md) that can help you get started, as well.
 
 Bindings must:
 

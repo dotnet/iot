@@ -64,7 +64,7 @@ namespace Iot.Device.Nrf24l01.Samples
             }
             Console.WriteLine();
 
-            Console.WriteLine($"Massage: {res}");
+            Console.WriteLine($"Message: {res}");
             Console.WriteLine();
         }
     }

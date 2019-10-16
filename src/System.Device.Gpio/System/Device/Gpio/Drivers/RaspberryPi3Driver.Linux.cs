@@ -2,22 +2,31 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
 
 namespace System.Device.Gpio.Drivers
 {
     public unsafe partial class RaspberryPi3Driver : GpioDriver
     {
+        private const int ENOENT = 2; // error indicates that an entity doesn't exist
         private RegisterView* _registerViewPointer = null;
-        private const int GpioRegisterOffset = 0x00;
         private static readonly object s_initializationLock = new object();
         private static readonly object s_sysFsInitializationLock = new object();
+        private const uint PeripheralBaseAddressBcm2835 = 0x2000_0000;
+        private const uint PeripheralBaseAddressBcm2836 = 0x3F00_0000;
+        private const uint PeripheralBaseAddressBcm2838 = 0xFE00_0000;
+        private const uint PeripheralBaseAddressVideocore = 0x7E00_0000;
+        private const uint InvalidPeripheralBaseAddress = 0xFFFF_FFFF;
+        private const uint GpioPeripheralOffset = 0x0020_0000; // offset from the peripheral base address of the GPIO registers
         private const string GpioMemoryFilePath = "/dev/gpiomem";
+        private const string MemoryFilePath = "/dev/mem";
+        private const string DeviceTreeRanges = "/proc/device-tree/soc/ranges";
         private UnixDriver _sysFSDriver = null;
         private readonly IDictionary<int, PinMode> _sysFSModes = new Dictionary<int, PinMode>();
 
@@ -328,6 +337,46 @@ namespace System.Device.Gpio.Drivers
             set {  *(ulong*)(_registerViewPointer->GPCLR) = value; }
         }
 
+        /// <summary>
+        /// Returns the peripheral base address on the CPU bus of the raspberry pi based on the ranges set within the device tree.
+        /// </summary>
+        /// <remarks>
+        /// The range examined in this method is essentially a mapping between where the peripheral base address on the videocore bus and its
+        /// address on the cpu bus. The return value is 32bit (is in the first 4GB) even on 64 bit operating systems (debian / ubuntu tested) but may change in the future
+        /// This method is based on bcm_host_get_peripheral_address() in libbcm_host which may not exist in all linux distributions.
+        /// </remarks>
+        /// <returns>This returns the peripheral base address as a 32 bit address or 0xFFFFFFFF when in error.</returns>
+        private uint GetPeripheralBaseAddress()
+        {
+            uint cpuBusPeripheralBaseAddress = InvalidPeripheralBaseAddress;
+            uint vcBusPeripheralBaseAddress;
+
+            using (BinaryReader rdr = new BinaryReader(File.Open(DeviceTreeRanges, FileMode.Open, FileAccess.Read)))
+            {
+                // get the Peripheral Base Address on the VC bus from the device tree this is to be used to verify that
+                // the right thing is being read and should always be 0x7E000000
+                vcBusPeripheralBaseAddress = BinaryPrimitives.ReadUInt32BigEndian(rdr.ReadBytes(4));
+
+                // get the Peripheral Base Address on the CPU bus from the device tree.
+                cpuBusPeripheralBaseAddress = BinaryPrimitives.ReadUInt32BigEndian(rdr.ReadBytes(4));
+
+                // if the CPU bus Peripheral Base Address is 0 then assume that this is a 64 bit address and so read the next 32 bits.
+                if (cpuBusPeripheralBaseAddress == 0)
+                {
+                    cpuBusPeripheralBaseAddress = BinaryPrimitives.ReadUInt32BigEndian(rdr.ReadBytes(4));
+                }
+
+                // if the address values don't fall withing known values for the chipsets associated with the Pi2, Pi3 and Pi4 then assume an error
+                // These addresses are coded into the device tree and the dts source for the device tree is within https://github.com/raspberrypi/linux/tree/rpi-4.19.y/arch/arm/boot/dts
+                if (vcBusPeripheralBaseAddress != PeripheralBaseAddressVideocore || !(cpuBusPeripheralBaseAddress == PeripheralBaseAddressBcm2835 || cpuBusPeripheralBaseAddress == PeripheralBaseAddressBcm2836 || cpuBusPeripheralBaseAddress == PeripheralBaseAddressBcm2838))
+                {
+                    cpuBusPeripheralBaseAddress = InvalidPeripheralBaseAddress;
+                }
+            }
+
+            return cpuBusPeripheralBaseAddress;
+        }
+
         private void InitializeSysFS()
         {
             if (_sysFSDriver != null)
@@ -346,6 +395,10 @@ namespace System.Device.Gpio.Drivers
 
         private void Initialize()
         {
+            uint gpioRegisterOffset = 0;
+            int fileDescriptor;
+            int win32Error;
+
             if (_registerViewPointer != null)
             {
                 return;
@@ -358,13 +411,60 @@ namespace System.Device.Gpio.Drivers
                     return;
                 }
 
-                int fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
+                // try and open /dev/gpiomem
+                fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
                 if (fileDescriptor == -1)
                 {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
+                    win32Error = Marshal.GetLastWin32Error();
+
+                    // if the failure is NOT because /dev/gpiomem doesn't exist then throw an exception at this point.
+                    // if it were anything else then it is probably best not to try and use /dev/mem on the basis that
+                    // it would be better to solve the issue rather than use a method that requires root privileges
+                    if (win32Error != ENOENT)
+                    {
+                        throw new IOException($"Error {win32Error} initializing the Gpio driver.");
+                    }
+
+                    // if /dev/gpiomem doesn't seem to be available then let's try /dev/mem
+                    fileDescriptor = Interop.open(MemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
+                    if (fileDescriptor == -1)
+                    {
+                        throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
+                    }
+                    else // success so set the offset into memory of the gpio registers
+                    {
+                        gpioRegisterOffset = InvalidPeripheralBaseAddress;
+
+                        try
+                        {
+                            // get the periphal base address from the libbcm_host library which is the reccomended way
+                            // according to the RasperryPi website
+                            gpioRegisterOffset = Interop.libbcmhost.bcm_host_get_peripheral_address();
+
+                            // if we get zero back then we use our own internal method. This can happen 
+                            // on a Pi4 if the userland libraries haven't been updated and was fixed in Jul/Aug 2019.
+                            if (gpioRegisterOffset == 0)
+                            {
+                                gpioRegisterOffset = GetPeripheralBaseAddress();
+                            }
+                        }
+                        catch (DllNotFoundException)
+                        {
+                            // if the code gets here then then use our internal method as libbcm_host isn't available.
+                            gpioRegisterOffset = GetPeripheralBaseAddress();
+                        }
+
+                        if (gpioRegisterOffset == InvalidPeripheralBaseAddress)
+                        {
+                            throw new InvalidOperationException("Error - Unable to determine peripheral base address.");
+                        }
+
+                        // add on the offset from the peripheral base address to point to the gpio registers
+                        gpioRegisterOffset += GpioPeripheralOffset;
+                    }
                 }
 
-                IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, GpioRegisterOffset);
+                IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)gpioRegisterOffset);
                 if (mapPointer.ToInt64() == -1)
                 {
                     throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");

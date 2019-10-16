@@ -22,12 +22,11 @@ namespace Iot.Device.Bmxx80.CalibrationData
         public short DigP7 { get; set; }
         public short DigP8 { get; set; }
         public short DigP9 { get; set; }
-        public byte DigP10 { get; set; }
-
+        
         /// <summary>
         /// Read coefficient data from device.
         /// </summary>
         /// <param name="bmxx80Base">The <see cref="Bmxx80Base"/> to read coefficient data from.</param>
-        protected internal virtual void ReadFromDevice(Bmxx80Base bmxx80Base) { }
+        protected internal abstract void ReadFromDevice(Bmxx80Base bmxx80Base);
     }
 }

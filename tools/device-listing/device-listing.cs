@@ -17,7 +17,6 @@ namespace Iot.Tools.DeviceListing
         {
             "adc",
             "accelerometer",
-            "voc",
             "gas",
             "light",
             "barometer",
@@ -47,6 +46,8 @@ namespace Iot.Tools.DeviceListing
             "color",
             "led",
             "spi",
+            "nfc",
+            "media",
         };
 
         static Dictionary<string, string> s_categoriesDescriptions = new Dictionary<string, string>()
@@ -74,16 +75,20 @@ namespace Iot.Tools.DeviceListing
             { "pir", "Passive InfraRed (motion) sensors" },
             { "motion", "Motion sensors" },
             { "display", "Displays" },
+            { "segment", "Segment displays" },
             { "io-expander", "GPIO Expanders" },
             { "canbus", "CAN BUS libraries/modules" },
             { "proximity", "Proximity sensors" },
             { "touch", "Touch sensors" },
             { "wireless", "Wireless communication modules" },
+            { "radio", "Radio modules" },
             { "pwm", "PWM libraries/modules" },
             { "spi", "SPI libraries/modules" },
             { "joystick", "Joysticks" },
             { "color", "Color sensors" },
             { "led", "LED drivers" },
+            { "nfc", "RFID/NFC modules" },
+            { "media", "Media libraries" },
             { "characterlcd", null },
             { "brickpi3", null },
             { "buzzer", null },
@@ -164,7 +169,7 @@ namespace Iot.Tools.DeviceListing
             var deviceListing = new StringBuilder();
             foreach (DeviceInfo device in devices)
             {
-                deviceListing.AppendLine($"* [{device.Title}]({GetRelativePathSimple(device.ReadmePath, devicesPath)})");
+                deviceListing.AppendLine($"* [{device.Title}]({CreateMarkdownLinkFromPath(device.ReadmePath, devicesPath)})");
             }
 
             return deviceListing.ToString();
@@ -203,18 +208,15 @@ namespace Iot.Tools.DeviceListing
             return null;
         }
 
-        // simple means it won't try to use ".."
-        private static string GetRelativePathSimple(string path, string parentPath)
+        private static string CreateMarkdownLinkFromPath(string path, string parentPath)
         {
             if (path.StartsWith(parentPath))
             {
-                int i = parentPath.Length;
-                if (path[i] == '/' || path[i] == '\\')
-                {
-                    i++;
-                }
+                string fileName = Path.GetFileName(path);
+                string dirName = new DirectoryInfo(path).Parent.Name;
+                UriBuilder uriBuilder = new UriBuilder() { Path = Path.Combine(dirName, fileName) };
 
-                return path.Substring(i);
+                return uriBuilder.Path;
             }
             else
             {

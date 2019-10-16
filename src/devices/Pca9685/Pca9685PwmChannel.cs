@@ -26,7 +26,7 @@ namespace  Iot.Device.Pwm
             set => _parent.SetDutyCycleInternal(_channel, value);
         }
 
-        public override double DutyCyclePercentage
+        public override double DutyCycle
         {
             get => _running ? ActualDutyCycle : _dutyCycle;
             set
