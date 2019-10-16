@@ -4,7 +4,7 @@
 
 namespace System.Device.Gpio.Drivers
 {
-    public partial class RaspberryPi3Driver : Windows10Driver
+    public partial class GenericRaspberryPiDriver : Windows10Driver
     {
         protected ulong ClearRegister
         {

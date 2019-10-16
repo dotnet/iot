@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace System.Device.Gpio.Drivers
 {
-    public unsafe partial class RaspberryPi3Driver : GpioDriver
+    public unsafe partial class GenericRaspberryPiDriver : GpioDriver
     {
         private const int ENOENT = 2; // error indicates that an entity doesn't exist
         private RegisterView* _registerViewPointer = null;
