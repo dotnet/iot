@@ -13,7 +13,11 @@ namespace Iot.Device.OneWire
     /// </summary>
     public partial class OneWireBus
     {
-        internal OneWireBus(string busId)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OneWireBus"/> class
+        /// </summary>
+        /// <param name="busId">The platform id of the 1-wire bus.</param>
+        public OneWireBus(string busId)
         {
             BusId = busId;
         }
@@ -24,12 +28,12 @@ namespace Iot.Device.OneWire
         public string BusId { get; }
 
         /// <summary>
-        /// Enumerate all 1-wire busses in the system.
+        /// Enumerate names of all 1-wire busses in the system.
         /// </summary>
-        /// <returns>A list of discovered busses.</returns>
-        public static IEnumerable<OneWireBus> EnumerateBuses()
+        /// <returns>A list of discovered bus ids.</returns>
+        public static IEnumerable<string> EnumerateBusIds()
         {
-            return EnumerateBusesInternal();
+            return EnumerateBusIdsInternal();
         }
 
         internal OneWireDevice CreateDeviceByFamily(string deviceId, DeviceFamily family)
@@ -47,7 +51,8 @@ namespace Iot.Device.OneWire
         }
 
         /// <summary>
-        /// Enumerates all devices on this bus.
+        /// Enumerates all devices currently detected on this bus. Platform can update device list
+        /// periodically. To manually trigger an update call <see cref="ScanForDeviceChangesAsync" />.
         /// </summary>
         /// <param name="family">Family id used to filter enumerated devices.</param>
         /// <returns>A list of discovered devices.</returns>
@@ -57,17 +62,14 @@ namespace Iot.Device.OneWire
         }
 
         /// <summary>
-        /// Start a new scan for devices on the bus.
+        /// Start a new scan for device changes on the bus.
         /// </summary>
-        /// <param name="numDevices">Max number of devices to scan for before finishing.</param>
-        /// <param name="numScans">Number of scans to do to find numDevices devices.</param>
+        /// <param name="numDevices">Max number of devices to scan for before finishing. Use -1 for pltform default.</param>
+        /// <param name="numScans">Number of scans to do to find numDevices devices. Use -1 for platform default.</param>
         /// <returns>Task representing the async work.</returns>
-        public Task ScanForDevicesAsync(int numDevices = 64, int numScans = -1)
+        public Task ScanForDeviceChangesAsync(int numDevices = -1, int numScans = -1)
         {
-            // Default 64 used to align with Linux driver
-            // https://github.com/torvalds/linux/blob/v5.3/drivers/w1/w1.c#L46
-
-            return ScanForDevicesInternal(this, numDevices, numScans);
+            return ScanForDeviceChangesInternal(this, numDevices, numScans);
         }
     }
 }

@@ -19,9 +19,11 @@ namespace Iot.Device.OneWire
             var data = await File.ReadAllTextAsync(Path.Combine(OneWireBus.SysfsDevicesPath, Bus.BusId, DeviceId, "w1_slave"));
             if (!data.Contains("YES"))
                 throw new IOException("Unable to read temperature from device.");
+
             var tempIdx = data.LastIndexOf("t=");
             if (tempIdx == -1 || tempIdx + 2 >= data.Length || !int.TryParse(data.AsSpan(tempIdx + 2), out var temp))
                 throw new FormatException("Invalid sensor data format.");
+
             return Temperature.FromCelsius(temp * 0.001);
         }
     }

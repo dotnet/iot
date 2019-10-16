@@ -13,11 +13,11 @@ namespace Iot.Device.OneWire
     public class OneWireDevice
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="OneWireDevice"/> class
+        /// Initializes a new instance of the <see cref="OneWireDevice"/> class.
         /// </summary>
-        /// <param name="bus">The 1-wire bus the device is found on</param>
-        /// <param name="deviceId">The id of the device</param>
-        /// <param name="family">The 1-wire fmily id</param>
+        /// <param name="bus">The 1-wire bus the device is found on.</param>
+        /// <param name="deviceId">The id of the device.</param>
+        /// <param name="family">The 1-wire family id.</param>
         protected internal OneWireDevice(OneWireBus bus, string deviceId, DeviceFamily family)
         {
             if (family <= 0 || (int)family > 0xff)
@@ -34,9 +34,10 @@ namespace Iot.Device.OneWire
         /// <returns>A list of devices found.</returns>
         public static IEnumerable<OneWireDevice> EnumerateDevices(DeviceFamily family = DeviceFamily.Any)
         {
-            foreach (var bus in OneWireBus.EnumerateBuses())
+            foreach (var busId in OneWireBus.EnumerateBusIds())
             {
-                foreach (var dev in bus.EnumerateDevices(family))
+                var bus = new OneWireBus(busId);
+                foreach (var dev in bus.EnumerateDevicesInternal(family))
                 {
                     yield return dev;
                 }

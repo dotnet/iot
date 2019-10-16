@@ -11,11 +11,11 @@ namespace Iot.Device.OneWire
         internal const string SysfsBusDevicesPath = "/sys/bus/w1/devices";
         internal const string SysfsDevicesPath = "/sys/devices";
 
-        private static IEnumerable<OneWireBus> EnumerateBusesInternal()
+        private static IEnumerable<string> EnumerateBusIdsInternal()
         {
             foreach (var entry in Directory.EnumerateDirectories(SysfsBusDevicesPath, "w1_bus_master*"))
             {
-                yield return new OneWireBus(Path.GetFileName(entry));
+                yield return Path.GetFileName(entry);
             }
         }
 
@@ -42,9 +42,11 @@ namespace Iot.Device.OneWire
             }
         }
 
-        internal static async Task ScanForDevicesInternal(OneWireBus bus, int numDevices, int numScans)
+        internal static async Task ScanForDeviceChangesInternal(OneWireBus bus, int numDevices, int numScans)
         {
-            await File.WriteAllTextAsync(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_max_slave_count"), numDevices.ToString());
+            if (numDevices > 0)
+                await File.WriteAllTextAsync(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_max_slave_count"), numDevices.ToString());
+
             await File.WriteAllTextAsync(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_search"), numScans.ToString());
         }
     }

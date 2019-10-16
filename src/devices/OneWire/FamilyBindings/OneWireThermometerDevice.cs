@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using Iot.Units;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Iot.Device.OneWire
@@ -21,6 +23,15 @@ namespace Iot.Device.OneWire
         protected internal OneWireThermometerDevice(OneWireBus bus, string deviceId, DeviceFamily family)
             : base(bus, deviceId, family)
         {
+        }
+
+        /// <summary>
+        /// Enumerate all devices in system of type thermometer
+        /// </summary>
+        /// <returns>A list of thermometer devices.</returns>
+        public static IEnumerable<OneWireThermometerDevice> EnumerateDevices()
+        {
+            return OneWireDevice.EnumerateDevices(DeviceFamily.DigitalThermometer).Cast<OneWireThermometerDevice>();
         }
 
         /// <summary>
