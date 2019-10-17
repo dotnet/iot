@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Device.Gpio.Tests
 {
-    public class RaspberryPiDriverTests : GpioControllerTestBase
+    public class RaspberryPi3DriverTests : GpioControllerTestBase
     {
         protected override GpioDriver GetTestDriver() => new RaspberryPi3Driver();
 
