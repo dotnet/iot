@@ -18,7 +18,7 @@
   <ProductDependencies>
     <Dependency Name="System.Drawing.Common" Version="4.6.1">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>b7c9adac194142041f361332082c743e5467be68</Sha>
+      <Sha>c1778515a3bee34cc09c757b5563d0af0c8b1e99</Sha>
     </Dependency>
   </ProductDependencies>
 </Dependencies>
