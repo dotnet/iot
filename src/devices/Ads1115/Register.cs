@@ -11,5 +11,7 @@ namespace Iot.Device.Ads1115
     {
         ADC_CONVERSION_REG_ADDR = 0x00,
         ADC_CONFIG_REG_ADDR = 0x01,
+        ADC_CONFIG_REG_LO_THRESH = 0x02,
+        ADC_CONFIG_REG_HI_THRESH = 0x03
     }
 }
