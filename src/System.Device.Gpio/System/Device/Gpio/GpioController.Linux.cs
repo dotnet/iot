@@ -53,11 +53,12 @@ namespace System.Device.Gpio
                                     if (rev.EndsWith("03111"))
                                     {
                                         // The Pi4 reports the same CPU (although that's technically wrong) but different board revisions.
-                                        // The currently known revisions are 0xa03111, 0xb0311, 0xc03111 for the models with 1GB, 2GB and 4GB of ram, respectively. 
+                                        // The currently known revisions are 0xa03111, 0xb03111, 0xc03111 for the models with 1GB, 2GB and 4GB of ram, respectively. 
                                         return new RaspberryPi4Driver();
                                     }
                                 }
                             }
+
                             // Assume Pi3 otherwise
                             return new RaspberryPi3Driver();
                         }
