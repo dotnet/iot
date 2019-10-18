@@ -8,7 +8,7 @@ using System.Text;
 
 namespace System.Device.Gpio.Drivers
 {
-    public unsafe partial class RaspberryPi4Driver : RaspberryPi3Driver
+    public unsafe partial class RaspberryPi4Driver : GenericRaspberryPiDriver
     {
     }
 }
