@@ -4,6 +4,7 @@
 
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Device;
 using System.Device.Gpio;
 using System.Drawing;
@@ -23,7 +24,7 @@ namespace Iot.Device.CharacterLcd
     ///
     /// This implementation was drawn from numerous datasheets and libraries such as Adafruit_Python_CharLCD.
     /// </remarks>
-    public class Hd44780 : IDisposable
+    public class Hd44780 : ICharacterLcd, IDisposable
     {
         private bool _disposed;
 
@@ -75,6 +76,7 @@ namespace Iot.Device.CharacterLcd
         {
             Size = size;
             _lcdInterface = lcdInterface;
+            AutoShift = false;
 
             if (_lcdInterface.EightBitMode)
             {
@@ -414,17 +416,27 @@ namespace Iot.Device.CharacterLcd
         /// '}' are usually the same with the exception of '\', which is a
         /// yen symbol on some chips '¥'.
         /// </remarks>
-        /// <param name="value">Text to be displayed.</param>
-        public void Write(string value)
+        /// <param name="text">Text to be displayed.</param>
+        public void Write(string text)
         {
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(value.Length);
-            for (int i = 0; i < value.Length; ++i)
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(text.Length);
+            for (int i = 0; i < text.Length; ++i)
             {
-                buffer[i] = (byte)value[i];
+                buffer[i] = (byte)text[i];
             }
 
-            SendData(new ReadOnlySpan<byte>(buffer, 0, value.Length));
+            SendData(new ReadOnlySpan<byte>(buffer, 0, text.Length));
             ArrayPool<byte>.Shared.Return(buffer);
+        }
+
+        /// <summary>
+        /// Write a raw byte stream to the display. 
+        /// Used if character translation already took place
+        /// </summary>
+        /// <param name="text">Text to print</param>
+        public void Write(ReadOnlySpan<byte> text)
+        {
+           SendData(text);
         }
 
         /// <summary>

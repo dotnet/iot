@@ -9,6 +9,7 @@
     <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />
     <Compile Include="Flags.cs" />
     <Compile Include="Hd44780.cs" />
+    <Compile Include="ICharacterLcd.cs" />
     <Compile Include="Lcd1602.cs" />
     <Compile Include="Lcd2004.cs" />
     <Compile Include="LcdInterface.cs" />
