@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -36,35 +35,24 @@ namespace Iot.Device.OneWire
             return EnumerateBusIdsInternal();
         }
 
-        internal OneWireDevice CreateDeviceByFamily(string deviceId, DeviceFamily family)
-        {
-            switch (family)
-            {
-                case DeviceFamily.Ds18S20:
-                case DeviceFamily.Ds18B20: // or Max31820
-                case DeviceFamily.Ds1825: // or Max31826, Max31850
-                case DeviceFamily.Ds28EA00:
-                    return new OneWireThermometerDevice(this, deviceId, family);
-                default:
-                    return new OneWireDevice(this, deviceId, family);
-            }
-        }
-
         /// <summary>
         /// Enumerates all devices currently detected on this bus. Platform can update device list
         /// periodically. To manually trigger an update call <see cref="ScanForDeviceChangesAsync" />.
         /// </summary>
         /// <param name="family">Family id used to filter enumerated devices.</param>
         /// <returns>A list of discovered devices.</returns>
-        public IEnumerable<OneWireDevice> EnumerateDevices(DeviceFamily family = DeviceFamily.Any)
+        public IEnumerable<string> EnumerateDeviceIds(DeviceFamily family = DeviceFamily.Any)
         {
-            return EnumerateDevicesInternal(family);
+            foreach (var devId in EnumerateDeviceIdsInternal(BusId, family))
+            {
+                yield return devId;
+            }
         }
 
         /// <summary>
         /// Start a new scan for device changes on the bus.
         /// </summary>
-        /// <param name="numDevices">Max number of devices to scan for before finishing. Use -1 for pltform default.</param>
+        /// <param name="numDevices">Max number of devices to scan for before finishing. Use -1 for platform default.</param>
         /// <param name="numScans">Number of scans to do to find numDevices devices. Use -1 for platform default.</param>
         /// <returns>Task representing the async work.</returns>
         public Task ScanForDeviceChangesAsync(int numDevices = -1, int numScans = -1)

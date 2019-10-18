@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Iot.Device.OneWire
@@ -11,7 +12,7 @@ namespace Iot.Device.OneWire
         internal const string SysfsBusDevicesPath = "/sys/bus/w1/devices";
         internal const string SysfsDevicesPath = "/sys/devices";
 
-        private static IEnumerable<string> EnumerateBusIdsInternal()
+        internal static IEnumerable<string> EnumerateBusIdsInternal()
         {
             foreach (var entry in Directory.EnumerateDirectories(SysfsBusDevicesPath, "w1_bus_master*"))
             {
@@ -19,27 +20,21 @@ namespace Iot.Device.OneWire
             }
         }
 
-        internal IEnumerable<OneWireDevice> EnumerateDevicesInternal(DeviceFamily family)
+        internal static IEnumerable<string> EnumerateDeviceIdsInternal(string busId, DeviceFamily family)
         {
-            var devNames = File.ReadLines(Path.Combine(SysfsDevicesPath, BusId, "w1_master_slaves"));
-            foreach (var devName in devNames)
+            var devIds = File.ReadLines(Path.Combine(SysfsDevicesPath, busId, "w1_master_slaves"));
+            return family switch
             {
-                int.TryParse(devName.AsSpan(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var devFamily);
-                switch (family)
-                {
-                    case DeviceFamily.Any:
-                        yield return CreateDeviceByFamily(devName, (DeviceFamily)devFamily);
-                        break;
-                    case DeviceFamily.DigitalThermometer:
-                        if (devFamily == 0x10 || devFamily == 0x28 || devFamily == 0x3B || devFamily == 0x42)
-                            yield return CreateDeviceByFamily(devName, (DeviceFamily)devFamily);
-                        break;
-                    default:
-                        if (devFamily == (int)family)
-                            yield return CreateDeviceByFamily(devName, (DeviceFamily)devFamily);
-                        break;
-                }
-            }
+                DeviceFamily.Any => devIds,
+                DeviceFamily.Thermometer => devIds.Where(devId => OneWireThermometerDevice.IsCompatible(busId, devId)),
+                _ => devIds.Where(devId => GetDeviceFamilyInternal(busId, devId) == family),
+            };
+        }
+
+        internal static DeviceFamily GetDeviceFamilyInternal(string busId, string devId)
+        {
+            int.TryParse(devId.AsSpan(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var devFamily);
+            return (DeviceFamily)devFamily;
         }
 
         internal static async Task ScanForDeviceChangesInternal(OneWireBus bus, int numDevices, int numScans)

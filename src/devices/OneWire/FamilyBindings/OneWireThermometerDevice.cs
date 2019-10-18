@@ -4,7 +4,6 @@
 
 using Iot.Units;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Iot.Device.OneWire
@@ -15,23 +14,50 @@ namespace Iot.Device.OneWire
     public partial class OneWireThermometerDevice : OneWireDevice
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="OneWireThermometerDevice"/> class
+        /// Initializes a new instance of the <see cref="OneWireThermometerDevice"/> class.
         /// </summary>
-        /// <param name="bus">The 1-wire bus the device is found on</param>
-        /// <param name="deviceId">The id of the device</param>
-        /// <param name="family">The 1-wire fmily id</param>
-        protected internal OneWireThermometerDevice(OneWireBus bus, string deviceId, DeviceFamily family)
-            : base(bus, deviceId, family)
+        /// <param name="busId">The 1-wire bus the device is found on.</param>
+        /// <param name="devId">The id of the device.</param>
+        public OneWireThermometerDevice(string busId, string devId)
+            : base(busId, devId)
         {
         }
 
         /// <summary>
-        /// Enumerate all devices in system of type thermometer
+        /// Check if family is compatible with this type of devices.
+        /// </summary>
+        /// <param name="family">The family to check.</param>
+        /// <returns>Returns true if device is compatible.</returns>
+        public static bool IsCompatible(DeviceFamily family)
+        {
+            return family == DeviceFamily.Ds18S20 ||
+                   family == DeviceFamily.Ds18B20 ||
+                   family == DeviceFamily.Ds1825 ||
+                   family == DeviceFamily.Ds28EA00;
+        }
+
+        /// <summary>
+        /// Check if device is compatible with this family of devices.
+        /// </summary>
+        /// <param name="busId">The 1-wire bus the device is found on.</param>
+        /// <param name="devId">The id of the device.</param>
+        /// <returns>Returns true if device is compatible.</returns>
+        public static bool IsCompatible(string busId, string devId)
+        {
+            var family = OneWireBus.GetDeviceFamilyInternal(busId, devId);
+            return IsCompatible(family);
+        }
+
+        /// <summary>
+        /// Enumerate all devices in system of type thermometer.
         /// </summary>
         /// <returns>A list of thermometer devices.</returns>
         public static IEnumerable<OneWireThermometerDevice> EnumerateDevices()
         {
-            return OneWireDevice.EnumerateDevices(DeviceFamily.DigitalThermometer).Cast<OneWireThermometerDevice>();
+            foreach (var (busId, devId) in EnumerateDeviceIds(DeviceFamily.Thermometer))
+            {
+                yield return new OneWireThermometerDevice(busId, devId);
+            }
         }
 
         /// <summary>

@@ -12,27 +12,29 @@ namespace Iot.Device.OneWire.Samples
     {
         static async Task Main(string[] args)
         {
-            // Make sure you can access the bus device before requesting a device scan
+            // Make sure you can access the bus device before requesting a device scan (or run using sudo)
             // $ sudo chmod a+rw /sys/bus/w1/devices/w1_bus_master1/w1_master_*
-            if (args.Any(_ => _ == "simple"))
+            if (args.Any(_ => _ == "temp"))
             {
-                // Quick and simple way to find a device and print the temperature
+                // Quick and simple way to find a thermometer and print the temperature
                 foreach (var dev in OneWireThermometerDevice.EnumerateDevices())
-                    Console.WriteLine("Temperature reported by device: " + (await dev.ReadTemperatureAsync()).Celsius.ToString("F2") + "\u00B0C");
+                    Console.WriteLine($"Temperature reported by '{dev.DeviceId}': " + (await dev.ReadTemperatureAsync()).Celsius.ToString("F2") + "\u00B0C");
             }
             else
             {
-                // More advanced way, with rescanning the bus and iterating per 1-wire bus
+                // More advanced way, with rescanning the bus and iterating devices per 1-wire bus
                 foreach (var busId in OneWireBus.EnumerateBusIds())
                 {
-                    Console.WriteLine($"Found bus '{busId}', scanning for devices ...");
                     var bus = new OneWireBus(busId);
+                    Console.WriteLine($"Found bus '{bus.BusId}', scanning for devices ...");
                     await bus.ScanForDeviceChangesAsync();
-                    foreach (var dev in bus.EnumerateDevices())
+                    foreach (var devId in bus.EnumerateDeviceIds())
                     {
-                        Console.WriteLine($"Found family '{(int)dev.Family:x2}' device '{dev.DeviceId}' on master '{bus.BusId}'");
-                        if (dev is OneWireThermometerDevice devTemp)
+                        var dev = new OneWireDevice(busId, devId);
+                        Console.WriteLine($"Found family '{dev.Family}' device '{dev.DeviceId}' on '{bus.BusId}'");
+                        if (OneWireThermometerDevice.IsCompatible(busId, devId))
                         {
+                            var devTemp = new OneWireThermometerDevice(busId, devId);
                             Console.WriteLine("Temperature reported by device: " + (await devTemp.ReadTemperatureAsync()).Celsius.ToString("F2") + "\u00B0C");
                         }
                     }

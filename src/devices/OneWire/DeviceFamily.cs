@@ -44,6 +44,6 @@ namespace Iot.Device.OneWire
         /// <summary>
         /// Special family id used to enumerate all temperature sensors.
         /// </summary>
-        DigitalThermometer = 0x100,
+        Thermometer = 0x100,
     }
 }

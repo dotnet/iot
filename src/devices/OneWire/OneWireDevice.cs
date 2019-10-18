@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 
 namespace Iot.Device.OneWire
@@ -15,16 +14,13 @@ namespace Iot.Device.OneWire
         /// <summary>
         /// Initializes a new instance of the <see cref="OneWireDevice"/> class.
         /// </summary>
-        /// <param name="bus">The 1-wire bus the device is found on.</param>
-        /// <param name="deviceId">The id of the device.</param>
-        /// <param name="family">The 1-wire family id.</param>
-        protected internal OneWireDevice(OneWireBus bus, string deviceId, DeviceFamily family)
+        /// <param name="busId">The 1-wire bus the device is found on.</param>
+        /// <param name="devId">The id of the device.</param>
+        public OneWireDevice(string busId, string devId)
         {
-            if (family <= 0 || (int)family > 0xff)
-                throw new ArgumentException(nameof(family));
-            Bus = bus;
-            DeviceId = deviceId;
-            Family = family;
+            BusId = busId;
+            DeviceId = devId;
+            Family = OneWireBus.GetDeviceFamilyInternal(busId, devId);
         }
 
         /// <summary>
@@ -32,14 +28,13 @@ namespace Iot.Device.OneWire
         /// </summary>
         /// <param name="family">Family id used to filter devices.</param>
         /// <returns>A list of devices found.</returns>
-        public static IEnumerable<OneWireDevice> EnumerateDevices(DeviceFamily family = DeviceFamily.Any)
+        public static IEnumerable<(string busId, string devId)> EnumerateDeviceIds(DeviceFamily family = DeviceFamily.Any)
         {
-            foreach (var busId in OneWireBus.EnumerateBusIds())
+            foreach (var busId in OneWireBus.EnumerateBusIdsInternal())
             {
-                var bus = new OneWireBus(busId);
-                foreach (var dev in bus.EnumerateDevicesInternal(family))
+                foreach (var devId in OneWireBus.EnumerateDeviceIdsInternal(busId, family))
                 {
-                    yield return dev;
+                    yield return (busId, devId);
                 }
             }
         }
@@ -47,7 +42,7 @@ namespace Iot.Device.OneWire
         /// <summary>
         /// The bus where this device is attached.
         /// </summary>
-        public OneWireBus Bus { get; }
+        public string BusId { get; }
 
         /// <summary>
         /// The 1-wire id of this device.
