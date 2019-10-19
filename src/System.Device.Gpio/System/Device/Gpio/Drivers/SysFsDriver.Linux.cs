@@ -78,6 +78,8 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void OpenPin(int pinNumber)
         {
+            const int numOpenRetries = 100; // wait 1 second max for udev to set the permissions
+            int openRetries;
             int pinOffset = pinNumber + s_pinOffset;
             string pinPath = $"{GpioBasePath}/gpio{pinOffset}";
             // If the directory exists, this becomes a no-op since the pin might have been opened already by the some controller or somebody else.
@@ -86,6 +88,27 @@ namespace System.Device.Gpio.Drivers
                 try
                 {
                     File.WriteAllText(Path.Combine(GpioBasePath, "export"), pinOffset.ToString(CultureInfo.InvariantCulture));
+
+                    // test to see if we have rw access to the GPIO pin.
+                    if ( Interop.access(pinPath, AccessModeFlags.R_OK | AccessModeFlags.W_OK) != 0 )
+                    {
+                        openRetries = 0;
+
+                        // repeatedly check for access to the GPIO pin until access is granted or the number of tries is exceeded
+                        do
+                        {
+                            // delay a little to give udev potentially time to respond
+                            Thread.Sleep(TimeSpan.FromMilliseconds(10));
+                            openRetries++;
+                        } while ( Interop.access(pinPath, AccessModeFlags.R_OK | AccessModeFlags.W_OK) != 0 & openRetries < numOpenRetries );
+
+                        // if we have run out of retries then throw an exception. 
+                        if( openRetries >= numOpenRetries )
+                        {
+                            throw new UnauthorizedAccessException("Opening pins requires root permissions.");
+                        }
+                    }
+
                     _exportedPins.Add(pinNumber);
                 }
                 catch (UnauthorizedAccessException e)
