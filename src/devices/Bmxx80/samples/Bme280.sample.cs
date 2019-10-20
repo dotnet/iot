@@ -55,18 +55,19 @@ namespace Iot.Device.Samples
                     i2CBmpe80.TryReadTemperature(out var tempValue);
                     i2CBmpe80.TryReadPressure(out var preValue);
                     i2CBmpe80.TryReadHumidity(out var humValue);
-                    var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
+
+                    // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using 
+                    // var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
+                    i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out var altValue);
                     
                     Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");                    
                     Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");                    
                     Console.WriteLine($"Altitude: {altValue:0.##}m");                    
                     Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+
+                    // WeatherHelper supports more calculations, such as the summer simmer index, saturated vapor pressure, actual vapor pressure and absolute humidity.
                     Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
-                    Console.WriteLine($"Summer simmer index: {WeatherHelper.CalculateSummerSimmerIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
-                    Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.CalculateSaturatedVaporPressure(tempValue).Hectopascal:0.##}hPa");
-                    Console.WriteLine($"Actual vapor pressure: {WeatherHelper.CalculateActualVaporPressure(tempValue, humValue).Hectopascal:0.##}hPa");
                     Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
-                    Console.WriteLine($"Absolute humidity: {WeatherHelper.CalculateAbsoluteHumidity(tempValue, humValue):0.#}g/m\u0179");
                     Thread.Sleep(1000);
 
                     // change sampling and filter
@@ -86,18 +87,19 @@ namespace Iot.Device.Samples
                     i2CBmpe80.TryReadTemperature(out tempValue);
                     i2CBmpe80.TryReadPressure(out preValue);
                     i2CBmpe80.TryReadHumidity(out humValue);
-                    altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
+
+                    // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using 
+                    // var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
+                    i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out altValue);
                     
                     Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");                    
                     Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");                    
                     Console.WriteLine($"Altitude: {altValue:0.##}m");                    
                     Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+
+                    // WeatherHelper supports more calculations, such as the summer simmer index, saturated vapor pressure, actual vapor pressure and absolute humidity.
                     Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
-                    Console.WriteLine($"Summer simmer index: {WeatherHelper.CalculateSummerSimmerIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
-                    Console.WriteLine($"Saturated vapor pressure: {WeatherHelper.CalculateSaturatedVaporPressure(tempValue).Hectopascal:0.##}hPa");
-                    Console.WriteLine($"Actual vapor pressure: {WeatherHelper.CalculateActualVaporPressure(tempValue, humValue).Hectopascal:0.##}hPa");
                     Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
-                    Console.WriteLine($"Absolute humidity: {WeatherHelper.CalculateAbsoluteHumidity(tempValue, humValue):0.#}g/m\u0179");
                     Thread.Sleep(5000);
                 }
             }

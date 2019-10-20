@@ -11,6 +11,7 @@
       <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
+    <ProjectReference Include="..\..\Common\Iot\Device\Common\CommonHelpers.csproj" />
   </ItemGroup>
 
 </Project>

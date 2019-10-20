@@ -10,7 +10,7 @@ namespace Iot.Device.Common
     /// <summary>
     /// Helpers for weather
     /// </summary>
-    public class WeatherHelper
+    public static class WeatherHelper
     {
         #region TemperatureAndRelativeHumidity
         // Formulas taken from http://www.reahvac.com/tools/humidity-formulas/
@@ -48,11 +48,11 @@ namespace Iot.Device.Common
                 - (1.99 * 0.000001 * tf2 * rh2);
 
             if (rh < 13 && tf >= 80 && tf <= 112)
-            { // adjustment
+            {
                 rothfuszRegression += ((13 - rh) / 4) * Math.Sqrt((17 - Math.Abs(tf - 95)) / 17);
             }
             else if (rh > 85 && tf >= 80 && tf <= 87)
-            { // adjustment
+            {
                 rothfuszRegression += ((rh - 85) / 10) * ((87 - tf) / 5);
             }
 

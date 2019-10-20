@@ -41,7 +41,11 @@ namespace Iot.Device.Bmp180.Samples
                 Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
                 var preValue = i2cBmp280.ReadPressure();
                 Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
-                var altValue = WeatherHelper.CalculateAltitude(preValue, Pressure.MeanSeaLevel, tempValue);
+
+                // Note that if you already have the pressure value and the temperature, you could also calculate altitude by 
+                // calling WeatherHelper.CalculateAltitude(preValue, Pressure.MeanSeaLevel, tempValue) which would be more performant.
+                var altValue = i2cBmp280.ReadAltitude(Pressure.MeanSeaLevel);
+
                 Console.WriteLine($"Altitude: {altValue:0.##}m");
                 Thread.Sleep(1000);
 
