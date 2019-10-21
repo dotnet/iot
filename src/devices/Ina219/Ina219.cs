@@ -28,18 +28,9 @@ namespace Iot.Device.Adc
         private Ina219AdcResolutionOrSamples _shuntAdcResSamp;
         private float _currentLsb;
 
-        // These are possitive ranges in volts associated with each gain setting of the Programable Gain Controller.
-        private readonly Dictionary<Ina219PgaSensitivity, float> _sensitivityVoltage = new Dictionary<Ina219PgaSensitivity, float>()
-        { 
-            { Ina219PgaSensitivity.PlusOrMinus40mv, 0.04F },
-            { Ina219PgaSensitivity.PlusOrMinus80mv, 0.08F },
-            { Ina219PgaSensitivity.PlusOrMinus160mv, 0.16F },
-            { Ina219PgaSensitivity.PlusOrMinus320mv, 0.32F }
-        };
-
         // These values are the datasheet defined delays in micro seconds between requesting a Current or Power value from the INA219 and the ADC sampling having completed
         // along with any conversions.
-        private readonly Dictionary<Ina219AdcResolutionOrSamples, int> _readDelays = new Dictionary<Ina219AdcResolutionOrSamples, int>()
+        private static readonly Dictionary<Ina219AdcResolutionOrSamples, int> s_readDelays = new Dictionary<Ina219AdcResolutionOrSamples, int>()
         {
             { Ina219AdcResolutionOrSamples.Adc9Bit, 84 },
             { Ina219AdcResolutionOrSamples.Adc10Bit, 148 },
@@ -58,7 +49,7 @@ namespace Iot.Device.Adc
         /// Method to initialize values during device construction
         /// </summary>
         /// <param name="i2cDevice"></param>        
-        private void _Ina219(I2cDevice i2cDevice)
+        private void Initialize(I2cDevice i2cDevice)
         {
             _currentLsb = 1F;
             _i2cDevice = i2cDevice;
@@ -78,7 +69,7 @@ namespace Iot.Device.Adc
                 throw new System.ArgumentNullException(nameof(i2cDevice));
             }
 
-            _Ina219(i2cDevice);
+            Initialize(i2cDevice);
         }
 
         /// <summary>
@@ -95,7 +86,7 @@ namespace Iot.Device.Adc
                 throw new System.ArgumentNullException(nameof(settings));
             }
 
-            _Ina219(I2cDevice.Create(settings));
+            Initialize(I2cDevice.Create(settings));
 
             _disposeI2cDevice = true;
         }
@@ -274,7 +265,7 @@ namespace Iot.Device.Adc
         public float ReadShuntVoltage()
         {
             // read the shunt voltage. LSB = 10uV then convert to Volts
-            return (short)ReadRegister(Ina219Register.ShuntVoltage, _readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * 10 / 1000000F;
+            return (short)ReadRegister(Ina219Register.ShuntVoltage, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * 10 / 1000000F;
         }
 
         /// <summary>
@@ -284,7 +275,7 @@ namespace Iot.Device.Adc
         public float ReadBusVoltage()
         {
             // read the bus voltage. LSB = 4mV then convert to Volts
-            return ((short)ReadRegister(Ina219Register.BusVoltage, _readDelays[_busAdcResSamp]) >> 3) * 4 / 1000F;
+            return ((short)ReadRegister(Ina219Register.BusVoltage, s_readDelays[_busAdcResSamp]) >> 3) * 4 / 1000F;
         }
 
         /// <summary>
@@ -302,7 +293,7 @@ namespace Iot.Device.Adc
             // whenever needed.
             SetCalibration(_calibrationValue, _currentLsb);
 
-            return (float)(short)ReadRegister(Ina219Register.Current, _readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * _currentLsb;
+            return (float)(short)ReadRegister(Ina219Register.Current, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * _currentLsb;
         }
 
         /// <summary>
@@ -320,7 +311,7 @@ namespace Iot.Device.Adc
             // whenever needed.
             SetCalibration(_calibrationValue, _currentLsb);
 
-            return (float)ReadRegister(Ina219Register.Power, _readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * _currentLsb * 20;
+            return (float)ReadRegister(Ina219Register.Power, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * _currentLsb * 20;
         }
 
         /// <summary>
