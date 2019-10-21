@@ -36,6 +36,7 @@ namespace System.Device.Pwm.Drivers
         private Thread _runningThread;
         private GpioController _controller;
         private bool _runThread = true;
+        private bool _ownController;
 
         /// <summary>
         /// The frequency in hertz.
@@ -82,7 +83,16 @@ namespace System.Device.Pwm.Drivers
         /// <param name="controller">The <see cref="GpioController"/> to which <paramref name="pinNumber"/> belongs to. Null defaults to board GpioController</param>
         public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCycle = 0.5, bool usePrecisionTimer = false, GpioController controller = null)
         {
-            _controller = controller ?? new GpioController();
+            if (controller == null)
+            {
+                _controller = new GpioController();
+                _ownController = true;
+            }
+            else
+            {
+                _controller = controller;
+                _ownController = false;
+            }
             if (_controller == null)
             {
                 Debug.WriteLine("GPIO does not exist on the current system.");
@@ -197,8 +207,11 @@ namespace System.Device.Pwm.Drivers
             _runThread = false;
             _runningThread?.Join();
             _runningThread = null;
-            _controller?.Dispose();
-            _controller = null;
+            if (_ownController)
+            {
+                _controller?.Dispose();
+                _controller = null;
+            }
             base.Dispose(disposing);
         }
     }
