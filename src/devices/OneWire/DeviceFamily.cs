@@ -16,11 +16,11 @@ namespace Iot.Device.OneWire
         /// <summary>
         /// Family id of a DS18S20 temperature sensor.
         /// </summary>
-        Ds18S20 = 0x10,
+        Ds18s20 = 0x10,
         /// <summary>
         /// Family id of a DS18B20 temperature sensor.
         /// </summary>
-        Ds18B20 = 0x28,
+        Ds18b20 = 0x28,
         /// <summary>
         /// Family id of a MAX31820 temperature sensor.
         /// </summary>
@@ -40,7 +40,7 @@ namespace Iot.Device.OneWire
         /// <summary>
         /// Family id of a DS28EA00 temperature sensor.
         /// </summary>
-        Ds28EA00 = 0x42,
+        Ds28ea00 = 0x42,
         /// <summary>
         /// Special family id used to enumerate all temperature sensors.
         /// </summary>

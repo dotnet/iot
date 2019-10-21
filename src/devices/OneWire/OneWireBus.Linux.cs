@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -37,12 +41,20 @@ namespace Iot.Device.OneWire
             return (DeviceFamily)devFamily;
         }
 
-        internal static async Task ScanForDeviceChangesInternal(OneWireBus bus, int numDevices, int numScans)
+        internal static async Task ScanForDeviceChangesInternalAsync(OneWireBus bus, int numDevices, int numScans)
         {
             if (numDevices > 0)
                 await File.WriteAllTextAsync(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_max_slave_count"), numDevices.ToString());
 
             await File.WriteAllTextAsync(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_search"), numScans.ToString());
+        }
+
+        internal static void ScanForDeviceChangesInternal(OneWireBus bus, int numDevices, int numScans)
+        {
+            if (numDevices > 0)
+                File.WriteAllText(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_max_slave_count"), numDevices.ToString());
+
+            File.WriteAllText(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_search"), numScans.ToString());
         }
     }
 }

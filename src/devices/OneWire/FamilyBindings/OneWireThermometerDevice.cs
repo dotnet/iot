@@ -30,10 +30,10 @@ namespace Iot.Device.OneWire
         /// <returns>Returns true if device is compatible.</returns>
         public static bool IsCompatible(DeviceFamily family)
         {
-            return family == DeviceFamily.Ds18S20 ||
-                   family == DeviceFamily.Ds18B20 ||
+            return family == DeviceFamily.Ds18s20 ||
+                   family == DeviceFamily.Ds18b20 ||
                    family == DeviceFamily.Ds1825 ||
-                   family == DeviceFamily.Ds28EA00;
+                   family == DeviceFamily.Ds28ea00;
         }
 
         /// <summary>
@@ -68,6 +68,16 @@ namespace Iot.Device.OneWire
         public Task<Temperature> ReadTemperatureAsync()
         {
             return ReadTemperatureInternalAsync();
+        }
+
+        /// <summary>
+        /// Reads the current temperature of the device.
+        /// Expect this function to be slow (about one second).
+        /// </summary>
+        /// <returns>The read temperature value.</returns>
+        public Temperature ReadTemperature()
+        {
+            return ReadTemperatureInternal();
         }
     }
 }
