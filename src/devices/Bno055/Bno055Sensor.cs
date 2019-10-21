@@ -124,7 +124,7 @@ namespace Iot.Device.Bno055
             Info.BootloaderVersion = new Version(ReadByte(Registers.BL_REV_ID), 0);
 
             _operationMode = operationMode;
-            initializeRegisters();
+            InitializeRegisters();
         }
 
         private static readonly byte[][] s_registerDefaults =
@@ -150,7 +150,7 @@ namespace Iot.Device.Bno055
             }
         };
 
-        private void initializeRegisters()
+        private void InitializeRegisters()
         {
             // WriteReg(Registers.SYS_TRIGGER, 0x20);
             // Using the chip's internal reset might not work:
