@@ -127,16 +127,22 @@ namespace Iot.Device.Bno055
             initializeRegisters();
         }
 
-        private static readonly byte[][] registerDefaults =
+        private static readonly byte[][] s_registerDefaults =
         {
-            new byte[]{ (byte)Registers.UNIT_SEL, (byte)(Units.AccelerationMeterPerSecond | Units.AngularRateDegreePerSecond | Units.DataOutputFormatWindows | Units.EulerAnglesDegrees | Units.TemperatureCelsius) },
-            new byte[]{ (byte)Registers.TEMP_SOURCE, (byte)TemperatureSource.Gyroscope },
-            new byte[]{ (byte)Registers.PWR_MODE, (byte)PowerMode.Normal },
-            new byte[]{ (byte)Registers.AXIS_MAP_CONFIG,
+            new byte[] { (byte)Registers.UNIT_SEL, (byte)(
+                Units.AccelerationMeterPerSecond |
+                Units.AngularRateDegreePerSecond |
+                Units.DataOutputFormatWindows |
+                Units.EulerAnglesDegrees |
+                Units.TemperatureCelsius
+            ) },
+            new byte[] { (byte)Registers.TEMP_SOURCE, (byte)TemperatureSource.Gyroscope },
+            new byte[] { (byte)Registers.PWR_MODE, (byte)PowerMode.Normal },
+            new byte[] { (byte)Registers.AXIS_MAP_CONFIG,
                 0x24, // AXIS_MAP_CONFIG
                 0, // AXIS_MAP_SIGN
             },
-            new byte[]{ (byte)Registers.ACCEL_OFFSET_X_LSB,
+            new byte[] { (byte)Registers.ACCEL_OFFSET_X_LSB,
                 0, 0, 0, 0, 0, 0, // ACC_OFFSET_*_*SB
                 0, 0, 0, 0, 0, 0, // MAC_OFFSET_*_*SB
                 0, 0, 0, 0, 0, 0, // GYR_OFFSET_*_*SB
@@ -151,8 +157,12 @@ namespace Iot.Device.Bno055
             // https://community.bosch-sensortec.com/t5/MEMS-sensors-forum/BNO055-power-on-reset-issues/m-p/8457/highlight/true#M948
 
             SetConfigMode(true);
-            foreach (var registerDefault in registerDefaults)
+
+            foreach (var registerDefault in s_registerDefaults)
+            {
                 _i2cDevice.Write(registerDefault);
+            }
+
             SetConfigMode(false);
         }
 
