@@ -10,7 +10,7 @@
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
     <ProjectReference Include="..\Units\Units.csproj" />
-    <ProjectReference Include="..\Common\Iot\Device\Common\CommonHelpers.csproj" />
+    <Compile Include="..\Common\Iot\Device\Common\NumberHelper.cs" />
     <Compile Include="Devices\Ds1307\Ds1307.cs" />
     <Compile Include="Devices\Ds1307\Ds1307Register.cs" />
     <Compile Include="Devices\Ds3231\Ds3231.cs" />
