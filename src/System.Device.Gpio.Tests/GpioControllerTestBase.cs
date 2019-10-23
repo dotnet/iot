@@ -85,7 +85,7 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        public void IsPinOpenTest()
+        public void IsPinOpenOnInputTest()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
@@ -98,7 +98,7 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        public void IsPinOpenTest2()
+        public void IsPinOpenOnOutputTest()
         {
             // Separate test to check the IsPinOpen works also when the PinMode is Output, See Bug #776
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
