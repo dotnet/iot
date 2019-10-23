@@ -35,6 +35,7 @@ namespace System.Device.Pwm.Drivers
 
         private Thread _runningThread;
         private GpioController _controller;
+        private readonly bool _shouldDispose;
         private bool _runThread = true;
 
         /// <summary>
@@ -80,9 +81,21 @@ namespace System.Device.Pwm.Drivers
         /// <param name="dutyCycle">The duty cycle percentage represented as a value between 0.0 and 1.0</param>
         /// <param name="usePrecisionTimer">Determines if a high precision timer should be used.</param>
         /// <param name="controller">The <see cref="GpioController"/> to which <paramref name="pinNumber"/> belongs to. Null defaults to board GpioController</param>
-        public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCycle = 0.5, bool usePrecisionTimer = false, GpioController controller = null)
+        /// <param name="shouldDispose">True to automatically dispose the controller when this class is disposed, false otherwise.
+        /// This parameter is ignored if <paramref name="controller"/> is null.</param>
+        public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCycle = 0.5, bool usePrecisionTimer = false, GpioController controller = null, bool shouldDispose = true)
         {
-            _controller = controller ?? new GpioController();
+            if (controller == null)
+            {
+                _controller = new GpioController();
+                _shouldDispose = true;
+            }
+            else
+            {
+                _controller = controller;
+                _shouldDispose = shouldDispose;
+            }
+
             if (_controller == null)
             {
                 Debug.WriteLine("GPIO does not exist on the current system.");
@@ -197,8 +210,13 @@ namespace System.Device.Pwm.Drivers
             _runThread = false;
             _runningThread?.Join();
             _runningThread = null;
-            _controller?.Dispose();
-            _controller = null;
+
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null;
+            }
+
             base.Dispose(disposing);
         }
     }
