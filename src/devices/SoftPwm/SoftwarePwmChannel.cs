@@ -36,7 +36,7 @@ namespace System.Device.Pwm.Drivers
         private Thread _runningThread;
         private GpioController _controller;
         private readonly bool _shouldDispose;
-		private bool _runThread = true;
+        private bool _runThread = true;
 
         /// <summary>
         /// The frequency in hertz.
