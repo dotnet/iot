@@ -13,7 +13,7 @@ namespace Iot.Device.Common
     public static class WeatherHelper
     {
         #region TemperatureAndRelativeHumidity
-        // Formulas taken from https://www.aprweather.com/pages/calc.htm, https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml and https://ncalculators.com/meteorology/summer-simmer-index-calculator.htm
+        // Formulas taken from https://www.aprweather.com/pages/calc.htm and https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
         
         /// <summary>
         /// The heat index (or apparent temperature) is used to measure the amount of discomfort
