@@ -89,8 +89,9 @@ namespace System.Device.Gpio.Tests
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
+                // Open pin in input mode (default)
                 Assert.False(controller.IsPinOpen(LedPin));
-                controller.OpenPin(LedPin);
+                controller.OpenPin(LedPin, PinMode.Input);
                 Assert.True(controller.IsPinOpen(LedPin));
                 controller.ClosePin(LedPin);
                 Assert.False(controller.IsPinOpen(LedPin));
