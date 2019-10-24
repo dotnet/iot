@@ -21,6 +21,7 @@ dotnet build System.Device.Gpio.sln
 ```
 This builds the main System.Device.Gpio assembly together with its test assembly. Before running the tests, you need to:
 - Connect BCM Pins 12 and 16 (physical Pins 32 and 36) with a cable. It is suggested to add a 1kΩ to 10kΩ resistor between the pins; this protects the Pi in the case of a misconfiguration (i.e both pins set to Out, one high, the other low). 
+- Leave BCM Pin 23 (physical Pin 16) open (not connected to anything).
 
 ## Raspberry Pi driver tests
 After that, you can run the tests with the RaspberryPiDriver (which is the default low-level driver for the Raspberry Pi) like:
