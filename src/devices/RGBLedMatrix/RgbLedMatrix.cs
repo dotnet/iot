@@ -238,10 +238,6 @@ namespace Iot.Device.LEDMatrix
                 return;
             }
 
-            red = s_gamma[red];
-            green = s_gamma[green];
-            blue = s_gamma[blue];
-
             if (_chainRows > 1)
             {
                 int panelRow = row / _deviceRows;
@@ -612,6 +608,7 @@ namespace Iot.Device.LEDMatrix
 
             _safeToDispose = true;
         }
+
         private void RenderRow(int row)
         {
             int pos = (row % (_deviceRows >> 1)) * _fullChainWidth * 8;
@@ -629,12 +626,10 @@ namespace Iot.Device.LEDMatrix
                     _gpio.WriteClear(_gpio.ClockMask);
                 }
 
-                _gpio.WriteSet(_gpio.OEMask | _gpio.LatchMask);
-
-                _gpio.WriteClear(_gpio.LatchMask);
-                _gpio.WriteClear(_gpio.OEMask);
-
+                _gpio.WriteSet(_gpio.LatchMask);
+                _gpio.WriteClear(_gpio.LatchMask | _gpio.OEMask);
                 Sleep(_duration * (1 << bit));
+                _gpio.WriteSet(_gpio.OEMask);
             }
         }
 
@@ -643,26 +638,5 @@ namespace Iot.Device.LEDMatrix
             _controller.OpenPin(pinNumber, PinMode.Output);
             _controller.Write(pinNumber, value);
         }
-
-        private static readonly byte [] s_gamma = new byte []
-        {
-        //           0    1     2    3    4    5    6    7    8    9    A    B    C    D    E    F
-        /* 00 */      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        /* 10 */      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,
-        /* 20 */      1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2,   2,   3,   3,   3,   3,
-        /* 30 */      3,   4,   4,   4,   4,   5,   5,   5,   5,   6,   6,   6,   6,   7,   7,   7,
-        /* 40 */      8,   8,   8,   9,   9,   9,  10,  10,  10,  11,  11,  11,  12,  12,  13,  13,
-        /* 50 */     14,  14,  14,  15,  15,  16,  16,  17,  17,  18,  18,  19,  19,  20,  21,  21,
-        /* 60 */     22,  22,  23,  23,  24,  25,  25,  26,  27,  27,  28,  29,  29,  30,  31,  31,
-        /* 70 */     32,  33,  34,  34,  35,  36,  37,  37,  38,  39,  40,  41,  42,  42,  43,  44,
-        /* 80 */     45,  46,  47,  48,  49,  50,  51,  52,  52,  53,  54,  55,  56,  57,  59,  60,
-        /* 90 */     61,  62,  63,  64,  65,  66,  67,  68,  69,  71,  72,  73,  74,  75,  77,  78,
-        /* A0 */     79,  80,  82,  83,  84,  85,  87,  88,  89,  91,  92,  93,  95,  96,  98,  99,
-        /* B0 */    100, 102, 103, 105, 106, 108, 109, 111, 112, 114, 115, 117, 119, 120, 122, 123,
-        /* C0 */    125, 127, 128, 130, 132, 133, 135, 137, 138, 140, 142, 144, 145, 147, 149, 151,
-        /* D0 */    153, 155, 156, 158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182,
-        /* E0 */    184, 186, 188, 190, 192, 194, 197, 199, 201, 203, 205, 207, 210, 212, 214, 216,
-        /* F0 */    219, 221, 223, 226, 228, 230, 233, 235, 237, 240, 242, 245, 247, 250, 252, 255
-        };
     }
 }
