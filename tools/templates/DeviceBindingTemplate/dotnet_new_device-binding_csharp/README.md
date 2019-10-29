@@ -1,7 +1,7 @@
 ﻿# _DeviceBinding
 
 ## Summary
-Provide a brief description on what the component is and its functonality.
+Provide a brief description on what the component is and its functionality.
 
 ## Device Family
 Provide a list of component names and link to datasheets (if available) the binding will work with.
