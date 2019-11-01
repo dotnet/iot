@@ -51,7 +51,7 @@ namespace Iot.Device.Hcsr04
         {
             _timer.Reset();
 
-            // Measures should be 60ms apart, in order to prevent trigger signal mixing with echo signal
+            // Measurements should be 60ms apart, in order to prevent trigger signal mixing with echo signal
             // ref https://components101.com/sites/default/files/component_datasheet/HCSR04%20Datasheet.pdf
             while (Environment.TickCount - _lastMeasurment < 60)
             {
