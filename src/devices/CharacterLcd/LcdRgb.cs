@@ -39,10 +39,10 @@ namespace Iot.Device.CharacterLcd
         /// Initializes a new HD44780 LCD with an RGB Backlight.
         /// </summary>
         /// <param name="size">Size of the device in characters. Usually 16x2 or 20x4.</param>
-        /// <param name="interface">Interface to the display.</param>
+        /// <param name="lcdInterface">Interface to the display.</param>
         /// <param name="rgbDevice">The I2C device to control RGB backlight.</param>
-        public LcdRgb(Size size, LcdInterface @interface, I2cDevice rgbDevice)
-            : base(size, @interface)
+        public LcdRgb(Size size, LcdInterface lcdInterface, I2cDevice rgbDevice)
+            : base(size, lcdInterface)
         {
             _rgbDevice = rgbDevice;
 

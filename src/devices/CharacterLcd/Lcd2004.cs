@@ -44,9 +44,9 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// Constructs a new LCD 20x4 controller with the given interface
         /// </summary>
-        /// <param name="interface">The LCD Interface</param>
-        public Lcd2004(LcdInterface @interface)
-            : base(new Size(20, 4), @interface)
+        /// <param name="lcdInterface">The LCD Interface</param>
+        public Lcd2004(LcdInterface lcdInterface)
+            : base(new Size(20, 4), lcdInterface)
         {
         }
     }
