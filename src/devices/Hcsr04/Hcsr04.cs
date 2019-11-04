@@ -64,7 +64,7 @@ namespace Iot.Device.Hcsr04
             _controller.Write(_trigger, PinValue.Low);
 
             // Wait until the echo pin is HIGH (that marks the beginning of the pulse length we want to measure)
-             while (_controller.Read(_echo) == PinValue.Low)
+            while (_controller.Read(_echo) == PinValue.Low)
             {
             }
 
