@@ -123,24 +123,47 @@ namespace Iot.Device.Bno055
             Info.FirmwareVersion = new Version(ReadByte(Registers.SW_REV_ID_MSB), ReadByte(Registers.SW_REV_ID_LSB));
             Info.BootloaderVersion = new Version(ReadByte(Registers.BL_REV_ID), 0);
 
-            // Check if a reset is needed
-            if (TemperatureSource != TemperatureSource.Gyroscope)
-            {
-                WriteReg(Registers.SYS_TRIGGER, 0x20);
-                // Need 650 milliseconds after reset
-                Thread.Sleep(650);
-                PowerMode = PowerMode.Normal;
-                WriteReg(Registers.SYS_TRIGGER, 0x00);
-                TemperatureSource = TemperatureSource.Gyroscope;
+            _operationMode = operationMode;
+            InitializeRegisters();
+        }
+
+        private static readonly byte[][] s_registerDefaults =
+        {
+            new byte[] { (byte)Registers.UNIT_SEL, (byte)(
+                Units.AccelerationMeterPerSecond |
+                Units.AngularRateDegreePerSecond |
+                Units.DataOutputFormatWindows |
+                Units.EulerAnglesDegrees |
+                Units.TemperatureCelsius
+            ) },
+            new byte[] { (byte)Registers.TEMP_SOURCE, (byte)TemperatureSource.Gyroscope },
+            new byte[] { (byte)Registers.PWR_MODE, (byte)PowerMode.Normal },
+            new byte[] { (byte)Registers.AXIS_MAP_CONFIG,
+                0x24, // AXIS_MAP_CONFIG
+                0, // AXIS_MAP_SIGN
+            },
+            new byte[] { (byte)Registers.ACCEL_OFFSET_X_LSB,
+                0, 0, 0, 0, 0, 0, // ACC_OFFSET_*_*SB
+                0, 0, 0, 0, 0, 0, // MAC_OFFSET_*_*SB
+                0, 0, 0, 0, 0, 0, // GYR_OFFSET_*_*SB
+                0, 0, 0, 0, // *_RADIUS_*SB
             }
-            // Select default units
-            Units = Units.AccelerationMeterPerSecond | Units.AngularRateDegreePerSecond | Units.DataOutputFormatWindows | Units.EulerAnglesDegrees | Units.TemperatureCelsius;
-            // Using the gyroscope as temeprature source
-            TemperatureSource = TemperatureSource.Gyroscope;
-            // Set the operation mode
-            OperationMode = operationMode;
-            // Get the current unit (should be all at default)
-            _units = Units;
+        };
+
+        private void InitializeRegisters()
+        {
+            // WriteReg(Registers.SYS_TRIGGER, 0x20);
+            // Using the chip's internal reset might not work:
+            // https://community.bosch-sensortec.com/t5/MEMS-sensors-forum/BNO055-power-on-reset-issues/m-p/8457/highlight/true#M948
+
+            SetConfigMode(true);
+
+            foreach (var registerDefault in s_registerDefaults)
+            {
+                _i2cDevice.Write(registerDefault);
+            }
+
+            SetConfigMode(false);
         }
 
         /// <summary>
