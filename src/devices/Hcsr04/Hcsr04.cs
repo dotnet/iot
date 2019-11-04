@@ -73,7 +73,7 @@ namespace Iot.Device.Hcsr04
             _timer.Start();
 
             // Wait until the pin is LOW again, (that marks the end of the pulse we are measuring)
-             while (_controller.Read(_echo) == PinValue.High)
+            while (_controller.Read(_echo) == PinValue.High)
             {
             }
 
