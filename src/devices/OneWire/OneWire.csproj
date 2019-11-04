@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <!--Disabling default items so samples source won't get build by the main library-->
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="*.cs" />
+    <Compile Include="FamilyBindings\OneWireThermometerDevice.cs" />
+    <Compile Include="FamilyBindings\OneWireThermometerDevice.Linux.cs" />
+    <None Include="README.md" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Units\Units.csproj" />
+  </ItemGroup>
+
+</Project>

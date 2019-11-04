@@ -38,8 +38,8 @@ The following deliverables are not in any particular order:
 * Support Device Bindings for common sensors and microcontrollers such as those bundled with the [Microsoft IoT Starter Pack](https://www.adafruit.com/product/2733)
 * Support Device Bindings and Canvas Widgets for LCDS, multi-panel [LED matrices](https://www.adafruit.com/product/607), and Displays
 * Support Device Bindings for servo and stepper motors, motor controllers
-* Stabilize IoT.Device.Bindings APIs for Device Bindings
-* Publish [IoT.Device.Bindings to NuGet.org](https://www.nuget.org/packages/Iot.Device.Bindings)
+* Stabilize Iot.Device.Bindings APIs for Device Bindings
+* Publish [Iot.Device.Bindings to NuGet.org](https://www.nuget.org/packages/Iot.Device.Bindings)
 
 ![](images/DotNetIotRoadmapComponents.png)
   

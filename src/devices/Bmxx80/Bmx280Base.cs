@@ -138,11 +138,11 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public override bool TryReadPressure(out double pressure)
+        public override bool TryReadPressure(out Pressure pressure)
         {
             if (PressureSampling == Sampling.Skipped)
             {
-                pressure = double.NaN;
+                pressure = Pressure.FromPascal(double.NaN);
                 return false;
             }
 
@@ -153,23 +153,23 @@ namespace Iot.Device.Bmxx80
             var press = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
 
             //Convert the raw value to the pressure in Pa.
-            long pressPa = CompensatePressure(press >> 4);
+            var pressPa = CompensatePressure(press >> 4);
 
-            //Return the temperature as a float value.
-            pressure = (double)pressPa / 256;
+            //Return the pressure as a Pressure instance.
+            pressure = Pressure.FromHectopascal(pressPa.Hectopascal / 256);
             return true;
         }
 
         /// <summary>
         /// Calculates the altitude in meters from the specified sea-level pressure(in hPa).
         /// </summary>
-        /// <param name="seaLevelPressure">Sea-level pressure in hPa.</param>
+        /// <param name="seaLevelPressure">Sea-level pressure</param>
         /// <param name="altitude">
         /// Contains the calculated metres above sea-level if the <see cref="Bmxx80Base.PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadAltitude(double seaLevelPressure, out double altitude)
+        public bool TryReadAltitude(Pressure seaLevelPressure, out double altitude)
         {
             // Read the pressure first.
             var success = TryReadPressure(out var pressure);
@@ -179,12 +179,22 @@ namespace Iot.Device.Bmxx80
                 return false;
             }
 
-            // Convert the pressure to Hectopascals (hPa).
-            pressure /= 100;
-
             // Calculate and return the altitude using the international barometric formula.
-            altitude = 44330.0 * (1.0 - Math.Pow(pressure / seaLevelPressure, 0.1903));
+            altitude = 44330.0 * (1.0 - Math.Pow(pressure.Hectopascal / seaLevelPressure.Hectopascal, 0.1903));
             return true;
+        }        
+        
+        /// <summary>
+        /// Calculates the altitude in meters from the mean sea-level pressure.
+        /// </summary>
+        /// <param name="altitude">
+        /// Contains the calculated metres above sea-level if the <see cref="Bmxx80Base.PressureSampling"/> was not set to <see cref="Sampling.Skipped"/>.
+        /// Contains <see cref="double.NaN"/> otherwise.
+        /// </param>
+        /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
+        public bool TryReadAltitude(out double altitude)
+        {
+            return TryReadAltitude(Pressure.MeanSeaLevel, out altitude);
         }
 
         /// <summary>
@@ -250,7 +260,7 @@ namespace Iot.Device.Bmxx80
         /// <remarks>
         /// Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa.
         /// </remarks>
-        private long CompensatePressure(int adcPressure)
+        private Pressure CompensatePressure(long adcPressure)
         {
             // Formula from the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
             // The pressure is calculated using the compensation formula in the BMP280 datasheet
@@ -262,7 +272,7 @@ namespace Iot.Device.Bmxx80
             var1 = (((((long)1 << 47) + var1)) * (long)_calibrationData.DigP1) >> 33;
             if (var1 == 0)
             {
-                return 0; //Avoid exception caused by division by zero
+                return Pressure.FromPascal(0); //Avoid exception caused by division by zero
             }
             //Perform calibration operations
             long p = 1048576 - adcPressure;
@@ -271,7 +281,7 @@ namespace Iot.Device.Bmxx80
             var2 = ((long)_calibrationData.DigP8 * p) >> 19;
             p = ((p + var1 + var2) >> 8) + ((long)_calibrationData.DigP7 << 4);
 
-            return p;
+            return Pressure.FromPascal(p);
         }
     }
 }

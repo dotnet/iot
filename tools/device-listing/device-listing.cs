@@ -17,7 +17,6 @@ namespace Iot.Tools.DeviceListing
         {
             "adc",
             "accelerometer",
-            "voc",
             "gas",
             "light",
             "barometer",
@@ -48,6 +47,7 @@ namespace Iot.Tools.DeviceListing
             "led",
             "spi",
             "nfc",
+            "media",
         };
 
         static Dictionary<string, string> s_categoriesDescriptions = new Dictionary<string, string>()
@@ -87,12 +87,13 @@ namespace Iot.Tools.DeviceListing
             { "joystick", "Joysticks" },
             { "color", "Color sensors" },
             { "led", "LED drivers" },
+            { "nfc", "RFID/NFC modules" },
+            { "media", "Media libraries" },
             { "characterlcd", null },
             { "brickpi3", null },
             { "buzzer", null },
             { "gopigo3", null },
             { "grovepi", null },
-            { "nfc", "RFID/NFC modules" },
         };
 
         static void Main(string[] args)
@@ -206,13 +207,13 @@ namespace Iot.Tools.DeviceListing
 
             return null;
         }
-       
+
         private static string CreateMarkdownLinkFromPath(string path, string parentPath)
         {
             if (path.StartsWith(parentPath))
             {
                 string fileName = Path.GetFileName(path);
-                string dirName = new DirectoryInfo(path).Parent.Name;                    
+                string dirName = new DirectoryInfo(path).Parent.Name;
                 UriBuilder uriBuilder = new UriBuilder() { Path = Path.Combine(dirName, fileName) };
 
                 return uriBuilder.Path;

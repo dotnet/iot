@@ -50,9 +50,9 @@ namespace Iot.Device.Lps25h
         public Temperature Temperature => Temperature.FromCelsius(42.5f + ReadInt16(Register.Temperature) / 480f);
 
         /// <summary>
-        /// Pressure in hPa
+        /// Pressure
         /// </summary>
-        public float Pressure => ReadInt24(Register.Pressure) / 4096f;
+        public Pressure Pressure => Pressure.FromHectopascal(ReadInt24(Register.Pressure) / 4096.0);
 
         private void WriteByte(Register register, byte data)
         {

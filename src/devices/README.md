@@ -22,12 +22,8 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [ADXL345 - Accelerometer](Adxl345/README.md)
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [Sense HAT](SenseHat/README.md)
-
-### Volatile Organic Compound sensors
-
-* [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
-* [BMxx80 Device Family](Bmxx80/README.md)
 
 ### Gas sensors
 
@@ -63,6 +59,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [LM75 - Digital Temperature Sensor](Lm75/README.md)
 * [LPS25H - Piezoresistive pressure and thermometer sensor](Lps25h/README.md)
 * [MLX90614 - Infra Red Thermometer](Mlx90614/README.md)
+* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
 * [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
@@ -71,6 +68,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [Sense HAT](SenseHat/README.md)
 
 ### Compasses
@@ -92,13 +90,16 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [Sense HAT](SenseHat/README.md)
 
 ### Magnetometers
 
+* [AK8963 - Magnetometer](Ak8963/README.md)
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [HMC5883L - 3 Axis Digital Compass](Hmc5883l/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
+* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [Sense HAT](SenseHat/README.md)
 
 ### Liquid Crystal Displays
@@ -190,6 +191,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### LED drivers
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
+* [On-board LED driver](BoardLed/README.md)
 * [Ws28xx LED drivers](Ws28xx/README.md)
 
 ### SPI libraries/modules
@@ -200,6 +202,10 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [PN532 - RFID and NFC reader](Pn532/README.md)
 * [RFID shared elements](Card/README.md)
+
+### Media libraries
+
+* [Still image recording library](Media/README.md)
 
 </categorizedDevices>
 
