@@ -51,18 +51,20 @@ namespace Iot.Device.Hcsr04
         {
             _timer.Reset();
 
-            // Trigger input for 10uS to start ranging
+            // Measurements should be 60ms apart, in order to prevent trigger signal mixing with echo signal
             // ref https://components101.com/sites/default/files/component_datasheet/HCSR04%20Datasheet.pdf
             while (Environment.TickCount - _lastMeasurment < 60)
             {
                 Thread.Sleep(TimeSpan.FromMilliseconds(Environment.TickCount - _lastMeasurment));
             }
 
+            // Trigger input for 10uS to start ranging
             _controller.Write(_trigger, PinValue.High);
             Thread.Sleep(TimeSpan.FromMilliseconds(0.01));
             _controller.Write(_trigger, PinValue.Low);
 
-            while(_controller.Read(_echo) == PinValue.Low)
+            // Wait until the echo pin is HIGH (that marks the beginning of the pulse length we want to measure)
+            while (_controller.Read(_echo) == PinValue.Low)
             {
             }
 
@@ -70,7 +72,8 @@ namespace Iot.Device.Hcsr04
 
             _timer.Start();
 
-            while(_controller.Read(_echo) == PinValue.High)
+            // Wait until the pin is LOW again, (that marks the end of the pulse we are measuring)
+            while (_controller.Read(_echo) == PinValue.High)
             {
             }
 
