@@ -1,12 +1,14 @@
 ﻿# MotorHat
 
 ## Summary
-Provide a brief description on what the component is and its functionality.
+The MotorHat is a Raspberry Pi Motor Controller Hat based on PCA9685 PWM controller, that uses I²C-bus.
+Allows controlling up to 4 DC Motors or up to 2 Stepper Motors
+It also has 4 PWM Extra outputs that can be used to control ServoMotors or any PWM device
 
 ## Device Family
 Provide a list of component names and link to datasheets (if available) the binding will work with.
 
-**[Family Name Here]**: [Datasheet link here]
+**Adafruit Motor Hat**: https://www.adafruit.com/product/2348
 
 ## Binding Notes
 
