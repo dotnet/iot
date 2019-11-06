@@ -15,7 +15,6 @@ namespace Iot.Device.MotorHat.Samples
             const double Period = 10.0;
             Stopwatch sw = Stopwatch.StartNew();
 
-
             // Use the following code to generate an I2C address different from the default
             //var busId = 1;
             //var selectedI2cAddress = 0b000000;     // A5 A4 A3 A2 A1 A0
