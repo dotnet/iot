@@ -8,7 +8,7 @@ using System;
 namespace Iot.Device.MotorHat
 {
     /// <summary>
-    /// Raspberry Pi Motor Controller Hat based on PCA9685 PWM controller
+    /// Raspberry Pi Motor Hat based on PCA9685 PWM controller
     /// </summary>
     public class MotorHat : IDisposable
     {
