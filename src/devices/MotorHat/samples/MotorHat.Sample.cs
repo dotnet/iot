@@ -21,11 +21,11 @@ namespace Iot.Device.MotorHat.Samples
             //var selectedI2cAddress = 0b000000;     // A5 A4 A3 A2 A1 A0
             //var deviceAddress = MotorHat.I2cAddressBase + selectedI2cAddress;
             //var settings = new I2cConnectionSettings(busId, deviceAddress);
-            var motorHat = new Iot.Device.MotorHat.MotorHat();
 
-
-            using (var motor = motorHat.CreateDCMotor(1))
+            using (var motorHat = new MotorHat())
             {
+                var motor = motorHat.CreateDCMotor(1);
+
                 bool done = false;
                 Console.CancelKeyPress += (o, e) =>
                 {
