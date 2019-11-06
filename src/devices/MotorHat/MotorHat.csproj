@@ -14,6 +14,7 @@
     </ProjectReference>
     <ProjectReference Include="..\Pca9685\Pca9685.csproj" />
     <ProjectReference Include="..\ServoMotor\ServoMotor.csproj" />
+    <ProjectReference Include="..\DCMotor\DCMotor.csproj" />
   </ItemGroup>
 
 </Project>

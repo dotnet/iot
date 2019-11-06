@@ -4,6 +4,10 @@
 
 using Iot.Device.Pwm;
 using System;
+using System.Device.I2c;
+using System.Collections.Generic;
+using MotorHat;
+using System.Device.Pwm;
 
 namespace Iot.Device.MotorHat
 {
@@ -23,17 +27,128 @@ namespace Iot.Device.MotorHat
         private readonly Pca9685 pca9685;
 
         /// <summary>
-        /// 
+        /// Holds every channel that is being used by either a DCMotor, Stepper, ServoMotor, or PWM
         /// </summary>
-        public MotorHat()
+        private IList<PwmChannel> channelsUsed = new List<PwmChannel>();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MotorHat"/> class with the specified I2C settings and PWM frequency.
+        /// </summary>
+        /// <param name="settings">The I2C settings of the MotorHat.</param>
+        /// <param name="frequency">The frequency in Hz to set the PWM controller.</param>
+        /// <remarks>
+        /// The default i2c address is 0x60, but the HAT can be configured in hardware to any address from 0x60 to 0x7f.
+        /// The PWM hardware used by this HAT is a PCA9685. It has a total possible frequency range of 24 to 1526 Hz.
+        /// Setting the frequency above or below this range will cause PWM hardware to be set at its maximum or minimum setting.
+        /// </remarks>
+        public MotorHat(I2cConnectionSettings settings, double frequency)
+        {
+            var device = I2cDevice.Create(settings);
+            this.pca9685 = new Pca9685(device);
+
+            pca9685.PwmFrequency = frequency;
+            Console.WriteLine($"PWM Frequency has been set to {pca9685.PwmFrequency}Hz");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MotorHat"/> class with the specified I2C settings and default PWM frequency.
+        /// </summary>
+        /// <param name="settings">The I2C connection settings of the MotorHat.</param>
+        /// <remarks>
+        /// The <see cref="MotorHat"/> will be created with the default frequency of 1600 Hz.
+        /// </remarks>
+        public MotorHat(I2cConnectionSettings settings) : this(settings, 1600)
         {
         }
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="MotorHat"/> class with the default I2C address and PWM frequency.
         /// </summary>
+        /// <remarks>
+        /// The <see cref="MotorHat"/> will be created with the default I2C address of 0x60 and PWM frequency of 1600 Hz.
+        /// </remarks>
+        public MotorHat() : this(new I2cConnectionSettings(1, I2cAddressBase + 0b000000), 1600)
+        {
+            //Use the following code to set an address equivalent to the one configured in your device jumpers
+            //var busId = 1;
+            //var selectedI2cAddress = 0b000000;     // A5 A4 A3 A2 A1 A0
+            //var deviceAddress = Pca9685.I2cAddressBase + selectedI2cAddress;
+            //var settings = new I2cConnectionSettings(busId, deviceAddress);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="DCMotor"/> object for the specified channel.
+        /// </summary>
+        /// <param name="motorNumber">A motor number from 1 to 4.</param>
+        /// <returns>The created DCMotor object.</returns>
+        /// <remarks>
+        /// The motorNumber parameter refers to the motor numbers M1, M2, M3 or M4 printed in the device.
+        /// </remarks>
+        public DCMotor.DCMotor CreateDCMotor(byte motorNumber)
+        {
+            if (motorNumber < 1 || motorNumber > 4)
+                throw new ArgumentOutOfRangeException(nameof(motorNumber), $"Must be between 1 and 4, corresponding with M1, M2, M3 and M4. (Received: {motorNumber}");
+
+            // The PCA9685 PWM controller is used to control the inputs of two dual motor drivers.
+            // These correspond to motor hat screw terminals M1, M2, M3 and M4.
+            // Each motor driver circuit has one speed pin and two IN pins.
+            // The PWM pin expects a PWM input signal. The two IN pins expect a logic 0 or 1 input signal.
+            // The variables speed, in1 and in2 variables identify which PCA9685 PWM output pins will be used to drive this DCMotor.
+            // The speed variable identifies which PCA9685 output pin is used to drive the PWM input on the motor driver.
+            // And the in1 and in2 variables are used to specify which PCA9685 output pins are used to drive the xIN1 and xIN2 input pins of the motor driver.
+
+            byte speedPin, in1Pin, in2Pin;
+
+            switch (motorNumber)
+            {
+                case 1:
+                    speedPin = 8;
+                    in2Pin = 9;
+                    in1Pin = 10;
+                    break;
+                case 2:
+                    speedPin = 13;
+                    in2Pin = 12;
+                    in1Pin = 11;
+                    break;
+                case 3:
+                    speedPin = 2;
+                    in2Pin = 3;
+                    in1Pin = 4;
+                    break;
+                case 4:
+                    speedPin = 7;
+                    in2Pin = 6;
+                    in1Pin = 5;
+                    break;
+                default:
+                    throw new ArgumentException($"MotorHat Motor must be between 1 and 4 inclusive. Received: {motorNumber}");
+            }
+
+            //Add to the channelsUsed list, the channels we will use for this DCMotor
+            var speedPwm = pca9685.CreatePwmChannel(speedPin);
+            var in1Pwm = pca9685.CreatePwmChannel(in1Pin);
+            var in2Pwm = pca9685.CreatePwmChannel(in2Pin);
+
+            channelsUsed.Add(speedPwm);
+            channelsUsed.Add(in1Pwm);
+            channelsUsed.Add(in2Pwm);
+
+            var dcMotor = new DCMotor3Pwm(speedPwm, in1Pwm, in2Pwm);
+
+            return dcMotor;
+        }
+
+        /// <inheritdoc/>
         public void Dispose()
         {
+            foreach (var channel in channelsUsed)
+            {
+                channel.Stop();
+                channel.Dispose();
+            }
+
+            pca9685.Dispose();
         }
     }
 }
