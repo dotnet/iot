@@ -7,7 +7,7 @@ Motor HAT is an add-on board for Raspberry Pi.
 It consists of a pca9685 PWM driver and two motor controller chips, that together support up to 4 DC motors, or 2 Stepper motors.
 It also provides 4 extra PWM Outputs, that can be used for anything that requires PWM, (controlling a LED, a ServoMotor, etc)
 
-You can find i depth documentation on the hat in [Adafruit website](https://www.adafruit.com/product/2348)
+You can find in depth documentation on the hat in [Adafruit website](https://www.adafruit.com/product/2348)
 Or you can also buy it at [Aliexpress](http://s.click.aliexpress.com/e/mTB4ZB2s)
 
 ###Currently supported devices:
