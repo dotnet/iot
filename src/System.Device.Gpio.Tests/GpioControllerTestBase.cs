@@ -85,12 +85,34 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        public void IsPinOpenTest()
+        public void IsPinOpenOnInputTest()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
+                // Open pin in input mode (default)
                 Assert.False(controller.IsPinOpen(LedPin));
-                controller.OpenPin(LedPin);
+                controller.OpenPin(LedPin, PinMode.Input);
+                Assert.True(controller.IsPinOpen(LedPin));
+                controller.ClosePin(LedPin);
+                Assert.False(controller.IsPinOpen(LedPin));
+            }
+        }
+
+        [Fact]
+        public void IsPinOpenOnOutputTest()
+        {
+            // Separate test to check the IsPinOpen works also when the PinMode is Output, See Bug #776
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                Assert.False(controller.IsPinOpen(LedPin));
+
+                controller.OpenPin(LedPin, PinMode.Output);
+                Assert.True(controller.IsPinOpen(LedPin));
+
+                controller.Write(LedPin, PinValue.High);
+                Assert.True(controller.IsPinOpen(LedPin));
+
+                controller.Write(LedPin, PinValue.Low);
                 Assert.True(controller.IsPinOpen(LedPin));
                 controller.ClosePin(LedPin);
                 Assert.False(controller.IsPinOpen(LedPin));
