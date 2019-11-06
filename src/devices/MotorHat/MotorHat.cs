@@ -24,12 +24,12 @@ namespace Iot.Device.MotorHat
         /// <summary>
         /// Motor Hat is built on top of a PCa9685
         /// </summary>
-        private readonly Pca9685 pca9685;
+        private Pca9685 _pca9685;
 
         /// <summary>
         /// Holds every channel that is being used by either a DCMotor, Stepper, ServoMotor, or PWM
         /// </summary>
-        private IList<PwmChannel> channelsUsed = new List<PwmChannel>();
+        private List<PwmChannel> channelsUsed = new List<PwmChannel>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MotorHat"/> class with the specified I2C settings and PWM frequency.
@@ -44,21 +44,9 @@ namespace Iot.Device.MotorHat
         public MotorHat(I2cConnectionSettings settings, double frequency)
         {
             var device = I2cDevice.Create(settings);
-            this.pca9685 = new Pca9685(device);
+            this._pca9685 = new Pca9685(device);
 
-            pca9685.PwmFrequency = frequency;
-            Console.WriteLine($"PWM Frequency has been set to {pca9685.PwmFrequency}Hz");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MotorHat"/> class with the specified I2C settings and default PWM frequency.
-        /// </summary>
-        /// <param name="settings">The I2C connection settings of the MotorHat.</param>
-        /// <remarks>
-        /// The <see cref="MotorHat"/> will be created with the default frequency of 1600 Hz.
-        /// </remarks>
-        public MotorHat(I2cConnectionSettings settings) : this(settings, 1600)
-        {
+            _pca9685.PwmFrequency = frequency;
         }
 
         /// <summary>
@@ -67,13 +55,13 @@ namespace Iot.Device.MotorHat
         /// <remarks>
         /// The <see cref="MotorHat"/> will be created with the default I2C address of 0x60 and PWM frequency of 1600 Hz.
         /// </remarks>
-        public MotorHat() : this(new I2cConnectionSettings(1, I2cAddressBase + 0b000000), 1600)
+        public MotorHat(double frequency = 1600) : this(new I2cConnectionSettings(1, I2cAddressBase + 0b000000), frequency)
         {
-            //Use the following code to set an address equivalent to the one configured in your device jumpers
-            //var busId = 1;
-            //var selectedI2cAddress = 0b000000;     // A5 A4 A3 A2 A1 A0
-            //var deviceAddress = Pca9685.I2cAddressBase + selectedI2cAddress;
-            //var settings = new I2cConnectionSettings(busId, deviceAddress);
+            // Use the following code to set an address equivalent to the one configured in your device jumpers
+            // var busId = 1;
+            // var selectedI2cAddress = 0b000000;     // A5 A4 A3 A2 A1 A0
+            // var deviceAddress = Pca9685.I2cAddressBase + selectedI2cAddress;
+            // var settings = new I2cConnectionSettings(busId, deviceAddress);
         }
 
         /// <summary>
@@ -124,10 +112,9 @@ namespace Iot.Device.MotorHat
                     throw new ArgumentException($"MotorHat Motor must be between 1 and 4 inclusive. Received: {motorNumber}");
             }
 
-            //Add to the channelsUsed list, the channels we will use for this DCMotor
-            var speedPwm = pca9685.CreatePwmChannel(speedPin);
-            var in1Pwm = pca9685.CreatePwmChannel(in1Pin);
-            var in2Pwm = pca9685.CreatePwmChannel(in2Pin);
+            var speedPwm = _pca9685.CreatePwmChannel(speedPin);
+            var in1Pwm = _pca9685.CreatePwmChannel(in1Pin);
+            var in2Pwm = _pca9685.CreatePwmChannel(in2Pin);
 
             channelsUsed.Add(speedPwm);
             channelsUsed.Add(in1Pwm);
@@ -152,7 +139,7 @@ namespace Iot.Device.MotorHat
                 throw new ArgumentOutOfRangeException(nameof(channelNumber), $"Must be one of de available PWM channels (0, 1, 14 or 15). (received: {channelNumber})");
             }
 
-            var pwmChannel = this.pca9685.CreatePwmChannel(channelNumber);
+            var pwmChannel = this._pca9685.CreatePwmChannel(channelNumber);
 
             channelsUsed.Add(pwmChannel);
 
@@ -184,10 +171,10 @@ namespace Iot.Device.MotorHat
             foreach (var channel in channelsUsed)
             {
                 channel.Stop();
-                channel.Dispose();
             }
 
-            pca9685.Dispose();
+            _pca9685?.Dispose();
+            _pca9685 = null;
         }
     }
 }

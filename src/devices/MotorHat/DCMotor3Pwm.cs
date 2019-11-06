@@ -1,4 +1,8 @@
-﻿using Iot.Device.DCMotor;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Iot.Device.DCMotor;
 using System;
 using System.Device.Pwm;
 
@@ -6,21 +10,21 @@ namespace MotorHat
 {
     internal class DCMotor3Pwm : DCMotor
     {
-        private PwmChannel pwmPin;
-        private PwmChannel in1Pin;
-        private PwmChannel in2Pin;
-        private double speed = 0;
+        private PwmChannel _pwmPin;
+        private PwmChannel _in1Pin;
+        private PwmChannel _in2Pin;
+        private double _speed = 0;
 
         public DCMotor3Pwm(PwmChannel pwm, PwmChannel in1, PwmChannel in2) : base(null)
         {
-            this.pwmPin = pwm;
-            this.pwmPin.DutyCycle = speed;
+            this._pwmPin = pwm;
+            this._pwmPin.DutyCycle = _speed;
 
-            this.in1Pin = in1;
-            this.in1Pin.DutyCycle = 1;
+            this._in1Pin = in1;
+            this._in1Pin.DutyCycle = 1;
 
-            this.in2Pin = in2;
-            this.in2Pin.DutyCycle = 1;
+            this._in2Pin = in2;
+            this._in2Pin.DutyCycle = 1;
         }
 
         public override double Speed
@@ -28,47 +32,47 @@ namespace MotorHat
             get
             {
                 // Just return the last speed received
-                return this.speed;
+                return this._speed;
             }
             set
             {
                 // Make sure the speed is between -1 and 1
-                speed = Math.Clamp(value, -1, 1);
+                _speed = Math.Clamp(value, -1, 1);
 
                 // The motor Direction is handled configuring in1 and in2 based on speed sign
-                if (speed > 0)
+                if (_speed > 0)
                 {
                     // Motor moving forward...
-                    in1Pin.Start();
-                    in2Pin.Stop();
-                    pwmPin.Start();
+                    _in1Pin.Start();
+                    _in2Pin.Stop();
+                    _pwmPin.Start();
                 }
-                else if (speed < 0)
+                else if (_speed < 0)
                 {
                     // Motor moving backwards...
-                    in1Pin.Stop();
-                    in2Pin.Start();
-                    pwmPin.Start();
+                    _in1Pin.Stop();
+                    _in2Pin.Start();
+                    _pwmPin.Start();
                 }
                 else
                 {
                     // Motor stopped...
-                    in1Pin.Stop();
-                    in2Pin.Stop();
-                    pwmPin.Stop();
+                    _in1Pin.Stop();
+                    _in2Pin.Stop();
+                    _pwmPin.Stop();
                 }
 
                 // Here we set the DutyCycle based on the absolute speed value speed
                 // (PWM pin only supports positive values)
-                pwmPin.DutyCycle = Math.Abs(speed);
+                _pwmPin.DutyCycle = Math.Abs(_speed);
             }
         }
 
         protected override void Dispose(bool disposing)
         {
-            pwmPin.Stop();
-            in1Pin.Stop();
-            in2Pin.Stop();
+            _pwmPin.Stop();
+            _in1Pin.Stop();
+            _in2Pin.Stop();
         }
     }
 }
