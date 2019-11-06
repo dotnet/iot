@@ -1,11 +1,11 @@
 ﻿# MotorHat
 
 ## Summary
-The MotorHat is a Raspberry Pi Motor Controller Hat based on PCA9685 PWM controller, that uses I²C-bus.
+The MotorHat is a Raspberry Pi Motor Hat based on PCA9685 PWM controller, that uses I²C-bus.
 
-Allows controlling up to 4 DC Motors or up to 2 Stepper Motors
-
-It also has 4 PWM extra outputs that can be used to control any PWM device like ServoMotors or LEDs
+Allows controlling:
+* Up to 4 DC Motors or Up to 2 Stepper Motors
+* Up to 4 PWM Channels, (can be used to control any PWM device, including ServoMotors)
 
 ## Device Family
 
