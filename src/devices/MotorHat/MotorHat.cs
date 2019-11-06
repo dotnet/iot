@@ -71,7 +71,7 @@ namespace Iot.Device.MotorHat
         /// <remarks>
         /// The motorNumber parameter refers to the motor numbers M1, M2, M3 or M4 printed in the device.
         /// </remarks>
-        public DCMotor.DCMotor CreateDCMotor(byte motorNumber)
+        public DCMotor.DCMotor CreateDCMotor(int motorNumber)
         {
             if (motorNumber < 1 || motorNumber > 4)
                 throw new ArgumentOutOfRangeException(nameof(motorNumber), $"Must be between 1 and 4, corresponding with M1, M2, M3 and M4. (Received: {motorNumber}");
