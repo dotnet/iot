@@ -8,7 +8,7 @@ It consists of a pca9685 PWM driver and two motor controller chips, that togethe
 It also provides 4 extra PWM Outputs, that can be used for anything that requires PWM, (controlling a LED, a ServoMotor, etc)
 
 You can find in depth documentation on the hat in [Adafruit website](https://www.adafruit.com/product/2348)
-Or you can also buy it at [Aliexpress](http://s.click.aliexpress.com/e/mTB4ZB2s)
+Or you can also get it at [Aliexpress](http://s.click.aliexpress.com/e/mTB4ZB2s)
 
 ###Currently supported devices:
 - Up to 4 DC Motors
@@ -19,12 +19,11 @@ Or you can also buy it at [Aliexpress](http://s.click.aliexpress.com/e/mTB4ZB2s)
 - Up to 2 Stepper Motors
 
 
-## Notes
+# Notes
 
-###DC Motors
+##DC Motors
    The following example show how to create a DCMotor.
 
-## Code
 ```C#   
 using (var motorHat = new MotorHat())
 {
@@ -34,11 +33,9 @@ using (var motorHat = new MotorHat())
 }
 ```
 
-
-###ServoMotor
+##ServoMotor
    The following example show how to create a ServoMotor.
 
-## Code
 ```C#   
 using (var motorHat = new MotorHat())
 {
