@@ -80,7 +80,6 @@ namespace Iot.Device.MotorHat
         /// Creates a <see cref="DCMotor"/> object for the specified channel.
         /// </summary>
         /// <param name="motorNumber">A motor number from 1 to 4.</param>
-        /// <returns>The created DCMotor object.</returns>
         /// <remarks>
         /// The motorNumber parameter refers to the motor numbers M1, M2, M3 or M4 printed in the device.
         /// </remarks>
@@ -137,6 +136,46 @@ namespace Iot.Device.MotorHat
             var dcMotor = new DCMotor3Pwm(speedPwm, in1Pwm, in2Pwm);
 
             return dcMotor;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="PwmChannel"/> from one of the 4 available PWM channels in the MotorHat
+        /// </summary>
+        /// <param name="channelNumber">A valid PWM channel (0, 1, 14 or 15)</param>
+        /// <remarks>
+        /// The channelNumber refers to ont of the available PWM channel numbers available in the Motor Hat (0, 1, 14, 15) printed in the device.
+        /// </remarks>
+        public PwmChannel CreatePwmChannel(byte channelNumber)
+        {
+            if (channelNumber != 0 && channelNumber != 1 && channelNumber != 14 && channelNumber != 15)
+            {
+                throw new ArgumentOutOfRangeException(nameof(channelNumber), $"Must be one of de available PWM channels (0, 1, 14 or 15). (received: {channelNumber})");
+            }
+
+            var pwmChannel = this.pca9685.CreatePwmChannel(channelNumber);
+
+            channelsUsed.Add(pwmChannel);
+
+            return pwmChannel;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="ServoMotor"/> from one of the 4 available PWM channels  in the MotorHat
+        /// </summary>
+        /// <param name="channelNumber">A valid PWM channel (0, 1, 14 or 15)</param>
+        /// <param name="maximumAngle">The maximum angle the servo motor can move represented as a value between 0 and 360.</param>
+        /// <param name="minimumPulseWidthMicroseconds">The minimum pulse width, in microseconds, that represent an angle for 0 degrees.</param>
+        /// <param name="maximumPulseWidthMicroseconds">The maxnimum pulse width, in microseconds, that represent an angle for maximum angle.</param>
+        /// <remarks>
+        /// The channelNumber refers to ont of the available PWM channel numbers available in the Motor Hat (0, 1, 14, 15) printed in the device.
+        /// </remarks>
+        public ServoMotor.ServoMotor CreateServoMotor(byte channelNumber, double maximumAngle = 180, double minimumPulseWidthMicroseconds = 1000, double maximumPulseWidthMicroseconds = 2000)
+        {
+            var pwmChannel = this.CreatePwmChannel(channelNumber);
+
+            var servo = new ServoMotor.ServoMotor(pwmChannel, maximumAngle, minimumPulseWidthMicroseconds, maximumPulseWidthMicroseconds);
+
+            return servo;
         }
 
         /// <inheritdoc/>
