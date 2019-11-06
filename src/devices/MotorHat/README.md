@@ -8,12 +8,12 @@ It consists of a pca9685 PWM driver and two motor controller chips, that togethe
 It also provides 4 extra PWM Outputs, that can be used for anything that requires PWM, (controlling a LED, a ServoMotor, etc)
 
 You can find i depth documentation on the hat in [Adafruit website](https://www.adafruit.com/product/2348)
-Or you can also buy it at (Aliexpress)[http://s.click.aliexpress.com/e/mTB4ZB2s] 
+Or you can also buy it at [Aliexpress](http://s.click.aliexpress.com/e/mTB4ZB2s)
 
 ###Currently supported devices:
 - Up to 4 DC Motors
 - Up to 4 PWM Xtra channels
-- Up to 4 (ServoMotors)[https://github.com/dotnet/iot/blob/master/src/devices/ServoMotor/README.md]
+- Up to 4 [ServoMotors](https://github.com/dotnet/iot/blob/master/src/devices/ServoMotor/README.md)
 
 ###Not yet supported devices:
 - Up to 2 Stepper Motors
@@ -47,4 +47,4 @@ using (var motorHat = new MotorHat())
     ...
 }
 ```
-Check the (ServoMotor documentation)[https://github.com/dotnet/iot/tree/master/src/devices/ServoMotor] for examples on how to use the ServoMotor class
+Check the [ServoMotor documentation](https://github.com/dotnet/iot/tree/master/src/devices/ServoMotor) for examples on how to use the ServoMotor class
