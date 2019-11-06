@@ -10,18 +10,18 @@ It also provides 4 extra PWM Outputs, that can be used for anything that require
 You can find in depth documentation on the hat in [Adafruit website](https://www.adafruit.com/product/2348)
 Or you can also get it at [Aliexpress](http://s.click.aliexpress.com/e/mTB4ZB2s)
 
-###Currently supported devices:
+### Currently supported devices:
 - Up to 4 DC Motors
 - Up to 4 PWM Xtra channels
 - Up to 4 [ServoMotors](https://github.com/dotnet/iot/blob/master/src/devices/ServoMotor/README.md)
 
-###Not yet supported devices:
+### Not yet supported devices:
 - Up to 2 Stepper Motors
 
 
-# Notes
+## Notes
 
-##DC Motors
+### DC Motors
    The following example show how to create a DCMotor.
 
 ```C#   
@@ -33,7 +33,7 @@ using (var motorHat = new MotorHat())
 }
 ```
 
-##ServoMotor
+### ServoMotor
    The following example show how to create a ServoMotor.
 
 ```C#   
