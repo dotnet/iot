@@ -38,16 +38,12 @@ namespace Iot.Device.MotorHat
                 // Make sure the speed is between -1 and 1
                 _speed = Math.Clamp(value, -1, 1);
 
-                // Stop the pwm, to prevent the motor spinning in the wrong direction if we 
-                // get a context switch right in the middle of congiguration
-                _pwmPin.Stop();
-
                 // The motor Direction is handled configuring in1 and in2 based on speed sign
                 if (_speed > 0)
                 {
                     // Motor moving forward...
-                    _in1Pin.Start();
                     _in2Pin.Stop();
+                    _in1Pin.Start();
                     _pwmPin.Start();
                 }
                 else if (_speed < 0)
@@ -60,9 +56,9 @@ namespace Iot.Device.MotorHat
                 else
                 {
                     // Motor stopped...
+                    _pwmPin.Stop();
                     _in1Pin.Stop();
                     _in2Pin.Stop();
-                    _pwmPin.Stop();
                 }
 
                 // Here we set the DutyCycle based on the absolute speed value speed
