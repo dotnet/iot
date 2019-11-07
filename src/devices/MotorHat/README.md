@@ -12,9 +12,7 @@ Or you can also get it at [Aliexpress](http://s.click.aliexpress.com/e/mTB4ZB2s)
 
 ### Currently supported devices:
 - Up to 4 DC Motors
-- Up to 4 PWM Xtra channels
-- Up to 4 [ServoMotors](../ServoMotor/README.md)
-
+- And Up to 4 PWM Xtra channels OR up to 4 [ServoMotors](../ServoMotor/README.md)
 
 ## Notes
 
