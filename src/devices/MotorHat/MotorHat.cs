@@ -6,7 +6,6 @@ using Iot.Device.Pwm;
 using System;
 using System.Device.I2c;
 using System.Collections.Generic;
-using MotorHat;
 using System.Device.Pwm;
 
 namespace Iot.Device.MotorHat
@@ -29,7 +28,7 @@ namespace Iot.Device.MotorHat
         /// <summary>
         /// Holds every channel that is being used by either a DCMotor, Stepper, ServoMotor, or PWM
         /// </summary>
-        private List<PwmChannel> channelsUsed = new List<PwmChannel>();
+        private List<PwmChannel> _channelsUsed = new List<PwmChannel>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MotorHat"/> class with the specified I2C settings and PWM frequency.
@@ -44,7 +43,7 @@ namespace Iot.Device.MotorHat
         public MotorHat(I2cConnectionSettings settings, double frequency)
         {
             var device = I2cDevice.Create(settings);
-            this._pca9685 = new Pca9685(device);
+            _pca9685 = new Pca9685(device);
 
             _pca9685.PwmFrequency = frequency;
         }
@@ -52,16 +51,15 @@ namespace Iot.Device.MotorHat
         /// <summary>
         /// Initializes a new instance of the <see cref="MotorHat"/> class with the default I2C address and PWM frequency.
         /// </summary>
+        /// <param name="frequency">The frequency in Hz to set the PWM controller.</param>
+        /// <param name="selectedAddress">The I2C settings of the MotorHat. 0 by default if jumpers were not changed
+        /// Use the following code to set an address equivalent to the one configured in your device jumpers
+        /// var selectedAddress = 0b000000;  // were bits represents jumpers A5 A4 A3 A2 A1 A0</param>
         /// <remarks>
         /// The <see cref="MotorHat"/> will be created with the default I2C address of 0x60 and PWM frequency of 1600 Hz.
         /// </remarks>
-        public MotorHat(double frequency = 1600) : this(new I2cConnectionSettings(1, I2cAddressBase + 0b000000), frequency)
+        public MotorHat(double frequency = 1600, int selectedAddress = 0b000000) : this(new I2cConnectionSettings(1, I2cAddressBase + selectedAddress), frequency)
         {
-            // Use the following code to set an address equivalent to the one configured in your device jumpers
-            // var busId = 1;
-            // var selectedI2cAddress = 0b000000;     // A5 A4 A3 A2 A1 A0
-            // var deviceAddress = Pca9685.I2cAddressBase + selectedI2cAddress;
-            // var settings = new I2cConnectionSettings(busId, deviceAddress);
         }
 
         /// <summary>
@@ -84,7 +82,7 @@ namespace Iot.Device.MotorHat
             // The speed variable identifies which PCA9685 output pin is used to drive the PWM input on the motor driver.
             // And the in1 and in2 variables are used to specify which PCA9685 output pins are used to drive the xIN1 and xIN2 input pins of the motor driver.
 
-            byte speedPin, in1Pin, in2Pin;
+            int speedPin, in1Pin, in2Pin;
 
             switch (motorNumber)
             {
@@ -116,13 +114,11 @@ namespace Iot.Device.MotorHat
             var in1Pwm = _pca9685.CreatePwmChannel(in1Pin);
             var in2Pwm = _pca9685.CreatePwmChannel(in2Pin);
 
-            channelsUsed.Add(speedPwm);
-            channelsUsed.Add(in1Pwm);
-            channelsUsed.Add(in2Pwm);
+            _channelsUsed.Add(speedPwm);
+            _channelsUsed.Add(in1Pwm);
+            _channelsUsed.Add(in2Pwm);
 
-            var dcMotor = new DCMotor3Pwm(speedPwm, in1Pwm, in2Pwm);
-
-            return dcMotor;
+            return new DCMotor3Pwm(speedPwm, in1Pwm, in2Pwm);
         }
 
         /// <summary>
@@ -132,16 +128,16 @@ namespace Iot.Device.MotorHat
         /// <remarks>
         /// The channelNumber refers to ont of the available PWM channel numbers available in the Motor Hat (0, 1, 14, 15) printed in the device.
         /// </remarks>
-        public PwmChannel CreatePwmChannel(byte channelNumber)
+        public PwmChannel CreatePwmChannel(int channelNumber)
         {
             if (channelNumber != 0 && channelNumber != 1 && channelNumber != 14 && channelNumber != 15)
             {
                 throw new ArgumentOutOfRangeException(nameof(channelNumber), $"Must be one of de available PWM channels (0, 1, 14 or 15). (received: {channelNumber})");
             }
 
-            var pwmChannel = this._pca9685.CreatePwmChannel(channelNumber);
+            var pwmChannel = _pca9685.CreatePwmChannel(channelNumber);
 
-            channelsUsed.Add(pwmChannel);
+            _channelsUsed.Add(pwmChannel);
 
             return pwmChannel;
         }
@@ -156,9 +152,9 @@ namespace Iot.Device.MotorHat
         /// <remarks>
         /// The channelNumber refers to ont of the available PWM channel numbers available in the Motor Hat (0, 1, 14, 15) printed in the device.
         /// </remarks>
-        public ServoMotor.ServoMotor CreateServoMotor(byte channelNumber, double maximumAngle = 180, double minimumPulseWidthMicroseconds = 1000, double maximumPulseWidthMicroseconds = 2000)
+        public ServoMotor.ServoMotor CreateServoMotor(int channelNumber, double maximumAngle = 180, double minimumPulseWidthMicroseconds = 1000, double maximumPulseWidthMicroseconds = 2000)
         {
-            var pwmChannel = this.CreatePwmChannel(channelNumber);
+            var pwmChannel = CreatePwmChannel(channelNumber);
 
             var servo = new ServoMotor.ServoMotor(pwmChannel, maximumAngle, minimumPulseWidthMicroseconds, maximumPulseWidthMicroseconds);
 
@@ -168,7 +164,7 @@ namespace Iot.Device.MotorHat
         /// <inheritdoc/>
         public void Dispose()
         {
-            foreach (var channel in channelsUsed)
+            foreach (var channel in _channelsUsed)
             {
                 channel.Stop();
             }

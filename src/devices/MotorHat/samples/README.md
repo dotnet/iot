@@ -2,4 +2,4 @@
 
 ## Summary
 
-Please refer to (MotorHat documentation)[https://github.com/dotnet/iot/tree/master/src/devices/MotorHat] for examples on how to use this device binding. 
+Please refer to (MotorHat documentation)[../README.md] for examples on how to use this device binding. 

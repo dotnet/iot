@@ -2,13 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.DCMotor;
 using System;
 using System.Device.Pwm;
 
-namespace MotorHat
+namespace Iot.Device.MotorHat
 {
-    internal class DCMotor3Pwm : DCMotor
+    internal class DCMotor3Pwm : DCMotor.DCMotor
     {
         private PwmChannel _pwmPin;
         private PwmChannel _in1Pin;
@@ -17,14 +16,14 @@ namespace MotorHat
 
         public DCMotor3Pwm(PwmChannel pwm, PwmChannel in1, PwmChannel in2) : base(null)
         {
-            this._pwmPin = pwm;
-            this._pwmPin.DutyCycle = _speed;
+            _pwmPin = pwm;
+            _pwmPin.DutyCycle = _speed;
 
-            this._in1Pin = in1;
-            this._in1Pin.DutyCycle = 1;
+            _in1Pin = in1;
+            _in1Pin.DutyCycle = 1;
 
-            this._in2Pin = in2;
-            this._in2Pin.DutyCycle = 1;
+            _in2Pin = in2;
+            _in2Pin.DutyCycle = 1;
         }
 
         public override double Speed
@@ -32,12 +31,16 @@ namespace MotorHat
             get
             {
                 // Just return the last speed received
-                return this._speed;
+                return _speed;
             }
             set
             {
                 // Make sure the speed is between -1 and 1
                 _speed = Math.Clamp(value, -1, 1);
+
+                // Stop the pwm, to prevent the motor spinning in the wrong direction if we 
+                // get a context switch right in the middle of congiguration
+                _pwmPin.Stop();
 
                 // The motor Direction is handled configuring in1 and in2 based on speed sign
                 if (_speed > 0)

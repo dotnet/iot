@@ -13,10 +13,7 @@ Or you can also get it at [Aliexpress](http://s.click.aliexpress.com/e/mTB4ZB2s)
 ### Currently supported devices:
 - Up to 4 DC Motors
 - Up to 4 PWM Xtra channels
-- Up to 4 [ServoMotors](https://github.com/dotnet/iot/blob/master/src/devices/ServoMotor/README.md)
-
-### Not yet supported devices:
-- Up to 2 Stepper Motors
+- Up to 4 [ServoMotors](../ServoMotor/README.md)
 
 
 ## Notes
@@ -44,4 +41,4 @@ using (var motorHat = new MotorHat())
     ...
 }
 ```
-Check the [ServoMotor documentation](https://github.com/dotnet/iot/tree/master/src/devices/ServoMotor) for examples on how to use the ServoMotor class
+Check the [ServoMotor documentation](../ServoMotor/README.md) for examples on how to use the ServoMotor class
