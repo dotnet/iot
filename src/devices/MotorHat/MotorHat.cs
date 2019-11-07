@@ -40,7 +40,7 @@ namespace Iot.Device.MotorHat
         /// The PWM hardware used by this HAT is a PCA9685. It has a total possible frequency range of 24 to 1526 Hz.
         /// Setting the frequency above or below this range will cause PWM hardware to be set at its maximum or minimum setting.
         /// </remarks>
-        public MotorHat(I2cConnectionSettings settings, double frequency)
+        public MotorHat(I2cConnectionSettings settings, double frequency = 1600)
         {
             var device = I2cDevice.Create(settings);
             _pca9685 = new Pca9685(device);
