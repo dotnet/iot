@@ -19,13 +19,22 @@ namespace Iot.Device.CharacterLcd.Samples
         /// <param name="args">Should be empty</param>
         static void Main(string[] args)
         {
-            // Sets up a 16x2 character LCD with a hardwired or no backlight.
-            //using (Lcd1602 lcd = new Lcd1602(registerSelectPin: 22, enablePin: 17, dataPins: new int[] { 25, 24, 23, 18 }))
-            //{
-            //    lcd.Clear();
-            //    lcd.Write("Hello World");
-            //}
+            // Choose the right setup for your display:
+            // UsingGpioPins()
+            // UsingMcp()
             UsingHd44780OverI2C();
+        }
+
+        /// <summary>
+        /// This sets up a 16x2 character LCD, directly connected to a set of GPIO pins, with a hardwired or no backlight and 4 Bit commands
+        /// </summary>
+        static void UsingGpioPins()
+        {
+            using (Lcd1602 lcd = new Lcd1602(registerSelectPin: 22, enablePin: 17, dataPins: new int[] { 25, 24, 23, 18 }))
+            {
+                lcd.Clear();
+                lcd.Write("Hello World");
+            }
         }
 
         /// <summary>
@@ -51,6 +60,10 @@ namespace Iot.Device.CharacterLcd.Samples
             }
         }
 
+        /// <summary>
+        /// This method will use I2C commands to talk to the display. The display is expected to be at address 0x27 and accept 4 bit commands. 
+        /// This runs a full test suite against the display. 
+        /// </summary>
         static void UsingHd44780OverI2C()
         {
             using (I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x27)))
@@ -63,7 +76,6 @@ namespace Iot.Device.CharacterLcd.Samples
                     hd44780.DisplayOn = true;
                     hd44780.Clear();
                     ExtendedSample.Test(hd44780);
-                    
                 }
             }
 

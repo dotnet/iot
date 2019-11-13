@@ -57,37 +57,10 @@ namespace Iot.Device.CharacterLcd.Samples
 
             TestPrompt("Colors", lcd, SetBacklightColorTest);
 
-            // Now to something at least a bit usable...
-            lcd.Clear();
-            Console.WriteLine("Press any key to exit");
-            try
-            {
-                using (System.Timers.Timer timer = new System.Timers.Timer(100))
-                {
-                    timer.Elapsed += (o, e) =>
-                    {
-                        var now = DateTime.Now;
-                        lcd.SetCursorPosition(0, 0);
-                        lcd.Write(String.Format(CultureInfo.CurrentCulture, "{0:dddd}", now));
-                        lcd.SetCursorPosition(0, 1);
-                        lcd.Write(String.Format(CultureInfo.CurrentCulture, "{0:M} {0:yyyy}", now, now));
-                        lcd.SetCursorPosition(0, 2);
-                        lcd.Write("It is now ");
-                        lcd.SetCursorPosition(0, 3);
-                        lcd.Write(String.Format(CultureInfo.CurrentCulture, "{0}", now.ToLongTimeString()));
-                    };
-                    timer.AutoReset = true;
-                    timer.Enabled = true;
-                    Console.ReadLine();
-                }
-            }
-            finally
-            {
-                lcd.DisplayOn = false;
-                lcd.BacklightOn = false;
-                Console.WriteLine("Done...");
-            }
-
+            TestPrompt("Time", lcd, TestClock);
+            lcd.DisplayOn = false;
+            lcd.BacklightOn = false;
+            Console.WriteLine("Done...");
         }
 
         static void CharacterSet(Hd44780 lcd)
@@ -221,6 +194,7 @@ namespace Iot.Device.CharacterLcd.Samples
             if (colorLcd == null)
             {
                 Console.WriteLine("Color backlight not supported");
+                return;
             }
             Color[] colors = { Color.Red, Color.Green, Color.Blue, Color.Aqua, Color.Azure,
                 Color.Brown, Color.Chocolate, Color.LemonChiffon, Color.Lime, Color.Tomato, Color.Yellow };
@@ -236,6 +210,37 @@ namespace Iot.Device.CharacterLcd.Samples
 
             lcd.Clear();
             colorLcd.SetBacklightColor(Color.White);
+        }
+
+        /// <summary>
+        /// A small test that shows something useful. It may not work optimally due to wrong character mappings if the month names contain non-ascii characters. 
+        /// </summary>
+        static void TestClock(Hd44780 lcd)
+        {
+            using (System.Timers.Timer timer = new System.Timers.Timer(100))
+            {
+                object myLock = new object();
+                timer.Elapsed += (o, e) =>
+                {
+                    // The callback may be executed in parallel several times, but the display component is not reentrant!
+                    if (Monitor.TryEnter(myLock))
+                    {
+                        var now = DateTime.Now;
+                        lcd.SetCursorPosition(0, 0);
+                        lcd.Write(String.Format(CultureInfo.CurrentCulture, "{0:dddd}", now));
+                        lcd.SetCursorPosition(0, 1);
+                        lcd.Write(String.Format(CultureInfo.CurrentCulture, "{0:M} {0:yyyy}", now, now));
+                        lcd.SetCursorPosition(0, 2);
+                        lcd.Write("It is now ");
+                        lcd.SetCursorPosition(0, 3);
+                        lcd.Write(String.Format(CultureInfo.CurrentCulture, "{0}", now.ToLongTimeString()));
+                        Monitor.Exit(myLock);
+                    }
+                };
+                timer.AutoReset = true;
+                timer.Enabled = true;
+                Console.ReadLine();
+            }
         }
 
         static void TestPrompt<T>(string test, T lcd, Action<T> action) where T : Hd44780
