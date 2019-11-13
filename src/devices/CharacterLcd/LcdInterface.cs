@@ -134,7 +134,7 @@ namespace Iot.Device.CharacterLcd
         /// </remarks>
         /// <param name="device">The I2c device for the LCD.</param>
         /// <param name="uses8Bit">True if the device uses 8 Bit commands, false if it handles only 4 bit commands.</param>
-        public static LcdInterface CreateI2c(I2cDevice device, bool uses8Bit)
+        public static LcdInterface CreateI2c(I2cDevice device, bool uses8Bit = true)
         {
             if (uses8Bit)
             {

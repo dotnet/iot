@@ -63,11 +63,13 @@ namespace Iot.Device.CharacterLcd
             {
                 get
                 {
-                    // Not implemented / Not supported, but don't throw exceptions here
+                    // Setting the backlight on or off is not supported with 8 bit commands, according to the docs. 
                     return true;
                 }
                 set
                 {
+                    // Ignore setting the backlight. Exceptions are not expected by user code here, as it is normal to 
+                    // enable this during initialization, so that it is enabled whether switching it is supported or not.
                 }
             }
 

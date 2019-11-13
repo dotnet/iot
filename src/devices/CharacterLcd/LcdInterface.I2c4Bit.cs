@@ -106,14 +106,13 @@ namespace Iot.Device.CharacterLcd
 
             private void Write4Bits(byte command)
             {
-                // _device.WriteByte((byte)(command | BacklightFlag));
                 _device.WriteByte((byte)(command | ENABLE | BacklightFlag));
                 _device.WriteByte((byte)((command & ~ENABLE) | BacklightFlag));
             }
 
             public override void SendCommands(ReadOnlySpan<byte> commands)
             {
-                foreach(var c in commands)
+                foreach (var c in commands)
                 {
                     SendCommand(c);
                 }
