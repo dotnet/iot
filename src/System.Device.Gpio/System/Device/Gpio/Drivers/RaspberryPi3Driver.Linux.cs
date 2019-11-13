@@ -27,7 +27,9 @@ namespace System.Device.Gpio.Drivers
         private const string GpioMemoryFilePath = "/dev/gpiomem";
         private const string MemoryFilePath = "/dev/mem";
         private const string DeviceTreeRanges = "/proc/device-tree/soc/ranges";
-        private UnixDriver _sysFSDriver = null;
+		private const string ModelFilePath = "/proc/device-tree/model";
+
+		private UnixDriver _sysFSDriver = null;
         private readonly IDictionary<int, PinMode> _sysFSModes = new Dictionary<int, PinMode>();
 
         /// <summary>
@@ -517,17 +519,23 @@ namespace System.Device.Gpio.Drivers
                 IsPi4 = false;
                 try
                 {
-                    string model = File.ReadAllText("/proc/device-tree/model", Text.Encoding.ASCII);
-                    if (model.Contains("Raspberry Pi 4"))
-                    {
-                        IsPi4 = true;
-                    }
+					if (File.Exists(ModelFilePath))
+					{
+						string model = File.ReadAllText(ModelFilePath, Text.Encoding.ASCII);
+						if (model.Contains("Raspberry Pi 4"))
+						{
+							IsPi4 = true;
+						}
+					}
                 }
-                catch
-                {
-                    // Ignore any exceptions, just continue as Pi3
-                }
-            }
+                catch (Exception x)
+				{
+                    // This should not normally fail, but we currently don't know how this behaves on different operating systems. Therefore, we ignore
+					// any exceptions in release and just continue as Pi3 if something fails. 
+                    // If in debug mode, we might want to check what happened here (i.e unsupported OS, incorrect permissions)
+					System.Diagnostics.Debug.Fail($"Unexpected exception: {x}");
+				}
+			}
         }
 
         /// <summary>
