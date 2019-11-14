@@ -101,7 +101,7 @@ namespace Iot.Device.CharacterLcd
             public override void SendCommand(byte command)
             {
                 Write4Bits((byte)(0x00 | (command & 0xF0)));
-                Write4Bits((byte)(0x00 | (command << 4 & 0xF0)));
+                Write4Bits((byte)(0x00 | ((command << 4) & 0xF0)));
             }
 
             private void Write4Bits(byte command)
@@ -121,7 +121,7 @@ namespace Iot.Device.CharacterLcd
             public override void SendData(byte value)
             {
                 Write4Bits((byte)(REGISTERSELECT | (value & 0xF0)));
-                Write4Bits((byte)(REGISTERSELECT | (value << 4 & 0xF0)));
+                Write4Bits((byte)(REGISTERSELECT | ((value << 4) & 0xF0)));
             }
 
             public override void SendData(ReadOnlySpan<byte> values)
@@ -129,7 +129,7 @@ namespace Iot.Device.CharacterLcd
                 foreach (var c in values)
                 {
                     Write4Bits((byte)(REGISTERSELECT | (c & 0xF0)));
-                    Write4Bits((byte)(REGISTERSELECT | (c << 4 & 0xF0)));
+                    Write4Bits((byte)(REGISTERSELECT | ((c << 4) & 0xF0)));
                 }
             }
         }
