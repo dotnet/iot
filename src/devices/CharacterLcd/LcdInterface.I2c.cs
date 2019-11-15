@@ -59,7 +59,19 @@ namespace Iot.Device.CharacterLcd
 
             public override bool EightBitMode => true;
 
-            public override bool BacklightOn { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public override bool BacklightOn 
+            {
+                get
+                {
+                    // Setting the backlight on or off is not supported with 8 bit commands, according to the docs. 
+                    return true;
+                }
+                set
+                {
+                    // Ignore setting the backlight. Exceptions are not expected by user code here, as it is normal to 
+                    // enable this during initialization, so that it is enabled whether switching it is supported or not.
+                }
+            }
 
             public override void SendCommand(byte command)
             {

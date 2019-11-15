@@ -9,12 +9,12 @@ using System.Drawing;
 namespace Iot.Device.CharacterLcd
 {
     /// <summary>
-    /// Supports I2c LCDs with I2c RGB backlight, such as the Grove - LCD RGB Backlight (16x2 LCD character display with RGB backlight).
+    /// Supports I2c LCDs with I2c RGB backlight, such as the Grove - LCD RGB Backlight (i.e. 16x2 LCD character display with RGB backlight).
     /// </summary>
     /// <remarks>
     /// This implementation was drawn from numerous libraries such as Grove_LCD_RGB_Backlight.
     /// </remarks>
-    public class LcdRgb1602 : Lcd1602
+    public class LcdRgb : Hd44780
     {
         private readonly I2cDevice _rgbDevice;
 
@@ -24,10 +24,25 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// Initializes a new HD44780 LCD controller.
         /// </summary>
+        /// <param name="size">Size of the device in characters. Usually 16x2 or 20x4.</param>
         /// <param name="lcdDevice">The I2C device to control LCD display.</param>
         /// <param name="rgbDevice">The I2C device to control RGB backlight.</param>
-        public LcdRgb1602(I2cDevice lcdDevice, I2cDevice rgbDevice)
-            : base(lcdDevice)
+        public LcdRgb(Size size, I2cDevice lcdDevice, I2cDevice rgbDevice)
+            : base(size, LcdInterface.CreateI2c(lcdDevice, true))
+        {
+            _rgbDevice = rgbDevice;
+
+            InitRgb();
+        }
+
+        /// <summary>
+        /// Initializes a new HD44780 LCD with an RGB Backlight.
+        /// </summary>
+        /// <param name="size">Size of the device in characters. Usually 16x2 or 20x4.</param>
+        /// <param name="lcdInterface">Interface to the display.</param>
+        /// <param name="rgbDevice">The I2C device to control RGB backlight.</param>
+        public LcdRgb(Size size, LcdInterface lcdInterface, I2cDevice rgbDevice)
+            : base(size, lcdInterface)
         {
             _rgbDevice = rgbDevice;
 

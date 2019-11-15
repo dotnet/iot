@@ -7,7 +7,9 @@ using System.Device.I2c;
 using System.Diagnostics;
 using System.Drawing;
 using System.Text;
+using System.Threading;
 using System.Timers;
+using System.Globalization;
 using Iot.Device.Mcp23xxx;
 
 namespace Iot.Device.CharacterLcd.Samples
@@ -19,87 +21,46 @@ namespace Iot.Device.CharacterLcd.Samples
         const string Fourty = Thirty + "123456789\u000b";
         const string Eighty = Fourty + "123456789\u000c123456789\u000d123456789\u000e123456789\u000f";
 
-        public static void Test()
+        public static void Test(Hd44780 lcd)
         {
             Console.WriteLine("Starting...");
+            lcd.Clear();
+            Console.WriteLine("Initialized");
+            Console.ReadLine();
+            TestPrompt("SetCursor", lcd, SetCursorTest);
+            TestPrompt("Underline", lcd, l => l.UnderlineCursorVisible = true);
+            lcd.UnderlineCursorVisible = false;
+            TestPrompt("Walker", lcd, WalkerTest);
+            CreateTensCharacters(lcd);
+            TestPrompt("CharacterSet", lcd, CharacterSet);
 
-#if USEI2C
-            var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x21));
-            var controller = new Mcp23008(i2cDevice);
-            var lcd = new Lcd1602(registerSelectPin: 1, enablePin: 2, dataPins: new int[] { 3, 4, 5, 6 }, backlightPin: 7, controller: controller);
-#elif USERGB
-            var i2cLcdDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x3E));
-            var i2cRgbDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x62));
-            var lcd = new LcdRgb1602(i2cLcdDevice, i2cRgbDevice);
-#else
-            Hd44780 lcd = new Hd44780(new Size(20, 4), LcdInterface.CreateGpio(12, 26, new int[] { 16, 17, 18, 19, 20, 21, 22, 23 }, readWritePin: 13));
-#endif
-            using (lcd)
-            {
-                Console.WriteLine("Initialized");
-                Console.ReadLine();
+            TestPrompt("DisplayEnable", lcd, DisplayAndBackLightOnOff);
 
-                TestPrompt("SetCursor", lcd, SetCursorTest);
-                TestPrompt("Underline", lcd, l => l.UnderlineCursorVisible = true);
-                lcd.UnderlineCursorVisible = false;
-                TestPrompt("Walker", lcd, WalkerTest);
-                CreateTensCharacters(lcd);
-                TestPrompt("CharacterSet", lcd, CharacterSet);
+            // Shifting
+            TestPrompt("Autoshift", lcd, AutoShift);
+            TestPrompt("DisplayLeft", lcd, l => ShiftDisplayTest(l, a => a.ShiftDisplayLeft()));
+            TestPrompt("DisplayRight", lcd, l => ShiftDisplayTest(l, a => a.ShiftDisplayRight()));
+            TestPrompt("CursorLeft", lcd, l => ShiftCursorTest(l, a => a.ShiftCursorLeft()));
+            TestPrompt("CursorRight", lcd, l => ShiftCursorTest(l, a => a.ShiftCursorRight()));
 
-                // Shifting
-                TestPrompt("Autoshift", lcd, AutoShift);
-                TestPrompt("DisplayLeft", lcd, l => ShiftDisplayTest(l, a => a.ShiftDisplayLeft()));
-                TestPrompt("DisplayRight", lcd, l => ShiftDisplayTest(l, a => a.ShiftDisplayRight()));
-                TestPrompt("CursorLeft", lcd, l => ShiftCursorTest(l, a => a.ShiftCursorLeft()));
-                TestPrompt("CursorRight", lcd, l => ShiftCursorTest(l, a => a.ShiftCursorRight()));
+            // Long string
+            TestPrompt("Twenty", lcd, l => l.Write(Twenty));
+            TestPrompt("Fourty", lcd, l => l.Write(Fourty));
+            TestPrompt("Eighty", lcd, l => l.Write(Eighty));
 
-                // Long string
-                TestPrompt("Twenty", lcd, l => l.Write(Twenty));
-                TestPrompt("Fourty", lcd, l => l.Write(Fourty));
-                TestPrompt("Eighty", lcd, l => l.Write(Eighty));
+            TestPrompt("Twenty-", lcd, l => WriteFromEnd(l, Twenty));
+            TestPrompt("Fourty-", lcd, l => WriteFromEnd(l, Fourty));
+            TestPrompt("Eighty-", lcd, l => WriteFromEnd(l, Eighty));
 
-                TestPrompt("Twenty-", lcd, l => WriteFromEnd(l, Twenty));
-                TestPrompt("Fourty-", lcd, l => WriteFromEnd(l, Fourty));
-                TestPrompt("Eighty-", lcd, l => WriteFromEnd(l, Eighty));
+            TestPrompt("Wrap", lcd, l => l.Write(new string('*', 80) + ">>>>>"));
+            TestPrompt("Perf", lcd, PerfTests);
 
-                TestPrompt("Wrap", lcd, l => l.Write(new string('*', 80) + ">>>>>"));
-                TestPrompt("Perf", lcd, PerfTests);
+            TestPrompt("Colors", lcd, SetBacklightColorTest);
 
-#if USERGB
-                TestPrompt("Colors", lcd, SetBacklightColorTest);
-#endif
-
-                // Shift display right
-                lcd.Write("Hello .NET!");
-                try
-                {
-                    int state = 0;
-                    Timer timer = new Timer(1000);
-                    timer.Elapsed += (o, e) =>
-                    {
-                        lcd.SetCursorPosition(0, 1);
-                        lcd.Write(DateTime.Now.ToLongTimeString() + " ");
-                        if (state == 0)
-                        {
-                            state = 1;
-                        }
-                        else
-                        {
-                            lcd.ShiftDisplayRight();
-                            state = 0;
-                        }
-                    };
-                    timer.AutoReset = true;
-                    timer.Enabled = true;
-                    Console.ReadLine();
-                }
-                finally
-                {
-                    lcd.DisplayOn = false;
-                    lcd.BacklightOn = false;
-                    Console.WriteLine("Done...");
-                }
-            }
+            TestPrompt("Time", lcd, TestClock);
+            lcd.DisplayOn = false;
+            lcd.BacklightOn = false;
+            Console.WriteLine("Done...");
         }
 
         static void CharacterSet(Hd44780 lcd)
@@ -126,6 +87,18 @@ namespace Iot.Device.CharacterLcd.Samples
                     System.Threading.Thread.Sleep(1000);
                 }
             }
+        }
+
+        static void DisplayAndBackLightOnOff(Hd44780 lcd)
+        {
+            lcd.Clear();
+            lcd.Write("This is some text");
+            lcd.DisplayOn = false;
+            Thread.Sleep(1000);
+            lcd.DisplayOn = true;
+            lcd.BacklightOn = false;
+            Thread.Sleep(1000);
+            lcd.BacklightOn = true;
         }
 
         static void AutoShift(Hd44780 lcd)
@@ -215,8 +188,14 @@ namespace Iot.Device.CharacterLcd.Samples
             Console.WriteLine(result);
         }
 
-        static void SetBacklightColorTest(LcdRgb1602 lcd)
+        static void SetBacklightColorTest(Hd44780 lcd)
         {
+            var colorLcd = lcd as LcdRgb;
+            if (colorLcd == null)
+            {
+                Console.WriteLine("Color backlight not supported");
+                return;
+            }
             Color[] colors = { Color.Red, Color.Green, Color.Blue, Color.Aqua, Color.Azure,
                 Color.Brown, Color.Chocolate, Color.LemonChiffon, Color.Lime, Color.Tomato, Color.Yellow };
 
@@ -225,12 +204,43 @@ namespace Iot.Device.CharacterLcd.Samples
                 lcd.Clear();
                 lcd.Write(color.Name);
 
-                lcd.SetBacklightColor(color);
+                colorLcd.SetBacklightColor(color);
                 System.Threading.Thread.Sleep(1000);
             }
 
             lcd.Clear();
-            lcd.SetBacklightColor(Color.White);
+            colorLcd.SetBacklightColor(Color.White);
+        }
+
+        /// <summary>
+        /// A small test that shows something useful. It may not work optimally due to wrong character mappings if the month names contain non-ascii characters. 
+        /// </summary>
+        static void TestClock(Hd44780 lcd)
+        {
+            using (System.Timers.Timer timer = new System.Timers.Timer(100))
+            {
+                object myLock = new object();
+                timer.Elapsed += (o, e) =>
+                {
+                    // The callback may be executed in parallel several times, but the display component is not reentrant!
+                    if (Monitor.TryEnter(myLock))
+                    {
+                        var now = DateTime.Now;
+                        lcd.SetCursorPosition(0, 0);
+                        lcd.Write(String.Format(CultureInfo.CurrentCulture, "{0:dddd}", now));
+                        lcd.SetCursorPosition(0, 1);
+                        lcd.Write(String.Format(CultureInfo.CurrentCulture, "{0:M} {0:yyyy}", now, now));
+                        lcd.SetCursorPosition(0, 2);
+                        lcd.Write("It is now ");
+                        lcd.SetCursorPosition(0, 3);
+                        lcd.Write(String.Format(CultureInfo.CurrentCulture, "{0}", now.ToLongTimeString()));
+                        Monitor.Exit(myLock);
+                    }
+                };
+                timer.AutoReset = true;
+                timer.Enabled = true;
+                Console.ReadLine();
+            }
         }
 
         static void TestPrompt<T>(string test, T lcd, Action<T> action) where T : Hd44780
@@ -244,7 +254,7 @@ namespace Iot.Device.CharacterLcd.Samples
             lcd.BlinkingCursorVisible = false;
             lcd.Clear();
             action(lcd);
-            Console.Write("Test Complete:");
+            Console.Write("Test Complete.");
             Console.ReadLine();
             lcd.Clear();
         }

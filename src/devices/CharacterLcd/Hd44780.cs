@@ -59,7 +59,7 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// LCD interface used by the device
         /// </summary>
-        protected readonly LcdInterface _interface;
+        protected readonly LcdInterface _lcdInterface;
 
         /// <summary>
         /// Logical size, in characters, of the LCD.
@@ -70,13 +70,13 @@ namespace Iot.Device.CharacterLcd
         /// Initializes a new HD44780 LCD controller.
         /// </summary>
         /// <param name="size">The logical size of the LCD.</param>
-        /// <param name="interface">The interface to use with the LCD.</param>
-        public Hd44780(Size size, LcdInterface @interface)
+        /// <param name="lcdInterface">The interface to use with the LCD.</param>
+        public Hd44780(Size size, LcdInterface lcdInterface)
         {
             Size = size;
-            _interface = @interface;
+            _lcdInterface = lcdInterface;
 
-            if (_interface.EightBitMode)
+            if (_lcdInterface.EightBitMode)
                 _displayFunction |= DisplayFunction.EightBit;
 
             Initialize(size.Height);
@@ -117,33 +117,33 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         public virtual bool BacklightOn
         {
-            get => _interface.BacklightOn;
-            set => _interface.BacklightOn = value;
+            get => _lcdInterface.BacklightOn;
+            set => _lcdInterface.BacklightOn = value;
         }
 
         /// <summary>
         /// Sends byte to the device
         /// </summary>
         /// <param name="value">Byte to be sent to the device</param>
-        protected void SendData(byte value) => _interface.SendData(value);
+        protected void SendData(byte value) => _lcdInterface.SendData(value);
 
         /// <summary>
         /// Sends command to the device
         /// </summary>
         /// <param name="command">Byte representing the command to be sent</param>
-        protected void SendCommand(byte command) => _interface.SendCommand(command);
+        protected void SendCommand(byte command) => _lcdInterface.SendCommand(command);
 
         /// <summary>
         /// Sends data to the device
         /// </summary>
         /// <param name="values">Data to be send to the device</param>
-        protected void SendData(ReadOnlySpan<byte> values) => _interface.SendData(values);
+        protected void SendData(ReadOnlySpan<byte> values) => _lcdInterface.SendData(values);
 
         /// <summary>
         /// Send commands to the device
         /// </summary>
         /// <param name="commands">Each byte represents command being sent to the device</param>
-        protected void SendCommands(ReadOnlySpan<byte> commands) => _interface.SendCommands(commands);
+        protected void SendCommands(ReadOnlySpan<byte> commands) => _lcdInterface.SendCommands(commands);
 
         /// <summary>
         /// Determines if the device should use two line mode
@@ -205,7 +205,7 @@ namespace Iot.Device.CharacterLcd
         /// <param name="microseconds">Time to wait if checking busy state isn't possible/practical.</param>
         protected void WaitForNotBusy(int microseconds)
         {
-            _interface.WaitForNotBusy(microseconds);
+            _lcdInterface.WaitForNotBusy(microseconds);
         }
 
         /// <summary>
@@ -425,7 +425,7 @@ namespace Iot.Device.CharacterLcd
         {
             if (disposing)
             {
-                _interface?.Dispose();
+                _lcdInterface?.Dispose();
             }
         }
 

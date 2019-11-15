@@ -133,9 +133,17 @@ namespace Iot.Device.CharacterLcd
         /// This is for on-chip I2c support. For connecting via I2c GPIO expanders, use the GPIO interface <see cref="CreateGpio(int, int, int[], int, float, int, GpioController)"/>.
         /// </remarks>
         /// <param name="device">The I2c device for the LCD.</param>
-        public static LcdInterface CreateI2c(I2cDevice device)
+        /// <param name="uses8Bit">True if the device uses 8 Bit commands, false if it handles only 4 bit commands.</param>
+        public static LcdInterface CreateI2c(I2cDevice device, bool uses8Bit = true)
         {
-            return new I2c(device);
+            if (uses8Bit)
+            {
+                return new I2c(device);
+            }
+            else
+            {
+                return new I2c4Bit(device);
+            }
         }
     }
 }

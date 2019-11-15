@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio;
+using System.Device.I2c;
 using System.Drawing;
 
 namespace Iot.Device.CharacterLcd
@@ -24,6 +25,28 @@ namespace Iot.Device.CharacterLcd
         /// <param name="controller">The controller to use with the LCD. If not specified, uses the platform default.</param>
         public Lcd2004(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController controller = null)
             : base(new Size(20, 4), LcdInterface.CreateGpio(registerSelectPin, enablePin, dataPins, backlightPin, backlightBrightness, readWritePin, controller))
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new HD44780 based 16x2 LCD controller with integrated I2c support.
+        /// </summary>
+        /// <remarks>
+        /// This is for on-chip I2c support. For connecting via I2c GPIO expanders, use the GPIO constructor <see cref="Lcd1602(int, int, int[], int, float, int, GpioController)"/>.
+        /// </remarks>
+        /// <param name="device">The I2c device for the LCD.</param>
+        /// <param name="uses8Bit">True if the device uses 8 Bit commands, false if it handles only 4 bit commands.</param>
+        public Lcd2004(I2cDevice device, bool uses8Bit = true)
+            : base(new Size(20, 4), LcdInterface.CreateI2c(device, uses8Bit))
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new LCD 20x4 controller with the given interface
+        /// </summary>
+        /// <param name="lcdInterface">The LCD Interface</param>
+        public Lcd2004(LcdInterface lcdInterface)
+            : base(new Size(20, 4), lcdInterface)
         {
         }
     }
