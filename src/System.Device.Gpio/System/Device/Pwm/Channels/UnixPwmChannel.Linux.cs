@@ -88,6 +88,7 @@ namespace System.Device.Pwm.Channels
 
         /// <summary>
         /// Sets the frequency for the channel.
+        /// This will quickly set the Duty Cycle to 0 before re-enabling it on the previous value.
         /// </summary>
         /// <param name="frequency">The frequency in hertz to set.</param>
         private void SetFrequency(int frequency)
@@ -96,12 +97,16 @@ namespace System.Device.Pwm.Channels
             {
                 throw new ArgumentOutOfRangeException(nameof(frequency), frequency, "Value must not be negative.");
             }
-
+            double oldDutyCycle = _dutyCycle;
+            // We have to set the duty cycle to 0 before changing the frequency, otherwise an InvalidArgumentException occurs when writing the period file and the 
+            // current duty cycle is longer than the period. We have to recompute the duty cycle (in nanoseconds) after this, anyway
+            SetDutyCycle(0);
             int periodInNanoseconds = GetPeriodInNanoseconds(frequency);
             _frequencyWriter.BaseStream.SetLength(0);
             _frequencyWriter.Write(periodInNanoseconds);
             _frequencyWriter.Flush();
             _frequency = frequency;
+            SetDutyCycle(oldDutyCycle);
         }
 
         /// <summary>
