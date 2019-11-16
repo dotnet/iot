@@ -12,6 +12,7 @@ namespace System.Device.Pwm.Channels
     /// </summary>
     internal class UnixPwmChannel : PwmChannel
     {
+        private readonly TimeSpan OpenTimeout = TimeSpan.FromSeconds(1);
         private readonly int _chip;
         private readonly int _channel;
         private int _frequency;
@@ -41,12 +42,27 @@ namespace System.Device.Pwm.Channels
             Validate();
             Open();
 
-            // avoid opening the file for operations changing relatively frequently
-            _dutyCycleWriter = new StreamWriter(new FileStream($"{_channelPath}/duty_cycle", FileMode.Open, FileAccess.ReadWrite));
-            _frequencyWriter = new StreamWriter(new FileStream($"{_channelPath}/period", FileMode.Open, FileAccess.ReadWrite));
+            var timeout = OpenTimeout;
+            // If we're running as non-root (and the udev rule needs to kick in here) we 
+            // might need a few retries until we can open the channel files. 
+            while (timeout > TimeSpan.Zero)
+            {
+                try
+                {
+                    // avoid opening the file for operations changing relatively frequently
+                    _dutyCycleWriter = new StreamWriter(new FileStream($"{_channelPath}/duty_cycle", FileMode.Open, FileAccess.ReadWrite));
+                    _frequencyWriter = new StreamWriter(new FileStream($"{_channelPath}/period", FileMode.Open, FileAccess.ReadWrite));
+                    break;
+                }
+                catch (Exception x) when (x is UnauthorizedAccessException || x is IOException)
+                {
+                    Thread.Sleep(1);
+                    timeout -= TimeSpan.FromMilliseconds(1);
+                }
+            }
 
             SetFrequency(frequency);
-            DutyCycle = dutyCycle;
+            SetDutyCycle(dutyCycle);
         }
 
         /// <inheritdoc/>
