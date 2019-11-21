@@ -78,6 +78,10 @@ namespace Iot.Device.CharacterLcd.Samples
                     hd44780.BacklightOn = true;
                     hd44780.DisplayOn = true;
                     hd44780.Clear();
+                    Console.WriteLine("Starting test");
+                    Console.ReadLine();
+                    
+                    LcdConsoleSamples.WriteTest(hd44780);
                     ExtendedSample.Test(hd44780);
                 }
             }

@@ -12,11 +12,15 @@
     <Compile Include="ICharacterLcd.cs" />
     <Compile Include="Lcd1602.cs" />
     <Compile Include="Lcd2004.cs" />
+    <Compile Include="LcdCharacterEncoding.cs" />
+    <Compile Include="LcdCharacterEncodingFactory.cs" />
+    <Compile Include="LcdConsole.cs" />
     <Compile Include="LcdInterface.cs" />
     <Compile Include="LcdInterface.Gpio.cs" />
     <Compile Include="LcdInterface.I2c.cs" />
     <Compile Include="LcdInterface.I2c4Bit.cs" />
     <Compile Include="LcdRgb.cs" />
+    <Compile Include="LineFeedMode.cs" />
     <Compile Include="Registers.cs" />
   </ItemGroup>
 
