@@ -48,7 +48,7 @@ namespace System.Device.Pwm.Drivers
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, "Value must note be negative.");
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "Value must not be negative.");
                 }
                 _frequency = value;
                 _pulseFrequency = (_frequency > 0) ? 1 / _frequency * 1000.0 : 0.0;
