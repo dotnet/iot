@@ -16,9 +16,9 @@
   </ToolsetDependencies>
   <!-- ProductDependencies -->
   <ProductDependencies>
-    <Dependency Name="System.Drawing.Common" Version="4.6.2-servicing.19571.3">
+    <Dependency Name="System.Drawing.Common" Version="4.6.2-servicing.19572.6">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>6027214b8a59368b58365969239e93cb0ae7af2f</Sha>
+      <Sha>a2b312cfb6b50fa9c224c1954a6ba2fe3095796b</Sha>
     </Dependency>
   </ProductDependencies>
 </Dependencies>

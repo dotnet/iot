@@ -4,6 +4,6 @@
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
     <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19572.3</MicrosoftDotNetGenAPIPackageVersion>
     <!-- dotnet/corefx dependencies -->
-    <SystemDrawingCommonPackageVersion>4.6.2-servicing.19571.3</SystemDrawingCommonPackageVersion>
+    <SystemDrawingCommonPackageVersion>4.6.2-servicing.19572.6</SystemDrawingCommonPackageVersion>
   </PropertyGroup>
 </Project>
