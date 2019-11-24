@@ -24,8 +24,10 @@ namespace System.Device.Gpio.Drivers
         private readonly CancellationTokenSource _eventThreadCancellationTokenSource;
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
-        private readonly int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
-        private static readonly int s_pinOffset = ReadOffset();
+        private readonly int _pinOffset;
+
+        private int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
+        private int _statusUpdateSleepTime = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
         private int _pollFileDescriptor = -1;
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
@@ -64,6 +66,37 @@ namespace System.Device.Gpio.Drivers
         public SysFsDriver()
         {
             _eventThreadCancellationTokenSource = new CancellationTokenSource();
+            _pinOffset = ReadOffset();
+        }
+
+        /// <summary>
+        /// The internal timeout for the event wait function.
+        /// </summary>
+        internal TimeSpan PollingTimeout
+        {
+            get
+            {
+                return TimeSpan.FromMilliseconds(_pollingTimeoutInMilliseconds);
+            }
+            set
+            {
+                _pollingTimeoutInMilliseconds = Convert.ToInt32(value.TotalMilliseconds);
+            }
+        }
+
+        /// <summary>
+        /// The sleep time after an event occured and before the new value is read.
+        /// </summary>
+        internal TimeSpan StatusUpdateSleepTime
+        {
+            get
+            {
+                return TimeSpan.FromMilliseconds(_statusUpdateSleepTime);
+            }
+            set
+            {
+                _statusUpdateSleepTime = Convert.ToInt32(value.TotalMilliseconds);
+            }
         }
 
         /// <summary>
@@ -84,7 +117,7 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void OpenPin(int pinNumber)
         {
-            int pinOffset = pinNumber + s_pinOffset;
+            int pinOffset = pinNumber + _pinOffset;
             string pinPath = $"{GpioBasePath}/gpio{pinOffset}";
             // If the directory exists, this becomes a no-op since the pin might have been opened already by the some controller or somebody else.
             if (!Directory.Exists(pinPath))
@@ -110,7 +143,7 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void ClosePin(int pinNumber)
         {
-            int pinOffset = pinNumber + s_pinOffset;
+            int pinOffset = pinNumber + _pinOffset;
             string pinPath = $"{GpioBasePath}/gpio{pinOffset}";
             // If the directory doesn't exist, this becomes a no-op since the pin was closed already.
             if (Directory.Exists(pinPath))
@@ -140,7 +173,7 @@ namespace System.Device.Gpio.Drivers
                 throw new PlatformNotSupportedException("This driver is generic so it does not support Input Pull Down or Input Pull Up modes.");
             }
 
-            string directionPath = $"{GpioBasePath}/gpio{pinNumber + s_pinOffset}/direction";
+            string directionPath = $"{GpioBasePath}/gpio{pinNumber + _pinOffset}/direction";
             string sysFsMode = ConvertPinModeToSysFsMode(mode);
             if (File.Exists(directionPath))
             {
@@ -198,7 +231,7 @@ namespace System.Device.Gpio.Drivers
         protected internal override PinValue Read(int pinNumber)
         {
             PinValue result = default;
-            string valuePath = $"{GpioBasePath}/gpio{pinNumber + s_pinOffset}/value";
+            string valuePath = $"{GpioBasePath}/gpio{pinNumber + _pinOffset}/value";
             if (File.Exists(valuePath))
             {
                 try
@@ -236,7 +269,7 @@ namespace System.Device.Gpio.Drivers
         /// <param name="value">The value to be written to the pin.</param>
         protected internal override void Write(int pinNumber, PinValue value)
         {
-            string valuePath = $"{GpioBasePath}/gpio{pinNumber + s_pinOffset}/value";
+            string valuePath = $"{GpioBasePath}/gpio{pinNumber + _pinOffset}/value";
             if (File.Exists(valuePath))
             {
                 try
@@ -301,14 +334,14 @@ namespace System.Device.Gpio.Drivers
 
         private void SetPinEventsToDetect(int pinNumber, PinEventTypes eventTypes)
         {
-            string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "edge");
+            string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + _pinOffset}", "edge");
             string stringValue = PinEventTypeToStringValue(eventTypes);
             File.WriteAllText(edgePath, stringValue);
         }
 
         private PinEventTypes GetPinEventsToDetect(int pinNumber)
         {
-            string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "edge");
+            string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + _pinOffset}", "edge");
             string stringValue = File.ReadAllText(edgePath);
             return StringValueToPinEventType(stringValue);
         }
@@ -365,7 +398,7 @@ namespace System.Device.Gpio.Drivers
 
             if (valueFileDescriptor == -1)
             {
-                string valuePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "value");
+                string valuePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + _pinOffset}", "value");
                 valueFileDescriptor = Interop.open(valuePath, FileOpenFlags.O_RDONLY | FileOpenFlags.O_NONBLOCK);
                 if (valueFileDescriptor < 0)
                 {
@@ -402,11 +435,11 @@ namespace System.Device.Gpio.Drivers
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                // poll every 1 millisecond
+                // Wait until something happens
                 int waitResult = Interop.epoll_wait(pollFileDescriptor, out epoll_event events, 1, _pollingTimeoutInMilliseconds);
                 if (waitResult == -1)
                 {
-                    throw new IOException("Error while trying to initialize pin interrupts.");
+                    throw new IOException("Error while waiting for pin interrupts.");
                 }
 
                 if (waitResult > 0)
@@ -414,7 +447,7 @@ namespace System.Device.Gpio.Drivers
                     pinNumber = events.data.pinNumber;
 
                     // valueFileDescriptor will be -1 when using the callback eventing. For WaitForEvent, the value will be set.
-                    if (valueFileDescriptor == -1)
+                    /* if (valueFileDescriptor == -1)
                     {
                         valueFileDescriptor = _devicePins[pinNumber].FileDescriptor;
                     }
@@ -429,7 +462,7 @@ namespace System.Device.Gpio.Drivers
                     if (readResult != 1)
                     {
                         throw new IOException("Error while trying to initialize pin interrupts.");
-                    }
+                    }*/
 
                     return true;
                 }
@@ -448,7 +481,7 @@ namespace System.Device.Gpio.Drivers
             int result = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_DEL, valueFileDescriptor, ref epollEvent);
             if (result == -1)
             {
-                throw new IOException("Error while trying to initialize pin interrupts.");
+                throw new IOException("Error while trying to delete pin interrupts.");
             }
 
             if (closePinValueFileDescriptor)
@@ -558,11 +591,12 @@ namespace System.Device.Gpio.Drivers
                 {
                     IsBackground = true
                 };
+                _eventDetectionThread.Priority = ThreadPriority.Highest;
                 _eventDetectionThread.Start();
             }
         }
 
-        private unsafe void DetectEvents()
+        private void DetectEvents()
         {
             while (_pinsToDetectEventsCount > 0)
             {
@@ -571,7 +605,11 @@ namespace System.Device.Gpio.Drivers
                     bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, _eventThreadCancellationTokenSource.Token);
                     if (eventDetected)
                     {
-                        Thread.Sleep(1); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
+                        if (_statusUpdateSleepTime > 0)
+                        {
+                            Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
+                        }
+
                         PinEventTypes eventTypes = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
                         var args = new PinValueChangedEventArgs(eventTypes, pinNumber);
                         _devicePins[pinNumber]?.OnPinValueChanged(args);
@@ -618,7 +656,7 @@ namespace System.Device.Gpio.Drivers
         /// <returns>The mode of the pin.</returns>
         protected internal override PinMode GetPinMode(int pinNumber)
         {
-            pinNumber += s_pinOffset;
+            pinNumber += _pinOffset;
             string directionPath = $"{GpioBasePath}/gpio{pinNumber}/direction";
             if (File.Exists(directionPath))
             {

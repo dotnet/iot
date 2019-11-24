@@ -12,9 +12,9 @@ namespace System.Device.Gpio.Tests
 {
     public abstract class GpioControllerTestBase
     {
-        private const int LedPin = 5;
-        private const int OutputPin = 5;
-        private const int InputPin = 6;
+        protected const int LedPin = 5;
+        protected const int OutputPin = 5;
+        protected const int InputPin = 6;
         private static readonly int WaitMilliseconds = 1000;
 
         [Fact]
