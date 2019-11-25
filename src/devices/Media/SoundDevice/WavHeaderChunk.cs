@@ -2,8 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-internal partial class Interop
+namespace Iot.Device.Media
 {
-    private const string LibcLibrary = "libc";
-    private const string AlsaLibrary = "libasound";
+    internal struct WavHeaderChunk
+    {
+        public char[] ChunkId { get; set; }
+
+        public uint ChunkSize { get; set; }
+    }
 }
