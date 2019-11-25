@@ -17,7 +17,7 @@ namespace Iot.Device.Bmxx80
     /// <summary>
     /// Represents a BME680 temperature, pressure, relative humidity and VOC gas sensor.
     /// </summary>
-    public sealed class Bme680 : Bmxx80Base
+    public class Bme680 : Bmxx80Base
     {
         /// <summary>
         /// Default I2C bus address.
