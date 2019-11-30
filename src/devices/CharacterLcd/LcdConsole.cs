@@ -303,7 +303,7 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         private void FindLineWraps(int cursorPos, List<string> lines)
         {
-            if (LineFeedMode.HasFlag(LineFeedMode.Intelligent) || LineFeedMode.HasFlag(LineFeedMode.UntilFull))
+            if (LineFeedMode == LineFeedMode.Wrap || LineFeedMode == LineFeedMode.WordWrap)
             {
                 int roomOnLine = Size.Width - cursorPos;
                 roomOnLine = Math.Max(roomOnLine, 0);
@@ -312,7 +312,7 @@ namespace Iot.Device.CharacterLcd
                     string remaining = lines[i];
                     if (remaining.Length > roomOnLine)
                     {
-                        if (LineFeedMode.HasFlag(LineFeedMode.Intelligent))
+                        if (LineFeedMode == LineFeedMode.WordWrap)
                         {
                             // In intelligent mode, try finding spaces backwards
                             // Note: this indexes the element 1 char after the last to be printed in the first iteration, since there might be a space just there
@@ -409,7 +409,7 @@ namespace Iot.Device.CharacterLcd
                 {
                     SetCursorPosition(0, CursorTop + 1);
                 }
-                else if (LineFeedMode.HasFlag(LineFeedMode.ScrollUp))
+                else if (LineFeedMode == LineFeedMode.WordWrap || LineFeedMode == LineFeedMode.Wrap)
                 {
                     ScrollUp();
                     SetCursorPosition(0, Size.Height - 1); // Go to beginning of last line
