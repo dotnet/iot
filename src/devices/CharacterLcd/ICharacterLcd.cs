@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -33,6 +37,12 @@ namespace Iot.Device.CharacterLcd
         /// Returns the size of the display.
         /// </summary>
         System.Drawing.Size Size { get; }
+
+        /// <summary>
+        /// Returns the number of custom characters for this display. 
+        /// A custom character is one that can be user-defined and assigned to a slot using <see cref="CreateCustomCharacter(byte, byte[])"/>
+        /// </summary>
+        int NumberOfCustomCharactersSupported { get; }
         
         /// <summary>
         /// Clears the display and moves the cursor to the top left.
@@ -78,7 +88,7 @@ namespace Iot.Device.CharacterLcd
         /// are useless. The datasheet helpfully suggests that you can store your own data there.
         /// The same would be true for bits 5-7 of lines that matter for both 5x8 and 5x10.
         /// </remarks>
-        /// <param name="location">Should be between 0 and 7</param>
+        /// <param name="location">Should be between 0 and <see cref="NumberOfCustomCharactersSupported"/>.</param>
         /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
         void CreateCustomCharacter(byte location, params byte[] characterMap);
 

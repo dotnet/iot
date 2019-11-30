@@ -63,11 +63,6 @@ namespace Iot.Device.CharacterLcd
         protected readonly LcdInterface _lcdInterface;
 
         /// <summary>
-        /// Logical size, in characters, of the LCD.
-        /// </summary>
-        public Size Size { get; }
-
-        /// <summary>
         /// Initializes a new HD44780 LCD controller.
         /// </summary>
         /// <param name="size">The logical size of the LCD.</param>
@@ -86,6 +81,17 @@ namespace Iot.Device.CharacterLcd
             Initialize(size.Height);
             _rowOffsets = InitializeRowOffsets(size.Height);
         }
+
+        /// <summary>
+        /// Logical size, in characters, of the LCD.
+        /// </summary>
+        public Size Size { get; }
+
+        /// <summary>
+        /// Returns the number of custom characters for this display. 
+        /// A custom character is one that can be user-defined and assigned to a slot using <see cref="CreateCustomCharacter(byte, byte[])"/>
+        /// </summary>
+        public virtual int NumberOfCustomCharactersSupported => 8;
 
         /// <summary>
         /// Initializes the display by setting the specified columns and lines.
@@ -392,14 +398,14 @@ namespace Iot.Device.CharacterLcd
         /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
         public void CreateCustomCharacter(byte location, ReadOnlySpan<byte> characterMap)
         {
-            if (location > 7)
+            if (location > NumberOfCustomCharactersSupported - 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(location));
             }
 
             if (characterMap.Length != 8)
             {
-                throw new ArgumentException(nameof(characterMap));
+                throw new ArgumentException("The character map must be exactly 8 bytes long", nameof(characterMap));
             }
 
             // The character address is set in bits 3-5 of the command byte

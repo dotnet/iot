@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -12,9 +16,18 @@ namespace Iot.Device.CharacterLcd
     {
         private static Dictionary<char, byte> DefaultA00Map;
         private static Dictionary<char, byte> DefaultA02Map;
+        private static Dictionary<char, byte> DefaultCustomMap;
 
         static LcdCharacterEncodingFactory()
         {
+            // Default map which is used for unknown ROMs
+            DefaultCustomMap = new Dictionary<char, byte>();
+            // Inserts ASCII characters ' ' to 'z', which are common to most known character sets
+            for (char c = ' '; c <= 'z'; c++)
+            {
+                DefaultCustomMap.Add(c, (byte)c);
+            }
+
             // The character map A00 contains the most used european letters, some greek math symbola plus japanese letters. 
             // Compare with the HD44780 specification sheet, page 17
             DefaultA00Map = new Dictionary<char, byte>();
@@ -193,6 +206,19 @@ namespace Iot.Device.CharacterLcd
             // Not available in ROM: ЉЊЋЌЏ
             DefaultA02Map.Add('Ў', 0b1101_1101);
 
+            DefaultA02Map.Add('–', 0b0010_1101);
+            DefaultA02Map.Add('α', 0b1001_0000);
+            DefaultA02Map.Add('ε', 0b1001_1110);
+            DefaultA02Map.Add('δ', 0b1001_1011);
+            DefaultA02Map.Add('σ', 0b1001_0101);
+           
+            // 240 and 241 look like p and q again. What are they?
+            DefaultA02Map.Add('θ', 0b1001_1001);
+            DefaultA02Map.Add('Ω', 0b1001_1010);
+            DefaultA02Map.Add('Ω', 0b1001_1010);
+            DefaultA02Map.Add('∑', 0b1001_0100);
+            DefaultA02Map.Add('π', 0b1001_0011);
+
             string cyrillicLettersSmall   = "абвгдежзийклмнопрстуфхцчшщъыьэюяёђѓєѕіїјљњћќўџ";
             string cyrillicLettersCapital = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯЁЂЃЄЅІЇЈЉЊЋЌЎЏ";
 
@@ -285,10 +311,10 @@ namespace Iot.Device.CharacterLcd
         /// <param name="romName">ROM type of attached chip. Supported values: "A00" and "A02"</param>
         /// <param name="unknownLetter">Letter that is printed when an unknown character is encountered. This letter must be part of the 
         /// default rom set</param>
-        /// <param name="supported">Out: Returns true if the given culture was correctly loaded. If this returns false, some characters relevant for the 
-        /// given language could not be available</param>
-        /// <returns>True if all important characters for this culture are available and loaded, false otherwise</returns>
-        public LcdCharacterEncoding Create(CultureInfo culture, string romName, char unknownLetter, out bool supported)
+        /// <param name="maxNumberOfCustomCharacters">Maximum number of custom characters supported on the hardware. Should be 8 for Hd44780-controlled displays.</param>
+        /// <returns>The newly created encoding. Whether the encoding can be loaded to a certain display will be decided later.</returns>
+        /// <exception cref="ArgumentException">The character specified as unknownLetter must be part of the mapping.</exception>
+        public LcdCharacterEncoding Create(CultureInfo culture, string romName, char unknownLetter, int maxNumberOfCustomCharacters)
         {
             if (culture == null)
             {
@@ -298,34 +324,33 @@ namespace Iot.Device.CharacterLcd
             switch (romName)
             {
                 case "A00":
-                    if (!DefaultA00Map.ContainsKey(unknownLetter))
-                    {
-                        throw new ArgumentException("The replacement letter must be part of the mapping", nameof(unknownLetter));
-                    }
                     newMap = DefaultA00Map;
-
                     break;
                 case "A02":
-                    if (!DefaultA02Map.ContainsKey(unknownLetter))
-                    {
-                        throw new ArgumentException("The replacement letter must be part of the mapping", nameof(unknownLetter));
-                    }
                     newMap = DefaultA02Map;
                     break;
                 default:
-                    throw new NotSupportedException("Unknown ROM type: " + romName);
+                    newMap = DefaultCustomMap;
+                    break;
             }
 
             List<byte[]> extraCharacters = new List<byte[]>();
-            supported = AssignLettersForCurrentCulture(newMap, culture, romName, extraCharacters);
+            bool supported = AssignLettersForCurrentCulture(newMap, culture, romName, extraCharacters, maxNumberOfCustomCharacters);
 
-            return new LcdCharacterEncoding(culture.Name, newMap, unknownLetter, extraCharacters);
+            if (!newMap.ContainsKey(unknownLetter))
+            {
+                throw new ArgumentException("The replacement letter is not part of the mapping", nameof(unknownLetter));
+            }
+
+            var encoding = new LcdCharacterEncoding(culture.Name, romName, newMap, unknownLetter, extraCharacters);
+            encoding.AllCharactersSupported = !supported;
+            return encoding;
         }
 
         /// <summary>
         /// Tries to generate letters important in that culture but missing from the current rom set
         /// </summary>
-        private bool AssignLettersForCurrentCulture(Dictionary<char, byte> characterMapping, CultureInfo culture, string romName, List<byte[]> extraCharacters)
+        private bool AssignLettersForCurrentCulture(Dictionary<char, byte> characterMapping, CultureInfo culture, string romName, List<byte[]> extraCharacters, int maxNumberOfCustomCharacters)
         {
             string specialLetters = SpecialLettersForCulture(culture, characterMapping); // Special letters this language group uses, in order of importance
             
@@ -336,7 +361,7 @@ namespace Iot.Device.CharacterLcd
                 if (!characterMapping.ContainsKey(c))
                 {
                     // This letter doesn't exist, insert it
-                    if (charPos < 8)
+                    if (charPos < maxNumberOfCustomCharacters)
                     {
                         var pixelMap = CreateLetter(c, romName);
                         if (pixelMap != null)

@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -20,26 +24,32 @@ namespace Iot.Device.CharacterLcd
         /// Creates an instance of <see cref="LcdCharacterEncoding"/>.
         /// </summary>
         /// <param name="cultureName">Culture name for this encoding (informational only)</param>
+        /// <param name="romName">Name of the ROM on the display</param>
         /// <param name="characterMap">The character map to use</param>
         /// <param name="unknownLetter">The character to print when a letter not in the map is found</param>
-        public LcdCharacterEncoding(String cultureName, Dictionary<char, byte> characterMap, char unknownLetter)
+        public LcdCharacterEncoding(String cultureName, string romName, Dictionary<char, byte> characterMap, char unknownLetter)
         {
+            _cultureName = cultureName;
             _characterMapping = characterMap;
             _unknownLetter = unknownLetter;
-            _cultureName = cultureName;
+            _extraCharacters = new List<byte[]>();
+            AllCharactersSupported = true;
+            RomName = romName;
         }
 
         /// <summary>
         /// Creates an instance of <see cref="LcdCharacterEncoding"/>.
         /// </summary>
         /// <param name="cultureName">Culture name for this encoding (informational only)</param>
+        /// <param name="romName">Name of the ROM on the display</param>
         /// <param name="characterMap">The character map to use</param>
         /// <param name="unknownLetter">The character to print when a letter not in the map is found</param>
         /// <param name="extraCharacters">The pixel map of characters required for this culture but not found in the character ROM</param>
-        public LcdCharacterEncoding(string cultureName, Dictionary<char, byte> characterMap, char unknownLetter, List<byte[]> extraCharacters)
-            : this(cultureName, characterMap, unknownLetter)
+        public LcdCharacterEncoding(string cultureName, string romName, Dictionary<char, byte> characterMap, char unknownLetter, List<byte[]> extraCharacters)
+            : this(cultureName, romName, characterMap, unknownLetter)
         {
             _extraCharacters = extraCharacters;
+            AllCharactersSupported = true;
         }
 
         /// <summary>
@@ -59,6 +69,23 @@ namespace Iot.Device.CharacterLcd
             {
                 return _extraCharacters;
             }
+        }
+
+        /// <summary>
+        /// This is internally set to false if we already know that we won't be able to display all required characters
+        /// </summary>
+        protected internal bool AllCharactersSupported
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Specified Name of the ROM for which this Encoding is intended. 
+        /// </summary>
+        public string RomName
+        {
+            get;
         }
 
         /// <inheritDoc/>
