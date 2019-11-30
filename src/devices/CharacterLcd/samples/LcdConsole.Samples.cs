@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Iot.Device.CharacterLcd;
 
 namespace Iot.Device.CharacterLcd.Samples
@@ -57,10 +58,12 @@ namespace Iot.Device.CharacterLcd.Samples
             console.Write(0, "This is all garbage that will be replaced");
             console.Write(0, "Running clock test");
             int left = console.Size.Width;
+            Task alertTask = null;
             // Let the current time move trought the display on line 1
             while (!Console.KeyAvailable)
             {
-                String time = String.Format(CultureInfo.CurrentCulture, "{0}", DateTime.Now.ToLongTimeString());
+                DateTime now = DateTime.Now;
+                String time = String.Format(CultureInfo.CurrentCulture, "{0}", now.ToLongTimeString());
                 string printTime = time;
                 if (left > 0)
                 {
@@ -72,6 +75,17 @@ namespace Iot.Device.CharacterLcd.Samples
                 }
                 console.Write(1, printTime);
                 left--;
+                // Each full minute, blink the display (but continue writing the time)
+                if (now.Second == 0 && alertTask == null)
+                {
+                    alertTask = console.BlinkDisplayAsync(3);
+                }
+                if (alertTask != null && alertTask.IsCompleted)
+                {
+                    // Ensure we catch any exceptions (there shouldn't be any...)
+                    alertTask.Wait();
+                    alertTask = null;
+                }
                 Thread.Sleep(500);
                 // Restart when the time string has left the display
                 if (left < -time.Length)
@@ -79,8 +93,7 @@ namespace Iot.Device.CharacterLcd.Samples
                     left = console.Size.Width;
                 }
             }
-            console.Write(0, "!! ALERTING !!");
-            console.BlinkDisplay(4);
+            alertTask?.Wait();
             Console.ReadKey();
             Console.WriteLine("Culture Info Test");
             console.LoadCulture(CultureInfo.CreateSpecificCulture("de-CH"), '?');
@@ -100,7 +113,7 @@ namespace Iot.Device.CharacterLcd.Samples
             console.WriteLine("Code: [{|}]^_\\");
             console.WriteLine("Greek: Ωαβεπθμ");
             console.WriteLine("Others: @ñ¢");
-            console.Write("Math stuff: ∑÷×∞");
+            console.WriteLine("Math stuff: ∑÷×∞");
 
             console.WriteLine("German code page");
             console.WriteLine("Umlauts: äöüßÄÜÖ");

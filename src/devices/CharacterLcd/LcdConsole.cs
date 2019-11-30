@@ -393,7 +393,7 @@ namespace Iot.Device.CharacterLcd
         /// <returns>A task handle</returns>
         public Task BlinkDisplayAsync(int times)
         {
-            return new Task(() => BlinkDisplay(times));
+            return Task.Factory.StartNew(() => BlinkDisplay(times));
         }
 
         private void NewLine()
