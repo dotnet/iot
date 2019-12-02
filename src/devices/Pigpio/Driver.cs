@@ -91,6 +91,8 @@ namespace Iot.Device.Pigpio
             switch (mode)
             {
                 case PinMode.Input: return true;
+                case PinMode.InputPullUp: return true;
+                case PinMode.InputPullDown: return true;
                 case PinMode.Output: return true;
                 default: return false; // Only input & output supported ATM. Should be increased to support input-pullup/pulldown
             }
@@ -125,8 +127,10 @@ namespace Iot.Device.Pigpio
         protected override void SetPinMode(int pinNumber, PinMode pinMode)
         {
             var mode = pinMode.AsMode();
+            var pud = pinMode.AsPullUpDown();
 
             _proxy.set_mode((uint)pinNumber, mode);
+            _proxy.set_pull_up_down((uint)pinNumber, pud);
         }
 
         /// <inheritdoc/>
