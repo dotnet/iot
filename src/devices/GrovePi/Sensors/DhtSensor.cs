@@ -15,7 +15,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
     public class DhtSensor
     {
         private GrovePi _grovePi;
-        private readonly double[] _lastTemHum = new double[2];
+        private readonly double[] _lastTemHum = new double[2] { double.NaN, double.NaN };
 
         /// <summary>
         /// grove sensor port
@@ -63,9 +63,17 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         public void Read()
         {
-            _grovePi.WriteCommand(GrovePiCommand.DhtTemp, _port, (byte)DhtType, 0);
+            // Fix for the firmware 1.4.0, you can request a new measurement only if you got data
+            // from the previous one
+            if (!(double.IsNaN(_lastTemHum[0]) && double.IsNaN(_lastTemHum[1])))
+            {
+                _grovePi.WriteCommand(GrovePiCommand.DhtTemp, _port, (byte)DhtType, 0);
+            }
+            
             // Wait a little bit to read the result
-            Thread.Sleep(50);
+            // Delay from source code, line 90 in the Grove Pi firmware repository
+            // This is needed for firmware 1.4.0 and also working for previous versions
+            Thread.Sleep(300);
             var retArray = _grovePi.ReadCommand(GrovePiCommand.DhtTemp, _port);
             _lastTemHum[0] = BitConverter.ToSingle(retArray.AsSpan(1, 4));
             _lastTemHum[1] = BitConverter.ToSingle(retArray.AsSpan(5, 4));
