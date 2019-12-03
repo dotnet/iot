@@ -69,6 +69,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
             {
                 _grovePi.WriteCommand(GrovePiCommand.DhtTemp, _port, (byte)DhtType, 0);
             }
+            
             // Wait a little bit to read the result
             // Delay from source code, line 90 in the Grove Pi firmware repository
             // This is needed for firmware 1.4.0 and also working for previous versions
