@@ -1,12 +1,17 @@
+﻿// Licensed to the .NET Foundation under one or more agreements. 
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 
-namespace Iot.Device.LidarLiteV3
+namespace Iot.Device.TimeOfFlight.Models.LidarLiteV3
 {
     /// <summary>
-    /// System Status
+    /// System status flags
     /// </summary>
     [Flags]
-    public enum SystemStatus : byte {
+    public enum SystemStatusFlag
+    {
         /// <summary>
         /// Process Error Flag
         /// 0 - No error detected
@@ -35,7 +40,7 @@ namespace Iot.Device.LidarLiteV3
         /// Signal Overflow Flag
         /// 0 - Signal data has not overflowed
         /// 1 - Signal data in correlation record has reached the maximum value before
-        ///     overflow.  This occurs with a string received signal strength.
+        ///     overflow.  This occurs with a string received signal strength. 
         /// </summary>
         SignalOverflow = 0x4,
         /// <summary>

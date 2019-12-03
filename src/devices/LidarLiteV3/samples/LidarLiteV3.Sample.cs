@@ -5,15 +5,12 @@
 using System;
 using System.Threading;
 using System.Device.I2c;
-using Iot.Device.LidarLiteV3;
+using Iot.Device.TimeOfFlight;
 
-namespace Iot.Device.LidarLiteV3.Samples
+namespace Iot.Device.TimeOfFlight.LidarLiteV3Samples
 {
     internal class Program
     {
-        // I2C address on SenseHat board
-        public const int I2cAddress = 0x5F;
-
         public static void Main(string[] args)
         {
             using (var llv3 = new LidarLiteV3(CreateI2cDevice()))

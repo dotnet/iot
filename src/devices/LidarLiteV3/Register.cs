@@ -1,11 +1,11 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements. 
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.LidarLiteV3
+namespace Iot.Device.TimeOfFlight.Models.LidarLiteV3
 {
     /// <summary>
-    /// All the documented registers for the MPU99250
+    /// All the documented registers for the LidarLiteV3
     /// </summary>
     internal enum Register
     {
@@ -22,10 +22,10 @@ namespace Iot.Device.LidarLiteV3
         REF_COUNT_VAL = 0x12,
         LAST_DELAY_HIGH = 0x14,
         LAST_DELAY_LOW = 0x15,
-        UNIT_ID_HIGH = 0x16,
-        UNIT_ID_LOW = 0x17,
+        UNIT_ID = 0x96,
         I2C_ID_HIGH = 0x18,
         I2C_ID_LOW = 0x19,
+        I2C_SEC_ADDR = 0x1a,
         THRESHOLD_BYPASS = 0x1c,
         I2C_CONFIG = 0x1e,
         COMMAND = 0x40,
