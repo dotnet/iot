@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -78,6 +79,7 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void OpenPin(int pinNumber)
         {
+            const int RetryDelayMaximumMillis = 1000; // wait 1 second max for udev to set the permissions
             int pinOffset = pinNumber + s_pinOffset;
             string pinPath = $"{GpioBasePath}/gpio{pinOffset}";
             // If the directory exists, this becomes a no-op since the pin might have been opened already by the some controller or somebody else.
@@ -86,6 +88,28 @@ namespace System.Device.Gpio.Drivers
                 try
                 {
                     File.WriteAllText(Path.Combine(GpioBasePath, "export"), pinOffset.ToString(CultureInfo.InvariantCulture));
+
+                    // test to see if we have rw access to the GPIO pin.
+                    if (Interop.access(pinPath, AccessModeFlags.R_OK | AccessModeFlags.W_OK) != 0)
+                    {
+                        Stopwatch retryStopwatch = Stopwatch.StartNew();
+
+                        // repeatedly check for access to the GPIO pin until access is granted or the timeout is exceeded
+                        do
+                        {
+                            // delay a little to give udev potentially time to respond
+                            Thread.Sleep(TimeSpan.FromMilliseconds(10));
+                        } while (Interop.access(pinPath, AccessModeFlags.R_OK | AccessModeFlags.W_OK) != 0 & retryStopwatch.ElapsedMilliseconds < RetryDelayMaximumMillis);
+
+                        retryStopwatch.Stop();
+
+                        // if we have run out of time for the permissions to be set then throw an exception. 
+                        if (retryStopwatch.ElapsedMilliseconds >= RetryDelayMaximumMillis)
+                        {
+                            throw new UnauthorizedAccessException("Timeout exceeded waiting for access to the pin.");
+                        }
+                    }
+
                     _exportedPins.Add(pinNumber);
                 }
                 catch (UnauthorizedAccessException e)
