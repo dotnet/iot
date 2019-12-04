@@ -80,14 +80,7 @@ namespace Iot.Device.TimeOfFlight
         /// </summary>
         public void Reset()
         {
-            try
-            {
-                WriteRegister(Register.ACQ_COMMAND, 0x00);
-            }
-            catch (System.IO.IOException)
-            {
-                // This exception is expected due to the reset.
-            }
+            WriteRegister(Register.ACQ_COMMAND, 0x00);
         }
 
         /// <summary>
@@ -99,16 +92,9 @@ namespace Iot.Device.TimeOfFlight
         /// </remarks>
         /// <param name="withReceiverBiasCorrection">Faster without bias correction, but more prone to errors if condition changes.</param>
         /// <returns>Distance in cm</returns>
-        public ushort MeasureDistance(bool withReceiverBiasCorrection = true)
+        public int MeasureDistance(bool withReceiverBiasCorrection = true)
         {
-            if (withReceiverBiasCorrection)
-            {
-                WriteRegister(Register.ACQ_COMMAND, 0x04);
-            }
-            else
-            {
-                WriteRegister(Register.ACQ_COMMAND, 0x03);
-            }
+            WriteRegister(Register.ACQ_COMMAND, withReceiverBiasCorrection ? (byte)0x04 : (byte)0x03);
 
             while (Status.HasFlag(SystemStatusFlag.BusyFlag))
             {
@@ -315,9 +301,7 @@ namespace Iot.Device.TimeOfFlight
             _i2cDevice.Read(readBytes);
         }
 
-        /// <summary>
-        /// Cleanup everything
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             if (_gpioController != null && _powerEnablePin.HasValue)
