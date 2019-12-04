@@ -195,7 +195,7 @@ namespace Iot.Device.TimeOfFlight
         /// <summary>
         /// Get the distance measurement in cm.
         /// </summary>
-        public ushort Distance {
+        public int Distance {
             get {
                 Span<byte> rawData = stackalloc byte[2] { 0, 0 };
                 ReadBytes(Register.FULL_DELAY, rawData);
@@ -208,11 +208,11 @@ namespace Iot.Device.TimeOfFlight
         /// in a signed (2's complement) 8-bit number in cm.
         /// Positive is away from the device.
         /// </summary>
-        public sbyte Velocity {
+        public int Velocity {
             get {
                 Span<byte> rawData = stackalloc byte[1] { 0 };
                 ReadBytes(Register.VELOCITY, rawData);
-                return (sbyte)rawData[0];
+                return (int)(sbyte)rawData[0];
             }
         }
 
