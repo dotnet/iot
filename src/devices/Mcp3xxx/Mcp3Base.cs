@@ -110,6 +110,9 @@ namespace Iot.Device.Adc
         /// <param name="spiDevice">Device used for SPI communication</param>
         public Mcp3Base(SpiDevice spiDevice)
         {
+            if (spiDevice == null)
+                throw new ArgumentNullException(nameof(spiDevice));
+
             _spiDevice = spiDevice;
         }
 
