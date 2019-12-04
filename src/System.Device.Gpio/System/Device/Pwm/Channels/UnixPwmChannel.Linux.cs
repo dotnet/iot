@@ -209,10 +209,7 @@ namespace System.Device.Pwm.Channels
                 File.WriteAllText($"{_chipPath}/export", Convert.ToString(_channel));
             }
 
-            while (!Directory.Exists(_channelPath))
-            {
-                Thread.Sleep(10);
-            }
+            SysFsHelpers.EnsureDirectoryExistsAndHasReadWriteAccess(_channelPath);
         }
 
         /// <inheritdoc/>
