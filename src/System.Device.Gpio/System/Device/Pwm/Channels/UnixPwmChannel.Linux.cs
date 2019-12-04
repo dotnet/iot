@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Text;
 using System.Threading;
 
 namespace System.Device.Pwm.Channels
@@ -38,15 +39,27 @@ namespace System.Device.Pwm.Channels
             _channel = channel;
             _chipPath = $"/sys/class/pwm/pwmchip{_chip}";
             _channelPath = $"{_chipPath}/pwm{_channel}";
+
             Validate();
             Open();
 
             // avoid opening the file for operations changing relatively frequently
-            _dutyCycleWriter = new StreamWriter(new FileStream($"{_channelPath}/duty_cycle", FileMode.Open, FileAccess.ReadWrite));
+            var dutyCycleFile = new FileStream($"{_channelPath}/duty_cycle", FileMode.Open, FileAccess.ReadWrite);
+            _dutyCycleWriter = new StreamWriter(dutyCycleFile);
             _frequencyWriter = new StreamWriter(new FileStream($"{_channelPath}/period", FileMode.Open, FileAccess.ReadWrite));
 
-            SetFrequency(frequency);
-            DutyCycle = dutyCycle;
+            int currentDutyCycleNs = GetCurrentDutyCycleNs(dutyCycleFile);
+            SetFrequency(frequency, dutyCycle, currentDutyCycleNs);
+        }
+
+        private static int GetCurrentDutyCycleNs(FileStream dutyCycleFile)
+        {
+            using (var sr = new StreamReader(dutyCycleFile, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, bufferSize: 10, leaveOpen: true))
+            {
+                int currentDutyCycleNs;
+                int.TryParse(sr.ReadLine(), out currentDutyCycleNs);
+                return currentDutyCycleNs;
+            }
         }
 
         /// <inheritdoc/>
@@ -58,7 +71,7 @@ namespace System.Device.Pwm.Channels
             }
             set
             {
-                SetFrequency(value);
+                SetFrequency(value, _dutyCycle);
             }
         }
 
@@ -86,11 +99,7 @@ namespace System.Device.Pwm.Channels
             return (int)((1.0 / frequency) * 1_000_000_000);
         }
 
-        /// <summary>
-        /// Sets the frequency for the channel.
-        /// </summary>
-        /// <param name="frequency">The frequency in hertz to set.</param>
-        private void SetFrequency(int frequency)
+        private void SetFrequency(int frequency, double newDutyCycle, int? dutyCycleOnTimeNs = null)
         {
             if (frequency < 0)
             {
@@ -98,10 +107,35 @@ namespace System.Device.Pwm.Channels
             }
 
             int periodInNanoseconds = GetPeriodInNanoseconds(frequency);
+
+            int dutyCycleNs = dutyCycleOnTimeNs ?? GetDutyCycleOnTimeNs(GetPeriodInNanoseconds(_frequency), _dutyCycle);
+
+            if (dutyCycleNs > periodInNanoseconds)
+            {
+                // Internally duty cycle is represented as `on time` and frequency as `period`
+                // When changing to certain values of frequency current `on time` might be higher
+                // than period which would cause driver to cause error ("invalid argument").
+                // We cannot set duty cycle first as well because we have similar problem.
+                // Also after rebooting both period and duty cycle are zeros which requires
+                // period to be always set first.
+                // What we do to fix this is following:
+                // - at program start we read current value of duty cycle time in ns and this is the real value
+                // - any time later we use cached value and assume cached value is correct
+                //   - external changes to the file will cause issues with this assumption
+                // - we prefer setting frequency first
+                // - the only time this doesn't work is when we are required to use temporary value
+                //
+                // Now additionally there is chicken and the egg problem: we cannot use _dutyCycle value at startup
+                // At startup we are required that this value is passed in explicitly.
+                DutyCycle = 0;
+            }
+
             _frequencyWriter.BaseStream.SetLength(0);
             _frequencyWriter.Write(periodInNanoseconds);
             _frequencyWriter.Flush();
             _frequency = frequency;
+
+            DutyCycle = newDutyCycle;
         }
 
         /// <summary>
@@ -116,11 +150,16 @@ namespace System.Device.Pwm.Channels
             }
 
             // In Linux, the period needs to be a whole number and can't have decimal point.
-            int dutyCycleInNanoseconds = (int)(GetPeriodInNanoseconds(_frequency) * dutyCycle);
+            int dutyCycleInNanoseconds = GetDutyCycleOnTimeNs(GetPeriodInNanoseconds(_frequency), dutyCycle);
             _dutyCycleWriter.BaseStream.SetLength(0);
             _dutyCycleWriter.Write(dutyCycleInNanoseconds);
             _dutyCycleWriter.Flush();
             _dutyCycle = dutyCycle;
+        }
+
+        private static int GetDutyCycleOnTimeNs(int pwmPeriodNs, double dutyCycle)
+        {
+            return (int)(pwmPeriodNs * dutyCycle);
         }
 
         /// <summary>
@@ -169,6 +208,8 @@ namespace System.Device.Pwm.Channels
             {
                 File.WriteAllText($"{_chipPath}/export", Convert.ToString(_channel));
             }
+
+            SysFsHelpers.EnsureDirectoryExistsAndHasReadWriteAccess(_channelPath);
         }
 
         /// <inheritdoc/>

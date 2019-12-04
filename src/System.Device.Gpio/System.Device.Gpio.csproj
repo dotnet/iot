@@ -34,6 +34,7 @@
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <!--Excluding Linux implementations-->
     <Compile Remove="**\*.Linux.cs" />
+    <Compile Remove="**\*.Unix.cs" />
     <Compile Remove="Interop\Unix\**\*.cs" />
     <Reference Include="Windows.Devices.DevicesLowLevelContract">
       <HintPath>winmd\Windows.Devices.DevicesLowLevelContract.winmd</HintPath>
