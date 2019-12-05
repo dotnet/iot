@@ -14,9 +14,9 @@ namespace Iot.Device.CharacterLcd
     /// </summary>
     public class LcdCharacterEncodingFactory
     {
-        private static Dictionary<char, byte> DefaultA00Map;
-        private static Dictionary<char, byte> DefaultA02Map;
-        private static Dictionary<char, byte> DefaultCustomMap;
+        private static readonly Dictionary<char, byte> DefaultA00Map;
+        private static readonly Dictionary<char, byte> DefaultA02Map;
+        private static readonly Dictionary<char, byte> DefaultCustomMap;
 
         static LcdCharacterEncodingFactory()
         {
@@ -211,7 +211,7 @@ namespace Iot.Device.CharacterLcd
             DefaultA02Map.Add('ε', 0b1001_1110);
             DefaultA02Map.Add('δ', 0b1001_1011);
             DefaultA02Map.Add('σ', 0b1001_0101);
-           
+
             // 240 and 241 look like p and q again. What are they?
             DefaultA02Map.Add('θ', 0b1001_1001);
             DefaultA02Map.Add('Ω', 0b1001_1010);
@@ -219,7 +219,7 @@ namespace Iot.Device.CharacterLcd
             DefaultA02Map.Add('∑', 0b1001_0100);
             DefaultA02Map.Add('π', 0b1001_0011);
 
-            string cyrillicLettersSmall   = "абвгдежзийклмнопрстуфхцчшщъыьэюяёђѓєѕіїјљњћќўџ";
+            string cyrillicLettersSmall = "абвгдежзийклмнопрстуфхцчшщъыьэюяёђѓєѕіїјљњћќўџ";
             string cyrillicLettersCapital = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯЁЂЃЄЅІЇЈЉЊЋЌЎЏ";
 
             // Map the small cycrillic letters to their capital equivalents
@@ -321,16 +321,17 @@ namespace Iot.Device.CharacterLcd
                 throw new ArgumentNullException(nameof(culture));
             }
             Dictionary<char, byte> newMap;
+            // Need to copy the static map, we must not update that
             switch (romName)
             {
                 case "A00":
-                    newMap = DefaultA00Map;
+                    newMap = new Dictionary<char, byte>(DefaultA00Map);
                     break;
                 case "A02":
-                    newMap = DefaultA02Map;
+                    newMap = new Dictionary<char, byte>(DefaultA02Map);
                     break;
                 default:
-                    newMap = DefaultCustomMap;
+                    newMap = new Dictionary<char, byte>(DefaultCustomMap);
                     break;
             }
 
@@ -353,7 +354,7 @@ namespace Iot.Device.CharacterLcd
         private bool AssignLettersForCurrentCulture(Dictionary<char, byte> characterMapping, CultureInfo culture, string romName, List<byte[]> extraCharacters, int maxNumberOfCustomCharacters)
         {
             string specialLetters = SpecialLettersForCulture(culture, characterMapping); // Special letters this language group uses, in order of importance
-            
+
             byte charPos = 0;
             bool retValue = true;
             foreach (var c in specialLetters)
@@ -409,8 +410,8 @@ namespace Iot.Device.CharacterLcd
                     specialLetters = "€£";
                     break;
                 case "ja": // Japanese
-                    // About all the letters. They're there if we use rom map A00, otherwise this will later fail
-                   specialLetters = "イロハニホヘトチリヌルヲワカヨタレソツネナラムウヰノオクヤマケフコエテアサキユメミシヱヒモセス";
+                           // About all the letters. They're there if we use rom map A00, otherwise this will later fail
+                    specialLetters = "イロハニホヘトチリヌルヲワカヨタレソツネナラムウヰノオクヤマケフコエテアサキユメミシヱヒモセス";
                     break;
                 case "de":
                     specialLetters = "äöüß€ÄÖÜ£ë";
@@ -437,7 +438,7 @@ namespace Iot.Device.CharacterLcd
                     break;
                 case "uk":
                 case "ru":
-                    specialLetters = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"; // cycrillic script used for russian (only works on ROM A02, capital letters only)
+                    specialLetters = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"; // cyryllic script used for russian (only works on ROM A02, capital letters only)
                     break;
                 default:
                     specialLetters = "€£";
@@ -450,9 +451,8 @@ namespace Iot.Device.CharacterLcd
         /// Creates the given letter for the given ROM type.
         /// Overwrite this only if an alternate ROM is used.
         /// </summary>
-        protected virtual byte[] CreateLetter(Char character, string romName)
+        protected virtual byte[] CreateLetter(char character, string romName)
         {
-            
             if (romName == "A00")
             {
                 return CreateLetterA00(character);
@@ -473,9 +473,8 @@ namespace Iot.Device.CharacterLcd
         /// <remarks>
         /// Currently requires the characters to be hardcoded here. Would be nice if we could generate the pixel maps from an existing font, such as Consolas
         /// </remarks>
-        protected virtual byte[] CreateLetterA00(Char character)
+        protected virtual byte[] CreateLetterA00(char character)
         {
-            Span<byte> map = stackalloc byte[8];
             switch (character)
             {
                 case '€':
@@ -719,7 +718,6 @@ namespace Iot.Device.CharacterLcd
                     0b_01111,
                     0b_00000);
 
-
                 case 'ï':
                     return CreateCustomCharacter(
                     0b_01010,
@@ -897,10 +895,10 @@ namespace Iot.Device.CharacterLcd
         /// <remarks>
         /// Currently requires the characters to be hardcoded here. Would be nice if we could generate the pixel maps from an existing font, such as Consolas
         /// </remarks>
-        protected virtual byte[] CreateLetterA02(Char character)
+        protected virtual byte[] CreateLetterA02(char character)
         {
-			// TODO: Create letters for A02 map, but that one is a lot better equipped for european languages, so nothing to do for the currently supported languages
-			return null;
+            // TODO: Create letters for A02 map, but that one is a lot better equipped for european languages, so nothing to do for the currently supported languages
+            return null;
         }
 
         /// <summary>

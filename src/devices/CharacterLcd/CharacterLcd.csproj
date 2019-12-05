@@ -20,7 +20,7 @@
     <Compile Include="LcdInterface.I2c.cs" />
     <Compile Include="LcdInterface.I2c4Bit.cs" />
     <Compile Include="LcdRgb.cs" />
-    <Compile Include="LineFeedMode.cs" />
+    <Compile Include="LineWrapMode.cs" />
     <Compile Include="Registers.cs" />
   </ItemGroup>
 

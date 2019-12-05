@@ -26,7 +26,7 @@ namespace Iot.Device.CharacterLcd
         /// The text currently on the display (required for arbitrary scrolling)
         /// </summary>
         private StringBuilder[] _currentData;
-        private LineFeedMode _lineFeedMode;
+        private LineWrapMode _lineFeedMode;
         private readonly object _lock;
         private readonly bool _shouldDispose;
         private TimeSpan _scrollUpDelay;
@@ -147,7 +147,7 @@ namespace Iot.Device.CharacterLcd
         /// Sets the Line Feed Mode. 
         /// This defines what happens when writting past the end of the line/screen.
         /// </summary>
-        public LineFeedMode LineFeedMode
+        public LineWrapMode LineFeedMode
         {
             get
             {
@@ -220,15 +220,20 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// Write text to display.
         /// </summary>
+        /// <param name="text">Text to be displayed.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="text"/> was null.</exception>
         /// <remarks>
         /// There are only 256 characters available. There are chip variants
         /// with different character sets. Characters from space ' ' (32) to
         /// '}' are usually the same with the exception of '\', which is a
         /// yen symbol on some chips '¥'.
         /// </remarks>
-        /// <param name="text">Text to be displayed.</param>
         public void Write(string text)
         {
+            if (text == null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
             text = text.Replace("\r\n", "\n"); // Change to linux format only, so we have to consider only this case further
 
             List<string> lines = text.Split("\n", StringSplitOptions.None).ToList();
@@ -254,22 +259,6 @@ namespace Iot.Device.CharacterLcd
                 }
             }
 
-        }
-
-        /// <summary>
-        /// Asynchronously writes text to the display.
-        /// See <see cref="Write(string)"/> for limitations.
-        /// Only one write operation (synchronous or asynchronous) should be executed at once, otherwise the execution order 
-        /// is undefined. 
-        /// </summary>
-        /// <param name="text">Text to write</param>
-        /// <returns>A task object</returns>
-        public Task WriteAsync(string text)
-        {
-            return Task.Factory.StartNew(() =>
-            {
-                Write(text);
-            });
         }
 
         /// <summary>
@@ -308,7 +297,7 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         private void FindLineWraps(int cursorPos, List<string> lines)
         {
-            if (LineFeedMode == LineFeedMode.Wrap || LineFeedMode == LineFeedMode.WordWrap)
+            if (LineFeedMode == LineWrapMode.Wrap || LineFeedMode == LineWrapMode.WordWrap)
             {
                 int roomOnLine = Size.Width - cursorPos;
                 roomOnLine = Math.Max(roomOnLine, 0);
@@ -317,7 +306,7 @@ namespace Iot.Device.CharacterLcd
                     string remaining = lines[i];
                     if (remaining.Length > roomOnLine)
                     {
-                        if (LineFeedMode == LineFeedMode.WordWrap)
+                        if (LineFeedMode == LineWrapMode.WordWrap)
                         {
                             // In intelligent mode, try finding spaces backwards
                             // Note: this indexes the element 1 char after the last to be printed in the first iteration, since there might be a space just there
@@ -349,18 +338,11 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <summary>
-        /// Writes a newline to the display (wrapping to the next line)
-        /// </summary>
-        public void WriteLine()
-        {
-            NewLine();
-        }
-
-        /// <summary>
-        /// Writes the given text to the current position, then wraps to the next line
+        /// Writes the given text to the current position, then wraps to the next line.
         /// </summary>
         /// <param name="text">Text to draw.</param>
-        public void WriteLine(string text)
+        /// <exception cref="ArgumentNullException"><paramref name="text"/> was null.</exception>
+        public void WriteLine(string text = "")
         {
             Write(text);
             NewLine();
@@ -374,21 +356,8 @@ namespace Iot.Device.CharacterLcd
         /// <param name="times">Number of times to blink. The blink rate is 1 Hz</param>
         public void BlinkDisplay(int times)
         {
-            for (int i = 0; i < times; i++)
-            {
-                lock (_lock)
-                {
-                    _lcd.DisplayOn = false;
-                    _lcd.BacklightOn = false;
-                }
-                Thread.Sleep(500);
-                lock (_lock)
-                {
-                    _lcd.DisplayOn = true;
-                    _lcd.BacklightOn = true;
-                }
-                Thread.Sleep(500);
-            }
+            var blinkTask = BlinkDisplayAsync(times);
+            blinkTask.Wait();
         }
 
         /// <summary>
@@ -398,7 +367,24 @@ namespace Iot.Device.CharacterLcd
         /// <returns>A task handle</returns>
         public Task BlinkDisplayAsync(int times)
         {
-            return Task.Factory.StartNew(() => BlinkDisplay(times));
+            return Task.Factory.StartNew(() =>
+            {
+                for (int i = 0; i < times; i++)
+                {
+                    lock (_lock)
+                    {
+                        _lcd.DisplayOn = false;
+                        _lcd.BacklightOn = false;
+                    }
+                    Thread.Sleep(500);
+                    lock (_lock)
+                    {
+                        _lcd.DisplayOn = true;
+                        _lcd.BacklightOn = true;
+                    }
+                    Thread.Sleep(500);
+                }
+            });
         }
 
         private void NewLine()
@@ -414,7 +400,7 @@ namespace Iot.Device.CharacterLcd
                 {
                     SetCursorPosition(0, CursorTop + 1);
                 }
-                else if (LineFeedMode == LineFeedMode.WordWrap || LineFeedMode == LineFeedMode.Wrap)
+                else if (LineFeedMode == LineWrapMode.WordWrap || LineFeedMode == LineWrapMode.Wrap)
                 {
                     ScrollUp();
                     SetCursorPosition(0, Size.Height - 1); // Go to beginning of last line

@@ -24,7 +24,7 @@ namespace Iot.Device.CharacterLcd.Samples
         public static void WriteTest(ICharacterLcd lcd)
         {
             LcdConsole console = new LcdConsole(lcd, "A00", false);
-            console.LineFeedMode = LineFeedMode.Truncate;
+            console.LineFeedMode = LineWrapMode.Truncate;
             Console.WriteLine("Nowrap test:");
             console.Write("This is a long text that should not wrap and just extend beyond the display");
             console.WriteLine("This has CRLF\r\nin it and should \r\n wrap.");
@@ -32,7 +32,7 @@ namespace Iot.Device.CharacterLcd.Samples
             console.WriteLine("This isn't printed, because it's off the screen");
             Console.ReadLine();
             Console.WriteLine("Autoscroll test:");
-            console.LineFeedMode = LineFeedMode.Wrap;
+            console.LineFeedMode = LineWrapMode.Wrap;
             console.WriteLine();
             console.WriteLine("Now the display should move up.");
             console.WriteLine("And more up.");
@@ -41,7 +41,7 @@ namespace Iot.Device.CharacterLcd.Samples
                 console.WriteLine($"This is line {i + 1}/{20}, but longer than the screen");
                 Thread.Sleep(10);
             }
-            console.LineFeedMode = LineFeedMode.Wrap;
+            console.LineFeedMode = LineWrapMode.Wrap;
             console.WriteLine("Same again, this time with full wrapping.");
             for (int i = 0; i < 20; i++)
             {
@@ -50,7 +50,7 @@ namespace Iot.Device.CharacterLcd.Samples
             }
             Console.ReadLine();
             Console.WriteLine("Intelligent wrapping test");
-            console.LineFeedMode = LineFeedMode.WordWrap;
+            console.LineFeedMode = LineWrapMode.WordWrap;
             console.WriteLine("Now intelligent wrapping should wrap this long sentence at word borders and ommit spaces at the start of lines.");
             Console.WriteLine("Not wrappable test");
             Console.ReadLine();
@@ -58,7 +58,7 @@ namespace Iot.Device.CharacterLcd.Samples
             Console.ReadLine();
             Console.WriteLine("Individual line test");
             console.Clear();
-            console.LineFeedMode = LineFeedMode.Truncate;
+            console.LineFeedMode = LineWrapMode.Truncate;
             console.ReplaceLine(0, "This is all garbage that will be replaced");
             console.ReplaceLine(0, "Running clock test");
             int left = console.Size.Width;
@@ -104,7 +104,7 @@ namespace Iot.Device.CharacterLcd.Samples
             console.LoadEncoding(encoding);
             console.Clear();
             console.ScrollUpDelay = TimeSpan.FromSeconds(1);
-            console.LineFeedMode = LineFeedMode.WordWrap;
+            console.LineFeedMode = LineWrapMode.WordWrap;
             console.WriteLine(@"Die Ratten im Gemäuer, englischer Originaltitel ""The Rats in the Walls"" " +
                 "ist eine phantastische Kurzgeschichte des amerikanischen Schriftstellers H. P. Lovecraft. Das etwa " +
                 "8000 Wörter umfassende Werk wurde zwischen August und September 1923 verfasst und erschien erstmals " +
