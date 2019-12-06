@@ -286,7 +286,7 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="mode">The mode of a pin to set the resistor pull up/down mode.</param>
-        protected void SetInputPullModePi4(int pinNumber, PinMode mode)
+        private void SetInputPullModePi4(int pinNumber, PinMode mode)
         {
             int shift = (pinNumber & 0xf) << 1;
             uint pull = 0;
