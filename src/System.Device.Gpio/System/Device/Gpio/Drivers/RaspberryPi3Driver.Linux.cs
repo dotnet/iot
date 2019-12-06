@@ -4,6 +4,7 @@
 
 using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -27,8 +28,19 @@ namespace System.Device.Gpio.Drivers
         private const string GpioMemoryFilePath = "/dev/gpiomem";
         private const string MemoryFilePath = "/dev/mem";
         private const string DeviceTreeRanges = "/proc/device-tree/soc/ranges";
+        private const string ModelFilePath = "/proc/device-tree/model";
+
         private UnixDriver _sysFSDriver = null;
         private readonly IDictionary<int, PinMode> _sysFSModes = new Dictionary<int, PinMode>();
+
+        /// <summary>
+        /// Returns true if this is a Raspberry Pi4
+        /// </summary>
+        private bool IsPi4
+        {
+            get;
+            set;
+        }
 
         protected override void Dispose(bool disposing)
         {
@@ -214,6 +226,12 @@ namespace System.Device.Gpio.Drivers
         /// <param name="mode">The mode of a pin to set the resistor pull up/down mode.</param>
         private void SetInputPullMode(int pinNumber, PinMode mode)
         {
+            if (IsPi4)
+            {
+                SetInputPullModePi4(pinNumber, mode);
+                return;
+            }
+
             byte modeToPullMode = mode switch
             {
                 PinMode.Input => (byte)0,
@@ -260,6 +278,31 @@ namespace System.Device.Gpio.Drivers
             register &= ~0b11U;
             *gppudPointer = register;
             *gppudclkPointer = 0;
+        }
+
+        /// <summary>
+        /// Sets the resistor pull up/down mode for an input pin on the Raspberry Pi4. 
+        /// The above, complex method doesn't do anything on a Pi4 (it doesn't cause any harm, though)
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="mode">The mode of a pin to set the resistor pull up/down mode.</param>
+        private void SetInputPullModePi4(int pinNumber, PinMode mode)
+        {
+            int shift = (pinNumber & 0xf) << 1;
+            uint pull = 0;
+            uint bits = 0;
+            switch (mode)
+            {
+                case PinMode.Input: pull = 0; break;
+                case PinMode.InputPullUp: pull = 1; break;
+                case PinMode.InputPullDown: pull = 2; break;
+            }
+
+            var gpioReg = _registerViewPointer;
+            bits = (gpioReg->GPPUPPDN[(pinNumber >> 4)]);
+            bits &= ~(3u << shift);
+            bits |= (pull << shift);
+            gpioReg->GPPUPPDN[(pinNumber >> 4)] = bits;
         }
 
         /// <summary>
@@ -472,6 +515,27 @@ namespace System.Device.Gpio.Drivers
 
                 Interop.close(fileDescriptor);
                 _registerViewPointer = (RegisterView*)mapPointer;
+
+                // Detect whether we're running on a Raspberry Pi 4
+                IsPi4 = false;
+                try
+                {
+                    if (File.Exists(ModelFilePath))
+                    {
+                        string model = File.ReadAllText(ModelFilePath, Text.Encoding.ASCII);
+                        if (model.Contains("Raspberry Pi 4"))
+                        {
+                            IsPi4 = true;
+                        }
+                    }
+                }
+                catch (Exception x)
+                {
+                    // This should not normally fail, but we currently don't know how this behaves on different operating systems. Therefore, we ignore
+                    // any exceptions in release and just continue as Pi3 if something fails. 
+                    // If in debug mode, we might want to check what happened here (i.e unsupported OS, incorrect permissions)
+                    Debug.Fail($"Unexpected exception: {x}");
+                }
             }
         }
 
