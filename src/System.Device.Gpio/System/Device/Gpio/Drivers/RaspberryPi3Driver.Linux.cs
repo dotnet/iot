@@ -4,6 +4,7 @@
 
 using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -27,18 +28,18 @@ namespace System.Device.Gpio.Drivers
         private const string GpioMemoryFilePath = "/dev/gpiomem";
         private const string MemoryFilePath = "/dev/mem";
         private const string DeviceTreeRanges = "/proc/device-tree/soc/ranges";
-		private const string ModelFilePath = "/proc/device-tree/model";
+        private const string ModelFilePath = "/proc/device-tree/model";
 
-		private UnixDriver _sysFSDriver = null;
+        private UnixDriver _sysFSDriver = null;
         private readonly IDictionary<int, PinMode> _sysFSModes = new Dictionary<int, PinMode>();
 
         /// <summary>
         /// Returns true if this is a Raspberry Pi4
         /// </summary>
-        protected bool IsPi4
+        private bool IsPi4
         {
             get;
-            private set;
+            set;
         }
 
         protected override void Dispose(bool disposing)
@@ -288,8 +289,8 @@ namespace System.Device.Gpio.Drivers
         protected void SetInputPullModePi4(int pinNumber, PinMode mode)
         {
             int shift = (pinNumber & 0xf) << 1;
-            UInt32 pull = 0;
-            UInt32 bits = 0;
+            uint pull = 0;
+            uint bits = 0;
             switch (mode)
             {
                 case PinMode.Input: pull = 0; break;
@@ -519,23 +520,23 @@ namespace System.Device.Gpio.Drivers
                 IsPi4 = false;
                 try
                 {
-					if (File.Exists(ModelFilePath))
-					{
-						string model = File.ReadAllText(ModelFilePath, Text.Encoding.ASCII);
-						if (model.Contains("Raspberry Pi 4"))
-						{
-							IsPi4 = true;
-						}
-					}
+                    if (File.Exists(ModelFilePath))
+                    {
+                        string model = File.ReadAllText(ModelFilePath, Text.Encoding.ASCII);
+                        if (model.Contains("Raspberry Pi 4"))
+                        {
+                            IsPi4 = true;
+                        }
+                    }
                 }
                 catch (Exception x)
-				{
+                {
                     // This should not normally fail, but we currently don't know how this behaves on different operating systems. Therefore, we ignore
-					// any exceptions in release and just continue as Pi3 if something fails. 
+                    // any exceptions in release and just continue as Pi3 if something fails. 
                     // If in debug mode, we might want to check what happened here (i.e unsupported OS, incorrect permissions)
-					System.Diagnostics.Debug.Fail($"Unexpected exception: {x}");
-				}
-			}
+                    Debug.Fail($"Unexpected exception: {x}");
+                }
+            }
         }
 
         /// <summary>

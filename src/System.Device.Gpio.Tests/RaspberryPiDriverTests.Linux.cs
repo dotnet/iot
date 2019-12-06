@@ -24,7 +24,7 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void InputPullResistorsWork()
         {
-            using (GpioController controller = new GpioController(GetTestNumberingScheme()))
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(OpenPin, PinMode.InputPullUp);
                 Assert.Equal(PinValue.High, controller.Read(OpenPin));
