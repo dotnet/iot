@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.TimeOfFlight.Models.LidarLiteV3
+namespace Iot.Device.DistanceSensor.Models.LidarLiteV3
 {
     /// <summary>
     /// All the documented registers for the LidarLiteV3

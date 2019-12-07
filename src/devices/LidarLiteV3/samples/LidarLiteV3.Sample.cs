@@ -5,9 +5,9 @@
 using System;
 using System.Threading;
 using System.Device.I2c;
-using Iot.Device.TimeOfFlight;
+using Iot.Device.DistanceSensor;
 
-namespace Iot.Device.TimeOfFlight.LidarLiteV3Samples
+namespace Iot.Device.DistanceSensor.LidarLiteV3Samples
 {
     internal class Program
     {
@@ -16,7 +16,8 @@ namespace Iot.Device.TimeOfFlight.LidarLiteV3Samples
             using (var llv3 = new LidarLiteV3(CreateI2cDevice()))
             {
                 // Take 10 measurements, each one second apart.
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < 10; i++) 
+                {
                     int currentDistance = llv3.MeasureDistance();
                     Console.WriteLine($"Current Distance: {currentDistance} cm");
                     Thread.Sleep(1000);

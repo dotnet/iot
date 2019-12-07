@@ -4,13 +4,13 @@
 
 using System;
 
-namespace Iot.Device.TimeOfFlight.Models.LidarLiteV3
+namespace Iot.Device.DistanceSensor.Models.LidarLiteV3
 {
     /// <summary>
-    /// Power option flags
+    /// Power mode flags
     /// </summary>
     [Flags]
-    public enum PowerOptionFlag
+    public enum PowerMode
     {
         /// <summary>
         /// Turn on the device.

@@ -14,14 +14,14 @@ implemented.
 
 I2C Wiring on the Raspberry PI:
 
-| LidarLiteV3 Wire      | Raspberry PI GPIO Pin                   |
-|-----------------------|-----------------------------------------|
-| 5V (red)              | 5V (pin 2)                              |
-| Ground (black)        | Ground (pin 6)                          |
-| Power enable (orange) | Optional, an available IO pin (pin 33)  |
-| Mode control (yellow) | Not used                                |
-| I2C SCL (green)       | SCL (pin 5)                             |
-| I2C SDA (blue)        | SDA (pin 3)                             |
+| LidarLiteV3 Wire      | Raspberry PI GPIO Pin (Physical Numbering) |
+|-----------------------|--------------------------------------------|
+| 5V (red)              | 5V (pin 2)                                 |
+| Ground (black)        | Ground (pin 6)                             |
+| Power enable (orange) | Optional, an available IO pin (pin 33)     |
+| Mode control (yellow) | Not used                                   |
+| I2C SCL (green)       | SCL (pin 5)                                |
+| I2C SDA (blue)        | SDA (pin 3)                                |
 
 > Important! Don't forget to enable I2C via `raspi-config`.
 
@@ -52,7 +52,7 @@ class Program
 
 # Advance Usage
 
-## Power Control
+## Power Modes
 
 Power can be controlled to the device via a GPIO pin. Use the optional constructor parameters to 
 specify the GPIO controller and a power enable pin number (numbering scheme depends on GpioController).
@@ -87,7 +87,7 @@ since the initialization time is only 2 ms shorter.
 ```csharp
 using (var llv3 = new LidarLiteV3(CreateI2cDevice()))
 {
-   llv3.PowerOption = PowerOption.Sleep;
+   llv3.PowerMode = PowerMode.Sleep;
 }
 ```
 
