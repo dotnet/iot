@@ -1,4 +1,4 @@
-﻿# LidarLiteV3  LIDAR ToF Sensor by Garmin
+# LidarLiteV3 - LIDAR Time of Flight Sensor
 
 ## Summary
 
