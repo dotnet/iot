@@ -118,7 +118,7 @@ using (var llv3 = new LidarLiteV3(CreateI2cDevice()))
 }
 ```
 
-# Change the IC2 Address
+# Change the I2C Address
 
 By default, the device has an address of `0x62`.  It's possible to change this address to 
 resolve a conflict with another device or to run multiple devices.
