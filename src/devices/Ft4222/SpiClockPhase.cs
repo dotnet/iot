@@ -11,5 +11,5 @@ namespace System.Device.Ft4222
     {
         ClockLeading = 0,
         ClockTailing = 1,
-    };
+    }
 }

@@ -19,7 +19,7 @@ namespace System.Device.Ft4222
         /// <param name="numdevs">number of devices</param>
         /// <returns>The status</returns>
         [DllImport("ftd2xx.dll")]
-        public static extern FtStatus FT_CreateDeviceInfoList(ref uint numdevs);
+        public static extern FtStatus FT_CreateDeviceInfoList(out uint numdevs);
 
         /// <summary>
         /// Get Device Information Detail
@@ -34,7 +34,7 @@ namespace System.Device.Ft4222
         /// <param name="ftHandle">Handle</param>
         /// <returns>The status</returns>
         [DllImport("ftd2xx.dll")]
-        public static extern FtStatus FT_GetDeviceInfoDetail(uint index, ref uint flags, ref FtDevice chiptype, ref uint id, ref uint locid, byte[] serialnumber, byte[] description, ref IntPtr ftHandle);
+        public static extern FtStatus FT_GetDeviceInfoDetail(uint index, out uint flags, out FtDevice chiptype, out uint id, out uint locid, out byte serialnumber, out byte description, out IntPtr ftHandle);
 
         /// <summary>
         /// Open a device
@@ -44,7 +44,7 @@ namespace System.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
         [DllImport("ftd2xx.dll")]
-        public static extern FtStatus FT_OpenEx(uint pvArg1, FtOpenType dwFlags, ref IntPtr ftHandle);
+        public static extern FtStatus FT_OpenEx(uint pvArg1, FtOpenType dwFlags, out SafeFtHandle ftHandle);
 
         /// <summary>
         /// Close the device
@@ -52,7 +52,7 @@ namespace System.Device.Ft4222
         /// <param name="ftHandle">The device handle</param>
         /// <returns>The status</returns>
         [DllImport("ftd2xx.dll")]
-        public static extern FtStatus FT_Close(IntPtr ftHandle);
+        public static extern FtStatus FT_Close(SafeFtHandle ftHandle);
 
         #endregion
 
@@ -64,7 +64,7 @@ namespace System.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_UnInitialize(IntPtr ftHandle);
+        public static extern FtStatus FT4222_UnInitialize(SafeFtHandle ftHandle);
 
         /// <summary>
         /// Set the device system clock
@@ -73,7 +73,7 @@ namespace System.Device.Ft4222
         /// <param name="clk">The system clock rate</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SetClock(IntPtr ftHandle, FtClockRate clk);
+        public static extern FtStatus FT4222_SetClock(SafeFtHandle ftHandle, FtClockRate clk);
 
         /// <summary>
         /// Get the system clock
@@ -82,7 +82,7 @@ namespace System.Device.Ft4222
         /// <param name="clk">The system clock rate</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_GetClock(IntPtr ftHandle, ref FtClockRate clk);
+        public static extern FtStatus FT4222_GetClock(SafeFtHandle ftHandle, out FtClockRate clk);
 
         /// <summary>
         /// Set the Wake Up Interrupt
@@ -91,7 +91,7 @@ namespace System.Device.Ft4222
         /// <param name="enable">True to enable, false to disable</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SetWakeUpInterrupt(IntPtr ftHandle, bool enable);
+        public static extern FtStatus FT4222_SetWakeUpInterrupt(SafeFtHandle ftHandle, bool enable);
 
         /// <summary>
         /// Set Interrupt Trigger
@@ -100,7 +100,7 @@ namespace System.Device.Ft4222
         /// <param name="trigger">The trigger type</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SetInterruptTrigger(IntPtr ftHandle, GpioTrigger trigger);
+        public static extern FtStatus FT4222_SetInterruptTrigger(SafeFtHandle ftHandle, GpioTrigger trigger);
 
         /// <summary>
         /// Set Suspend Out
@@ -109,7 +109,7 @@ namespace System.Device.Ft4222
         /// <param name="enable">True to enable, false to disable</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SetSuspendOut(IntPtr ftHandle, bool enable);
+        public static extern FtStatus FT4222_SetSuspendOut(SafeFtHandle ftHandle, bool enable);
 
         /// <summary>
         /// Get the maximum transfer buffer size thru USB
@@ -118,7 +118,7 @@ namespace System.Device.Ft4222
         /// <param name="pMaxSize">the maximum size in bytes</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_GetMaxTransferSize(IntPtr ftHandle, ref ushort pMaxSize);
+        public static extern FtStatus FT4222_GetMaxTransferSize(SafeFtHandle ftHandle, out ushort pMaxSize);
 
         /// <summary>
         /// 
@@ -128,7 +128,7 @@ namespace System.Device.Ft4222
         /// <param name="param"></param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SetEventNotification(IntPtr ftHandle, ulong mask, IntPtr param);
+        public static extern FtStatus FT4222_SetEventNotification(SafeFtHandle ftHandle, ulong mask, IntPtr param);
 
         /// <summary>
         /// Get the version of the chip and dll
@@ -137,7 +137,7 @@ namespace System.Device.Ft4222
         /// <param name="pVersion">A version structure</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_GetVersion(IntPtr ftHandle, ref FtVersion pVersion);
+        public static extern FtStatus FT4222_GetVersion(SafeFtHandle ftHandle, out FtVersion pVersion);
 
         /// <summary>
         /// Reset the chipset
@@ -145,7 +145,7 @@ namespace System.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_ChipReset(IntPtr ftHandle);
+        public static extern FtStatus FT4222_ChipReset(SafeFtHandle ftHandle);
 
         #endregion
 
@@ -162,7 +162,7 @@ namespace System.Device.Ft4222
         /// <param name="ssoMap">The chip select starting by 0x01</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPIMaster_Init(IntPtr ftHandle, SpiOperatingMode ioLine, SpiClock clock, SpiClockPolarity cpol, SpiClockPhase cpha, byte ssoMap);
+        public static extern FtStatus FT4222_SPIMaster_Init(SafeFtHandle ftHandle, SpiOperatingMode ioLine, SpiClock clock, SpiClockPolarity cpol, SpiClockPhase cpha, byte ssoMap);
 
         /// <summary>
         /// Set the operation mode for SPI as a master
@@ -171,7 +171,7 @@ namespace System.Device.Ft4222
         /// <param name="spiMode">The operation mode, none, single, dual or quad</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPIMaster_SetLines(IntPtr ftHandle, SpiOperatingMode spiMode);
+        public static extern FtStatus FT4222_SPIMaster_SetLines(SafeFtHandle ftHandle, SpiOperatingMode spiMode);
 
         /// <summary>
         /// Operate a single SPI read as a master
@@ -183,7 +183,7 @@ namespace System.Device.Ft4222
         /// <param name="isEndTransaction">True if this is the final SPI transaction</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPIMaster_SingleRead(IntPtr ftHandle, byte[] buffer, ushort bufferSize, ref ushort sizeOfRead, bool isEndTransaction);
+        public static extern FtStatus FT4222_SPIMaster_SingleRead(SafeFtHandle ftHandle, out byte buffer, ushort bufferSize, out ushort sizeOfRead, bool isEndTransaction);
 
         /// <summary>
         /// Operate a single SPI write as a master
@@ -195,7 +195,7 @@ namespace System.Device.Ft4222
         /// <param name="isEndTransaction">True if this is the final SPI transaction</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPIMaster_SingleWrite(IntPtr ftHandle, byte[] buffer, ushort bufferSize, ref ushort sizeTransferred, bool isEndTransaction);
+        public static extern FtStatus FT4222_SPIMaster_SingleWrite(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred, bool isEndTransaction);
 
         /// <summary>
         /// Operate a single read and write SPI operation as a master
@@ -208,7 +208,7 @@ namespace System.Device.Ft4222
         /// <param name="isEndTransaction">True if this is the final SPI transaction</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPIMaster_SingleReadWrite(IntPtr ftHandle, byte[] readBuffer, byte[] writeBuffer, ushort bufferSize, ref ushort sizeTransferred, bool isEndTransaction);
+        public static extern FtStatus FT4222_SPIMaster_SingleReadWrite(SafeFtHandle ftHandle, out byte readBuffer, in byte writeBuffer, ushort bufferSize, out ushort sizeTransferred, bool isEndTransaction);
 
         /// <summary>
         /// Operate multiple read and write SPI operations as a master
@@ -222,7 +222,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeOfRead">The size of the read buffer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPIMaster_MultiReadWrite(IntPtr ftHandle, byte[] readBuffer, byte[] writeBuffer, byte singleWriteBytes, ushort multiWriteBytes, ushort multiReadBytes, ref uint sizeOfRead);
+        public static extern FtStatus FT4222_SPIMaster_MultiReadWrite(SafeFtHandle ftHandle, out byte readBuffer, in byte writeBuffer, byte singleWriteBytes, ushort multiWriteBytes, ushort multiReadBytes, out uint sizeOfRead);
 
         /// <summary>
         /// Initialize the chipset as a SPI slave
@@ -230,16 +230,16 @@ namespace System.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPISlave_Init(IntPtr ftHandle);
+        public static extern FtStatus FT4222_SPISlave_Init(SafeFtHandle ftHandle);
 
         /// <summary>
         /// Initialize the chipset as a SPI slave
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
-        /// <param name="protocolOpt">Initialize with, without protocol or never send the hacknoledge</param>
+        /// <param name="protocolOpt">Initialize with, without protocol or never send the acknowledge</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPISlave_InitEx(IntPtr ftHandle, SpiSlaveProtocol protocolOpt);
+        public static extern FtStatus FT4222_SPISlave_InitEx(SafeFtHandle ftHandle, SpiSlaveProtocol protocolOpt);
 
         /// <summary>
         /// Set SPI as slave clock modes
@@ -249,7 +249,7 @@ namespace System.Device.Ft4222
         /// <param name="cpha">The clock phase</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPISlave_SetMode(IntPtr ftHandle, SpiClockPolarity cpol, SpiClockPhase cpha);
+        public static extern FtStatus FT4222_SPISlave_SetMode(SafeFtHandle ftHandle, SpiClockPolarity cpol, SpiClockPhase cpha);
 
         /// <summary>
         /// Get the SPI as salve RX status
@@ -258,7 +258,7 @@ namespace System.Device.Ft4222
         /// <param name="pRxSize">The RX size</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPISlave_GetRxStatus(IntPtr ftHandle, ref ushort pRxSize);
+        public static extern FtStatus FT4222_SPISlave_GetRxStatus(SafeFtHandle ftHandle, out ushort pRxSize);
 
         /// <summary>
         /// Operate a SPI read as slave
@@ -269,7 +269,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeOfRead">The size of the read buffer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPISlave_Read(IntPtr ftHandle, byte[] buffer, ushort bufferSize, ref ushort sizeOfRead);
+        public static extern FtStatus FT4222_SPISlave_Read(SafeFtHandle ftHandle, out byte buffer, ushort bufferSize, out ushort sizeOfRead);
 
         /// <summary>
         /// Operate a SPI write as a slave
@@ -280,7 +280,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeTransferred">The size what has been sent</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPISlave_Write(IntPtr ftHandle, byte[] buffer, ushort bufferSize, ref ushort sizeTransferred);
+        public static extern FtStatus FT4222_SPISlave_Write(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
         /// Get or set the SPI as slave Rx quick response
@@ -289,7 +289,7 @@ namespace System.Device.Ft4222
         /// <param name="enable">True to enable it, false to disable it</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPISlave_RxQuickResponse(IntPtr ftHandle, bool enable);
+        public static extern FtStatus FT4222_SPISlave_RxQuickResponse(SafeFtHandle ftHandle, bool enable);
 
         /// <summary>
         /// Reset the SPI
@@ -297,7 +297,7 @@ namespace System.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPI_Reset(IntPtr ftHandle);
+        public static extern FtStatus FT4222_SPI_Reset(SafeFtHandle ftHandle);
 
         /// <summary>
         /// Reset a specific SPI transaction ID
@@ -306,7 +306,7 @@ namespace System.Device.Ft4222
         /// <param name="spiIdx">The SPI ID</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPI_ResetTransaction(IntPtr ftHandle, byte spiIdx);
+        public static extern FtStatus FT4222_SPI_ResetTransaction(SafeFtHandle ftHandle, byte spiIdx);
 
         /// <summary>
         /// Set the intensity of the pin out on SPI
@@ -317,7 +317,7 @@ namespace System.Device.Ft4222
         /// <param name="ssoStrength">The intensity of the chip select pin</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPI_SetDrivingStrength(IntPtr ftHandle, PinDrivingStrength clkStrength, PinDrivingStrength ioStrength, PinDrivingStrength ssoStrength);
+        public static extern FtStatus FT4222_SPI_SetDrivingStrength(SafeFtHandle ftHandle, PinDrivingStrength clkStrength, PinDrivingStrength ioStrength, PinDrivingStrength ssoStrength);
 
         #endregion
 
@@ -330,7 +330,7 @@ namespace System.Device.Ft4222
         /// <param name="kbps">ency in kilo Hertz</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CMaster_Init(IntPtr ftHandle, uint kbps);
+        public static extern FtStatus FT4222_I2CMaster_Init(SafeFtHandle ftHandle, uint kbps);
 
         /// <summary>
         /// Operate an I2C read as a master
@@ -342,7 +342,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CMaster_Read(IntPtr ftHandle, ushort deviceAddress, byte[] buffer, ushort bufferSize, ref ushort sizeTransferred);
+        public static extern FtStatus FT4222_I2CMaster_Read(SafeFtHandle ftHandle, ushort deviceAddress, out byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
         /// Operate an I2C write as a master
@@ -354,7 +354,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CMaster_Write(IntPtr ftHandle, ushort deviceAddress, byte[] buffer, ushort bufferSize, ref ushort sizeTransferred);
+        public static extern FtStatus FT4222_I2CMaster_Write(SafeFtHandle ftHandle, ushort deviceAddress, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
         /// Operate an I2C read as a master
@@ -367,7 +367,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CMaster_ReadEx(IntPtr ftHandle, ushort deviceAddress, byte flag, byte[] buffer, ushort bufferSize, ref ushort sizeTransferred);
+        public static extern FtStatus FT4222_I2CMaster_ReadEx(SafeFtHandle ftHandle, ushort deviceAddress, byte flag, out byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
         /// Operate an I2C write as a master
@@ -380,7 +380,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CMaster_WriteEx(IntPtr ftHandle, ushort deviceAddress, byte flag, byte[] buffer, ushort bufferSize, ref ushort sizeTransferred);
+        public static extern FtStatus FT4222_I2CMaster_WriteEx(SafeFtHandle ftHandle, ushort deviceAddress, byte flag, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
         /// Reset I2C as a master
@@ -388,7 +388,7 @@ namespace System.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CMaster_Reset(IntPtr ftHandle);
+        public static extern FtStatus FT4222_I2CMaster_Reset(SafeFtHandle ftHandle);
 
         /// <summary>
         /// Get the I2C status as a master
@@ -397,7 +397,7 @@ namespace System.Device.Ft4222
         /// <param name="controllerStatus"></param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CMaster_GetStatus(IntPtr ftHandle, ref byte controllerStatus);
+        public static extern FtStatus FT4222_I2CMaster_GetStatus(SafeFtHandle ftHandle, out byte controllerStatus);
 
         /// <summary>
         /// Initialize the chip as an I2C slave
@@ -405,7 +405,7 @@ namespace System.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CSlave_Init(IntPtr ftHandle);
+        public static extern FtStatus FT4222_I2CSlave_Init(SafeFtHandle ftHandle);
 
         /// <summary>
         /// REset the I2C as a slave
@@ -413,7 +413,7 @@ namespace System.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CSlave_Reset(IntPtr ftHandle);
+        public static extern FtStatus FT4222_I2CSlave_Reset(SafeFtHandle ftHandle);
 
         /// <summary>
         /// Get the I2C address as a slave
@@ -422,7 +422,7 @@ namespace System.Device.Ft4222
         /// <param name="addr">The I2C device address</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CSlave_GetAddress(IntPtr ftHandle, ref byte addr);
+        public static extern FtStatus FT4222_I2CSlave_GetAddress(SafeFtHandle ftHandle, out byte addr);
 
         /// <summary>
         /// Get the I2C address as a slave
@@ -431,7 +431,7 @@ namespace System.Device.Ft4222
         /// <param name="addr">The I2C device address</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CSlave_SetAddress(IntPtr ftHandle, byte addr);
+        public static extern FtStatus FT4222_I2CSlave_SetAddress(SafeFtHandle ftHandle, byte addr);
 
         /// <summary>
         /// Get the I2C as a slave RX status
@@ -440,7 +440,7 @@ namespace System.Device.Ft4222
         /// <param name="pRxSize">the RX size</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CSlave_GetRxStatus(IntPtr ftHandle, ref ushort pRxSize);
+        public static extern FtStatus FT4222_I2CSlave_GetRxStatus(SafeFtHandle ftHandle, out ushort pRxSize);
 
         /// <summary>
         /// Operate an I2C read as a slave
@@ -451,7 +451,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CSlave_Read(IntPtr ftHandle, byte[] buffer, ushort bufferSize, ref ushort sizeTransferred);
+        public static extern FtStatus FT4222_I2CSlave_Read(SafeFtHandle ftHandle, out byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
         /// 
@@ -462,7 +462,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CSlave_Write(IntPtr ftHandle, byte[] buffer, ushort bufferSize, ref ushort sizeTransferred);
+        public static extern FtStatus FT4222_I2CSlave_Write(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
         /// Set I2C as a slave clock stretch
@@ -471,7 +471,7 @@ namespace System.Device.Ft4222
         /// <param name="enable">True to enable, false to disable</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CSlave_SetClockStretch(IntPtr ftHandle, bool enable);
+        public static extern FtStatus FT4222_I2CSlave_SetClockStretch(SafeFtHandle ftHandle, bool enable);
 
         /// <summary>
         /// Set I2C as a slave response word
@@ -480,20 +480,20 @@ namespace System.Device.Ft4222
         /// <param name="responseWord">The response word</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CSlave_SetRespWord(IntPtr ftHandle, byte responseWord);
+        public static extern FtStatus FT4222_I2CSlave_SetRespWord(SafeFtHandle ftHandle, byte responseWord);
 
         #endregion
 
         #region GPIO
 
         /// <summary>
-        /// Initialize the chi as GPIO
+        /// Initialize the chip as GPIO
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="gpioDir">Array of pin configuration</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_GPIO_Init(IntPtr ftHandle, [MarshalAs(UnmanagedType.LPArray, SizeConst = 4)] GpioPinMode[] gpioDir);
+        public static extern FtStatus FT4222_GPIO_Init(SafeFtHandle ftHandle, GpioPinMode[] gpioDir);
 
         /// <summary>
         /// Operate a GPIO read
@@ -503,7 +503,7 @@ namespace System.Device.Ft4222
         /// <param name="value">True if high, false if low</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_GPIO_Read(IntPtr ftHandle, GpioPort portNum, ref GpioPinValue value);
+        public static extern FtStatus FT4222_GPIO_Read(SafeFtHandle ftHandle, GpioPort portNum, out GpioPinValue value);
 
         /// <summary>
         /// Operate a GPIO write
@@ -513,7 +513,7 @@ namespace System.Device.Ft4222
         /// <param name="bValue">True if high, false if low</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_GPIO_Write(IntPtr ftHandle, GpioPort portNum, GpioPinValue bValue);
+        public static extern FtStatus FT4222_GPIO_Write(SafeFtHandle ftHandle, GpioPort portNum, GpioPinValue bValue);
 
         /// <summary>
         /// Set the GPIO input trigger
@@ -523,7 +523,7 @@ namespace System.Device.Ft4222
         /// <param name="trigger">The trigger type</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_GPIO_SetInputTrigger(IntPtr ftHandle, GpioPort portNum, GpioTrigger trigger);
+        public static extern FtStatus FT4222_GPIO_SetInputTrigger(SafeFtHandle ftHandle, GpioPort portNum, GpioTrigger trigger);
 
         /// <summary>
         /// Get the GPIO trigger status
@@ -533,7 +533,7 @@ namespace System.Device.Ft4222
         /// <param name="queueSize">The queue size</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_GPIO_GetTriggerStatus(IntPtr ftHandle, GpioPort portNum, ref ushort queueSize);
+        public static extern FtStatus FT4222_GPIO_GetTriggerStatus(SafeFtHandle ftHandle, GpioPort portNum, out ushort queueSize);
 
         /// <summary>
         /// Read the GPIO Trigger queue
@@ -545,7 +545,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeofRead">The size of the read buffer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_GPIO_ReadTriggerQueue(IntPtr ftHandle, GpioPort portNum, GpioTrigger[] events, ushort readSize, ref ushort sizeofRead);
+        public static extern FtStatus FT4222_GPIO_ReadTriggerQueue(SafeFtHandle ftHandle, GpioPort portNum, out GpioTrigger events, ushort readSize, out ushort sizeofRead);
 
         /// <summary>
         /// Set the GPIO in wave form
@@ -554,7 +554,7 @@ namespace System.Device.Ft4222
         /// <param name="enable">True to enable, false to disable</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_GPIO_SetWaveFormMode(IntPtr ftHandle, bool enable);
+        public static extern FtStatus FT4222_GPIO_SetWaveFormMode(SafeFtHandle ftHandle, bool enable);
 
         #endregion
     }

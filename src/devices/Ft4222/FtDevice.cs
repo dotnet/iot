@@ -66,5 +66,5 @@ namespace System.Device.Ft4222
         /// OTP programmer board for the FT4222.
         /// </summary>
         Ft4222OtpProgrammerBoard,
-    };
+    }
 }

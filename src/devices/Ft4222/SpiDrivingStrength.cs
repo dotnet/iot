@@ -12,18 +12,18 @@ namespace System.Device.Ft4222
         /// <summary>
         /// 4 Milli Amperes
         /// </summary>
-        Intensity4Ma = 0,
+        Intensity4mA = 0,
         /// <summary>
         /// 8 Milli Amperes
         /// </summary>
-        Intensity8Ma,
+        Intensity8mA,
         /// <summary>
         /// 12 Milli Amperes
         /// </summary>
-        Intensity12Ma,
+        Intensity12mA,
         /// <summary>
         /// 16 Milli Amperes
         /// </summary>
-        Intensity16Ma,
-    };
+        Intensity16mA,
+    }
 }

@@ -4,6 +4,8 @@
 
 using System.Device.Ft4222;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace System.Device.I2c
 {
@@ -12,13 +14,15 @@ namespace System.Device.I2c
     /// </summary>
     public class Ft4222I2c : I2cDevice
     {
+        const uint I2cMAsterFrequencyKbps = 400;
+
         private I2cConnectionSettings _settings;
-        private IntPtr _ftHandle = new IntPtr();
+        private SafeFtHandle _ftHandle = new SafeFtHandle();
 
         /// <summary>
         /// Store the FTDI Device Information
         /// </summary>
-        public DeviceInformation DeviceInformation { get; internal set; }
+        public DeviceInformation DeviceInformation { get; private set; }
 
         /// <summary>
         /// Create a FT4222 I2C Device
@@ -29,11 +33,17 @@ namespace System.Device.I2c
             _settings = settings;
             // Check device
             var devInfos = FtCommon.GetDevices();
+            if (devInfos.Count == 0)
+                throw new IOException("No FTDI device available");
+
             // Select the one from bus Id
-            DeviceInformation = devInfos[_settings.BusId];            
-            
+            var devInfo = devInfos.Where(m => m.SerialNumber == "A" || string.IsNullOrEmpty(m.SerialNumber)).Where(m => !string.IsNullOrEmpty(m.Description)).ToArray();
+            if ((devInfo.Length == 0) || (devInfo.Length < _settings.BusId))
+                throw new IOException($"Can't find a device to open I2C on index {_settings.BusId}");
+
+            DeviceInformation = devInfo[_settings.BusId];
             // Open device
-            var ftStatus = FtFunction.FT_OpenEx(DeviceInformation.LocId, FtOpenType.OpenByLocation, ref _ftHandle);
+            var ftStatus = FtFunction.FT_OpenEx(DeviceInformation.LocId, FtOpenType.OpenByLocation, out _ftHandle);
 
             if (ftStatus != FtStatus.Ok)
                 throw new IOException($"Failed to open device {DeviceInformation.Description}, status: {ftStatus}");
@@ -46,98 +56,59 @@ namespace System.Device.I2c
                 throw new IOException($"Failed set clock rate {ft4222Clock} on device: {DeviceInformation.Description}, status: {ftStatus}");
 
             // Set the device as I2C Master
-            ftStatus = FtFunction.FT4222_I2CMaster_Init(_ftHandle, 400);
+            ftStatus = FtFunction.FT4222_I2CMaster_Init(_ftHandle, I2cMAsterFrequencyKbps);
             if (ftStatus != FtStatus.Ok)
                 throw new IOException($"Failed to initialize I2C Master mode on device: {DeviceInformation.Description}, status: {ftStatus}");
         }
 
-        /// <summary>
-        /// The connection settings of a device on an I2C bus. The connection settings are immutable after the device is created
-        /// so the object returned will be a clone of the settings object.
-        /// </summary>
+        /// <inheritdoc/>
         public override I2cConnectionSettings ConnectionSettings => _settings;
 
-        /// <summary>
-        /// Reads data from the I2C device.
-        /// </summary>
-        /// <param name="buffer">
-        /// The buffer to read the data from the I2C device.
-        /// The length of the buffer determines how much data to read from the I2C device.
-        /// </param>
+        /// <inheritdoc/>
         public override void Read(Span<byte> buffer)
         {
-            byte[] buff = new byte[buffer.Length];
-            ushort byteRead = 0;
-            var ftStatus = FtFunction.FT4222_I2CMaster_Read(_ftHandle, (ushort)_settings.DeviceAddress, buff, (ushort)buff.Length, ref byteRead);
+            ushort byteRead;
+            var ftStatus = FtFunction.FT4222_I2CMaster_Read(_ftHandle, (ushort)_settings.DeviceAddress, out MemoryMarshal.GetReference(buffer), (ushort)buffer.Length, out byteRead);
             if (ftStatus != FtStatus.Ok)
                 throw new IOException($"{nameof(Read)} failed to read, error: {ftStatus}");
-
-            buff.CopyTo(buffer);
         }
 
-        /// <summary>
-        /// Reads a byte from the I2C device.
-        /// </summary>
-        /// <returns>A byte read from the I2C device.</returns>
+        /// <inheritdoc/>
         public override byte ReadByte()
         {
-            byte[] toRead = new byte[1];
+            Span<byte> toRead = stackalloc byte[1];
             Read(toRead);
             return toRead[0];
         }
 
-        /// <summary>
-        /// Writes data to the I2C device.
-        /// </summary>
-        /// <param name="buffer">
-        /// The buffer that contains the data to be written to the I2C device.
-        /// The data should not include the I2C device address.
-        /// </param>
+        /// <inheritdoc/>
         public override void Write(ReadOnlySpan<byte> buffer)
         {
-            ushort byteSent = 0;
-            var ftStatus = FtFunction.FT4222_I2CMaster_Write(_ftHandle, (ushort)_settings.DeviceAddress, buffer.ToArray(), (ushort)buffer.Length, ref byteSent);
+            ushort byteSent;
+            var ftStatus = FtFunction.FT4222_I2CMaster_Write(_ftHandle, (ushort)_settings.DeviceAddress, in MemoryMarshal.GetReference(buffer), (ushort)buffer.Length, out byteSent);
             if (ftStatus != FtStatus.Ok)
                 throw new IOException($"{nameof(Write)} failed to write, error: {ftStatus}");
         }
 
-        /// <summary>
-        /// Writes a byte to the I2C device.
-        /// </summary>
-        /// <param name="value">The byte to be written to the I2C device.</param>
+        /// <inheritdoc/>
         public override void WriteByte(byte value)
         {
-            Write(new byte[] { value });
+            Span<byte> toWrite = stackalloc byte[1] { value };
+            Write(toWrite);
         }
 
-        /// <summary>
-        /// Performs an atomic operation to write data to and then read data from the I2C bus on which the device is connected, 
-        /// and sends a restart condition between the write and read operations.
-        /// </summary>
-        /// <param name="writeBuffer">
-        /// The buffer that contains the data to be written to the I2C device.
-        /// The data should not include the I2C device address.</param>
-        /// <param name="readBuffer">
-        /// The buffer to read the data from the I2C device.
-        /// The length of the buffer determines how much data to read from the I2C device.
-        /// </param>
+        /// <inheritdoc/>
         public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
             Write(writeBuffer);
             Read(readBuffer);
         }
 
-        /// <summary>
-        /// Dispose the class
-        /// </summary>
-        /// <param name="disposing"></param>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            if (_ftHandle != IntPtr.Zero)
-            {
-                FtFunction.FT4222_UnInitialize(_ftHandle);
-                FtFunction.FT_Close(DeviceInformation.FtHandle);
-            }
+            if (!_ftHandle.IsClosed)
+                _ftHandle.Close();
 
             base.Dispose(disposing);
         }

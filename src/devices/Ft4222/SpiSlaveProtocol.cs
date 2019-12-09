@@ -20,6 +20,6 @@ namespace System.Device.Ft4222
         /// <summary>
         /// Never send acknowledge
         /// </summary>
-        NeverSendAcknoledge,
+        NeverSendAcknowledge,
     }
 }

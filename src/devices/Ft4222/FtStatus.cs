@@ -176,5 +176,5 @@ namespace System.Device.Ft4222
         /// Event not supported
         /// </summary>
         EventNotSupported,
-    };
+    }
 }

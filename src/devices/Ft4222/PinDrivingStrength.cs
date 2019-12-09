@@ -25,5 +25,5 @@ namespace System.Device.Ft4222
         /// 16 Milli Amperes
         /// </summary>
         Intensity16Ma,
-    };
+    }
 }

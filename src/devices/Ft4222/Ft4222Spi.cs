@@ -4,6 +4,8 @@
 
 using System.Device.Ft4222;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace System.Device.Spi
 {
@@ -13,12 +15,9 @@ namespace System.Device.Spi
     public class Ft4222Spi : SpiDevice
     {
         private readonly SpiConnectionSettings _settings;
-        private IntPtr _ftHandle = new IntPtr();
+        private SafeFtHandle _ftHandle = new SafeFtHandle();
 
-        /// <summary>
-        /// The connection settings of a device on a SPI bus. The connection settings are immutable after the device is created
-        /// so the object returned will be a clone of the settings object.
-        /// </summary>
+        /// <inheritdoc/>
         public override SpiConnectionSettings ConnectionSettings => _settings;
 
         /// <summary>
@@ -35,14 +34,20 @@ namespace System.Device.Spi
             _settings = settings;
             // Check device
             var devInfos = FtCommon.GetDevices();
-            // Select the one from bus Id
-            DeviceInformation = devInfos[_settings.BusId];
+            if (devInfos.Count == 0)
+                throw new IOException("No FTDI device available");
 
+            // Select the one from bus Id
+            var devInfo = devInfos.Where(m => m.SerialNumber == "A" || string.IsNullOrEmpty(m.SerialNumber)).Where(m => !string.IsNullOrEmpty(m.Description)).ToArray();
+            if ((devInfo.Length == 0) || (devInfo.Length < _settings.BusId))
+                throw new IOException($"Can't find a device to open SPI on index {_settings.BusId}");
+
+            DeviceInformation = devInfo[_settings.BusId];
             // Open device
-            var ftStatus = FtFunction.FT_OpenEx(DeviceInformation.LocId, FtOpenType.OpenByLocation, ref _ftHandle);
+            var ftStatus = FtFunction.FT_OpenEx(DeviceInformation.LocId, FtOpenType.OpenByLocation, out _ftHandle);
 
             if (ftStatus != FtStatus.Ok)
-                throw new IOException($"Failed to open device {DeviceInformation.Description}with error: {ftStatus}");
+                throw new IOException($"Failed to open device {DeviceInformation.Description} with error: {ftStatus}");
 
             // Set the clock but we need some math
             var (ft4222Clock, tfSpiDiv) = CalculateBestClockRate();
@@ -74,7 +79,7 @@ namespace System.Device.Spi
             if (_settings.ClockFrequency < 187500)
                 return (FtClockRate.Clock24MHz, SpiClock.DivideBy256);
             if (_settings.ClockFrequency < 234375)
-                return (FtClockRate.Clock24MHz, SpiClock.DivideBy256);
+                return (FtClockRate.Clock48MHz, SpiClock.DivideBy256);
             if (_settings.ClockFrequency < 312500)
                 return (FtClockRate.Clock60MHz, SpiClock.DivideBy256);
             if (_settings.ClockFrequency < 375000)
@@ -129,85 +134,53 @@ namespace System.Device.Spi
             return (FtClockRate.Clock80MHz, SpiClock.DivideBy1);
         }
 
-        /// <summary>
-        /// Reads data from the SPI device.
-        /// </summary>
-        /// <param name="buffer">
-        /// The buffer to read the data from the SPI device.
-        /// The length of the buffer determines how much data to read from the SPI device.
-        /// </param>
+        /// <inheritdoc/>
         public override void Read(Span<byte> buffer)
         {
-            byte[] readBuff = new byte[buffer.Length];
-            ushort readBytes = 0;
-            var ftStatus = FtFunction.FT4222_SPIMaster_SingleRead(_ftHandle, readBuff, (ushort)buffer.Length, ref readBytes, true);
+            ushort readBytes;
+            var ftStatus = FtFunction.FT4222_SPIMaster_SingleRead(_ftHandle, out MemoryMarshal.GetReference(buffer), (ushort)buffer.Length, out readBytes, true);
             if (ftStatus != FtStatus.Ok)
                 throw new IOException($"{nameof(Read)} failed to read, error: {ftStatus}");
-
-            readBuff.CopyTo(buffer);
         }
 
-        /// <summary>
-        /// Reads a byte from the SPI device.
-        /// </summary>
-        /// <returns>A byte read from the SPI device.</returns>
+        /// <inheritdoc/>
         public override byte ReadByte()
         {
-            byte[] toRead = new byte[1];
+            Span<byte> toRead = stackalloc byte[1];
             Read(toRead);
             return toRead[1];
         }
 
-        /// <summary>
-        /// Writes and reads data from the SPI device.
-        /// </summary>
-        /// <param name="writeBuffer">The buffer that contains the data to be written to the SPI device.</param>
-        /// <param name="readBuffer">The buffer to read the data from the SPI device.</param>
+        /// <inheritdoc/>
         public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
-            byte[] readBuff = new byte[readBuffer.Length];
-            ushort readBytes = 0;
-            var ftStatus = FtFunction.FT4222_SPIMaster_SingleReadWrite(_ftHandle, readBuff, writeBuffer.ToArray(), (ushort)writeBuffer.Length, ref readBytes, true);
+            ushort readBytes;
+            var ftStatus = FtFunction.FT4222_SPIMaster_SingleReadWrite(_ftHandle, out MemoryMarshal.GetReference(readBuffer), in MemoryMarshal.GetReference(writeBuffer), (ushort)writeBuffer.Length, out readBytes, true);
             if (ftStatus != FtStatus.Ok)
                 throw new IOException($"{nameof(TransferFullDuplex)} failed to do a full duplex transfer, error: {ftStatus}");
-
-            readBuff.CopyTo(readBuffer);
         }
 
-        /// <summary>
-        /// Writes data to the SPI device.
-        /// </summary>
-        /// <param name="buffer">
-        /// The buffer that contains the data to be written to the SPI device.
-        /// </param>
+        /// <inheritdoc/>
         public override void Write(ReadOnlySpan<byte> buffer)
         {
-            ushort writeBytes = 0;
-            var ftStatus = FtFunction.FT4222_SPIMaster_SingleWrite(_ftHandle, buffer.ToArray(), (ushort)buffer.Length, ref writeBytes, true);
+            ushort writeBytes;
+            var ftStatus = FtFunction.FT4222_SPIMaster_SingleWrite(_ftHandle, in MemoryMarshal.GetReference(buffer), (ushort)buffer.Length, out writeBytes, true);
             if (ftStatus != FtStatus.Ok)
                 throw new IOException($"{nameof(Write)} failed to write, error: {ftStatus}");
         }
 
-        /// <summary>
-        /// Writes a byte to the SPI device.
-        /// </summary>
-        /// <param name="value">The byte to be written to the SPI device.</param>
+        /// <inheritdoc/>
         public override void WriteByte(byte value)
         {
-            Write(new byte[] { value });
+            Span<byte> toWrite = stackalloc byte[1] { value };
+            Write(toWrite);
         }
 
-        /// <summary>
-        /// Dispose the class
-        /// </summary>
-        /// <param name="disposing"></param>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            if (_ftHandle != IntPtr.Zero)
-            {
-                FtFunction.FT4222_UnInitialize(_ftHandle);
-                FtFunction.FT_Close(DeviceInformation.FtHandle);
-            }
+            if (!_ftHandle.IsClosed)
+                _ftHandle.Close();
 
             base.Dispose(disposing);
         }

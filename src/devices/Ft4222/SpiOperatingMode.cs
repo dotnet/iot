@@ -13,5 +13,5 @@ namespace System.Device.Ft4222
         Single = 1,
         Dual = 2,
         Quad = 4,
-    };
+    }
 }

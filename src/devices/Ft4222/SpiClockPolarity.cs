@@ -11,5 +11,5 @@ namespace System.Device.Ft4222
     {
         ClockIdleLow = 0,
         ClockIdelHigh = 1,
-    };
+    }
 }

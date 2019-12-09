@@ -49,5 +49,5 @@ namespace System.Device.Ft4222
         /// 1/512 System Clock (ClockRate)
         /// </summary>
         DivideBy512,
-    };
+    }
 }

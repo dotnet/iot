@@ -16,6 +16,6 @@ namespace System.Device.Ft4222
         /// <summary>
         /// Dll version
         /// </summary>
-        public uint DllVersion;
+        public uint dllVersion;
     }
 }
