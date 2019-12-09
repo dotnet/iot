@@ -1,6 +1,6 @@
-# SPI and I2C
+# SPI, GPIO and I2C drivers for FT4222
 
-This project support SPI and I2C into a normal Windows 64 bits or Windows 32 bits environment thru FT4222 chipset. MacOS and Linux 64 bits can be added as well.
+This project support SPI, GPIO and I2C into a normal Windows 64 bits or Windows 32 bits environment thru FT4222 chipset. MacOS and Linux 64 bits can be added as well.
 
 ## Device family
 
@@ -10,7 +10,7 @@ You can find boards implementing this chip like on [bitWizard](http://bitwizard.
 
 ## Requirements
 
-In order to have this FTDI board working and getting support for SPI and I2C, you need to install in a path the ```LibFT4222.dll``` provided by FTDI Chip. You can find the latest version [here](https://www.ftdichip.com/Products/ICs/FT4222H.html).
+In order to have this FTDI board working and getting support for SPI, GPIO and I2C, you need to install in a path the ```LibFT4222.dll``` provided by FTDI Chip. You can find the latest version [here](https://www.ftdichip.com/Products/ICs/FT4222H.html).
 The version used to build this project is 1.4.2 and you can download it directly from FTDI [here](https://www.ftdichip.com/Support/SoftwareExamples/LibFT4222-v1.4.2.zip).
 
 ### Running it on a Windows 64 bit version
@@ -93,7 +93,7 @@ while (!Console.KeyAvailable)
 
 The ```deviceNumber``` paramateris the FTDI device index you want to use.
 
-The example below shows how to blink a led on GPIO2 and then read the value. It's fully aligned and the same as the standard GPIO Driver that you pass to the GPIO Controller. Note that the GPIO Driver so far does not support Callbacks and events functions.
+The example below shows how to blink a led on GPIO2 and then read the value. It's fully aligned and the same as the standard GPIO Driver that you pass to the GPIO Controller. The drive does support as well callbacks and WaitForEvent functions
 
 ```csharp
     const int Gpio2 = 2;
@@ -146,11 +146,9 @@ This SPI and I2C implementation are over USB which can contains some delays and 
 For the moment this project supports only SPI and I2C in a Windows environement. Here is the list of needed support:
 
 - [x] SPI master support for Windows 64/32
-- [ ] SPI slave support for Windows 64/32
 - [x] I2C master support for Windows 64/32
-- [ ] I2C slave support for Windows 64/32
 - [x] Basic GPIO support for Windows 64/32
-- [ ] Advanced GPIO support for Windows 64/32
+- [x] Advanced GPIO support for Windows 64/32
 - [ ] SPI support for MacOS 
 - [ ] I2C support for MacOS
 - [ ] GPIO support for MacOS

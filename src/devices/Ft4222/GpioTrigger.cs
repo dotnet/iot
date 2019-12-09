@@ -10,6 +10,7 @@ namespace System.Device.Ft4222
     [Flags]
     internal enum GpioTrigger
     {
+        None = 0x00,
         Rising = 0x01,
         Falling = 0x02,
         LevelHigh = 0x04,

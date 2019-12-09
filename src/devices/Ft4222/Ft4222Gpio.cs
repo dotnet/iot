@@ -20,6 +20,9 @@ namespace System.Device.Gpio
         private SafeFtHandle _ftHandle = new SafeFtHandle();
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
         private GpioPinMode[] _gpioDirections = new GpioPinMode[PinCountConst];
+        private GpioTrigger[] _gpioTriggers = new GpioTrigger[PinCountConst];
+        private PinChangeEventHandler[] _pinRisingHandlers = new PinChangeEventHandler[PinCountConst];
+        private PinChangeEventHandler[] _pinFallingHandlers = new PinChangeEventHandler[PinCountConst];
 
         /// <inheritdoc/>
         protected override int PinCount => PinCountConst;
@@ -42,11 +45,11 @@ namespace System.Device.Gpio
 
             // Select the deviceNumber, only the last one in Mode 0 and Mode 1 can be open.
             string strMode = devInfos[0].Type == FtDevice.Ft4222HMode1or2With4Interfaces ? "D" : "B";
-            
+
             var devInfo = devInfos.Where(m => m.SerialNumber == strMode).ToArray();
             if ((devInfo.Length == 0) || (devInfo.Length < deviceNumber))
                 throw new IOException($"Can't find a device to open GPIO on index {deviceNumber}");
-            
+
             DeviceInformation = devInfo[deviceNumber];
             // Open device
             var ftStatus = FtFunction.FT_OpenEx(DeviceInformation.LocId, FtOpenType.OpenByLocation, out _ftHandle);
@@ -128,25 +131,109 @@ namespace System.Device.Gpio
         /// <inheritdoc/>
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
+            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
+                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
+
+            if (eventTypes == PinEventTypes.None)
+                throw new ArgumentException($"{PinEventTypes.None} is an invalid value.", nameof(eventTypes));
+
+            if (eventTypes.HasFlag(PinEventTypes.Falling))
+            {
+                _gpioTriggers[pinNumber] |= GpioTrigger.Falling;
+                _pinFallingHandlers[pinNumber] += callback;
+            }
+            if (eventTypes.HasFlag(PinEventTypes.Rising))
+            {
+                _gpioTriggers[pinNumber] |= GpioTrigger.Rising;
+                _pinRisingHandlers[pinNumber] += callback;
+            }
+            FtFunction.FT4222_GPIO_SetInputTrigger(_ftHandle, (GpioPort)pinNumber, _gpioTriggers[pinNumber]);
             // TODO: implement callback
             // This can be done using the function FT4222_GPIO_SetInputTrigger to set them up
             // Then calling in an infinite loop FT4222_GPIO_GetTriggerStatus
             // and finally FT4222_GPIO_ReadTriggerQueue to understand what has trigged
-            throw new PlatformNotSupportedException();
         }
 
         /// <inheritdoc/>
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
-            // TODO: to implement. See the add callback to understand the mechanism
-            throw new PlatformNotSupportedException();
+            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
+                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
+
+            _pinFallingHandlers[pinNumber] -= callback;
+            _pinRisingHandlers[pinNumber] -= callback;
+            if (_pinFallingHandlers == null)
+            {
+                _gpioTriggers[pinNumber] &= ~GpioTrigger.Falling;
+            }
+            if (_pinRisingHandlers == null)
+            {
+                _gpioTriggers[pinNumber] &= ~GpioTrigger.Rising;
+            }
+            FtFunction.FT4222_GPIO_SetInputTrigger(_ftHandle, (GpioPort)pinNumber, _gpioTriggers[pinNumber]);
         }
 
         /// <inheritdoc/>
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
-            // TODO: see the add callback function comments
-            throw new PlatformNotSupportedException();
+            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
+                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                ushort queueSize;
+                var ftStatus = FtFunction.FT4222_GPIO_GetTriggerStatus(_ftHandle, (GpioPort)pinNumber, out queueSize);
+                if (ftStatus != FtStatus.Ok)
+                    throw new IOException($"Can't get trigger status, error {ftStatus}");
+
+                if (queueSize > 0)
+                {
+                    Span<GpioTrigger> gpioTriggers = stackalloc GpioTrigger[queueSize];
+                    ushort readTrigger;
+                    ftStatus = FtFunction.FT4222_GPIO_ReadTriggerQueue(_ftHandle, (GpioPort)pinNumber, out MemoryMarshal.GetReference(gpioTriggers), queueSize, out readTrigger);
+                    if (ftStatus != FtStatus.Ok)
+                        throw new IOException($"Can't read trigger status, error {ftStatus}");
+
+                    switch (eventTypes)
+                    {
+                        case PinEventTypes.Rising:
+                            if (_gpioTriggers[pinNumber].HasFlag(GpioTrigger.Rising))
+                            {
+                                if (gpioTriggers.ToArray().Where(m => m == GpioTrigger.Rising).Count() > 0)
+                                {
+                                    return new WaitForEventResult()
+                                    {
+                                        EventTypes = PinEventTypes.Rising,
+                                        TimedOut = false
+                                    };
+                                }
+                            }
+                            break;
+                        case PinEventTypes.Falling:
+                            if (_gpioTriggers[pinNumber].HasFlag(GpioTrigger.Falling))
+                            {
+                                if (gpioTriggers.ToArray().Where(m => m == GpioTrigger.Falling).Count() > 0)
+                                {
+                                    return new WaitForEventResult()
+                                    {
+                                        EventTypes = PinEventTypes.Falling,
+                                        TimedOut = false
+                                    };
+                                }
+                            }
+                            break;
+                        case PinEventTypes.None:
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            return new WaitForEventResult()
+            {
+                EventTypes = PinEventTypes.None,
+                TimedOut = true
+            };
         }
 
         /// <inheritdoc/>
