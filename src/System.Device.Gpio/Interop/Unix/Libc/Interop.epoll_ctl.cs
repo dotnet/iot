@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
+[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "Native library name")]
 internal partial class Interop
 {
     [DllImport(LibcLibrary)]
@@ -17,6 +19,8 @@ internal enum PollOperations
     EPOLL_CTL_DEL = 2
 }
 
+[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "Native library name")]
+[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "native member names")]
 internal struct epoll_event
 {
     public PollEvents events;
@@ -30,6 +34,8 @@ internal enum PollEvents : uint
     EPOLLET = 0x80000000
 }
 
+[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "Native name")]
+[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "native member names")]
 [StructLayout(LayoutKind.Explicit)]
 internal struct epoll_data
 {

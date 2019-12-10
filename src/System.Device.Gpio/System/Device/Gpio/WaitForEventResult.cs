@@ -13,6 +13,7 @@ namespace System.Device.Gpio
         /// The event types to wait for.
         /// </summary>
         public PinEventTypes EventTypes;
+
         /// <summary>
         /// True if waiting for the event timed out. False if an event was triggered before the timeout expired.
         /// </summary>

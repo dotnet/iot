@@ -18,6 +18,7 @@ namespace System.Device.Gpio.Drivers
             {
                 driver = new SysFsDriver();
             }
+
             return driver;
         }
     }

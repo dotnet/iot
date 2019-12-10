@@ -13,14 +13,17 @@ namespace System.Device.Gpio
         /// Input used for reading values from a pin.
         /// </summary>
         Input,
+
         /// <summary>
         /// Output used for writing values to a pin.
         /// </summary>
         Output,
+
         /// <summary>
         /// Input using a pull-down resistor.
         /// </summary>
         InputPullDown,
+
         /// <summary>
         /// Input using a pull-up resistor.
         /// </summary>

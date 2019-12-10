@@ -15,10 +15,11 @@ namespace System.Device.Pwm.Channels
     {
         private readonly int _chip;
         private readonly int _channel;
-        private int _frequency;
-        private double _dutyCycle;
         private readonly string _chipPath;
         private readonly string _channelPath;
+
+        private int _frequency;
+        private double _dutyCycle;
         private StreamWriter _dutyCycleWriter;
         private StreamWriter _frequencyWriter;
 

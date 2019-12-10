@@ -4,12 +4,14 @@
 
 using System;
 using System.Device.Gpio;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 // Since this is only used on Linux, and in C on Linux sizeof(long) == sizeof(void*) this is a valid alias.
 using NativeLong = System.IntPtr;
 
 internal partial class Interop
 {
+    [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "Native library name")]
     internal partial class libgpiod
     {
         private const string LibgpiodLibrary = "libgpiod";
@@ -132,6 +134,7 @@ internal partial class Interop
     }
 }
 
+[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "native member names")]
 internal struct GpioLineEvent
 {
     public TimeSpec ts;

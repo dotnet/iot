@@ -21,14 +21,14 @@ namespace System.Device.Gpio.Drivers
         private const string GpioLabel = "/label";
         private const string GpioContoller = "pinctrl";
         private const string GpioOffsetBase = "/base";
-        private int _pollFileDescriptor = -1;
-        private Thread _eventDetectionThread;
-        private int _pinsToDetectEventsCount;
-        private readonly CancellationTokenSource s_eventThreadCancellationTokenSource;
+        private readonly CancellationTokenSource _eventThreadCancellationTokenSource;
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
         private readonly int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
         private static readonly int s_pinOffset = ReadOffset();
+        private int _pollFileDescriptor = -1;
+        private Thread _eventDetectionThread;
+        private int _pinsToDetectEventsCount;
 
         private static int ReadOffset()
         {
@@ -42,14 +42,19 @@ namespace System.Device.Gpio.Drivers
                         if (File.ReadAllText($"{name}{GpioLabel}").StartsWith(GpioContoller, StringComparison.Ordinal))
                         {
                             if (int.TryParse(File.ReadAllText($"{name}{GpioOffsetBase}"), out int pinOffset))
+                            {
                                 return pinOffset;
+                            }
                         }
                     }
-                    // Ignoring file not found or any other IO exceptions as it is not guaranteed the folder would have files "label" "base"
-                    // And don't want to throw in this case just continue to load the gpiochip with default offset = 0  
-                    catch (IOException) { }
+                    catch (IOException)
+                    {
+                        // Ignoring file not found or any other IO exceptions as it is not guaranteed the folder would have files "label" "base"
+                        // And don't want to throw in this case just continue to load the gpiochip with default offset = 0  
+                    }
                 }
             }
+
             return 0;
         }
 
@@ -58,7 +63,7 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         public SysFsDriver()
         {
-            s_eventThreadCancellationTokenSource = new CancellationTokenSource();
+            _eventThreadCancellationTokenSource = new CancellationTokenSource();
         }
 
         /// <summary>
@@ -134,6 +139,7 @@ namespace System.Device.Gpio.Drivers
             {
                 throw new PlatformNotSupportedException("This driver is generic so it does not support Input Pull Down or Input Pull Up modes.");
             }
+
             string directionPath = $"{GpioBasePath}/gpio{pinNumber + s_pinOffset}/direction";
             string sysFsMode = ConvertPinModeToSysFsMode(mode);
             if (File.Exists(directionPath))
@@ -159,10 +165,12 @@ namespace System.Device.Gpio.Drivers
             {
                 return "in";
             }
+
             if (mode == PinMode.Output)
             {
                 return "out";
             }
+
             throw new PlatformNotSupportedException($"{mode} is not supported by this driver.");
         }
 
@@ -173,10 +181,12 @@ namespace System.Device.Gpio.Drivers
             {
                 return PinMode.Input;
             }
+
             if (sysFsMode == "out")
             {
                 return PinMode.Output;
             }
+
             throw new ArgumentException($"Unable to parse {sysFsMode} as a PinMode.");
         }
 
@@ -205,6 +215,7 @@ namespace System.Device.Gpio.Drivers
             {
                 throw new InvalidOperationException("There was an attempt to read from a pin that is not open.");
             }
+
             return result;
         }
 
@@ -260,6 +271,7 @@ namespace System.Device.Gpio.Drivers
             {
                 return false;
             }
+
             return true;
         }
 
@@ -319,18 +331,22 @@ namespace System.Device.Gpio.Drivers
             {
                 return "none";
             }
+
             if ((kind & PinEventTypes.Falling) != 0 && (kind & PinEventTypes.Rising) != 0)
             {
                 return "both";
             }
+
             if (kind == PinEventTypes.Rising)
             {
                 return "rising";
             }
+
             if (kind == PinEventTypes.Falling)
             {
                 return "falling";
             }
+
             throw new ArgumentException("Invalid Pin Event Type.", nameof(kind));
         }
 
@@ -355,6 +371,7 @@ namespace System.Device.Gpio.Drivers
                 {
                     throw new IOException("Error while trying to initialize pin interrupts.");
                 }
+
                 closePinValueFileDescriptor = true;
             }
 
@@ -391,6 +408,7 @@ namespace System.Device.Gpio.Drivers
                 {
                     throw new IOException("Error while trying to initialize pin interrupts.");
                 }
+
                 if (waitResult > 0)
                 {
                     pinNumber = events.data.pinNumber;
@@ -412,9 +430,11 @@ namespace System.Device.Gpio.Drivers
                     {
                         throw new IOException("Error while trying to initialize pin interrupts.");
                     }
+
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -436,14 +456,19 @@ namespace System.Device.Gpio.Drivers
                 Interop.close(valueFileDescriptor);
                 valueFileDescriptor = -1;
             }
+
             if (closePollFileDescriptor)
             {
                 if (cancelEventDetectionThread)
                 {
                     try
                     {
-                        s_eventThreadCancellationTokenSource.Cancel();
-                    } catch (ObjectDisposedException) { }
+                        _eventThreadCancellationTokenSource.Cancel();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                    }
+
                     while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                     {
                         Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
@@ -462,28 +487,37 @@ namespace System.Device.Gpio.Drivers
             {
                 try
                 {
-                    s_eventThreadCancellationTokenSource.Cancel();
-                    s_eventThreadCancellationTokenSource.Dispose();
-                } catch (ObjectDisposedException) { } //The Cancellation Token source may already be disposed.
+                    _eventThreadCancellationTokenSource.Cancel();
+                    _eventThreadCancellationTokenSource.Dispose();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // The Cancellation Token source may already be disposed.
+                }
+
                 while (_eventDetectionThread != null && _eventDetectionThread.IsAlive)
                 {
                     Thread.Sleep(TimeSpan.FromMilliseconds(10)); // Wait until the event detection thread is aborted.
                 }
             }
+
             foreach (UnixDriverDevicePin devicePin in _devicePins.Values)
             {
                 devicePin.Dispose();
             }
+
             _devicePins.Clear();
             if (_pollFileDescriptor != -1)
             {
                 Interop.close(_pollFileDescriptor);
                 _pollFileDescriptor = -1;
             }
+
             while (_exportedPins.Count > 0)
             {
                 ClosePin(_exportedPins.FirstOrDefault());
             }
+
             base.Dispose(disposing);
         }
 
@@ -501,14 +535,17 @@ namespace System.Device.Gpio.Drivers
                 _pinsToDetectEventsCount++;
                 AddPinToPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, out _);
             }
+
             if ((eventTypes & PinEventTypes.Rising) != 0)
             {
                 _devicePins[pinNumber].ValueRising += callback;
             }
+
             if ((eventTypes & PinEventTypes.Falling) != 0)
             {
                 _devicePins[pinNumber].ValueFalling += callback;
             }
+
             SetPinEventsToDetect(pinNumber, (GetPinEventsToDetect(pinNumber) | eventTypes));
             InitializeEventDetectionThread();
         }
@@ -531,7 +568,7 @@ namespace System.Device.Gpio.Drivers
             {
                 try
                 {
-                    bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, s_eventThreadCancellationTokenSource.Token);
+                    bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, _eventThreadCancellationTokenSource.Token);
                     if (eventDetected)
                     {
                         Thread.Sleep(1); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
@@ -539,9 +576,10 @@ namespace System.Device.Gpio.Drivers
                         var args = new PinValueChangedEventArgs(eventTypes, pinNumber);
                         _devicePins[pinNumber]?.OnPinValueChanged(args);
                     }
-                } catch (ObjectDisposedException)
+                }
+                catch (ObjectDisposedException)
                 {
-                    break; //If cancellation token source is dispossed then we need to exit this thread.
+                    break; // If cancellation token source is dispossed then we need to exit this thread.
                 }
             }
 
@@ -559,10 +597,11 @@ namespace System.Device.Gpio.Drivers
             {
                 throw new InvalidOperationException("Attempted to remove a callback for a pin that is not listening for events.");
             }
+
             _devicePins[pinNumber].ValueFalling -= callback;
             _devicePins[pinNumber].ValueRising -= callback;
             if (_devicePins[pinNumber].IsCallbackListEmpty())
-            { 
+            {
                 _pinsToDetectEventsCount--;
 
                 bool closePollFileDescriptor = (_pinsToDetectEventsCount == 0);

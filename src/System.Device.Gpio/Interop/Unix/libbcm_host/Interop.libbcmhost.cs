@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
+    [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "Native library name")]
     internal partial class libbcmhost
     {
         private const string LibbcmhostLibrary = "libbcm_host";

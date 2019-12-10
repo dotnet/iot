@@ -11,7 +11,9 @@ namespace System.Device.Spi
     /// </summary>
     public sealed class SpiConnectionSettings
     {
-        private SpiConnectionSettings() { }
+        private SpiConnectionSettings()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SpiConnectionSettings"/> class.

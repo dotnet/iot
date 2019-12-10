@@ -7,7 +7,7 @@ namespace System.Device.Gpio.Drivers
     /// <summary>
     /// A GPIO driver for the Raspberry Pi 3.
     /// </summary>
-    public partial class RaspberryPi3Driver  // Different base classes declared in RaspberryPi3Driver.Linux.cs and RaspberryPi3Driver.Windows.cs
+    public partial class RaspberryPi3Driver // Different base classes declared in RaspberryPi3Driver.Linux.cs and RaspberryPi3Driver.Windows.cs
     {
         /// <summary>
         /// Raspberry Pi 3 has 28 GPIO pins.

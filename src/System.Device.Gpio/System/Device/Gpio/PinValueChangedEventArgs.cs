@@ -24,6 +24,7 @@ namespace System.Device.Gpio
         /// The change type that triggered the event.
         /// </summary>
         public PinEventTypes ChangeType { get; }
+
         /// <summary>
         /// The pin number that triggered the event.
         /// </summary>

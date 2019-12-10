@@ -22,6 +22,7 @@ namespace System.Device.Gpio.Drivers
             {
                 ValueRising?.Invoke(this, args);
             }
+
             if (ValueFalling != null && args.ChangeType == PinEventTypes.Falling)
             {
                 ValueFalling?.Invoke(this, args);
@@ -40,6 +41,7 @@ namespace System.Device.Gpio.Drivers
                 Interop.close(FileDescriptor);
                 FileDescriptor = -1;
             }
+
             ValueRising = null;
             ValueFalling = null;
         }

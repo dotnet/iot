@@ -22,7 +22,8 @@ namespace System.Device.Gpio.Drivers
 
         private bool _disposing = false;
 
-        public LibGpiodDriverEventHandler(int pinNumber, SafeLineHandle safeLineHandle) {
+        public LibGpiodDriverEventHandler(int pinNumber, SafeLineHandle safeLineHandle)
+        {
             _pinNumber = pinNumber;
             CancellationTokenSource = new CancellationTokenSource();
             SubscribeForEvent(safeLineHandle);
@@ -38,7 +39,6 @@ namespace System.Device.Gpio.Drivers
                 throw ExceptionHelper.GetIOException(ExceptionResource.RequestEventError, _pinNumber, Marshal.GetLastWin32Error());
             }
         }
-
 
         private Task InitializeEventDetectionTask(CancellationToken token, SafeLineHandle pinHandle)
         {
@@ -78,9 +78,14 @@ namespace System.Device.Gpio.Drivers
         public void OnPinValueChanged(PinValueChangedEventArgs args, PinEventTypes detectionOfEventTypes)
         {
             if (detectionOfEventTypes == PinEventTypes.Rising && args.ChangeType == PinEventTypes.Rising)
+            {
                 ValueRising?.Invoke(this, args);
+            }
+
             if (detectionOfEventTypes == PinEventTypes.Falling && args.ChangeType == PinEventTypes.Falling)
+            {
                 ValueFalling?.Invoke(this, args);
+            }
         }
 
         public bool IsCallbackListEmpty()

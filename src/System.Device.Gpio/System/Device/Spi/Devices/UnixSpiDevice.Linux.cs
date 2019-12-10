@@ -15,9 +15,9 @@ namespace System.Device.Spi
     {
         private const string DefaultDevicePath = "/dev/spidev";
         private const uint SPI_IOC_MESSAGE_1 = 0x40206b00;
-        private int _deviceFileDescriptor = -1;
-        private readonly SpiConnectionSettings _settings;
         private static readonly object s_initializationLock = new object();
+        private readonly SpiConnectionSettings _settings;
+        private int _deviceFileDescriptor = -1;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnixSpiDevice"/> class that will use the specified settings to communicate with the SPI device.
@@ -48,6 +48,7 @@ namespace System.Device.Spi
             {
                 return;
             }
+
             lock (s_initializationLock)
             {
                 string deviceFileName = $"{DevicePath}{_settings.BusId}.{_settings.ChipSelectLine}";
@@ -55,6 +56,7 @@ namespace System.Device.Spi
                 {
                     return;
                 }
+
                 _deviceFileDescriptor = Interop.open(deviceFileName, FileOpenFlags.O_RDWR);
                 if (_deviceFileDescriptor < 0)
                 {
@@ -144,8 +146,10 @@ namespace System.Device.Spi
         public override unsafe void Read(Span<byte> buffer)
         {
             if (buffer.Length == 0)
+            {
                 throw new ArgumentException($"{nameof(buffer)} cannot be empty.");
-                
+            }
+
             Initialize();
 
             fixed (byte* bufferPtr = buffer)
