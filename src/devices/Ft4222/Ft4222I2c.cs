@@ -14,10 +14,10 @@ namespace System.Device.I2c
     /// </summary>
     public class Ft4222I2c : I2cDevice
     {
-        const uint I2cMAsterFrequencyKbps = 400;
+        const uint I2cMasterFrequencyKbps = 400;
 
         private I2cConnectionSettings _settings;
-        private SafeFtHandle _ftHandle = new SafeFtHandle();
+        private SafeFtHandle _ftHandle;
 
         /// <summary>
         /// Store the FTDI Device Information
@@ -37,6 +37,7 @@ namespace System.Device.I2c
                 throw new IOException("No FTDI device available");
 
             // Select the one from bus Id
+            // FT4222 propose depending on the mode multiple interfaces. Only the A is available for I2C or where there is none as it's the only interface
             var devInfo = devInfos.Where(m => m.SerialNumber == "A" || string.IsNullOrEmpty(m.SerialNumber)).Where(m => !string.IsNullOrEmpty(m.Description)).ToArray();
             if ((devInfo.Length == 0) || (devInfo.Length < _settings.BusId))
                 throw new IOException($"Can't find a device to open I2C on index {_settings.BusId}");
@@ -56,7 +57,7 @@ namespace System.Device.I2c
                 throw new IOException($"Failed set clock rate {ft4222Clock} on device: {DeviceInformation.Description}, status: {ftStatus}");
 
             // Set the device as I2C Master
-            ftStatus = FtFunction.FT4222_I2CMaster_Init(_ftHandle, I2cMAsterFrequencyKbps);
+            ftStatus = FtFunction.FT4222_I2CMaster_Init(_ftHandle, I2cMasterFrequencyKbps);
             if (ftStatus != FtStatus.Ok)
                 throw new IOException($"Failed to initialize I2C Master mode on device: {DeviceInformation.Description}, status: {ftStatus}");
         }
@@ -68,7 +69,7 @@ namespace System.Device.I2c
         public override void Read(Span<byte> buffer)
         {
             ushort byteRead;
-            var ftStatus = FtFunction.FT4222_I2CMaster_Read(_ftHandle, (ushort)_settings.DeviceAddress, out MemoryMarshal.GetReference(buffer), (ushort)buffer.Length, out byteRead);
+            var ftStatus = FtFunction.FT4222_I2CMaster_Read(_ftHandle, (ushort)_settings.DeviceAddress, in MemoryMarshal.GetReference(buffer), (ushort)buffer.Length, out byteRead);
             if (ftStatus != FtStatus.Ok)
                 throw new IOException($"{nameof(Read)} failed to read, error: {ftStatus}");
         }
@@ -107,9 +108,7 @@ namespace System.Device.I2c
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            if (!_ftHandle.IsClosed)
-                _ftHandle.Close();
-
+            _ftHandle.Dispose();
             base.Dispose(disposing);
         }
     }

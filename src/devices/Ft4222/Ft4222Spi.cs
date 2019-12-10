@@ -15,7 +15,7 @@ namespace System.Device.Spi
     public class Ft4222Spi : SpiDevice
     {
         private readonly SpiConnectionSettings _settings;
-        private SafeFtHandle _ftHandle = new SafeFtHandle();
+        private SafeFtHandle _ftHandle;
 
         /// <inheritdoc/>
         public override SpiConnectionSettings ConnectionSettings => _settings;
@@ -38,6 +38,7 @@ namespace System.Device.Spi
                 throw new IOException("No FTDI device available");
 
             // Select the one from bus Id
+            // FT4222 propose depending on the mode multiple interfaces. Only the A is available for SPI or where there is none as it's the only interface
             var devInfo = devInfos.Where(m => m.SerialNumber == "A" || string.IsNullOrEmpty(m.SerialNumber)).Where(m => !string.IsNullOrEmpty(m.Description)).ToArray();
             if ((devInfo.Length == 0) || (devInfo.Length < _settings.BusId))
                 throw new IOException($"Can't find a device to open SPI on index {_settings.BusId}");
@@ -138,7 +139,7 @@ namespace System.Device.Spi
         public override void Read(Span<byte> buffer)
         {
             ushort readBytes;
-            var ftStatus = FtFunction.FT4222_SPIMaster_SingleRead(_ftHandle, out MemoryMarshal.GetReference(buffer), (ushort)buffer.Length, out readBytes, true);
+            var ftStatus = FtFunction.FT4222_SPIMaster_SingleRead(_ftHandle, in MemoryMarshal.GetReference(buffer), (ushort)buffer.Length, out readBytes, true);
             if (ftStatus != FtStatus.Ok)
                 throw new IOException($"{nameof(Read)} failed to read, error: {ftStatus}");
         }
@@ -155,7 +156,7 @@ namespace System.Device.Spi
         public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
             ushort readBytes;
-            var ftStatus = FtFunction.FT4222_SPIMaster_SingleReadWrite(_ftHandle, out MemoryMarshal.GetReference(readBuffer), in MemoryMarshal.GetReference(writeBuffer), (ushort)writeBuffer.Length, out readBytes, true);
+            var ftStatus = FtFunction.FT4222_SPIMaster_SingleReadWrite(_ftHandle, in MemoryMarshal.GetReference(readBuffer), in MemoryMarshal.GetReference(writeBuffer), (ushort)writeBuffer.Length, out readBytes, true);
             if (ftStatus != FtStatus.Ok)
                 throw new IOException($"{nameof(TransferFullDuplex)} failed to do a full duplex transfer, error: {ftStatus}");
         }
@@ -163,8 +164,8 @@ namespace System.Device.Spi
         /// <inheritdoc/>
         public override void Write(ReadOnlySpan<byte> buffer)
         {
-            ushort writeBytes;
-            var ftStatus = FtFunction.FT4222_SPIMaster_SingleWrite(_ftHandle, in MemoryMarshal.GetReference(buffer), (ushort)buffer.Length, out writeBytes, true);
+            ushort bytesWritten;
+            var ftStatus = FtFunction.FT4222_SPIMaster_SingleWrite(_ftHandle, in MemoryMarshal.GetReference(buffer), (ushort)buffer.Length, out bytesWritten, true);
             if (ftStatus != FtStatus.Ok)
                 throw new IOException($"{nameof(Write)} failed to write, error: {ftStatus}");
         }
@@ -179,9 +180,7 @@ namespace System.Device.Spi
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            if (!_ftHandle.IsClosed)
-                _ftHandle.Close();
-
+            _ftHandle.Dispose();
             base.Dispose(disposing);
         }
     }

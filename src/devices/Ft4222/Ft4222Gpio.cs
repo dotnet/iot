@@ -17,8 +17,7 @@ namespace System.Device.Gpio
     {
         private const int PinCountConst = 4;
 
-        private SafeFtHandle _ftHandle = new SafeFtHandle();
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        private SafeFtHandle _ftHandle;
         private GpioPinMode[] _gpioDirections = new GpioPinMode[PinCountConst];
         private GpioTrigger[] _gpioTriggers = new GpioTrigger[PinCountConst];
         private PinChangeEventHandler[] _pinRisingHandlers = new PinChangeEventHandler[PinCountConst];
@@ -44,6 +43,7 @@ namespace System.Device.Gpio
                 throw new IOException("No FTDI device available");
 
             // Select the deviceNumber, only the last one in Mode 0 and Mode 1 can be open.
+            // The last one is either B if in Mode 0 or D in mode 1.
             string strMode = devInfos[0].Type == FtDevice.Ft4222HMode1or2With4Interfaces ? "D" : "B";
 
             var devInfo = devInfos.Where(m => m.SerialNumber == strMode).ToArray();
@@ -76,51 +76,24 @@ namespace System.Device.Gpio
 
         /// <inheritdoc/>
         protected override void ClosePin(int pinNumber)
-        {
-            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
-                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
-        }
+        { }
 
         /// <inheritdoc/>
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
-        {
-            return pinNumber;
-        }
+        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
 
         /// <inheritdoc/>
-        protected override PinMode GetPinMode(int pinNumber)
-        {
-            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
-                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
-
-            return _gpioDirections[pinNumber] == GpioPinMode.Input ? PinMode.Input : PinMode.Output;
-        }
+        protected override PinMode GetPinMode(int pinNumber) => _gpioDirections[pinNumber] == GpioPinMode.Input ? PinMode.Input : PinMode.Output;
 
         /// <inheritdoc/>
-        protected override bool IsPinModeSupported(int pinNumber, PinMode mode)
-        {
-            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
-                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
-
-            if ((mode == PinMode.Input) || (mode == PinMode.Output))
-                return true;
-
-            return false;
-        }
+        protected override bool IsPinModeSupported(int pinNumber, PinMode mode) => (mode == PinMode.Input) || (mode == PinMode.Output);
 
         /// <inheritdoc/>
         protected override void OpenPin(int pinNumber)
-        {
-            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
-                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
-        }
+        { }
 
         /// <inheritdoc/>
         protected override PinValue Read(int pinNumber)
         {
-            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
-                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
-
             GpioPinValue pinVal;
             var status = FtFunction.FT4222_GPIO_Read(_ftHandle, (GpioPort)pinNumber, out pinVal);
             if (status != FtStatus.Ok)
@@ -131,9 +104,6 @@ namespace System.Device.Gpio
         /// <inheritdoc/>
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
-            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
-                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
-
             if (eventTypes == PinEventTypes.None)
                 throw new ArgumentException($"{PinEventTypes.None} is an invalid value.", nameof(eventTypes));
 
@@ -148,18 +118,11 @@ namespace System.Device.Gpio
                 _pinRisingHandlers[pinNumber] += callback;
             }
             FtFunction.FT4222_GPIO_SetInputTrigger(_ftHandle, (GpioPort)pinNumber, _gpioTriggers[pinNumber]);
-            // TODO: implement callback
-            // This can be done using the function FT4222_GPIO_SetInputTrigger to set them up
-            // Then calling in an infinite loop FT4222_GPIO_GetTriggerStatus
-            // and finally FT4222_GPIO_ReadTriggerQueue to understand what has trigged
         }
 
         /// <inheritdoc/>
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
-            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
-                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
-
             _pinFallingHandlers[pinNumber] -= callback;
             _pinRisingHandlers[pinNumber] -= callback;
             if (_pinFallingHandlers == null)
@@ -176,9 +139,6 @@ namespace System.Device.Gpio
         /// <inheritdoc/>
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
-            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
-                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
-
             while (!cancellationToken.IsCancellationRequested)
             {
                 ushort queueSize;
@@ -190,7 +150,7 @@ namespace System.Device.Gpio
                 {
                     Span<GpioTrigger> gpioTriggers = stackalloc GpioTrigger[queueSize];
                     ushort readTrigger;
-                    ftStatus = FtFunction.FT4222_GPIO_ReadTriggerQueue(_ftHandle, (GpioPort)pinNumber, out MemoryMarshal.GetReference(gpioTriggers), queueSize, out readTrigger);
+                    ftStatus = FtFunction.FT4222_GPIO_ReadTriggerQueue(_ftHandle, (GpioPort)pinNumber, in MemoryMarshal.GetReference(gpioTriggers), queueSize, out readTrigger);
                     if (ftStatus != FtStatus.Ok)
                         throw new IOException($"Can't read trigger status, error {ftStatus}");
 
@@ -239,9 +199,6 @@ namespace System.Device.Gpio
         /// <inheritdoc/>
         protected override void SetPinMode(int pinNumber, PinMode mode)
         {
-            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
-                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
-
             _gpioDirections[pinNumber] = mode == PinMode.Output ? GpioPinMode.Output : GpioPinMode.Input;
             var status = FtFunction.FT4222_GPIO_Init(_ftHandle, _gpioDirections);
             if (status != FtStatus.Ok)
@@ -251,9 +208,6 @@ namespace System.Device.Gpio
         /// <inheritdoc/>
         protected override void Write(int pinNumber, PinValue value)
         {
-            if ((pinNumber < 0) || (pinNumber >= PinCountConst))
-                throw new ArgumentException($"Pin number must be between 0 and {PinCountConst - 1}");
-
             var status = FtFunction.FT4222_GPIO_Write(_ftHandle, (GpioPort)pinNumber, value == PinValue.High ? GpioPinValue.High : GpioPinValue.Low);
             if (status != FtStatus.Ok)
                 throw new IOException($"{nameof(Write)}: failed to write GPIO, status: {status}");
@@ -262,9 +216,7 @@ namespace System.Device.Gpio
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            if (!_ftHandle.IsClosed)
-                _ftHandle.Close();
-
+            _ftHandle.Dispose();
             base.Dispose(disposing);
         }
     }

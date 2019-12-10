@@ -42,7 +42,7 @@ namespace System.Device.Ft4222
                 uint id;
                 uint locId;
                 IntPtr handle;
-                ftStatus = FtFunction.FT_GetDeviceInfoDetail(i, out flags, out ftDevice, out id, out locId , out MemoryMarshal.GetReference(sernum), out MemoryMarshal.GetReference(desc), out handle);
+                ftStatus = FtFunction.FT_GetDeviceInfoDetail(i, out flags, out ftDevice, out id, out locId, in MemoryMarshal.GetReference(sernum), in MemoryMarshal.GetReference(desc), out handle);
                 if (ftStatus != FtStatus.Ok)
                     throw new IOException($"Can't read device information on device index {i}, error {ftStatus}");
                 devInfo.Type = ftDevice;
@@ -94,8 +94,8 @@ namespace System.Device.Ft4222
                 throw new IOException($"Can't close the device to check chipset version, status: {ftStatus}");
 
 
-            Version chip = new Version((int)((ftVersion.ChipVersion >> 24) & 0xFF), (int)((ftVersion.ChipVersion >> 16) & 0xFF), (int)((ftVersion.ChipVersion >> 8) & 0xFF), (int)(ftVersion.ChipVersion & 0xFF));
-            Version dll = new Version((int)((ftVersion.dllVersion >> 24) & 0xFF), (int)((ftVersion.dllVersion >> 16) & 0xFF), (int)((ftVersion.dllVersion >> 8) & 0xFF), (int)(ftVersion.dllVersion & 0xFF));
+            Version chip = new Version((int)(ftVersion.ChipVersion >> 24), (int)((ftVersion.ChipVersion >> 16) & 0xFF), (int)((ftVersion.ChipVersion >> 8) & 0xFF), (int)(ftVersion.ChipVersion & 0xFF));
+            Version dll = new Version((int)(ftVersion.dllVersion >> 24), (int)((ftVersion.dllVersion >> 16) & 0xFF), (int)((ftVersion.dllVersion >> 8) & 0xFF), (int)(ftVersion.dllVersion & 0xFF));
 
             return (chip, dll);
         }

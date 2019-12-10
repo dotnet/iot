@@ -34,7 +34,7 @@ namespace System.Device.Ft4222
         /// <param name="ftHandle">Handle</param>
         /// <returns>The status</returns>
         [DllImport("ftd2xx.dll")]
-        public static extern FtStatus FT_GetDeviceInfoDetail(uint index, out uint flags, out FtDevice chiptype, out uint id, out uint locid, out byte serialnumber, out byte description, out IntPtr ftHandle);
+        public static extern FtStatus FT_GetDeviceInfoDetail(uint index, out uint flags, out FtDevice chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle);
 
         /// <summary>
         /// Open a device
@@ -183,7 +183,7 @@ namespace System.Device.Ft4222
         /// <param name="isEndTransaction">True if this is the final SPI transaction</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPIMaster_SingleRead(SafeFtHandle ftHandle, out byte buffer, ushort bufferSize, out ushort sizeOfRead, bool isEndTransaction);
+        public static extern FtStatus FT4222_SPIMaster_SingleRead(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeOfRead, bool isEndTransaction);
 
         /// <summary>
         /// Operate a single SPI write as a master
@@ -208,7 +208,7 @@ namespace System.Device.Ft4222
         /// <param name="isEndTransaction">True if this is the final SPI transaction</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPIMaster_SingleReadWrite(SafeFtHandle ftHandle, out byte readBuffer, in byte writeBuffer, ushort bufferSize, out ushort sizeTransferred, bool isEndTransaction);
+        public static extern FtStatus FT4222_SPIMaster_SingleReadWrite(SafeFtHandle ftHandle, in byte readBuffer, in byte writeBuffer, ushort bufferSize, out ushort sizeTransferred, bool isEndTransaction);
 
         /// <summary>
         /// Operate multiple read and write SPI operations as a master
@@ -222,7 +222,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeOfRead">The size of the read buffer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPIMaster_MultiReadWrite(SafeFtHandle ftHandle, out byte readBuffer, in byte writeBuffer, byte singleWriteBytes, ushort multiWriteBytes, ushort multiReadBytes, out uint sizeOfRead);
+        public static extern FtStatus FT4222_SPIMaster_MultiReadWrite(SafeFtHandle ftHandle, in byte readBuffer, in byte writeBuffer, byte singleWriteBytes, ushort multiWriteBytes, ushort multiReadBytes, out uint sizeOfRead);
 
         /// <summary>
         /// Initialize the chipset as a SPI slave
@@ -269,7 +269,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeOfRead">The size of the read buffer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPISlave_Read(SafeFtHandle ftHandle, out byte buffer, ushort bufferSize, out ushort sizeOfRead);
+        public static extern FtStatus FT4222_SPISlave_Read(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeOfRead);
 
         /// <summary>
         /// Operate a SPI write as a slave
@@ -342,7 +342,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CMaster_Read(SafeFtHandle ftHandle, ushort deviceAddress, out byte buffer, ushort bufferSize, out ushort sizeTransferred);
+        public static extern FtStatus FT4222_I2CMaster_Read(SafeFtHandle ftHandle, ushort deviceAddress, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
         /// Operate an I2C write as a master
@@ -367,7 +367,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CMaster_ReadEx(SafeFtHandle ftHandle, ushort deviceAddress, byte flag, out byte buffer, ushort bufferSize, out ushort sizeTransferred);
+        public static extern FtStatus FT4222_I2CMaster_ReadEx(SafeFtHandle ftHandle, ushort deviceAddress, byte flag, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
         /// Operate an I2C write as a master
@@ -451,7 +451,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_I2CSlave_Read(SafeFtHandle ftHandle, out byte buffer, ushort bufferSize, out ushort sizeTransferred);
+        public static extern FtStatus FT4222_I2CSlave_Read(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
         /// 
@@ -545,7 +545,7 @@ namespace System.Device.Ft4222
         /// <param name="sizeofRead">The size of the read buffer</param>
         /// <returns>The status</returns>
         [DllImport("LibFT4222.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_GPIO_ReadTriggerQueue(SafeFtHandle ftHandle, GpioPort portNum, out GpioTrigger events, ushort readSize, out ushort sizeofRead);
+        public static extern FtStatus FT4222_GPIO_ReadTriggerQueue(SafeFtHandle ftHandle, GpioPort portNum, in GpioTrigger events, ushort readSize, out ushort sizeofRead);
 
         /// <summary>
         /// Set the GPIO in wave form

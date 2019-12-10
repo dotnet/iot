@@ -7,7 +7,7 @@
 
   <ItemGroup>
       <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=win</AdditionalProperties>
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
     <ProjectReference Include="..\Ft4222.csproj" />
     <ProjectReference Include="..\..\Bno055\Bno055.csproj" />
