@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="SyleCop Rules" ToolsVersion="15.0">
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="SA0000" Action="Error" />
+    <Rule Id="SA0001" Action="None" /> <!-- XML comment analysis is disabled (default for sample projects) -->
+    <Rule Id="SA1000" Action="Error" />
+    <Rule Id="SA1001" Action="Error" />
+    <Rule Id="SA1002" Action="Error" />
+    <Rule Id="SA1003" Action="Error" />
+    <Rule Id="SA1004" Action="None" /> <!-- Documentation line should begin with a space -->
+    <Rule Id="SA1005" Action="Error" />
+    <Rule Id="SA1006" Action="Error" />
+    <Rule Id="SA1007" Action="Error" />
+    <Rule Id="SA1008" Action="Error" />
+    <Rule Id="SA1009" Action="Error" />
+    <Rule Id="SA1010" Action="Error" />
+    <Rule Id="SA1011" Action="Error" />
+    <Rule Id="SA1012" Action="Error" />
+    <Rule Id="SA1013" Action="Error" />
+    <Rule Id="SA1014" Action="Error" />
+    <Rule Id="SA1015" Action="Error" />
+    <Rule Id="SA1016" Action="Error" />
+    <Rule Id="SA1017" Action="Error" />
+    <Rule Id="SA1018" Action="Error" />
+    <Rule Id="SA1019" Action="Error" />
+    <Rule Id="SA1020" Action="Error" />
+    <Rule Id="SA1021" Action="Error" />
+    <Rule Id="SA1022" Action="Error" />
+    <Rule Id="SA1023" Action="Error" />
+    <Rule Id="SA1024" Action="Error" />
+    <Rule Id="SA1025" Action="Error" /> 
+    <Rule Id="SA1026" Action="Error" />
+    <Rule Id="SA1027" Action="None" />
+    <Rule Id="SA1028" Action="None" /> <!-- Code should not contain trailing whitespace -->
+    <Rule Id="SA1100" Action="Error" />
+    <Rule Id="SA1101" Action="None" />
+    <Rule Id="SA1102" Action="Error" />
+    <Rule Id="SA1103" Action="Error" />
+    <Rule Id="SA1104" Action="Error" />
+    <Rule Id="SA1105" Action="Error" />
+    <Rule Id="SA1106" Action="Error" />
+    <Rule Id="SA1107" Action="Error" />
+    <Rule Id="SA1108" Action="None" />
+    <Rule Id="SA1110" Action="Error" />
+    <Rule Id="SA1111" Action="Error" />
+    <Rule Id="SA1112" Action="Error" />
+    <Rule Id="SA1113" Action="Error" />
+    <Rule Id="SA1114" Action="Error" />
+    <Rule Id="SA1115" Action="Error" />
+    <Rule Id="SA1116" Action="None" />
+    <Rule Id="SA1117" Action="None" />
+    <Rule Id="SA1118" Action="None" />
+    <Rule Id="SA1119" Action="None" />
+    <Rule Id="SA1120" Action="Error" />
+    <Rule Id="SA1121" Action="None" /> <!-- Use Built-In type aliases. When interfacing with hardware, using the Framework types may be more clear.-->
+    <Rule Id="SA1122" Action="Error" />
+    <Rule Id="SA1123" Action="Error" />
+    <Rule Id="SA1124" Action="None" />
+    <Rule Id="SA1125" Action="None" />
+    <Rule Id="SA1127" Action="Error" />
+    <Rule Id="SA1128" Action="Error" />
+    <Rule Id="SA1129" Action="None" /> <!-- Should not use value type default ctors -->
+    <Rule Id="SA1130" Action="Error" />
+    <Rule Id="SA1131" Action="None" /> <!-- Constants should be on the right side of a comparison -->
+    <Rule Id="SA1132" Action="Error" />
+    <Rule Id="SA1133" Action="Error" />
+    <Rule Id="SA1134" Action="Error" />
+    <Rule Id="SA1135" Action="Error" />
+    <Rule Id="SA1136" Action="Error" />
+    <Rule Id="SA1137" Action="Error" />
+    <Rule Id="SA1139" Action="Error" /> 
+    <Rule Id="SA1200" Action="Error" />
+    <Rule Id="SA1201" Action="None" /> <!--Enum should not follow a class -->
+    <Rule Id="SA1202" Action="None" />
+    <Rule Id="SA1203" Action="Error" />
+    <Rule Id="SA1204" Action="None" />
+    <Rule Id="SA1205" Action="Error" />
+    <Rule Id="SA1206" Action="Error" />
+    <Rule Id="SA1207" Action="Error" />
+    <Rule Id="SA1208" Action="Error" />
+    <Rule Id="SA1209" Action="Error" />
+    <Rule Id="SA1210" Action="None" />
+    <Rule Id="SA1211" Action="None" />
+    <Rule Id="SA1212" Action="Error" />
+    <Rule Id="SA1213" Action="Error" />
+    <Rule Id="SA1214" Action="Error" />
+    <Rule Id="SA1216" Action="Error" />
+    <Rule Id="SA1217" Action="None" /> <!-- Using statements should be ordered by alphabet -->
+    <Rule Id="SA1300" Action="Error" />
+    <Rule Id="SA1302" Action="Error" />
+    <Rule Id="SA1303" Action="Error" />
+    <Rule Id="SA1304" Action="None" />
+    <Rule Id="SA1305" Action="None" /> <!-- Field names must not use hungarian notation  -->
+    <Rule Id="SA1306" Action="Error" />
+    <Rule Id="SA1307" Action="Error" />
+    <Rule Id="SA1308" Action="None" />
+    <Rule Id="SA1309" Action="None" /> <!-- Field names should not begin with an underscore (in our case, they should, see SX1309) -->
+    <Rule Id="SA1310" Action="None" />
+    <Rule Id="SA1311" Action="None" /> <!-- Static readonly fields should begin with upper-case letter -->
+    <Rule Id="SA1312" Action="Error" />
+    <Rule Id="SA1313" Action="None" /> 
+    <Rule Id="SA1314" Action="Error" /> 
+    <Rule Id="SA1400" Action="Error" />
+    <Rule Id="SA1401" Action="None" />
+    <Rule Id="SA1402" Action="None" /> <!-- File may only contain a single type -->
+    <Rule Id="SA1403" Action="Error" />
+    <Rule Id="SA1404" Action="Error" />
+    <Rule Id="SA1405" Action="Error" />
+    <Rule Id="SA1406" Action="Error" />
+    <Rule Id="SA1407" Action="None" /> <!-- Arithmetic expressions must declare precedence -->
+    <Rule Id="SA1408" Action="Error" />
+    <Rule Id="SA1410" Action="Error" />
+    <Rule Id="SA1411" Action="None" /> 
+    <Rule Id="SA1412" Action="None" /> <!-- Store files as UTF-8 -->
+    <Rule Id="SA1413" Action="None" /> <!-- Use trailing comma in multi-line initializers -->
+    <Rule Id="SA1500" Action="Error" /> 
+    <Rule Id="SA1501" Action="Error" />
+    <Rule Id="SA1502" Action="Error" />
+    <Rule Id="SA1503" Action="Error" />
+    <Rule Id="SA1504" Action="Error" />
+    <Rule Id="SA1505" Action="Error" />
+    <Rule Id="SA1506" Action="Error" />
+    <Rule Id="SA1507" Action="Error" /> 
+    <Rule Id="SA1508" Action="None" /> <!-- A closing brace should not be preceded by a blank line -->
+    <Rule Id="SA1509" Action="Error" />
+    <Rule Id="SA1510" Action="Error" />
+    <Rule Id="SA1511" Action="Error" />
+    <Rule Id="SA1512" Action="Error" />
+    <Rule Id="SA1513" Action="Error" />
+    <Rule Id="SA1514" Action="Error" /> 
+    <Rule Id="SA1515" Action="None" />
+    <Rule Id="SA1516" Action="None" />
+    <Rule Id="SA1517" Action="Error" />
+    <Rule Id="SA1518" Action="Error" />
+    <Rule Id="SA1519" Action="Error" />
+    <Rule Id="SA1520" Action="Error" />
+    <Rule Id="SA1600" Action="None" />  <!-- Elements should be documented -->
+    <Rule Id="SA1601" Action="None" /> <!-- Partial elements should be documented -->
+    <Rule Id="SA1602" Action="None" /> <!-- Enumeration items should be documented -->
+    <Rule Id="SA1604" Action="None" /> <!-- Element documentation should have summary -->
+    <Rule Id="SA1605" Action="Error" />
+    <Rule Id="SA1606" Action="Error" />
+    <Rule Id="SA1607" Action="Error" />
+    <Rule Id="SA1608" Action="Error" />
+    <Rule Id="SA1609" Action="None" />
+    <Rule Id="SA1610" Action="None" /> <!-- Property documentation should have value text -->
+    <Rule Id="SA1611" Action="None" /> <!-- The documentation for parameter 'message' is missing -->
+    <Rule Id="SA1612" Action="Error" />
+    <Rule Id="SA1613" Action="Error" />
+    <Rule Id="SA1614" Action="Error" />
+    <Rule Id="SA1615" Action="None" />
+    <Rule Id="SA1616" Action="None" /> <!-- Element return value documentation should have text -->
+    <Rule Id="SA1617" Action="Error" />
+    <Rule Id="SA1618" Action="None" /> <!-- The documentation for type parameter is missing -->
+    <Rule Id="SA1619" Action="None" /> <!-- The documentation for type parameter is missing -->
+    <Rule Id="SA1620" Action="Error" />
+    <Rule Id="SA1621" Action="Error" />
+    <Rule Id="SA1622" Action="Error" />
+    <Rule Id="SA1623" Action="None" /> <!-- Property documentation text -->
+    <Rule Id="SA1624" Action="None" /> <!-- Because the property only contains a visible get accessor, the documentation summary text should begin with 'Gets' -->
+    <Rule Id="SA1625" Action="None" /> <!-- Maybe not so important: Element documentation should not be copy-pasted -->
+    <Rule Id="SA1626" Action="None" /> <!-- Single-line comments should not use documentation style slashes -->
+    <Rule Id="SA1627" Action="None" /> <!-- The documentation text within the \'exception\' tag should not be empty -->
+    <Rule Id="SA1629" Action="None" /> <!-- Documentation text should end with a period -->
+    <Rule Id="SA1633" Action="None" /> <!-- File should have header -->
+    <Rule Id="SA1634" Action="None" /> <!-- File Header must show copyright. Our header does not use the expected syntax -->
+    <Rule Id="SA1635" Action="None" /> <!-- Same as SA1634? -->
+    <Rule Id="SA1636" Action="None" /> <!-- File Header copyright tag must match -->
+    <Rule Id="SA1637" Action="None" /> <!-- File Header must contain file name -->
+    <Rule Id="SA1638" Action="Error" />
+    <Rule Id="SA1640" Action="None" /> <!-- File header must have valid company text -->
+    <Rule Id="SA1641" Action="Error" />
+    <Rule Id="SA1642" Action="None" /> <!-- Constructor summary documentation should begin with standard text -->
+    <Rule Id="SA1643" Action="None" /> <!-- Destructor summary documentation should begin with standard text -->
+    <Rule Id="SA1648" Action="Error" />
+    <Rule Id="SA1649" Action="None" /> <!-- Maybe todo: File name should match first type name -->
+    <Rule Id="SA1651" Action="Error" />
+    <Rule Id="SA1652" Action="Error" />
+    <Rule Id="SX1101" Action="None" /> <!-- Maybe todo: Do not prefix local members with this -->
+	<Rule Id="SX1309" Action="Error" /> <!-- Members should be prefixed with _ -->
+  </Rules>
+</RuleSet>
