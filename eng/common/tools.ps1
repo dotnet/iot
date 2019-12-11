@@ -216,7 +216,10 @@ function InstallDotNet([string] $dotnetRoot,
       }
       catch {
         Write-PipelineTelemetryError -Category 'InitializeToolset' -Message "Failed to install dotnet runtime '$runtime' from custom location '$runtimeSourceFeed'."
+        ExitWithExitCode 1
       }
+    } else {
+      ExitWithExitCode 1
     }
   }
 }
