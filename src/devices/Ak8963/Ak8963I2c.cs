@@ -44,7 +44,11 @@ namespace Iot.Device.Magnetometer
         /// <param name="data">A byte to write</param>
         public override void WriteRegister(I2cDevice i2cDevice, byte reg, byte data)
         {
-            Span<byte> dataout = stackalloc byte[] { reg, data };
+            Span<byte> dataout = stackalloc byte[]
+            {
+                reg,
+                data
+            };
             i2cDevice.Write(dataout);
         }
     }

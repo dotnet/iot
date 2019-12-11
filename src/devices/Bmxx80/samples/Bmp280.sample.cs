@@ -12,15 +12,22 @@ using Iot.Units;
 
 namespace Iot.Device.Samples
 {
-    class Program
+    /// <summary>
+    /// Test program main class
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Entry point for example program
+        /// </summary>
+        /// <param name="args">Command line arguments</param>
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello Bmp280!");
 
-            //bus id on the raspberry pi 3
+            // bus id on the raspberry pi 3
             const int busId = 1;
-            //set this to the current sea level pressure in the area for correct altitude readings
+            // set this to the current sea level pressure in the area for correct altitude readings
             var defaultSeaLevelPressure = Pressure.MeanSeaLevel;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bmp280.DefaultI2cAddress);
@@ -31,18 +38,18 @@ namespace Iot.Device.Samples
             {
                 while (true)
                 {
-                    //set higher sampling
+                    // set higher sampling
                     i2CBmp280.TemperatureSampling = Sampling.LowPower;
                     i2CBmp280.PressureSampling = Sampling.UltraHighResolution;
 
-                    //set mode forced so device sleeps after read
+                    // set mode forced so device sleeps after read
                     i2CBmp280.SetPowerMode(Bmx280PowerMode.Forced);
 
                     // wait for measurement to be performed
                     var measurementTime = i2CBmp280.GetMeasurementDuration();
                     Thread.Sleep(measurementTime);
 
-                    //read values
+                    // read values
                     i2CBmp280.TryReadTemperature(out var tempValue);
                     Console.WriteLine($"Temperature: {tempValue.Celsius} \u00B0C");
                     i2CBmp280.TryReadPressure(out var preValue);
@@ -51,19 +58,19 @@ namespace Iot.Device.Samples
                     Console.WriteLine($"Altitude: {altValue} m");
                     Thread.Sleep(1000);
 
-                    //change sampling rate
+                    // change sampling rate
                     i2CBmp280.TemperatureSampling = Sampling.UltraHighResolution;
                     i2CBmp280.PressureSampling = Sampling.UltraLowPower;
                     i2CBmp280.FilterMode = Bmx280FilteringMode.X4;
 
-                    //set mode forced and read again
+                    // set mode forced and read again
                     i2CBmp280.SetPowerMode(Bmx280PowerMode.Forced);
 
                     // wait for measurement to be performed
                     measurementTime = i2CBmp280.GetMeasurementDuration();
                     Thread.Sleep(measurementTime);
 
-                    //read values
+                    // read values
                     i2CBmp280.TryReadTemperature(out tempValue);
                     Console.WriteLine($"Temperature {tempValue.Celsius} \u00B0C");
                     i2CBmp280.TryReadPressure(out preValue);

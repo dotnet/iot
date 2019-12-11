@@ -13,14 +13,17 @@ namespace Iot.Device.Bmp180
         /// Skipped (output set to 0x80000)
         /// </summary>
         UltraLowPower = 0b000,
+
         /// <summary>
         /// oversampling x1
         /// </summary>
         Standard = 0b001,
+
         /// <summary>
         /// oversampling x2
         /// </summary>
-        HighResolution  = 0b010,
+        HighResolution = 0b010,
+
         /// <summary>
         /// oversampling x4
         /// </summary>

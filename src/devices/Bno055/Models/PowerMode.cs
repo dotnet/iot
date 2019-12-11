@@ -11,8 +11,10 @@ namespace Iot.Device.Bno055
     {
         /// <summary>Normal power mode</summary>
         Normal = 0x00,
+
         /// <summary>Low power mode</summary>
         LowPower = 0x01,
+
         /// <summary>Device in suspend mode</summary>
         Suspend = 0x02,
     }

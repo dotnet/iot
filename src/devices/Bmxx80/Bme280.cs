@@ -47,19 +47,27 @@ namespace Iot.Device.Bmxx80
             set
             {
                 if (!Enum.IsDefined(typeof(Sampling), value))
+                {
                     throw new ArgumentOutOfRangeException();
+                }
 
                 byte status = Read8BitsFromRegister((byte)Bme280Register.CTRL_HUM);
                 status = (byte)(status & 0b_1111_1000);
                 status = (byte)(status | (byte)value);
 
-                Span<byte> command = stackalloc[] {(byte)Bme280Register.CTRL_HUM, status};
+                Span<byte> command = stackalloc[]
+                {
+                    (byte)Bme280Register.CTRL_HUM, status
+                };
                 _i2cDevice.Write(command);
 
                 // Changes to the above register only become effective after a write operation to "CTRL_MEAS".
                 byte measureState = Read8BitsFromRegister((byte)Bmx280Register.CTRL_MEAS);
 
-                command = stackalloc[] {(byte)Bmx280Register.CTRL_MEAS, measureState};
+                command = stackalloc[]
+                {
+                    (byte)Bmx280Register.CTRL_MEAS, measureState
+                };
                 _i2cDevice.Write(command);
                 _humiditySampling = value;
             }

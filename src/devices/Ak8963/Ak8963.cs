@@ -32,8 +32,10 @@ namespace Iot.Device.Magnetometer
         /// Default constructor for an independent AK8963
         /// </summary>
         /// <param name="i2CDevice">The I2C device</param>
-        public Ak8963(I2cDevice i2CDevice) : this(i2CDevice, new Ak8963I2c())
-        { }
+        public Ak8963(I2cDevice i2CDevice)
+            : this(i2CDevice, new Ak8963I2c())
+        {
+        }
 
         /// <summary>
         /// Constructor to use if AK8963 is behind another element and need a special I2C protocol like
@@ -54,7 +56,9 @@ namespace Iot.Device.Magnetometer
             byte mode = (byte)((byte)_measurementMode | ((byte)_outputBitMode << 4));
             WriteRegister(Register.CNTL, mode);
             if (!IsVersionCorrect())
+            {
                 throw new IOException($"This device does not contain the correct signature 0x48 for a AK8963");
+            }
         }
 
         /// <summary>
@@ -148,6 +152,7 @@ namespace Iot.Device.Magnetometer
                 }
 
             }
+
             // Store the bias
             var magBias = (maxbias + minbias) / 2;
             magBias *= calib;
@@ -200,7 +205,9 @@ namespace Iot.Device.Magnetometer
                 while (!HasDataToRead)
                 {
                     if (DateTime.Now > dt)
+                    {
                         throw new TimeoutException($"{nameof(ReadMagnetometer)} timeout reading value");
+                    }
                 }
             }
 
@@ -228,6 +235,7 @@ namespace Iot.Device.Magnetometer
                 // result of 4912.0f / 8192.0f
                 magneto *= 0.599609375f;
             }
+
             return magneto;
 
         }

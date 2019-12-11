@@ -4,7 +4,6 @@
 
 // Ported from https://github.com/adafruit/Adafruit_Python_BMP/blob/master/Adafruit_BMP/BMP085.py  
 // Formulas and code examples can also be found in the datasheet https://cdn-shop.adafruit.com/datasheets/BST-BMP180-DS000-09.pdf
-
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
@@ -18,8 +17,8 @@ namespace Iot.Device.Bmp180
     /// </summary>
     public class Bmp180 : IDisposable
     {
-        private I2cDevice _i2cDevice;        
         private readonly CalibrationData _calibrationData;
+        private I2cDevice _i2cDevice;
         private Sampling _mode;
 
         /// <summary>
@@ -33,13 +32,13 @@ namespace Iot.Device.Bmp180
         /// <param name="i2cDevice">I2C device used to communicate with the device</param>
         public Bmp180(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice;            
-            _calibrationData = new CalibrationData();            
-            //Read the coefficients table
+            _i2cDevice = i2cDevice;
+            _calibrationData = new CalibrationData();
+            // Read the coefficients table
             _calibrationData.ReadFromDevice(this);
             SetSampling(Sampling.Standard);
         }
-        
+
         /// <summary>
         /// Sets sampling to the given value
         /// </summary>
@@ -57,7 +56,7 @@ namespace Iot.Device.Bmp180
         /// </returns>
         public Temperature ReadTemperature()
         {
-            return Temperature.FromCelsius((CalculateTrueTemperature() + 8) / 160.0);              
+            return Temperature.FromCelsius((CalculateTrueTemperature() + 8) / 160.0);
         }
 
         /// <summary>
@@ -69,19 +68,19 @@ namespace Iot.Device.Bmp180
         public Pressure ReadPressure()
         {
             // Pressure Calculations
-            int B6 = CalculateTrueTemperature() - 4000;
-            int B62 = (B6 * B6) / 4096;
-            int X3 =  (((short)_calibrationData.B2 * B62) + ((short)_calibrationData.AC2 * B6)) / 2048;
-            int B3 = ((((short)_calibrationData.AC1 * 4 + X3) << (short)Sampling.Standard) + 2) / 4;
-            int X1 = ((short)_calibrationData.AC3 * B6 ) / 8192;
-            int X2 = ((short)_calibrationData.B1 * B62) / 65536;
-            X3 = ((X1 + X2) + 2) / 4;
-            int B4 = _calibrationData.AC4 * (X3 + 32768) / 32768;
-            uint B7 = (uint)(ReadRawPressure() - B3) * (uint)(50000 >> (short)Sampling.Standard);
-            int p = (B7 < 0x80000000) ? (int)((B7 * 2) / B4) : (int)((B7 / B4) * 2);
-            X1 = (((p * p) / 65536 ) * 3038) / 65536;
-            
-            return Pressure.FromPascal(p + ( ((((p * p) / 65536 ) * 3038) / 65536) + ((-7357 * p) / 65536) + 3791) / 8);
+            int b6 = CalculateTrueTemperature() - 4000;
+            int b62 = (b6 * b6) / 4096;
+            int x3 = (((short)_calibrationData.B2 * b62) + ((short)_calibrationData.AC2 * b6)) / 2048;
+            int b3 = ((((short)_calibrationData.AC1 * 4 + x3) << (short)Sampling.Standard) + 2) / 4;
+            int x1 = ((short)_calibrationData.AC3 * b6) / 8192;
+            int x2 = ((short)_calibrationData.B1 * b62) / 65536;
+            x3 = ((x1 + x2) + 2) / 4;
+            int b4 = _calibrationData.AC4 * (x3 + 32768) / 32768;
+            uint b7 = (uint)(ReadRawPressure() - b3) * (uint)(50000 >> (short)Sampling.Standard);
+            int p = (b7 < 0x80000000) ? (int)((b7 * 2) / b4) : (int)((b7 / b4) * 2);
+            x1 = (((p * p) / 65536) * 3038) / 65536;
+
+            return Pressure.FromPascal(p + (((((p * p) / 65536) * 3038) / 65536) + ((-7357 * p) / 65536) + 3791) / 8);
         }
 
         /// <summary>
@@ -97,7 +96,7 @@ namespace Iot.Device.Bmp180
         {
             return 44330.0 * (1.0 - Math.Pow((ReadPressure().Pascal / seaLevelPressure.Pascal), (1.0 / 5.255)));
         }
-        
+
         /// <summary>
         ///  Calculates the altitude in meters from the mean sea-level pressure.
         /// </summary>
@@ -132,10 +131,10 @@ namespace Iot.Device.Bmp180
         private int CalculateTrueTemperature()
         {
             // Calculations below are taken straight from section 3.5 of the datasheet.
-            int X1 = (ReadRawTemperature() - _calibrationData.AC6) * _calibrationData.AC5 / 32768;
-            int X2 = _calibrationData.MC * (2048) / (X1 + _calibrationData.MD);
-            
-            return X1 + X2;
+            int x1 = (ReadRawTemperature() - _calibrationData.AC6) * _calibrationData.AC5 / 32768;
+            int x2 = _calibrationData.MC * (2048) / (x1 + _calibrationData.MD);
+
+            return x1 + x2;
         }
 
         /// <summary>
@@ -147,11 +146,14 @@ namespace Iot.Device.Bmp180
         private short ReadRawTemperature()
         {
             // Reads the raw (uncompensated) temperature from the sensor
-            Span<byte> command = stackalloc byte[]  { (byte)Register.CONTROL, (byte)Register.READTEMPCMD };  
-            _i2cDevice.Write(command);            
+            Span<byte> command = stackalloc byte[]
+            {
+                (byte)Register.CONTROL, (byte)Register.READTEMPCMD
+            };
+            _i2cDevice.Write(command);
             // Wait 5ms, taken straight from section 3.3 of the datasheet. 
             Thread.Sleep(5);
-            
+
             return (short)Read16BitsFromRegisterBE((byte)Register.TEMPDATA);
         }
 
@@ -169,7 +171,10 @@ namespace Iot.Device.Bmp180
         private int ReadRawPressure()
         {
             // Reads the raw (uncompensated) pressure level from the sensor.
-            _i2cDevice.Write(new[] { (byte)Register.CONTROL, (byte)(Register.READPRESSURECMD + ((byte)Sampling.Standard << 6))});
+            _i2cDevice.Write(new[]
+            {
+                (byte)Register.CONTROL, (byte)(Register.READPRESSURECMD + ((byte)Sampling.Standard << 6))
+            });
 
             if (_mode.Equals(Sampling.UltraLowPower))
             {
@@ -188,11 +193,11 @@ namespace Iot.Device.Bmp180
                 Thread.Sleep(8);
             }
 
-            int msb = Read8BitsFromRegister((byte)Register.PRESSUREDATA);            
-            int lsb = Read8BitsFromRegister((byte)Register.PRESSUREDATA + 1);            
+            int msb = Read8BitsFromRegister((byte)Register.PRESSUREDATA);
+            int lsb = Read8BitsFromRegister((byte)Register.PRESSUREDATA + 1);
             int xlsb = Read8BitsFromRegister((byte)Register.PRESSUREDATA + 2);
-            
-            return  ((msb << 16) + (lsb << 8) + xlsb) >> (8 - (byte)Sampling.Standard);            
+
+            return ((msb << 16) + (lsb << 8) + xlsb) >> (8 - (byte)Sampling.Standard);
         }
 
         /// <summary>
@@ -205,11 +210,11 @@ namespace Iot.Device.Bmp180
         ///  Value from register
         /// </returns>
         internal byte Read8BitsFromRegister(byte register)
-        {                                
+        {
             _i2cDevice.WriteByte(register);
             byte value = _i2cDevice.ReadByte();
 
-            return value;         
+            return value;
         }
 
         /// <summary>
@@ -222,12 +227,12 @@ namespace Iot.Device.Bmp180
         ///  Value from register
         /// </returns>
         internal ushort Read16BitsFromRegister(byte register)
-        {            
+        {
             Span<byte> bytes = stackalloc byte[2];
             _i2cDevice.WriteByte(register);
             _i2cDevice.Read(bytes);
 
-            return BinaryPrimitives.ReadUInt16LittleEndian(bytes);         
+            return BinaryPrimitives.ReadUInt16LittleEndian(bytes);
         }
 
         /// <summary>
@@ -241,12 +246,11 @@ namespace Iot.Device.Bmp180
         /// </returns>
         internal ushort Read16BitsFromRegisterBE(byte register)
         {
-            
             Span<byte> bytes = stackalloc byte[2];
             _i2cDevice.WriteByte(register);
             _i2cDevice.Read(bytes);
 
-            return BinaryPrimitives.ReadUInt16BigEndian(bytes);            
+            return BinaryPrimitives.ReadUInt16BigEndian(bytes);
         }
 
         /// <inheritdoc/>

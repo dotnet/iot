@@ -8,9 +8,16 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Bh1745.Samples
 {
-    class Program
+    /// <summary>
+    /// Test program main class
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Entry point for example program
+        /// </summary>
+        /// <param name="args">Command line arguments</param>
+        public static void Main(string[] args)
         {
             // bus id on the raspberry pi 3
             const int busId = 1;
@@ -23,7 +30,7 @@ namespace Iot.Device.Bh1745.Samples
             {
                 // wait for first measurement
                 Task.Delay(i2cBh1745.MeasurementTime.ToMilliseconds()).Wait();
-                
+
                 while (true)
                 {
                     var color = i2cBh1745.GetCompensatedColor();

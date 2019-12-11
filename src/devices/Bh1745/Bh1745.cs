@@ -38,10 +38,7 @@ namespace Iot.Device.Bh1745
             _i2cDevice = device;
             ChannelCompensationMultipliers = new ChannelCompensationMultipliers
             {
-                Red = 2.2,
-                Green = 1.0,
-                Blue = 1.8,
-                Clear = 10.0
+                Red = 2.2, Green = 1.0, Blue = 1.8, Clear = 10.0
             };
 
             // reset device and set default configuration
@@ -73,7 +70,9 @@ namespace Iot.Device.Bh1745
             set
             {
                 if (!Enum.IsDefined(typeof(InterruptStatus), value))
+                {
                     throw new ArgumentOutOfRangeException();
+                }
 
                 var intReset = Read8BitsFromRegister((byte)Register.SYSTEM_CONTROL);
                 intReset = (byte)((intReset & (byte)~Mask.INT_RESET) | (byte)value << 6);
@@ -92,7 +91,9 @@ namespace Iot.Device.Bh1745
             set
             {
                 if (!Enum.IsDefined(typeof(MeasurementTime), value))
+                {
                     throw new ArgumentOutOfRangeException();
+                }
 
                 var time = Read8BitsFromRegister((byte)Register.MODE_CONTROL1);
                 time = (byte)((time & (byte)~Mask.MEASUREMENT_TIME) | (byte)value);
@@ -128,7 +129,9 @@ namespace Iot.Device.Bh1745
             set
             {
                 if (!Enum.IsDefined(typeof(AdcGain), value))
+                {
                     throw new ArgumentOutOfRangeException();
+                }
 
                 var adcGain = Read8BitsFromRegister((byte)Register.MODE_CONTROL2);
                 adcGain = (byte)((adcGain & (byte)~Mask.ADC_GAIN) | (byte)value);
@@ -161,7 +164,9 @@ namespace Iot.Device.Bh1745
             set
             {
                 if (!Enum.IsDefined(typeof(LatchBehavior), value))
+                {
                     throw new ArgumentOutOfRangeException();
+                }
 
                 var intLatch = Read8BitsFromRegister((byte)Register.INTERRUPT);
                 intLatch = (byte)((intLatch & (byte)~Mask.INT_LATCH) | (byte)value << 4);
@@ -180,7 +185,9 @@ namespace Iot.Device.Bh1745
             set
             {
                 if (!Enum.IsDefined(typeof(InterruptSource), value))
+                {
                     throw new ArgumentOutOfRangeException();
+                }
 
                 var intSource = Read8BitsFromRegister((byte)Register.INTERRUPT);
                 intSource = (byte)((intSource & (byte)~Mask.INT_SOURCE) | (byte)value << 2);
@@ -201,7 +208,6 @@ namespace Iot.Device.Bh1745
                 var intPin = Read8BitsFromRegister((byte)Register.INTERRUPT);
                 intPin = (byte)((intPin & (byte)~Mask.INT_ENABLE) | Convert.ToByte(value));
 
-
                 Write8BitsToRegister((byte)Register.INTERRUPT, intPin);
                 _interruptIsEnabled = value;
             }
@@ -216,7 +222,9 @@ namespace Iot.Device.Bh1745
             set
             {
                 if (!Enum.IsDefined(typeof(InterruptPersistence), value))
+                {
                     throw new ArgumentOutOfRangeException();
+                }
 
                 var intPersistence = Read8BitsFromRegister((byte)Register.PERSISTENCE);
                 intPersistence = (byte)((intPersistence & (byte)~Mask.PERSISTENCE) | (byte)value);
@@ -281,7 +289,7 @@ namespace Iot.Device.Bh1745
             _interruptIsEnabled = false;
             _lowerInterruptThreshold = 0x0000;
             _higherInterruptThreshold = 0xFFFF;
-            
+
             // write default value to Mode_Control3
             Write8BitsToRegister((byte)Register.MODE_CONTROL3, 0x02);
         }
@@ -328,7 +336,9 @@ namespace Iot.Device.Bh1745
         {
             var clearDataRaw = ReadClearDataRegister();
             if (clearDataRaw == 0)
+            {
                 return Color.FromArgb(0, 0, 0);
+            }
 
             // apply channel multipliers and normalize
             double compensatedRed = ReadRedDataRegister() * ChannelCompensationMultipliers.Red / MeasurementTime.ToMilliseconds() * 360;
@@ -348,9 +358,14 @@ namespace Iot.Device.Bh1745
         {
             // check manufacturer and part Id
             if (ManufacturerId != 0xE0)
+            {
                 throw new Exception($"Manufacturer ID {ManufacturerId} is not the same as expected 224. Please check if you are using the right device.");
+            }
+
             if (PartId != 0x0b)
+            {
                 throw new Exception($"Part ID {PartId} is not the same as expected 11. Please check if you are using the right device.");
+            }
 
             // soft reset sensor
             Reset();
@@ -376,7 +391,9 @@ namespace Iot.Device.Bh1745
         private void WriteShortToRegister(byte register, ushort value)
         {
             var bytes = new byte[3];
-            var source = !BitConverter.IsLittleEndian ? BitConverter.GetBytes(value).Reverse().ToArray() : BitConverter.GetBytes(value);
+            var source = !BitConverter.IsLittleEndian
+                ? BitConverter.GetBytes(value).Reverse().ToArray()
+                : BitConverter.GetBytes(value);
 
             bytes[0] = register;
             Buffer.BlockCopy(source, 0, bytes, 1, source.Length);
@@ -386,7 +403,10 @@ namespace Iot.Device.Bh1745
 
         private void Write8BitsToRegister(byte register, byte data)
         {
-            Span<byte> command = stackalloc[] { register, data };
+            Span<byte> command = stackalloc[]
+            {
+                register, data
+            };
             _i2cDevice.Write(command);
         }
 

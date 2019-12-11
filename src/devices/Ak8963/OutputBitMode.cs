@@ -13,6 +13,7 @@ namespace Iot.Device.Magnetometer
         /// Output 14 bit
         /// </summary>
         Output14bit = 0,
+
         /// <summary>
         /// Output 16 bit
         /// </summary>
