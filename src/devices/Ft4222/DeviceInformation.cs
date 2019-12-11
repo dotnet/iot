@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Device.Ft4222
+using System;
+
+namespace Iot.Device.Ft4222
 {
     /// <summary>
     /// FT4222 device information    
@@ -33,10 +35,5 @@ namespace System.Device.Ft4222
         /// The device description
         /// </summary>
         public string Description { get; set; }
-        /// <summary>
-        /// The device handle.  This value is not used externally and is provided for information only.
-        /// If the device is not open, this value is 0.
-        /// </summary>
-        public IntPtr FtHandle { get; set; }
     }
 }

@@ -4,7 +4,7 @@
 
 using Iot.Device.Bno055;
 using System;
-using System.Device.Ft4222;
+using Iot.Device.Ft4222;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Spi;
@@ -31,7 +31,6 @@ namespace Ft4222.sample
             {
                 Console.WriteLine($"Description: {device.Description}");
                 Console.WriteLine($"Flags: {device.Flags}");
-                Console.WriteLine($"Handle: {device.FtHandle}");
                 Console.WriteLine($"Id: {device.Id}");
                 Console.WriteLine($"Location Id: {device.LocId}");
                 Console.WriteLine($"Serial Number: {device.SerialNumber}");

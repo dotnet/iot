@@ -2,13 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace System.Device.Ft4222
+namespace Iot.Device.Ft4222
 {
     /// <summary>
     /// Common static functions for the FT4222
@@ -47,8 +48,7 @@ namespace System.Device.Ft4222
                     throw new IOException($"Can't read device information on device index {i}, error {ftStatus}");
                 devInfo.Type = ftDevice;
                 devInfo.Id = id;
-                devInfo.LocId = locId;
-                devInfo.FtHandle = handle;
+                devInfo.LocId = locId;                
                 devInfo.Flags = (FtFlag)flags;
                 devInfo.SerialNumber = Encoding.ASCII.GetString(sernum.ToArray(), 0, 16);
                 devInfo.Description = Encoding.ASCII.GetString(desc.ToArray(), 0, 64);

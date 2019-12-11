@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 
-namespace System.Device.Ft4222
+namespace Iot.Device.Ft4222
 {
     /// <summary>
     /// List of FTDI device types
