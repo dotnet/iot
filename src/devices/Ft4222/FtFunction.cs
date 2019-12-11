@@ -8,18 +8,18 @@ using System.Runtime.InteropServices;
 namespace Iot.Device.Ft4222
 {
     /// <summary>
-    /// Imports for the libft4222.so as well as libft4222.so
+    /// Imports for the ftd2xx.dll as well as libft4222
     /// </summary>
     internal class FtFunction
     {
-        #region libft4222.so
+        #region ftd2xx.dll
 
         /// <summary>
         /// Create Device Information List
         /// </summary>
         /// <param name="numdevs">number of devices</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so")]
+        [DllImport("ftd2xx")]
         public static extern FtStatus FT_CreateDeviceInfoList(out uint numdevs);
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Iot.Device.Ft4222
         /// <param name="description">Description</param>
         /// <param name="ftHandle">Handle</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so")]
+        [DllImport("ftd2xx")]
         public static extern FtStatus FT_GetDeviceInfoDetail(uint index, out uint flags, out FtDevice chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle);
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Iot.Device.Ft4222
         /// <param name="dwFlags">The flag how to open the device</param>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so")]
+        [DllImport("ftd2xx")]
         public static extern FtStatus FT_OpenEx(uint pvArg1, FtOpenType dwFlags, out SafeFtHandle ftHandle);
 
         /// <summary>
@@ -52,19 +52,19 @@ namespace Iot.Device.Ft4222
         /// </summary>
         /// <param name="ftHandle">The device handle</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so")]
+        [DllImport("ftd2xx")]
         public static extern FtStatus FT_Close(SafeFtHandle ftHandle);
 
         #endregion
 
-        #region libft4222.so common functions
+        #region libft4222 common functions
 
         /// <summary>
         /// Uninitialize a device, call before closing the device
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_UnInitialize(SafeFtHandle ftHandle);
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="clk">The system clock rate</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SetClock(SafeFtHandle ftHandle, FtClockRate clk);
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="clk">The system clock rate</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_GetClock(SafeFtHandle ftHandle, out FtClockRate clk);
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="enable">True to enable, false to disable</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SetWakeUpInterrupt(SafeFtHandle ftHandle, bool enable);
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="trigger">The trigger type</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SetInterruptTrigger(SafeFtHandle ftHandle, GpioTrigger trigger);
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="enable">True to enable, false to disable</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SetSuspendOut(SafeFtHandle ftHandle, bool enable);
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="pMaxSize">the maximum size in bytes</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_GetMaxTransferSize(SafeFtHandle ftHandle, out ushort pMaxSize);
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace Iot.Device.Ft4222
         /// <param name="mask"></param>
         /// <param name="param"></param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SetEventNotification(SafeFtHandle ftHandle, ulong mask, IntPtr param);
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="pVersion">A version structure</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_GetVersion(SafeFtHandle ftHandle, out FtVersion pVersion);
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace Iot.Device.Ft4222
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_ChipReset(SafeFtHandle ftHandle);
 
         #endregion
@@ -162,7 +162,7 @@ namespace Iot.Device.Ft4222
         /// <param name="cpha">The clock phase</param>
         /// <param name="ssoMap">The chip select starting by 0x01</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPIMaster_Init(SafeFtHandle ftHandle, SpiOperatingMode ioLine, SpiClock clock, SpiClockPolarity cpol, SpiClockPhase cpha, byte ssoMap);
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="spiMode">The operation mode, none, single, dual or quad</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPIMaster_SetLines(SafeFtHandle ftHandle, SpiOperatingMode spiMode);
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace Iot.Device.Ft4222
         /// <param name="sizeOfRead">Number of bytes read</param>
         /// <param name="isEndTransaction">True if this is the final SPI transaction</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPIMaster_SingleRead(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeOfRead, bool isEndTransaction);
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace Iot.Device.Ft4222
         /// <param name="sizeTransferred">The size of the buffer</param>
         /// <param name="isEndTransaction">True if this is the final SPI transaction</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPIMaster_SingleWrite(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred, bool isEndTransaction);
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace Iot.Device.Ft4222
         /// <param name="sizeTransferred">The size of buffer to transfer</param>
         /// <param name="isEndTransaction">True if this is the final SPI transaction</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPIMaster_SingleReadWrite(SafeFtHandle ftHandle, in byte readBuffer, in byte writeBuffer, ushort bufferSize, out ushort sizeTransferred, bool isEndTransaction);
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace Iot.Device.Ft4222
         /// <param name="multiReadBytes">multiReadBytes</param>
         /// <param name="sizeOfRead">The size of the read buffer</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPIMaster_MultiReadWrite(SafeFtHandle ftHandle, in byte readBuffer, in byte writeBuffer, byte singleWriteBytes, ushort multiWriteBytes, ushort multiReadBytes, out uint sizeOfRead);
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace Iot.Device.Ft4222
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPISlave_Init(SafeFtHandle ftHandle);
 
         /// <summary>
@@ -239,7 +239,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="protocolOpt">Initialize with, without protocol or never send the acknowledge</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPISlave_InitEx(SafeFtHandle ftHandle, SpiSlaveProtocol protocolOpt);
 
         /// <summary>
@@ -249,7 +249,7 @@ namespace Iot.Device.Ft4222
         /// <param name="cpol">The clock polarity</param>
         /// <param name="cpha">The clock phase</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPISlave_SetMode(SafeFtHandle ftHandle, SpiClockPolarity cpol, SpiClockPhase cpha);
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="pRxSize">The RX size</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPISlave_GetRxStatus(SafeFtHandle ftHandle, out ushort pRxSize);
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace Iot.Device.Ft4222
         /// <param name="bufferSize">The size of the buffer</param>
         /// <param name="sizeOfRead">The size of the read buffer</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPISlave_Read(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeOfRead);
 
         /// <summary>
@@ -280,7 +280,7 @@ namespace Iot.Device.Ft4222
         /// <param name="bufferSize">The size of the buffer</param>
         /// <param name="sizeTransferred">The size what has been sent</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPISlave_Write(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
@@ -289,7 +289,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="enable">True to enable it, false to disable it</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPISlave_RxQuickResponse(SafeFtHandle ftHandle, bool enable);
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace Iot.Device.Ft4222
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPI_Reset(SafeFtHandle ftHandle);
 
         /// <summary>
@@ -306,7 +306,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="spiIdx">The SPI ID</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPI_ResetTransaction(SafeFtHandle ftHandle, byte spiIdx);
 
         /// <summary>
@@ -317,7 +317,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ioStrength">The intensity of the MOSI and MISO pins</param>
         /// <param name="ssoStrength">The intensity of the chip select pin</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SPI_SetDrivingStrength(SafeFtHandle ftHandle, PinDrivingStrength clkStrength, PinDrivingStrength ioStrength, PinDrivingStrength ssoStrength);
 
         #endregion
@@ -330,7 +330,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="kbps">ency in kilo Hertz</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CMaster_Init(SafeFtHandle ftHandle, uint kbps);
 
         /// <summary>
@@ -342,7 +342,7 @@ namespace Iot.Device.Ft4222
         /// <param name="bufferSize">The size of the buffer</param>
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CMaster_Read(SafeFtHandle ftHandle, ushort deviceAddress, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
@@ -354,7 +354,7 @@ namespace Iot.Device.Ft4222
         /// <param name="bufferSize">The size of the buffer</param>
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CMaster_Write(SafeFtHandle ftHandle, ushort deviceAddress, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
@@ -367,7 +367,7 @@ namespace Iot.Device.Ft4222
         /// <param name="bufferSize">The size of the buffer</param>
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CMaster_ReadEx(SafeFtHandle ftHandle, ushort deviceAddress, byte flag, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
@@ -380,7 +380,7 @@ namespace Iot.Device.Ft4222
         /// <param name="bufferSize">The size of the buffer</param>
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CMaster_WriteEx(SafeFtHandle ftHandle, ushort deviceAddress, byte flag, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
@@ -388,7 +388,7 @@ namespace Iot.Device.Ft4222
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CMaster_Reset(SafeFtHandle ftHandle);
 
         /// <summary>
@@ -397,7 +397,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="controllerStatus"></param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CMaster_GetStatus(SafeFtHandle ftHandle, out byte controllerStatus);
 
         /// <summary>
@@ -405,7 +405,7 @@ namespace Iot.Device.Ft4222
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CSlave_Init(SafeFtHandle ftHandle);
 
         /// <summary>
@@ -413,7 +413,7 @@ namespace Iot.Device.Ft4222
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CSlave_Reset(SafeFtHandle ftHandle);
 
         /// <summary>
@@ -422,7 +422,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="addr">The I2C device address</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CSlave_GetAddress(SafeFtHandle ftHandle, out byte addr);
 
         /// <summary>
@@ -431,7 +431,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="addr">The I2C device address</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CSlave_SetAddress(SafeFtHandle ftHandle, byte addr);
 
         /// <summary>
@@ -440,7 +440,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="pRxSize">the RX size</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CSlave_GetRxStatus(SafeFtHandle ftHandle, out ushort pRxSize);
 
         /// <summary>
@@ -451,7 +451,7 @@ namespace Iot.Device.Ft4222
         /// <param name="bufferSize">The size of the buffer</param>
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CSlave_Read(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
@@ -462,7 +462,7 @@ namespace Iot.Device.Ft4222
         /// <param name="bufferSize">The size of the buffer</param>
         /// <param name="sizeTransferred">The size of the transfer</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CSlave_Write(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
@@ -471,7 +471,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="enable">True to enable, false to disable</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CSlave_SetClockStretch(SafeFtHandle ftHandle, bool enable);
 
         /// <summary>
@@ -480,7 +480,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="responseWord">The response word</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CSlave_SetRespWord(SafeFtHandle ftHandle, byte responseWord);
 
         #endregion
@@ -493,7 +493,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="gpioDir">Array of pin configuration</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_GPIO_Init(SafeFtHandle ftHandle, GpioPinMode[] gpioDir);
 
         /// <summary>
@@ -503,7 +503,7 @@ namespace Iot.Device.Ft4222
         /// <param name="portNum">The pin port</param>
         /// <param name="value">True if high, false if low</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_GPIO_Read(SafeFtHandle ftHandle, GpioPort portNum, out GpioPinValue value);
 
         /// <summary>
@@ -513,7 +513,7 @@ namespace Iot.Device.Ft4222
         /// <param name="portNum">The pin port</param>
         /// <param name="bValue">True if high, false if low</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_GPIO_Write(SafeFtHandle ftHandle, GpioPort portNum, GpioPinValue bValue);
 
         /// <summary>
@@ -523,7 +523,7 @@ namespace Iot.Device.Ft4222
         /// <param name="portNum">The pin port</param>
         /// <param name="trigger">The trigger type</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_GPIO_SetInputTrigger(SafeFtHandle ftHandle, GpioPort portNum, GpioTrigger trigger);
 
         /// <summary>
@@ -533,7 +533,7 @@ namespace Iot.Device.Ft4222
         /// <param name="portNum">The pin port</param>
         /// <param name="queueSize">The queue size</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_GPIO_GetTriggerStatus(SafeFtHandle ftHandle, GpioPort portNum, out ushort queueSize);
 
         /// <summary>
@@ -545,7 +545,7 @@ namespace Iot.Device.Ft4222
         /// <param name="readSize">The number of events read</param>
         /// <param name="sizeofRead">The size of the read buffer</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_GPIO_ReadTriggerQueue(SafeFtHandle ftHandle, GpioPort portNum, in GpioTrigger events, ushort readSize, out ushort sizeofRead);
 
         /// <summary>
@@ -554,7 +554,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="enable">True to enable, false to disable</param>
         /// <returns>The status</returns>
-        [DllImport("libft4222.so", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_GPIO_SetWaveFormMode(SafeFtHandle ftHandle, bool enable);
 
         #endregion
