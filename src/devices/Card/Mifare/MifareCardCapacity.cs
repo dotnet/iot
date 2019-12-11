@@ -13,18 +13,22 @@ namespace Iot.Device.Card.Mifare
         /// Unknown
         /// </summary>
         Unknown,
+
         /// <summary>
         /// Mifare 300
         /// </summary>
         Mifare300,
+
         /// <summary>
         /// Mifare 1K
         /// </summary>
         Mifare1K,
+
         /// <summary>
         /// Mifare 2K
         /// </summary>
         Mifare2K,
+
         /// <summary>
         /// Mifare 4K
         /// </summary>

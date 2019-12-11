@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
+using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
@@ -15,7 +15,6 @@ namespace Iot.Device.BrickPi3.Sensors
     /// </summary>
     public class NXTSoundSensor : INotifyPropertyChanged, ISensor
     {
-
         private const int NXTCutoff = 512;
 
         private Brick _brick = null;
@@ -27,14 +26,17 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize a NXT Sound Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor Port</param>
-        public NXTSoundSensor(Brick brick, SensorPort port) : this(brick, port, 1000) { }
+        public NXTSoundSensor(Brick brick, SensorPort port)
+            : this(brick, port, 1000)
+        {
+        }
 
         /// <summary>
         /// Initialize a NXT Sound Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor port</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>
         public NXTSoundSensor(Brick brick, SensorPort port, int timeout)
@@ -71,7 +73,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int PeriodRefresh
         {
-            get { return _periodRefresh; }
+            get
+            {
+                return _periodRefresh;
+            }
 
             set
             {
@@ -85,7 +90,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int Value
         {
-            get { return ReadRaw(); }
+            get
+            {
+                return ReadRaw();
+            }
 
             internal set
             {
@@ -102,7 +110,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public string ValueAsString
         {
-            get { return ReadAsString(); }
+            get
+            {
+                return ReadAsString();
+            }
 
             internal set
             {
@@ -177,7 +188,7 @@ namespace Iot.Device.BrickPi3.Sensors
         }
 
         /// <summary>
-        /// Number of modes
+        /// Number of modes supported
         /// </summary>
         /// <returns>Number of modes</returns>
         public int NumberOfModes()
@@ -197,11 +208,15 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Moves to next mode
         /// </summary>
-        public void SelectNextMode() { }
+        public void SelectNextMode()
+        {
+        }
 
         /// <summary>
         /// Moves to previous mode
         /// </summary>
-        public void SelectPreviousMode() { }
+        public void SelectPreviousMode()
+        {
+        }
     }
 }

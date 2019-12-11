@@ -39,7 +39,7 @@ namespace Iot.Device.Rfid
 
         /// <summary>
         /// The bit rate
-        /// TODO: find more details on this elements it can be 
+        /// TODO: find more details on this elements it can be
         /// transformed as an enum
         /// </summary>
         public byte BitRates { get; set; }
@@ -72,14 +72,14 @@ namespace Iot.Device.Rfid
         /// <summary>
         /// Create a 106 kbps card type B like a credit card
         /// </summary>
-        /// <param name="atqb"></param>
+        /// <param name="atqb">Data to decode</param>
         public Data106kbpsTypeB(byte[] atqb)
         {
             try
             {
                 Command = atqb[0];
                 NfcId = new byte[4];
-                atqb.AsSpan().Slice(1,4).CopyTo(NfcId);
+                atqb.AsSpan().Slice(1, 4).CopyTo(NfcId);
                 ApplicationData = new byte[4];
                 atqb.AsSpan().Slice(5, 4).CopyTo(ApplicationData);
                 BitRates = atqb[9];
@@ -88,35 +88,65 @@ namespace Iot.Device.Rfid
 
                 var fwi = atqb[11] & 0b1111_0000;
                 if (fwi == 0b0000_0000)
+                {
                     FrameWaitingTime = 302.1f;
+                }
                 else if (fwi == 0b0001_0000)
+                {
                     FrameWaitingTime = 604.1f;
+                }
                 else if (fwi == 0b0010_0000)
+                {
                     FrameWaitingTime = 1203.3f;
+                }
                 else if (fwi == 0b0011_0000)
+                {
                     FrameWaitingTime = 2416.5f;
+                }
                 else if (fwi == 0b0100_0000)
+                {
                     FrameWaitingTime = 4833.0f;
+                }
                 else if (fwi == 0b0101_0000)
+                {
                     FrameWaitingTime = 9666.1f;
+                }
                 else if (fwi == 0b0110_0000)
+                {
                     FrameWaitingTime = 19332.2f;
+                }
                 else if (fwi == 0b0111_0000)
+                {
                     FrameWaitingTime = 38664.3f;
+                }
                 else if (fwi == 0b1000_0000)
+                {
                     FrameWaitingTime = 77328.6f;
+                }
                 else if (fwi == 0b1001_0000)
+                {
                     FrameWaitingTime = 154657.2f;
+                }
                 else if (fwi == 0b1010_0000)
+                {
                     FrameWaitingTime = 309314.5f;
+                }
                 else if (fwi == 0b1011_0000)
+                {
                     FrameWaitingTime = 618628.9f;
+                }
                 else if (fwi == 0b1100_0000)
+                {
                     FrameWaitingTime = 1237257.8f;
+                }
                 else if (fwi == 0b1101_0000)
+                {
                     FrameWaitingTime = 2474515.6f;
+                }
                 else if (fwi == 0b1110_0000)
+                {
                     FrameWaitingTime = 4949031.3f;
+                }
 
                 NadSupported = (atqb[11] & 0b0000_0010) == 0b0000_0010;
                 CidSupported = (atqb[11] & 0b0000_0001) == 0b0000_0001;

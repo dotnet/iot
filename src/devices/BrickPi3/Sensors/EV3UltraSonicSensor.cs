@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.BrickPi3.Extensions;
-using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
+using Iot.Device.BrickPi3.Extensions;
+using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
@@ -26,22 +26,28 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize an EV3 Ulrasonic sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor port</param>
-        public EV3UltraSonicSensor(Brick brick, SensorPort port) : this(brick, port, UltraSonicMode.Centimeter, 1000) { }
+        public EV3UltraSonicSensor(Brick brick, SensorPort port)
+            : this(brick, port, UltraSonicMode.Centimeter, 1000)
+        {
+        }
 
         /// <summary>
         /// Initialize an EV3 Ultrasonic sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor mode</param>
         /// <param name="usmode">Ultrasonic mode</param>
-        public EV3UltraSonicSensor(Brick brick, SensorPort port, UltraSonicMode usmode) : this(brick, port, usmode, 1000) { }
+        public EV3UltraSonicSensor(Brick brick, SensorPort port, UltraSonicMode usmode)
+            : this(brick, port, usmode, 1000)
+        {
+        }
 
         /// <summary>
         /// Initialize an EV3 Ultrasonic Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor port</param>
         /// <param name="usmode">Ultrasonic mode</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>
@@ -50,7 +56,10 @@ namespace Iot.Device.BrickPi3.Sensors
             _brick = brick;
             Port = port;
             if (UltraSonicMode.Listen == _mode)
+            {
                 _mode = UltraSonicMode.Centimeter;
+            }
+
             _mode = usmode;
             brick.SetSensorType((byte)Port, (SensorType)usmode);
             _periodRefresh = timeout;
@@ -82,7 +91,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int PeriodRefresh
         {
-            get { return _periodRefresh; }
+            get
+            {
+                return _periodRefresh;
+            }
 
             set
             {
@@ -96,7 +108,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int Value
         {
-            get { return ReadRaw(); }
+            get
+            {
+                return ReadRaw();
+            }
 
             internal set
             {
@@ -113,7 +128,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public string ValueAsString
         {
-            get { return ReadAsString(); }
+            get
+            {
+                return ReadAsString();
+            }
 
             internal set
             {
@@ -135,12 +153,15 @@ namespace Iot.Device.BrickPi3.Sensors
         }
 
         /// <summary>
-        /// Gets or sets the Gyro mode. 
+        /// Gets or sets the Gyro mode.
         /// </summary>
         /// <value>The mode.</value>
         public UltraSonicMode Mode
         {
-            get { return _mode; }
+            get
+            {
+                return _mode;
+            }
 
             set
             {
@@ -168,7 +189,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <returns>The value as a string</returns>
         public string ReadAsString()
         {
-            string s = "";
+            string s = string.Empty;
             switch (_mode)
             {
                 case UltraSonicMode.Centimeter:
@@ -193,7 +214,10 @@ namespace Iot.Device.BrickPi3.Sensors
         {
             var ret = ReadRaw();
             if (ret == int.MaxValue)
+            {
                 return ret;
+            }
+
             return Mode == UltraSonicMode.Listen ? (ret != 0 ? 1 : 0) : ret;
         }
 
@@ -216,7 +240,8 @@ namespace Iot.Device.BrickPi3.Sensors
                 }
             }
             catch (Exception ex) when (ex is IOException)
-            { }
+            {
+            }
 
             return int.MaxValue;
         }
@@ -247,7 +272,7 @@ namespace Iot.Device.BrickPi3.Sensors
         }
 
         /// <summary>
-        /// Number of modes
+        /// Number of modes supported
         /// </summary>
         /// <returns>Number of modes</returns>
         public int NumberOfModes()

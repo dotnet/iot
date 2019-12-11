@@ -53,7 +53,7 @@ namespace Iot.Device.CharacterLcd
         /// we're exposing a multiplier for any "hard coded" waits. This can also be
         /// used to reduce the wait time when the clock runs faster or other overhead
         /// (time spent in other code) allows for more aggressive timing.
-        /// 
+        ///
         /// There is a busy signal that can be checked that could make this moot, but
         /// currently we are unable to check the signal fast enough to make gains (or
         /// even equal) going off hard timings. The busy signal also requires having a

@@ -51,7 +51,7 @@ namespace Iot.Device.Bh1745
         BlueChannel = 0b10,
 
         /// <summary>
-        /// The clear color channel. 
+        /// The clear color channel.
         /// </summary>
         ClearChannel = 0b11
     }

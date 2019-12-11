@@ -162,7 +162,7 @@ namespace Iot.Device.Bno055
             new byte[]
             {
                 (byte)Registers.PWR_MODE, (byte)PowerMode.Normal
-            }, 
+            },
             new byte[]
             {
                 (byte)Registers.AXIS_MAP_CONFIG, 0x24, // AXIS_MAP_CONFIG

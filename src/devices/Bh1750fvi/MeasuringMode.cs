@@ -5,7 +5,7 @@
 namespace Iot.Device.Bh1750fvi
 {
     /// <summary>
-    /// The measuring mode of BH1750FVI 
+    /// The measuring mode of BH1750FVI
     /// </summary>
     public enum MeasuringMode : byte
     {
@@ -13,39 +13,39 @@ namespace Iot.Device.Bh1750fvi
 
         /// <summary>
         /// Start measurement at 1lx resolution
-        /// Measurement Time is typically 120ms. 
+        /// Measurement Time is typically 120ms.
         /// </summary>
         ContinuouslyHighResolutionMode = 0b_0001_0000,
 
         /// <summary>
         /// Start measurement at 0.5lx resolution
-        /// Measurement Time is typically 120ms. 
+        /// Measurement Time is typically 120ms.
         /// </summary>
         ContinuouslyHighResolutionMode2 = 0b_0001_0001,
 
         /// <summary>
         /// Start measurement at 4lx resolution
-        /// Measurement Time is typically 16ms. 
+        /// Measurement Time is typically 16ms.
         /// </summary>
         ContinuouslyLowResolutionMode = 0b_0001_0011,
 
         /// <summary>
         /// Start measurement at 1lx resolution once
-        /// Measurement Time is typically 120ms. 
+        /// Measurement Time is typically 120ms.
         /// It is automatically set to Power Down mode after measurement.
         /// </summary>
         OneTimeHighResolutionMode = 0b_0010_0000,
 
         /// <summary>
         /// Start measurement at 0.5lx resolution once
-        /// Measurement Time is typically 120ms. 
+        /// Measurement Time is typically 120ms.
         /// It is automatically set to Power Down mode after measurement.
         /// </summary>
         OneTimeHighResolutionMode2 = 0b_0010_0001,
 
         /// <summary>
         /// Start measurement at 4lx resolution once
-        /// Measurement Time is typically 16ms. 
+        /// Measurement Time is typically 16ms.
         /// It is automatically set to Power Down mode after measurement.
         /// </summary>
         OneTimeLowResolutionMode = 0b_0010_0011

@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.BrickPi3.Extensions;
-using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
+using Iot.Device.BrickPi3.Extensions;
+using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
@@ -21,19 +21,19 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Result will be in degrees
         /// </summary>
         Angle = SensorType.EV3GyroAbs,
+
         /// <summary>
         /// Result will be in degrees per second
         /// </summary>
         AngularVelocity = SensorType.EV3GyroDps
 #pragma warning restore
-    };
+    }
 
     /// <summary>
     /// Create a EV3 Gyro sensor
     /// </summary>
     public class EV3GyroSensor : INotifyPropertyChanged, ISensor
     {
-
         private Brick _brick = null;
         private GyroMode _gmode;
         private Timer _timer = null;
@@ -44,22 +44,28 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize an EV3 Gyro Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor port</param>
-        public EV3GyroSensor(Brick brick, SensorPort port) : this(brick, port, GyroMode.Angle) { }
+        public EV3GyroSensor(Brick brick, SensorPort port)
+            : this(brick, port, GyroMode.Angle)
+        {
+        }
 
         /// <summary>
         /// Initialize an EV3 Gyro Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">Gyro mode</param>
-        public EV3GyroSensor(Brick brick, SensorPort port, GyroMode mode) : this(brick, port, mode, 1000) { }
+        public EV3GyroSensor(Brick brick, SensorPort port, GyroMode mode)
+            : this(brick, port, mode, 1000)
+        {
+        }
 
         /// <summary>
         /// Initialize an EV3 Gyro Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">Gyro mode</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>
@@ -92,7 +98,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int Value
         {
-            get { return ReadRaw(); }
+            get
+            {
+                return ReadRaw();
+            }
             internal set
             {
                 if (value != _value)
@@ -108,7 +117,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public string ValueAsString
         {
-            get { return ReadAsString(); }
+            get
+            {
+                return ReadAsString();
+            }
             internal set
             {
                 if (_valueAsString != value)
@@ -118,6 +130,7 @@ namespace Iot.Device.BrickPi3.Sensors
                 }
             }
         }
+
         /// <summary>
         /// To notify a property has changed. The minimum time can be set up
         /// with timeout property
@@ -129,7 +142,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int PeriodRefresh
         {
-            get { return _periodRefresh; }
+            get
+            {
+                return _periodRefresh;
+            }
             set
             {
                 _periodRefresh = value;
@@ -147,12 +163,15 @@ namespace Iot.Device.BrickPi3.Sensors
         }
 
         /// <summary>
-        /// Gets or sets the Gyro mode. 
+        /// Gets or sets the Gyro mode.
         /// </summary>
         /// <value>The mode.</value>
         public GyroMode Mode
         {
-            get { return _gmode; }
+            get
+            {
+                return _gmode;
+            }
 
             set
             {
@@ -175,7 +194,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <returns>The value as a string</returns>
         public string ReadAsString()
         {
-            string s = "";
+            string s = string.Empty;
             switch (_gmode)
             {
                 case GyroMode.Angle:
@@ -216,18 +235,24 @@ namespace Iot.Device.BrickPi3.Sensors
         {
             var ret = ReadRaw();
             if (ret == int.MaxValue)
+            {
                 return ret;
+            }
+
             return (Mode == GyroMode.Angle) ? ret / 360 : 0;
         }
 
         /// <summary>
-        /// Read the gyro sensor value. The returned value depends on the mode. 
+        /// Read the gyro sensor value. The returned value depends on the mode.
         /// </summary>
         public int Read()
         {
             var ret = ReadRaw();
             if (ret == int.MaxValue)
+            {
                 return ret;
+            }
+
             return (Mode == GyroMode.Angle) ? ret % 360 : ret;
         }
 
@@ -274,7 +299,7 @@ namespace Iot.Device.BrickPi3.Sensors
         }
 
         /// <summary>
-        /// Number of modes
+        /// Number of modes supported
         /// </summary>
         /// <returns>Number of modes</returns>
         public int NumberOfModes()

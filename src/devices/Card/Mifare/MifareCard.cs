@@ -70,34 +70,40 @@ namespace Iot.Device.Card.Mifare
         /// </summary>
         /// <returns>-1 if the process fails otherwise the number of bytes read</returns>
         public int RunMifiCardCommand()
-        {            
+        {
             byte[] dataOut = new byte[0];
             if (Command == MifareCardCommand.Read16Bytes)
+            {
                 dataOut = new byte[16];
+            }
+
             var ret = _rfid.Transceive(Target, Serialize(), dataOut.AsSpan());
             LogInfo.Log($"{nameof(RunMifiCardCommand)}: {Command}, Target: {Target}, Data: {BitConverter.ToString(Serialize())}, Success: {ret}, Dataout: {BitConverter.ToString(dataOut)}", LogLevel.Debug);
             if ((ret > 0) && (Command == MifareCardCommand.Read16Bytes))
+            {
                 Data = dataOut;
+            }
+
             return ret;
         }
 
         private (byte C1a, byte C1b, byte C2a, byte C2b, byte C3a, byte C3b) DecodeSectorTailer(byte blockNumber, byte[] sectorData)
         {
             // Bit      7    6    5    4    3    2    1    0
-            // Byte 6 !C23 !C22 !C21 !C20 !C13 !C12 !C11 !C10 
+            // Byte 6 !C23 !C22 !C21 !C20 !C13 !C12 !C11 !C10
             // Byte 7  C13  C12  C11  C10 !C33 !C32 !C31 !C30
             // Byte 8  C33  C32  C31  C30  C23  C22  C21  C20
             // Cab a = access bit and b = block number
             // Extract the C1
-            byte C1a = (byte)((~(sectorData[6]) >> blockNumber) & 0b0000_0001);
-            byte C1b = (byte)((sectorData[7] >> (4 + blockNumber)) & 0b0000_0001);
+            byte c1a = (byte)((~(sectorData[6]) >> blockNumber) & 0b0000_0001);
+            byte c1b = (byte)((sectorData[7] >> (4 + blockNumber)) & 0b0000_0001);
             // Extract the C2
-            byte C2a = (byte)((sectorData[8] >> blockNumber) & 0b0000_0001);
-            byte C2b = (byte)((~(sectorData[6]) >> (4 + blockNumber)) & 0b0000_0001);
+            byte c2a = (byte)((sectorData[8] >> blockNumber) & 0b0000_0001);
+            byte c2b = (byte)((~(sectorData[6]) >> (4 + blockNumber)) & 0b0000_0001);
             // Extract the C3
-            byte C3a = (byte)((~(sectorData[7]) >> blockNumber) & 0b0000_0001);
-            byte C3b = (byte)((sectorData[8] >> (4 + blockNumber)) & 0b0000_0001);
-            return (C1a, C1b, C2a, C2b, C3a, C3b);
+            byte c3a = (byte)((~(sectorData[7]) >> blockNumber) & 0b0000_0001);
+            byte c3b = (byte)((sectorData[8] >> (4 + blockNumber)) & 0b0000_0001);
+            return (c1a, c1b, c2a, c2b, c3a, c3b);
         }
 
         /// <summary>
@@ -107,9 +113,9 @@ namespace Iot.Device.Card.Mifare
         /// <returns>the 3 bytes for configuration</returns>
         public (byte b6, byte b7, byte b8) EncodeSectorTailer(AccessSector accessSector)
         {
-            byte C1 = 0;
-            byte C2 = 0;
-            byte C3 = 0;
+            byte c1 = 0;
+            byte c2 = 0;
+            byte c3 = 0;
 
             // Ignore AccessSector.KeyBRead
             accessSector = accessSector & ~AccessSector.ReadKeyB;
@@ -117,71 +123,71 @@ namespace Iot.Device.Card.Mifare
             if (accessSector == (AccessSector.WriteKeyAWithKeyA | AccessSector.ReadAccessBitsWithKeyA | AccessSector.ReadKeyBWithKeyA |
                     AccessSector.WriteKeyBWithKeyA))
             {
-                C1 = 0;
-                C2 = 0;
-                C3 = 0;
+                c1 = 0;
+                c2 = 0;
+                c3 = 0;
             }
 
             if (accessSector == (AccessSector.ReadAccessBitsWithKeyA | AccessSector.ReadKeyBWithKeyA))
             {
-                C1 = 0;
-                C2 = 1;
-                C3 = 0;
+                c1 = 0;
+                c2 = 1;
+                c3 = 0;
             }
 
             if (accessSector == (AccessSector.WriteKeyAWithKeyB | AccessSector.ReadAccessBitsWithKeyA |
                     AccessSector.ReadAccessBitsWithKeyB | AccessSector.WriteKeyBWithKeyB))
             {
-                C1 = 1;
-                C2 = 0;
-                C3 = 0;
+                c1 = 1;
+                c2 = 0;
+                c3 = 0;
             }
 
             if (accessSector == (AccessSector.ReadAccessBitsWithKeyA | AccessSector.ReadAccessBitsWithKeyB))
             {
-                C1 = 1;
-                C2 = 1;
-                C3 = 0;
+                c1 = 1;
+                c2 = 1;
+                c3 = 0;
             }
 
             if (accessSector == (AccessSector.WriteKeyAWithKeyA | AccessSector.ReadAccessBitsWithKeyA |
                     AccessSector.WriteAccessBitsWithKeyA | AccessSector.ReadKeyBWithKeyA |
                     AccessSector.WriteKeyBWithKeyA))
             {
-                C1 = 0;
-                C2 = 0;
-                C3 = 1;
+                c1 = 0;
+                c2 = 0;
+                c3 = 1;
             }
 
             if (accessSector == (AccessSector.WriteKeyAWithKeyB | AccessSector.ReadAccessBitsWithKeyA |
                     AccessSector.ReadAccessBitsWithKeyB | AccessSector.WriteAccessBitsWithKeyB |
                     AccessSector.WriteKeyBWithKeyB))
             {
-                C1 = 0;
-                C2 = 1;
-                C3 = 1;
+                c1 = 0;
+                c2 = 1;
+                c3 = 1;
             }
 
             if (accessSector == (AccessSector.ReadAccessBitsWithKeyA |
                     AccessSector.ReadAccessBitsWithKeyB | AccessSector.WriteAccessBitsWithKeyB))
             {
-                C1 = 1;
-                C2 = 0;
-                C3 = 1;
+                c1 = 1;
+                c2 = 0;
+                c3 = 1;
             }
 
             if (accessSector == (AccessSector.ReadAccessBitsWithKeyA |
                     AccessSector.ReadAccessBitsWithKeyB))
             {
-                C1 = 1;
-                C2 = 1;
-                C3 = 1;
+                c1 = 1;
+                c2 = 1;
+                c3 = 1;
             }
 
             // Encode the into the 3 bytes
-            byte b6 = (byte)((((~C2) & 0x01) << 7) | (((~C1) & 0x01) << 3));
-            byte b7 = (byte)(((C1) << 7) | (((~C3) & 0x01) << 3));
-            byte b8 = (byte)(((C3) << 7) | ((C2) << 3));
+            byte b6 = (byte)((((~c2) & 0x01) << 7) | (((~c1) & 0x01) << 3));
+            byte b7 = (byte)(((c1) << 7) | (((~c3) & 0x01) << 3));
+            byte b8 = (byte)(((c3) << 7) | ((c2) << 3));
             return (b6, b7, b8);
         }
 
@@ -195,74 +201,75 @@ namespace Iot.Device.Card.Mifare
         {
             blockNumber = (byte)(blockNumber % 4);
 
-            byte C1 = 0;
-            byte C2 = 0;
-            byte C3 = 0;
+            byte c1 = 0;
+            byte c2 = 0;
+            byte c3 = 0;
 
             if (accessType == (AccessType.ReadKeyA | AccessType.ReadKeyB | AccessType.WriteKeyA | AccessType.WriteKeyB |
                     AccessType.IncrementKeyA | AccessType.IncrementKeyB |
                     AccessType.DecrementTransferRestoreKeyA | AccessType.DecrementTransferRestoreKeyB))
             {
-                C1 = 0;
-                C2 = 0;
-                C3 = 0;
+                c1 = 0;
+                c2 = 0;
+                c3 = 0;
             }
 
             if (accessType == (AccessType.ReadKeyA | AccessType.ReadKeyB))
             {
-                C1 = 0;
-                C2 = 1;
-                C3 = 0;
+                c1 = 0;
+                c2 = 1;
+                c3 = 0;
             }
 
             if (accessType == (AccessType.ReadKeyA | AccessType.ReadKeyB | AccessType.WriteKeyB))
             {
-                C1 = 1;
-                C2 = 0;
-                C3 = 0;
+                c1 = 1;
+                c2 = 0;
+                c3 = 0;
             }
 
             if (accessType == (AccessType.ReadKeyA | AccessType.ReadKeyB | AccessType.WriteKeyB |
                     AccessType.IncrementKeyB |
                     AccessType.DecrementTransferRestoreKeyA | AccessType.DecrementTransferRestoreKeyB))
             {
-                C1 = 1;
-                C2 = 1;
-                C3 = 0;
+                c1 = 1;
+                c2 = 1;
+                c3 = 0;
             }
 
             if (accessType == (AccessType.ReadKeyA | AccessType.ReadKeyB |
                     AccessType.DecrementTransferRestoreKeyA | AccessType.DecrementTransferRestoreKeyB))
             {
-                C1 = 0;
-                C2 = 0;
-                C3 = 1;
+                c1 = 0;
+                c2 = 0;
+                c3 = 1;
             }
 
             if (accessType == (AccessType.ReadKeyB | AccessType.WriteKeyB))
             {
-                C1 = 0;
-                C2 = 1;
-                C3 = 1;
+                c1 = 0;
+                c2 = 1;
+                c3 = 1;
             }
 
             if (accessType == AccessType.ReadKeyB)
             {
-                C1 = 1;
-                C2 = 0;
-                C3 = 1;
+                c1 = 1;
+                c2 = 0;
+                c3 = 1;
             }
 
             if (accessType == AccessType.None)
             {
-                C1 = 1;
-                C2 = 1;
-                C3 = 1;
+                c1 = 1;
+                c2 = 1;
+                c3 = 1;
             }
+
             // Encore the access bits
-            byte b6 = (byte)((((~C2) & 0x01) << (4 + blockNumber)) | (((~C1) & 0x01) << blockNumber));
-            byte b7 = (byte)(((C1) << (4 + blockNumber)) | (((~C3) & 0x01) << blockNumber));
-            byte b8 = (byte)(((C3) << (4 + blockNumber)) | ((C2) << blockNumber));
+            byte b6 = (byte)((((~c2) & 0x01) << (4 + blockNumber)) | (((~c1) & 0x01) << blockNumber));
+            byte b7 = (byte)(((c1) << (4 + blockNumber)) | (((~c3) & 0x01) << blockNumber));
+            byte b8 = (byte)(((c3) << (4 + blockNumber)) | ((c2) << blockNumber));
             return (b6, b7, b8);
         }
 
@@ -275,56 +282,80 @@ namespace Iot.Device.Card.Mifare
         public AccessSector SectorTailerAccess(byte blockNumber, byte[] sectorData)
         {
             // Bit      7    6    5    4    3    2    1    0
-            // Byte 6 !C23 !C22 !C21 !C20 !C13 !C12 !C11 !C10 
+            // Byte 6 !C23 !C22 !C21 !C20 !C13 !C12 !C11 !C10
             // Byte 7  C13  C12  C11  C10 !C33 !C32 !C31 !C30
             // Byte 8  C33  C32  C31  C30  C23  C22  C21  C20
             // Cab a = access bit and b = block number
             blockNumber = (byte)(blockNumber % 4);
             if (blockNumber != 3)
+            {
                 return AccessSector.None;
+            }
 
-            var (C1a, C1b, C2a, C2b, C3a, C3b) = DecodeSectorTailer(blockNumber, sectorData);
-            if (C1a != C1b)
+            var (c1a, c1b, c2a, c2b, c3a, c3b) = DecodeSectorTailer(blockNumber, sectorData);
+            if (c1a != c1b)
+            {
                 return AccessSector.None;
+            }
 
-            if (C2a != C2b)
+            if (c2a != c2b)
+            {
                 return AccessSector.None;
+            }
 
-            if (C3a != C3b)
+            if (c3a != c3b)
+            {
                 return AccessSector.None;
+            }
 
             // Table of truth
-            if ((C1a == 0) && (C2a == 0) && (C3a == 0))
+            if ((c1a == 0) && (c2a == 0) && (c3a == 0))
+            {
                 return AccessSector.WriteKeyAWithKeyA | AccessSector.ReadAccessBitsWithKeyA | AccessSector.ReadKeyBWithKeyA |
                     AccessSector.WriteKeyBWithKeyA | AccessSector.ReadKeyB;
+            }
 
-            if ((C1a == 0) && (C2a == 1) && (C3a == 0))
+            if ((c1a == 0) && (c2a == 1) && (c3a == 0))
+            {
                 return AccessSector.ReadAccessBitsWithKeyA | AccessSector.ReadKeyBWithKeyA | AccessSector.ReadKeyB;
+            }
 
-            if ((C1a == 1) && (C2a == 0) && (C3a == 0))
+            if ((c1a == 1) && (c2a == 0) && (c3a == 0))
+            {
                 return AccessSector.WriteKeyAWithKeyB | AccessSector.ReadAccessBitsWithKeyA |
                     AccessSector.ReadAccessBitsWithKeyB | AccessSector.WriteKeyBWithKeyB;
+            }
 
-            if ((C1a == 1) && (C2a == 1) && (C3a == 0))
+            if ((c1a == 1) && (c2a == 1) && (c3a == 0))
+            {
                 return AccessSector.ReadAccessBitsWithKeyA | AccessSector.ReadAccessBitsWithKeyB;
+            }
 
-            if ((C1a == 0) && (C2a == 0) && (C3a == 1))
+            if ((c1a == 0) && (c2a == 0) && (c3a == 1))
+            {
                 return AccessSector.WriteKeyAWithKeyA | AccessSector.ReadAccessBitsWithKeyA |
                     AccessSector.WriteAccessBitsWithKeyA | AccessSector.ReadKeyBWithKeyA |
                     AccessSector.WriteKeyBWithKeyA | AccessSector.ReadKeyB;
+            }
 
-            if ((C1a == 0) && (C2a == 1) && (C3a == 1))
+            if ((c1a == 0) && (c2a == 1) && (c3a == 1))
+            {
                 return AccessSector.WriteKeyAWithKeyB | AccessSector.ReadAccessBitsWithKeyA |
                     AccessSector.ReadAccessBitsWithKeyB | AccessSector.WriteAccessBitsWithKeyB |
                     AccessSector.WriteKeyBWithKeyB;
+            }
 
-            if ((C1a == 1) && (C2a == 0) && (C3a == 1))
+            if ((c1a == 1) && (c2a == 0) && (c3a == 1))
+            {
                 return AccessSector.ReadAccessBitsWithKeyA |
                     AccessSector.ReadAccessBitsWithKeyB | AccessSector.WriteAccessBitsWithKeyB;
+            }
 
-            if ((C1a == 1) && (C2a == 0) && (C3a == 1))
+            if ((c1a == 1) && (c2a == 0) && (c3a == 1))
+            {
                 return AccessSector.ReadAccessBitsWithKeyA |
                     AccessSector.ReadAccessBitsWithKeyB;
+            }
 
             return AccessSector.None;
         }
@@ -338,50 +369,72 @@ namespace Iot.Device.Card.Mifare
         public AccessType BlockAccess(byte blockNumber, byte[] sectorData)
         {
             // Bit      7    6    5    4    3    2    1    0
-            // Byte 6 !C23 !C22 !C21 !C20 !C13 !C12 !C11 !C10 
+            // Byte 6 !C23 !C22 !C21 !C20 !C13 !C12 !C11 !C10
             // Byte 7  C13  C12  C11  C10 !C33 !C32 !C31 !C30
             // Byte 8  C33  C32  C31  C30  C23  C22  C21  C20
             // Cab a = access bit and b = block number
             blockNumber = (byte)(blockNumber % 4);
             if (blockNumber == 3)
+            {
                 return AccessType.None;
+            }
 
-            var (C1a, C1b, C2a, C2b, C3a, C3b) = DecodeSectorTailer(blockNumber, sectorData);
-            if (C1a != C1b)
+            var (c1a, c1b, c2a, c2b, c3a, c3b) = DecodeSectorTailer(blockNumber, sectorData);
+            if (c1a != c1b)
+            {
                 return AccessType.None;
+            }
 
-            if (C2a != C2b)
+            if (c2a != c2b)
+            {
                 return AccessType.None;
+            }
 
-            if (C3a != C3b)
+            if (c3a != c3b)
+            {
                 return AccessType.None;
+            }
 
             // Table of truth
-            if ((C1a == 0) && (C2a == 0) && (C3a == 0))
+            if ((c1a == 0) && (c2a == 0) && (c3a == 0))
+            {
                 return AccessType.ReadKeyA | AccessType.ReadKeyB | AccessType.WriteKeyA | AccessType.WriteKeyB |
                     AccessType.IncrementKeyA | AccessType.IncrementKeyB |
                     AccessType.DecrementTransferRestoreKeyA | AccessType.DecrementTransferRestoreKeyB;
+            }
 
-            if ((C1a == 0) && (C2a == 1) && (C3a == 0))
+            if ((c1a == 0) && (c2a == 1) && (c3a == 0))
+            {
                 return AccessType.ReadKeyA | AccessType.ReadKeyB;
+            }
 
-            if ((C1a == 1) && (C2a == 0) && (C3a == 0))
+            if ((c1a == 1) && (c2a == 0) && (c3a == 0))
+            {
                 return AccessType.ReadKeyA | AccessType.ReadKeyB | AccessType.WriteKeyB;
+            }
 
-            if ((C1a == 1) && (C2a == 1) && (C3a == 0))
+            if ((c1a == 1) && (c2a == 1) && (c3a == 0))
+            {
                 return AccessType.ReadKeyA | AccessType.ReadKeyB | AccessType.WriteKeyB |
                     AccessType.IncrementKeyB |
                     AccessType.DecrementTransferRestoreKeyA | AccessType.DecrementTransferRestoreKeyB;
+            }
 
-            if ((C1a == 0) && (C2a == 0) && (C3a == 1))
+            if ((c1a == 0) && (c2a == 0) && (c3a == 1))
+            {
                 return AccessType.ReadKeyA | AccessType.ReadKeyB |
                     AccessType.DecrementTransferRestoreKeyA | AccessType.DecrementTransferRestoreKeyB;
+            }
 
-            if ((C1a == 0) && (C2a == 1) && (C3a == 1))
+            if ((c1a == 0) && (c2a == 1) && (c3a == 1))
+            {
                 return AccessType.ReadKeyB | AccessType.WriteKeyB;
+            }
 
-            if ((C1a == 1) && (C2a == 0) && (C3a == 1))
+            if ((c1a == 1) && (c2a == 0) && (c3a == 1))
+            {
                 return AccessType.ReadKeyB;
+            }
 
             return AccessType.None;
         }
@@ -395,7 +448,10 @@ namespace Iot.Device.Card.Mifare
         public (byte b6, byte b7, byte b8) EncodeSectorAndClockTailer(AccessSector accessSector, AccessType[] accessTypes)
         {
             if (accessTypes.Length != 3)
+            {
                 throw new ArgumentException($"{nameof(accessTypes)} can only be array of 3");
+            }
+
             var tupleRes = EncodeSectorTailer(accessSector);
             byte b6 = tupleRes.Item1;
             byte b7 = tupleRes.Item2;
@@ -407,6 +463,7 @@ namespace Iot.Device.Card.Mifare
                 b7 |= tupleRes.Item2;
                 b8 |= tupleRes.Item3;
             }
+
             return (b6, b7, b8);
         }
 
@@ -432,21 +489,27 @@ namespace Iot.Device.Card.Mifare
             if (ATAQ == 0x0004)
             {
                 if (SAK == 0x08)
+                {
                     Capacity = MifareCardCapacity.Mifare1K;
+                }
                 else if (SAK == 0x0009)
+                {
                     Capacity = MifareCardCapacity.Mifare300;
+                }
             }
             else if (ATAQ == 0x0002)
             {
                 if (SAK == 0x18)
+                {
                     Capacity = MifareCardCapacity.Mifare4K;
+                }
             }
         }
 
         /// <summary>
         /// Is it a block sector?
         /// </summary>
-        /// <param name="blockNumber"></param>
+        /// <param name="blockNumber">Input block number</param>
         /// <returns>True if it is a sector block</returns>
         public bool IsSectorBlock(byte blockNumber)
         {
@@ -459,16 +522,20 @@ namespace Iot.Device.Card.Mifare
                     return blockNumber % 4 == 3;
                 case MifareCardCapacity.Mifare4K:
                     if (blockNumber < 128)
+                    {
                         return blockNumber % 4 == 3;
+                    }
                     else
+                    {
                         return blockNumber % 16 == 15;
+                    }
             }
         }
 
         /// <summary>
         /// Depending on the command, serialize the needed data
-        /// Authentication will serialize the command, the concerned key and 
-        /// the serial number 
+        /// Authentication will serialize the command, the concerned key and
+        /// the serial number
         /// Reading data will just serialize the command
         /// Writing data will serialize the data as well
         /// </summary>
@@ -483,18 +550,30 @@ namespace Iot.Device.Card.Mifare
                     ser[0] = (byte)Command;
                     ser[1] = BlockNumber;
                     if (KeyA.Length > 0)
+                    {
                         KeyA.CopyTo(ser, 2);
+                    }
+
                     if (SerialNumber.Length > 0)
+                    {
                         SerialNumber.CopyTo(ser, 2 + KeyA.Length);
+                    }
+
                     return ser;
                 case MifareCardCommand.AuthenticationB:
                     ser = new byte[2 + KeyB.Length + SerialNumber.Length];
                     ser[0] = (byte)Command;
                     ser[1] = BlockNumber;
                     if (KeyB.Length > 0)
+                    {
                         KeyB.CopyTo(ser, 2);
+                    }
+
                     if (SerialNumber.Length > 0)
+                    {
                         SerialNumber.CopyTo(ser, 2 + KeyB.Length);
+                    }
+
                     return ser;
                 case MifareCardCommand.Write16Bytes:
                 case MifareCardCommand.Write4Bytes:
@@ -502,7 +581,10 @@ namespace Iot.Device.Card.Mifare
                     ser[0] = (byte)Command;
                     ser[1] = BlockNumber;
                     if (Data.Length > 0)
+                    {
                         Data.CopyTo(ser, 2);
+                    }
+
                     return ser;
                 case MifareCardCommand.Incrementation:
                 case MifareCardCommand.Decrementation:
@@ -518,4 +600,3 @@ namespace Iot.Device.Card.Mifare
         }
     }
 }
-

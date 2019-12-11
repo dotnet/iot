@@ -11,13 +11,16 @@ using Iot.Device.Mcp23xxx;
 
 namespace Iot.Device.CharacterLcd.Samples
 {
-    class Program
+    /// <summary>
+    /// A test application for LCD displays. Adapt as needed for your hardware.
+    /// </summary>
+    public class Program
     {
         /// <summary>
         /// This program will print `Hello World`
         /// </summary>
         /// <param name="args">Should be empty</param>
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             // Choose the right setup for your display:
             // UsingGpioPins()
@@ -28,7 +31,7 @@ namespace Iot.Device.CharacterLcd.Samples
         /// <summary>
         /// This sets up a 16x2 character LCD, directly connected to a set of GPIO pins, with a hardwired or no backlight and 4 Bit commands
         /// </summary>
-        static void UsingGpioPins()
+        private static void UsingGpioPins()
         {
             using (Lcd1602 lcd = new Lcd1602(registerSelectPin: 22, enablePin: 17, dataPins: new int[] { 25, 24, 23, 18 }))
             {
@@ -41,7 +44,7 @@ namespace Iot.Device.CharacterLcd.Samples
         /// This method will use an mcp gpio extender to connect to the LCM display.
         /// This has been tested on the CrowPi lcd display.
         /// </summary>
-        static void UsingMcp()
+        private static void UsingMcp()
         {
             I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x21));
             Mcp23008 driver = new Mcp23008(i2CDevice);
@@ -61,10 +64,10 @@ namespace Iot.Device.CharacterLcd.Samples
         }
 
         /// <summary>
-        /// This method will use I2C commands to talk to the display. The display is expected to be at address 0x27 and accept 4 bit commands. 
-        /// This runs a full test suite against the display. 
+        /// This method will use I2C commands to talk to the display. The display is expected to be at address 0x27 and accept 4 bit commands.
+        /// This runs a full test suite against the display.
         /// </summary>
-        static void UsingHd44780OverI2C()
+        private static void UsingHd44780OverI2C()
         {
             using (I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x27)))
             {

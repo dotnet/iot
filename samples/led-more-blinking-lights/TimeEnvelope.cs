@@ -13,7 +13,7 @@ internal class TimeEnvelope
 
     public static void AddTime(IEnumerable<TimeEnvelope> envelopes, int value)
     {
-        foreach(var envelope in envelopes)
+        foreach (var envelope in envelopes)
         {
             envelope.AddTime(value);
         }
@@ -50,8 +50,9 @@ internal class TimeEnvelope
         }
         else if (_throwOnOverflow && _time > _count)
         {
-            throw new Exception ("TimeEnvelope count overflowed!");
+            throw new Exception("TimeEnvelope count overflowed!");
         }
+
         return _time;
     }
 
@@ -61,6 +62,7 @@ internal class TimeEnvelope
         {
             return true;
         }
+
         return false;
     }
 
@@ -70,6 +72,7 @@ internal class TimeEnvelope
         {
             return true;
         }
+
         return false;
     }
 
@@ -79,6 +82,7 @@ internal class TimeEnvelope
         {
             return true;
         }
+
         return false;
     }
 }

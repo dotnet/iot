@@ -13,6 +13,9 @@ namespace Iot.Device.Buzzer.Samples
         /// Create Pause element.
         /// </summary>
         /// <param name="duration">Duration of pause in melody sequence timeline.</param>
-        public PauseElement(Duration duration) : base(duration) {}
+        public PauseElement(Duration duration)
+            : base(duration)
+        {
+        }
     }
 }

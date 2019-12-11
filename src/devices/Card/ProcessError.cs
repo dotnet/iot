@@ -29,18 +29,26 @@ namespace Iot.Device.Card
         {
             // EMV 4.3 Book 3 page 60
             if (errorToProcess.Length < 2)
+            {
                 ErrorType = ErrorType.Unknown;
+            }
             else if ((errorToProcess[0] == 0x90) && (errorToProcess[1] == 0x00))
+            {
                 ErrorType = ErrorType.ProcessCompletedNormal;
+            }
             else if ((errorToProcess[0] == 0x62) || (errorToProcess[0] == 0x63))
             {
                 ErrorType = ErrorType.ProcessCompletedWarning;
                 if ((errorToProcess[0] == 0x62) && (errorToProcess[1] == 0x83))
+                {
                     ErrorType = ErrorType.StateNonVolatileMemoryUnchangedSelectedFileInvalidated;
+                }
                 else if (errorToProcess[0] == 0x63)
                 {
                     if (errorToProcess[1] == 0x00)
+                    {
                         ErrorType = ErrorType.StateNonVolatileMemoryChangedAuthenticationFailed;
+                    }
                     else if ((errorToProcess[1] & 0xC0) == 0xC0)
                     {
                         ErrorType = ErrorType.StateNonVolatileMemoryChanged;
@@ -61,19 +69,33 @@ namespace Iot.Device.Card
             {
                 ErrorType = ErrorType.ProcessAbortedChecking;
                 if ((errorToProcess[0] == 0x69) && (errorToProcess[1] == 0x83))
+                {
                     ErrorType = ErrorType.CommandNotAllowedAuthenticationMethodBlocked;
+                }
                 else if ((errorToProcess[0] == 0x69) && (errorToProcess[1] == 0x84))
+                {
                     ErrorType = ErrorType.CommandNotAllowedReferenceDataInvalidated;
+                }
                 else if ((errorToProcess[0] == 0x69) && (errorToProcess[1] == 0x85))
+                {
                     ErrorType = ErrorType.CommandNotAllowedConditionsNotSatisfied;
+                }
                 else if ((errorToProcess[0] == 0x6A) && (errorToProcess[1] == 0x88))
+                {
                     ErrorType = ErrorType.ReferenceDataNotFound;
+                }
                 else if ((errorToProcess[0] == 0x6A) && (errorToProcess[1] == 0x81))
+                {
                     ErrorType = ErrorType.WrongParameterP1P2FunctionNotSupported;
+                }
                 else if ((errorToProcess[0] == 0x6A) && (errorToProcess[1] == 0x82))
+                {
                     ErrorType = ErrorType.WrongParameterP1P2FileNotFound;
+                }
                 else if ((errorToProcess[0] == 0x6A) && (errorToProcess[1] == 0x83))
+                {
                     ErrorType = ErrorType.WrongParameterP1P2RecordNotFound;
+                }
                 else if (errorToProcess[0] == 0x6C)
                 {
                     ErrorType = ErrorType.WrongLength;
@@ -90,7 +112,9 @@ namespace Iot.Device.Card
                 CorrectLegnthOrBytesAvailable = errorToProcess[1];
             }
             else
+            {
                 ErrorType = ErrorType.Unknown;
+            }
         }
     }
 }
