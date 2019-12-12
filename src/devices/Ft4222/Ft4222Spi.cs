@@ -40,7 +40,7 @@ namespace Iot.Device.Ft4222
 
             // Select the one from bus Id
             // FT4222 propose depending on the mode multiple interfaces. Only the A is available for SPI or where there is none as it's the only interface
-            var devInfo = devInfos.Where(m => m.SerialNumber == "A" || string.IsNullOrEmpty(m.SerialNumber)).Where(m => !string.IsNullOrEmpty(m.Description)).ToArray();
+            var devInfo = devInfos.Where(m => m.Description == "FT4222 A" || m.Description == "FT4222").ToArray();
             if ((devInfo.Length == 0) || (devInfo.Length < _settings.BusId))
                 throw new IOException($"Can't find a device to open SPI on index {_settings.BusId}");
 

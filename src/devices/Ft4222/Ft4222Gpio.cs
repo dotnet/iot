@@ -45,9 +45,9 @@ namespace Iot.Device.Ft4222
 
             // Select the deviceNumber, only the last one in Mode 0 and Mode 1 can be open.
             // The last one is either B if in Mode 0 or D in mode 1.
-            string strMode = devInfos[0].Type == FtDevice.Ft4222HMode1or2With4Interfaces ? "D" : "B";
+            string strMode = devInfos[0].Type == FtDevice.Ft4222HMode1or2With4Interfaces ? "FT4222 D" : "FT4222 B";
 
-            var devInfo = devInfos.Where(m => m.SerialNumber == strMode).ToArray();
+            var devInfo = devInfos.Where(m => m.Description == strMode).ToArray();
             if ((devInfo.Length == 0) || (devInfo.Length < deviceNumber))
                 throw new IOException($"Can't find a device to open GPIO on index {deviceNumber}");
 

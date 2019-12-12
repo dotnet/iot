@@ -31,7 +31,7 @@ namespace Iot.Device.Ft4222
 
             Debug.WriteLine($"Number of devices: {numOfDevices}");
             if (numOfDevices == 0)
-                throw new IOException($"No device found");
+                throw new IOException($"No device found");           
 
             for (uint i = 0; i < numOfDevices; i++)
             {
@@ -46,17 +46,26 @@ namespace Iot.Device.Ft4222
                 ftStatus = FtFunction.FT_GetDeviceInfoDetail(i, out flags, out ftDevice, out id, out locId, in MemoryMarshal.GetReference(sernum), in MemoryMarshal.GetReference(desc), out handle);
                 if (ftStatus != FtStatus.Ok)
                     throw new IOException($"Can't read device information on device index {i}, error {ftStatus}");
+
                 devInfo.Type = ftDevice;
                 devInfo.Id = id;
-                devInfo.LocId = locId;                
+                devInfo.LocId = locId;
                 devInfo.Flags = (FtFlag)flags;
-                devInfo.SerialNumber = Encoding.ASCII.GetString(sernum.ToArray(), 0, 16);
-                devInfo.Description = Encoding.ASCII.GetString(desc.ToArray(), 0, 64);
-                devInfo.SerialNumber = devInfo.SerialNumber.Substring(0, devInfo.SerialNumber.IndexOf("\0"));
-                devInfo.Description = devInfo.Description.Substring(0, devInfo.Description.IndexOf("\0"));
+                devInfo.SerialNumber = Encoding.ASCII.GetString(sernum.ToArray(), 0, FindFirstZero(sernum));
+                devInfo.Description = Encoding.ASCII.GetString(desc.ToArray(), 0, FindFirstZero(desc));
                 devInfos.Add(devInfo);
             }
             return devInfos;
+        }
+
+        private static int FindFirstZero(ReadOnlySpan<byte> span)
+        {
+            for (int i = 0; i < span.Length; i++)
+            {
+                if (span[i] == 0)
+                    return i;
+            }
+            return span.Length;
         }
 
         /// <summary>
@@ -87,7 +96,7 @@ namespace Iot.Device.Ft4222
             FtVersion ftVersion;
             ftStatus = FtFunction.FT4222_GetVersion(ftHandle, out ftVersion);
             if (ftStatus != FtStatus.Ok)
-                throw new IOException($"Can't find versions of chipset and FT4222 dll, status: {ftStatus}");
+                throw new IOException($"Can't find versions of chipset and FT4222, status: {ftStatus}");
 
             ftStatus = FtFunction.FT_Close(ftHandle);
             if (ftStatus != FtStatus.Ok)
