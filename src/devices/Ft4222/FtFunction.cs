@@ -455,7 +455,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CSlave_Read(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
-        /// 
+        /// Reads data from the I2C slave
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="buffer">The buffer to write</param>
