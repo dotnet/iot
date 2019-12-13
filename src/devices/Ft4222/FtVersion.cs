@@ -13,9 +13,10 @@ namespace Iot.Device.Ft4222
         /// Chip version
         /// </summary>
         public uint ChipVersion;
+
         /// <summary>
         /// Dll version
         /// </summary>
-        public uint dllVersion;
+        public uint DllVersion;
     }
 }

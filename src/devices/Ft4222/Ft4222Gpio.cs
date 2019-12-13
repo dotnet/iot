@@ -35,13 +35,15 @@ namespace Iot.Device.Ft4222
         /// <summary>
         /// Create a FT4222 GPIO driver
         /// </summary>
-        /// <param name="deviceNumber"></param>
+        /// <param name="deviceNumber">Number of the device in the device list, default 0</param>
         public Ft4222Gpio(int deviceNumber = 0)
         {
             // Check device
             var devInfos = FtCommon.GetDevices();
             if (devInfos.Count == 0)
+            {
                 throw new IOException("No FTDI device available");
+            }
 
             // Select the deviceNumber, only the last one in Mode 0 and Mode 1 can be open.
             // The last one is either B if in Mode 0 or D in mode 1.
@@ -49,35 +51,48 @@ namespace Iot.Device.Ft4222
 
             var devInfo = devInfos.Where(m => m.Description == strMode).ToArray();
             if ((devInfo.Length == 0) || (devInfo.Length < deviceNumber))
+            {
                 throw new IOException($"Can't find a device to open GPIO on index {deviceNumber}");
+            }
 
             DeviceInformation = devInfo[deviceNumber];
             // Open device
             var ftStatus = FtFunction.FT_OpenEx(DeviceInformation.LocId, FtOpenType.OpenByLocation, out _ftHandle);
 
             if (ftStatus != FtStatus.Ok)
+            {
                 throw new IOException($"Failed to open device {DeviceInformation.Description}, status: {ftStatus}");
+            }
 
             ftStatus = FtFunction.FT4222_SetSuspendOut(_ftHandle, false);
             if (ftStatus != FtStatus.Ok)
+            {
                 throw new IOException($"Can't initialize GPIO for device {DeviceInformation.Description} changing Suspend out mode, status: {ftStatus}");
+            }
 
             ftStatus = FtFunction.FT4222_SetWakeUpInterrupt(_ftHandle, false);
             if (ftStatus != FtStatus.Ok)
+            {
                 throw new IOException($"Can't initialize GPIO for device {DeviceInformation.Description} removing wake up interrupt, status: {ftStatus}");
+            }
 
             for (int i = 0; i < PinCountConst; i++)
+            {
                 _gpioDirections[i] = GpioPinMode.Output;
+            }
 
             ftStatus = FtFunction.FT4222_GPIO_Init(_ftHandle, _gpioDirections);
 
             if (ftStatus != FtStatus.Ok)
+            {
                 throw new IOException($"Can't initialize GPIO for device {DeviceInformation.Description}, status: {ftStatus}");
+            }
         }
 
         /// <inheritdoc/>
         protected override void ClosePin(int pinNumber)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
@@ -90,7 +105,8 @@ namespace Iot.Device.Ft4222
 
         /// <inheritdoc/>
         protected override void OpenPin(int pinNumber)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         protected override PinValue Read(int pinNumber)
@@ -98,7 +114,10 @@ namespace Iot.Device.Ft4222
             GpioPinValue pinVal;
             var status = FtFunction.FT4222_GPIO_Read(_ftHandle, (GpioPort)pinNumber, out pinVal);
             if (status != FtStatus.Ok)
+            {
                 throw new IOException($"{nameof(Read)}: failed to write GPIO, status: {status}");
+            }
+
             return pinVal == GpioPinValue.High ? PinValue.High : PinValue.Low;
         }
 
@@ -106,18 +125,22 @@ namespace Iot.Device.Ft4222
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             if (eventTypes == PinEventTypes.None)
+            {
                 throw new ArgumentException($"{PinEventTypes.None} is an invalid value.", nameof(eventTypes));
+            }
 
             if (eventTypes.HasFlag(PinEventTypes.Falling))
             {
                 _gpioTriggers[pinNumber] |= GpioTrigger.Falling;
                 _pinFallingHandlers[pinNumber] += callback;
             }
+
             if (eventTypes.HasFlag(PinEventTypes.Rising))
             {
                 _gpioTriggers[pinNumber] |= GpioTrigger.Rising;
                 _pinRisingHandlers[pinNumber] += callback;
             }
+
             FtFunction.FT4222_GPIO_SetInputTrigger(_ftHandle, (GpioPort)pinNumber, _gpioTriggers[pinNumber]);
         }
 
@@ -130,10 +153,12 @@ namespace Iot.Device.Ft4222
             {
                 _gpioTriggers[pinNumber] &= ~GpioTrigger.Falling;
             }
+
             if (_pinRisingHandlers == null)
             {
                 _gpioTriggers[pinNumber] &= ~GpioTrigger.Rising;
             }
+
             FtFunction.FT4222_GPIO_SetInputTrigger(_ftHandle, (GpioPort)pinNumber, _gpioTriggers[pinNumber]);
         }
 
@@ -145,7 +170,9 @@ namespace Iot.Device.Ft4222
                 ushort queueSize;
                 var ftStatus = FtFunction.FT4222_GPIO_GetTriggerStatus(_ftHandle, (GpioPort)pinNumber, out queueSize);
                 if (ftStatus != FtStatus.Ok)
+                {
                     throw new IOException($"Can't get trigger status, error {ftStatus}");
+                }
 
                 if (queueSize > 0)
                 {
@@ -153,7 +180,9 @@ namespace Iot.Device.Ft4222
                     ushort readTrigger;
                     ftStatus = FtFunction.FT4222_GPIO_ReadTriggerQueue(_ftHandle, (GpioPort)pinNumber, in MemoryMarshal.GetReference(gpioTriggers), queueSize, out readTrigger);
                     if (ftStatus != FtStatus.Ok)
+                    {
                         throw new IOException($"Can't read trigger status, error {ftStatus}");
+                    }
 
                     switch (eventTypes)
                     {
@@ -169,6 +198,7 @@ namespace Iot.Device.Ft4222
                                     };
                                 }
                             }
+
                             break;
                         case PinEventTypes.Falling:
                             if (_gpioTriggers[pinNumber].HasFlag(GpioTrigger.Falling))
@@ -182,6 +212,7 @@ namespace Iot.Device.Ft4222
                                     };
                                 }
                             }
+
                             break;
                         case PinEventTypes.None:
                         default:
@@ -203,7 +234,9 @@ namespace Iot.Device.Ft4222
             _gpioDirections[pinNumber] = mode == PinMode.Output ? GpioPinMode.Output : GpioPinMode.Input;
             var status = FtFunction.FT4222_GPIO_Init(_ftHandle, _gpioDirections);
             if (status != FtStatus.Ok)
+            {
                 throw new IOException($"{nameof(SetPinMode)}: failed to set pin number {pinNumber} to {mode}, status: {status}");
+            }
         }
 
         /// <inheritdoc/>
@@ -211,7 +244,9 @@ namespace Iot.Device.Ft4222
         {
             var status = FtFunction.FT4222_GPIO_Write(_ftHandle, (GpioPort)pinNumber, value == PinValue.High ? GpioPinValue.High : GpioPinValue.Low);
             if (status != FtStatus.Ok)
+            {
                 throw new IOException($"{nameof(Write)}: failed to write GPIO, status: {status}");
+            }
         }
 
         /// <inheritdoc/>

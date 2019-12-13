@@ -122,11 +122,11 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_GetMaxTransferSize(SafeFtHandle ftHandle, out ushort pMaxSize);
 
         /// <summary>
-        /// 
+        /// Set event notification
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
-        /// <param name="mask"></param>
-        /// <param name="param"></param>
+        /// <param name="mask">Event mask</param>
+        /// <param name="param">Event parameter</param>
         /// <returns>The status</returns>
         [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SetEventNotification(SafeFtHandle ftHandle, ulong mask, IntPtr param);
@@ -395,7 +395,7 @@ namespace Iot.Device.Ft4222
         /// Get the I2C status as a master
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
-        /// <param name="controllerStatus"></param>
+        /// <param name="controllerStatus">Returns the controller status byte</param>
         /// <returns>The status</returns>
         [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CMaster_GetStatus(SafeFtHandle ftHandle, out byte controllerStatus);

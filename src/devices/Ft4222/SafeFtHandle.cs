@@ -9,8 +9,10 @@ namespace Iot.Device.Ft4222
 {
     internal class SafeFtHandle : SafeHandle
     {
-        public SafeFtHandle() : base(IntPtr.Zero, true)
-        { }
+        public SafeFtHandle() 
+            : base(IntPtr.Zero, true)
+        {
+        }
 
         public override bool IsInvalid => handle == IntPtr.Zero;
 

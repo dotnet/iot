@@ -13,10 +13,12 @@ namespace Iot.Device.Ft4222
         /// With Protocol
         /// </summary>
         WithProtocol = 0,
+
         /// <summary>
         /// Without Protocol
         /// </summary>
         WithoutProtocol,
+
         /// <summary>
         /// Never send acknowledge
         /// </summary>

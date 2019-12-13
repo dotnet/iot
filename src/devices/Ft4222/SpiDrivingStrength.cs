@@ -13,14 +13,17 @@ namespace Iot.Device.Ft4222
         /// 4 Milli Amperes
         /// </summary>
         Intensity4mA = 0,
+
         /// <summary>
         /// 8 Milli Amperes
         /// </summary>
         Intensity8mA,
+
         /// <summary>
         /// 12 Milli Amperes
         /// </summary>
         Intensity12mA,
+
         /// <summary>
         /// 16 Milli Amperes
         /// </summary>

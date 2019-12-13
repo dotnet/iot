@@ -13,10 +13,12 @@ namespace Iot.Device.Ft4222
         /// Open by serial number
         /// </summary>
         OpenBySerialNumber = 1,
+
         /// <summary>
         /// Open by description
         /// </summary>
         OpenByDescription = 2,
+
         /// <summary>
         /// Open by location
         /// </summary>

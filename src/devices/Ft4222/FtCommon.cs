@@ -22,7 +22,7 @@ namespace Iot.Device.Ft4222
         /// <returns>A list of devices connected</returns>
         public static List<DeviceInformation> GetDevices()
         {
-            List<DeviceInformation> devInfos = new List<DeviceInformation>(); ;
+            List<DeviceInformation> devInfos = new List<DeviceInformation>();
             FtStatus ftStatus = 0;
 
             // Check device
@@ -31,7 +31,9 @@ namespace Iot.Device.Ft4222
 
             Debug.WriteLine($"Number of devices: {numOfDevices}");
             if (numOfDevices == 0)
-                throw new IOException($"No device found");           
+            {
+                throw new IOException($"No device found");
+            }
 
             for (uint i = 0; i < numOfDevices; i++)
             {
@@ -43,9 +45,12 @@ namespace Iot.Device.Ft4222
                 uint id;
                 uint locId;
                 IntPtr handle;
-                ftStatus = FtFunction.FT_GetDeviceInfoDetail(i, out flags, out ftDevice, out id, out locId, in MemoryMarshal.GetReference(sernum), in MemoryMarshal.GetReference(desc), out handle);
+                ftStatus = FtFunction.FT_GetDeviceInfoDetail(i, out flags, out ftDevice, out id, out locId,
+                    in MemoryMarshal.GetReference(sernum), in MemoryMarshal.GetReference(desc), out handle);
                 if (ftStatus != FtStatus.Ok)
+                {
                     throw new IOException($"Can't read device information on device index {i}, error {ftStatus}");
+                }
 
                 devInfo.Type = ftDevice;
                 devInfo.Id = id;
@@ -55,6 +60,7 @@ namespace Iot.Device.Ft4222
                 devInfo.Description = Encoding.ASCII.GetString(desc.ToArray(), 0, FindFirstZero(desc));
                 devInfos.Add(devInfo);
             }
+
             return devInfos;
         }
 
@@ -63,8 +69,11 @@ namespace Iot.Device.Ft4222
             for (int i = 0; i < span.Length; i++)
             {
                 if (span[i] == 0)
+                {
                     return i;
+                }
             }
+
             return span.Length;
         }
 
@@ -77,34 +86,49 @@ namespace Iot.Device.Ft4222
             // First, let's find a device
             var devices = GetDevices();
             if (devices.Count == 0)
+            {
                 return (null, null);
+            }
+
             // Check if the first not open device
             int idx = 0;
             for (idx = 0; idx < devices.Count; idx++)
             {
                 if ((devices[idx].Flags & FtFlag.PortOpened) != FtFlag.PortOpened)
+                {
                     break;
+                }
             }
+
             if (idx == devices.Count)
+            {
                 throw new InvalidOperationException($"Can't find any open device to check the versions");
+            }
 
             SafeFtHandle ftHandle = new SafeFtHandle();
             var ftStatus = FtFunction.FT_OpenEx(devices[idx].LocId, FtOpenType.OpenByLocation, out ftHandle);
             if (ftStatus != FtStatus.Ok)
+            {
                 throw new IOException($"Can't open the device to check chipset version, status: {ftStatus}");
+            }
 
             FtVersion ftVersion;
             ftStatus = FtFunction.FT4222_GetVersion(ftHandle, out ftVersion);
             if (ftStatus != FtStatus.Ok)
+            {
                 throw new IOException($"Can't find versions of chipset and FT4222, status: {ftStatus}");
+            }
 
             ftStatus = FtFunction.FT_Close(ftHandle);
             if (ftStatus != FtStatus.Ok)
+            {
                 throw new IOException($"Can't close the device to check chipset version, status: {ftStatus}");
+            }
 
-
-            Version chip = new Version((int)(ftVersion.ChipVersion >> 24), (int)((ftVersion.ChipVersion >> 16) & 0xFF), (int)((ftVersion.ChipVersion >> 8) & 0xFF), (int)(ftVersion.ChipVersion & 0xFF));
-            Version dll = new Version((int)(ftVersion.dllVersion >> 24), (int)((ftVersion.dllVersion >> 16) & 0xFF), (int)((ftVersion.dllVersion >> 8) & 0xFF), (int)(ftVersion.dllVersion & 0xFF));
+            Version chip = new Version((int)(ftVersion.ChipVersion >> 24), (int)((ftVersion.ChipVersion >> 16) & 0xFF),
+                (int)((ftVersion.ChipVersion >> 8) & 0xFF), (int)(ftVersion.ChipVersion & 0xFF));
+            Version dll = new Version((int)(ftVersion.DllVersion >> 24), (int)((ftVersion.DllVersion >> 16) & 0xFF),
+                (int)((ftVersion.DllVersion >> 8) & 0xFF), (int)(ftVersion.DllVersion & 0xFF));
 
             return (chip, dll);
         }

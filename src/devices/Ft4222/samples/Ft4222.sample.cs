@@ -2,19 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Bno055;
 using System;
-using Iot.Device.Ft4222;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Spi;
 using System.Threading;
+using Iot.Device.Bno055;
+using Iot.Device.Ft4222;
 
-namespace Ft4222.sample
+namespace Ft4222.Samples
 {
-    class Program
+    /// <summary>
+    /// Sample application for Ft4222
+    /// </summary>
+    internal class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Main entry point
+        /// </summary>
+        /// <param name="args">Unused</param>
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello I2C, SPI and GPIO FTFI! FT4222");
             Console.WriteLine("Select the test you want to run:");
@@ -42,16 +49,24 @@ namespace Ft4222.sample
             Console.WriteLine($"Dll version: {dll}");
 
             if (key.KeyChar == '1')
+            {
                 TestI2c();
+            }
 
             if (key.KeyChar == '2')
+            {
                 TestSpi();
+            }
 
             if (key.KeyChar == '3')
+            {
                 TestGpio();
+            }
 
             if (key.KeyChar == '4')
+            {
                 TestEvents();
+            }
         }
 
         private static void TestI2c()
@@ -119,7 +134,7 @@ namespace Ft4222.sample
 
             Console.WriteLine("Setting up events on GPIO2 for rising and failing");
 
-            gpioController.RegisterCallbackForPinValueChangedEvent(Gpio2, PinEventTypes.Falling | PinEventTypes.Rising, myCallbackFailing);
+            gpioController.RegisterCallbackForPinValueChangedEvent(Gpio2, PinEventTypes.Falling | PinEventTypes.Rising, MyCallbackFailing);
 
             Console.WriteLine("Event setup, press a key to remove the failing event");
             while (!Console.KeyAvailable)
@@ -127,17 +142,19 @@ namespace Ft4222.sample
                 var res = gpioController.WaitForEvent(Gpio2, PinEventTypes.Falling, new TimeSpan(0, 0, 0, 0, 50));
                 if ((!res.TimedOut) && (res.EventTypes != PinEventTypes.None))
                 {
-                    myCallbackFailing(gpioController, new PinValueChangedEventArgs(res.EventTypes, Gpio2));
+                    MyCallbackFailing(gpioController, new PinValueChangedEventArgs(res.EventTypes, Gpio2));
                 }
+
                 res = gpioController.WaitForEvent(Gpio2, PinEventTypes.Rising, new TimeSpan(0, 0, 0, 0, 50));
                 if ((!res.TimedOut) && (res.EventTypes != PinEventTypes.None))
                 {
-                    myCallbackFailing(gpioController, new PinValueChangedEventArgs(res.EventTypes, Gpio2));
+                    MyCallbackFailing(gpioController, new PinValueChangedEventArgs(res.EventTypes, Gpio2));
                 }
             }
+
             Console.ReadKey();
-            gpioController.UnregisterCallbackForPinValueChangedEvent(Gpio2, myCallbackFailing);
-            gpioController.RegisterCallbackForPinValueChangedEvent(Gpio2, PinEventTypes.Rising, myCallback);
+            gpioController.UnregisterCallbackForPinValueChangedEvent(Gpio2, MyCallbackFailing);
+            gpioController.RegisterCallbackForPinValueChangedEvent(Gpio2, PinEventTypes.Rising, MyCallback);
 
             Console.WriteLine("Event removed, press a key to remove all events and quit");
             while (!Console.KeyAvailable)
@@ -145,19 +162,19 @@ namespace Ft4222.sample
                 var res = gpioController.WaitForEvent(Gpio2, PinEventTypes.Rising, new TimeSpan(0, 0, 0, 0, 50));
                 if ((!res.TimedOut) && (res.EventTypes != PinEventTypes.None))
                 {
-                    myCallback(gpioController, new PinValueChangedEventArgs(res.EventTypes, Gpio2));
+                    MyCallback(gpioController, new PinValueChangedEventArgs(res.EventTypes, Gpio2));
                 }
             }
 
-            gpioController.UnregisterCallbackForPinValueChangedEvent(Gpio2, myCallback);
+            gpioController.UnregisterCallbackForPinValueChangedEvent(Gpio2, MyCallback);
         }
 
-        private static void myCallback(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
+        private static void MyCallback(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
         {
             Console.WriteLine($"Event on GPIO {pinValueChangedEventArgs.PinNumber}, event type: {pinValueChangedEventArgs.ChangeType}");
         }
 
-        private static void myCallbackFailing(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
+        private static void MyCallbackFailing(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
         {
             Console.WriteLine($"Event on GPIO {pinValueChangedEventArgs.PinNumber}, event type: {pinValueChangedEventArgs.ChangeType}");
         }
