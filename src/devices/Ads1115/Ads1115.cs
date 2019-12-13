@@ -151,14 +151,7 @@ namespace Iot.Device.Ads1115
                     break;
             }
 
-            if ((byte)_inputMultiplexer <= 0x03)
-            {
-                resolution = 65535.0;
-            }
-            else
-            {
-                resolution = 32768.0;
-            }
+            resolution = 32768.0;
 
             return val * (voltage / resolution);
         }
