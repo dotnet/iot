@@ -67,7 +67,9 @@ namespace System.Device.I2c
         public override void Read(Span<byte> buffer)
         {
             if (buffer.Length == 0)
+            {
                 throw new ArgumentException($"{nameof(buffer)} cannot be empty.");
+            }
 
             byte[] byteArray = new byte[buffer.Length];
             _winI2cDevice.Read(byteArray);
@@ -109,7 +111,9 @@ namespace System.Device.I2c
         public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
             if (readBuffer.Length == 0)
+            {
                 throw new ArgumentException($"{nameof(readBuffer)} cannot be empty.");
+            }
 
             byte[] byteArray = new byte[readBuffer.Length];
             _winI2cDevice.WriteRead(writeBuffer.ToArray(), byteArray);

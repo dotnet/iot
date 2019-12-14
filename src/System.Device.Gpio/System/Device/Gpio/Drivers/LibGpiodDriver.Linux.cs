@@ -28,6 +28,7 @@ namespace System.Device.Gpio.Drivers
                 {
                     throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
                 }
+
                 _pinNumberToSafeLineHandle = new Dictionary<int, SafeLineHandle>(PinCount);
             }
             catch (DllNotFoundException)
@@ -69,6 +70,7 @@ namespace System.Device.Gpio.Drivers
                     _pinNumberToSafeLineHandle[pinNumber] = pinHandle;
                 }
             }
+
             return new LibGpiodDriverEventHandler(pinNumber, pinHandle);
         }
 
@@ -86,7 +88,7 @@ namespace System.Device.Gpio.Drivers
             return _pinNumberToEventHandler.ContainsKey(pinNumber);
         }
 
-        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => 
+        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) =>
             throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.ConvertPinNumberingSchemaError);
 
         protected internal override PinMode GetPinMode(int pinNumber)
@@ -95,6 +97,7 @@ namespace System.Device.Gpio.Drivers
             {
                 throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError, pin: pinNumber);
             }
+
             return pinHandle.PinMode;
         }
 
@@ -127,6 +130,7 @@ namespace System.Device.Gpio.Drivers
 
                 return result;
             }
+
             throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError, pin: pinNumber);
         }
 
@@ -150,7 +154,7 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
-            int requestResult  = -1;
+            int requestResult = -1;
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
                 string consumer = pinNumber.ToString();
@@ -169,7 +173,7 @@ namespace System.Device.Gpio.Drivers
             if (requestResult == -1)
             {
                 throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(), pinNumber);
-            } 
+            }
         }
 
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
@@ -180,22 +184,22 @@ namespace System.Device.Gpio.Drivers
 
                 if ((eventTypes & PinEventTypes.Rising) != 0)
                 {
-                    eventHandler.ValueRising += callback;
+                    eventHandler.ValueRising += Callback;
                 }
 
                 if ((eventTypes & PinEventTypes.Falling) != 0)
                 {
-                    eventHandler.ValueFalling += callback;
+                    eventHandler.ValueFalling += Callback;
                 }
 
                 bool eventOccured = false;
-                void callback(object o, PinValueChangedEventArgs e)
+                void Callback(object o, PinValueChangedEventArgs e)
                 {
                     eventOccured = true;
                 }
 
                 WaitForEventResult(cancellationToken, eventHandler.CancellationTokenSource.Token, ref eventOccured);
-                RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
+                RemoveCallbackForPinValueChangedEvent(pinNumber, Callback);
 
                 return new WaitForEventResult
                 {
@@ -241,7 +245,6 @@ namespace System.Device.Gpio.Drivers
                 _pinNumberToEventHandler = null;
             }
 
-            
             if (_pinNumberToSafeLineHandle != null)
             {
                 foreach (int pin in _pinNumberToSafeLineHandle.Keys)

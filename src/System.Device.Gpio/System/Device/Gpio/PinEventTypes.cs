@@ -14,10 +14,12 @@ namespace System.Device.Gpio
         /// None.
         /// </summary>
         None = 0,
+
         /// <summary>
         /// Triggered when pin value goes from low to high.
         /// </summary>
         Rising = 1,
+
         /// <summary>
         /// Triggered when a pin value goes from high to low.
         /// </summary>

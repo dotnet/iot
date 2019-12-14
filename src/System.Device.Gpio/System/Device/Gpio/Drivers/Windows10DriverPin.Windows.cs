@@ -13,9 +13,9 @@ namespace System.Device.Gpio.Drivers
     internal class Windows10DriverPin : IDisposable
     {
         private const int ReasonableDebounceTimeoutMillseconds = 50;
+        private readonly int _pinNumber;
         private WeakReference<Windows10Driver> _driver;
         private WinGpio.GpioPin _pin;
-        private readonly int _pinNumber;
         private PinChangeEventHandler _risingCallbacks;
         private PinChangeEventHandler _fallingCallbacks;
 
@@ -42,6 +42,7 @@ namespace System.Device.Gpio.Drivers
                 _pin.Dispose();
                 _pin = null;
             }
+			
             _driver = null;
             _fallingCallbacks = null;
             _risingCallbacks = null;
@@ -118,7 +119,7 @@ namespace System.Device.Gpio.Drivers
             using (ManualResetEvent completionEvent = new ManualResetEvent(false))
             {
                 PinEventTypes pinEventTypes = PinEventTypes.None;
-                void handler(WinGpio.GpioPin s, WinGpio.GpioPinValueChangedEventArgs a)
+                void Handler(WinGpio.GpioPin s, WinGpio.GpioPinValueChangedEventArgs a)
                 {
                     pinEventTypes = GpioEdgeToPinEventType(a.Edge);
 
@@ -134,9 +135,9 @@ namespace System.Device.Gpio.Drivers
                     cancellationToken.WaitHandle
                 };
 
-                _pin.ValueChanged += handler;
+                _pin.ValueChanged += Handler;
                 bool eventOccurred = 0 == WaitHandle.WaitAny(waitHandles);
-                _pin.ValueChanged -= handler;
+                _pin.ValueChanged -= Handler;
 
                 return new WaitForEventResult
                 {

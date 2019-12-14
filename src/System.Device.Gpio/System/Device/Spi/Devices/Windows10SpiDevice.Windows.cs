@@ -76,7 +76,9 @@ namespace System.Device.Spi
         public override void Read(Span<byte> buffer)
         {
             if (buffer.Length == 0)
+            {
                 throw new ArgumentException($"{nameof(buffer)} cannot be empty.");
+            }
 
             byte[] byteArray = new byte[buffer.Length];
             _winDevice.Read(byteArray);
@@ -114,6 +116,7 @@ namespace System.Device.Spi
             {
                 throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length.");
             }
+			
             byte[] byteArray = new byte[readBuffer.Length];
             _winDevice.TransferFullDuplex(writeBuffer.ToArray(), byteArray);
             byteArray.CopyTo(readBuffer);

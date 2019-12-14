@@ -1,6 +1,8 @@
 <Project>
   <Import Project="../../eng/Compilers.props" />
   <Import Project="../../eng/Versions.props" />
+  <!-- Disabled until all projects are merged -->
+  <!-- <Import Project="../../eng/Analyzers.props" /> -->
   <PropertyGroup>
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>

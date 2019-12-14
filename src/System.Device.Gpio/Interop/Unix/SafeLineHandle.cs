@@ -13,7 +13,10 @@ namespace System.Device.Gpio
     {
         public PinMode PinMode { get; set; }
 
-        public SafeLineHandle() : base(IntPtr.Zero, true) { }
+        public SafeLineHandle()
+            : base(IntPtr.Zero, true)
+        {
+        }
 
         protected override bool ReleaseHandle()
         {

@@ -39,6 +39,7 @@ namespace System.Device.Gpio
             {
                 return Equals((PinValue)obj);
             }
+
             return false;
         }
 

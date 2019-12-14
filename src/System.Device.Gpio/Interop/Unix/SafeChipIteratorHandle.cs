@@ -11,7 +11,10 @@ namespace System.Device.Gpio
     /// </summary>
     internal class SafeChipIteratorHandle : SafeHandle
     {
-        public SafeChipIteratorHandle() : base(IntPtr.Zero, true) { }
+        public SafeChipIteratorHandle()
+            : base(IntPtr.Zero, true)
+        {
+        }
 
         protected override bool ReleaseHandle()
         {
