@@ -13,6 +13,7 @@ namespace Iot.Device.Ft4222
         /// Output
         /// </summary>
         Output = 0,
+
         /// <summary>
         /// Input
         /// </summary>

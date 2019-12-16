@@ -16,6 +16,7 @@ namespace Iot.Device.Ft4222
         /// Indicates that the device is open
         /// </summary>
         PortOpened = 0x00000001,
+
         /// <summary>
         /// Indicates that the device is enumerated as a hi-speed USB device
         /// </summary>

@@ -13,14 +13,17 @@ namespace Iot.Device.Ft4222
         /// GPIO 0
         /// </summary>
         Gpio0 = 0,
+
         /// <summary>
         /// GPIO 1
         /// </summary>
         Gpio1,
+
         /// <summary>
         /// GPIO 2
         /// </summary>
         Gpio2,
+
         /// <summary>
         /// GPIO 3
         /// </summary>

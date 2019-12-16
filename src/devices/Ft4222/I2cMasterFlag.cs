@@ -13,18 +13,22 @@ namespace Iot.Device.Ft4222
         /// No specific flag
         /// </summary>
         None = 0x80,
+
         /// <summary>
         /// Send start
         /// </summary>
         Start = 0x02,
+
         /// <summary>
         /// Repeated start
         /// </summary>
         RepeatedStart = 0x03,
+
         /// <summary>
         /// Send stop
         /// </summary>
         Stop = 0x04,
+
         /// <summary>
         /// Start condition followed by a stop condition
         /// </summary>
