@@ -68,8 +68,8 @@
     <Rule Id="SA1135" Action="Error" />
     <Rule Id="SA1136" Action="Error" />
     <Rule Id="SA1137" Action="Error" />
-    <Rule Id="SA1139" Action="Error" /> 
-	<Rule Id="SA1167" Action="Error" /> <!-- Elements must have same indentation -->
+    <Rule Id="SA1139" Action="Error" />
+    <Rule Id="SA1167" Action="Error" /> <!-- Elements must have same indentation -->
     <Rule Id="SA1200" Action="Error" />
     <Rule Id="SA1201" Action="None" /> <!--Enum should not follow a class -->
     <Rule Id="SA1202" Action="None" />

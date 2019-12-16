@@ -8,7 +8,7 @@ file which is not marked as such, making StyleCop fail. -->
   </PropertyGroup>
   <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj' AND '$(GeneratePlatformNotSupportedAssembly)'!='true' AND '$(MSBuildProjectFile)'!='Iot.Device.Bindings.csproj'">
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)\stylecop.json" Link="stylecop.json" />
-	<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
