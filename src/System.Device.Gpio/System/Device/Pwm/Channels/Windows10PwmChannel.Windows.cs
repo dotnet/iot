@@ -71,7 +71,7 @@ namespace System.Device.Pwm.Channels
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), value, "Value must not be negative.");
                 }
-				
+
                 _winController.SetDesiredFrequency(value);
                 _frequency = value;
             }
@@ -87,7 +87,7 @@ namespace System.Device.Pwm.Channels
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), value, "Value must be between 0.0 and 1.0.");
                 }
-				
+
                 _winPin.SetActiveDutyCyclePercentage(value);
                 _dutyCycle = value;
             }

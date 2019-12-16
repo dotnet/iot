@@ -116,7 +116,7 @@ namespace System.Device.Spi
             {
                 throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length.");
             }
-			
+
             byte[] byteArray = new byte[readBuffer.Length];
             _winDevice.TransferFullDuplex(writeBuffer.ToArray(), byteArray);
             byteArray.CopyTo(readBuffer);

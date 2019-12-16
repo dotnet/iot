@@ -50,7 +50,7 @@ namespace System.Device.Gpio.Drivers
                     catch (IOException)
                     {
                         // Ignoring file not found or any other IO exceptions as it is not guaranteed the folder would have files "label" "base"
-                        // And don't want to throw in this case just continue to load the gpiochip with default offset = 0  
+                        // And don't want to throw in this case just continue to load the gpiochip with default offset = 0
                     }
                 }
             }

@@ -283,7 +283,7 @@ namespace System.Device.Gpio.Drivers
         }
 
         /// <summary>
-        /// Sets the resistor pull up/down mode for an input pin on the Raspberry Pi4. 
+        /// Sets the resistor pull up/down mode for an input pin on the Raspberry Pi4.
         /// The above, complex method doesn't do anything on a Pi4 (it doesn't cause any harm, though)
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
@@ -488,7 +488,7 @@ namespace System.Device.Gpio.Drivers
                             // according to the RasperryPi website
                             gpioRegisterOffset = Interop.libbcmhost.bcm_host_get_peripheral_address();
 
-                            // if we get zero back then we use our own internal method. This can happen 
+                            // if we get zero back then we use our own internal method. This can happen
                             // on a Pi4 if the userland libraries haven't been updated and was fixed in Jul/Aug 2019.
                             if (gpioRegisterOffset == 0)
                             {
@@ -536,7 +536,7 @@ namespace System.Device.Gpio.Drivers
                 catch (Exception x)
                 {
                     // This should not normally fail, but we currently don't know how this behaves on different operating systems. Therefore, we ignore
-                    // any exceptions in release and just continue as Pi3 if something fails. 
+                    // any exceptions in release and just continue as Pi3 if something fails.
                     // If in debug mode, we might want to check what happened here (i.e unsupported OS, incorrect permissions)
                     Debug.Fail($"Unexpected exception: {x}");
                 }

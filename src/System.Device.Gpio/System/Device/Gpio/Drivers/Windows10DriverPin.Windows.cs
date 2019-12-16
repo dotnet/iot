@@ -42,7 +42,7 @@ namespace System.Device.Gpio.Drivers
                 _pin.Dispose();
                 _pin = null;
             }
-			
+
             _driver = null;
             _fallingCallbacks = null;
             _risingCallbacks = null;
