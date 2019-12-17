@@ -15,8 +15,8 @@ namespace Iot.Device.Bh1750fvi
         AddPinHigh = 0x5C,
 
         /// <summary>
-        /// ADD Pin connect to low power level 
-        /// </summary>     
+        /// ADD Pin connect to low power level
+        /// </summary>
         AddPinLow = 0x23
     }
 }

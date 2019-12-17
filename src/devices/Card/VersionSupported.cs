@@ -15,13 +15,15 @@ namespace Iot.Device.Card
     public enum VersionSupported
     {
         /// <summary>
-        /// Support for Iso 18092 
+        /// Support for Iso 18092
         /// </summary>
         Iso18092 = 0b0000_0100,
+
         /// <summary>
         /// Support for Iso/Iec 14443 TypeB
         /// </summary>
         IsoIec14443TypeB = 0b0000_0010,
+
         /// <summary>
         /// Support for Iso/Iec 14443 TypeA
         /// </summary>

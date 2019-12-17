@@ -16,34 +16,42 @@ namespace Iot.Device.Card.Mifare
         /// None
         /// </summary>
         None = 0b0000_0000,
+
         /// <summary>
         /// Read Key A
         /// </summary>
         ReadKeyA = 0b0000_0001,
+
         /// <summary>
         /// Read Key B
         /// </summary>
         ReadKeyB = 0b0000_0010,
+
         /// <summary>
         /// Write Key A
         /// </summary>
         WriteKeyA = 0b0000_0100,
+
         /// <summary>
         /// Write Key B
         /// </summary>
         WriteKeyB = 0b0000_1000,
+
         /// <summary>
         /// Increment Key A
         /// </summary>
         IncrementKeyA = 0b0001_0000,
+
         /// <summary>
         /// Increment Key B
         /// </summary>
         IncrementKeyB = 0b0010_0000,
+
         /// <summary>
         /// Decrement Transfer Restore Key A
         /// </summary>
         DecrementTransferRestoreKeyA = 0b0100_0000,
+
         /// <summary>
         /// Decrement Transfer Restore Key B
         /// </summary>

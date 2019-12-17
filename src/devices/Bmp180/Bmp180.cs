@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-// Ported from https://github.com/adafruit/Adafruit_Python_BMP/blob/master/Adafruit_BMP/BMP085.py  
+// Ported from https://github.com/adafruit/Adafruit_Python_BMP/blob/master/Adafruit_BMP/BMP085.py
 // Formulas and code examples can also be found in the datasheet https://cdn-shop.adafruit.com/datasheets/BST-BMP180-DS000-09.pdf
 using System;
 using System.Buffers.Binary;
@@ -86,7 +86,7 @@ namespace Iot.Device.Bmp180
         /// <summary>
         ///  Calculates the altitude in meters from the specified sea-level pressure.
         /// </summary>
-        /// <param name="seaLevelPressure"> 
+        /// <param name="seaLevelPressure">
         ///  Sea-level pressure
         /// </param>
         /// <returns>
@@ -111,7 +111,7 @@ namespace Iot.Device.Bmp180
         /// <summary>
         ///  Calculates the pressure at sealevel when given a known altitude in meter
         /// </summary>
-        /// <param name="altitude" > 
+        /// <param name="altitude" >
         ///  altitude in meters
         /// </param>
         /// <returns>
@@ -151,7 +151,7 @@ namespace Iot.Device.Bmp180
                 (byte)Register.CONTROL, (byte)Register.READTEMPCMD
             };
             _i2cDevice.Write(command);
-            // Wait 5ms, taken straight from section 3.3 of the datasheet. 
+            // Wait 5ms, taken straight from section 3.3 of the datasheet.
             Thread.Sleep(5);
 
             return (short)Read16BitsFromRegisterBE((byte)Register.TEMPDATA);
@@ -218,7 +218,7 @@ namespace Iot.Device.Bmp180
         }
 
         /// <summary>
-        ///  Reads a 16 bit value over I2C 
+        ///  Reads a 16 bit value over I2C
         /// </summary>
         /// <param name="register">
         ///  Register to read from
@@ -236,13 +236,13 @@ namespace Iot.Device.Bmp180
         }
 
         /// <summary>
-        ///  Reads a 16 bit value over I2C 
+        ///  Reads a 16 bit value over I2C
         /// </summary>
         /// <param name="register">
         ///  Register to read from
         /// </param>
         /// <returns>
-        ///  Value (BigEndian) from register 
+        ///  Value (BigEndian) from register
         /// </returns>
         internal ushort Read16BitsFromRegisterBE(byte register)
         {

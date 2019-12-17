@@ -18,7 +18,8 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// TagDetail constructor
         /// </summary>
         public TagDetails()
-        { }
+        {
+        }
 
         /// <summary>
         /// Constructor using an existing Tag
@@ -80,9 +81,12 @@ namespace Iot.Device.Card.CreditCardProcessing
             switch (Decoder)
             {
                 case ConversionType.BcdToString:
-                    string ret = "";
+                    string ret = string.Empty;
                     for (int i = 0; i < Data.Length; i++)
+                    {
                         ret += Data[i].ToString("X2");
+                    }
+
                     ret = ret.TrimEnd('F');
                     return ret;
                 case ConversionType.RawString:
@@ -90,9 +94,12 @@ namespace Iot.Device.Card.CreditCardProcessing
                 case ConversionType.Date:
                     return ("20" + Data[0].ToString("X2") + "/" + Data[1].ToString("X2") + "/" + Data[2].ToString("X2"));
                 case ConversionType.DecimalNumber:
-                    string dec = "";
+                    string dec = string.Empty;
                     for (int i = 0; i < Data.Length; i++)
-                        dec += Data[i].ToString("X2") + (i == Data.Length - 2 ? "." : "");
+                    {
+                        dec += Data[i].ToString("X2") + (i == Data.Length - 2 ? "." : string.Empty);
+                    }
+
                     dec = dec.TrimStart('0');
                     return dec;
                 case ConversionType.Time:

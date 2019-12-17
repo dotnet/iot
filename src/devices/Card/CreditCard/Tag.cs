@@ -64,10 +64,15 @@ namespace Iot.Device.Card.CreditCardProcessing
                 {
                     var ret = SearchTag(tagparent.Tags, tagNumber);
                     if (ret.Count > 0)
+                    {
                         tags.AddRange(ret);
+                    }
                 }
+
                 if (tagparent.TagNumber == tagNumber)
+                {
                     tags.Add(tagparent);
+                }
             }
 
             return tags;

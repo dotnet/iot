@@ -18,9 +18,9 @@ namespace Iot.Device.CharacterLcd
     /// The Hitatchi HD44780 was released in 1987 and set the standard for LCD controllers. Hitatchi does not make this chipset anymore, but
     /// most character LCD drivers are intended to be fully compatible with this chipset. Some examples: Sunplus SPLC780D, Sitronix ST7066U,
     /// Samsung KS0066U, Aiptek AIP31066, and many more.
-    /// 
+    ///
     /// Some compatible chips extend the HD44780 with addtional pins and features. They are still fully compatible. The ST7036 is one example.
-    /// 
+    ///
     /// This implementation was drawn from numerous datasheets and libraries such as Adafruit_Python_CharLCD.
     /// </remarks>
     public class Hd44780 : IDisposable
@@ -77,7 +77,9 @@ namespace Iot.Device.CharacterLcd
             _lcdInterface = lcdInterface;
 
             if (_lcdInterface.EightBitMode)
+            {
                 _displayFunction |= DisplayFunction.EightBit;
+            }
 
             Initialize(size.Height);
             _rowOffsets = InitializeRowOffsets(size.Height);
@@ -91,9 +93,10 @@ namespace Iot.Device.CharacterLcd
             // While the chip supports 5x10 pixel characters for one line displays they
             // don't seem to be generally available. Supporting 5x10 would require extra
             // support for CreateCustomCharacter
-
             if (GetTwoLineMode(rows))
+            {
                 _displayFunction |= DisplayFunction.TwoLine;
+            }
 
             _displayControl |= DisplayControl.DisplayOn;
             _displayMode |= DisplayEntryMode.Increment;
@@ -176,7 +179,6 @@ namespace Iot.Device.CharacterLcd
             //   Second row: 64 - 83  [0x40 - 0x53]
             //   Third row:  20 - 39  [0x14 - 0x27]  (Continues first row)
             //   Fourth row: 84 - 103 [0x54 - 0x67]  (Continues second row)
-
             byte[] rowOffsets;
 
             switch (rows)
@@ -231,7 +233,7 @@ namespace Iot.Device.CharacterLcd
             SendCommand(ReturnHomeCommand);
 
             // The return home command is documented as taking 1.52ms with the standard 270KHz clock.
-            // SendCommand already waits for 37μs, 
+            // SendCommand already waits for 37μs,
             WaitForNotBusy(1520);
         }
 
@@ -244,15 +246,18 @@ namespace Iot.Device.CharacterLcd
         {
             int rows = _rowOffsets.Length;
             if (top < 0 || top >= rows)
+            {
                 throw new ArgumentOutOfRangeException(nameof(top));
+            }
 
             // Throw if we're given a negative left value or the calculated address would be
             // larger than the max "good" address. Addressing is covered in detail in
             // InitializeRowOffsets above.
-
             int newAddress = left + _rowOffsets[top];
             if (left < 0 || (rows == 1 && newAddress >= 80) || (rows > 1 && newAddress >= 104))
+            {
                 throw new ArgumentOutOfRangeException(nameof(left));
+            }
 
             SendCommand((byte)(SetDDRamAddressCommand | newAddress));
         }
@@ -332,36 +337,36 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         /// <remarks>
         /// The custom characters also occupy character codes 8 - 15.
-        /// 
+        ///
         /// You can find help designing characters at https://www.quinapalus.com/hd44780udg.html.
-        /// 
+        ///
         /// The datasheet description for custom characters is very difficult to follow. Here is
         /// a rehash of the technical details that is hopefully easier:
-        /// 
+        ///
         /// Only 6 bits of addresses are available for character ram. That makes for 64 bytes of
         /// available character data. 8 bytes of data are used for each character, which is where
         /// the 8 total custom characters comes from (64/8).
-        /// 
+        ///
         /// Each byte corresponds to a character line. Characters are only 5 bits wide so only
         /// bits 0-4 are used for display. Whatever is in bits 5-7 is just ignored. Store bits
         /// there if it makes you happy, but it won't impact the display. '1' is on, '0' is off.
-        /// 
+        ///
         /// In the built-in characters the 8th byte is usually empty as this is where the underline
         /// cursor will be if enabled. You can put data there if you like, which gives you the full
         /// 5x8 character. The underline cursor just turns on the entire bottom row.
-        /// 
+        ///
         /// 5x10 mode is effectively useless as displays aren't available that utilize it. In 5x10
         /// mode *16* bytes of data are used for each character. That leaves room for only *4*
         /// custom characters. The first character is addressable from code 0, 1, 8, and 9. The
         /// second is 2, 3, 10, 11 and so on...
-        /// 
+        ///
         /// In this mode *11* bytes of data are actually used for the character data, which
         /// effectively gives you a 5x11 character, although typically the last line is blank to
         /// leave room for the underline cursor. Why the modes are referred to as 5x8 and 5x10 as
         /// opposed to 5x7 and 5x10 or 5x8 and 5x11 is a mystery. In an early pre-release data
         /// book 5x7 and 5x10 is used (Advance Copy #AP4 from July 1985). Perhaps it was a
         /// marketing change?
-        /// 
+        ///
         /// As only 11 bytes are used in 5x10 mode, but 16 bytes are reserved, the last 5 bytes
         /// are useless. The datasheet helpfully suggests that you can store your own data there.
         /// The same would be true for bits 5-7 of lines that matter for both 5x8 and 5x10.
@@ -371,7 +376,9 @@ namespace Iot.Device.CharacterLcd
         public void CreateCustomCharacter(byte location, params byte[] characterMap)
         {
             if (characterMap == null)
+            {
                 throw new ArgumentNullException(nameof(characterMap));
+            }
 
             CreateCustomCharacter(location, characterMap.AsSpan());
         }
@@ -384,10 +391,14 @@ namespace Iot.Device.CharacterLcd
         public void CreateCustomCharacter(byte location, ReadOnlySpan<byte> characterMap)
         {
             if (location > 7)
+            {
                 throw new ArgumentOutOfRangeException(nameof(location));
+            }
 
             if (characterMap.Length != 8)
+            {
                 throw new ArgumentException(nameof(characterMap));
+            }
 
             // The character address is set in bits 3-5 of the command byte
             SendCommand((byte)(SetCGRamAddressCommand | (location << 3)));
@@ -435,7 +446,7 @@ namespace Iot.Device.CharacterLcd
             if (!_disposed)
             {
                 Dispose(true);
-               _disposed = true;
+                _disposed = true;
             }
         }
     }

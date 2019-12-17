@@ -16,10 +16,12 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// Card
         /// </summary>
         Icc = 0b0000_0001,
+
         /// <summary>
         /// Terminal
         /// </summary>
         Terminal = 0b0000_0010,
+
         /// <summary>
         /// Issuer
         /// </summary>

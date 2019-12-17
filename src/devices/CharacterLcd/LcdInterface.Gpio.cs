@@ -34,6 +34,8 @@ namespace Iot.Device.CharacterLcd
 
             private readonly int _backlight;
 
+            private readonly int[] _dataPins;
+
             // We need to add PWM support to make this useful (to drive the VO pin).
             // For now we'll just stash the value and use it to decide the initial
             // backlight state.
@@ -42,7 +44,6 @@ namespace Iot.Device.CharacterLcd
             private byte _lastByte;
             private bool _useLastByte;
 
-            private readonly int[] _dataPins;
             private GpioController _controller;
             private PinValuePair[] _pinBuffer = new PinValuePair[8];
 
@@ -73,7 +74,6 @@ namespace Iot.Device.CharacterLcd
 
             private void Initialize()
             {
-
                 // Prep the pins
                 _controller.OpenPin(_rsPin, PinMode.Output);
 
@@ -86,6 +86,7 @@ namespace Iot.Device.CharacterLcd
                     // the pin is low when writing).
                     _controller.Write(_rwPin, PinValue.Low);
                 }
+
                 if (_backlight != -1)
                 {
                     _controller.OpenPin(_backlight, PinMode.Output);
@@ -95,6 +96,7 @@ namespace Iot.Device.CharacterLcd
                         _controller.Write(_backlight, PinValue.High);
                     }
                 }
+
                 _controller.OpenPin(_enablePin, PinMode.Output);
 
                 for (int i = 0; i < _dataPins.Length; ++i)
@@ -103,7 +105,7 @@ namespace Iot.Device.CharacterLcd
                 }
 
                 // The HD44780 self-initializes when power is turned on to the following settings:
-                // 
+                //
                 //  - 8 bit, 1 line, 5x7 font
                 //  - Display, cursor, and blink off
                 //  - Increment with no shift
@@ -112,7 +114,6 @@ namespace Iot.Device.CharacterLcd
                 // within specific tolerances. As such, we'll always perform the software based
                 // initialization as described on pages 45/46 of the HD44780 data sheet. We give
                 // a little extra time to the required waits as described.
-
                 if (_dataPins.Length == 8)
                 {
                     // Init to 8 bit mode (this is the default, but other drivers
@@ -150,7 +151,9 @@ namespace Iot.Device.CharacterLcd
                 set
                 {
                     if (_backlight != -1)
+                    {
                         _controller.Write(_backlight, value ? PinValue.High : PinValue.Low);
+                    }
                 }
             }
 
@@ -223,14 +226,15 @@ namespace Iot.Device.CharacterLcd
                 }
 
                 if (changedCount > 0)
+                {
                     _controller.Write(new ReadOnlySpan<PinValuePair>(_pinBuffer, 0, changedCount));
+                }
 
                 _useLastByte = true;
                 _lastByte = bits;
 
                 // Enable pin needs to be high for at least 450ns when running on 3V
                 // and 230ns on 5V. (PWeh on page 49/52 and Figure 25 on page 58)
-
                 _controller.Write(_enablePin, PinValue.High);
                 DelayHelper.DelayMicroseconds(1, allowThreadYield: false);
                 _controller.Write(_enablePin, PinValue.Low);

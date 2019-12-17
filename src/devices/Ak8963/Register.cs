@@ -5,7 +5,7 @@
 namespace Iot.Device.Magnetometer
 {
     /// <summary>
-    /// Registers of the AK8963. 
+    /// Registers of the AK8963.
     /// </summary>
     internal enum Register
     {
@@ -40,7 +40,7 @@ namespace Iot.Device.Magnetometer
         HYL = 0x05,
 
         /// <summary>
-        /// Y-axis measurement data higher 8bit 
+        /// Y-axis measurement data higher 8bit
         /// </summary>
         HYH = 0x06,
 
@@ -50,7 +50,7 @@ namespace Iot.Device.Magnetometer
         HZL = 0x07,
 
         /// <summary>
-        /// Z-axis measurement data higher 8bit 
+        /// Z-axis measurement data higher 8bit
         /// </summary>
         HZH = 0x08,
 
@@ -60,18 +60,18 @@ namespace Iot.Device.Magnetometer
         ST2 = 0x09,
 
         /// <summary>
-        /// CNTL1: Control1 
+        /// CNTL1: Control1
         /// </summary>
         CNTL = 0x0A,
 
         /// <summary>
-        /// Do not access in theory but 
+        /// Do not access in theory but
         /// Used to reset the device
         /// </summary>
         RSV = 0x0B,
 
         /// <summary>
-        /// ASTC: Self Test Control 
+        /// ASTC: Self Test Control
         /// </summary>
         ASTC = 0x0C,
 
@@ -93,17 +93,17 @@ namespace Iot.Device.Magnetometer
         I2CDIS = 0x0F,
 
         /// <summary>
-        /// Magnetic sensor X-axis sensitivity adjustment value 
+        /// Magnetic sensor X-axis sensitivity adjustment value
         /// </summary>
         ASAX = 0x10,
 
         /// <summary>
-        /// Magnetic sensor Y-axis sensitivity adjustment value 
+        /// Magnetic sensor Y-axis sensitivity adjustment value
         /// </summary>
         ASAY = 0x11,
 
         /// <summary>
-        /// Magnetic sensor Z-axis sensitivity adjustment value 
+        /// Magnetic sensor Z-axis sensitivity adjustment value
         /// </summary>
         ASAZ = 0x12,
     }

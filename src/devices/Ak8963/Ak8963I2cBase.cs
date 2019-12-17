@@ -8,8 +8,8 @@ using System.Device.I2c;
 namespace Iot.Device.Magnetometer
 {
     /// <summary>
-    /// Abstract class for AK8963 the I2C interface. This sensor can be found as a sub 
-    /// I2C sensor like in the MPU9250. The access is done thru another I2C device and the 
+    /// Abstract class for AK8963 the I2C interface. This sensor can be found as a sub
+    /// I2C sensor like in the MPU9250. The access is done thru another I2C device and the
     /// core I2C primitive are different. Use those 3 primitive to define the access to read
     /// and write bytes to the AK8963
     /// </summary>

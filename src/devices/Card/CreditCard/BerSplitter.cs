@@ -55,17 +55,17 @@ namespace Iot.Device.Card.CreditCardProcessing
         {
             uint tagValue = toSplit[0];
             byte index = 1;
-            //  check if single or double triple or quadruple element
+            // check if single or double triple or quadruple element
             if ((toSplit[0] & 0b0001_1111) == 0b0001_1111)
             {
-                              
                 do
                 {
-                    tagValue = tagValue<<8 | toSplit[index];
+                    tagValue = tagValue << 8 | toSplit[index];
                 }
                 while ((toSplit[index++] & 0x80) == 0x80);
 
             }
+
             return (tagValue, index);
         }
 
@@ -73,17 +73,24 @@ namespace Iot.Device.Card.CreditCardProcessing
         {
             // Case infinite
             if (toSplit[0] == 0b1000_0000)
+            {
                 return (-1, 1);
-            // Check how many bytes 
+            }
+
+            // Check how many bytes
             if ((toSplit[0] & 0b1000_0000) == 0b1000_0000)
             {
                 // multiple bytes
                 var numBytes = toSplit[0] & 0b0111_1111;
                 int size = 0;
                 for (int i = 0; i < numBytes; i++)
+                {
                     size = (size << 8) + toSplit[1 + i];
+                }
+
                 return (size, (byte)(numBytes + 1));
             }
+
             return (toSplit[0], 1);
         }
     }

@@ -13,14 +13,17 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// Application transaction counter
         /// </summary>
         ApplicationTransactionCounter,
+
         /// <summary>
         /// Number of pin try left
         /// </summary>
         PinTryCounter,
+
         /// <summary>
         /// Last online ATC register
         /// </summary>
         LastOnlineAtcRegister,
+
         /// <summary>
         /// Log format
         /// </summary>
