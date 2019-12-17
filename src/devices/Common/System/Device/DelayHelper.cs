@@ -35,7 +35,8 @@ namespace System.Device
                 do
                 {
                     Thread.SpinWait(1);
-                } while ((ulong)(Stopwatch.GetTimestamp() - start) < minimumTicks);
+                }
+                while ((ulong)(Stopwatch.GetTimestamp() - start) < minimumTicks);
             }
             else
             {
@@ -43,7 +44,8 @@ namespace System.Device
                 do
                 {
                     spinWait.SpinOnce();
-                } while ((ulong)(Stopwatch.GetTimestamp() - start) < minimumTicks);
+                }
+                while ((ulong)(Stopwatch.GetTimestamp() - start) < minimumTicks);
             }
         }
 
@@ -61,7 +63,6 @@ namespace System.Device
             // and to allow us to add additional logic to the millisecond wait in the
             // future. If waiting only 1 millisecond we still have ample room for more
             // complicated logic. For 1 microsecond that isn't the case.
-
             DelayMicroseconds(milliseconds * 1000, allowThreadYield);
         }
     }

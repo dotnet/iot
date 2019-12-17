@@ -9,9 +9,9 @@ using Iot.Device.Ads1115;
 
 namespace Ads1115.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             // set I2C bus ID: 1
             // ADS1115 Addr Pin connect to GND
