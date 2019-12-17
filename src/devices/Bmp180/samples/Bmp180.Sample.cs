@@ -10,13 +10,20 @@ using Iot.Units;
 
 namespace Iot.Device.Bmp180.Samples
 {
-    class Program
+    /// <summary>
+    /// Test program main class
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Entry point for example program
+        /// </summary>
+        /// <param name="args">Command line arguments</param>
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello Bmp180!");
 
-            //bus id on the raspberry pi 3
+            // bus id on the raspberry pi 3
             const int busId = 1;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bmp180.DefaultI2cAddress);
@@ -25,10 +32,10 @@ namespace Iot.Device.Bmp180.Samples
 
             using (i2cBmp280)
             {
-                //set samplings
+                // set samplings
                 i2cBmp280.SetSampling(Sampling.Standard);
 
-                //read values
+                // read values
                 Temperature tempValue = i2cBmp280.ReadTemperature();
                 Console.WriteLine($"Temperature {tempValue.Celsius} \u00B0C");
                 var preValue = i2cBmp280.ReadPressure();
@@ -37,10 +44,10 @@ namespace Iot.Device.Bmp180.Samples
                 Console.WriteLine($"Altitude {altValue:0.##} m");
                 Thread.Sleep(1000);
 
-                //set higher sampling
+                // set higher sampling
                 i2cBmp280.SetSampling(Sampling.UltraLowPower);
 
-                //read values
+                // read values
                 tempValue = i2cBmp280.ReadTemperature();
                 Console.WriteLine($"Temperature {tempValue.Celsius} \u00B0C");
                 preValue = i2cBmp280.ReadPressure();

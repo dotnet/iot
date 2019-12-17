@@ -70,7 +70,7 @@ namespace Iot.Device.BoardLed
             _triggerReader.BaseStream.Position = 0;
 
             // Remove selected chars
-            return Regex.Replace(_triggerReader.ReadToEnd(), @"\[|\]", "")
+            return Regex.Replace(_triggerReader.ReadToEnd(), @"\[|\]", string.Empty)
                 .Split(' ');
         }
 
@@ -94,7 +94,7 @@ namespace Iot.Device.BoardLed
         public void Dispose()
         {
             _brightnessReader?.Dispose();
-            _brightnessWriter?.Dispose();    
+            _brightnessWriter?.Dispose();
             _triggerReader?.Dispose();
             _triggerWriter?.Dispose();
             _maxBrightnessReader?.Dispose();

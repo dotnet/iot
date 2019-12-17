@@ -92,7 +92,9 @@ namespace Iot.Device.Bh1750fvi
         private double GetIlluminance()
         {
             if (MeasuringMode == MeasuringMode.OneTimeHighResolutionMode || MeasuringMode == MeasuringMode.OneTimeHighResolutionMode2 || MeasuringMode == MeasuringMode.OneTimeLowResolutionMode)
+            {
                 _i2cDevice.WriteByte((byte)Command.PowerOn);
+            }
 
             Span<byte> readBuff = stackalloc byte[2];
 
@@ -104,7 +106,9 @@ namespace Iot.Device.Bh1750fvi
             double result = raw / (1.2 * _lightTransmittance);
 
             if (MeasuringMode == MeasuringMode.ContinuouslyHighResolutionMode2 || MeasuringMode == MeasuringMode.OneTimeHighResolutionMode2)
+            {
                 result *= 2;
+            }
 
             return result;
         }

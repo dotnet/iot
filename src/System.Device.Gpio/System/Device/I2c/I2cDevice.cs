@@ -46,7 +46,7 @@ namespace System.Device.I2c
         public abstract void Write(ReadOnlySpan<byte> buffer);
 
         /// <summary>
-        /// Performs an atomic operation to write data to and then read data from the I2C bus on which the device is connected, 
+        /// Performs an atomic operation to write data to and then read data from the I2C bus on which the device is connected,
         /// and sends a restart condition between the write and read operations.
         /// </summary>
         /// <param name="writeBuffer">

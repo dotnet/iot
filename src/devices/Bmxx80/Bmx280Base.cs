@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-//Ported from https://github.com/adafruit/Adafruit_BMP280_Library/blob/master/Adafruit_BMP280.cpp
-//Formulas and code examples can also be found in the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
-
+// Ported from https://github.com/adafruit/Adafruit_BMP280_Library/blob/master/Adafruit_BMP280.cpp
+// Formulas and code examples can also be found in the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
 using System;
 using System.Device.I2c;
 using System.IO;
@@ -44,7 +43,9 @@ namespace Iot.Device.Bmxx80
         /// <param name="deviceId">The ID of the device.</param>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
         protected Bmx280Base(byte deviceId, I2cDevice i2cDevice)
-            : base(deviceId, i2cDevice) { }
+            : base(deviceId, i2cDevice)
+        {
+        }
 
         /// <summary>
         /// Gets or sets the IIR filter mode.
@@ -58,7 +59,10 @@ namespace Iot.Device.Bmxx80
                 byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
                 current = (byte)((current & 0b_1110_0011) | (byte)value << 2);
 
-                Span<byte> command = stackalloc[] { (byte)Bmx280Register.CONFIG, current };
+                Span<byte> command = stackalloc[]
+                {
+                    (byte)Bmx280Register.CONFIG, current
+                };
                 _i2cDevice.Write(command);
                 _filteringMode = value;
             }
@@ -76,7 +80,10 @@ namespace Iot.Device.Bmxx80
                 byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
                 current = (byte)((current & 0b_0001_1111) | (byte)value << 5);
 
-                Span<byte> command = stackalloc[] { (byte)Bmx280Register.CONFIG, current };
+                Span<byte> command = stackalloc[]
+                {
+                    (byte)Bmx280Register.CONFIG, current
+                };
                 _i2cDevice.Write(command);
                 _standbyTime = value;
             }
@@ -152,10 +159,10 @@ namespace Iot.Device.Bmxx80
             // Read pressure data.
             var press = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
 
-            //Convert the raw value to the pressure in Pa.
+            // Convert the raw value to the pressure in Pa.
             var pressPa = CompensatePressure(press >> 4);
 
-            //Return the pressure as a Pressure instance.
+            // Return the pressure as a Pressure instance.
             pressure = Pressure.FromHectopascal(pressPa.Hectopascal / 256);
             return true;
         }
@@ -182,8 +189,8 @@ namespace Iot.Device.Bmxx80
             // Calculate and return the altitude using the international barometric formula.
             altitude = 44330.0 * (1.0 - Math.Pow(pressure.Hectopascal / seaLevelPressure.Hectopascal, 0.1903));
             return true;
-        }        
-        
+        }
+
         /// <summary>
         /// Calculates the altitude in meters from the mean sea-level pressure.
         /// </summary>
@@ -229,7 +236,10 @@ namespace Iot.Device.Bmxx80
             // Clear last 2 bits.
             var cleared = (byte)(read & 0b_1111_1100);
 
-            Span<byte> command = stackalloc[] { _controlRegister, (byte)(cleared | (byte)powerMode) };
+            Span<byte> command = stackalloc[]
+            {
+                _controlRegister, (byte)(cleared | (byte)powerMode)
+            };
             _i2cDevice.Write(command);
         }
 
@@ -269,12 +279,13 @@ namespace Iot.Device.Bmxx80
             var2 = var2 + ((var1 * (long)_calibrationData.DigP5) << 17);
             var2 = var2 + ((long)_calibrationData.DigP4 << 35);
             var1 = ((var1 * var1 * (long)_calibrationData.DigP3) >> 8) + ((var1 * (long)_calibrationData.DigP2) << 12);
-            var1 = (((((long)1 << 47) + var1)) * (long)_calibrationData.DigP1) >> 33;
+            var1 = ((((1L << 47) + var1)) * (long)_calibrationData.DigP1) >> 33;
             if (var1 == 0)
             {
-                return Pressure.FromPascal(0); //Avoid exception caused by division by zero
+                return Pressure.FromPascal(0); // Avoid exception caused by division by zero
             }
-            //Perform calibration operations
+
+            // Perform calibration operations
             long p = 1048576 - adcPressure;
             p = (((p << 31) - var2) * 3125) / var1;
             var1 = ((long)_calibrationData.DigP9 * (p >> 13) * (p >> 13)) >> 25;

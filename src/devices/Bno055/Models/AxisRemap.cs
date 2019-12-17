@@ -21,8 +21,10 @@ namespace Iot.Device.Bno055
     {
         /// <summary>X coordinate</summary>
         X = 0x00,
+
         /// <summary>Y coordinate</summary>
         Y = 0x01,
+
         /// <summary>Z coordinate</summary>
         Z = 0x02,
     }
@@ -34,6 +36,7 @@ namespace Iot.Device.Bno055
     {
         /// <summary>Positive axis sign</summary>
         Positive = 0x00,
+
         /// <summary>Negative axis sign</summary>
         Negative = 0x01,
     }

@@ -10,18 +10,6 @@
             "usingDirectivesPlacement": "outsideNamespace",
             "blankLinesBetweenUsingGroups": "omit"
         },
-        "namingRules": {
-            "allowCommonHungarianPrefixes": true,
-            "allowedHungarianPrefixes": [
-                "os",
-                "ip"
-            ]
-        },
-        "maintainabilityRules": {
-            "topLevelTypes": [
-                "class", "interface", "struct", "enum"
-            ]
-        },
         "documentationRules": {
             "documentInterfaces": true,
             "documentInternalElements": false

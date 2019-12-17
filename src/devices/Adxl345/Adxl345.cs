@@ -14,14 +14,14 @@ namespace Iot.Device.Adxl345
     /// </summary>
     public class Adxl345 : IDisposable
     {
-        private SpiDevice _sensor = null;
-                             
-        private readonly byte _gravityRangeByte;                             
+        private const int Resolution = 1024; // All g ranges resolution
+        private readonly byte _gravityRangeByte;
         private readonly int _range;
 
-        private const int Resolution = 1024;        // All g ranges resolution
+        private SpiDevice _sensor = null;
 
         #region SpiSetting
+
         /// <summary>
         /// ADX1345 SPI Clock Frequency
         /// </summary>
@@ -31,6 +31,7 @@ namespace Iot.Device.Adxl345
         /// ADX1345 SPI Mode
         /// </summary>
         public const SpiMode SpiMode = System.Device.Spi.SpiMode.Mode3;
+
         #endregion
 
         /// <summary>
@@ -61,6 +62,7 @@ namespace Iot.Device.Adxl345
             {
                 _range = 32;
             }
+
             _gravityRangeByte = (byte)gravityRange;
 
             _sensor = sensor;
@@ -73,8 +75,14 @@ namespace Iot.Device.Adxl345
         /// </summary>
         private void Initialize()
         {
-            Span<byte> dataFormat = stackalloc byte[] { (byte)Register.ADLX_DATA_FORMAT, _gravityRangeByte };
-            Span<byte> powerControl = stackalloc byte[] { (byte)Register.ADLX_POWER_CTL, 0x08 };
+            Span<byte> dataFormat = stackalloc byte[]
+            {
+                (byte)Register.ADLX_DATA_FORMAT, _gravityRangeByte
+            };
+            Span<byte> powerControl = stackalloc byte[]
+            {
+                (byte)Register.ADLX_POWER_CTL, 0x08
+            };
 
             _sensor.Write(dataFormat);
             _sensor.Write(powerControl);
@@ -95,15 +103,13 @@ namespace Iot.Device.Adxl345
             _sensor.TransferFullDuplex(regAddrBuf, readBuf);
             Span<byte> readData = readBuf.Slice(1);
 
-            short AccelerationX = BinaryPrimitives.ReadInt16LittleEndian(readData.Slice(0, 2));
-            short AccelerationY = BinaryPrimitives.ReadInt16LittleEndian(readData.Slice(2, 2));
-            short AccelerationZ = BinaryPrimitives.ReadInt16LittleEndian(readData.Slice(4, 2));
+            short accelerationX = BinaryPrimitives.ReadInt16LittleEndian(readData.Slice(0, 2));
+            short accelerationY = BinaryPrimitives.ReadInt16LittleEndian(readData.Slice(2, 2));
+            short accelerationZ = BinaryPrimitives.ReadInt16LittleEndian(readData.Slice(4, 2));
 
             Vector3 accel = new Vector3
             {
-                X = (float)AccelerationX / units,
-                Y = (float)AccelerationY / units,
-                Z = (float)AccelerationZ / units
+                X = (float)accelerationX / units, Y = (float)accelerationY / units, Z = (float)accelerationZ / units
             };
 
             return accel;

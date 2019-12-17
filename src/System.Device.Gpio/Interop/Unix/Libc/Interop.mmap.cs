@@ -35,7 +35,7 @@ internal enum MemoryMappedFlags
 /// <summary>
 /// The BCM GPIO registers expose the data/direction/interrupt/etc functionality of pins.
 /// Each register is 64 bits, where each bit represents a logical register number.
-/// 
+///
 /// For example, writing HIGH to register 20 would translate to (registerViewPointer).GPSET[0] | (1U &lt;&lt; 20).
 /// </summary>
 [StructLayout(LayoutKind.Explicit)]

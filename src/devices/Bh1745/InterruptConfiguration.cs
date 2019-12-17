@@ -13,14 +13,17 @@ namespace Iot.Device.Bh1745
         /// Interrupt status is toggled at each measurement end.
         /// </summary>
         ToggleMeasurementEnd = 0b00,
+
         /// <summary>
         /// Interrupt status is updated at each measurement end.
         /// </summary>
         UpdateMeasurementEnd = 0b01,
+
         /// <summary>
         /// Interrupt status is updated if 4 consecutive threshold judgments are the same.
         /// </summary>
         UpdateConsecutiveX4 = 0b10,
+
         /// <summary>
         /// Interrupt status is updated if 8 consecutive threshold judgments are the same.
         /// </summary>
@@ -36,14 +39,17 @@ namespace Iot.Device.Bh1745
         /// The red color channel.
         /// </summary>
         RedChannel = 0b00,
+
         /// <summary>
         /// The green color channel.
         /// </summary>
         GreenChannel = 0b01,
+
         /// <summary>
         /// The blue color channel.
         /// </summary>
         BlueChannel = 0b10,
+
         /// <summary>
         /// The clear color channel. 
         /// </summary>
@@ -60,6 +66,7 @@ namespace Iot.Device.Bh1745
         /// or initialized.
         /// </summary>
         LatchUntilReadOrInitialized = 0b00,
+
         /// <summary>
         /// Interrupt pin is latched after each measurement
         /// </summary>
@@ -75,6 +82,7 @@ namespace Iot.Device.Bh1745
         /// Default state in which the interrupt pin is not initialized (active).
         /// </summary>
         Active = 0b00,
+
         /// <summary>
         /// Sets the pin to high impedance (inactive).
         /// </summary>
