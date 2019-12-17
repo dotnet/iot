@@ -18,7 +18,8 @@ namespace Iot.Device.DCMotor
         public DCMotor2PinNoEnable(
             PwmChannel pwmChannel,
             int pin1,
-            GpioController controller) : base(controller ?? ((pin1 == -1) ? null : new GpioController()))
+            GpioController controller)
+            : base(controller ?? ((pin1 == -1) ? null : new GpioController()))
         {
             _pwm = pwmChannel;
 
@@ -51,7 +52,9 @@ namespace Iot.Device.DCMotor
                 double val = Math.Clamp(value, _pin1 != -1 ? -1.0 : 0.0, 1.0);
 
                 if (_speed == val)
+                {
                     return;
+                }
 
                 if (val >= 0.0)
                 {
@@ -75,6 +78,7 @@ namespace Iot.Device.DCMotor
                 _speed = val;
             }
         }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

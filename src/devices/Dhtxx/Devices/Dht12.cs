@@ -25,7 +25,8 @@ namespace Iot.Device.DHTxx
         /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
         public Dht12(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
             : base(pin, pinNumberingScheme)
-        { }
+        {
+        }
 
         /// <summary>
         /// Create a DHT12 sensor through I2C
@@ -33,7 +34,8 @@ namespace Iot.Device.DHTxx
         /// <param name="i2cDevice">I2C Device</param>
         public Dht12(I2cDevice i2cDevice)
             : base(i2cDevice)
-        { }
+        {
+        }
 
         internal override double GetHumidity(byte[] readBuff)
         {

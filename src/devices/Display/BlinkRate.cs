@@ -14,14 +14,17 @@ namespace Iot.Device.Display
         /// Turn off blinking
         /// </summary>
         Off = 0b00,
+
         /// <summary>
         /// Blink display at 2Hz (2x per second)
         /// </summary>
         Blink2Hz = 0b01,
+
         /// <summary>
         /// Blink display at 1Hz (1x per second)
         /// </summary>
         Blink1Hz = 0b10,
+
         /// <summary>
         /// Blink display at 0.5Hz (Once every 2 seconds)
         /// </summary>

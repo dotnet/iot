@@ -18,7 +18,10 @@ namespace Iot.Device.GoPiGo3.Models
         public GroveSensor(GrovePort GrovePort)
         {
             if ((GrovePort != GrovePort.Grove1) && (GrovePort != GrovePort.Grove2))
+            {
                 throw new ArgumentException("Grove sensor can only be on Port 1 or Port 2");
+            }
+
             SensorType = GroveSensorType.None;
             Port = GrovePort;
         }
@@ -45,14 +48,19 @@ namespace Iot.Device.GoPiGo3.Models
     {
         /// <summary>None</summary>
         None = 0,
+
         /// <summary>Custom</summary>
         Custom = 1,
+
         /// <summary>Infrared remote</summary>
         InfraredRemote,
+
         /// <summary>Infrared EV3 remote</summary>
         InfraredEV3Remote,
+
         /// <summary>Ultrasonic</summary>
         Ultrasonic,
+
         /// <summary>I2C</summary>
         I2c
     }
@@ -64,12 +72,16 @@ namespace Iot.Device.GoPiGo3.Models
     {
         /// <summary>Valid data</summary>
         ValidData,
+
         /// <summary>Not configured</summary>
         NotConfigured,
+
         /// <summary>Configuring</summary>
         Configuring,
+
         /// <summary>No data</summary>
         NoData,
+
         /// <summary>I2C error</summary>
         I2cError
     }

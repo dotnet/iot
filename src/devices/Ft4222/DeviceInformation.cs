@@ -7,7 +7,7 @@ using System;
 namespace Iot.Device.Ft4222
 {
     /// <summary>
-    /// FT4222 device information    
+    /// FT4222 device information
     /// </summary>
     public class DeviceInformation
     {

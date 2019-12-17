@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.GoPiGo3.Models;
 using System;
 using System.IO;
 using System.Threading;
+using Iot.Device.GoPiGo3.Models;
 
 namespace Iot.Device.GoPiGo3.Movements
 {
@@ -120,7 +120,7 @@ namespace Iot.Device.GoPiGo3.Movements
         }
 
         /// <summary>
-        /// Return the MotorPort of the left motor 
+        /// Return the MotorPort of the left motor
         /// </summary>
         public MotorPort PortLeft { get; }
 
@@ -134,7 +134,10 @@ namespace Iot.Device.GoPiGo3.Movements
         /// </summary>
         public bool DirectionOpposite
         {
-            get { return _directionOpposite; }
+            get
+            {
+                return _directionOpposite;
+            }
 
             set
             {
@@ -146,16 +149,26 @@ namespace Iot.Device.GoPiGo3.Movements
         private void RunMotorSyncTime(MotorPort[] ports, int[] speeds, int timeout)
         {
             if ((ports == null) || (speeds == null))
+            {
                 return;
-            if (ports.Length != speeds.Length)
-                return;
-            //create a timer for the needed time to run
-            if (_timer == null)
-                _timer = new Timer(RunUntil, null, TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
-            else
-                _timer.Change(TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
+            }
 
-            //initialize the speed and enable motors
+            if (ports.Length != speeds.Length)
+            {
+                return;
+            }
+
+            // create a timer for the needed time to run
+            if (_timer == null)
+            {
+                _timer = new Timer(RunUntil, null, TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
+            }
+            else
+            {
+                _timer.Change(TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
+            }
+
+            // initialize the speed and enable motors
             for (int i = 0; i < ports.Length; i++)
             {
                 StartMotor(ports[i], speeds[i]);
@@ -169,6 +182,7 @@ namespace Iot.Device.GoPiGo3.Movements
                 {
                     status |= IsRunning(ports[i]);
                 }
+
                 nonstop = status;
             }
         }
@@ -198,17 +212,25 @@ namespace Iot.Device.GoPiGo3.Movements
         private void RunMotorSyncDegrees(MotorPort[] ports, int[] speeds, int[] degrees)
         {
             if ((ports == null) || (speeds == null) || degrees == null)
+            {
                 return;
+            }
+
             if ((ports.Length != speeds.Length) && (degrees.Length != speeds.Length))
+            {
                 return;
-            //make sure we have only positive degrees
+            }
+
+            // make sure we have only positive degrees
             for (int i = 0; i < degrees.Length; i++)
             {
                 if (degrees[i] < 0)
+                {
                     degrees[i] = -degrees[i];
+                }
             }
 
-            //initialize the speed and enable motors
+            // initialize the speed and enable motors
             int[] initval = new int[ports.Length];
             for (int i = 0; i < ports.Length; i++)
             {
@@ -218,7 +240,8 @@ namespace Iot.Device.GoPiGo3.Movements
                     StartMotor(ports[i], speeds[i]);
                 }
                 catch (IOException)
-                { }
+                {
+                }
             }
 
             bool nonstop = true;
@@ -231,24 +254,29 @@ namespace Iot.Device.GoPiGo3.Movements
                     {
                         if (speeds[i] > 0)
                         {
-                            if (_goPiGo.GetMotorEncoder(ports[i]) >= (initval[i] + degrees[i] * _goPiGo.EncoderTicksPerRotation))
+                            if (_goPiGo.GetMotorEncoder(ports[i]) >=
+                                (initval[i] + degrees[i] * _goPiGo.EncoderTicksPerRotation))
                             {
                                 StopMotor(ports[i]);
                             }
                         }
                         else
                         {
-                            if (_goPiGo.GetMotorEncoder(ports[i]) <= (initval[i] - degrees[i] * _goPiGo.EncoderTicksPerRotation))
+                            if (_goPiGo.GetMotorEncoder(ports[i]) <=
+                                (initval[i] - degrees[i] * _goPiGo.EncoderTicksPerRotation))
                             {
                                 StopMotor(ports[i]);
                             }
                         }
+
                         status |= IsRunning(ports[i]);
                     }
+
                     nonstop = status;
                 }
                 catch (IOException)
-                { }
+                {
+                }
             }
         }
 
@@ -263,10 +291,14 @@ namespace Iot.Device.GoPiGo3.Movements
             try
             {
                 if (_goPiGo.GetMotorStatus(port).Speed == 0)
+                {
                     return false;
+                }
             }
             catch (IOException)
-            { }
+            {
+            }
+
             return true;
         }
     }

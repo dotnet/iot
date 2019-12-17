@@ -12,20 +12,23 @@ namespace Iot.Device.GoPiGo3.Sensors
     public class Relay : DigitalOutput
     {
         /// <summary>
-        /// 
+        /// Creates a new instance of <see cref="Relay"/>.
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
         /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
-        public Relay(GoPiGo goPiGo, GrovePort port) : this(goPiGo, port, false)
-        { }
+        public Relay(GoPiGo goPiGo, GrovePort port)
+            : this(goPiGo, port, false)
+        {
+        }
 
         /// <summary>
-        /// 
+        /// Creates a new instance of <see cref="Relay"/>.
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
         /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
         /// <param name="inverted">If inverted, the relay is on when output is low and off when output is high</param>
-        public Relay(GoPiGo goPiGo, GrovePort port, bool inverted) : base(goPiGo, port)
+        public Relay(GoPiGo goPiGo, GrovePort port, bool inverted)
+            : base(goPiGo, port)
         {
             IsInverted = inverted;
         }
@@ -56,7 +59,10 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// </summary>
         public new int Value
         {
-            get { return _value ? 1 : 0; }
+            get
+            {
+                return _value ? 1 : 0;
+            }
 
             set
             {

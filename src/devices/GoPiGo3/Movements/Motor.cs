@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.GoPiGo3.Models;
 using System;
 using System.IO;
 using System.Threading;
+using Iot.Device.GoPiGo3.Models;
 
 namespace Iot.Device.GoPiGo3.Movements
 {
@@ -16,8 +16,10 @@ namespace Iot.Device.GoPiGo3.Movements
     {
         /// <summary>Backward</summary>
         Backward = -1,
+
         /// <summary>Forward</summary>
         Forward = 1,
+
         /// <summary>Opposite direction</summary>
         OppositeDirection = 0
     }
@@ -38,7 +40,10 @@ namespace Iot.Device.GoPiGo3.Movements
         /// </summary>
         /// <param name="brick">GoPiGo3 brick</param>
         /// <param name="port">Motor port</param>
-        public Motor(GoPiGo brick, MotorPort port) : this(brick, port, 1000) { }
+        public Motor(GoPiGo brick, MotorPort port)
+            : this(brick, port, 1000)
+        {
+        }
 
         /// <summary>
         /// Create a motor
@@ -49,11 +54,14 @@ namespace Iot.Device.GoPiGo3.Movements
         public Motor(GoPiGo brick, MotorPort port, int timeout)
         {
             if (port == MotorPort.Both)
+            {
                 throw new ArgumentException($"Motor class can only have 1 motor");
+            }
+
             _goPiGo = brick;
             Port = port;
             _periodRefresh = timeout;
-            _timer = new Timer(UpdateSensor, this, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(timeout));            
+            _timer = new Timer(UpdateSensor, this, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(timeout));
         }
 
         /// <summary>
@@ -115,11 +123,17 @@ namespace Iot.Device.GoPiGo3.Movements
                 {
                     case Polarity.Backward:
                         if (motorstatus.Speed > 0)
+                        {
                             _goPiGo.SetMotorPower(Port, -Speed);
+                        }
+
                         break;
                     case Polarity.Forward:
                         if (motorstatus.Speed < 0)
+                        {
                             _goPiGo.SetMotorPower(Port, -Speed);
+                        }
+
                         break;
                     case Polarity.OppositeDirection:
                         _goPiGo.SetMotorPower(Port, -Speed);
@@ -128,7 +142,9 @@ namespace Iot.Device.GoPiGo3.Movements
                         break;
                 }
             }
-            catch (IOException) { }
+            catch (IOException)
+            {
+            }
         }
 
         /// <summary>

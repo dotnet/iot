@@ -19,12 +19,12 @@ namespace Iot.Device.DHTxx
         /// </summary>
         public const byte DefaultI2cAddress = 0x38;
 
-        // state, humi[20-13], humi[12-5], humi[4-1]temp[20-17], temp[16-9], temp[8-1]
-        private byte[] _dht10ReadBuff = new byte[6];
-
         private const byte DHT10_CMD_INIT = 0b_1110_0001;
         private const byte DHT10_CMD_START = 0b_1010_1100;
         private const byte DHT10_CMD_SOFTRESET = 0b_1011_1010;
+
+        // state, humi[20-13], humi[12-5], humi[4-1]temp[20-17], temp[16-9], temp[8-1]
+        private byte[] _dht10ReadBuff = new byte[6];
 
         /// <summary>
         /// Get the last read of relative humidity in percentage

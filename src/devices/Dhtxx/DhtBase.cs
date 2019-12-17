@@ -112,12 +112,18 @@ namespace Iot.Device.DHTxx
         {
             // The time of two measurements should be more than 1s.
             if (Environment.TickCount - _lastMeasurement < 1000)
+            {
                 return;
+            }
 
             if (_protocol == CommunicationProtocol.OneWire)
+            {
                 ReadThroughOneWire();
+            }
             else
+            {
                 ReadThroughI2c();
+            }
         }
 
         /// <summary>
@@ -194,6 +200,7 @@ namespace Iot.Device.DHTxx
                         return;
                     }
                 }
+
                 _stopwatch.Stop();
 
                 // bit to byte

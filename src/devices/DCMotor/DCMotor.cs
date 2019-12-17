@@ -17,11 +17,6 @@ namespace Iot.Device.DCMotor
         private const int DefaultPwmFrequency = 50;
 
         /// <summary>
-        /// <see cref="GpioController"/> related with operations on pins
-        /// </summary>
-        protected GpioController Controller;
-
-        /// <summary>
         /// Constructs generic <see cref="DCMotor"/> instance
         /// </summary>
         /// <param name="controller"><see cref="GpioController"/> related with operations on pins</param>
@@ -35,6 +30,15 @@ namespace Iot.Device.DCMotor
         /// 1 means maximum speed, 0 means no movement and -1 means movement in opposite direction.
         /// </summary>
         public abstract double Speed { get; set; }
+
+        /// <summary>
+        /// <see cref="GpioController"/> related with operations on pins
+        /// </summary>
+        protected GpioController Controller
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Disposes the <see cref="DCMotor"/> class
@@ -71,7 +75,9 @@ namespace Iot.Device.DCMotor
         public static DCMotor Create(PwmChannel speedControlChannel)
         {
             if (speedControlChannel == null)
+            {
                 throw new ArgumentNullException(nameof(speedControlChannel));
+            }
 
             return new DCMotor2PinNoEnable(speedControlChannel, -1, null);
         }
@@ -90,7 +96,9 @@ namespace Iot.Device.DCMotor
         public static DCMotor Create(int speedControlPin, GpioController controller = null)
         {
             if (speedControlPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(speedControlPin));
+            }
 
             controller = controller ?? new GpioController();
             return new DCMotor2PinNoEnable(
@@ -115,14 +123,18 @@ namespace Iot.Device.DCMotor
         public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, GpioController controller = null)
         {
             if (speedControlChannel == null)
+            {
                 throw new ArgumentNullException(nameof(speedControlChannel));
+            }
 
             if (directionPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(directionPin));
+            }
 
             return new DCMotor2PinNoEnable(speedControlChannel, directionPin, controller);
         }
-        
+
         /// <summary>
         /// Creates <see cref="DCMotor"/> instance which allows to control speed in both directions.
         /// </summary>
@@ -139,10 +151,14 @@ namespace Iot.Device.DCMotor
         public static DCMotor Create(int speedControlPin, int directionPin, GpioController controller = null)
         {
             if (speedControlPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(speedControlPin));
+            }
 
             if (directionPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(directionPin));
+            }
 
             controller = controller ?? new GpioController();
             return new DCMotor2PinNoEnable(
@@ -156,7 +172,7 @@ namespace Iot.Device.DCMotor
         /// </summary>
         /// <param name="speedControlChannel"><see cref="PwmChannel"/> used to control the speed of the motor</param>
         /// <param name="directionPin">Pin used to control the direction of the motor</param>
-        /// <param name="otherDirectionPin">Pin used to control the direction of the motor</param>
+        /// <param name="otherDirectionPin">Pin used to control the reverse direction of the motor</param>
         /// <param name="controller"><see cref="GpioController"/> related to <paramref name="directionPin"/> and <paramref name="otherDirectionPin"/></param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
@@ -169,13 +185,19 @@ namespace Iot.Device.DCMotor
         public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, int otherDirectionPin, GpioController controller = null)
         {
             if (speedControlChannel == null)
+            {
                 throw new ArgumentNullException(nameof(speedControlChannel));
+            }
 
             if (directionPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(directionPin));
+            }
 
             if (otherDirectionPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(otherDirectionPin));
+            }
 
             return new DCMotor3Pin(
                 speedControlChannel,
@@ -189,7 +211,7 @@ namespace Iot.Device.DCMotor
         /// </summary>
         /// <param name="speedControlPin">Pin used to control the speed of the motor with software PWM (frequency will default to 50Hz)</param>
         /// <param name="directionPin">Pin used to control the direction of the motor</param>
-        /// <param name="otherDirectionPin">Pin used to control the direction of the motor</param>
+        /// <param name="otherDirectionPin">Pin used to control the reverse direction of the motor</param>
         /// <param name="controller"><see cref="GpioController"/> related to <paramref name="speedControlPin"/>, <paramref name="directionPin"/> and <paramref name="otherDirectionPin"/></param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
@@ -202,13 +224,19 @@ namespace Iot.Device.DCMotor
         public static DCMotor Create(int speedControlPin, int directionPin, int otherDirectionPin, GpioController controller = null)
         {
             if (speedControlPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(speedControlPin));
+            }
 
             if (directionPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(directionPin));
+            }
 
             if (otherDirectionPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(otherDirectionPin));
+            }
 
             controller = controller ?? new GpioController();
             return new DCMotor3Pin(

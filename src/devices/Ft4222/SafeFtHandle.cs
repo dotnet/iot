@@ -9,7 +9,7 @@ namespace Iot.Device.Ft4222
 {
     internal class SafeFtHandle : SafeHandle
     {
-        public SafeFtHandle() 
+        public SafeFtHandle()
             : base(IntPtr.Zero, true)
         {
         }

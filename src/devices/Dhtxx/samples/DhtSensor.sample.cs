@@ -7,23 +7,34 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.DHTxx;
 
-class Program
+namespace Iot.Device.DHTxx.Samples
 {
-    static void Main(string[] args)
+    /// <summary>
+    /// Test program main class
+    /// </summary>
+    public class Program
     {
-        Console.WriteLine("Hello DHT!");
-
-        // Init DHT10 through I2C
-        I2cConnectionSettings settings = new I2cConnectionSettings(1, Dht10.DefaultI2cAddress);
-        I2cDevice device = I2cDevice.Create(settings);
-
-        using (Dht10 dht = new Dht10(device))
+        /// <summary>
+        /// Entry point for example program
+        /// </summary>
+        /// <param name="args">Command line arguments</param>
+        public static void Main(string[] args)
         {
-            while (true)
-            {
-                Console.WriteLine($"Temperature: {dht.Temperature.Celsius.ToString("0.0")} °C, Humidity: {dht.Humidity.ToString("0.0")} %");
+            Console.WriteLine("Hello DHT!");
 
-                Thread.Sleep(2000);
+            // Init DHT10 through I2C
+            I2cConnectionSettings settings = new I2cConnectionSettings(1, Dht10.DefaultI2cAddress);
+            I2cDevice device = I2cDevice.Create(settings);
+
+            using (Dht10 dht = new Dht10(device))
+            {
+                while (true)
+                {
+                    Console.WriteLine(
+                        $"Temperature: {dht.Temperature.Celsius.ToString("0.0")} °C, Humidity: {dht.Humidity.ToString("0.0")} %");
+
+                    Thread.Sleep(2000);
+                }
             }
         }
     }

@@ -27,34 +27,42 @@ namespace Iot.Device.Display
         /// No segment
         /// </summary>
         None = 0b0000_0000,
+
         /// <summary>
         /// Top segment
         /// </summary>
         Top = 0b0000_0001,
+
         /// <summary>
         /// Top right segment
         /// </summary>
         TopRight = 0b0000_0010,
+
         /// <summary>
         /// Bottom right segment
         /// </summary>
         BottomRight = 0b0000_0100,
+
         /// <summary>
         /// Bottom segment
         /// </summary>
         Bottom = 0b0000_1000,
+
         /// <summary>
         /// Bottom left segment
         /// </summary>
         BottomLeft = 0b0001_0000,
+
         /// <summary>
         /// Top left segment
         /// </summary>
         TopLeft = 0b0010_0000,
+
         /// <summary>
         /// Middle segment
         /// </summary>
         Middle = 0b0100_0000,
+
         /// <summary>
         /// Dot
         /// </summary>

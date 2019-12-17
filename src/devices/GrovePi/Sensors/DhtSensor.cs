@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.GrovePiDevice.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -14,8 +14,8 @@ namespace Iot.Device.GrovePiDevice.Sensors
     /// </summary>
     public class DhtSensor
     {
-        private GrovePi _grovePi;
         private readonly double[] _lastTemHum = new double[2] { double.NaN, double.NaN };
+        private GrovePi _grovePi;
 
         /// <summary>
         /// grove sensor port
@@ -31,7 +31,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public DhtSensor(GrovePi grovePi, GrovePort port, DhtType dhtType)
         {
             if (!SupportedPorts.Contains(port))
+            {
                 throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
+            }
+
             _grovePi = grovePi;
             DhtType = dhtType;
             _port = port;
@@ -69,7 +72,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
             {
                 _grovePi.WriteCommand(GrovePiCommand.DhtTemp, _port, (byte)DhtType, 0);
             }
-            
+
             // Wait a little bit to read the result
             // Delay from source code, line 90 in the Grove Pi firmware repository
             // This is needed for firmware 1.4.0 and also working for previous versions

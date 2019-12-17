@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.GoPiGo3.Models;
 using System;
 using System.Collections.Generic;
+using Iot.Device.GoPiGo3.Models;
 
 namespace Iot.Device.GoPiGo3.Sensors
 {
@@ -13,8 +13,8 @@ namespace Iot.Device.GoPiGo3.Sensors
     /// </summary>
     public class AnalogSensor : ISensor
     {
-        internal GoPiGo _goPiGo;
         internal readonly GrovePort _mode;
+        internal GoPiGo _goPiGo;
 
         /// <summary>
         /// Constructor for the generic Analog Sensor
@@ -24,7 +24,10 @@ namespace Iot.Device.GoPiGo3.Sensors
         public AnalogSensor(GoPiGo goPiGo, GrovePort port)
         {
             if (!SupportedPorts.Contains(port))
+            {
                 throw new ArgumentException($"Error: Grove Port not supported");
+            }
+
             _goPiGo = goPiGo;
             Port = port;
             _goPiGo.SetGroveType(port, GroveSensorType.Custom);
@@ -60,7 +63,7 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// <summary>
         /// List the supported Grove ports for the sensor
         /// </summary>
-        static public List<GrovePort> SupportedPorts => new List<GrovePort>() { GrovePort.Grove1, GrovePort.Grove2 };
+        public static List<GrovePort> SupportedPorts => new List<GrovePort>() { GrovePort.Grove1, GrovePort.Grove2 };
 
         /// <summary>
         /// Get the sensor name "Analog Sensor"

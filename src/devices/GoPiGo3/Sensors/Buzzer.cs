@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.GoPiGo3.Models;
 using System;
 using System.Collections.Generic;
+using Iot.Device.GoPiGo3.Models;
 
 namespace Iot.Device.GoPiGo3.Sensors
 {
@@ -13,8 +13,8 @@ namespace Iot.Device.GoPiGo3.Sensors
     /// </summary>
     public class Buzzer : ISensor
     {
-        private GoPiGo _goPiGo;
         private readonly GrovePort _mode;
+        private GoPiGo _goPiGo;
         private int _value;
         private byte _duty;
 
@@ -23,11 +23,13 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
         /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
-        public Buzzer(GoPiGo goPiGo, GrovePort port) : this(goPiGo, port, 50)
-        { }
+        public Buzzer(GoPiGo goPiGo, GrovePort port)
+            : this(goPiGo, port, 50)
+        {
+        }
 
         /// <summary>
-        /// 
+        /// Creates an instance of the <see cref="Buzzer"/> class
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
         /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
@@ -35,14 +37,17 @@ namespace Iot.Device.GoPiGo3.Sensors
         public Buzzer(GoPiGo goPiGo, GrovePort port, byte duty)
         {
             if (!SupportedPorts.Contains(port))
+            {
                 throw new ArgumentException($"Error: Grove Port not supported");
+            }
+
             _goPiGo = goPiGo;
             Port = port;
             _goPiGo.SetGroveType(port, GroveSensorType.Custom);
             _mode = (port == GrovePort.Grove1) ? GrovePort.Grove1Pin1 : GrovePort.Grove2Pin1;
             _goPiGo.SetGroveMode(_mode, GroveInputOutput.OutputPwm);
             Duty = duty;
-            Value = 24_000; //The default value
+            Value = 24_000; // The default value
             Stop();
         }
 
@@ -51,7 +56,10 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// </summary>
         public byte Duty
         {
-            get { return _duty; }
+            get
+            {
+                return _duty;
+            }
             set
             {
                 var prev = _duty;
@@ -84,7 +92,10 @@ namespace Iot.Device.GoPiGo3.Sensors
         /// </summary>
         public int Value
         {
-            get { return _value; }
+            get
+            {
+                return _value;
+            }
 
             set
             {
