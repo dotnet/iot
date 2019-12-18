@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Ssd13xx.Commands;
-using Iot.Device.Ssd13xx.Commands.Ssd1306Commands;
 using System;
 using Xunit;
+using Iot.Device.Ssd13xx.Commands;
+using Iot.Device.Ssd13xx.Commands.Ssd1306Commands;
 
 namespace Iot.Device.Ssd13xx.Tests
 {

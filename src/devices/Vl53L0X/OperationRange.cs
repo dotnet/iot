@@ -11,8 +11,10 @@ namespace Iot.Device.Vl53L0X
     {
         /// <summary>Minimum range: 5 millimeters</summary>
         Minimum = 5,
+
         /// <summary>Maximum range: 8 millimeters</summary>
         Maximum = 8000,
+
         /// <summary>Out of range</summary>
         OutOfRange = 8190
     }

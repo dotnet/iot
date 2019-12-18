@@ -13,14 +13,17 @@ namespace Iot.Device.Si7021
         /// Humidity 12-bit, Temperature 14-bit
         /// </summary>
         Resolution1 = 0b00,
+
         /// <summary>
         /// Humidity 8-bit, Temperature 12-bit
         /// </summary>
         Resolution2 = 0b01,
+
         /// <summary>
         /// Humidity 10-bit, Temperature 13-bit
         /// </summary>
         Resolution3 = 0b10,
+
         /// <summary>
         /// Humidity 11-bit, Temperature 11-bit
         /// </summary>

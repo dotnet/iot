@@ -14,12 +14,12 @@ namespace Iot.Device.Spi
     /// </summary>
     public class SoftwareSpi : SpiDevice
     {
-        private GpioController _controller;
         private readonly int _clk;
         private readonly int _miso;
         private readonly int _mosi;
         private readonly int _cs;
         private readonly SpiConnectionSettings _settings;
+        private GpioController _controller;
 
         /// <summary>
         /// Software implementation of the SPI.
@@ -74,27 +74,32 @@ namespace Iot.Device.Spi
                 // When we capture onPulseEnd then we need to start pulse before we send the data
                 // and then trigger the capture on exit
                 _bitTransfer = new ScopeData(
-                    enter: () => {
+                    enter: () =>
+                    {
                         _controller.Write(_clk, !idle);
                     },
-                    exit: () => {
+                    exit: () =>
+                    {
                         controller.Write(_clk, idle);
                     });
             }
             else
             {
                 _bitTransfer = new ScopeData(
-                    exit: () => {
+                    exit: () =>
+                    {
                         _controller.Write(_clk, !idle);
                         _controller.Write(_clk, idle);
                     });
             }
 
             _chipSelect = new ScopeData(
-                enter: () => {
+                enter: () =>
+                {
                     _controller.Write(_cs, _settings.ChipSelectLineActiveState);
                 },
-                exit: () => {
+                exit: () =>
+                {
                     _controller.Write(_cs, !(bool)_settings.ChipSelectLineActiveState);
                 });
         }
@@ -177,7 +182,7 @@ namespace Iot.Device.Spi
         {
             _controller?.Dispose();
             _controller = null;
-            base.Dispose();
+            base.Dispose(disposing);
         }
 
         private ScopeData _bitTransfer;
@@ -187,7 +192,8 @@ namespace Iot.Device.Spi
 
         private class ScopeData
         {
-            Action _enter, _exit;
+            internal Action _enter;
+            internal Action _exit;
 
             public ScopeData(Action enter = null, Action exit = null)
             {
@@ -214,7 +220,7 @@ namespace Iot.Device.Spi
 
         private struct Scope : IDisposable
         {
-            ScopeData _data;
+            internal readonly ScopeData _data;
 
             public Scope(ScopeData data)
             {

@@ -13,7 +13,8 @@ namespace Iot.Device.SocketCan
 {
     internal class SafeCanRawSocketHandle : SafeHandle
     {
-        public SafeCanRawSocketHandle(string networkInterface) : base(Interop.CreateCanRawSocket(networkInterface), true)
+        public SafeCanRawSocketHandle(string networkInterface)
+            : base(Interop.CreateCanRawSocket(networkInterface), true)
         {
         }
 

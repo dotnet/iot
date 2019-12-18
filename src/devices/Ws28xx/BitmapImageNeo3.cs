@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Graphics;
 using System.Drawing;
+using Iot.Device.Graphics;
 
 namespace Iot.Device.Ws28xx
 {
@@ -49,6 +49,7 @@ namespace Iot.Device.Ws28xx
                 {
                     data = (data << 3) | 0b100 | ((i >> j) << 1) & 2;
                 }
+
                 _lookup[i * BytesPerComponent + 0] = unchecked((byte)(data >> 16));
                 _lookup[i * BytesPerComponent + 1] = unchecked((byte)(data >> 8));
                 _lookup[i * BytesPerComponent + 2] = unchecked((byte)(data >> 0));

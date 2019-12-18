@@ -91,7 +91,9 @@ namespace Iot.Device.SocketCan
             int socket = CreateNativeSocket(PF_CAN, SOCK_RAW, CanProtocol.CAN_RAW);
 
             if (socket == -1)
+            {
                 throw new IOException("CAN socket could not be created");
+            }
 
             BindToInterface(socket, networkInterface);
 
@@ -209,7 +211,7 @@ namespace Iot.Device.SocketCan
         internal enum CanSocketOption : int
         {
             // set 0 .. n can_filter(s)
-            CAN_RAW_FILTER = 1,       
+            CAN_RAW_FILTER = 1,
             // set filter for error frames
             CAN_RAW_ERR_FILTER,
             // local loopback (default:on)

@@ -15,47 +15,47 @@ namespace Iot.Units
         private const double InchOfMercuryRatio = 0.000295301;
         private const double MillimeterOfMercuryRatio = 0.00750062;
         private double _pascal;
-        
+
         private Pressure(double pascal)
         {
             _pascal = pascal;
         }
-        
+
         /// <summary>
         /// The mean sea-level pressure (MSLP) is the average atmospheric pressure at mean sea level
         /// </summary>
         public static Pressure MeanSeaLevel => Pressure.FromPascal(101325);
-        
+
         /// <summary>
         /// Pressure in Pa
         /// </summary>
         public double Pascal => _pascal;
-        
+
         /// <summary>
         /// Pressure in mbar
         /// </summary>
         public double Millibar => MillibarRatio * _pascal;
-        
+
         /// <summary>
         /// Pressure in kPa
         /// </summary>
         public double Kilopascal => KilopascalRatio * _pascal;
-        
+
         /// <summary>
         /// Pressure in hPa
         /// </summary>
         public double Hectopascal => HectopascalRatio * _pascal;
-        
+
         /// <summary>
         /// Pressure in inHg
         /// </summary>
         public double InchOfMercury => InchOfMercuryRatio * _pascal;
-        
+
         /// <summary>
         /// Pressure in mmHg
         /// </summary>
         public double MillimeterOfMercury => MillimeterOfMercuryRatio * _pascal;
-        
+
         /// <summary>
         /// Creates Pressure instance from pressure in Pa
         /// </summary>
@@ -65,7 +65,7 @@ namespace Iot.Units
         {
             return new Pressure(value);
         }
-        
+
         /// <summary>
         /// Creates Pressure instance from pressure in mbar
         /// </summary>
@@ -75,7 +75,7 @@ namespace Iot.Units
         {
             return new Pressure(value / MillibarRatio);
         }
-        
+
         /// <summary>
         /// Creates Pressure instance from pressure in kPa
         /// </summary>
@@ -85,7 +85,7 @@ namespace Iot.Units
         {
             return new Pressure(value / KilopascalRatio);
         }
-        
+
         /// <summary>
         /// Creates Pressure instance from pressure in hPa
         /// </summary>
@@ -95,7 +95,7 @@ namespace Iot.Units
         {
             return new Pressure(value / HectopascalRatio);
         }
-        
+
         /// <summary>
         /// Creates Pressure instance from pressure in inHg
         /// </summary>
@@ -105,7 +105,7 @@ namespace Iot.Units
         {
             return new Pressure(value / InchOfMercuryRatio);
         }
-        
+
         /// <summary>
         /// Creates Pressure instance from pressure in mmHg
         /// </summary>

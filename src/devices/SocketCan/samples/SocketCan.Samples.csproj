@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-  	<ProjectReference Include="../SocketCan.csproj" />
+      <ProjectReference Include="../SocketCan.csproj" />
   </ItemGroup>
 
 </Project>

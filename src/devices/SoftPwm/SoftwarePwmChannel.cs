@@ -14,6 +14,7 @@ namespace System.Device.Pwm.Drivers
     /// </summary>
     public class SoftwarePwmChannel : PwmChannel
     {
+        private readonly bool _shouldDispose;
         // use to determine the freqncy of the PWM
         // PulseFrequency = total frenquency
         // curent pulse width = when the signal is hi
@@ -35,7 +36,6 @@ namespace System.Device.Pwm.Drivers
 
         private Thread _runningThread;
         private GpioController _controller;
-        private readonly bool _shouldDispose;
         private bool _runThread = true;
 
         /// <summary>
@@ -50,6 +50,7 @@ namespace System.Device.Pwm.Drivers
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), value, "Value must not be negative.");
                 }
+
                 _frequency = value;
                 _pulseFrequency = (_frequency > 0) ? 1 / _frequency * 1000.0 : 0.0;
                 UpdateRange();
@@ -68,6 +69,7 @@ namespace System.Device.Pwm.Drivers
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), value, "Value must be between 0.0 and 1.0.");
                 }
+
                 _percentage = value;
                 UpdateRange();
             }
@@ -101,6 +103,7 @@ namespace System.Device.Pwm.Drivers
                 Debug.WriteLine("GPIO does not exist on the current system.");
                 return;
             }
+
             _servoPin = pinNumber;
             _controller.OpenPin(_servoPin, PinMode.Output);
             _usePrecisionTimer = usePrecisionTimer;
@@ -184,9 +187,10 @@ namespace System.Device.Pwm.Drivers
             double finalTick = initialTick + desiredTicks;
             while (_stopwatch.ElapsedTicks < finalTick)
             {
-                //nothing than waiting
+                // nothing than waiting
             }
         }
+
         /// <summary>
         /// Starts the PWM channel.
         /// </summary>

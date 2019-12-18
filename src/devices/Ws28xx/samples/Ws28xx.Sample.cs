@@ -2,32 +2,32 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Graphics;
 using System;
 using System.Device.Spi;
 using System.Drawing;
+using Iot.Device.Graphics;
 
 namespace Iot.Device.Ws28xx.Samples
 {
-    class Program
+    internal class Program
     {
         // Configure the count of pixels
-        private const int count = 8; 
-        static void Main()
+        private const int Count = 8;
+
+        public static void Main()
         {
-            var settings = new SpiConnectionSettings(0, 0) {
-                ClockFrequency = 2_400_000,
-                Mode = SpiMode.Mode0,
-                DataBitLength = 8
+            var settings = new SpiConnectionSettings(0, 0)
+            {
+                ClockFrequency = 2_400_000, Mode = SpiMode.Mode0, DataBitLength = 8
             };
-            
-		    // Create a Neo Pixel x8 stick on spi 0.0
+
+            // Create a Neo Pixel x8 stick on spi 0.0
             var spi = SpiDevice.Create(settings);
-            
+
 #if WS2808
             var neo = new Ws2808(spi, count);
 #else
-            var neo = new Ws2812b(spi, count);
+            var neo = new Ws2812b(spi, Count);
 #endif
 
             // Display basic colors for 5 sec

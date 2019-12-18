@@ -43,6 +43,7 @@ namespace Iot.Device.Si7021
         public Resolution Resolution { get => GetResolution(); set => SetResolution(value); }
 
         private bool _heater;
+
         /// <summary>
         /// Si7021 Heater
         /// </summary>
@@ -116,7 +117,10 @@ namespace Iot.Device.Si7021
         /// <returns>Firmware Revision</returns>
         private byte GetRevision()
         {
-            Span<byte> writeBuff = stackalloc byte[2] { (byte)Register.SI_REVISION_MSB, (byte)Register.SI_REVISION_LSB };
+            Span<byte> writeBuff = stackalloc byte[2]
+            {
+                (byte)Register.SI_REVISION_MSB, (byte)Register.SI_REVISION_LSB
+            };
 
             _i2cDevice.Write(writeBuff);
             // wait SCL free
@@ -138,7 +142,10 @@ namespace Iot.Device.Si7021
             // Details in the Datasheet P25
             reg1 = (byte)(reg1 | ((byte)resolution & 0b01) | (((byte)resolution & 0b10) >> 1 << 7));
 
-            Span<byte> writeBuff = stackalloc byte[2] { (byte)Register.SI_USER_REG1_WRITE, reg1 };
+            Span<byte> writeBuff = stackalloc byte[2]
+            {
+                (byte)Register.SI_USER_REG1_WRITE, reg1
+            };
             _i2cDevice.Write(writeBuff);
         }
 
@@ -165,11 +172,18 @@ namespace Iot.Device.Si7021
             byte reg1 = GetUserRegister1();
 
             if (isOn)
+            {
                 reg1 |= 0b_0100;
+            }
             else
+            {
                 reg1 &= 0b_1111_1011;
+            }
 
-            Span<byte> writeBuff = stackalloc byte[2] { (byte)Register.SI_USER_REG1_WRITE, reg1 };
+            Span<byte> writeBuff = stackalloc byte[2]
+            {
+                (byte)Register.SI_USER_REG1_WRITE, reg1
+            };
 
             _i2cDevice.Write(writeBuff);
         }

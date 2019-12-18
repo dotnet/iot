@@ -59,7 +59,7 @@ namespace Iot.Device.Ssd13xx
             SendData(data);
             SendCommand(new SetDisplayOn());
         }
-        
+
         /// <summary>
         /// Send a command to the display controller.
         /// </summary>
