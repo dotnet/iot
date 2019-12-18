@@ -37,6 +37,7 @@ namespace Iot.Device.Mcp23xxx
             {
                 throw new ArgumentOutOfRangeException(nameof(deviceAddress), "The Mcp23s08 address must be between 32 (0x20) and 35 (0x23).");
             }
+
             return new SpiAdapter(spiDevice, deviceAddress);
         }
     }

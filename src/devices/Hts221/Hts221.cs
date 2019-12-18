@@ -23,7 +23,9 @@ namespace Iot.Device.Hts221
         public Hts221(I2cDevice i2cDevice)
         {
             if (i2cDevice == null)
+            {
                 throw new ArgumentNullException(nameof(i2cDevice));
+            }
 
             _i2c = i2cDevice;
 

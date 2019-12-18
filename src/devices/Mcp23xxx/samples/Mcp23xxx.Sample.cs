@@ -10,11 +10,17 @@ using System.Threading;
 
 namespace Iot.Device.Mcp23xxx.Samples
 {
-    class Program
+    /// <summary>
+    /// Samples for Mcp23xxx
+    /// </summary>
+    public class Program
     {
         private static readonly int s_deviceAddress = 0x20;
 
-        static void Main(string[] args)
+        /// <summary>
+        /// Main entry point
+        /// </summary>
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello Mcp23xxx!");
 
@@ -26,12 +32,12 @@ namespace Iot.Device.Mcp23xxx.Samples
                 {
                     // Uncomment sample to run.
                     ReadSwitchesWriteLeds(mcp23x1x);
-                    //WriteByte(mcp23x1x);
-                    //WriteUshort(mcp23x1x);
-                    //WriteBits(mcp23x1x, controllerUsingMcp);
+                    // WriteByte(mcp23x1x);
+                    // WriteUshort(mcp23x1x);
+                    // WriteBits(mcp23x1x, controllerUsingMcp);
                 }
 
-                //ReadBits(controllerUsingMcp);
+                // ReadBits(controllerUsingMcp);
             }
         }
 
@@ -42,6 +48,7 @@ namespace Iot.Device.Mcp23xxx.Samples
             Mcp23009,
             Mcp23017,
             Mcp23018,
+
             // SPI.
             Mcp23S08,
             Mcp23S09,
@@ -69,8 +76,7 @@ namespace Iot.Device.Mcp23xxx.Samples
 
             var spiConnectionSettings = new SpiConnectionSettings(0, 0)
             {
-                ClockFrequency = 1000000,
-                Mode = SpiMode.Mode0
+                ClockFrequency = 1000000, Mode = SpiMode.Mode0
             };
 
             var spiDevice = SpiDevice.Create(spiConnectionSettings);
@@ -147,7 +153,7 @@ namespace Iot.Device.Mcp23xxx.Samples
             {
                 ushort dataRead = mcp.ReadUInt16(Register.IODIR);
                 Console.WriteLine($"\tIODIRA: 0x{(byte)dataRead:X2}");
-                Console.WriteLine($"\tIODIRB: 0x{(byte)dataRead>>8:X2}");
+                Console.WriteLine($"\tIODIRB: 0x{(byte)dataRead >> 8:X2}");
             }
 
             Console.WriteLine("Before Write");

@@ -13,6 +13,7 @@ namespace Iot.Device.Hmc5883l
         /// Continuous Measuring Mode
         /// </summary>
         Continuous = 0x00,
+
         /// <summary>
         /// Single Measuring Mode (Measure only once. In this mode, OutputRate will be invalid.)
         /// </summary>

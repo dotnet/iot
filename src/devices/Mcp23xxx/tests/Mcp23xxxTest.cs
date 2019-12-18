@@ -47,7 +47,7 @@ namespace Iot.Device.Mcp23xxx.Tests
         {
             public Mcp23xxx Device { get; }
             public Mcp23xxxChipMock ChipMock { get; }
-            public GpioController Controller { get; }   
+            public GpioController Controller { get; }
 
             public TestDevice(Mcp23xxx device, Mcp23xxxChipMock chipMock)
             {
@@ -136,7 +136,9 @@ namespace Iot.Device.Mcp23xxx.Tests
             {
                 _lastReadBuffer = buffer.ToArray();
                 if (_isSpi)
+                {
                     buffer = buffer.Slice(2);
+                }
 
                 byte registerAddress = _lastWriteBuffer[0];
 
@@ -150,7 +152,10 @@ namespace Iot.Device.Mcp23xxx.Tests
             public void Write(ReadOnlySpan<byte> data)
             {
                 if (_isSpi)
+                {
                     data = data.Slice(1);
+                }
+
                 _lastWriteBuffer = data.ToArray();
 
                 byte registerAddress = data[0];
@@ -171,7 +176,6 @@ namespace Iot.Device.Mcp23xxx.Tests
                 }
             }
         }
-
 
         public class GpioDriverMock : GpioDriver
         {
@@ -199,7 +203,9 @@ namespace Iot.Device.Mcp23xxx.Tests
             protected override PinValue Read(int pinNumber)
             {
                 if (_pinValues.TryGetValue(pinNumber, out PinValue value))
+                {
                     return value;
+                }
 
                 return PinValue.Low;
             }

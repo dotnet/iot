@@ -8,9 +8,9 @@ using System.Threading;
 
 namespace Iot.Device.Lm75.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             I2cConnectionSettings settings = new I2cConnectionSettings(1, Lm75.DefaultI2cAddress);
             I2cDevice device = I2cDevice.Create(settings);

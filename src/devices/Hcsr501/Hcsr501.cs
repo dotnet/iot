@@ -12,8 +12,8 @@ namespace Iot.Device.Hcsr501
     /// </summary>
     public class Hcsr501 : IDisposable
     {
-        private GpioController _controller;
         private readonly int _outPin;
+        private GpioController _controller;
 
         /// <summary>
         /// Creates a new instance of the HC-SCR501.
@@ -40,7 +40,7 @@ namespace Iot.Device.Hcsr501
         /// </summary>
         public void Dispose()
         {
-            if(_controller != null)
+            if (_controller != null)
             {
                 _controller.Dispose();
                 _controller = null;

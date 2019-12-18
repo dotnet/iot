@@ -26,7 +26,9 @@ namespace Iot.Device.Lsm9Ds1
             MagneticInductionScale magneticInductionScale = MagneticInductionScale.Scale04G)
         {
             if (i2cDevice == null)
+            {
                 throw new ArgumentNullException(nameof(i2cDevice));
+            }
 
             _i2c = i2cDevice;
             _magneticInductionScale = magneticInductionScale;

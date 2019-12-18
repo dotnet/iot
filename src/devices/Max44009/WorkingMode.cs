@@ -13,6 +13,7 @@ namespace Iot.Device.Max44009
         /// Measure lux intensity only once every 800ms regardless of integration time.
         /// </summary>
         Default = 0,
+
         /// <summary>
         /// Measure lux intensity continuously.
         /// If integration time is 6.25ms, readings are taken every 6.25ms. If integration time is 800ms, readings are taken every 800ms.

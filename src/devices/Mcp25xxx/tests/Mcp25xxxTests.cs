@@ -93,7 +93,7 @@ namespace Iot.Device.Mcp25xxx.Tests
         [Fact]
         public void Send_ReadStatus_Instruction()
         {
-            byte[] expectedWriteBuffer = new byte[] { 0b1010_0000, 0b0000_0000};
+            byte[] expectedWriteBuffer = new byte[] { 0b1010_0000, 0b0000_0000 };
             var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.ReadStatus();

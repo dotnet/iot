@@ -22,13 +22,10 @@ namespace System.Interop
             nice(19);
         }
 
-        //
         // Native Interop
-        //
-
         private const int SYS_gettid = 224;
         private const int SCHED_NORMAL = 0;
-        private const int SCHED_FIFO =  1;
+        private const int SCHED_FIFO = 1;
         private const int SCHED_RR = 2;
         private const int SCHED_BATCH = 3;
         private const int SCHED_OTHER = 4;
@@ -57,8 +54,8 @@ namespace System.Interop
         [StructLayout(LayoutKind.Sequential)]
         private unsafe struct sched_param
         {
-            public int  sched_priority;
-            public int  sched_curpriority;
+            public int sched_priority;
+            public int sched_curpriority;
             public fixed int reserved[8];
         }
     }

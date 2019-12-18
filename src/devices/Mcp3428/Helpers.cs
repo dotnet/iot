@@ -112,7 +112,10 @@ namespace Iot.Device.Mcp3428
         public static byte SetChannelBits(byte configByte, int channel)
         {
             if (channel > 3 || channel < 0)
+            {
                 throw new ArgumentException("Channel numbers are only valid 0 to 3", nameof(channel));
+            }
+
             return (byte)((configByte & ~Helpers.Masks.ChannelMask) | ((byte)channel << 5));
         }
 

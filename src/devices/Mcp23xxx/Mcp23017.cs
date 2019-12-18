@@ -38,6 +38,7 @@ namespace Iot.Device.Mcp23xxx
             {
                 throw new ArgumentOutOfRangeException(nameof(i2cDevice), "The Mcp23017 address must be between 32 (0x20) and 39 (0x27).");
             }
+
             return new I2cAdapter(i2cDevice);
         }
     }
