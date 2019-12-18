@@ -267,7 +267,7 @@ namespace Iot.Device.Graphics
                 if (!span.StartsWith(s_endChar, StringComparison.Ordinal))
                 {
                     throw new InvalidDataException(
-                        "The font data is not well formed. expected ENDCHAR tag in the beginning of glyoh data.");
+                        "The font data is not well formed. expected ENDCHAR tag in the beginning of glyph data.");
                 }
             }
         }
