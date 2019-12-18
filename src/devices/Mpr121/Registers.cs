@@ -158,7 +158,7 @@ namespace Iot.Device.Mpr121
         E10RTH = 0x56,
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         E11TTH = 0x57,
 

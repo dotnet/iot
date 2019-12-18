@@ -30,6 +30,6 @@ namespace Iot.Device.Nrf24l01
         NRF_RX_PW_P4 = 0x15,
         NRF_RX_PW_P5 = 0x16,
         NRF_FIFO_STATUS = 0x17,
-        NRF_NOOP=0x00,
+        NRF_NOOP = 0x00,
     }
 }

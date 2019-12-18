@@ -5,7 +5,7 @@
 using System;
 using System.Device.Pwm;
 
-namespace  Iot.Device.Pwm
+namespace Iot.Device.Pwm
 {
     internal class Pca9685PwmChannel : PwmChannel
     {

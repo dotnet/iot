@@ -13,18 +13,22 @@ namespace Iot.Device.Imu
         /// Slave 0
         /// </summary>
         Slave0 = 0,
+
         /// <summary>
         /// Slave 1
         /// </summary>
         Slave1 = 1,
+
         /// <summary>
         /// Slave 2
         /// </summary>
         Slave2 = 2,
+
         /// <summary>
         /// Slave 3
         /// </summary>
         Slave3 = 3,
+
         /// <summary>
         /// Slave 4
         /// </summary>

@@ -13,6 +13,7 @@ namespace Iot.Device.Nrf24l01
         /// 1Mbps
         /// </summary>
         Rate1Mbps = 0x00,
+
         /// <summary>
         /// 2Mbps
         /// </summary>

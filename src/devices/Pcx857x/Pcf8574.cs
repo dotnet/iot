@@ -22,7 +22,7 @@ namespace Iot.Device.Pcx857x
         /// If not specified, the default controller will be used.
         /// </param>
         public Pcf8574(I2cDevice device, int interrupt = -1, GpioController gpioController = null)
-            : base (device, interrupt, gpioController)
+            : base(device, interrupt, gpioController)
         {
         }
     }

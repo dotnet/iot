@@ -16,8 +16,10 @@ namespace Iot.Device.Pcx857x.Tests
         {
             // Set all pins to output
             for (int pin = 0; pin < testDevice.Controller.PinCount; pin++)
+            {
+                Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Write(-1, PinValue.High));
+            }
 
-            Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Write(-1, PinValue.High));
             Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Write(testDevice.Controller.PinCount, PinValue.Low));
             Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Write(testDevice.Controller.PinCount + 1, PinValue.High));
         }

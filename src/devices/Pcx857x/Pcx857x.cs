@@ -122,7 +122,10 @@ namespace Iot.Device.Pcx857x
         /// <inheritdoc/>
         protected override PinValue Read(int pinNumber)
         {
-            Span<PinValuePair> values = stackalloc PinValuePair[]{ new PinValuePair(pinNumber, default) };
+            Span<PinValuePair> values = stackalloc PinValuePair[]
+            {
+                new PinValuePair(pinNumber, default)
+            };
             Read(values);
             return values[0].PinValue;
         }
@@ -135,7 +138,9 @@ namespace Iot.Device.Pcx857x
         {
             (uint pins, _) = new PinVector32(pinValues);
             if (pins >> PinCount > 0)
+            {
                 ThrowInvalidPin(nameof(pinValues));
+            }
 
             if ((pins & _pinModes) != 0)
             {
@@ -163,7 +168,9 @@ namespace Iot.Device.Pcx857x
         private void ValidatePinNumber(int pinNumber)
         {
             if (pinNumber < 0 || pinNumber >= PinCount)
+            {
                 ThrowInvalidPin(nameof(pinNumber));
+            }
         }
 
         /// <inheritdoc/>
@@ -208,16 +215,23 @@ namespace Iot.Device.Pcx857x
         /// <inheritdoc/>
         protected override void Write(int pinNumber, PinValue value)
         {
-            Span<PinValuePair> values = stackalloc PinValuePair[] { new PinValuePair(pinNumber, value) };
+            Span<PinValuePair> values = stackalloc PinValuePair[]
+            {
+                new PinValuePair(pinNumber, value)
+            };
             Write(values);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Writes a value to a set of pins.
+        /// </summary>
         public void Write(ReadOnlySpan<PinValuePair> pinValues)
         {
             (uint pins, uint values) = new PinVector32(pinValues);
             if (pins >> PinCount > 0)
+            {
                 ThrowInvalidPin(nameof(pinValues));
+            }
 
             if ((pins & ~_pinModes) != 0)
             {
@@ -245,6 +259,7 @@ namespace Iot.Device.Pcx857x
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
 
         // For now eventing APIs are not supported.
+
         /// <inheritdoc/>
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => throw new NotImplementedException();
 
