@@ -18,22 +18,27 @@ namespace Iot.Device.Pn532
         /// P35
         /// </summary>
         P35 = 0b0010_0000,
+
         /// <summary>
         /// P34
         /// </summary>
         P34 = 0b0001_0000,
+
         /// <summary>
         /// P33
         /// </summary>
         P33 = 0b0000_1000,
+
         /// <summary>
         /// P32
         /// </summary>
         P32 = 0b0000_0100,
+
         /// <summary>
         /// P31
         /// </summary>
         P31 = 0b0000_0010,
+
         /// <summary>
         /// P30
         /// </summary>

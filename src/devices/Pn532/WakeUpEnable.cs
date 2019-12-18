@@ -13,26 +13,32 @@ namespace Iot.Device.Pn532
         /// I2C
         /// </summary>
         I2c = 0b1000_0000,
+
         /// <summary>
         /// GPIO
         /// </summary>
         Gpio = 0b0100_0000,
+
         /// <summary>
         /// SPI
         /// </summary>
         Spi = 0b0010_0000,
+
         /// <summary>
         /// High Speed UART
         /// </summary>
         Hsu = 0b0001_0000,
+
         /// <summary>
         /// RF Lev el Detector
         /// </summary>
         RFLevelDetector = 0b0000_1000,
+
         /// <summary>
         /// Int 1
         /// </summary>
         Int1 = 0b0000_0010,
+
         /// <summary>
         /// Int 0
         /// </summary>

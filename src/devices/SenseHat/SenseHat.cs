@@ -95,7 +95,6 @@ namespace Iot.Device.SenseHat
         /// </summary>
         public Vector3 Acceleration => _gyro.Acceleration;
 
-
         /// <summary>
         /// Gets angular rate from the gyroscope
         /// </summary>

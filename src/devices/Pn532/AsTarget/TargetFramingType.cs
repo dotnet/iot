@@ -13,10 +13,12 @@ namespace Iot.Device.Pn532.AsTarget
         /// Mifare
         /// </summary>
         Mifare = 0b0000_0000,
+
         /// <summary>
         /// Active Mode
         /// </summary>
         ActiveMode = 0b0000_0001,
+
         /// <summary>
         /// FeliCa
         /// </summary>

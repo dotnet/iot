@@ -7,7 +7,7 @@ using System.IO;
 using System.Device.Gpio;
 using System.Diagnostics;
 using System.Drawing;
-using System.Runtime.CompilerServices; 
+using System.Runtime.CompilerServices;
 
 namespace Iot.Device.SenseHat
 {
@@ -63,13 +63,15 @@ namespace Iot.Device.SenseHat
         /// <summary>
         /// Translates position in the buffer to X, Y coordinates
         /// </summary>
-        /// <param name="index"></param>
+        /// <param name="index">Index</param>
         /// <returns>Tuple of X and Y coordinates</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (int x, int y) IndexToPosition(int index)
         {
             if (index < 0 || index >= NumberOfPixelsPerRow * NumberOfPixelsPerRow)
+            {
                 throw new ArgumentOutOfRangeException(nameof(index));
+            }
 
             return (index % NumberOfPixelsPerRow, index / NumberOfPixelsPerRow);
         }
@@ -84,10 +86,14 @@ namespace Iot.Device.SenseHat
         public static int PositionToIndex(int x, int y)
         {
             if (x < 0 || x >= NumberOfPixelsPerRow)
+            {
                 throw new ArgumentOutOfRangeException(nameof(x));
+            }
 
             if (y < 0 || y >= NumberOfPixelsPerColumn)
+            {
                 throw new ArgumentOutOfRangeException(nameof(x));
+            }
 
             return x + y * NumberOfPixelsPerRow;
         }

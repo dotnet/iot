@@ -14,10 +14,12 @@ namespace Iot.Device.Pn532.AsTarget
         /// 106k bps
         /// </summary>
         B106kbps = 0b0000_0000,
+
         /// <summary>
         /// 212k bps
         /// </summary>
         B212kbps = 0b0001_0000,
+
         /// <summary>
         /// 424k bps
         /// </summary>

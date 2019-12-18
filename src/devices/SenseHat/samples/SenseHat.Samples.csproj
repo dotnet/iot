@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-  	<ProjectReference Include="../SenseHat.csproj" />
-  	<ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <ProjectReference Include="../SenseHat.csproj" />
+      <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
   </ItemGroup>

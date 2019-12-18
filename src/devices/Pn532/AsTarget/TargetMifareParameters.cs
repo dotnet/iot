@@ -21,11 +21,17 @@ namespace Iot.Device.Pn532.AsTarget
         /// </summary>
         public byte[] Atqa
         {
-            get { return _atqa; }
+            get
+            {
+                return _atqa;
+            }
             set
             {
                 if (value.Length != _atqa.Length)
+                {
                     throw new ArgumentException($"{nameof(Atqa)} has to be {_atqa.Length} byte long");
+                }
+
                 value.CopyTo(_atqa, 0);
             }
         }
@@ -37,11 +43,17 @@ namespace Iot.Device.Pn532.AsTarget
         /// </summary>
         public byte[] NfcId3
         {
-            get { return _nfcId3; }
+            get
+            {
+                return _nfcId3;
+            }
             set
             {
                 if (value.Length != _nfcId3.Length)
+                {
                     throw new ArgumentException($"{nameof(NfcId3)} has to be {_nfcId3.Length} byte long");
+                }
+
                 value.CopyTo(_nfcId3, 0);
             }
         }
@@ -50,7 +62,7 @@ namespace Iot.Device.Pn532.AsTarget
         /// SEL_RES (1 byte), typical value:
         /// = 0x40 (for DEP)
         /// = 0x20 (for ISO/IEC14443-4 PICC emulation)
-        /// = 0x60 (for both DEP and emulation of ISO/IEC14443-4 PICC) 
+        /// = 0x60 (for both DEP and emulation of ISO/IEC14443-4 PICC)
         /// </summary>
         public byte Sak { get; set; } = 0x40;
 

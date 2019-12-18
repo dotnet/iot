@@ -23,15 +23,29 @@ namespace Iot.Device.SenseHat.Samples
 
                     Console.Clear();
                     if (j.HoldingUp)
+                    {
                         Console.Write("U");
+                    }
+
                     if (j.HoldingDown)
+                    {
                         Console.Write("D");
+                    }
+
                     if (j.HoldingLeft)
+                    {
                         Console.Write("L");
+                    }
+
                     if (j.HoldingRight)
+                    {
                         Console.Write("R");
+                    }
+
                     if (j.HoldingButton)
+                    {
                         Console.Write("!");
+                    }
                 }
             }
         }

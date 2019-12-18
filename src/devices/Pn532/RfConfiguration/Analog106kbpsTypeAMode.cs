@@ -16,7 +16,7 @@ namespace Iot.Device.Pn532.RfConfiguration
     /// during a reception i.e.initiator passive mode,
     /// • CIU_Demod when own RF is Off defines a setting when its RF field is off
     /// during a reception i.e.initiator active mode.
-    /// CIU = Contactless Interface Unit 
+    /// CIU = Contactless Interface Unit
     /// Please refer to https://www.nxp.com/docs/en/nxp/data-sheets/PN532_C1.pdf page 144
     /// </summary>
     public class Analog106kbpsTypeAMode
@@ -95,7 +95,8 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// <returns>Serialized value</returns>
         public byte[] Serialize()
         {
-            return new byte[11] {
+            return new byte[11]
+            {
                 RfConfiguration, GsNOn, CWGsP,
                 ModGsP, DemodWhenRfOn,
                 RxThreshold, DemodWhenRfOff,

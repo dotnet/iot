@@ -29,7 +29,10 @@ namespace Iot.Device.Rtc
             _i2cDevice = i2cDevice;
 
             // Set "Normal Mode"
-            Span<byte> ctrl1Config = stackalloc byte[] { (byte)Pcf8563Register.PCF_CTRL1_ADDR, 0x00 };
+            Span<byte> ctrl1Config = stackalloc byte[]
+            {
+                (byte)Pcf8563Register.PCF_CTRL1_ADDR, 0x00
+            };
             _i2cDevice.Write(ctrl1Config);
         }
 

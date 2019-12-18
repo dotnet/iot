@@ -13,26 +13,32 @@ namespace Iot.Device.Pn532
         /// Communication Line Test
         /// </summary>
         CommunicationLineTest = 0x00,
+
         /// <summary>
         /// ROM Test
         /// </summary>
         ROMTest = 0x01,
+
         /// <summary>
         /// RAM Test
         /// </summary>
         RAMTest = 0x02,
+
         /// <summary>
         /// Polling Test To Target
         /// </summary>
         PollingTestToTarget = 0x04,
+
         /// <summary>
         /// Echo Back Test
         /// </summary>
         EchoBackTest = 0x05,
+
         /// <summary>
         /// Attention Request Test
         /// </summary>
         AttentionRequestTest = 0x06,
+
         /// <summary>
         /// Self Antena Test
         /// </summary>

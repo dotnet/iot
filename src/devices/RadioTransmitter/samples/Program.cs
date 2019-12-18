@@ -8,9 +8,9 @@ using Iot.Device.RadioTransmitter;
 
 namespace RadioTransmitter
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             I2cConnectionSettings settings = new I2cConnectionSettings(1, Kt0803.DefaultI2cAddress);
             I2cDevice device = I2cDevice.Create(settings);

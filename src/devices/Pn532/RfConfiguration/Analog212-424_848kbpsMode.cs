@@ -8,11 +8,11 @@ namespace Iot.Device.Pn532.RfConfiguration
     /// This CfgItem is used to choose the analog settings that the PN532 will use for the
     /// baudrates 212/424/848 kbps with ISO/IEC14443-4 cards.
     /// When using this command, the host controller has to provide 9 values
-    /// (ConfigurationData[]) for the following internal registers: 
+    /// (ConfigurationData[]) for the following internal registers:
     /// Except for these three specific registers (CIU_RxThreshold, CIU_ModWidth and
     /// CIU_MifNFC), the 8 remaining analog registers are the same as the previous
-    /// CfgItem 0x0A. 
-    /// CIU = Contactless Interface Unit 
+    /// CfgItem 0x0A.
+    /// CIU = Contactless Interface Unit
     /// Please refer to https://www.nxp.com/docs/en/nxp/data-sheets/PN532_C1.pdf page 144
     /// </summary>
     public class Analog212_424_848kbpsMode
@@ -78,7 +78,8 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// <returns>Serialized value</returns>
         public byte[] Serialize()
         {
-            return new byte[9] {
+            return new byte[9]
+            {
                 RxThreshold212, ModWidth212, MifNFC212,
                 RxThreshold424, ModWidth424, MifNFC424,
                 RxThreshold848, ModWidth848, MifNFC848,

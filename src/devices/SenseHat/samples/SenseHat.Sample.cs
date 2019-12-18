@@ -19,7 +19,6 @@ namespace Iot.Device.SenseHat.Samples
             // Magnetometer.Run();
             // TemperatureAndHumidity.Run();
             // PressureAndTemperature.Run();
-
             using (var sh = new SenseHat())
             {
                 int n = 0;
@@ -32,7 +31,9 @@ namespace Iot.Device.SenseHat.Samples
                     (int dx, int dy, bool holding) = JoystickState(sh);
 
                     if (holding)
+                    {
                         n++;
+                    }
 
                     x = (x + 8 + dx) % 8;
                     y = (y + 8 + dy) % 8;
@@ -60,16 +61,24 @@ namespace Iot.Device.SenseHat.Samples
             int dy = 0;
 
             if (sh.HoldingUp)
+            {
                 dy--; // y goes down
+            }
 
             if (sh.HoldingDown)
+            {
                 dy++;
+            }
 
             if (sh.HoldingLeft)
+            {
                 dx--;
+            }
 
             if (sh.HoldingRight)
+            {
                 dx++;
+            }
 
             return (dx, dy, sh.HoldingButton);
         }

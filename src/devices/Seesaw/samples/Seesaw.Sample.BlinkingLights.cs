@@ -9,9 +9,9 @@ using System.Threading;
 
 namespace Iot.Device.Seesaw.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main()
+        public static void Main()
         {
             // pins
             const int ledOne = 9;

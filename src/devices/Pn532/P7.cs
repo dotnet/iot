@@ -18,6 +18,7 @@ namespace Iot.Device.Pn532
         /// P72
         /// </summary>
         P72 = 0b0000_0100,
+
         /// <summary>
         /// P71
         /// </summary>
