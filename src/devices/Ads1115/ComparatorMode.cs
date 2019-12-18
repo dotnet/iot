@@ -11,6 +11,7 @@ namespace Iot.Device.Ads1115
     {
         /// <summary>Traditional mode</summary>
         Traditional = 0x00,
+
         /// <summary>Window mode</summary>
         Window = 0x01
     }

@@ -34,6 +34,7 @@ namespace Iot.Device.Common
                 result *= 100;
                 result += Bcd2Dec(bcd);
             }
+
             return result;
         }
 
@@ -45,7 +46,10 @@ namespace Iot.Device.Common
         public static byte Dec2Bcd(int dec)
         {
             if ((dec > 99) || (dec < 0))
+            {
                 throw new ArgumentException($"{nameof(dec)}, encoding value can't be more than 99");
+            }
+
             return (byte)(((dec / 10) << 4) + (dec % 10));
         }
     }

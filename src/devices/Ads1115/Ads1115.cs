@@ -17,6 +17,7 @@ namespace Iot.Device.Ads1115
         private I2cDevice _i2cDevice = null;
 
         private InputMultiplexer _inputMultiplexer;
+
         /// <summary>
         /// ADS1115 Input Multiplexer
         /// </summary>
@@ -31,6 +32,7 @@ namespace Iot.Device.Ads1115
         }
 
         private MeasuringRange _measuringRange;
+
         /// <summary>
         /// ADS1115 Programmable Gain Amplifier
         /// </summary>
@@ -45,6 +47,7 @@ namespace Iot.Device.Ads1115
         }
 
         private DataRate _dataRate;
+
         /// <summary>
         /// ADS1115 Data Rate
         /// </summary>
@@ -91,7 +94,12 @@ namespace Iot.Device.Ads1115
                             ((byte)ComparatorLatching.NonLatching << 2) |
                             (byte)ComparatorQueue.Disable);
 
-            Span<byte> writeBuff = stackalloc byte[3] { (byte)Register.ADC_CONFIG_REG_ADDR, configHi, configLo };
+            Span<byte> writeBuff = stackalloc byte[3]
+            {
+                (byte)Register.ADC_CONFIG_REG_ADDR,
+                configHi,
+                configLo
+            };
 
             _i2cDevice.Write(writeBuff);
 
