@@ -13,14 +13,17 @@ namespace Iot.Device.Nrf24l01
         /// -18dBm
         /// </summary>
         N18dBm = 0x00,
+
         /// <summary>
         /// -12dBm
         /// </summary>
         N12dBm = 0x01,
+
         /// <summary>
         /// -6dBm
         /// </summary>
         N06dBm = 0x02,
+
         /// <summary>
         /// 0dBm
         /// </summary>

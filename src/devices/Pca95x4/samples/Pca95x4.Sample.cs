@@ -9,18 +9,25 @@ using System.Threading;
 
 namespace Iot.Device.Pca95x4.Samples
 {
-    class Program
+    /// <summary>
+    /// Test program for PCA95x4
+    /// </summary>
+    public class Program
     {
         private static readonly int s_deviceAddress = 0x38;
 
-        static void Main(string[] args)
+        /// <summary>
+        /// Main entry point
+        /// </summary>
+        /// <param name="args">Unused</param>
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello Pca95x4 Sample!");
 
             using (Pca95x4 pca95x4 = GetPca95x4Device())
             {
-                //CycleOutputBits(pca95x4);
-                //ReadInputPort(pca95x4);
+                ////CycleOutputBits(pca95x4);
+                ////ReadInputPort(pca95x4);
                 CheckInputRegisterPolarityInversion(pca95x4);
             }
         }

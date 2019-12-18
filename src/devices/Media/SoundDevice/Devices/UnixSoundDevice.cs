@@ -45,6 +45,7 @@ namespace Iot.Device.Media
 
         // The lib do not have a method of get all channels mute state.
         private bool _playbackMute;
+
         /// <summary>
         /// The playback mute of the sound device.
         /// </summary>
@@ -64,6 +65,7 @@ namespace Iot.Device.Media
         public override long RecordingVolume { get => GetRecordingVolume(); set => SetRecordingVolume(value); }
 
         private bool _recordingMute;
+
         /// <summary>
         /// The recording mute of the sound device.
         /// </summary>
@@ -163,7 +165,7 @@ namespace Iot.Device.Media
 
             WavHeader header = new WavHeader
             {
-                Chunk = chunk,     
+                Chunk = chunk,
                 Format = new[] { 'W', 'A', 'V', 'E' },
                 SubChunk1 = subChunk1,
                 AudioFormat = 1,
@@ -339,6 +341,7 @@ namespace Iot.Device.Media
                     outputStream.Write(readBuffer);
                 }
             }
+
             outputStream.Flush();
         }
 

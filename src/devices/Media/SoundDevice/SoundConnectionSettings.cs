@@ -30,7 +30,7 @@ namespace Iot.Device.Media
         public uint RecordingSampleRate { get; set; } = 8000;
 
         /// <summary>
-        /// The channels of recording. 
+        /// The channels of recording.
         /// </summary>
         public ushort RecordingChannels { get; set; } = 2;
 

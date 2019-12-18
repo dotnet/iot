@@ -10,10 +10,12 @@ namespace Iot.Device.Imu
         /// Internal 20MHz
         /// </summary>
         Internal20MHz = 0,
+
         /// <summary>
         /// Auto Select
         /// </summary>
         AutoSelect = 1,
+
         /// <summary>
         /// Stop Clock
         /// </summary>

@@ -13,6 +13,7 @@ namespace Iot.Device.Nrf24l01
         /// Receive Mode
         /// </summary>
         Receive = 1,
+
         /// <summary>
         /// Transmit Mode
         /// </summary>

@@ -445,6 +445,7 @@ namespace Iot.Device.Media
                 {
                     return;
                 }
+
                 _deviceFileDescriptor = Interop.open(deviceFileName, FileOpenFlags.O_RDWR);
 
                 if (_deviceFileDescriptor < 0)

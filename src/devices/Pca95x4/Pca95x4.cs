@@ -13,9 +13,9 @@ namespace Iot.Device.Pca95x4
     /// </summary>
     public class Pca95x4 : IDisposable
     {
+        private readonly int? _interrupt;
         private I2cDevice _i2cDevice;
         private GpioController _masterGpioController;
-        private readonly int? _interrupt;
 
         /// <summary>
         /// Initializes new instance of Pca95x4.

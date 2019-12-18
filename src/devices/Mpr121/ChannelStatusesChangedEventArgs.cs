@@ -23,7 +23,8 @@ namespace Iot.Device.Mpr121
         /// Initialize event arguments.
         /// </summary>
         /// <param name="channelStatuses">The channel statuses.</param>
-        public ChannelStatusesChangedEventArgs(IReadOnlyDictionary<Channels, bool> channelStatuses) : base()
+        public ChannelStatusesChangedEventArgs(IReadOnlyDictionary<Channels, bool> channelStatuses)
+            : base()
         {
             ChannelStatuses = channelStatuses;
         }

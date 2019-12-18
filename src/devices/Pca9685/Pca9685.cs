@@ -9,13 +9,12 @@ using System.Device.I2c;
 using System.Device.Pwm;
 using System.Diagnostics;
 using System.Threading;
+using static Iot.Device.Pwm.Mode1;
+using static Iot.Device.Pwm.Mode2;
+using static Iot.Device.Pwm.Register;
 
 namespace Iot.Device.Pwm
 {
-    using static Mode1;
-    using static Iot.Device.Pwm.Mode2;
-    using static Iot.Device.Pwm.Register;
-
     /// <summary>
     /// PCA9685 PWM LED/servo controller
     /// </summary>
@@ -40,7 +39,9 @@ namespace Iot.Device.Pwm
             set
             {
                 if (!_usingExternalClock)
+                {
                     throw new InvalidOperationException("Clock frequency can only be set when using external oscillator.");
+                }
 
                 _clockFrequency = value;
             }
@@ -194,7 +195,9 @@ namespace Iot.Device.Pwm
             CheckChannel(channel);
 
             if (IsChannelCreated(channel))
+            {
                 throw new ArgumentException("Only one instance of the channel can be created at the same time.", nameof(channel));
+            }
 
             SetChannelAsCreated(channel);
 
@@ -212,9 +215,9 @@ namespace Iot.Device.Pwm
         private void SetOnOffTime(int channel, ushort on, ushort off)
         {
             // on and off are 13-bit values (12 bit value + 1bit full on/off override)
-            Debug.Assert((on & 0b1111111111111) == on);
-            Debug.Assert((off & 0b1111111111111) == off);
-            Debug.Assert((channel & 0xF) == channel);
+            Debug.Assert((on & 0b1111111111111) == on, "On has invalid value");
+            Debug.Assert((off & 0b1111111111111) == off, "Off has invalid value");
+            Debug.Assert((channel & 0xF) == channel, "Unknown channel");
 
             int offset = 4 * channel;
 
@@ -225,8 +228,8 @@ namespace Iot.Device.Pwm
         private void SetOnOffTimeAllChannels(ushort on, ushort off)
         {
             // on and off are 13-bit values (12 bit value + 1bit full on/off override)
-            Debug.Assert((on & 0b1111111111111) == on);
-            Debug.Assert((off & 0b1111111111111) == off);
+            Debug.Assert((on & 0b1111111111111) == on, "On has invalid value");
+            Debug.Assert((off & 0b1111111111111) == off, "Off has invalid value");
 
             WriteUInt16(ALL_LED_ON_L, on);
             WriteUInt16(ALL_LED_OFF_L, off);
@@ -311,7 +314,7 @@ namespace Iot.Device.Pwm
 
         private static (ushort on, ushort off) DutyCycleToOnOff(double dutyCycle)
         {
-            Debug.Assert(dutyCycle >= 0.0 && dutyCycle <= 1.0);
+            Debug.Assert(dutyCycle >= 0.0 && dutyCycle <= 1.0, "Duty cycle must be between 0 and 1");
 
             // there are actually 4097 values in the set but we can do edge values
             // using 13th bit which overrides to always on/off
@@ -338,7 +341,7 @@ namespace Iot.Device.Pwm
                 const ushort Max = (ushort)(1 << 12);
                 if (onCycles == 0)
                 {
-                    return  (offCycles == Max) ? (ushort)0 : offCycles;
+                    return (offCycles == Max) ? (ushort)0 : offCycles;
                 }
                 else if (onCycles == Max && offCycles == 0)
                 {

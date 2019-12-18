@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Pwm;
 using System;
 using System.Device.I2c;
 using System.Collections.Generic;
 using System.Device.Pwm;
+using Iot.Device.Pwm;
 
 namespace Iot.Device.MotorHat
 {
@@ -58,7 +58,8 @@ namespace Iot.Device.MotorHat
         /// <remarks>
         /// The <see cref="MotorHat"/> will be created with the default I2C address of 0x60 and PWM frequency of 1600 Hz.
         /// </remarks>
-        public MotorHat(double frequency = 1600, int selectedAddress = 0b000000) : this(new I2cConnectionSettings(1, I2cAddressBase + selectedAddress), frequency)
+        public MotorHat(double frequency = 1600, int selectedAddress = 0b000000)
+            : this(new I2cConnectionSettings(1, I2cAddressBase + selectedAddress), frequency)
         {
         }
 
@@ -72,7 +73,9 @@ namespace Iot.Device.MotorHat
         public DCMotor.DCMotor CreateDCMotor(int motorNumber)
         {
             if (motorNumber < 1 || motorNumber > 4)
+            {
                 throw new ArgumentOutOfRangeException(nameof(motorNumber), $"Must be between 1 and 4, corresponding with M1, M2, M3 and M4. (Received: {motorNumber}");
+            }
 
             // The PCA9685 PWM controller is used to control the inputs of two dual motor drivers.
             // These correspond to motor hat screw terminals M1, M2, M3 and M4.
@@ -81,7 +84,6 @@ namespace Iot.Device.MotorHat
             // The variables speed, in1 and in2 variables identify which PCA9685 PWM output pins will be used to drive this DCMotor.
             // The speed variable identifies which PCA9685 output pin is used to drive the PWM input on the motor driver.
             // And the in1 and in2 variables are used to specify which PCA9685 output pins are used to drive the xIN1 and xIN2 input pins of the motor driver.
-
             int speedPin, in1Pin, in2Pin;
 
             switch (motorNumber)

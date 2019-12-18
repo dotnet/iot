@@ -14,17 +14,18 @@ namespace Iot.Device.Nrf24l01
     /// </summary>
     public class Nrf24l01 : IDisposable
     {
-        private GpioController _gpio = null;
-        private SpiDevice _sensor = null;
-
         private readonly int _ce;
         private readonly int _irq;
 
         private readonly byte[] _empty = Array.Empty<byte>();
 
+        private GpioController _gpio = null;
+        private SpiDevice _sensor = null;
+
         #region prop
 
         private byte _packetSize;
+
         /// <summary>
         /// nRF24L01 Receive Packet Size
         /// </summary>
@@ -97,6 +98,7 @@ namespace Iot.Device.Nrf24l01
         #endregion
 
         #region SpiSettings
+
         /// <summary>
         /// NRF24L01 SPI Clock Frequency
         /// </summary>
@@ -264,7 +266,10 @@ namespace Iot.Device.Nrf24l01
 
             _gpio.Write(_ce, PinValue.Low);
 
-            Span<byte> writeData = stackalloc byte[1] { payload };
+            Span<byte> writeData = stackalloc byte[1]
+            {
+                payload
+            };
 
             Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P0, writeData);
             Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P1, writeData);
@@ -294,7 +299,10 @@ namespace Iot.Device.Nrf24l01
                 throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
             }
 
-            Span<byte> writeData = stackalloc byte[] { (byte)((byte)Command.NRF_W_REGISTER + (byte)Register.NRF_RX_PW_P0 + pipe), payload };
+            Span<byte> writeData = stackalloc byte[]
+            {
+                (byte)((byte)Command.NRF_W_REGISTER + (byte)Register.NRF_RX_PW_P0 + pipe), payload
+            };
 
             _gpio.Write(_ce, PinValue.Low);
 
@@ -762,7 +770,10 @@ namespace Iot.Device.Nrf24l01
 
         internal void Write(Command command, Register register, byte writeByte)
         {
-            Span<byte> writeBuf = stackalloc byte[2] { (byte)((byte)command + (byte)register), writeByte };
+            Span<byte> writeBuf = stackalloc byte[2]
+            {
+                (byte)((byte)command + (byte)register), writeByte
+            };
             Span<byte> readBuf = stackalloc byte[2];
 
             _sensor.TransferFullDuplex(writeBuf, readBuf);

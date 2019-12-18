@@ -10,14 +10,17 @@ namespace Iot.Device.Imu
         /// Scale 250
         /// </summary>
         Scale0250 = 0,
+
         /// <summary>
         /// Scale 500
         /// </summary>
         Scale0500 = 1,
+
         /// <summary>
         /// Scale 1000
         /// </summary>
         Scale1000 = 2,
+
         /// <summary>
         /// Scale 2000
         /// </summary>
