@@ -2,6 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// Disable these StyleCop rules for this file, as we are using native names here.
+#pragma warning disable SA1300 // Element should begin with upper-case letter
+#pragma warning disable SA1307 // Field should begin with upper-case letter
+
 using System.Runtime.InteropServices;
 
 namespace System.Interop
@@ -31,7 +35,6 @@ namespace System.Interop
         private const int SCHED_OTHER = 4;
         private const int SCHED_IDLE = 5;
         private const int SCHED_RESET_ON_FORK = 0x40000000;
-
 
         [DllImport("libc")]
         private static extern int nice(int inc);
