@@ -7,15 +7,8 @@ using Iot.Device;
 
 namespace Iot.Device.Adc.Samples
 {
-    /// <summary>
-    /// Sample program for INA219
-    /// </summary>
-    public class Program
+    internal class Program
     {
-        /// <summary>
-        /// Main entry point
-        /// </summary>
-        /// <param name="args">Unused</param>
         public static void Main(string[] args)
         {
             const byte Adafruit_Ina219_I2cAddress = 0x40;

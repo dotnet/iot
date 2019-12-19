@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.Spi;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Iot.Device.Adc
 {
@@ -13,6 +14,12 @@ namespace Iot.Device.Adc
     public abstract class Mcp3xxx : Mcp3Base
     {
         private byte _adcResolutionBits;
+
+        /// <summary>
+        /// the number of single ended input channel on the ADC
+        /// </summary>
+        [SuppressMessage("Microsoft Naming", "SA1306", Justification = "Needs to be checked for breaking changes")]
+        protected byte ChannelCount;
 
         /// <summary>
         /// Constructs Mcp3xxx instance
@@ -25,15 +32,6 @@ namespace Iot.Device.Adc
         {
             ChannelCount = channelCount;
             _adcResolutionBits = adcResolutionBits;
-        }
-
-        /// <summary>
-        /// the number of single ended input channel on the ADC
-        /// </summary>
-        protected byte ChannelCount
-        {
-            get;
-            set;
         }
 
         /// <summary>
