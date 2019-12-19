@@ -13,9 +13,9 @@ namespace System.Device.Gpio.Tests
 {
     public abstract class GpioControllerTestBase
     {
-        private const int LedPin = 18;
-        private const int OutputPin = 16; // CI should fail now
-        private const int InputPin = 12;
+        private const int LedPin = 5;
+        private const int OutputPin = 5;
+        private const int InputPin = 6;
         private static readonly int WaitMilliseconds = 1000;
 
         [Fact]
