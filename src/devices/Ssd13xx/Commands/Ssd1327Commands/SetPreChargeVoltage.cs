@@ -15,8 +15,8 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         /// This command sets the first pre-charge voltage (phase 2) level of segment pins.
         /// </summary>
         /// <param name="level">
-        /// Pre-charge voltage level. 
-        /// Parameter values between 0b_0000 and 0b_0111 leads to voltage values between 0.2 x Vcc and 0.613 x Vcc Volts.  
+        /// Pre-charge voltage level.
+        /// Parameter values between 0b_0000 and 0b_0111 leads to voltage values between 0.2 x Vcc and 0.613 x Vcc Volts.
         /// Parameter value 0b_1XXX leads to voltage value equals to Vcomh.
         /// </param>
         public SetPreChargeVoltage(byte level = 0x05)

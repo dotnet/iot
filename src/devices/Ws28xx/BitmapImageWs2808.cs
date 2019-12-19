@@ -2,15 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Graphics;
 using System.Drawing;
+using Iot.Device.Graphics;
 
 namespace Iot.Device.Ws28xx
 {
     internal class BitmapImageWs2808 : BitmapImage
     {
         private const int BytesPerPixel = 3;
-        
+
         public BitmapImageWs2808(int width, int height)
             : base(new byte[width * height * BytesPerPixel], width, height, width * BytesPerPixel)
         {

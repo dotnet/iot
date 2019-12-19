@@ -88,6 +88,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
             /// Vertical and right horizontal scroll.
             /// </summary>
             Right = 0x29,
+
             /// <summary>
             /// Vertical and left horizontal scroll.
             /// </summary>

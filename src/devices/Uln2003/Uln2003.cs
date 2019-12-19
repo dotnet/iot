@@ -29,26 +29,29 @@ namespace Iot.Device.Uln2003
         private Stopwatch _stopwatch = new Stopwatch();
         private long _stepMicrosecondsDelay;
 
-        private static bool[,] _halfStepSequence = new bool[4, 8] {
-                 { true, true, false, false, false, false, false, true },
-                 { false, true, true, true, false, false, false, false },
-                 { false, false, false, true, true, true, false, false },
-                 { false, false, false, false, false, true, true, true }
-            };
+        private static bool[,] _halfStepSequence = new bool[4, 8]
+        {
+            { true, true, false, false, false, false, false, true },
+            { false, true, true, true, false, false, false, false },
+            { false, false, false, true, true, true, false, false },
+            { false, false, false, false, false, true, true, true }
+        };
 
-        private static bool[,] _fullStepSinglePhaseSequence = new bool[4, 8] {
-                 { true, false, false, false, true, false, false, false },
-                 { false, true, false, false, false, true, false, false },
-                 { false, false, true, false, false, false, true, false },
-                 { false, false, false, true, false, false, false, true }
-            };
+        private static bool[,] _fullStepSinglePhaseSequence = new bool[4, 8]
+        {
+            { true, false, false, false, true, false, false, false },
+            { false, true, false, false, false, true, false, false },
+            { false, false, true, false, false, false, true, false },
+            { false, false, false, true, false, false, false, true }
+        };
 
-        private static bool[,] _fullStepDualPhaseSequence = new bool[4, 8] {
-                 { true, false, false, true, true, false, false, true },
-                 { true, true, false, false, true, true, false, false },
-                 { false, true, true, false, false, true, true, false },
-                 { false, false, true, true, false, false, true, true }
-            };
+        private static bool[,] _fullStepDualPhaseSequence = new bool[4, 8]
+        {
+            { true, false, false, true, true, false, false, true },
+            { true, true, false, false, true, true, false, false },
+            { false, true, true, false, false, true, true, false },
+            { false, false, true, true, false, false, true, true }
+        };
 
         /// <summary>
         /// Initialize a Uln2003 class.
@@ -142,9 +145,13 @@ namespace Iot.Device.Uln2003
                     lastStepTime = elapsedMicroseconds;
 
                     if (_isClockwise)
+                    {
                         _engineStep = _engineStep - 1 < 1 ? 8 : _engineStep - 1;
+                    }
                     else
+                    {
                         _engineStep = _engineStep + 1 > 8 ? 1 : _engineStep + 1;
+                    }
 
                     ApplyEngineStep();
                     _currentStep++;

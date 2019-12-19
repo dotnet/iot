@@ -12,7 +12,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
     public class SetInternalVddRegulator : ISsd1327Command
     {
         /// <summary>
-        /// This command is used to enable internal Vdd regulator. 
+        /// This command is used to enable internal Vdd regulator.
         /// </summary>
         /// <param name="enable">Represents if internal Vdd have to be enabled.</param>
         public SetInternalVddRegulator(bool enable)

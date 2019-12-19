@@ -41,7 +41,7 @@ namespace Iot.Units.Tests
         }
 
         [Fact]
-        void FromCelsiusNaN()
+        public void FromCelsiusNaN()
         {
             Temperature t = Temperature.FromCelsius(double.NaN);
             Assert.True(double.IsNaN(t.Celsius));
@@ -50,7 +50,7 @@ namespace Iot.Units.Tests
         }
 
         [Fact]
-        void FromFahrenheitNaN()
+        public void FromFahrenheitNaN()
         {
             Temperature t = Temperature.FromFahrenheit(double.NaN);
             Assert.True(double.IsNaN(t.Celsius));
@@ -59,7 +59,7 @@ namespace Iot.Units.Tests
         }
 
         [Fact]
-        void FromKelvinNaN()
+        public void FromKelvinNaN()
         {
             Temperature t = Temperature.FromKelvin(double.NaN);
             Assert.True(double.IsNaN(t.Celsius));
@@ -68,7 +68,7 @@ namespace Iot.Units.Tests
         }
 
         [Fact]
-        void FromCelsiusPositiveInfinity()
+        public void FromCelsiusPositiveInfinity()
         {
             Temperature t = Temperature.FromCelsius(double.PositiveInfinity);
             Assert.True(double.IsPositiveInfinity(t.Celsius));
@@ -77,7 +77,7 @@ namespace Iot.Units.Tests
         }
 
         [Fact]
-        void FromFahrenheitPositiveInfinity()
+        public void FromFahrenheitPositiveInfinity()
         {
             Temperature t = Temperature.FromFahrenheit(double.PositiveInfinity);
             Assert.True(double.IsPositiveInfinity(t.Celsius));
@@ -86,7 +86,7 @@ namespace Iot.Units.Tests
         }
 
         [Fact]
-        void FromKelvinPositiveInfinity()
+        public void FromKelvinPositiveInfinity()
         {
             Temperature t = Temperature.FromKelvin(double.PositiveInfinity);
             Assert.True(double.IsPositiveInfinity(t.Celsius));
@@ -95,7 +95,7 @@ namespace Iot.Units.Tests
         }
 
         [Fact]
-        void FromCelsiusNegativeInfinity()
+        public void FromCelsiusNegativeInfinity()
         {
             Temperature t = Temperature.FromCelsius(double.NegativeInfinity);
             Assert.True(double.IsNegativeInfinity(t.Celsius));
@@ -104,7 +104,7 @@ namespace Iot.Units.Tests
         }
 
         [Fact]
-        void FromFahrenheitNegativeInfinity()
+        public void FromFahrenheitNegativeInfinity()
         {
             Temperature t = Temperature.FromFahrenheit(double.NegativeInfinity);
             Assert.True(double.IsNegativeInfinity(t.Celsius));
@@ -113,7 +113,7 @@ namespace Iot.Units.Tests
         }
 
         [Fact]
-        void FromKelvinNegativeInfinity()
+        public void FromKelvinNegativeInfinity()
         {
             Temperature t = Temperature.FromKelvin(double.NegativeInfinity);
             Assert.True(double.IsNegativeInfinity(t.Celsius));
