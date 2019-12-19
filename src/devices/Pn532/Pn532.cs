@@ -1975,9 +1975,6 @@ namespace Iot.Device.Pn532
             // Finally, we can read the data
             if (length - 2 > 0)
             {
-                ////var buff = new byte[length - 2];
-                ////_i2cDevice.Read(buff);
-                ////buff.AsSpan().CopyTo(readData);
                 preamb.AsSpan().Slice(idxPreamb, length - 2).CopyTo(readData);
                 idxPreamb += length - 2;
             }
