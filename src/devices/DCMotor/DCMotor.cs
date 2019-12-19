@@ -171,8 +171,8 @@ namespace Iot.Device.DCMotor
         /// Creates <see cref="DCMotor"/> instance which allows to control speed in both directions.
         /// </summary>
         /// <param name="speedControlChannel"><see cref="PwmChannel"/> used to control the speed of the motor</param>
-        /// <param name="directionPin">Pin used to control the direction of the motor</param>
-        /// <param name="otherDirectionPin">Pin used to control the reverse direction of the motor</param>
+        /// <param name="directionPin">First pin used to control the direction of the motor</param>
+        /// <param name="otherDirectionPin">Second pin used to control the direction of the motor</param>
         /// <param name="controller"><see cref="GpioController"/> related to <paramref name="directionPin"/> and <paramref name="otherDirectionPin"/></param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
@@ -210,8 +210,8 @@ namespace Iot.Device.DCMotor
         /// Creates <see cref="DCMotor"/> instance which allows to control speed in both directions.
         /// </summary>
         /// <param name="speedControlPin">Pin used to control the speed of the motor with software PWM (frequency will default to 50Hz)</param>
-        /// <param name="directionPin">Pin used to control the direction of the motor</param>
-        /// <param name="otherDirectionPin">Pin used to control the reverse direction of the motor</param>
+        /// <param name="directionPin">First pin used to control the direction of the motor</param>
+        /// <param name="otherDirectionPin">Second pin used to control the direction of the motor</param>
         /// <param name="controller"><see cref="GpioController"/> related to <paramref name="speedControlPin"/>, <paramref name="directionPin"/> and <paramref name="otherDirectionPin"/></param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>

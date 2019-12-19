@@ -12,15 +12,8 @@ using Iot.Device.DCMotor;
 
 namespace Iot.Device.DCMotor.Samples
 {
-    /// <summary>
-    /// Test program main class
-    /// </summary>
-    public class Program
+    internal class Program
     {
-        /// <summary>
-        /// Entry point for example program
-        /// </summary>
-        /// <param name="args">Command line arguments</param>
         public static void Main(string[] args)
         {
             const double Period = 10.0;
