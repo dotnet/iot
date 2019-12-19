@@ -90,7 +90,7 @@ dotnet test --filter LibGpiodDriverTests System.Device.Gpio.sln
 
 Our CI is currently using [this schematics](board-schematics.pdf) with Raspberry PI 3.
 
-You can download [gerber files](board-gerber.zip) if you'd like to manufacture PCB yourself.
+You can download [gerber files](board-gerber.zip) if you'd like to manufacture PCB yourself (this is a 2 layer board).
 
 Following list of components are needed for PCB:
 
@@ -113,3 +113,17 @@ All headers are standard 2.54mm headers. Male headers are usually sold longer an
 
 ![PCB](board-pic.jpg)
 ![PCB](board-pcb-picture.png)
+
+## Raspberry Pi configuration
+
+### Linux
+
+`/boot/config.txt`
+
+```
+# Enable I2C, SPI, PWM
+
+dtparam=i2c_arm=on
+dtparam=spi=on
+dtoverlay=pwm-2chan
+```
