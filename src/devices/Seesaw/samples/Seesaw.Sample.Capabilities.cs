@@ -8,9 +8,9 @@ using System.Device.I2c;
 
 namespace Iot.Device.Seesaw.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main()
+        public static void Main()
         {
             const byte AdafruitSeesawBreakoutI2cAddress = 0x49;
             const byte AdafruitSeesawBreakoutI2cBus = 0x1;

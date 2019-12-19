@@ -24,11 +24,17 @@ namespace Iot.Device.Pn532.AsTarget
         /// </summary>
         public byte[] NfcId3
         {
-            get { return _nfcId3; }
+            get
+            {
+                return _nfcId3;
+            }
             set
             {
                 if (value.Length != _nfcId3.Length)
+                {
                     throw new ArgumentException($"{nameof(NfcId3)} can only be {_nfcId3.Length} byte long");
+                }
+
                 value.CopyTo(_nfcId3, 0);
             }
         }
@@ -39,11 +45,17 @@ namespace Iot.Device.Pn532.AsTarget
         /// </summary>
         public byte[] GeneralTarget
         {
-            get { return _generalTarget; }
+            get
+            {
+                return _generalTarget;
+            }
             set
             {
                 if (value.Length > 47)
+                {
                     throw new ArgumentException($"{nameof(GeneralTarget)} can only be less than 47 byte long");
+                }
+
                 _generalTarget = new byte[value.Length];
                 value.CopyTo(_generalTarget, 0);
             }
@@ -54,11 +66,17 @@ namespace Iot.Device.Pn532.AsTarget
         /// </summary>
         public byte[] HistoricalTarget
         {
-            get { return _historicalTarget; }
+            get
+            {
+                return _historicalTarget;
+            }
             set
             {
                 if (value.Length > 48)
+                {
                     throw new ArgumentException($"{nameof(HistoricalTarget)} can only be less than 48 byte long");
+                }
+
                 _historicalTarget = new byte[value.Length];
                 value.CopyTo(_historicalTarget, 0);
             }

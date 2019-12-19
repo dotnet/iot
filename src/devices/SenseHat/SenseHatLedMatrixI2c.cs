@@ -40,7 +40,9 @@ namespace Iot.Device.SenseHat
         public override void Write(ReadOnlySpan<Color> colors)
         {
             if (colors.Length != NumberOfPixels)
+            {
                 throw new ArgumentException($"`{nameof(colors)}` must have exactly {NumberOfPixels} elements.");
+            }
 
             Span<byte> buffer = stackalloc byte[FrameBufferLength + 1];
 
@@ -105,10 +107,14 @@ namespace Iot.Device.SenseHat
         public override void SetPixel(int x, int y, Color color)
         {
             if (x < 0 || x >= NumberOfPixelsPerRow)
+            {
                 throw new ArgumentOutOfRangeException(nameof(x));
+            }
 
             if (y < 0 || y >= NumberOfPixelsPerColumn)
+            {
                 throw new ArgumentOutOfRangeException(nameof(y));
+            }
 
             (byte r, byte g, byte b) = DestructColor(color);
 

@@ -7,9 +7,9 @@ using System.Device.Pwm;
 
 namespace Iot.Device.ServoMotor.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello Servo Motor!");
 

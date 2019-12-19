@@ -23,7 +23,10 @@ namespace Iot.Device.Seesaw
         /// Initializes a new instance of the <see cref="SeesawGpioDriver"/> class that will use the specified I2cDevice to communicate with the Seesaw device.
         /// </summary>
         /// <param name="i2cDevice">The I2cDevice used for communicating with the Seesaw device.</param>
-        public SeesawGpioDriver(I2cDevice i2cDevice) : this(new Seesaw(i2cDevice)) { }
+        public SeesawGpioDriver(I2cDevice i2cDevice)
+            : this(new Seesaw(i2cDevice))
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SeesawGpioDriver"/> class that will use the specified Seesaw device.
@@ -71,7 +74,7 @@ namespace Iot.Device.Seesaw
         /// Gets the mode of a pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <returns>The mode of the pin.</returns>        
+        /// <returns>The mode of the pin.</returns>
         protected override PinMode GetPinMode(int pinNumber)
         {
             if (pinNumber < 0 || pinNumber > 63)
@@ -109,7 +112,7 @@ namespace Iot.Device.Seesaw
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <returns>The status if the pin is open or closed.</returns>
-        public bool IsPinOpen(int pinNumber) 
+        public bool IsPinOpen(int pinNumber)
         {
             if (pinNumber < 0 || pinNumber > 63)
             {
@@ -117,7 +120,7 @@ namespace Iot.Device.Seesaw
             }
 
             return _openPins.ContainsKey(pinNumber);
-        } 
+        }
 
         /// <summary>
         /// Opens a pin and in Input mode.

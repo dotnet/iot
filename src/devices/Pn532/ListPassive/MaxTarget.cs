@@ -7,12 +7,13 @@ namespace Iot.Device.Pn532.ListPassive
     /// <summary>
     /// The number of targets to look for
     /// </summary>
-    public enum  MaxTarget
+    public enum MaxTarget
     {
         /// <summary>
         /// One
         /// </summary>
         One = 0x01,
+
         /// <summary>
         /// Two
         /// </summary>

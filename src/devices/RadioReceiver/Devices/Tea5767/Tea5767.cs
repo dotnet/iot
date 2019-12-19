@@ -128,12 +128,14 @@ namespace Iot.Device.RadioReceiver
                     {
                         throw new ArgumentOutOfRangeException(nameof(frequency), $"{nameof(frequency)} needs to be in the range of 76 to 90.");
                     }
+
                     break;
                 case FrequencyRange.Other:
                     if (frequency < 87 || frequency > 108)
                     {
                         throw new ArgumentOutOfRangeException(nameof(frequency), $"{nameof(frequency)} needs to be in the range of 87 to 108.");
                     }
+
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(FrequencyRange), FrequencyRange, null);
@@ -230,7 +232,8 @@ namespace Iot.Device.RadioReceiver
             do
             {
                 readBuffer = ReadRegisters();
-            } while (readBuffer[0] >> 7 != 1);
+            }
+            while (readBuffer[0] >> 7 != 1);
 
             // disable search mode
             _registers[0] &= 0b_1011_1111;

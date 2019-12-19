@@ -17,9 +17,9 @@ using System.Threading.Tasks;
 using Iot.Device.LEDMatrix;
 using Iot.Device.Graphics;
 
-namespace dotnettest
+namespace Iot.Device.LEDMatrix.Samples
 {
-    class Program
+    internal class Program
     {
         private static bool play = false;
         private static int scenario = 2;
@@ -50,7 +50,6 @@ namespace dotnettest
 
             // If you chain 4 32x32 panels having 2 rows chaining (2 panels in first row an d2 panels in second row).
             // RGBLedMatrix matrix = new RGBLedMatrix(mapping, 64, 64, 2, 2);
-
             Task.Run(() =>
             {
                 matrix.StartRendering();
@@ -97,7 +96,7 @@ namespace dotnettest
                 if (cki.KeyChar == 'f')
                 {
                     Console.WriteLine($"Frame Time: {matrix.FrameTime} \u00B5s");
-                    Console.WriteLine($"Duration : { matrix.PWMDuration }");
+                    Console.WriteLine($"Duration : {matrix.PWMDuration}");
                 }
 
                 if (cki.KeyChar >= '1' && cki.KeyChar <= '9')
@@ -106,7 +105,8 @@ namespace dotnettest
                     scenario = cki.KeyChar - '0';
                     Thread.Sleep(1000);
                 }
-            } while (cki.KeyChar != 'q');
+            }
+            while (cki.KeyChar != 'q');
 
             play = false;
             scenario = 0;
@@ -114,7 +114,7 @@ namespace dotnettest
             matrix.Dispose();
         }
 
-        static unsafe void Demo1(RGBLedMatrix matrix)
+        private static unsafe void Demo1(RGBLedMatrix matrix)
         {
             play = true;
 
@@ -134,7 +134,9 @@ namespace dotnettest
                     matrix.DrawText(x, 0, text, font, 0, 0, 255, 0, 0, 0);
                     x--;
                     if (x == -fullTextWidth)
+                    {
                         x = matrix.Width - 1;
+                    }
 
                     string d = DateTime.Now.ToString("hh:mm:ss");
                     matrix.DrawText(0, font.Height + 1, d, font1, 128, 128, 0, 0, 0, 0);
@@ -148,33 +150,33 @@ namespace dotnettest
             }
         }
 
-        static void Demo2(RGBLedMatrix matrix)
+        private static void Demo2(RGBLedMatrix matrix)
         {
             int length = matrix.Width / 4;
-            int height =  matrix.Height / 4;
+            int height = matrix.Height / 4;
 
             play = true;
             while (play)
             {
                 matrix.FillRectangle(0, 0, length, length, 255, 0, 0);
-                matrix.FillRectangle(length,     0, length, length, 0,   255, 0);
-                matrix.FillRectangle(2 * length, 0, length, length, 0,   0,   255);
+                matrix.FillRectangle(length, 0, length, length, 0, 255, 0);
+                matrix.FillRectangle(2 * length, 0, length, length, 0, 0, 255);
                 matrix.FillRectangle(3 * length, 0, length, length, 255, 255, 0);
 
-                matrix.FillRectangle(0,  height, length, length, 255, 0,   255);
-                matrix.FillRectangle(length,  height, length, length, 255, 255, 255);
-                matrix.FillRectangle(2 * length, height, length, length, 0,   130, 0);
-                matrix.FillRectangle(3 * length, height, length, length, 130, 0,   0);
+                matrix.FillRectangle(0, height, length, length, 255, 0, 255);
+                matrix.FillRectangle(length, height, length, length, 255, 255, 255);
+                matrix.FillRectangle(2 * length, height, length, length, 0, 130, 0);
+                matrix.FillRectangle(3 * length, height, length, length, 130, 0, 0);
 
-                matrix.FillRectangle(0,  2 * height, length, length, 0,   0,   128);
-                matrix.FillRectangle(length,  2 * height, length, length, 192, 192, 192);
+                matrix.FillRectangle(0, 2 * height, length, length, 0, 0, 128);
+                matrix.FillRectangle(length, 2 * height, length, length, 192, 192, 192);
                 matrix.FillRectangle(2 * length, 2 * height, length, length, 128, 128, 0);
                 matrix.FillRectangle(3 * length, 2 * height, length, length, 128, 128, 128);
 
-                matrix.FillRectangle(0,  3 * height, length, length, 40, 40, 40);
-                matrix.FillRectangle(length,  3 * height, length, length,  80, 80, 80);
-                matrix.FillRectangle(2 * length, 3 * height, length, length,  120,  120,  120);
-                matrix.FillRectangle(3 * length, 3 * height, length, length,  0,  120,  120);
+                matrix.FillRectangle(0, 3 * height, length, length, 40, 40, 40);
+                matrix.FillRectangle(length, 3 * height, length, length, 80, 80, 80);
+                matrix.FillRectangle(2 * length, 3 * height, length, length, 120, 120, 120);
+                matrix.FillRectangle(3 * length, 3 * height, length, length, 0, 120, 120);
 
                 Thread.Sleep(5000);
             }
@@ -182,7 +184,7 @@ namespace dotnettest
 
         private static readonly string s_weatherKey = "Please request a key from openweathermap.org";
 
-        static void Demo3(RGBLedMatrix matrix)
+        private static void Demo3(RGBLedMatrix matrix)
         {
             try
             {
@@ -191,8 +193,8 @@ namespace dotnettest
                 byte blue = 0x10;
                 matrix.Fill(0, 0, blue);
 
-                TimeZoneInfo [] zones = new TimeZoneInfo [s_citiesData.Length] ;
-                string [] weatherUrls = new string [s_citiesData.Length];
+                TimeZoneInfo[] zones = new TimeZoneInfo[s_citiesData.Length];
+                string[] weatherUrls = new string[s_citiesData.Length];
                 for (int i = 0; i < s_citiesData.Length; i++)
                 {
                     weatherUrls[i] = String.Format("http://api.openweathermap.org/data/2.5/weather?q={0},{1}&mode=xml&units=imperial&APPID={2}", s_citiesData[i].City, s_citiesData[i].CountryCode, s_weatherKey);
@@ -201,7 +203,7 @@ namespace dotnettest
 
                 using (WebClient client = new WebClient())
                 {
-                    BdfFont font  = BdfFont.Load(@"fonts/6x12.bdf");
+                    BdfFont font = BdfFont.Load(@"fonts/6x12.bdf");
                     BdfFont font1 = BdfFont.Load(@"fonts/5x7.bdf");
                     BdfFont font2 = BdfFont.Load(@"fonts/4x6.bdf");
 
@@ -212,7 +214,7 @@ namespace dotnettest
                         string xml = client.DownloadString(weatherUrls[cityIndex]);
                         XDocument doc = XDocument.Parse(xml);
                         XElement element = doc.Root.Element("temperature");
-                        string temperature = ((int) Math.Round(Double.Parse(element.Attribute("value").Value))).ToString(CultureInfo.InvariantCulture);
+                        string temperature = ((int)Math.Round(Double.Parse(element.Attribute("value").Value))).ToString(CultureInfo.InvariantCulture);
 
                         element = doc.Root.Element("weather");
                         string description = element.Attribute("value").Value + "                                           ";
@@ -261,7 +263,7 @@ namespace dotnettest
                             s_citiesData[cityIndex].City,
                             font,
                             pos,
-                            - (pos + s_citiesData[cityIndex].City.Length * font.Width),
+                            -(pos + s_citiesData[cityIndex].City.Length * font.Width),
                             128, 128, 128, 0, 0, blue);
 
                         y = font.Height;
@@ -294,7 +296,8 @@ namespace dotnettest
                 Console.WriteLine(e);
             }
         }
-        static unsafe void Demo4(RGBLedMatrix matrix)
+
+        private static unsafe void Demo4(RGBLedMatrix matrix)
         {
             play = true;
 
@@ -303,15 +306,15 @@ namespace dotnettest
 
             using (WebClient client = new WebClient())
             {
-                int lastMinute          = -1;
-                string temperature      = "";
+                int lastMinute = -1;
+                string temperature = string.Empty;
 
-                BdfFont font  = BdfFont.Load(@"fonts/6x12.bdf");
+                BdfFont font = BdfFont.Load(@"fonts/6x12.bdf");
                 BdfFont font1 = BdfFont.Load(@"fonts/5x7.bdf");
 
                 Bitmap weatherIcon = null;
                 string lastIcon = null;
-                string description = "";
+                string description = string.Empty;
 
                 while (play)
                 {
@@ -323,7 +326,7 @@ namespace dotnettest
 
                         XDocument doc = XDocument.Parse(xml);
                         XElement element = doc.Root.Element("temperature");
-                        temperature = ((int) Math.Round(Double.Parse(element.Attribute("value").Value))).ToString(CultureInfo.InvariantCulture);
+                        temperature = ((int)Math.Round(Double.Parse(element.Attribute("value").Value))).ToString(CultureInfo.InvariantCulture);
 
                         element = doc.Root.Element("weather");
                         string icon = element.Attribute("icon").Value;
@@ -347,7 +350,7 @@ namespace dotnettest
             }
         }
 
-        static void Demo5(RGBLedMatrix matrix)
+        private static void Demo5(RGBLedMatrix matrix)
         {
             play = true;
 
@@ -375,7 +378,7 @@ namespace dotnettest
             }
         }
 
-        static unsafe void Demo6(RGBLedMatrix matrix)
+        private static unsafe void Demo6(RGBLedMatrix matrix)
         {
             play = true;
 
@@ -383,7 +386,7 @@ namespace dotnettest
             {
                 matrix.Fill(0, 0, 0);
 
-                Bitmap [] bitmaps = new Bitmap []
+                Bitmap[] bitmaps = new Bitmap[]
                 {
                     new Bitmap(@"bitmaps/dotnet-bot-branded-32x32.bmp"),
                     new Bitmap(@"bitmaps/i-love-dotnet.bmp")
@@ -417,7 +420,7 @@ namespace dotnettest
             }
         }
 
-        static unsafe void Demo7(RGBLedMatrix matrix)
+        private static unsafe void Demo7(RGBLedMatrix matrix)
         {
             play = true;
 
@@ -427,10 +430,10 @@ namespace dotnettest
 
                 while (play)
                 {
-                    matrix.SetPixel(matrix.Width / 2, matrix.Height /2, 255, 0, 0);
-                    matrix.DrawCircle(matrix.Width / 2, matrix.Height /2, 14, 255, 0, 0);
-                    matrix.DrawCircle(matrix.Width / 2, matrix.Height /2, 9, 0, 255, 0);
-                    matrix.DrawCircle(matrix.Width / 2, matrix.Height /2, 6, 0, 0, 255);
+                    matrix.SetPixel(matrix.Width / 2, matrix.Height / 2, 255, 0, 0);
+                    matrix.DrawCircle(matrix.Width / 2, matrix.Height / 2, 14, 255, 0, 0);
+                    matrix.DrawCircle(matrix.Width / 2, matrix.Height / 2, 9, 0, 255, 0);
+                    matrix.DrawCircle(matrix.Width / 2, matrix.Height / 2, 6, 0, 0, 255);
                 }
             }
             catch (Exception e)
@@ -439,7 +442,7 @@ namespace dotnettest
             }
         }
 
-        static void Demo8(RGBLedMatrix matrix)
+        private static void Demo8(RGBLedMatrix matrix)
         {
             play = true;
 
@@ -467,12 +470,12 @@ namespace dotnettest
             }
         }
 
-        private static Vector3 clamp(Vector3 c, float a, float b)
+        private static Vector3 Clamp(Vector3 c, float a, float b)
         {
             return new Vector3(Math.Clamp(c.X, a, b), Math.Clamp(c.Y, a, b), Math.Clamp(c.Z, a, b));
         }
 
-        private static float mod(float a, float b)
+        private static float Mod(float a, float b)
         {
             float ret = a % b;
             if (ret < 0)
@@ -483,9 +486,9 @@ namespace dotnettest
             return ret;
         }
 
-        private static Vector3 mod(Vector3 a, float b)
+        private static Vector3 Mod(Vector3 a, float b)
         {
-            return new Vector3(mod(a.X, b), mod(a.Y, b), mod(a.Z, b));
+            return new Vector3(Mod(a.X, b), Mod(a.Y, b), Mod(a.Z, b));
         }
 
         private static Vector3 Add(Vector3 v, float s)
@@ -493,29 +496,29 @@ namespace dotnettest
             return new Vector3(v.X + s, v.Y + s, v.Z + s);
         }
 
-        private static Vector3 abs(Vector3 vector)
+        private static Vector3 Abs(Vector3 vector)
         {
             return new Vector3(Math.Abs(vector.X), Math.Abs(vector.Y), Math.Abs(vector.Z));
         }
 
-        private static Vector3 mix(Vector3 a, Vector3 b, float f)
+        private static Vector3 Mix(Vector3 a, Vector3 b, float f)
         {
             return a * (1 - f) + b * f;
         }
 
-        private static Vector3 hsv2rgb_smooth(Vector3 c)
+        private static Vector3 Hsv2rgb_smooth(Vector3 c)
         {
             float c1 = c.X + 6.0f;
 
             Vector3 v1 = Add(new Vector3(0.0f, 4.0f, 2.0f), c.X * 6.0f);
-            Vector3 rgb = clamp(Add(abs(Add(mod(v1, 6.0f), -3.0f)), -1.0f), 0.0f, 1.0f);
+            Vector3 rgb = Clamp(Add(Abs(Add(Mod(v1, 6.0f), -3.0f)), -1.0f), 0.0f, 1.0f);
 
-            rgb = rgb*rgb*(Add(-2.0f * rgb, 3.0f)); // cubic smoothing
+            rgb = rgb * rgb * (Add(-2.0f * rgb, 3.0f)); // cubic smoothing
 
-            return c.Z * mix(new Vector3(1.0f, 1.0f, 1.0f), rgb, c.Y);
+            return c.Z * Mix(new Vector3(1.0f, 1.0f, 1.0f), rgb, c.Y);
         }
 
-        private static float smoothstep(float edge0, float edge1, float x)
+        private static float Smoothstep(float edge0, float edge1, float x)
         {
             // Scale, bias and saturate x to 0..1 range
             x = Math.Clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
@@ -528,7 +531,7 @@ namespace dotnettest
             Vector2 p = uv - new Vector2(0.5f, 0.5f);
             float a = (float)(Math.Atan2(p.Y, p.X) / 2f / Math.PI);
 
-            a = mod(a + time / 10.0f, 1.0f);
+            a = Mod(a + time / 10.0f, 1.0f);
 
             float r = p.Length();
             float n = 5.0f;
@@ -536,18 +539,18 @@ namespace dotnettest
             float s1 = 0.2f;
             float s2 = 0.5f;
             float srange = s2 - s1;
-            float x = Math.Abs(mod(a, 1.0f / n) * n - 0.5f) * srange / 0.5f + s1;
+            float x = Math.Abs(Mod(a, 1.0f / n) * n - 0.5f) * srange / 0.5f + s1;
 
             float blur = 4.0f + 3.0f * (float)Math.Sin(time * 2f * Math.PI / 5f);
-            float c = smoothstep(0.0f, 1.0f, (x - r) * blur);//x <= r ? 0.0 : 1.0;
+            float c = Smoothstep(0.0f, 1.0f, (x - r) * blur); // x <= r ? 0.0 : 1.0;
 
             float ha = a;
-            float h = mod(ha, 1.0f);
+            float h = Mod(ha, 1.0f);
 
             float v = c;
 
             float s = 1.0f;
-            return hsv2rgb_smooth(new Vector3(h, s, v));
+            return Hsv2rgb_smooth(new Vector3(h, s, v));
         }
 
         private static Vector3 HSV(Vector2 uv, float time)
@@ -555,17 +558,17 @@ namespace dotnettest
             Vector2 p = uv - new Vector2(0.5f, 0.5f);
             float a = (float)(Math.Atan2(p.Y, p.X) / 2f / Math.PI);
 
-            a = mod(a + time / 10.0f, 1.0f);
+            a = Mod(a + time / 10.0f, 1.0f);
 
             float r = p.Length();
 
             float ha = a;
-            float h = mod(ha, 1.0f);
+            float h = Mod(ha, 1.0f);
 
             float s = 1.0f;
             float v = r * 2.0f;
 
-            return hsv2rgb_smooth(new Vector3(a, s, v));
+            return Hsv2rgb_smooth(new Vector3(a, s, v));
         }
 
         private static byte Col(float x)
@@ -647,10 +650,10 @@ namespace dotnettest
 
             public string City { get; }
             public string CountryCode { get; }
-            public string ZoneId {get; }
+            public string ZoneId { get; }
         }
 
-        private static readonly CityData [] s_citiesData = new CityData []
+        private static readonly CityData[] s_citiesData = new CityData[]
         {
             new CityData("New York", "US", "America/New_York"),
             new CityData("Redmond", "US", "America/Los_Angeles"),
@@ -664,6 +667,6 @@ namespace dotnettest
             new CityData("Casablanca", "MA", "Africa/Casablanca"),
             new CityData("Cairo", "EG", "Africa/Cairo"),
             new CityData("Riyadh", "SA", "Asia/Riyadh")
-        } ;
+        };
     }
 }

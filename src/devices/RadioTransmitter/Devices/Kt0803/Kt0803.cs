@@ -33,7 +33,7 @@ namespace Iot.Device.RadioTransmitter
         /// Kt0803 mute.
         /// </summary>
         public bool Mute { get => GetMute(); set => SetMute(value); }
-        
+
         /// <summary>
         /// Kt0803 PGA (Programmable Gain Amplifier) gain.
         /// </summary>
@@ -42,13 +42,26 @@ namespace Iot.Device.RadioTransmitter
         /// <summary>
         /// Kt0803 transmission power.
         /// </summary>
-        public TransmissionPower TransmissionPower { get => GetTransmissionPower(); set => SetTransmissionPower(value); }
+        public TransmissionPower TransmissionPower
+        {
+            get => GetTransmissionPower();
+            set => SetTransmissionPower(value);
+        }
 
         private Region _region;
+
         /// <summary>
         /// Kt0803 region.
         /// </summary>
-        public Region Region { get => _region; set { SetRegion(value); _region = value; } }
+        public Region Region
+        {
+            get => _region;
+            set
+            {
+                SetRegion(value);
+                _region = value;
+            }
+        }
 
         /// <summary>
         /// Kt0803 bass boost.
@@ -63,7 +76,8 @@ namespace Iot.Device.RadioTransmitter
         /// <param name="region">Region.</param>
         /// <param name="power">Transmission power.</param>
         /// <param name="pga">PGA (Programmable Gain Amplifier) gain.</param>
-        public Kt0803(I2cDevice i2cDevice, double frequency, Region region, TransmissionPower power = TransmissionPower.Power108dBuV, PgaGain pga = PgaGain.Pga00dB)
+        public Kt0803(I2cDevice i2cDevice, double frequency, Region region,
+            TransmissionPower power = TransmissionPower.Power108dBuV, PgaGain pga = PgaGain.Pga00dB)
         {
             _i2cDevice = i2cDevice;
             Frequency = frequency;
@@ -114,6 +128,7 @@ namespace Iot.Device.RadioTransmitter
             {
                 reg2 &= ~0b_1000_0000;
             }
+
             reg0 = freq >> 1;
             reg1 = (reg1 & 0b_1111_1000) | (freq >> 9);
 
@@ -332,7 +347,7 @@ namespace Iot.Device.RadioTransmitter
         {
             int reg4 = ReadByte(Register.KT_CONFIG0B);
 
-            return reg4  >> 7 == 1 ? true : false;
+            return reg4 >> 7 == 1 ? true : false;
         }
 
         /// <summary>
@@ -363,14 +378,20 @@ namespace Iot.Device.RadioTransmitter
 
         private void WriteByte(Register register, byte value)
         {
-            Span<byte> writeBuffer = stackalloc byte[] { (byte)register, value };
+            Span<byte> writeBuffer = stackalloc byte[]
+            {
+                (byte)register, value
+            };
 
             _i2cDevice.Write(writeBuffer);
         }
 
         private byte ReadByte(Register register)
         {
-            Span<byte> writeBuffer = stackalloc byte[] { (byte)register };
+            Span<byte> writeBuffer = stackalloc byte[]
+            {
+                (byte)register
+            };
             Span<byte> readBuffer = stackalloc byte[1];
 
             _i2cDevice.WriteRead(writeBuffer, readBuffer);

@@ -80,8 +80,7 @@ namespace Iot.Device.SenseHat.Samples
             return Color.FromArgb(
                 Col(0.5 + 0.5 * Math.Cos(time + uv.X)),
                 Col(0.5 + 0.5 * Math.Cos(time + uv.Y + 2.0)),
-                Col(0.5 + 0.5 * Math.Cos(time + uv.X + 4.0))
-            );
+                Col(0.5 + 0.5 * Math.Cos(time + uv.X + 4.0)));
         }
 
         private static byte Col(double x)

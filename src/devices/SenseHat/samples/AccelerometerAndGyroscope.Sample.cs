@@ -19,7 +19,7 @@ namespace Iot.Device.SenseHat.Samples
             {
                 while (true)
                 {
-                    Console.WriteLine($"Acceleration={ag.Acceleration}"); 
+                    Console.WriteLine($"Acceleration={ag.Acceleration}");
                     Console.WriteLine($"AngularRate={ag.AngularRate}");
                     Thread.Sleep(100);
                 }

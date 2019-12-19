@@ -26,7 +26,7 @@ internal class Volume
         double value = _seesawDevice.AnalogRead(2);
         value = value / 10.24;
         value = Math.Round(value);
-        return (int) value;
+        return (int)value;
     }
 
     private void Init()
@@ -63,12 +63,13 @@ internal class Volume
             factor = 1 / factor;
         }
 
-        newValue = (int) (sleep / factor);
+        newValue = (int)(sleep / factor);
 
         if (newValue >= 10 && newValue <= 1000)
         {
             return (true, newValue);
         }
+
         return (true, sleep);
     }
 }

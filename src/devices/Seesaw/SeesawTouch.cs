@@ -10,7 +10,7 @@ namespace Iot.Device.Seesaw
     public partial class Seesaw : IDisposable
     {
         /// <summary>
-        /// Reads the analog value on an capacitive touch-enabled pin. 
+        /// Reads the analog value on an capacitive touch-enabled pin.
         /// </summary>
         /// <param name="pinId">The number of the pin to read.</param>
         /// <returns>An analogue value betweeen 0 and 1023 that represents the capacitance read from the pin.</returns>
