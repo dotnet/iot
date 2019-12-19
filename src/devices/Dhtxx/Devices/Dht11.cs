@@ -19,7 +19,8 @@ namespace Iot.Device.DHTxx
         /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
         public Dht11(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
             : base(pin, pinNumberingScheme)
-        { }
+        {
+        }
 
         internal override double GetHumidity(byte[] readBuff)
         {

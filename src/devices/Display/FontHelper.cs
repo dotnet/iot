@@ -12,6 +12,7 @@ namespace Iot.Device.Display
     public static class FontHelper
     {
         #region Private members
+
         /// <summary>
         /// Hexadecimal digit (0..F) fonts
         /// </summary>
@@ -104,11 +105,13 @@ namespace Iot.Device.Display
 
         #region Public members
         #region Constants
+
         /// <summary>
         /// Used to mask upper 4 bits of a byte for a single hexadecimal value
         /// </summary>
         public const byte HexadecimalMask = 0b0000_1111;
         #endregion
+
         /// <summary>
         /// Convert byte value hexadecimal digit (0..F) to corresponding font bits
         /// </summary>
@@ -143,6 +146,7 @@ namespace Iot.Device.Display
                     fonts[i] = GetHexDigit(digits[i]);
                 }
             }
+
             return fonts;
         }
 
@@ -196,6 +200,7 @@ namespace Iot.Device.Display
             {
                 ConvertString(input.AsSpan(), fonts.AsSpan());
             }
+
             return fonts;
         }
         #endregion

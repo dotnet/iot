@@ -13,6 +13,7 @@ namespace Iot.Device.Display
         /// Aligns displayed value to the left side of the display
         /// </summary>
         Left,
+
         /// <summary>
         /// Aligns displayed value to the right side of the display
         /// </summary>

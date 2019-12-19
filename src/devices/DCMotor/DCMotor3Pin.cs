@@ -24,7 +24,9 @@ namespace Iot.Device.DCMotor
             : base(controller ?? new GpioController())
         {
             if (pwmChannel == null)
+            {
                 throw new ArgumentNullException(nameof(pwmChannel));
+            }
 
             _pwm = pwmChannel;
 
@@ -58,7 +60,9 @@ namespace Iot.Device.DCMotor
                 double val = Math.Clamp(value, -1.0, 1.0);
 
                 if (_speed == val)
+                {
                     return;
+                }
 
                 if (val == 0.0)
                 {

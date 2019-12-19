@@ -19,6 +19,7 @@ namespace Iot.Device.Display
     public abstract partial class Ht16k33 : IDisposable
     {
         #region Constants
+
         /// <summary>
         /// HT16K33 default I2C address
         /// </summary>
@@ -31,6 +32,7 @@ namespace Iot.Device.Display
         #endregion
 
         #region Protected members
+
         /// <summary>
         /// I2C device interface
         /// </summary>
@@ -54,6 +56,7 @@ namespace Iot.Device.Display
         #endregion
 
         #region Private members
+
         /// <summary>
         /// Display on/off state
         /// </summary>
@@ -89,6 +92,7 @@ namespace Iot.Device.Display
         #endregion
 
         #region Public members
+
         /// <summary>
         /// Initialize HT16K33 device
         /// </summary>
@@ -197,6 +201,7 @@ namespace Iot.Device.Display
         }
 
         #region Abstract members
+
         /// <summary>
         /// Write raw data to display buffer
         /// </summary>
@@ -223,18 +228,22 @@ namespace Iot.Device.Display
             /// HT16K33 blink command
             /// </summary>
             Blink = 0b1000_0000,
+
             /// <summary>
             /// HT16K33 blink display on command
             /// </summary>
             BlinkDisplayOn = 0b0000_0001,
+
             /// <summary>
             /// HT16K33 turn on oscillator command
             /// </summary>
             TurnOnOscillator = 0b0010_0001,
+
             /// <summary>
             /// HT16K33 set brightness command
             /// </summary>
             SetBrightness = 0b1110_0000,
+
             /// <summary>
             /// HT16K33 brightness bit mask
             /// </summary>

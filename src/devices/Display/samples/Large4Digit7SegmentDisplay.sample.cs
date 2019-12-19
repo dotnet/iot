@@ -9,11 +9,18 @@ using Iot.Device.Display;
 
 namespace SevenSegmentSample
 {
-    class Program
+    /// <summary>
+    /// Test code for 7-Segment displays
+    /// </summary>
+    public class Program
     {
-        const string SupportedCharacters = "0123456789aAbBcCdDeEfFgGhHiIjJlLnNoOpPrRsStuUyYzZ-=_|°[]     ";
+        private const string SupportedCharacters = "0123456789aAbBcCdDeEfFgGhHiIjJlLnNoOpPrRsStuUyYzZ-=_|°[]     ";
 
-        static void Main(string[] args)
+        /// <summary>
+        /// Main entry point
+        /// </summary>
+        /// <param name="args">Unused</param>
+        public static void Main(string[] args)
         {
             // Initialize display (busId = 1 for Raspberry Pi 2 & 3)
             using var display = new Large4Digit7SegmentDisplay(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))

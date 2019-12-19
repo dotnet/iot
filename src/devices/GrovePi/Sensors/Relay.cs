@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.GrovePiDevice.Models;
 using System.Device.Gpio;
+using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -17,8 +17,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         /// <param name="grovePi">The GrovePi class</param>
         /// <param name="port">The grove Port, need to be in the list of SupportedPorts</param>
-        public Relay(GrovePi grovePi, GrovePort port) : this(grovePi, port, false)
-        { }
+        public Relay(GrovePi grovePi, GrovePort port)
+            : this(grovePi, port, false)
+        {
+        }
 
         /// <summary>
         /// Relay constructor
@@ -26,7 +28,8 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// <param name="grovePi">The GrovePi class</param>
         /// <param name="port">The grove Port, need to be in the list of SupportedPorts</param>
         /// <param name="inverted">If inverted, the relay is on when output is low and off when output is high</param>
-        public Relay(GrovePi grovePi, GrovePort port, bool inverted) : base(grovePi, port)
+        public Relay(GrovePi grovePi, GrovePort port, bool inverted)
+            : base(grovePi, port)
         {
             IsInverted = inverted;
         }
@@ -62,7 +65,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         public new PinValue Value
         {
-            get { return _value; }
+            get
+            {
+                return _value;
+            }
             set
             {
                 _value = value;

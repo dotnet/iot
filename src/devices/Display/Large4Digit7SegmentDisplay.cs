@@ -24,6 +24,7 @@ namespace Iot.Device.Display
     {
         #region Private members
         #region Constants
+
         /// <summary>
         /// Number of digits supported by display
         /// </summary>
@@ -38,6 +39,7 @@ namespace Iot.Device.Display
         #endregion
 
         #region Enums
+
         /// <summary>
         /// Digit address within display buffer
         /// </summary>
@@ -47,18 +49,22 @@ namespace Iot.Device.Display
             /// First digit
             /// </summary>
             Digit1 = 1,
+
             /// <summary>
             /// Second digit
             /// </summary>
             Digit2 = 3,
+
             /// <summary>
             /// Dot setting bits
             /// </summary>
             Dots = 5,
+
             /// <summary>
             /// Third digit
             /// </summary>
             Digit3 = 7,
+
             /// <summary>
             /// Fourth digit
             /// </summary>
@@ -111,11 +117,15 @@ namespace Iot.Device.Display
         #endregion
 
         #region Public members
+
         /// <summary>
         /// Initialize 7-Segment display
         /// </summary>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
-        public Large4Digit7SegmentDisplay(I2cDevice i2cDevice) : base(i2cDevice) { }
+        public Large4Digit7SegmentDisplay(I2cDevice i2cDevice)
+            : base(i2cDevice)
+        {
+        }
 
         /// <inheritdoc/>
         public int NumberOfDigits { get; } = MaxNumberOfDigits;
@@ -182,6 +192,7 @@ namespace Iot.Device.Display
             _i2cDevice.Write(_displayBuffer);
 
         #region Write overloads
+
         /// <summary>
         /// Write integer value as decimal digits
         /// </summary>
@@ -226,6 +237,7 @@ namespace Iot.Device.Display
                 {
                     return;
                 }
+
                 value = value.Substring(1);
             }
 

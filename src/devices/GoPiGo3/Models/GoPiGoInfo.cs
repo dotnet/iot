@@ -35,6 +35,6 @@ namespace Iot.Device.GoPiGo3.Models
         /// <summary>
         /// Id of the GoPiGo3
         /// </summary>
-        public string Id { get; set; }        
+        public string Id { get; set; }
     }
 }

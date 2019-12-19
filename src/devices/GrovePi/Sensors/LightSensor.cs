@@ -16,8 +16,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         /// <param name="grovePi">The GrovePi class</param>
         /// <param name="port">The grove Port, need to be in the list of SupportedPorts</param>
-        public LightSensor(GrovePi grovePi, GrovePort port) : base(grovePi, port)
-        { }
+        public LightSensor(GrovePi grovePi, GrovePort port)
+            : base(grovePi, port)
+        {
+        }
 
         /// <summary>
         /// Get the name Light Sensor

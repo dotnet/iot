@@ -78,7 +78,7 @@ namespace Iot.Device.Ft4222
                 pha = SpiClockPhase.ClockTailing;
             }
 
-            // Configure the SPI             
+            // Configure the SPI
             ftStatus = FtFunction.FT4222_SPIMaster_Init(_ftHandle, SpiOperatingMode.Single, tfSpiDiv, pol, pha,
                 (byte)_settings.ChipSelectLine);
             if (ftStatus != FtStatus.Ok)

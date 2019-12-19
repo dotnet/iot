@@ -10,11 +10,11 @@ using System.Diagnostics;
 using System.Threading;
 using Iot.Device.DCMotor;
 
-namespace samples
+namespace Iot.Device.DCMotor.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             const double Period = 10.0;
             Stopwatch sw = Stopwatch.StartNew();

@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.GrovePiDevice.Models;
 using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
+using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -30,7 +30,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public DigitalOutput(GrovePi grovePi, GrovePort port)
         {
             if (!SupportedPorts.Contains(port))
+            {
                 throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
+            }
+
             _grovePi = grovePi;
             _port = port;
             _grovePi.PinMode(_port, PinMode.Output);
@@ -42,7 +45,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         public PinValue Value
         {
-            get { return _value; }
+            get
+            {
+                return _value;
+            }
 
             set
             {
@@ -52,7 +58,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         }
 
         /// <summary>
-        /// Returns the pin level as a string
+        /// Returns the pin level as a string.
         /// </summary>
         /// <returns>Returns the pin level as a string</returns>
         public override string ToString() => Value.ToString();

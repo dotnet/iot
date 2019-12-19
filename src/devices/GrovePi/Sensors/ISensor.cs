@@ -7,8 +7,8 @@ using Iot.Device.GrovePiDevice.Models;
 namespace Iot.Device.GrovePiDevice.Sensors
 {
     /// <summary>
-	/// Interface for a sensor 
-	/// </summary>
+    /// Interface for a sensor
+    /// </summary>
     public interface ISensor<T>
     {
         /// <summary>

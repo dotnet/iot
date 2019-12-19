@@ -17,22 +17,27 @@ namespace Iot.Device.Display
         /// Disable all dots
         /// </summary>
         Off = 0b0000_0000,
+
         /// <summary>
         /// Center colon
         /// </summary>
         CenterColon = 0b0000_0010,
+
         /// <summary>
         /// Left colon
         /// </summary>
         LeftColon = LeftLower | LeftUpper,
+
         /// <summary>
         /// Left lower dot
         /// </summary>
         LeftLower = 0b0000_0100,
+
         /// <summary>
         /// Left upper dot
         /// </summary>
         LeftUpper = 0b0000_1000,
+
         /// <summary>
         /// Decimal point (between third and fourth digits)
         /// </summary>
