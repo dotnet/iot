@@ -49,9 +49,8 @@ If everything went smoothly, the output should end with a success message.
 
 Currently the full test suite requires following components, if you don't have one use following command line switches to skip
 
-|---|---|
 | Requirements | Skip arguments |
-|---|---|
+| --- | --- |
 | MCP 3008 (SPI)* | `-notrait feature=spi` |
 | BME280 (I2C) | `-notrait feature=i2c` |
 | Pins 5 and 6 connected | `-notrait feature=gpio` |
@@ -94,9 +93,8 @@ You can download [gerber files](board-gerber.zip) if you'd like to manufacture P
 
 Following list of components are needed for PCB:
 
-|---|---|
 | Component | Quantity |
-|---|---|
+| --- | --- |
 | MCP3008 I/SL | 1 |
 | BME280 breakout board | 1 |
 | 2x20 female header (Raspberry PI hat) | 1 |
