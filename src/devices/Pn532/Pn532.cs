@@ -26,23 +26,17 @@ namespace Iot.Device.Pn532
     public class Pn532 : CardTransceiver, IDisposable
     {
         private const int I2cMaxBuffer = 1024;
-
         // Communication way
         private const byte ToHostCheckSumD5 = 0xD5;
-
         private const byte FromHostCheckSumD4 = 0xD4;
-
         // Preamble, codes and postamble
         private const byte Preamble = 0x00;
         private const byte Postamble = 0x00;
         private const byte StartCode1 = 0x00;
-
         private const byte StartCode2 = 0xFF;
-
         // Operation type for SPI
         private const byte WriteData = 0b0000_0001;
         private const byte ReadStatus = 0b0000_0010;
-
         private const byte ReadData = 0b0000_0011;
 
         // Acknowledge
@@ -57,7 +51,6 @@ namespace Iot.Device.Pn532
 
         private byte[] _i2CWakeUp = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         private ParametersFlags _parametersFlags;
-
         private SpiDevice _spiDevice = null;
         private I2cDevice _i2cDevice = null;
         private GpioController _controller = null;
