@@ -43,6 +43,7 @@ namespace Iot.Device.Mcp23xxx.Tests
             {
                 mcp23S08.WriteByte(Register.GPIO, 0xA1);
             }
+
             Assert.Equal(expectedOpCode, spiMock.LastInitialWriteByte);
         }
 
@@ -52,7 +53,9 @@ namespace Iot.Device.Mcp23xxx.Tests
 
             public override SpiConnectionSettings ConnectionSettings => null;
 
-            public override void Read(Span<byte> buffer) {}
+            public override void Read(Span<byte> buffer)
+            {
+            }
 
             public override byte ReadByte() => 0x42;
 

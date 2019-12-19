@@ -12,25 +12,25 @@ namespace Iot.Device.Max7219
     /// <remarks>
     /// Each character consists of a list of bytes where a single byte represents a column of the display.
     /// </remarks>
-    /// 
+    ///
     /// <example>
     /// This example shows how the 'A' char could by encoded:
     /// <code>
     /// var aBytes = new byte[] {
-    ///     0b1111100, 
-    ///     0b1111110, 
-    ///     0b0010011, 
-    ///     0b0010011, 
-    ///     0b1111110, 
-    ///     0b1111100, 
-    ///     0b0000000, 
-    ///     0b0000000 
+    ///     0b1111100,
+    ///     0b1111110,
+    ///     0b0010011,
+    ///     0b0010011,
+    ///     0b1111110,
+    ///     0b1111100,
+    ///     0b0000000,
+    ///     0b0000000
     /// };
     /// </code>
-    /// 
+    ///
     /// </example>
-    public interface IFont {
-
+    public interface IFont
+    {
         /// <summary>
         /// Returns a list of bytes for a given character to be written to a matrix.
         /// </summary>

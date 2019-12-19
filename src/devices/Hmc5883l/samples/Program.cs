@@ -8,9 +8,9 @@ using System.Threading;
 
 namespace Iot.Device.Hmc5883l.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             I2cConnectionSettings settings = new I2cConnectionSettings(1, Hmc5883l.DefaultI2cAddress);
             I2cDevice device = I2cDevice.Create(settings);
@@ -27,7 +27,9 @@ namespace Iot.Device.Hmc5883l.Samples
                     foreach (Status item in Enum.GetValues(typeof(Status)))
                     {
                         if (status.HasFlag(item))
+                        {
                             Console.Write($"{item} ");
+                        }
                     }
 
                     Console.WriteLine();

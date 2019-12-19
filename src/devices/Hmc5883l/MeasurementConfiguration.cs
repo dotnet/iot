@@ -16,11 +16,13 @@ namespace Iot.Device.Hmc5883l
         /// The positive and negative pins of the resistive load are left floating and high impedance.
         /// </summary>
         Normal = 0b_0000_0000,
+
         /// <summary>
         /// Positive bias configuration for X and Y axes, negative bias configuration for Z axis.
         /// In this configuration, a positive current is forced across the resistive load for X and Y axes, a negative current for Z axis.
         /// </summary>
         PositiveBiasConfiguration = 0b_0000_0001,
+
         /// <summary>
         /// Negative bias configuration for X and Y axes, positive bias configuration for Z axis.
         /// In this configuration, a negative current is forced across the resistive load for X and Y axes, a positive current for Z axis.

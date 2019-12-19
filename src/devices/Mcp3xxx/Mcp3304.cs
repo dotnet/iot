@@ -16,6 +16,9 @@ namespace Iot.Device.Adc
         /// Constructs Mcp3304 instance
         /// </summary>
         /// <param name="spiDevice">Device used for SPI communication</param>
-        public Mcp3304(SpiDevice spiDevice) : base(spiDevice, channelCount: 8, adcResolutionBits: 13) { }
+        public Mcp3304(SpiDevice spiDevice)
+            : base(spiDevice, channelCount: 8, adcResolutionBits: 13)
+        {
+        }
     }
 }

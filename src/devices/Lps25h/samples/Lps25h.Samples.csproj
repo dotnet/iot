@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-  	<ProjectReference Include="../Lps25h.csproj" />
-  	<ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <ProjectReference Include="../Lps25h.csproj" />
+      <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
   </ItemGroup>

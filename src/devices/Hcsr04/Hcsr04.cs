@@ -41,7 +41,7 @@ namespace Iot.Device.Hcsr04
             _controller.OpenPin(_echo, PinMode.Input);
             _controller.OpenPin(_trigger, PinMode.Output);
 
-             _controller.Write(_trigger, PinValue.Low);
+            _controller.Write(_trigger, PinValue.Low);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Iot.Device.Hcsr04
         /// <inheritdoc/>
         public void Dispose()
         {
-            if(_controller != null)
+            if (_controller != null)
             {
                 _controller.Dispose();
                 _controller = null;

@@ -86,14 +86,17 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
             /// Lowest message priority.
             /// </summary>
             LowestMessage = 0,
+
             /// <summary>
             /// Low intermediate message priority.
             /// </summary>
             LowIntermediateMessage = 1,
+
             /// <summary>
             /// High intermediate message priority.
             /// </summary>
             HighIntermediateMessage = 2,
+
             /// <summary>
             /// Highest message priority.
             /// </summary>

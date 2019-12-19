@@ -4,7 +4,6 @@
 
 namespace Iot.Device.Max7219
 {
-  
     /// <summary>
     /// Rotation if several displays are rotated in a row.
     /// </summary>
@@ -14,14 +13,17 @@ namespace Iot.Device.Max7219
         /// No rotation needed
         /// </summary>
         None,
+
         /// <summary>
         /// each device is turned 90 degree to the right
         /// </summary>
         Right,
+
         /// <summary>
         /// each device is turned 90 degree to the left
         /// </summary>
         Half,
+
         /// <summary>
         /// each device is turned by 180 degree
         /// </summary>

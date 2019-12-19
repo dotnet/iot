@@ -10,9 +10,9 @@ using Iot.Device.Spi;
 
 namespace Iot.Device.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var hardwareSpiSettings = new SpiConnectionSettings(0, 0)
             {

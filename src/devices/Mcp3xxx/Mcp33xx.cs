@@ -18,7 +18,10 @@ namespace Iot.Device.Adc
         /// <param name="spiDevice">Device used for SPI communication</param>
         /// <param name="channelCount">Value representing the number of single ended input channels on the device.</param>
         /// <param name="adcResolutionBits">The number of bits of resolution for the ADC.</param>
-        public Mcp33xx(SpiDevice spiDevice, byte channelCount, byte adcResolutionBits) : base(spiDevice, channelCount, adcResolutionBits) { }
+        public Mcp33xx(SpiDevice spiDevice, byte channelCount, byte adcResolutionBits)
+            : base(spiDevice, channelCount, adcResolutionBits)
+        {
+        }
 
         /// <summary>
         /// Reads a  value from the device using pseudo-differential inputs

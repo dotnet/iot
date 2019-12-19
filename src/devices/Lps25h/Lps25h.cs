@@ -24,7 +24,9 @@ namespace Iot.Device.Lps25h
         public Lps25h(I2cDevice i2cDevice)
         {
             if (i2cDevice == null)
+            {
                 throw new ArgumentNullException(nameof(i2cDevice));
+            }
 
             _i2c = i2cDevice;
 
@@ -67,7 +69,7 @@ namespace Iot.Device.Lps25h
 
         private static int ReadInt24LittleEndian(ReadOnlySpan<byte> buff)
         {
-            Debug.Assert(buff.Length == 3);
+            Debug.Assert(buff.Length == 3, "Buffer must be 3 bytes long");
 
             byte mostSignificantByte = buff[2];
             Span<byte> b = stackalloc byte[4]

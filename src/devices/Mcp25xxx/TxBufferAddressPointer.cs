@@ -13,22 +13,27 @@ namespace Iot.Device.Mcp25xxx
         /// TX Buffer 0 starting at TXB0SIDH (0x31).
         /// </summary>
         TxB0Sidh = 0,
+
         /// <summary>
         /// TX Buffer 0 starting at TXB0D0 (0x36).
         /// </summary>
         TxB0D0 = 1,
+
         /// <summary>
         /// TX Buffer 1 starting at TXB1SIDH (0x41).
         /// </summary>
         TxB1Sidh = 2,
+
         /// <summary>
         /// TX Buffer 1 starting at TXB1D0 (0x46).
         /// </summary>
         TxB1D0 = 3,
+
         /// <summary>
         /// TX Buffer 2 starting at TXB2SIDH (0x51).
         /// </summary>
         TxB2Sidh = 4,
+
         /// <summary>
         /// TX Buffer 2 starting at TXB2D0 (0x56).
         /// </summary>

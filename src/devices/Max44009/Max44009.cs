@@ -33,7 +33,10 @@ namespace Iot.Device.Max44009
             _i2cDevice = i2cDevice;
 
             // Details in the Datasheet P8
-            Span<byte> writeBuff = stackalloc byte[2] { (byte)Register.MAX_CONFIG, 0b_0000_0000 };
+            Span<byte> writeBuff = stackalloc byte[2]
+            {
+                (byte)Register.MAX_CONFIG, 0b_0000_0000
+            };
 
             _i2cDevice.Write(writeBuff);
         }
@@ -48,7 +51,10 @@ namespace Iot.Device.Max44009
             _i2cDevice = i2cDevice;
 
             // Details in the Datasheet P8
-            Span<byte> writeBuff = stackalloc byte[2] { (byte)Register.MAX_CONFIG, (byte)(0b_1100_0000 | (byte)integrationTime) };
+            Span<byte> writeBuff = stackalloc byte[2]
+            {
+                (byte)Register.MAX_CONFIG, (byte)(0b_1100_0000 | (byte)integrationTime)
+            };
 
             _i2cDevice.Write(writeBuff);
         }

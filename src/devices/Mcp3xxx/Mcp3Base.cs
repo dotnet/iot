@@ -96,8 +96,10 @@ namespace Iot.Device.Adc
         {
             ///<summary>The value is measured as the voltage on a single pin</summary>
             SingleEnded = 0,
+
             ///<summary>The value is the difference in voltage between two pins with the first pin being the positive one</summary>
             Differential = 1,
+
             ///<summary>The value is the difference in voltage between two pins with the second pin being the positive one</summary>
             InvertedDifferential = 2
         }
@@ -111,7 +113,9 @@ namespace Iot.Device.Adc
         public Mcp3Base(SpiDevice spiDevice)
         {
             if (spiDevice == null)
+            {
                 throw new ArgumentNullException(nameof(spiDevice));
+            }
 
             _spiDevice = spiDevice;
         }
@@ -137,7 +141,7 @@ namespace Iot.Device.Adc
             int retval = 0;
             int bufferSize;
 
-            // shift the request left to make space in the response for the number of bits in the 
+            // shift the request left to make space in the response for the number of bits in the
             // response plus the conversion delay and plus 1 for a null bit.
             adcRequest <<= (adcResolutionBits + delayBits + 1);
 
@@ -151,7 +155,7 @@ namespace Iot.Device.Adc
             for (int i = 0; i < bufferSize; i++)
             {
                 requestBuffer[i] = (byte)(adcRequest >> (bufferSize - i - 1) * 8);
-            }   
+            }
 
             _spiDevice.TransferFullDuplex(requestBuffer, responseBuffer);
 

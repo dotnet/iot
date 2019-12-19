@@ -10,14 +10,15 @@ using Iot.Device.Hcsr501;
 
 namespace Hcsr501.Samples
 {
-    class Program
+    internal class Program
     {
         // HC-SR501 OUT Pin
-        static int hcsr501Pin = 17;
-        // LED Pin
-        static int ledPin = 27;
+        private static int hcsr501Pin = 17;
 
-        static void Main(string[] args)
+        // LED Pin
+        private static int ledPin = 27;
+
+        public static void Main(string[] args)
         {
             // get the GPIO controller
             GpioController ledController = new GpioController(PinNumberingScheme.Logical);
@@ -25,7 +26,8 @@ namespace Hcsr501.Samples
             ledController.OpenPin(ledPin, PinMode.Output);
 
             // initialize PIR sensor
-            using(Iot.Device.Hcsr501.Hcsr501 sensor = new Iot.Device.Hcsr501.Hcsr501(hcsr501Pin, PinNumberingScheme.Logical))
+            using (Iot.Device.Hcsr501.Hcsr501 sensor =
+                new Iot.Device.Hcsr501.Hcsr501(hcsr501Pin, PinNumberingScheme.Logical))
             {
                 // loop
                 while (true)

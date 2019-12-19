@@ -28,7 +28,9 @@ namespace Iot.Device.Lsm9Ds1
             AngularRateScale angularRateScale = AngularRateScale.Scale0245Dps)
         {
             if (i2cDevice == null)
+            {
                 throw new ArgumentNullException(nameof(i2cDevice));
+            }
 
             _i2c = i2cDevice;
             _accelerometerScale = accelerationScale;

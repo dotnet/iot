@@ -51,14 +51,17 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
             /// Length = 1 x TQ.
             /// </summary>
             Tqx1 = 0,
+
             /// <summary>
             /// Length = 2 x TQ.
             /// </summary>
             Tqx2 = 1,
+
             /// <summary>
             /// Length = 3 x TQ.
             /// </summary>
             Tqx3 = 2,
+
             /// <summary>
             /// Length = 4 x TQ.
             /// </summary>

@@ -10,10 +10,10 @@ namespace Iot.Device.Mcp3428
     /// Possible gain values of the ADC
     /// </summary>
     public enum AdcGain : byte
-    { 
+    {
         /// <summary>1x gain</summary>
         X1 = 0,
-        
+
         /// <summary>2x gain</summary>
         X2 = 1,
 
