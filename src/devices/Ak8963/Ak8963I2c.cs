@@ -18,7 +18,7 @@ namespace Iot.Device.Magnetometer
         /// <param name="i2cDevice">An I2C device</param>
         /// <param name="reg">The register to read</param>
         /// <returns>The register value</returns>
-        public override byte ReadByte(I2cDevice i2cDevice, byte reg)
+          public override byte ReadByte(I2cDevice i2cDevice, byte reg)
         {
             i2cDevice.WriteByte(reg);
             return i2cDevice.ReadByte();
