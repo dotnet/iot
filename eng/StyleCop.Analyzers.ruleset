@@ -111,7 +111,7 @@
     <Rule Id="SA1407" Action="None" /> <!-- Arithmetic expressions must declare precedence -->
     <Rule Id="SA1408" Action="Error" />
     <Rule Id="SA1410" Action="Error" />
-    <Rule Id="SA1411" Action="None" /> 
+    <Rule Id="SA1411" Action="None" /> <!-- Attribute Constructor Must Not Use Unnecessary Parenthesis -->
     <Rule Id="SA1412" Action="None" /> <!-- Store files as UTF-8 -->
     <Rule Id="SA1413" Action="None" /> <!-- Use trailing comma in multi-line initializers -->
     <Rule Id="SA1500" Action="Error" /> 
@@ -129,8 +129,8 @@
     <Rule Id="SA1512" Action="Error" />
     <Rule Id="SA1513" Action="Error" />
     <Rule Id="SA1514" Action="Error" /> 
-    <Rule Id="SA1515" Action="None" />
-    <Rule Id="SA1516" Action="None" />
+    <Rule Id="SA1515" Action="None" /> <!-- Single-line comment should be preceded by blank line -->
+    <Rule Id="SA1516" Action="None" /> <!-- Elements should be separated by blank line -->
     <Rule Id="SA1517" Action="Error" />
     <Rule Id="SA1518" Action="Error" />
     <Rule Id="SA1519" Action="Error" />
@@ -149,7 +149,7 @@
     <Rule Id="SA1612" Action="Error" />
     <Rule Id="SA1613" Action="Error" />
     <Rule Id="SA1614" Action="Error" />
-    <Rule Id="SA1615" Action="None" />
+    <Rule Id="SA1615" Action="None" /> <!-- Element return value should be documented -->
     <Rule Id="SA1616" Action="None" /> <!-- Element return value documentation should have text -->
     <Rule Id="SA1617" Action="Error" />
     <Rule Id="SA1618" Action="None" /> <!-- The documentation for type parameter is missing -->

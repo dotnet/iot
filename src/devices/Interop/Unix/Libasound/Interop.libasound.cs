@@ -2,6 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// Disable these StyleCop rules for this file, as we are using native names here.
+#pragma warning disable SA1300 // Element should begin with upper-case letter
+#pragma warning disable SA1307 // Field should begin with upper-case letter
+
 using System;
 using System.Runtime.InteropServices;
 
@@ -62,17 +66,17 @@ internal partial class Interop
     internal static extern int snd_pcm_hw_params_set_channels(IntPtr pcm, IntPtr @params, uint val);
 
     [DllImport(AlsaLibrary)]
-    internal unsafe static extern int snd_pcm_hw_params_set_rate_near(IntPtr pcm, IntPtr @params, uint* val, int* dir);
+    internal static unsafe extern int snd_pcm_hw_params_set_rate_near(IntPtr pcm, IntPtr @params, uint* val, int* dir);
 
     [DllImport(AlsaLibrary)]
     internal static extern int snd_pcm_hw_params(IntPtr pcm, IntPtr @params);
 
     // <param name="frames">snd_pcm_uframes_t*</param>
     [DllImport(AlsaLibrary)]
-    internal unsafe static extern int snd_pcm_hw_params_get_period_size(IntPtr @params, ulong* frames, int* dir);
+    internal static unsafe extern int snd_pcm_hw_params_get_period_size(IntPtr @params, ulong* frames, int* dir);
 
     [DllImport(AlsaLibrary)]
-    internal unsafe static extern int snd_pcm_hw_params_set_period_size_near(IntPtr pcm, IntPtr @params, ulong* frames, int* dir);
+    internal static unsafe extern int snd_pcm_hw_params_set_period_size_near(IntPtr pcm, IntPtr @params, ulong* frames, int* dir);
 
     // <param name="mixer">snd_mixer_t**</param>
     [DllImport(AlsaLibrary)]
@@ -106,7 +110,7 @@ internal partial class Interop
 
     // <param name="mixer">snd_mixer_elem_t*</param>
     [DllImport(AlsaLibrary)]
-    internal unsafe static extern int snd_mixer_selem_get_playback_volume(IntPtr elem, snd_mixer_selem_channel_id channel, long* value);
+    internal static unsafe extern int snd_mixer_selem_get_playback_volume(IntPtr elem, snd_mixer_selem_channel_id channel, long* value);
 
     [DllImport(AlsaLibrary)]
     internal static extern int snd_mixer_selem_set_playback_volume(IntPtr elem, snd_mixer_selem_channel_id channel, long value);
@@ -118,13 +122,13 @@ internal partial class Interop
     internal static extern int snd_mixer_selem_set_playback_switch_all(IntPtr elem, int value);
 
     [DllImport(AlsaLibrary)]
-    internal unsafe static extern int snd_mixer_selem_get_playback_volume_range(IntPtr elem, long* min, long* max);
+    internal static unsafe extern int snd_mixer_selem_get_playback_volume_range(IntPtr elem, long* min, long* max);
 
     [DllImport(AlsaLibrary)]
     internal static extern int snd_mixer_selem_set_playback_volume_range(IntPtr elem, long min, long max);
 
     [DllImport(AlsaLibrary)]
-    internal unsafe static extern int snd_mixer_selem_get_capture_volume(IntPtr elem, snd_mixer_selem_channel_id channel, long* value);
+    internal static unsafe extern int snd_mixer_selem_get_capture_volume(IntPtr elem, snd_mixer_selem_channel_id channel, long* value);
 
     [DllImport(AlsaLibrary)]
     internal static extern int snd_mixer_selem_set_capture_volume(IntPtr elem, snd_mixer_selem_channel_id channel, long value);
@@ -136,7 +140,7 @@ internal partial class Interop
     internal static extern int snd_mixer_selem_set_capture_switch_all(IntPtr elem, int value);
 
     [DllImport(AlsaLibrary)]
-    internal unsafe static extern int snd_mixer_selem_get_capture_volume_range(IntPtr elem, long* min, long* max);
+    internal static unsafe extern int snd_mixer_selem_get_capture_volume_range(IntPtr elem, long* min, long* max);
 
     [DllImport(AlsaLibrary)]
     internal static extern int snd_mixer_selem_set_capture_volume_range(IntPtr elem, long min, long max);
