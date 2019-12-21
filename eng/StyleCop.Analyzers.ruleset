@@ -7,7 +7,7 @@
     <Rule Id="SA1001" Action="Error" />
     <Rule Id="SA1002" Action="Error" />
     <Rule Id="SA1003" Action="Error" />
-    <Rule Id="SA1004" Action="None" /> <!-- Documentation line should begin with a space -->
+    <Rule Id="SA1004" Action="Error" /> <!-- Documentation line should begin with a space -->
     <Rule Id="SA1005" Action="Error" />
     <Rule Id="SA1006" Action="Error" />
     <Rule Id="SA1007" Action="Error" />

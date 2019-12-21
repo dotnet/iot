@@ -94,13 +94,13 @@ namespace Iot.Device.Adc
         /// </summary>
         protected enum InputType
         {
-            ///<summary>The value is measured as the voltage on a single pin</summary>
+            /// <summary>The value is measured as the voltage on a single pin</summary>
             SingleEnded = 0,
 
-            ///<summary>The value is the difference in voltage between two pins with the first pin being the positive one</summary>
+            /// <summary>The value is the difference in voltage between two pins with the first pin being the positive one</summary>
             Differential = 1,
 
-            ///<summary>The value is the difference in voltage between two pins with the second pin being the positive one</summary>
+            /// <summary>The value is the difference in voltage between two pins with the second pin being the positive one</summary>
             InvertedDifferential = 2
         }
 
