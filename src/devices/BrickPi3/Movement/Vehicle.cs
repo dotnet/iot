@@ -30,7 +30,7 @@ namespace Iot.Device.BrickPi3.Movement
         /// <param name="right">Motor port for right motor</param>
         public Vehicle(Brick brick, BrickPortMotor left, BrickPortMotor right)
         {
-            this._brick = brick;
+            _brick = brick;
             PortLeft = left;
             PortRight = right;
         }

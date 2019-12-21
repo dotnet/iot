@@ -172,9 +172,9 @@ namespace Iot.Device.BrickPi3.Sensors
 
             internal set
             {
-                if (value != this._value)
+                if (value != _value)
                 {
-                    this._value = value;
+                    _value = value;
                     OnPropertyChanged(nameof(Value));
                 }
             }

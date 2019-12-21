@@ -177,7 +177,7 @@
     <Rule Id="SA1649" Action="None" /> <!-- Maybe todo: File name should match first type name -->
     <Rule Id="SA1651" Action="Error" />
     <Rule Id="SA1652" Action="Error" />
-    <Rule Id="SX1101" Action="None" /> <!-- Maybe todo: Do not prefix local members with this -->
+    <Rule Id="SX1101" Action="Error" /> <!-- Do not prefix local members with this -->
 	<Rule Id="SX1309" Action="Error" /> <!-- Members should be prefixed with _ -->
   </Rules>
 </RuleSet>
