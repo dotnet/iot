@@ -52,7 +52,7 @@ namespace Tm1637Sample
             Thread.Sleep(3000);
             for (int i = 0; i < 6; i++)
             {
-                rawData[i] = (Character)Enum.Parse(typeof(Character), $"Char{i}");
+                rawData[i] = (Character)Enum.Parse(typeof(Character), $"Digit{i}");
             }
 
             tm1637.Display(rawData);
@@ -72,10 +72,10 @@ namespace Tm1637Sample
             while (!Console.KeyAvailable)
             {
                 var dt = DateTime.Now;
-                toDisplay[0] = (Character)Enum.Parse(typeof(Character), $"Char{dt.Minute / 10}");
-                toDisplay[1] = (Character)Enum.Parse(typeof(Character), $"Char{dt.Minute % 10}") | Character.Dot;
-                toDisplay[2] = (Character)Enum.Parse(typeof(Character), $"Char{dt.Second / 10}");
-                toDisplay[3] = (Character)Enum.Parse(typeof(Character), $"Char{dt.Second % 10}");
+                toDisplay[0] = (Character)Enum.Parse(typeof(Character), $"Digit{dt.Minute / 10}");
+                toDisplay[1] = (Character)Enum.Parse(typeof(Character), $"Digit{dt.Minute % 10}") | Character.Dot;
+                toDisplay[2] = (Character)Enum.Parse(typeof(Character), $"Digit{dt.Second / 10}");
+                toDisplay[3] = (Character)Enum.Parse(typeof(Character), $"Digit{dt.Second % 10}");
                 tm1637.Brightness = (byte)(bright++ % 8);
                 tm1637.Display(toDisplay);
                 Thread.Sleep(100);
