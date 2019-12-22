@@ -363,7 +363,7 @@ namespace Iot.Device.Mcp23xxx
         }
 
         /// <summary>
-        ///Reads the value of a set of pins
+        /// Reads the value of a set of pins
         /// </summary>
         protected void Read(Span<PinValuePair> pinValuePairs)
         {

@@ -7,7 +7,7 @@
     <Rule Id="SA1001" Action="Error" />
     <Rule Id="SA1002" Action="Error" />
     <Rule Id="SA1003" Action="Error" />
-    <Rule Id="SA1004" Action="None" /> <!-- Documentation line should begin with a space -->
+    <Rule Id="SA1004" Action="Error" /> <!-- Documentation line should begin with a space -->
     <Rule Id="SA1005" Action="Error" />
     <Rule Id="SA1006" Action="Error" />
     <Rule Id="SA1007" Action="Error" />
@@ -86,7 +86,7 @@
     <Rule Id="SA1213" Action="Error" />
     <Rule Id="SA1214" Action="Error" />
     <Rule Id="SA1216" Action="Error" />
-    <Rule Id="SA1217" Action="None" /> <!-- Using statements should be ordered by alphabet -->
+    <Rule Id="SA1217" Action="Error" /> <!-- Using statements should be ordered by alphabet -->
     <Rule Id="SA1300" Action="Error" />
     <Rule Id="SA1302" Action="Error" />
     <Rule Id="SA1303" Action="Error" />
@@ -111,8 +111,8 @@
     <Rule Id="SA1407" Action="None" /> <!-- Arithmetic expressions must declare precedence -->
     <Rule Id="SA1408" Action="Error" />
     <Rule Id="SA1410" Action="Error" />
-    <Rule Id="SA1411" Action="None" /> <!-- Attribute Constructor Must Not Use Unnecessary Parenthesis -->
-    <Rule Id="SA1412" Action="None" /> <!-- Store files as UTF-8 -->
+    <Rule Id="SA1411" Action="Error" /> <!-- Attribute Constructor Must Not Use Unnecessary Parenthesis -->
+    <Rule Id="SA1412" Action="Error" /> <!-- Store files as UTF-8 -->
     <Rule Id="SA1413" Action="None" /> <!-- Use trailing comma in multi-line initializers -->
     <Rule Id="SA1500" Action="Error" /> 
     <Rule Id="SA1501" Action="Error" />
@@ -177,7 +177,7 @@
     <Rule Id="SA1649" Action="None" /> <!-- Maybe todo: File name should match first type name -->
     <Rule Id="SA1651" Action="Error" />
     <Rule Id="SA1652" Action="Error" />
-    <Rule Id="SX1101" Action="None" /> <!-- Maybe todo: Do not prefix local members with this -->
+    <Rule Id="SX1101" Action="Error" /> <!-- Do not prefix local members with this -->
 	<Rule Id="SX1309" Action="Error" /> <!-- Members should be prefixed with _ -->
   </Rules>
 </RuleSet>
