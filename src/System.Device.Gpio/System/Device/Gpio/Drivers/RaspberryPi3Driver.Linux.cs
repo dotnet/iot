@@ -95,7 +95,6 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
-            //// _sysFSDriver.SetPinMode(pinNumber, PinMode.Input);
 
             _sysFSDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
         }
@@ -181,7 +180,6 @@ namespace System.Device.Gpio.Drivers
             InitializeSysFS();
 
             _sysFSDriver.OpenPin(pinNumber);
-            //// _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
 
             _sysFSDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
         }

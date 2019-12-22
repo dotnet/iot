@@ -57,7 +57,6 @@ namespace System.Device.Gpio.Tests
             const int pulseLength = 1;
             const int waitTime = 20;
 
-            // int maxWaitSpins = 5000;
             int numInterrupts = 0;
             int numRisingEdges = 0;
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
