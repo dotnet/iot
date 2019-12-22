@@ -20,7 +20,7 @@ namespace Iot.Device.Tm1637
         /// <summary>
         /// The number of segments that the TM1637 can handle
         /// </summary>
-        public byte MaxSegments => 6;
+        public static byte MaxSegments => 6;
 
         // According to the doc, the clock pulse width minimum is 400 ns
         // And waiting time between clk up and down is 1 µs
