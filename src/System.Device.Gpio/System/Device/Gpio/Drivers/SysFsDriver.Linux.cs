@@ -598,6 +598,7 @@ namespace System.Device.Gpio.Drivers
 
         private void DetectEvents()
         {
+            Interop.SetCurrentThreadHighPriority();
             while (_pinsToDetectEventsCount > 0)
             {
                 try
