@@ -35,8 +35,7 @@ namespace Iot.Device.Ads1115
         /// <summary>
         /// ADS1115 Input Multiplexer.
         /// This selects the channel(s) for the next read operation, <see cref="Iot.Device.Ads1115.InputMultiplexer"/>.
-        /// Note that the input to the converter will be changed and a new value requested. The chip does not store values
-        /// from unselected channels.
+        /// Setting this property will wait until a value is available from the newly selected input channel.
         /// </summary>
         public InputMultiplexer InputMultiplexer
         {
@@ -50,6 +49,9 @@ namespace Iot.Device.Ads1115
 
         /// <summary>
         /// ADS1115 Programmable Gain Amplifier
+        /// This sets the maximum value that can be measured. Regardless of this setting, the input value on any pin must not exceed VDD + 0.3V,
+        /// so high ranges are only usable with a VDD of more than 5V.
+        /// Setting this property will wait until a new value is available.
         /// </summary>
         public MeasuringRange MeasuringRange
         {
@@ -62,7 +64,10 @@ namespace Iot.Device.Ads1115
         }
 
         /// <summary>
-        /// ADS1115 Data Rate
+        /// ADS1115 Data Rate.
+        /// The number of conversions per second that will take place. One conversion will take "1/rate" seconds to become ready. If in
+        /// power-down mode, only one conversion will happen automatically, then another request is required.
+        /// Setting this property will wait until a new value is available.
         /// </summary>
         public DataRate DataRate
         {
@@ -416,7 +421,7 @@ namespace Iot.Device.Ads1115
         /// Wait until the current conversion finishes.
         /// </summary>
         /// <exception cref="TimeoutException">A timeout occured waiting for the ADC to finish the conversion (in powerdown-mode only)</exception>
-        public void WaitWhileBusy()
+        private void WaitWhileBusy()
         {
             if (DeviceMode == DeviceMode.PowerDown)
             {
