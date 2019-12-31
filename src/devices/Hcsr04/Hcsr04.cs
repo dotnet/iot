@@ -29,14 +29,14 @@ namespace Iot.Device.Hcsr04
         /// <summary>
         /// Creates a new instance of the HC-SCR04 sonar.
         /// </summary>
+        /// <param name="gpioController">GPIO controller related with the pins</param>
         /// <param name="triggerPin">Trigger pulse input.</param>
         /// <param name="echoPin">Trigger pulse output.</param>
-        /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
-        public Hcsr04(int triggerPin, int echoPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+        public Hcsr04(GpioController gpioController, int triggerPin, int echoPin)
         {
             _echo = echoPin;
             _trigger = triggerPin;
-            _controller = new GpioController(pinNumberingScheme);
+            _controller = gpioController;
 
             _controller.OpenPin(_echo, PinMode.Input);
             _controller.OpenPin(_trigger, PinMode.Output);
@@ -50,14 +50,27 @@ namespace Iot.Device.Hcsr04
         }
 
         /// <summary>
+        /// Creates a new instance of the HC-SCR04 sonar.
+        /// </summary>
+        /// <param name="triggerPin">Trigger pulse input.</param>
+        /// <param name="echoPin">Trigger pulse output.</param>
+        /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
+        public Hcsr04(int triggerPin, int echoPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+            : this(new GpioController(pinNumberingScheme), triggerPin, echoPin)
+        {
+        }
+
+        /// <summary>
         /// Gets the current distance in cm.
         /// </summary>
         private double GetDistance()
         {
-            // Retry at most 3 times.
+            // Retry at most 10 times.
             // Try method will fail when context switch occurs in the wrong moment
-            // or something else (i.e. JIT, extra workload) causes extra delay
-            for (int i = 0; i < 3; i++)
+            // or something else (i.e. JIT, extra workload) causes extra delay.
+            // Other situation is when distance is changing rapidly (i.e. moving hand in front of the sensor)
+            // which is causing invalid readings.
+            for (int i = 0; i < 10; i++)
             {
                 if (TryGetDistance(out double result))
                 {
@@ -92,7 +105,7 @@ namespace Iot.Device.Hcsr04
             // Wait until the echo pin is HIGH (that marks the beginning of the pulse length we want to measure)
             while (_controller.Read(_echo) == PinValue.Low)
             {
-                if (Environment.TickCount > hangTicks)
+                if (Environment.TickCount - hangTicks > 0)
                 {
                     result = default;
                     return false;
@@ -106,7 +119,7 @@ namespace Iot.Device.Hcsr04
             // Wait until the pin is LOW again, (that marks the end of the pulse we are measuring)
             while (_controller.Read(_echo) == PinValue.High)
             {
-                if (Environment.TickCount > hangTicks)
+                if (Environment.TickCount - hangTicks > 0)
                 {
                     result = default;
                     return false;
@@ -119,6 +132,15 @@ namespace Iot.Device.Hcsr04
 
             // distance = (time / 2) × velocity of sound (34300 cm/s)
             result = elapsed.TotalMilliseconds / 2.0 * 34.3;
+
+            if (result > 400)
+            {
+                // result is more than sensor supports
+                // something went wrong
+                result = default;
+                return false;
+            }
+
             return true;
         }
 
