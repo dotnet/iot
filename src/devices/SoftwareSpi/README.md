@@ -1,4 +1,4 @@
-﻿# Software implementation of SPI
+﻿# Software SPI
 
 Usage is very simple:
 

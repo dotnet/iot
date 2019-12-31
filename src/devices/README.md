@@ -14,6 +14,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [ADS1115 - Analog to Digital Converter](Ads1115/README.md)
+* [INA219 - Bidirectional Current/Power Monitor](Ina219/README.md)
 * [Mcp3428 - Analog to Digital Converter (I2C)](Mcp3428/README.md)
 * [MCP3xxx family of Analog to Digital Converters](Mcp3xxx/README.md)
 
@@ -84,6 +85,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [28BYJ-48 Stepper Motor 5V 4-Phase 5-Wire & ULN2003 Driver Board](Uln2003/README.md)
 * [DC Motor Controller](DCMotor/README.md)
+* [MotorHat](MotorHat/README.md)
 * [Servo Motor](ServoMotor/README.md)
 
 ### Inertial Measurement Units
@@ -141,6 +143,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [Max7219 (LED Matrix driver)](Max7219/README.md)
 * [RGBLedMatrix - RGB LED Matrix](RGBLedMatrix/README.md)
+* [Segment display driver (HT16K33)](Display/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [Solomon Systech Ssd1306 OLED display](Ssd13xx/README.md)
 * [Solomon Systech Ssd1351 - CMOS OLED](Ssd1351/README.md)
@@ -174,12 +177,6 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Radio Receiver](RadioReceiver/README.md)
 * [Radio Transmitter](RadioTransmitter/README.md)
 
-### PWM libraries/modules
-
-* [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
-* [Pca9685 - I2C PWM Driver](Pca9685/README.md)
-* [Software PWM](SoftPwm/README.md)
-
 ### Joysticks
 
 * [Sense HAT](SenseHat/README.md)
@@ -192,11 +189,8 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [On-board LED driver](BoardLed/README.md)
+* [Segment display driver (HT16K33)](Display/README.md)
 * [Ws28xx LED drivers](Ws28xx/README.md)
-
-### SPI libraries/modules
-
-* [Software implementation of SPI](SoftwareSpi/README.md)
 
 ### RFID/NFC modules
 
@@ -206,6 +200,20 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Media libraries
 
 * [Still image recording library](Media/README.md)
+
+### USB devices
+
+* [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
+
+### Protocols providers/libraries
+
+* [1-wire](OneWire/README.md)
+* [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
+* [MotorHat](MotorHat/README.md)
+* [Pca9685 - I2C PWM Driver](Pca9685/README.md)
+* [Software PWM](SoftPwm/README.md)
+* [Software SPI](SoftwareSpi/README.md)
+* [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
 
 </categorizedDevices>
 
