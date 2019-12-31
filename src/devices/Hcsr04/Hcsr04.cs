@@ -42,6 +42,11 @@ namespace Iot.Device.Hcsr04
             _controller.OpenPin(_trigger, PinMode.Output);
 
             _controller.Write(_trigger, PinValue.Low);
+
+            // Call Read once to make sure method is JITted
+            // Too long JITting is causing that initial echo pulse is frequently missed on the first run
+            // which would cause unnecessary retry
+            _controller.Read(_echo);
         }
 
         /// <summary>
@@ -49,6 +54,27 @@ namespace Iot.Device.Hcsr04
         /// </summary>
         private double GetDistance()
         {
+            // Retry at most 3 times.
+            // Try method will fail when context switch occurs in the wrong moment
+            // or something else (i.e. JIT, extra workload) causes extra delay
+            for (int i = 0; i < 3; i++)
+            {
+                if (TryGetDistance(out double result))
+                {
+                    return result;
+                }
+            }
+
+            throw new InvalidOperationException("Could not get reading from the sensor");
+        }
+
+        private bool TryGetDistance(out double result)
+        {
+            // Time when we give up on looping and declare that reading failed
+            // 100ms was chosen because max measurement time for this sensor is around 24ms for 400cm
+            // additionally we need to account 60ms max delay.
+            // Rounding this up to a 100 in case of a context switch.
+            long hangTicks = Environment.TickCount + 100;
             _timer.Reset();
 
             // Measurements should be 60ms apart, in order to prevent trigger signal mixing with echo signal
@@ -66,6 +92,11 @@ namespace Iot.Device.Hcsr04
             // Wait until the echo pin is HIGH (that marks the beginning of the pulse length we want to measure)
             while (_controller.Read(_echo) == PinValue.Low)
             {
+                if (Environment.TickCount > hangTicks)
+                {
+                    result = default;
+                    return false;
+                }
             }
 
             _lastMeasurment = Environment.TickCount;
@@ -75,6 +106,11 @@ namespace Iot.Device.Hcsr04
             // Wait until the pin is LOW again, (that marks the end of the pulse we are measuring)
             while (_controller.Read(_echo) == PinValue.High)
             {
+                if (Environment.TickCount > hangTicks)
+                {
+                    result = default;
+                    return false;
+                }
             }
 
             _timer.Stop();
@@ -82,7 +118,8 @@ namespace Iot.Device.Hcsr04
             TimeSpan elapsed = _timer.Elapsed;
 
             // distance = (time / 2) × velocity of sound (34300 cm/s)
-            return elapsed.TotalMilliseconds / 2.0 * 34.3;
+            result = elapsed.TotalMilliseconds / 2.0 * 34.3;
+            return true;
         }
 
         /// <inheritdoc/>
