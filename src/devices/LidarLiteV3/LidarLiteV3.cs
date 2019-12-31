@@ -55,7 +55,8 @@ namespace Iot.Device.DistanceSensor
             if (_powerEnablePin != -1)
             {
                 _gpioController.Write(_powerEnablePin, PinValue.Low);
-            } else
+            }
+            else
             {
                 throw new InvalidOperationException("Cannot power off without providing GPIO controller and power enable pin.");
             }
@@ -125,12 +126,12 @@ namespace Iot.Device.DistanceSensor
         /// <param name="measurementRepetition">Repetition mode, either Off, Repeat, or RepeatInfinitely.</param>
         /// <param name="count">If Repeat, the number of times to repeat the measurement.</param>
         /// <param name="delay">The delay between each measurements. Note the unit does not directly to hz, a value of 20 maps to about 100 hz.</param>
-        public void SetMeasurementRepetitionMode(MeasurementRepetition measurementRepetition, int? count = null, int? delay = null)
+        public void SetMeasurementRepetitionMode(MeasurementRepetition measurementRepetition, int count = -1, int delay = -1)
         {
-            if (count.HasValue && (count < 2 || count > 254))
+            if (count < 2 || count > 254)
             {
                 throw new ArgumentOutOfRangeException("Count must be between 2 and 254");
-            };
+            }
 
             switch (measurementRepetition)
             {
@@ -145,15 +146,16 @@ namespace Iot.Device.DistanceSensor
                     break;
             }
 
-            if (delay != null)
+            if (delay != -1)
             {
-                WriteRegister(Register.MEASURE_DELAY, (byte)delay.Value);
+                WriteRegister(Register.MEASURE_DELAY, (byte)delay);
 
                 // Set mode to use custom delay.
                 var currentAcqSettings = AcquistionSettings;
                 currentAcqSettings |= AcquistionSettings.UseDefaultDelay;
                 AcquistionSettings = currentAcqSettings;
-            } else
+            }
+            else
             {
                 // Set mode to use default delay.
                 var currentAcqSettings = AcquistionSettings;
@@ -168,6 +170,9 @@ namespace Iot.Device.DistanceSensor
         /// <summary>
         /// Set a new I2C address.
         /// </summary>
+        /// <remarks>
+        /// Note, if the device is powered off or reset, the IC2 address will reset to the default address.
+        /// </remarks>
         /// <param name="address">new address, valid values are 7-bit values with 0 in the LSB.</param>
         public void SetI2CAddress(byte address)
         {
@@ -198,7 +203,8 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         public int LastDistance 
         {
-            get {
+            get
+            {
                 Span<byte> rawData = stackalloc byte[2] { 0, 0 };
                 ReadBytes(Register.FULL_DELAY, rawData);
                 return BinaryPrimitives.ReadUInt16BigEndian(rawData);
@@ -210,9 +216,10 @@ namespace Iot.Device.DistanceSensor
         /// in a signed (2's complement) 8-bit number in cm.
         /// Positive is away from the device.
         /// </summary>
-        public int Velocity 
+        public int DifferenceBetweenLastTwoDistances 
         {
-            get {
+            get 
+            {
                 Span<byte> rawData = stackalloc byte[1] { 0 };
                 ReadBytes(Register.VELOCITY, rawData);
                 return (int)(sbyte)rawData[0];
@@ -224,12 +231,14 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         public AcquistionSettings AcquistionSettings
         {
-            get {
+            get 
+            {
                 Span<byte> rawData = stackalloc byte[1] { 0 };
                 ReadBytes(Register.ACQ_CONFIG_REG, rawData);
                 return (AcquistionSettings)rawData[0];
             }
-            set {
+            set 
+            {
                 WriteRegister(Register.ACQ_CONFIG_REG, (byte)value);
             }
         }
@@ -244,12 +253,14 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         private int MaximumAcquisitionCount 
         {
-            get {
+            get 
+            {
                 Span<byte> rawData = stackalloc byte[1] { 0 };
                 ReadBytes(Register.SIG_COUNT_VAL, rawData);
                 return rawData[0];
             }
-            set {
+            set 
+            {
                 WriteRegister(Register.SIG_COUNT_VAL, (byte)value);
             }
         }
@@ -263,12 +274,14 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         public int AlgorithmBypassThreshold 
         {
-            get {
+            get 
+            {
                 Span<byte> rawData = stackalloc byte[1] { 0 };
                 ReadBytes(Register.THRESHOLD_BYPASS, rawData);
                 return rawData[0];
             }
-            set {
+            set 
+            {
                 WriteRegister(Register.THRESHOLD_BYPASS, (byte)value);
             }
         }
@@ -278,12 +291,14 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         public PowerMode PowerMode 
         {
-            get {
+            get 
+            {
                 Span<byte> rawData = stackalloc byte[1] { 0 };
                 ReadBytes(Register.POWER_CONTROL, rawData);
                 return (PowerMode)rawData[0];
             }
-            set {
+            set 
+            {
                 // Bit 0 disables receiver circuit
                 WriteRegister(Register.POWER_CONTROL, (byte)value);
             }
@@ -294,7 +309,8 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         public SystemStatus Status 
         {
-            get {
+            get 
+            {
                 Span<byte> rawData = stackalloc byte[1] { 0 };
                 ReadBytes(Register.STATUS, rawData);
                 return (SystemStatus)rawData[0];
