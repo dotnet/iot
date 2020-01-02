@@ -1,4 +1,4 @@
-# Display
+# Segment display driver (HT16K33)
 
 This project contains multipurpose LED display drivers and binding implementations for concrete display configurations.
 

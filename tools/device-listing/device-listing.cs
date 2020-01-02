@@ -41,13 +41,13 @@ namespace Iot.Tools.DeviceListing
             "proximity",
             "touch",
             "wireless",
-            "pwm",
             "joystick",
             "color",
             "led",
-            "spi",
             "nfc",
             "media",
+            "usb",
+            "protocol"
         };
 
         static Dictionary<string, string> s_categoriesDescriptions = new Dictionary<string, string>()
@@ -89,11 +89,23 @@ namespace Iot.Tools.DeviceListing
             { "led", "LED drivers" },
             { "nfc", "RFID/NFC modules" },
             { "media", "Media libraries" },
+            { "usb", "USB devices" },
+            // Bucket for stuff we want mentioned but there is no clear category
+            // In other words: anything allowing a way to create PWM channel, SPI/I2C/... device
+            { "protocol", "Protocols providers/libraries" },
             { "characterlcd", null },
             { "brickpi3", null },
             { "buzzer", null },
             { "gopigo3", null },
             { "grovepi", null },
+            { "i2c", null },
+        };
+
+        static HashSet<string> s_ignoredDeviceDirectories = new HashSet<string>()
+        {
+            "Common",
+            "Units",
+            "Interop",
         };
 
         static void Main(string[] args)
@@ -119,6 +131,7 @@ namespace Iot.Tools.DeviceListing
 
                 string readme = Path.Combine(directory, "README.md");
                 string categories = Path.Combine(directory, "category.txt");
+
                 if (File.Exists(readme))
                 {
                     var device = new DeviceInfo(readme, categories);
@@ -227,7 +240,7 @@ namespace Iot.Tools.DeviceListing
         private static bool IsIgnoredDevice(string path)
         {
             string dirName = new DirectoryInfo(path).Name;
-            return dirName == "Common" || dirName == "Units" || dirName == "Interop";
+            return s_ignoredDeviceDirectories.Contains(dirName);
         }
 
         private static void ReplacePlaceholder(string filePath, string placeholderName, string newContent)
