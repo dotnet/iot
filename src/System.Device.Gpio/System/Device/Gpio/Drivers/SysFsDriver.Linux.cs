@@ -594,7 +594,6 @@ namespace System.Device.Gpio.Drivers
                 {
                     IsBackground = true
                 };
-                _eventDetectionThread.Priority = ThreadPriority.Highest;
                 _eventDetectionThread.Start();
             }
         }
