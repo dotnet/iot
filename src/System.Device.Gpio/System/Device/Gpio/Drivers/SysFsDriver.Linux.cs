@@ -448,25 +448,6 @@ namespace System.Device.Gpio.Drivers
                 if (waitResult > 0)
                 {
                     pinNumber = events.data.pinNumber;
-
-                    // valueFileDescriptor will be -1 when using the callback eventing. For WaitForEvent, the value will be set.
-                    /* if (valueFileDescriptor == -1)
-                    {
-                        valueFileDescriptor = _devicePins[pinNumber].FileDescriptor;
-                    }
-
-                    int lseekResult = Interop.lseek(valueFileDescriptor, 0, SeekFlags.SEEK_SET);
-                    if (lseekResult == -1)
-                    {
-                        throw new IOException("Error while trying to initialize pin interrupts.");
-                    }
-
-                    int readResult = Interop.read(valueFileDescriptor, bufPtr, 1);
-                    if (readResult != 1)
-                    {
-                        throw new IOException("Error while trying to initialize pin interrupts.");
-                    }*/
-
                     return true;
                 }
             }
