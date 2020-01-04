@@ -76,7 +76,7 @@ namespace System.Device.Gpio.Tests
 
         public static PwmChannel CreatePwmChannel(int frequency = 10000, bool stopped = false, double dutyCycle = 0.5)
         {
-            var pwm = PwmChannel.Create(0, 0, frequency, dutyCycle);
+            var pwm = CreatePwmChannelCore(frequency, dutyCycle);
 
             if (!stopped)
             {
