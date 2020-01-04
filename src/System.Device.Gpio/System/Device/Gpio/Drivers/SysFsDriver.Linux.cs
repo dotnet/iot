@@ -393,7 +393,7 @@ namespace System.Device.Gpio.Drivers
                 pollFileDescriptor = Interop.epoll_create(1);
                 if (pollFileDescriptor < 0)
                 {
-                    throw new IOException("Error while trying to initialize pin interrupts.");
+                    throw new IOException("Error while trying to initialize pin interrupts (epoll_create failed).");
                 }
             }
 
@@ -405,7 +405,7 @@ namespace System.Device.Gpio.Drivers
                 valueFileDescriptor = Interop.open(valuePath, FileOpenFlags.O_RDONLY | FileOpenFlags.O_NONBLOCK);
                 if (valueFileDescriptor < 0)
                 {
-                    throw new IOException("Error while trying to initialize pin interrupts.");
+                    throw new IOException($"Error while trying to open pin value file {valuePath}.");
                 }
 
                 closePinValueFileDescriptor = true;
@@ -423,7 +423,7 @@ namespace System.Device.Gpio.Drivers
             int result = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, valueFileDescriptor, ref epollEvent);
             if (result == -1)
             {
-                throw new IOException("Error while trying to initialize pin interrupts.");
+                throw new IOException("Error while trying to initialize pin interrupts (epoll_ctl failed).");
             }
 
             // Ignore first time because it will always return the current state.
