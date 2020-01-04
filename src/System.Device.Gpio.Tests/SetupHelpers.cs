@@ -11,6 +11,7 @@ using System.Device;
 using System.Device.Spi;
 using System.Device.I2c;
 using System.Device.Pwm;
+using System.Device.Pwm.Drivers;
 
 using Iot.Device.Adc;
 using Iot.Device.Bmxx80;
@@ -57,6 +58,20 @@ namespace System.Device.Gpio.Tests
             bme280.SetPowerMode(Bmx280PowerMode.Forced);
 
             return bme280;
+        }
+
+        private static PwmChannel CreatePwmChannelCore(int frequency, double dutyCycle)
+        {
+            try
+            {
+                return PwmChannel.Create(0, 0, frequency, dutyCycle);
+            }
+            catch (ArgumentException)
+            {
+                // PWM is likely not enabled
+                // Let's try to run against software PWM implementation
+                return new SoftwarePwmChannel(18, frequency, dutyCycle);
+            }
         }
 
         public static PwmChannel CreatePwmChannel(int frequency = 10000, bool stopped = false, double dutyCycle = 0.5)
