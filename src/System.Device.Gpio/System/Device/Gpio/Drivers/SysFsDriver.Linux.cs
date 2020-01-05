@@ -325,13 +325,18 @@ namespace System.Device.Gpio.Drivers
             SetPinEventsToDetect(pinNumber, eventTypes);
             AddPinToPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, out bool closePinValueFileDescriptor);
 
-            bool eventDetected = WasEventDetected(pollFileDescriptor, valueFileDescriptor, out _, cancellationToken);
+            bool eventDetected = WasEventDetected(pollFileDescriptor, out _, cancellationToken);
+            if (_statusUpdateSleepTime > 0)
+            {
+                Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
+            }
 
+            var detectedEventType = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
             RemovePinFromPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, closePinValueFileDescriptor, closePollFileDescriptor: true, cancelEventDetectionThread: false);
             return new WaitForEventResult
             {
                 TimedOut = !eventDetected,
-                EventTypes = eventTypes
+                EventTypes = detectedEventType
             };
         }
 
@@ -430,7 +435,7 @@ namespace System.Device.Gpio.Drivers
             Interop.epoll_wait(pollFileDescriptor, out _, 1, 0);
         }
 
-        private unsafe bool WasEventDetected(int pollFileDescriptor, int valueFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
+        private unsafe bool WasEventDetected(int pollFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
         {
             char buf;
             IntPtr bufPtr = new IntPtr(&buf);
@@ -585,7 +590,7 @@ namespace System.Device.Gpio.Drivers
             {
                 try
                 {
-                    bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, _eventThreadCancellationTokenSource.Token);
+                    bool eventDetected = WasEventDetected(_pollFileDescriptor, out int pinNumber, _eventThreadCancellationTokenSource.Token);
                     if (eventDetected)
                     {
                         if (_statusUpdateSleepTime > 0)
