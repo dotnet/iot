@@ -70,7 +70,7 @@ namespace System.Device.Gpio.Tests
             {
                 // PWM is likely not enabled
                 // Let's try to run against software PWM implementation
-                return new SoftwarePwmChannel(18, frequency, dutyCycle);
+                return new SoftwarePwmChannel(18, frequency, dutyCycle, usePrecisionTimer: true);
             }
         }
 
