@@ -216,9 +216,9 @@ namespace Iot.Device.DistanceSensor
         /// in a signed (2's complement) 8-bit number in cm.
         /// Positive is away from the device.
         /// </summary>
-        public int DifferenceBetweenLastTwoDistances 
+        public int DifferenceBetweenLastTwoDistances
         {
-            get 
+            get
             {
                 Span<byte> rawData = stackalloc byte[1] { 0 };
                 ReadBytes(Register.VELOCITY, rawData);
@@ -231,13 +231,13 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         public AcquistionSettings AcquistionSettings
         {
-            get 
+            get
             {
                 Span<byte> rawData = stackalloc byte[1] { 0 };
                 ReadBytes(Register.ACQ_CONFIG_REG, rawData);
                 return (AcquistionSettings)rawData[0];
             }
-            set 
+            set
             {
                 WriteRegister(Register.ACQ_CONFIG_REG, (byte)value);
             }
@@ -253,13 +253,13 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         private int MaximumAcquisitionCount 
         {
-            get 
+            get
             {
                 Span<byte> rawData = stackalloc byte[1] { 0 };
                 ReadBytes(Register.SIG_COUNT_VAL, rawData);
                 return rawData[0];
             }
-            set 
+            set
             {
                 WriteRegister(Register.SIG_COUNT_VAL, (byte)value);
             }
@@ -269,18 +269,18 @@ namespace Iot.Device.DistanceSensor
         /// Get or set the threshold of peak value that bypasses the internal algorithm.
         /// 
         /// Recommended non-default values are 32 for higher sensitivity
-        /// but higher erronenous measurement and 96 for reduced 
+        /// but higher erronenous measurement and 96 for reduced
         /// sensitivity and fewer erroneous measurements.
         /// </summary>
         public int AlgorithmBypassThreshold 
         {
-            get 
+            get
             {
                 Span<byte> rawData = stackalloc byte[1] { 0 };
                 ReadBytes(Register.THRESHOLD_BYPASS, rawData);
                 return rawData[0];
             }
-            set 
+            set
             {
                 WriteRegister(Register.THRESHOLD_BYPASS, (byte)value);
             }
@@ -291,13 +291,13 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         public PowerMode PowerMode 
         {
-            get 
+            get
             {
                 Span<byte> rawData = stackalloc byte[1] { 0 };
                 ReadBytes(Register.POWER_CONTROL, rawData);
                 return (PowerMode)rawData[0];
             }
-            set 
+            set
             {
                 // Bit 0 disables receiver circuit
                 WriteRegister(Register.POWER_CONTROL, (byte)value);
