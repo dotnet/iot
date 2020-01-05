@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements. 
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -33,7 +33,7 @@ namespace Iot.Device.DistanceSensor.Models.LidarLiteV3
         EnableQuickTermination = 0x08,
 
         /// <summary>
-        /// Enable default reference acquisition count (5) instead of reference acquisition 
+        /// Enable default reference acquisition count (5) instead of reference acquisition
         /// count set in REF_COUNT_VAL (0x12).
         /// </summary>
         UseDefaultReferenceAcq = 0x04
