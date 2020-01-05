@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Device.Gpio;
 using ExplorerHat.Gpio;
-using Serilog;
 
 namespace Iot.Device.ExplorerHat.Lighting
 {
@@ -47,7 +46,6 @@ namespace Iot.Device.ExplorerHat.Lighting
             Name = name;
             Pin = pin;
             IsOn = false;
-            Log.Information("Led #{ledNumber} ({ledName}) initialized", Number, Name);
         }
 
         /// <summary>
@@ -60,7 +58,6 @@ namespace Iot.Device.ExplorerHat.Lighting
                 _controller.EnsureOpenPin(Pin, PinMode.Output);
                 _controller.Write(Pin, PinValue.High);
                 IsOn = true;
-                Log.Information("Led #{ledNumber} ({ledName}) switched {onoroff}", Number, Name, "ON");
             }
         }
 
@@ -74,7 +71,6 @@ namespace Iot.Device.ExplorerHat.Lighting
                 _controller.EnsureOpenPin(Pin, PinMode.Output);
                 _controller.Write(Pin, PinValue.Low);
                 IsOn = false;
-                Log.Information("Led #{ledNumber} ({ledName}) switched {onoroff}", Number, Name, "OFF");
             }
         }
 
@@ -91,9 +87,7 @@ namespace Iot.Device.ExplorerHat.Lighting
             {
                 if (disposing)
                 {
-                    Log.Debug("Disposing led #{LedNumber} ({LedName})", Number, Name);
                     Off();
-                    Log.Information("Led #{LedNumber} ({LedName}) disposed", Number, Name);
                 }
 
                 _disposedValue = true;

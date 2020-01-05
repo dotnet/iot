@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
-using Serilog;
 
 namespace Iot.Device.ExplorerHat.Lighting
 {
@@ -114,8 +113,6 @@ namespace Iot.Device.ExplorerHat.Lighting
                 new Led(3, "red", LED3_PIN, _controller),
                 new Led(4, "green", LED4_PIN, _controller)
             };
-            var featureName = "Lighting";
-            Log.Information("{featureName} initialized", featureName);
         }
 
         /// <summary>
@@ -153,13 +150,10 @@ namespace Iot.Device.ExplorerHat.Lighting
             {
                 if (disposing)
                 {
-                    var featureName = "Lighting";
-                    Log.Debug("Disposing {featureName} features", featureName);
                     LedArray[0].Dispose();
                     LedArray[1].Dispose();
                     LedArray[2].Dispose();
                     LedArray[3].Dispose();
-                    Log.Information("{featureName} features disposed", featureName);
                 }
 
                 _disposedValue = true;

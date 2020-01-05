@@ -1,5 +1,4 @@
 ﻿using System.Threading;
-using Serilog;
 
 namespace Iot.Device.ExplorerHat.BasicSample
 {
@@ -9,12 +8,6 @@ namespace Iot.Device.ExplorerHat.BasicSample
 
         public static void Main(string[] args)
         {
-            // Logging configuration
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
-                .WriteTo.Console()
-                .CreateLogger();
-
             using (var hat = new ExplorerHat())
             {
                 hat.Lights.Blue.On();

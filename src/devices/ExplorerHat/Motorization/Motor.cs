@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Device.Gpio;
-using Serilog;
 
 namespace Iot.Device.ExplorerHat.Motorization
 {
@@ -55,7 +54,6 @@ namespace Iot.Device.ExplorerHat.Motorization
                 }
 
                 _innerMotor.Speed = speed;
-                Log.Information("Motor #{motorNumber} speed setted at {speed}", Number, Speed);
             }
         }
 
@@ -66,7 +64,6 @@ namespace Iot.Device.ExplorerHat.Motorization
         public void Forwards(double speed = 1)
         {
             Speed = speed;
-            Log.Information("Motor #{motorNumber} {direction} at {speed}", Number, "forwards", Speed);
         }
 
         /// <summary>
@@ -76,7 +73,6 @@ namespace Iot.Device.ExplorerHat.Motorization
         public void Backwards(double speed = 1)
         {
             Speed = Math.Abs(speed) * -1;
-            Log.Information("Motor #{motorNumber} {direction} at {speed}", Number, "backwards", Speed);
         }
 
         /// <summary>
@@ -85,7 +81,6 @@ namespace Iot.Device.ExplorerHat.Motorization
         public void Stop()
         {
             _innerMotor.Speed = 0;
-            Log.Information("Motor #{motorNumber} {action}", Number, "stopped");
         }
 
         /// <summary>
@@ -104,7 +99,6 @@ namespace Iot.Device.ExplorerHat.Motorization
 
             _innerMotor = DCMotor.DCMotor.Create(SpeedControlPin, DirectionPin, _controller);
             Speed = 0;
-            Log.Information("Motor #{motorNumber} initialized", Number);
         }
 
         #region IDisposable Support
@@ -120,10 +114,8 @@ namespace Iot.Device.ExplorerHat.Motorization
             {
                 if (disposing)
                 {
-                    Log.Debug("Disposing motor #{motorNumber}", Number);
                     Stop();
                     _innerMotor.Dispose();
-                    Log.Information("Motor #{motorNumber} disposed", Number);
                 }
 
                 _disposedValue = true;
