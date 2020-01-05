@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements. 
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -89,7 +89,7 @@ namespace Iot.Device.DistanceSensor
         /// Measure distance in cm
         /// </summary>
         /// <remarks>
-        /// Note: Do not call if running while in repetition mode.  It will block until 
+        /// Note: Do not call if running while in repetition mode.  It will block until
         /// repetition finishes (forever if infinite).
         /// </remarks>
         /// <param name="withReceiverBiasCorrection">Faster without bias correction, but more prone to errors if condition changes.</param>
@@ -110,7 +110,7 @@ namespace Iot.Device.DistanceSensor
         /// Measure distance in cm
         /// </summary>
         /// <remarks>
-        /// Note: Do not call if running while in repetition mode.  It will block until 
+        /// Note: Do not call if running while in repetition mode.  It will block until
         /// repetition finishes (forever if infinite).
         /// </remarks>
         /// <param name="withReceiverBiasCorrection">Faster without bias correction, but more prone to errors if condition changes.</param>
@@ -201,7 +201,7 @@ namespace Iot.Device.DistanceSensor
         /// <summary>
         /// Get the last distance measurement in cm.
         /// </summary>
-        public int LastDistance 
+        public int LastDistance
         {
             get
             {
