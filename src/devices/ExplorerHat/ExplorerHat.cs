@@ -31,8 +31,6 @@ namespace Iot.Device.ExplorerHat
         {
             _controller = controller;
             _shouldDispose = shouldDispose;
-            Motors = new Motors(_controller);
-            Lights = new Lights(_controller);
 
             if (_controller is null)
             {
@@ -43,6 +41,9 @@ namespace Iot.Device.ExplorerHat
             {
                 throw new ArgumentException("Invalid GpioController config: NumberingScheme value must be 'Logical'", nameof(controller));
             }
+
+            Motors = new Motors(_controller);
+            Lights = new Lights(_controller);
         }
 
         #region IDisposable Support
