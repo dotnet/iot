@@ -20,7 +20,7 @@ namespace System.Device.Pwm.Drivers
         private double _periodMs;
         private int _frequency;
         // Use to determine the length of the pulse
-        // 100% = 1.0 = full output. 0% = 0.0 nothing as output
+        // 100% = 1.0 = full output. 0% = 0.0 = nothing as output
         private double _dutyCycle;
 
         // Determines if a high precision timer should be used.
