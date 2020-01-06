@@ -182,7 +182,8 @@ namespace Iot.Device.DistanceSensor
             }
 
             // Read in the unit's serial number.
-            Span<byte> rawData = stackalloc byte[2] { 0, 0 };
+            Span<byte> rawData = stackalloc byte[2];
+
             ReadBytes(Register.UNIT_ID, rawData);
 
             // Write serial number to I2C_ID.
@@ -205,7 +206,7 @@ namespace Iot.Device.DistanceSensor
         {
             get
             {
-                Span<byte> rawData = stackalloc byte[2] { 0, 0 };
+                Span<byte> rawData = stackalloc byte[2];
                 ReadBytes(Register.FULL_DELAY, rawData);
                 return BinaryPrimitives.ReadUInt16BigEndian(rawData);
             }
@@ -220,7 +221,7 @@ namespace Iot.Device.DistanceSensor
         {
             get
             {
-                Span<byte> rawData = stackalloc byte[1] { 0 };
+                Span<byte> rawData = stackalloc byte[1];
                 ReadBytes(Register.VELOCITY, rawData);
                 return (int)(sbyte)rawData[0];
             }
@@ -233,7 +234,7 @@ namespace Iot.Device.DistanceSensor
         {
             get
             {
-                Span<byte> rawData = stackalloc byte[1] { 0 };
+                Span<byte> rawData = stackalloc byte[1];
                 ReadBytes(Register.ACQ_CONFIG_REG, rawData);
                 return (AcquistionSettings)rawData[0];
             }
@@ -247,15 +248,15 @@ namespace Iot.Device.DistanceSensor
         /// Get or set the maximum aquisition count limits the number of times
         /// the device will integrate acquistions to find a correlation
         /// record peak.
-        /// 
-        /// Roughly correlates to: acq rate = 1/count and max 
+        ///
+        /// Roughly correlates to: acq rate = 1/count and max
         /// range = count^(1/4)
         /// </summary>
-        private int MaximumAcquisitionCount 
+        private int MaximumAcquisitionCount
         {
             get
             {
-                Span<byte> rawData = stackalloc byte[1] { 0 };
+                Span<byte> rawData = stackalloc byte[1];
                 ReadBytes(Register.SIG_COUNT_VAL, rawData);
                 return rawData[0];
             }
@@ -267,16 +268,16 @@ namespace Iot.Device.DistanceSensor
 
         /// <summary>
         /// Get or set the threshold of peak value that bypasses the internal algorithm.
-        /// 
+        ///
         /// Recommended non-default values are 32 for higher sensitivity
         /// but higher erronenous measurement and 96 for reduced
         /// sensitivity and fewer erroneous measurements.
         /// </summary>
-        public int AlgorithmBypassThreshold 
+        public int AlgorithmBypassThreshold
         {
             get
             {
-                Span<byte> rawData = stackalloc byte[1] { 0 };
+                Span<byte> rawData = stackalloc byte[1];
                 ReadBytes(Register.THRESHOLD_BYPASS, rawData);
                 return rawData[0];
             }
@@ -289,11 +290,11 @@ namespace Iot.Device.DistanceSensor
         /// <summary>
         /// Get or set the power control option.
         /// </summary>
-        public PowerMode PowerMode 
+        public PowerMode PowerMode
         {
             get
             {
-                Span<byte> rawData = stackalloc byte[1] { 0 };
+                Span<byte> rawData = stackalloc byte[1];
                 ReadBytes(Register.POWER_CONTROL, rawData);
                 return (PowerMode)rawData[0];
             }
@@ -307,11 +308,11 @@ namespace Iot.Device.DistanceSensor
         /// <summary>
         /// Get the system status
         /// </summary>
-        public SystemStatus Status 
+        public SystemStatus Status
         {
-            get 
+            get
             {
-                Span<byte> rawData = stackalloc byte[1] { 0 };
+                Span<byte> rawData = stackalloc byte[1];
                 ReadBytes(Register.STATUS, rawData);
                 return (SystemStatus)rawData[0];
             }
@@ -323,7 +324,12 @@ namespace Iot.Device.DistanceSensor
 
         private void WriteRegister(Register reg, byte data)
         {
-            Span<byte> dataout = stackalloc byte[] { (byte)reg, data };
+            Span<byte> dataout = stackalloc byte[]
+            { 
+                (byte)reg,
+                data
+            };
+            
             _i2cDevice.Write(dataout);
         }
 

@@ -34,7 +34,7 @@ namespace Iot.Device.DistanceSensor.Models.LidarLiteV3
 
         /// <summary>
         /// Signal data in correlation record has reached the maximum value before
-        /// overflow.  This occurs with a strong received signal strength. 
+        /// overflow. This occurs with a strong received signal strength.
         /// </summary>
         SignalOverflow = 0x4,
 
@@ -43,7 +43,7 @@ namespace Iot.Device.DistanceSensor.Models.LidarLiteV3
         /// overflow.  This occurs periodically.
         /// </summary>
         ReferenceOverflow = 0x2,
-        
+
         /// <summary>
         /// Device is busy callibrating or taking a measurement.
         /// </summary>
