@@ -4,65 +4,91 @@ namespace Iot.Device.ExplorerHat.BasicSample
 {
     internal class Program
     {
-        private const int MOTOR_TIME = 2000;
-
         public static void Main(string[] args)
         {
             using (var hat = new ExplorerHat())
             {
+                // All lights on
+                hat.Lights.On();
+                Thread.Sleep(1000);
+                // All lights off
+                hat.Lights.Off();
+                Thread.Sleep(500);
+
+                // By color
                 hat.Lights.Blue.On();
-                hat.Lights.Yellow.On();
-                hat.Lights.Green.On();
-                hat.Motors.Forwards(0.9);
-                Thread.Sleep(MOTOR_TIME);
+                Thread.Sleep(1000);
                 hat.Lights.Blue.Off();
+                Thread.Sleep(500);
+                hat.Lights.Yellow.On();
+                Thread.Sleep(1000);
                 hat.Lights.Yellow.Off();
-                hat.Lights.Green.Off();
-                hat.Motors.Stop();
-
-                hat.Lights.Blue.On();
-                hat.Lights.Yellow.On();
+                Thread.Sleep(500);
                 hat.Lights.Red.On();
-                hat.Motors.Backwards(0.9);
-                Thread.Sleep(MOTOR_TIME);
-                hat.Lights.Blue.Off();
-                hat.Lights.Yellow.Off();
+                Thread.Sleep(1000);
                 hat.Lights.Red.Off();
-                hat.Motors.Stop();
-
-                hat.Lights.Blue.On();
+                Thread.Sleep(500);
                 hat.Lights.Green.On();
-                hat.Motors.One.Speed = 0.8;
-                Thread.Sleep(MOTOR_TIME);
-                hat.Lights.Blue.Off();
+                Thread.Sleep(1000);
                 hat.Lights.Green.Off();
-                hat.Motors.Stop();
+                Thread.Sleep(500);
 
-                hat.Lights.Blue.On();
-                hat.Lights.Red.On();
-                hat.Motors.One.Speed = -0.8;
-                Thread.Sleep(MOTOR_TIME);
-                hat.Lights.Blue.Off();
-                hat.Lights.Red.Off();
-                hat.Motors.Stop();
+                // By number
+                hat.Lights.One.On();
+                Thread.Sleep(1000);
+                hat.Lights.One.Off();
+                Thread.Sleep(500);
+                hat.Lights.Two.On();
+                Thread.Sleep(1000);
+                hat.Lights.Two.Off();
+                Thread.Sleep(500);
+                hat.Lights.Three.On();
+                Thread.Sleep(1000);
+                hat.Lights.Three.Off();
+                Thread.Sleep(500);
+                hat.Lights.Four.On();
+                Thread.Sleep(1000);
+                hat.Lights.Four.Off();
+                Thread.Sleep(500);
 
-                hat.Lights.Yellow.On();
-                hat.Lights.Green.On();
-                hat.Motors.One.Speed = -0.8;
+                // Motors
+                // Forwards full speed
+                hat.Motors.Forwards(1);
+                Thread.Sleep(2000);
+
+                // Backwards full speed
+                hat.Motors.Backwards(1);
+                Thread.Sleep(2000);
+
+                // Manage one motor at a time
+                hat.Motors.One.Forwards(1);
+                Thread.Sleep(2000);
+                hat.Motors.One.Backwards(0.6);
+                Thread.Sleep(2000);
+                hat.Motors.Two.Forwards(1);
+                Thread.Sleep(2000);
+                hat.Motors.Two.Backwards(0.6);
+                Thread.Sleep(2000);
+
+                // Set motors speed
+                hat.Motors.One.Speed = 1;
+                Thread.Sleep(2000);
+                hat.Motors.One.Speed = -0.6;
+                Thread.Sleep(2000);
                 hat.Motors.Two.Speed = 0.8;
-                Thread.Sleep(MOTOR_TIME);
-                hat.Lights.Yellow.Off();
-                hat.Lights.Green.Off();
+                Thread.Sleep(2000);
+                hat.Motors.Two.Speed = -0.75;
+                Thread.Sleep(2000);
+
+                // Stop motors
                 hat.Motors.Stop();
 
-                hat.Lights.Yellow.On();
-                hat.Lights.Red.On();
-                hat.Motors.One.Speed = 0.8;
-                hat.Motors.Two.Speed = -0.8;
-                Thread.Sleep(MOTOR_TIME);
-                hat.Lights.Yellow.Off();
-                hat.Lights.Red.Off();
-                hat.Motors.Stop();
+                // Stop motors one at a time
+                hat.Motors.Forwards(1);
+                Thread.Sleep(2000);
+                hat.Motors.One.Stop();
+                Thread.Sleep(2000);
+                hat.Motors.Two.Stop();
             }
         }
     }
