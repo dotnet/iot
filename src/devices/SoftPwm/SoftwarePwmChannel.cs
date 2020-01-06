@@ -16,8 +16,8 @@ namespace System.Device.Pwm.Drivers
     {
         private readonly bool _shouldDispose;
         // how long the signal is high in its period
-        private double _pulseWidthMs;
-        private double _periodMs;
+        private double _pulseWidthInMilliseconds;
+        private double _periodInMilliseconds;
         private int _frequency;
         // Use to determine the length of the pulse
         // 100% = 1.0 = full output. 0% = 0.0 = nothing as output
@@ -121,8 +121,8 @@ namespace System.Device.Pwm.Drivers
 
         private void UpdatePulseWidthParameters()
         {
-            _periodMs = 1000.0 / _frequency;
-            _pulseWidthMs = _dutyCycle * _periodMs;
+            _periodInMilliseconds = 1000.0 / _frequency;
+            _pulseWidthInMilliseconds = _dutyCycle * _periodInMilliseconds;
         }
 
         private void RunSoftPWM()
@@ -137,7 +137,7 @@ namespace System.Device.Pwm.Drivers
                 // Write the pin high for the appropriate length of time
                 if (_isRunning)
                 {
-                    if (_pulseWidthMs != 0)
+                    if (_pulseWidthInMilliseconds != 0)
                     {
                         _controller.Write(_pin, PinValue.High);
                         _isStopped = false;
@@ -146,11 +146,11 @@ namespace System.Device.Pwm.Drivers
                     // Use the wait helper method to wait for the length of the pulse
                     if (_usePrecisionTimer)
                     {
-                        Wait(_pulseWidthMs);
+                        Wait(_pulseWidthInMilliseconds);
                     }
                     else
                     {
-                        Task.Delay(TimeSpan.FromMilliseconds(_pulseWidthMs)).Wait();
+                        Task.Delay(TimeSpan.FromMilliseconds(_pulseWidthInMilliseconds)).Wait();
                     }
 
                     // The pulse if over and so set the pin to low and then wait until it's time for the next pulse
@@ -158,11 +158,11 @@ namespace System.Device.Pwm.Drivers
 
                     if (_usePrecisionTimer)
                     {
-                        Wait(_periodMs - _pulseWidthMs);
+                        Wait(_periodInMilliseconds - _pulseWidthInMilliseconds);
                     }
                     else
                     {
-                        Task.Delay(TimeSpan.FromMilliseconds(_periodMs - _pulseWidthMs)).Wait();
+                        Task.Delay(TimeSpan.FromMilliseconds(_periodInMilliseconds - _pulseWidthInMilliseconds)).Wait();
                     }
                 }
                 else
