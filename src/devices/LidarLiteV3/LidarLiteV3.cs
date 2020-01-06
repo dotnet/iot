@@ -325,11 +325,10 @@ namespace Iot.Device.DistanceSensor
         private void WriteRegister(Register reg, byte data)
         {
             Span<byte> dataout = stackalloc byte[]
-            { 
+            {
                 (byte)reg,
                 data
             };
-            
             _i2cDevice.Write(dataout);
         }
 
