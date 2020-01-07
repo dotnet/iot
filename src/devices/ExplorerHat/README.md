@@ -13,7 +13,7 @@ It consists of multiple devices. Currently supported devices:
 
 ## Notes
 
-Capacitive touchpad, inputs, outputs, and 3.3v breakout not supported... Working on them
+Capacitive touchpad, inputs, outputs, and 3.3v breakout not supported... Working on them.
 
 ## References
 
