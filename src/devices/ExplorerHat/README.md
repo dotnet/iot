@@ -4,7 +4,7 @@
 
 [Explorer HAT Pro](https://shop.pimoroni.com/products/explorer-hat) is an add-on board for Raspberry Pi.
 
-![Explorer HAT Pro](https://res.cloudinary.com/practicaldev/image/fetch/s--h3gOjXAH--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://user-images.githubusercontent.com/10654401/63101233-e88c4b80-bf78-11e9-87ff-20e7a2809c40.png)
+![Explorer HAT Pro](https://user-images.githubusercontent.com/10654401/63101233-e88c4b80-bf78-11e9-87ff-20e7a2809c40.png)
 
 It consists of multiple devices. Currently supported devices:
 

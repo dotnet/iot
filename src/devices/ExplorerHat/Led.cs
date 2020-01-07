@@ -49,6 +49,8 @@ namespace Iot.Device.ExplorerHat
             Name = name;
             Pin = pin;
             IsOn = false;
+
+            _controller.OpenPin(Pin, PinMode.Output);
         }
 
         /// <summary>
@@ -58,7 +60,6 @@ namespace Iot.Device.ExplorerHat
         {
             if (!IsOn)
             {
-                _controller.EnsureOpenPin(Pin, PinMode.Output);
                 _controller.Write(Pin, PinValue.High);
                 IsOn = true;
             }
@@ -71,7 +72,6 @@ namespace Iot.Device.ExplorerHat
         {
             if (IsOn)
             {
-                _controller.EnsureOpenPin(Pin, PinMode.Output);
                 _controller.Write(Pin, PinValue.Low);
                 IsOn = false;
             }

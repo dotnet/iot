@@ -33,15 +33,7 @@ namespace Iot.Device.ExplorerHat
             _controller = controller;
             _shouldDispose = shouldDispose;
 
-            if (_controller is null)
-            {
-                _controller = new GpioController(PinNumberingScheme.Logical);
-            }
-
-            if (_controller.NumberingScheme != PinNumberingScheme.Logical)
-            {
-                throw new ArgumentException("Invalid GpioController config: NumberingScheme value must be 'Logical'", nameof(controller));
-            }
+            _controller = controller ?? new GpioController();
 
             Motors = new Motors(_controller);
             Lights = new Lights(_controller);
@@ -49,14 +41,12 @@ namespace Iot.Device.ExplorerHat
 
         #region IDisposable Support
 
-        private bool _disposedValue = false;
-
         /// <summary>
         /// Disposes the <see cref="ExplorerHat"/> instance
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            if (!(_controller is null))
             {
                 if (disposing)
                 {
@@ -66,11 +56,10 @@ namespace Iot.Device.ExplorerHat
                     if (_shouldDispose)
                     {
                         _controller.Dispose();
+                        _controller = null;
                     }
 
                 }
-
-                _disposedValue = true;
             }
         }
 

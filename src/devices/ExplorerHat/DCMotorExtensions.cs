@@ -28,7 +28,7 @@ namespace Iot.Device.ExplorerHat
         /// <param name="speed">Indicated speed</param>
         public static void Backwards(this DCMotor.DCMotor motor, double speed = 1)
         {
-            motor.Speed = Math.Abs(speed) * -1;
+            motor.Speed = -speed;
         }
 
         /// <summary>
