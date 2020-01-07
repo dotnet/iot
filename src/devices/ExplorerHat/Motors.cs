@@ -1,8 +1,12 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 
-namespace Iot.Device.ExplorerHat.Motorization
+namespace Iot.Device.ExplorerHat
 {
     /// <summary>
     /// Represents the Explorer HAT DCMotors collection
@@ -16,37 +20,19 @@ namespace Iot.Device.ExplorerHat.Motorization
 
         private GpioController _controller;
 
-        private List<Motor> _motorArray;
-
-        /// <summary>
-        /// Gets the <see cref="Motor"/> at the specified index
-        /// </summary>
-        /// <param name="key">The zero-based (0 to 1) of the motor to get</param>
-        /// <returns>The <see cref="Motor"/> at the specified index</returns>
-        public Motor this[int key]
-        {
-            get
-            {
-                if (key < 0 || key > 1)
-                {
-                    throw new Exception("Motors are 0..1");
-                }
-
-                return _motorArray[key];
-            }
-        }
+        private List<DCMotor.DCMotor> _motorArray;
 
         /// <summary>
         /// Motor #1
         /// </summary>
         /// <value></value>
-        public Motor One { get => _motorArray[0]; }
+        public DCMotor.DCMotor One { get => _motorArray[0]; }
 
         /// <summary>
         /// Motor #2
         /// </summary>
         /// <value></value>
-        public Motor Two { get => _motorArray[1]; }
+        public DCMotor.DCMotor Two { get => _motorArray[1]; }
 
         /// <summary>
         /// Both motors turns forwards at indicated speed
@@ -85,10 +71,10 @@ namespace Iot.Device.ExplorerHat.Motorization
         {
             _controller = controller;
 
-            _motorArray = new List<Motor>()
+            _motorArray = new List<DCMotor.DCMotor>()
             {
-                new Motor(1, MOTOR1_SPDPIN, MOTOR1_DIRPIN, _controller),
-                new Motor(2, MOTOR2_SPDPIN, MOTOR2_DIRPIN, _controller)
+                DCMotor.DCMotor.Create(MOTOR1_SPDPIN, MOTOR1_DIRPIN, _controller),
+                DCMotor.DCMotor.Create(MOTOR2_SPDPIN, MOTOR2_DIRPIN, _controller)
             };
         }
 
