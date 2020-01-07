@@ -78,6 +78,9 @@ namespace Tm1637Sample
 
             Thread.Sleep(3000);
 
+            // Revert order of the segments
+            tm1637.SegmentOrder = new byte[] { 0, 1, 2, 3, 4, 5 };
+
             // Blink the screen by switching on and off
             for (int i = 0; i < 10; i++)
             {
