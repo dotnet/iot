@@ -12,41 +12,33 @@ namespace Hcsr501.Samples
 {
     internal class Program
     {
-        // HC-SR501 OUT Pin
-        private static int hcsr501Pin = 17;
-
-        // LED Pin
-        private static int ledPin = 27;
+        private const int Hcsr501Pin = 17;
+        private const int LedPin = 27;
 
         public static void Main(string[] args)
         {
-            // get the GPIO controller
-            GpioController ledController = new GpioController(PinNumberingScheme.Logical);
-            // open PIN 27 for led
-            ledController.OpenPin(ledPin, PinMode.Output);
+            GpioController ledController = new GpioController();
+            ledController.OpenPin(LedPin, PinMode.Output);
 
-            // initialize PIR sensor
             using (Iot.Device.Hcsr501.Hcsr501 sensor =
-                new Iot.Device.Hcsr501.Hcsr501(hcsr501Pin, PinNumberingScheme.Logical))
+                new Iot.Device.Hcsr501.Hcsr501(Hcsr501Pin))
             {
-                // loop
                 while (true)
                 {
                     // adjusting the detection distance and time by rotating the potentiometer on the sensor
-                    if (sensor.IsMotionDetected == true)
+                    if (sensor.IsMotionDetected)
                     {
                         // turn the led on when the sensor detected infrared heat
-                        ledController.Write(ledPin, PinValue.High);
+                        ledController.Write(LedPin, PinValue.High);
                         Console.WriteLine("Detected! Turn the LED on.");
                     }
                     else
                     {
                         // turn the led off when the sensor undetected infrared heat
-                        ledController.Write(ledPin, PinValue.Low);
+                        ledController.Write(LedPin, PinValue.Low);
                         Console.WriteLine("Undetected! Turn the LED off.");
                     }
 
-                    // wait for a second
                     Thread.Sleep(1000);
                 }
             }
