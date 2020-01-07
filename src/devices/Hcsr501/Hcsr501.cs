@@ -61,7 +61,10 @@ namespace Iot.Device.Hcsr501
 
         private void Sensor_ValueChanged(object sender, PinValueChangedEventArgs e)
         {
-            Hcsr501ValueChanged(sender, new Hcsr501ValueChangedEventArgs(_controller.Read(_outPin)));
+            if (Hcsr501ValueChanged != null)
+            {
+                Hcsr501ValueChanged(sender, new Hcsr501ValueChangedEventArgs(_controller.Read(_outPin)));
+            }
         }
     }
 }
