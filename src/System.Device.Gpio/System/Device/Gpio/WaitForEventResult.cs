@@ -10,9 +10,14 @@ namespace System.Device.Gpio
     public struct WaitForEventResult
     {
         /// <summary>
-        /// The event types to wait for.
+        /// The event types that were waited for.
         /// </summary>
         public PinEventTypes EventTypes;
+
+        /// <summary>
+        /// The event type that was actually seen
+        /// </summary>
+        public PinEventTypes DetectedEventTypes;
 
         /// <summary>
         /// True if waiting for the event timed out. False if an event was triggered before the timeout expired.

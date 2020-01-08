@@ -363,6 +363,38 @@ namespace System.Device.Gpio.Tests
             }
         }
 
+        [Fact]
+        public void WaitForEventBothEdgesTest()
+        {
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                CancellationTokenSource tokenSource = new CancellationTokenSource();
+                controller.OpenPin(InputPin, PinMode.Input);
+                controller.OpenPin(OutputPin, PinMode.Output);
+                controller.Write(OutputPin, PinValue.High);
+
+                var task = Task.Run(() =>
+                {
+                    controller.Write(OutputPin, PinValue.High);
+                    Thread.Sleep(WaitMilliseconds);
+                    controller.Write(OutputPin, PinValue.Low);
+                    Thread.Sleep(WaitMilliseconds);
+                    controller.Write(OutputPin, PinValue.High);
+                });
+
+                // First event is falling, second is rising
+                WaitForEventResult result = controller.WaitForEvent(InputPin, PinEventTypes.Falling | PinEventTypes.Rising, tokenSource.Token);
+                Assert.False(result.TimedOut);
+                Assert.Equal(PinEventTypes.Falling | PinEventTypes.Rising, result.EventTypes);
+                Assert.Equal(PinEventTypes.Falling, result.DetectedEventTypes);
+                result = controller.WaitForEvent(InputPin, PinEventTypes.Falling | PinEventTypes.Rising, tokenSource.Token);
+                Assert.False(result.TimedOut);
+                Assert.Equal(PinEventTypes.Falling | PinEventTypes.Rising, result.EventTypes);
+                Assert.Equal(PinEventTypes.Rising, result.DetectedEventTypes);
+                Assert.True(task.Wait(TimeSpan.FromSeconds(30))); // Should end way before that
+            }
+        }
+
         protected abstract GpioDriver GetTestDriver();
         protected abstract PinNumberingScheme GetTestNumberingScheme();
     }
