@@ -3,15 +3,17 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Device.Gpio;
+using System.Drawing;
 
 namespace Iot.Device.ExplorerHat
 {
     /// <summary>
     /// Represents the Explorer HAT led array
     /// </summary>
-    public class Lights : IDisposable
+    public class Lights : IDisposable, IEnumerable<Led>
     {
         private const int LED1_PIN = 4;
         private const int LED2_PIN = 17;
@@ -72,10 +74,10 @@ namespace Iot.Device.ExplorerHat
 
             LedArray = new List<Led>()
             {
-                new Led(1, "blue", LED1_PIN, _controller),
-                new Led(2, "yellow", LED2_PIN, _controller),
-                new Led(3, "red", LED3_PIN, _controller),
-                new Led(4, "green", LED4_PIN, _controller)
+                new Led(1, Color.Blue, LED1_PIN, _controller),
+                new Led(2, Color.Yellow, LED2_PIN, _controller),
+                new Led(3, Color.Red, LED3_PIN, _controller),
+                new Led(4, Color.Green, LED4_PIN, _controller)
             };
         }
 
@@ -130,6 +132,24 @@ namespace Iot.Device.ExplorerHat
         public void Dispose()
         {
             Dispose(true);
+        }
+
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection of leds
+        /// </summary>
+        /// <returns>An enumerator that can be used to iterate through the collection of leds</returns>
+        public IEnumerator<Led> GetEnumerator()
+        {
+            return ((IEnumerable<Led>)LedArray).GetEnumerator();
+        }
+
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection of leds
+        /// </summary>
+        /// <returns>An enumerator that can be used to iterate through the collection of leds</returns>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<Led>)LedArray).GetEnumerator();
         }
 
         #endregion

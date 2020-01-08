@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Threading;
 
 namespace Iot.Device.ExplorerHat.BasicSample
@@ -54,6 +55,12 @@ namespace Iot.Device.ExplorerHat.BasicSample
                 Thread.Sleep(1000);
                 hat.Lights.Four.Off();
                 Thread.Sleep(500);
+
+                // Iterate through led array
+                foreach (var led in hat.Lights)
+                {
+                    Console.WriteLine($"Led {led.Color.Name} (#{led.Number}) is {(led.IsOn ? "ON" : "OFF")}");
+                }
 
                 // Motors
                 // Forwards full speed
