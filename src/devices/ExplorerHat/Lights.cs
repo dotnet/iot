@@ -6,7 +6,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Device.Gpio;
-using System.Drawing;
 
 namespace Iot.Device.ExplorerHat
 {
@@ -74,10 +73,10 @@ namespace Iot.Device.ExplorerHat
 
             LedArray = new List<Led>()
             {
-                new Led(1, Color.Blue, LED1_PIN, _controller),
-                new Led(2, Color.Yellow, LED2_PIN, _controller),
-                new Led(3, Color.Red, LED3_PIN, _controller),
-                new Led(4, Color.Green, LED4_PIN, _controller)
+                new Led(LED1_PIN, _controller),
+                new Led(LED2_PIN, _controller),
+                new Led(LED3_PIN, _controller),
+                new Led(LED4_PIN, _controller)
             };
         }
 

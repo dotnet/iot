@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.Gpio;
-using System.Drawing;
 
 namespace Iot.Device.ExplorerHat
 {
@@ -21,16 +20,6 @@ namespace Iot.Device.ExplorerHat
         public int Pin { get; private set; }
 
         /// <summary>
-        /// Led number on Hat
-        /// </summary>
-        public int Number { get; private set; }
-
-        /// <summary>
-        /// Led color on Hat
-        /// </summary>
-        public Color Color { get; private set; }
-
-        /// <summary>
         /// Gets if led is switched on or not
         /// </summary>
         /// <value></value>
@@ -39,15 +28,11 @@ namespace Iot.Device.ExplorerHat
         /// <summary>
         /// Initializes a <see cref="Led"/> instance
         /// </summary>
-        /// <param name="number">Led number</param>
-        /// <param name="color">Led color</param>
         /// <param name="pin">Underlying rpi GPIO pin number</param>
         /// <param name="controller"><see cref="GpioController"/> used by <see cref="Led"/> to manage GPIO resources</param>
-        internal Led(int number, Color color, int pin, GpioController controller)
+        internal Led(int pin, GpioController controller)
         {
             _controller = controller;
-            Number = number;
-            Color = color;
             Pin = pin;
             IsOn = false;
 
