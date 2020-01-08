@@ -56,6 +56,12 @@ hat.Lights.Four.On();
 Thread.Sleep(1000);
 hat.Lights.Four.Off();
 Thread.Sleep(500);
+
+// Iterate through led array
+foreach (var led in hat.Lights)
+{
+    Console.WriteLine($"Led {led.Color.Name} (#{led.Number}) is {(led.IsOn ? "ON" : "OFF")}");
+}
 ```
 
 ## Motors
