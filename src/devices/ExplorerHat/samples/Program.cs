@@ -5,7 +5,7 @@
 using System;
 using System.Threading;
 
-namespace Iot.Device.ExplorerHat.BasicSample
+namespace Iot.Device.ExplorerHat.Sample
 {
     internal class Program
     {

@@ -11,7 +11,7 @@
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)../../ExplorerHat.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../ExplorerHat.csproj" />
   </ItemGroup>
 
 </Project>
