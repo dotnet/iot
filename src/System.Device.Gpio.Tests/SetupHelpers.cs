@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 using System.Device;
 using System.Device.Spi;
@@ -66,7 +67,7 @@ namespace System.Device.Gpio.Tests
             {
                 return PwmChannel.Create(0, 0, frequency, dutyCycle);
             }
-            catch (ArgumentException)
+            catch (ArgumentException) when (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // PWM is likely not enabled
                 // Let's try to run against software PWM implementation

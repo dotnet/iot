@@ -46,6 +46,8 @@
   <PropertyGroup Condition="'$(TestOS)' == 'Windows_NT'">
     <DotNetCliRuntime>win-arm</DotNetCliRuntime>
     <XUnitArguments>$(XUnitArguments) -notrait "SkipOnTestRun=Windows_NT"</XUnitArguments>
+    <!-- Issue: https://github.com/dotnet/iot/issues/934 -->
+    <XUnitArguments>$(XUnitArguments) -notrait feature=pwm</XUnitArguments>
   </PropertyGroup>
 
   <!-- Linux-specific settings -->
