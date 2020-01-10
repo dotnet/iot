@@ -22,23 +22,6 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        private void ValidatePinIsInput(int pinNumber)
-        {
-            ValidatePinNumber(pinNumber);
-            if (!IsPinOpen(pinNumber))
-            {
-                throw new InvalidOperationException($"Pin {pinNumber} is not open.");
-            }
-
-            PinMode mode = GetPinMode(pinNumber);
-            if (mode == PinMode.Input || mode == PinMode.InputPullDown || mode == PinMode.InputPullUp)
-            {
-                return;
-            }
-
-            throw new InvalidOperationException($"Pin {pinNumber} is not set to an input mode.");
-        }
-
         /// <summary>
         /// Converts a board pin number to the driver's logical numbering scheme.
         /// </summary>

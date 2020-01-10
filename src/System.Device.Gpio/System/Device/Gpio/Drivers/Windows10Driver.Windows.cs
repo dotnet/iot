@@ -46,11 +46,6 @@ namespace System.Device.Gpio.Drivers
             base.Dispose(disposing);
         }
 
-        internal bool IsPinOpen(int pin)
-        {
-            return _openPins.TryGetValue(pin, out _);
-        }
-
         /// <summary>
         /// Adds a handler for a pin value changed event.
         /// </summary>
