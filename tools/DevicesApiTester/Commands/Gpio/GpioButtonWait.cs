@@ -73,7 +73,7 @@ namespace DeviceApiTester.Commands.Gpio
                         waitResult = await controller.WaitForEventAsync(ButtonPin, bothPinEventTypes, cancellationTokenSource.Token);
                         if (!waitResult.TimedOut)
                         {
-                            var pressedOrReleased = waitResult.DetectedEventTypes == PressedValue ? "pressed" : "released";
+                            var pressedOrReleased = waitResult.EventTypes == PressedValue ? "pressed" : "released";
                             Console.WriteLine($"[{count++}] Button {pressedOrReleased}: GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin number {ButtonPin}, ChangeType={waitResult.EventTypes}");
 
                             if (LedPin != null)

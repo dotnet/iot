@@ -10,14 +10,10 @@ namespace System.Device.Gpio
     public struct WaitForEventResult
     {
         /// <summary>
-        /// The event types that were waited for.
+        /// The event types that was detected.
+        /// This is especially useful when listing to both rising and falling edges, where it will indicate which kind of edge was seen.
         /// </summary>
         public PinEventTypes EventTypes;
-
-        /// <summary>
-        /// The event type that was actually seen
-        /// </summary>
-        public PinEventTypes DetectedEventTypes;
 
         /// <summary>
         /// True if waiting for the event timed out. False if an event was triggered before the timeout expired.
