@@ -61,26 +61,6 @@ namespace System.Device.Gpio.Drivers
         }
 
         /// <summary>
-        /// Gets the mode of a pin for Unix.
-        /// </summary>
-        /// <param name="mode">The mode of a pin to get.</param>
-        /// <returns>The mode of a pin for Unix.</returns>
-        private PinMode GetModeForUnixDriver(PinMode mode)
-        {
-            switch (mode)
-            {
-                case PinMode.Input:
-                case PinMode.InputPullUp:
-                case PinMode.InputPullDown:
-                    return PinMode.Input;
-                case PinMode.Output:
-                    return PinMode.Output;
-                default:
-                    throw new InvalidOperationException($"Can not parse pin mode {_pinModes}");
-            }
-        }
-
-        /// <summary>
         /// Adds a handler for a pin value changed event.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
