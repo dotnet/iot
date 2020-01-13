@@ -20,7 +20,7 @@ nuget install System.Device.Gpio -PreRelease -Source https://dotnetfeed.blob.cor
 nuget install Iot.Device.Bindings -PreRelease -Source https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json
 ~~~~
 ### Official Build Status
-![BuildStatus](https://dev.azure.com/dnceng/internal/_apis/build/status/dotnet/iot/dotnet.iot-official?branchName=master)
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/dotnet/iot/dotnet.iot.github?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=268&branchName=master)
 
 ## .NET CLI
 ~~~~
