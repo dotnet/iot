@@ -243,8 +243,8 @@ namespace Iot.Device.Ft4222
         /// Set event notification
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
-        /// <param name="mask">Mask</param>
-        /// <param name="param">Parameter</param>
+        /// <param name="mask">Event mask</param>
+        /// <param name="param">Event Parameter</param>
         /// <returns>The status</returns>
         [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SetEventNotification(SafeFtHandle ftHandle, ulong mask, IntPtr param);
@@ -513,7 +513,7 @@ namespace Iot.Device.Ft4222
         /// Get the I2C status as a master
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
-        /// <param name="controllerStatus">Controller status</param>
+        /// <param name="controllerStatus">Returns the controller status byte</param>
         /// <returns>The status</returns>
         [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_I2CMaster_GetStatus(SafeFtHandle ftHandle, out byte controllerStatus);
@@ -527,7 +527,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CSlave_Init(SafeFtHandle ftHandle);
 
         /// <summary>
-        /// REset the I2C as a slave
+        /// Reset the I2C as a slave
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
