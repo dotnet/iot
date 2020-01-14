@@ -8,7 +8,7 @@ This device supports multiple SPI as well as GPIO and I2C. It is a [FT4222](http
 
 You can find boards implementing this chip like on [bitWizard](http://bitwizard.nl/shop/FT4222h-Breakout-Board?search=ft4222). This is the board which has been used to develop this project. The pins are described [here](http://bitwizard.nl/wiki/FT4222h). Note that for I2C there is no pull up implemented. 
 
-## Requirements
+## Windows Requirements
 
 In order to have this FTDI board working and getting support for SPI, GPIO and I2C, you need to install in a path the ```LibFT4222.dll``` provided by FTDI Chip. You can find the latest version [here](https://www.ftdichip.com/Products/ICs/FT4222H.html).
 The version used to build this project is 1.4.2 and you can download it directly from FTDI [here](https://www.ftdichip.com/Support/SoftwareExamples/LibFT4222-v1.4.2.zip).
@@ -24,6 +24,12 @@ Alternatively, you can register your dll globally. Copy ```LibFT4222-64.dll``` t
 You will need to unzip the file and go to ```LibFT4222-v1.4.2\imports\LibFT4222\lib\i386```, copy ```LibFT4222.dll``` to your path or in the same directory as the executable you are launching.
 
 Alternatively, you can register your dll globally. Run from the directory where your ```LibFT4222.dll``` is located the following command in administrator mode: ```regsvr32.exe LibFT4222.dll```
+
+## Linux Requirements
+
+For Linux, you need to download and install the proper version of ```libft4222.so```. The lib include the driver itself in a static binding. You can find the library [here](https://www.ftdichip.com/Support/SoftwareExamples/libft4222-linux-1.4.2.184.tgz). Once downloaded and extracted, run under administrator priviledges ```install4222.sh```. This will install the required library related to your system.
+
+Alternately, you can copy your platform library into the same directory of your project if you don't want to install it. While writting this page, they all look like ```libft4222.so.1.4.2.184```. The library name needs ti be ```libft4222.so```.
 
 ## Usage
 
