@@ -7,6 +7,9 @@ using Xunit;
 
 namespace System.Device.Gpio.Tests
 {
+    [Trait("requirement", "root")]
+    [Trait("feature", "gpio")]
+    [Trait("feature", "gpio-rpi3")]
     public class RaspberryPiDriverTests : GpioControllerTestBase
     {
         /// <summary>

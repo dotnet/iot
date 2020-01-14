@@ -3,9 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio.Drivers;
+using Xunit;
 
 namespace System.Device.Gpio.Tests
 {
+    [Trait("feature", "gpio")]
+    [Trait("feature", "gpio-libgpiod")]
     public class LibGpiodDriverTests : GpioControllerTestBase
     {
         protected override GpioDriver GetTestDriver() => new LibGpiodDriver();
