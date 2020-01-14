@@ -27,15 +27,18 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void InputPullResistorsWork()
         {
-            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            RetryHelper.Execute(() =>
             {
-                controller.OpenPin(OpenPin, PinMode.InputPullUp);
-                Assert.Equal(PinValue.High, controller.Read(OpenPin));
-                controller.SetPinMode(OpenPin, PinMode.InputPullDown);
-                Assert.Equal(PinValue.Low, controller.Read(OpenPin));
-                controller.SetPinMode(OpenPin, PinMode.InputPullUp);
-                Assert.Equal(PinValue.High, controller.Read(OpenPin));
-            }
+                using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+                {
+                    controller.OpenPin(OpenPin, PinMode.InputPullUp);
+                    Assert.Equal(PinValue.High, controller.Read(OpenPin));
+                    controller.SetPinMode(OpenPin, PinMode.InputPullDown);
+                    Assert.Equal(PinValue.Low, controller.Read(OpenPin));
+                    controller.SetPinMode(OpenPin, PinMode.InputPullUp);
+                    Assert.Equal(PinValue.High, controller.Read(OpenPin));
+                }
+            });
         }
     }
 }
