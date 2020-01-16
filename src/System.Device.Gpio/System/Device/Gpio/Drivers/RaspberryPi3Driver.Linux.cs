@@ -270,7 +270,8 @@ namespace System.Device.Gpio.Drivers
 
             // Wait 150 cycles – this provides the required set-up time for the control signal
             for (int i = 0; i < 150; i++)
-                ;
+            {
+            }
 
             int index = pinNumber / 32;
             int shift = pinNumber % 32;
@@ -280,7 +281,8 @@ namespace System.Device.Gpio.Drivers
 
             // Wait 150 cycles – this provides the required hold time for the control signal
             for (int i = 0; i < 150; i++)
-                ;
+            {
+            }
 
             // Spec calls to reset clock after the control signal
             // Since context switch between those two instructions can potentially
@@ -292,7 +294,8 @@ namespace System.Device.Gpio.Drivers
             // but lack of it is causing intermittent failures when
             // pull up/down is changed frequently.
             for (int i = 0; i < 150; i++)
-                ;
+            {
+            }
         }
 
         /// <summary>
