@@ -343,6 +343,8 @@ namespace System.Device.Gpio.Drivers
         private void SetPinEventsToDetect(int pinNumber, PinEventTypes eventTypes)
         {
             string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "edge");
+            // Even though the pin is open, we might sometimes need to wait for access
+            SysFsHelpers.EnsureReadWriteAccessToPath(edgePath);
             string stringValue = PinEventTypeToStringValue(eventTypes);
             File.WriteAllText(edgePath, stringValue);
         }
@@ -350,6 +352,8 @@ namespace System.Device.Gpio.Drivers
         private PinEventTypes GetPinEventsToDetect(int pinNumber)
         {
             string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "edge");
+            // Even though the pin is open, we might sometimes need to wait for access
+            SysFsHelpers.EnsureReadWriteAccessToPath(edgePath);
             string stringValue = File.ReadAllText(edgePath);
             return StringValueToPinEventType(stringValue);
         }
