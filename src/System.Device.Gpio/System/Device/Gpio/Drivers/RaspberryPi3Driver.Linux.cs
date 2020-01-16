@@ -263,7 +263,6 @@ namespace System.Device.Gpio.Drivers
             *gppudPointer |= modeToPullMode;
 
             // Wait 150 cycles – this provides the required set-up time for the control signal
-            // Thread.SpinWait(150);
             for (int i = 0; i < 150; i++)
                 ;
 
@@ -274,7 +273,6 @@ namespace System.Device.Gpio.Drivers
             *gppudclkPointer |= pinBit;
 
             // Wait 150 cycles – this provides the required hold time for the control signal
-            // Thread.SpinWait(150);
             for (int i = 0; i < 150; i++)
                 ;
 
