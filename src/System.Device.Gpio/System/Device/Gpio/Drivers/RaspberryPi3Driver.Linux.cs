@@ -226,6 +226,7 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="mode">The mode of a pin to set the resistor pull up/down mode.</param>
+        [MethodImpl(MethodImplOptions.NoOptimization)]
         private void SetInputPullMode(int pinNumber, PinMode mode)
         {
             if (IsPi4)
@@ -258,28 +259,30 @@ namespace System.Device.Gpio.Drivers
              */
 
             uint* gppudPointer = &_registerViewPointer->GPPUD;
-            uint register = *gppudPointer;
-            register &= ~0b11U;
-            register |= modeToPullMode;
-            *gppudPointer = register;
+            *gppudPointer &= ~0b11U;
+            *gppudPointer |= modeToPullMode;
 
             // Wait 150 cycles – this provides the required set-up time for the control signal
-            Thread.SpinWait(150);
+            // Thread.SpinWait(150);
+            for (int i = 0; i < 150; i++)
+                ;
 
             int index = pinNumber / 32;
             int shift = pinNumber % 32;
             uint* gppudclkPointer = &_registerViewPointer->GPPUDCLK[index];
-            register = *gppudclkPointer;
-            register |= 1U << shift;
-            *gppudclkPointer = register;
+            uint pinBit = 1U << shift;
+            *gppudclkPointer |= pinBit;
 
             // Wait 150 cycles – this provides the required hold time for the control signal
-            Thread.SpinWait(150);
+            // Thread.SpinWait(150);
+            for (int i = 0; i < 150; i++)
+                ;
 
-            register = *gppudPointer;
-            register &= ~0b11U;
-            *gppudPointer = register;
-            *gppudclkPointer = 0;
+            *gppudclkPointer &= ~pinBit;
+            *gppudPointer &= ~0b11U;
+
+            for (int i = 0; i < 150; i++)
+                ;
         }
 
         /// <summary>
