@@ -12,15 +12,22 @@ namespace Iot.Device.Ft4222
     /// </summary>
     internal class FtFunction
     {
-        #region ftd2xx.dll
+        #region ftd2xx wrapper
 
         /// <summary>
         /// Create Device Information List
         /// </summary>
         /// <param name="numdevs">number of devices</param>
         /// <returns>The status</returns>
-        [DllImport("ftd2xx")]
-        public static extern FtStatus FT_CreateDeviceInfoList(out uint numdevs);
+        public static FtStatus FT_CreateDeviceInfoList(out uint numdevs)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                return FT_CreateDeviceInfoListLinux(out numdevs);
+            }
+
+            return FT_CreateDeviceInfoListWin(out numdevs);
+        }
 
         /// <summary>
         /// Get Device Information Detail
@@ -34,8 +41,15 @@ namespace Iot.Device.Ft4222
         /// <param name="description">Description</param>
         /// <param name="ftHandle">Handle</param>
         /// <returns>The status</returns>
-        [DllImport("ftd2xx")]
-        public static extern FtStatus FT_GetDeviceInfoDetail(uint index, out uint flags, out FtDevice chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle);
+        public static FtStatus FT_GetDeviceInfoDetail(uint index, out uint flags, out FtDevice chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                return FT_GetDeviceInfoDetailLinux(index, out flags, out chiptype, out id, out locid, in serialnumber, in description, out ftHandle);
+            }
+
+            return FT_GetDeviceInfoDetailWin(index, out flags, out chiptype, out id, out locid, in serialnumber, in description, out ftHandle);
+        }
 
         /// <summary>
         /// Open a device
@@ -44,16 +58,120 @@ namespace Iot.Device.Ft4222
         /// <param name="dwFlags">The flag how to open the device</param>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
-        [DllImport("ftd2xx")]
-        public static extern FtStatus FT_OpenEx(uint pvArg1, FtOpenType dwFlags, out SafeFtHandle ftHandle);
+        public static FtStatus FT_OpenEx(uint pvArg1, FtOpenType dwFlags, out SafeFtHandle ftHandle)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                return FT_OpenExLinux(pvArg1, dwFlags, out ftHandle);
+            }
+
+            return FT_OpenExWin(pvArg1, dwFlags, out ftHandle);
+        }
 
         /// <summary>
         /// Close the device
         /// </summary>
         /// <param name="ftHandle">The device handle</param>
         /// <returns>The status</returns>
-        [DllImport("ftd2xx")]
-        public static extern FtStatus FT_Close(SafeFtHandle ftHandle);
+        public static FtStatus FT_Close(SafeFtHandle ftHandle)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                return FT_CloseLinux(ftHandle);
+            }
+
+            return FT_CloseWin(ftHandle);
+        }
+
+        #endregion
+
+        #region Linux ftd2xx
+
+        /// <summary>
+        /// Create Device Information List
+        /// </summary>
+        /// <param name="numdevs">number of devices</param>
+        /// <returns>The status</returns>
+        [DllImport("libft4222", EntryPoint = "FT_CreateDeviceInfoList")]
+        private static extern FtStatus FT_CreateDeviceInfoListLinux(out uint numdevs);
+
+        /// <summary>
+        /// Get Device Information Detail
+        /// </summary>
+        /// <param name="index">Index of the device</param>
+        /// <param name="flags">Flags</param>
+        /// <param name="chiptype">Device type</param>
+        /// <param name="id">ID</param>
+        /// <param name="locid">Location ID</param>
+        /// <param name="serialnumber">Serial Number</param>
+        /// <param name="description">Description</param>
+        /// <param name="ftHandle">Handle</param>
+        /// <returns>The status</returns>
+        [DllImport("libft4222", EntryPoint = "FT_GetDeviceInfoDetail")]
+        private static extern FtStatus FT_GetDeviceInfoDetailLinux(uint index, out uint flags, out FtDevice chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle);
+
+        /// <summary>
+        /// Open a device
+        /// </summary>
+        /// <param name="pvArg1">The device element identifying the device, depends on the flag</param>
+        /// <param name="dwFlags">The flag how to open the device</param>
+        /// <param name="ftHandle">The handle of the open device</param>
+        /// <returns>The status</returns>
+        [DllImport("libft4222", EntryPoint = "FT_OpenEx")]
+        private static extern FtStatus FT_OpenExLinux(uint pvArg1, FtOpenType dwFlags, out SafeFtHandle ftHandle);
+
+        /// <summary>
+        /// Close the device
+        /// </summary>
+        /// <param name="ftHandle">The device handle</param>
+        /// <returns>The status</returns>
+        [DllImport("libft4222", EntryPoint = "FT_Close")]
+        private static extern FtStatus FT_CloseLinux(SafeFtHandle ftHandle);
+
+        #endregion
+
+        #region Windows ftd2xx
+
+        /// <summary>
+        /// Create Device Information List
+        /// </summary>
+        /// <param name="numdevs">number of devices</param>
+        /// <returns>The status</returns>
+        [DllImport("ftd2xx", EntryPoint = "FT_CreateDeviceInfoList")]
+        private static extern FtStatus FT_CreateDeviceInfoListWin(out uint numdevs);
+
+        /// <summary>
+        /// Get Device Information Detail
+        /// </summary>
+        /// <param name="index">Index of the device</param>
+        /// <param name="flags">Flags</param>
+        /// <param name="chiptype">Device type</param>
+        /// <param name="id">ID</param>
+        /// <param name="locid">Location ID</param>
+        /// <param name="serialnumber">Serial Number</param>
+        /// <param name="description">Description</param>
+        /// <param name="ftHandle">Handle</param>
+        /// <returns>The status</returns>
+        [DllImport("ftd2xx", EntryPoint = "FT_GetDeviceInfoDetail")]
+        private static extern FtStatus FT_GetDeviceInfoDetailWin(uint index, out uint flags, out FtDevice chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle);
+
+        /// <summary>
+        /// Open a device
+        /// </summary>
+        /// <param name="pvArg1">The device element identifying the device, depends on the flag</param>
+        /// <param name="dwFlags">The flag how to open the device</param>
+        /// <param name="ftHandle">The handle of the open device</param>
+        /// <returns>The status</returns>
+        [DllImport("ftd2xx", EntryPoint = "FT_OpenEx")]
+        private static extern FtStatus FT_OpenExWin(uint pvArg1, FtOpenType dwFlags, out SafeFtHandle ftHandle);
+
+        /// <summary>
+        /// Close the device
+        /// </summary>
+        /// <param name="ftHandle">The device handle</param>
+        /// <returns>The status</returns>
+        [DllImport("ftd2xx", EntryPoint = "FT_Close")]
+        private static extern FtStatus FT_CloseWin(SafeFtHandle ftHandle);
 
         #endregion
 
@@ -126,7 +244,7 @@ namespace Iot.Device.Ft4222
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="mask">Event mask</param>
-        /// <param name="param">Event parameter</param>
+        /// <param name="param">Event Parameter</param>
         /// <returns>The status</returns>
         [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
         public static extern FtStatus FT4222_SetEventNotification(SafeFtHandle ftHandle, ulong mask, IntPtr param);
@@ -409,7 +527,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CSlave_Init(SafeFtHandle ftHandle);
 
         /// <summary>
-        /// REset the I2C as a slave
+        /// Reset the I2C as a slave
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
@@ -455,7 +573,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CSlave_Read(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
-        /// Reads data from the I2C slave
+        /// Write on the I2C device as slave
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="buffer">The buffer to write</param>
