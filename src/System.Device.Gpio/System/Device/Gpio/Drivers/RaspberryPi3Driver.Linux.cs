@@ -229,6 +229,12 @@ namespace System.Device.Gpio.Drivers
         [MethodImpl(MethodImplOptions.NoOptimization)]
         private void SetInputPullMode(int pinNumber, PinMode mode)
         {
+            /*
+             * NoOptimization is needed to force wait time to be at least minimum required cycles.
+             * Also to ensure that pointer operations optimizations won't be using any locals
+             * which would introduce time period where multiple threads could override value set
+             * to this register.
+             */
             if (IsPi4)
             {
                 SetInputPullModePi4(pinNumber, mode);
@@ -276,6 +282,9 @@ namespace System.Device.Gpio.Drivers
             for (int i = 0; i < 150; i++)
                 ;
 
+            // Spec calls to reset clock after the control signal
+            // Since context switch between those two instructions can potentially
+            // change pull up/down value we reset the clock first.
             *gppudclkPointer &= ~pinBit;
             *gppudPointer &= ~0b11U;
 
