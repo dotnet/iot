@@ -288,6 +288,9 @@ namespace System.Device.Gpio.Drivers
             *gppudclkPointer &= ~pinBit;
             *gppudPointer &= ~0b11U;
 
+            // This timeout is not documented in the spec
+            // but lack of it is causing intermittent failures when
+            // pull up/down is changed frequently.
             for (int i = 0; i < 150; i++)
                 ;
         }
