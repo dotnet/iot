@@ -304,8 +304,15 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="mode">The mode of a pin to set the resistor pull up/down mode.</param>
+        [MethodImpl(MethodImplOptions.NoOptimization)]
         private void SetInputPullModePi4(int pinNumber, PinMode mode)
         {
+            /*
+             * NoOptimization is needed to force wait time to be at least minimum required cycles.
+             * Also to ensure that pointer operations optimizations won't be using any locals
+             * which would introduce time period where multiple threads could override value set
+             * to this register.
+             */
             int shift = (pinNumber & 0xf) << 1;
             uint pull = 0;
             uint bits = 0;
@@ -321,6 +328,9 @@ namespace System.Device.Gpio.Drivers
             bits &= ~(3u << shift);
             bits |= (pull << shift);
             gpioReg->GPPUPPDN[(pinNumber >> 4)] = bits;
+            for (int i = 0; i < 150; i++)
+            {
+            }
         }
 
         /// <summary>
