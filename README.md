@@ -44,6 +44,7 @@ Please contribute. We are primarily interested in the following:
 
 After installing, please see the following areas to learn more:
 
+* [.NET IoT 101 (Jan 2020)](https://channel9.msdn.com/Series/IoT-101) - An introduction series on how to create .NET IoT applications with a Raspberry Pi.
 * [Documentation](Documentation/README.md) - Resources related to electronics, devices, vendors, software and other IoT topics.
 * [Samples](samples/README.md) - Step-by-step instructions on building your first app.
 * [Roadmap](Documentation/roadmap.md) - Areas planned or currently being worked on.
