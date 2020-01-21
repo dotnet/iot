@@ -50,6 +50,7 @@ After installing, please see the following areas to learn more:
 
 ## Tutorials
 
+* [.NET IoT 101 (Jan 2020)](https://channel9.msdn.com/Series/IoT-101)
 * [Web service using SenseHat by Dawid Borycki (Aug 2019)](https://msdn.microsoft.com/magazine/mt833493)
 
 # Community 
