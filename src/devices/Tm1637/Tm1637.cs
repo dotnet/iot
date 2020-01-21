@@ -310,8 +310,8 @@ namespace Iot.Device.Tm1637
             WriteByte((byte)DataCommand.FixAddress);
             StopTransmission();
             StartTransmission();
-            // Fix address with the address
-            WriteByte((byte)(DataCommand.FixAddress + segmentAddress));
+            // Set the address to transfer
+            WriteByte((byte)(DataCommand.AddressCommandSetting + segmentAddress));
             // Transfer the byte
             WriteByte(rawData);
             StopTransmission();

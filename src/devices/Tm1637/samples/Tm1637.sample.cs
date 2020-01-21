@@ -26,6 +26,17 @@ namespace Tm1637Sample
             tm1637.Display(toDisplay);
             Thread.Sleep(3000);
 
+            // Display a character at a specific segment position
+            // If you have a 4 display, only the fisrt 4 will be displayed as like as [0123]
+            // on a 6 segment one, all 6 will be displayed as like as [012345]
+            tm1637.Display(0, Character.Digit0);
+            tm1637.Display(1, Character.Digit1);
+            tm1637.Display(2, Character.Digit2);
+            tm1637.Display(3, Character.Digit3);
+            tm1637.Display(4, Character.Digit4);
+            tm1637.Display(5, Character.Digit5);
+            Thread.Sleep(3000);
+
             // Changing order of the segments
             tm1637.SegmentOrder = new byte[] { 2, 1, 0, 5, 4, 3 };
 
@@ -57,6 +68,18 @@ namespace Tm1637Sample
 
             tm1637.Display(rawData);
             Thread.Sleep(3000);
+
+            // If you have a 4 display, only the fisrt 4 will be displayed, as like as [6549]
+            // on a 6 segment one, all 6 will be displayed, as like as [654987]
+            for (int i = 0; i < 6; i++)
+            {
+                tm1637.Display((byte)i, (Character)Enum.Parse(typeof(Character), $"Digit{4 + i}"));
+            }
+
+            Thread.Sleep(3000);
+
+            // Revert order of the segments
+            tm1637.SegmentOrder = new byte[] { 0, 1, 2, 3, 4, 5 };
 
             // Blink the screen by switching on and off
             for (int i = 0; i < 10; i++)
