@@ -36,7 +36,7 @@ These steps are not required but might be useful for diagnosing potential issues
 sudo apt-get -y install can-utils
 ```
 
-- On first device listen to CAN frames (can be also sent on the same device but ensure seperate terminal)
+- On first device listen to CAN frames (can be also sent on the same device but ensure separate terminal)
 
 ```sh
 candump can0

@@ -486,7 +486,7 @@ namespace Iot.Device.Vl53L0X
             _i2cDevice.WriteByte((byte)Registers.GLOBAL_CONFIG_SPAD_ENABLES_REF_0);
             // Allocate 1 more byte as it will be used to send back the configuration
             Span<byte> referenceSpadMap = stackalloc byte[7];
-            // Skip the first byte for reading, it will be used for writting
+            // Skip the first byte for reading, it will be used for writing
             _i2cDevice.Read(referenceSpadMap.Slice(1));
 
             // Set the squads, prepare the registers firsts
@@ -613,7 +613,7 @@ namespace Iot.Device.Vl53L0X
             WriteRegister((byte)Registers.SYSRANGE_START, 0x01);
             WriteRegister(0xFF, 0x00);
             WriteRegister((byte)Registers.POWER_MANAGEMENT_GO1_POWER_FORCE, 0x00);
-            // End of initialization sequence took from official API docuementation
+            // End of initialization sequence took from official API documentation
 
             // Set the interruptions
             WriteRegister((byte)Registers.SYSTEM_INTERRUPT_CONFIG_GPIO, 0x04);

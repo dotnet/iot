@@ -1,6 +1,6 @@
 # Conventions for devices APIs
 
-This document is meant to provide guidelines. If you think the guidelines don't make sense in a specifc case (or at all) please file an issue or mention it in the PR description.
+This document is meant to provide guidelines. If you think the guidelines don't make sense in a specific case (or at all) please file an issue or mention it in the PR description.
 
 ## Expose everything device has vs. expose simple functionality
 
@@ -8,7 +8,7 @@ All APIs should be as simple as they can be and simplicity is the most important
 
 It is acceptable for the device to provide full functionality exposed by the device but if full functionality makes simple stuff hardly discoverable or harder to reason about then you should consider making advanced functionality `protected` or move it to a separate class.
 
-I.e. every thermometer should have a way of getting a temperature (i.e. `GetTemperature`). If your thermometer is special (i.e. very high resolution) exposing internal representation might make sense but for regular thermometer it likely will not. On the other hand exposing way of calibrating the thermometer is recommended (but not required). Going further if your thermometer exposes 100 calibration parameters it probably would make it hard to see what the device actually was meant for and therefore such parameters should be made `protected` (so that derived class can still access it) or moved to a seperate class - it is fine to expose one calibration method directly and move remainder elsewhere.
+I.e. every thermometer should have a way of getting a temperature (i.e. `GetTemperature`). If your thermometer is special (i.e. very high resolution) exposing internal representation might make sense but for regular thermometer it likely will not. On the other hand exposing way of calibrating the thermometer is recommended (but not required). Going further if your thermometer exposes 100 calibration parameters it probably would make it hard to see what the device actually was meant for and therefore such parameters should be made `protected` (so that derived class can still access it) or moved to a separate class - it is fine to expose one calibration method directly and move remainder elsewhere.
 
 There is no specific guidelines what simple and main scenario is but you should consider what is the most likely thing user will do with your device and you should think if it will be useful and if it is exposed as simple as possible. If reality will be different than initial assumptions the device can be modified later.
 
@@ -19,7 +19,7 @@ There is no specific guidelines what simple and main scenario is but you should 
 - Use `double` when you need to return any floating point value
 - Async methods can be added but the name of such method should have an `Async` suffix and there should also be synchronous equivalent method
 - When method may or not return the (valid) value use `bool TryGetTemperature(out Temperature temperature)` pattern (`TryRead` and any `TryVerb` is acceptable as well) rather than returning `double.NaN` or some other sentinel value
-  - exception to this are values which are not meant to be further processed and are not ambigious (i.e. lack of pin number can be represented as `-1` because `-1` is an invalid pin number and pin numbers are not meant to be processed)
+  - exception to this are values which are not meant to be further processed and are not ambiguous (i.e. lack of pin number can be represented as `-1` because `-1` is an invalid pin number and pin numbers are not meant to be processed)
 - Use `Vector2/3/4` for returning vectors`*`
 - Value should conform to units conventions (see below)
 - Only the most useful APIs should be public, anything else which may be useful but will unlikely get used by most of the people should be protected (inheriting the class allows you to use it but it is not visible by default) or internal/private

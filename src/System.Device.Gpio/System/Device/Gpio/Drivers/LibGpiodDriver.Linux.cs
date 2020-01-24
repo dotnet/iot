@@ -192,18 +192,18 @@ namespace System.Device.Gpio.Drivers
                     eventHandler.ValueFalling += Callback;
                 }
 
-                bool eventOccured = false;
+                bool eventOccurred = false;
                 void Callback(object o, PinValueChangedEventArgs e)
                 {
-                    eventOccured = true;
+                    eventOccurred = true;
                 }
 
-                WaitForEventResult(cancellationToken, eventHandler.CancellationTokenSource.Token, ref eventOccured);
+                WaitForEventResult(cancellationToken, eventHandler.CancellationTokenSource.Token, ref eventOccurred);
                 RemoveCallbackForPinValueChangedEvent(pinNumber, Callback);
 
                 return new WaitForEventResult
                 {
-                    TimedOut = !eventOccured,
+                    TimedOut = !eventOccurred,
                     EventTypes = eventTypes
                 };
             }
@@ -213,9 +213,9 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        private void WaitForEventResult(CancellationToken sourceToken, CancellationToken parentToken, ref bool eventOccured)
+        private void WaitForEventResult(CancellationToken sourceToken, CancellationToken parentToken, ref bool eventOccurred)
         {
-            while (!(sourceToken.IsCancellationRequested || parentToken.IsCancellationRequested || eventOccured))
+            while (!(sourceToken.IsCancellationRequested || parentToken.IsCancellationRequested || eventOccurred))
             {
                 Thread.Sleep(1);
             }
