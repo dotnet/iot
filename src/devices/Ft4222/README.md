@@ -29,7 +29,7 @@ Alternatively, you can register your dll globally. Run from the directory where 
 
 For Linux, you need to download and install the proper version of ```libft4222.so```. The lib include the driver itself in a static binding. You can find the library [here](https://www.ftdichip.com/Support/SoftwareExamples/libft4222-linux-1.4.2.184.tgz). Once downloaded and extracted, run provided script ```install4222.sh``` as root. This will install the required library related to your system.
 
-Alternately, you can copy your platform library into the same directory of your project if you don't want to install it. While writting this page, they all look like ```libft4222.so.1.4.2.184```. The library name needs ti be ```libft4222.so```.
+Alternately, you can copy your platform library into the same directory of your project if you don't want to install it. While writing this page, they all look like ```libft4222.so.1.4.2.184```. The library name needs ti be ```libft4222.so```.
 
 ## Usage
 

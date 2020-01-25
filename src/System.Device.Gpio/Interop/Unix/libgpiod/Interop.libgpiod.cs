@@ -46,7 +46,7 @@ internal partial class Interop
         /// </summary>
         /// <param name="chip">The GPIO chip handle</param>
         /// <param name="offset">The offset of the GPIO line</param>
-        /// <returns>Handle to the GPIO line or <see langword="null" /> if an error occured.</returns>
+        /// <returns>Handle to the GPIO line or <see langword="null" /> if an error occurred.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern SafeLineHandle gpiod_chip_get_line(SafeChipHandle chip, int offset);
 
@@ -123,7 +123,7 @@ internal partial class Interop
         /// </summary>
         /// <param name="line">GPIO line handle</param>
         /// <param name="gpioEvent">Reference to the gpio event that was detected</param>
-        /// <returns>1 if rising edge event occured, 2 on falling edge, -1 on error.</returns>
+        /// <returns>1 if rising edge event occurred, 2 on falling edge, -1 on error.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern int gpiod_line_event_read(SafeLineHandle line, ref GpioLineEvent gpioEvent);
 

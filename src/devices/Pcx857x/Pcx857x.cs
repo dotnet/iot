@@ -51,7 +51,7 @@ namespace Iot.Device.Pcx857x
             }
 
             // These controllers do not have commands, setting the pins to high designates
-            // them as able to recieve input. As we don't want to set high on pins intended
+            // them as able to receive input. As we don't want to set high on pins intended
             // for output we'll set all of the pins to low for our initial state.
             if (PinCount == 8)
             {
