@@ -154,6 +154,12 @@ namespace System.Device.Gpio.Drivers
                 try
                 {
                     SetPinEventsToDetect(pinNumber, PinEventTypes.None);
+                    if (_devicePins.ContainsKey(pinNumber))
+                    {
+                        _devicePins[pinNumber].Dispose();
+                        _devicePins.Remove(pinNumber);
+                    }
+
                     File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinOffset.ToString(CultureInfo.InvariantCulture));
                     _exportedPins.Remove(pinNumber);
                 }
@@ -331,12 +337,27 @@ namespace System.Device.Gpio.Drivers
                 Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
             }
 
-            var detectedEventType = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
+            PinEventTypes detectedEventType = PinEventTypes.None;
+            if (eventDetected)
+            {
+                // This is the only case where we need to read the new state. Although there are reports of this not being 100% reliable in all situations,
+                // it seems to be working fine most of the time.
+                if (eventTypes == (PinEventTypes.Rising | PinEventTypes.Falling))
+                {
+                    detectedEventType = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                }
+                else if (eventTypes != PinEventTypes.None)
+                {
+                    // If we're only waiting for one event type, we know which one it has to be
+                    detectedEventType = eventTypes;
+                }
+            }
+
             RemovePinFromPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, closePinValueFileDescriptor, closePollFileDescriptor: true, cancelEventDetectionThread: false);
             return new WaitForEventResult
             {
                 TimedOut = !eventDetected,
-                EventTypes = (eventDetected ? detectedEventType : PinEventTypes.None)
+                EventTypes = detectedEventType,
             };
         }
 
@@ -572,7 +593,11 @@ namespace System.Device.Gpio.Drivers
                 _devicePins[pinNumber].ValueFalling += callback;
             }
 
-            SetPinEventsToDetect(pinNumber, (GetPinEventsToDetect(pinNumber) | eventTypes));
+            var events = (GetPinEventsToDetect(pinNumber) | eventTypes);
+            SetPinEventsToDetect(pinNumber, events);
+
+            // Remember which events are active
+            _devicePins[pinNumber].ActiveEdges = events;
             InitializeEventDetectionThread();
         }
 
@@ -602,7 +627,14 @@ namespace System.Device.Gpio.Drivers
                             Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
                         }
 
-                        PinEventTypes eventTypes = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                        var activeEdges = _devicePins[pinNumber].ActiveEdges;
+                        PinEventTypes eventTypes = activeEdges;
+                        // Only if the active edges are both, we need to query the current state
+                        if (activeEdges == (PinEventTypes.Falling | PinEventTypes.Rising))
+                        {
+                            eventTypes = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                        }
+
                         var args = new PinValueChangedEventArgs(eventTypes, pinNumber);
                         _devicePins[pinNumber]?.OnPinValueChanged(args);
                     }

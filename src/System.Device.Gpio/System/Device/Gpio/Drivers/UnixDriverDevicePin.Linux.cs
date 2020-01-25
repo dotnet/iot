@@ -9,12 +9,19 @@ namespace System.Device.Gpio.Drivers
         public UnixDriverDevicePin()
         {
             FileDescriptor = -1;
+            ActiveEdges = PinEventTypes.None;
         }
 
         public event PinChangeEventHandler ValueRising;
         public event PinChangeEventHandler ValueFalling;
 
         public int FileDescriptor;
+
+        public PinEventTypes ActiveEdges
+        {
+            get;
+            set;
+        }
 
         public void OnPinValueChanged(PinValueChangedEventArgs args)
         {
@@ -42,6 +49,7 @@ namespace System.Device.Gpio.Drivers
                 FileDescriptor = -1;
             }
 
+            ActiveEdges = PinEventTypes.None;
             ValueRising = null;
             ValueFalling = null;
         }
