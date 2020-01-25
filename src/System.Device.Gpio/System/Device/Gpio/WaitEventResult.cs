@@ -8,6 +8,6 @@ namespace System.Device.Gpio
     {
         Error = -1,
         TimedOut = 0,
-        EventOccurred = 1
+        EventOccured = 1
     }
 }

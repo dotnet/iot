@@ -46,7 +46,7 @@ namespace System.Device.Gpio.Drivers
             {
                 while (!(token.IsCancellationRequested || _disposing))
                 {
-                    // WaitEventResult can be TimedOut, EventOccurred or Error, in case of TimedOut will continue waiting
+                    // WaitEventResult can be TimedOut, EventOccured or Error, in case of TimedOut will continue waiting
                     TimeSpec timeout = new TimeSpec
                     {
                         TvSec = new IntPtr(0),
@@ -59,7 +59,7 @@ namespace System.Device.Gpio.Drivers
                         throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, Marshal.GetLastWin32Error(), _pinNumber);
                     }
 
-                    if (waitResult == WaitEventResult.EventOccurred)
+                    if (waitResult == WaitEventResult.EventOccured)
                     {
                         GpioLineEvent eventResult = new GpioLineEvent();
                         int checkForEvent = Interop.libgpiod.gpiod_line_event_read(pinHandle, ref eventResult);
