@@ -201,6 +201,11 @@ namespace System.Device.Gpio.Tests
 
             void Callback(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
             {
+                if (pinValueChangedEventArgs.PinNumber != InputPin)
+                {
+                    return;
+                }
+
                 Debug.WriteLine("Oops I was called!");
                 wasCalled = true;
             }
