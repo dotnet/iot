@@ -60,6 +60,16 @@ internal partial class Interop
         internal static extern int gpiod_line_request_input(SafeLineHandle line, string consumer);
 
         /// <summary>
+        /// Reserve a single line, set the direction to input with flags
+        /// </summary>
+        /// <param name="line">GPIO line handle</param>
+        /// <param name="consumer">Name of the consumer.</param>
+        /// <param name="flags">Additional request flags.</param>
+        /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        internal static extern int gpiod_line_request_input_flags(SafeLineHandle line, string consumer, int flags);
+
+        /// <summary>
         /// Reserve a single line, set the direction to output.
         /// </summary>
         /// <param name="line">GPIO line handle</param>
