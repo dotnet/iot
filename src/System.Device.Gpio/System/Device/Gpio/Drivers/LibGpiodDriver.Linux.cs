@@ -19,7 +19,7 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override int PinCount => Interop.libgpiod.gpiod_chip_num_lines(_chip);
 
-        private string consumerName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+        private static string s_consumerName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
 
         public LibGpiodDriver(int gpioChip = 0)
         {
@@ -161,11 +161,11 @@ namespace System.Device.Gpio.Drivers
             {
                 if (mode == PinMode.Input)
                 {
-                    requestResult = Interop.libgpiod.gpiod_line_request_input(pinHandle, consumerName);
+                    requestResult = Interop.libgpiod.gpiod_line_request_input(pinHandle, s_consumerName);
                 }
                 else
                 {
-                    requestResult = Interop.libgpiod.gpiod_line_request_output(pinHandle, consumerName);
+                    requestResult = Interop.libgpiod.gpiod_line_request_output(pinHandle, s_consumerName);
                 }
 
                 pinHandle.PinMode = mode;

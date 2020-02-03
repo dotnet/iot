@@ -22,7 +22,7 @@ namespace System.Device.Gpio.Drivers
 
         private bool _disposing = false;
 
-        private string consumerName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+        private static string s_consumerName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
 
         public LibGpiodDriverEventHandler(int pinNumber, SafeLineHandle safeLineHandle)
         {
@@ -34,7 +34,7 @@ namespace System.Device.Gpio.Drivers
 
         private void SubscribeForEvent(SafeLineHandle pinHandle)
         {
-            int eventSuccess = Interop.libgpiod.gpiod_line_request_both_edges_events(pinHandle, consumerName);
+            int eventSuccess = Interop.libgpiod.gpiod_line_request_both_edges_events(pinHandle, s_consumerName);
 
             if (eventSuccess < 0)
             {
