@@ -118,7 +118,15 @@ namespace System.Device.Gpio.Drivers
                 try
                 {
                     SetPinEventsToDetect(pinNumber, PinEventTypes.None);
-                    File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinOffset.ToString(CultureInfo.InvariantCulture));
+                    try
+                    {
+                        File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinOffset.ToString(CultureInfo.InvariantCulture));
+                    }
+                    catch (IOException)
+                    {
+                        // Unexport failed -> pin is probably configured in device tree
+                    }
+
                     _exportedPins.Remove(pinNumber);
                 }
                 catch (UnauthorizedAccessException e)
@@ -146,6 +154,11 @@ namespace System.Device.Gpio.Drivers
             {
                 try
                 {
+                    if (File.ReadAllText(directionPath).Trim() == sysFsMode) // PIN direction already set
+                    {
+                        return;
+                    }
+
                     File.WriteAllText(directionPath, sysFsMode);
                 }
                 catch (UnauthorizedAccessException e)
@@ -302,15 +315,25 @@ namespace System.Device.Gpio.Drivers
         private void SetPinEventsToDetect(int pinNumber, PinEventTypes eventTypes)
         {
             string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "edge");
-            string stringValue = PinEventTypeToStringValue(eventTypes);
-            File.WriteAllText(edgePath, stringValue);
+            if (File.Exists(edgePath)) // Only exists for input pins!
+            {
+                string stringValue = PinEventTypeToStringValue(eventTypes);
+                File.WriteAllText(edgePath, stringValue);
+            }
         }
 
         private PinEventTypes GetPinEventsToDetect(int pinNumber)
         {
             string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "edge");
-            string stringValue = File.ReadAllText(edgePath);
-            return StringValueToPinEventType(stringValue);
+            if (File.Exists(edgePath)) // Only exists for input pins!
+            {
+                string stringValue = File.ReadAllText(edgePath);
+                return StringValueToPinEventType(stringValue);
+            }
+            else
+            {
+                return PinEventTypes.None;
+            }
         }
 
         private PinEventTypes StringValueToPinEventType(string value)
