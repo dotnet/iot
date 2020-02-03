@@ -331,7 +331,7 @@ namespace System.Device.Gpio.Drivers
             SetPinEventsToDetect(pinNumber, eventTypes);
             AddPinToPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, out bool closePinValueFileDescriptor);
 
-            bool eventDetected = WasEventDetected(pollFileDescriptor, out _, cancellationToken);
+            bool eventDetected = WasEventDetected(pollFileDescriptor, valueFileDescriptor, out _, cancellationToken);
             if (_statusUpdateSleepTime > 0)
             {
                 Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
@@ -460,7 +460,7 @@ namespace System.Device.Gpio.Drivers
             Interop.epoll_wait(pollFileDescriptor, out _, 1, 0);
         }
 
-        private unsafe bool WasEventDetected(int pollFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
+        private unsafe bool WasEventDetected(int pollFileDescriptor, int valueFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
         {
             char buf;
             IntPtr bufPtr = new IntPtr(&buf);
@@ -478,6 +478,25 @@ namespace System.Device.Gpio.Drivers
                 if (waitResult > 0)
                 {
                     pinNumber = events.data.pinNumber;
+                    /*
+                    // valueFileDescriptor will be -1 when using the callback eventing. For WaitForEvent, the value will be set.
+                    if (valueFileDescriptor == -1)
+                    {
+                        valueFileDescriptor = _devicePins[pinNumber].FileDescriptor;
+                    }
+
+                    int lseekResult = Interop.lseek(valueFileDescriptor, 0, SeekFlags.SEEK_SET);
+                    if (lseekResult == -1)
+                    {
+                        throw new IOException("Error while trying to initialize pin interrupts.");
+                    }
+
+                    int readResult = Interop.read(valueFileDescriptor, bufPtr, 1);
+                    if (readResult != 1)
+                    {
+                        throw new IOException("Error while trying to initialize pin interrupts.");
+                    }
+                    */
                     return true;
                 }
             }
@@ -578,7 +597,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (!_devicePins.ContainsKey(pinNumber))
             {
-                _devicePins.Add(pinNumber, new UnixDriverDevicePin());
+                _devicePins.Add(pinNumber, new UnixDriverDevicePin(Read(pinNumber)));
                 _pinsToDetectEventsCount++;
                 AddPinToPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, out _);
             }
@@ -615,11 +634,14 @@ namespace System.Device.Gpio.Drivers
 
         private void DetectEvents()
         {
+            OpenPin(13);
+            SetPinMode(13, PinMode.Output);
+            Write(13, PinValue.Low);
             while (_pinsToDetectEventsCount > 0)
             {
                 try
                 {
-                    bool eventDetected = WasEventDetected(_pollFileDescriptor, out int pinNumber, _eventThreadCancellationTokenSource.Token);
+                    bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, _eventThreadCancellationTokenSource.Token);
                     if (eventDetected)
                     {
                         if (_statusUpdateSleepTime > 0)
@@ -627,16 +649,57 @@ namespace System.Device.Gpio.Drivers
                             Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
                         }
 
-                        var activeEdges = _devicePins[pinNumber].ActiveEdges;
-                        PinEventTypes eventTypes = activeEdges;
-                        // Only if the active edges are both, we need to query the current state
+                        Write(13, PinValue.High);
+
+                        var currentPin = _devicePins[pinNumber];
+                        var activeEdges = currentPin.ActiveEdges;
+                        PinEventTypes eventType = activeEdges;
+                        PinEventTypes secondEvent = PinEventTypes.None;
+                        // Only if the active edges are both, we need to query the current state and guess about the change
                         if (activeEdges == (PinEventTypes.Falling | PinEventTypes.Rising))
                         {
-                            eventTypes = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                            var oldValue = currentPin.LastValue;
+                            var newValue = Read(pinNumber);
+                            if (oldValue == PinValue.Low && newValue == PinValue.High)
+                            {
+                                eventType = PinEventTypes.Rising;
+                            }
+                            else if (oldValue == PinValue.High && newValue == PinValue.Low)
+                            {
+                                eventType = PinEventTypes.Falling;
+                            }
+                            else if (oldValue == PinValue.High)
+                            {
+                                // Both high -> There must have been a low-active peak
+                                eventType = PinEventTypes.Falling;
+                                secondEvent = PinEventTypes.Rising;
+                            }
+                            else
+                            {
+                                // Both low -> There must have been a high-active peak
+                                eventType = PinEventTypes.Rising;
+                                secondEvent = PinEventTypes.Falling;
+                            }
+
+                            currentPin.LastValue = newValue;
+                        }
+                        else
+                        {
+                            // Update the value, in case we need it later
+                            currentPin.LastValue = Read(pinNumber);
                         }
 
-                        var args = new PinValueChangedEventArgs(eventTypes, pinNumber);
-                        _devicePins[pinNumber]?.OnPinValueChanged(args);
+                        // Console.WriteLine($"Got an event on pin {pinNumber} and it is {eventType} (Active: {activeEdges})");
+                        // Thread.Sleep(10);
+                        var args = new PinValueChangedEventArgs(eventType, pinNumber);
+                        currentPin.OnPinValueChanged(args);
+                        if (secondEvent != PinEventTypes.None)
+                        {
+                            args = new PinValueChangedEventArgs(secondEvent, pinNumber);
+                            currentPin.OnPinValueChanged(args);
+                        }
+
+                        Write(13, PinValue.Low);
                     }
                 }
                 catch (ObjectDisposedException)

@@ -6,8 +6,9 @@ namespace System.Device.Gpio.Drivers
 {
     internal sealed class UnixDriverDevicePin : IDisposable
     {
-        public UnixDriverDevicePin()
+        public UnixDriverDevicePin(PinValue currentValue)
         {
+            LastValue = currentValue;
             FileDescriptor = -1;
             ActiveEdges = PinEventTypes.None;
         }
@@ -18,6 +19,12 @@ namespace System.Device.Gpio.Drivers
         public int FileDescriptor;
 
         public PinEventTypes ActiveEdges
+        {
+            get;
+            set;
+        }
+
+        public PinValue LastValue
         {
             get;
             set;

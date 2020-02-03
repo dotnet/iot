@@ -188,16 +188,29 @@ namespace System.Device.Gpio.Tests
         public void AddCallbackFallingEdgeNotDetectedTest()
         {
             bool wasCalled = false;
+            AutoResetEvent ev = new AutoResetEvent(false);
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(InputPin, PinMode.Input);
                 controller.OpenPin(OutputPin, PinMode.Output);
                 controller.Write(OutputPin, PinValue.Low);
+                // Thread.Sleep(20);
+                // Console.WriteLine("Now registering for falling events");
+                // Console.ReadLine();
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Falling, Callback);
+                // Console.WriteLine("Registered");
+                // Sometimes, we get an extra event just at the beginning - wait for it and then drop it
+                ev.WaitOne(1000);
+                wasCalled = false;
+                // Console.ReadLine();
                 controller.Write(OutputPin, PinValue.High);
-                Thread.Sleep(WaitMilliseconds);
+                // Thread.Sleep(WaitMilliseconds);
+                controller.UnregisterCallbackForPinValueChangedEvent(InputPin, Callback);
+                // Console.WriteLine("Unregistered. Should not get any triggers any more");
                 Assert.False(wasCalled);
             }
+
+            ev.Dispose();
 
             void Callback(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
             {
@@ -206,7 +219,8 @@ namespace System.Device.Gpio.Tests
                     return;
                 }
 
-                Debug.WriteLine("Oops I was called!");
+                // Console.WriteLine("Oops I was called!");
+                ev.Set();
                 wasCalled = true;
             }
         }
