@@ -19,6 +19,15 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override int PinCount => Interop.libgpiod.gpiod_chip_num_lines(_chip);
 
+        public enum RequestFlag : ulong {
+            GPIOD_LINE_REQUEST_FLAG_OPEN_DRAIN = (1UL << 0),
+            GPIOD_LINE_REQUEST_FLAG_OPEN_SOURCE = (1UL << 1),
+            GPIOD_LINE_REQUEST_FLAG_ACTIVE_LOW = (1UL << 2),
+            GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE = (1UL << 3),
+            GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN = (1UL << 4),
+            GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP = (1UL << 5)
+        };
+
         public LibGpiodDriver(int gpioChip = 0)
         {
             try
@@ -103,8 +112,16 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
-            // Libgpiod Api do not support pull up or pull down resistors for now.
-            return mode != PinMode.InputPullDown && mode != PinMode.InputPullUp;
+            switch (mode)
+            {
+                case PinMode.Input:
+                case PinMode.InputPullDown:
+                case PinMode.InputPullUp:
+                case PinMode.Output:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         protected internal override void OpenPin(int pinNumber)
@@ -157,14 +174,25 @@ namespace System.Device.Gpio.Drivers
             int requestResult = -1;
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
+                int flags;
                 string consumer = pinNumber.ToString();
-                if (mode == PinMode.Input)
+
+                switch (mode)
                 {
-                    requestResult = Interop.libgpiod.gpiod_line_request_input(pinHandle, consumer);
-                }
-                else
-                {
-                    requestResult = Interop.libgpiod.gpiod_line_request_output(pinHandle, consumer);
+                    case PinMode.Input:
+                        requestResult = Interop.libgpiod.gpiod_line_request_input(pinHandle, consumer);
+                        break;
+                    case PinMode.InputPullDown:
+                        flags = (int) RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN;
+                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, consumer, flags);
+                        break;
+                    case PinMode.InputPullUp:
+                        flags = (int) RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
+                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, consumer, flags);
+                        break;
+                    case PinMode.Output:
+                        requestResult = Interop.libgpiod.gpiod_line_request_output(pinHandle, consumer);
+                        break;
                 }
 
                 pinHandle.PinMode = mode;
