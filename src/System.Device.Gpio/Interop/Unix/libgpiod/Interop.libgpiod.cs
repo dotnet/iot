@@ -143,6 +143,13 @@ internal partial class Interop
         /// <returns>GPIO chip pointer handle or NULL if an error occurred.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern SafeChipHandle gpiod_chip_open_by_number(int number);
+
+        /// <summary>
+        /// Get the API version of the library as a human-readable string.
+        /// </summary>
+        /// <returns>Human-readable string containing the library version.</returns>
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        internal static extern IntPtr gpiod_version_string();
     }
 }
 
