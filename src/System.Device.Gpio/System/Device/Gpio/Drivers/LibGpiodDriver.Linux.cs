@@ -19,7 +19,7 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override int PinCount => Interop.libgpiod.gpiod_chip_num_lines(_chip);
 
-        public enum RequestFlag : ulong {
+        private enum RequestFlag : ulong {
             GPIOD_LINE_REQUEST_FLAG_OPEN_DRAIN = (1UL << 0),
             GPIOD_LINE_REQUEST_FLAG_OPEN_SOURCE = (1UL << 1),
             GPIOD_LINE_REQUEST_FLAG_ACTIVE_LOW = (1UL << 2),
