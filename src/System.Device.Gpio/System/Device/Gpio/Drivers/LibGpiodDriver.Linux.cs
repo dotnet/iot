@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
-using System.Text.RegularExpressions;
 
 namespace System.Device.Gpio.Drivers
 {
@@ -120,15 +119,15 @@ namespace System.Device.Gpio.Drivers
                 case PinMode.InputPullDown:
                 case PinMode.InputPullUp:
                     // for use the bias flags we need Kernel version 5.5 or later
-                    var linuxVersionMatch = Regex.Split(RuntimeInformation.OSDescription, @"Linux (.*?)\.(.*?)\.");
-                    
-                    if (linuxVersionMatch.Length > 2)
+                    var linuxVersionMatch = RuntimeInformation.OSDescription.Replace("Linux ", "").Trim().Split('.');
+
+                    if (linuxVersionMatch.Length > 1)
                     {
-                        var version = float.Parse($"{linuxVersionMatch[1]}.{linuxVersionMatch[2]}");
+                        var version = float.Parse($"{linuxVersionMatch[0]}.{linuxVersionMatch[1]}");
                         if (version >= 5.5)
                             return true;
                         else
-                            Console.Error.WriteLine($"Using Kernel v{version}, to use pull-up pull-down with libgpiod v1.5 you need Kernel v5.5 or later");
+                            Console.Error.WriteLine($"Using Kernel v{version}, Kernel v5.5 or later is needed to use pull-up/pull-down with libgpiod");
                     }
 
                     return false;
