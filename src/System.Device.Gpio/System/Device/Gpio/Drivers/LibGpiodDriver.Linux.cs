@@ -118,17 +118,35 @@ namespace System.Device.Gpio.Drivers
                     return true;
                 case PinMode.InputPullDown:
                 case PinMode.InputPullUp:
+                    // for use the bias flags we need libgpiod version 1.5 or later
+                    IntPtr libgpiodVersionPtr = Interop.libgpiod.gpiod_version_string();
+                    var libgpiodVersionMatch = Marshal.PtrToStringAnsi(libgpiodVersionPtr).Trim().Split('.');
+                    var libgpiodVersion = 0.0F;
+                    bool isLibgpiod1dot5 = false;
+
+                    if (libgpiodVersionMatch.Length > 1)
+                    {
+                        libgpiodVersion = float.Parse($"{libgpiodVersionMatch[0]}.{libgpiodVersionMatch[1]}");
+                        isLibgpiod1dot5 = (libgpiodVersion >= 1.5);
+                    }
+
                     // for use the bias flags we need Kernel version 5.5 or later
                     var linuxVersionMatch = RuntimeInformation.OSDescription.Replace("Linux ", "").Trim().Split('.');
+                    var linuxVersion = 0.0F;
+                    bool isKernelLinux5dot5 = false;
 
                     if (linuxVersionMatch.Length > 1)
                     {
-                        var version = float.Parse($"{linuxVersionMatch[0]}.{linuxVersionMatch[1]}");
-                        if (version >= 5.5)
-                            return true;
-                        else
-                            Console.Error.WriteLine($"Using Kernel v{version}, Kernel v5.5 or later is needed to use pull-up/pull-down with libgpiod");
+                        linuxVersion = float.Parse($"{linuxVersionMatch[0]}.{linuxVersionMatch[1]}");
+                        isKernelLinux5dot5 = (linuxVersion >= 5.5);
                     }
+
+                    // check if we have the correct versions
+                    if (isKernelLinux5dot5 && isLibgpiod1dot5)
+                        return true;
+                    else
+                        Console.Error.WriteLine($"Using Kernel v{linuxVersion} but v5.5 or later is required.\n" +
+                                                $"Using libgpiod v{libgpiodVersion} but v1.5 or later is required.");
 
                     return false;
                 case PinMode.Output:
