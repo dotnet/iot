@@ -634,9 +634,6 @@ namespace System.Device.Gpio.Drivers
 
         private void DetectEvents()
         {
-            OpenPin(13);
-            SetPinMode(13, PinMode.Output);
-            Write(13, PinValue.Low);
             while (_pinsToDetectEventsCount > 0)
             {
                 try
@@ -648,8 +645,6 @@ namespace System.Device.Gpio.Drivers
                         {
                             Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
                         }
-
-                        Write(13, PinValue.High);
 
                         var currentPin = _devicePins[pinNumber];
                         var activeEdges = currentPin.ActiveEdges;
@@ -689,8 +684,6 @@ namespace System.Device.Gpio.Drivers
                             currentPin.LastValue = Read(pinNumber);
                         }
 
-                        // Console.WriteLine($"Got an event on pin {pinNumber} and it is {eventType} (Active: {activeEdges})");
-                        // Thread.Sleep(10);
                         var args = new PinValueChangedEventArgs(eventType, pinNumber);
                         currentPin.OnPinValueChanged(args);
                         if (secondEvent != PinEventTypes.None)
@@ -698,8 +691,6 @@ namespace System.Device.Gpio.Drivers
                             args = new PinValueChangedEventArgs(secondEvent, pinNumber);
                             currentPin.OnPinValueChanged(args);
                         }
-
-                        Write(13, PinValue.Low);
                     }
                 }
                 catch (ObjectDisposedException)
