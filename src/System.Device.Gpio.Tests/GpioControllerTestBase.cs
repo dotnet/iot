@@ -407,9 +407,14 @@ namespace System.Device.Gpio.Tests
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 CancellationTokenSource tokenSource = new CancellationTokenSource();
+                tokenSource.CancelAfter(2000);
                 controller.OpenPin(InputPin, PinMode.Input);
                 controller.OpenPin(OutputPin, PinMode.Output);
                 controller.Write(OutputPin, PinValue.High);
+
+                // Wait for any events that happen because of the initialization
+                controller.WaitForEvent(InputPin, PinEventTypes.Falling | PinEventTypes.Rising, tokenSource.Token);
+                tokenSource.Dispose();
 
                 var task = Task.Run(() =>
                 {
@@ -420,6 +425,9 @@ namespace System.Device.Gpio.Tests
                     controller.Write(OutputPin, PinValue.High);
                 });
 
+                tokenSource = new CancellationTokenSource();
+                tokenSource.CancelAfter(WaitMilliseconds * 4);
+
                 // First event is falling, second is rising
                 WaitForEventResult result = controller.WaitForEvent(InputPin, PinEventTypes.Falling | PinEventTypes.Rising, tokenSource.Token);
                 Assert.False(result.TimedOut);
@@ -427,7 +435,8 @@ namespace System.Device.Gpio.Tests
                 result = controller.WaitForEvent(InputPin, PinEventTypes.Falling | PinEventTypes.Rising, tokenSource.Token);
                 Assert.False(result.TimedOut);
                 Assert.Equal(PinEventTypes.Rising, result.EventTypes);
-                Assert.True(task.Wait(TimeSpan.FromSeconds(30))); // Should end way before that
+                Assert.True(task.Wait(TimeSpan.FromSeconds(30))); // Should end long before that
+                tokenSource.Dispose();
             }
         }
 
