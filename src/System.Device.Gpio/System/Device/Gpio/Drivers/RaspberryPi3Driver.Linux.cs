@@ -452,7 +452,14 @@ namespace System.Device.Gpio.Drivers
                     return;
                 }
 
-                _sysFSDriver = new InterruptSysFsDriver(this);
+                try
+                {
+                    _sysFSDriver = new LibGpiodDriver(0);
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    _sysFSDriver = new InterruptSysFsDriver(this);
+                }
             }
         }
 
