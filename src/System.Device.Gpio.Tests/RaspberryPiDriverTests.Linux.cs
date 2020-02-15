@@ -6,6 +6,7 @@ using System.Device.Gpio.Drivers;
 using System.Diagnostics;
 using System.Threading;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Device.Gpio.Tests
 {
@@ -18,6 +19,10 @@ namespace System.Device.Gpio.Tests
         /// Leave this pin open (unconnected) for the tests
         /// </summary>
         private const int OpenPin = 23;
+        public RaspberryPiDriverTests(ITestOutputHelper testOutputHelper)
+            : base(testOutputHelper)
+        {
+        }
 
         protected override GpioDriver GetTestDriver() => new RaspberryPi3Driver();
 
