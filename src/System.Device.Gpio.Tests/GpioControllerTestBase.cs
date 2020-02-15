@@ -448,14 +448,13 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        // [Trait("SkipOnTestRun", "Windows_NT")] // This should work on windows as well...
         public void FastInterruptHandling()
         {
             const int numPulses = 100;
             // These are in ms
             const int pulseLength = 1;
             const int waitTime = 20;
-            const double acceptableTimeFactor = 1.7;
+            const double acceptableTimeFactor = 2.0;
 
             int numInterrupts = 0;
             int numRisingEdges = 0;
