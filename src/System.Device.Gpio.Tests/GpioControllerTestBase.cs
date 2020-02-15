@@ -441,7 +441,7 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        [Trait("SkipOnTestRun", "Windows_NT")]
+        // [Trait("SkipOnTestRun", "Windows_NT")] // This should work on windows as well...
         public void FastInterruptHandling()
         {
             const int numPulses = 100;

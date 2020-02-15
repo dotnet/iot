@@ -12,7 +12,7 @@ namespace System.Device.Gpio.Drivers
 {
     internal class Windows10DriverPin : IDisposable
     {
-        private const int ReasonableDebounceTimeoutMillseconds = 50;
+        private const int ReasonableDebounceTimeoutMilliseconds = 0;
         private readonly int _pinNumber;
         private WeakReference<Windows10Driver> _driver;
         private WinGpio.GpioPin _pin;
@@ -26,7 +26,7 @@ namespace System.Device.Gpio.Drivers
             _pinNumber = _pin.PinNumber;
 
             // Set a reasonable default for DebounceTimeout (until .NET Core API adds a DebouceTimeout property)
-            _pin.DebounceTimeout = TimeSpan.FromMilliseconds(ReasonableDebounceTimeoutMillseconds);
+            _pin.DebounceTimeout = TimeSpan.FromMilliseconds(ReasonableDebounceTimeoutMilliseconds);
         }
 
         ~Windows10DriverPin()
@@ -141,7 +141,7 @@ namespace System.Device.Gpio.Drivers
 
                 return new WaitForEventResult
                 {
-                    EventTypes = eventOccurred ? pinEventTypes : PinEventTypes.None,
+                    EventTypes = pinEventTypes,
                     TimedOut = !eventOccurred
                 };
             }
