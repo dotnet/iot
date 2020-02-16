@@ -14,12 +14,14 @@ using System.Globalization;
 namespace Iot.Device.CharacterLcd
 {
     /// <summary>
-    /// This is a high-level interface to an LCD display. 
+    /// This is a high-level interface to an LCD display.
     /// It supports automatic wrapping of text, automatic scrolling and code page mappings.
-    /// This class is thread safe, however using Write from different threads may lead to unexpected results, since the order is not guaranteed. 
+    /// This class is thread safe, however using Write from different threads may lead to unexpected results, since the order is not guaranteed.
     /// </summary>
     public sealed class LcdConsole : IDisposable
     {
+        private readonly object _lock;
+        private readonly bool _shouldDispose;
         private ICharacterLcd _lcd;
 
         /// <summary>
@@ -27,15 +29,13 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         private StringBuilder[] _currentData;
         private LineWrapMode _lineFeedMode;
-        private readonly object _lock;
-        private readonly bool _shouldDispose;
         private TimeSpan _scrollUpDelay;
         private string _romType;
         private Encoding _characterEncoding;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="LcdConsole"/> class using the specified LCD low-level interface. 
-        /// This class automatically configures the low-level interface. Do not use the low-level interface at the same time. 
+        /// Creates a new instance of the <see cref="LcdConsole"/> class using the specified LCD low-level interface.
+        /// This class automatically configures the low-level interface. Do not use the low-level interface at the same time.
         /// </summary>
         /// <param name="lcd">The low-level LCD interface.</param>
         /// <param name="romType">Name of character ROM of display. Currently supported types: A00 and A02.</param>
@@ -81,8 +81,8 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <summary>
-        /// If this is larger than zero, an a wait is introduced each time the display wraps to the next line or scrolls up. Can be used to print long texts to the display, 
-        /// but keeping it readable. 
+        /// If this is larger than zero, an a wait is introduced each time the display wraps to the next line or scrolls up. Can be used to print long texts to the display,
+        /// but keeping it readable.
         /// </summary>
         public TimeSpan ScrollUpDelay
         {
@@ -97,6 +97,7 @@ namespace Iot.Device.CharacterLcd
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), "Timespan must be positive");
                 }
+
                 _scrollUpDelay = value;
             }
         }
@@ -144,7 +145,7 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <summary>
-        /// Sets the Line Feed Mode. 
+        /// Sets the Line Feed Mode.
         /// This defines what happens when writting past the end of the line/screen.
         /// </summary>
         public LineWrapMode LineFeedMode
@@ -171,7 +172,7 @@ namespace Iot.Device.CharacterLcd
         {
             for (int i = 0; i < Size.Height; i++)
             {
-                // The display has now only spaces on it. 
+                // The display has now only spaces on it.
                 _currentData[i] = new StringBuilder(new String(' ', Size.Width));
             }
         }
@@ -204,14 +205,17 @@ namespace Iot.Device.CharacterLcd
                 {
                     throw new ArgumentOutOfRangeException(nameof(left));
                 }
+
                 if (top < 0)
                 {
                     throw new ArgumentOutOfRangeException(nameof(top));
                 }
+
                 if (left < Size.Width && top < Size.Height)
                 {
                     _lcd.SetCursorPosition(left, top);
                 }
+
                 CursorLeft = left;
                 CursorTop = top;
             }
@@ -234,6 +238,7 @@ namespace Iot.Device.CharacterLcd
             {
                 throw new ArgumentNullException(nameof(text));
             }
+
             text = text.Replace("\r\n", "\n"); // Change to linux format only, so we have to consider only this case further
 
             List<string> lines = text.Split("\n", StringSplitOptions.None).ToList();
@@ -262,9 +267,9 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <summary>
-        /// Replaces the text of the given line. 
-        /// This will overwrite the text in the given line, filling up with spaces, if needed. 
-        /// This will never wrap to the next line, and line feeds in the input string are not allowed. 
+        /// Replaces the text of the given line.
+        /// This will overwrite the text in the given line, filling up with spaces, if needed.
+        /// This will never wrap to the next line, and line feeds in the input string are not allowed.
         /// </summary>
         /// <param name="lineNumber">0-based index of the line to start</param>
         /// <param name="text">Text to insert. No newlines supported.</param>
@@ -276,6 +281,7 @@ namespace Iot.Device.CharacterLcd
                 // This is to simplify usage. You would normally use this method to replace one line with new text (i.e. replace only the active element, not affecting the menu title)
                 throw new ArgumentException("The string may not contain line feeds");
             }
+
             lock (_lock)
             {
                 SetCursorPosition(0, lineNumber);
@@ -330,8 +336,8 @@ namespace Iot.Device.CharacterLcd
                         // Insert the remaining part as new entry to the list, continue iteration there
                         string remainingPart = remaining.Substring(roomOnLine).TrimStart(' ');
                         lines.Insert(i + 1, remainingPart);
-
                     }
+
                     roomOnLine = Size.Width; // From now on, we have the full width available
                 }
             }
@@ -350,7 +356,7 @@ namespace Iot.Device.CharacterLcd
 
         /// <summary>
         /// Blinks the display text (and the backlight, if available).
-        /// Can be used to get user attention. 
+        /// Can be used to get user attention.
         /// Operation is synchronous.
         /// </summary>
         /// <param name="times">Number of times to blink. The blink rate is 1 Hz</param>
@@ -376,12 +382,14 @@ namespace Iot.Device.CharacterLcd
                         _lcd.DisplayOn = false;
                         _lcd.BacklightOn = false;
                     }
+
                     Thread.Sleep(500);
                     lock (_lock)
                     {
                         _lcd.DisplayOn = true;
                         _lcd.BacklightOn = true;
                     }
+
                     Thread.Sleep(500);
                 }
             });
@@ -394,6 +402,7 @@ namespace Iot.Device.CharacterLcd
             {
                 Thread.Sleep(_scrollUpDelay);
             }
+
             lock (_lock)
             {
                 if (CursorTop < Size.Height - 1)
@@ -426,12 +435,13 @@ namespace Iot.Device.CharacterLcd
                 byte[] buffer = MapChars(_currentData[i].ToString());
                 _lcd.Write(buffer);
             }
+
             SetCursorPosition(x, y);
         }
 
         /// <summary>
         /// Scrolls the text up by one row, clearing the last row. Does not change the cursor position.
-        /// Implementation note: Caller must own the lock. 
+        /// Implementation note: Caller must own the lock.
         /// </summary>
         private void ScrollUp()
         {
@@ -439,13 +449,14 @@ namespace Iot.Device.CharacterLcd
             {
                 _currentData[i - 1] = _currentData[i];
             }
+
             _currentData[Size.Height - 1] = new StringBuilder(new String(' ', Size.Width));
             RefreshFromBuffer();
         }
 
         /// <summary>
-        /// This is expected to be called only with a string length of less or equal the remaining number of characters on the current line. 
-        /// Implementation note: Caller must own the lock. 
+        /// This is expected to be called only with a string length of less or equal the remaining number of characters on the current line.
+        /// Implementation note: Caller must own the lock.
         /// </summary>
         private void WriteCurrentLine(string line)
         {
@@ -458,14 +469,14 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <summary>
-        /// Creates an encoding that can be used for an LCD display. 
+        /// Creates an encoding that can be used for an LCD display.
         /// Typically, the returned value will be loaded using <see cref="LoadEncoding(LcdCharacterEncoding)"/>.
         /// </summary>
         /// <param name="culture">Required display culture (forwarded to the factory)</param>
         /// <param name="romType">The name of the ROM for which the encoding is to be applied. The default factory supports roms A00 and A02.</param>
         /// <param name="unknownCharacter">The character to print for unknown letters, default: ?</param>
         /// <param name="maxNumberOfCustomCharacters">The maximum number of custom characters supported by the hardware.</param>
-        /// <param name="factory">Character encoding factory that delivers the mapping of the Char type to the hardware ROM character codes. May add special characters into 
+        /// <param name="factory">Character encoding factory that delivers the mapping of the Char type to the hardware ROM character codes. May add special characters into
         /// the character ROM. Default: Null (Use internal factory)</param>
         public static LcdCharacterEncoding CreateEncoding(CultureInfo culture, string romType, char unknownCharacter = '?', int maxNumberOfCustomCharacters = 8, LcdCharacterEncodingFactory factory = null)
         {
@@ -478,8 +489,8 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <summary>
-        /// Loads the specified encoding. 
-        /// This behaves as <see cref="LoadEncoding(LcdCharacterEncoding)"/> when the argument is of the dynamic type <see cref="LcdCharacterEncoding"/>, otherwise like an encding 
+        /// Loads the specified encoding.
+        /// This behaves as <see cref="LoadEncoding(LcdCharacterEncoding)"/> when the argument is of the dynamic type <see cref="LcdCharacterEncoding"/>, otherwise like an encding
         /// with no special characters.
         /// </summary>
         /// <param name="encoding">The encoding to load.</param>
@@ -491,15 +502,17 @@ namespace Iot.Device.CharacterLcd
             {
                 return LoadEncoding(encoding);
             }
+
             lock (_lock)
             {
                 _characterEncoding = encoding;
             }
+
             return true;
         }
 
         /// <summary>
-        /// Loads the specified character encoding. This loads any custom characters from the encoding to the display. 
+        /// Loads the specified character encoding. This loads any custom characters from the encoding to the display.
         /// </summary>
         /// <param name="encoding">The encoding to load.</param>
         /// <returns>True if the character encoding was successfully loaded, false if there are not enough custom slots for all the required custom characters.
@@ -512,9 +525,10 @@ namespace Iot.Device.CharacterLcd
                 int numberOfCharctersToLoad = Math.Min(encoding.ExtraCharacters.Count, _lcd.NumberOfCustomCharactersSupported);
                 if (numberOfCharctersToLoad < encoding.ExtraCharacters.Count)
                 {
-                    // We can't completelly load that encoding, because there are not enough custom slots. 
+                    // We can't completelly load that encoding, because there are not enough custom slots.
                     allCharactersLoaded = false;
                 }
+
                 for (byte i = 0; i < numberOfCharctersToLoad; i++)
                 {
                     byte[] pixelMap = encoding.ExtraCharacters[i];
@@ -523,6 +537,7 @@ namespace Iot.Device.CharacterLcd
 
                 _characterEncoding = encoding;
             }
+
             return allCharactersLoaded;
         }
 
@@ -546,6 +561,7 @@ namespace Iot.Device.CharacterLcd
                 {
                     buffer[i] = (byte)line[i];
                 }
+
                 return buffer;
             }
             else
@@ -563,6 +579,7 @@ namespace Iot.Device.CharacterLcd
             {
                 _lcd.Dispose();
             }
+
             GC.SuppressFinalize(this);
         }
     }

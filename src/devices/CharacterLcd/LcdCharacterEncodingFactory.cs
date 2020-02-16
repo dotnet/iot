@@ -5,12 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 
 namespace Iot.Device.CharacterLcd
 {
     /// <summary>
-    /// Factory for creating Encodings that support different cultures on different LCD Displays. 
+    /// Factory for creating Encodings that support different cultures on different LCD Displays.
     /// </summary>
     public class LcdCharacterEncodingFactory
     {
@@ -28,7 +27,7 @@ namespace Iot.Device.CharacterLcd
                 DefaultCustomMap.Add(c, (byte)c);
             }
 
-            // The character map A00 contains the most used european letters, some greek math symbola plus japanese letters. 
+            // The character map A00 contains the most used european letters, some greek math symbola plus japanese letters.
             // Compare with the HD44780 specification sheet, page 17
             DefaultA00Map = new Dictionary<char, byte>();
             // Inserts ASCII characters ' ' to 'z', which are common to most known character sets
@@ -36,6 +35,7 @@ namespace Iot.Device.CharacterLcd
             {
                 DefaultA00Map.Add(c, (byte)c);
             }
+
             DefaultA00Map.Remove('\\'); // Instead of the backspace, the Yen letter is in the map, but we can use char 164 instead
             DefaultA00Map.Add('\\', 164);
             DefaultA00Map.Add('¥', 92);
@@ -73,7 +73,7 @@ namespace Iot.Device.CharacterLcd
             DefaultA00Map.Add('×', (byte)'x');
             DefaultA00Map.Add('█', 255);
 
-            // Now the japanese characters in the A00 rom map. 
+            // Now the japanese characters in the A00 rom map.
             // They use the same order than described in https://de.wikipedia.org/wiki/Japanische_Schrift#F%C3%BCnfzig-Laute-Tafel Table "Katakana", so the mapping sounds reasonable.
 
             // Small letters
@@ -147,6 +147,7 @@ namespace Iot.Device.CharacterLcd
             {
                 DefaultA02Map.Add(c, (byte)c);
             }
+
             // This map contains wide arrow characters. They could be helpful for menus, but not sure where to map them.
             DefaultA02Map.Add('{', 123);
             DefaultA02Map.Add('|', 124);
@@ -309,7 +310,7 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         /// <param name="culture">Culture for which support is required</param>
         /// <param name="romName">ROM type of attached chip. Supported values: "A00" and "A02"</param>
-        /// <param name="unknownLetter">Letter that is printed when an unknown character is encountered. This letter must be part of the 
+        /// <param name="unknownLetter">Letter that is printed when an unknown character is encountered. This letter must be part of the
         /// default rom set</param>
         /// <param name="maxNumberOfCustomCharacters">Maximum number of custom characters supported on the hardware. Should be 8 for Hd44780-controlled displays.</param>
         /// <returns>The newly created encoding. Whether the encoding can be loaded to a certain display will be decided later.</returns>
@@ -320,6 +321,7 @@ namespace Iot.Device.CharacterLcd
             {
                 throw new ArgumentNullException(nameof(culture));
             }
+
             Dictionary<char, byte> newMap;
             // Need to copy the static map, we must not update that
             switch (romName)
@@ -382,17 +384,18 @@ namespace Iot.Device.CharacterLcd
                     }
                 }
             }
+
             return retValue;
         }
 
         /// <summary>
-        /// Returns the set of special characters required for a given culture/language. 
-        /// This may include diacritics (ä, ö, ø), currency signs (€) or similar chars. 
+        /// Returns the set of special characters required for a given culture/language.
+        /// This may include diacritics (ä, ö, ø), currency signs (€) or similar chars.
         /// If any of the returned characters are not found in the ROM map, <see cref="CreateLetter"/> is called to obtain the pixel representation of the given character.
-        /// A maximum of 8 extra characters can be added to the ones in the ROM. 
+        /// A maximum of 8 extra characters can be added to the ones in the ROM.
         /// </summary>
         /// <param name="culture">Culture to support</param>
-        /// <param name="characterMapping">The character map, pre-loaded with the characters from the character ROM. This may be extended by explicity adding direct mappings 
+        /// <param name="characterMapping">The character map, pre-loaded with the characters from the character ROM. This may be extended by explicitly adding direct mappings
         /// where an alternative is allowed (i.e. mapping capital diacritics to normal capital letters É -> E, when there's not enough room to put É into character RAM.</param>
         /// <returns>A string with the set of special characters for a language, i.e. "äöüß€ÄÖÜ" for German</returns>
         protected virtual string SpecialLettersForCulture(CultureInfo culture, Dictionary<char, byte> characterMapping)
@@ -403,6 +406,7 @@ namespace Iot.Device.CharacterLcd
             {
                 mainCultureName = mainCultureName.Substring(0, idx);
             }
+
             string specialLetters;
             switch (mainCultureName)
             {
@@ -419,7 +423,7 @@ namespace Iot.Device.CharacterLcd
                 case "fr":
                     specialLetters = "èéêà€çôù";
                     // If the character map doesn't already contain them, we map these diacritical capital letters to their non-diacritical variants.
-                    // That's common in french. 
+                    // That's common in french.
                     characterMapping.TryAdd('É', (byte)'E');
                     characterMapping.TryAdd('È', (byte)'E');
                     characterMapping.TryAdd('Ê', (byte)'E');
@@ -444,6 +448,7 @@ namespace Iot.Device.CharacterLcd
                     specialLetters = "€£";
                     break;
             }
+
             return specialLetters;
         }
 
@@ -462,6 +467,7 @@ namespace Iot.Device.CharacterLcd
             {
                 return CreateLetterA02(character);
             }
+
             return null;
         }
 
@@ -884,6 +890,7 @@ namespace Iot.Device.CharacterLcd
                     0b_00000);
 
             }
+
             return null;
         }
 

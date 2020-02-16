@@ -41,6 +41,7 @@ namespace Iot.Device.CharacterLcd.Samples
                 console.WriteLine($"This is line {i + 1}/{20}, but longer than the screen");
                 Thread.Sleep(10);
             }
+
             console.LineFeedMode = LineWrapMode.Wrap;
             console.WriteLine("Same again, this time with full wrapping.");
             for (int i = 0; i < 20; i++)
@@ -48,6 +49,7 @@ namespace Iot.Device.CharacterLcd.Samples
                 console.Write($"This is string {i + 1}/{20} longer than the screen");
                 Thread.Sleep(10);
             }
+
             Console.ReadLine();
             Console.WriteLine("Intelligent wrapping test");
             console.LineFeedMode = LineWrapMode.WordWrap;
@@ -77,6 +79,7 @@ namespace Iot.Device.CharacterLcd.Samples
                 {
                     printTime = time.Substring(-left);
                 }
+
                 console.ReplaceLine(1, printTime);
                 left--;
                 // Each full minute, blink the display (but continue writing the time)
@@ -84,12 +87,14 @@ namespace Iot.Device.CharacterLcd.Samples
                 {
                     alertTask = console.BlinkDisplayAsync(3);
                 }
+
                 if (alertTask != null && alertTask.IsCompleted)
                 {
                     // Ensure we catch any exceptions (there shouldn't be any...)
                     alertTask.Wait();
                     alertTask = null;
                 }
+
                 Thread.Sleep(500);
                 // Restart when the time string has left the display
                 if (left < -time.Length)
@@ -97,6 +102,7 @@ namespace Iot.Device.CharacterLcd.Samples
                     left = console.Size.Width;
                 }
             }
+
             alertTask?.Wait();
             Console.ReadKey();
             Console.WriteLine("Culture Info Test");
@@ -139,7 +145,7 @@ namespace Iot.Device.CharacterLcd.Samples
             console.WriteLine("Dansk er et nordgermansk sprog af den østnordiske (kontinentale) gruppe, " +
                 "der tales af ca. seks millioner mennesker. Det er stærkt påvirket af plattysk. Dansk tales " +
                 "også i Sydslesvig (i Flensborg ca. 20 %) samt PÅ FÆRØER OG GRØNLAND.");
-            
+
             Console.ReadLine();
             Console.WriteLine("Japanese test");
             encoding = LcdConsole.CreateEncoding(CultureInfo.CreateSpecificCulture("ja-ja"), "A00", '?', 8);

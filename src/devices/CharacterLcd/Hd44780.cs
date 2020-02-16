@@ -4,9 +4,6 @@
 
 using System;
 using System.Buffers;
-using System.Collections.Generic;
-using System.Device;
-using System.Device.Gpio;
 using System.Drawing;
 
 namespace Iot.Device.CharacterLcd
@@ -88,7 +85,7 @@ namespace Iot.Device.CharacterLcd
         public Size Size { get; }
 
         /// <summary>
-        /// Returns the number of custom characters for this display. 
+        /// Returns the number of custom characters for this display.
         /// A custom character is one that can be user-defined and assigned to a slot using <see cref="CreateCustomCharacter(byte, byte[])"/>
         /// </summary>
         public virtual int NumberOfCustomCharactersSupported => 8;
@@ -436,7 +433,7 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <summary>
-        /// Write a raw byte stream to the display. 
+        /// Write a raw byte stream to the display.
         /// Used if character translation already took place
         /// </summary>
         /// <param name="text">Text to print</param>
