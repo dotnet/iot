@@ -395,7 +395,7 @@ namespace Iot.Device.CharacterLcd
         /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
         public void CreateCustomCharacter(byte location, ReadOnlySpan<byte> characterMap)
         {
-            if (location > NumberOfCustomCharactersSupported - 1)
+            if (location >= NumberOfCustomCharactersSupported)
             {
                 throw new ArgumentOutOfRangeException(nameof(location));
             }
