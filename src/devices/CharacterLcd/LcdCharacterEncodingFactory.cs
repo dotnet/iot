@@ -27,7 +27,7 @@ namespace Iot.Device.CharacterLcd
                 DefaultCustomMap.Add(c, (byte)c);
             }
 
-            // The character map A00 contains the most used european letters, some greek math symbola plus japanese letters.
+            // The character map A00 contains the most used european letters, some greek math symbols plus japanese letters.
             // Compare with the HD44780 specification sheet, page 17
             DefaultA00Map = new Dictionary<char, byte>();
             // Inserts ASCII characters ' ' to 'z', which are common to most known character sets
