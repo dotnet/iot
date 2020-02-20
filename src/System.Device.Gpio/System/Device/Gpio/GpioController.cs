@@ -172,11 +172,6 @@ namespace System.Device.Gpio
                 throw new InvalidOperationException("Can not read from a pin that is not open.");
             }
 
-            if (_driver.GetPinMode(logicalPinNumber) == PinMode.Output)
-            {
-                throw new InvalidOperationException("Can not read from a pin that is set to Output mode.");
-            }
-
             return _driver.Read(logicalPinNumber);
         }
 
