@@ -121,7 +121,12 @@ namespace System.Device.Gpio.Tests
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(OutputPin, PinMode.Output);
+
+                controller.Write(OutputPin, PinValue.Low);
                 Assert.Equal(PinValue.Low, controller.Read(OutputPin));
+
+                controller.Write(OutputPin, PinValue.High);
+                Assert.Equal(PinValue.High, controller.Read(OutputPin));
             }
         }
 
