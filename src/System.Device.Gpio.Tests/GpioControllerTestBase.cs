@@ -116,6 +116,16 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
+        public void CanReadFromOutputPin()
+        {
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                controller.OpenPin(OutputPin, PinMode.Output);
+                Assert.Equal(PinValue.Low, controller.Read(OutputPin));
+            }
+        }
+
+        [Fact]
         [Trait("SkipOnTestRun", "Windows_NT")] // Currently, the Windows Driver is defaulting to InputPullDown instead of Input when Closed/Opened.
         public void OpenPinDefaultsModeToInput()
         {
