@@ -263,7 +263,6 @@ namespace Iot.Device.CharacterLcd
                     NewLine();
                 }
             }
-
         }
 
         /// <summary>

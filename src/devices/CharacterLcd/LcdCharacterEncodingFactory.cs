@@ -21,19 +21,22 @@ namespace Iot.Device.CharacterLcd
         {
             // Default map which is used for unknown ROMs
             DefaultCustomMap = new Dictionary<char, byte>();
+            // The character map A00 contains the most used european letters, some greek math symbols plus japanese letters.
+            // Compare with the HD44780 specification sheet, page 17
+            DefaultA00Map = new Dictionary<char, byte>();
+
+            // Character map A02 contains about all characters used in western european languages, a few greek math symbols and some symbols.
+            // Compare with the HD44780 specification sheet, page 18.
+            // Note especially that this character map really uses the 8 pixel height of the characters, while the A00 map leaves the lowest
+            // pixel row usually empty for the cursor. The added space at the top of the character helps by better supporting diacritical symbols.
+            DefaultA02Map = new Dictionary<char, byte>();
+
             // Inserts ASCII characters ' ' to 'z', which are common to most known character sets
             for (char c = ' '; c <= 'z'; c++)
             {
                 DefaultCustomMap.Add(c, (byte)c);
-            }
-
-            // The character map A00 contains the most used european letters, some greek math symbols plus japanese letters.
-            // Compare with the HD44780 specification sheet, page 17
-            DefaultA00Map = new Dictionary<char, byte>();
-            // Inserts ASCII characters ' ' to 'z', which are common to most known character sets
-            for (char c = ' '; c <= 'z'; c++)
-            {
                 DefaultA00Map.Add(c, (byte)c);
+                DefaultA02Map.Add(c, (byte)c);
             }
 
             DefaultA00Map.Remove('\\'); // Instead of the backspace, the Yen letter is in the map, but we can use char 164 instead
@@ -140,13 +143,6 @@ namespace Iot.Device.CharacterLcd
             DefaultA00Map.Add('ヲ', 0b1010_0110); // This one is out of sequence
             DefaultA00Map.Add('゛', 0b1101_1110);
             DefaultA00Map.Add('゜', 0b1101_1111);
-
-            DefaultA02Map = new Dictionary<char, byte>();
-            // Inserts ASCII characters ' ' to 'z', which are common to most known character sets
-            for (char c = ' '; c <= 'z'; c++)
-            {
-                DefaultA02Map.Add(c, (byte)c);
-            }
 
             // This map contains wide arrow characters. They could be helpful for menus, but not sure where to map them.
             DefaultA02Map.Add('{', 123);
@@ -914,8 +910,7 @@ namespace Iot.Device.CharacterLcd
         /// <example>
         /// Use as follows to create letter 'ü':
         /// <code>
-        /// case 'ü':
-        ///            return CreateCustomCharacter(
+        /// CreateCustomCharacter(
         ///            0b_01010,
         ///            0b_00000,
         ///            0b_10001,
@@ -923,8 +918,8 @@ namespace Iot.Device.CharacterLcd
         ///            0b_10001,
         ///            0b_10011,
         ///            0b_01101,
-        ///            0b_00000);
-        ///            </code>
+        ///            0b_00000)
+        /// </code>
         /// </example>
         protected byte[] CreateCustomCharacter(byte byte0, byte byte1, byte byte2, byte byte3, byte byte4, byte byte5, byte byte6, byte byte7)
         {

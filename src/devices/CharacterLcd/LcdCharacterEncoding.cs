@@ -18,35 +18,35 @@ namespace Iot.Device.CharacterLcd
         private char _unknownLetter;
         // Character pixel maps for characters that will need to be written to the character RAM for this code page
         private List<byte[]> _extraCharacters;
-        private String _cultureName;
+        private string _cultureName;
 
         /// <summary>
         /// Creates an instance of <see cref="LcdCharacterEncoding"/>.
         /// </summary>
         /// <param name="cultureName">Culture name for this encoding (informational only)</param>
-        /// <param name="romName">Name of the ROM on the display</param>
+        /// <param name="readOnlyMemoryName">Name of the ROM (hard coded read-only character memory) on the display</param>
         /// <param name="characterMap">The character map to use</param>
         /// <param name="unknownLetter">The character to print when a letter not in the map is found</param>
-        public LcdCharacterEncoding(String cultureName, string romName, Dictionary<char, byte> characterMap, char unknownLetter)
+        public LcdCharacterEncoding(string cultureName, string readOnlyMemoryName, Dictionary<char, byte> characterMap, char unknownLetter)
         {
             _cultureName = cultureName;
             _characterMapping = characterMap;
             _unknownLetter = unknownLetter;
             _extraCharacters = new List<byte[]>();
             AllCharactersSupported = true;
-            RomName = romName;
+            ReadOnlyMemoryName = readOnlyMemoryName;
         }
 
         /// <summary>
         /// Creates an instance of <see cref="LcdCharacterEncoding"/>.
         /// </summary>
         /// <param name="cultureName">Culture name for this encoding (informational only)</param>
-        /// <param name="romName">Name of the ROM on the display</param>
+        /// <param name="readOnlyMemoryName">Name of the ROM (hard coded read-only character memory) on the display</param>
         /// <param name="characterMap">The character map to use</param>
         /// <param name="unknownLetter">The character to print when a letter not in the map is found</param>
         /// <param name="extraCharacters">The pixel map of characters required for this culture but not found in the character ROM</param>
-        public LcdCharacterEncoding(string cultureName, string romName, Dictionary<char, byte> characterMap, char unknownLetter, List<byte[]> extraCharacters)
-            : this(cultureName, romName, characterMap, unknownLetter)
+        public LcdCharacterEncoding(string cultureName, string readOnlyMemoryName, Dictionary<char, byte> characterMap, char unknownLetter, List<byte[]> extraCharacters)
+            : this(cultureName, readOnlyMemoryName, characterMap, unknownLetter)
         {
             _extraCharacters = extraCharacters;
             AllCharactersSupported = true;
@@ -81,9 +81,10 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <summary>
-        /// Specified Name of the ROM for which this Encoding is intended.
+        /// Specified Name of the hardcoded character memory set for which this Encoding is intended. An encoding shall only be loaded to
+        /// a matching display.
         /// </summary>
-        public string RomName
+        public string ReadOnlyMemoryName
         {
             get;
         }

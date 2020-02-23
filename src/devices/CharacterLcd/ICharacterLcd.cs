@@ -103,13 +103,13 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// Write text to the display, without any character translation.
         /// </summary>
+        /// <param name="text">Text to be displayed.</param>
         /// <remarks>
         /// There are only 256 characters available. Different chip variants
         /// have different character sets. Characters from space ' ' (32) to
         /// '}' are usually the same with the exception of '\', which is a
-        /// yen symbol on some chips '¥'.
+        /// yen symbol ('¥') on some chips.
         /// </remarks>
-        /// <param name="text">Text to be displayed.</param>
         void Write(string text);
 
         /// <summary>
