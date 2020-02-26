@@ -58,31 +58,16 @@ internal class TimeEnvelope
 
     public bool IsFirstMultiple(int value)
     {
-        if (_time == value)
-        {
-            return true;
-        }
-
-        return false;
+        return _time == value;
     }
 
     public bool IsLastMultiple(int value)
     {
-        if (_time - value == 0)
-        {
-            return true;
-        }
-
-        return false;
+        return _count - value == _time;
     }
 
     public bool IsMultiple(int value)
     {
-        if (_time % value == 0)
-        {
-            return true;
-        }
-
-        return false;
+        return _time % value == 0;
     }
 }
