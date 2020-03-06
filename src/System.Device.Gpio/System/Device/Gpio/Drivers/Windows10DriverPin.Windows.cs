@@ -70,7 +70,7 @@ namespace System.Device.Gpio.Drivers
 
             if (isFirstCallback)
             {
-                _pin.ValueChanged += this.Pin_ValueChanged;
+                _pin.ValueChanged += Pin_ValueChanged;
             }
         }
 
