@@ -21,14 +21,15 @@ namespace System.Device.Gpio.Drivers
 
         private static string s_consumerName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
 
-        private enum RequestFlag : ulong {
+        private enum RequestFlag : ulong
+        {
             GPIOD_LINE_REQUEST_FLAG_OPEN_DRAIN = (1UL << 0),
             GPIOD_LINE_REQUEST_FLAG_OPEN_SOURCE = (1UL << 1),
             GPIOD_LINE_REQUEST_FLAG_ACTIVE_LOW = (1UL << 2),
             GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE = (1UL << 3),
             GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN = (1UL << 4),
             GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP = (1UL << 5)
-        };
+        }
 
         public LibGpiodDriver(int gpioChip = 0)
         {
@@ -127,7 +128,7 @@ namespace System.Device.Gpio.Drivers
                     bool isLibgpiod1dot5 = (libgpiodVersion.Major >= 1 && libgpiodVersion.Minor >= 5);
 
                     // for use the bias flags we need Kernel version 5.5 or later
-                    string[] linuxVersionMatch = RuntimeInformation.OSDescription.Replace("Linux ", "").Split('.');
+                    string[] linuxVersionMatch = RuntimeInformation.OSDescription.Replace("Linux ", string.Empty).Split('.');
                     Version linuxVersion = new Version();
                     bool isKernelLinux5dot5 = false;
 
@@ -139,12 +140,16 @@ namespace System.Device.Gpio.Drivers
 
                     // check if we have the correct versions
                     if (isKernelLinux5dot5 && isLibgpiod1dot5)
+                    {
                         return true;
+                    }
                     else
+                    {
                         Console.Error.WriteLine($"Using Kernel v{linuxVersion} but v5.5 or later is required.\n" +
                                                 $"Using libgpiod v{libgpiodVersion} but v1.5 or later is required.");
+                        return false;
+                    }
 
-                    return false;
                 case PinMode.Output:
                     return true;
                 default:
@@ -210,11 +215,11 @@ namespace System.Device.Gpio.Drivers
                         requestResult = Interop.libgpiod.gpiod_line_request_input(pinHandle, s_consumerName);
                         break;
                     case PinMode.InputPullDown:
-                        flags = (int) RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN;
+                        flags = (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN;
                         requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName, flags);
                         break;
                     case PinMode.InputPullUp:
-                        flags = (int) RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
+                        flags = (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
                         requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName, flags);
                         break;
                     case PinMode.Output:
