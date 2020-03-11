@@ -120,25 +120,19 @@ namespace System.Device.Gpio.Drivers
                 case PinMode.InputPullUp:
                     // for use the bias flags we need libgpiod version 1.5 or later
                     IntPtr libgpiodVersionPtr = Interop.libgpiod.gpiod_version_string();
-                    var libgpiodVersionMatch = Marshal.PtrToStringAnsi(libgpiodVersionPtr).Trim().Split('.');
-                    var libgpiodVersion = 0.0F;
-                    bool isLibgpiod1dot5 = false;
-
-                    if (libgpiodVersionMatch.Length > 1)
-                    {
-                        libgpiodVersion = float.Parse($"{libgpiodVersionMatch[0]}.{libgpiodVersionMatch[1]}");
-                        isLibgpiod1dot5 = (libgpiodVersion >= 1.5);
-                    }
+                    string libgpiodVersionMatch = Marshal.PtrToStringAnsi(libgpiodVersionPtr);
+                    Version libgpiodVersion = new Version(libgpiodVersionMatch);
+                    bool isLibgpiod1dot5 = (libgpiodVersion.Major >= 1 && libgpiodVersion.Minor >= 5);
 
                     // for use the bias flags we need Kernel version 5.5 or later
-                    var linuxVersionMatch = RuntimeInformation.OSDescription.Replace("Linux ", "").Trim().Split('.');
-                    var linuxVersion = 0.0F;
+                    string[] linuxVersionMatch = RuntimeInformation.OSDescription.Replace("Linux ", "").Split('.');
+                    Version linuxVersion = new Version();
                     bool isKernelLinux5dot5 = false;
 
                     if (linuxVersionMatch.Length > 1)
                     {
-                        linuxVersion = float.Parse($"{linuxVersionMatch[0]}.{linuxVersionMatch[1]}");
-                        isKernelLinux5dot5 = (linuxVersion >= 5.5);
+                        linuxVersion = new Version($"{linuxVersionMatch[0]}.{linuxVersionMatch[1]}");
+                        isKernelLinux5dot5 = (linuxVersion.Major >= 5 && libgpiodVersion.Minor >= 5);
                     }
 
                     // check if we have the correct versions
