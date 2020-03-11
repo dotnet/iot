@@ -19,6 +19,8 @@ namespace System.Device.Gpio.Drivers
 
         protected internal override int PinCount => Interop.libgpiod.gpiod_chip_num_lines(_chip);
 
+        private static string s_consumerName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+
         private enum RequestFlag : ulong {
             GPIOD_LINE_REQUEST_FLAG_OPEN_DRAIN = (1UL << 0),
             GPIOD_LINE_REQUEST_FLAG_OPEN_SOURCE = (1UL << 1),
@@ -201,23 +203,22 @@ namespace System.Device.Gpio.Drivers
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
                 int flags;
-                string consumer = pinNumber.ToString();
 
                 switch (mode)
                 {
                     case PinMode.Input:
-                        requestResult = Interop.libgpiod.gpiod_line_request_input(pinHandle, consumer);
+                        requestResult = Interop.libgpiod.gpiod_line_request_input(pinHandle, s_consumerName);
                         break;
                     case PinMode.InputPullDown:
                         flags = (int) RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN;
-                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, consumer, flags);
+                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName, flags);
                         break;
                     case PinMode.InputPullUp:
                         flags = (int) RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
-                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, consumer, flags);
+                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName, flags);
                         break;
                     case PinMode.Output:
-                        requestResult = Interop.libgpiod.gpiod_line_request_output(pinHandle, consumer);
+                        requestResult = Interop.libgpiod.gpiod_line_request_output(pinHandle, s_consumerName);
                         break;
                 }
 

@@ -3,10 +3,10 @@
 <!-- If the runtime is unknown, GeneratePlatformNotSupportedAssembly is set in 
 System.Device.Gpio.csproj, which creates an auto-generated code 
 file which is not marked as such, making StyleCop fail. -->
-  <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj' AND '$(GeneratePlatformNotSupportedAssembly)' != 'true'">
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj' AND '$(GeneratePlatformNotSupportedAssembly)' != 'true'">
+  <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)\stylecop.json" Link="stylecop.json" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
