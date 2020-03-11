@@ -612,7 +612,7 @@ namespace System.Device.Gpio.Drivers
                 _devicePins[pinNumber].ValueFalling += callback;
             }
 
-            var events = (GetPinEventsToDetect(pinNumber) | eventTypes);
+            PinEventTypes events = (GetPinEventsToDetect(pinNumber) | eventTypes);
             SetPinEventsToDetect(pinNumber, events);
 
             // Remember which events are active
@@ -646,15 +646,15 @@ namespace System.Device.Gpio.Drivers
                             Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
                         }
 
-                        var currentPin = _devicePins[pinNumber];
-                        var activeEdges = currentPin.ActiveEdges;
+                        UnixDriverDevicePin currentPin = _devicePins[pinNumber];
+                        PinEventTypes activeEdges = currentPin.ActiveEdges;
                         PinEventTypes eventType = activeEdges;
                         PinEventTypes secondEvent = PinEventTypes.None;
                         // Only if the active edges are both, we need to query the current state and guess about the change
                         if (activeEdges == (PinEventTypes.Falling | PinEventTypes.Rising))
                         {
-                            var oldValue = currentPin.LastValue;
-                            var newValue = Read(pinNumber);
+                            PinValue oldValue = currentPin.LastValue;
+                            PinValue newValue = Read(pinNumber);
                             if (oldValue == PinValue.Low && newValue == PinValue.High)
                             {
                                 eventType = PinEventTypes.Rising;
@@ -684,7 +684,7 @@ namespace System.Device.Gpio.Drivers
                             currentPin.LastValue = Read(pinNumber);
                         }
 
-                        var args = new PinValueChangedEventArgs(eventType, pinNumber);
+                        PinValueChangedEventArgs args = new PinValueChangedEventArgs(eventType, pinNumber);
                         currentPin.OnPinValueChanged(args);
                         if (secondEvent != PinEventTypes.None)
                         {
