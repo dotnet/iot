@@ -29,7 +29,7 @@ namespace Iot.Device.DHTxx
 
         internal override Temperature GetTemperature(byte[] readBuff)
         {
-            var temp = (readBuff[2] & 0x7F) + readBuff[3] * 0.1;
+            var temp = ((readBuff[2] & 0x7F) * 256 + readBuff[3]) * 0.1;
             // if MSB = 1 we have negative temperature
             temp = ((readBuff[2] & 0x80) == 0 ? temp : -temp);
 
