@@ -20,7 +20,6 @@ namespace System.Device.Gpio.Drivers
         {
             _gpioDriver = gpioDriver;
             StatusUpdateSleepTime = TimeSpan.Zero; // This driver does not need this "magic sleep" as we're directly accessing the hardware registers
-            PollingTimeout = TimeSpan.FromMilliseconds(100);
         }
 
         protected internal override PinValue Read(int pinNumber)

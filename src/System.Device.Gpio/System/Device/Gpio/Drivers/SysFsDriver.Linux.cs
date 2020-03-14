@@ -21,12 +21,12 @@ namespace System.Device.Gpio.Drivers
         private const string GpioLabel = "/label";
         private const string GpioContoller = "pinctrl";
         private const string GpioOffsetBase = "/base";
+        private const int PollingTimeout = 50;
         private readonly CancellationTokenSource _eventThreadCancellationTokenSource;
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
         private static readonly int s_pinOffset = ReadOffset();
-        private int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
-        private int _statusUpdateSleepTime = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
+        private TimeSpan _statusUpdateSleepTime = TimeSpan.FromMilliseconds(1);
         private int _pollFileDescriptor = -1;
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
@@ -68,32 +68,17 @@ namespace System.Device.Gpio.Drivers
         }
 
         /// <summary>
-        /// The internal timeout for the event wait function.
-        /// </summary>
-        internal TimeSpan PollingTimeout
-        {
-            get
-            {
-                return TimeSpan.FromMilliseconds(_pollingTimeoutInMilliseconds);
-            }
-            set
-            {
-                _pollingTimeoutInMilliseconds = Convert.ToInt32(value.TotalMilliseconds);
-            }
-        }
-
-        /// <summary>
         /// The sleep time after an event occured and before the new value is read.
         /// </summary>
         internal TimeSpan StatusUpdateSleepTime
         {
             get
             {
-                return TimeSpan.FromMilliseconds(_statusUpdateSleepTime);
+                return _statusUpdateSleepTime;
             }
             set
             {
-                _statusUpdateSleepTime = Convert.ToInt32(value.TotalMilliseconds);
+                _statusUpdateSleepTime = value;
             }
         }
 
@@ -327,7 +312,7 @@ namespace System.Device.Gpio.Drivers
             AddPinToPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, out bool closePinValueFileDescriptor);
 
             bool eventDetected = WasEventDetected(pollFileDescriptor, valueFileDescriptor, out _, cancellationToken);
-            if (_statusUpdateSleepTime > 0)
+            if (_statusUpdateSleepTime > TimeSpan.Zero)
             {
                 Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
             }
@@ -464,7 +449,7 @@ namespace System.Device.Gpio.Drivers
             while (!cancellationToken.IsCancellationRequested)
             {
                 // Wait until something happens
-                int waitResult = Interop.epoll_wait(pollFileDescriptor, out epoll_event events, 1, _pollingTimeoutInMilliseconds);
+                int waitResult = Interop.epoll_wait(pollFileDescriptor, out epoll_event events, 1, PollingTimeout);
                 if (waitResult == -1)
                 {
                     throw new IOException("Error while waiting for pin interrupts.");
@@ -636,7 +621,7 @@ namespace System.Device.Gpio.Drivers
                     bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, _eventThreadCancellationTokenSource.Token);
                     if (eventDetected)
                     {
-                        if (_statusUpdateSleepTime > 0)
+                        if (_statusUpdateSleepTime > TimeSpan.Zero)
                         {
                             Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
                         }
