@@ -24,17 +24,12 @@ namespace System.Device.Gpio.Drivers
         private readonly CancellationTokenSource _eventThreadCancellationTokenSource;
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
-        private static readonly int s_pinOffset;
+        private static readonly int s_pinOffset = ReadOffset();
         private int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
         private int _statusUpdateSleepTime = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
         private int _pollFileDescriptor = -1;
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
-
-        static SysFsDriver()
-        {
-            s_pinOffset = ReadOffset();
-        }
 
         private static int ReadOffset()
         {
