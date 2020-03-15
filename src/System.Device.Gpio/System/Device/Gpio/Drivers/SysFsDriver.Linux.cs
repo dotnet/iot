@@ -626,6 +626,8 @@ namespace System.Device.Gpio.Drivers
                             Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
                         }
 
+                        PinValue newValue = Read(pinNumber);
+
                         UnixDriverDevicePin currentPin = _devicePins[pinNumber];
                         PinEventTypes activeEdges = currentPin.ActiveEdges;
                         PinEventTypes eventType = activeEdges;
@@ -634,7 +636,6 @@ namespace System.Device.Gpio.Drivers
                         if (activeEdges == (PinEventTypes.Falling | PinEventTypes.Rising))
                         {
                             PinValue oldValue = currentPin.LastValue;
-                            PinValue newValue = Read(pinNumber);
                             if (oldValue == PinValue.Low && newValue == PinValue.High)
                             {
                                 eventType = PinEventTypes.Rising;
@@ -661,7 +662,7 @@ namespace System.Device.Gpio.Drivers
                         else
                         {
                             // Update the value, in case we need it later
-                            currentPin.LastValue = Read(pinNumber);
+                            currentPin.LastValue = newValue;
                         }
 
                         PinValueChangedEventArgs args = new PinValueChangedEventArgs(eventType, pinNumber);
@@ -675,7 +676,7 @@ namespace System.Device.Gpio.Drivers
                 }
                 catch (ObjectDisposedException)
                 {
-                    break; // If cancellation token source is dispossed then we need to exit this thread.
+                    break; // If cancellation token source is disposed then we need to exit this thread.
                 }
             }
 
