@@ -43,7 +43,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                     index += resSize.Item1;
 
                 }
-                catch (ArgumentOutOfRangeException)
+                catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is OverflowException)
                 {
                     // We may have a non supported Tag
                     break;
