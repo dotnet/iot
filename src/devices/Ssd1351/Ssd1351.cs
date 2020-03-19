@@ -23,7 +23,7 @@ namespace Iot.Device.Ssd1351
         private readonly int _dcPinId;
         private readonly int _resetPinId;
         private readonly int _spiBufferSize;
-        private readonly bool _disposeGpioController = false;
+        private readonly bool _disposeGpioController;
 
         private SpiDevice _spiDevice;
         private GpioController _gpioDevice;
@@ -41,25 +41,21 @@ namespace Iot.Device.Ssd1351
         /// <param name="dataCommandPin">The id of the GPIO pin used to control the DC line (data/command).</param>
         /// <param name="resetPin">The id of the GPIO pin used to control the /RESET line (data/command).</param>
         /// <param name="spiBufferSize">The size of the SPI buffer. If data larger than the buffer is sent then it is split up into multiple transmissions. The default value is 4096.</param>
-        public Ssd1351(SpiDevice spiDevice, int dataCommandPin, int resetPin, int spiBufferSize = DefaultSPIBufferSize, GpioController gpioController = null)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Ssd1351(SpiDevice spiDevice, int dataCommandPin, int resetPin, int spiBufferSize = DefaultSPIBufferSize, GpioController gpioController = null, bool shouldDispose = true)
         {
             if (!InRange((uint)spiBufferSize, 0x1000, 0x10000))
             {
                 throw new ArgumentException($"SPI Buffer Size must be between 4096 and 65536.", nameof(spiBufferSize));
             }
 
-            _gpioDevice = gpioController;
+            _gpioDevice = gpioController ?? new GpioController();
+            _disposeGpioController = shouldDispose;
 
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
 
             _dcPinId = dataCommandPin;
             _resetPinId = resetPin;
-
-            if (_gpioDevice == null)
-            {
-                _gpioDevice = new GpioController();
-                _disposeGpioController = true;
-            }
 
             _gpioDevice.OpenPin(_dcPinId, PinMode.Output);
             _gpioDevice.OpenPin(_resetPinId, PinMode.Output);

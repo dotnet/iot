@@ -26,6 +26,7 @@ namespace Iot.Device.Uln2003
         private bool[,] _currentSwitchingSequence = _halfStepSequence;
         private bool _isClockwise = true;
         private GpioController _controller;
+        private bool _shouldDispose;
         private Stopwatch _stopwatch = new Stopwatch();
         private long _stepMicrosecondsDelay;
 
@@ -61,7 +62,8 @@ namespace Iot.Device.Uln2003
         /// <param name="pin3">The GPIO pin number which corresponds pin C on ULN2003 driver board.</param>
         /// <param name="pin4">The GPIO pin number which corresponds pin D on ULN2003 driver board.</param>
         /// <param name="controller">The controller.</param>
-        public Uln2003(int pin1, int pin2, int pin3, int pin4, GpioController controller = null)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Uln2003(int pin1, int pin2, int pin3, int pin4, GpioController controller = null, bool shouldDispose = true)
         {
             _pin1 = pin1;
             _pin2 = pin2;
@@ -69,6 +71,7 @@ namespace Iot.Device.Uln2003
             _pin4 = pin4;
 
             _controller = controller ?? new GpioController();
+            _shouldDispose = shouldDispose;
 
             _controller.OpenPin(_pin1, PinMode.Output);
             _controller.OpenPin(_pin2, PinMode.Output);
@@ -171,8 +174,11 @@ namespace Iot.Device.Uln2003
         public void Dispose()
         {
             Stop();
-            _controller?.Dispose();
-            _controller = null;
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null;
+            }
         }
     }
 }

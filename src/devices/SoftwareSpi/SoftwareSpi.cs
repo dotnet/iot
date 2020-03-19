@@ -20,6 +20,7 @@ namespace Iot.Device.Spi
         private readonly int _cs;
         private readonly SpiConnectionSettings _settings;
         private GpioController _controller;
+        private bool _shouldDispose;
 
         /// <summary>
         /// Software implementation of the SPI.
@@ -30,9 +31,11 @@ namespace Iot.Device.Spi
         /// <param name="cs">Chip select pin (or negated chip select).</param>
         /// <param name="settings">Settings of the SPI connection.</param>
         /// <param name="controller">GPIO controller used for pins.</param>
-        public SoftwareSpi(int clk, int miso, int mosi, int cs, SpiConnectionSettings settings = null, GpioController controller = null)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public SoftwareSpi(int clk, int miso, int mosi, int cs, SpiConnectionSettings settings = null, GpioController controller = null, bool shouldDispose = true)
         {
             _controller = controller ?? new GpioController();
+            _shouldDispose = shouldDispose;
 
             _settings = settings ?? new SpiConnectionSettings(-1, -1);
 
@@ -180,8 +183,12 @@ namespace Iot.Device.Spi
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
-            _controller?.Dispose();
-            _controller = null;
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null;
+            }
+
             base.Dispose(disposing);
         }
 

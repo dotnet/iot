@@ -24,8 +24,9 @@ namespace Iot.Device.Pcx857x
         /// The GPIO controller for the <paramref name="interrupt"/>.
         /// If not specified, the default controller will be used.
         /// </param>
-        public Pca8574(I2cDevice device, int interrupt = -1, GpioController gpioController = null)
-            : base(device, interrupt, gpioController)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Pca8574(I2cDevice device, int interrupt = -1, GpioController gpioController = null, bool shouldDispose = true)
+            : base(device, interrupt, gpioController, shouldDispose)
         {
         }
     }

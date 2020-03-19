@@ -27,6 +27,7 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="gpioController">
         /// The GPIO controller for defined external pins. If not specified, the default controller will be used.
         /// </param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Mcp2515(
             SpiDevice spiDevice,
             int reset = -1,
@@ -37,7 +38,8 @@ namespace Iot.Device.Mcp25xxx
             int rx0bf = -1,
             int rx1bf = -1,
             int clkout = -1,
-            GpioController gpioController = null)
+            GpioController gpioController = null,
+            bool shouldDispose = true)
             : base(
                   spiDevice,
                   reset,
@@ -48,7 +50,8 @@ namespace Iot.Device.Mcp25xxx
                   rx0bf,
                   rx1bf,
                   clkout,
-                  gpioController)
+                  gpioController,
+                  shouldDispose)
         {
         }
     }

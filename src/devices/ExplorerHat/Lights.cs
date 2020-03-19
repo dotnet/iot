@@ -67,9 +67,11 @@ namespace Iot.Device.ExplorerHat
         /// Initializes a <see cref="Lights"/> instance
         /// </summary>
         /// <param name="controller"><see cref="GpioController"/> used by <see cref="Lights"/> to manage GPIO resources</param>
-        internal Lights(GpioController controller)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        internal Lights(GpioController controller, bool shouldDispose = true)
         {
             _controller = controller;
+            _shouldDispose = shouldDispose;
 
             LedArray = new List<Led>()
             {
@@ -104,24 +106,22 @@ namespace Iot.Device.ExplorerHat
 
         #region IDisposable Support
 
-        private bool _disposedValue = false; // Para detectar llamadas redundantes
+        private bool _shouldDispose;
 
         /// <summary>
         /// Disposes the <see cref="Lights"/> instance
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            if (disposing)
             {
-                if (disposing)
+                if (_shouldDispose)
                 {
                     LedArray[0].Dispose();
                     LedArray[1].Dispose();
                     LedArray[2].Dispose();
                     LedArray[3].Dispose();
                 }
-
-                _disposedValue = true;
             }
         }
 

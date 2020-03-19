@@ -23,6 +23,7 @@ namespace Iot.Device.Mcp25xxx
         private readonly int _rx1bf;
         private readonly int _clkout;
         internal GpioController _gpioController;
+        private bool _shouldDispose;
         private SpiDevice _spiDevice;
 
         /// <summary>
@@ -40,6 +41,7 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="gpioController">
         /// The GPIO controller for defined external pins. If not specified, the default controller will be used.
         /// </param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Mcp25xxx(
             SpiDevice spiDevice,
             int reset = -1,
@@ -50,9 +52,11 @@ namespace Iot.Device.Mcp25xxx
             int rx0bf = -1,
             int rx1bf = -1,
             int clkout = -1,
-            GpioController gpioController = null)
+            GpioController gpioController = null,
+            bool shouldDispose = true)
         {
             _spiDevice = spiDevice;
+            _shouldDispose = shouldDispose;
 
             _reset = reset;
             _tx0rts = tx0rts;
@@ -213,7 +217,9 @@ namespace Iot.Device.Mcp25xxx
             const byte dontCare = 0x00;
             ReadOnlySpan<byte> writeBuffer = stackalloc byte[]
             {
-                (byte)InstructionFormat.Read, (byte)address, dontCare
+                (byte)InstructionFormat.Read,
+                (byte)address,
+                dontCare
             };
             Span<byte> readBuffer = stackalloc byte[3];
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
@@ -351,7 +357,8 @@ namespace Iot.Device.Mcp25xxx
             const byte dontCare = 0x00;
             ReadOnlySpan<byte> writeBuffer = stackalloc byte[]
             {
-                (byte)InstructionFormat.ReadStatus, dontCare
+                (byte)InstructionFormat.ReadStatus,
+                dontCare
             };
             Span<byte> readBuffer = stackalloc byte[2];
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
@@ -369,7 +376,8 @@ namespace Iot.Device.Mcp25xxx
             const byte dontCare = 0x00;
             ReadOnlySpan<byte> writeBuffer = stackalloc byte[]
             {
-                (byte)InstructionFormat.RxStatus, dontCare
+                (byte)InstructionFormat.RxStatus,
+                dontCare
             };
             Span<byte> readBuffer = stackalloc byte[2];
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
@@ -389,7 +397,10 @@ namespace Iot.Device.Mcp25xxx
         {
             Span<byte> writeBuffer = stackalloc byte[]
             {
-                (byte)InstructionFormat.BitModify, (byte)address, mask, value
+                (byte)InstructionFormat.BitModify,
+                (byte)address,
+                mask,
+                value
             };
             _spiDevice.Write(writeBuffer);
         }
@@ -397,8 +408,12 @@ namespace Iot.Device.Mcp25xxx
         /// <inheritdoc/>
         public void Dispose()
         {
-            _gpioController?.Dispose();
-            _gpioController = null;
+            if (_shouldDispose)
+            {
+                _gpioController?.Dispose();
+                _gpioController = null;
+            }
+
             _spiDevice?.Dispose();
             _spiDevice = null;
         }

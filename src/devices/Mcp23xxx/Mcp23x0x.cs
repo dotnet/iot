@@ -21,8 +21,9 @@ namespace Iot.Device.Mcp23xxx
         /// <see cref="GpioController"/> related with
         /// <paramref name="reset"/> and <paramref name="interrupt"/> pins
         /// </param>
-        protected Mcp23x0x(BusAdapter device, int reset, int interrupt, GpioController masterController)
-            : base(device, reset, interrupt, masterController: masterController)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        protected Mcp23x0x(BusAdapter device, int reset, int interrupt, GpioController masterController, bool shouldDispose = true)
+            : base(device, reset, interrupt, masterController: masterController, shouldDispose: shouldDispose)
         {
         }
 
