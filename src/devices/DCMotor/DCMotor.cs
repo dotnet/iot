@@ -20,11 +20,9 @@ namespace Iot.Device.DCMotor
         /// Constructs generic <see cref="DCMotor"/> instance
         /// </summary>
         /// <param name="controller"><see cref="GpioController"/> related with operations on pins</param>
-        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        protected DCMotor(GpioController controller, bool shouldDispose = true)
+        protected DCMotor(GpioController controller)
         {
             Controller = controller;
-            ShouldDispose = shouldDispose;
         }
 
         /// <summary>
@@ -43,11 +41,6 @@ namespace Iot.Device.DCMotor
         }
 
         /// <summary>
-        /// True to dispose the Gpio Controller
-        /// </summary>
-        protected bool ShouldDispose { get; set; }
-
-        /// <summary>
         /// Disposes the <see cref="DCMotor"/> class
         /// </summary>
         public void Dispose()
@@ -64,11 +57,8 @@ namespace Iot.Device.DCMotor
         {
             if (disposing)
             {
-                if (ShouldDispose)
-                {
-                    Controller?.Dispose();
-                    Controller = null;
-                }
+                Controller?.Dispose();
+                Controller = null;
             }
         }
 

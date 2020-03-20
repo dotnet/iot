@@ -18,9 +18,8 @@ namespace Iot.Device.DCMotor
         public DCMotor2PinNoEnable(
             PwmChannel pwmChannel,
             int pin1,
-            GpioController controller,
-            bool shouldDispose = true)
-            : base(controller ?? ((pin1 == -1) ? null : new GpioController()), shouldDispose)
+            GpioController controller)
+            : base(controller ?? ((pin1 == -1) ? null : new GpioController()))
         {
             _pwm = pwmChannel;
 
