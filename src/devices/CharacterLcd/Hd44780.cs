@@ -4,8 +4,6 @@
 
 using System;
 using System.Buffers;
-using System.Device;
-using System.Device.Gpio;
 using System.Drawing;
 
 namespace Iot.Device.CharacterLcd
@@ -23,7 +21,7 @@ namespace Iot.Device.CharacterLcd
     ///
     /// This implementation was drawn from numerous datasheets and libraries such as Adafruit_Python_CharLCD.
     /// </remarks>
-    public class Hd44780 : IDisposable
+    public class Hd44780 : ICharacterLcd, IDisposable
     {
         private bool _disposed;
 
@@ -62,11 +60,6 @@ namespace Iot.Device.CharacterLcd
         protected readonly LcdInterface _lcdInterface;
 
         /// <summary>
-        /// Logical size, in characters, of the LCD.
-        /// </summary>
-        public Size Size { get; }
-
-        /// <summary>
         /// Initializes a new HD44780 LCD controller.
         /// </summary>
         /// <param name="size">The logical size of the LCD.</param>
@@ -75,6 +68,7 @@ namespace Iot.Device.CharacterLcd
         {
             Size = size;
             _lcdInterface = lcdInterface;
+            AutoShift = false;
 
             if (_lcdInterface.EightBitMode)
             {
@@ -84,6 +78,17 @@ namespace Iot.Device.CharacterLcd
             Initialize(size.Height);
             _rowOffsets = InitializeRowOffsets(size.Height);
         }
+
+        /// <summary>
+        /// Logical size, in characters, of the LCD.
+        /// </summary>
+        public Size Size { get; }
+
+        /// <summary>
+        /// Returns the number of custom characters for this display.
+        /// A custom character is one that can be user-defined and assigned to a slot using <see cref="CreateCustomCharacter"/>
+        /// </summary>
+        public virtual int NumberOfCustomCharactersSupported => 8;
 
         /// <summary>
         /// Initializes the display by setting the specified columns and lines.
@@ -373,31 +378,16 @@ namespace Iot.Device.CharacterLcd
         /// </remarks>
         /// <param name="location">Should be between 0 and 7</param>
         /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
-        public void CreateCustomCharacter(byte location, params byte[] characterMap)
-        {
-            if (characterMap == null)
-            {
-                throw new ArgumentNullException(nameof(characterMap));
-            }
-
-            CreateCustomCharacter(location, characterMap.AsSpan());
-        }
-
-        /// <summary>
-        /// Fill one of the 8 CGRAM locations (character codes 0 - 7) with custom characters.
-        /// </summary>
-        /// <param name="location">Should be between 0 and 7</param>
-        /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
         public void CreateCustomCharacter(byte location, ReadOnlySpan<byte> characterMap)
         {
-            if (location > 7)
+            if (location >= NumberOfCustomCharactersSupported)
             {
                 throw new ArgumentOutOfRangeException(nameof(location));
             }
 
             if (characterMap.Length != 8)
             {
-                throw new ArgumentException(nameof(characterMap));
+                throw new ArgumentException("The character map must be exactly 8 bytes long", nameof(characterMap));
             }
 
             // The character address is set in bits 3-5 of the command byte
@@ -408,23 +398,33 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// Write text to display.
         /// </summary>
+        /// <param name="text">Text to be displayed.</param>
         /// <remarks>
         /// There are only 256 characters available. There are chip variants
         /// with different character sets. Characters from space ' ' (32) to
         /// '}' are usually the same with the exception of '\', which is a
         /// yen symbol on some chips '¥'.
         /// </remarks>
-        /// <param name="value">Text to be displayed.</param>
-        public void Write(string value)
+        public void Write(string text)
         {
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(value.Length);
-            for (int i = 0; i < value.Length; ++i)
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(text.Length);
+            for (int i = 0; i < text.Length; ++i)
             {
-                buffer[i] = (byte)value[i];
+                buffer[i] = (byte)text[i];
             }
 
-            SendData(new ReadOnlySpan<byte>(buffer, 0, value.Length));
+            SendData(new ReadOnlySpan<byte>(buffer, 0, text.Length));
             ArrayPool<byte>.Shared.Return(buffer);
+        }
+
+        /// <summary>
+        /// Write a raw byte stream to the display.
+        /// Used if character translation already took place
+        /// </summary>
+        /// <param name="text">Text to print</param>
+        public void Write(ReadOnlySpan<byte> text)
+        {
+           SendData(text);
         }
 
         /// <summary>
