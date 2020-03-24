@@ -26,6 +26,8 @@ using (Dht11 dht = new Dht11(26))
 }
 ```
 
+Note:  1-wire will not work with Win 10 IoT-Core as the OS cannot switch the pin fast enough between output and input (or viz).
+
 ### I2C Protocol
 
 Only DHT12 can use I2C protocol.
