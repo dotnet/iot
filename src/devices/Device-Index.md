@@ -36,6 +36,7 @@
 * [Mcp25xxx device family - CAN bus](Mcp25xxx/README.md)
 * [Mcp3428 - Analog to Digital Converter (I2C)](Mcp3428/README.md)
 * [MCP3xxx family of Analog to Digital Converters](Mcp3xxx/README.md)
+* [Mcp9808 - Microchip's MCP9808 I2C Temp sensor](Mcp9808/README.md)
 * [MLX90614 - Infra Red Thermometer](Mlx90614/README.md)
 * [MotorHat](MotorHat/README.md)
 * [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
