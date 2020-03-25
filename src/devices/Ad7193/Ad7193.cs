@@ -700,7 +700,13 @@ namespace Iot.Device.Ad7193
             {
                 spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
             }
-            readBuffer = readBuffer[1..];
+
+            byte[] trimmedReadBuffer = new byte[readBuffer.Length - 1];
+            Array.Copy(readBuffer, 1, trimmedReadBuffer, 0, trimmedReadBuffer.Length);
+            readBuffer = trimmedReadBuffer;
+            
+            // .NET Core 3.0+ only
+            //readBuffer = readBuffer[1..];
 
             registerCache[registerAddress] = ByteArrayToUInt32(readBuffer);
 
@@ -733,7 +739,13 @@ namespace Iot.Device.Ad7193
             {
                 spiDevice.Write(writeBuffer);
             }
-            writeBuffer = writeBuffer[1..];
+
+            byte[] trimmedWriteBuffer = new byte[writeBuffer.Length - 1];
+            Array.Copy(writeBuffer, 1, trimmedWriteBuffer, 0, trimmedWriteBuffer.Length);
+            writeBuffer = trimmedWriteBuffer;
+
+            // .NET Core 3.0+ only
+            //writeBuffer = writeBuffer[1..];
 
             //Debug.WriteLine($"Write Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, sent: {String.Join(' ', writeBuffer.Select(x => x.ToString("X2")))}");
         }
