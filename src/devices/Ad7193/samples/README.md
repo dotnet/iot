@@ -1,7 +1,7 @@
 # AD7193 - Samples
 
 ## Required hardware
-* [AD7193](https://www.analog.com/media/en/technical-documentation/data-sheets/AD7193.pdf)
+* [Analog Devices AD7193](https://www.analog.com/media/en/technical-documentation/data-sheets/AD7193.pdf)
 * Any supported IoT device with an SPI bus
 
 ## Hardware used for testing
@@ -20,26 +20,20 @@
 1, Before you publish your binaries on Raspberry Pi, you must restore the .NET Core packages for the project
 > dotnet restore
 
-2, Open and edit the credentials on the [DeployToPi.ps1](DeployToPi.ps1) file
+2, Open and edit the credentials in the [DeployToPi.ps1](DeployToPi.ps1) file
 
 3, Run the [DeployToPi.ps1](DeployToPi.ps1) script in a PowerShell window.
 > .\DeployToPi.ps1
 
 4, You can optionally attach the Visual Studio Debugger, and debug your application running on the Pi:
 
-a, Open Visual Studio
-
-b, Debug / Attach to Process... (Ctrl+Alt+P)
-
-c, Type: SSH, Target: <IP address of your Raspberry Pi>, hit Enter
-    
-d, Enter username and password, hit Connect
-
-e, Enter "AD7193" to the filter textbox, select the process
-
-f, Check "Managed (.NET Core for Unix)"
-
-g, Next time you can quickly Reattach to Process... (Shift+Alt+P)
+    a, Open Visual Studio
+    b, Debug / Attach to Process... (Ctrl+Alt+P)
+    c, Type: SSH, Target: <IP address of your Raspberry Pi>, hit Enter
+    d, Enter username and password, hit Connect
+    e, Enter "AD7193" to the filter textbox, select the process
+    f, Check "Managed (.NET Core for Unix)"
+    g, Next time you can quickly Reattach to Process... (Shift+Alt+P)
 
 ## Code
 ```C#
@@ -137,5 +131,6 @@ private static void Ad7193_AdcValueReceived(object sender, Iot.Device.Ad7193.Adc
 ```
 
 ## Result
-You can see that the values are oscillating between 1.0 V and 0.0 V at the rate of 4800 SPS as expected.
+You can see that the values are oscillating between 0.0 V and 1.0 V at the rate of 4800 SPS, as expected.
+
 ![Results in a PowerShell window](PowerShell_RaspberryPi_Output.png)
