@@ -50,7 +50,7 @@ namespace Iot.Device.Ad7193
             ID = 4,                 // ID Register             (RO, 8-bit)
             GPOCON = 5,             // GPOCON Register         (RW, 8-bit)
             Offset = 6,             // Offset Register         (RW, 24-bit)
-            FullScale = 7           // Full-Scale Register     (RW, 24-bit)
+            FullScale = 7,          // Full-Scale Register     (RW, 24-bit)
         }
 
         /// <summary>
@@ -184,6 +184,7 @@ namespace Iot.Device.Ad7193
                         sb.Append(" (system full-scale calibration)");
                         break;
                 }
+
                 sb.Append(" | ");
                 sb.Append($"DAT_STA: {(register & 0b0001_0000_0000_0000_0000_0000) >> 20}");
                 sb.Append(" | ");
@@ -510,14 +511,14 @@ namespace Iot.Device.Ad7193
         }
 
         public void StartContinuousConversion(uint frequency = ADCSamplerate)
-        {            
+        {
             registerCache[(byte)Register.Mode] &= 0x1FFFFF; // keep all bit values except Mode bits
             registerCache[(byte)Register.Mode] |= 0x000000; // continuous conversion mode bits (MD2 = 0, MD1 = 0, MD0 = 0)
 
             SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
 
             ContinuousRead = true;
-            
+
             long samplePerTicks = Stopwatch.Frequency / frequency;
             if (samplePerTicks == 0) samplePerTicks = 1;
 
@@ -550,7 +551,7 @@ namespace Iot.Device.Ad7193
                         }
                     }
                 }
-            });           
+            });
         }
 
         /// <summary>
@@ -686,7 +687,7 @@ namespace Iot.Device.Ad7193
             byte[] trimmedReadBuffer = new byte[readBuffer.Length - 1];
             Array.Copy(readBuffer, 1, trimmedReadBuffer, 0, trimmedReadBuffer.Length);
             readBuffer = trimmedReadBuffer;
-            
+
             registerCache[registerAddress] = ByteArrayToUInt32(readBuffer);
 
             // Debug.WriteLine($"Read Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, received: {String.Join(' ', readBuffer.Select(x => x.ToString("X2")))}");
