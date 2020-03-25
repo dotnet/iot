@@ -31,13 +31,11 @@ namespace Iot.Device.Ad7193
         public const int ADCSamplerate = 4800;
         public const int ADCInputChannelCount = 8;
 
-
         private object spiTransferLock = new object();
         private Stopwatch stopWatch = new Stopwatch();
         //public ConcurrentQueue<AdcValue> AdcValues = new ConcurrentQueue<AdcValue>();
         public BlockingCollection<AdcValue> AdcValues = new BlockingCollection<AdcValue>();
         public event EventHandler<AdcValueReceivedEventArgs> AdcValueReceived;
-
 
         /// <summary>
         /// AD7193 Register Map
@@ -112,7 +110,6 @@ namespace Iot.Device.Ad7193
 
         protected StringBuilder sb = new StringBuilder();
 
-
         /// <summary>
         /// The external reference voltage value. The default is 2.5V on REFIN1+ and REFIN1- (on the Digilent Pmod AD5 board)
         /// </summary>
@@ -128,7 +125,6 @@ namespace Iot.Device.Ad7193
                 SetRegisterValue(Register.Configuration, registerCache[(byte)Register.Configuration]);
             }
         }
-
 
         public string Status
         {
@@ -386,7 +382,6 @@ namespace Iot.Device.Ad7193
             }
         }
 
-
         /// <summary>
         /// Sets the amount of averaging. The data from the sinc filter is averaged by 2, 8, or 16. The averaging reduces the output data rate for a given FS word; however, the RMS noise improves.
         /// </summary>
@@ -611,7 +606,6 @@ namespace Iot.Device.Ad7193
             return ReadADCValue();
         }
 
-
         /// <summary>
         /// Converts the ADC result to Volts
         /// </summary>
@@ -673,7 +667,6 @@ namespace Iot.Device.Ad7193
             double degreeCelsius = ((float)(adcValue - 0x0080_0000) / 2815.0f) - 273.0f;
             return Temperature.FromCelsius(degreeCelsius);
         }
-
 
         /// <summary>
         /// Reads the value of a register
