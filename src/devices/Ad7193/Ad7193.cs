@@ -12,8 +12,6 @@ namespace Iot.Device.Ad7193
 {
     public class Ad7193 : IDisposable
     {
-        private SpiDevice spiDevice = null;
-
         // metadata for IDevice
         public const string Manufacturer = "Analog Devices";
         public const string Product = "AD7193";
@@ -31,8 +29,10 @@ namespace Iot.Device.Ad7193
         public const int ADCSamplerate = 4800;
         public const int ADCInputChannelCount = 8;
 
-        private object spiTransferLock = new object();
-        private Stopwatch stopWatch = new Stopwatch();
+        private SpiDevice _spiDevice = null;
+
+        private object _spiTransferLock = new object();
+        private Stopwatch _stopWatch = new Stopwatch();
         //public ConcurrentQueue<AdcValue> AdcValues = new ConcurrentQueue<AdcValue>();
         public BlockingCollection<AdcValue> AdcValues = new BlockingCollection<AdcValue>();
         public event EventHandler<AdcValueReceivedEventArgs> AdcValueReceived;
@@ -40,8 +40,8 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// AD7193 Register Map
         /// </summary>
-        protected enum Register : byte 
-        { 
+        protected enum Register : byte
+        {
             Communications = 0,     // Communications Register (WO, 8-bit) 
             Status = 0,             // Status Register         (RO, 8-bit)
             Mode = 1,               // Mode Register           (RW, 24-bit)
@@ -273,9 +273,14 @@ namespace Iot.Device.Ad7193
             }
         }
 
-        private bool continuousRead = false;
+        private bool _continuousRead = false;
         public bool ContinuousRead
         {
+            get
+            {
+                return _continuousRead;
+            }
+
             set
             {
                 if (value)
@@ -286,12 +291,7 @@ namespace Iot.Device.Ad7193
                 {
                     SetRegisterValue(Register.Communications, 0b0101_1000);
                 }
-                continuousRead = value;
-            }
-
-            get
-            {
-                return continuousRead;
+                _continuousRead = value;
             }
         }
 
@@ -300,6 +300,11 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public bool AppendStatusRegisterToData
         {
+            get
+            {
+                return ((registerCache[(byte)Register.Mode] & 0x100000) == 0x100000);
+            }
+
             set
             {
                 registerCache[(byte)Register.Mode] &= 0xEFFFFF;     // keep all bit values except DAT_STA bit
@@ -323,11 +328,6 @@ namespace Iot.Device.Ad7193
                 {
                     registerSize[(byte)Register.Data] = 3;          // change register size to 3
                 }
-            }
-
-            get
-            {
-                return ((registerCache[(byte)Register.Mode] & 0x100000) == 0x100000);
             }
         }
 
@@ -452,7 +452,7 @@ namespace Iot.Device.Ad7193
                 throw new Exception("SPI device must be in SPI mode 3 in order to work with AD7193.");
             }
 
-            this.spiDevice = spiDevice;
+            this._spiDevice = spiDevice;
 
             Reset();
         }
@@ -462,7 +462,7 @@ namespace Iot.Device.Ad7193
             for (int i = 0; i < 6; i++)
 
             {
-                spiDevice.Write(new byte[] { 0xFF });
+                _spiDevice.Write(new byte[] { 0xFF });
             }
         }
 
@@ -497,7 +497,6 @@ namespace Iot.Device.Ad7193
             }
         }
 
-
         /// <summary>
         /// Initiate Single Conversion (device will go into low power mode when conversion complete, and DOUT/!RDY goes low to indicate the completion of a conversion)
         /// </summary>
@@ -508,7 +507,7 @@ namespace Iot.Device.Ad7193
 
             SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
 
-            stopWatch.Restart();
+            _stopWatch.Restart();
         }
 
         public void StartContinuousConversion(uint frequency = ADCSamplerate)
@@ -519,22 +518,21 @@ namespace Iot.Device.Ad7193
             SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
 
             ContinuousRead = true;
-
             
             long samplePerTicks = Stopwatch.Frequency / frequency;
             if (samplePerTicks == 0) samplePerTicks = 1;
 
-            stopWatch.Restart();
+            _stopWatch.Restart();
             Task samplingTask = Task.Run(() =>
             {
                 long samples = 0;
-                long nextSampleAt = stopWatch.ElapsedTicks;
+                long nextSampleAt = _stopWatch.ElapsedTicks;
                 long elapsedTicks = 0;
                 long jitter = 0;
                 long maxJitterCorrectionPerSample = Math.Max(Stopwatch.Frequency / 100000, 1);
-                while (stopWatch.IsRunning)
+                while (_stopWatch.IsRunning)
                 {
-                    elapsedTicks = stopWatch.ElapsedTicks;
+                    elapsedTicks = _stopWatch.ElapsedTicks;
                     if (elapsedTicks >= nextSampleAt)
                     {
                         nextSampleAt = elapsedTicks + samplePerTicks;
@@ -578,7 +576,7 @@ namespace Iot.Device.Ad7193
             }
 
             // create the new AdcValue object and calculate the voltage
-            var adcValue = new AdcValue() { Raw = raw, Time = stopWatch.ElapsedTicks, Channel = (byte)(registerCache[(byte)Register.Status] & 0b0000_1111), Voltage = RawValueToVoltage(raw) };
+            var adcValue = new AdcValue() { Raw = raw, Time = _stopWatch.ElapsedTicks, Channel = (byte)(registerCache[(byte)Register.Status] & 0b0000_1111), Voltage = RawValueToVoltage(raw) };
 
             // add it to the collection
             //AdcValues.Enqueue(adcValue);
@@ -653,7 +651,6 @@ namespace Iot.Device.Ad7193
 
             voltage *= (this.VReference / pgaGain);
 
-
             return (voltage);
         }
 
@@ -678,24 +675,19 @@ namespace Iot.Device.Ad7193
             byte commandByte = 0;
             byte[] writeBuffer = new byte[byteNumber + 1];
 
-
             commandByte = (byte)((byte)CommunicationsRegisterBits.ReadOperation | GetCommAddress(registerAddress));
             writeBuffer[0] = commandByte;
 
-
             byte[] readBuffer = new byte[writeBuffer.Length];
-            lock (spiTransferLock)
+            lock (_spiTransferLock)
             {
-                spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
+                _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
             }
 
             byte[] trimmedReadBuffer = new byte[readBuffer.Length - 1];
             Array.Copy(readBuffer, 1, trimmedReadBuffer, 0, trimmedReadBuffer.Length);
             readBuffer = trimmedReadBuffer;
             
-            // .NET Core 3.0+ only
-            //readBuffer = readBuffer[1..];
-
             registerCache[registerAddress] = ByteArrayToUInt32(readBuffer);
 
             //Debug.WriteLine($"Read Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, received: {String.Join(' ', readBuffer.Select(x => x.ToString("X2")))}");
@@ -720,17 +712,14 @@ namespace Iot.Device.Ad7193
             byte[] buffer = UInt32ToByteArray(registerValue, byteNumber);
             Array.Copy(buffer, 0, writeBuffer, 1, byteNumber);
 
-            lock (spiTransferLock)
+            lock (_spiTransferLock)
             {
-                spiDevice.Write(writeBuffer);
+                _spiDevice.Write(writeBuffer);
             }
 
             byte[] trimmedWriteBuffer = new byte[writeBuffer.Length - 1];
             Array.Copy(writeBuffer, 1, trimmedWriteBuffer, 0, trimmedWriteBuffer.Length);
             writeBuffer = trimmedWriteBuffer;
-
-            // .NET Core 3.0+ only
-            //writeBuffer = writeBuffer[1..];
 
             //Debug.WriteLine($"Write Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, sent: {String.Join(' ', writeBuffer.Select(x => x.ToString("X2")))}");
         }
@@ -758,10 +747,10 @@ namespace Iot.Device.Ad7193
 
         public void Dispose()
         {
-            if (spiDevice != null)
+            if (_spiDevice != null)
             {
-                spiDevice?.Dispose();
-                spiDevice = null;
+                _spiDevice?.Dispose();
+                _spiDevice = null;
             }
         }
 
