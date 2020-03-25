@@ -33,7 +33,7 @@ namespace Iot.Device.Ad7193
 
         private object _spiTransferLock = new object();
         private Stopwatch _stopWatch = new Stopwatch();
-        //public ConcurrentQueue<AdcValue> AdcValues = new ConcurrentQueue<AdcValue>();
+        // public ConcurrentQueue<AdcValue> AdcValues = new ConcurrentQueue<AdcValue>();
         public BlockingCollection<AdcValue> AdcValues = new BlockingCollection<AdcValue>();
         public event EventHandler<AdcValueReceivedEventArgs> AdcValueReceived;
 
@@ -338,7 +338,7 @@ namespace Iot.Device.Ad7193
         /// When the pseudo bit is set to 1, the AD7193 is configured to have eight pseudo differential analog inputs. When pseudo bit is set to 0, the AD7193 is configured to have four differential analog inputs.
         /// </summary>
         public AnalogInputMode InputMode
-        { 
+        {
             get
             {
                 return (AnalogInputMode)((registerCache[(byte)Register.Configuration] & 0b0000_0100_0000_0000_0000_0000) >> 18);
@@ -415,8 +415,8 @@ namespace Iot.Device.Ad7193
             }
         }
 
-        public uint Offset 
-        { 
+        public uint Offset
+        {
             get
             {
                 registerCache[(byte)Register.Offset] = GetRegisterValue(Register.Offset) & 0b0000_0000_1111_1111_1111_1111_1111_1111;
@@ -473,7 +473,7 @@ namespace Iot.Device.Ad7193
             registerCache[(byte)Register.Mode] &= 0x1FFFFF;         // keep all bit values except Mode bits
             registerCache[(byte)Register.Mode] |= 0x800000;         // internal zero scale calibration (MD2 = 1, MD1 = 0, MD0 = 0)
 
-            SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting 
+            SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting
 
             WaitForADC();
 
@@ -689,8 +689,7 @@ namespace Iot.Device.Ad7193
             
             registerCache[registerAddress] = ByteArrayToUInt32(readBuffer);
 
-            //Debug.WriteLine($"Read Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, received: {String.Join(' ', readBuffer.Select(x => x.ToString("X2")))}");
-
+            // Debug.WriteLine($"Read Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, received: {String.Join(' ', readBuffer.Select(x => x.ToString("X2")))}");
             return registerCache[registerAddress];
         }
 
