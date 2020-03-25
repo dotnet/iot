@@ -4,7 +4,7 @@
     {
         public byte Channel { get; set; }
         public uint Raw { get; set; }
-        public float Voltage { get; set; }
+        public double Voltage { get; set; }
         public long Time { get; set; }
 
         public override string ToString()

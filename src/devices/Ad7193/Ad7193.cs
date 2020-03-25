@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Iot.Units;
 
 namespace Iot.Device.Ad7193
 {
@@ -38,23 +39,33 @@ namespace Iot.Device.Ad7193
         public event EventHandler<AdcValueReceivedEventArgs> AdcValueReceived;
 
 
-        // AD7193 Register Map
-        public const byte AD7193_REG_COMM = 0;          // Communications Register (WO, 8-bit) 
-        public const byte AD7193_REG_STAT = 0;          // Status Register         (RO, 8-bit)
-        public const byte AD7193_REG_MODE = 1;          // Mode Register           (RW, 24-bit)
-        public const byte AD7193_REG_CONF = 2;          // Configuration Register  (RW, 24-bit)
-        public const byte AD7193_REG_DATA = 3;          // Data Register           (RO, 24/32-bit) 
-        public const byte AD7193_REG_ID = 4;            // ID Register             (RO, 8-bit) 
-        public const byte AD7193_REG_GPOCON = 5;        // GPOCON Register         (RW, 8-bit) 
-        public const byte AD7193_REG_OFFSET = 6;        // Offset Register         (RW, 24-bit) 
-        public const byte AD7193_REG_FULLSCALE = 7;     // Full-Scale Register     (RW, 24-bit)
+        /// <summary>
+        /// AD7193 Register Map
+        /// </summary>
+        protected enum Register : byte 
+        { 
+            Communications = 0,     // Communications Register (WO, 8-bit) 
+            Status = 0,             // Status Register         (RO, 8-bit)
+            Mode = 1,               // Mode Register           (RW, 24-bit)
+            Configuration = 2,      // Configuration Register  (RW, 24-bit)
+            Data = 3,               // Data Register           (RO, 24/32-bit) 
+            ID = 4,                 // ID Register             (RO, 8-bit) 
+            GPOCON = 5,             // GPOCON Register         (RW, 8-bit) 
+            Offset = 6,             // Offset Register         (RW, 24-bit) 
+            FullScale = 7           // Full-Scale Register     (RW, 24-bit)
+        }
 
-        // Communications Register Bit Designations (AD7193_REG_COMM)
-        public const int AD7193_COMM_WEN = (1 << 7);    // Write Enable. 
-        public const int AD7193_COMM_WRITE = (0 << 6);  // Write Operation.
-        public const int AD7193_COMM_READ = (1 << 6);   // Read Operation.         
-        public const int AD7193_COMM_CREAD = (1 << 2);  // Continuous Read of Data Register.
-
+        /// <summary>
+        /// Communications Register Bit Designations
+        /// </summary>
+        protected enum CommunicationsRegisterBits : byte
+        {
+            WriteEnable = (1 << 7),
+            WriteOperation = (0 << 6),
+            ReadOperation = (1 << 6),
+            ContinuousDataRead = (1 << 2)
+        }
+        
         // Gain settings
         public enum Gain
         {
@@ -81,7 +92,7 @@ namespace Iot.Device.Ad7193
             Shrt = 0b10_0000_0000
         }
 
-        public enum AveragingModes
+        public enum AveragingMode
         {
             Off = 0b00,
             Avg2 = 0b01,
@@ -89,32 +100,32 @@ namespace Iot.Device.Ad7193
             Avg16 = 0b11
         }
 
-        public enum AnalogInputModes
+        public enum AnalogInputMode
         {
             FourDifferentialAnalogInputs = 0b0,
             EightPseudoDifferentialAnalogInputs = 0b1
         }
 
         // Default register settings
-        private uint[] registerCache = { 0x00, 0x080060, 0x000117, 0x000000, 0xa2, 0x00, 0x000000, 0x000000 };
-        private byte[] registerSize = { 1, 3, 3, 3, 1, 1, 3, 3 };
+        protected uint[] registerCache = { 0x00, 0x080060, 0x000117, 0x000000, 0xa2, 0x00, 0x000000, 0x000000 };
+        protected byte[] registerSize = { 1, 3, 3, 3, 1, 1, 3, 3 };
 
-        private StringBuilder sb = new StringBuilder();
+        protected StringBuilder sb = new StringBuilder();
 
 
         /// <summary>
         /// The external reference voltage value. The default is 2.5V on REFIN1+ and REFIN1- (on the Digilent Pmod AD5 board)
         /// </summary>
-        public float VReference { get; set; } = 2.50f;
+        public double VReference { get; set; } = 2.50f;
 
         public Gain PGAGain
         {
             set
             {
-                registerCache[AD7193_REG_CONF] &= 0xFF_FFF8;          // keep all bit values except Gain bits
-                registerCache[AD7193_REG_CONF] |= (uint)value;
+                registerCache[(byte)Register.Configuration] &= 0xFF_FFF8;          // keep all bit values except Gain bits
+                registerCache[(byte)Register.Configuration] |= (uint)value;
 
-                SetRegisterValue(AD7193_REG_CONF, registerCache[AD7193_REG_CONF]);
+                SetRegisterValue(Register.Configuration, registerCache[(byte)Register.Configuration]);
             }
         }
 
@@ -123,7 +134,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                uint register = GetRegisterValue(AD7193_REG_STAT);
+                uint register = GetRegisterValue(Register.Status);
 
                 sb.Clear();
                 sb.Append(((register & 0b1000_0000) == 0b1000_0000) ? "Not ready" : "Ready");
@@ -144,7 +155,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                uint register = GetRegisterValue(AD7193_REG_MODE);
+                uint register = GetRegisterValue(Register.Mode);
 
                 string mode = UInt32ToBinaryString((register & 0b1110_0000_0000_0000_0000_0000) >> 21, 3);
 
@@ -206,7 +217,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                uint register = GetRegisterValue(AD7193_REG_CONF);
+                uint register = GetRegisterValue(Register.Configuration);
 
                 sb.Clear();
                 sb.Append($"Chop: {(register & 0b1000_0000_0000_0000_0000_0000) >> 23}");
@@ -241,7 +252,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                uint mode = GetRegisterValue(AD7193_REG_MODE);
+                uint mode = GetRegisterValue(Register.Mode);
                 return ((mode & 0b1110_0000_0000_0000_0000_0000) >> 21) == 0b011;
             }
         }
@@ -250,7 +261,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                uint status = GetRegisterValue(AD7193_REG_STAT);
+                uint status = GetRegisterValue(Register.Status);
 
                 return (status & 0b1000_0000) != 0b1000_0000;
             }
@@ -260,7 +271,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                uint status = GetRegisterValue(AD7193_REG_STAT);
+                uint status = GetRegisterValue(Register.Status);
 
                 return (status & 0b0100_0000) == 0b0100_0000;
             }
@@ -273,11 +284,11 @@ namespace Iot.Device.Ad7193
             {
                 if (value)
                 {
-                    SetRegisterValue(AD7193_REG_COMM, 0b0101_1100);
+                    SetRegisterValue(Register.Communications, 0b0101_1100);
                 }
                 else
                 {
-                    SetRegisterValue(AD7193_REG_COMM, 0b0101_1000);
+                    SetRegisterValue(Register.Communications, 0b0101_1000);
                 }
                 continuousRead = value;
             }
@@ -295,32 +306,32 @@ namespace Iot.Device.Ad7193
         {
             set
             {
-                registerCache[AD7193_REG_MODE] &= 0xEFFFFF;     // keep all bit values except DAT_STA bit
+                registerCache[(byte)Register.Mode] &= 0xEFFFFF;     // keep all bit values except DAT_STA bit
 
                 if (value)
                 {
-                    registerCache[AD7193_REG_MODE] |= 0x100000;     // set DAT_STA to 1
+                    registerCache[(byte)Register.Mode] |= 0x100000;     // set DAT_STA to 1
                 }
                 else
                 {
-                    registerCache[AD7193_REG_MODE] |= 0x000000;     // set DAT_STA to 0
+                    registerCache[(byte)Register.Mode] |= 0x000000;     // set DAT_STA to 0
                 }
 
-                SetRegisterValue(AD7193_REG_MODE, registerCache[AD7193_REG_MODE]);
+                SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
 
                 if (value)
                 {
-                    registerSize[AD7193_REG_DATA] = 4;          // change register size to 4, b/c status register is now appended
+                    registerSize[(byte)Register.Data] = 4;          // change register size to 4, b/c status register is now appended
                 }
                 else
                 {
-                    registerSize[AD7193_REG_DATA] = 3;          // change register size to 3
+                    registerSize[(byte)Register.Data] = 3;          // change register size to 3
                 }
             }
 
             get
             {
-                return ((registerCache[AD7193_REG_MODE] & 0x100000) == 0x100000);
+                return ((registerCache[(byte)Register.Mode] & 0x100000) == 0x100000);
             }
         }
 
@@ -330,28 +341,28 @@ namespace Iot.Device.Ad7193
         /// Switches from differential input to pseudo differential inputs.
         /// When the pseudo bit is set to 1, the AD7193 is configured to have eight pseudo differential analog inputs. When pseudo bit is set to 0, the AD7193 is configured to have four differential analog inputs.
         /// </summary>
-        public AnalogInputModes AnalogInputMode 
+        public AnalogInputMode InputMode 
         { 
             get
             {
-                return (AnalogInputModes)((registerCache[AD7193_REG_CONF] & 0b0000_0100_0000_0000_0000_0000) >> 18);
+                return (AnalogInputMode)((registerCache[(byte)Register.Configuration] & 0b0000_0100_0000_0000_0000_0000) >> 18);
             }
 
             set
             {
-                registerCache[AD7193_REG_CONF] &= 0b1111_1011_1111_1111_1111_1111;
+                registerCache[(byte)Register.Configuration] &= 0b1111_1011_1111_1111_1111_1111;
 
-                if (value == AnalogInputModes.FourDifferentialAnalogInputs)
+                if (value == AnalogInputMode.FourDifferentialAnalogInputs)
                 {
-                    registerCache[AD7193_REG_CONF] |= 0 << 11;
+                    registerCache[(byte)Register.Configuration] |= 0 << 11;
                 }
 
-                if (value == AnalogInputModes.EightPseudoDifferentialAnalogInputs)
+                if (value == AnalogInputMode.EightPseudoDifferentialAnalogInputs)
                 {
-                    registerCache[AD7193_REG_CONF] |= 1 << 11;
+                    registerCache[(byte)Register.Configuration] |= 1 << 11;
                 }
 
-                SetRegisterValue(AD7193_REG_CONF, registerCache[AD7193_REG_CONF]);
+                SetRegisterValue(Register.Configuration, registerCache[(byte)Register.Configuration]);
 
             }
         }
@@ -368,11 +379,11 @@ namespace Iot.Device.Ad7193
                 uint channelBits = (uint)value << 8;
 
                 // write Channel bits to Config register, keeping other bits as is
-                registerCache[AD7193_REG_CONF] &= 0xFC00FF;       // keep all bit values except Channel bits
-                registerCache[AD7193_REG_CONF] |= channelBits;
+                registerCache[(byte)Register.Configuration] &= 0xFC00FF;       // keep all bit values except Channel bits
+                registerCache[(byte)Register.Configuration] |= channelBits;
 
                 // write channel selected to Configuration register
-                SetRegisterValue(AD7193_REG_CONF, registerCache[AD7193_REG_CONF]);
+                SetRegisterValue(Register.Configuration, registerCache[(byte)Register.Configuration]);
             }
         }
 
@@ -380,14 +391,14 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// Sets the amount of averaging. The data from the sinc filter is averaged by 2, 8, or 16. The averaging reduces the output data rate for a given FS word; however, the RMS noise improves.
         /// </summary>
-        public AveragingModes Averaging
+        public AveragingMode Averaging
         {
             set
             {
-                registerCache[AD7193_REG_MODE] &= 0xFC_FFFF;                //keep all bit values except Averaging setting bits
-                registerCache[AD7193_REG_MODE] |= ((uint)value) << 16;
+                registerCache[(byte)Register.Mode] &= 0xFC_FFFF;                //keep all bit values except Averaging setting bits
+                registerCache[(byte)Register.Mode] |= ((uint)value) << 16;
 
-                SetRegisterValue(AD7193_REG_MODE, registerCache[AD7193_REG_MODE]);
+                SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
             }
         }
 
@@ -404,10 +415,10 @@ namespace Iot.Device.Ad7193
                     throw new ArgumentException("Filter rate is too high, it must be a 10-bit value.");
                 }
 
-                registerCache[AD7193_REG_MODE] &= 0xFFFC00;         //keep all bit values except Filter setting bits
-                registerCache[AD7193_REG_MODE] |= (uint)value << 0;
+                registerCache[(byte)Register.Mode] &= 0xFFFC00;         //keep all bit values except Filter setting bits
+                registerCache[(byte)Register.Mode] |= (uint)value << 0;
 
-                SetRegisterValue(AD7193_REG_MODE, registerCache[AD7193_REG_MODE]);
+                SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
             }
         }
 
@@ -415,14 +426,14 @@ namespace Iot.Device.Ad7193
         { 
             get
             {
-                registerCache[AD7193_REG_OFFSET] = GetRegisterValue(AD7193_REG_OFFSET) & 0b0000_0000_1111_1111_1111_1111_1111_1111;
-                return registerCache[AD7193_REG_OFFSET];
+                registerCache[(byte)Register.Offset] = GetRegisterValue(Register.Offset) & 0b0000_0000_1111_1111_1111_1111_1111_1111;
+                return registerCache[(byte)Register.Offset];
             }
 
             set
             {
-                registerCache[AD7193_REG_OFFSET] = value & 0b0000_0000_1111_1111_1111_1111_1111_1111;
-                SetRegisterValue(AD7193_REG_OFFSET, registerCache[AD7193_REG_OFFSET]);
+                registerCache[(byte)Register.Offset] = value & 0b0000_0000_1111_1111_1111_1111_1111_1111;
+                SetRegisterValue(Register.Offset, registerCache[(byte)Register.Offset]);
             }
         }
 
@@ -430,14 +441,14 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                registerCache[AD7193_REG_FULLSCALE] = GetRegisterValue(AD7193_REG_FULLSCALE) & 0b0000_0000_1111_1111_1111_1111_1111_1111;
-                return registerCache[AD7193_REG_FULLSCALE];
+                registerCache[(byte)Register.FullScale] = GetRegisterValue(Register.FullScale) & 0b0000_0000_1111_1111_1111_1111_1111_1111;
+                return registerCache[(byte)Register.FullScale];
             }
 
             set
             {
-                registerCache[AD7193_REG_FULLSCALE] = value & 0b0000_0000_1111_1111_1111_1111_1111_1111;
-                SetRegisterValue(AD7193_REG_FULLSCALE, registerCache[AD7193_REG_FULLSCALE]);
+                registerCache[(byte)Register.FullScale] = value & 0b0000_0000_1111_1111_1111_1111_1111_1111;
+                SetRegisterValue(Register.FullScale, registerCache[(byte)Register.FullScale]);
             }
         }
 
@@ -467,17 +478,17 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public void Calibrate()
         {
-            registerCache[AD7193_REG_MODE] &= 0x1FFFFF;         // keep all bit values except Mode bits
-            registerCache[AD7193_REG_MODE] |= 0x800000;         // internal zero scale calibration (MD2 = 1, MD1 = 0, MD0 = 0)
+            registerCache[(byte)Register.Mode] &= 0x1FFFFF;         // keep all bit values except Mode bits
+            registerCache[(byte)Register.Mode] |= 0x800000;         // internal zero scale calibration (MD2 = 1, MD1 = 0, MD0 = 0)
 
-            SetRegisterValue(AD7193_REG_MODE, registerCache[AD7193_REG_MODE]);     // overwriting previous MODE reg setting 
+            SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting 
 
             WaitForADC();
 
-            registerCache[AD7193_REG_MODE] &= 0x1FFFFF;         // keep all bit values except Mode bits
-            registerCache[AD7193_REG_MODE] |= 0xA00000;         // internal full scale calibration (MD2 = 1, MD1 = 0, MD0 = 1)
+            registerCache[(byte)Register.Mode] &= 0x1FFFFF;         // keep all bit values except Mode bits
+            registerCache[(byte)Register.Mode] |= 0xA00000;         // internal full scale calibration (MD2 = 1, MD1 = 0, MD0 = 1)
 
-            SetRegisterValue(AD7193_REG_MODE, registerCache[AD7193_REG_MODE]);     // overwriting previous MODE reg setting 
+            SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting 
 
             WaitForADC();
         }
@@ -499,20 +510,20 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public void StartSingleConversion()
         {
-            registerCache[AD7193_REG_MODE] &= 0x1FFFFF; // keep all bit values except Mode bits
-            registerCache[AD7193_REG_MODE] |= 0x200000; // single conversion mode bits (MD2 = 0, MD1 = 0, MD0 = 1)
+            registerCache[(byte)Register.Mode] &= 0x1FFFFF; // keep all bit values except Mode bits
+            registerCache[(byte)Register.Mode] |= 0x200000; // single conversion mode bits (MD2 = 0, MD1 = 0, MD0 = 1)
 
-            SetRegisterValue(AD7193_REG_MODE, registerCache[AD7193_REG_MODE]);
+            SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
 
             stopWatch.Restart();
         }
 
         public void StartContinuousConversion(uint frequency = ADCSamplerate)
         {            
-            registerCache[AD7193_REG_MODE] &= 0x1FFFFF; // keep all bit values except Mode bits
-            registerCache[AD7193_REG_MODE] |= 0x000000; // continuous conversion mode bits (MD2 = 0, MD1 = 0, MD0 = 0)
+            registerCache[(byte)Register.Mode] &= 0x1FFFFF; // keep all bit values except Mode bits
+            registerCache[(byte)Register.Mode] |= 0x000000; // continuous conversion mode bits (MD2 = 0, MD1 = 0, MD0 = 0)
 
-            SetRegisterValue(AD7193_REG_MODE, registerCache[AD7193_REG_MODE]);
+            SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
 
             ContinuousRead = true;
 
@@ -558,12 +569,12 @@ namespace Iot.Device.Ad7193
         /// <returns>24-bit raw value of the last ADC result (+ status byte if enabled)</returns>
         public uint? ReadADCValue()
         {
-            uint raw = GetRegisterValue(AD7193_REG_DATA);
+            uint raw = GetRegisterValue(Register.Data);
 
             // update the status register cache if we have it here
             if (this.AppendStatusRegisterToData)
             {
-                registerCache[AD7193_REG_STAT] = (byte)(raw & 0xFF);
+                registerCache[(byte)Register.Status] = (byte)(raw & 0xFF);
                 raw = (raw & 0xFFFFFF00) >> 8;
             }
 
@@ -574,7 +585,7 @@ namespace Iot.Device.Ad7193
             }
 
             // create the new AdcValue object and calculate the voltage
-            var adcValue = new AdcValue() { Raw = raw, Time = stopWatch.ElapsedTicks, Channel = (byte)(registerCache[AD7193_REG_STAT] & 0b0000_1111), Voltage = RawValueToVoltage(raw) };
+            var adcValue = new AdcValue() { Raw = raw, Time = stopWatch.ElapsedTicks, Channel = (byte)(registerCache[(byte)Register.Status] & 0b0000_1111), Voltage = RawValueToVoltage(raw) };
 
             // add it to the collection
             //AdcValues.Enqueue(adcValue);
@@ -608,13 +619,13 @@ namespace Iot.Device.Ad7193
         /// </summary>
         /// <param name="adcValue">The raw ADC result</param>
         /// <returns></returns>
-        public float RawValueToVoltage(uint adcValue)
+        private double RawValueToVoltage(uint adcValue)
         {
             // 0 - bipolar (ranges from ±19.53 mV to ±2.5 V) ; 1 - unipolar (ranges from 0 mV to 19.53 mV to 0 V to 2.5 V)
-            byte mPolarity = (byte)(registerCache[AD7193_REG_CONF] & 0b0000_0000_0000_0000_0000_1000 >> 3);
+            byte mPolarity = (byte)(registerCache[(byte)Register.Configuration] & 0b0000_0000_0000_0000_0000_1000 >> 3);
 
-            ulong pgaSetting = registerCache[AD7193_REG_CONF] & 0b0000_0000_0000_0000_0000_0111;  // keep only the PGA setting bits
-            float pgaGain = 1;
+            ulong pgaSetting = registerCache[(byte)Register.Configuration] & 0b0000_0000_0000_0000_0000_0111;  // keep only the PGA setting bits
+            int pgaGain = 1;
 
             switch (pgaSetting)
             {
@@ -638,14 +649,14 @@ namespace Iot.Device.Ad7193
                     break;
             }
 
-            float voltage = 0;
+            double voltage = 0;
             if (mPolarity == 1)
             {
-                voltage = (float)adcValue / 16777216.0f;
+                voltage = (double)adcValue / 16777216.0;
             }
             if (mPolarity == 0)
             {
-                voltage = ((float)adcValue / 8388608.0f) - 1.0f;
+                voltage = ((double)adcValue / 8388608.0) - 1.0;
             }
 
             voltage *= (this.VReference / pgaGain);
@@ -659,11 +670,10 @@ namespace Iot.Device.Ad7193
         /// </summary>
         /// <param name="adcValue">The raw ADC result</param>
         /// <returns></returns>
-        public float ADCValueToCelsius(ulong adcValue)
+        protected Temperature ADCValueToTemperature(ulong adcValue)
         {
-            float degreeCelsius = ((float)(adcValue - 0x800000) / 2815.0f) - 273.0f;
-            float degreeFahrenheit = (degreeCelsius * 9 / 5) + 32;
-            return (degreeCelsius);
+            double degreeCelsius = ((float)(adcValue - 0x0080_0000) / 2815.0f) - 273.0f;
+            return Temperature.FromCelsius(degreeCelsius);
         }
 
 
@@ -673,14 +683,15 @@ namespace Iot.Device.Ad7193
         /// <param name="registerAddress"></param>
         /// <param name="bytesNumber"></param>
         /// <returns></returns>
-        public uint GetRegisterValue(byte registerAddress)
+        protected uint GetRegisterValue(Register register)
         {
+            byte registerAddress = (byte)register;
             byte byteNumber = registerSize[registerAddress];
             byte commandByte = 0;
             byte[] writeBuffer = new byte[byteNumber + 1];
 
 
-            commandByte = (byte)(AD7193_COMM_READ | GetCommAddress(registerAddress));
+            commandByte = (byte)((byte)CommunicationsRegisterBits.ReadOperation | GetCommAddress(registerAddress));
             writeBuffer[0] = commandByte;
 
 
@@ -704,14 +715,15 @@ namespace Iot.Device.Ad7193
         /// <param name="registerAddress"></param>
         /// <param name="registerValue"></param>
         /// <param name="byteNumber"></param>
-        public void SetRegisterValue(byte registerAddress, uint registerValue)
+        protected void SetRegisterValue(Register register, uint registerValue)
         {
+            byte registerAddress = (byte)register;
             byte byteNumber = registerSize[registerAddress];
             byte commandByte = 0;
             byte[] writeBuffer = new byte[byteNumber + 1];
 
 
-            commandByte = (byte)(AD7193_COMM_WRITE | GetCommAddress(registerAddress));
+            commandByte = (byte)((byte)CommunicationsRegisterBits.WriteOperation | GetCommAddress(registerAddress));
             writeBuffer[0] = commandByte;
 
             byte[] buffer = UInt32ToByteArray(registerValue, byteNumber);
@@ -726,18 +738,18 @@ namespace Iot.Device.Ad7193
             //Debug.WriteLine($"Write Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, sent: {String.Join(' ', writeBuffer.Select(x => x.ToString("X2")))}");
         }
 
-        public List<uint> GetAllRegisterValues()
+        protected List<uint> GetAllRegisterValues()
         {
             List<uint> result = new List<uint>();
 
-            result.Add(GetRegisterValue(AD7193_REG_STAT));
-            result.Add(GetRegisterValue(AD7193_REG_MODE));
-            result.Add(GetRegisterValue(AD7193_REG_CONF));
-            result.Add(GetRegisterValue(AD7193_REG_DATA));
-            result.Add(GetRegisterValue(AD7193_REG_ID));
-            result.Add(GetRegisterValue(AD7193_REG_GPOCON));
-            result.Add(GetRegisterValue(AD7193_REG_OFFSET));
-            result.Add(GetRegisterValue(AD7193_REG_FULLSCALE));
+            result.Add(GetRegisterValue(Register.Status));
+            result.Add(GetRegisterValue(Register.Mode));
+            result.Add(GetRegisterValue(Register.Configuration));
+            result.Add(GetRegisterValue(Register.Data));
+            result.Add(GetRegisterValue(Register.ID));
+            result.Add(GetRegisterValue(Register.GPOCON));
+            result.Add(GetRegisterValue(Register.Offset));
+            result.Add(GetRegisterValue(Register.FullScale));
 
             return result;
         }
