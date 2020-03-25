@@ -36,15 +36,15 @@ namespace AD7193Sample
 			Console.WriteLine($"-- Resetting and calibrating AD7193.");
 			ad7193.Reset();
 			ad7193.PGAGain = Ad7193.Gain.X1;
-			ad7193.Averaging = Ad7193.AveragingModes.Off;
-			ad7193.AnalogInputMode = Ad7193.AnalogInputModes.EightPseudoDifferentialAnalogInputs;
+			ad7193.Averaging = Ad7193.AveragingMode.Off;
+			ad7193.InputMode = Ad7193.AnalogInputMode.EightPseudoDifferentialAnalogInputs;
 			ad7193.AppendStatusRegisterToData = true;
 			ad7193.JitterCorrection = true;
 			ad7193.Filter = 0;
 
-			Console.WriteLine($"AD7193 before calibration: offset={ad7193.Offset.ToString("x")}, full-scale={ad7193.FullScale.ToString("x")}");
+			Console.WriteLine($"AD7193 before calibration: offset={ad7193.Offset.ToString("X8")}, full-scale={ad7193.FullScale.ToString("X8")}");
 			ad7193.Calibrate();
-			Console.WriteLine($"AD7193  after calibration: offset={ad7193.Offset.ToString("x")}, full-scale={ad7193.FullScale.ToString("x")}");
+			Console.WriteLine($"AD7193  after calibration: offset={ad7193.Offset.ToString("X8")}, full-scale={ad7193.FullScale.ToString("X8")}");
 
 
 			Console.WriteLine("Starting 100 single conversions on CH0...");
