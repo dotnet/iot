@@ -1,7 +1,7 @@
 # AD7193 - Samples
 
 ## Required hardware
-* [AD7193](https://www.analog.com/media/en/technical-documentation/data-sheets/AD7193.pdf)
+* [Analog Devices AD7193](https://www.analog.com/media/en/technical-documentation/data-sheets/AD7193.pdf)
 * Any supported IoT device with an SPI bus
 
 ## Hardware used for testing
@@ -17,15 +17,23 @@
 ![Signal input from Digilent Analog Discovery 2](AD2_Oscilloscope_Input.png)
 
 ## Installation on Raspberry Pi
-Before you publish your binaries on Raspberry Pi, you must restore the .NET Core packages for the project
+1, Before you publish your binaries on Raspberry Pi, you must restore the .NET Core packages for the project
 > dotnet restore
 
-Open and edit the credentials on the DeployToPi.ps1 file
+2, Open and edit the credentials in the [DeployToPi.ps1](DeployToPi.ps1) file
 
-Run the DeployToPi.ps1 script in a PowerShell window.
+3, Run the [DeployToPi.ps1](DeployToPi.ps1) script in a PowerShell window.
 > .\DeployToPi.ps1
 
-You can optionally attach the Visual Studio debugger, and debug your application running on the Pi
+4, You can optionally attach the Visual Studio Debugger, and debug your application running on the Pi:
+
+    a, Open Visual Studio
+    b, Debug / Attach to Process... (Ctrl+Alt+P)
+    c, Type: SSH, Target: <IP address of your Raspberry Pi>, hit Enter
+    d, Enter username and password, hit Connect
+    e, Enter "AD7193" to the filter textbox, select the process
+    f, Check "Managed (.NET Core for Unix)"
+    g, Next time you can quickly Reattach to Process... (Shift+Alt+P)
 
 ## Code
 ```C#
@@ -34,6 +42,7 @@ private static DateTime firstDataRead;
 private static double lastChecked = 0;
 private static int lastCount = 0;
 private static int samplesTaken = 0;
+
 
 static void Main(string[] args)
 {
@@ -46,20 +55,24 @@ static void Main(string[] args)
 
 
 	ad7193 = new Ad7193(ad7193SpiDevice);
+	ad7193.AdcValueReceived += Ad7193_AdcValueReceived;
 
 	Console.WriteLine($"-- Resetting and calibrating AD7193.");
 	ad7193.Reset();
-	ad7193.SetPGAGain(Ad7193.Gain.X1);
-	ad7193.Calibrate();
-	ad7193.SetPsuedoDifferentialInputs(false);
+	ad7193.PGAGain = Ad7193.Gain.X1;
+	ad7193.Averaging = Ad7193.AveragingModes.Off;
+	ad7193.AnalogInputMode = Ad7193.AnalogInputModes.EightPseudoDifferentialAnalogInputs;
 	ad7193.AppendStatusRegisterToData = true;
 	ad7193.JitterCorrection = true;
+	ad7193.Filter = 0;
 
-	ad7193.AdcValueReceived += Ad7193_AdcValueReceived;
+	Console.WriteLine($"AD7193 before calibration: offset={ad7193.Offset.ToString("x")}, full-scale={ad7193.FullScale.ToString("x")}");
+	ad7193.Calibrate();
+	Console.WriteLine($"AD7193  after calibration: offset={ad7193.Offset.ToString("x")}, full-scale={ad7193.FullScale.ToString("x")}");
 
 
-	Console.WriteLine("Starting 100 single conversion on CH0...");
-	ad7193.SetChannel(Ad7193.Channel.CH00);
+	Console.WriteLine("Starting 100 single conversions on CH0...");
+	ad7193.ActiveChannels = Ad7193.Channel.CH00;
 
 	for (int i = 0; i < 100; i++)
 	{
@@ -75,19 +88,21 @@ static void Main(string[] args)
 	Console.WriteLine();
 	Console.WriteLine();
 	Console.WriteLine("Starting continuous conversion on CH0 and CH1...");
-	ad7193.SetChannel(Ad7193.Channel.CH00 | Ad7193.Channel.CH01);
+	ad7193.ActiveChannels = Ad7193.Channel.CH00 | Ad7193.Channel.CH01;
 	ad7193.StartContinuousConversion();
 
+	int loopcounter = 0;
 	while (true)
 	{
-		if (ad7193.HasErrors)
+		loopcounter++;
+		if (ad7193.HasErrors || (loopcounter % 50 == 0))
 		{
 			Console.WriteLine();
 			Console.WriteLine($"AD7193 status: {ad7193.Status}");
 			Console.WriteLine($"AD7193 mode: {ad7193.Mode}");
 			Console.WriteLine($"AD7193 config: {ad7193.Config}");
 			Console.WriteLine();
-			Thread.Sleep(5000);
+			Thread.Sleep(1500);
 		}
 		Thread.Sleep(250);
 	}
@@ -110,11 +125,12 @@ private static void Ad7193_AdcValueReceived(object sender, Iot.Device.Ad7193.Adc
 
 		Iot.Device.Ad7193.AdcValue adcValue = e.AdcValue;
 
-		Console.WriteLine($"ADC value on channel {adcValue.Channel}: {adcValue.Voltage.ToString("0.0000").PadLeft(9)} V [{adcValue.Raw.ToString("N0").PadLeft(13)}] | sample rate: {sps.ToString("N1")} SPS");
+		Console.WriteLine($"Channel {adcValue.Channel.ToString().PadLeft(2)}: {adcValue.Voltage.ToString("0.0000").PadLeft(11)} V | {adcValue.Raw.ToString("N0").PadLeft(13)} | {sps.ToString("N1").PadLeft(9)} SPS");
 	}
 }
 ```
 
 ## Result
-You can see that the values are oscillating between 1.0 V and 0.0 V at the rate of 4800 SPS as expected.
+You can see that the values are oscillating between 0.0 V and 1.0 V at the rate of 4800 SPS, as expected.
+
 ![Results in a PowerShell window](PowerShell_RaspberryPi_Output.png)
