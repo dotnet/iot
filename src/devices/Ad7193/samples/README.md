@@ -11,10 +11,10 @@
 * [Analog Discovery 2](https://reference.digilentinc.com/reference/instrumentation/analog-discovery-2/reference-manual) (for signal generation)
 * BNC to SMA cable
 
-## Circuit, wiring and signal input
+## Test unit and signal input
 ![Raspberry Pi 3 Model B+ + Digilent Pmod HAT + Digilent PmodAD5](Raspberry_3Bp_PmodHAT_PmodAD5.jpg)
 
-![Signal input from Digilent Analog Discovery 2](AD2_Oscilloscope_Input.png)
+![Signal input from Digilent Analog Discovery 2](AD2_Oscilloscope_Input_v4.png)
 
 ## Installation on Raspberry Pi
 1, Before you publish your binaries on Raspberry Pi, you must restore the .NET Core packages for the project
