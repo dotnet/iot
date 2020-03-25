@@ -42,14 +42,14 @@ namespace Iot.Device.Ad7193
         /// </summary>
         protected enum Register : byte
         {
-            Communications = 0,     // Communications Register (WO, 8-bit) 
+            Communications = 0,     // Communications Register (WO, 8-bit)
             Status = 0,             // Status Register         (RO, 8-bit)
             Mode = 1,               // Mode Register           (RW, 24-bit)
             Configuration = 2,      // Configuration Register  (RW, 24-bit)
-            Data = 3,               // Data Register           (RO, 24/32-bit) 
-            ID = 4,                 // ID Register             (RO, 8-bit) 
-            GPOCON = 5,             // GPOCON Register         (RW, 8-bit) 
-            Offset = 6,             // Offset Register         (RW, 24-bit) 
+            Data = 3,               // Data Register           (RO, 24/32-bit)
+            ID = 4,                 // ID Register             (RO, 8-bit)
+            GPOCON = 5,             // GPOCON Register         (RW, 8-bit)
+            Offset = 6,             // Offset Register         (RW, 24-bit)
             FullScale = 7           // Full-Scale Register     (RW, 24-bit)
         }
 
@@ -63,7 +63,7 @@ namespace Iot.Device.Ad7193
             ReadOperation = (1 << 6),
             ContinuousDataRead = (1 << 2)
         }
-        
+
         // Gain settings
         public enum Gain
         {
@@ -337,7 +337,7 @@ namespace Iot.Device.Ad7193
         /// Switches from differential input to pseudo differential inputs.
         /// When the pseudo bit is set to 1, the AD7193 is configured to have eight pseudo differential analog inputs. When pseudo bit is set to 0, the AD7193 is configured to have four differential analog inputs.
         /// </summary>
-        public AnalogInputMode InputMode 
+        public AnalogInputMode InputMode
         { 
             get
             {
@@ -389,7 +389,7 @@ namespace Iot.Device.Ad7193
         {
             set
             {
-                registerCache[(byte)Register.Mode] &= 0xFC_FFFF;                //keep all bit values except Averaging setting bits
+                registerCache[(byte)Register.Mode] &= 0xFC_FFFF;                // keep all bit values except Averaging setting bits
                 registerCache[(byte)Register.Mode] |= ((uint)value) << 16;
 
                 SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
@@ -408,7 +408,7 @@ namespace Iot.Device.Ad7193
                     throw new ArgumentException("Filter rate is too high, it must be a 10-bit value.");
                 }
 
-                registerCache[(byte)Register.Mode] &= 0xFFFC00;         //keep all bit values except Filter setting bits
+                registerCache[(byte)Register.Mode] &= 0xFFFC00;         // keep all bit values except Filter setting bits
                 registerCache[(byte)Register.Mode] |= (uint)value << 0;
 
                 SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
@@ -460,7 +460,6 @@ namespace Iot.Device.Ad7193
         public void Reset()
         {
             for (int i = 0; i < 6; i++)
-
             {
                 _spiDevice.Write(new byte[] { 0xFF });
             }
@@ -579,7 +578,7 @@ namespace Iot.Device.Ad7193
             var adcValue = new AdcValue() { Raw = raw, Time = _stopWatch.ElapsedTicks, Channel = (byte)(registerCache[(byte)Register.Status] & 0b0000_1111), Voltage = RawValueToVoltage(raw) };
 
             // add it to the collection
-            //AdcValues.Enqueue(adcValue);
+            // AdcValues.Enqueue(adcValue);
             AdcValues.Add(adcValue);
 
             // call the event handler
@@ -705,7 +704,6 @@ namespace Iot.Device.Ad7193
             byte commandByte = 0;
             byte[] writeBuffer = new byte[byteNumber + 1];
 
-
             commandByte = (byte)((byte)CommunicationsRegisterBits.WriteOperation | GetCommAddress(registerAddress));
             writeBuffer[0] = commandByte;
 
@@ -721,7 +719,7 @@ namespace Iot.Device.Ad7193
             Array.Copy(writeBuffer, 1, trimmedWriteBuffer, 0, trimmedWriteBuffer.Length);
             writeBuffer = trimmedWriteBuffer;
 
-            //Debug.WriteLine($"Write Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, sent: {String.Join(' ', writeBuffer.Select(x => x.ToString("X2")))}");
+            // Debug.WriteLine($"Write Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, sent: {String.Join(' ', writeBuffer.Select(x => x.ToString("X2")))}");
         }
 
         protected List<uint> GetAllRegisterValues()
