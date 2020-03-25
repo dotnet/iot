@@ -1,11 +1,11 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
-using Iot.Units;
 using System.Threading;
+using Iot.Units;
 
 namespace Iot.Device.Mcp9808
 {
@@ -59,28 +59,46 @@ namespace Iot.Device.Mcp9808
             Disabled = false;
         }
 
+        /// <summary>
+        /// Checks if the device is a MCP9808
+        /// </summary>
+        /// <returns>True if device has been correctly detected</returns>
         public bool Init()
         {
             if (Read16(Register8.MCP_MANUF_ID) != 0x0054)
+            {
                 return false;
+            }
 
             if (Read16(Register8.MCP_DEVICE_ID) != 0x0400)
+            {
                 return false;
+            }
 
             return true;
         }
 
+        /// <summary>
+        /// Return the internal resolution register
+        /// </summary>
+        /// <returns>Resolution setting</returns>
         public byte GetResolution()
         {
             return Read8(Register8.MCP_RESOLUTION);
         }
 
+        /// <summary>
+        /// Wakes-up the device
+        /// </summary>
         public void Wake()
         {
             SetShutdown(false);
             Thread.Sleep(250);
         }
 
+        /// <summary>
+        /// Shuts down the device
+        /// </summary>
         public void Shutdown()
         {
             SetShutdown(true);
@@ -95,13 +113,17 @@ namespace Iot.Device.Mcp9808
             ushort value = Read16(Register8.MCP_AMBIENT_TEMP);
 
             if (value == 0xFFFF)
+            {
                 return double.NaN;
+            }
 
             double temp = value & 0x0FFF;
             temp /= 16.0;
             if ((value & 0x1000) != 0)
+            {
                 temp -= 256;
-                
+            }
+
             return Math.Round(temp, 5);
         }
 
@@ -114,9 +136,13 @@ namespace Iot.Device.Mcp9808
             Register16 curVal = ReadRegister16(Register8.MCP_CONFIG);
 
             if (isShutdown)
+            {
                 curVal |= Register16.MCP_CONFIG_SHUTDOWN;
+            }
             else
+            {
                 curVal &= ~Register16.MCP_CONFIG_SHUTDOWN;
+            }
 
             Write16(Register8.MCP_CONFIG, curVal);
         }
@@ -130,12 +156,12 @@ namespace Iot.Device.Mcp9808
             _i2cDevice = null;
         }
 
-        public Register16 ReadRegister16(Register8 reg)
+        internal Register16 ReadRegister16(Register8 reg)
         {
             return (Register16)Read16(reg);
         }
 
-        public ushort Read16(Register8 reg)
+        internal ushort Read16(Register8 reg)
         {
             _i2cDevice.WriteByte((byte)reg);
             var buf = new byte[2];
@@ -144,24 +170,27 @@ namespace Iot.Device.Mcp9808
             return (ushort)(buf[0] << 8 | buf[1]);
         }
 
-        public void Write16(Register8 reg, Register16 value)
+        internal void Write16(Register8 reg, Register16 value)
         {
-            _i2cDevice.Write(new byte[] {
+            _i2cDevice.Write(new byte[]
+            {
                 (byte)reg,
                 (byte)((ushort)value >> 8),
                 (byte)((ushort)value & 0xFF)
             });
         }
 
-        public byte Read8(Register8 reg)
+        internal byte Read8(Register8 reg)
         {
             _i2cDevice.WriteByte((byte)reg);
+
             return _i2cDevice.ReadByte();
         }
 
-        public void Write8(Register8 reg, byte value)
+        internal void Write8(Register8 reg, byte value)
         {
-            _i2cDevice.Write(new byte[] {
+            _i2cDevice.Write(new byte[]
+            {
                 (byte)reg,
                 value
             });
