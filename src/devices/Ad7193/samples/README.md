@@ -14,7 +14,9 @@
 ## Test unit and signal input
 ![Raspberry Pi 3 Model B+ + Digilent Pmod HAT + Digilent PmodAD5](Raspberry_3Bp_PmodHAT_PmodAD5.jpg)
 
-![Signal input from Digilent Analog Discovery 2](AD2_Oscilloscope_Input_v4.png)
+The oscilloscope output is a [triangle waveform with 1V of peak-to-peak amplitude](AD2_Oscilloscope_Input.png), and that's the input of the PmodAD5.
+![Signal input from Digilent Analog Discovery 2](AD2_Oscilloscope_Input.png)
+
 
 ## Installation on Raspberry Pi
 1, Before you publish your binaries on Raspberry Pi, you must restore the .NET Core packages for the project
