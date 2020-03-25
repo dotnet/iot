@@ -370,7 +370,6 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// Changes the currently selected channel
         /// </summary>
-        /// <param name="channel">Channel index</param>
         public Channel ActiveChannels
         {
             set
