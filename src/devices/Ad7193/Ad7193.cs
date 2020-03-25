@@ -404,7 +404,6 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// Set the filter output data rate select bits. The 10 bits of data programmed into these bits determine the filter cutoff frequency, the position of the first notch of the filter, and the output data rate for the part.
         /// </summary>
-        /// <param name="filterRate"></param>
         public ushort Filter
         {
             set
