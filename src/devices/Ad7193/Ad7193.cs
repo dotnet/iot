@@ -678,9 +678,6 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// Reads the value of a register
         /// </summary>
-        /// <param name="registerAddress"></param>
-        /// <param name="bytesNumber"></param>
-        /// <returns></returns>
         protected uint GetRegisterValue(Register register)
         {
             byte registerAddress = (byte)register;
@@ -716,9 +713,6 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// Writes data into a register
         /// </summary>
-        /// <param name="registerAddress"></param>
-        /// <param name="registerValue"></param>
-        /// <param name="byteNumber"></param>
         protected void SetRegisterValue(Register register, uint registerValue)
         {
             byte registerAddress = (byte)register;
