@@ -2,9 +2,9 @@
 using System.Threading;
 using System.Device.Spi;
 using System.Diagnostics;
-using BBD.Mars.Iot.Device.Ad7193;
+using Iot.Device.Ad7193;
 
-namespace BBD.Mars.AD7193Sample
+namespace AD7193Sample
 {
 	class Program
 	{

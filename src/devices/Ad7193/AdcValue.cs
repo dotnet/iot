@@ -1,4 +1,4 @@
-﻿namespace BBD.Mars.Iot.Device.Ad7193
+﻿namespace Iot.Device.Ad7193
 {
     public class AdcValue
     {
