@@ -9,7 +9,7 @@
 
         public override string ToString()
         {
-            return $"Ch{Channel.ToString().PadLeft(5,' ')} {Voltage.ToString("0.0000").PadLeft(10, ' ')} V";
+            return $"Ch{Channel.ToString().PadLeft(5, ' ')} {Voltage.ToString("0.0000").PadLeft(10, ' ')} V";
         }
     }
 }

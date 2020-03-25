@@ -17,7 +17,7 @@ namespace Iot.Device.Ad7193
         public const string Product = "AD7193";
         public const string ProductCategory = "ADC";
         public const string ProductDescription = "4-Channel, 4.8 kHz, Ultralow Noise, 24-Bit Sigma-Delta ADC with PGA";
-        public Uri DataSheetURI = new Uri("https://www.analog.com/media/en/technical-documentation/data-sheets/AD7193.pdf");
+        public const string DataSheetURI = "https://www.analog.com/media/en/technical-documentation/data-sheets/AD7193.pdf";
 
         // metadata for ISpiDevice
         public const SpiMode ValidSpiModes = SpiMode.Mode3;
@@ -292,6 +292,7 @@ namespace Iot.Device.Ad7193
                 {
                     SetRegisterValue(Register.Communications, 0b0101_1000);
                 }
+
                 _continuousRead = value;
             }
         }
@@ -481,7 +482,7 @@ namespace Iot.Device.Ad7193
             registerCache[(byte)Register.Mode] &= 0x1FFFFF;         // keep all bit values except Mode bits
             registerCache[(byte)Register.Mode] |= 0xA00000;         // internal full scale calibration (MD2 = 1, MD1 = 0, MD0 = 1)
 
-            SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting 
+            SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting
 
             WaitForADC();
         }
@@ -643,8 +644,7 @@ namespace Iot.Device.Ad7193
             if (mPolarity == 1)
             {
                 voltage = (double)adcValue / 16777216.0;
-            }
-            if (mPolarity == 0)
+            } else if (mPolarity == 0)
             {
                 voltage = ((double)adcValue / 8388608.0) - 1.0;
             }
@@ -759,6 +759,7 @@ namespace Iot.Device.Ad7193
             {
                 fourByteRawValue[buffer.Length - 1 - i] = buffer[i];
             }
+
             return BitConverter.ToUInt32(fourByteRawValue);
         }
 
@@ -770,6 +771,7 @@ namespace Iot.Device.Ad7193
                 result[byteNumber - 1 - i] = (byte)(number & 0xFF);
                 number = number >> 8;
             }
+
             return result;
         }
 
