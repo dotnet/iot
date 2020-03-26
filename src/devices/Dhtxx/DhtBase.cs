@@ -94,9 +94,9 @@ namespace Iot.Device.DHTxx
         public DhtBase(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController gpioController = null, bool shouldDispose = true)
         {
             _protocol = CommunicationProtocol.OneWire;
+            _shouldDispose = gpioController == null ? true : shouldDispose;
             _controller = gpioController ?? new GpioController(pinNumberingScheme);
             _pin = pin;
-            _shouldDispose = shouldDispose;
 
             _controller.OpenPin(_pin);
             // delay 1s to make sure DHT stable
@@ -277,7 +277,11 @@ namespace Iot.Device.DHTxx
         /// <inheritdoc/>
         public void Dispose()
         {
-            _controller?.Dispose();
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+            }
+
             _i2cDevice?.Dispose();
         }
     }

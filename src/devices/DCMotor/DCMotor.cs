@@ -15,13 +15,16 @@ namespace Iot.Device.DCMotor
     public abstract class DCMotor : IDisposable
     {
         private const int DefaultPwmFrequency = 50;
+        private bool _shouldDispose;
 
         /// <summary>
         /// Constructs generic <see cref="DCMotor"/> instance
         /// </summary>
         /// <param name="controller"><see cref="GpioController"/> related with operations on pins</param>
-        protected DCMotor(GpioController controller)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        protected DCMotor(GpioController controller, bool shouldDispose)
         {
+            _shouldDispose = shouldDispose;
             Controller = controller;
         }
 
@@ -57,8 +60,11 @@ namespace Iot.Device.DCMotor
         {
             if (disposing)
             {
-                Controller?.Dispose();
-                Controller = null;
+                if (_shouldDispose)
+                {
+                    Controller?.Dispose();
+                    Controller = null;
+                }
             }
         }
 
@@ -79,7 +85,7 @@ namespace Iot.Device.DCMotor
                 throw new ArgumentNullException(nameof(speedControlChannel));
             }
 
-            return new DCMotor2PinNoEnable(speedControlChannel, -1, null);
+            return new DCMotor2PinNoEnable(speedControlChannel, -1, null, true);
         }
 
         /// <summary>
@@ -105,7 +111,8 @@ namespace Iot.Device.DCMotor
             return new DCMotor2PinNoEnable(
                 new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller),
                 -1,
-                controller);
+                controller,
+                shouldDispose);
         }
 
         /// <summary>
@@ -134,7 +141,7 @@ namespace Iot.Device.DCMotor
                 throw new ArgumentOutOfRangeException(nameof(directionPin));
             }
 
-            return new DCMotor2PinNoEnable(speedControlChannel, directionPin, controller);
+            return new DCMotor2PinNoEnable(speedControlChannel, directionPin, controller, shouldDispose);
         }
 
         /// <summary>
@@ -167,7 +174,8 @@ namespace Iot.Device.DCMotor
             return new DCMotor2PinNoEnable(
                 new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller),
                 directionPin,
-                controller);
+                controller,
+                shouldDispose);
         }
 
         /// <summary>
@@ -207,7 +215,8 @@ namespace Iot.Device.DCMotor
                 speedControlChannel,
                 directionPin,
                 otherDirectionPin,
-                controller);
+                controller,
+                shouldDispose);
         }
 
         /// <summary>
@@ -248,7 +257,8 @@ namespace Iot.Device.DCMotor
                 new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller),
                 directionPin,
                 otherDirectionPin,
-                controller);
+                controller,
+                shouldDispose);
         }
     }
 }

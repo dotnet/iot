@@ -56,7 +56,7 @@ namespace Iot.Device.Mcp25xxx
             bool shouldDispose = true)
         {
             _spiDevice = spiDevice;
-            _shouldDispose = shouldDispose;
+            _shouldDispose = gpioController == null ? true : shouldDispose;
 
             _reset = reset;
             _tx0rts = tx0rts;

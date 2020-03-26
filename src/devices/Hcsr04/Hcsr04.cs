@@ -152,11 +152,8 @@ namespace Iot.Device.Hcsr04
         {
             if (_shouldDispose)
             {
-                if (_controller != null)
-                {
-                    _controller.Dispose();
-                    _controller = null;
-                }
+                _controller?.Dispose();
+                _controller = null;
             }
         }
     }

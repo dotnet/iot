@@ -45,7 +45,7 @@ namespace Iot.Device.Pcx857x
         {
             Device = device ?? throw new ArgumentNullException(nameof(device));
             _interrupt = interrupt;
-            _shouldDispose = shouldDispose;
+            _shouldDispose = gpioController == null ? true : shouldDispose;
 
             if (_interrupt != -1)
             {

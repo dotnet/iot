@@ -30,7 +30,7 @@ namespace Iot.Device.Pca95x4
         {
             _i2cDevice = i2cDevice;
             _interrupt = interrupt;
-            _shouldDispose = shouldDispose;
+            _shouldDispose = gpioController == null ? true : shouldDispose;
 
             InitializeMasterGpioController(gpioController);
         }

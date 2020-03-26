@@ -27,7 +27,7 @@ namespace Iot.Device.Hcsr501
         {
             _outPin = outPin;
 
-            _shouldDispose = shouldDispose;
+            _shouldDispose = gpioController == null ? true : shouldDispose;
             _controller = gpioController ?? new GpioController(pinNumberingScheme);
             _controller.OpenPin(outPin, PinMode.Input);
             _controller.RegisterCallbackForPinValueChangedEvent(outPin, PinEventTypes.Falling, Sensor_ValueChanged);

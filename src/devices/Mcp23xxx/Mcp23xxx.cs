@@ -54,7 +54,7 @@ namespace Iot.Device.Mcp23xxx
         {
             _bus = bus;
             _bankStyle = bankStyle;
-            _shouldDispose = shouldDispose;
+            _shouldDispose = masterController == null ? true : shouldDispose;
 
             _reset = reset;
             _interruptA = interruptA;

@@ -35,7 +35,7 @@ namespace Iot.Device.Spi
         public SoftwareSpi(int clk, int miso, int mosi, int cs, SpiConnectionSettings settings = null, GpioController controller = null, bool shouldDispose = true)
         {
             _controller = controller ?? new GpioController();
-            _shouldDispose = shouldDispose;
+            _shouldDispose = controller == null ? true : shouldDispose;
 
             _settings = settings ?? new SpiConnectionSettings(-1, -1);
 

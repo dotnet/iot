@@ -50,7 +50,7 @@ namespace Iot.Device.Ssd1351
             }
 
             _gpioDevice = gpioController ?? new GpioController();
-            _disposeGpioController = shouldDispose;
+            _disposeGpioController = gpioController == null ? true : shouldDispose;
 
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
 

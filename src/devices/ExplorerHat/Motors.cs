@@ -83,19 +83,26 @@ namespace Iot.Device.ExplorerHat
         #region IDisposable Support
 
         private bool _shouldDispose;
+        // This to avoid double dispose
+        private bool _disposedValue = false;
 
         /// <summary>
         /// Disposes the <see cref="Motors"/> instance
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!_disposedValue)
             {
-                if (_shouldDispose)
+                if (disposing)
                 {
-                    _motorArray[0].Dispose();
-                    _motorArray[1].Dispose();
+                    if (_shouldDispose)
+                    {
+                        _motorArray[0].Dispose();
+                        _motorArray[1].Dispose();
+                    }
                 }
+
+                _disposedValue = true;
             }
         }
 
