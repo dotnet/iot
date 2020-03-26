@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Units\Units.csproj" />
+    <Compile Include="Ad7193.cs" />
+    <Compile Include="AdcValue.cs" />
+    <Compile Include="AdcValueReceivedEventArgs.cs" />
+    <Compile Include="AnalogInputMode.cs" />
+    <Compile Include="AveragingMode.cs" />
+    <Compile Include="Channel.cs" />
+    <Compile Include="CommunicationsRegisterBits.cs" />
+    <Compile Include="Gain.cs" />
+    <Compile Include="Register.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="README.md" />
+  </ItemGroup>
+
+</Project>
