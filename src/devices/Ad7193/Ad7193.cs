@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Device.Spi;
-using System.Diagnostics;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Iot.Units;
-
-namespace Iot.Device.Ad7193
+﻿namespace Iot.Device.Ad7193
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Device.Spi;
+    using System.Diagnostics;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using global::Iot.Units;
+
     public class Ad7193 : IDisposable
     {
         // metadata for IDevice
@@ -29,10 +29,11 @@ namespace Iot.Device.Ad7193
         public const int ADCSamplerate = 4800;
         public const int ADCInputChannelCount = 8;
 
+        private readonly object _spiTransferLock = new object();
+        private readonly Stopwatch _stopWatch = new Stopwatch();
+
         private SpiDevice _spiDevice = null;
 
-        private object _spiTransferLock = new object();
-        private Stopwatch _stopWatch = new Stopwatch();
         // public ConcurrentQueue<AdcValue> AdcValues = new ConcurrentQueue<AdcValue>();
         public BlockingCollection<AdcValue> AdcValues = new BlockingCollection<AdcValue>();
         public event EventHandler<AdcValueReceivedEventArgs> AdcValueReceived;
@@ -454,7 +455,7 @@ namespace Iot.Device.Ad7193
                 throw new Exception("SPI device must be in SPI mode 3 in order to work with AD7193.");
             }
 
-            this._spiDevice = spiDevice;
+            _spiDevice = spiDevice;
 
             Reset();
         }
@@ -492,7 +493,7 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public void WaitForADC()
         {
-            while (!this.IsReady)
+            while (!IsReady)
             {
                 Thread.Sleep(5);
             }
@@ -521,7 +522,10 @@ namespace Iot.Device.Ad7193
             ContinuousRead = true;
 
             long samplePerTicks = Stopwatch.Frequency / frequency;
-            if (samplePerTicks == 0) samplePerTicks = 1;
+            if (samplePerTicks == 0)
+            {
+                samplePerTicks = 1;
+            }
 
             _stopWatch.Restart();
             Task samplingTask = Task.Run(() =>
@@ -540,12 +544,13 @@ namespace Iot.Device.Ad7193
                         ReadADCValue();
                         samples++;
                         jitter = (elapsedTicks - (samples * samplePerTicks));
-                        if (this.JitterCorrection)
+                        if (JitterCorrection)
                         {
                             if (jitter > 0)
                             {
                                 nextSampleAt -= Math.Min(jitter, maxJitterCorrectionPerSample);
-                            } else if (jitter < 0)
+                            }
+                            else if (jitter < 0)
                             {
                                 nextSampleAt += Math.Min(-jitter, maxJitterCorrectionPerSample);
                             }
@@ -564,14 +569,14 @@ namespace Iot.Device.Ad7193
             uint raw = GetRegisterValue(Register.Data);
 
             // update the status register cache if we have it here
-            if (this.AppendStatusRegisterToData)
+            if (AppendStatusRegisterToData)
             {
                 registerCache[(byte)Register.Status] = (byte)(raw & 0xFF);
                 raw = (raw & 0xFFFFFF00) >> 8;
             }
 
             // check if we have an error
-            if (this.HasErrors)
+            if (HasErrors)
             {
                 return null;
             }
@@ -596,7 +601,7 @@ namespace Iot.Device.Ad7193
         /// <returns></returns>
         public uint? ReadSingleADCValue(Channel channel)
         {
-            this.ActiveChannels = channel;
+            ActiveChannels = channel;
 
             StartSingleConversion();
 
@@ -644,12 +649,13 @@ namespace Iot.Device.Ad7193
             if (mPolarity == 1)
             {
                 voltage = (double)adcValue / 16777216.0;
-            } else if (mPolarity == 0)
+            }
+            else if (mPolarity == 0)
             {
                 voltage = ((double)adcValue / 8388608.0) - 1.0;
             }
 
-            voltage *= (this.VReference / pgaGain);
+            voltage *= (VReference / pgaGain);
 
             return (voltage);
         }
@@ -672,10 +678,9 @@ namespace Iot.Device.Ad7193
         {
             byte registerAddress = (byte)register;
             byte byteNumber = registerSize[registerAddress];
-            byte commandByte = 0;
             byte[] writeBuffer = new byte[byteNumber + 1];
 
-            commandByte = (byte)((byte)CommunicationsRegisterBits.ReadOperation | GetCommAddress(registerAddress));
+            byte commandByte = (byte)((byte)CommunicationsRegisterBits.ReadOperation | GetCommAddress(registerAddress));
             writeBuffer[0] = commandByte;
 
             byte[] readBuffer = new byte[writeBuffer.Length];
@@ -701,10 +706,9 @@ namespace Iot.Device.Ad7193
         {
             byte registerAddress = (byte)register;
             byte byteNumber = registerSize[registerAddress];
-            byte commandByte = 0;
             byte[] writeBuffer = new byte[byteNumber + 1];
 
-            commandByte = (byte)((byte)CommunicationsRegisterBits.WriteOperation | GetCommAddress(registerAddress));
+            byte commandByte = (byte)((byte)CommunicationsRegisterBits.WriteOperation | GetCommAddress(registerAddress));
             writeBuffer[0] = commandByte;
 
             byte[] buffer = UInt32ToByteArray(registerValue, byteNumber);
@@ -724,16 +728,17 @@ namespace Iot.Device.Ad7193
 
         protected List<uint> GetAllRegisterValues()
         {
-            List<uint> result = new List<uint>();
-
-            result.Add(GetRegisterValue(Register.Status));
-            result.Add(GetRegisterValue(Register.Mode));
-            result.Add(GetRegisterValue(Register.Configuration));
-            result.Add(GetRegisterValue(Register.Data));
-            result.Add(GetRegisterValue(Register.ID));
-            result.Add(GetRegisterValue(Register.GPOCON));
-            result.Add(GetRegisterValue(Register.Offset));
-            result.Add(GetRegisterValue(Register.FullScale));
+            List<uint> result = new List<uint>
+            {
+                GetRegisterValue(Register.Status),
+                GetRegisterValue(Register.Mode),
+                GetRegisterValue(Register.Configuration),
+                GetRegisterValue(Register.Data),
+                GetRegisterValue(Register.ID),
+                GetRegisterValue(Register.GPOCON),
+                GetRegisterValue(Register.Offset),
+                GetRegisterValue(Register.FullScale)
+            };
 
             return result;
         }
@@ -769,7 +774,7 @@ namespace Iot.Device.Ad7193
             for (int i = 0; i < result.Length; i++)
             {
                 result[byteNumber - 1 - i] = (byte)(number & 0xFF);
-                number = number >> 8;
+                number >>= 8;
             }
 
             return result;
@@ -778,12 +783,12 @@ namespace Iot.Device.Ad7193
         private string UInt32ToBinaryString(uint number, byte padding)
         {
             const int mask = 1;
-            var binary = string.Empty;
+            string binary = string.Empty;
             while (number > 0)
             {
                 // Logical AND the number and prepend it to the result string
                 binary = (number & mask) + binary;
-                number = number >> 1;
+                number >>= 1;
             }
 
             return binary.PadLeft(padding, '0');
