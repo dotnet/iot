@@ -11,7 +11,7 @@ using global::Iot.Units;
 namespace Iot.Device.Ad7193
 {
     /// <summary>
-    /// Represent the Analog Devices AD7193, the 4-Channel, 4.8 kHz, Ultralow Noise, 24-Bit Sigma-Delta ADC with PGA
+    /// Represents the Analog Devices AD7193, the 4-channel, 4.8 kHz, ultralow noise, 24-bit sigma-delta ADC with PGA
     /// </summary>
     public class Ad7193 : IDisposable
     {
