@@ -42,7 +42,6 @@ namespace Iot.Device.Mcp9808
             set
             {
                 SetShutdown(value);
-                _disable = value;
             }
         }
 
@@ -152,6 +151,8 @@ namespace Iot.Device.Mcp9808
             }
 
             Write16(Register8.MCP_CONFIG, curVal);
+
+            _disable = isShutdown;
         }
 
         /// <summary>
@@ -171,7 +172,7 @@ namespace Iot.Device.Mcp9808
         internal ushort Read16(Register8 reg)
         {
             _i2cDevice.WriteByte((byte)reg);
-            var buf = new byte[2];
+            Span<byte> buf = stackalloc byte[2];
             _i2cDevice.Read(buf);
 
             return (ushort)(buf[0] << 8 | buf[1]);
