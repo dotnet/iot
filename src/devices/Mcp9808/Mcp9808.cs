@@ -57,13 +57,18 @@ namespace Iot.Device.Mcp9808
             _i2cDevice = i2cDevice;
 
             Disabled = false;
+
+            if (!Init())
+            {
+                throw new Exception("Unable to identify manufacturer/device id");
+            }
         }
 
         /// <summary>
         /// Checks if the device is a MCP9808
         /// </summary>
         /// <returns>True if device has been correctly detected</returns>
-        public bool Init()
+        private bool Init()
         {
             if (Read16(Register8.MCP_MANUF_ID) != 0x0054)
             {
@@ -93,6 +98,8 @@ namespace Iot.Device.Mcp9808
         public void Wake()
         {
             SetShutdown(false);
+
+            // Sleep 250 ms, which is the typical temperature conversion time for the highest resolution (page 3 in datasheet, tCONV)
             Thread.Sleep(250);
         }
 
