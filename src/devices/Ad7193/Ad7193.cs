@@ -1,86 +1,151 @@
-﻿namespace Iot.Device.Ad7193
-{
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Device.Spi;
-    using System.Diagnostics;
-    using System.Text;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using global::Iot.Units;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Device.Spi;
+using System.Diagnostics;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using global::Iot.Units;
 
+namespace Iot.Device.Ad7193
+{
+    /// <summary>
+    /// Represent the Analog Devices AD7193, the 4-Channel, 4.8 kHz, Ultralow Noise, 24-Bit Sigma-Delta ADC with PGA
+    /// </summary>
     public class Ad7193 : IDisposable
     {
-        // metadata for IDevice
+        #region Metadata for IDevice
+
+        /// <summary>
+        /// Name of the manufacturer of the device
+        /// </summary>
         public const string Manufacturer = "Analog Devices";
+
+        /// <summary>
+        /// Name of the product
+        /// </summary>
         public const string Product = "AD7193";
+
+        /// <summary>
+        /// Category of the device
+        /// </summary>
         public const string ProductCategory = "ADC";
+
+        /// <summary>
+        /// Description of the device
+        /// </summary>
         public const string ProductDescription = "4-Channel, 4.8 kHz, Ultralow Noise, 24-Bit Sigma-Delta ADC with PGA";
+
+        /// <summary>
+        /// The URI of the datasheet of the device
+        /// </summary>
         public const string DataSheetURI = "https://www.analog.com/media/en/technical-documentation/data-sheets/AD7193.pdf";
+        #endregion
 
-        // metadata for ISpiDevice
+        #region Metadata for ISpiDevice
+
+        /// <summary>
+        /// The list of SPI modes that are valid for this device
+        /// </summary>
         public const SpiMode ValidSpiModes = SpiMode.Mode3;
-        public const int MaximumSpiFrequency = 10000000;    // min 100 ns SCLK pulse width
 
-        // metadata for IAdcDevice
+        /// <summary>
+        /// The maximum frequency that can be used on the SPI bus
+        /// </summary>
+        public const int MaximumSpiFrequency = 10000000;
+        #endregion
+
+        #region metadata for IAdcDevice
+
+        /// <summary>
+        /// Number of ADCs on the device
+        /// </summary>
         public const int ADCCount = 1;
+
+        /// <summary>
+        /// The maximum bitrate of the ADC
+        /// </summary>
         public const int ADCBitrate = 24;
+
+        /// <summary>
+        /// The maximum sampling rate of the ADC
+        /// </summary>
         public const int ADCSamplerate = 4800;
+
+        /// <summary>
+        /// The number of channels the ADC has
+        /// </summary>
         public const int ADCInputChannelCount = 8;
+        #endregion
 
         private readonly object _spiTransferLock = new object();
         private readonly Stopwatch _stopWatch = new Stopwatch();
 
         private SpiDevice _spiDevice = null;
 
-        // public ConcurrentQueue<AdcValue> AdcValues = new ConcurrentQueue<AdcValue>();
-        public BlockingCollection<AdcValue> AdcValues = new BlockingCollection<AdcValue>();
+        /// <summary>
+        /// The list of received ADC values
+        /// </summary>
+        // protected ConcurrentQueue<AdcValue> adcValues = new ConcurrentQueue<AdcValue>();
+        protected BlockingCollection<AdcValue> adcValues = new BlockingCollection<AdcValue>();
+
+        /// <summary>
+        /// The event that is fired every time a new value is received from the ADC
+        /// </summary>
         public event EventHandler<AdcValueReceivedEventArgs> AdcValueReceived;
 
-        // Default register settings
-        protected uint[] registerCache = { 0x00, 0x080060, 0x000117, 0x000000, 0xa2, 0x00, 0x000000, 0x000000 };
-        protected byte[] registerSize = { 1, 3, 3, 3, 1, 1, 3, 3 };
+        private readonly StringBuilder _sb = new StringBuilder();
 
-        protected StringBuilder sb = new StringBuilder();
+        private readonly uint[] _registerCache = { 0x00, 0x080060, 0x000117, 0x000000, 0xa2, 0x00, 0x000000, 0x000000 };
+        private readonly byte[] _registerSize = { 1, 3, 3, 3, 1, 1, 3, 3 };
 
         /// <summary>
         /// The external reference voltage value. The default is 2.5V on REFIN1+ and REFIN1- (on the Digilent Pmod AD5 board)
         /// </summary>
         public double VReference { get; set; } = 2.50f;
 
+        /// <summary>
+        /// Gain level on the ADC
+        /// </summary>
         public Gain PGAGain
         {
             set
             {
-                registerCache[(byte)Register.Configuration] &= 0xFF_FFF8;          // keep all bit values except Gain bits
-                registerCache[(byte)Register.Configuration] |= (uint)value;
+                _registerCache[(byte)Register.Configuration] &= 0xFF_FFF8;          // keep all bit values except Gain bits
+                _registerCache[(byte)Register.Configuration] |= (uint)value;
 
-                SetRegisterValue(Register.Configuration, registerCache[(byte)Register.Configuration]);
+                SetRegisterValue(Register.Configuration, _registerCache[(byte)Register.Configuration]);
             }
         }
 
+        /// <summary>
+        /// Human-readable representation of the current status register
+        /// </summary>
         public string Status
         {
             get
             {
                 uint register = GetRegisterValue(Register.Status);
 
-                sb.Clear();
-                sb.Append(((register & 0b1000_0000) == 0b1000_0000) ? "Not ready" : "Ready");
-                sb.Append(" | ");
-                sb.Append(((register & 0b0100_0000) == 0b0100_0000) ? "Error" : "No errors");
-                sb.Append(" | ");
-                sb.Append(((register & 0b0010_0000) == 0b0010_0000) ? "No external reference" : "External reference");
-                sb.Append(" | ");
-                sb.Append(((register & 0b0001_0000) == 0b0001_0000) ? "Parity Odd" : "Parity Even");
-                sb.Append(" | ");
-                sb.Append($"Result CH: {(register & 0b00001111)}");
+                _sb.Clear();
+                _sb.Append(((register & 0b1000_0000) == 0b1000_0000) ? "Not ready" : "Ready");
+                _sb.Append(" | ");
+                _sb.Append(((register & 0b0100_0000) == 0b0100_0000) ? "Error" : "No errors");
+                _sb.Append(" | ");
+                _sb.Append(((register & 0b0010_0000) == 0b0010_0000) ? "No external reference" : "External reference");
+                _sb.Append(" | ");
+                _sb.Append(((register & 0b0001_0000) == 0b0001_0000) ? "Parity Odd" : "Parity Even");
+                _sb.Append(" | ");
+                _sb.Append($"Result CH: {(register & 0b00001111)}");
 
-                return sb.ToString();
+                return _sb.ToString();
             }
         }
 
+        /// <summary>
+        /// Human-readable representation of the current mode register
+        /// </summary>
         public string Mode
         {
             get
@@ -89,96 +154,102 @@
 
                 string mode = UInt32ToBinaryString((register & 0b1110_0000_0000_0000_0000_0000) >> 21, 3);
 
-                sb.Clear();
-                sb.Append($"Mode: {mode}");
+                _sb.Clear();
+                _sb.Append($"Mode: {mode}");
                 switch (mode)
                 {
                     case "000":
-                        sb.Append(" (continuous)");
+                        _sb.Append(" (continuous)");
                         break;
                     case "001":
-                        sb.Append(" (single)");
+                        _sb.Append(" (single)");
                         break;
                     case "010":
-                        sb.Append(" (idle)");
+                        _sb.Append(" (idle)");
                         break;
                     case "011":
-                        sb.Append(" (power down)");
+                        _sb.Append(" (power down)");
                         break;
                     case "100":
-                        sb.Append(" (internal zero-scale calibration)");
+                        _sb.Append(" (internal zero-scale calibration)");
                         break;
                     case "101":
-                        sb.Append(" (internal full-scale calibration)");
+                        _sb.Append(" (internal full-scale calibration)");
                         break;
                     case "110":
-                        sb.Append(" (system zero-scale calibration)");
+                        _sb.Append(" (system zero-scale calibration)");
                         break;
                     case "111":
-                        sb.Append(" (system full-scale calibration)");
+                        _sb.Append(" (system full-scale calibration)");
                         break;
                 }
 
-                sb.Append(" | ");
-                sb.Append($"DAT_STA: {(register & 0b0001_0000_0000_0000_0000_0000) >> 20}");
-                sb.Append(" | ");
-                sb.Append($"CLK: {UInt32ToBinaryString((register & 0b0000_1100_0000_0000_0000_0000) >> 18, 2)}");
-                sb.Append(" | ");
-                sb.Append($"AVG: {UInt32ToBinaryString((register & 0b0000_0011_0000_0000_0000_0000) >> 16, 2)}");
-                sb.Append(" | ");
-                sb.Append($"SINC3: {(register & 0b0000_0000_1000_0000_0000_0000) >> 15}");
-                sb.Append(" | ");
-                sb.Append($"0: {(register & 0b0000_0000_0100_0000_0000_0000) >> 14}");
-                sb.Append(" | ");
-                sb.Append($"ENPAR: {(register & 0b0000_0000_0010_0000_0000_0000) >> 13}");
-                sb.Append(" | ");
-                sb.Append($"CLK_DIV: {(register & 0b0000_0000_0001_0000_0000_0000) >> 12}");
-                sb.Append(" | ");
-                sb.Append($"Single: {(register & 0b0000_0000_0000_1000_0000_0000) >> 11}");
-                sb.Append(" | ");
-                sb.Append($"REJ60: {(register & 0b0000_0000_0000_0100_0000_0000) >> 10}");
-                sb.Append(" | ");
-                sb.Append($"FS: {UInt32ToBinaryString((register & 0b0000_0000_0000_0011_1111_1111), 10)}");
+                _sb.Append(" | ");
+                _sb.Append($"DAT_STA: {(register & 0b0001_0000_0000_0000_0000_0000) >> 20}");
+                _sb.Append(" | ");
+                _sb.Append($"CLK: {UInt32ToBinaryString((register & 0b0000_1100_0000_0000_0000_0000) >> 18, 2)}");
+                _sb.Append(" | ");
+                _sb.Append($"AVG: {UInt32ToBinaryString((register & 0b0000_0011_0000_0000_0000_0000) >> 16, 2)}");
+                _sb.Append(" | ");
+                _sb.Append($"SINC3: {(register & 0b0000_0000_1000_0000_0000_0000) >> 15}");
+                _sb.Append(" | ");
+                _sb.Append($"0: {(register & 0b0000_0000_0100_0000_0000_0000) >> 14}");
+                _sb.Append(" | ");
+                _sb.Append($"ENPAR: {(register & 0b0000_0000_0010_0000_0000_0000) >> 13}");
+                _sb.Append(" | ");
+                _sb.Append($"CLK_DIV: {(register & 0b0000_0000_0001_0000_0000_0000) >> 12}");
+                _sb.Append(" | ");
+                _sb.Append($"Single: {(register & 0b0000_0000_0000_1000_0000_0000) >> 11}");
+                _sb.Append(" | ");
+                _sb.Append($"REJ60: {(register & 0b0000_0000_0000_0100_0000_0000) >> 10}");
+                _sb.Append(" | ");
+                _sb.Append($"FS: {UInt32ToBinaryString((register & 0b0000_0000_0000_0011_1111_1111), 10)}");
 
-                return sb.ToString();
+                return _sb.ToString();
             }
         }
 
+        /// <summary>
+        /// Human-readable representation of the current config register
+        /// </summary>
         public string Config
         {
             get
             {
                 uint register = GetRegisterValue(Register.Configuration);
 
-                sb.Clear();
-                sb.Append($"Chop: {(register & 0b1000_0000_0000_0000_0000_0000) >> 23}");
-                sb.Append(" | ");
-                sb.Append($"00: {UInt32ToBinaryString((register & 0b0110_0000_0000_0000_0000_0000) >> 21, 2)}");
-                sb.Append(" | ");
-                sb.Append($"REFSEL: {(register & 0b0001_0000_0000_0000_0000_0000) >> 20}");
-                sb.Append(" | ");
-                sb.Append($"0: {(register & 0b0000_1000_0000_0000_0000_0000) >> 19}");
-                sb.Append(" | ");
-                sb.Append($"Pseudo: {(register & 0b0000_0100_0000_0000_0000_0000) >> 18}");
-                sb.Append(" | ");
-                sb.Append($"Channel: {UInt32ToBinaryString((register & 0b0000_0011_1111_1111_0000_0000) >> 8, 10)}");
-                sb.Append(" | ");
-                sb.Append($"Burn: {(register & 0b0000_0000_0000_0000_1000_0000) >> 7}");
-                sb.Append(" | ");
-                sb.Append($"REFDET: {(register & 0b0000_0000_0000_0000_0100_0000) >> 6}");
-                sb.Append(" | ");
-                sb.Append($"0: {(register & 0b0000_0000_0000_0000_0010_0000) >> 5}");
-                sb.Append(" | ");
-                sb.Append($"BUF: {(register & 0b0000_0000_0000_0000_0001_0000) >> 4}");
-                sb.Append(" | ");
-                sb.Append($"Unipolar: {(register & 0b0000_0000_0000_0000_0000_1000) >> 3}");
-                sb.Append(" | ");
-                sb.Append($"Gain: {UInt32ToBinaryString((register & 0b0000_0000_0000_0000_0000_0111), 3)}");
+                _sb.Clear();
+                _sb.Append($"Chop: {(register & 0b1000_0000_0000_0000_0000_0000) >> 23}");
+                _sb.Append(" | ");
+                _sb.Append($"00: {UInt32ToBinaryString((register & 0b0110_0000_0000_0000_0000_0000) >> 21, 2)}");
+                _sb.Append(" | ");
+                _sb.Append($"REFSEL: {(register & 0b0001_0000_0000_0000_0000_0000) >> 20}");
+                _sb.Append(" | ");
+                _sb.Append($"0: {(register & 0b0000_1000_0000_0000_0000_0000) >> 19}");
+                _sb.Append(" | ");
+                _sb.Append($"Pseudo: {(register & 0b0000_0100_0000_0000_0000_0000) >> 18}");
+                _sb.Append(" | ");
+                _sb.Append($"Channel: {UInt32ToBinaryString((register & 0b0000_0011_1111_1111_0000_0000) >> 8, 10)}");
+                _sb.Append(" | ");
+                _sb.Append($"Burn: {(register & 0b0000_0000_0000_0000_1000_0000) >> 7}");
+                _sb.Append(" | ");
+                _sb.Append($"REFDET: {(register & 0b0000_0000_0000_0000_0100_0000) >> 6}");
+                _sb.Append(" | ");
+                _sb.Append($"0: {(register & 0b0000_0000_0000_0000_0010_0000) >> 5}");
+                _sb.Append(" | ");
+                _sb.Append($"BUF: {(register & 0b0000_0000_0000_0000_0001_0000) >> 4}");
+                _sb.Append(" | ");
+                _sb.Append($"Unipolar: {(register & 0b0000_0000_0000_0000_0000_1000) >> 3}");
+                _sb.Append(" | ");
+                _sb.Append($"Gain: {UInt32ToBinaryString((register & 0b0000_0000_0000_0000_0000_0111), 3)}");
 
-                return sb.ToString();
+                return _sb.ToString();
             }
         }
 
+        /// <summary>
+        /// True if the ADC is idle
+        /// </summary>
         public bool IsIdle
         {
             get
@@ -188,6 +259,9 @@
             }
         }
 
+        /// <summary>
+        /// True if the ADC is readz for the next conversion
+        /// </summary>
         public bool IsReady
         {
             get
@@ -198,6 +272,9 @@
             }
         }
 
+        /// <summary>
+        /// True is the ADC has errors
+        /// </summary>
         public bool HasErrors
         {
             get
@@ -209,6 +286,10 @@
         }
 
         private bool _continuousRead = false;
+
+        /// <summary>
+        /// Is the ADC in continuous conversion mode
+        /// </summary>
         public bool ContinuousRead
         {
             get
@@ -238,35 +319,38 @@
         {
             get
             {
-                return ((registerCache[(byte)Register.Mode] & 0x100000) == 0x100000);
+                return ((_registerCache[(byte)Register.Mode] & 0x100000) == 0x100000);
             }
 
             set
             {
-                registerCache[(byte)Register.Mode] &= 0xEFFFFF;     // keep all bit values except DAT_STA bit
+                _registerCache[(byte)Register.Mode] &= 0xEFFFFF;     // keep all bit values except DAT_STA bit
 
                 if (value)
                 {
-                    registerCache[(byte)Register.Mode] |= 0x100000;     // set DAT_STA to 1
+                    _registerCache[(byte)Register.Mode] |= 0x100000;     // set DAT_STA to 1
                 }
                 else
                 {
-                    registerCache[(byte)Register.Mode] |= 0x000000;     // set DAT_STA to 0
+                    _registerCache[(byte)Register.Mode] |= 0x000000;     // set DAT_STA to 0
                 }
 
-                SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
+                SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
 
                 if (value)
                 {
-                    registerSize[(byte)Register.Data] = 4;          // change register size to 4, b/c status register is now appended
+                    _registerSize[(byte)Register.Data] = 4;          // change register size to 4, b/c status register is now appended
                 }
                 else
                 {
-                    registerSize[(byte)Register.Data] = 3;          // change register size to 3
+                    _registerSize[(byte)Register.Data] = 3;          // change register size to 3
                 }
             }
         }
 
+        /// <summary>
+        /// True if the jitter correction is enabled in the driver. Jitter correction tries to guarantie the steady samples rate even is the hardware rasterization speed jitters.
+        /// </summary>
         public bool JitterCorrection { get; set; }
 
         /// <summary>
@@ -277,24 +361,24 @@
         {
             get
             {
-                return (AnalogInputMode)((registerCache[(byte)Register.Configuration] & 0b0000_0100_0000_0000_0000_0000) >> 18);
+                return (AnalogInputMode)((_registerCache[(byte)Register.Configuration] & 0b0000_0100_0000_0000_0000_0000) >> 18);
             }
 
             set
             {
-                registerCache[(byte)Register.Configuration] &= 0b1111_1011_1111_1111_1111_1111;
+                _registerCache[(byte)Register.Configuration] &= 0b1111_1011_1111_1111_1111_1111;
 
                 if (value == AnalogInputMode.FourDifferentialAnalogInputs)
                 {
-                    registerCache[(byte)Register.Configuration] |= 0 << 11;
+                    _registerCache[(byte)Register.Configuration] |= 0 << 11;
                 }
 
                 if (value == AnalogInputMode.EightPseudoDifferentialAnalogInputs)
                 {
-                    registerCache[(byte)Register.Configuration] |= 1 << 11;
+                    _registerCache[(byte)Register.Configuration] |= 1 << 11;
                 }
 
-                SetRegisterValue(Register.Configuration, registerCache[(byte)Register.Configuration]);
+                SetRegisterValue(Register.Configuration, _registerCache[(byte)Register.Configuration]);
 
             }
         }
@@ -310,11 +394,11 @@
                 uint channelBits = (uint)value << 8;
 
                 // write Channel bits to Config register, keeping other bits as is
-                registerCache[(byte)Register.Configuration] &= 0xFC00FF;       // keep all bit values except Channel bits
-                registerCache[(byte)Register.Configuration] |= channelBits;
+                _registerCache[(byte)Register.Configuration] &= 0xFC00FF;       // keep all bit values except Channel bits
+                _registerCache[(byte)Register.Configuration] |= channelBits;
 
                 // write channel selected to Configuration register
-                SetRegisterValue(Register.Configuration, registerCache[(byte)Register.Configuration]);
+                SetRegisterValue(Register.Configuration, _registerCache[(byte)Register.Configuration]);
             }
         }
 
@@ -325,10 +409,10 @@
         {
             set
             {
-                registerCache[(byte)Register.Mode] &= 0xFC_FFFF;                // keep all bit values except Averaging setting bits
-                registerCache[(byte)Register.Mode] |= ((uint)value) << 16;
+                _registerCache[(byte)Register.Mode] &= 0xFC_FFFF;                // keep all bit values except Averaging setting bits
+                _registerCache[(byte)Register.Mode] |= ((uint)value) << 16;
 
-                SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
+                SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
             }
         }
 
@@ -344,43 +428,53 @@
                     throw new ArgumentException("Filter rate is too high, it must be a 10-bit value.");
                 }
 
-                registerCache[(byte)Register.Mode] &= 0xFFFC00;         // keep all bit values except Filter setting bits
-                registerCache[(byte)Register.Mode] |= (uint)value << 0;
+                _registerCache[(byte)Register.Mode] &= 0xFFFC00;         // keep all bit values except Filter setting bits
+                _registerCache[(byte)Register.Mode] |= (uint)value << 0;
 
-                SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
+                SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
             }
         }
 
+        /// <summary>
+        /// The value of the offset calibration register
+        /// </summary>
         public uint Offset
         {
             get
             {
-                registerCache[(byte)Register.Offset] = GetRegisterValue(Register.Offset) & 0b0000_0000_1111_1111_1111_1111_1111_1111;
-                return registerCache[(byte)Register.Offset];
+                _registerCache[(byte)Register.Offset] = GetRegisterValue(Register.Offset) & 0b0000_0000_1111_1111_1111_1111_1111_1111;
+                return _registerCache[(byte)Register.Offset];
             }
 
             set
             {
-                registerCache[(byte)Register.Offset] = value & 0b0000_0000_1111_1111_1111_1111_1111_1111;
-                SetRegisterValue(Register.Offset, registerCache[(byte)Register.Offset]);
+                _registerCache[(byte)Register.Offset] = value & 0b0000_0000_1111_1111_1111_1111_1111_1111;
+                SetRegisterValue(Register.Offset, _registerCache[(byte)Register.Offset]);
             }
         }
 
+        /// <summary>
+        /// The value of the full-scale calibration register
+        /// </summary>
         public uint FullScale
         {
             get
             {
-                registerCache[(byte)Register.FullScale] = GetRegisterValue(Register.FullScale) & 0b0000_0000_1111_1111_1111_1111_1111_1111;
-                return registerCache[(byte)Register.FullScale];
+                _registerCache[(byte)Register.FullScale] = GetRegisterValue(Register.FullScale) & 0b0000_0000_1111_1111_1111_1111_1111_1111;
+                return _registerCache[(byte)Register.FullScale];
             }
 
             set
             {
-                registerCache[(byte)Register.FullScale] = value & 0b0000_0000_1111_1111_1111_1111_1111_1111;
-                SetRegisterValue(Register.FullScale, registerCache[(byte)Register.FullScale]);
+                _registerCache[(byte)Register.FullScale] = value & 0b0000_0000_1111_1111_1111_1111_1111_1111;
+                SetRegisterValue(Register.FullScale, _registerCache[(byte)Register.FullScale]);
             }
         }
 
+        /// <summary>
+        /// Initializes the ADC
+        /// </summary>
+        /// <param name="spiDevice">The SPI device to initialize the ADC on</param>
         public Ad7193(SpiDevice spiDevice)
         {
             if (spiDevice.ConnectionSettings.Mode != SpiMode.Mode3)
@@ -393,6 +487,9 @@
             Reset();
         }
 
+        /// <summary>
+        /// Resets the ADC
+        /// </summary>
         public void Reset()
         {
             for (int i = 0; i < 6; i++)
@@ -406,17 +503,17 @@
         /// </summary>
         public void Calibrate()
         {
-            registerCache[(byte)Register.Mode] &= 0x1FFFFF;         // keep all bit values except Mode bits
-            registerCache[(byte)Register.Mode] |= 0x800000;         // internal zero scale calibration (MD2 = 1, MD1 = 0, MD0 = 0)
+            _registerCache[(byte)Register.Mode] &= 0x1FFFFF;         // keep all bit values except Mode bits
+            _registerCache[(byte)Register.Mode] |= 0x800000;         // internal zero scale calibration (MD2 = 1, MD1 = 0, MD0 = 0)
 
-            SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting
+            SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting
 
             WaitForADC();
 
-            registerCache[(byte)Register.Mode] &= 0x1FFFFF;         // keep all bit values except Mode bits
-            registerCache[(byte)Register.Mode] |= 0xA00000;         // internal full scale calibration (MD2 = 1, MD1 = 0, MD0 = 1)
+            _registerCache[(byte)Register.Mode] &= 0x1FFFFF;         // keep all bit values except Mode bits
+            _registerCache[(byte)Register.Mode] |= 0xA00000;         // internal full scale calibration (MD2 = 1, MD1 = 0, MD0 = 1)
 
-            SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting
+            SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting
 
             WaitForADC();
         }
@@ -433,24 +530,28 @@
         }
 
         /// <summary>
-        /// Initiate Single Conversion (device will go into low power mode when conversion complete, and DOUT/!RDY goes low to indicate the completion of a conversion)
+        /// Initiates Single Conversion (device will go into low power mode when conversion complete, and DOUT/!RDY goes low to indicate the completion of a conversion)
         /// </summary>
         public void StartSingleConversion()
         {
-            registerCache[(byte)Register.Mode] &= 0x1FFFFF; // keep all bit values except Mode bits
-            registerCache[(byte)Register.Mode] |= 0x200000; // single conversion mode bits (MD2 = 0, MD1 = 0, MD0 = 1)
+            _registerCache[(byte)Register.Mode] &= 0x1FFFFF; // keep all bit values except Mode bits
+            _registerCache[(byte)Register.Mode] |= 0x200000; // single conversion mode bits (MD2 = 0, MD1 = 0, MD0 = 1)
 
-            SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
+            SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
 
             _stopWatch.Restart();
         }
 
+        /// <summary>
+        /// Initiates Continuous Conversion. After calling this method the AdcValueReceived event will be fired continuously. This mode is much faster, but uses significatily more CPU power.
+        /// </summary>
+        /// <param name="frequency">The target frequency of the sampling. AD7193 has the maximum of 4800 samples per second.</param>
         public void StartContinuousConversion(uint frequency = ADCSamplerate)
         {
-            registerCache[(byte)Register.Mode] &= 0x1FFFFF; // keep all bit values except Mode bits
-            registerCache[(byte)Register.Mode] |= 0x000000; // continuous conversion mode bits (MD2 = 0, MD1 = 0, MD0 = 0)
+            _registerCache[(byte)Register.Mode] &= 0x1FFFFF; // keep all bit values except Mode bits
+            _registerCache[(byte)Register.Mode] |= 0x000000; // continuous conversion mode bits (MD2 = 0, MD1 = 0, MD0 = 0)
 
-            SetRegisterValue(Register.Mode, registerCache[(byte)Register.Mode]);
+            SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
 
             ContinuousRead = true;
 
@@ -504,7 +605,7 @@
             // update the status register cache if we have it here
             if (AppendStatusRegisterToData)
             {
-                registerCache[(byte)Register.Status] = (byte)(raw & 0xFF);
+                _registerCache[(byte)Register.Status] = (byte)(raw & 0xFF);
                 raw = (raw & 0xFFFFFF00) >> 8;
             }
 
@@ -515,11 +616,11 @@
             }
 
             // create the new AdcValue object and calculate the voltage
-            var adcValue = new AdcValue() { Raw = raw, Time = _stopWatch.ElapsedTicks, Channel = (byte)(registerCache[(byte)Register.Status] & 0b0000_1111), Voltage = RawValueToVoltage(raw) };
+            var adcValue = new AdcValue() { Raw = raw, Time = _stopWatch.ElapsedTicks, Channel = (byte)(_registerCache[(byte)Register.Status] & 0b0000_1111), Voltage = RawValueToVoltage(raw) };
 
             // add it to the collection
             // AdcValues.Enqueue(adcValue);
-            AdcValues.Add(adcValue);
+            adcValues.Add(adcValue);
 
             // call the event handler
             AdcValueReceived?.Invoke(this, new AdcValueReceivedEventArgs(adcValue));
@@ -551,9 +652,9 @@
         private double RawValueToVoltage(uint adcValue)
         {
             // 0 - bipolar (ranges from ±19.53 mV to ±2.5 V) ; 1 - unipolar (ranges from 0 mV to 19.53 mV to 0 V to 2.5 V)
-            byte mPolarity = (byte)(registerCache[(byte)Register.Configuration] & 0b0000_0000_0000_0000_0000_1000 >> 3);
+            byte mPolarity = (byte)(_registerCache[(byte)Register.Configuration] & 0b0000_0000_0000_0000_0000_1000 >> 3);
 
-            ulong pgaSetting = registerCache[(byte)Register.Configuration] & 0b0000_0000_0000_0000_0000_0111;  // keep only the PGA setting bits
+            ulong pgaSetting = _registerCache[(byte)Register.Configuration] & 0b0000_0000_0000_0000_0000_0111;  // keep only the PGA setting bits
             int pgaGain = 1;
 
             switch (pgaSetting)
@@ -610,7 +711,7 @@
         protected uint GetRegisterValue(Register register)
         {
             byte registerAddress = (byte)register;
-            byte byteNumber = registerSize[registerAddress];
+            byte byteNumber = _registerSize[registerAddress];
             byte[] writeBuffer = new byte[byteNumber + 1];
 
             byte commandByte = (byte)((byte)CommunicationsRegisterBits.ReadOperation | GetCommAddress(registerAddress));
@@ -626,10 +727,10 @@
             Array.Copy(readBuffer, 1, trimmedReadBuffer, 0, trimmedReadBuffer.Length);
             readBuffer = trimmedReadBuffer;
 
-            registerCache[registerAddress] = ByteArrayToUInt32(readBuffer);
+            _registerCache[registerAddress] = ByteArrayToUInt32(readBuffer);
 
             // Debug.WriteLine($"Read Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, received: {String.Join(' ', readBuffer.Select(x => x.ToString("X2")))}");
-            return registerCache[registerAddress];
+            return _registerCache[registerAddress];
         }
 
         /// <summary>
@@ -638,7 +739,7 @@
         protected void SetRegisterValue(Register register, uint registerValue)
         {
             byte registerAddress = (byte)register;
-            byte byteNumber = registerSize[registerAddress];
+            byte byteNumber = _registerSize[registerAddress];
             byte[] writeBuffer = new byte[byteNumber + 1];
 
             byte commandByte = (byte)((byte)CommunicationsRegisterBits.WriteOperation | GetCommAddress(registerAddress));
@@ -659,6 +760,10 @@
             // Debug.WriteLine($"Write Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, sent: {String.Join(' ', writeBuffer.Select(x => x.ToString("X2")))}");
         }
 
+        /// <summary>
+        /// Gets all the register values
+        /// </summary>
+        /// <returns>List of the values of the registers of the ADC</returns>
         protected List<uint> GetAllRegisterValues()
         {
             List<uint> result = new List<uint>
@@ -681,6 +786,9 @@
             return (((x) & 0x07) << 3);
         }
 
+        /// <summary>
+        /// Disposes the AD7193 object and closes the SPI device
+        /// </summary>
         public void Dispose()
         {
             if (_spiDevice != null)
@@ -698,7 +806,7 @@
                 fourByteRawValue[buffer.Length - 1 - i] = buffer[i];
             }
 
-            return BitConverter.ToUInt32(fourByteRawValue);
+            return BitConverter.ToUInt32(fourByteRawValue, 0);
         }
 
         private byte[] UInt32ToByteArray(uint number, byte byteNumber)

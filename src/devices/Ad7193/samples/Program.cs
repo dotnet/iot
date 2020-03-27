@@ -1,12 +1,12 @@
-﻿namespace AD7193Sample
-{
-    using System;
-    using System.Device.Spi;
-    using System.Diagnostics;
-    using System.Threading;
-    using Device.Ad7193;
+﻿using System;
+using System.Device.Spi;
+using System.Diagnostics;
+using System.Threading;
+using Iot.Device.Ad7193;
 
-    public class Program
+namespace AD7193Sample
+{
+    internal class Program
     {
         private const int PI_3_SPI_SPEED_MIN = 320000;
         private const int PI_3_SPI_SPEED_MAX = 20480000;

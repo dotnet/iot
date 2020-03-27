@@ -3,9 +3,21 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <Configurations>Windows-Debug;Linux-Debug;Linux-Release;Windows-Release;Debug;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
+    <!--Cases used when running in VS, with the solution config either Windows-Debug or Linux-Debug (or -Release) -->
+    <ProjectReference Condition="$(Configuration.Contains('Win'))" Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=win</AdditionalProperties>
+  </ProjectReference>
+    <ProjectReference Condition="$(Configuration.Contains('Linux'))" Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
+    <!--Cases used when running build script in other cases. Just pick one -->
+    <ProjectReference Condition="'$(Configuration)' == 'Debug' or '$(Configuration)' == 'Release'" Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
     <ProjectReference Include="..\Units\Units.csproj" />
     <Compile Include="Ad7193.cs" />
     <Compile Include="AdcValue.cs" />

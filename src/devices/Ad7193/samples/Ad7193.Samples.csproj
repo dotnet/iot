@@ -3,12 +3,28 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace></RootNamespace>
+    <Configurations>Windows-Debug;Linux-Debug;Linux-Release;Windows-Release;Debug;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
+    <!--Cases used when running in VS, with the solution config either Windows-Debug or Linux-Debug (or -Release) -->
+    <ProjectReference Condition="$(Configuration.Contains('Win'))" Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=win</AdditionalProperties>
+    </ProjectReference>
+    <ProjectReference Condition="$(Configuration.Contains('Linux'))" Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
+    <!--Cases used when running build script in other cases. Just pick one -->
+    <ProjectReference Condition="'$(Configuration)' == 'Debug' or '$(Configuration)' == 'Release'" Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
     <PackageReference Include="Iot.Device.Bindings" Version="1.0.0" />
+    <PackageReference Include="NetCoreServer" Version="3.0.7" />
     <PackageReference Include="System.Device.Gpio" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ad7193.csproj" />
   </ItemGroup>
 
 </Project>
