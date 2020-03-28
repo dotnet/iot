@@ -21,6 +21,18 @@ namespace System.Device.Gpio.Drivers
 
         private static string s_consumerName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
 
+        // for use the bias flags we need libgpiod version 1.5 or later
+        private static bool IsLibgpiodVersion1_5orHigher()
+        {
+            IntPtr libgpiodVersionPtr = Interop.libgpiod.gpiod_version_string();
+            string libgpiodVersionMatch = Marshal.PtrToStringAnsi(libgpiodVersionPtr);
+            Version libgpiodVersion = new Version(libgpiodVersionMatch);
+
+            return (libgpiodVersion.Major >= 1 && libgpiodVersion.Minor >= 5);
+        }
+
+        private static bool s_isLibgpiodVersion1_5orHigher = IsLibgpiodVersion1_5orHigher();
+
         private enum RequestFlag : ulong
         {
             GPIOD_LINE_REQUEST_FLAG_OPEN_DRAIN = (1UL << 0),
@@ -121,35 +133,7 @@ namespace System.Device.Gpio.Drivers
                     return true;
                 case PinMode.InputPullDown:
                 case PinMode.InputPullUp:
-                    // for use the bias flags we need libgpiod version 1.5 or later
-                    IntPtr libgpiodVersionPtr = Interop.libgpiod.gpiod_version_string();
-                    string libgpiodVersionMatch = Marshal.PtrToStringAnsi(libgpiodVersionPtr);
-                    Version libgpiodVersion = new Version(libgpiodVersionMatch);
-                    bool isLibgpiod1dot5 = (libgpiodVersion.Major >= 1 && libgpiodVersion.Minor >= 5);
-
-                    // for use the bias flags we need Kernel version 5.5 or later
-                    string[] linuxVersionMatch = RuntimeInformation.OSDescription.Replace("Linux ", string.Empty).Split('.');
-                    Version linuxVersion = new Version();
-                    bool isKernelLinux5dot5 = false;
-
-                    if (linuxVersionMatch.Length > 1)
-                    {
-                        linuxVersion = new Version($"{linuxVersionMatch[0]}.{linuxVersionMatch[1]}");
-                        isKernelLinux5dot5 = (linuxVersion.Major >= 5 && libgpiodVersion.Minor >= 5);
-                    }
-
-                    // check if we have the correct versions
-                    if (isKernelLinux5dot5 && isLibgpiod1dot5)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine($"Using Kernel v{linuxVersion} but v5.5 or later is required.\n" +
-                                                $"Using libgpiod v{libgpiodVersion} but v1.5 or later is required.");
-                        return false;
-                    }
-
+                    return s_isLibgpiodVersion1_5orHigher;
                 case PinMode.Output:
                     return true;
                 default:
