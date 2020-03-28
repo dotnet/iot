@@ -120,6 +120,7 @@ namespace Iot.Device.Mcp9808
 
             if (value == 0xFFFF)
             {
+                // Return NaN if the MCP9808 doesn't have a measurement ready at the time of reading
                 return double.NaN;
             }
 
