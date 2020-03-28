@@ -191,20 +191,16 @@ namespace System.Device.Gpio.Drivers
             int requestResult = -1;
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
             {
-                int flags;
-
                 switch (mode)
                 {
                     case PinMode.Input:
                         requestResult = Interop.libgpiod.gpiod_line_request_input(pinHandle, s_consumerName);
                         break;
                     case PinMode.InputPullDown:
-                        flags = (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN;
-                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName, flags);
+                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName, (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN);
                         break;
                     case PinMode.InputPullUp:
-                        flags = (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
-                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName, flags);
+                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName, (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP);
                         break;
                     case PinMode.Output:
                         requestResult = Interop.libgpiod.gpiod_line_request_output(pinHandle, s_consumerName);
