@@ -458,25 +458,27 @@ namespace System.Device.Gpio.Drivers
                 if (waitResult > 0)
                 {
                     pinNumber = events.data.pinNumber;
-                    /*
-                    // valueFileDescriptor will be -1 when using the callback eventing. For WaitForEvent, the value will be set.
+
+                    // This entire section is probably not necessary, but this seems to be hard to validate.
+                    // See https://github.com/dotnet/iot/pull/914#discussion_r389924106 and issue #1024.
                     if (valueFileDescriptor == -1)
                     {
+                        // valueFileDescriptor will be -1 when using the callback eventing. For WaitForEvent, the value will be set.
                         valueFileDescriptor = _devicePins[pinNumber].FileDescriptor;
                     }
 
                     int lseekResult = Interop.lseek(valueFileDescriptor, 0, SeekFlags.SEEK_SET);
                     if (lseekResult == -1)
                     {
-                        throw new IOException("Error while trying to initialize pin interrupts.");
+                        throw new IOException("Error while trying to seek in value file.");
                     }
 
                     int readResult = Interop.read(valueFileDescriptor, bufPtr, 1);
                     if (readResult != 1)
                     {
-                        throw new IOException("Error while trying to initialize pin interrupts.");
+                        throw new IOException("Error while trying to read value file.");
                     }
-                    */
+
                     return true;
                 }
             }
