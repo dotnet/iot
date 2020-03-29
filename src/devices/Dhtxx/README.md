@@ -25,6 +25,10 @@ using (Dht11 dht = new Dht11(26))
     double humidity = dht.Humidity;
 }
 ```
+**Note:** _Specifically on the RPi with teh DHT22, 1-Wire works using Raspian but not with IoT-Core. The device has to switch the 1-wire pin between input and output and viz. It seems that becuase of the non-deterministic nature of the Windows OS, , it can't switch the pin quick enough. There have been suggestions for using two pins; one for input and one for output. This solution has not been implemented here but here are some links to solutions:_
+- https://github.com/ms-iot/samples/tree/develop/GpioOneWire
+- And on Hackster.io (https://www.hackster.io/porrey/go-native-c-with-the-dht22-a8e8eb
+_These are UWP projecs though._
 
 ### I2C Protocol
 
