@@ -80,9 +80,11 @@ namespace Iot.Device.ExplorerHat
             {
                 if (disposing)
                 {
+                    Off();
                     if (_shouldDispose)
                     {
-                        Off();
+                        _controller?.Dispose();
+                        _controller = null;
                     }
                 }
 

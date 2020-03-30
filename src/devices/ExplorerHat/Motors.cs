@@ -95,10 +95,12 @@ namespace Iot.Device.ExplorerHat
             {
                 if (disposing)
                 {
+                    _motorArray[0].Dispose();
+                    _motorArray[1].Dispose();
                     if (_shouldDispose)
                     {
-                        _motorArray[0].Dispose();
-                        _motorArray[1].Dispose();
+                        _controller?.Dispose();
+                        _controller = null;
                     }
                 }
 
