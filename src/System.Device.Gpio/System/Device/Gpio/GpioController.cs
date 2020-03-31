@@ -289,7 +289,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not add callback for a pin that is not open.");
+                throw new InvalidOperationException("Can not remove callback for a pin that is not open.");
             }
 
             _driver.RemoveCallbackForPinValueChangedEvent(logicalPinNumber, callback);

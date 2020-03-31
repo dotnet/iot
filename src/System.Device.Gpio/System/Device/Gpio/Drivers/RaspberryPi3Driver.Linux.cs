@@ -27,12 +27,11 @@ namespace System.Device.Gpio.Drivers
         private const string DeviceTreeRanges = "/proc/device-tree/soc/ranges";
         private const string ModelFilePath = "/proc/device-tree/model";
 
-        private readonly IDictionary<int, PinMode> _sysFSModes = new Dictionary<int, PinMode>();
+        private readonly PinState[] _pinModes;
         private RegisterView* _registerViewPointer = null;
         private static readonly object s_initializationLock = new object();
-        private static readonly object s_sysFsInitializationLock = new object();
 
-        private UnixDriver _sysFSDriver = null;
+        private UnixDriver _interruptDriver = null;
 
         /// <summary>
         /// Returns true if this is a Raspberry Pi4
@@ -43,6 +42,11 @@ namespace System.Device.Gpio.Drivers
             set;
         }
 
+        public RaspberryPi3Driver()
+        {
+            _pinModes = new PinState[PinCount];
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (_registerViewPointer != null)
@@ -51,30 +55,10 @@ namespace System.Device.Gpio.Drivers
                 _registerViewPointer = null;
             }
 
-            if (_sysFSDriver != null)
+            if (_interruptDriver != null)
             {
-                _sysFSDriver.Dispose();
-                _sysFSDriver = null;
-            }
-        }
-
-        /// <summary>
-        /// Gets the mode of a pin for Unix.
-        /// </summary>
-        /// <param name="mode">The mode of a pin to get.</param>
-        /// <returns>The mode of a pin for Unix.</returns>
-        private PinMode GetModeForUnixDriver(PinMode mode)
-        {
-            switch (mode)
-            {
-                case PinMode.Input:
-                case PinMode.InputPullUp:
-                case PinMode.InputPullDown:
-                    return PinMode.Input;
-                case PinMode.Output:
-                    return PinMode.Output;
-                default:
-                    throw new InvalidOperationException($"Can not parse pin mode {_sysFSModes}");
+                _interruptDriver.Dispose();
+                _interruptDriver = null;
             }
         }
 
@@ -87,12 +71,11 @@ namespace System.Device.Gpio.Drivers
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             ValidatePinNumber(pinNumber);
-            InitializeSysFS();
 
-            _sysFSDriver.OpenPin(pinNumber);
-            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
+            _interruptDriver.OpenPin(pinNumber);
+            _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            _sysFSDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
+            _interruptDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
         }
 
         /// <summary>
@@ -103,11 +86,16 @@ namespace System.Device.Gpio.Drivers
         {
             ValidatePinNumber(pinNumber);
 
-            if (_sysFSModes.ContainsKey(pinNumber) && _sysFSModes[pinNumber] == PinMode.Output)
+            bool isOpen = _pinModes[pinNumber] != null && _pinModes[pinNumber].InUseByInterruptDriver;
+            if (isOpen)
             {
-                Write(pinNumber, PinValue.Low);
-                SetPinMode(pinNumber, PinMode.Input);
+                _interruptDriver.ClosePin(pinNumber);
             }
+
+            // Set pin low and mode to input upon closing a pin
+            Write(pinNumber, PinValue.Low);
+            SetPinMode(pinNumber, PinMode.Input);
+            _pinModes[pinNumber] = null;
         }
 
         /// <summary>
@@ -167,12 +155,11 @@ namespace System.Device.Gpio.Drivers
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             ValidatePinNumber(pinNumber);
-            InitializeSysFS();
 
-            _sysFSDriver.OpenPin(pinNumber);
-            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
+            _interruptDriver.OpenPin(pinNumber);
+            _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            _sysFSDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
+            _interruptDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
         }
 
         /// <summary>
@@ -206,13 +193,13 @@ namespace System.Device.Gpio.Drivers
             register |= (mode == PinMode.Output ? 1u : 0u) << shift;
             *registerPointer = register;
 
-            if (_sysFSModes.ContainsKey(pinNumber))
+            if (_pinModes[pinNumber] != null)
             {
-                _sysFSModes[pinNumber] = mode;
+                _pinModes[pinNumber].CurrentPinMode = mode;
             }
             else
             {
-                _sysFSModes.Add(pinNumber, mode);
+                _pinModes[pinNumber] = new PinState(mode);
             }
 
             if (mode != PinMode.Output)
@@ -343,12 +330,11 @@ namespace System.Device.Gpio.Drivers
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             ValidatePinNumber(pinNumber);
-            InitializeSysFS();
 
-            _sysFSDriver.OpenPin(pinNumber);
-            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
+            _interruptDriver.OpenPin(pinNumber);
+            _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            return _sysFSDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
+            return _interruptDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
         }
 
         /// <summary>
@@ -361,12 +347,11 @@ namespace System.Device.Gpio.Drivers
         protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             ValidatePinNumber(pinNumber);
-            InitializeSysFS();
 
-            _sysFSDriver.OpenPin(pinNumber);
-            _sysFSDriver.SetPinMode(pinNumber, GetModeForUnixDriver(_sysFSModes[pinNumber]));
+            _interruptDriver.OpenPin(pinNumber);
+            _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            return _sysFSDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
+            return _interruptDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
         }
 
         /// <summary>
@@ -448,21 +433,15 @@ namespace System.Device.Gpio.Drivers
             return cpuBusPeripheralBaseAddress;
         }
 
-        private void InitializeSysFS()
+        private void InitializeInterruptDriver()
         {
-            if (_sysFSDriver != null)
+            try
             {
-                return;
+                _interruptDriver = new LibGpiodDriver(0);
             }
-
-            lock (s_sysFsInitializationLock)
+            catch (PlatformNotSupportedException)
             {
-                if (_sysFSDriver != null)
-                {
-                    return;
-                }
-
-                _sysFSDriver = new SysFsDriver();
+                _interruptDriver = new InterruptSysFsDriver(this);
             }
         }
 
@@ -566,6 +545,8 @@ namespace System.Device.Gpio.Drivers
                     // If in debug mode, we might want to check what happened here (i.e unsupported OS, incorrect permissions)
                     Debug.Fail($"Unexpected exception: {x}");
                 }
+
+                InitializeInterruptDriver();
             }
         }
 
@@ -578,12 +559,34 @@ namespace System.Device.Gpio.Drivers
         {
             ValidatePinNumber(pinNumber);
 
-            if (!_sysFSModes.ContainsKey(pinNumber))
+            var entry = _pinModes[pinNumber];
+            if (entry == null)
             {
                 throw new InvalidOperationException("Can not get a pin mode of a pin that is not open.");
             }
 
-            return _sysFSModes[pinNumber];
+            return entry.CurrentPinMode;
+        }
+
+        private class PinState
+        {
+            public PinState(PinMode currentMode)
+            {
+                CurrentPinMode = currentMode;
+                InUseByInterruptDriver = false;
+            }
+
+            public PinMode CurrentPinMode
+            {
+                get;
+                set;
+            }
+
+            public bool InUseByInterruptDriver
+            {
+                get;
+                set;
+            }
         }
     }
 }

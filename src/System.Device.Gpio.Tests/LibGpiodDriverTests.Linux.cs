@@ -4,6 +4,7 @@
 
 using System.Device.Gpio.Drivers;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Device.Gpio.Tests
 {
@@ -11,6 +12,11 @@ namespace System.Device.Gpio.Tests
     [Trait("feature", "gpio-libgpiod")]
     public class LibGpiodDriverTests : GpioControllerTestBase
     {
+        public LibGpiodDriverTests(ITestOutputHelper testOutputHelper)
+            : base(testOutputHelper)
+        {
+        }
+
         protected override GpioDriver GetTestDriver() => new LibGpiodDriver();
 
         protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;

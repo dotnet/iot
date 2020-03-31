@@ -4,6 +4,7 @@
 
 using System.Device.Gpio.Drivers;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Device.Gpio.Tests
 {
@@ -12,6 +13,11 @@ namespace System.Device.Gpio.Tests
     [Trait("feature", "gpio-sysfs")]
     public class SysFsDriverTests : GpioControllerTestBase
     {
+        public SysFsDriverTests(ITestOutputHelper testOutputHelper)
+            : base(testOutputHelper)
+        {
+        }
+
         protected override GpioDriver GetTestDriver() => new SysFsDriver();
 
         protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
