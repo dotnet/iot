@@ -202,7 +202,7 @@ namespace Iot.Device.Ads1115
             byte configHi = (byte)(0x80 | // Set conversion enable bit, so we always do (at least) one conversion using the new settings
                             ((byte)_inputMultiplexer << 4) |
                             ((byte)_measuringRange << 1) |
-                            ((byte)_deviceMode));
+                            ((byte)DeviceMode.PowerDown)); // Always in powerdown mode, otherwise we can't wait properly
 
             byte configLo = (byte)(((byte)_dataRate << 5) |
                             ((byte)_comparatorMode << 4) |
@@ -221,6 +221,17 @@ namespace Iot.Device.Ads1115
 
             // waiting for the sensor stability
             WaitWhileBusy();
+
+            if (_deviceMode == DeviceMode.Continuous)
+            {
+                // We need to wait two cycles when changing the configuration in continuous mode,
+                // otherwise we may be getting a value from the wrong input
+                _i2cDevice.Write(writeBuff);
+                WaitWhileBusy();
+                configHi &= 0xFE; // Clear last bit
+                writeBuff[1] = configHi;
+                _i2cDevice.Write(writeBuff); // And enable continuous mode
+            }
         }
 
         /// <summary>
@@ -419,33 +430,24 @@ namespace Iot.Device.Ads1115
 
         /// <summary>
         /// Wait until the current conversion finishes.
+        /// This method must only be called in powerdown mode, otherwise it would timeout, since the busy bit never changes.
+        /// Due to that, we always write the configuration first in power down mode and then enable the continuous bit.
         /// </summary>
-        /// <exception cref="TimeoutException">A timeout occured waiting for the ADC to finish the conversion (in powerdown-mode only)</exception>
+        /// <exception cref="TimeoutException">A timeout occured waiting for the ADC to finish the conversion</exception>
         private void WaitWhileBusy()
         {
-            if (DeviceMode == DeviceMode.PowerDown)
+            // In powerdown-mode, wait until the busy bit goes high
+            ushort reg = ReadConfigRegister();
+            int timeout = 5000;
+            while ((reg & 0x8000) == 0 && (timeout-- > 0))
             {
-                // In powerdown-mode, wait until the busy bit goes high
-                Span<byte> readBuff = stackalloc byte[2];
-                ushort reg = ReadConfigRegister();
-                int timeout = 5000;
-                while ((reg & 0x8000) == 0 && (timeout-- > 0))
-                {
-                    DelayHelper.DelayMicroseconds(2, true);
-                    reg = ReadConfigRegister();
-                }
-
-                if (timeout <= 0)
-                {
-                    throw new TimeoutException("Timeout waiting for ADC to complete conversion");
-                }
+                DelayHelper.DelayMicroseconds(2, true);
+                reg = ReadConfigRegister();
             }
-            else
+
+            if (timeout <= 0)
             {
-                // In continuous mode, we have to wait two cycles, the current one needs to end and then another one.
-                // (Checking the busy bit is pointless, as it is always cleared, because a new conversion starts right after the last ended)
-                double waitTime = 2.0 * (1.0 / FrequencyFromDataRate(DataRate));
-                Thread.Sleep(TimeSpan.FromSeconds(waitTime));
+                throw new TimeoutException("Timeout waiting for ADC to complete conversion");
             }
         }
 
