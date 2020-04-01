@@ -120,10 +120,11 @@ namespace Iot.Device.ExplorerHat
                 if (disposing)
                 {
                     Off();
-                    LedArray[0].Dispose();
-                    LedArray[1].Dispose();
-                    LedArray[2].Dispose();
-                    LedArray[3].Dispose();
+                    if (_shouldDispose)
+                    {
+                        _controller?.Dispose();
+                        _controller = null;
+                    }
                 }
 
                 _disposedValue = true;
