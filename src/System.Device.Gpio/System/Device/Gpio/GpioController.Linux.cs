@@ -30,6 +30,17 @@ namespace System.Device.Gpio
         /// <returns>A driver that works with the board the program is executing on.</returns>
         private static GpioDriver GetBestDriverForBoard()
         {
+            Board board = Board.LoadBoard();
+            switch (board.GetBoardModel())
+            {
+                case Board.Model.RaspberryPiB3:
+                    return new RaspberryPi3Driver();
+                case Board.Model.RaspberryPiComputeModule3:
+                    return new RaspberryPiCM3Driver();
+                default:
+                    return UnixDriver.Create();
+            }
+
             string[] cpuInfoLines = File.ReadAllLines(CpuInfoPath);
             Regex regex = new Regex(@"Hardware\s*:\s*(.*)");
             foreach (string cpuInfoLine in cpuInfoLines)

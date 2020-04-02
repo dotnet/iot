@@ -6,12 +6,13 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace System.Device.Gpio.Drivers
 {
     public class LibGpiodDriver : UnixDriver
     {
-        private static string s_consumerName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+        private static string s_consumerName = Process.GetCurrentProcess().ProcessName;
         private readonly object _pinNumberLock;
         private readonly ConcurrentDictionary<int, SafeLineHandle> _pinNumberToSafeLineHandle;
         private readonly ConcurrentDictionary<int, LibGpiodDriverEventHandler> _pinNumberToEventHandler;
