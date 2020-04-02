@@ -12,26 +12,26 @@ namespace Ad7193.Metadata
         /// <summary>
         /// Name of the manufacturer of the device
         /// </summary>
-        public string Manufacturer { get; }
+        string Manufacturer { get; }
 
         /// <summary>
         /// Name of the product
         /// </summary>
-        public string Product { get; }
+        string Product { get; }
 
         /// <summary>
         /// Category of the device
         /// </summary>
-        public string ProductCategory { get; }
+        string ProductCategory { get; }
 
         /// <summary>
         /// Description of the device
         /// </summary>
-        public string ProductDescription { get; }
+        string ProductDescription { get; }
 
         /// <summary>
         /// The URI of the datasheet of the device
         /// </summary>
-        public string DataSheetURI { get; }
+        string DataSheetURI { get; }
     }
 }

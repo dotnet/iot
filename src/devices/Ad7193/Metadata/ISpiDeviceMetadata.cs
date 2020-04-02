@@ -13,11 +13,11 @@ namespace Ad7193.Metadata
         /// <summary>
         /// The list of SPI modes that are valid for this device
         /// </summary>
-        public SpiMode ValidSpiModes { get; }
+        SpiMode ValidSpiModes { get; }
 
         /// <summary>
         /// The maximum frequency that can be used on the SPI bus
         /// </summary>
-        public int MaximumSpiFrequency { get; }
+        int MaximumSpiFrequency { get; }
     }
 }
