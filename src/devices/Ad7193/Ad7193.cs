@@ -67,130 +67,38 @@ namespace Iot.Device.Ad7193
         }
 
         /// <summary>
-        /// Human-readable representation of the current status register
+        /// The value of the current Status register
         /// </summary>
-        public string Status
+        public uint Status
         {
             get
             {
-                uint register = GetRegisterValue(Register.Status);
-
-                _sb.Clear();
-                _sb.Append(((register & 0b1000_0000) == 0b1000_0000) ? "Not ready" : "Ready");
-                _sb.Append(" | ");
-                _sb.Append(((register & 0b0100_0000) == 0b0100_0000) ? "Error" : "No errors");
-                _sb.Append(" | ");
-                _sb.Append(((register & 0b0010_0000) == 0b0010_0000) ? "No external reference" : "External reference");
-                _sb.Append(" | ");
-                _sb.Append(((register & 0b0001_0000) == 0b0001_0000) ? "Parity Odd" : "Parity Even");
-                _sb.Append(" | ");
-                _sb.Append($"Result CH: {(register & 0b00001111)}");
-
-                return _sb.ToString();
+                _registerCache[(byte)Register.Status] = GetRegisterValue(Register.Status);
+                return _registerCache[(byte)Register.Status];
             }
         }
 
         /// <summary>
-        /// Human-readable representation of the current mode register
+        /// The value of the current Mode register
         /// </summary>
-        public string Mode
+        public uint Mode
         {
             get
             {
-                uint register = GetRegisterValue(Register.Mode);
-
-                string mode = UInt32ToBinaryString((register & 0b1110_0000_0000_0000_0000_0000) >> 21, 3);
-
-                _sb.Clear();
-                _sb.Append($"Mode: {mode}");
-                switch (mode)
-                {
-                    case "000":
-                        _sb.Append(" (continuous)");
-                        break;
-                    case "001":
-                        _sb.Append(" (single)");
-                        break;
-                    case "010":
-                        _sb.Append(" (idle)");
-                        break;
-                    case "011":
-                        _sb.Append(" (power down)");
-                        break;
-                    case "100":
-                        _sb.Append(" (internal zero-scale calibration)");
-                        break;
-                    case "101":
-                        _sb.Append(" (internal full-scale calibration)");
-                        break;
-                    case "110":
-                        _sb.Append(" (system zero-scale calibration)");
-                        break;
-                    case "111":
-                        _sb.Append(" (system full-scale calibration)");
-                        break;
-                }
-
-                _sb.Append(" | ");
-                _sb.Append($"DAT_STA: {(register & 0b0001_0000_0000_0000_0000_0000) >> 20}");
-                _sb.Append(" | ");
-                _sb.Append($"CLK: {UInt32ToBinaryString((register & 0b0000_1100_0000_0000_0000_0000) >> 18, 2)}");
-                _sb.Append(" | ");
-                _sb.Append($"AVG: {UInt32ToBinaryString((register & 0b0000_0011_0000_0000_0000_0000) >> 16, 2)}");
-                _sb.Append(" | ");
-                _sb.Append($"SINC3: {(register & 0b0000_0000_1000_0000_0000_0000) >> 15}");
-                _sb.Append(" | ");
-                _sb.Append($"0: {(register & 0b0000_0000_0100_0000_0000_0000) >> 14}");
-                _sb.Append(" | ");
-                _sb.Append($"ENPAR: {(register & 0b0000_0000_0010_0000_0000_0000) >> 13}");
-                _sb.Append(" | ");
-                _sb.Append($"CLK_DIV: {(register & 0b0000_0000_0001_0000_0000_0000) >> 12}");
-                _sb.Append(" | ");
-                _sb.Append($"Single: {(register & 0b0000_0000_0000_1000_0000_0000) >> 11}");
-                _sb.Append(" | ");
-                _sb.Append($"REJ60: {(register & 0b0000_0000_0000_0100_0000_0000) >> 10}");
-                _sb.Append(" | ");
-                _sb.Append($"FS: {UInt32ToBinaryString((register & 0b0000_0000_0000_0011_1111_1111), 10)}");
-
-                return _sb.ToString();
+                _registerCache[(byte)Register.Mode] = GetRegisterValue(Register.Mode);
+                return _registerCache[(byte)Register.Mode];
             }
         }
 
         /// <summary>
-        /// Human-readable representation of the current config register
+        /// The value of the current Configuration register
         /// </summary>
-        public string Config
+        public uint Config
         {
             get
             {
-                uint register = GetRegisterValue(Register.Configuration);
-
-                _sb.Clear();
-                _sb.Append($"Chop: {(register & 0b1000_0000_0000_0000_0000_0000) >> 23}");
-                _sb.Append(" | ");
-                _sb.Append($"00: {UInt32ToBinaryString((register & 0b0110_0000_0000_0000_0000_0000) >> 21, 2)}");
-                _sb.Append(" | ");
-                _sb.Append($"REFSEL: {(register & 0b0001_0000_0000_0000_0000_0000) >> 20}");
-                _sb.Append(" | ");
-                _sb.Append($"0: {(register & 0b0000_1000_0000_0000_0000_0000) >> 19}");
-                _sb.Append(" | ");
-                _sb.Append($"Pseudo: {(register & 0b0000_0100_0000_0000_0000_0000) >> 18}");
-                _sb.Append(" | ");
-                _sb.Append($"Channel: {UInt32ToBinaryString((register & 0b0000_0011_1111_1111_0000_0000) >> 8, 10)}");
-                _sb.Append(" | ");
-                _sb.Append($"Burn: {(register & 0b0000_0000_0000_0000_1000_0000) >> 7}");
-                _sb.Append(" | ");
-                _sb.Append($"REFDET: {(register & 0b0000_0000_0000_0000_0100_0000) >> 6}");
-                _sb.Append(" | ");
-                _sb.Append($"0: {(register & 0b0000_0000_0000_0000_0010_0000) >> 5}");
-                _sb.Append(" | ");
-                _sb.Append($"BUF: {(register & 0b0000_0000_0000_0000_0001_0000) >> 4}");
-                _sb.Append(" | ");
-                _sb.Append($"Unipolar: {(register & 0b0000_0000_0000_0000_0000_1000) >> 3}");
-                _sb.Append(" | ");
-                _sb.Append($"Gain: {UInt32ToBinaryString((register & 0b0000_0000_0000_0000_0000_0111), 3)}");
-
-                return _sb.ToString();
+                _registerCache[(byte)Register.Configuration] = GetRegisterValue(Register.Configuration);
+                return _registerCache[(byte)Register.Configuration];
             }
         }
 
@@ -760,6 +668,124 @@ namespace Iot.Device.Ad7193
         private static int GetCommAddress(int x)
         {
             return (((x) & 0x07) << 3);
+        }
+
+        /// <summary>
+        /// Returns the human-readable representation of a register
+        /// </summary>
+        /// <param name="register">The register you need the text-representation of</param>
+        /// <returns></returns>
+        public string RegisterToString(Register register)
+        {
+            uint registerValue = _registerCache[(byte)register];
+            string result;
+
+            switch (register)
+            {
+                case Register.Status:
+                    _sb.Clear();
+                    _sb.Append(((registerValue & 0b1000_0000) == 0b1000_0000) ? "Not ready" : "Ready");
+                    _sb.Append(" | ");
+                    _sb.Append(((registerValue & 0b0100_0000) == 0b0100_0000) ? "Error" : "No errors");
+                    _sb.Append(" | ");
+                    _sb.Append(((registerValue & 0b0010_0000) == 0b0010_0000) ? "No external reference" : "External reference");
+                    _sb.Append(" | ");
+                    _sb.Append(((registerValue & 0b0001_0000) == 0b0001_0000) ? "Parity Odd" : "Parity Even");
+                    _sb.Append(" | ");
+                    _sb.Append($"Result CH: {(registerValue & 0b00001111)}");
+
+                    result = _sb.ToString();
+                    break;
+                case Register.Mode:
+                    string mode = UInt32ToBinaryString((registerValue & 0b1110_0000_0000_0000_0000_0000) >> 21, 3);
+
+                    _sb.Clear();
+                    _sb.Append($"Mode: {mode}");
+                    switch (mode)
+                    {
+                        case "000":
+                            _sb.Append(" (continuous)");
+                            break;
+                        case "001":
+                            _sb.Append(" (single)");
+                            break;
+                        case "010":
+                            _sb.Append(" (idle)");
+                            break;
+                        case "011":
+                            _sb.Append(" (power down)");
+                            break;
+                        case "100":
+                            _sb.Append(" (internal zero-scale calibration)");
+                            break;
+                        case "101":
+                            _sb.Append(" (internal full-scale calibration)");
+                            break;
+                        case "110":
+                            _sb.Append(" (system zero-scale calibration)");
+                            break;
+                        case "111":
+                            _sb.Append(" (system full-scale calibration)");
+                            break;
+                    }
+
+                    _sb.Append(" | ");
+                    _sb.Append($"DAT_STA: {(registerValue & 0b0001_0000_0000_0000_0000_0000) >> 20}");
+                    _sb.Append(" | ");
+                    _sb.Append($"CLK: {UInt32ToBinaryString((registerValue & 0b0000_1100_0000_0000_0000_0000) >> 18, 2)}");
+                    _sb.Append(" | ");
+                    _sb.Append($"AVG: {UInt32ToBinaryString((registerValue & 0b0000_0011_0000_0000_0000_0000) >> 16, 2)}");
+                    _sb.Append(" | ");
+                    _sb.Append($"SINC3: {(registerValue & 0b0000_0000_1000_0000_0000_0000) >> 15}");
+                    _sb.Append(" | ");
+                    _sb.Append($"0: {(registerValue & 0b0000_0000_0100_0000_0000_0000) >> 14}");
+                    _sb.Append(" | ");
+                    _sb.Append($"ENPAR: {(registerValue & 0b0000_0000_0010_0000_0000_0000) >> 13}");
+                    _sb.Append(" | ");
+                    _sb.Append($"CLK_DIV: {(registerValue & 0b0000_0000_0001_0000_0000_0000) >> 12}");
+                    _sb.Append(" | ");
+                    _sb.Append($"Single: {(registerValue & 0b0000_0000_0000_1000_0000_0000) >> 11}");
+                    _sb.Append(" | ");
+                    _sb.Append($"REJ60: {(registerValue & 0b0000_0000_0000_0100_0000_0000) >> 10}");
+                    _sb.Append(" | ");
+                    _sb.Append($"FS: {UInt32ToBinaryString((registerValue & 0b0000_0000_0000_0011_1111_1111), 10)}");
+
+                    result = _sb.ToString();
+                    break;
+                case Register.Configuration:
+                    _sb.Clear();
+                    _sb.Append($"Chop: {(registerValue & 0b1000_0000_0000_0000_0000_0000) >> 23}");
+                    _sb.Append(" | ");
+                    _sb.Append($"00: {UInt32ToBinaryString((registerValue & 0b0110_0000_0000_0000_0000_0000) >> 21, 2)}");
+                    _sb.Append(" | ");
+                    _sb.Append($"REFSEL: {(registerValue & 0b0001_0000_0000_0000_0000_0000) >> 20}");
+                    _sb.Append(" | ");
+                    _sb.Append($"0: {(registerValue & 0b0000_1000_0000_0000_0000_0000) >> 19}");
+                    _sb.Append(" | ");
+                    _sb.Append($"Pseudo: {(registerValue & 0b0000_0100_0000_0000_0000_0000) >> 18}");
+                    _sb.Append(" | ");
+                    _sb.Append($"Channel: {UInt32ToBinaryString((registerValue & 0b0000_0011_1111_1111_0000_0000) >> 8, 10)}");
+                    _sb.Append(" | ");
+                    _sb.Append($"Burn: {(registerValue & 0b0000_0000_0000_0000_1000_0000) >> 7}");
+                    _sb.Append(" | ");
+                    _sb.Append($"REFDET: {(registerValue & 0b0000_0000_0000_0000_0100_0000) >> 6}");
+                    _sb.Append(" | ");
+                    _sb.Append($"0: {(registerValue & 0b0000_0000_0000_0000_0010_0000) >> 5}");
+                    _sb.Append(" | ");
+                    _sb.Append($"BUF: {(registerValue & 0b0000_0000_0000_0000_0001_0000) >> 4}");
+                    _sb.Append(" | ");
+                    _sb.Append($"Unipolar: {(registerValue & 0b0000_0000_0000_0000_0000_1000) >> 3}");
+                    _sb.Append(" | ");
+                    _sb.Append($"Gain: {UInt32ToBinaryString((registerValue & 0b0000_0000_0000_0000_0000_0111), 3)}");
+
+                    result = _sb.ToString();
+                    break;
+                default:
+                    result = registerValue.ToString();
+                    break;
+            }
+
+            return result;
         }
 
         /// <summary>

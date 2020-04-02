@@ -82,9 +82,9 @@ namespace AD7193Sample
                 if (ad7193.HasErrors || (loopcounter % 50 == 0))
                 {
                     Console.WriteLine();
-                    Console.WriteLine($"AD7193 status: {ad7193.Status}");
-                    Console.WriteLine($"AD7193 mode: {ad7193.Mode}");
-                    Console.WriteLine($"AD7193 config: {ad7193.Config}");
+                    Console.WriteLine($"AD7193 status: {ad7193.RegisterToString(Register.Status)}");
+                    Console.WriteLine($"AD7193 mode: {ad7193.RegisterToString(Register.Mode)}");
+                    Console.WriteLine($"AD7193 config: {ad7193.RegisterToString(Register.Configuration)}");
                     Console.WriteLine();
                     Thread.Sleep(1500);
                 }
