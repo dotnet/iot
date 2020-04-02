@@ -10,7 +10,7 @@ namespace System.Device.Gpio.Drivers
     public partial class RaspberryPiCM3Driver // Different base classes declared in RaspberryPi3Driver.Linux.cs and RaspberryPi3Driver.Windows.cs
     {
         /// <summary>
-        /// Raspberry CM3 has 28 GPIO pins.
+        /// Raspberry CM3 has 48 GPIO pins.
         /// </summary>
         protected internal override int PinCount => 48;
 
