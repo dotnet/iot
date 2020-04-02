@@ -52,6 +52,11 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public Gain PGAGain
         {
+            get
+            {
+                return (Gain)((_registerCache[(byte)Register.Configuration] & 0xFF_FFF8) >> 0);
+            }
+
             set
             {
                 _registerCache[(byte)Register.Configuration] &= 0xFF_FFF8;          // keep all bit values except Gain bits
@@ -363,6 +368,11 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public ushort Filter
         {
+            get
+            {
+                return (ushort)((_registerCache[(byte)Register.Mode] & 0xFF_FC00) >> 0);
+            }
+
             set
             {
                 if (value > 0x03FF)
@@ -370,7 +380,7 @@ namespace Iot.Device.Ad7193
                     throw new ArgumentException("Filter rate is too high, it must be a 10-bit value.");
                 }
 
-                _registerCache[(byte)Register.Mode] &= 0xFFFC00;         // keep all bit values except Filter setting bits
+                _registerCache[(byte)Register.Mode] &= 0xFF_FC00;         // keep all bit values except Filter setting bits
                 _registerCache[(byte)Register.Mode] |= (uint)value << 0;
 
                 SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
