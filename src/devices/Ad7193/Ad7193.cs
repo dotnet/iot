@@ -428,9 +428,14 @@ namespace Iot.Device.Ad7193
         /// <param name="spiDevice">The SPI device to initialize the ADC on</param>
         public Ad7193(SpiDevice spiDevice)
         {
-            if (spiDevice.ConnectionSettings.Mode != SpiMode.Mode3)
+            if ((spiDevice.ConnectionSettings.Mode & metadata.ValidSpiModes) != spiDevice.ConnectionSettings.Mode)
             {
                 throw new Exception("SPI device must be in SPI mode 3 in order to work with AD7193.");
+            }
+
+            if (spiDevice.ConnectionSettings.ClockFrequency > metadata.MaximumSpiFrequency)
+            {
+                throw new Exception($"SPI device must have a lower clock frequency, because AD7193's maximum operating SPI frequncy is {metadata.MaximumSpiFrequency} Hz.");
             }
 
             _spiDevice = spiDevice;
@@ -502,6 +507,11 @@ namespace Iot.Device.Ad7193
             if (frequency == 0)
             {
                 frequency = metadata.ADCSamplerate;
+            }
+
+            if (frequency >= metadata.ADCSamplerate)
+            {
+                throw new ArgumentException($"The frequency you provided is higher than the maximum sampling rate of AD7193 ({metadata.ADCSamplerate} SPS).");
             }
 
             _registerCache[(byte)Register.Mode] &= 0x1FFFFF; // keep all bit values except Mode bits
