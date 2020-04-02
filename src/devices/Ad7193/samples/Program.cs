@@ -2,6 +2,7 @@
 using System.Device.Spi;
 using System.Diagnostics;
 using System.Threading;
+using Ad7193.Metadata;
 using Iot.Device.Ad7193;
 
 namespace AD7193Sample
@@ -11,7 +12,7 @@ namespace AD7193Sample
         private const int PI_3_SPI_SPEED_MIN = 320000;
         private const int PI_3_SPI_SPEED_MAX = 20480000;
 
-        private static Ad7193 ad7193;
+        private static Iot.Device.Ad7193.Ad7193 ad7193;
         private static DateTime firstDataRead;
         private static double lastChecked = 0;
         private static int lastCount = 0;
@@ -27,12 +28,12 @@ namespace AD7193Sample
             // AD7193 CS Pin: 1
             SpiConnectionSettings settings = new SpiConnectionSettings(0, 1)
             {
-                ClockFrequency = Ad7193.MaximumSpiFrequency,
+                ClockFrequency = ((ISpiDeviceMetadata)Iot.Device.Ad7193.Ad7193.GetDeviceMetadata()).MaximumSpiFrequency,
                 Mode = SpiMode.Mode3
             };
             SpiDevice ad7193SpiDevice = SpiDevice.Create(settings);
 
-            ad7193 = new Ad7193(ad7193SpiDevice);
+            ad7193 = new Iot.Device.Ad7193.Ad7193(ad7193SpiDevice);
             ad7193.AdcValueReceived += Ad7193_AdcValueReceived;
 
             Console.WriteLine($"-- Resetting and calibrating AD7193.");

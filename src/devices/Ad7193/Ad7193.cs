@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Ad7193.Metadata;
 using global::Iot.Units;
 
 namespace Iot.Device.Ad7193
@@ -15,74 +16,15 @@ namespace Iot.Device.Ad7193
     /// </summary>
     public class Ad7193 : IDisposable
     {
-        #region Metadata for IDevice
-
-        /// <summary>
-        /// Name of the manufacturer of the device
-        /// </summary>
-        public const string Manufacturer = "Analog Devices";
-
-        /// <summary>
-        /// Name of the product
-        /// </summary>
-        public const string Product = "AD7193";
-
-        /// <summary>
-        /// Category of the device
-        /// </summary>
-        public const string ProductCategory = "ADC";
-
-        /// <summary>
-        /// Description of the device
-        /// </summary>
-        public const string ProductDescription = "4-Channel, 4.8 kHz, Ultralow Noise, 24-Bit Sigma-Delta ADC with PGA";
-
-        /// <summary>
-        /// The URI of the datasheet of the device
-        /// </summary>
-        public const string DataSheetURI = "https://www.analog.com/media/en/technical-documentation/data-sheets/AD7193.pdf";
-        #endregion
-
-        #region Metadata for ISpiDevice
-
-        /// <summary>
-        /// The list of SPI modes that are valid for this device
-        /// </summary>
-        public const SpiMode ValidSpiModes = SpiMode.Mode3;
-
-        /// <summary>
-        /// The maximum frequency that can be used on the SPI bus
-        /// </summary>
-        public const int MaximumSpiFrequency = 10000000;
-        #endregion
-
-        #region metadata for IAdcDevice
-
-        /// <summary>
-        /// Number of ADCs on the device
-        /// </summary>
-        public const int ADCCount = 1;
-
-        /// <summary>
-        /// The maximum bitrate of the ADC
-        /// </summary>
-        public const int ADCBitrate = 24;
-
-        /// <summary>
-        /// The maximum sampling rate of the ADC
-        /// </summary>
-        public const int ADCSamplerate = 4800;
-
-        /// <summary>
-        /// The number of channels the ADC has
-        /// </summary>
-        public const int ADCInputChannelCount = 8;
-        #endregion
-
         private readonly object _spiTransferLock = new object();
         private readonly Stopwatch _stopWatch = new Stopwatch();
 
         private SpiDevice _spiDevice = null;
+
+        /// <summary>
+        /// Metadata of AD7193
+        /// </summary>
+        protected static Ad7193Metadata metadata = new Ad7193Metadata();
 
         /// <summary>
         /// The list of received ADC values
@@ -472,6 +414,15 @@ namespace Iot.Device.Ad7193
         }
 
         /// <summary>
+        /// Gets the metadata class for the device
+        /// </summary>
+        /// <returns></returns>
+        public static IDeviceMetadata GetDeviceMetadata()
+        {
+            return Ad7193.metadata;
+        }
+
+        /// <summary>
         /// Initializes the ADC
         /// </summary>
         /// <param name="spiDevice">The SPI device to initialize the ADC on</param>
@@ -546,8 +497,13 @@ namespace Iot.Device.Ad7193
         /// Initiates Continuous Conversion. After calling this method the AdcValueReceived event will be fired continuously. This mode is much faster, but uses significatily more CPU power.
         /// </summary>
         /// <param name="frequency">The target frequency of the sampling. AD7193 has the maximum of 4800 samples per second.</param>
-        public void StartContinuousConversion(uint frequency = ADCSamplerate)
+        public void StartContinuousConversion(uint frequency = 0)
         {
+            if (frequency == 0)
+            {
+                frequency = metadata.ADCSamplerate;
+            }
+
             _registerCache[(byte)Register.Mode] &= 0x1FFFFF; // keep all bit values except Mode bits
             _registerCache[(byte)Register.Mode] |= 0x000000; // continuous conversion mode bits (MD2 = 0, MD1 = 0, MD0 = 0)
 

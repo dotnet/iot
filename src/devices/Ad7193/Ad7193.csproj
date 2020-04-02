@@ -20,6 +20,8 @@
     </ProjectReference>
     <ProjectReference Include="..\Units\Units.csproj" />
     <Compile Include="Ad7193.cs" />
+    <Compile Include="Metadata\Ad7193Metadata.cs" />
+    <Compile Include="Metadata\IAdcDeviceMetadata.cs" />
     <Compile Include="AdcValue.cs" />
     <Compile Include="AdcValueReceivedEventArgs.cs" />
     <Compile Include="AnalogInputMode.cs" />
@@ -27,6 +29,8 @@
     <Compile Include="Channel.cs" />
     <Compile Include="CommunicationsRegisterBits.cs" />
     <Compile Include="Gain.cs" />
+    <Compile Include="Metadata\IDeviceMetadata.cs" />
+    <Compile Include="Metadata\ISpiDeviceMetadata.cs" />
     <Compile Include="Register.cs" />
   </ItemGroup>
 
