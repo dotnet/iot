@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Card\CreditCard\CreditCardProcessing.csproj" />
+    <ProjectReference Include="..\..\Card\Mifare\Mifare.csproj" />
+    <ProjectReference Include="..\..\Ft4222\Ft4222.csproj" />
+    <ProjectReference Include="..\Pn5180.csproj" />
+  </ItemGroup>
+</Project>
