@@ -8,11 +8,5 @@
     <PackageTags>.NET Core GPIO Pins SPI I2C PWM BCM2835 RPi IoT</PackageTags>
   </PropertyGroup>
 
-  <!--Project Configurations properties for VS-->
-  <PropertyGroup>
-    <RuntimeIdentifier Condition="$(Configuration.StartsWith('Windows'))">win</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="$(Configuration.StartsWith('Linux'))">linux</RuntimeIdentifier>
-  </PropertyGroup>
-
   <Import Project="..\..\Directory.Build.props" />
 </Project>

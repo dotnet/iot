@@ -24,11 +24,23 @@ namespace System.Device.Gpio
         {
         }
 
+        private static GpioDriver GetBestDriverForBoard()
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return GetBestDriverForBoardOnWindows();
+            }
+            else
+            {
+                return GetBestDriverForBoardOnLinux();
+            }
+        }
+
         /// <summary>
         /// Attempt to get the best applicable driver for the board the program is executing on.
         /// </summary>
         /// <returns>A driver that works with the board the program is executing on.</returns>
-        private static GpioDriver GetBestDriverForBoard()
+        private static GpioDriver GetBestDriverForBoardOnLinux()
         {
             string[] cpuInfoLines = File.ReadAllLines(CpuInfoPath);
             Regex regex = new Regex(@"Hardware\s*:\s*(.*)");

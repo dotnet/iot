@@ -15,16 +15,6 @@ namespace System.Device.Gpio
         private const string HummingBoardProduct = "HummingBoard-Edge";
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GpioController"/> class that will use the specified numbering scheme.
-        /// The controller will default to use the driver that best applies given the platform the program is executing on.
-        /// </summary>
-        /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
-        public GpioController(PinNumberingScheme numberingScheme)
-            : this(numberingScheme, GetBestDriverForBoard())
-        {
-        }
-
-        /// <summary>
         /// Attempt to get the best applicable driver for the board the program is executing on.
         /// </summary>
         /// <returns>A driver that works with the board the program is executing on.</returns>
@@ -34,7 +24,7 @@ namespace System.Device.Gpio
         ///     The GpioController could use reflection to find all GpioDriver-derived classes and call this
         ///     static method to determine if the driver considers itself to be the best match for the environment.
         /// </remarks>
-        private static GpioDriver GetBestDriverForBoard()
+        private static GpioDriver GetBestDriverForBoardOnWindows()
         {
             string baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
 
