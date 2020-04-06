@@ -34,7 +34,7 @@ namespace AD7193Sample
             SpiDevice ad7193SpiDevice = SpiDevice.Create(settings);
 
             ad7193 = new Iot.Device.Ad7193.Ad7193(ad7193SpiDevice);
-            ad7193.AdcValueReceived += Ad7193_AdcValueReceived;
+            ad7193.OnValueReceived += Ad7193_AdcValueReceived;
 
             Console.WriteLine($"-- Resetting and calibrating AD7193.");
             ad7193.Reset();

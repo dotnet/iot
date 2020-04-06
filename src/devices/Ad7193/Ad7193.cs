@@ -35,7 +35,7 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// The event that is fired every time a new value is received from the ADC
         /// </summary>
-        public event EventHandler<AdcValueReceivedEventArgs> AdcValueReceived;
+        public event EventHandler<AdcValueReceivedEventArgs> OnValueReceived;
 
         private readonly StringBuilder _sb = new StringBuilder();
 
@@ -507,7 +507,7 @@ namespace Iot.Device.Ad7193
             _adcValues.Add(adcValue);
 
             // call the event handler
-            AdcValueReceived?.Invoke(this, new AdcValueReceivedEventArgs(adcValue));
+            OnValueReceived?.Invoke(this, new AdcValueReceivedEventArgs(adcValue));
 
             return raw;
         }
