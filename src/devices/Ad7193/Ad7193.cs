@@ -29,8 +29,8 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// The list of received ADC values
         /// </summary>
-        // protected ConcurrentQueue<AdcValue> adcValues = new ConcurrentQueue<AdcValue>();
-        protected BlockingCollection<AdcValue> adcValues = new BlockingCollection<AdcValue>();
+        // private ConcurrentQueue<AdcValue> _adcValues = new ConcurrentQueue<AdcValue>();
+        private BlockingCollection<AdcValue> _adcValues = new BlockingCollection<AdcValue>();
 
         /// <summary>
         /// The event that is fired every time a new value is received from the ADC
@@ -504,7 +504,7 @@ namespace Iot.Device.Ad7193
 
             // add it to the collection
             // AdcValues.Enqueue(adcValue);
-            adcValues.Add(adcValue);
+            _adcValues.Add(adcValue);
 
             // call the event handler
             AdcValueReceived?.Invoke(this, new AdcValueReceivedEventArgs(adcValue));
