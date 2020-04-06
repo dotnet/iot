@@ -48,20 +48,35 @@ namespace Iot.Device.Ad7193
         public double VReference { get; set; } = 2.50f;
 
         /// <summary>
+        /// Polarity select bit: true is unipolar, false is bipolar operation.
+        /// </summary>
+        public bool Unipolar
+        {
+            get
+            {
+                return (GetRegisterBits(Register.Configuration, BitMask.ConfigurationU) == 1);
+            }
+
+            set
+            {
+                _registerCache[(byte)Register.Configuration] = SetRegisterBits(Register.Configuration, BitMask.ConfigurationU, value ? 1U : 0);
+                SetRegisterValue(Register.Configuration, _registerCache[(byte)Register.Configuration]);
+            }
+        }
+
+        /// <summary>
         /// Gain level on the ADC
         /// </summary>
         public Gain PGAGain
         {
             get
             {
-                return (Gain)((_registerCache[(byte)Register.Configuration] & 0xFF_FFF8) >> 0);
+                return (Gain)(GetRegisterBits(Register.Configuration, BitMask.ConfigurationG));
             }
 
             set
             {
-                _registerCache[(byte)Register.Configuration] &= 0xFF_FFF8;          // keep all bit values except Gain bits
-                _registerCache[(byte)Register.Configuration] |= (uint)value;
-
+                _registerCache[(byte)Register.Configuration] = SetRegisterBits(Register.Configuration, BitMask.ConfigurationG, (uint)value);
                 SetRegisterValue(Register.Configuration, _registerCache[(byte)Register.Configuration]);
             }
         }
@@ -103,27 +118,26 @@ namespace Iot.Device.Ad7193
         }
 
         /// <summary>
-        /// True if the ADC is idle
+        /// Power-down mode. In power-down mode, all AD7193 circuitry, except the bridge power-down switch, is powered down. The bridge power-down switch remains active because the user may need to power up the sensor prior to powering up the AD7193 for settling reasons. The external crystal, if selected, remains active.
         /// </summary>
-        public bool IsIdle
+        public bool IsPowerDown
         {
             get
             {
-                uint mode = GetRegisterValue(Register.Mode);
-                return ((mode & 0b1110_0000_0000_0000_0000_0000) >> 21) == 0b011;
+                GetRegisterValue(Register.Mode);
+                return (GetRegisterBits(Register.Mode, BitMask.ModeMD) == 0b011);
             }
         }
 
         /// <summary>
-        /// True if the ADC is readz for the next conversion
+        /// Ready bit for the ADC. This bit is set when data is written to the ADC data register.
         /// </summary>
         public bool IsReady
         {
             get
             {
-                uint status = GetRegisterValue(Register.Status);
-
-                return (status & 0b1000_0000) != 0b1000_0000;
+                GetRegisterValue(Register.Status);
+                return (GetRegisterBits(Register.Mode, BitMask.StatusRDY) != 0b1);
             }
         }
 
@@ -174,27 +188,17 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                return ((_registerCache[(byte)Register.Mode] & 0x100000) == 0x100000);
+                return (GetRegisterBits(Register.Mode, BitMask.ModeDAT_STA) == 1);
             }
 
             set
             {
-                _registerCache[(byte)Register.Mode] &= 0xEFFFFF;     // keep all bit values except DAT_STA bit
-
-                if (value)
-                {
-                    _registerCache[(byte)Register.Mode] |= 0x100000;     // set DAT_STA to 1
-                }
-                else
-                {
-                    _registerCache[(byte)Register.Mode] |= 0x000000;     // set DAT_STA to 0
-                }
-
+                _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeDAT_STA, value ? 1U : 0);
                 SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
 
                 if (value)
                 {
-                    _registerSize[(byte)Register.Data] = 4;          // change register size to 4, b/c status register is now appended
+                    _registerSize[(byte)Register.Data] = 4;          // change register size to 4, because Status register is now appended
                 }
                 else
                 {
@@ -216,23 +220,12 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                return (AnalogInputMode)((_registerCache[(byte)Register.Configuration] & 0b0000_0100_0000_0000_0000_0000) >> 18);
+                return (AnalogInputMode)(GetRegisterBits(Register.Configuration, BitMask.ConfigurationPseudo));
             }
 
             set
             {
-                _registerCache[(byte)Register.Configuration] &= 0b1111_1011_1111_1111_1111_1111;
-
-                if (value == AnalogInputMode.FourDifferentialAnalogInputs)
-                {
-                    _registerCache[(byte)Register.Configuration] |= 0 << 11;
-                }
-
-                if (value == AnalogInputMode.EightPseudoDifferentialAnalogInputs)
-                {
-                    _registerCache[(byte)Register.Configuration] |= 1 << 11;
-                }
-
+                _registerCache[(byte)Register.Configuration] = SetRegisterBits(Register.Configuration, BitMask.ConfigurationPseudo, (uint)value);
                 SetRegisterValue(Register.Configuration, _registerCache[(byte)Register.Configuration]);
 
             }
@@ -243,16 +236,14 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public Channel ActiveChannels
         {
+            get
+            {
+                return (Channel)(GetRegisterBits(Register.Configuration, BitMask.ConfigurationCH));
+            }
+
             set
             {
-                // generate Channel settings bits for Configuration write
-                uint channelBits = (uint)value << 8;
-
-                // write Channel bits to Config register, keeping other bits as is
-                _registerCache[(byte)Register.Configuration] &= 0xFC00FF;       // keep all bit values except Channel bits
-                _registerCache[(byte)Register.Configuration] |= channelBits;
-
-                // write channel selected to Configuration register
+                _registerCache[(byte)Register.Configuration] = SetRegisterBits(Register.Configuration, BitMask.ConfigurationCH, (uint)value);
                 SetRegisterValue(Register.Configuration, _registerCache[(byte)Register.Configuration]);
             }
         }
@@ -262,11 +253,14 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public AveragingMode Averaging
         {
+            get
+            {
+                return (AveragingMode)(GetRegisterBits(Register.Mode, BitMask.ModeAVG));
+            }
+
             set
             {
-                _registerCache[(byte)Register.Mode] &= 0xFC_FFFF;                // keep all bit values except Averaging setting bits
-                _registerCache[(byte)Register.Mode] |= ((uint)value) << 16;
-
+                _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeAVG, (uint)value);
                 SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
             }
         }
@@ -278,19 +272,12 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                return (ushort)((_registerCache[(byte)Register.Mode] & 0xFF_FC00) >> 0);
+                return (ushort)(GetRegisterBits(Register.Mode, BitMask.ModeFS));
             }
 
             set
             {
-                if (value > 0x03FF)
-                {
-                    throw new ArgumentException("Filter rate is too high, it must be a 10-bit value.");
-                }
-
-                _registerCache[(byte)Register.Mode] &= 0xFF_FC00;         // keep all bit values except Filter setting bits
-                _registerCache[(byte)Register.Mode] |= (uint)value << 0;
-
+                _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeFS, value);
                 SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
             }
         }
@@ -377,16 +364,12 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public void Calibrate()
         {
-            _registerCache[(byte)Register.Mode] &= 0x1FFFFF;         // keep all bit values except Mode bits
-            _registerCache[(byte)Register.Mode] |= 0x800000;         // internal zero scale calibration (MD2 = 1, MD1 = 0, MD0 = 0)
-
+            _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeMD, 0b100);      // internal zero scale calibration (MD2 = 1, MD1 = 0, MD0 = 0)
             SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting
 
             WaitForADC();
 
-            _registerCache[(byte)Register.Mode] &= 0x1FFFFF;         // keep all bit values except Mode bits
-            _registerCache[(byte)Register.Mode] |= 0xA00000;         // internal full scale calibration (MD2 = 1, MD1 = 0, MD0 = 1)
-
+            _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeMD, 0b101);      // internal full scale calibration (MD2 = 1, MD1 = 0, MD0 = 1)
             SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting
 
             WaitForADC();
@@ -408,9 +391,7 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public void StartSingleConversion()
         {
-            _registerCache[(byte)Register.Mode] &= 0x1FFFFF; // keep all bit values except Mode bits
-            _registerCache[(byte)Register.Mode] |= 0x200000; // single conversion mode bits (MD2 = 0, MD1 = 0, MD0 = 1)
-
+            _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeMD, 0b001);      // single conversion mode bits
             SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
 
             _stopWatch.Restart();
@@ -427,14 +408,12 @@ namespace Iot.Device.Ad7193
                 frequency = metadata.ADCSamplerate;
             }
 
-            if (frequency >= metadata.ADCSamplerate)
+            if (frequency > metadata.ADCSamplerate)
             {
                 throw new ArgumentException($"The frequency you provided is higher than the maximum sampling rate of AD7193 ({metadata.ADCSamplerate} SPS).");
             }
 
-            _registerCache[(byte)Register.Mode] &= 0x1FFFFF; // keep all bit values except Mode bits
-            _registerCache[(byte)Register.Mode] |= 0x000000; // continuous conversion mode bits (MD2 = 0, MD1 = 0, MD0 = 0)
-
+            _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeMD, 0b000);      // continuous conversion mode
             SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
 
             ContinuousRead = true;
@@ -500,7 +479,7 @@ namespace Iot.Device.Ad7193
             }
 
             // create the new AdcValue object and calculate the voltage
-            var adcValue = new AdcValue() { Raw = raw, Time = _stopWatch.ElapsedTicks, Channel = (byte)(_registerCache[(byte)Register.Status] & 0b0000_1111), Voltage = RawValueToVoltage(raw) };
+            var adcValue = new AdcValue() { Raw = raw, Time = _stopWatch.ElapsedTicks, Channel = (byte)(GetRegisterBits(Register.Status, BitMask.StatusCHD)), Voltage = RawValueToVoltage(raw) };
 
             // add it to the collection
             // AdcValues.Enqueue(adcValue);
@@ -535,40 +514,37 @@ namespace Iot.Device.Ad7193
         /// <returns></returns>
         private double RawValueToVoltage(uint adcValue)
         {
-            // 0 - bipolar (ranges from ±19.53 mV to ±2.5 V) ; 1 - unipolar (ranges from 0 mV to 19.53 mV to 0 V to 2.5 V)
-            byte mPolarity = (byte)(_registerCache[(byte)Register.Configuration] & 0b0000_0000_0000_0000_0000_1000 >> 3);
-
-            ulong pgaSetting = _registerCache[(byte)Register.Configuration] & 0b0000_0000_0000_0000_0000_0111;  // keep only the PGA setting bits
             int pgaGain = 1;
-
-            switch (pgaSetting)
+            switch (PGAGain)
             {
-                case 0b000:
+                case Gain.X1:
                     pgaGain = 1;
                     break;
-                case 0b011:
+                case Gain.X8:
                     pgaGain = 8;
                     break;
-                case 0b100:
+                case Gain.X16:
                     pgaGain = 16;
                     break;
-                case 0b101:
+                case Gain.X32:
                     pgaGain = 32;
                     break;
-                case 0b110:
+                case Gain.X64:
                     pgaGain = 64;
                     break;
-                case 0b111:
+                case Gain.X128:
                     pgaGain = 128;
                     break;
             }
 
             double voltage = 0;
-            if (mPolarity == 1)
+
+            // 0 - bipolar (ranges from ±19.53 mV to ±2.5 V) ; 1 - unipolar (ranges from 0 mV to 19.53 mV to 0 V to 2.5 V)
+            if (Unipolar)
             {
                 voltage = (double)adcValue / 16777216.0;
             }
-            else if (mPolarity == 0)
+            else if (!Unipolar)
             {
                 voltage = ((double)adcValue / 8388608.0) - 1.0;
             }
@@ -798,6 +774,45 @@ namespace Iot.Device.Ad7193
                 _spiDevice?.Dispose();
                 _spiDevice = null;
             }
+        }
+
+        private uint GetRegisterBits(Register reg, BitMask bitmask)
+        {
+            uint result = _registerCache[(byte)reg] & (uint)bitmask;     // clear all bit(s) except the bit(s) we would like to read
+
+            if (bitmask > 0)
+            {
+                uint bits = (uint)bitmask;
+
+                while (bits % 2 == 0)
+                {
+                    result >>= 1;
+                    bits /= 2;
+                }
+            }
+
+            return result;
+        }
+
+        private uint SetRegisterBits(Register reg, BitMask bitmask, uint value)
+        {
+            uint result = _registerCache[(byte)reg] & ~(uint)bitmask;     // keep all bit values except the bit(s) we would like to modify
+
+            if (bitmask > 0)
+            {
+                uint bits = (uint)bitmask;
+
+                while (bits % 2 == 0)
+                {
+                    value <<= 1;
+                    bits /= 2;
+                }
+
+                value &= (uint)bitmask;
+                result |= value;
+            }
+
+            return result;
         }
 
         private uint ByteArrayToUInt32(byte[] buffer)

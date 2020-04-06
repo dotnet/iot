@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29905.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ad7193", "Ad7193.csproj", "{C57EF9B1-9042-4AFD-93B7-78C256B95D6A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ad7193.Samples", "samples\Ad7193.Samples.csproj", "{4470BDC6-A731-4C12-935E-607E4EADC4FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ad7193.Samples.BasicSample", "samples\Ad7193.Samples.BasicSample.csproj", "{4470BDC6-A731-4C12-935E-607E4EADC4FA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Units", "..\Units\Units.csproj", "{D0634123-59C9-4119-8364-8BB92075146D}"
 EndProject

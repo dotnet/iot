@@ -31,6 +31,7 @@
     <Compile Include="Gain.cs" />
     <Compile Include="Metadata\IDeviceMetadata.cs" />
     <Compile Include="Metadata\ISpiDeviceMetadata.cs" />
+    <Compile Include="BitMask.cs" />
     <Compile Include="Register.cs" />
   </ItemGroup>
 
