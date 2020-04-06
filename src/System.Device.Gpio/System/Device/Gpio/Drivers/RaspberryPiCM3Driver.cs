@@ -7,20 +7,12 @@ namespace System.Device.Gpio.Drivers
     /// <summary>
     /// A GPIO driver for the Raspberry Pi 3.
     /// </summary>
-    public partial class RaspberryPiCM3Driver // Different base classes declared in RaspberryPi3Driver.Linux.cs and RaspberryPi3Driver.Windows.cs
+    public partial class RaspberryPiCM3Driver : RaspberryPi3Driver // Different base classes declared in RaspberryPi3Driver.Linux.cs and RaspberryPi3Driver.Windows.cs
     {
         /// <summary>
         /// Raspberry CM3 has 48 GPIO pins.
         /// </summary>
         protected internal override int PinCount => 48;
-
-        private void ValidatePinNumber(int pinNumber)
-        {
-            if (pinNumber < 0 || pinNumber > PinCount)
-            {
-                throw new ArgumentException("The specified pin number is invalid.", nameof(pinNumber));
-            }
-        }
 
         /// <summary>
         /// Converts a board pin number to the driver's logical numbering scheme.

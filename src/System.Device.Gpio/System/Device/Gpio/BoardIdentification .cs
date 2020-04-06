@@ -4,7 +4,7 @@ using System.IO;
 
 namespace System.Device.Gpio
 {
-    public class Board
+    public class BoardIdentification
     {
         /// <summary>
         /// The Raspberry Pi model.
@@ -78,11 +78,9 @@ namespace System.Device.Gpio
         }
         #region Fields
 
-        private static readonly Lazy<Board> board = new Lazy<Board>(LoadBoard);
-
         private readonly Dictionary<string, string> _settings;
 
-        private Board(Dictionary<string, string> settings)
+        private BoardIdentification(Dictionary<string, string> settings)
         {
             _settings = settings;
         }
@@ -220,9 +218,9 @@ namespace System.Device.Gpio
         /// Detect the board CPU information from /proc/cpuinfo
         /// </summary>
         /// <returns>
-        /// The <see cref="Board"/>.
+        /// The <see cref="BoardIdentification"/>.
         /// </returns>
-        internal static Board LoadBoard()
+        internal static BoardIdentification LoadBoard()
         {
             try
             {
@@ -253,11 +251,11 @@ namespace System.Device.Gpio
                     }
                 }
 
-                return new Board(settings);
+                return new BoardIdentification(settings);
             }
             catch
             {
-                return new Board(new Dictionary<string, string>());
+                return new BoardIdentification(new Dictionary<string, string>());
             }
         }
         #endregion

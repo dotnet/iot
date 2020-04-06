@@ -16,7 +16,7 @@ namespace System.Device.Gpio.Drivers
 
         private void ValidatePinNumber(int pinNumber)
         {
-            if (pinNumber < 0 || pinNumber > 27)
+            if (pinNumber < 0 || pinNumber > PinCount)
             {
                 throw new ArgumentException("The specified pin number is invalid.", nameof(pinNumber));
             }
