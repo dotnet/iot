@@ -60,6 +60,16 @@ internal partial class Interop
         internal static extern int gpiod_line_request_input(SafeLineHandle line, string consumer);
 
         /// <summary>
+        /// Reserve a single line, set the direction to input with flags
+        /// </summary>
+        /// <param name="line">GPIO line handle</param>
+        /// <param name="consumer">Name of the consumer.</param>
+        /// <param name="flags">Additional request flags.</param>
+        /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        internal static extern int gpiod_line_request_input_flags(SafeLineHandle line, string consumer, int flags);
+
+        /// <summary>
         /// Reserve a single line, set the direction to output.
         /// </summary>
         /// <param name="line">GPIO line handle</param>
@@ -133,6 +143,13 @@ internal partial class Interop
         /// <returns>GPIO chip pointer handle or NULL if an error occurred.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern SafeChipHandle gpiod_chip_open_by_number(int number);
+
+        /// <summary>
+        /// Get the API version of the library as a human-readable string.
+        /// </summary>
+        /// <returns>Human-readable string containing the library version.</returns>
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        internal static extern IntPtr gpiod_version_string();
     }
 }
 
