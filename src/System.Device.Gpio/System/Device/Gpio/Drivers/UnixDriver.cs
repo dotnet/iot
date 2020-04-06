@@ -4,6 +4,9 @@
 
 namespace System.Device.Gpio.Drivers
 {
+    /// <summary>
+    /// Creates the default driver for Unix (not Raspbian)
+    /// </summary>
     public abstract class UnixDriver : GpioDriver
     {
         protected UnixDriver()
@@ -14,6 +17,10 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <summary>
+        /// Static factory method
+        /// </summary>
+        /// <returns>An instance of GpioDriver, depending on which one fits</returns>
         // TODO: remove try catch after https://github.com/dotnet/corefx/issues/32015 deployed
         public static UnixDriver Create()
         {
