@@ -1,6 +1,6 @@
 $localPath = "$PSScriptRoot\bin\Debug\netcoreapp3.1\linux-arm\publish"
-$remotePath = "/home/pi/Work/BBD.Mars.AD7193Sample"
-$remoteExecutable = "BBD.Mars.AD7193Sample"
+$remotePath = "/home/pi/Work/dotnet/Iot.Device.Ad7193/Ad7193.Samples.BasicSample"
+$remoteExecutable = "Ad7193.Samples.BasicSample"
 
 
 # Load WinSCP .NET assembly
