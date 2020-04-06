@@ -27,6 +27,8 @@ The oscilloscope output is a [triangle waveform with 1V of peak-to-peak amplitud
 3, Run the [DeployToPi.ps1](DeployToPi.ps1) script in a PowerShell window (you will also need the [WinSCP .NET assembly](https://winscp.net/eng/downloads.php))
 > .\DeployToPi.ps1
 
+![Results in a PowerShell window](PowerShell_DeployToPi_Output.png)
+
 4, You can optionally attach the Visual Studio Debugger, and debug your application running on the Pi:
 
     a, Open Visual Studio
