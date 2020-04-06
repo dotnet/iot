@@ -21,11 +21,12 @@ namespace System.Device.Gpio.Drivers
         private const string GpioLabel = "/label";
         private const string GpioContoller = "pinctrl";
         private const string GpioOffsetBase = "/base";
+        private const int PollingTimeout = 50;
         private readonly CancellationTokenSource _eventThreadCancellationTokenSource;
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
-        private readonly int _pollingTimeoutInMilliseconds = Convert.ToInt32(TimeSpan.FromMilliseconds(1).TotalMilliseconds);
         private static readonly int s_pinOffset = ReadOffset();
+        private TimeSpan _statusUpdateSleepTime = TimeSpan.FromMilliseconds(1);
         private int _pollFileDescriptor = -1;
         private Thread _eventDetectionThread;
         private int _pinsToDetectEventsCount;
@@ -64,6 +65,21 @@ namespace System.Device.Gpio.Drivers
         public SysFsDriver()
         {
             _eventThreadCancellationTokenSource = new CancellationTokenSource();
+        }
+
+        /// <summary>
+        /// The sleep time after an event occured and before the new value is read.
+        /// </summary>
+        internal TimeSpan StatusUpdateSleepTime
+        {
+            get
+            {
+                return _statusUpdateSleepTime;
+            }
+            set
+            {
+                _statusUpdateSleepTime = value;
+            }
         }
 
         /// <summary>
@@ -118,6 +134,12 @@ namespace System.Device.Gpio.Drivers
                 try
                 {
                     SetPinEventsToDetect(pinNumber, PinEventTypes.None);
+                    if (_devicePins.ContainsKey(pinNumber))
+                    {
+                        _devicePins[pinNumber].Dispose();
+                        _devicePins.Remove(pinNumber);
+                    }
+
                     File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinOffset.ToString(CultureInfo.InvariantCulture));
                     _exportedPins.Remove(pinNumber);
                 }
@@ -279,7 +301,7 @@ namespace System.Device.Gpio.Drivers
         /// Blocks execution until an event of type eventType is received or a cancellation is requested.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="eventTypes">The event types to wait for. Can be <see cref="PinEventTypes.Rising"/>, <see cref="PinEventTypes.Falling"/> or both.</param>
         /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
         /// <returns>A structure that contains the result of the waiting operation.</returns>
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
@@ -290,18 +312,40 @@ namespace System.Device.Gpio.Drivers
             AddPinToPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, out bool closePinValueFileDescriptor);
 
             bool eventDetected = WasEventDetected(pollFileDescriptor, valueFileDescriptor, out _, cancellationToken);
+            if (_statusUpdateSleepTime > TimeSpan.Zero)
+            {
+                Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
+            }
+
+            PinEventTypes detectedEventType = PinEventTypes.None;
+            if (eventDetected)
+            {
+                // This is the only case where we need to read the new state. Although there are reports of this not being 100% reliable in all situations,
+                // it seems to be working fine most of the time.
+                if (eventTypes == (PinEventTypes.Rising | PinEventTypes.Falling))
+                {
+                    detectedEventType = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                }
+                else if (eventTypes != PinEventTypes.None)
+                {
+                    // If we're only waiting for one event type, we know which one it has to be
+                    detectedEventType = eventTypes;
+                }
+            }
 
             RemovePinFromPoll(pinNumber, ref valueFileDescriptor, ref pollFileDescriptor, closePinValueFileDescriptor, closePollFileDescriptor: true, cancelEventDetectionThread: false);
             return new WaitForEventResult
             {
                 TimedOut = !eventDetected,
-                EventTypes = eventTypes
+                EventTypes = detectedEventType,
             };
         }
 
         private void SetPinEventsToDetect(int pinNumber, PinEventTypes eventTypes)
         {
             string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "edge");
+            // Even though the pin is open, we might sometimes need to wait for access
+            SysFsHelpers.EnsureReadWriteAccessToPath(edgePath);
             string stringValue = PinEventTypeToStringValue(eventTypes);
             File.WriteAllText(edgePath, stringValue);
         }
@@ -309,6 +353,8 @@ namespace System.Device.Gpio.Drivers
         private PinEventTypes GetPinEventsToDetect(int pinNumber)
         {
             string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "edge");
+            // Even though the pin is open, we might sometimes need to wait for access
+            SysFsHelpers.EnsureReadWriteAccessToPath(edgePath);
             string stringValue = File.ReadAllText(edgePath);
             return StringValueToPinEventType(stringValue);
         }
@@ -357,7 +403,7 @@ namespace System.Device.Gpio.Drivers
                 pollFileDescriptor = Interop.epoll_create(1);
                 if (pollFileDescriptor < 0)
                 {
-                    throw new IOException("Error while trying to initialize pin interrupts.");
+                    throw new IOException("Error while trying to initialize pin interrupts (epoll_create failed).");
                 }
             }
 
@@ -369,7 +415,7 @@ namespace System.Device.Gpio.Drivers
                 valueFileDescriptor = Interop.open(valuePath, FileOpenFlags.O_RDONLY | FileOpenFlags.O_NONBLOCK);
                 if (valueFileDescriptor < 0)
                 {
-                    throw new IOException("Error while trying to initialize pin interrupts.");
+                    throw new IOException($"Error while trying to open pin value file {valuePath}.");
                 }
 
                 closePinValueFileDescriptor = true;
@@ -387,7 +433,7 @@ namespace System.Device.Gpio.Drivers
             int result = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, valueFileDescriptor, ref epollEvent);
             if (result == -1)
             {
-                throw new IOException("Error while trying to initialize pin interrupts.");
+                throw new IOException("Error while trying to initialize pin interrupts (epoll_ctl failed).");
             }
 
             // Ignore first time because it will always return the current state.
@@ -402,33 +448,35 @@ namespace System.Device.Gpio.Drivers
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                // poll every 1 millisecond
-                int waitResult = Interop.epoll_wait(pollFileDescriptor, out epoll_event events, 1, _pollingTimeoutInMilliseconds);
+                // Wait until something happens
+                int waitResult = Interop.epoll_wait(pollFileDescriptor, out epoll_event events, 1, PollingTimeout);
                 if (waitResult == -1)
                 {
-                    throw new IOException("Error while trying to initialize pin interrupts.");
+                    throw new IOException("Error while waiting for pin interrupts.");
                 }
 
                 if (waitResult > 0)
                 {
                     pinNumber = events.data.pinNumber;
 
-                    // valueFileDescriptor will be -1 when using the callback eventing. For WaitForEvent, the value will be set.
+                    // This entire section is probably not necessary, but this seems to be hard to validate.
+                    // See https://github.com/dotnet/iot/pull/914#discussion_r389924106 and issue #1024.
                     if (valueFileDescriptor == -1)
                     {
+                        // valueFileDescriptor will be -1 when using the callback eventing. For WaitForEvent, the value will be set.
                         valueFileDescriptor = _devicePins[pinNumber].FileDescriptor;
                     }
 
                     int lseekResult = Interop.lseek(valueFileDescriptor, 0, SeekFlags.SEEK_SET);
                     if (lseekResult == -1)
                     {
-                        throw new IOException("Error while trying to initialize pin interrupts.");
+                        throw new IOException("Error while trying to seek in value file.");
                     }
 
                     int readResult = Interop.read(valueFileDescriptor, bufPtr, 1);
                     if (readResult != 1)
                     {
-                        throw new IOException("Error while trying to initialize pin interrupts.");
+                        throw new IOException("Error while trying to read value file.");
                     }
 
                     return true;
@@ -448,7 +496,7 @@ namespace System.Device.Gpio.Drivers
             int result = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_DEL, valueFileDescriptor, ref epollEvent);
             if (result == -1)
             {
-                throw new IOException("Error while trying to initialize pin interrupts.");
+                throw new IOException("Error while trying to delete pin interrupts.");
             }
 
             if (closePinValueFileDescriptor)
@@ -531,7 +579,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (!_devicePins.ContainsKey(pinNumber))
             {
-                _devicePins.Add(pinNumber, new UnixDriverDevicePin());
+                _devicePins.Add(pinNumber, new UnixDriverDevicePin(Read(pinNumber)));
                 _pinsToDetectEventsCount++;
                 AddPinToPoll(pinNumber, ref _devicePins[pinNumber].FileDescriptor, ref _pollFileDescriptor, out _);
             }
@@ -546,7 +594,11 @@ namespace System.Device.Gpio.Drivers
                 _devicePins[pinNumber].ValueFalling += callback;
             }
 
-            SetPinEventsToDetect(pinNumber, (GetPinEventsToDetect(pinNumber) | eventTypes));
+            PinEventTypes events = (GetPinEventsToDetect(pinNumber) | eventTypes);
+            SetPinEventsToDetect(pinNumber, events);
+
+            // Remember which events are active
+            _devicePins[pinNumber].ActiveEdges = events;
             InitializeEventDetectionThread();
         }
 
@@ -562,7 +614,7 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        private unsafe void DetectEvents()
+        private void DetectEvents()
         {
             while (_pinsToDetectEventsCount > 0)
             {
@@ -571,15 +623,62 @@ namespace System.Device.Gpio.Drivers
                     bool eventDetected = WasEventDetected(_pollFileDescriptor, -1, out int pinNumber, _eventThreadCancellationTokenSource.Token);
                     if (eventDetected)
                     {
-                        Thread.Sleep(1); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
-                        PinEventTypes eventTypes = (Read(pinNumber) == PinValue.High) ? PinEventTypes.Rising : PinEventTypes.Falling;
-                        var args = new PinValueChangedEventArgs(eventTypes, pinNumber);
-                        _devicePins[pinNumber]?.OnPinValueChanged(args);
+                        if (_statusUpdateSleepTime > TimeSpan.Zero)
+                        {
+                            Thread.Sleep(_statusUpdateSleepTime); // Adding some delay to make sure that the value of the File has been updated so that we will get the right event type.
+                        }
+
+                        PinValue newValue = Read(pinNumber);
+
+                        UnixDriverDevicePin currentPin = _devicePins[pinNumber];
+                        PinEventTypes activeEdges = currentPin.ActiveEdges;
+                        PinEventTypes eventType = activeEdges;
+                        PinEventTypes secondEvent = PinEventTypes.None;
+                        // Only if the active edges are both, we need to query the current state and guess about the change
+                        if (activeEdges == (PinEventTypes.Falling | PinEventTypes.Rising))
+                        {
+                            PinValue oldValue = currentPin.LastValue;
+                            if (oldValue == PinValue.Low && newValue == PinValue.High)
+                            {
+                                eventType = PinEventTypes.Rising;
+                            }
+                            else if (oldValue == PinValue.High && newValue == PinValue.Low)
+                            {
+                                eventType = PinEventTypes.Falling;
+                            }
+                            else if (oldValue == PinValue.High)
+                            {
+                                // Both high -> There must have been a low-active peak
+                                eventType = PinEventTypes.Falling;
+                                secondEvent = PinEventTypes.Rising;
+                            }
+                            else
+                            {
+                                // Both low -> There must have been a high-active peak
+                                eventType = PinEventTypes.Rising;
+                                secondEvent = PinEventTypes.Falling;
+                            }
+
+                            currentPin.LastValue = newValue;
+                        }
+                        else
+                        {
+                            // Update the value, in case we need it later
+                            currentPin.LastValue = newValue;
+                        }
+
+                        PinValueChangedEventArgs args = new PinValueChangedEventArgs(eventType, pinNumber);
+                        currentPin.OnPinValueChanged(args);
+                        if (secondEvent != PinEventTypes.None)
+                        {
+                            args = new PinValueChangedEventArgs(secondEvent, pinNumber);
+                            currentPin.OnPinValueChanged(args);
+                        }
                     }
                 }
                 catch (ObjectDisposedException)
                 {
-                    break; // If cancellation token source is dispossed then we need to exit this thread.
+                    break; // If cancellation token source is disposed then we need to exit this thread.
                 }
             }
 

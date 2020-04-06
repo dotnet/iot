@@ -248,7 +248,7 @@ namespace Iot.Device.Ft4222
         {
             Span<byte> toRead = stackalloc byte[1];
             Read(toRead);
-            return toRead[1];
+            return toRead[0];
         }
 
         /// <inheritdoc/>

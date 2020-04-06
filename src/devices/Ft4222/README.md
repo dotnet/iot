@@ -158,6 +158,6 @@ For the moment this project supports only SPI and I2C in a Windows environement.
 - [ ] SPI support for MacOS 
 - [ ] I2C support for MacOS
 - [ ] GPIO support for MacOS
-- [ ] SPI support for Linux 64
-- [ ] I2C support for Linux 64
-- [ ] GPIO support for Linux 64
+- [x] SPI support for Linux 64
+- [x] I2C support for Linux 64
+- [x] GPIO support for Linux 64

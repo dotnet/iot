@@ -7,15 +7,22 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Device.Gpio.Tests
 {
     public abstract class GpioControllerTestBase
     {
-        private const int LedPin = 5;
-        private const int OutputPin = 5;
-        private const int InputPin = 6;
+        private readonly ITestOutputHelper _testOutputHelper;
+        protected const int LedPin = 5;
+        protected const int OutputPin = 5;
+        protected const int InputPin = 6;
         private static readonly int WaitMilliseconds = 1000;
+
+        protected GpioControllerTestBase(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
 
         [Fact]
         [Trait("SkipOnTestRun", "Windows_NT")] // The WindowsDriver is kept as High when disposed.
@@ -131,6 +138,24 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
+        public void ThrowsIfReadingClosedPin()
+        {
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                Assert.Throws<InvalidOperationException>(() => controller.Read(OutputPin));
+            }
+        }
+
+        [Fact]
+        public void ThrowsIfWritingClosedPin()
+        {
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                Assert.Throws<InvalidOperationException>(() => controller.Write(OutputPin, PinValue.High));
+            }
+        }
+
+        [Fact]
         [Trait("SkipOnTestRun", "Windows_NT")] // Currently, the Windows Driver is defaulting to InputPullDown instead of Input when Closed/Opened.
         public void OpenPinDefaultsModeToInput()
         {
@@ -170,20 +195,31 @@ namespace System.Device.Gpio.Tests
         public void AddCallbackFallingEdgeNotDetectedTest()
         {
             bool wasCalled = false;
+            AutoResetEvent ev = new AutoResetEvent(false);
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(InputPin, PinMode.Input);
                 controller.OpenPin(OutputPin, PinMode.Output);
                 controller.Write(OutputPin, PinValue.Low);
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Falling, Callback);
+                // Sometimes, we get an extra event just at the beginning - wait for it and then drop it
+                ev.WaitOne(1000);
+                wasCalled = false;
                 controller.Write(OutputPin, PinValue.High);
-                Thread.Sleep(WaitMilliseconds);
+                controller.UnregisterCallbackForPinValueChangedEvent(InputPin, Callback);
                 Assert.False(wasCalled);
             }
 
+            ev.Dispose();
+
             void Callback(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
             {
-                Debug.WriteLine("Oops I was called!");
+                if (pinValueChangedEventArgs.PinNumber != InputPin)
+                {
+                    return;
+                }
+
+                ev.Set();
                 wasCalled = true;
             }
         }
@@ -299,7 +335,6 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        [Trait("SkipOnTestRun", "Windows_NT")] // The windows driver is returning none as the event type.
         public void WaitForEventCancelAfter10MillisecondsTest()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
@@ -312,7 +347,17 @@ namespace System.Device.Gpio.Tests
                 WaitForEventResult result = controller.WaitForEvent(InputPin, PinEventTypes.Falling, tokenSource.Token);
 
                 Assert.True(result.TimedOut);
-                Assert.Equal(PinEventTypes.Falling, result.EventTypes);
+                // Result is expected to be None if the timeout elapsed
+                Assert.Equal(PinEventTypes.None, result.EventTypes);
+            }
+        }
+
+        [Fact]
+        public void ThrowsIfWaitingOnClosedPin()
+        {
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                Assert.Throws<InvalidOperationException>(() => controller.WaitForEvent(InputPin, PinEventTypes.Falling, CancellationToken.None));
             }
         }
 
@@ -360,6 +405,105 @@ namespace System.Device.Gpio.Tests
 
                 Assert.False(result.TimedOut);
                 Assert.Equal(PinEventTypes.Falling, result.EventTypes);
+            }
+        }
+
+        [Fact]
+        public void WaitForEventBothEdgesTest()
+        {
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                CancellationTokenSource tokenSource = new CancellationTokenSource();
+                tokenSource.CancelAfter(2000);
+                controller.OpenPin(InputPin, PinMode.Input);
+                controller.OpenPin(OutputPin, PinMode.Output);
+                controller.Write(OutputPin, PinValue.High);
+
+                // Wait for any events that happen because of the initialization
+                controller.WaitForEvent(InputPin, PinEventTypes.Falling | PinEventTypes.Rising, tokenSource.Token);
+                tokenSource.Dispose();
+
+                var task = Task.Run(() =>
+                {
+                    controller.Write(OutputPin, PinValue.High);
+                    Thread.Sleep(WaitMilliseconds);
+                    controller.Write(OutputPin, PinValue.Low);
+                    Thread.Sleep(WaitMilliseconds);
+                    controller.Write(OutputPin, PinValue.High);
+                });
+
+                tokenSource = new CancellationTokenSource();
+                tokenSource.CancelAfter(WaitMilliseconds * 4);
+
+                // First event is falling, second is rising
+                WaitForEventResult result = controller.WaitForEvent(InputPin, PinEventTypes.Falling | PinEventTypes.Rising, tokenSource.Token);
+                Assert.False(result.TimedOut);
+                Assert.Equal(PinEventTypes.Falling, result.EventTypes);
+                result = controller.WaitForEvent(InputPin, PinEventTypes.Falling | PinEventTypes.Rising, tokenSource.Token);
+                Assert.False(result.TimedOut);
+                Assert.Equal(PinEventTypes.Rising, result.EventTypes);
+                Assert.True(task.Wait(TimeSpan.FromSeconds(30))); // Should end long before that
+                tokenSource.Dispose();
+            }
+        }
+
+        [Fact]
+        public void FastInterruptHandling()
+        {
+            const int numPulses = 100;
+            // These are in ms
+            const int pulseLength = 1;
+            const int waitTime = 20;
+            const double acceptableTimeFactor = 2.0;
+
+            int numInterrupts = 0;
+            int numRisingEdges = 0;
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                controller.OpenPin(InputPin, PinMode.Input);
+                controller.OpenPin(OutputPin, PinMode.Output);
+                controller.Write(OutputPin, PinValue.Low);
+                while (controller.Read(InputPin) == PinValue.High)
+                {
+                }
+
+                controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, Callback);
+                // Ensure the poll thread is ready before we continue the actual loop
+                // If the triggers are generated by external hardware (which is what the interrupt triggering
+                // is for), we don't know when the pulses start, so no synchronisation possible there anyway
+                Thread.Sleep(10);
+                Stopwatch w = Stopwatch.StartNew();
+                for (int i = 0; i < numPulses; i++)
+                {
+                    controller.Write(OutputPin, PinValue.High);
+                    Thread.Sleep(TimeSpan.FromMilliseconds(pulseLength));
+                    controller.Write(OutputPin, PinValue.Low);
+                    Thread.Sleep(TimeSpan.FromMilliseconds(waitTime));
+                }
+
+                TimeSpan elapsed = w.Elapsed;
+                Thread.Sleep(10);
+                controller.UnregisterCallbackForPinValueChangedEvent(InputPin, Callback);
+                // All pulses must be marked as rising edge
+                Assert.Equal(numInterrupts, numRisingEdges);
+                Assert.True(numInterrupts >= numPulses - 1, $"Expected at least {numPulses - 1}, got only {numInterrupts}"); // Allow one missing pulse
+                // That's how long this test should last (at most).
+                // It will usually be around 3s, but on Windows it's around 4s (for reasons unknown)
+                double expectedMillis = numPulses * (pulseLength + waitTime);
+                Assert.True(elapsed < TimeSpan.FromMilliseconds(expectedMillis * acceptableTimeFactor), $"Used {w.Elapsed.TotalMilliseconds}ms, expected max {expectedMillis * acceptableTimeFactor}ms");
+                // Write the state of the test to the log, even if it passed (for detailed analysis)
+                _testOutputHelper.WriteLine($"Got {numInterrupts} out of {numPulses} expected. Expected a duration of {expectedMillis}, actually used {elapsed.TotalMilliseconds}ms");
+            }
+
+            void Callback(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
+            {
+                numInterrupts++;
+                // Console.WriteLine($"Seen pulse {numInterrupts}");
+                Assert.Equal(InputPin, pinValueChangedEventArgs.PinNumber);
+                if (pinValueChangedEventArgs.ChangeType == PinEventTypes.Rising)
+                {
+                    numRisingEdges++;
+                }
             }
         }
 

@@ -78,14 +78,14 @@ namespace DeviceApiTester.Commands.Gpio
                     // Wait for the cancel (Ctrl+C) console event.
                     cancelEvent.WaitOne();
 
+                    // Unregister the event handler for changes to the pin value
+                    controller.UnregisterCallbackForPinValueChangedEvent(ButtonPin, valueChangeHandler);
+
                     controller.ClosePin(ButtonPin);
                     if (LedPin != null)
                     {
                         controller.ClosePin(LedPin.Value);
                     }
-
-                    // Unregister the event handler for changes to the pin value
-                    controller.UnregisterCallbackForPinValueChangedEvent(ButtonPin, valueChangeHandler);
 
                     Console.WriteLine("Operation cancelled. Exiting.");
                     Console.OpenStandardOutput().Flush();
