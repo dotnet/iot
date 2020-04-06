@@ -5,18 +5,6 @@
     </ItemGroup>
   </Target>
 
-  <!-- Remove all the default content to be includded in the package as we have custom logic that handles that. -->
-  <PropertyGroup>
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);RemoveBuildOutputBeforePackaging</TargetsForTfmSpecificBuildOutput>
-  </PropertyGroup>
-
-  <Target Name="RemoveBuildOutputBeforePackaging" DependsOnTargets="BuiltProjectOutputGroup">
-    <ItemGroup>
-      <BuiltProjectOutputGroupOutput Remove="@(BuiltProjectOutputGroupOutput)" />
-      <DocumentationProjectOutputGroupOutput Remove="@(DocumentationProjectOutputGroupOutput)" />
-    </ItemGroup>
-  </Target>
-
   <!-- Set the path to the symbols that will go into the snupkg -->
   <PropertyGroup>
     <DebugSymbolsProjectOutputGroupDependsOn>$(DebugSymbolsProjectOutputGroupDependsOn);GetSymbolsForSnupkg</DebugSymbolsProjectOutputGroupDependsOn>
@@ -24,20 +12,7 @@
 
   <Target Name="GetSymbolsForSnupkg" Condition="'$(DebugType)' == 'Portable'">
     <!-- Add the linux and windows specific pdbs -->
-    <ItemGroup>
-      <!-- DebugSymbolsProjectOutputGroupOutput doesn't support PackagePath and instead the output path is set to lib/$(TargetFramework)/$(TargetPath) 
-           Setting TargetPath to ./../../ will get us back to the root of the package, so now we are able to place the pdbs inside
-           the runtimes folder.
-      -->
-      <DebugSymbolsProjectOutputGroupOutput">
-        <TargetPath>./../../runtimes/linux/lib/$(TargetFramework)/$(AssemblyName).pdb</TargetPath>
-        <TargetFramework>$(TargetFramework)</TargetFramework>
-      </DebugSymbolsProjectOutputGroupOutput>
-      <DebugSymbolsProjectOutputGroupOutput Include="$(OutputPath)win/$(AssemblyName).pdb">
-        <TargetPath>./../../runtimes/win/lib/$(TargetFramework)/$(AssemblyName).pdb</TargetPath>
-        <TargetFramework>$(TargetFramework)</TargetFramework>
-      </DebugSymbolsProjectOutputGroupOutput>
-    </ItemGroup>
+    
   </Target>
 
   <Import Project="..\..\Directory.Build.targets" />

@@ -23,7 +23,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <!--Excluding Linux implementations-->
     <Reference Include="Windows.Devices.DevicesLowLevelContract">
       <HintPath>winmd\Windows.Devices.DevicesLowLevelContract.winmd</HintPath>
       <IsWinMDFile>true</IsWinMDFile>
