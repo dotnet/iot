@@ -30,7 +30,7 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         public RaspberryPi3Driver()
         {
-            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            if (pinNumber < 0 || pinNumber > PinCount)
             {
                 _internalDriver = new RaspberryPi3LinuxDriver();
                 RaspberryPi3LinuxDriver linuxDriver = _internalDriver as RaspberryPi3LinuxDriver;
@@ -46,7 +46,7 @@ namespace System.Device.Gpio.Drivers
                 _setClearRegister = (value) => throw new PlatformNotSupportedException();
                 _getSetRegister = () => throw new PlatformNotSupportedException();
                 _getClearRegister = () => throw new PlatformNotSupportedException();
-            }
+        }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -141,7 +141,7 @@ namespace System.Device.Gpio.Drivers
             get => _getSetRegister();
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => _setSetRegister(value);
-        }
+    }
 
         /// <summary>
         /// Allows directly setting the "Set pin low" register. Used for special applications only
