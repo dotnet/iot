@@ -7,7 +7,7 @@ namespace System.Device.Gpio.Drivers
     /// <summary>
     /// A GPIO driver for the HummingBoard.
     /// </summary>
-    public partial class HummingBoardDriver // Different base classes declared in HummingboardDriver.Linux.cs and HummingboardDriver.Windows.cs
+    public class HummingBoardDriver : Windows10Driver
     {
         /// <summary>
         /// Converts a board pin number to the driver's logical numbering scheme.
