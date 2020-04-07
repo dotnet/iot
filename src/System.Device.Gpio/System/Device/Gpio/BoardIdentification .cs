@@ -75,6 +75,11 @@ namespace System.Device.Gpio
             /// Compute module 3.
             /// </summary>
             RaspberryPiComputeModule3,
+
+            /// <summary>
+            /// Pi 4 all versions.
+            /// </summary>
+            RaspberryPi4,
         }
         #region Fields
 
@@ -89,6 +94,11 @@ namespace System.Device.Gpio
 
         #region Properties
 
+        /// <summary>
+        /// Get board model from firmware revision
+        /// </summary>
+        /// <see cref="http://www.raspberrypi-spy.co.uk/2012/09/checking-your-raspberry-pi-board-version/"/> for information.
+        /// <returns></returns>
         internal Model GetBoardModel()
         {
             var firmware = Firmware;
@@ -139,6 +149,9 @@ namespace System.Device.Gpio
 
                 case 0x20A0:
                     return Model.RaspberryPiComputeModule3;
+
+                case 0x3111:
+                    return Model.RaspberryPi4;
 
                 default:
                     return Model.Unknown;
