@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio.Drivers;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace System.Device.Gpio.Tests
 {
+    [Trait("SkipOnTestRun", "Unix")]
     public class WindowsDriverTests : GpioControllerTestBase
     {
         public WindowsDriverTests(ITestOutputHelper testOutputHelper)

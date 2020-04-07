@@ -8,16 +8,18 @@ using Xunit.Abstractions;
 
 namespace System.Device.Gpio.Tests
 {
+    [Trait("requirement", "root")]
     [Trait("feature", "gpio")]
-    [Trait("feature", "gpio-libgpiod")]
-    public class LibGpiodDriverTests : GpioControllerTestBase
+    [Trait("feature", "gpio-sysfs")]
+    [Trait("SkipOnTestRun", "Windows_NT")]
+    public class SysFsDriverTests : GpioControllerTestBase
     {
-        public LibGpiodDriverTests(ITestOutputHelper testOutputHelper)
+        public SysFsDriverTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
         }
 
-        protected override GpioDriver GetTestDriver() => new LibGpiodDriver();
+        protected override GpioDriver GetTestDriver() => new SysFsDriver();
 
         protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
     }

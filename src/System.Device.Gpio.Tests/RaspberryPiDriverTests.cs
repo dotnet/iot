@@ -13,6 +13,7 @@ namespace System.Device.Gpio.Tests
     [Trait("requirement", "root")]
     [Trait("feature", "gpio")]
     [Trait("feature", "gpio-rpi3")]
+    [Trait("SkipOnTestRun", "Windows_NT")]
     public class RaspberryPiDriverTests : GpioControllerTestBase
     {
         /// <summary>
