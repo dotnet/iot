@@ -96,8 +96,8 @@ namespace System.Device.Gpio
 
         /// <summary>
         /// Get board model from firmware revision
+        /// See http://www.raspberrypi-spy.co.uk/2012/09/checking-your-raspberry-pi-board-version/ for information.
         /// </summary>
-        /// <see cref="http://www.raspberrypi-spy.co.uk/2012/09/checking-your-raspberry-pi-board-version/"/> for information.
         /// <returns></returns>
         internal Model GetBoardModel()
         {
