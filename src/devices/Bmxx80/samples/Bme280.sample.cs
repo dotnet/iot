@@ -1,15 +1,15 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Device.I2c;
+using System.Threading;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Common;
 using Iot.Units;
-using System;
-using System.Device.I2c;
-using System.Threading;
 
 namespace Iot.Device.Samples
 {
@@ -56,13 +56,13 @@ namespace Iot.Device.Samples
                     i2CBmpe80.TryReadPressure(out var preValue);
                     i2CBmpe80.TryReadHumidity(out var humValue);
 
-                    // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using 
+                    // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using
                     // var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
                     i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out var altValue);
-                    
-                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");                    
-                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");                    
-                    Console.WriteLine($"Altitude: {altValue:0.##}m");                    
+
+                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
+                    Console.WriteLine($"Altitude: {altValue:0.##}m");
                     Console.WriteLine($"Relative humidity: {humValue:0.#}%");
 
                     // WeatherHelper supports more calculations, such as the summer simmer index, saturated vapor pressure, actual vapor pressure and absolute humidity.
@@ -88,13 +88,13 @@ namespace Iot.Device.Samples
                     i2CBmpe80.TryReadPressure(out preValue);
                     i2CBmpe80.TryReadHumidity(out humValue);
 
-                    // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using 
+                    // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using
                     // var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
                     i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out altValue);
-                    
-                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");                    
-                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");                    
-                    Console.WriteLine($"Altitude: {altValue:0.##}m");                    
+
+                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
+                    Console.WriteLine($"Altitude: {altValue:0.##}m");
                     Console.WriteLine($"Relative humidity: {humValue:0.#}%");
 
                     // WeatherHelper supports more calculations, such as the summer simmer index, saturated vapor pressure, actual vapor pressure and absolute humidity.

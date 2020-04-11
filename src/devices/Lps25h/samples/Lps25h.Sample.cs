@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Common;
-using Iot.Units;
 using System;
 using System.Threading;
 using System.Device.I2c;
+using Iot.Device.Common;
+using Iot.Units;
 
 namespace Iot.Device.Lps25h.Samples
 {
@@ -14,12 +14,12 @@ namespace Iot.Device.Lps25h.Samples
     {
         // I2C address on SenseHat board
         public const int I2cAddress = 0x5c;
-        
+
         public static void Main(string[] args)
         {
-            //set this to the current sea level pressure in the area for correct altitude readings
+            // set this to the current sea level pressure in the area for correct altitude readings
             var defaultSeaLevelPressure = Pressure.MeanSeaLevel;
-            
+
             using (var th = new Lps25h(CreateI2cDevice()))
             {
                 while (true)
@@ -27,7 +27,7 @@ namespace Iot.Device.Lps25h.Samples
                     var tempValue = th.Temperature;
                     var preValue = th.Pressure;
                     var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
-                    
+
                     Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
                     Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
                     Console.WriteLine($"Altitude: {altValue:0.##}m");

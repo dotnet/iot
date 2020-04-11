@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Bmp180;
-using Iot.Device.Common;
-using Iot.Units;
 using System;
 using System.Device.I2c;
 using System.Threading;
+using Iot.Device.Bmp180;
+using Iot.Device.Common;
+using Iot.Units;
 
 namespace Iot.Device.Bmp180.Samples
 {
@@ -42,7 +42,7 @@ namespace Iot.Device.Bmp180.Samples
                 var preValue = i2cBmp280.ReadPressure();
                 Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
 
-                // Note that if you already have the pressure value and the temperature, you could also calculate altitude by 
+                // Note that if you already have the pressure value and the temperature, you could also calculate altitude by
                 // calling WeatherHelper.CalculateAltitude(preValue, Pressure.MeanSeaLevel, tempValue) which would be more performant.
                 var altValue = i2cBmp280.ReadAltitude(Pressure.MeanSeaLevel);
 
@@ -58,7 +58,7 @@ namespace Iot.Device.Bmp180.Samples
                 preValue = i2cBmp280.ReadPressure();
                 Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
 
-                // Note that if you already have the pressure value and the temperature, you could also calculate altitude by 
+                // Note that if you already have the pressure value and the temperature, you could also calculate altitude by
                 // calling WeatherHelper.CalculateAltitude(preValue, Pressure.MeanSeaLevel, tempValue) which would be more performant.
                 altValue = i2cBmp280.ReadAltitude(Pressure.MeanSeaLevel);
 

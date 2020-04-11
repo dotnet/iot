@@ -1,9 +1,9 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Units;
 using System;
+using Iot.Units;
 
 namespace Iot.Device.Common
 {
@@ -14,7 +14,7 @@ namespace Iot.Device.Common
     {
         #region TemperatureAndRelativeHumidity
         // Formulas taken from https://www.aprweather.com/pages/calc.htm and https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
-        
+
         /// <summary>
         /// The heat index (or apparent temperature) is used to measure the amount of discomfort
         /// during the summer months when heat and humidity often combine to make it feel hotter
@@ -34,7 +34,9 @@ namespace Iot.Device.Common
             double steadman = 0.5 * (tf + 61 + ((tf - 68) * 1.2) + (rh * 0.094));
 
             if (steadman + tf < 160) // if the average is lower than 80F, use Steadman, otherwise use Rothfusz.
+            {
                 return Temperature.FromFahrenheit(steadman);
+            }
 
             double rothfuszRegression = (-42.379)
                 + (2.04901523 * tf)
@@ -121,10 +123,10 @@ namespace Iot.Device.Common
             return avp / (airTemperature.Kelvin * 461.5) * 1000;
         }
         #endregion TemperatureAndRelativeHumidity
-            
+
         #region Pressure
         // Formula taken from https://keisan.casio.com/has10/SpecExec.cgi?path=06000000.Science%252F02100100.Earth%2520science%252F12000300.Altitude%2520from%2520atmospheric%2520pressure%252Fdefault.xml&charset=utf-8
-            
+
         /// <summary>
         /// Calculates the altitude in meters from the given pressure, sea-level pressure and air temperature
         /// </summary>
@@ -136,7 +138,7 @@ namespace Iot.Device.Common
         {
             return ((Math.Pow(seaLevelPressure.Pascal / pressure.Pascal, 1 / 5.257) - 1) * airTemperature.Kelvin) / 0.0065;
         }
-        
+
         /// <summary>
         /// Calculates the altitude in meters from the given pressure and air temperature. Assumes mean sea-level pressure.
         /// </summary>
@@ -147,7 +149,7 @@ namespace Iot.Device.Common
         {
             return CalculateAltitude(pressure, Pressure.MeanSeaLevel, airTemperature);
         }
-        
+
         /// <summary>
         /// Calculates the altitude in meters from the given pressure and sea-level pressure. Assumes temperature of 15C.
         /// </summary>
@@ -158,7 +160,7 @@ namespace Iot.Device.Common
         {
             return CalculateAltitude(pressure, seaLevelPressure, Temperature.FromCelsius(15));
         }
-        
+
         /// <summary>
         /// Calculates the altitude in meters from the given pressure. Assumes mean sea-level pressure and temperature of 15C.
         /// </summary>
@@ -168,7 +170,7 @@ namespace Iot.Device.Common
         {
             return CalculateAltitude(pressure, Pressure.MeanSeaLevel, Temperature.FromCelsius(15));
         }
-        
+
         /// <summary>
         /// Calculates the sea-level pressure from given pressure, altitude and air temperature.
         /// </summary>
@@ -180,7 +182,7 @@ namespace Iot.Device.Common
         {
             return Pressure.FromPascal(Math.Pow((((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257) * pressure.Pascal);
         }
-        
+
         /// <summary>
         /// Calculates the pressure from given sea-level pressure, altitude and air temperature.
         /// </summary>
@@ -192,7 +194,7 @@ namespace Iot.Device.Common
         {
             return Pressure.FromPascal(seaLevelPressure.Pascal / Math.Pow((((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257));
         }
-        
+
         /// <summary>
         /// Calculates the temperature from given pressure, sea-level pressure and altitude.
         /// </summary>

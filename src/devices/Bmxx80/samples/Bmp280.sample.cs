@@ -2,14 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Device.I2c;
+using System.Threading;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Common;
 using Iot.Units;
-using System;
-using System.Device.I2c;
-using System.Threading;
 
 namespace Iot.Device.Samples
 {

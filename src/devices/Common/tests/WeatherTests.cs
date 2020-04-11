@@ -1,11 +1,11 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Common;
-using Iot.Units;
 using System;
 using System.Collections.Generic;
+using Iot.Device.Common;
+using Iot.Units;
 using Xunit;
 
 namespace Iot.Device.Common.Tests
@@ -83,7 +83,7 @@ namespace Iot.Device.Common.Tests
         {
             var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascal(hpa));
             Assert.Equal(expected, Math.Round(altitude, 2));
-        }        
+        }
 
         [Theory]
         [InlineData(1010.83, 900, 1013.25)]
@@ -104,7 +104,7 @@ namespace Iot.Device.Common.Tests
             var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascal(hpa), Pressure.FromHectopascal(seaLevelHpa), Temperature.FromCelsius(celsius));
             Assert.Equal(expected, Math.Round(altitude, 2));
         }
-        
+
         [Theory]
         [InlineData(1013.25, 900, 1010.83, 15)]
         [InlineData(1013.25, 1000, 111.14, 15)]
@@ -114,7 +114,7 @@ namespace Iot.Device.Common.Tests
             var seaLevelPressure = WeatherHelper.CalculateSeaLevelPressure(Pressure.FromHectopascal(pressure), altitude, Temperature.FromCelsius(celsius));
             Assert.Equal(expected, Math.Round(seaLevelPressure.Hectopascal, 2));
         }
-        
+
         [Theory]
         [InlineData(900, 1013.25, 1010.83, 15)]
         [InlineData(1000, 1013.25, 111.14, 15)]
@@ -124,7 +124,7 @@ namespace Iot.Device.Common.Tests
             var pressure = WeatherHelper.CalculatePressure(Pressure.FromHectopascal(seaLevelPressure), altitude, Temperature.FromCelsius(celsius));
             Assert.Equal(expected, Math.Round(pressure.Hectopascal, 2));
         }
-        
+
         [Theory]
         [InlineData(15, 900, 1013.25, 1010.83)]
         [InlineData(15, 1000, 1013.25, 111.14)]

@@ -4,14 +4,14 @@
 
 // Ported from https://github.com/adafruit/Adafruit_BMP280_Library/blob/master/Adafruit_BMP280.cpp
 // Formulas and code examples can also be found in the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
+using System;
+using System.Device.I2c;
+using System.IO;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
 using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Common;
 using Iot.Units;
-using System;
-using System.Device.I2c;
-using System.IO;
 
 namespace Iot.Device.Bmxx80
 {
@@ -186,7 +186,7 @@ namespace Iot.Device.Bmxx80
                 altitude = double.NaN;
                 return false;
             }
-            
+
             // Then read the temperature.
             success = TryReadTemperature(out var temperature);
             if (!success)

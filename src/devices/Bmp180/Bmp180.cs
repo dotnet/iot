@@ -4,12 +4,12 @@
 
 // Ported from https://github.com/adafruit/Adafruit_Python_BMP/blob/master/Adafruit_BMP/BMP085.py
 // Formulas and code examples can also be found in the datasheet https://cdn-shop.adafruit.com/datasheets/BST-BMP180-DS000-09.pdf
-using Iot.Device.Common;
-using Iot.Units;
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Threading;
+using Iot.Device.Common;
+using Iot.Units;
 
 namespace Iot.Device.Bmp180
 {
