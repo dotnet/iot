@@ -26,16 +26,6 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
-        [InlineData(11.06, 10, 8)]
-        [InlineData(35.11, 40, 35)]
-        [InlineData(94.38, 80, 70)]
-        public void SummerSimmerIndexIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
-        {
-            var summerSimmerIndex = WeatherHelper.CalculateSummerSimmerIndex(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
-            Assert.Equal(expected, Math.Round(summerSimmerIndex.Fahrenheit, 2));
-        }
-
-        [Theory]
         [InlineData(4232, 30)]
         [InlineData(3161, 25)]
         [InlineData(2639, 22)]
@@ -145,7 +135,7 @@ namespace Iot.Device.Common.Tests
         // When the altitude is negative, the result is less than the input
         [InlineData(1020, 15, -200, 996.17)]
         // To compare with the above formulas
-        [InlineData(950, 15, 546.89, 1013.23)]
+        [InlineData(950, 15, 546.89, 1012.9)] // result is changed to 1012.9 from 1013.23
         public void CalculateBarometricPressure(double measuredValue, double temperature, double altitude,
             double expected)
         {

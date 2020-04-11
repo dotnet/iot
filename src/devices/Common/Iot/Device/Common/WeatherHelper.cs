@@ -13,13 +13,13 @@ namespace Iot.Device.Common
     public static class WeatherHelper
     {
         #region TemperatureAndRelativeHumidity
-        // Formulas taken from https://www.aprweather.com/pages/calc.htm and https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
+        // Formulas taken from https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
+        // US government website, therefore public domain.
 
         /// <summary>
         /// The heat index (or apparent temperature) is used to measure the amount of discomfort
         /// during the summer months when heat and humidity often combine to make it feel hotter
         /// than it actually is. The heat index is usually used for afternoon high temperatures.
-        /// Use the summer simmer index instead for overnight low temperatures.
         /// </summary>
         /// <param name="airTemperature">The dry air temperature</param>
         /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
@@ -58,22 +58,6 @@ namespace Iot.Device.Common
             }
 
             return Temperature.FromFahrenheit(rothfuszRegression);
-        }
-
-        /// <summary>
-        /// The summer simmer index is used to measure the amount of discomfort during the summer months
-        /// when heat and humidity often combine to make it feel hotter than it actually is. The summer
-        /// simmer index is usually used for overnight low temperatures. Use the heat index instead for
-        /// afternoon high temperatures.
-        /// </summary>
-        /// <param name="airTemperature">The dry air temperature</param>
-        /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
-        /// <returns>The summer simmer index</returns>
-        public static Temperature CalculateSummerSimmerIndex(Temperature airTemperature, double relativeHumidity)
-        {
-            double tf = airTemperature.Fahrenheit;
-            double rh = relativeHumidity;
-            return Temperature.FromFahrenheit(1.98 * (tf - ((0.55 - (0.0055 * rh)) * (tf - 58.0))) - 56.83);
         }
 
         /// <summary>
@@ -209,6 +193,40 @@ namespace Iot.Device.Common
         {
             return Temperature.FromKelvin((0.0065 * altitude) / (Math.Pow(seaLevelPressure.Pascal / pressure.Pascal, 1 / 5.255) - 1));
         }
+
+        /// <summary>
+        /// Calculates the barometric pressure from a raw reading, using the reduction formula from the german met service.
+        /// This is a more complex variant of <see cref="CalculateSeaLevelPressure"/>. It gives the value that a weather station gives
+        /// for a particular area and is also used in meteorological charts.
+        /// <example>
+        /// You are at 650m over sea and measure a pressure of 948.7 hPa and a temperature of 24.0°C. The met service will show that
+        /// you are within a high-pressure area of around 1020 hPa.
+        /// </example>
+        /// </summary>
+        /// <param name="measuredPressure">Measured pressure at the observation point</param>
+        /// <param name="measuredTemperature">Measured temperature at the observation point</param>
+        /// <param name="measurementAltitude">Height over sea level of the observation point (to be really precise, geopotential heights have
+        /// to be used above ~750m)</param>
+        /// <returns>The barometric pressure at the point of observation</returns>
+        public static Pressure CalculateBarometricPressure(Pressure measuredPressure, Temperature measuredTemperature,
+            double measurementAltitude)
+        {
+            double vaporPressure;
+            if (measuredTemperature.Celsius >= 9.1)
+            {
+                vaporPressure = 18.2194 * (1.0463 - Math.Exp((-0.0666) * measuredTemperature.Celsius));
+            }
+            else
+            {
+                vaporPressure = 5.6402 * (-0.0916 + Math.Exp((-0.06) * measuredTemperature.Celsius));
+            }
+
+            double x = (9.80665 / (287.05 * ((measuredTemperature.Kelvin) + 0.12 * vaporPressure +
+                                             (0.0065 * measurementAltitude) / 2))) * measurementAltitude;
+            double barometricPressure = measuredPressure.Hectopascal * Math.Exp(x);
+            return Pressure.FromHectopascal(barometricPressure);
+        }
+
         #endregion
     }
 }
