@@ -180,19 +180,22 @@ namespace Iot.Device.Common
         /// <returns>The sea-level pressure</returns>
         public static Pressure CalculateSeaLevelPressure(Pressure pressure, double altitude, Temperature airTemperature)
         {
-            return Pressure.FromPascal(Math.Pow((((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257) * pressure.Pascal);
+            return Pressure.FromPascal(Math.Pow((((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.255) * pressure.Pascal);
         }
 
         /// <summary>
-        /// Calculates the pressure from given sea-level pressure, altitude and air temperature.
+        /// Calculates the approximate absolute pressure from given sea-level pressure, altitude and air temperature.
         /// </summary>
         /// <param name="seaLevelPressure">The sea-level pressure</param>
         /// <param name="altitude">The altitude in meters at the point for which pressure is being calculated</param>
         /// <param name="airTemperature">The air temperature at the point for which pressure is being calculated</param>
-        /// <returns>The air pressure</returns>
+        /// <returns>The estimated absolute pressure at the given altitude</returns>
+        /// <remarks>
+        /// Formula (with inverse sign) from https://de.wikipedia.org/wiki/Barometrische_H%C3%B6henformel#Internationale_H%C3%B6henformel
+        /// </remarks>
         public static Pressure CalculatePressure(Pressure seaLevelPressure, double altitude, Temperature airTemperature)
         {
-            return Pressure.FromPascal(seaLevelPressure.Pascal / Math.Pow((((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.257));
+            return Pressure.FromPascal(seaLevelPressure.Pascal / Math.Pow((((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.255));
         }
 
         /// <summary>

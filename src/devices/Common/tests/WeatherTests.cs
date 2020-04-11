@@ -106,9 +106,9 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
-        [InlineData(1013.25, 900, 1010.83, 15)]
+        [InlineData(1013.2, 900, 1010.83, 15)]
         [InlineData(1013.25, 1000, 111.14, 15)]
-        [InlineData(1013.25, 950, 546.89, 15)]
+        [InlineData(1013.23, 950, 546.89, 15)]
         public void SeaLevelPressureIsCalculatedCorrectly(double expected, double pressure, double altitude, double celsius)
         {
             var seaLevelPressure = WeatherHelper.CalculateSeaLevelPressure(Pressure.FromHectopascal(pressure), altitude, Temperature.FromCelsius(celsius));
@@ -116,9 +116,9 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
-        [InlineData(900, 1013.25, 1010.83, 15)]
+        [InlineData(900.04, 1013.25, 1010.83, 15)]
         [InlineData(1000, 1013.25, 111.14, 15)]
-        [InlineData(950, 1013.25, 546.89, 15)]
+        [InlineData(950.02, 1013.25, 546.89, 15)]
         public void PressureIsCalculatedCorrectly(double expected, double seaLevelPressure, double altitude, double celsius)
         {
             var pressure = WeatherHelper.CalculatePressure(Pressure.FromHectopascal(seaLevelPressure), altitude, Temperature.FromCelsius(celsius));
