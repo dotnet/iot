@@ -76,9 +76,9 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
-        [InlineData(1010.83, 900)]
-        [InlineData(111.14, 1000)]
-        [InlineData(546.89, 950)]
+        [InlineData(1011.22, 900)]
+        [InlineData(111.18, 1000)]
+        [InlineData(547.1, 950)]
         public void AltitudeIsCalculatedCorrectlyAtMslpAndDefaultTemp(double expected, double hpa)
         {
             var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascal(hpa));
@@ -86,9 +86,9 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
-        [InlineData(1010.83, 900, 1013.25)]
-        [InlineData(111.14, 1000, 1013.25)]
-        [InlineData(546.89, 950, 1013.25)]
+        [InlineData(1011.22, 900, 1013.25)]
+        [InlineData(111.18, 1000, 1013.25)]
+        [InlineData(547.1, 950, 1013.25)]
         public void AltitudeIsCalculatedCorrectlyAtDefaultTemp(double expected, double hpa, double seaLevelHpa)
         {
             var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascal(hpa), Pressure.FromHectopascal(seaLevelHpa));
@@ -96,9 +96,9 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
-        [InlineData(1010.83, 900, 1013.25, 15)]
-        [InlineData(111.14, 1000, 1013.25, 15)]
-        [InlineData(546.89, 950, 1013.25, 15)]
+        [InlineData(1011.22, 900, 1013.25, 15)]
+        [InlineData(111.18, 1000, 1013.25, 15)]
+        [InlineData(547.1, 950, 1013.25, 15)]
         public void AltitudeIsCalculatedCorrectly(double expected, double hpa, double seaLevelHpa, double celsius)
         {
             var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascal(hpa), Pressure.FromHectopascal(seaLevelHpa), Temperature.FromCelsius(celsius));
@@ -133,6 +133,25 @@ namespace Iot.Device.Common.Tests
         {
             var temperature = WeatherHelper.CalculateTemperature(Pressure.FromHectopascal(pressure), Pressure.FromHectopascal(seaLevelPressure), altitude);
             Assert.Equal(expected, Math.Round(temperature.Celsius, 0));
+        }
+
+        [Theory]
+        // This is quite close to what my GPS says
+        [InlineData(948.17, 24.0, 650, 1020.739)]
+        // Should give a similar result, but uses the low temperature vapor pressure formula
+        [InlineData(948.17, 9.0, 650, 1025.12)]
+        // When no height difference is given, the input should equal the output
+        [InlineData(999, 10, 0, 999)]
+        // When the altitude is negative, the result is less than the input
+        [InlineData(1020, 15, -200, 996.17)]
+        // To compare with the above formulas
+        [InlineData(950, 15, 546.89, 1013.23)]
+        public void CalculateBarometricPressure(double measuredValue, double temperature, double altitude,
+            double expected)
+        {
+            var result = WeatherHelper.CalculateBarometricPressure(Pressure.FromHectopascal(measuredValue),
+                Temperature.FromCelsius(temperature), altitude);
+            Assert.Equal(expected, result.Hectopascal, 2);
         }
     }
 }
