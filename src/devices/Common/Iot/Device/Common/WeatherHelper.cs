@@ -125,7 +125,8 @@ namespace Iot.Device.Common
         #endregion TemperatureAndRelativeHumidity
 
         #region Pressure
-        // Formula taken from https://keisan.casio.com/has10/SpecExec.cgi?path=06000000.Science%252F02100100.Earth%2520science%252F12000300.Altitude%2520from%2520atmospheric%2520pressure%252Fdefault.xml&charset=utf-8
+        // Formula  from https://de.wikipedia.org/wiki/Barometrische_H%C3%B6henformel#Internationale_H%C3%B6henformel, solved
+        // for different parameters
 
         /// <summary>
         /// Calculates the altitude in meters from the given pressure, sea-level pressure and air temperature
@@ -136,7 +137,7 @@ namespace Iot.Device.Common
         /// <returns>The altitude in meters</returns>
         public static double CalculateAltitude(Pressure pressure, Pressure seaLevelPressure, Temperature airTemperature)
         {
-            return ((Math.Pow(seaLevelPressure.Pascal / pressure.Pascal, 1 / 5.257) - 1) * airTemperature.Kelvin) / 0.0065;
+            return ((Math.Pow(seaLevelPressure.Pascal / pressure.Pascal, 1 / 5.255) - 1) * airTemperature.Kelvin) / 0.0065;
         }
 
         /// <summary>
@@ -172,12 +173,13 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
-        /// Calculates the sea-level pressure from given pressure, altitude and air temperature.
+        /// Calculates the approximate sea-level pressure from given absolute pressure, altitude and air temperature.
         /// </summary>
-        /// <param name="pressure">The air pressure</param>
-        /// <param name="altitude">The altitude in meters</param>
+        /// <param name="pressure">The air pressure at the point of measurement</param>
+        /// <param name="altitude">The altitude in meters at the point of the measurement</param>
         /// <param name="airTemperature">The air temperature</param>
-        /// <returns>The sea-level pressure</returns>
+        /// <returns>The estimated absolute sea-level pressure</returns>
+        /// <remarks><see cref="CalculatePressure"/> solved for sea level pressure</remarks>
         public static Pressure CalculateSeaLevelPressure(Pressure pressure, double altitude, Temperature airTemperature)
         {
             return Pressure.FromPascal(Math.Pow((((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.255) * pressure.Pascal);
@@ -190,24 +192,22 @@ namespace Iot.Device.Common
         /// <param name="altitude">The altitude in meters at the point for which pressure is being calculated</param>
         /// <param name="airTemperature">The air temperature at the point for which pressure is being calculated</param>
         /// <returns>The estimated absolute pressure at the given altitude</returns>
-        /// <remarks>
-        /// Formula (with inverse sign) from https://de.wikipedia.org/wiki/Barometrische_H%C3%B6henformel#Internationale_H%C3%B6henformel
-        /// </remarks>
         public static Pressure CalculatePressure(Pressure seaLevelPressure, double altitude, Temperature airTemperature)
         {
             return Pressure.FromPascal(seaLevelPressure.Pascal / Math.Pow((((0.0065 * altitude) / airTemperature.Kelvin) + 1), 5.255));
         }
 
         /// <summary>
-        /// Calculates the temperature from given pressure, sea-level pressure and altitude.
+        /// Calculates the temperature gradient for the given pressure difference
         /// </summary>
         /// <param name="pressure">The air pressure at the point for which temperature is being calculated</param>
         /// <param name="seaLevelPressure">The sea-level pressure</param>
         /// <param name="altitude">The altitude in meters at the point for which temperature is being calculated</param>
-        /// <returns>The temperature</returns>
+        /// <returns>The standard temperature at the given altitude, when the given pressure difference is known</returns>
+        /// <remarks><see cref="CalculatePressure"/> solved for temperature</remarks>
         public static Temperature CalculateTemperature(Pressure pressure, Pressure seaLevelPressure, double altitude)
         {
-            return Temperature.FromKelvin((0.0065 * altitude) / (Math.Pow(seaLevelPressure.Pascal / pressure.Pascal, 1 / 5.257) - 1));
+            return Temperature.FromKelvin((0.0065 * altitude) / (Math.Pow(seaLevelPressure.Pascal / pressure.Pascal, 1 / 5.255) - 1));
         }
         #endregion
     }
