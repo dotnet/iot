@@ -208,6 +208,9 @@ namespace Iot.Device.Common
         /// <param name="measurementAltitude">Height over sea level of the observation point (to be really precise, geopotential heights have
         /// to be used above ~750m)</param>
         /// <returns>The barometric pressure at the point of observation</returns>
+        /// <remarks>
+        /// From https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Anwendungen
+        /// </remarks>
         public static Pressure CalculateBarometricPressure(Pressure measuredPressure, Temperature measuredTemperature,
             double measurementAltitude)
         {
@@ -221,10 +224,58 @@ namespace Iot.Device.Common
                 vaporPressure = 5.6402 * (-0.0916 + Math.Exp((-0.06) * measuredTemperature.Celsius));
             }
 
-            double x = (9.80665 / (287.05 * ((measuredTemperature.Kelvin) + 0.12 * vaporPressure +
+            return CalculateBarometricPressure(measuredPressure, measuredTemperature, Pressure.FromHectopascal(vaporPressure),
+                measurementAltitude);
+        }
+
+        /// <summary>
+        /// Calculates the barometric pressure from a raw reading, using the reduction formula from the german met service.
+        /// This is a more complex variant of <see cref="CalculateSeaLevelPressure"/>. It gives the value that a weather station gives
+        /// for a particular area and is also used in meteorological charts.
+        /// <example>
+        /// You are at 650m over sea and measure a pressure of 948.7 hPa and a temperature of 24.0°C. The met service will show that
+        /// you are within a high-pressure area of around 1020 hPa.
+        /// </example>
+        /// </summary>
+        /// <param name="measuredPressure">Measured pressure at the observation point</param>
+        /// <param name="measuredTemperature">Measured temperature at the observation point</param>
+        /// <param name="vaporPressure">Vapor pressure, meteorologic definition</param>
+        /// <param name="measurementAltitude">Height over sea level of the observation point (to be really precise, geopotential heights have
+        /// to be used above ~750m)</param>
+        /// <returns>The barometric pressure at the point of observation</returns>
+        /// <remarks>
+        /// From https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Anwendungen
+        /// </remarks>
+        public static Pressure CalculateBarometricPressure(Pressure measuredPressure, Temperature measuredTemperature, Pressure vaporPressure,
+            double measurementAltitude)
+        {
+            double x = (9.80665 / (287.05 * ((measuredTemperature.Kelvin) + 0.12 * vaporPressure.Hectopascal +
                                              (0.0065 * measurementAltitude) / 2))) * measurementAltitude;
             double barometricPressure = measuredPressure.Hectopascal * Math.Exp(x);
             return Pressure.FromHectopascal(barometricPressure);
+        }
+
+        /// <summary>
+        /// Calculates the barometric pressure from a raw reading, using the reduction formula from the german met service.
+        /// This is a more complex variant of <see cref="CalculateSeaLevelPressure"/>. It gives the value that a weather station gives
+        /// for a particular area and is also used in meteorological charts.
+        /// Use this method if you also have the relative humidity.
+        /// </summary>
+        /// <param name="measuredPressure">Measured pressure at the observation point</param>
+        /// <param name="measuredTemperature">Measured temperature at the observation point</param>
+        /// <param name="measurementAltitude">Height over sea level of the observation point (to be really precise, geopotential heights have
+        /// to be used above ~750m)</param>
+        /// <param name="relativeHumidity">Relative humidity at point of measurement</param>
+        /// <returns>The barometric pressure at the point of observation</returns>
+        /// <remarks>
+        /// From https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Anwendungen
+        /// </remarks>
+        public static Pressure CalculateBarometricPressure(Pressure measuredPressure, Temperature measuredTemperature,
+            double measurementAltitude, double relativeHumidity)
+        {
+            Pressure vaporPressure = CalculateActualVaporPressure(measuredTemperature, relativeHumidity);
+            return CalculateBarometricPressure(measuredPressure, measuredTemperature, vaporPressure,
+                measurementAltitude);
         }
 
         #endregion

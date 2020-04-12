@@ -143,5 +143,19 @@ namespace Iot.Device.Common.Tests
                 Temperature.FromCelsius(temperature), altitude);
             Assert.Equal(expected, result.Hectopascal, 2);
         }
+
+        [Theory]
+        [InlineData(950, 15, 546.89, 10, 1013.19)]
+        [InlineData(950, 15, 546.89, 50, 1013.01)]
+        [InlineData(950, 15, 546.89, 100, 1012.78)]
+        [InlineData(950, -5, 546.89, 100, 1017.95)]
+        [InlineData(950, -35, 546.89, 100, 1026.92)]
+        public void CalculateBarometricPressureWithHumidity(double measuredValue, double temperature, double altitude, double relativeHumidity,
+            double expected)
+        {
+            var result = WeatherHelper.CalculateBarometricPressure(Pressure.FromHectopascal(measuredValue),
+                Temperature.FromCelsius(temperature), altitude, relativeHumidity);
+            Assert.Equal(expected, result.Hectopascal, 2);
+        }
     }
 }
