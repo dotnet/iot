@@ -2,12 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Globalization;
+
 namespace Iot.Units
 {
     /// <summary>
     /// Structure representing pressure
     /// </summary>
-    public struct Pressure
+    public struct Pressure : IEquatable<Pressure>, IComparable<Pressure>, IComparable
     {
         private const double MillibarRatio = 0.01;
         private const double KilopascalRatio = 0.001;
@@ -15,7 +18,7 @@ namespace Iot.Units
         private const double InchOfMercuryRatio = 0.000295301;
         private const double MillimeterOfMercuryRatio = 0.00750062;
         private const double MeanSeaLevelPascal = 101325;
-        private double _pascal;
+        private readonly double _pascal;
 
         private Pressure(double pascal)
         {
@@ -115,6 +118,101 @@ namespace Iot.Units
         public static Pressure FromMillimeterOfMercury(double value)
         {
             return new Pressure(value / MillimeterOfMercuryRatio);
+        }
+
+        /// <summary>
+        /// Creates a string representation of this object, in hPa.
+        /// </summary>
+        public override string ToString()
+        {
+            return string.Format(CultureInfo.CurrentCulture, "{0:F2}hPa", Hectopascal);
+        }
+
+        /// <summary>
+        /// Equality member
+        /// </summary>
+        public bool Equals(Pressure other)
+        {
+            return _pascal.Equals(other._pascal);
+        }
+
+        /// <summary>
+        /// Equality member
+        /// </summary>
+        public override bool Equals(object obj)
+        {
+            return obj is Pressure other && Equals(other);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return _pascal.GetHashCode();
+        }
+
+        /// <inheritdoc cref="IComparable{T}"/>
+        public int CompareTo(Pressure other)
+        {
+            return _pascal.CompareTo(other._pascal);
+        }
+
+        /// <inheritdoc cref="IComparable"/>
+        int IComparable.CompareTo(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return 1;
+            }
+
+            return obj is Pressure other ? CompareTo(other) : throw new ArgumentException($"Object must be of type {nameof(Pressure)}");
+        }
+
+        /// <summary>
+        /// Equality operator
+        /// </summary>
+        public static bool operator ==(Pressure left, Pressure right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Unequality operator
+        /// </summary>
+        public static bool operator !=(Pressure left, Pressure right)
+        {
+            return !left.Equals(right);
+        }
+
+        /// <summary>
+        /// Less-than operator
+        /// </summary>
+        public static bool operator <(Pressure left, Pressure right)
+        {
+            return left.CompareTo(right) < 0;
+        }
+
+        /// <summary>
+        /// Greater-than operator
+        /// </summary>
+        public static bool operator >(Pressure left, Pressure right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+
+        /// <summary>
+        /// Less-than-or-equal operator
+        /// </summary>
+        public static bool operator <=(Pressure left, Pressure right)
+        {
+            return left.CompareTo(right) <= 0;
+        }
+
+        /// <summary>
+        /// Greater-than-or-equal operator
+        /// </summary>
+        public static bool operator >=(Pressure left, Pressure right)
+        {
+            return left.CompareTo(right) >= 0;
         }
     }
 }
