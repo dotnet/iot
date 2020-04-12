@@ -10,12 +10,12 @@ namespace Iot.Units
     /// <summary>
     /// Structure representing temperature
     /// </summary>
-    public struct Temperature : IFormattable
+    public struct Temperature : IFormattable, IComparable<Temperature>, IEquatable<Temperature>
     {
         private const double KelvinOffset = 273.15;
         private const double FahrenheitOffset = 32.0;
         private const double FahrenheitRatio = 1.8;
-        private double _celsius;
+        private readonly double _celsius;
 
         private Temperature(double celsius)
         {
@@ -65,6 +65,12 @@ namespace Iot.Units
         public static Temperature FromKelvin(double value)
         {
             return new Temperature(value - KelvinOffset);
+        }
+
+        /// <inheritdoc cref="IComparable{T}.CompareTo" />
+        public int CompareTo(Temperature other)
+        {
+            return _celsius.CompareTo(other._celsius);
         }
 
         /// <summary>
@@ -129,6 +135,72 @@ namespace Iot.Units
             }
 
             throw new InvalidOperationException($"Unknown format specification: {formatArgs}");
+        }
+
+        /// <inheritdoc cref="IEquatable{T}.Equals(T)"/>
+        public bool Equals(Temperature other)
+        {
+            return _celsius.Equals(other._celsius);
+        }
+
+        /// <inheritdoc cref="IEquatable{T}.Equals(T)"/>
+        public override bool Equals(object obj)
+        {
+            return obj is Temperature other && Equals(other);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return _celsius.GetHashCode();
+        }
+
+        /// <summary>
+        /// Equality operator
+        /// </summary>
+        public static bool operator ==(Temperature left, Temperature right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Inequality operator
+        /// </summary>
+        public static bool operator !=(Temperature left, Temperature right)
+        {
+            return !left.Equals(right);
+        }
+
+        /// <summary>
+        /// Less-than operator
+        /// </summary>
+        public static bool operator <(Temperature left, Temperature right)
+        {
+            return left.CompareTo(right) < 0;
+        }
+
+        /// <summary>
+        /// Greater-than operator
+        /// </summary>
+        public static bool operator >(Temperature left, Temperature right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+
+        /// <summary>
+        /// Less-or-equal operator
+        /// </summary>
+        public static bool operator <=(Temperature left, Temperature right)
+        {
+            return left.CompareTo(right) <= 0;
+        }
+
+        /// <summary>
+        /// Greater-or-equal operator
+        /// </summary>
+        public static bool operator >=(Temperature left, Temperature right)
+        {
+            return left.CompareTo(right) >= 0;
         }
     }
 }

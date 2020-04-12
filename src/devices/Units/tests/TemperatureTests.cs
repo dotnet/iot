@@ -173,6 +173,23 @@ namespace Iot.Units.Tests
             Assert.Equal("It is 68.4°F outside, this equals 20.21°C", s);
         }
 
+        [Fact]
+        public void Compare()
+        {
+            Temperature a = Temperature.FromCelsius(20.2);
+            Temperature b = Temperature.FromFahrenheit(20.2);
+            Temperature c = Temperature.FromCelsius(20.2);
+            Assert.NotEqual(a, b);
+            Assert.True(a != b);
+            Assert.True(a.CompareTo(b) > 0);
+            Assert.True(a == c);
+            Assert.True(b < a);
+            Assert.True(a > b);
+            Assert.True(a >= c);
+            Assert.True(a <= c);
+            Assert.False(a < b);
+        }
+
         private static void Equal(double expected, double actual)
         {
             const double epsilon = 0.001;
