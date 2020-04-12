@@ -26,19 +26,34 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
-        [InlineData(4232, 30)]
-        [InlineData(3161, 25)]
-        [InlineData(2639, 22)]
-        public void SaturatedVaporPressureIsCalculatedCorrectly(double expected, double celsius)
+        // Test values from https://de.wikibooks.org/wiki/Tabellensammlung_Chemie/_Stoffdaten_Wasser
+        [InlineData(4245.20, 30)]
+        [InlineData(3168.74, 25)]
+        [InlineData(2644.42, 22)]
+        [InlineData(1705.32, 15)]
+        [InlineData(611.213, 0)]
+        public void SaturatedVaporPressureOverWater(double expected, double celsius)
         {
-            var saturatedVaporPressure = WeatherHelper.CalculateSaturatedVaporPressure(Temperature.FromCelsius(celsius));
-            Assert.Equal(expected, Math.Round(saturatedVaporPressure.Pascal, 0));
+            var saturatedVaporPressure = WeatherHelper.CalculateSaturatedVaporPressureOverWater(Temperature.FromCelsius(celsius));
+            Assert.Equal(expected, saturatedVaporPressure.Pascal, 1);
         }
 
         [Theory]
-        [InlineData(1058, 30, 25)]
-        [InlineData(1612, 25, 51)]
-        [InlineData(1900, 22, 72)]
+        // Test values from https://de.wikibooks.org/wiki/Tabellensammlung_Chemie/_Stoffdaten_Wasser
+        [InlineData(611.1, 0)]
+        [InlineData(259.6, -10)]
+        [InlineData(103.06, -20)]
+        [InlineData(22.273, -35)]
+        public void SaturatedVaporPressureOverIce(double expected, double celsius)
+        {
+            var saturatedVaporPressure = WeatherHelper.CalculateSaturatedVaporPressureOverIce(Temperature.FromCelsius(celsius));
+            Assert.Equal(expected, saturatedVaporPressure.Pascal, 1);
+        }
+
+        [Theory]
+        [InlineData(1061, 30, 25)]
+        [InlineData(1616, 25, 51)]
+        [InlineData(1904, 22, 72)]
         public void ActualVaporPressureIsCalculatedCorrectly(double expected, double celsius, double relativeHumidity)
         {
             var actualVaporPressure = WeatherHelper.CalculateActualVaporPressure(Temperature.FromCelsius(celsius), relativeHumidity);
@@ -46,13 +61,14 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
-        [InlineData(78, 100, 50)]
-        [InlineData(46, 80, 30)]
-        [InlineData(28, 60, 29)]
+        // Compare with https://en.wikipedia.org/wiki/Dew_point#/media/File:Dewpoint-RH.svg
+        [InlineData(77.71, 100, 50)]
+        [InlineData(45.79, 80, 30)]
+        [InlineData(27.68, 60, 29)]
         public void DewPointIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
             var dewPoint = WeatherHelper.CalculateDewPoint(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
-            Assert.Equal(expected, Math.Round(dewPoint.Fahrenheit, 0));
+            Assert.Equal(expected, Math.Round(dewPoint.Fahrenheit, 2));
         }
 
         [Theory]

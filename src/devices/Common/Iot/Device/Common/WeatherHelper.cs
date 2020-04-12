@@ -61,14 +61,37 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
-        /// Calculates the saturated vapor pressure.
+        /// Calculates the saturated vapor pressure for a given air temperature over water.
+        /// The formula used is valid for temperatures between -100°C and +100°C.
         /// </summary>
         /// <param name="airTemperature">The dry air temperature</param>
         /// <returns>The saturated vapor pressure</returns>
-        public static Pressure CalculateSaturatedVaporPressure(Temperature airTemperature)
+        /// <remarks>
+        /// From https://de.wikibooks.org/wiki/Tabellensammlung_Chemie/_Stoffdaten_Wasser, after D. Sonntag (1982)
+        /// </remarks>
+        public static Pressure CalculateSaturatedVaporPressureOverWater(Temperature airTemperature)
         {
-            double tc = airTemperature.Celsius;
-            return Pressure.FromHectopascal(6.11 * Math.Pow(10, ((7.5 * tc) / (237.7 + tc))));
+            double tk = airTemperature.Kelvin;
+            double e_w = Math.Exp((-6094.4642 / tk) + 21.1249952 - (2.7245552E-2 * tk) + (1.6853396E-5 * tk * tk) +
+                                   (2.4575506 * Math.Log(tk)));
+            return Pressure.FromPascal(e_w);
+        }
+
+        /// <summary>
+        /// Calculates the saturated vapor pressure for a given air temperature over ice.
+        /// The formula used is valid for temperatures between -100°C and +0°C.
+        /// </summary>
+        /// <param name="airTemperature">The dry air temperature</param>
+        /// <returns>The saturated vapor pressure</returns>
+        /// <remarks>
+        /// From https://de.wikibooks.org/wiki/Tabellensammlung_Chemie/_Stoffdaten_Wasser, after D. Sonntag (1982)
+        /// </remarks>
+        public static Pressure CalculateSaturatedVaporPressureOverIce(Temperature airTemperature)
+        {
+            double tk = airTemperature.Kelvin;
+            double e_i = Math.Exp((-5504.4088 / tk) - 3.574628 - (1.7337458E-2 * tk) + (6.5204209E-6 * tk * tk) +
+                                  (6.1295027 * Math.Log(tk)));
+            return Pressure.FromPascal(e_i * 1.0041); // The table values are corrected by this
         }
 
         /// <summary>
@@ -79,7 +102,7 @@ namespace Iot.Device.Common
         /// <returns>The actual vapor pressure</returns>
         public static Pressure CalculateActualVaporPressure(Temperature airTemperature, double relativeHumidity)
         {
-            return Pressure.FromHectopascal((relativeHumidity * CalculateSaturatedVaporPressure(airTemperature).Hectopascal) / 100);
+            return Pressure.FromHectopascal((relativeHumidity * CalculateSaturatedVaporPressureOverWater(airTemperature).Hectopascal) / 100);
         }
 
         /// <summary>
@@ -88,11 +111,17 @@ namespace Iot.Device.Common
         /// <param name="airTemperature">The dry air temperature</param>
         /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
         /// <returns>The dew point</returns>
+        /// <remarks>
+        /// Source https://en.wikipedia.org/wiki/Dew_point
+        /// </remarks>
         public static Temperature CalculateDewPoint(Temperature airTemperature, double relativeHumidity)
         {
-            var avp = CalculateActualVaporPressure(airTemperature, relativeHumidity).Hectopascal;
-            var lavp = Math.Log(avp);
-            return Temperature.FromCelsius((-430.22 + (237.7 * lavp)) / (19.08 - lavp));
+            double pa = CalculateActualVaporPressure(airTemperature, relativeHumidity).Hectopascal;
+            double a = 6.1121; // hPa
+            double c = 257.14; // °C
+            double b = 18.678;
+            double dewPoint = (c * Math.Log(pa / a)) / (b - Math.Log(pa / a));
+            return Temperature.FromCelsius(dewPoint);
         }
 
         /// <summary>
@@ -101,6 +130,9 @@ namespace Iot.Device.Common
         /// <param name="airTemperature">The dry air temperature</param>
         /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
         /// <returns>The absolute humidity in g/m³</returns>
+        /// <remarks>
+        /// Source https://de.wikipedia.org/wiki/Luftfeuchtigkeit#Absolute_Luftfeuchtigkeit
+        /// </remarks>
         public static double CalculateAbsoluteHumidity(Temperature airTemperature, double relativeHumidity)
         {
             var avp = CalculateActualVaporPressure(airTemperature, relativeHumidity).Pascal;
@@ -109,7 +141,7 @@ namespace Iot.Device.Common
         #endregion TemperatureAndRelativeHumidity
 
         #region Pressure
-        // Formula  from https://de.wikipedia.org/wiki/Barometrische_H%C3%B6henformel#Internationale_H%C3%B6henformel, solved
+        // Formula  from https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Internationale_Höhenformel, solved
         // for different parameters
 
         /// <summary>
