@@ -7,13 +7,23 @@ namespace System.Device.Spi
     /// <summary>
     /// The communications channel to a device on a SPI bus.
     /// </summary>
-    public abstract partial class SpiDevice : IDisposable
+    public abstract class SpiDevice : IDisposable
     {
+        public SpiDevice(SpiConnectionSettings settings, Board board)
+        {
+            ConnectionSettings = settings;
+            Board = board;
+        }
+
         /// <summary>
-        /// The connection settings of a device on a SPI bus. The connection settings are immutable after the device is created
-        /// so the object returned will be a clone of the settings object.
+        /// The connection settings of a device on a SPI bus.
         /// </summary>
-        public abstract SpiConnectionSettings ConnectionSettings { get; }
+        public SpiConnectionSettings ConnectionSettings
+        {
+            get;
+        }
+
+        public Board Board { get; }
 
         /// <summary>
         /// Reads a byte from the SPI device.
@@ -56,6 +66,7 @@ namespace System.Device.Spi
         /// </summary>
         /// <param name="settings">The connection settings of a device on a SPI bus.</param>
         /// <returns>A communications channel to a device on a SPI bus running on Windows 10 IoT.</returns>
+        [Obsolete]
         public static SpiDevice Create(SpiConnectionSettings settings)
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)

@@ -16,18 +16,20 @@ namespace System.Device.Spi
         private const string DefaultDevicePath = "/dev/spidev";
         private const uint SPI_IOC_MESSAGE_1 = 0x40206b00;
         private static readonly object s_initializationLock = new object();
-        private readonly SpiConnectionSettings _settings;
         private int _deviceFileDescriptor = -1;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnixSpiDevice"/> class that will use the specified settings to communicate with the SPI device.
         /// </summary>
-        /// <param name="settings">
-        /// The connection settings of a device on a SPI bus.
-        /// </param>
+        /// <param name="settings"> The connection settings of a device on a SPI bus. </param>
         public UnixSpiDevice(SpiConnectionSettings settings)
+        : this(settings, null)
         {
-            _settings = settings;
+        }
+
+        public UnixSpiDevice(SpiConnectionSettings settings, Board board)
+        : base(settings, board)
+        {
             DevicePath = DefaultDevicePath;
         }
 
@@ -35,12 +37,6 @@ namespace System.Device.Spi
         /// Path to SPI resources located on the platform.
         /// </summary>
         public string DevicePath { get; set; }
-
-        /// <summary>
-        /// The connection settings of a device on a SPI bus. The connection settings are immutable after the device is created
-        /// so the object returned will be a clone of the settings object.
-        /// </summary>
-        public override SpiConnectionSettings ConnectionSettings => new SpiConnectionSettings(_settings);
 
         private unsafe void Initialize()
         {
@@ -51,7 +47,7 @@ namespace System.Device.Spi
 
             lock (s_initializationLock)
             {
-                string deviceFileName = $"{DevicePath}{_settings.BusId}.{_settings.ChipSelectLine}";
+                string deviceFileName = $"{DevicePath}{ConnectionSettings.BusId}.{ConnectionSettings.ChipSelectLine}";
                 if (_deviceFileDescriptor >= 0)
                 {
                     return;
@@ -69,39 +65,39 @@ namespace System.Device.Spi
                 int result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MODE, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI mode to {_settings.Mode}.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI mode to {ConnectionSettings.Mode}.");
                 }
 
-                byte dataLengthInBits = (byte)_settings.DataBitLength;
+                byte dataLengthInBits = (byte)ConnectionSettings.DataBitLength;
                 nativePtr = new IntPtr(&dataLengthInBits);
 
                 result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_BITS_PER_WORD, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI data bit length to {_settings.DataBitLength}.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI data bit length to {ConnectionSettings.DataBitLength}.");
                 }
 
-                int clockFrequency = _settings.ClockFrequency;
+                int clockFrequency = ConnectionSettings.ClockFrequency;
                 nativePtr = new IntPtr(&clockFrequency);
 
                 result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MAX_SPEED_HZ, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI clock frequency to {_settings.ClockFrequency}.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI clock frequency to {ConnectionSettings.ClockFrequency}.");
                 }
             }
         }
 
         private UnixSpiMode SpiSettingsToUnixSpiMode()
         {
-            UnixSpiMode mode = SpiModeToUnixSpiMode(_settings.Mode);
+            UnixSpiMode mode = SpiModeToUnixSpiMode(ConnectionSettings.Mode);
 
-            if (_settings.ChipSelectLineActiveState == PinValue.High)
+            if (ConnectionSettings.ChipSelectLineActiveState == PinValue.High)
             {
                 mode |= UnixSpiMode.SPI_CS_HIGH;
             }
 
-            if (_settings.DataFlow == DataFlow.LsbFirst)
+            if (ConnectionSettings.DataFlow == DataFlow.LsbFirst)
             {
                 mode |= UnixSpiMode.SPI_LSB_FIRST;
             }
@@ -216,8 +212,8 @@ namespace System.Device.Spi
                 tx_buf = (ulong)writeBufferPtr,
                 rx_buf = (ulong)readBufferPtr,
                 len = (uint)buffersLength,
-                speed_hz = (uint)_settings.ClockFrequency,
-                bits_per_word = (byte)_settings.DataBitLength,
+                speed_hz = (uint)ConnectionSettings.ClockFrequency,
+                bits_per_word = (byte)ConnectionSettings.DataBitLength,
                 delay_usecs = 0
             };
 

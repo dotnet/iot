@@ -9,17 +9,64 @@ namespace System.Device.Gpio
 {
     public abstract class GpioDriver : IDisposable
     {
+        [Obsolete("Available for backwards compatibility only")]
+        protected GpioDriver()
+        {
+            Board = null;
+        }
+
+        protected GpioDriver(Board board)
+        {
+            Board = board;
+        }
+
+        protected Board Board
+        {
+            get;
+        }
+
         /// <summary>
         /// The number of pins provided by the driver.
         /// </summary>
         protected internal abstract int PinCount { get; }
 
         /// <summary>
+        /// Explicitly initializes the driver (instead of waiting for the first pin to be opened)
+        /// </summary>
+        public virtual void Initialize()
+        {
+        }
+
+        /// <summary>
         /// Converts a board pin number to the driver's logical numbering scheme.
         /// </summary>
         /// <param name="pinNumber">The board pin number to convert.</param>
         /// <returns>The pin number in the driver's logical numbering scheme.</returns>
-        protected internal abstract int ConvertPinNumberToLogicalNumberingScheme(int pinNumber);
+        protected internal virtual int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
+        {
+            if (Board != null)
+            {
+                return Board.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+            }
+            else
+            {
+                // Somebody used the obsolete ctor while not overriding this method
+                throw new InvalidOperationException("Board must not be null when this implementation is used.");
+            }
+        }
+
+        protected internal virtual int ConvertLogicalNumberingSchemeToPinNumber(int pinNumber)
+        {
+            if (Board != null)
+            {
+                return Board.ConvertLogicalNumberingSchemeToPinNumber(pinNumber);
+            }
+            else
+            {
+                // Somebody used the obsolete ctor while not overriding this method
+                throw new InvalidOperationException("Board must not be null when this implementation is used.");
+            }
+        }
 
         /// <summary>
         /// Opens a pin in order for it to be ready to use.

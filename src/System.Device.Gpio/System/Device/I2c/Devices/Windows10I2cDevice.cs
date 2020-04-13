@@ -19,7 +19,9 @@ namespace System.Device.I2c
         /// Initializes a new instance of the <see cref="Windows10I2cDevice"/> class that will use the specified settings to communicate with the I2C device.
         /// </summary>
         /// <param name="settings">The connection settings of a device on an I2C bus.</param>
-        public Windows10I2cDevice(I2cConnectionSettings settings)
+        /// <param name="board">The board providing this connection</param>
+        internal Windows10I2cDevice(I2cConnectionSettings settings, Board board)
+        : base(settings, board)
         {
             _settings = settings;
             var winSettings = new WinI2c.I2cConnectionSettings(settings.DeviceAddress);
@@ -40,11 +42,11 @@ namespace System.Device.I2c
             }
         }
 
-        /// <summary>
-        /// The connection settings of a device on an I2C bus. The connection settings are immutable after the device is created
-        /// so the object returned will be a clone of the settings object.
-        /// </summary>
-        public override I2cConnectionSettings ConnectionSettings => new I2cConnectionSettings(_settings);
+        [Obsolete]
+        public Windows10I2cDevice(I2cConnectionSettings settings)
+        : this(settings, null)
+        {
+        }
 
         /// <summary>
         /// Reads a byte from the I2C device.

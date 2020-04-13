@@ -38,7 +38,8 @@ namespace System.Device.Gpio.Drivers
         /// <summary>
         /// Returns true if this is a Raspberry Pi4
         /// </summary>
-        public RaspberryPi3LinuxDriver()
+        public RaspberryPi3LinuxDriver(Board board)
+        : base(board)
         {
             _pinModes = new PinState[PinCount];
         }
@@ -484,15 +485,15 @@ namespace System.Device.Gpio.Drivers
         {
             try
             {
-                _interruptDriver = new LibGpiodDriver(0);
+                _interruptDriver = new LibGpiodDriver(Board);
             }
             catch (PlatformNotSupportedException)
             {
-                _interruptDriver = new InterruptSysFsDriver(this);
+                _interruptDriver = new InterruptSysFsDriver(Board, this);
             }
         }
 
-        private void Initialize()
+        public override void Initialize()
         {
             uint gpioRegisterOffset = 0;
             int fileDescriptor;

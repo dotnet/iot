@@ -42,7 +42,8 @@ namespace System.Device.Gpio.Drivers
             GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP = (1UL << 5)
         }
 
-        public LibGpiodDriver(int gpioChip = 0)
+        public LibGpiodDriver(Board board, int gpioChip = 0)
+        : base(board)
         {
             if (Environment.OSVersion.Platform != PlatformID.Unix)
             {
@@ -66,6 +67,12 @@ namespace System.Device.Gpio.Drivers
             {
                 throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodNotInstalled);
             }
+        }
+
+        [Obsolete("Use Board.CreateGpioController instead")]
+        public LibGpiodDriver(int gpioChip = 0)
+            : this(null, gpioChip)
+        {
         }
 
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)

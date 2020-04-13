@@ -30,11 +30,23 @@ namespace System.Device.Pwm.Channels
         /// <param name="channel">The PWM channel number.</param>
         /// <param name="frequency">The frequency in hertz.</param>
         /// <param name="dutyCycle">The duty cycle represented as a value between 0.0 and 1.0.</param>
+        [Obsolete]
         public UnixPwmChannel(
             int chip,
             int channel,
             int frequency = 400,
             double dutyCycle = 0.5)
+        : this(null, chip, channel, frequency, dutyCycle)
+        {
+        }
+
+        public UnixPwmChannel(
+            Board board,
+            int chip,
+            int channel,
+            int frequency = 400,
+            double dutyCycle = 0.5)
+        : base(board)
         {
             _chip = chip;
             _channel = channel;

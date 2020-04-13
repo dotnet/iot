@@ -30,11 +30,14 @@ namespace System.Device.Gpio
         private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
 
         private readonly GpioDriver _driver;
+        private readonly Board _board;
         private readonly HashSet<int> _openPins;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GpioController"/> class that will use the logical pin numbering scheme as default.
+        /// This method is obsolete. Use <see cref="Board.CreateGpioController"/> instead
         /// </summary>
+        [Obsolete("Use Board.CreateGpioController instead")]
         public GpioController()
             : this(PinNumberingScheme.Logical)
         {
@@ -42,12 +45,22 @@ namespace System.Device.Gpio
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GpioController"/> class that will use the specified numbering scheme and driver.
+        /// This method is obsolete. Use <see cref="Board.CreateGpioController"/> instead
         /// </summary>
         /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
         /// <param name="driver">The driver that manages all of the pin operations for the controller.</param>
+        [Obsolete("Use Board.CreateGpioController instead")]
         public GpioController(PinNumberingScheme numberingScheme, GpioDriver driver)
         {
             _driver = driver;
+            NumberingScheme = numberingScheme;
+            _openPins = new HashSet<int>();
+        }
+
+        public GpioController(PinNumberingScheme numberingScheme, GpioDriver driver, Board board)
+        {
+            _driver = driver;
+            _board = board;
             NumberingScheme = numberingScheme;
             _openPins = new HashSet<int>();
         }
@@ -63,12 +76,22 @@ namespace System.Device.Gpio
         public int PinCount => _driver.PinCount;
 
         /// <summary>
+        /// The board that provides this interface.
+        /// </summary>
+        public Board Board => _board;
+
+        /// <summary>
         /// Gets the logical pin number in the controller's numbering scheme.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <returns>The logical pin number in the controller's numbering scheme.</returns>
         private int GetLogicalPinNumber(int pinNumber)
         {
+            if (_board != null)
+            {
+                return _board.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+            }
+
             return (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : _driver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
         }
 
@@ -82,6 +105,11 @@ namespace System.Device.Gpio
             if (_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException("The selected pin is already open.");
+            }
+
+            if (_board != null)
+            {
+                _board.ReservePin(pinNumber, PinUsage.Gpio, this);
             }
 
             _driver.OpenPin(logicalPinNumber);
@@ -113,6 +141,11 @@ namespace System.Device.Gpio
 
             _driver.ClosePin(logicalPinNumber);
             _openPins.Remove(logicalPinNumber);
+
+            if (_board != null)
+            {
+                _board.ReleasePin(pinNumber, PinUsage.Gpio, this);
+            }
         }
 
         /// <summary>
@@ -358,6 +391,7 @@ namespace System.Device.Gpio
         /// The controller will default to use the driver that best applies given the platform the program is executing on.
         /// </summary>
         /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
+        [Obsolete("Use Board.CreateGpioController instead")]
         public GpioController(PinNumberingScheme numberingScheme)
             : this(numberingScheme, GetBestDriverForBoard())
         {
@@ -365,6 +399,7 @@ namespace System.Device.Gpio
 
         private static GpioDriver GetBestDriverForBoard()
         {
+#pragma warning disable 612
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
                 return GetBestDriverForBoardOnWindows();
@@ -372,6 +407,7 @@ namespace System.Device.Gpio
             else
             {
                 return GetBestDriverForBoardOnLinux();
+#pragma warning restore 612
             }
         }
 
@@ -379,6 +415,7 @@ namespace System.Device.Gpio
         /// Attempt to get the best applicable driver for the board the program is executing on.
         /// </summary>
         /// <returns>A driver that works with the board the program is executing on.</returns>
+        [Obsolete]
         private static GpioDriver GetBestDriverForBoardOnLinux()
         {
             string[] cpuInfoLines = File.ReadAllLines(CpuInfoPath);
@@ -419,19 +456,14 @@ namespace System.Device.Gpio
         ///     The GpioController could use reflection to find all GpioDriver-derived classes and call this
         ///     static method to determine if the driver considers itself to be the best match for the environment.
         /// </remarks>
+        [Obsolete]
         private static GpioDriver GetBestDriverForBoardOnWindows()
         {
             string baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
 
-            if (baseBoardProduct == RaspberryPi3Product || baseBoardProduct.StartsWith($"{RaspberryPi3Product} ") ||
-                baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))
-            {
-                return new RaspberryPi3Driver();
-            }
-
             if (baseBoardProduct == HummingBoardProduct || baseBoardProduct.StartsWith($"{HummingBoardProduct} "))
             {
-                return new HummingBoardDriver();
+                return new HummingBoardDriver(null);
             }
 
             // Default for Windows IoT Core on a non-specific device

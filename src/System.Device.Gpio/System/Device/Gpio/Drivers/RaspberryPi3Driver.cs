@@ -25,10 +25,16 @@ namespace System.Device.Gpio.Drivers
         private readonly Get_Register _getClearRegister;
 
         public RaspberryPi3Driver()
+        : this(null)
+        {
+        }
+
+        internal RaspberryPi3Driver(Board board)
+        : base(board)
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                _internalDriver = new RaspberryPi3LinuxDriver();
+                _internalDriver = new RaspberryPi3LinuxDriver(board);
                 RaspberryPi3LinuxDriver linuxDriver = _internalDriver as RaspberryPi3LinuxDriver;
                 _setSetRegister = (value) => linuxDriver.SetRegister = value;
                 _setClearRegister = (value) => linuxDriver.ClearRegister = value;
@@ -37,7 +43,7 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                _internalDriver = new Windows10Driver();
+                _internalDriver = new Windows10Driver(board);
                 _setSetRegister = (value) => throw new PlatformNotSupportedException();
                 _setClearRegister = (value) => throw new PlatformNotSupportedException();
                 _getSetRegister = () => throw new PlatformNotSupportedException();
@@ -57,6 +63,11 @@ namespace System.Device.Gpio.Drivers
         /// <inheritdoc/>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
+            if (Board != null)
+            {
+                return Board.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+            }
+
             return pinNumber switch
             {
                 3 => 2,
@@ -117,6 +128,12 @@ namespace System.Device.Gpio.Drivers
 
         /// <inheritdoc/>
         protected internal override void Write(int pinNumber, PinValue value) => _internalDriver.Write(pinNumber, value);
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            _internalDriver.Initialize();
+        }
 
         protected ulong SetRegister
         {

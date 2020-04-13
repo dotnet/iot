@@ -62,6 +62,7 @@ namespace System.Device.Gpio.Drivers
         /// <summary>
         /// Initializes a new instance of the <see cref="SysFsDriver"/> class.
         /// </summary>
+        [Obsolete]
         public SysFsDriver()
         {
             if (Environment.OSVersion.Platform != PlatformID.Unix)
@@ -69,6 +70,15 @@ namespace System.Device.Gpio.Drivers
                 throw new PlatformNotSupportedException($"{GetType().Name} is only supported on Linux/Unix.");
             }
 
+            _eventThreadCancellationTokenSource = new CancellationTokenSource();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SysFsDriver"/> class.
+        /// </summary>
+        public SysFsDriver(Board board)
+            : base(board)
+        {
             _eventThreadCancellationTokenSource = new CancellationTokenSource();
         }
 

@@ -13,7 +13,6 @@ namespace System.Device.I2c
     internal class UnixI2cDevice : I2cDevice
     {
         private const string DefaultDevicePath = "/dev/i2c";
-        private readonly I2cConnectionSettings _settings;
         private int _deviceFileDescriptor = -1;
         private I2cFunctionalityFlags _functionalities;
         private static readonly object s_initializationLock = new object();
@@ -24,9 +23,21 @@ namespace System.Device.I2c
         /// <param name="settings">
         /// The connection settings of a device on an I2C bus.
         /// </param>
+        [Obsolete("Use Board.CreateI2cDevice() instead")]
         public UnixI2cDevice(I2cConnectionSettings settings)
+        : base(settings, null)
         {
-            _settings = settings;
+            DevicePath = DefaultDevicePath;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnixI2cDevice"/> class that will use the specified settings to communicate with the I2C device.
+        /// </summary>
+        /// <param name="settings">The connection settings of a device on an I2C bus.</param>
+        /// <param name="board">The board on which this is opened</param>
+        internal UnixI2cDevice(I2cConnectionSettings settings, Board board)
+            : base(settings, board)
+        {
             DevicePath = DefaultDevicePath;
         }
 
@@ -35,12 +46,6 @@ namespace System.Device.I2c
         /// </summary>
         public string DevicePath { get; set; }
 
-        /// <summary>
-        /// The connection settings of a device on an I2C bus. The connection settings are immutable after the device is created
-        /// so the object returned will be a clone of the settings object.
-        /// </summary>
-        public override I2cConnectionSettings ConnectionSettings => new I2cConnectionSettings(_settings);
-
         private unsafe void Initialize()
         {
             if (_deviceFileDescriptor >= 0)
@@ -48,7 +53,7 @@ namespace System.Device.I2c
                 return;
             }
 
-            string deviceFileName = $"{DevicePath}-{_settings.BusId}";
+            string deviceFileName = $"{DevicePath}-{ConnectionSettings.BusId}";
             lock (s_initializationLock)
             {
                 if (_deviceFileDescriptor >= 0)
@@ -97,7 +102,7 @@ namespace System.Device.I2c
                 messagesPtr[messageCount++] = new i2c_msg()
                 {
                     flags = I2cMessageFlags.I2C_M_WR,
-                    addr = (ushort)_settings.DeviceAddress,
+                    addr = (ushort)ConnectionSettings.DeviceAddress,
                     len = (ushort)writeBufferLength,
                     buf = writeBuffer
                 };
@@ -108,7 +113,7 @@ namespace System.Device.I2c
                 messagesPtr[messageCount++] = new i2c_msg()
                 {
                     flags = I2cMessageFlags.I2C_M_RD,
-                    addr = (ushort)_settings.DeviceAddress,
+                    addr = (ushort)ConnectionSettings.DeviceAddress,
                     len = (ushort)readBufferLength,
                     buf = readBuffer
                 };
@@ -129,7 +134,7 @@ namespace System.Device.I2c
 
         private unsafe void FileInterfaceTransfer(byte* writeBuffer, byte* readBuffer, int writeBufferLength, int readBufferLength)
         {
-            int result = Interop.ioctl(_deviceFileDescriptor, (uint)I2cSettings.I2C_SLAVE_FORCE, (ulong)_settings.DeviceAddress);
+            int result = Interop.ioctl(_deviceFileDescriptor, (uint)I2cSettings.I2C_SLAVE_FORCE, (ulong)ConnectionSettings.DeviceAddress);
             if (result < 0)
             {
                 throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");

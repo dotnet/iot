@@ -9,11 +9,42 @@ namespace System.Device.I2c
     /// </summary>
     public abstract class I2cDevice : IDisposable
     {
+        private I2cConnectionSettings _settings;
+
+        [Obsolete]
+        protected I2cDevice()
+        {
+        }
+
+        protected I2cDevice(I2cConnectionSettings settings, Board board)
+        {
+            _settings = settings;
+            Board = board;
+            if (Board != null)
+            {
+                // Todo: if the second fails, the other stays reserved
+                Board.ReservePin(Board.ConvertLogicalNumberingSchemeToPinNumber(settings.SdaPin), PinUsage.I2c, this);
+                Board.ReservePin(Board.ConvertLogicalNumberingSchemeToPinNumber(settings.SclPin), PinUsage.I2c, this);
+            }
+        }
+
+        public Board Board
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         /// The connection settings of a device on an I2C bus. The connection settings are immutable after the device is created
         /// so the object returned will be a clone of the settings object.
         /// </summary>
-        public abstract I2cConnectionSettings ConnectionSettings { get; }
+        public I2cConnectionSettings ConnectionSettings
+        {
+            get
+            {
+                return new I2cConnectionSettings(_settings);
+            }
+        }
 
         /// <summary>
         /// Reads a byte from the I2C device.
@@ -63,6 +94,7 @@ namespace System.Device.I2c
         /// </summary>
         /// <param name="settings">The connection settings of a device on an I2C bus.</param>
         /// <returns>A communications channel to a device on an I2C bus running on Windows 10 IoT.</returns>
+        [Obsolete("Use Board.CreateI2cDevice() instead")]
         public static I2cDevice Create(I2cConnectionSettings settings)
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
@@ -83,7 +115,15 @@ namespace System.Device.I2c
 
         protected virtual void Dispose(bool disposing)
         {
-            // Nothing to do in base class.
+            if (disposing)
+            {
+                if (Board != null)
+                {
+                    Board.ReleasePin(ConnectionSettings.SdaPin, PinUsage.I2c, this);
+                    Board.ReleasePin(ConnectionSettings.SclPin, PinUsage.I2c, this);
+                    Board = null; // Because the above must not happen twice
+                }
+            }
         }
     }
 }

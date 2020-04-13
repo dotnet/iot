@@ -20,13 +20,19 @@ namespace System.Device.Gpio.Drivers
         private Windows10Driver _internalDriver;
 
         public HummingBoardDriver()
+            : this(null)
+        {
+        }
+
+        public HummingBoardDriver(Board board)
+        : base(board)
         {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT)
             {
                 throw new PlatformNotSupportedException($"{GetType().Name} is only supported on Windows.");
             }
 
-            _internalDriver = new Windows10Driver();
+            _internalDriver = new Windows10Driver(null);
         }
 
         /// <inheritdoc/>
