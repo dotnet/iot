@@ -69,8 +69,8 @@ Write "Hello World from MAX7219!" to the Matrix using different fonts each itera
 ```csharp
 devices.Init();
 devices.Rotation = RotationType.Left;
-var writer = new MatrixTextWriter(devices, Fonts.CP437);
-foreach (var font in new[]{Fonts.CP437, Fonts.LCD_FONT, Fonts.SINCLAIR_FONT, Fonts.TINY_FONT, Fonts.UKR_FONT}) {
+var writer = new MatrixGraphics(devices, Fonts.CP437);
+foreach (var font in new[]{Fonts.CP437, Fonts.LCD, Fonts.Sinclair, Fonts.Tiny, Fonts.CyrillicUkrainian}) {
     writer.Font = font;
     writer.ShowMessage("Hello World from MAX7219!", alwaysScroll: true);
 }
