@@ -15,8 +15,6 @@ namespace AD7193Sample
         private static int lastCount = 0;
         private static int samplesTaken = 0;
 
-        private static NetCoreServer.UdpServer udpServer;
-
         public static void Main(string[] args)
         {
             WaitForDebugger();
@@ -45,11 +43,6 @@ namespace AD7193Sample
             Console.WriteLine($"AD7193 before calibration: offset={ad7193.Offset.ToString("X8")}, full-scale={ad7193.FullScale.ToString("X8")}");
             ad7193.Calibrate();
             Console.WriteLine($"AD7193  after calibration: offset={ad7193.Offset.ToString("X8")}, full-scale={ad7193.FullScale.ToString("X8")}");
-
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("Starting a UDP Server for GNURadio at 192.168.1.36:8843...");
-            StartUdpServer("192.168.1.36", 8843);
 
             Console.WriteLine();
             Console.WriteLine();
@@ -113,11 +106,6 @@ namespace AD7193Sample
 
                 Console.WriteLine($"Channel {adcValue.Channel.ToString().PadLeft(2)}: {adcValue.Voltage.ToString("0.0000").PadLeft(11)} V | {adcValue.Raw.ToString("N0").PadLeft(13)} | {sps.ToString("N1").PadLeft(9)} SPS");
             }
-
-            if ((udpServer != null) && (udpServer.IsStarted))
-            {
-                udpServer.Send(BitConverter.GetBytes((float)e.AdcValue.Voltage));
-            }
         }
 
         private static void WaitForDebugger()
@@ -142,12 +130,6 @@ namespace AD7193Sample
             }
 
             Console.WriteLine();
-        }
-
-        private static void StartUdpServer(string address, int port)
-        {
-            udpServer = new NetCoreServer.UdpServer(address, port);
-            udpServer.Start();
         }
     }
 }
