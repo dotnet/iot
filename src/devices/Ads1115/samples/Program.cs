@@ -84,7 +84,7 @@ namespace Ads1115.Samples
             {
                 Console.Clear();
                 Console.WriteLine("This triggers an interrupt each time a new value is available on AIN0");
-                using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, InputMultiplexer.AIN0, MeasuringRange.FS2048, DataRate.SPS250))
+                using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, controller, 23, false, InputMultiplexer.AIN0, MeasuringRange.FS2048, DataRate.SPS250))
                 {
                     Stopwatch w = Stopwatch.StartNew();
                     int totalInterruptsSeen = 0;
@@ -97,7 +97,7 @@ namespace Ads1115.Samples
                         totalInterruptsSeen++;
                     };
 
-                    adc.EnableConversionReady(controller, 23);
+                    adc.EnableConversionReady();
                     // (Do something else, here we print the output (as the console operations use to much time in the interrupt callback)
                     while (Console.KeyAvailable == false)
                     {
@@ -121,7 +121,7 @@ namespace Ads1115.Samples
             {
                 Console.Clear();
                 Console.WriteLine("This triggers an interrupt as long as the value is above 2.0V (and then stays above 1.8V)");
-                using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, InputMultiplexer.AIN1, MeasuringRange.FS4096, DataRate.SPS860))
+                using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, controller, 23, false, InputMultiplexer.AIN1, MeasuringRange.FS4096, DataRate.SPS860))
                 {
                     Stopwatch w = Stopwatch.StartNew();
                     int totalInterruptsSeen = 0;
@@ -134,7 +134,7 @@ namespace Ads1115.Samples
                         totalInterruptsSeen++;
                     };
 
-                    adc.EnableComparator(adc.VoltageToRaw(1.8), adc.VoltageToRaw(2.0), ComparatorMode.Traditional, ComparatorQueue.AssertAfterTwo, controller, 23);
+                    adc.EnableComparator(adc.VoltageToRaw(1.8), adc.VoltageToRaw(2.0), ComparatorMode.Traditional, ComparatorQueue.AssertAfterTwo);
                     // Do something else, here we print the output (as the console operations use to much time in the interrupt callback)
                     while (Console.KeyAvailable == false)
                     {
