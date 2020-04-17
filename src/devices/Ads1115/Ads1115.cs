@@ -448,10 +448,11 @@ namespace Iot.Device.Ads1115
         {
             // In powerdown-mode, wait until the busy bit goes high
             ushort reg = ReadConfigRegister();
-            int timeout = 5000;
-            while ((reg & 0x8000) == 0 && (timeout-- > 0))
+            int timeout = 10000; // microseconds
+            while ((reg & 0x8000) == 0 && (timeout > 0))
             {
                 DelayHelper.DelayMicroseconds(2, true);
+                timeout -= 2;
                 reg = ReadConfigRegister();
             }
 
