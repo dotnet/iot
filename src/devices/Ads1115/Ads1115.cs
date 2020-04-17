@@ -83,7 +83,7 @@ namespace Iot.Device.Ads1115
         /// ADS1115 operation mode.
         /// When set to <see cref="DeviceMode.Continuous"/> the chip continously measures the input and the values can be read directly.
         /// If set to <see cref="DeviceMode.PowerDown"/> the chip enters idle mode after each conversion and
-        /// a new value will be requested each time a read request is performed. This is the recommended setting when constantly
+        /// a new value will be requested each time a read request is performed. This is the recommended setting when frequently
         /// swapping between input channels, because a change of the channel requires a new conversion anyway.
         /// </summary>
         public DeviceMode DeviceMode
