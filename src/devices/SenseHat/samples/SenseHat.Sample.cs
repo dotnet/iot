@@ -5,6 +5,8 @@
 using System;
 using System.Drawing;
 using System.Threading;
+using Iot.Device.Common;
+using Iot.Units;
 
 namespace Iot.Device.SenseHat.Samples
 {
@@ -19,6 +21,10 @@ namespace Iot.Device.SenseHat.Samples
             // Magnetometer.Run();
             // TemperatureAndHumidity.Run();
             // PressureAndTemperature.Run();
+
+            // set this to the current sea level pressure in the area for correct altitude readings
+            var defaultSeaLevelPressure = Pressure.MeanSeaLevel;
+
             using (var sh = new SenseHat())
             {
                 int n = 0;
@@ -41,12 +47,27 @@ namespace Iot.Device.SenseHat.Samples
                     sh.Fill(n % 2 == 0 ? Color.DarkBlue : Color.DarkRed);
                     sh.SetPixel(x, y, Color.Yellow);
 
-                    Console.WriteLine($"Temperature: Sensor1: {sh.Temperature.Celsius} °C   Sensor2: {sh.Temperature2.Celsius} °C");
-                    Console.WriteLine($"Humidity: {sh.Humidity} %rH");
-                    Console.WriteLine($"Pressure: {sh.Pressure} hPa");
-                    Console.WriteLine($"Acceleration: {sh.Acceleration} g");
-                    Console.WriteLine($"Angular rate: {sh.AngularRate} DPS");
-                    Console.WriteLine($"Magnetic induction: {sh.MagneticInduction} gauss");
+                    var tempValue = sh.Temperature;
+                    var temp2Value = sh.Temperature2;
+                    var preValue = sh.Pressure;
+                    var humValue = sh.Humidity;
+                    var accValue = sh.Acceleration;
+                    var angValue = sh.AngularRate;
+                    var magValue = sh.MagneticInduction;
+                    var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
+
+                    Console.WriteLine($"Temperature Sensor 1: {tempValue.Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Temperature Sensor 2: {temp2Value.Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Pressure: {preValue:0.##}hPa");
+                    Console.WriteLine($"Altitude: {altValue:0.##}m");
+                    Console.WriteLine($"Acceleration: {sh.Acceleration}g");
+                    Console.WriteLine($"Angular rate: {sh.AngularRate}DPS");
+                    Console.WriteLine($"Magnetic induction: {sh.MagneticInduction}gauss");
+                    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+
+                    // WeatherHelper supports more calculations, such as the summer simmer index, saturated vapor pressure, actual vapor pressure and absolute humidity.
+                    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
 
                     Thread.Sleep(1000);
                 }

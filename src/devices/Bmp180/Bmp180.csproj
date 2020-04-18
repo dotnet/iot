@@ -14,6 +14,7 @@
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
     <ProjectReference Include="..\Units\Units.csproj" />
+    <ProjectReference Include="..\Common\Iot\Device\Common\CommonHelpers.csproj" />
     <None Include="README.md"/>
   </ItemGroup>
 

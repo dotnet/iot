@@ -10,6 +10,7 @@ using System.IO;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
 using Iot.Device.Bmxx80.FilteringMode;
+using Iot.Device.Common;
 using Iot.Units;
 
 namespace Iot.Device.Bmxx80
@@ -186,8 +187,16 @@ namespace Iot.Device.Bmxx80
                 return false;
             }
 
-            // Calculate and return the altitude using the international barometric formula.
-            altitude = 44330.0 * (1.0 - Math.Pow(pressure.Hectopascal / seaLevelPressure.Hectopascal, 0.1903));
+            // Then read the temperature.
+            success = TryReadTemperature(out var temperature);
+            if (!success)
+            {
+                altitude = double.NaN;
+                return false;
+            }
+
+            // Calculate and return the altitude using the hypsometric formula.
+            altitude = WeatherHelper.CalculateAltitude(pressure, seaLevelPressure, temperature);
             return true;
         }
 

@@ -4,11 +4,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using Units.Tests;
 using Xunit;
+using Xunit.Extensions;
+using Xunit.Sdk;
 
 namespace Iot.Units.Tests
 {
-    public class ConstructionTests
+    public class TemperatureTests
     {
         [Theory]
         [MemberData(nameof(TemperatureData))]
@@ -119,6 +123,71 @@ namespace Iot.Units.Tests
             Assert.True(double.IsNegativeInfinity(t.Celsius));
             Assert.True(double.IsNegativeInfinity(t.Fahrenheit));
             Assert.True(double.IsNegativeInfinity(t.Kelvin));
+        }
+
+        [Fact]
+        public void ToStringDefault()
+        {
+            using (new SetCultureForTest("en-US"))
+            {
+                Temperature t = Temperature.FromCelsius(20.2123);
+                var s = t.ToString();
+                Assert.Equal("20.2°C", s);
+            }
+
+            using (new SetCultureForTest("de-DE"))
+            {
+                Temperature t = Temperature.FromCelsius(20.2123);
+                var s = t.ToString();
+                Assert.Equal("20,2°C", s);
+            }
+        }
+
+        [Fact]
+        public void ToStringWithFormatArgs()
+        {
+            using (new SetCultureForTest("en-US"))
+            {
+                Temperature t = Temperature.FromCelsius(20.2123);
+                var s = t.ToString("C");
+                Assert.Equal("20.2°C", s);
+            }
+
+            using (new SetCultureForTest("de-DE"))
+            {
+                Temperature t = Temperature.FromFahrenheit(0);
+                var s = t.ToString("F2");
+                Assert.Equal("0,00°F", s);
+            }
+        }
+
+        [Fact]
+        public void ToStringWithFormatArgsAndCulture()
+        {
+            CultureInfo cf = new CultureInfo("en-US", false);
+            Temperature t = Temperature.FromCelsius(20.2123);
+            var s = t.ToString("K2", cf);
+            Assert.Equal("293.36°K", s);
+
+            s = $"It is {t:F1} outside, this equals {t:C2}".ToString(cf);
+            Assert.Equal("It is 68.4°F outside, this equals 20.21°C", s);
+        }
+
+        [Fact]
+        public void Compare()
+        {
+            Temperature a = Temperature.FromCelsius(20.2);
+            Temperature b = Temperature.FromFahrenheit(20.2);
+            Temperature c = Temperature.FromCelsius(20.2);
+            Assert.NotEqual(a, b);
+            Assert.True(a != b);
+            Assert.True(a.CompareTo(b) > 0);
+            Assert.True(a == c);
+            Assert.True(b < a);
+            Assert.True(a > b);
+            Assert.True(a >= c);
+            Assert.True(a <= c);
+            Assert.False(a < b);
         }
 
         private static void Equal(double expected, double actual)

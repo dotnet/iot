@@ -8,6 +8,7 @@ using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Threading;
+using Iot.Device.Common;
 using Iot.Units;
 
 namespace Iot.Device.Bmp180
@@ -94,7 +95,7 @@ namespace Iot.Device.Bmp180
         /// </returns>
         public double ReadAltitude(Pressure seaLevelPressure)
         {
-            return 44330.0 * (1.0 - Math.Pow((ReadPressure().Pascal / seaLevelPressure.Pascal), (1.0 / 5.255)));
+            return WeatherHelper.CalculateAltitude(ReadPressure(), seaLevelPressure, ReadTemperature());
         }
 
         /// <summary>
@@ -109,17 +110,17 @@ namespace Iot.Device.Bmp180
         }
 
         /// <summary>
-        ///  Calculates the pressure at sealevel when given a known altitude in meter
+        ///  Calculates the pressure at sea level when given a known altitude in meter
         /// </summary>
         /// <param name="altitude" >
-        ///  altitude in meters
+        ///  Altitude in meters
         /// </param>
         /// <returns>
         ///  Pressure
         /// </returns>
         public Pressure ReadSeaLevelPressure(double altitude = 0.0)
         {
-            return Pressure.FromPascal(ReadPressure().Pascal / Math.Pow((1.0 - (altitude / 44333.0)), 5.255));
+            return WeatherHelper.CalculateSeaLevelPressure(ReadPressure(), altitude, ReadTemperature());
         }
 
         /// <summary>

@@ -1,17 +1,16 @@
-﻿
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
-      <ProjectReference Include="../Hts221.csproj" />
-      <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
+    <Compile Include="*.cs" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
-    <ProjectReference Include="..\..\Common\Iot\Device\Common\CommonHelpers.csproj" />
+    <ProjectReference Include="..\..\..\..\Units\Units.csproj" />
   </ItemGroup>
 
 </Project>

@@ -5,6 +5,7 @@
 using System;
 using System.Device.I2c;
 using System.Threading;
+using Iot.Device.Common;
 using Iot.Device.DHTxx;
 
 namespace Iot.Device.DHTxx.Samples
@@ -23,8 +24,17 @@ namespace Iot.Device.DHTxx.Samples
             {
                 while (true)
                 {
+                    var tempValue = dht.Temperature;
+                    var humValue = dht.Humidity;
+
+                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+
+                    // WeatherHelper supports more calculations, such as the summer simmer index, saturated vapor pressure, actual vapor pressure and absolute humidity.
                     Console.WriteLine(
-                        $"Temperature: {dht.Temperature.Celsius.ToString("0.0")} °C, Humidity: {dht.Humidity.ToString("0.0")} %");
+                        $"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
+                    Console.WriteLine(
+                        $"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
 
                     Thread.Sleep(2000);
                 }
