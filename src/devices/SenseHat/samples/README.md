@@ -179,8 +179,8 @@ using (var th = new SenseHatTemperatureAndHumidity())
 {
     while (true)
     {
-        var tempValue = sh.Temperature;
-        var humValue = sh.Humidity;
+        var tempValue = th.Temperature;
+        var humValue = th.Humidity;
 
         Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
         Console.WriteLine($"Relative humidity: {humValue:0.#}%");

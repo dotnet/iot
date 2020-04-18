@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -19,8 +19,8 @@ namespace Iot.Device.SenseHat.Samples
             {
                 while (true)
                 {
-                    var tempValue = sh.Temperature;
-                    var humValue = sh.Humidity;
+                    var tempValue = th.Temperature;
+                    var humValue = th.Humidity;
 
                     Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
                     Console.WriteLine($"Relative humidity: {humValue:0.#}%");
