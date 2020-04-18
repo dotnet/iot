@@ -8,6 +8,8 @@ using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Iot.Device.Common;
+using Iot.Units;
 
 namespace Iot.Device.SenseHat.Samples
 {
