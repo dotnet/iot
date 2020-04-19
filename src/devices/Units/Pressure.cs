@@ -189,17 +189,17 @@ namespace Iot.Units
             {
                 return string.Format(culture, $"{{0:F{numDigits}}} kPa", Kilopascal);
             }
-            
+
             if (formatArgs.StartsWith("HPA"))
             {
                 return string.Format(culture, $"{{0:F{numDigits}}} hPa", Hectopascal);
             }
-            
+
             if (formatArgs.StartsWith("INHG"))
             {
                 return string.Format(culture, $"{{0:F{numDigits}}} inHg", InchOfMercury);
             }
-            
+
             if (formatArgs.StartsWith("MMHG"))
             {
                 return string.Format(culture, $"{{0:F{numDigits}}} mmHg", MillimeterOfMercury);
