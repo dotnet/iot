@@ -44,7 +44,7 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// The external reference voltage value. The default is 2.5V on REFIN1+ and REFIN1- (on the Digilent Pmod AD5 board)
         /// </summary>
-        public double VReference { get; set; } = 2.50f;
+        public double VoltageReference { get; set; } = 2.50f;
 
         /// <summary>
         /// Polarity select bit: true is unipolar, false is bipolar operation.
@@ -547,7 +547,7 @@ namespace Iot.Device.Ad7193
                 voltage = ((double)adcValue / 8388608.0) - 1.0;
             }
 
-            voltage *= (VReference / pgaGain);
+            voltage *= (VoltageReference / pgaGain);
 
             return (voltage);
         }
