@@ -439,7 +439,7 @@ namespace Iot.Device.Ad7193
         }
 
         /// <summary>
-        /// Reads the current ADC result value on the selected channel
+        /// Reads the current ADC result value on the currently selected channel without converting it to Volts
         /// </summary>
         /// <returns>24-bit raw value of the last ADC result (+ status byte if enabled)</returns>
         public uint? ReadADCValue()
@@ -472,10 +472,10 @@ namespace Iot.Device.Ad7193
         }
 
         /// <summary>
-        /// Reads a single value on the selected channel
+        /// Selects the channel, starts a single conversion, waits for its completion and returns the read value without converting it to Volts
         /// </summary>
         /// <param name="channel">Channel index</param>
-        /// <returns></returns>
+        /// <returns>24-bit raw value of the ADC result</returns>
         public uint? ReadSingleADCValue(Channel channel)
         {
             ActiveChannels = channel;
@@ -488,10 +488,10 @@ namespace Iot.Device.Ad7193
         }
 
         /// <summary>
-        /// Converts the ADC result to Volts
+        /// Converts the raw ADC result to Volts
         /// </summary>
         /// <param name="adcValue">The raw ADC result</param>
-        /// <returns></returns>
+        /// <returns>The ADC result value in Volts</returns>
         private double RawValueToVoltage(uint adcValue)
         {
             int pgaGain = 1;
