@@ -171,7 +171,7 @@ namespace Iot.Device.Ad7193
         }
 
         /// <summary>
-        /// Enables or disables DAT_STA Bit (appends status register to data register when reading)
+        /// Enables or disables DAT_STA Bit (appends the 8-bit Status register to the 24-bit Data register when reading)
         /// </summary>
         public bool AppendStatusRegisterToData
         {
@@ -186,11 +186,13 @@ namespace Iot.Device.Ad7193
 
                 if (value)
                 {
-                    _registerSize[(byte)Register.Data] = 4;          // change register size to 4, because Status register is now appended
+                    // change register size to 4, because the 8-bit Status register is now appended to the 24-bit ADC value
+                    _registerSize[(byte)Register.Data] = 4;
                 }
                 else
                 {
-                    _registerSize[(byte)Register.Data] = 3;          // change register size to 3
+                    // change register size to 3, because we have a 24-bit ADC value (without the 8-bit Status register)
+                    _registerSize[(byte)Register.Data] = 3;
                 }
             }
         }
@@ -749,7 +751,8 @@ namespace Iot.Device.Ad7193
 
         private uint GetRegisterBits(Register reg, BitMask bitmask)
         {
-            uint result = _registerCache[(byte)reg] & (uint)bitmask;     // clear all bit(s) except the bit(s) we would like to read
+            // clear all bit(s) except the bit(s) we would like to read
+            uint result = _registerCache[(byte)reg] & (uint)bitmask;
 
             if (bitmask > 0)
             {
@@ -767,7 +770,8 @@ namespace Iot.Device.Ad7193
 
         private uint SetRegisterBits(Register reg, BitMask bitmask, uint value)
         {
-            uint result = _registerCache[(byte)reg] & ~(uint)bitmask;     // keep all bit values except the bit(s) we would like to modify
+            // keep all bit values except the bit(s) we would like to modify
+            uint result = _registerCache[(byte)reg] & ~(uint)bitmask;
 
             if (bitmask > 0)
             {
