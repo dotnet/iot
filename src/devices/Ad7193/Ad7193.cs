@@ -29,7 +29,6 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// The list of received ADC values
         /// </summary>
-        // private ConcurrentQueue<AdcValue> _adcValues = new ConcurrentQueue<AdcValue>();
         private BlockingCollection<AdcValue> _adcValues = new BlockingCollection<AdcValue>();
 
         /// <summary>
@@ -482,7 +481,6 @@ namespace Iot.Device.Ad7193
             var adcValue = new AdcValue() { Raw = raw, Time = _stopWatch.ElapsedTicks, Channel = (byte)(GetRegisterBits(Register.Status, BitMask.StatusCHD)), Voltage = RawValueToVoltage(raw) };
 
             // add it to the collection
-            // AdcValues.Enqueue(adcValue);
             _adcValues.Add(adcValue);
 
             // call the event handler
