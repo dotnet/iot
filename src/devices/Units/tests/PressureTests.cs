@@ -47,7 +47,7 @@ namespace Units.Tests
             using (new SetCultureForTest("de-CH"))
             {
                 Pressure p = Pressure.FromHectopascal(1024.24);
-                Assert.Equal("1024.24 hPa", p.ToString());
+                Assert.Equal("1024.2 hPa", p.ToString());
             }
         }
     }
