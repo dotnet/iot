@@ -58,8 +58,7 @@ namespace Iot.Device.Ad7193
 
             set
             {
-                _registerCache[(byte)Register.Configuration] = SetRegisterBits(Register.Configuration, BitMask.ConfigurationU, value ? 1U : 0);
-                SetRegisterValue(Register.Configuration, _registerCache[(byte)Register.Configuration]);
+                SetRegisterBits(Register.Configuration, BitMask.ConfigurationU, value ? 1U : 0);
             }
         }
 
@@ -75,8 +74,7 @@ namespace Iot.Device.Ad7193
 
             set
             {
-                _registerCache[(byte)Register.Configuration] = SetRegisterBits(Register.Configuration, BitMask.ConfigurationG, (uint)value);
-                SetRegisterValue(Register.Configuration, _registerCache[(byte)Register.Configuration]);
+                SetRegisterBits(Register.Configuration, BitMask.ConfigurationG, (uint)value);
             }
         }
 
@@ -184,8 +182,7 @@ namespace Iot.Device.Ad7193
 
             set
             {
-                _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeDAT_STA, value ? 1U : 0);
-                SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
+                SetRegisterBits(Register.Mode, BitMask.ModeDAT_STA, value ? 1U : 0);
 
                 if (value)
                 {
@@ -216,9 +213,7 @@ namespace Iot.Device.Ad7193
 
             set
             {
-                _registerCache[(byte)Register.Configuration] = SetRegisterBits(Register.Configuration, BitMask.ConfigurationPseudo, (uint)value);
-                SetRegisterValue(Register.Configuration, _registerCache[(byte)Register.Configuration]);
-
+                SetRegisterBits(Register.Configuration, BitMask.ConfigurationPseudo, (uint)value);
             }
         }
 
@@ -234,8 +229,7 @@ namespace Iot.Device.Ad7193
 
             set
             {
-                _registerCache[(byte)Register.Configuration] = SetRegisterBits(Register.Configuration, BitMask.ConfigurationCH, (uint)value);
-                SetRegisterValue(Register.Configuration, _registerCache[(byte)Register.Configuration]);
+                SetRegisterBits(Register.Configuration, BitMask.ConfigurationCH, (uint)value);
             }
         }
 
@@ -251,8 +245,7 @@ namespace Iot.Device.Ad7193
 
             set
             {
-                _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeAVG, (uint)value);
-                SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
+                SetRegisterBits(Register.Mode, BitMask.ModeAVG, (uint)value);
             }
         }
 
@@ -268,8 +261,7 @@ namespace Iot.Device.Ad7193
 
             set
             {
-                _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeFS, value);
-                SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
+                SetRegisterBits(Register.Mode, BitMask.ModeFS, value);
             }
         }
 
@@ -286,8 +278,7 @@ namespace Iot.Device.Ad7193
 
             set
             {
-                _registerCache[(byte)Register.Offset] = value & 0b0000_0000_1111_1111_1111_1111_1111_1111;
-                SetRegisterValue(Register.Offset, _registerCache[(byte)Register.Offset]);
+                SetRegisterValue(Register.Offset, value & 0b0000_0000_1111_1111_1111_1111_1111_1111);
             }
         }
 
@@ -304,8 +295,7 @@ namespace Iot.Device.Ad7193
 
             set
             {
-                _registerCache[(byte)Register.FullScale] = value & 0b0000_0000_1111_1111_1111_1111_1111_1111;
-                SetRegisterValue(Register.FullScale, _registerCache[(byte)Register.FullScale]);
+                SetRegisterValue(Register.FullScale, value & 0b0000_0000_1111_1111_1111_1111_1111_1111);
             }
         }
 
@@ -355,14 +345,12 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public void Calibrate()
         {
-            _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeMD, 0b100);      // internal zero scale calibration (MD2 = 1, MD1 = 0, MD0 = 0)
-            SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting
-
+            // internal zero scale calibration (MD2 = 1, MD1 = 0, MD0 = 0)
+            SetRegisterBits(Register.Mode, BitMask.ModeMD, 0b100);
             WaitForADC();
 
-            _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeMD, 0b101);      // internal full scale calibration (MD2 = 1, MD1 = 0, MD0 = 1)
-            SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);     // overwriting previous MODE reg setting
-
+            // internal full scale calibration (MD2 = 1, MD1 = 0, MD0 = 1)
+            SetRegisterBits(Register.Mode, BitMask.ModeMD, 0b101);
             WaitForADC();
         }
 
@@ -382,8 +370,8 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public void StartSingleConversion()
         {
-            _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeMD, 0b001);      // single conversion mode bits
-            SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
+            // set the single conversion mode bits
+            SetRegisterBits(Register.Mode, BitMask.ModeMD, 0b001);
 
             _stopWatch.Restart();
         }
@@ -404,8 +392,8 @@ namespace Iot.Device.Ad7193
                 throw new ArgumentException($"The frequency you provided is higher than the maximum sampling rate of AD7193 ({metadata.ADCSamplerate} SPS).");
             }
 
-            _registerCache[(byte)Register.Mode] = SetRegisterBits(Register.Mode, BitMask.ModeMD, 0b000);      // continuous conversion mode
-            SetRegisterValue(Register.Mode, _registerCache[(byte)Register.Mode]);
+            // set the continuous conversion mode bits
+            SetRegisterBits(Register.Mode, BitMask.ModeMD, 0b000);
 
             ContinuousRead = true;
 
@@ -602,9 +590,8 @@ namespace Iot.Device.Ad7193
                 _spiDevice.Write(writeBuffer);
             }
 
-            byte[] trimmedWriteBuffer = new byte[writeBuffer.Length - 1];
-            Array.Copy(writeBuffer, 1, trimmedWriteBuffer, 0, trimmedWriteBuffer.Length);
-            writeBuffer = trimmedWriteBuffer;
+            // update the cache
+            _registerCache[(byte)register] = registerValue;
         }
 
         /// <summary>
@@ -795,6 +782,8 @@ namespace Iot.Device.Ad7193
                 value &= (uint)bitmask;
                 result |= value;
             }
+
+            SetRegisterValue(reg, value);
 
             return result;
         }
