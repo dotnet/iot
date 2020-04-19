@@ -53,7 +53,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                return (GetRegisterBits(Register.Configuration, BitMask.ConfigurationU) == 1);
+                return GetRegisterBits(Register.Configuration, BitMask.ConfigurationU) == 1;
             }
 
             set
@@ -124,7 +124,7 @@ namespace Iot.Device.Ad7193
             get
             {
                 GetRegisterValue(Register.Mode);
-                return (GetRegisterBits(Register.Mode, BitMask.ModeMD) == 0b011);
+                return GetRegisterBits(Register.Mode, BitMask.ModeMD) == 0b011;
             }
         }
 
@@ -136,7 +136,7 @@ namespace Iot.Device.Ad7193
             get
             {
                 GetRegisterValue(Register.Status);
-                return (GetRegisterBits(Register.Mode, BitMask.StatusRDY) != 0b1);
+                return GetRegisterBits(Register.Mode, BitMask.StatusRDY) != 0b1;
             }
         }
 
@@ -179,7 +179,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                return (GetRegisterBits(Register.Mode, BitMask.ModeDAT_STA) == 1);
+                return GetRegisterBits(Register.Mode, BitMask.ModeDAT_STA) == 1;
             }
 
             set
@@ -539,9 +539,9 @@ namespace Iot.Device.Ad7193
                 voltage = ((double)adcValue / 8388608.0) - 1.0;
             }
 
-            voltage *= (VoltageReference / pgaGain);
+            voltage *= VoltageReference / pgaGain;
 
-            return (voltage);
+            return voltage;
         }
 
         /// <summary>
@@ -630,7 +630,7 @@ namespace Iot.Device.Ad7193
 
         private static int GetCommAddress(int x)
         {
-            return (((x) & 0x07) << 3);
+            return ((x) & 0x07) << 3;
         }
 
         /// <summary>
