@@ -579,7 +579,6 @@ namespace Iot.Device.Ad7193
 
             _registerCache[registerAddress] = ByteArrayToUInt32(readBuffer);
 
-            // Debug.WriteLine($"Read Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, received: {String.Join(' ', readBuffer.Select(x => x.ToString("X2")))}");
             return _registerCache[registerAddress];
         }
 
@@ -606,8 +605,6 @@ namespace Iot.Device.Ad7193
             byte[] trimmedWriteBuffer = new byte[writeBuffer.Length - 1];
             Array.Copy(writeBuffer, 1, trimmedWriteBuffer, 0, trimmedWriteBuffer.Length);
             writeBuffer = trimmedWriteBuffer;
-
-            // Debug.WriteLine($"Write Register - address: {registerAddress.ToString("X2")}, command: {commandByte.ToString("X2")}, sent: {String.Join(' ', writeBuffer.Select(x => x.ToString("X2")))}");
         }
 
         /// <summary>
