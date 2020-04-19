@@ -756,11 +756,8 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public void Dispose()
         {
-            if (_spiDevice != null)
-            {
-                _spiDevice?.Dispose();
-                _spiDevice = null;
-            }
+            _spiDevice?.Dispose();
+            _spiDevice = null;
         }
 
         private uint GetRegisterBits(Register reg, BitMask bitmask)
