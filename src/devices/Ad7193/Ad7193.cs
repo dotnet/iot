@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Ad7193.Metadata;
-using global::Iot.Units;
+using Iot.Units;
 
 namespace Iot.Device.Ad7193
 {
