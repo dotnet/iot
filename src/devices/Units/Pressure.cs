@@ -10,7 +10,7 @@ namespace Iot.Units
     /// <summary>
     /// Structure representing pressure
     /// </summary>
-    public struct Pressure : IEquatable<Pressure>, IComparable<Pressure>, IComparable
+    public struct Pressure : IFormattable, IComparable<Pressure>, IEquatable<Pressure>
     {
         private const double MillibarRatio = 0.01;
         private const double KilopascalRatio = 0.001;
@@ -120,25 +120,101 @@ namespace Iot.Units
             return new Pressure(value / MillimeterOfMercuryRatio);
         }
 
-        /// <summary>
-        /// Creates a string representation of this object, in hPa.
-        /// </summary>
-        public override string ToString()
+        /// <inheritdoc cref="IComparable{T}.CompareTo" />
+        public int CompareTo(Pressure other)
         {
-            return string.Format(CultureInfo.CurrentCulture, "{0:F2}hPa", Hectopascal);
+            return _pascal.CompareTo(other._pascal);
         }
 
         /// <summary>
-        /// Equality member
+        /// Returns the string representation of this pressure, in hPa
         /// </summary>
+        /// <returns>String representation of this pressure</returns>
+        public override string ToString()
+        {
+            return String.Format(CultureInfo.CurrentCulture, "{0:F1} hPa", Hectopascal);
+        }
+
+        /// <summary>
+        /// Returns the string representation of this pressure, with the given format string and using the current culture.
+        /// For valid formatting arguments, see <see cref="ToString(string, IFormatProvider)"/>
+        /// </summary>
+        /// <param name="formatArgs">Format string</param>
+        /// <returns>String representation</returns>
+        public string ToString(string formatArgs)
+        {
+            return ToString(formatArgs, CultureInfo.CurrentCulture);
+        }
+
+        /// <summary>
+        /// Returns the string representation of this pressure, with the given format string and using the given culture.
+        /// Valid format specifiers are:
+        /// PA: Pascal
+        /// MBAR: Millibar
+        /// KPA: Kilopascal
+        /// HPA: Hectopascal
+        /// INHG: Inch of mercury
+        /// MMHG: Millimeter of mercury
+        /// An extra number defines the number of decimal digits to use (default 1)
+        /// <example>
+        /// <code>
+        /// var s = p.ToString("PA2"); -> "101325.01 Pa"
+        /// var s = p.ToString("HPA2"); --> "1013.25 hPa"
+        /// </code>
+        /// </example>
+        /// </summary>
+        /// <param name="formatArgs">Format string</param>
+        /// <param name="culture">Culture to use. Affects the format of the number.</param>
+        /// <returns>String representation</returns>
+        public string ToString(string formatArgs, IFormatProvider culture)
+        {
+            int numDigits = 1;
+            if (formatArgs.Length > 1)
+            {
+                // Let this throw if it fails - is a programming error
+                numDigits = int.Parse(formatArgs.Substring(1), NumberStyles.Any, CultureInfo.InvariantCulture);
+            }
+
+            if (formatArgs.StartsWith("PA"))
+            {
+                return string.Format(culture, $"{{0:F{numDigits}}} Pa", Pascal);
+            }
+
+            if (formatArgs.StartsWith("MBAR"))
+            {
+                return string.Format(culture, $"{{0:F{numDigits}}} mbar", Millibar);
+            }
+
+            if (formatArgs.StartsWith("KPA"))
+            {
+                return string.Format(culture, $"{{0:F{numDigits}}} kPa", Kilopascal);
+            }
+            
+            if (formatArgs.StartsWith("HPA"))
+            {
+                return string.Format(culture, $"{{0:F{numDigits}}} hPa", Hectopascal);
+            }
+            
+            if (formatArgs.StartsWith("INHG"))
+            {
+                return string.Format(culture, $"{{0:F{numDigits}}} inHg", InchOfMercury);
+            }
+            
+            if (formatArgs.StartsWith("MMHG"))
+            {
+                return string.Format(culture, $"{{0:F{numDigits}}} mmHg", MillimeterOfMercury);
+            }
+
+            throw new InvalidOperationException($"Unknown format specification: {formatArgs}");
+        }
+
+        /// <inheritdoc cref="IEquatable{T}.Equals(T)"/>
         public bool Equals(Pressure other)
         {
             return _pascal.Equals(other._pascal);
         }
 
-        /// <summary>
-        /// Equality member
-        /// </summary>
+        /// <inheritdoc cref="IEquatable{T}.Equals(T)"/>
         public override bool Equals(object obj)
         {
             return obj is Pressure other && Equals(other);
@@ -150,23 +226,6 @@ namespace Iot.Units
             return _pascal.GetHashCode();
         }
 
-        /// <inheritdoc cref="IComparable{T}"/>
-        public int CompareTo(Pressure other)
-        {
-            return _pascal.CompareTo(other._pascal);
-        }
-
-        /// <inheritdoc cref="IComparable"/>
-        int IComparable.CompareTo(object obj)
-        {
-            if (ReferenceEquals(null, obj))
-            {
-                return 1;
-            }
-
-            return obj is Pressure other ? CompareTo(other) : throw new ArgumentException($"Object must be of type {nameof(Pressure)}");
-        }
-
         /// <summary>
         /// Equality operator
         /// </summary>
@@ -176,7 +235,7 @@ namespace Iot.Units
         }
 
         /// <summary>
-        /// Unequality operator
+        /// Inequality operator
         /// </summary>
         public static bool operator !=(Pressure left, Pressure right)
         {
@@ -200,7 +259,7 @@ namespace Iot.Units
         }
 
         /// <summary>
-        /// Less-than-or-equal operator
+        /// Less-or-equal operator
         /// </summary>
         public static bool operator <=(Pressure left, Pressure right)
         {
@@ -208,7 +267,7 @@ namespace Iot.Units
         }
 
         /// <summary>
-        /// Greater-than-or-equal operator
+        /// Greater-or-equal operator
         /// </summary>
         public static bool operator >=(Pressure left, Pressure right)
         {
