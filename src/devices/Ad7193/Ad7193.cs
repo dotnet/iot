@@ -167,15 +167,7 @@ namespace Iot.Device.Ad7193
 
             set
             {
-                if (value)
-                {
-                    SetRegisterValue(Register.Communications, 0b0101_1100);
-                }
-                else
-                {
-                    SetRegisterValue(Register.Communications, 0b0101_1000);
-                }
-
+                SetRegisterValue(Register.Communications, (uint)(value ? 0b0101_1100 : 0b0101_1000));
                 _continuousRead = value;
             }
         }
@@ -564,7 +556,7 @@ namespace Iot.Device.Ad7193
         }
 
         /// <summary>
-        /// Reads the value of a register
+        /// Reads the value of a register and updates the register cache
         /// </summary>
         protected uint GetRegisterValue(Register register)
         {
