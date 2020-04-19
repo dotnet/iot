@@ -749,11 +749,18 @@ namespace Iot.Device.Ad7193
             _spiDevice = null;
         }
 
+        /// <summary>
+        /// Extracts a value from a register, where the value is located at the position the bitmask indicates
+        /// </summary>
+        /// <param name="reg">Register to extract the value from</param>
+        /// <param name="bitmask">Bitmask indicating the position of the value</param>
+        /// <returns>Value of the part of the register</returns>
         private uint GetRegisterBits(Register reg, BitMask bitmask)
         {
             // clear all bit(s) except the bit(s) we would like to read
             uint result = _registerCache[(byte)reg] & (uint)bitmask;
 
+            // remove the bits from the end of the register that are not part of the bitmask
             if (bitmask > 0)
             {
                 uint bits = (uint)bitmask;
