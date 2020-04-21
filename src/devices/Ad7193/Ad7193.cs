@@ -794,7 +794,7 @@ namespace Iot.Device.Ad7193
                 result |= value;
             }
 
-            SetRegisterValue(reg, value);
+            SetRegisterValue(reg, result);
 
             return result;
         }
