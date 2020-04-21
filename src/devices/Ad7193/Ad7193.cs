@@ -85,7 +85,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                _registerCache[(byte)Register.Status] = GetRegisterValue(Register.Status);
+                _registerCache[(byte)Register.Status] = ReadRegisterValue(Register.Status);
                 return _registerCache[(byte)Register.Status];
             }
         }
@@ -97,7 +97,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                _registerCache[(byte)Register.Mode] = GetRegisterValue(Register.Mode);
+                _registerCache[(byte)Register.Mode] = ReadRegisterValue(Register.Mode);
                 return _registerCache[(byte)Register.Mode];
             }
         }
@@ -109,7 +109,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                _registerCache[(byte)Register.Configuration] = GetRegisterValue(Register.Configuration);
+                _registerCache[(byte)Register.Configuration] = ReadRegisterValue(Register.Configuration);
                 return _registerCache[(byte)Register.Configuration];
             }
         }
@@ -121,7 +121,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                GetRegisterValue(Register.Mode);
+                ReadRegisterValue(Register.Mode);
                 return GetRegisterBits(Register.Mode, BitMask.ModeMD) == 0b011;
             }
         }
@@ -133,7 +133,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                GetRegisterValue(Register.Status);
+                ReadRegisterValue(Register.Status);
                 return GetRegisterBits(Register.Mode, BitMask.StatusRDY) != 0b1;
             }
         }
@@ -145,7 +145,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                uint status = GetRegisterValue(Register.Status);
+                uint status = ReadRegisterValue(Register.Status);
 
                 return (status & (uint)BitMask.StatusERR) == (uint)BitMask.StatusERR;
             }
@@ -165,7 +165,7 @@ namespace Iot.Device.Ad7193
 
             set
             {
-                SetRegisterValue(Register.Communications, (uint)(value ? 0b0101_1100 : 0b0101_1000));
+                WriteRegisterValue(Register.Communications, (uint)(value ? 0b0101_1100 : 0b0101_1000));
                 _continuousRead = value;
             }
         }
@@ -274,7 +274,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                return GetRegisterValue(Register.Offset) & (uint)BitMask.Offset;
+                return ReadRegisterValue(Register.Offset) & (uint)BitMask.Offset;
             }
 
             set
@@ -290,7 +290,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                return GetRegisterValue(Register.FullScale) & (uint)BitMask.FullScale;
+                return ReadRegisterValue(Register.FullScale) & (uint)BitMask.FullScale;
             }
 
             set
@@ -442,7 +442,7 @@ namespace Iot.Device.Ad7193
         /// <returns>24-bit raw value of the last ADC result (+ status byte if enabled)</returns>
         public uint ReadADCValue()
         {
-            uint raw = GetRegisterValue(Register.Data);
+            uint raw = ReadRegisterValue(Register.Data);
 
             // update the status register cache if we have it here
             if (AppendStatusRegisterToData)
@@ -546,7 +546,7 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// Reads the value of a register and updates the register cache
         /// </summary>
-        protected uint GetRegisterValue(Register register)
+        protected uint ReadRegisterValue(Register register)
         {
             byte registerAddress = (byte)register;
             byte byteNumber = _registerSize[registerAddress];
@@ -573,7 +573,7 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// Writes data into a register
         /// </summary>
-        protected void SetRegisterValue(Register register, uint registerValue)
+        protected void WriteRegisterValue(Register register, uint registerValue)
         {
             byte registerAddress = (byte)register;
             byte byteNumber = _registerSize[registerAddress];
@@ -602,14 +602,14 @@ namespace Iot.Device.Ad7193
         {
             List<uint> result = new List<uint>
             {
-                GetRegisterValue(Register.Status),
-                GetRegisterValue(Register.Mode),
-                GetRegisterValue(Register.Configuration),
-                GetRegisterValue(Register.Data),
-                GetRegisterValue(Register.ID),
-                GetRegisterValue(Register.GPOCON),
-                GetRegisterValue(Register.Offset),
-                GetRegisterValue(Register.FullScale)
+                ReadRegisterValue(Register.Status),
+                ReadRegisterValue(Register.Mode),
+                ReadRegisterValue(Register.Configuration),
+                ReadRegisterValue(Register.Data),
+                ReadRegisterValue(Register.ID),
+                ReadRegisterValue(Register.GPOCON),
+                ReadRegisterValue(Register.Offset),
+                ReadRegisterValue(Register.FullScale)
             };
 
             return result;
@@ -792,7 +792,7 @@ namespace Iot.Device.Ad7193
                 result |= value;
             }
 
-            SetRegisterValue(reg, result);
+            WriteRegisterValue(reg, result);
 
             return result;
         }
