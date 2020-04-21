@@ -11,6 +11,11 @@
         StatusRDY = 0b1000_0000,
 
         /// <summary>
+        /// ADC error bit. This bit is written to at the same time as the RDY bit. This bit is set to indicate that the result written to the ADC data register is clamped to all 0s or all 1s. Error sources include overrange, underrange, or the absence of a reference voltage. This bit is cleared when the result written to the data register returns to within the allowed analog input range. The ERR bit is also set during calibrations if the reference source is invalid or if the applied analog input voltages are outside range during system calibrations.
+        /// </summary>
+        StatusERR = 0b0100_0000,
+
+        /// <summary>
         /// These bits indicate which channel corresponds to the data register contents. They do not indicate which channel is presently being converted but indicate which channel was selected when the conversion contained in the data register was generated.
         /// </summary>
         StatusCHD = 0b0000_1111,

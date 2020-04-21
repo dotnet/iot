@@ -147,7 +147,7 @@ namespace Iot.Device.Ad7193
             {
                 uint status = GetRegisterValue(Register.Status);
 
-                return (status & 0b0100_0000) == 0b0100_0000;
+                return (status & (uint)BitMask.StatusERR) == (uint)BitMask.StatusERR;
             }
         }
 
@@ -442,7 +442,7 @@ namespace Iot.Device.Ad7193
         /// Reads the current ADC result value on the currently selected channel without converting it to Volts
         /// </summary>
         /// <returns>24-bit raw value of the last ADC result (+ status byte if enabled)</returns>
-        public uint? ReadADCValue()
+        public uint ReadADCValue()
         {
             uint raw = GetRegisterValue(Register.Data);
 
@@ -456,7 +456,7 @@ namespace Iot.Device.Ad7193
             // check if we have an error
             if (HasErrors)
             {
-                return null;
+                throw new Exception($"An error occured during the conversion. (Status register: {RegisterToString(Register.Status)})");
             }
 
             // create the new AdcValue object and calculate the voltage
