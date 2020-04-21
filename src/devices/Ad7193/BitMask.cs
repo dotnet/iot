@@ -64,5 +64,15 @@
         /// Gain select bits. These bits are written by the user to select the ADC input range.
         /// </summary>
         ConfigurationG = 0b0000_0000_0000_0000_0000_0111,
+
+        /// <summary>
+        /// 24-bit mask for the Offset register
+        /// </summary>
+        Offset = 0b0000_0000_1111_1111_1111_1111_1111_1111,
+
+        /// <summary>
+        /// 24-bit mask for the FullScale register
+        /// </summary>
+        FullScale = 0b0000_0000_1111_1111_1111_1111_1111_1111,
     }
 }

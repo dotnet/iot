@@ -274,13 +274,12 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                _registerCache[(byte)Register.Offset] = GetRegisterValue(Register.Offset) & 0b0000_0000_1111_1111_1111_1111_1111_1111;
-                return _registerCache[(byte)Register.Offset];
+                return GetRegisterValue(Register.Offset) & (uint)BitMask.Offset;
             }
 
             set
             {
-                SetRegisterValue(Register.Offset, value & 0b0000_0000_1111_1111_1111_1111_1111_1111);
+                SetRegisterBits(Register.Offset, BitMask.Offset, value);
             }
         }
 
@@ -291,13 +290,12 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                _registerCache[(byte)Register.FullScale] = GetRegisterValue(Register.FullScale) & 0b0000_0000_1111_1111_1111_1111_1111_1111;
-                return _registerCache[(byte)Register.FullScale];
+                return GetRegisterValue(Register.FullScale) & (uint)BitMask.FullScale;
             }
 
             set
             {
-                SetRegisterValue(Register.FullScale, value & 0b0000_0000_1111_1111_1111_1111_1111_1111);
+                SetRegisterBits(Register.FullScale, BitMask.FullScale, value);
             }
         }
 
