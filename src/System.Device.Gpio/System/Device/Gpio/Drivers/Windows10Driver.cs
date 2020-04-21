@@ -23,6 +23,11 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         public Windows10Driver()
         {
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            {
+                throw new PlatformNotSupportedException(GetType().Name + " is only supported on Windows");
+            }
+
             if (s_winGpioController == null)
             {
                 throw new NotSupportedException("No GPIO controllers exist on this system.");

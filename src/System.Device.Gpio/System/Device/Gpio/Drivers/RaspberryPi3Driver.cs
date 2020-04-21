@@ -40,6 +40,11 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         public RaspberryPi3Driver()
         {
+            if (Environment.OSVersion.Platform != PlatformID.Unix)
+            {
+                throw new PlatformNotSupportedException(GetType().Name + " is only supported on Linux/Unix");
+            }
+
             _pinModes = new PinState[PinCount];
         }
 
