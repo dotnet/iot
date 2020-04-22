@@ -1205,10 +1205,10 @@ namespace Iot.Device.Pn5180
             // Param 1
             attrib[5] = 0;
             // Param 2 is 0x08 for the maximum frame size
-            // We will stick to 212 Kb, so we will leave this as 0x08
+            // We will stick to 106 Kb, so we will leave this as 0x08
             attrib[6] = 0x08;
             // Param 3 to switch to protocol 14443-4
-            attrib[7] = (byte)(card.ISO14443_4Compliance ? 0x01 : 0x00);
+            attrib[7] = 0x01;
             // Param 4 is the CID selection, so the card number
             attrib[8] = card.TargetNumber;
             var ret = SendDataToCard(attrib);
