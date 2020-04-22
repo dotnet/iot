@@ -29,7 +29,7 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// The list of received ADC values
         /// </summary>
-        private BlockingCollection<AdcValue> _adcValues = new BlockingCollection<AdcValue>();
+        private readonly BlockingCollection<AdcValue> _adcValues = new BlockingCollection<AdcValue>();
 
         /// <summary>
         /// The event that is fired every time a new value is received from the ADC
@@ -133,8 +133,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                ReadRegisterValue(Register.Status);
-                return GetRegisterBits(Register.Mode, BitMask.StatusRDY) != 0b1;
+                return GetRegisterBits(Register.Status, BitMask.StatusRDY) != 0b1;
             }
         }
 
@@ -145,9 +144,7 @@ namespace Iot.Device.Ad7193
         {
             get
             {
-                uint status = ReadRegisterValue(Register.Status);
-
-                return (status & (uint)BitMask.StatusERR) == (uint)BitMask.StatusERR;
+                return GetRegisterBits(Register.Status, BitMask.StatusERR) == 0b1;
             }
         }
 
@@ -361,6 +358,7 @@ namespace Iot.Device.Ad7193
         {
             while (!IsReady)
             {
+                ReadRegisterValue(Register.Status);
                 Thread.Sleep(5);
             }
         }
@@ -414,10 +412,9 @@ namespace Iot.Device.Ad7193
                 while (_stopWatch.IsRunning)
                 {
                     elapsedTicks = _stopWatch.ElapsedTicks;
-                    if (elapsedTicks >= nextSampleAt)
+                    if ((elapsedTicks >= nextSampleAt) && (TryReadADCValue(out uint rawValue)))
                     {
                         nextSampleAt = elapsedTicks + samplePerTicks;
-                        ReadADCValue();
                         samples++;
                         jitter = (elapsedTicks - (samples * samplePerTicks));
                         if (JitterCorrection)
@@ -437,10 +434,11 @@ namespace Iot.Device.Ad7193
         }
 
         /// <summary>
-        /// Reads the current ADC result value on the currently selected channel without converting it to Volts
+        /// Tries to read the current ADC result value on the currently selected channel without converting it to Volts. It fails if the device is not configured properly or the analog input signal is out of range.
         /// </summary>
-        /// <returns>24-bit raw value of the last ADC result (+ status byte if enabled)</returns>
-        public uint ReadADCValue()
+        /// <param name="value">24-bit raw value of the last ADC result (+ status byte if enabled)</param>
+        /// <returns>True if the operation was successful</returns>
+        public bool TryReadADCValue(out uint value)
         {
             uint raw = ReadRegisterValue(Register.Data);
 
@@ -449,12 +447,14 @@ namespace Iot.Device.Ad7193
             {
                 _registerCache[(byte)Register.Status] = (byte)(raw & 0xFF);
                 raw = (raw & 0xFFFFFF00) >> 8;
-            }
 
-            // check if we have an error
-            if (HasErrors)
-            {
-                throw new Exception($"An error occured during the conversion. (Status register: {RegisterToString(Register.Status)})");
+                // check if we have an error
+                if (HasErrors)
+                {
+                    // An error occured during the conversion. This can happen if the device is misconfigured or when the signal on the analog input is out of range.
+                    value = 0;
+                    return false;
+                }
             }
 
             // create the new AdcValue object and calculate the voltage
@@ -466,7 +466,9 @@ namespace Iot.Device.Ad7193
             // call the event handler
             OnValueReceived?.Invoke(this, new AdcValueReceivedEventArgs(adcValue));
 
-            return raw;
+            value = raw;
+
+            return true;
         }
 
         /// <summary>
@@ -482,7 +484,7 @@ namespace Iot.Device.Ad7193
 
             WaitForADC();
 
-            return ReadADCValue();
+            return TryReadADCValue(out uint rawValue) ? rawValue : (uint?)null;
         }
 
         /// <summary>
