@@ -226,7 +226,7 @@ namespace Iot.Device.Ad7193
                 return (Channel)(GetRegisterBits(Register.Configuration, BitMask.ConfigurationCH));
             }
 
-            set
+            private set
             {
                 SetRegisterBits(Register.Configuration, BitMask.ConfigurationCH, (uint)value);
             }
@@ -377,9 +377,12 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// Initiates Continuous Conversion. After calling this method the AdcValueReceived event will be fired continuously. This mode is much faster, but uses significatily more CPU power.
         /// </summary>
+        /// <param name="channels">The channel(s) on which the conversion is taking place.</param>
         /// <param name="frequency">The target frequency of the sampling. AD7193 has the maximum of 4800 samples per second.</param>
-        public void StartContinuousConversion(uint frequency = 0)
+        public void StartContinuousConversion(Channel channels, uint frequency = 0)
         {
+            ActiveChannels = channels;
+
             if (frequency == 0)
             {
                 frequency = metadata.ADCSamplerate;

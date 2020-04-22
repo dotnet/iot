@@ -15,7 +15,7 @@ namespace AD7193Sample
         private static int lastCount = 0;
         private static int samplesTaken = 0;
 
-        public static void Main(string[] args)
+        public static void Main()
         {
             WaitForDebugger();
 
@@ -40,20 +40,17 @@ namespace AD7193Sample
             ad7193.JitterCorrection = true;
             ad7193.Filter = 0;
 
-            Console.WriteLine($"AD7193 before calibration: offset={ad7193.Offset.ToString("X8")}, full-scale={ad7193.FullScale.ToString("X8")}");
+            Console.WriteLine($"AD7193 before calibration: offset={ad7193.Offset:X8}, full-scale={ad7193.FullScale:X8}");
             ad7193.Calibrate();
-            Console.WriteLine($"AD7193  after calibration: offset={ad7193.Offset.ToString("X8")}, full-scale={ad7193.FullScale.ToString("X8")}");
+            Console.WriteLine($"AD7193  after calibration: offset={ad7193.Offset:X8}, full-scale={ad7193.FullScale:X8}");
 
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Starting 100 single conversions on CH0...");
-            ad7193.ActiveChannels = Channel.CH00;
 
             for (int i = 0; i < 100; i++)
             {
-                ad7193.StartSingleConversion();
-                ad7193.WaitForADC();
-                ad7193.ReadADCValue();
+                ad7193.ReadSingleADCValue(Channel.CH00);
                 Thread.Sleep(25);
             }
 
@@ -62,8 +59,7 @@ namespace AD7193Sample
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Starting continuous conversion on CH0 and CH1...");
-            ad7193.ActiveChannels = Channel.CH00 | Channel.CH01;
-            ad7193.StartContinuousConversion();
+            ad7193.StartContinuousConversion(Channel.CH00 | Channel.CH01);
 
             int loopcounter = 0;
             while (true)
@@ -104,7 +100,7 @@ namespace AD7193Sample
 
                 Iot.Device.Ad7193.AdcValue adcValue = e.AdcValue;
 
-                Console.WriteLine($"Channel {adcValue.Channel.ToString().PadLeft(2)}: {adcValue.Voltage.ToString("0.0000").PadLeft(11)} V | {adcValue.Raw.ToString("N0").PadLeft(13)} | {sps.ToString("N1").PadLeft(9)} SPS");
+                Console.WriteLine($"Channel {adcValue.Channel,-2}: {adcValue.Voltage,-11:0.0000} V | {adcValue.Raw,-13:N0} | {sps,-9:N1} SPS");
             }
         }
 
