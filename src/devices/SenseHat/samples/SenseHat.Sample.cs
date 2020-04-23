@@ -65,7 +65,7 @@ namespace Iot.Device.SenseHat.Samples
                     Console.WriteLine($"Magnetic induction: {sh.MagneticInduction}gauss");
                     Console.WriteLine($"Relative humidity: {humValue:0.#}%");
 
-                    // WeatherHelper supports more calculations, such as the summer simmer index, saturated vapor pressure, actual vapor pressure and absolute humidity.
+                    // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
                     Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
                     Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
 

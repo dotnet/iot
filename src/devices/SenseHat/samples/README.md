@@ -179,7 +179,16 @@ using (var th = new SenseHatTemperatureAndHumidity())
 {
     while (true)
     {
-        Console.WriteLine($"Temperature: {th.Temperature.Celsius}°C   Humidity: {th.Humidity}%rH");
+        var tempValue = th.Temperature;
+        var humValue = th.Humidity;
+
+        Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+        Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+
+        // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
+        Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
+        Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
+
         Thread.Sleep(1000);
     }
 }
@@ -188,12 +197,24 @@ using (var th = new SenseHatTemperatureAndHumidity())
 ## Pressure and temperature
 
 ```csharp
-using (var th = new SenseHatPressureAndTemperature())
+using (var pt = new SenseHatPressureAndTemperature())
 {
-    while (true)
+    // set this to the current sea level pressure in the area for correct altitude readings
+    var defaultSeaLevelPressure = Pressure.MeanSeaLevel;
+
+    using (var pt = new SenseHatPressureAndTemperature())
     {
-        Console.WriteLine($"Temperature: {th.Temperature.Celsius}°C   Humidity: {th.Pressure}hPa");
-        Thread.Sleep(1000);
+        while (true)
+        {
+            var tempValue = pt.Temperature;
+            var preValue = pt.Pressure;
+            var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
+
+            Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+            Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
+            Console.WriteLine($"Altitude: {altValue:0.##}m");
+            Thread.Sleep(1000);
+        }
     }
 }
 ```

@@ -39,8 +39,17 @@ I2cDevice device = I2cDevice.Create(settings);
 
 using (Dht12 dht = new Dht12(device))
 {
-    Temperature temperature = dht.Temperature;
-    double humidity = dht.Humidity;
+    var tempValue = dht.Temperature;
+    var humValue = dht.Humidity;
+
+    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+
+    // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
+    Console.WriteLine(
+        $"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
+    Console.WriteLine(
+        $"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
 }
 ```
 

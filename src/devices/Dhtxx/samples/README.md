@@ -31,7 +31,17 @@ using (Dht11 dht = new Dht11(26))
 {
     while (true)
     {
-        Console.WriteLine($"Temperature: {dht.Temperature.Celsius.ToString("0.0")} °C, "Humidity: {dht.Humidity.ToString("0.0")} %");
+        var tempValue = dht.Temperature;
+        var humValue = dht.Humidity;
+
+        Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+        Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+
+        // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
+        Console.WriteLine(
+            $"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
+        Console.WriteLine(
+            $"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
 
         Thread.Sleep(1000);
     }
