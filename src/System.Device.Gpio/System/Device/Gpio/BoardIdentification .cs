@@ -168,8 +168,7 @@ namespace System.Device.Gpio
         {
             get
             {
-                string hardware;
-                return _settings.TryGetValue("Hardware", out hardware) ? hardware : null;
+                return _settings.TryGetValue("Hardware", out string hardware) ? hardware : null;
             }
         }
 
@@ -226,6 +225,32 @@ namespace System.Device.Gpio
         #endregion
 
         #region Private Helpers
+
+        private Processor LoadProcessor(Model model)
+        {
+            switch (model)
+            {
+                case Model.RaspberryPiA:
+                case Model.RaspberryPiAPlus:
+                case Model.RaspberryPiBRev1:
+                case Model.RaspberryPiBRev2:
+                case Model.RaspberryPiBPlus:
+                case Model.RaspberryPiComputeModule:
+                case Model.RaspberryPiZero:
+                case Model.RaspberryPiZeroW:
+                    return Processor.Bcm2708;
+                case Model.RaspberryPiB2:
+                // TBC: B3(+) should be a BCM2710 processor ...
+                case Model.RaspberryPiB3:
+                case Model.RaspberryPiB3Plus:
+                case Model.RaspberryPiComputeModule3:
+                    return Processor.Bcm2709;
+                case Model.RaspberryPi4:
+                    return Processor.Bcm2711;
+                default:
+                    return Processor.Unknown;
+            }
+        }
 
         /// <summary>
         /// Detect the board CPU information from /proc/cpuinfo
