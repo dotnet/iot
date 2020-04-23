@@ -1,4 +1,4 @@
-# LPS25H - Piezoresistive pressure and thermometer sensor
+﻿# LPS25H - Piezoresistive pressure and thermometer sensor
 
 ```csharp
 class Program

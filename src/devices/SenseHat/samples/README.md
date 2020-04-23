@@ -1,4 +1,4 @@
-# Sense HAT
+﻿# Sense HAT
 
 ## Everything together
 
