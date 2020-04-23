@@ -1,4 +1,4 @@
-﻿namespace System.Device.Gpio.System.Device.Gpio
+﻿namespace System.Device.Gpio
 {
     /// <summary>
     /// The board processor.
@@ -19,5 +19,16 @@
         /// Processor is a BCM2709.
         /// </summary>
         Bcm2709,
+
+        /// <summary>
+        /// Processor is a BCM2710.
+        /// </summary>
+        Bcm2710,
+
+        /// <summary>
+        /// Processor is a11.
+        /// </summary>
+        Bcm2711,
+
     }
 }
