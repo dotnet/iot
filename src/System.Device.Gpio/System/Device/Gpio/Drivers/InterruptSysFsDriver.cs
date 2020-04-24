@@ -18,6 +18,11 @@ namespace System.Device.Gpio.Drivers
         public InterruptSysFsDriver(GpioDriver gpioDriver)
             : base()
         {
+            if (Environment.OSVersion.Platform != PlatformID.Unix)
+            {
+                throw new PlatformNotSupportedException($"{GetType().Name} is only supported on Linux/Unix.");
+            }
+
             _gpioDriver = gpioDriver;
             StatusUpdateSleepTime = TimeSpan.Zero; // This driver does not need this "magic sleep" as we're directly accessing the hardware registers
         }

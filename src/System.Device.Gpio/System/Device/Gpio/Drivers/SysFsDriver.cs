@@ -64,6 +64,11 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         public SysFsDriver()
         {
+            if (Environment.OSVersion.Platform != PlatformID.Unix)
+            {
+                throw new PlatformNotSupportedException($"{GetType().Name} is only supported on Linux/Unix.");
+            }
+
             _eventThreadCancellationTokenSource = new CancellationTokenSource();
         }
 

@@ -44,6 +44,11 @@ namespace System.Device.Gpio.Drivers
 
         public LibGpiodDriver(int gpioChip = 0)
         {
+            if (Environment.OSVersion.Platform != PlatformID.Unix)
+            {
+                throw new PlatformNotSupportedException($"{GetType().Name} is only supported on Linux/Unix.");
+            }
+
             try
             {
                 _pinNumberLock = new object();
