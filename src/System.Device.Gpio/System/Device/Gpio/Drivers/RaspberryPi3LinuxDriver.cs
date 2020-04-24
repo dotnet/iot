@@ -46,7 +46,7 @@ namespace System.Device.Gpio.Drivers
         /// <summary>
         /// Raspberry Pi 3 has 28 GPIO pins.
         /// </summary>
-        protected internal override int PinCount => throw new NotImplementedException(); // This method is being implemented directly on the RaspberryPi3Driver. Any changes to it should go directly there.
+        protected internal override int PinCount => 28;
 
         private bool IsPi4
         {
@@ -69,8 +69,38 @@ namespace System.Device.Gpio.Drivers
         /// <returns>The pin number in the driver's logical numbering scheme.</returns>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
-            // This method is being implemented directly on the RaspberryPi3Driver. Any changes to it should go directly there.
-            throw new NotImplementedException();
+            return pinNumber switch
+            {
+                3 => 2,
+                5 => 3,
+                7 => 4,
+                8 => 14,
+                10 => 15,
+                11 => 17,
+                12 => 18,
+                13 => 27,
+                15 => 22,
+                16 => 23,
+                18 => 24,
+                19 => 10,
+                21 => 9,
+                22 => 25,
+                23 => 11,
+                24 => 8,
+                26 => 7,
+                27 => 0,
+                28 => 1,
+                29 => 5,
+                31 => 6,
+                32 => 12,
+                33 => 13,
+                35 => 19,
+                36 => 16,
+                37 => 26,
+                38 => 20,
+                40 => 21,
+                _ => throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber))
+            };
         }
 
         /// <summary>
