@@ -168,7 +168,8 @@ namespace System.Device.Gpio
         {
             get
             {
-                return _settings.TryGetValue("Hardware", out string hardware) ? hardware : null;
+                _settings.TryGetValue("Hardware", out string hardware);
+                return hardware;
             }
         }
 
