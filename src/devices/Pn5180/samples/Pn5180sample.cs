@@ -24,14 +24,14 @@ namespace Pn5180sample
         {
             Console.WriteLine("Hello Pn5180!");
             Console.WriteLine($"Choose the device you want to use");
-            Console.WriteLine($"1 for Raspberry Pi");
+            Console.WriteLine($"1 for hardware Spi like on a Raspberry Pi");
             Console.WriteLine($"2 for FT4222");
             var choice = Console.ReadKey().KeyChar;
             Console.WriteLine();
             Console.WriteLine();
             if (choice == '1')
             {
-                _pn5180 = Rpi();
+                _pn5180 = HardwareSpi();
             }
             else if (choice == '2')
             {
@@ -43,14 +43,14 @@ namespace Pn5180sample
                 return;
             }
 
-            var (product, firmware, eeprom) = _pn5180.GetVersion();
+            var (product, firmware, eeprom) = _pn5180.GetVersions();
             Console.WriteLine($"Product: {product.ToString()}, Firmware: {firmware.ToString()}, EEPROM: {eeprom.ToString()}");
 
             Console.WriteLine($"Choose what you want to test");
             Console.WriteLine($"1 dump a full credit card ISO 14443 type B");
             Console.WriteLine($"2 dump a Mifare IS 14443 type A");
             Console.WriteLine($"3 EEPROM operations");
-            Console.WriteLine($"4 Radio Frequence operations");
+            Console.WriteLine($"4 Radio Frequency operations");
             Console.WriteLine($"5 Pull ISO 14443 Type A and B cards, display information");
             Console.WriteLine($"6 Pull ISO 14443 B cards, display information");
             choice = Console.ReadKey().KeyChar;
@@ -87,11 +87,11 @@ namespace Pn5180sample
             }
         }
 
-        private static Pn5180 Rpi()
+        private static Pn5180 HardwareSpi()
         {
-            var spi = SpiDevice.Create(new SpiConnectionSettings(0, 1) { ClockFrequency = Pn5180.SpiClockFrequency, Mode = Pn5180.SpiMode, DataFlow = DataFlow.MsbFirst });
+            var spi = SpiDevice.Create(new SpiConnectionSettings(0, 1) { ClockFrequency = Pn5180.MaximumSpiClockFrequency, Mode = Pn5180.DefaultSpiMode, DataFlow = DataFlow.MsbFirst });
 
-            // REset the device
+            // Reset the device
             var gpioController = new GpioController();
             gpioController.OpenPin(4, PinMode.Output);
             gpioController.Write(4, PinValue.Low);
@@ -121,7 +121,7 @@ namespace Pn5180sample
             Console.WriteLine($"Chip version: {chip}");
             Console.WriteLine($"Dll version: {dll}");
 
-            var ftSpi = new Ft4222Spi(new SpiConnectionSettings(0, 1) { ClockFrequency = Pn5180.SpiClockFrequency, Mode = Pn5180.SpiMode, DataFlow = DataFlow.MsbFirst });
+            var ftSpi = new Ft4222Spi(new SpiConnectionSettings(0, 1) { ClockFrequency = Pn5180.MaximumSpiClockFrequency, Mode = Pn5180.DefaultSpiMode, DataFlow = DataFlow.MsbFirst });
 
             var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
 
@@ -160,12 +160,12 @@ namespace Pn5180sample
 
         private static void RfConfiguration()
         {
-            var sizeConfig = _pn5180.GetRadioFrequenceConfigSize(TransmitterRadioFrequenceConfiguration.Iso14443B_106);
-            Span<byte> configBuff = stackalloc byte[Pn5180.RadioFrequenceConfiguraitonSize * sizeConfig];
-            var ret = _pn5180.RetrieveRadioFrequenceConfiguration(TransmitterRadioFrequenceConfiguration.Iso14443B_106, configBuff);
+            var sizeConfig = _pn5180.GetRadioFrequencyConfigSize(TransmitterRadioFrequencyConfiguration.Iso14443B_106);
+            Span<byte> configBuff = stackalloc byte[Pn5180.RadioFrequencyConfigurationSize * sizeConfig];
+            var ret = _pn5180.RetrieveRadioFrequencyConfiguration(TransmitterRadioFrequencyConfiguration.Iso14443B_106, configBuff);
             for (int i = 0; i < sizeConfig; i++)
             {
-                Console.WriteLine($"Register: {configBuff[Pn5180.RadioFrequenceConfiguraitonSize * i]}, Data: {BitConverter.ToString(configBuff.Slice(Pn5180.RadioFrequenceConfiguraitonSize * i + 1, Pn5180.RadioFrequenceConfiguraitonSize - 1).ToArray())}");
+                Console.WriteLine($"Register: {configBuff[Pn5180.RadioFrequencyConfigurationSize * i]}, Data: {BitConverter.ToString(configBuff.Slice(Pn5180.RadioFrequencyConfigurationSize * i + 1, Pn5180.RadioFrequencyConfigurationSize - 1).ToArray())}");
             }
         }
 
@@ -173,7 +173,7 @@ namespace Pn5180sample
         {
             Data106kbpsTypeB card;
             // Poll the data for 20 seconds
-            var ret = _pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequenceConfiguration.Iso14443B_106, ReceiverRadioFrequenceConfiguration.Iso14443B_106, out card, 20000);
+            var ret = _pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out card, 20000);
             Console.WriteLine();
 
             if (!ret)
@@ -194,11 +194,11 @@ namespace Pn5180sample
                 Console.WriteLine($"Max frame size: {card.MaxFrameSize}");
                 Console.WriteLine($"Nad support: {card.NadSupported}");
 
-                var creditCard = new CreditCard(_pn5180, card.TargetNumber);
+                var creditCard = new CreditCard(_pn5180, card.TargetNumber, 2);
                 ReadAndDisplayData(creditCard);
 
                 // Halt card
-                if (_pn5180.DeselecCardTypeB(card))
+                if (_pn5180.DeselectCardTypeB(card))
                 {
                     Console.WriteLine($"Card unselected properly");
                 }
@@ -214,7 +214,7 @@ namespace Pn5180sample
             Data106kbpsTypeA cardTypeA;
 
             // Let's pull for 20 seconds and see the result
-            var retok = _pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequenceConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequenceConfiguration.Iso14443A_Nfc_PI_106_106, out cardTypeA, 20000);
+            var retok = _pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, out cardTypeA, 20000);
             Console.WriteLine();
 
             if (!retok)
@@ -286,7 +286,7 @@ namespace Pn5180sample
 
             do
             {
-                var retok = _pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequenceConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequenceConfiguration.Iso14443A_Nfc_PI_106_106, out cardTypeA, 1000);
+                var retok = _pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, out cardTypeA, 1000);
                 if (retok)
                 {
                     Console.WriteLine($"ISO 14443 Type A found:");
@@ -295,7 +295,7 @@ namespace Pn5180sample
                     Console.WriteLine($"  UID: {BitConverter.ToString(cardTypeA.NfcId)}");
                 }
 
-                retok = _pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequenceConfiguration.Iso14443B_106, ReceiverRadioFrequenceConfiguration.Iso14443B_106, out card, 1000);
+                retok = _pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out card, 1000);
                 if (retok)
                 {
                     Console.WriteLine($"ISO 14443 Type B found:");
@@ -321,7 +321,7 @@ namespace Pn5180sample
 
             do
             {
-                var retok = _pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequenceConfiguration.Iso14443B_106, ReceiverRadioFrequenceConfiguration.Iso14443B_106, out card, 1000);
+                var retok = _pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out card, 1000);
                 if (retok)
                 {
                     Console.WriteLine($"ISO 14443 Type B found:");

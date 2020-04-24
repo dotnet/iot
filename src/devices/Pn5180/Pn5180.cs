@@ -7,6 +7,7 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Spi;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -22,7 +23,7 @@ namespace Iot.Device.Pn5180
     /// </summary>
     public class Pn5180 : CardTransceiver, IDisposable
     {
-        private const int TimeoutWaiting = 10_000;
+        private const int TimeoutWaitingMilliseconds = 2_000;
 
         private readonly SpiDevice _spiDevice;
         private readonly GpioController _gpioController;
@@ -33,21 +34,21 @@ namespace Iot.Device.Pn5180
         private static List<SelectedPiccInformation> _activeSelected = new List<SelectedPiccInformation>();
 
         /// <summary>
-        /// A radio Frequence configuration element size is 5 bytes
+        /// A radio Frequency configuration element size is 5 bytes
         /// Byte 1 = Register Address
         /// next 4 bytes = data of the register
         /// </summary>
-        public const int RadioFrequenceConfiguraitonSize = 5;
+        public const int RadioFrequencyConfigurationSize = 5;
 
         /// <summary>
         /// PN532 SPI Clock Frequency
         /// </summary>
-        public const int SpiClockFrequency = 7_000_000;
+        public const int MaximumSpiClockFrequency = 7_000_000;
 
         /// <summary>
         /// Only SPI Mode supported is Mode0
         /// </summary>
-        public const SpiMode SpiMode = System.Device.Spi.SpiMode.Mode0;
+        public const SpiMode DefaultSpiMode = System.Device.Spi.SpiMode.Mode0;
 
         /// <summary>
         /// The Log level
@@ -78,6 +79,16 @@ namespace Iot.Device.Pn5180
         /// <param name="logLevel">The log level</param>
         public Pn5180(SpiDevice spiDevice, int pinBusy, int pinNss, GpioController gpioController = null, bool shouldDispose = true, LogLevel logLevel = LogLevel.None)
         {
+            if (pinBusy < 0)
+            {
+                throw new ArgumentException($"{pinBusy} can't be negative, it has to be an actual real pin number");
+            }
+
+            if (pinNss < 0)
+            {
+                throw new ArgumentException($"{pinNss} can't be negative, it has to be an actual real pin number");
+            }
+
             LogLevel = logLevel;
 
             LogInfo.Log($"Opening PN5180, pin busy: {pinBusy}, pin NSS: {pinNss}", LogLevel.Debug);
@@ -90,7 +101,7 @@ namespace Iot.Device.Pn5180
             _gpioController.OpenPin(_pinNss, PinMode.Output);
 
             // Check the version
-            var (product, firmware, eeprom) = GetVersion();
+            var (product, firmware, eeprom) = GetVersions();
             if ((product.Major == 0) || (firmware.Major == 0) || (eeprom.Major == 0))
             {
                 throw new IOException($"Not a valid PN5180");
@@ -102,15 +113,7 @@ namespace Iot.Device.Pn5180
         /// </summary>
         public void Dispose()
         {
-            // If the RF field is on, try to switch it off
-            try
-            {
-                SetRadioFrequence(false);
-            }
-            catch (Exception)
-            {
-                // We don't do anything on purpose. Trying to switch off
-            }
+            SetRadioFrequency(false);
 
             if (_shouldDispose)
             {
@@ -125,7 +128,7 @@ namespace Iot.Device.Pn5180
         /// Get the Product, Firmware and EEPROM versions of the PN8150
         /// </summary>
         /// <returns>A tuple with the Product, Firmware and EEPROM versions</returns>
-        public (Version product, Version firmware, Version eeprom) GetVersion()
+        public (Version product, Version firmware, Version eeprom) GetVersions()
         {
             Span<byte> versionAnswer = stackalloc byte[6];
 
@@ -144,28 +147,28 @@ namespace Iot.Device.Pn5180
         /// <summary>
         /// Get the PN5180 identifier, this is a 16 byte long
         /// </summary>
-        /// <param name="identifier">A 16 byte buffer</param>
+        /// <param name="outputIdentifier">A 16 byte buffer</param>
         /// <returns>True if success</returns>
-        public bool GetIdentifier(Span<byte> identifier)
+        public bool GetIdentifier(Span<byte> outputIdentifier)
         {
-            if (identifier.Length != 16)
+            if (outputIdentifier.Length != 16)
             {
                 throw new ArgumentException($"Identifier must be 16 bytes long");
             }
 
-            return ReadEeprom(EepromAddress.DieIdentifier, identifier);
+            return ReadEeprom(EepromAddress.DieIdentifier, outputIdentifier);
         }
 
         /// <summary>
         /// Read the full EEPROM
         /// </summary>
-        /// <param name="eeprom">At least 255 bytes buffer</param>
+        /// <param name="eeprom">At 255 bytes buffer</param>
         /// <returns>True if success</returns>
         public bool ReadAllEeprom(Span<byte> eeprom)
         {
-            if (eeprom.Length > 255)
+            if (eeprom.Length != 255)
             {
-                throw new ArgumentException($"Size of EEPROM is 255 bytes, {nameof(eeprom)} must be less than 255 bytes");
+                throw new ArgumentException($"Size of EEPROM is 255 bytes, {nameof(eeprom)} must be 255 bytes");
             }
 
             return ReadEeprom(EepromAddress.DieIdentifier, eeprom);
@@ -203,11 +206,18 @@ namespace Iot.Device.Pn5180
             dumpEeprom[0] = (byte)Command.READ_EEPROM;
             dumpEeprom[1] = (byte)address;
             dumpEeprom[2] = (byte)eeprom.Length;
-            LogInfo.Log($"{nameof(ReadEeprom)}, {nameof(dumpEeprom)}: {BitConverter.ToString(dumpEeprom.ToArray())}", LogLevel.Debug);
+            if (LogLevel >= LogLevel.Debug)
+            {
+                LogInfo.Log($"{nameof(ReadEeprom)}, {nameof(dumpEeprom)}: {BitConverter.ToString(dumpEeprom.ToArray())}", LogLevel.Debug);
+            }
+
             try
             {
                 SpiWriteRead(dumpEeprom, eeprom);
-                LogInfo.Log($"{nameof(ReadEeprom)}, {nameof(dumpEeprom)}: {BitConverter.ToString(dumpEeprom.ToArray())}", LogLevel.Debug);
+                if (LogLevel >= LogLevel.Debug)
+                {
+                    LogInfo.Log($"{nameof(ReadEeprom)}, {nameof(dumpEeprom)}: {BitConverter.ToString(dumpEeprom.ToArray())}", LogLevel.Debug);
+                }
             }
             catch (TimeoutException)
             {
@@ -236,11 +246,19 @@ namespace Iot.Device.Pn5180
             dumpEeprom[0] = (byte)Command.WRITE_EEPROM;
             dumpEeprom[1] = (byte)address;
             eeprom.CopyTo(dumpEeprom.Slice(2));
-            LogInfo.Log($"{nameof(WriteEeprom)}, {nameof(eeprom)}: {BitConverter.ToString(eeprom.ToArray())}", LogLevel.Debug);
+            if (LogLevel >= LogLevel.Debug)
+            {
+                LogInfo.Log($"{nameof(WriteEeprom)}, {nameof(eeprom)}: {BitConverter.ToString(eeprom.ToArray())}", LogLevel.Debug);
+            }
+
             try
             {
                 SpiWrite(dumpEeprom);
-                LogInfo.Log($"{nameof(WriteEeprom)}, {nameof(dumpEeprom)}: {BitConverter.ToString(dumpEeprom.ToArray())}", LogLevel.Debug);
+                if (LogLevel >= LogLevel.Debug)
+                {
+                    LogInfo.Log($"{nameof(WriteEeprom)}, {nameof(dumpEeprom)}: {BitConverter.ToString(dumpEeprom.ToArray())}", LogLevel.Debug);
+                }
+
                 Span<byte> irqStatus = stackalloc byte[4];
                 ret = GetIrqStatus(irqStatus);
                 ret &= !((irqStatus[2] & 0b0000_0010) == 0b0000_0010);
@@ -264,7 +282,8 @@ namespace Iot.Device.Pn5180
         /// Send data to a card.
         /// </summary>
         /// <param name="toSend">The span of byte to send</param>
-        /// <param name="numberValidBitsLastByte">The number of bits valid in the last byte, 8 is the default</param>
+        /// <param name="numberValidBitsLastByte">The number of bits valid in the last byte, 8 is the default.
+        /// If validBits == 3 then it's equivalent to apply a mask of 0b000_0111 to get the correct valid bits</param>
         /// <returns>True if success</returns>
         /// <remarks>Using this function you'll have to manage yourself the possible low level communication protocol.
         /// This function write directly to the card all the bytes. Please make sure you'll first load specific radio frequence settings,
@@ -285,7 +304,11 @@ namespace Iot.Device.Pn5180
             sendData[0] = (byte)Command.SEND_DATA;
             sendData[1] = (byte)(numberValidBitsLastByte == 8 ? 0 : numberValidBitsLastByte);
             toSend.CopyTo(sendData.Slice(2));
-            LogInfo.Log($"{nameof(SendDataToCard)}: {nameof(sendData)}, {BitConverter.ToString(sendData.ToArray())}", LogLevel.Debug);
+            if (LogLevel >= LogLevel.Debug)
+            {
+                LogInfo.Log($"{nameof(SendDataToCard)}: {nameof(sendData)}, {BitConverter.ToString(sendData.ToArray())}", LogLevel.Debug);
+            }
+
             try
             {
                 SpiWrite(sendData);
@@ -317,11 +340,18 @@ namespace Iot.Device.Pn5180
             Span<byte> sendData = stackalloc byte[2];
             sendData[0] = (byte)Command.READ_DATA;
             sendData[1] = 0x00;
-            LogInfo.Log($"{nameof(ReadDataFromCard)}: {nameof(sendData)}, {BitConverter.ToString(sendData.ToArray())}", LogLevel.Debug);
+            if (LogLevel >= LogLevel.Debug)
+            {
+                LogInfo.Log($"{nameof(ReadDataFromCard)}: {nameof(sendData)}, {BitConverter.ToString(sendData.ToArray())}", LogLevel.Debug);
+            }
+
             try
             {
                 SpiWriteRead(sendData, toRead);
-                LogInfo.Log($"{nameof(ReadDataFromCard)}: {nameof(toRead)}, {BitConverter.ToString(toRead.ToArray())}", LogLevel.Debug);
+                if (LogLevel >= LogLevel.Debug)
+                {
+                    LogInfo.Log($"{nameof(ReadDataFromCard)}: {nameof(toRead)}, {BitConverter.ToString(toRead.ToArray())}", LogLevel.Debug);
+                }
             }
             catch (TimeoutException)
             {
@@ -341,17 +371,25 @@ namespace Iot.Device.Pn5180
         /// <remarks>Using this function you'll have to manage yourself the possible low level communication protocol.
         /// This function write directly to the card all the bytes. Please make sure you'll first load specific radio frequence settings,
         /// detect a card, select it and then send data</remarks>
-        public bool ReadDataFromCard(Span<byte> toRead, int expectedToRead)
+        private bool ReadDataFromCard(Span<byte> toRead, int expectedToRead)
         {
             var (numBytes, _) = GetNumberOfBytesReceivedAndValidBits();
             if (numBytes == expectedToRead)
             {
-                LogInfo.Log($"{nameof(ReadDataFromCard)}: right number of expected bytes to read", LogLevel.Debug);
+                if (LogLevel >= LogLevel.Debug)
+                {
+                    LogInfo.Log($"{nameof(ReadDataFromCard)}: right number of expected bytes to read", LogLevel.Debug);
+                }
+
                 return ReadDataFromCard(toRead);
             }
             else if (numBytes > expectedToRead)
             {
-                LogInfo.Log($"{nameof(ReadDataFromCard)}: wrong number of expected bytes, clearing the cache", LogLevel.Debug);
+                if (LogLevel >= LogLevel.Debug)
+                {
+                    LogInfo.Log($"{nameof(ReadDataFromCard)}: wrong number of expected bytes, clearing the cache", LogLevel.Debug);
+                }
+
                 // Clear all
                 ReadDataFromCard(new byte[numBytes]);
             }
@@ -360,29 +398,33 @@ namespace Iot.Device.Pn5180
         }
 
         /// <summary>
-        /// REad all the data from the card
+        /// Read all the data from the card
         /// </summary>
+        /// <param name="toRead">>The span of byte to read</param>
+        /// <param name="bytesRead">number of bytes read</param>
         /// <returns>A byte array with all the read elements, null if nothing can be read</returns>
         /// <remarks>Using this function you'll have to manage yourself the possible low level communication protocol.
         /// This function write directly to the card all the bytes. Please make sure you'll first load specific radio frequence settings,
         /// detect a card, select it and then send data</remarks>
-        public byte[] ReadAllDatFromCard()
+        public bool ReadDataFromCard(Span<byte> toRead, out int bytesRead)
         {
-            LogInfo.Log($"{nameof(ReadAllDatFromCard)}: ", LogLevel.Debug);
+            LogInfo.Log($"{nameof(ReadDataFromCard)}: ", LogLevel.Debug);
             var (numBytes, _) = GetNumberOfBytesReceivedAndValidBits();
             if (numBytes < 0)
             {
-                return null;
+                bytesRead = 0;
+                return false;
             }
 
-            Span<byte> toRead = stackalloc byte[numBytes];
             var ret = ReadDataFromCard(toRead);
             if (ret)
             {
-                return toRead.ToArray();
+                bytesRead = numBytes;
+                return true;
             }
 
-            return null;
+            bytesRead = 0;
+            return false;
         }
 
         /// <summary>
@@ -425,7 +467,12 @@ namespace Iot.Device.Pn5180
         private int TransceiveClassic(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
         {
             // type B card have a tag number which is always more than 1
-            if (targetNumber > 0)
+            if (targetNumber == 0)
+            {
+                // Case of a type A card
+                return TranceiveBuffer(dataToSend, dataFromCard);
+            }
+            else
             {
                 const int MaxTries = 5;
                 // All the type B protocol 14443-4 is from the ISO14443-4.pdf from ISO website
@@ -491,9 +538,8 @@ namespace Iot.Device.Pn5180
                     if (toReceive[0] == (0b0000_1010 | (card.LastBlockMark ? 1 : 0)))
                     {
                         toReceive.Slice(2).CopyTo(dataFromCard);
-                        dataFromCard[numBytes - 2] = 0x00;
                         card.LastBlockMark = !card.LastBlockMark;
-                        return numBytes - 1;
+                        return numBytes - 2;
                     }
 
                     // Case of a chained packet, we need to send acknowledgment and read more data
@@ -509,20 +555,19 @@ namespace Iot.Device.Pn5180
                         if (numBytes2 >= 2)
                         {
                             // If not the right target, then not for us
-                            if (!(toReceive[1] == targetNumber))
+                            if ((toReceive[1] & 0x0F) != targetNumber)
                             {
                                 return -1;
                             }
 
-                            if (!(toReceive[0] == (0b0000_1010 | (card.LastBlockMark ? 1 : 0))))
+                            if (toReceive[0] != (0b0000_1010 | (card.LastBlockMark ? 1 : 0)))
                             {
                                 return -1;
                             }
 
                             toReceive.Slice(2, numBytes2 - 2).CopyTo(dataFromCard.Slice(numBytes - 2));
-                            dataFromCard[numBytes - 2 + numBytes2 - 2] = 0x00;
                             card.LastBlockMark = !card.LastBlockMark;
-                            return numBytes - 2 + numBytes2 - 1;
+                            return numBytes - 2 + numBytes2 - 2;
                         }
                     }
 
@@ -544,12 +589,6 @@ namespace Iot.Device.Pn5180
 
                 return numBytes;
             }
-            else
-            {
-                // Case of a type A card
-                return TranceiveBuffer(dataToSend, dataFromCard);
-            }
-
         }
 
         private int TranceiveTypeB(SelectedPiccInformation card, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
@@ -674,11 +713,18 @@ namespace Iot.Device.Pn5180
             toAuthenticate[7] = (byte)(mirafareCommand == MifareCardCommand.AuthenticationA ? 0x60 : 0x61);
             toAuthenticate[8] = blockAddress;
             cardUid.CopyTo(toAuthenticate.Slice(9));
-            LogInfo.Log($"{nameof(MifareAuthenticate)}: {nameof(toAuthenticate)}: {BitConverter.ToString(toAuthenticate.ToArray())}", LogLevel.Debug);
+            if (LogLevel >= LogLevel.Debug)
+            {
+                LogInfo.Log($"{nameof(MifareAuthenticate)}: {nameof(toAuthenticate)}: {BitConverter.ToString(toAuthenticate.ToArray())}", LogLevel.Debug);
+            }
+
             try
             {
                 SpiWriteRead(toAuthenticate, response);
-                LogInfo.Log($"{nameof(MifareAuthenticate)}: {nameof(response)}: {BitConverter.ToString(response.ToArray())}", LogLevel.Debug);
+                if (LogLevel >= LogLevel.Debug)
+                {
+                    LogInfo.Log($"{nameof(MifareAuthenticate)}: {nameof(response)}: {BitConverter.ToString(response.ToArray())}", LogLevel.Debug);
+                }
             }
             catch (TimeoutException)
             {
@@ -692,15 +738,15 @@ namespace Iot.Device.Pn5180
 
         #endregion
 
-        #region RadioFrequence
+        #region RadioFrequency
 
         /// <summary>
-        /// Load a specific radio frequence configuration
+        /// Load a specific radio frequency configuration
         /// </summary>
         /// <param name="transmitter">The transmitter configuration</param>
         /// <param name="receiver">The receiver configuration</param>
         /// <returns>True if success</returns>
-        public bool LoadRadioFrequenceConfiguration(TransmitterRadioFrequenceConfiguration transmitter, ReceiverRadioFrequenceConfiguration receiver)
+        public bool LoadRadioFrequencyConfiguration(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver)
         {
             Span<byte> rfConfig = stackalloc byte[3];
             rfConfig[0] = (byte)Command.LOAD_RF_CONFIG;
@@ -724,16 +770,16 @@ namespace Iot.Device.Pn5180
         /// </summary>
         /// <param name="transmitter">The transmitter configuration</param>
         /// <returns>True if success</returns>
-        public int GetRadioFrequenceConfigSize(TransmitterRadioFrequenceConfiguration transmitter) => GetRadioFrequenceConfigSize((byte)transmitter);
+        public int GetRadioFrequencyConfigSize(TransmitterRadioFrequencyConfiguration transmitter) => GetRadioFrequencyConfigSize((byte)transmitter);
 
         /// <summary>
         /// Get the size of the configuration of a specific receiver configuration
         /// </summary>
         /// <param name="receiver">The receiver configuration</param>
         /// <returns>True if success</returns>
-        public int GetRadioFrequenceConfigSize(ReceiverRadioFrequenceConfiguration receiver) => GetRadioFrequenceConfigSize((byte)receiver);
+        public int GetRadioFrequencyConfigSize(ReceiverRadioFrequencyConfiguration receiver) => GetRadioFrequencyConfigSize((byte)receiver);
 
-        private int GetRadioFrequenceConfigSize(byte config)
+        private int GetRadioFrequencyConfigSize(byte config)
         {
             Span<byte> rfConfig = stackalloc byte[2];
             Span<byte> response = stackalloc byte[1];
@@ -753,27 +799,27 @@ namespace Iot.Device.Pn5180
         }
 
         /// <summary>
-        /// Retrieve the radio frequence configuration
+        /// Retrieve the radio frequency configuration
         /// </summary>
         /// <param name="transmitter">The transmitter configuration</param>
         /// <param name="configuration">A span of bytes for the configuration. Should be a multiple of 5 with the size of <see ref="GetRadioFrequenceConfigSize"/></param>
         /// <returns>True if success</returns>
-        public bool RetrieveRadioFrequenceConfiguration(TransmitterRadioFrequenceConfiguration transmitter, Span<byte> configuration) => RetrieveRadioFrequenceConfiguration((byte)transmitter, configuration);
+        public bool RetrieveRadioFrequencyConfiguration(TransmitterRadioFrequencyConfiguration transmitter, Span<byte> configuration) => RetrieveRadioFrequencyConfiguration((byte)transmitter, configuration);
 
         /// <summary>
-        /// Retrieve the radio frequence configuration
+        /// Retrieve the radio frequency configuration
         /// </summary>
         /// <param name="receiver">The receiver configuration</param>
         /// <param name="configuration">A span of bytes for the configuration. Should be a multiple of 5 with the size of <see ref="GetRadioFrequenceConfigSize"/></param>
         /// <returns>True if success</returns>
-        public bool RetrieveRadioFrequenceConfiguration(ReceiverRadioFrequenceConfiguration receiver, Span<byte> configuration) => RetrieveRadioFrequenceConfiguration((byte)receiver, configuration);
+        public bool RetrieveRadioFrequencyConfiguration(ReceiverRadioFrequencyConfiguration receiver, Span<byte> configuration) => RetrieveRadioFrequencyConfiguration((byte)receiver, configuration);
 
-        private bool RetrieveRadioFrequenceConfiguration(byte config, Span<byte> configuration)
+        private bool RetrieveRadioFrequencyConfiguration(byte config, Span<byte> configuration)
         {
             // Page 41 documentation PN5180A0XX-C3.pdf
             if ((configuration.Length > 195) || (configuration.Length % 5 != 0) || (configuration.Length == 0))
             {
-                throw new ArgumentException($"Configuration buffer size must be a multiple of 5 and no larger than 195 bytes");
+                throw new ArgumentException($"Configuration buffer size must be a positive multiple of 5 and no larger than 195 bytes");
             }
 
             Span<byte> rfConfig = stackalloc byte[2];
@@ -793,27 +839,27 @@ namespace Iot.Device.Pn5180
         }
 
         /// <summary>
-        /// Update the radio frequence configuration
+        /// Update the radio frequency configuration
         /// </summary>
         /// <param name="transmitter">The transmitter configuration</param>
         /// <param name="configuration">A span of bytes for the configuration. Should be a multiple of 5 with the size of <see ref="GetRadioFrequenceConfigSize"/></param>
         /// <returns>True if success</returns>
-        public bool UpdateRadioFrequenceConfiguration(TransmitterRadioFrequenceConfiguration transmitter, Span<byte> configuration) => UpdateRadioFrequenceConfiguration((byte)transmitter, configuration);
+        public bool UpdateRadioFrequencyConfiguration(TransmitterRadioFrequencyConfiguration transmitter, Span<byte> configuration) => UpdateRadioFrequenceConfiguration((byte)transmitter, configuration);
 
         /// <summary>
-        /// Update the radio frequence configuration
+        /// Update the radio frequency configuration
         /// </summary>
         /// <param name="receiver">The receiver configuration</param>
         /// <param name="configuration">A span of bytes for the configuration. Should be a multiple of 5 with the size of <see ref="GetRadioFrequenceConfigSize"/></param>
         /// <returns>True if success</returns>
-        public bool UpdateRadioFrequenceConfiguration(ReceiverRadioFrequenceConfiguration receiver, Span<byte> configuration) => UpdateRadioFrequenceConfiguration((byte)receiver, configuration);
+        public bool UpdateRadioFrequencyConfiguration(ReceiverRadioFrequencyConfiguration receiver, Span<byte> configuration) => UpdateRadioFrequenceConfiguration((byte)receiver, configuration);
 
         private bool UpdateRadioFrequenceConfiguration(byte config, Span<byte> configuration)
         {
             // Page 41 documentation PN5180A0XX-C3.pdf
             if ((configuration.Length > 252) || (configuration.Length % 6 != 0) || (configuration.Length == 0))
             {
-                throw new ArgumentException($"Configuration buffer size must be a multiple of 5 and no larger than 195 bytes");
+                throw new ArgumentException($"Configuration buffer size must be a positive multiple of 6 and no larger than 252 bytes");
             }
 
             Span<byte> rfConfig = stackalloc byte[1 + configuration.Length];
@@ -833,15 +879,15 @@ namespace Iot.Device.Pn5180
         }
 
         /// <summary>
-        /// True to disable the Radio Frequence collision avoidance according to ISO/IEC 18092
+        /// True to disable the Radio Frequency collision avoidance according to ISO/IEC 18092
         /// False to use Active Communication mode according to ISO/IEC 18092
         /// </summary>
-        public RadioFrequenceCollision RadioFrequenceCollision { get; set; } = RadioFrequenceCollision.Normal;
+        public RadioFrequencyCollision RadioFrequencyCollision { get; set; } = RadioFrequencyCollision.Normal;
 
         /// <summary>
-        /// Get or set the radio frequence field. True for on, false for off
+        /// Get or set the radio frequency field. True for on, false for off
         /// </summary>
-        public bool RadioFrequenceField
+        public bool RadioFrequencyField
         {
             get
             {
@@ -859,15 +905,15 @@ namespace Iot.Device.Pn5180
             }
             set
             {
-                SetRadioFrequence(value);
+                SetRadioFrequency(value);
             }
         }
 
         /// <summary>
-        /// Get the radio frenquence status
+        /// Get the radio frenquency status
         /// </summary>
         /// <returns>The radio frequence status</returns>
-        public RadioFrequenceStatus GetRadioFrequenceStatus()
+        public RadioFrequencyStatus GetRadioFrequencyStatus()
         {
             Span<byte> status = stackalloc byte[4];
             try
@@ -876,17 +922,17 @@ namespace Iot.Device.Pn5180
             }
             catch (TimeoutException)
             {
-                return RadioFrequenceStatus.Error;
+                return RadioFrequencyStatus.Error;
             }
 
-            return (RadioFrequenceStatus)((status[2] >> 1) & 0x07);
+            return (RadioFrequencyStatus)((status[2] >> 1) & 0x07);
         }
 
         /// <summary>
         /// Is the external field activated?
         /// </summary>
         /// <returns>True if active, false if not</returns>
-        public bool IsRadioFrequenceFieldExternal()
+        public bool IsRadioFrequencyFieldExternal()
         {
             Span<byte> status = stackalloc byte[4];
             try
@@ -901,11 +947,11 @@ namespace Iot.Device.Pn5180
             return (status[2] & 0b0000_0100) == 0b0000_0100;
         }
 
-        private bool SetRadioFrequence(bool field)
+        private bool SetRadioFrequency(bool fieldOn)
         {
             Span<byte> rfConfig = stackalloc byte[2];
-            rfConfig[0] = (byte)(field ? Command.RF_ON : Command.RF_OFF);
-            rfConfig[1] = (byte)RadioFrequenceCollision;
+            rfConfig[0] = (byte)(fieldOn ? Command.RF_ON : Command.RF_OFF);
+            rfConfig[1] = (byte)RadioFrequencyCollision;
             try
             {
                 SpiWrite(rfConfig);
@@ -930,7 +976,7 @@ namespace Iot.Device.Pn5180
         /// <param name="card">The type A card once detected</param>
         /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
         /// <returns>True if a 14443 Type A card has been detected</returns>
-        public bool ListenToCardIso14443TypeA(TransmitterRadioFrequenceConfiguration transmitter, ReceiverRadioFrequenceConfiguration receiver, out Data106kbpsTypeA card, int timeoutPollingMilliseconds)
+        public bool ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver, out Data106kbpsTypeA card, int timeoutPollingMilliseconds)
         {
             card = new Data106kbpsTypeA();
             // From NXP documentation AN12650.pdf, Page 8 and forward
@@ -938,9 +984,9 @@ namespace Iot.Device.Pn5180
             // From TI documentation http://www.ti.com/lit/an/sloa136/sloa136.pdf page 7 and 6 for the flow of selecting
             // and getting the UID
             // Load the configuration for the specific card
-            var ret = LoadRadioFrequenceConfiguration(transmitter, receiver);
+            var ret = LoadRadioFrequencyConfiguration(transmitter, receiver);
             // Switch on the radio frequence field
-            ret &= SetRadioFrequence(true);
+            ret &= SetRadioFrequency(true);
 
             Span<byte> atqa = stackalloc byte[2];
             Span<byte> irqStatus = stackalloc byte[4];
@@ -965,7 +1011,7 @@ namespace Iot.Device.Pn5180
                     // Activates TRANSCEIVE routine
                     SpiWriteRegister(Command.WRITE_REGISTER_OR_MASK, Register.SYSTEM_CONFIG, new byte[] { 0x03, 0x00, 0x00, 0x00 });
                     // Sends REQB command
-                    ret &= SendDataToCard(new byte[] { 0x26 }, 7);
+                    ret = SendDataToCard(new byte[] { 0x26 }, 7);
                     (numBytes, _) = GetNumberOfBytesReceivedAndValidBits();
                     if (numBytes > 0)
                     {
@@ -1059,18 +1105,18 @@ namespace Iot.Device.Pn5180
         /// <param name="card">The type B card once detected</param>
         /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
         /// <returns>True if a 14443 Type B card has been detected</returns>
-        public bool ListenToCardIso14443TypeB(TransmitterRadioFrequenceConfiguration transmitter, ReceiverRadioFrequenceConfiguration receiver, out Data106kbpsTypeB card, int timeoutPollingMilliseconds)
+        public bool ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver, out Data106kbpsTypeB card, int timeoutPollingMilliseconds)
         {
             card = null;
 
-            var ret = LoadRadioFrequenceConfiguration(transmitter, receiver);
+            var ret = LoadRadioFrequencyConfiguration(transmitter, receiver);
             // Switch on the radio frequence field and check it
-            ret &= SetRadioFrequence(true);
+            ret &= SetRadioFrequency(true);
 
             // Find out which slot we have, we starts at 1, 0 are for Mifare cards and Type A
             byte targetNumber = 0;
 
-            foreach (var potentioalActive in _activeSelected)
+            foreach (var potentialActive in _activeSelected)
             {
                 // In theory, this is working, practically, it depends of the cards
                 // Some cards just halt and wait, some others, continue to answer to this ping
@@ -1079,24 +1125,24 @@ namespace Iot.Device.Pn5180
                 // Send a RNAK and wait for the RACK
                 Span<byte> rNak = stackalloc byte[2];
                 rNak[0] = 0b1111_1010;
-                rNak[1] = potentioalActive.Card.TargetNumber;
+                rNak[1] = potentialActive.Card.TargetNumber;
                 ret = SendDataToCard(rNak);
-                var numByts = ReadWithTimeout(rNak, (int)(potentioalActive.Card.FrameWaitingTime / 1000));
+                var numByts = ReadWithTimeout(rNak, (int)(potentialActive.Card.FrameWaitingTime / 1000));
                 if ((!ret) || (numByts != 2))
                 {
-                    _activeSelected.Remove(potentioalActive);
+                    _activeSelected.Remove(potentialActive);
                     continue;
                 }
 
-                if (rNak[1] != potentioalActive.Card.TargetNumber)
+                if (rNak[1] != potentialActive.Card.TargetNumber)
                 {
-                    _activeSelected.Remove(potentioalActive);
+                    _activeSelected.Remove(potentialActive);
                     continue;
                 }
 
-                if (rNak[0] != (potentioalActive.LastBlockMark ? 0b1010_1010 : 0b1010_1011))
+                if (rNak[0] != (potentialActive.LastBlockMark ? 0b1010_1010 : 0b1010_1011))
                 {
-                    _activeSelected.Remove(potentioalActive);
+                    _activeSelected.Remove(potentialActive);
                     continue;
                 }
 
@@ -1107,7 +1153,7 @@ namespace Iot.Device.Pn5180
             var target = _activeSelected.Select(m => m.Card.TargetNumber);
             for (int i = 1; i < 14; i++)
             {
-                if (!target.Where(m => m == i).Any())
+                if (!target.Any(m => m == i))
                 {
                     targetNumber = (byte)i;
                     break;
@@ -1232,7 +1278,7 @@ namespace Iot.Device.Pn5180
         /// </summary>
         /// <param name="card">The card to deselect</param>
         /// <returns>True if success</returns>
-        public bool DeselecCardTypeB(Data106kbpsTypeB card)
+        public bool DeselectCardTypeB(Data106kbpsTypeB card)
         {
             // Sblock to deselect is 0b1100_1010 according to ISO 14443-4
             Span<byte> sBlock = new byte[2] { 0b1100_1010, card.TargetNumber };
@@ -1285,7 +1331,7 @@ namespace Iot.Device.Pn5180
         /// </summary>
         /// <param name="buffer">The buffer to process</param>
         /// <param name="crc">The CRC, Must be a 2 bytes buffer</param>
-        public void CalculateCrcB(Span<byte> buffer, Span<byte> crc)
+        public void CalculateCrcB(ReadOnlySpan<byte> buffer, Span<byte> crc)
         {
             if (crc.Length != 2)
             {
@@ -1303,7 +1349,7 @@ namespace Iot.Device.Pn5180
         /// </summary>
         /// <param name="buffer">The buffer to process</param>
         /// <param name="crc">The CRC, Must be a 2 bytes buffer</param>
-        public void CalculateCrcA(Span<byte> buffer, Span<byte> crc)
+        public void CalculateCrcA(ReadOnlySpan<byte> buffer, Span<byte> crc)
         {
             if (crc.Length != 2)
             {
@@ -1315,12 +1361,12 @@ namespace Iot.Device.Pn5180
             crc[1] = (byte)(crcRet >> 8);
         }
 
-        private ushort CalculateCrc(Span<byte> buffer, ushort crcB)
+        private ushort CalculateCrc(ReadOnlySpan<byte> buffer, ushort crcB)
         {
             // Page 42 of ISO14443-3.pdf
             for (int i = 0; i < buffer.Length; i++)
             {
-                var crcInterim = buffer[i];
+                byte crcInterim = buffer[i];
                 crcInterim = (byte)(crcInterim ^ (crcB & 0xFF));
                 crcInterim = (byte)(crcInterim ^ (crcInterim << 4));
                 crcB = (ushort)((crcB >> 8) ^ (crcInterim << 8) ^ (crcInterim << 3) ^ (crcInterim >> 4));
@@ -1340,7 +1386,10 @@ namespace Iot.Device.Pn5180
             try
             {
                 SpiReadRegister(Register.RX_STATUS, rxStatus);
-                LogInfo.Log($"{nameof(GetRxStatus)}: {nameof(rxStatus)}: {BitConverter.ToString(rxStatus.ToArray())}", LogLevel.Debug);
+                if (LogLevel >= LogLevel.Debug)
+                {
+                    LogInfo.Log($"{nameof(GetRxStatus)}: {nameof(rxStatus)}: {BitConverter.ToString(rxStatus.ToArray())}", LogLevel.Debug);
+                }
             }
             catch (TimeoutException)
             {
@@ -1362,7 +1411,10 @@ namespace Iot.Device.Pn5180
             try
             {
                 SpiReadRegister(Register.IRQ_STATUS, irqStatus);
-                LogInfo.Log($"{nameof(GetIrqStatus)}: {nameof(irqStatus)}: {BitConverter.ToString(irqStatus.ToArray())}", LogLevel.Debug);
+                if (LogLevel >= LogLevel.Debug)
+                {
+                    LogInfo.Log($"{nameof(GetIrqStatus)}: {nameof(irqStatus)}: {BitConverter.ToString(irqStatus.ToArray())}", LogLevel.Debug);
+                }
             }
             catch (TimeoutException)
             {
@@ -1421,10 +1473,10 @@ namespace Iot.Device.Pn5180
             // 4.Deassert NSS
             // 5.Wait until BUSY is low
             // Wait for the PN8150 to be ready
-            int timeout = TimeoutWaiting;
+            Stopwatch stopwatch = Stopwatch.StartNew();
             while (_gpioController.Read(_pinBusy) == PinValue.High)
             {
-                if (timeout-- == 0)
+                if (stopwatch.Elapsed.TotalMilliseconds >= TimeoutWaitingMilliseconds)
                 {
                     throw new TimeoutException($"PN8150 not ready to write");
                 }
@@ -1434,10 +1486,10 @@ namespace Iot.Device.Pn5180
             Thread.Sleep(2);
             _spiDevice.Write(toSend);
 
-            timeout = TimeoutWaiting;
+            stopwatch = Stopwatch.StartNew();
             while (_gpioController.Read(_pinBusy) == PinValue.Low)
             {
-                if (timeout-- == 0)
+                if (stopwatch.Elapsed.TotalMilliseconds >= TimeoutWaitingMilliseconds)
                 {
                     throw new TimeoutException($"PN8150 is still busy after writting");
                 }
@@ -1460,10 +1512,10 @@ namespace Iot.Device.Pn5180
             // 5.Wait until BUSY is low
 
             // Wait for the PN8150 to be ready
-            int timeout = TimeoutWaiting;
+            Stopwatch stopwatch = Stopwatch.StartNew();
             while (_gpioController.Read(_pinBusy) == PinValue.High)
             {
-                if (timeout-- == 0)
+                if (stopwatch.Elapsed.TotalMilliseconds >= TimeoutWaitingMilliseconds)
                 {
                     throw new TimeoutException($"PN8150 not ready to write");
                 }
@@ -1474,15 +1526,18 @@ namespace Iot.Device.Pn5180
             // In order to write data to or read data from the PN5180, "dummy reads" shall be
             // performed.The Figure 8 and Figure 9 are illustrating the usage of this "dummy reads" on
             // the SPI interface.
+            Span<byte> dummyRead = stackalloc byte[1];
+            dummyRead[0] = 0xFF;
+
             for (int i = 0; i < toRead.Length; i++)
             {
-                _spiDevice.TransferFullDuplex(new byte[] { 0xFF }, toRead.Slice(i, 1));
+                _spiDevice.TransferFullDuplex(dummyRead, toRead.Slice(i, 1));
             }
 
-            timeout = TimeoutWaiting;
+            stopwatch = Stopwatch.StartNew();
             while (_gpioController.Read(_pinBusy) == PinValue.Low)
             {
-                if (timeout-- == 0)
+                if (stopwatch.Elapsed.TotalMilliseconds >= TimeoutWaitingMilliseconds)
                 {
                     throw new TimeoutException($"PN8150 is still busy after reading");
                 }

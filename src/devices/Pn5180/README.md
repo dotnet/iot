@@ -36,7 +36,7 @@ Thread.Sleep(10);
 var pn5180 = new Pn5180(spi, 2, 3);
 ```
 
-You will note that the SPI maximum clock frenquency is preset with ```Pn5180.SpiClockFrequency```, the maximum operation frequency is 7MHz. Same for the mode thru ```Pn5180.SpiMode```. Data Flow has to be ```DataFlow.MsbFirst```.
+You will note that the SPI maximum clock frenquency is preset with ```Pn5180.MaximumSpiClockFrequency```, the maximum operation frequency is 7MHz. Same for the mode thru ```Pn5180.DefaultSpiMode```. Data Flow has to be ```DataFlow.MsbFirst```.
 
 In the previous example the pin 2 is used for busy and the pin 3 for the SPI selection. Note that you have to use a specific pin selection and cannot use the one which is associate with the SPI channel you create. 
 
@@ -49,7 +49,7 @@ Data106kbpsTypeA cardTypeA;
 do
 {
     // This will try to select the card for 1 second and will wait 300 milliseconds before trying again if none is found
-    var retok = _pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequenceConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequenceConfiguration.Iso14443A_Nfc_PI_106_106, out cardTypeA, 1000);
+    var retok = _pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, out cardTypeA, 1000);
     if (retok)
     {
         Console.WriteLine($"ISO 14443 Type A found:");
@@ -74,7 +74,7 @@ Data106kbpsTypeB card;
 do
 {
     // This will try to select the card for 1 second, if no card detected wait for 300 milliseconds and try again
-    retok = _pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequenceConfiguration.Iso14443B_106, ReceiverRadioFrequenceConfiguration.Iso14443B_106, out card, 1000);
+    retok = _pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out card, 1000);
     if (!retok)
     {
         Thread.Sleep(300);
@@ -108,7 +108,7 @@ do
 while (!Console.KeyAvailable);
 ```
 
-Please note that the ```ListenToCardIso14443TypeA``` and ```ListenToCardIso14443TypeB``` can be configured with different transceiver and receiver configurations. Usually the configuration need to match but you can adjust and change them. See the section with Radio Frequence configuration for more information.
+Please note that the ```ListenToCardIso14443TypeA``` and ```ListenToCardIso14443TypeB``` can be configured with different transceiver and receiver configurations. Usually the configuration need to match but you can adjust and change them. See the section with Radio Frequency configuration for more information.
 
 A card will be continuously tried to be detected during the duration on your polling. If nothing is detected or if any issue, the function will return false.
 
@@ -178,13 +178,13 @@ The PN5180 offers the possibility to set a lot of configurations. The good news 
 
 ```csharp
 // Number of configuration
-var sizeConfig = _pn5180.GetRadioFrequenceConfigSize(TransmitterRadioFrequenceConfiguration.Iso14443B_106);
-// The RadioFrequenceConfiguraitonSize is 5, 1 for the register and 4 for the register data
-Span<byte> configBuff = stackalloc byte[Pn5180.RadioFrequenceConfiguraitonSize * sizeConfig];
-var ret = _pn5180.RetrieveRadioFrequenceConfiguration(TransmitterRadioFrequenceConfiguration.Iso14443B_106, configBuff);
+var sizeConfig = _pn5180.GetRadioFrequencyConfigSize(TransmitterRadioFrequencyConfiguration.Iso14443B_106);
+// The RadioFrequencyConfiguraitonSize is 5, 1 for the register and 4 for the register data
+Span<byte> configBuff = stackalloc byte[Pn5180.RadioFrequencyConfiguraitonSize * sizeConfig];
+var ret = _pn5180.RetrieveRadioFrequencyConfiguration(TransmitterRadioFrequencyConfiguration.Iso14443B_106, configBuff);
 for (int i = 0; i < sizeConfig; i++)
 {
-    Console.WriteLine($"Register: {configBuff[Pn5180.RadioFrequenceConfiguraitonSize * i]}, Data: {BitConverter.ToString(configBuff.Slice(Pn5180.RadioFrequenceConfiguraitonSize * i + 1, Pn5180.RadioFrequenceConfiguraitonSize - 1).ToArray())}");
+    Console.WriteLine($"Register: {configBuff[Pn5180.RadioFrequencyConfiguraitonSize * i]}, Data: {BitConverter.ToString(configBuff.Slice(Pn5180.RadioFrequencyConfiguraitonSize * i + 1, Pn5180.RadioFrequencyConfiguraitonSize - 1).ToArray())}");
 }
 ```
 
@@ -200,7 +200,7 @@ This shows how to dump a Mifare (ISO 14443 type A) card fully:
 Data106kbpsTypeA cardTypeA;
 
 // Let's pull for 20 seconds and see the result
-var retok = _pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequenceConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequenceConfiguration.Iso14443A_Nfc_PI_106_106, out cardTypeA, 20000);
+var retok = _pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, out cardTypeA, 20000);
 Console.WriteLine();
 
 if (!retok)
@@ -270,8 +270,8 @@ The [example](./samples/Pn5180sample.cs) contains as well an implementation to f
 ## Current implementation
 
 Communication support:
-- [X] SPI: fully supported
-- [X] GPIO Controller: fully supported
+- [X] Hardware SPI Controller fully supported
+- [X] GPIO Controller fully supported
 
 Miscellaneous
 - [X] Read fully EEPROM

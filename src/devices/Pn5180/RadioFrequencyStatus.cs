@@ -9,9 +9,9 @@ using System.Text;
 namespace Iot.Device.Pn5180
 {
     /// <summary>
-    /// The radio frequence status
+    /// The radio frequency status
     /// </summary>
-    public enum RadioFrequenceStatus
+    public enum RadioFrequencyStatus
     {
         /// <summary>Idle</summary>
         Idle = 0,

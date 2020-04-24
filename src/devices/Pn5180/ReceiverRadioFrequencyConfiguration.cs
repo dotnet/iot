@@ -9,9 +9,9 @@ using System.Text;
 namespace Iot.Device.Pn5180
 {
     /// <summary>
-    /// Receiver radio frequence configuration
+    /// Receiver radio frequency configuration
     /// </summary>
-    public enum ReceiverRadioFrequenceConfiguration
+    public enum ReceiverRadioFrequencyConfiguration
     {
         /// <summary>Protocol: ISO 14443-A / NFC PI-106 Speed (kbit/s): 106</summary>
         Iso14443A_Nfc_PI_106_106 = 0x80,

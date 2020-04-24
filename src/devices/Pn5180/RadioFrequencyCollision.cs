@@ -11,7 +11,7 @@ namespace Iot.Device.Pn5180
     /// <summary>
     /// The radio frequence collision
     /// </summary>
-    public enum RadioFrequenceCollision
+    public enum RadioFrequencyCollision
     {
         /// <summary>
         /// Normal mode
