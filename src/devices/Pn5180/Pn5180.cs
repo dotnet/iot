@@ -451,7 +451,7 @@ namespace Iot.Device.Pn5180
         /// <inheritdoc/>
         public override int Transceive(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
         {
-            // Check if we have a Mirafare Card authentication request
+            // Check if we have a Mifare Card authentication request
             // Only valid for Type A card so with a target number equal to 0
             if ((targetNumber == 0) && ((dataToSend[0] == (byte)MifareCardCommand.AuthenticationA) || (dataToSend[0] == (byte)MifareCardCommand.AuthenticationB)))
             {
@@ -470,7 +470,7 @@ namespace Iot.Device.Pn5180
             if (targetNumber == 0)
             {
                 // Case of a type A card
-                return TranceiveBuffer(dataToSend, dataFromCard);
+                return TransceiveBuffer(dataToSend, dataFromCard);
             }
             else
             {
@@ -498,7 +498,7 @@ namespace Iot.Device.Pn5180
                 // Second byte it the number (CID)
                 toSend[1] = targetNumber;
                 dataToSend.CopyTo(toSend.Slice(2));
-                var numBytes = TranceiveTypeB(card, toSend, toReceive);
+                var numBytes = TransceiveTypeB(card, toSend, toReceive);
 
             RetryBlock:
                 if (numBytes == 0)
@@ -550,7 +550,7 @@ namespace Iot.Device.Pn5180
                         // Send Ack with the right mark
                         card.LastBlockMark = !card.LastBlockMark;
                         Span<byte> rBlockChain = new byte[2] { (byte)(0b1010_1010 | (card.LastBlockMark ? 1 : 0)), targetNumber };
-                        var numBytes2 = TranceiveTypeB(card, rBlockChain, toReceive);
+                        var numBytes2 = TransceiveTypeB(card, rBlockChain, toReceive);
 
                         if (numBytes2 >= 2)
                         {
@@ -591,7 +591,7 @@ namespace Iot.Device.Pn5180
             }
         }
 
-        private int TranceiveTypeB(SelectedPiccInformation card, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
+        private int TransceiveTypeB(SelectedPiccInformation card, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
         {
             var ret = SendDataToCard(dataToSend.ToArray());
             if (!ret)
@@ -644,7 +644,7 @@ namespace Iot.Device.Pn5180
             return numBytes;
         }
 
-        private int TranceiveBuffer(ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
+        private int TransceiveBuffer(ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
         {
             var ret = SendDataToCard(dataToSend.ToArray());
             if (!ret)
@@ -683,11 +683,11 @@ namespace Iot.Device.Pn5180
         /// Specific function to authenticate Mifare cards
         /// </summary>
         /// <param name="key">A 6 bytes key</param>
-        /// <param name="mirafareCommand">MifareCardCommand.AuthenticationA or MifareCardCommand.AuthenticationB</param>
+        /// <param name="mifareCommand">MifareCardCommand.AuthenticationA or MifareCardCommand.AuthenticationB</param>
         /// <param name="blockAddress">The block address to authenticate</param>
         /// <param name="cardUid">The 4 bytes UUID of the card</param>
         /// <returns>True if success</returns>
-        public bool MifareAuthenticate(Span<byte> key, MifareCardCommand mirafareCommand, byte blockAddress, Span<byte> cardUid)
+        public bool MifareAuthenticate(Span<byte> key, MifareCardCommand mifareCommand, byte blockAddress, Span<byte> cardUid)
         {
             LogInfo.Log($"{nameof(MifareAuthenticate)}: ", LogLevel.Debug);
             if (key.Length != 6)
@@ -700,7 +700,7 @@ namespace Iot.Device.Pn5180
                 throw new ArgumentException($"UID must be 4 bytes");
             }
 
-            if (!((mirafareCommand == MifareCardCommand.AuthenticationA) || (mirafareCommand == MifareCardCommand.AuthenticationB)))
+            if (!((mifareCommand == MifareCardCommand.AuthenticationA) || (mifareCommand == MifareCardCommand.AuthenticationB)))
             {
                 throw new ArgumentException($"{nameof(MifareCardCommand.AuthenticationA)} and {nameof(MifareCardCommand.AuthenticationB)} are the only supported commands");
             }
@@ -710,7 +710,7 @@ namespace Iot.Device.Pn5180
             toAuthenticate[0] = (byte)Command.MIFARE_AUTHENTICATE;
             key.CopyTo(toAuthenticate.Slice(1));
             // Page 32 documentation PN5180A0XX-C3
-            toAuthenticate[7] = (byte)(mirafareCommand == MifareCardCommand.AuthenticationA ? 0x60 : 0x61);
+            toAuthenticate[7] = (byte)(mifareCommand == MifareCardCommand.AuthenticationA ? 0x60 : 0x61);
             toAuthenticate[8] = blockAddress;
             cardUid.CopyTo(toAuthenticate.Slice(9));
             if (LogLevel >= LogLevel.Debug)
@@ -1429,7 +1429,7 @@ namespace Iot.Device.Pn5180
 
         #region SPI primitives
 
-        private void SpiWriteRegister(Command command, Register register, Span<byte> data)
+        private void SpiWriteRegister(Command command, Register register, ReadOnlySpan<byte> data)
         {
             if (data.Length != 4)
             {
@@ -1454,13 +1454,13 @@ namespace Iot.Device.Pn5180
             SpiRead(readBuffer);
         }
 
-        private void SpiWriteRead(Span<byte> toSend, Span<byte> toRead)
+        private void SpiWriteRead(ReadOnlySpan<byte> toSend, Span<byte> toRead)
         {
             SpiWrite(toSend);
             SpiRead(toRead);
         }
 
-        private void SpiWrite(Span<byte> toSend)
+        private void SpiWrite(ReadOnlySpan<byte> toSend)
         {
             // Both master and slave devices must operate with the same timing.The master device
             // always places data on the MOSI line a half cycle before the clock edge SCK, in order for
