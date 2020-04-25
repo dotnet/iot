@@ -143,7 +143,7 @@ namespace DemoMpu9250
                 Console.WriteLine($"Acc X = {acc.X,15}");
                 Console.WriteLine($"Acc Y = {acc.Y,15}");
                 Console.WriteLine($"Acc Z = {acc.Z,15}");
-                Console.WriteLine($"Temp = {mpu9250.GetTemperature().Celsius.ToString("0.00")} °C");
+                Console.WriteLine($"Temp = {mpu9250.GetTemperature().DegreesCelsius.ToString("0.00")} °C");
                 var magne = mpu9250.ReadMagnetometer();
                 Console.WriteLine($"Mag X = {magne.X,15}");
                 Console.WriteLine($"Mag Y = {magne.Y,15}");

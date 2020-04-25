@@ -20,7 +20,7 @@ namespace Iot.Device.OneWire.Samples
                 foreach (var dev in OneWireThermometerDevice.EnumerateDevices())
                 {
                     Console.WriteLine($"Temperature reported by '{dev.DeviceId}': " +
-                                      (await dev.ReadTemperatureAsync()).Celsius.ToString("F2") + "\u00B0C");
+                                      (await dev.ReadTemperatureAsync()).DegreesCelsius.ToString("F2") + "\u00B0C");
                 }
             }
             else
@@ -39,7 +39,7 @@ namespace Iot.Device.OneWire.Samples
                         {
                             var devTemp = new OneWireThermometerDevice(busId, devId);
                             Console.WriteLine("Temperature reported by device: " +
-                                              (await devTemp.ReadTemperatureAsync()).Celsius.ToString("F2") +
+                                              (await devTemp.ReadTemperatureAsync()).DegreesCelsius.ToString("F2") +
                                               "\u00B0C");
                         }
                     }

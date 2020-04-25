@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.DHTxx
 {
@@ -30,7 +30,7 @@ namespace Iot.Device.DHTxx
         internal override Temperature GetTemperature(byte[] readBuff)
         {
             var temp = readBuff[2] + readBuff[3] * 0.1;
-            return Temperature.FromCelsius(temp);
+            return Temperature.FromDegreesCelsius(temp);
         }
     }
 }

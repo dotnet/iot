@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.DHTxx
 {
@@ -33,7 +33,7 @@ namespace Iot.Device.DHTxx
             // if MSB = 1 we have negative temperature
             temp = ((readBuff[2] & 0x80) == 0 ? temp : -temp);
 
-            return Temperature.FromCelsius(temp);
+            return Temperature.FromDegreesCelsius(temp);
         }
     }
 }
