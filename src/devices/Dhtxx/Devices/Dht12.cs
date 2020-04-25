@@ -4,7 +4,7 @@
 
 using System.Device.Gpio;
 using System.Device.I2c;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.DHTxx
 {
@@ -50,7 +50,7 @@ namespace Iot.Device.DHTxx
             // if MSB = 1 we have negative temperature
             temp = (readBuff[3] & 0x80) == 0 ? temp : -temp;
 
-            return Temperature.FromCelsius(temp);
+            return Temperature.FromDegreesCelsius(temp);
         }
     }
 }

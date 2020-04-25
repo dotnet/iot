@@ -6,7 +6,7 @@ using System;
 using System.Threading;
 using System.Device.I2c;
 using Iot.Device.Common;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Lps25h.Samples
 {
@@ -18,7 +18,7 @@ namespace Iot.Device.Lps25h.Samples
         public static void Main(string[] args)
         {
             // set this to the current sea level pressure in the area for correct altitude readings
-            var defaultSeaLevelPressure = Pressure.MeanSeaLevel;
+            var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
 
             using (var th = new Lps25h(CreateI2cDevice()))
             {
@@ -28,8 +28,8 @@ namespace Iot.Device.Lps25h.Samples
                     var preValue = th.Pressure;
                     var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
 
-                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
-                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
+                    Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
+                    Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
                     Console.WriteLine($"Altitude: {altValue:0.##}m");
                     Thread.Sleep(1000);
                 }

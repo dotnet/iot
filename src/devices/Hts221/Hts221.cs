@@ -5,7 +5,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Hts221
 {
@@ -30,7 +30,7 @@ namespace Iot.Device.Hts221
             _i2c = i2cDevice;
 
             // Highest resolution for both temperature and humidity sensor:
-            // 0.007 Celsius and 0.03 percentage of relative humidity respectively
+            // 0.007 DegreesCelsius and 0.03 percentage of relative humidity respectively
             byte resolution = 0b0011_1111;
             WriteByte(Register.ResolutionMode, resolution);
 
@@ -47,7 +47,7 @@ namespace Iot.Device.Hts221
         /// <summary>
         /// Temperature
         /// </summary>
-        public Temperature Temperature => Temperature.FromCelsius(GetActualTemperature(ReadInt16(Register.Temperature)));
+        public Temperature Temperature => Temperature.FromDegreesCelsius(GetActualTemperature(ReadInt16(Register.Temperature)));
 
         /// <summary>
         /// Humidity in %rH (percentage relative humidity)

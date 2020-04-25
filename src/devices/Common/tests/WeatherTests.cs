@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 using Iot.Device.Common;
-using Iot.Units;
+using UnitsNet;
 using Xunit;
 
 namespace Iot.Device.Common.Tests
@@ -21,8 +21,8 @@ namespace Iot.Device.Common.Tests
         [InlineData(28, 29.5, 12)]
         public void HeatIndexIsCalculatedCorrectly(double expected, double celsius, double relativeHumidity)
         {
-            var heatIndex = WeatherHelper.CalculateHeatIndex(Temperature.FromCelsius(celsius), relativeHumidity);
-            Assert.Equal(expected, Math.Round(heatIndex.Celsius));
+            var heatIndex = WeatherHelper.CalculateHeatIndex(Temperature.FromDegreesCelsius(celsius), relativeHumidity);
+            Assert.Equal(expected, Math.Round(heatIndex.DegreesCelsius));
         }
 
         [Theory]
@@ -34,8 +34,8 @@ namespace Iot.Device.Common.Tests
         [InlineData(611.213, 0)]
         public void SaturatedVaporPressureOverWater(double expected, double celsius)
         {
-            var saturatedVaporPressure = WeatherHelper.CalculateSaturatedVaporPressureOverWater(Temperature.FromCelsius(celsius));
-            Assert.Equal(expected, saturatedVaporPressure.Pascal, 1);
+            var saturatedVaporPressure = WeatherHelper.CalculateSaturatedVaporPressureOverWater(Temperature.FromDegreesCelsius(celsius));
+            Assert.Equal(expected, saturatedVaporPressure.Pascals, 1);
         }
 
         [Theory]
@@ -46,8 +46,8 @@ namespace Iot.Device.Common.Tests
         [InlineData(22.273, -35)]
         public void SaturatedVaporPressureOverIce(double expected, double celsius)
         {
-            var saturatedVaporPressure = WeatherHelper.CalculateSaturatedVaporPressureOverIce(Temperature.FromCelsius(celsius));
-            Assert.Equal(expected, saturatedVaporPressure.Pascal, 1);
+            var saturatedVaporPressure = WeatherHelper.CalculateSaturatedVaporPressureOverIce(Temperature.FromDegreesCelsius(celsius));
+            Assert.Equal(expected, saturatedVaporPressure.Pascals, 1);
         }
 
         [Theory]
@@ -56,8 +56,8 @@ namespace Iot.Device.Common.Tests
         [InlineData(1904, 22, 72)]
         public void ActualVaporPressureIsCalculatedCorrectly(double expected, double celsius, double relativeHumidity)
         {
-            var actualVaporPressure = WeatherHelper.CalculateActualVaporPressure(Temperature.FromCelsius(celsius), relativeHumidity);
-            Assert.Equal(expected, Math.Round(actualVaporPressure.Pascal, 0));
+            var actualVaporPressure = WeatherHelper.CalculateActualVaporPressure(Temperature.FromDegreesCelsius(celsius), relativeHumidity);
+            Assert.Equal(expected, Math.Round(actualVaporPressure.Pascals, 0));
         }
 
         [Theory]
@@ -67,8 +67,8 @@ namespace Iot.Device.Common.Tests
         [InlineData(27.68, 60, 29)]
         public void DewPointIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
-            var dewPoint = WeatherHelper.CalculateDewPoint(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
-            Assert.Equal(expected, Math.Round(dewPoint.Fahrenheit, 2));
+            var dewPoint = WeatherHelper.CalculateDewPoint(Temperature.FromDegreesFahrenheit(fahrenheit), relativeHumidity);
+            Assert.Equal(expected, Math.Round(dewPoint.DegreesFahrenheit, 2));
         }
 
         [Theory]
@@ -77,7 +77,7 @@ namespace Iot.Device.Common.Tests
         [InlineData(5, 40, 75)]
         public void AbsoluteHumidityIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
-            var absoluteHumidity = WeatherHelper.CalculateAbsoluteHumidity(Temperature.FromFahrenheit(fahrenheit), relativeHumidity);
+            var absoluteHumidity = WeatherHelper.CalculateAbsoluteHumidity(Temperature.FromDegreesFahrenheit(fahrenheit), relativeHumidity);
             Assert.Equal(expected, Math.Round(absoluteHumidity, 0));
         }
 
@@ -87,7 +87,7 @@ namespace Iot.Device.Common.Tests
         [InlineData(547.1, 950)]
         public void AltitudeIsCalculatedCorrectlyAtMslpAndDefaultTemp(double expected, double hpa)
         {
-            var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascal(hpa));
+            var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascals(hpa));
             Assert.Equal(expected, Math.Round(altitude, 2));
         }
 
@@ -97,7 +97,7 @@ namespace Iot.Device.Common.Tests
         [InlineData(547.1, 950, 1013.25)]
         public void AltitudeIsCalculatedCorrectlyAtDefaultTemp(double expected, double hpa, double seaLevelHpa)
         {
-            var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascal(hpa), Pressure.FromHectopascal(seaLevelHpa));
+            var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascals(hpa), Pressure.FromHectopascals(seaLevelHpa));
             Assert.Equal(expected, Math.Round(altitude, 2));
         }
 
@@ -107,7 +107,7 @@ namespace Iot.Device.Common.Tests
         [InlineData(547.1, 950, 1013.25, 15)]
         public void AltitudeIsCalculatedCorrectly(double expected, double hpa, double seaLevelHpa, double celsius)
         {
-            var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascal(hpa), Pressure.FromHectopascal(seaLevelHpa), Temperature.FromCelsius(celsius));
+            var altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascals(hpa), Pressure.FromHectopascals(seaLevelHpa), Temperature.FromDegreesCelsius(celsius));
             Assert.Equal(expected, Math.Round(altitude, 2));
         }
 
@@ -117,8 +117,8 @@ namespace Iot.Device.Common.Tests
         [InlineData(1013.23, 950, 546.89, 15)]
         public void SeaLevelPressureIsCalculatedCorrectly(double expected, double pressure, double altitude, double celsius)
         {
-            var seaLevelPressure = WeatherHelper.CalculateSeaLevelPressure(Pressure.FromHectopascal(pressure), altitude, Temperature.FromCelsius(celsius));
-            Assert.Equal(expected, Math.Round(seaLevelPressure.Hectopascal, 2));
+            var seaLevelPressure = WeatherHelper.CalculateSeaLevelPressure(Pressure.FromHectopascals(pressure), altitude, Temperature.FromDegreesCelsius(celsius));
+            Assert.Equal(expected, Math.Round(seaLevelPressure.Hectopascals, 2));
         }
 
         [Theory]
@@ -127,8 +127,8 @@ namespace Iot.Device.Common.Tests
         [InlineData(950.02, 1013.25, 546.89, 15)]
         public void PressureIsCalculatedCorrectly(double expected, double seaLevelPressure, double altitude, double celsius)
         {
-            var pressure = WeatherHelper.CalculatePressure(Pressure.FromHectopascal(seaLevelPressure), altitude, Temperature.FromCelsius(celsius));
-            Assert.Equal(expected, Math.Round(pressure.Hectopascal, 2));
+            var pressure = WeatherHelper.CalculatePressure(Pressure.FromHectopascals(seaLevelPressure), altitude, Temperature.FromDegreesCelsius(celsius));
+            Assert.Equal(expected, Math.Round(pressure.Hectopascals, 2));
         }
 
         [Theory]
@@ -137,8 +137,8 @@ namespace Iot.Device.Common.Tests
         [InlineData(15, 950, 1013.25, 546.89)]
         public void TemperatureIsCalculatedCorrectly(double expected, double pressure, double seaLevelPressure, double altitude)
         {
-            var temperature = WeatherHelper.CalculateTemperature(Pressure.FromHectopascal(pressure), Pressure.FromHectopascal(seaLevelPressure), altitude);
-            Assert.Equal(expected, Math.Round(temperature.Celsius, 0));
+            var temperature = WeatherHelper.CalculateTemperature(Pressure.FromHectopascals(pressure), Pressure.FromHectopascals(seaLevelPressure), altitude);
+            Assert.Equal(expected, Math.Round(temperature.DegreesCelsius, 0));
         }
 
         [Theory]
@@ -155,9 +155,9 @@ namespace Iot.Device.Common.Tests
         public void CalculateBarometricPressure(double measuredValue, double temperature, double altitude,
             double expected)
         {
-            var result = WeatherHelper.CalculateBarometricPressure(Pressure.FromHectopascal(measuredValue),
-                Temperature.FromCelsius(temperature), altitude);
-            Assert.Equal(expected, result.Hectopascal, 2);
+            var result = WeatherHelper.CalculateBarometricPressure(Pressure.FromHectopascals(measuredValue),
+                Temperature.FromDegreesCelsius(temperature), altitude);
+            Assert.Equal(expected, result.Hectopascals, 2);
         }
 
         [Theory]
@@ -169,9 +169,9 @@ namespace Iot.Device.Common.Tests
         public void CalculateBarometricPressureWithHumidity(double measuredValue, double temperature, double altitude, double relativeHumidity,
             double expected)
         {
-            var result = WeatherHelper.CalculateBarometricPressure(Pressure.FromHectopascal(measuredValue),
-                Temperature.FromCelsius(temperature), altitude, relativeHumidity);
-            Assert.Equal(expected, result.Hectopascal, 2);
+            var result = WeatherHelper.CalculateBarometricPressure(Pressure.FromHectopascals(measuredValue),
+                Temperature.FromDegreesCelsius(temperature), altitude, relativeHumidity);
+            Assert.Equal(expected, result.Hectopascals, 2);
         }
     }
 }

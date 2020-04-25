@@ -10,4 +10,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UnitsNet" Version="4.58.0" />
+  </ItemGroup>
 </Project>

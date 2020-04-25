@@ -12,7 +12,7 @@ using System.Numerics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Iot.Device.Magnetometer;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Imu
 {

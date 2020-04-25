@@ -20,7 +20,7 @@ namespace Iot.Device.Mcp9808.Samples
                 while (true)
                 {
                     // read temperature
-                    Console.WriteLine($"Temperature: {sensor.Temperature.Celsius} ℃");
+                    Console.WriteLine($"Temperature: {sensor.Temperature.DegreesCelsius} ℃");
                     Console.WriteLine();
 
                     Thread.Sleep(1000);

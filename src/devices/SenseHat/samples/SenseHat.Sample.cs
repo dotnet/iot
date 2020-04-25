@@ -6,7 +6,7 @@ using System;
 using System.Drawing;
 using System.Threading;
 using Iot.Device.Common;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.SenseHat.Samples
 {
@@ -23,7 +23,7 @@ namespace Iot.Device.SenseHat.Samples
             // PressureAndTemperature.Run();
 
             // set this to the current sea level pressure in the area for correct altitude readings
-            var defaultSeaLevelPressure = Pressure.MeanSeaLevel;
+            var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
 
             using (var sh = new SenseHat())
             {
@@ -56,8 +56,8 @@ namespace Iot.Device.SenseHat.Samples
                     var magValue = sh.MagneticInduction;
                     var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
 
-                    Console.WriteLine($"Temperature Sensor 1: {tempValue.Celsius:0.#}\u00B0C");
-                    Console.WriteLine($"Temperature Sensor 2: {temp2Value.Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Temperature Sensor 1: {tempValue.DegreesCelsius:0.#}\u00B0C");
+                    Console.WriteLine($"Temperature Sensor 2: {temp2Value.DegreesCelsius:0.#}\u00B0C");
                     Console.WriteLine($"Pressure: {preValue:0.##}hPa");
                     Console.WriteLine($"Altitude: {altValue:0.##}m");
                     Console.WriteLine($"Acceleration: {sh.Acceleration}g");
@@ -66,8 +66,8 @@ namespace Iot.Device.SenseHat.Samples
                     Console.WriteLine($"Relative humidity: {humValue:0.#}%");
 
                     // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
-                    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
-                    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
+                    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
 
                     Thread.Sleep(1000);
                 }

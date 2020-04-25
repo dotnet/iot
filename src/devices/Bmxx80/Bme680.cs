@@ -10,7 +10,7 @@ using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Bmxx80
 {
@@ -377,7 +377,7 @@ namespace Iot.Device.Bmxx80
         {
             if (PressureSampling == Sampling.Skipped)
             {
-                pressure = Pressure.FromPascal(double.NaN);
+                pressure = Pressure.FromPascals(double.NaN);
                 return false;
             }
 
@@ -403,7 +403,7 @@ namespace Iot.Device.Bmxx80
         {
             if (TemperatureSampling == Sampling.Skipped)
             {
-                temperature = Temperature.FromCelsius(double.NaN);
+                temperature = Temperature.FromDegreesCelsius(double.NaN);
                 return false;
             }
 
@@ -451,7 +451,7 @@ namespace Iot.Device.Bmxx80
 
             _bme680Calibration = (Bme680CalibrationData)_calibrationData;
             TryReadTemperature(out var temp);
-            ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, 320, 150, temp.Celsius);
+            ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, 320, 150, temp.DegreesCelsius);
             HeaterProfile = Bme680HeaterProfile.Profile1;
 
             HeaterIsEnabled = true;
@@ -517,7 +517,7 @@ namespace Iot.Device.Bmxx80
                 calculatedPressure = 0;
             }
 
-            return Pressure.FromPascal(calculatedPressure);
+            return Pressure.FromPascals(calculatedPressure);
         }
 
         private bool ReadGasMeasurementIsValid()
