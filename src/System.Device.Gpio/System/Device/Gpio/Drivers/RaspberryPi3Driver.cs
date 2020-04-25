@@ -30,7 +30,7 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         public RaspberryPi3Driver()
         {
-            if (pinNumber < 0 || pinNumber > PinCount)
+            if (pinNumber < 0 || pinNumber >= PinCount)
             {
                 _internalDriver = new RaspberryPi3LinuxDriver();
                 RaspberryPi3LinuxDriver linuxDriver = _internalDriver as RaspberryPi3LinuxDriver;
