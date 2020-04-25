@@ -9,7 +9,6 @@
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
-    <ProjectReference Include="..\Units\Units.csproj" />
     <Compile Include="I2cAddress.cs" />
     <Compile Include="Resolution.cs" />
     <Compile Include="Register.cs" />

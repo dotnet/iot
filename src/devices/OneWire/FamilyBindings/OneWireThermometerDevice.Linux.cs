@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.OneWire
 {
@@ -39,7 +39,7 @@ namespace Iot.Device.OneWire
                 throw new InvalidOperationException("Invalid sensor data format.");
             }
 
-            return Temperature.FromCelsius(temp * 0.001);
+            return Temperature.FromDegreesCelsius(temp * 0.001);
         }
     }
 }

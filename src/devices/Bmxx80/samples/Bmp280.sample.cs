@@ -9,7 +9,7 @@ using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Common;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Samples
 {
@@ -29,7 +29,7 @@ namespace Iot.Device.Samples
             // bus id on the raspberry pi 3
             const int busId = 1;
             // set this to the current sea level pressure in the area for correct altitude readings
-            var defaultSeaLevelPressure = Pressure.MeanSeaLevel;
+            var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bmp280.DefaultI2cAddress);
             var i2cDevice = I2cDevice.Create(i2cSettings);
@@ -52,9 +52,9 @@ namespace Iot.Device.Samples
 
                     // read values
                     i2CBmp280.TryReadTemperature(out var tempValue);
-                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
                     i2CBmp280.TryReadPressure(out var preValue);
-                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
+                    Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
 
                     // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using
                     // double altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
@@ -77,9 +77,9 @@ namespace Iot.Device.Samples
 
                     // read values
                     i2CBmp280.TryReadTemperature(out tempValue);
-                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+                    Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
                     i2CBmp280.TryReadPressure(out preValue);
-                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
+                    Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
 
                     // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using
                     // double altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.

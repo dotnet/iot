@@ -8,7 +8,7 @@ using System.Device.I2c;
 using System.IO;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.Register;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Bmxx80
 {
@@ -185,7 +185,7 @@ namespace Iot.Device.Bmxx80
             TemperatureFine = (int)(var1 + var2);
 
             double temp = (var1 + var2) / 5120.0;
-            return Temperature.FromCelsius(temp);
+            return Temperature.FromDegreesCelsius(temp);
         }
 
         /// <summary>

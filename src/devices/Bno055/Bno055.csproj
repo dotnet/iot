@@ -12,7 +12,6 @@
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
     <PackageReference Include="System.Memory" Version="4.5.3" />
-    <ProjectReference Include="..\Units\Units.csproj" />
   </ItemGroup>
 
 </Project>

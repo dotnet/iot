@@ -15,9 +15,9 @@ using System.Device.Pwm;
 using Iot.Device.Adc;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
-using Iot.Units;
 
 using Xunit;
+using UnitsNet;
 
 using static System.Device.Gpio.Tests.SetupHelpers;
 
@@ -58,12 +58,12 @@ namespace System.Device.Gpio.Tests
 
                 // assuming that tests are run in the room temperature
                 // worst case scenario: it's very hot outside
-                Assert.InRange(temperature.Celsius, 15, 40);
+                Assert.InRange(temperature.DegreesCelsius, 15, 40);
 
                 Assert.True(bme280.TryReadPressure(out Pressure pressure));
                 // https://en.wikipedia.org/wiki/List_of_weather_records
                 // Min and max are extremes recorded on land
-                double pressureHPa = pressure.Hectopascal;
+                double pressureHPa = pressure.Hectopascals;
                 Assert.InRange(pressureHPa, 892, 1084);
 
                 Assert.True(bme280.TryReadHumidity(out double relativeHumidity));

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="UnitsNet" Version="4.58.0" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
       <AdditionalProperties Condition="'$(RuntimeIdentifier)' != ''">RuntimeIdentifier=$(RuntimeIdentifier.SubString(0, $(RuntimeIdentifier.IndexOf('-'))))</AdditionalProperties>
     </ProjectReference>

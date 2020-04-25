@@ -7,7 +7,7 @@ using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Numerics;
 using System.Threading;
-using Iot.Units;
+using Temperature = UnitsNet.Temperature;
 
 namespace Iot.Device.Bno055
 {
@@ -502,11 +502,11 @@ namespace Iot.Device.Bno055
                 // If unit is Farenheit, then divide by 2, otherwise no convertion
                 if ((_units & Units.TemperatureFarenheit) == Units.TemperatureFarenheit)
                 {
-                    return Temperature.FromFahrenheit(ReadByte(Registers.TEMP) / 2.0f);
+                    return Temperature.FromDegreesFahrenheit(ReadByte(Registers.TEMP) / 2.0f);
                 }
                 else
                 {
-                    return Temperature.FromCelsius(ReadByte(Registers.TEMP));
+                    return Temperature.FromDegreesCelsius(ReadByte(Registers.TEMP));
                 }
             }
         }

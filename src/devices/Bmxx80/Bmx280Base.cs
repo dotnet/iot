@@ -11,7 +11,7 @@ using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
 using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Common;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Bmxx80
 {
@@ -102,7 +102,7 @@ namespace Iot.Device.Bmxx80
         {
             if (TemperatureSampling == Sampling.Skipped)
             {
-                temperature = Temperature.FromCelsius(double.NaN);
+                temperature = Temperature.FromDegreesCelsius(double.NaN);
                 return false;
             }
 
@@ -150,7 +150,7 @@ namespace Iot.Device.Bmxx80
         {
             if (PressureSampling == Sampling.Skipped)
             {
-                pressure = Pressure.FromPascal(double.NaN);
+                pressure = Pressure.FromPascals(double.NaN);
                 return false;
             }
 
@@ -164,7 +164,7 @@ namespace Iot.Device.Bmxx80
             var pressPa = CompensatePressure(press >> 4);
 
             // Return the pressure as a Pressure instance.
-            pressure = Pressure.FromHectopascal(pressPa.Hectopascal / 256);
+            pressure = Pressure.FromHectopascals(pressPa.Hectopascals / 256);
             return true;
         }
 
@@ -210,7 +210,7 @@ namespace Iot.Device.Bmxx80
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
         public bool TryReadAltitude(out double altitude)
         {
-            return TryReadAltitude(Pressure.MeanSeaLevel, out altitude);
+            return TryReadAltitude(WeatherHelper.MeanSeaLevel, out altitude);
         }
 
         /// <summary>
@@ -291,7 +291,7 @@ namespace Iot.Device.Bmxx80
             var1 = ((((1L << 47) + var1)) * (long)_calibrationData.DigP1) >> 33;
             if (var1 == 0)
             {
-                return Pressure.FromPascal(0); // Avoid exception caused by division by zero
+                return Pressure.FromPascals(0); // Avoid exception caused by division by zero
             }
 
             // Perform calibration operations
@@ -301,7 +301,7 @@ namespace Iot.Device.Bmxx80
             var2 = ((long)_calibrationData.DigP8 * p) >> 19;
             p = ((p + var1 + var2) >> 8) + ((long)_calibrationData.DigP7 << 4);
 
-            return Pressure.FromPascal(p);
+            return Pressure.FromPascals(p);
         }
     }
 }
