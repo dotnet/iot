@@ -13,22 +13,40 @@ namespace System.Device.Gpio.Drivers
     /// </summary>
     public class RaspberryPi3Driver : GpioDriver
     {
-        private RaspberryPiRegisterDriver _internalDriver;
+        private GpioDriver _internalDriver;
+
+        /* private delegates for register Properties */
+        private delegate void Set_Register(ulong value);
+        private delegate ulong Get_Register();
+
+        private readonly Set_Register _setSetRegister;
+        private readonly Get_Register _getSetRegister;
+        private readonly Set_Register _setClearRegister;
+        private readonly Get_Register _getClearRegister;
 
         public RaspberryPi3Driver()
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 _internalDriver = new RaspberryPi3LinuxDriver();
+                RaspberryPi3LinuxDriver linuxDriver = _internalDriver as RaspberryPi3LinuxDriver;
+                _setSetRegister = (value) => linuxDriver.SetRegister = value;
+                _setClearRegister = (value) => linuxDriver.ClearRegister = value;
+                _getSetRegister = () => linuxDriver.SetRegister;
+                _getClearRegister = () => linuxDriver.ClearRegister;
             }
             else
             {
-                _internalDriver = new RaspberryPiRegisterDriver();
+                _internalDriver = new Windows10Driver();
+                _setSetRegister = (value) => throw new PlatformNotSupportedException();
+                _setClearRegister = (value) => throw new PlatformNotSupportedException();
+                _getSetRegister = () => throw new PlatformNotSupportedException();
+                _getClearRegister = () => throw new PlatformNotSupportedException();
             }
         }
 
         /// <inheritdoc/>
-        protected internal override int PinCount => _internalDriver.PinCount;
+        protected internal override int PinCount => 28;
 
         /// <inheritdoc/>
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => _internalDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
@@ -37,7 +55,41 @@ namespace System.Device.Gpio.Drivers
         protected internal override void ClosePin(int pinNumber) => _internalDriver.ClosePin(pinNumber);
 
         /// <inheritdoc/>
-        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => _internalDriver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+        protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
+        {
+            return pinNumber switch
+            {
+                3 => 2,
+                5 => 3,
+                7 => 4,
+                8 => 14,
+                10 => 15,
+                11 => 17,
+                12 => 18,
+                13 => 27,
+                15 => 22,
+                16 => 23,
+                18 => 24,
+                19 => 10,
+                21 => 9,
+                22 => 25,
+                23 => 11,
+                24 => 8,
+                26 => 7,
+                27 => 0,
+                28 => 1,
+                29 => 5,
+                31 => 6,
+                32 => 12,
+                33 => 13,
+                35 => 19,
+                36 => 16,
+                37 => 26,
+                38 => 20,
+                40 => 21,
+                _ => throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber))
+            };
+        }
 
         /// <inheritdoc/>
         protected internal override PinMode GetPinMode(int pinNumber) => _internalDriver.GetPinMode(pinNumber);
@@ -69,17 +121,17 @@ namespace System.Device.Gpio.Drivers
         protected ulong SetRegister
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _internalDriver.SetRegister;
+            get => _getSetRegister();
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => _internalDriver.SetRegister = value;
+            set => _setSetRegister(value);
         }
 
         protected ulong ClearRegister
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _internalDriver.ClearRegister;
+            get => _getClearRegister();
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => _internalDriver.ClearRegister = value;
+            set => _setClearRegister(value);
         }
 
         protected override void Dispose(bool disposing)

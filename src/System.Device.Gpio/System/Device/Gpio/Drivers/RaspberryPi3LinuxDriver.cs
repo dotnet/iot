@@ -15,7 +15,7 @@ namespace System.Device.Gpio.Drivers
     /// <summary>
     /// A GPIO driver for the Raspberry Pi 3 or 4, running Raspbian (or, with some limitations, ubuntu)
     /// </summary>
-    internal unsafe class RaspberryPi3LinuxDriver : RaspberryPiRegisterDriver
+    internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
     {
         private const int ENOENT = 2; // error indicates that an entity doesn't exist
         private const uint PeripheralBaseAddressBcm2835 = 0x2000_0000;
@@ -422,7 +422,7 @@ namespace System.Device.Gpio.Drivers
             *registerPointer = register;
         }
 
-        protected internal override ulong SetRegister
+        protected internal ulong SetRegister
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return *(ulong*)(_registerViewPointer->GPSET); }
@@ -431,7 +431,7 @@ namespace System.Device.Gpio.Drivers
             set { *(ulong*)(_registerViewPointer->GPSET) = value; }
         }
 
-        protected internal override ulong ClearRegister
+        protected internal ulong ClearRegister
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return *(ulong*)(_registerViewPointer->GPCLR); }
