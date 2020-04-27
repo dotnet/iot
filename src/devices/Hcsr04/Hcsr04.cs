@@ -17,6 +17,7 @@ namespace Iot.Device.Hcsr04
         private readonly int _echo;
         private readonly int _trigger;
         private GpioController _controller;
+        private bool _shouldDispose;
         private Stopwatch _timer = new Stopwatch();
 
         private int _lastMeasurment = 0;
@@ -32,11 +33,13 @@ namespace Iot.Device.Hcsr04
         /// <param name="gpioController">GPIO controller related with the pins</param>
         /// <param name="triggerPin">Trigger pulse input.</param>
         /// <param name="echoPin">Trigger pulse output.</param>
-        public Hcsr04(GpioController gpioController, int triggerPin, int echoPin)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Hcsr04(GpioController gpioController, int triggerPin, int echoPin, bool shouldDispose = true)
         {
             _echo = echoPin;
             _trigger = triggerPin;
             _controller = gpioController;
+            _shouldDispose = shouldDispose;
 
             _controller.OpenPin(_echo, PinMode.Input);
             _controller.OpenPin(_trigger, PinMode.Output);
@@ -147,9 +150,9 @@ namespace Iot.Device.Hcsr04
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_controller != null)
+            if (_shouldDispose)
             {
-                _controller.Dispose();
+                _controller?.Dispose();
                 _controller = null;
             }
         }

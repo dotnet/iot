@@ -15,7 +15,7 @@ namespace Iot.Device.MotorHat
         private double _speed = 0;
 
         public DCMotor3Pwm(PwmChannel pwm, PwmChannel in1, PwmChannel in2)
-            : base(null)
+            : base(null, true)
         {
             _pwmPin = pwm;
             _pwmPin.DutyCycle = _speed;

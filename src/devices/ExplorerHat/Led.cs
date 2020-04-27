@@ -30,9 +30,11 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         /// <param name="pin">Underlying rpi GPIO pin number</param>
         /// <param name="controller"><see cref="GpioController"/> used by <see cref="Led"/> to manage GPIO resources</param>
-        internal Led(int pin, GpioController controller)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        internal Led(int pin, GpioController controller, bool shouldDispose = true)
         {
             _controller = controller;
+            _shouldDispose = shouldDispose;
             Pin = pin;
             IsOn = false;
 
@@ -65,6 +67,8 @@ namespace Iot.Device.ExplorerHat
 
         #region IDisposable Support
 
+        private bool _shouldDispose;
+        // This to avoid double dispose
         private bool _disposedValue = false;
 
         /// <summary>
@@ -77,6 +81,11 @@ namespace Iot.Device.ExplorerHat
                 if (disposing)
                 {
                     Off();
+                    if (_shouldDispose)
+                    {
+                        _controller?.Dispose();
+                        _controller = null;
+                    }
                 }
 
                 _disposedValue = true;

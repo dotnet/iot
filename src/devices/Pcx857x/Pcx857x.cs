@@ -23,6 +23,7 @@ namespace Iot.Device.Pcx857x
         protected I2cDevice Device { get; }
         private readonly GpioController _masterGpioController;
         private readonly int _interrupt;
+        private bool _shouldDispose;
 
         // Pin mode bits- 0 for input, 1 for output to match PinMode
         private ushort _pinModes;
@@ -39,10 +40,12 @@ namespace Iot.Device.Pcx857x
         /// The GPIO controller for the <paramref name="interrupt"/>.
         /// If not specified, the default controller will be used.
         /// </param>
-        public Pcx857x(I2cDevice device, int interrupt = -1, GpioController gpioController = null)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Pcx857x(I2cDevice device, int interrupt = -1, GpioController gpioController = null, bool shouldDispose = true)
         {
             Device = device ?? throw new ArgumentNullException(nameof(device));
             _interrupt = interrupt;
+            _shouldDispose = gpioController == null ? true : shouldDispose;
 
             if (_interrupt != -1)
             {
@@ -109,6 +112,11 @@ namespace Iot.Device.Pcx857x
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
+            if (_shouldDispose)
+            {
+                _masterGpioController?.Dispose();
+            }
+
             Device.Dispose();
             base.Dispose(disposing);
         }

@@ -67,9 +67,11 @@ namespace Iot.Device.ExplorerHat
         /// Initializes a <see cref="Motors"/> instance
         /// </summary>
         /// <param name="controller"><see cref="GpioController"/> used by <see cref="Motors"/> to manage GPIO resources</param>
-        internal Motors(GpioController controller)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        internal Motors(GpioController controller, bool shouldDispose = true)
         {
             _controller = controller;
+            _shouldDispose = shouldDispose;
 
             _motorArray = new List<DCMotor.DCMotor>()
             {
@@ -80,6 +82,8 @@ namespace Iot.Device.ExplorerHat
 
         #region IDisposable Support
 
+        private bool _shouldDispose;
+        // This to avoid double dispose
         private bool _disposedValue = false;
 
         /// <summary>
@@ -93,6 +97,11 @@ namespace Iot.Device.ExplorerHat
                 {
                     _motorArray[0].Dispose();
                     _motorArray[1].Dispose();
+                    if (_shouldDispose)
+                    {
+                        _controller?.Dispose();
+                        _controller = null;
+                    }
                 }
 
                 _disposedValue = true;

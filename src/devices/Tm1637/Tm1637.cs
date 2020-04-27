@@ -29,6 +29,7 @@ namespace Iot.Device.Tm1637
         private readonly int _pinClk;
         private readonly int _pinDio;
         private GpioController _controller;
+        private bool _shouldDispose;
 
         private byte _brightness;
 
@@ -47,14 +48,16 @@ namespace Iot.Device.Tm1637
         /// <param name="pinDio">The data pin</param>
         /// <param name="pinNumberingScheme">Use the logical or physical pin layout</param>
         /// <param name="gpioController">A Gpio Controller if you want to use a specific one</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Tm1637(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical,
-            GpioController gpioController = null)
+            GpioController gpioController = null, bool shouldDispose = true)
         {
             _pinClk = pinClk;
             _pinDio = pinDio;
             _controller = gpioController != null
                 ? (GpioController)gpioController
                 : new GpioController(pinNumberingScheme);
+            _shouldDispose = gpioController == null ? true : shouldDispose;
             _controller.OpenPin(_pinClk, PinMode.Output);
             _controller.OpenPin(_pinDio, PinMode.Output);
             _brightness = 7;
@@ -329,8 +332,12 @@ namespace Iot.Device.Tm1637
             // 6 segments with nothing/space displayed
             Span<byte> clearDisplay = stackalloc byte[]
             {
-                (byte)Character.Nothing, (byte)Character.Nothing, (byte)Character.Nothing, (byte)Character.Nothing,
-                (byte)Character.Nothing, (byte)Character.Nothing,
+                (byte)Character.Nothing,
+                (byte)Character.Nothing,
+                (byte)Character.Nothing,
+                (byte)Character.Nothing,
+                (byte)Character.Nothing,
+                (byte)Character.Nothing,
             };
             Display(clearDisplay);
         }
@@ -340,8 +347,11 @@ namespace Iot.Device.Tm1637
         /// </summary>
         public void Dispose()
         {
-            _controller?.Dispose();
-            _controller = null;
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null;
+            }
         }
     }
 }

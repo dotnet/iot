@@ -45,9 +45,10 @@ namespace Iot.Device.CharacterLcd
             private bool _useLastByte;
 
             private GpioController _controller;
+            private bool _shouldDispose;
             private PinValuePair[] _pinBuffer = new PinValuePair[8];
 
-            public Gpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController controller = null)
+            public Gpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController controller = null, bool shouldDispose = true)
             {
                 _rwPin = readWritePin;
                 _rsPin = registerSelectPin;
@@ -65,6 +66,7 @@ namespace Iot.Device.CharacterLcd
                     throw new ArgumentException($"The length of the array given to parameter {nameof(dataPins)} must be 4 or 8");
                 }
 
+                _shouldDispose = controller == null ? true : shouldDispose;
                 _controller = controller ?? new GpioController(PinNumberingScheme.Logical);
 
                 Initialize();
@@ -242,7 +244,12 @@ namespace Iot.Device.CharacterLcd
 
             protected override void Dispose(bool disposing)
             {
-                _controller?.Dispose();
+                if (_shouldDispose)
+                {
+                    _controller?.Dispose();
+                    _controller = null;
+                }
+
                 base.Dispose(disposing);
             }
         }

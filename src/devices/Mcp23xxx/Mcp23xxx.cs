@@ -19,6 +19,7 @@ namespace Iot.Device.Mcp23xxx
         private readonly int _interruptB;
         private BankStyle _bankStyle;
         private GpioController _masterGpioController;
+        private bool _shouldDispose;
 
         /// <summary>
         /// Bus adapter (I2C/SPI) used to communicate with the device
@@ -47,11 +48,13 @@ namespace Iot.Device.Mcp23xxx
         /// detect what style the chip is in and most apps will fail if the chip is not set to defaults. This setting
         /// has no impact on 8-bit expanders.
         /// </param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         protected Mcp23xxx(BusAdapter bus, int reset = -1, int interruptA = -1, int interruptB = -1,
-            GpioController masterController = null, BankStyle bankStyle = BankStyle.Sequential)
+            GpioController masterController = null, BankStyle bankStyle = BankStyle.Sequential, bool shouldDispose = true)
         {
             _bus = bus;
             _bankStyle = bankStyle;
+            _shouldDispose = masterController == null ? true : shouldDispose;
 
             _reset = reset;
             _interruptA = interruptA;
@@ -235,8 +238,12 @@ namespace Iot.Device.Mcp23xxx
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            _masterGpioController?.Dispose();
-            _masterGpioController = null;
+            if (_shouldDispose)
+            {
+                _masterGpioController?.Dispose();
+                _masterGpioController = null;
+            }
+
             _bus?.Dispose();
             _bus = null;
             base.Dispose(disposing);

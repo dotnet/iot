@@ -31,7 +31,7 @@ namespace Iot.Device.ExplorerHat
         public ExplorerHat(GpioController controller = null, bool shouldDispose = true)
         {
             _controller = controller;
-            _shouldDispose = shouldDispose;
+            _shouldDispose = controller == null ? true : shouldDispose;
 
             _controller = controller ?? new GpioController();
 
