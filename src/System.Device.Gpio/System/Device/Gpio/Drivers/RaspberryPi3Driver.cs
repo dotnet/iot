@@ -2,31 +2,59 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace System.Device.Gpio.Drivers
 {
     /// <summary>
-    /// A GPIO driver for the Raspberry Pi 3.
+    /// A GPIO driver for the Raspberry Pi 3 or 4, running Raspbian (or, with some limitations, ubuntu)
     /// </summary>
-    public partial class RaspberryPi3Driver // Different base classes declared in RaspberryPi3Driver.Linux.cs and RaspberryPi3Driver.Windows.cs
+    public class RaspberryPi3Driver : GpioDriver
     {
-        /// <summary>
-        /// Raspberry Pi 3 has 28 GPIO pins.
-        /// </summary>
-        protected internal override int PinCount => 28;
+        private GpioDriver _internalDriver;
 
-        private void ValidatePinNumber(int pinNumber)
+        /* private delegates for register Properties */
+        private delegate void Set_Register(ulong value);
+        private delegate ulong Get_Register();
+
+        private readonly Set_Register _setSetRegister;
+        private readonly Get_Register _getSetRegister;
+        private readonly Set_Register _setClearRegister;
+        private readonly Get_Register _getClearRegister;
+
+        public RaspberryPi3Driver()
         {
-            if (pinNumber < 0 || pinNumber >= PinCount)
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                throw new ArgumentException("The specified pin number is invalid.", nameof(pinNumber));
+                _internalDriver = new RaspberryPi3LinuxDriver();
+                RaspberryPi3LinuxDriver linuxDriver = _internalDriver as RaspberryPi3LinuxDriver;
+                _setSetRegister = (value) => linuxDriver.SetRegister = value;
+                _setClearRegister = (value) => linuxDriver.ClearRegister = value;
+                _getSetRegister = () => linuxDriver.SetRegister;
+                _getClearRegister = () => linuxDriver.ClearRegister;
+            }
+            else
+            {
+                _internalDriver = new Windows10Driver();
+                _setSetRegister = (value) => throw new PlatformNotSupportedException();
+                _setClearRegister = (value) => throw new PlatformNotSupportedException();
+                _getSetRegister = () => throw new PlatformNotSupportedException();
+                _getClearRegister = () => throw new PlatformNotSupportedException();
             }
         }
 
-        /// <summary>
-        /// Converts a board pin number to the driver's logical numbering scheme.
-        /// </summary>
-        /// <param name="pinNumber">The board pin number to convert.</param>
-        /// <returns>The pin number in the driver's logical numbering scheme.</returns>
+        /// <inheritdoc/>
+        protected internal override int PinCount => 28;
+
+        /// <inheritdoc/>
+        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => _internalDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
+
+        /// <inheritdoc/>
+        protected internal override void ClosePin(int pinNumber) => _internalDriver.ClosePin(pinNumber);
+
+        /// <inheritdoc/>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
             return pinNumber switch
@@ -61,6 +89,56 @@ namespace System.Device.Gpio.Drivers
                 40 => 21,
                 _ => throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber))
             };
+        }
+
+        /// <inheritdoc/>
+        protected internal override PinMode GetPinMode(int pinNumber) => _internalDriver.GetPinMode(pinNumber);
+
+        /// <inheritdoc/>
+        protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode) => _internalDriver.IsPinModeSupported(pinNumber, mode);
+
+        /// <inheritdoc/>
+        protected internal override void OpenPin(int pinNumber) => _internalDriver.OpenPin(pinNumber);
+
+        /// <inheritdoc/>
+        protected internal override PinValue Read(int pinNumber) => _internalDriver.Read(pinNumber);
+
+        /// <inheritdoc/>
+        protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) => _internalDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
+
+        /// <inheritdoc/>
+        protected internal override void SetPinMode(int pinNumber, PinMode mode) => _internalDriver.SetPinMode(pinNumber, mode);
+
+        /// <inheritdoc/>
+        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => _internalDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
+
+        /// <inheritdoc/>
+        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => _internalDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
+
+        /// <inheritdoc/>
+        protected internal override void Write(int pinNumber, PinValue value) => _internalDriver.Write(pinNumber, value);
+
+        protected ulong SetRegister
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _getSetRegister();
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => _setSetRegister(value);
+        }
+
+        protected ulong ClearRegister
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _getClearRegister();
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => _setClearRegister(value);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _internalDriver?.Dispose();
+            _internalDriver = null;
+            base.Dispose(disposing);
         }
     }
 }

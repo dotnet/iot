@@ -51,6 +51,23 @@ namespace System.Device.Spi
         /// <param name="readBuffer">The buffer to read the data from the SPI device.</param>
         public abstract void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer);
 
+        /// <summary>
+        /// Creates a communications channel to a device on a SPI bus running on the current hardware
+        /// </summary>
+        /// <param name="settings">The connection settings of a device on a SPI bus.</param>
+        /// <returns>A communications channel to a device on a SPI bus running on Windows 10 IoT.</returns>
+        public static SpiDevice Create(SpiConnectionSettings settings)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return new Windows10SpiDevice(settings);
+            }
+            else
+            {
+                return new UnixSpiDevice(settings);
+            }
+        }
+
         public void Dispose()
         {
             Dispose(true);

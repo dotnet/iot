@@ -12,8 +12,6 @@
 
   <PropertyGroup>
     <Language>C#</Language>
-    <TargetsWindows Condition="$(RuntimeIdentifier.StartsWith('win'))">true</TargetsWindows>
-    <TargetsLinux Condition="$(RuntimeIdentifier.StartsWith('linux'))">true</TargetsLinux>
     <LangVersion>Latest</LangVersion>
     <!-- Generate snupkg package -->
     <IncludeSymbols>true</IncludeSymbols>

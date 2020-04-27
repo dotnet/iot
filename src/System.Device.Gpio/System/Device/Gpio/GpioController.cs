@@ -3,16 +3,32 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Device.Gpio.Drivers;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 
 namespace System.Device.Gpio
 {
     /// <summary>
     /// Represents a general-purpose I/O (GPIO) controller.
     /// </summary>
-    public sealed partial class GpioController : IDisposable
+    public sealed class GpioController : IDisposable
     {
+        // Constants used to check the hardware on linux
+        private const string CpuInfoPath = "/proc/cpuinfo";
+        private const string RaspberryPiHardware = "BCM2835";
+
+        // Constants used to check the hardware on Windows
+        private const string BaseBoardProductRegistryValue = @"SYSTEM\HardwareConfig\Current\BaseBoardProduct";
+        private const string RaspberryPi2Product = "Raspberry Pi 2";
+        private const string RaspberryPi3Product = "Raspberry Pi 3";
+
+        private const string HummingBoardProduct = "HummingBoard-Edge";
+        private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
+
         private readonly GpioDriver _driver;
         private readonly HashSet<int> _openPins;
 
@@ -335,6 +351,91 @@ namespace System.Device.Gpio
                 int pin = pinValuePairs[i].PinNumber;
                 pinValuePairs[i] = new PinValuePair(pin, Read(pin));
             }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GpioController"/> class that will use the specified numbering scheme.
+        /// The controller will default to use the driver that best applies given the platform the program is executing on.
+        /// </summary>
+        /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
+        public GpioController(PinNumberingScheme numberingScheme)
+            : this(numberingScheme, GetBestDriverForBoard())
+        {
+        }
+
+        private static GpioDriver GetBestDriverForBoard()
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return GetBestDriverForBoardOnWindows();
+            }
+            else
+            {
+                return GetBestDriverForBoardOnLinux();
+            }
+        }
+
+        /// <summary>
+        /// Attempt to get the best applicable driver for the board the program is executing on.
+        /// </summary>
+        /// <returns>A driver that works with the board the program is executing on.</returns>
+        private static GpioDriver GetBestDriverForBoardOnLinux()
+        {
+            string[] cpuInfoLines = File.ReadAllLines(CpuInfoPath);
+            Regex regex = new Regex(@"Hardware\s*:\s*(.*)");
+            foreach (string cpuInfoLine in cpuInfoLines)
+            {
+                Match match = regex.Match(cpuInfoLine);
+                if (match.Success)
+                {
+                    if (match.Groups.Count > 1)
+                    {
+                        if (match.Groups[1].Value == RaspberryPiHardware)
+                        {
+                            return new RaspberryPi3Driver();
+                        }
+
+                        // Commenting out as HummingBoard driver is not implemented yet, will be added back after implementation
+                        // https://github.com/dotnet/iot/issues/76
+                        // if (match.Groups[1].Value == HummingBoardHardware)
+                        // {
+                        //     return new HummingBoardDriver();
+                        // }
+                        return UnixDriver.Create();
+                    }
+                }
+            }
+
+            return UnixDriver.Create();
+        }
+
+        /// <summary>
+        /// Attempt to get the best applicable driver for the board the program is executing on.
+        /// </summary>
+        /// <returns>A driver that works with the board the program is executing on.</returns>
+        /// <remarks>
+        ///     This really feels like it needs a driver-based pattern, where each driver exposes a static method:
+        ///     public static bool IsSpecificToCurrentEnvironment { get; }
+        ///     The GpioController could use reflection to find all GpioDriver-derived classes and call this
+        ///     static method to determine if the driver considers itself to be the best match for the environment.
+        /// </remarks>
+        private static GpioDriver GetBestDriverForBoardOnWindows()
+        {
+            string baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
+
+            if (baseBoardProduct == RaspberryPi3Product || baseBoardProduct.StartsWith($"{RaspberryPi3Product} ") ||
+                baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))
+            {
+                return new RaspberryPi3Driver();
+            }
+
+            if (baseBoardProduct == HummingBoardProduct || baseBoardProduct.StartsWith($"{HummingBoardProduct} "))
+            {
+                return new HummingBoardDriver();
+            }
+
+            // Default for Windows IoT Core on a non-specific device
+            return new Windows10Driver();
         }
     }
 }

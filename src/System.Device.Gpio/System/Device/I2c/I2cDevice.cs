@@ -7,7 +7,7 @@ namespace System.Device.I2c
     /// <summary>
     /// The communications channel to a device on an I2C bus.
     /// </summary>
-    public abstract partial class I2cDevice : IDisposable
+    public abstract class I2cDevice : IDisposable
     {
         /// <summary>
         /// The connection settings of a device on an I2C bus. The connection settings are immutable after the device is created
@@ -57,6 +57,23 @@ namespace System.Device.I2c
         /// The length of the buffer determines how much data to read from the I2C device.
         /// </param>
         public abstract void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer);
+
+        /// <summary>
+        /// Creates a communications channel to a device on an I2C bus running on the current platform
+        /// </summary>
+        /// <param name="settings">The connection settings of a device on an I2C bus.</param>
+        /// <returns>A communications channel to a device on an I2C bus running on Windows 10 IoT.</returns>
+        public static I2cDevice Create(I2cConnectionSettings settings)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return new Windows10I2cDevice(settings);
+            }
+            else
+            {
+                return new UnixI2cDevice(settings);
+            }
+        }
 
         public void Dispose()
         {

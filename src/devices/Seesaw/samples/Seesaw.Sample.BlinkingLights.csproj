@@ -8,9 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Seesaw.csproj" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="Seesaw.Sample.BlinkingLights.cs" />
     <Compile Include="../../../../samples/led-more-blinking-lights/TimeEnvelope.cs" />
     <Compile Include="Volume.cs" />
