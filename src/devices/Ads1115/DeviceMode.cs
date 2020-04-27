@@ -12,7 +12,7 @@ namespace Iot.Device.Ads1115
         /// <summary>Continuous mode</summary>
         Continuous = 0x00,
 
-        /// <summary>Power down mode</summary>
+        /// <summary>Power down mode, the chip is shutting down after the next conversion</summary>
         PowerDown = 0x01
     }
 }
