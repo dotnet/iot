@@ -6,9 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="Devices\Tea5767\FrequencyRange.cs" />
     <Compile Include="Devices\Tea5767\SearchDirection.cs" />
     <Compile Include="Devices\Tea5767\Tea5767.cs" />
