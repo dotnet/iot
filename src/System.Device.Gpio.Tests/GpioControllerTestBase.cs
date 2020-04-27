@@ -448,6 +448,7 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
+        [Trait("SkipOnTestRun", "Windows_NT")] // WindowsDriver  is not very fast so this test is flaky on it.
         public void FastInterruptHandling()
         {
             const int numPulses = 100;
