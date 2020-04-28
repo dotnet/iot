@@ -22,6 +22,9 @@ namespace System.Device.Gpio.Drivers
         private readonly int _pinCount;
         private SafeChipHandle _chip;
 
+        /// <summary>
+        /// The number of pins this driver controls
+        /// </summary>
         protected internal override int PinCount => _pinCount;
 
         // for use the bias flags we need libgpiod version 1.5 or later
@@ -103,18 +106,18 @@ namespace System.Device.Gpio.Drivers
         {
             lock (_pinNumberLock)
             {
-            if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
-            {
-                if (!Interop.libgpiod.gpiod_line_is_free(pinHandle))
+                if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
                 {
-                    pinHandle.Dispose();
-                    pinHandle = Interop.libgpiod.gpiod_chip_get_line(_chip, pinNumber);
-                    _pinNumberToSafeLineHandle[pinNumber] = pinHandle;
+                    if (!Interop.libgpiod.gpiod_line_is_free(pinHandle))
+                    {
+                        pinHandle.Dispose();
+                        pinHandle = Interop.libgpiod.gpiod_chip_get_line(_chip, pinNumber);
+                        _pinNumberToSafeLineHandle[pinNumber] = pinHandle;
+                    }
                 }
-            }
 
-            return new LibGpiodDriverEventHandler(pinNumber, pinHandle);
-        }
+                return new LibGpiodDriverEventHandler(pinNumber, pinHandle);
+            }
         }
 
         /// <inheritdoc/>
@@ -125,11 +128,11 @@ namespace System.Device.Gpio.Drivers
                 if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle) &&
                     !IsListeningEvent(pinNumber))
                 {
-                pinHandle?.Dispose();
+                    pinHandle?.Dispose();
                     // We know this works
                     _pinNumberToSafeLineHandle.TryRemove(pinNumber, out _);
+                }
             }
-        }
         }
 
         private bool IsListeningEvent(int pinNumber)
@@ -183,14 +186,14 @@ namespace System.Device.Gpio.Drivers
                     return;
                 }
 
-            SafeLineHandle pinHandle = Interop.libgpiod.gpiod_chip_get_line(_chip, pinNumber);
-            if (pinHandle == null)
-            {
-                throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
-            }
+                SafeLineHandle pinHandle = Interop.libgpiod.gpiod_chip_get_line(_chip, pinNumber);
+                if (pinHandle == null)
+                {
+                    throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
+                }
 
                 _pinNumberToSafeLineHandle.TryAdd(pinNumber, pinHandle);
-        }
+            }
         }
 
         /// <inheritdoc/>
@@ -238,16 +241,18 @@ namespace System.Device.Gpio.Drivers
                 switch (mode)
                 {
                     case PinMode.Input:
-                    requestResult = Interop.libgpiod.gpiod_line_request_input(pinHandle, s_consumerName);
+                        requestResult = Interop.libgpiod.gpiod_line_request_input(pinHandle, s_consumerName);
                         break;
                     case PinMode.InputPullDown:
-                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName, (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN);
+                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
+                            (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN);
                         break;
                     case PinMode.InputPullUp:
-                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName, (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP);
+                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
+                            (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP);
                         break;
                     case PinMode.Output:
-                    requestResult = Interop.libgpiod.gpiod_line_request_output(pinHandle, s_consumerName);
+                        requestResult = Interop.libgpiod.gpiod_line_request_output(pinHandle, s_consumerName);
                         break;
                 }
 
@@ -256,7 +261,8 @@ namespace System.Device.Gpio.Drivers
 
             if (requestResult == -1)
             {
-                throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(), pinNumber);
+                throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(),
+                    pinNumber);
             }
         }
 

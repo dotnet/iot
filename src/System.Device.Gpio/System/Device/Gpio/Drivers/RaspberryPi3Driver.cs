@@ -24,6 +24,10 @@ namespace System.Device.Gpio.Drivers
         private readonly Set_Register _setClearRegister;
         private readonly Get_Register _getClearRegister;
 
+        /// <summary>
+        /// Creates an instance of the RaspberryPi3Driver.
+        /// This driver works on Raspberry 3 or 4, both on Linux and on Windows
+        /// </summary>
         public RaspberryPi3Driver()
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
@@ -118,6 +122,9 @@ namespace System.Device.Gpio.Drivers
         /// <inheritdoc/>
         protected internal override void Write(int pinNumber, PinValue value) => _internalDriver.Write(pinNumber, value);
 
+        /// <summary>
+        /// Allows directly setting the "Set pin high" register. Used for special applications only
+        /// </summary>
         protected ulong SetRegister
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -126,6 +133,9 @@ namespace System.Device.Gpio.Drivers
             set => _setSetRegister(value);
         }
 
+        /// <summary>
+        /// Allows directly setting the "Set pin low" register. Used for special applications only
+        /// </summary>
         protected ulong ClearRegister
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -134,6 +144,7 @@ namespace System.Device.Gpio.Drivers
             set => _setClearRegister(value);
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             _internalDriver?.Dispose();

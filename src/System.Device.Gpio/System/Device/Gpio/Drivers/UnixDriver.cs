@@ -5,10 +5,14 @@
 namespace System.Device.Gpio.Drivers
 {
     /// <summary>
-    /// Creates the default driver for Unix (not Raspbian)
+    /// The base class for the standard unix drivers
     /// </summary>
     public abstract class UnixDriver : GpioDriver
     {
+        /// <summary>
+        /// Construct an instance of an unix driver.
+        /// Just checks that the platform is Unix.
+        /// </summary>
         protected UnixDriver()
         {
             if (Environment.OSVersion.Platform != PlatformID.Unix)

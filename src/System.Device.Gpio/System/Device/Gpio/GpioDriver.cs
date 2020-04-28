@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace System.Device.Gpio
 {
+    /// <summary>
+    /// Base class for Gpio Drivers.
+    /// A Gpio driver provides methods to read from and write to digital I/O pins.
+    /// </summary>
     public abstract class GpioDriver : IDisposable
     {
         /// <summary>
@@ -105,12 +109,19 @@ namespace System.Device.Gpio
         /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected internal abstract void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback);
 
+        /// <summary>
+        /// Disposes this instance, closing all open pins
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Disposes this instance
+        /// </summary>
+        /// <param name="disposing">True if explicitly disposing, false if in finalizer</param>
         protected virtual void Dispose(bool disposing)
         {
             // Nothing to do in base class.

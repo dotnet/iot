@@ -75,12 +75,17 @@ namespace System.Device.I2c
             }
         }
 
+        /// <inheritdoc cref="IDisposable.Dispose"/>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Disposes this instance
+        /// </summary>
+        /// <param name="disposing">True if explicitly disposing, false if in finalizer</param>
         protected virtual void Dispose(bool disposing)
         {
             // Nothing to do in base class.
