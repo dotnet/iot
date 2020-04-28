@@ -12,12 +12,14 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace DeviceApiTester.Commands.Script
 {
+    /// <summary>
+    /// Runs a specified script file using the Roslyn scripting APIs.
+    /// </summary>
     [Verb("script-run", HelpText = "Runs a specified script file using the Roslyn scripting APIs.")]
     public class ScriptRun : ICommandVerbAsync
     {
         /// <summary>Executes the command asynchronously.</summary>
         /// <returns>The command's exit code.</returns>
-        /// </remarks>
         public async Task<int> ExecuteAsync()
         {
             Console.WriteLine($"File={ScriptFilePath}");
@@ -35,6 +37,9 @@ namespace DeviceApiTester.Commands.Script
             return 0;
         }
 
+        /// <summary>
+        /// The file path of script to execute.
+        /// </summary>
         [Option('f', "file-path", HelpText = "The file path of script to execute.", Required = true)]
         public string ScriptFilePath { get; set; }
     }
