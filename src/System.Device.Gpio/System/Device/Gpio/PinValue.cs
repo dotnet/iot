@@ -27,31 +27,31 @@ namespace System.Device.Gpio
         public static PinValue Low => new PinValue(0);
 
         /// <summary>
-        /// Implicit conversion from int. 0 means low, everything else means high.
+        /// Implicit conversion from int. 0 means <see cref="Low"/>, everything else means <see cref="High"/>.
         /// </summary>
         /// <param name="value">Value to set</param>
         public static implicit operator PinValue(int value) => value == 0 ? Low : High;
 
         /// <summary>
-        /// Implicit conversion from bool. false means low, true means high
+        /// Implicit conversion from bool. <see langword="false"/> means <see cref="Low"/>, <see langword="true"/> means <see cref="High"/>
         /// </summary>
         /// <param name="value">Value to set</param>
         public static implicit operator PinValue(bool value) => value ? High : Low;
 
         /// <summary>
-        /// Conversion to byte. Returns 1 on High, 0 on Low
+        /// Conversion to byte. Returns 1 on <see cref="High"/>, 0 on <see cref="Low"/>
         /// </summary>
         /// <param name="value">PinValue to convert</param>
         public static explicit operator byte(PinValue value) => value._value;
 
         /// <summary>
-        /// Conversion to int. Returns 1 on High, 0 on Low
+        /// Conversion to int. Returns 1 on <see cref="High"/>, 0 on <see cref="Low"/>
         /// </summary>
         /// <param name="value">PinValue to convert</param>
         public static explicit operator int(PinValue value) => value._value;
 
         /// <summary>
-        /// Conversion to byte. Returns true on High, false on Low
+        /// Conversion to byte. Returns <see langword="true"/> on <see cref="High"/>, <see langword="false"/> on <see cref="Low"/>
         /// </summary>
         /// <param name="value">PinValue to convert</param>
         public static explicit operator bool(PinValue value) => value._value == 0 ? false : true;

@@ -11,7 +11,8 @@ namespace System.Device.Gpio.Drivers
 {
     /// <summary>
     /// This driver uses the Libgpiod library to get user-level access to the gpio ports.
-    /// It superseeds the SysFsDriver
+    /// It superseeds the SysFsDriver, but requires that libgpiod is installed. To do so, run
+    /// "sudo apt install -y libgpiod-dev".
     /// </summary>
     public class LibGpiodDriver : UnixDriver
     {
@@ -22,9 +23,7 @@ namespace System.Device.Gpio.Drivers
         private readonly int _pinCount;
         private SafeChipHandle _chip;
 
-        /// <summary>
-        /// The number of pins this driver controls
-        /// </summary>
+        /// <inheritdoc />
         protected internal override int PinCount => _pinCount;
 
         // for use the bias flags we need libgpiod version 1.5 or later

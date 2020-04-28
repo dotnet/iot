@@ -85,7 +85,7 @@ namespace System.Device.I2c
         /// <summary>
         /// Disposes this instance
         /// </summary>
-        /// <param name="disposing">True if explicitly disposing, false if in finalizer</param>
+        /// <param name="disposing"><see langword="true"/> if explicitly disposing, <see langword="false"/> if in finalizer</param>
         protected virtual void Dispose(bool disposing)
         {
             // Nothing to do in base class.

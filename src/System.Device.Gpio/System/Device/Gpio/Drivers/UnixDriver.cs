@@ -11,7 +11,6 @@ namespace System.Device.Gpio.Drivers
     {
         /// <summary>
         /// Construct an instance of an unix driver.
-        /// Just checks that the platform is Unix.
         /// </summary>
         protected UnixDriver()
         {
@@ -28,6 +27,11 @@ namespace System.Device.Gpio.Drivers
         // TODO: remove try catch after https://github.com/dotnet/corefx/issues/32015 deployed
         public static UnixDriver Create()
         {
+            if (Environment.OSVersion.Platform != PlatformID.Unix)
+            {
+                throw new PlatformNotSupportedException(nameof(UnixDriver) + " is only supported on Linux/Unix");
+            }
+
             UnixDriver driver = null;
             try
             {
