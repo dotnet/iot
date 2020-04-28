@@ -6,6 +6,16 @@
     <CompilerVersion>3.6.0-2.20166.2</CompilerVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="!($(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase)))">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn></NoWarn> <!-- Make sure the list is empty - by default it is not -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition="($(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase)))">
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>CS1591</NoWarn> <!-- Documentation on public members missing -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Condition="'$(UseSdkCompilers)' != 'true'" Include="Microsoft.Net.Compilers.Toolset" Version="$(CompilerVersion)" IsImplicitlyDefined="true" PrivateAssets="all" />
   </ItemGroup>

@@ -15,8 +15,6 @@
     <LangVersion>Latest</LangVersion>
     <!-- Generate snupkg package -->
     <IncludeSymbols>true</IncludeSymbols>
-    <NoWarn>1701;1702</NoWarn>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
