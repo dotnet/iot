@@ -8,12 +8,13 @@
 
   <PropertyGroup Condition="!($(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase)))">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn></NoWarn> <!-- Make sure the list is empty - by default it is not -->
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn.Replace("1591", ""))</NoWarn> <!-- Make sure CS1591 is not in the list (by default it is) -->
   </PropertyGroup>
   <PropertyGroup Condition="($(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase)))">
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <NoWarn>CS1591</NoWarn> <!-- Documentation on public members missing -->
+    <NoWarn>$(NoWarn)</NoWarn> <!-- No changes required here (For test projects, missing documentation is ok) -->
+  </PropertyGroup>
+  <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
