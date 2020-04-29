@@ -6,15 +6,10 @@
     <CompilerVersion>3.6.0-2.20166.2</CompilerVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="!($(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase)))">
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn.Replace("1591", ""))</NoWarn> <!-- Make sure CS1591 is not in the list (by default it is) -->
-  </PropertyGroup>
-  <PropertyGroup Condition="($(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase)))">
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn)</NoWarn> <!-- No changes required here (For test projects, missing documentation is ok) -->
-  </PropertyGroup>
   <PropertyGroup>
+    <_IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase))">true</_IsTestProject>
+    <NoWarn Condition="'$(_IsTestProject)' != 'true'">$(NoWarn.Replace("1591", ""))</NoWarn> <!-- Removing CS1591 from warning exclusion list as we want to make sure documentation is enforced -->
+    <GenerateDocumentationFile Condition="'$(_IsTestProject)' != 'true'">true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
