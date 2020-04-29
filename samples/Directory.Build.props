@@ -3,7 +3,11 @@
   <Import Project="../eng/Compilers.props" />
   <Import Project="../eng/Versions.props" />
   <PropertyGroup>
-    <NoWarn>$(NoWarn);CS8321</NoWarn>
+    <!--
+         CS8321: The local function is not declared
+         CS1591: Missing XML comment for publicly visible type or member
+    -->
+    <NoWarn>$(NoWarn);CS8321;CS1591</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>
     <MainLibraryPath>$(MSBuildThisFileDirectory)../src/System.Device.Gpio/</MainLibraryPath>

@@ -533,6 +533,7 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             _pinsToDetectEventsCount = 0;

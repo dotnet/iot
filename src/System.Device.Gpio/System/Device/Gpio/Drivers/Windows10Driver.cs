@@ -39,6 +39,7 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         protected internal override int PinCount => s_winGpioController.PinCount;
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             foreach (Windows10DriverPin devicePin in _openPins.Values)

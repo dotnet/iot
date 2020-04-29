@@ -9,6 +9,11 @@ using System.Collections.Concurrent;
 
 namespace System.Device.Gpio.Drivers
 {
+    /// <summary>
+    /// This driver uses the Libgpiod library to get user-level access to the gpio ports.
+    /// It superseeds the SysFsDriver, but requires that libgpiod is installed. To do so, run
+    /// "sudo apt install -y libgpiod-dev".
+    /// </summary>
     public class LibGpiodDriver : UnixDriver
     {
         private static string s_consumerName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
@@ -18,6 +23,7 @@ namespace System.Device.Gpio.Drivers
         private readonly int _pinCount;
         private SafeChipHandle _chip;
 
+        /// <inheritdoc />
         protected internal override int PinCount => _pinCount;
 
         // for use the bias flags we need libgpiod version 1.5 or later
@@ -42,6 +48,10 @@ namespace System.Device.Gpio.Drivers
             GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP = (1UL << 5)
         }
 
+        /// <summary>
+        /// Construct an instance
+        /// </summary>
+        /// <param name="gpioChip">Number of the gpio Chip. Default 0</param>
         public LibGpiodDriver(int gpioChip = 0)
         {
             if (Environment.OSVersion.Platform != PlatformID.Unix)
@@ -68,6 +78,7 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <inheritdoc/>
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             if ((eventTypes & PinEventTypes.Rising) != 0 || (eventTypes & PinEventTypes.Falling) != 0)
@@ -108,6 +119,7 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <inheritdoc/>
         protected internal override void ClosePin(int pinNumber)
         {
             lock (_pinNumberLock)
@@ -127,23 +139,26 @@ namespace System.Device.Gpio.Drivers
             return _pinNumberToEventHandler.ContainsKey(pinNumber);
         }
 
+        /// <inheritdoc/>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) =>
             throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.ConvertPinNumberingSchemaError);
 
+        /// <inheritdoc/>
         protected internal override PinMode GetPinMode(int pinNumber)
         {
             lock (_pinNumberLock)
             {
-                if (!_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
-                {
+            if (!_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
+            {
                     throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError,
                         pin: pinNumber);
-                }
-
-                return pinHandle.PinMode;
             }
+
+            return pinHandle.PinMode;
+        }
         }
 
+        /// <inheritdoc/>
         protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
             switch (mode)
@@ -157,9 +172,10 @@ namespace System.Device.Gpio.Drivers
                     return true;
                 default:
                     return false;
-            }
+        }
         }
 
+        /// <inheritdoc/>
         protected internal override void OpenPin(int pinNumber)
         {
             lock (_pinNumberLock)
@@ -179,6 +195,7 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <inheritdoc/>
         protected internal override PinValue Read(int pinNumber)
         {
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
@@ -186,7 +203,7 @@ namespace System.Device.Gpio.Drivers
                 int result = Interop.libgpiod.gpiod_line_get_value(pinHandle);
                 if (result == -1)
                 {
-                        throw ExceptionHelper.GetIOException(ExceptionResource.ReadPinError, Marshal.GetLastWin32Error(), pinNumber);
+                    throw ExceptionHelper.GetIOException(ExceptionResource.ReadPinError, Marshal.GetLastWin32Error(), pinNumber);
                 }
 
                 return result;
@@ -195,6 +212,7 @@ namespace System.Device.Gpio.Drivers
             throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError, pin: pinNumber);
         }
 
+        /// <inheritdoc/>
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             if (_pinNumberToEventHandler.TryGetValue(pinNumber, out LibGpiodDriverEventHandler eventHandler))
@@ -213,6 +231,7 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <inheritdoc/>
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
             int requestResult = -1;
@@ -224,10 +243,12 @@ namespace System.Device.Gpio.Drivers
                         requestResult = Interop.libgpiod.gpiod_line_request_input(pinHandle, s_consumerName);
                         break;
                     case PinMode.InputPullDown:
-                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName, (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN);
+                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
+                            (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN);
                         break;
                     case PinMode.InputPullUp:
-                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName, (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP);
+                        requestResult = Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
+                            (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP);
                         break;
                     case PinMode.Output:
                         requestResult = Interop.libgpiod.gpiod_line_request_output(pinHandle, s_consumerName);
@@ -239,10 +260,12 @@ namespace System.Device.Gpio.Drivers
 
             if (requestResult == -1)
             {
-                throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(), pinNumber);
+                throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(),
+                    pinNumber);
             }
         }
 
+        /// <inheritdoc/>
         protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             if ((eventTypes & PinEventTypes.Rising) != 0 || (eventTypes & PinEventTypes.Falling) != 0)
@@ -290,6 +313,7 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <inheritdoc/>
         protected internal override void Write(int pinNumber, PinValue value)
         {
             if (!_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle pinHandle))
@@ -301,6 +325,7 @@ namespace System.Device.Gpio.Drivers
             Interop.libgpiod.gpiod_line_set_value(pinHandle, (value == PinValue.High) ? 1 : 0);
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (_pinNumberToEventHandler != null)
