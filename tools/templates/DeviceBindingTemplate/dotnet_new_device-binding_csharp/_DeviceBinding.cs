@@ -15,7 +15,7 @@ namespace Iot.Device._DeviceBinding
     public class _DeviceBinding : IDisposable
     {
         /// <summary>
-        /// Creates a new instance of this device.
+        /// Initializes a new instance of the <see cref="_DeviceBinding"/> class.
         /// </summary>
         public _DeviceBinding()
         {

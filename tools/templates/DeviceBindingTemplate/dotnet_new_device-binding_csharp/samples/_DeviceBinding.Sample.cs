@@ -10,9 +10,15 @@ using System.Threading;
 
 namespace Iot.Device._DeviceBinding.Samples
 {
-    class Program
+    /// <summary>
+    /// Samples for _DeviceBinding
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Main entry point
+        /// </summary>
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello _DeviceBinding Sample!");
         }
