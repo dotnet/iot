@@ -28,7 +28,7 @@ namespace Iot.Device.Adc.Samples
                 while (true)
                 {
                     // write out the current values from the INA219 device.
-                    System.Console.WriteLine($"Bus Voltage {device.ReadBusVoltage()}V Shunt Voltage {device.ReadShuntVoltage() * 1000}mV Current {device.ReadCurrent() * 1000}mA Power {device.ReadPower() * 1000}mW");
+                    System.Console.WriteLine($"Bus Voltage {device.ReadBusVoltage()} Shunt Voltage {device.ReadShuntVoltage().Millivolts}mV Current {device.ReadCurrent()} Power {device.ReadPower()}");
                     System.Threading.Thread.Sleep(1000);
                 }
             }

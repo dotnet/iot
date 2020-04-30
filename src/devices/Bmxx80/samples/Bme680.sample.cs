@@ -46,7 +46,7 @@ namespace Iot.Device.Samples
                         bme680.SetPowerMode(Bme680PowerMode.Forced);
 
                         // wait while measurement is being taken
-                        Thread.Sleep(measurementDuration);
+                        Thread.Sleep(measurementDuration.ToTimeSpan());
 
                         // Print out the measured data
                         bme680.TryReadTemperature(out var tempValue);
@@ -76,7 +76,7 @@ namespace Iot.Device.Samples
                     bme680.HumiditySampling = Sampling.UltraHighResolution;
                     bme680.PressureSampling = Sampling.Skipped;
 
-                    bme680.ConfigureHeatingProfile(Bme680HeaterProfile.Profile2, 280, 80, 24);
+                    bme680.ConfigureHeatingProfile(Bme680HeaterProfile.Profile2, Temperature.FromDegreesCelsius(280), Duration.FromMilliseconds(80), Temperature.FromDegreesCelsius(24));
                     bme680.HeaterProfile = Bme680HeaterProfile.Profile2;
 
                     measurementDuration = bme680.GetMeasurementDuration(bme680.HeaterProfile);
@@ -86,7 +86,7 @@ namespace Iot.Device.Samples
                     {
                         // perform the measurement
                         bme680.SetPowerMode(Bme680PowerMode.Forced);
-                        Thread.Sleep(measurementDuration);
+                        Thread.Sleep(measurementDuration.ToTimeSpan());
 
                         // Print out the measured data
                         bme680.TryReadTemperature(out var tempValue);
