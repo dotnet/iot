@@ -169,8 +169,54 @@ namespace Iot.Units.Tests
             var s = t.ToString("K2", cf);
             Assert.Equal("293.36°K", s);
 
-            s = $"It is {t:F1} outside, this equals {t:C2}".ToString(cf);
+            s = ((FormattableString)$"It is {t:F1} outside, this equals {t:C2}").ToString(cf);
             Assert.Equal("It is 68.4°F outside, this equals 20.21°C", s);
+        }
+
+        /// <summary>
+        /// Test to see if using an explicit format provider works with decimal points and decimal commas.
+        /// In order to use an explicit format provider it is necessary to specify the string as a FormattableString instead of a normal string.
+        /// The test uses a global setting of en-US and then overrules the format to use both the en-US culture (with decimal point) and de-DE culture which uses decimal comma.
+        /// The test then checks to see if the results remain the same when using the de-DE culture as globally set culture.
+        /// </summary>
+        [Fact]
+        public void ToStringWithExplicitCultureAndFormatArgsAndCulture()
+        {
+            using (new SetCultureForTest("en-US"))
+            {
+                CultureInfo cf = new CultureInfo("en-US", false);
+                Temperature t = Temperature.FromCelsius(20.2123);
+                var s = t.ToString("K2", cf);
+                Assert.Equal("293.36°K", s);
+
+                s = ((FormattableString)$"It is {t:F1} outside, this equals {t:C2}").ToString(cf);
+                Assert.Equal("It is 68.4°F outside, this equals 20.21°C", s);
+
+                cf = new CultureInfo("de-DE", false);
+                s = t.ToString("K2", cf);
+                Assert.Equal("293,36°K", s);
+
+                s = ((FormattableString)$"It is {t:F1} outside, this equals {t:C2}").ToString(cf);
+                Assert.Equal("It is 68,4°F outside, this equals 20,21°C", s);
+            }
+
+            using (new SetCultureForTest("de-DE"))
+            {
+                CultureInfo cf = new CultureInfo("en-US", false);
+                Temperature t = Temperature.FromCelsius(20.2123);
+                var s = t.ToString("K2", cf);
+                Assert.Equal("293.36°K", s);
+
+                s = ((FormattableString)$"It is {t:F1} outside, this equals {t:C2}").ToString(cf);
+                Assert.Equal("It is 68.4°F outside, this equals 20.21°C", s);
+
+                cf = new CultureInfo("de-DE", false);
+                s = t.ToString("K2", cf);
+                Assert.Equal("293,36°K", s);
+
+                s = ((FormattableString)$"It is {t:F1} outside, this equals {t:C2}").ToString(cf);
+                Assert.Equal("It is 68,4°F outside, this equals 20,21°C", s);
+            }
         }
 
         [Fact]
