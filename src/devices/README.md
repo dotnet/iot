@@ -63,6 +63,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
+* [SHTC3 - Temperature & Humidity Sensor](Shtc3/README.md)
 * [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
 
 ### Gyroscopes
@@ -115,6 +116,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [HTS221 - Capacitive digital sensor for relative humidity and temperature](Hts221/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
+* [SHTC3 - Temperature & Humidity Sensor](Shtc3/README.md)
 * [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
 
 ### Clocks

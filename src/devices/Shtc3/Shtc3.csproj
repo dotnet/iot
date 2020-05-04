@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="samples\**" />
+    <Compile Remove="tests\**" />
+    <EmbeddedResource Remove="samples\**" />
+    <EmbeddedResource Remove="tests\**" />
+    <None Remove="samples\**" />
+    <None Remove="tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="category.txt" />
+    <None Remove="README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="common\DelayHelper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="common\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Units\Units.csproj" />
+  </ItemGroup>
+
+</Project>
