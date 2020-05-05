@@ -24,7 +24,7 @@ namespace Iot.Device.Ad7193
         /// <summary>
         /// Metadata of AD7193
         /// </summary>
-        protected static Ad7193Metadata metadata = new Ad7193Metadata();
+        protected static Ad7193Metadata _metadata = new Ad7193Metadata();
 
         /// <summary>
         /// The list of received ADC values
@@ -302,7 +302,7 @@ namespace Iot.Device.Ad7193
         /// <returns></returns>
         public static IDeviceMetadata GetDeviceMetadata()
         {
-            return Ad7193.metadata;
+            return Ad7193._metadata;
         }
 
         /// <summary>
@@ -311,14 +311,14 @@ namespace Iot.Device.Ad7193
         /// <param name="spiDevice">The SPI device to initialize the ADC on</param>
         public Ad7193(SpiDevice spiDevice)
         {
-            if ((spiDevice.ConnectionSettings.Mode & metadata.ValidSpiModes) != spiDevice.ConnectionSettings.Mode)
+            if ((spiDevice.ConnectionSettings.Mode & _metadata.ValidSpiModes) != spiDevice.ConnectionSettings.Mode)
             {
                 throw new Exception("SPI device must be in SPI mode 3 in order to work with AD7193.");
             }
 
-            if (spiDevice.ConnectionSettings.ClockFrequency > metadata.MaximumSpiFrequency)
+            if (spiDevice.ConnectionSettings.ClockFrequency > _metadata.MaximumSpiFrequency)
             {
-                throw new Exception($"SPI device must have a lower clock frequency, because AD7193's maximum operating SPI frequncy is {metadata.MaximumSpiFrequency} Hz.");
+                throw new Exception($"SPI device must have a lower clock frequency, because AD7193's maximum operating SPI frequncy is {_metadata.MaximumSpiFrequency} Hz.");
             }
 
             _spiDevice = spiDevice;
@@ -385,12 +385,12 @@ namespace Iot.Device.Ad7193
 
             if (frequency == 0)
             {
-                frequency = metadata.ADCSamplerate;
+                frequency = _metadata.ADCSamplerate;
             }
 
-            if (frequency > metadata.ADCSamplerate)
+            if (frequency > _metadata.ADCSamplerate)
             {
-                throw new ArgumentException($"The frequency you provided is higher than the maximum sampling rate of AD7193 ({metadata.ADCSamplerate} SPS).");
+                throw new ArgumentException($"The frequency you provided is higher than the maximum sampling rate of AD7193 ({_metadata.ADCSamplerate} SPS).");
             }
 
             // set the continuous conversion mode bits
