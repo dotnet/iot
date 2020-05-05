@@ -2,7 +2,6 @@
 using System.Device.Spi;
 using System.Diagnostics;
 using System.Threading;
-using Ad7193.Metadata;
 using Iot.Device.Ad7193;
 
 namespace AD7193Sample
