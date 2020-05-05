@@ -14,23 +14,23 @@
     <IotBindingsLibraryPath>$(MSBuildThisFileDirectory)../src/Iot.Device.Bindings/</IotBindingsLibraryPath>
   </PropertyGroup>
 
+  <!--
+    This file adds two ProjectReferences to all sample projects (even if they don't depend on one or both projects).
+    This enables building the samples with the latest version of those two dependent projects, by default.
+    If changes to these projects break the samples, then the build will break.
+    
+    If you want to use the PackageReferences instead, set the PreferPackageReference property to true, either
+    in the project or on the commandline, like:
+
+    dotnet build /p:PreferPackageReference=true
+
+    The samples can be copied outside the repo, and will use the PackageReferences.
+    There is a comment each of the samples. Once the samples are copied outside the repo, that comment is no longer meaningful.
+  -->
+
   <ItemGroup Condition="'$(PreferPackageReference)' != 'true'">
     <ProjectReference Include="$(IotBindingsLibraryPath)Iot.Device.Bindings.csproj" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
-
-    <!--
-      This file adds two ProjectReferences to all sample projects (even if they don't depend on one or both projects).
-      This enables building the samples with the latest version of those two dependent projects, by default.
-      If changes to these projects break the samples, then the build will break.
-      
-      If you want to use the PackageReferences instead, set the PreferPackageReference property to true, either
-      in the project or on the commandline, like:
-
-      dotnet build /p:PreferPackageReference=true
-
-      The samples can be copied outside the repo, and will use the PackageReferences.
-      There is a comment each of the samples. Once the samples are copied outside the repo, that comment is no longer meaningful.
-  -->
 
 </Project>
