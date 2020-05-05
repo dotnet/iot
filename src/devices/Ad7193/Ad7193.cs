@@ -490,7 +490,7 @@ namespace Iot.Device.Ad7193
         }
 
         /// <summary>
-        /// Converts the raw ADC result to Volts
+        /// Converts the raw ADC result to Volts. With a 2.5 V reference the bipolar range is ±19.53 mV to ±2.5 V, and the unipolar range is 0 mV to 19.53 mV to 0 V to 2.5 V, depending on the gain setting.
         /// </summary>
         /// <param name="adcValue">The raw ADC result</param>
         /// <returns>The ADC result value in Volts</returns>
@@ -621,7 +621,7 @@ namespace Iot.Device.Ad7193
 
         private static int GetCommAddress(int x)
         {
-            return ((x) & 0x07) << 3;
+            return (x & 0x07) << 3;
         }
 
         /// <summary>
