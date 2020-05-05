@@ -526,7 +526,7 @@ namespace Iot.Device.Ad7193
             {
                 voltage = (double)adcValue / 16777216.0;
             }
-            else if (!Unipolar)
+            else
             {
                 voltage = ((double)adcValue / 8388608.0) - 1.0;
             }
