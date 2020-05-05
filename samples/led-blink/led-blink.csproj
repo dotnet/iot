@@ -10,19 +10,8 @@
   </ItemGroup>
 
   <!--  
-  If you want to use this project outside of the repo, then delete the following ItemGroup (with the ProjectReference).
-
-  Details:
-  This sample includes references to one or more NuGet packages as both ProjectReference and PackageReference.
-  The PackageReferences are intended for most use cases.
-  The project (as-is) will prefer the ProjectReference. If you want to test the project with the package, type: 
-  dotnet build /p:PreferPackageReference=true
-  The ProjectReference is used by the repo build to test project updates with the samples before they are published 
-  as packages to NuGet.org. This also ensures that the samples don't break.
+    Package and project references behave per the comment in:
+    https://github.com/dotnet/iot/blob/packageref/samples/Directory.Build.props
   -->
-
-  <ItemGroup Condition="'$(PreferPackageReference)' != 'true'">
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-  </ItemGroup>
 
 </Project>
