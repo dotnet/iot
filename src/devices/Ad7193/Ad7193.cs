@@ -331,10 +331,9 @@ namespace Iot.Device.Ad7193
         /// </summary>
         public void Reset()
         {
-            for (int i = 0; i < 6; i++)
-            {
-                _spiDevice.Write(new byte[] { 0xFF });
-            }
+            Span<byte> bytes = stackalloc byte[6];
+            bytes.Fill(0xFF);
+            _spiDevice.Write(bytes);
         }
 
         /// <summary>
