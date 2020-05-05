@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Ad7193.Metadata
+﻿namespace Iot.Device.Ad7193
 {
     /// <summary>
     /// Metadata interface for any supported IoT device

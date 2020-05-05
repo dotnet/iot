@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Device.Spi;
-using System.Text;
+﻿using System.Device.Spi;
 
-namespace Ad7193.Metadata
+namespace Iot.Device.Ad7193
 {
     /// <summary>
     /// Metadata class for AD7193
