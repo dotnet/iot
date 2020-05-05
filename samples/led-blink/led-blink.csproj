@@ -5,16 +5,16 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
-  <!--  This sample uses conditional ItemGroups, but you only need one of them.
-        The ProjectReference is used by the repo build, to ensure that the samples work
-        with new builds of the System.Device.Gpio project.
-        The PackageReference is intended for most user use-cases.
-        If you want to test the package, type `dotnet build /p:PreferPackageReference=true`
-        If you want to copy this project and use outside of the repo, then:
+  <!--  
+    This sample includes references to one or more NuGet packages as both ProjectReference and PackageReference.
+    ProjectReferences are used by the repo build to test project updates before they are published as packages to NuGet.org.
+    If you want to test the package, type `dotnet build /p:PreferPackageReference=true`
 
-          1. Delete the first ItemGroup.
-          2. Remove the Condition from second ItemGroup
-   -->
+    The PackageReference is intended for most use-cases. To delete the ProjectReference:
+
+      1. Delete the first ItemGroup.
+      2. Remove the Condition from second ItemGroup
+-->
 
   <ItemGroup Condition="!$(PreferPackageReference)">
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
