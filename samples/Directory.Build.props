@@ -12,7 +12,7 @@
     <IsPackable>false</IsPackable>
     <MainLibraryPath>$(MSBuildThisFileDirectory)../src/System.Device.Gpio/</MainLibraryPath>
     <IotBindingsLibraryPath>$(MSBuildThisFileDirectory)../src/Iot.Device.Bindings/</IotBindingsLibraryPath>
-    <PreferPackageReference>false</PreferPackageReference>
+    <PreferPackageReference></PreferPackageReference>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(PreferPackageReference)' != 'true'">
