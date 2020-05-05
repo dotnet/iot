@@ -15,8 +15,8 @@
   </PropertyGroup>
 
   <!--
-    This file adds two ProjectReferences to all sample projects (even if they don't depend on one or both projects).
-    This enables building the samples with the latest version of those two dependent projects, by default.
+    This file adds two ProjectReferences to all sample projects (even if they don't depend on these projects).
+    This enables building the samples, as part of the repo build, with the latest version of these projects.
     If changes to these projects break the samples, then the build will break.
     
     If you want to use the PackageReferences instead, set the PreferPackageReference property to true, either
