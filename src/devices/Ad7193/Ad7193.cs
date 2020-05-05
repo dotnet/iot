@@ -265,7 +265,7 @@ namespace Iot.Device.Ad7193
         }
 
         /// <summary>
-        /// The value of the offset calibration register
+        /// The offset register holds the offset calibration coefficient for the ADC.
         /// </summary>
         public uint Offset
         {
@@ -281,7 +281,7 @@ namespace Iot.Device.Ad7193
         }
 
         /// <summary>
-        /// The value of the full-scale calibration register
+        /// The full-scale register is a 24-bit register that holds the full-scale calibration coefficient for the ADC.
         /// </summary>
         public uint FullScale
         {
