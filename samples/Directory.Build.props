@@ -24,7 +24,7 @@
 
     dotnet build /p:PreferPackageReference=true
 
-    The samples can be copied outside the repo, and will use the PackageReferences.
+    The samples can be copied outside the repo, and will use the PackageReferences as long as this file isn't included.
     There is a comment each of the samples. Once the samples are copied outside the repo, that comment is no longer meaningful.
   -->
 
