@@ -10,7 +10,7 @@ The part operates with a power supply from 3 V to 5.25 V. It consumes a current 
 
 
 ## Images
-![Pmod AD5 by Digilent](pmodad5-0.png)
+![Pmod AD5 by Digilent](pmodad5-0.jpg)
 
 ## Usage
 In your Main method you can setup the device, and let the conversion begin. 
