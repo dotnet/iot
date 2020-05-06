@@ -5,7 +5,7 @@
 * Any supported IoT device with an SPI bus
 
 ## Hardware used for testing
-* [Bio Balance Detector Mars-64 (with 2x ADG731](http://www.biobalancedetector.com/)
+* [Bio Balance Detector Mars-64](http://www.biobalancedetector.com/) (with 2x ADG731s)
 * [Raspberry Pi 3 Model B+](https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/)
 * [Pmod HAT Adapter](https://reference.digilentinc.com/reference/add-ons/pmod-hat/reference-manual) (Raspberry Pi Pmod HAT)
 * [Extech MN47 multimeter](http://www.extech.com/products/MN47) (for verifying switch completion)
