@@ -23,7 +23,7 @@ namespace Iot.Device.Adg731
         public string DataSheetURI => "https://www.analog.com/media/en/technical-documentation/data-sheets/ADG725_731.pdf";
 
         /// <inheritdoc/>
-        public SpiMode ValidSpiModes => SpiMode.Mode1 | SpiMode.Mode2 | SpiMode.Mode3;
+        public SpiMode ValidSpiModes => SpiMode.Mode1 | SpiMode.Mode2;
 
         /// <inheritdoc/>
         public int MaximumSpiFrequency => 30000000;

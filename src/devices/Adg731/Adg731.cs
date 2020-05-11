@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Device.Spi;
+using System.Diagnostics;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Iot.Device.Adg731
 {
@@ -67,7 +69,7 @@ namespace Iot.Device.Adg731
 
             set
             {
-                _activeChannel = value;
+                _activeChannel = value % ((IMultiplexerDeviceMetadata)GetDeviceMetadata()).MultiplexerChannelCount;
                 StateChanged();
             }
         }
@@ -89,7 +91,7 @@ namespace Iot.Device.Adg731
         {
             if ((spiDevice.ConnectionSettings.Mode & _metadata.ValidSpiModes) != spiDevice.ConnectionSettings.Mode)
             {
-                throw new Exception("SPI device must be in SPI mode 1, 2 or 3 in order to work with ADG731.");
+                throw new Exception("SPI device must be in SPI mode 1 or 2 in order to work with ADG731.");
             }
 
             if (spiDevice.ConnectionSettings.ClockFrequency > _metadata.MaximumSpiFrequency)

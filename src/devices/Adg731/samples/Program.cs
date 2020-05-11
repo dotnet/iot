@@ -20,11 +20,11 @@ namespace ADG731Sample
             SpiConnectionSettings settings = new SpiConnectionSettings(0, 1)
             {
                 ClockFrequency = ((ISpiDeviceMetadata)Adg731.GetDeviceMetadata()).MaximumSpiFrequency,
-                Mode = SpiMode.Mode3
+                Mode = SpiMode.Mode1
             };
             SpiDevice adg731SpiDevice = SpiDevice.Create(settings);
 
-            Console.WriteLine($"Connecting to ADG731 using SPI {adg731SpiDevice.ConnectionSettings.Mode.ToString()} at {adg731SpiDevice.ConnectionSettings.ClockFrequency / 1000.0:N1} kHz...");
+            Console.WriteLine($"Connecting to ADG731 using SPI {adg731SpiDevice.ConnectionSettings.Mode} at {adg731SpiDevice.ConnectionSettings.ClockFrequency / 1000.0:N1} kHz...");
 
             s_adg731 = new Adg731(adg731SpiDevice);
             s_adg731.IsEnabled = true;
@@ -33,9 +33,8 @@ namespace ADG731Sample
             int loopcounter = 0;
             while (true)
             {
-                s_adg731.ActiveChannel = loopcounter % ((IMultiplexerDeviceMetadata)Adg731.GetDeviceMetadata()).MultiplexerChannelCount;
+                s_adg731.ActiveChannel = loopcounter++;
                 Console.WriteLine($"Channel changed to {s_adg731.ActiveChannel}");
-                loopcounter++;
                 Thread.Sleep(500);
             }
         }
