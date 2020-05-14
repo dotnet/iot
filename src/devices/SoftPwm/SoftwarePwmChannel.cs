@@ -13,19 +13,19 @@ namespace System.Device.Pwm.Drivers
     /// <summary>Software PWM channel implementation</summary>
     public class SoftwarePwmChannel : PwmChannel
     {
-        // Frequency represents the number of times the pin should "pulse" (go from low to high and back) per second
-        // DutyCycle represents the percentage of time the pin should be in the high state
-
-        // So, if the Frequency is 1 and the Duty Cycle is 0.5, the pin will go High once per second and stay on for 0.5 seconds
-        // While if the Frequency is 400 and the Duty Cycle is 0.5, the pin will go High 400 times per second staying on for 0.00125 seconds each time, for a total of 0.5 seconds
+        private readonly bool _shouldDispose;
 
         private int _pin;
 
+        // Frequency represents the number of times the pin should "pulse" (go from low to high and back) per second
+        // DutyCycle represents the percentage of time the pin should be in the high state
+        //
+        // So, if the Frequency is 1 and the Duty Cycle is 0.5, the pin will go High once per second and stay on for 0.5 seconds
+        // While if the Frequency is 400 and the Duty Cycle is 0.5, the pin will go High 400 times per second staying on for 0.00125 seconds each time, for a total of 0.5 seconds
         private int _frequency;
         private double _dutyCycle;
 
         private GpioController _controller;
-        private readonly bool _shouldDispose;
 
         private TimeSpan _pinHighTime;
         private TimeSpan _pinLowTime;
