@@ -2,51 +2,50 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Device.Gpio;
+using System.Device.Pwm;
 using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.Device.Pwm.Drivers
 {
-    /// <summary>
-    /// Software PWM channel implementation
-    /// </summary>
+    /// <summary>Software PWM channel implementation</summary>
     public class SoftwarePwmChannel : PwmChannel
     {
-        private readonly bool _shouldDispose;
-        // how long the signal is high in its period
-        private double _pulseWidthInMilliseconds;
-        private double _periodInMilliseconds;
-        private int _frequency;
-        // Use to determine the length of the pulse
-        // 100% = 1.0 = full output. 0% = 0.0 = nothing as output
-        private double _dutyCycle;
+        // Frequency represents the number of times the pin should "pulse" (go from low to high and back) per second
+        // DutyCycle represents the percentage of time the pin should be in the high state
 
-        // Determines if a high precision timer should be used.
-        private bool _usePrecisionTimer;
+        // So, if the Frequency is 1 and the Duty Cycle is 0.5, the pin will go High once per second and stay on for 0.5 seconds
+        // While if the Frequency is 400 and the Duty Cycle is 0.5, the pin will go High 400 times per second staying on for 0.00125 seconds each time, for a total of 0.5 seconds
 
-        private bool _isRunning;
-        private bool _isStopped = true;
         private int _pin;
 
-        private Stopwatch _stopwatch = Stopwatch.StartNew();
+        private int _frequency;
+        private double _dutyCycle;
 
-        private Thread _runningThread;
         private GpioController _controller;
-        private bool _runThread = true;
+        private readonly bool _shouldDispose;
 
-        /// <summary>
-        /// The frequency in hertz.
-        /// </summary>
+        private TimeSpan _pinHighTime;
+        private TimeSpan _pinLowTime;
+
+        private Thread _thread;
+        private Stopwatch _stopwatch;
+
+        private bool _isRunning;
+        private bool _isTerminating;
+
+        /// <summary>The frequency in hertz.</summary>
         public override int Frequency
         {
             get => _frequency;
+
             set
             {
                 if (value <= 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), "Frequency must be a positive value.");
+                    throw new ArgumentOutOfRangeException(nameof(value), "Frequency must be a positive non-zero value.");
                 }
 
                 _frequency = value;
@@ -54,17 +53,16 @@ namespace System.Device.Pwm.Drivers
             }
         }
 
-        /// <summary>
-        /// The duty cycle percentage represented as a value between 0.0 and 1.0.
-        /// </summary>
+        /// <summary>The duty cycle percentage represented as a value between 0.0 and 1.0.</summary>
         public override double DutyCycle
         {
             get => _dutyCycle;
+
             set
             {
                 if (value < 0.0 || value > 1.0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, "Value must be between 0.0 and 1.0.");
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "DutyCycle must be between 0.0 and 1.0 (inclusive).");
                 }
 
                 _dutyCycle = value;
@@ -72,16 +70,13 @@ namespace System.Device.Pwm.Drivers
             }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SoftwarePwmChannel"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="SoftwarePwmChannel"/> class.</summary>
         /// <param name="pinNumber">The GPIO pin number to be used</param>
         /// <param name="frequency">The frequency in hertz. Defaults to 400</param>
         /// <param name="dutyCycle">The duty cycle percentage represented as a value between 0.0 and 1.0</param>
         /// <param name="usePrecisionTimer">Determines if a high precision timer should be used.</param>
-        /// <param name="controller">The <see cref="GpioController"/> to which <paramref name="pinNumber"/> belongs to. Null defaults to board GpioController</param>
-        /// <param name="shouldDispose">True to automatically dispose the controller when this class is disposed, false otherwise.
-        /// This parameter is ignored if <paramref name="controller"/> is null.</param>
+        /// <param name="controller">The <see cref="GpioController"/> to which <paramref name="pinNumber"/> belongs to. <c>null</c> defaults to board GpioController</param>
+        /// <param name="shouldDispose"><c>true</c> to automatically dispose the controller when this class is disposed, <c>false</c> otherwise. This parameter is ignored if <paramref name="controller"/> is <c>null</c>.</param>
         public SoftwarePwmChannel(int pinNumber, int frequency = 400, double dutyCycle = 0.5, bool usePrecisionTimer = false, GpioController controller = null, bool shouldDispose = true)
         {
             if (pinNumber == -1)
@@ -91,10 +86,20 @@ namespace System.Device.Pwm.Drivers
 
             if (frequency <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(frequency), "Frequency must be a positive value.");
+                throw new ArgumentOutOfRangeException(nameof(frequency), frequency, "Frequency must be a positive non-zero value.");
             }
 
-            if (controller == null)
+            if (dutyCycle < 0.0 || dutyCycle > 1.0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(dutyCycle), dutyCycle, "DutyCycle must be between 0.0 and 1.0 (inclusive).");
+            }
+
+            _pin = pinNumber;
+
+            _frequency = frequency;
+            _dutyCycle = dutyCycle;
+
+            if (controller is null)
             {
                 _controller = new GpioController();
                 _shouldDispose = true;
@@ -105,75 +110,57 @@ namespace System.Device.Pwm.Drivers
                 _shouldDispose = shouldDispose;
             }
 
-            _pin = pinNumber;
-            _controller.OpenPin(_pin, PinMode.Output);
-            _usePrecisionTimer = usePrecisionTimer;
-            _isRunning = false;
-
-            _frequency = frequency;
-            _dutyCycle = dutyCycle;
-
             UpdatePulseWidthParameters();
 
-            _runningThread = new Thread(RunSoftPWM);
-            _runningThread.Start();
+            _thread = new Thread(Run);
+
+            if (usePrecisionTimer)
+            {
+                _stopwatch = new Stopwatch();
+                _stopwatch.Start();
+                _thread.Priority = ThreadPriority.Highest;
+            }
+
+            _controller.OpenPin(_pin, PinMode.Output);
+
+            _thread.Start();
         }
 
         private void UpdatePulseWidthParameters()
         {
-            _periodInMilliseconds = 1000.0 / _frequency;
-            _pulseWidthInMilliseconds = _dutyCycle * _periodInMilliseconds;
+            double cycleTicks = TimeSpan.TicksPerSecond / (double)_frequency;
+
+            double pinHighTicks = cycleTicks * _dutyCycle;
+            _pinHighTime = TimeSpan.FromTicks((long)pinHighTicks);
+
+            double pinLowTicks = cycleTicks - pinHighTicks;
+            _pinLowTime = TimeSpan.FromTicks((long)pinLowTicks);
         }
 
-        private void RunSoftPWM()
+        private void Run()
         {
-            if (_usePrecisionTimer)
+            while (!_isTerminating)
             {
-                Thread.CurrentThread.Priority = ThreadPriority.Highest;
-            }
-
-            while (_runThread)
-            {
-                // Write the pin high for the appropriate length of time
-                if (_isRunning)
+                if (!_isRunning)
                 {
-                    if (_pulseWidthInMilliseconds != 0)
-                    {
-                        _controller.Write(_pin, PinValue.High);
-                        _isStopped = false;
-                    }
+                    Thread.Yield();
+                    continue;
+                }
 
-                    // Use the wait helper method to wait for the length of the pulse
-                    if (_usePrecisionTimer)
-                    {
-                        Wait(_pulseWidthInMilliseconds);
-                    }
-                    else
-                    {
-                        Task.Delay(TimeSpan.FromMilliseconds(_pulseWidthInMilliseconds)).Wait();
-                    }
+                if (_pinHighTime != TimeSpan.Zero)
+                {
+                    _controller.Write(_pin, PinValue.High);
+                    Wait(_pinHighTime);
+                }
 
-                    // The pulse if over and so set the pin to low and then wait until it's time for the next pulse
+                if (_pinLowTime != TimeSpan.Zero)
+                {
                     _controller.Write(_pin, PinValue.Low);
-
-                    if (_usePrecisionTimer)
-                    {
-                        Wait(_periodInMilliseconds - _pulseWidthInMilliseconds);
-                    }
-                    else
-                    {
-                        Task.Delay(TimeSpan.FromMilliseconds(_periodInMilliseconds - _pulseWidthInMilliseconds)).Wait();
-                    }
-                }
-                else
-                {
-                    if (!_isStopped)
-                    {
-                        _controller.Write(_pin, PinValue.Low);
-                        _isStopped = true;
-                    }
+                    Wait(_pinLowTime);
                 }
             }
+
+            _controller.Write(_pin, PinValue.Low);
         }
 
         /// <summary>
@@ -181,30 +168,31 @@ namespace System.Device.Pwm.Drivers
         /// This method calculates the number of CPU ticks will elapse in the specified time and spins
         /// in a loop until that threshold is hit. This allows for very precise timing.
         /// </summary>
-        /// <param name="milliseconds">The milliseconds to wait for</param>
-        private void Wait(double milliseconds)
+        /// <param name="ticks">The time to wait.</param>
+        private void Wait(TimeSpan timeout)
         {
-            long initialTick = _stopwatch.ElapsedTicks;
-            long initialElapsed = _stopwatch.ElapsedMilliseconds;
-            double desiredTicks = milliseconds / 1000.0 * Stopwatch.Frequency;
-            double finalTick = initialTick + desiredTicks;
-            while (_stopwatch.ElapsedTicks < finalTick)
+            if (_stopwatch is null)
+            {
+                Thread.Sleep(timeout);
+                return;
+            }
+
+            TimeSpan elapsed = _stopwatch.Elapsed;
+            TimeSpan target = elapsed + timeout;
+
+            while (target > _stopwatch.Elapsed)
             {
                 // nothing than waiting
             }
         }
 
-        /// <summary>
-        /// Starts the PWM channel.
-        /// </summary>
+        /// <summary>Starts the PWM channel.</summary>
         public override void Start()
         {
             _isRunning = true;
         }
 
-        /// <summary>
-        /// Stops the PWM channel.
-        /// </summary>
+        /// <summary>Stops the PWM channel.</summary>
         public override void Stop()
         {
             _isRunning = false;
@@ -213,10 +201,10 @@ namespace System.Device.Pwm.Drivers
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            _isRunning = false;
-            _runThread = false;
-            _runningThread?.Join();
-            _runningThread = null;
+            _isTerminating = true;
+
+            _thread?.Join();
+            _thread = null;
 
             if (_shouldDispose)
             {
