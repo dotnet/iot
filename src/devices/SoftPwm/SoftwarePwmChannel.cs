@@ -168,7 +168,7 @@ namespace System.Device.Pwm.Drivers
         /// This method calculates the number of CPU ticks will elapse in the specified time and spins
         /// in a loop until that threshold is hit. This allows for very precise timing.
         /// </summary>
-        /// <param name="ticks">The time to wait.</param>
+        /// <param name="timeout">The time to wait.</param>
         private void Wait(TimeSpan timeout)
         {
             if (_stopwatch is null)
