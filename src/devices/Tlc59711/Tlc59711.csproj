@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Tlc59711.cs" />
+    <None Include="README.md" />
+    <ProjectReference Include="..\SoftwareSpi\SoftwareSpi.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+  </ItemGroup>
+
+</Project>
