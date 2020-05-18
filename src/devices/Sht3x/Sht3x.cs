@@ -5,7 +5,7 @@
 using System;
 using System.Device.I2c;
 using System.Threading;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Sht3x
 {
@@ -37,7 +37,7 @@ namespace Iot.Device.Sht3x
             get
             {
                 ReadTempAndHumi();
-                return Temperature.FromCelsius(_temperature);
+                return Temperature.FromDegreesCelsius(_temperature);
             }
         }
 

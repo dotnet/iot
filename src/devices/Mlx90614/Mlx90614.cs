@@ -5,7 +5,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Mlx90614
 {
@@ -34,13 +34,13 @@ namespace Iot.Device.Mlx90614
         /// Read ambient temperature from MLX90614
         /// </summary>
         /// <returns>Temperature</returns>
-        public Temperature ReadAmbientTemperature() => Temperature.FromCelsius(ReadTemperature((byte)Register.MLX_AMBIENT_TEMP));
+        public Temperature ReadAmbientTemperature() => Temperature.FromDegreesCelsius(ReadTemperature((byte)Register.MLX_AMBIENT_TEMP));
 
         /// <summary>
         /// Read surface temperature of object from MLX90614
         /// </summary>
         /// <returns>Temperature</returns>
-        public Temperature ReadObjectTemperature() => Temperature.FromCelsius(ReadTemperature((byte)Register.MLX_OBJECT1_TEMP));
+        public Temperature ReadObjectTemperature() => Temperature.FromDegreesCelsius(ReadTemperature((byte)Register.MLX_OBJECT1_TEMP));
 
         /// <summary>
         /// Read temperature form specified register

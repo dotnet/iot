@@ -5,7 +5,7 @@
 using System;
 using System.Device.I2c;
 using System.Threading;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Mcp9808
 {
@@ -26,7 +26,7 @@ namespace Iot.Device.Mcp9808
         /// <summary>
         /// MCP9808 Temperature
         /// </summary>
-        public Temperature Temperature { get => Temperature.FromCelsius(GetTemperature()); }
+        public Temperature Temperature { get => Temperature.FromDegreesCelsius(GetTemperature()); }
 
         private bool _disable;
 

@@ -25,7 +25,7 @@ namespace RealtimeClock.Samples
                     DateTime dt = rtc.DateTime;
 
                     Console.WriteLine($"Time: {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
-                    Console.WriteLine($"Temperature: {rtc.Temperature.Celsius} ℃");
+                    Console.WriteLine($"Temperature: {rtc.Temperature.DegreesCelsius} ℃");
                     Console.WriteLine();
 
                     // wait for a second

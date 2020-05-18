@@ -7,7 +7,7 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Bmp180;
 using Iot.Device.Common;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Bmp180.Samples
 {
@@ -38,13 +38,13 @@ namespace Iot.Device.Bmp180.Samples
 
                 // read values
                 Temperature tempValue = i2cBmp280.ReadTemperature();
-                Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+                Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
                 var preValue = i2cBmp280.ReadPressure();
-                Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
+                Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
 
                 // Note that if you already have the pressure value and the temperature, you could also calculate altitude by
                 // calling WeatherHelper.CalculateAltitude(preValue, Pressure.MeanSeaLevel, tempValue) which would be more performant.
-                var altValue = i2cBmp280.ReadAltitude(Pressure.MeanSeaLevel);
+                var altValue = i2cBmp280.ReadAltitude(WeatherHelper.MeanSeaLevel);
 
                 Console.WriteLine($"Altitude: {altValue:0.##}m");
                 Thread.Sleep(1000);
@@ -54,13 +54,13 @@ namespace Iot.Device.Bmp180.Samples
 
                 // read values
                 tempValue = i2cBmp280.ReadTemperature();
-                Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+                Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
                 preValue = i2cBmp280.ReadPressure();
-                Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
+                Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
 
                 // Note that if you already have the pressure value and the temperature, you could also calculate altitude by
                 // calling WeatherHelper.CalculateAltitude(preValue, Pressure.MeanSeaLevel, tempValue) which would be more performant.
-                altValue = i2cBmp280.ReadAltitude(Pressure.MeanSeaLevel);
+                altValue = i2cBmp280.ReadAltitude(WeatherHelper.MeanSeaLevel);
 
                 Console.WriteLine($"Altitude: {altValue:0.##}m");
             }

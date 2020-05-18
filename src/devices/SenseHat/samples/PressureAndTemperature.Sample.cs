@@ -9,7 +9,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Iot.Device.Common;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.SenseHat.Samples
 {
@@ -18,7 +18,7 @@ namespace Iot.Device.SenseHat.Samples
         public static void Run()
         {
             // set this to the current sea level pressure in the area for correct altitude readings
-            var defaultSeaLevelPressure = Pressure.MeanSeaLevel;
+            var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
 
             using (var pt = new SenseHatPressureAndTemperature())
             {
@@ -28,8 +28,8 @@ namespace Iot.Device.SenseHat.Samples
                     var preValue = pt.Pressure;
                     var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
 
-                    Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
-                    Console.WriteLine($"Pressure: {preValue.Hectopascal:0.##}hPa");
+                    Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
+                    Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
                     Console.WriteLine($"Altitude: {altValue:0.##}m");
                     Thread.Sleep(1000);
                 }

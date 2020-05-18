@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.CpuTemperature
 {
@@ -20,7 +20,7 @@ namespace Iot.Device.CpuTemperature
         /// <summary>
         /// Gets CPU temperature
         /// </summary>
-        public Temperature Temperature => Temperature.FromCelsius(ReadTemperature());
+        public Temperature Temperature => Temperature.FromDegreesCelsius(ReadTemperature());
 
         /// <summary>
         /// Is CPU temperature available

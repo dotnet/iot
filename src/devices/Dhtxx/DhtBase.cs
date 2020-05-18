@@ -8,7 +8,7 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Diagnostics;
 using System.Threading;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.DHTxx
 {
@@ -65,7 +65,7 @@ namespace Iot.Device.DHTxx
             get
             {
                 ReadData();
-                return IsLastReadSuccessful ? GetTemperature(_readBuff) : Temperature.FromCelsius(double.NaN);
+                return IsLastReadSuccessful ? GetTemperature(_readBuff) : Temperature.FromDegreesCelsius(double.NaN);
             }
         }
 

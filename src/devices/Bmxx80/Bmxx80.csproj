@@ -31,7 +31,6 @@
     <Compile Include="Sampling.cs" />
     <Compile Include="StandbyTime.cs" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-    <ProjectReference Include="..\Units\Units.csproj" />
     <ProjectReference Include="..\Common\Iot\Device\Common\CommonHelpers.csproj" />
   </ItemGroup>
 
