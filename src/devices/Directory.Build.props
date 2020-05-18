@@ -12,6 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="UnitsNet" Version="4.58.0" />
+    <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
   </ItemGroup>
 </Project>
