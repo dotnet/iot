@@ -25,10 +25,11 @@ namespace Iot.Device.Spi
         /// <summary>
         /// Software implementation of the SPI.
         /// </summary>
+        /// <remarks>Note that there is a ChipSelectLine in the SPIConnectionSettings as well, either that or the cs property will be used.</remarks>
         /// <param name="clk">Clock pin.</param>
         /// <param name="miso">Master Input Slave Output pin. Optional, set to -1 to ignore</param>
         /// <param name="mosi">Master Output Slave Input pin.</param>
-        /// <param name="cs">Chip select pin (or negated chip select). Optional, set to -1 to ignore. Note that there is a ChipSelectLine in the SPIConnectionSettings as well, either will be used.</param>
+        /// <param name="cs">Chip select pin (or negated chip select). Optional, set to -1 to ignore.</param>
         /// <param name="settings">Settings of the SPI connection.</param>
         /// <param name="controller">GPIO controller used for pins.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
@@ -43,12 +44,12 @@ namespace Iot.Device.Spi
             _miso = miso;
             _mosi = mosi;
 
-            if (_cs > -1 && _settings.ChipSelectLine > -1 && _cs != _settings.ChipSelectLine)
+            if (_cs != -1 && _settings.ChipSelectLine != -1 && _cs != _settings.ChipSelectLine)
             {
                 throw new ArgumentException("Both cs and settings.ChipSelectLine can't both be set");
             }
 
-            if (cs > -1)
+            if (cs != -1)
             {
                 _cs = cs;
             }
@@ -58,13 +59,13 @@ namespace Iot.Device.Spi
             }
 
             _controller.OpenPin(_clk, PinMode.Output);
-            if (_miso > -1)
+            if (_miso != -1)
             {
                 _controller.OpenPin(_miso, PinMode.Input);
             }
 
             _controller.OpenPin(_mosi, PinMode.Output);
-            if (_cs > -1)
+            if (_cs != -1)
             {
                 _controller.OpenPin(_cs, PinMode.Output);
             }
@@ -75,7 +76,7 @@ namespace Iot.Device.Spi
             // aka. CPHA - tells us when read/write is 'captured'
             bool onPulseEnd = ((int)_settings.Mode & 1) == 1;
 
-            if (_cs > -1)
+            if (_cs != -1)
             {
                 _controller.Write(_cs, !(bool)_settings.ChipSelectLineActiveState);
             }
@@ -113,6 +114,7 @@ namespace Iot.Device.Spi
             else
             {
                 _bitTransfer = new ScopeData(
+                    enter: () => { },
                     exit: () =>
                     {
                         _controller.Write(_clk, !idle);
@@ -120,7 +122,7 @@ namespace Iot.Device.Spi
                     });
             }
 
-            if (_cs > -1)
+            if (_cs != -1)
             {
                 _chipSelect = new ScopeData(
                     enter: () =>
@@ -131,6 +133,10 @@ namespace Iot.Device.Spi
                     {
                         _controller.Write(_cs, !(bool)_settings.ChipSelectLineActiveState);
                     });
+            }
+            else
+            {
+                _chipSelect = new ScopeData(() => { }, () => { });
             }
         }
 
@@ -195,11 +201,7 @@ namespace Iot.Device.Spi
 
         private bool ReadWriteBit(bool bitToWrite)
         {
-            if (_miso == -1)
-            {
-                throw new ArgumentException("Cannot read without a miso pin specified");
-            }
-
+            // _mosi is checked higher up the call path
             _controller.Write(_mosi, bitToWrite);
             return (bool)_controller.Read(_miso);
         }
@@ -212,6 +214,11 @@ namespace Iot.Device.Spi
         /// <inheritdoc />
         public override void Read(Span<byte> data)
         {
+            if (_miso == -1)
+            {
+                throw new ArgumentException("Cannot read without a miso pin specified");
+            }
+
             Span<byte> dataToWrite = stackalloc byte[data.Length];
             TransferFullDuplex(dataToWrite, data);
         }
@@ -219,19 +226,8 @@ namespace Iot.Device.Spi
         /// <inheritdoc />
         public override void Write(ReadOnlySpan<byte> data)
         {
-            if (_miso == -1)
-            {
-                // Output/Write only
-                TransferWriteOnly(data);
-
-                return;
-            }
-            else
-            {
-                // Write and read
-                Span<byte> dataToRead = stackalloc byte[data.Length];
-                TransferFullDuplex(data, dataToRead);
-            }
+            // Output/Write only
+            TransferWriteOnly(data);
         }
 
         /// <inheritdoc />
@@ -272,20 +268,20 @@ namespace Iot.Device.Spi
             internal Action _enter;
             internal Action _exit;
 
-            public ScopeData(Action enter = null, Action exit = null)
+            public ScopeData(Action enter, Action exit)
             {
-                _enter = enter;
-                _exit = exit;
+                _enter = enter ?? throw new ArgumentNullException(nameof(enter));
+                _exit = exit ?? throw new ArgumentNullException(nameof(exit));
             }
 
             public void Enter()
             {
-                _enter?.Invoke();
+                _enter.Invoke();
             }
 
             public void Exit()
             {
-                _exit?.Invoke();
+                _exit.Invoke();
             }
         }
 
@@ -295,13 +291,13 @@ namespace Iot.Device.Spi
 
             public Scope(ScopeData data)
             {
-                _data = data;
-                data?.Enter();
+                _data = data ?? throw new ArgumentNullException(nameof(data));
+                data.Enter();
             }
 
             public void Dispose()
             {
-                _data?.Exit();
+                _data.Exit();
             }
         }
     }
