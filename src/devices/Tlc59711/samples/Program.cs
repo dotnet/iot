@@ -25,7 +25,7 @@ namespace Tlc59711Sample
 
             // Create a software SPI
             // Note that bit-banging from managed code is very slow, about 1ms per bit
-            var spiDevice = new SoftwareSpi(clk: 15, miso: -1, mosi: 16);
+            var spiDevice = new SoftwareSpi(clk: 15, miso: -1, mosi: 16, cs: -1);
 
             using var tlc = new Tlc59711(1, spiDevice);
 
