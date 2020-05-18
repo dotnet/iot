@@ -17,9 +17,9 @@ using System.Device.Pwm.Drivers;
 using Iot.Device.Adc;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
-using Iot.Units;
 
 using Xunit;
+using UnitsNet;
 
 namespace System.Device.Gpio.Tests
 {

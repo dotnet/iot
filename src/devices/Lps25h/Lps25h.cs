@@ -6,7 +6,7 @@ using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Diagnostics;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Lps25h
 {
@@ -49,12 +49,12 @@ namespace Iot.Device.Lps25h
         /// <summary>
         /// Temperature
         /// </summary>
-        public Temperature Temperature => Temperature.FromCelsius(42.5f + ReadInt16(Register.Temperature) / 480f);
+        public Temperature Temperature => Temperature.FromDegreesCelsius(42.5f + ReadInt16(Register.Temperature) / 480f);
 
         /// <summary>
         /// Pressure
         /// </summary>
-        public Pressure Pressure => Pressure.FromHectopascal(ReadInt24(Register.Pressure) / 4096.0);
+        public Pressure Pressure => Pressure.FromHectopascals(ReadInt24(Register.Pressure) / 4096.0);
 
         private void WriteByte(Register register, byte data)
         {

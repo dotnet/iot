@@ -19,8 +19,8 @@ namespace Iot.Device.Mlx90614.Sample
             {
                 while (true)
                 {
-                    Console.WriteLine($"Ambient: {sensor.ReadAmbientTemperature().Celsius} ℃");
-                    Console.WriteLine($"Object: {sensor.ReadObjectTemperature().Celsius} ℃");
+                    Console.WriteLine($"Ambient: {sensor.ReadAmbientTemperature().DegreesCelsius} ℃");
+                    Console.WriteLine($"Object: {sensor.ReadObjectTemperature().DegreesCelsius} ℃");
                     Console.WriteLine();
 
                     Thread.Sleep(1000);

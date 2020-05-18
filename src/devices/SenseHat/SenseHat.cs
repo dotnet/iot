@@ -5,7 +5,7 @@
 using System;
 using System.Drawing;
 using System.Numerics;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.SenseHat
 {

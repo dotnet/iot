@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-    <ProjectReference Include="..\Units\Units.csproj" />
     <None Include="README.md" />
   </ItemGroup>
 

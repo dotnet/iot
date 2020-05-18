@@ -8,6 +8,7 @@
     <SystemIOPortsPackageVersion>4.6.0</SystemIOPortsPackageVersion>
     <MicrosoftWin32RegistryPackageVersion>4.6.0</MicrosoftWin32RegistryPackageVersion>
     <SystemRuntimeWindowsRuntimePackageVersion>4.6.0</SystemRuntimeWindowsRuntimePackageVersion>
+    <UnitsNetPackageVersion>4.58.0</UnitsNetPackageVersion>
   </PropertyGroup>
   <!-- Restore sources -->
   <PropertyGroup>

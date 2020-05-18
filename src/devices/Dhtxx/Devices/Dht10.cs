@@ -5,7 +5,7 @@
 using System;
 using System.Device;
 using System.Device.I2c;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.DHTxx
 {
@@ -92,7 +92,7 @@ namespace Iot.Device.DHTxx
         {
             int raw = ((((readBuff[3] & 0b_0000_1111) << 8) | readBuff[4]) << 8) | readBuff[5];
 
-            return Temperature.FromCelsius(raw / Math.Pow(2, 20) * 200 - 50);
+            return Temperature.FromDegreesCelsius(raw / Math.Pow(2, 20) * 200 - 50);
         }
     }
 }

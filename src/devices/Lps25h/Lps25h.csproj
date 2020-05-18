@@ -9,7 +9,6 @@
     <Compile Include="*.cs" />
     <None Include="README.md" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-    <ProjectReference Include="..\Units\Units.csproj" />
   </ItemGroup>
 
 </Project>
