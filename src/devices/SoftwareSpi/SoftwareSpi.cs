@@ -150,6 +150,11 @@ namespace Iot.Device.Spi
                 throw new ArgumentException(nameof(dataToWrite));
             }
 
+            if (_miso == -1)
+            {
+                throw new ArgumentException("Cannot read without a miso pin specified");
+            }
+
             int bitLen = _settings.DataBitLength;
             int lastBit = bitLen - 1;
 
@@ -213,11 +218,6 @@ namespace Iot.Device.Spi
         /// <inheritdoc />
         public override void Read(Span<byte> data)
         {
-            if (_miso == -1)
-            {
-                throw new ArgumentException("Cannot read without a miso pin specified");
-            }
-
             Span<byte> dataToWrite = stackalloc byte[data.Length];
             TransferFullDuplex(dataToWrite, data);
         }
