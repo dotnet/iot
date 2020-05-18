@@ -114,7 +114,6 @@ namespace Iot.Device.Spi
             else
             {
                 _bitTransfer = new ScopeData(
-                    enter: () => { },
                     exit: () =>
                     {
                         _controller.Write(_clk, !idle);
@@ -136,7 +135,7 @@ namespace Iot.Device.Spi
             }
             else
             {
-                _chipSelect = new ScopeData(() => { }, () => { });
+                _chipSelect = new ScopeData();
             }
         }
 
@@ -226,7 +225,6 @@ namespace Iot.Device.Spi
         /// <inheritdoc />
         public override void Write(ReadOnlySpan<byte> data)
         {
-            // Output/Write only
             TransferWriteOnly(data);
         }
 
@@ -268,10 +266,10 @@ namespace Iot.Device.Spi
             internal Action _enter;
             internal Action _exit;
 
-            public ScopeData(Action enter, Action exit)
+            public ScopeData(Action enter = null, Action exit = null)
             {
-                _enter = enter ?? throw new ArgumentNullException(nameof(enter));
-                _exit = exit ?? throw new ArgumentNullException(nameof(exit));
+                _enter = enter ?? new Action(() => { });
+                _exit = exit ?? new Action(() => { });
             }
 
             public void Enter()
