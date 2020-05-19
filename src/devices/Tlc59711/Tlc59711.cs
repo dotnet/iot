@@ -19,8 +19,10 @@ namespace Iot.Device.Tlc59711
     /// </summary>
     public class Tlc59711 : IDisposable
     {
+        private const int ChannelsPerDriver = 12;
+
         private readonly ushort[] _pwmBuffer;
-        private readonly byte _numberOfDrivers;
+        private readonly int _numberOfDrivers;
         private SpiDevice _spiDevice;
         private byte _brightnessRed;
         private byte _brightnessGreen;
@@ -30,7 +32,7 @@ namespace Iot.Device.Tlc59711
         /// <summary>
         /// Creates a new instance of the Tlc59711.
         /// </summary>
-        public Tlc59711(byte numberOfDrivers, SpiDevice spiDevice)
+        public Tlc59711(SpiDevice spiDevice, int numberOfDrivers = 1)
         {
             _numberOfDrivers = numberOfDrivers;
 
@@ -40,9 +42,10 @@ namespace Iot.Device.Tlc59711
             _brightnessRed = _brightnessGreen = _brightnessBlue = 0x7f;
 
             // 12 channels per driver
-            _pwmBuffer = new ushort[numberOfDrivers * 12];
+            _pwmBuffer = new ushort[numberOfDrivers * ChannelsPerDriver];
 
-            _dataToWrite = new byte[_numberOfDrivers * 28];
+            // Two bytes per channel, plus 1 byte for the command, and 3 bytes for the global brightness control
+            _dataToWrite = new byte[_numberOfDrivers * (ChannelsPerDriver * 2 + 4)];
         }
 
         /// <summary>
@@ -61,13 +64,12 @@ namespace Iot.Device.Tlc59711
         /// <param name="pwm">PWM level (0 = minimum, 65535 = maximum)</param>
         public void SetPWM(int channel, ushort pwm)
         {
-            if (channel > 12 * _numberOfDrivers)
+            if (channel > ChannelsPerDriver * _numberOfDrivers)
             {
                 throw new ArgumentOutOfRangeException("channel");
             }
 
             _pwmBuffer[channel] = pwm;
-
         }
 
         /// <summary>
@@ -117,11 +119,11 @@ namespace Iot.Device.Tlc59711
                 _dataToWrite[pos++] = (byte)(command);
 
                 // 12 channels per TLC59711
-                for (int c = 11; c >= 0; c--)
+                for (int c = ChannelsPerDriver - 1; c >= 0; c--)
                 {
                     // 16 bits per channel, send MSB first
-                    _dataToWrite[pos++] = (byte)(_pwmBuffer[n * 12 + c] >> 8);
-                    _dataToWrite[pos++] = (byte)(_pwmBuffer[n * 12 + c]);
+                    _dataToWrite[pos++] = (byte)(_pwmBuffer[n * ChannelsPerDriver + c] >> 8);
+                    _dataToWrite[pos++] = (byte)(_pwmBuffer[n * ChannelsPerDriver + c]);
                 }
             }
 
