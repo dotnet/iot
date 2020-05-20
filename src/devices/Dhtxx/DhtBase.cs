@@ -75,12 +75,12 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.NaN
         /// </remarks>
-        public virtual double Humidity
+        public virtual Ratio Humidity
         {
             get
             {
                 ReadData();
-                return IsLastReadSuccessful ? GetHumidity(_readBuff) : double.NaN;
+                return IsLastReadSuccessful ? GetHumidity(_readBuff) : default(Ratio);
             }
         }
 
@@ -265,7 +265,7 @@ namespace Iot.Device.DHTxx
         /// </summary>
         /// <param name="readBuff">Data</param>
         /// <returns>Humidity</returns>
-        internal abstract double GetHumidity(byte[] readBuff);
+        internal abstract Ratio GetHumidity(byte[] readBuff);
 
         /// <summary>
         /// Converting data to Temperature

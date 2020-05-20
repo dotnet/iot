@@ -21,7 +21,7 @@ namespace Iot.Device.Common.Tests
         [InlineData(28, 29.5, 12)]
         public void HeatIndexIsCalculatedCorrectly(double expected, double celsius, double relativeHumidity)
         {
-            var heatIndex = WeatherHelper.CalculateHeatIndex(Temperature.FromDegreesCelsius(celsius), relativeHumidity);
+            var heatIndex = WeatherHelper.CalculateHeatIndex(Temperature.FromDegreesCelsius(celsius), Ratio.FromPercent(relativeHumidity));
             Assert.Equal(expected, Math.Round(heatIndex.DegreesCelsius));
         }
 
@@ -56,7 +56,7 @@ namespace Iot.Device.Common.Tests
         [InlineData(1904, 22, 72)]
         public void ActualVaporPressureIsCalculatedCorrectly(double expected, double celsius, double relativeHumidity)
         {
-            var actualVaporPressure = WeatherHelper.CalculateActualVaporPressure(Temperature.FromDegreesCelsius(celsius), relativeHumidity);
+            var actualVaporPressure = WeatherHelper.CalculateActualVaporPressure(Temperature.FromDegreesCelsius(celsius), Ratio.FromPercent(relativeHumidity));
             Assert.Equal(expected, Math.Round(actualVaporPressure.Pascals, 0));
         }
 
@@ -67,7 +67,7 @@ namespace Iot.Device.Common.Tests
         [InlineData(27.68, 60, 29)]
         public void DewPointIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
-            var dewPoint = WeatherHelper.CalculateDewPoint(Temperature.FromDegreesFahrenheit(fahrenheit), relativeHumidity);
+            var dewPoint = WeatherHelper.CalculateDewPoint(Temperature.FromDegreesFahrenheit(fahrenheit), Ratio.FromPercent(relativeHumidity));
             Assert.Equal(expected, Math.Round(dewPoint.DegreesFahrenheit, 2));
         }
 
@@ -77,7 +77,7 @@ namespace Iot.Device.Common.Tests
         [InlineData(5, 40, 75)]
         public void AbsoluteHumidityIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
-            var absoluteHumidity = WeatherHelper.CalculateAbsoluteHumidity(Temperature.FromDegreesFahrenheit(fahrenheit), relativeHumidity);
+            var absoluteHumidity = WeatherHelper.CalculateAbsoluteHumidity(Temperature.FromDegreesFahrenheit(fahrenheit), Ratio.FromPercent(relativeHumidity));
             Assert.Equal(expected, Math.Round(absoluteHumidity, 0));
         }
 
@@ -156,7 +156,7 @@ namespace Iot.Device.Common.Tests
             double expected)
         {
             var result = WeatherHelper.CalculateBarometricPressure(Pressure.FromHectopascals(measuredValue),
-                Temperature.FromDegreesCelsius(temperature), altitude);
+                Temperature.FromDegreesCelsius(temperature), Length.FromMeters(altitude));
             Assert.Equal(expected, result.Hectopascals, 2);
         }
 
@@ -170,7 +170,7 @@ namespace Iot.Device.Common.Tests
             double expected)
         {
             var result = WeatherHelper.CalculateBarometricPressure(Pressure.FromHectopascals(measuredValue),
-                Temperature.FromDegreesCelsius(temperature), altitude, relativeHumidity);
+                Temperature.FromDegreesCelsius(temperature), Length.FromMeters(altitude), Ratio.FromPercent(relativeHumidity));
             Assert.Equal(expected, result.Hectopascals, 2);
         }
     }

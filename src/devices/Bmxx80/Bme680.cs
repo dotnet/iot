@@ -349,11 +349,11 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadHumidity(out double humidity)
+        public bool TryReadHumidity(out Ratio humidity)
         {
             if (HumiditySampling == Sampling.Skipped)
             {
-                humidity = double.NaN;
+                humidity = default;
                 return false;
             }
 
@@ -463,7 +463,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="adcHumidity">The humidity value read from the device.</param>
         /// <returns>The percentage relative humidity.</returns>
-        private double CompensateHumidity(int adcHumidity)
+        private Ratio CompensateHumidity(int adcHumidity)
         {
             // Calculate the humidity.
             var temperature = TemperatureFine / 5120.0;
@@ -483,7 +483,7 @@ namespace Iot.Device.Bmxx80
                 calculatedHumidity = 0.0;
             }
 
-            return calculatedHumidity;
+            return Ratio.FromPercent(calculatedHumidity);
         }
 
         /// <summary>

@@ -6,6 +6,7 @@ using System;
 using System.Device.I2c;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.Register;
+using UnitsNet;
 
 namespace Iot.Device.Bmxx80
 {
@@ -81,11 +82,11 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadHumidity(out double humidity)
+        public bool TryReadHumidity(out Ratio humidity)
         {
             if (HumiditySampling == Sampling.Skipped)
             {
-                humidity = double.NaN;
+                humidity = default;
                 return false;
             }
 
@@ -121,7 +122,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="adcHumidity">The humidity value read from the device.</param>
         /// <returns>The percentage relative humidity.</returns>
-        private double CompensateHumidity(int adcHumidity)
+        private Ratio CompensateHumidity(int adcHumidity)
         {
             // The humidity is calculated using the compensation formula in the BME280 datasheet.
             double varH = TemperatureFine - 76800.0;
@@ -139,7 +140,7 @@ namespace Iot.Device.Bmxx80
                 varH = 0;
             }
 
-            return varH;
+            return Ratio.FromPercent(varH);
         }
     }
 }
