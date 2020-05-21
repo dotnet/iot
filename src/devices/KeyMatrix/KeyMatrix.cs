@@ -47,7 +47,7 @@ namespace Iot.Device.KeyMatrix
         private GpioController _gpioController;
         private PinValue[] _buttonValues;
         private bool _pinsOpened;
-        int currentOutput = 0;
+        private int currentOutput = 0;
 
         /// <summary>
         /// Initialize key matrix
