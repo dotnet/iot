@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
 using System.Threading;
@@ -17,12 +18,18 @@ namespace Iot.Device.KeyMatrix.Samples
         public static void Main(string[] args)
         {
             // get arguments
-            Console.Write("input output pins(eg. 27,23,24,10) ");
-            System.Collections.Generic.IEnumerable<int> outputs = Console.ReadLine().Split(',').Select(m => int.Parse(m));
-            Console.Write("input input pins(eg. 15,14,3,2) ");
-            System.Collections.Generic.IEnumerable<int> inputs = Console.ReadLine().Split(',').Select(m => int.Parse(m));
+            Console.Write("input output pins(eg. 26,19,13,6) ");
+            var line = Console.ReadLine();
+            IEnumerable<int> outputs = (string.IsNullOrEmpty(line)? "26,19,13,6" : line).Split(',').Select(m => int.Parse(m));
+            Console.Write("input input pins(eg. 21,20,16,12) ");
+            line = Console.ReadLine();
+            IEnumerable<int> inputs = (string.IsNullOrEmpty(line) ? "21,20,16,12" : line).Split(',').Select(m => int.Parse(m));
             Console.Write("input scaning interval(eg. 15) ");
-            int interval = int.Parse(Console.ReadLine());
+            line = Console.ReadLine();
+            int interval = int.TryParse(line,out int i)?i:15;
+            Console.Write("input read key event count(eg. 20) ");
+            line = Console.ReadLine();
+            int count = int.TryParse(line, out int c) ? c : 20;
 
             // get GPIO controller
             GpioController gpio = new GpioController();
@@ -42,63 +49,44 @@ namespace Iot.Device.KeyMatrix.Samples
             CancellationTokenSource source = new CancellationTokenSource();
             CancellationToken token = source.Token;
 
-            // serial mode
-            int count = 10;
+            // read key events
             for (int n = 0; n < count; n++)
             {
                 Console.WriteLine();
                 Console.WriteLine();
                 Console.WriteLine($"Waiting for matrix keyboard event... {n}/{count}");
-                KeyMatrixEventArgs key = mk.ReadKeyAsync(token).Result;
-                Mk_PinChangeEvent(mk, key);
+                KeyMatrixEvent key = mk.ReadKey();
+                ShowKeyMatrixEvent(mk, key);
             }
 
-            // event mode
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("Press any key to start. Then stop. Then dispose. Then exit.");
-
-            //  register event handler
-            mk.PinChangeEvent += Mk_PinChangeEvent;
-
-            // start scanning
-            Console.ReadKey();
-            System.Threading.Tasks.Task task = mk.ScanAsync(token);
-            Console.WriteLine("KeyMatrix.StartScan() ");
-
-            // stop scanning
-            Console.ReadKey();
-            source.Cancel();
-            task.Wait();
-            Console.WriteLine("KeyMatrix.StopScan() ");
-
             // dispose
-            Console.ReadKey();
+            Console.WriteLine("Dispose after 2 seconds...");
+            Thread.Sleep(2000);
             mk.Dispose();
-            Console.WriteLine("KeyMatrix.Dispose() ");
+            Console.WriteLine("KeyMatrix.Dispose()");
 
             // quit
-            Console.ReadKey();
+            Console.WriteLine("Sample finished. Quit after 2 seconds...");
+            Thread.Sleep(2000);
         }
 
         /// <summary>
         /// Keyboard event
         /// </summary>
-        private static void Mk_PinChangeEvent(object sender, KeyMatrixEventArgs pinValueChangedEventArgs)
+        private static void ShowKeyMatrixEvent(KeyMatrix sender, KeyMatrixEvent pinValueChangedEventArgs)
         {
             // clear screen
             Console.Clear();
 
             // print event
-            Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff")} {pinValueChangedEventArgs.Output}, {pinValueChangedEventArgs.Input}, {pinValueChangedEventArgs.EventType}");
+            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} {pinValueChangedEventArgs.Output}, {pinValueChangedEventArgs.Input}, {pinValueChangedEventArgs.EventType}");
             Console.WriteLine();
 
             // print keyboard status
-            KeyMatrix s = (KeyMatrix)sender;
-            for (int r = 0; r < s.OutputPins.Count(); r++)
+            for (int r = 0; r < sender.OutputPins.Count(); r++)
             {
-                ReadOnlySpan<PinValue> rv = s.ValuesByOutput(r);
-                for (int c = 0; c < s.InputPins.Count(); c++)
+                ReadOnlySpan<PinValue> rv = sender[r];
+                for (int c = 0; c < sender.InputPins.Count(); c++)
                 {
                     Console.Write(rv[c] == PinValue.Low ? " ." : " #");
                 }

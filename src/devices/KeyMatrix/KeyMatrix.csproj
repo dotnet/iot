@@ -10,11 +10,11 @@
       <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
     </ProjectReference>
     <Compile Include="KeyMatrix.cs" />
-    <Compile Include="KeyMatrixEventArgs.cs" />
+    <Compile Include="KeyMatrixEvent.cs" />
   </ItemGroup>
 
   <ItemGroup>    
     <None Include="README.md" />
   </ItemGroup>
-
+  
 </Project>

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Device.Gpio;
 
 namespace Iot.Device.KeyMatrix
@@ -10,7 +9,7 @@ namespace Iot.Device.KeyMatrix
     /// <summary>
     /// Keyboard event
     /// </summary>
-    public class KeyMatrixEventArgs : EventArgs
+    public class KeyMatrixEvent
     {
         /// <summary>
         /// Event type of current button. PinEventTypes.Rising is pressed，PinEventTypes.Falling is released
@@ -27,7 +26,7 @@ namespace Iot.Device.KeyMatrix
         /// </summary>
         public int Input;
 
-        internal KeyMatrixEventArgs(PinEventTypes eventType, int output, int input)
+        internal KeyMatrixEvent(PinEventTypes eventType, int output, int input)
         {
             EventType = eventType;
             Output = output;

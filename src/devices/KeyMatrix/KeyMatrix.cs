@@ -37,15 +37,17 @@ namespace Iot.Device.KeyMatrix
         public int ScanInterval { get; set; }
 
         /// <summary>
-        /// Delegate of key matrix event
+        /// Get buttons' values by output
         /// </summary>
-        public delegate void PinChangeEventHandler(object sender, KeyMatrixEventArgs pinValueChangedEventArgs);
+        /// <param name="output">Output index</param>
+        public ReadOnlySpan<PinValue> this[int output] => _buttonValues.AsSpan(output * _outputPins.Length, _inputPins.Length);
 
         private int[] _outputPins;
         private int[] _inputPins;
-        private GpioController _masterGpioController;
+        private GpioController _gpioController;
         private PinValue[] _buttonValues;
         private bool _pinsOpened;
+        int currentOutput = 0;
 
         /// <summary>
         /// Initialize key matrix
@@ -56,29 +58,31 @@ namespace Iot.Device.KeyMatrix
         /// <param name="scanInterval">Scanning interval in milliseconds</param>
         public KeyMatrix(GpioController masterController, IEnumerable<int> outputPins, IEnumerable<int> inputPins, int scanInterval)
         {
-            _masterGpioController = masterController ?? throw new ArgumentNullException(nameof(masterController));
+            _gpioController = masterController ?? throw new ArgumentNullException(nameof(masterController));
 
             if (outputPins == null)
             {
                 throw new ArgumentNullException(nameof(outputPins));
             }
+
             if (!outputPins.Any())
             {
-                throw new ArgumentOutOfRangeException(nameof(outputPins), "The number of outputs is at least 1");
+                throw new ArgumentOutOfRangeException(nameof(outputPins), "The number of outputs must be at least 1");
             }
 
             if (inputPins == null)
             {
                 throw new ArgumentNullException(nameof(inputPins));
             }
+
             if (!inputPins.Any())
             {
-                throw new ArgumentOutOfRangeException(nameof(inputPins), "The number of inputs is at least 1");
+                throw new ArgumentOutOfRangeException(nameof(inputPins), "The number of inputs must be at least 1");
             }
 
-            if (scanInterval <= 0)
+            if (scanInterval < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(scanInterval), "Scanning interval must be positive");
+                throw new ArgumentOutOfRangeException(nameof(scanInterval), "Scanning interval must be 0 or negative");
             }
 
             _outputPins = outputPins.ToArray();
@@ -92,52 +96,46 @@ namespace Iot.Device.KeyMatrix
         }
 
         /// <summary>
-        /// Start a task to open GPIO pins then start keyboard scanning. Raises KeyMatrixEventArgs.
+        /// Blocks execution until a key event is received
         /// </summary>
-        /// <param name="token">A cancellation token that can be used to cancel the work</param>
-        public Task ScanAsync(CancellationToken token)
+        public KeyMatrixEvent ReadKey()
         {
-            return Task.Run(() =>
-            {
-                KeyMatrixEventArgs args = Scan(token, false);
-                return args;
-            }, token);
-        }
+            KeyMatrixEvent args = null;
+            currentOutput--;
 
-        /// <summary>
-        /// Start a task to open GPIO pins then start keyboard scanning. End with a KeyMatrixEventArgs raises.
-        /// </summary>
-        /// <param name="token">A cancellation token that can be used to cancel the work</param>
-        public Task<KeyMatrixEventArgs> ReadKeyAsync(CancellationToken token)
-        {
-            return Task.Run(() =>
-            {
-                KeyMatrixEventArgs args = Scan(token, true);
-                return args;
-            }, token);
-        }
+            do {
+                Thread.Sleep(ScanInterval);
 
-        /// <summary>
-        /// Get buttons' values by output
-        /// </summary>
-        /// <param name="output">Output index</param>
-        public ReadOnlySpan<PinValue> ValuesByOutput(int output)
-        {
-            return _buttonValues.AsSpan(output * _outputPins.Length, _inputPins.Length);
-        }
+                currentOutput = (currentOutput + 1) % _outputPins.Length;
+                _gpioController.Write(_outputPins[currentOutput], PinValue.High);
 
-        /// <summary>
-        /// Keyboard event
-        /// </summary>
-        public event PinChangeEventHandler PinChangeEvent;
+                for (var i = 0; i < _inputPins.Length; i++) { 
+                    int index = currentOutput * _inputPins.Length + i;
+
+                    PinValue oldValue = _buttonValues[index];
+                    PinValue newValue = _gpioController.Read(_inputPins[i]);
+                    _buttonValues[index] = newValue;
+
+                    if (newValue != oldValue)
+                    {
+                        args = new KeyMatrixEvent(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, currentOutput, i);
+                        return args;
+                    }
+                }
+
+                _gpioController.Write(_outputPins[currentOutput], PinValue.Low);
+            } while (_pinsOpened);
+
+            return args;
+        }
 
         /// <inheritdoc/>
         public void Dispose()
         {
             ClosePins();
 
-            _masterGpioController.Dispose();
-            _masterGpioController = null;
+            _gpioController?.Dispose();
+            _gpioController = null;
 
             _outputPins = null;
             _inputPins = null;
@@ -148,64 +146,28 @@ namespace Iot.Device.KeyMatrix
         {
             for (int i = 0; i < _outputPins.Length; i++)
             {
-                _masterGpioController.OpenPin(_outputPins[i], PinMode.Output);
+                _gpioController.OpenPin(_outputPins[i], PinMode.Output);
             }
             for (int i = 0; i < _inputPins.Length; i++)
             {
-                _masterGpioController.OpenPin(_inputPins[i], PinMode.Input);
+                _gpioController.OpenPin(_inputPins[i], PinMode.Input);
             }
 
             _pinsOpened = true;
         }
+
         private void ClosePins()
         {
             _pinsOpened = false;
 
             for (int i = 0; i < _outputPins.Length; i++)
             {
-                _masterGpioController.ClosePin(_outputPins[i]);
+                _gpioController.ClosePin(_outputPins[i]);
             }
             for (int i = 0; i < _inputPins.Length; i++)
             {
-                _masterGpioController.ClosePin(_inputPins[i]);
+                _gpioController.ClosePin(_inputPins[i]);
             }
-        }
-
-        private KeyMatrixEventArgs Scan(CancellationToken token, bool readKey)
-        {
-            KeyMatrixEventArgs args = null;
-            int currentOutput = 0;
-            _masterGpioController.Write(_outputPins[currentOutput], PinValue.High);
-
-            while (_pinsOpened && !token.IsCancellationRequested)
-            {
-                for (int i = 0; i < _outputPins.Length; i++)
-                {
-                    int index = currentOutput * _inputPins.Length + i;
-
-                    PinValue oldValue = _buttonValues[index];
-                    PinValue newValue = _masterGpioController.Read(_inputPins[i]);
-                    _buttonValues[index] = newValue;
-
-                    if (newValue != oldValue)
-                    {
-                        args = new KeyMatrixEventArgs(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, currentOutput, i);
-                        PinChangeEvent?.Invoke(this, args);
-                        if (readKey)
-                        {
-                            return args;
-                        }
-                    }
-                }
-
-                _masterGpioController.Write(_outputPins[currentOutput], PinValue.Low);
-                currentOutput = (currentOutput + 1) % _outputPins.Length;
-                _masterGpioController.Write(_outputPins[currentOutput], PinValue.High);
-
-                // Console.Title = string.Join(" ", _buttonValues.Select(m => (int)m));
-                Thread.Sleep(ScanInterval);
-            }
-            return args;
         }
     }
 }
