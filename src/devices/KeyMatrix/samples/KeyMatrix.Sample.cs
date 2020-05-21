@@ -20,13 +20,13 @@ namespace Iot.Device.KeyMatrix.Samples
             // get arguments
             Console.Write("input output pins(eg. 26,19,13,6) ");
             var line = Console.ReadLine();
-            IEnumerable<int> outputs = (string.IsNullOrEmpty(line)? "26,19,13,6" : line).Split(',').Select(m => int.Parse(m));
+            IEnumerable<int> outputs = (string.IsNullOrEmpty(line) ? "26,19,13,6" : line).Split(',').Select(m => int.Parse(m));
             Console.Write("input input pins(eg. 21,20,16,12) ");
             line = Console.ReadLine();
             IEnumerable<int> inputs = (string.IsNullOrEmpty(line) ? "21,20,16,12" : line).Split(',').Select(m => int.Parse(m));
             Console.Write("input scaning interval(eg. 15) ");
             line = Console.ReadLine();
-            int interval = int.TryParse(line,out int i)?i:15;
+            int interval = int.TryParse(line, out int i) ? i : 15;
             Console.Write("input read key event count(eg. 20) ");
             line = Console.ReadLine();
             int count = int.TryParse(line, out int c) ? c : 20;

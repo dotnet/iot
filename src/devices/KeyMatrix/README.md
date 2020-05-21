@@ -18,7 +18,7 @@ You can also use any compatible GPIO controller like [Mcp23xxx](../Mcp23xxx) ins
 
 * Using diodes(eg. 1N4148) for each button prevents "ghosting" or "masking" problem.
 
-* N pull-down resistors (or similar network resistor) and a ground pin is optional if your MCU already have it in input pins.
+* Input pins need pull-down resistors connect to ground if your MCU don't have it.
 
 * If your key matrix doesn't work well, try to swap output and input pins.
 

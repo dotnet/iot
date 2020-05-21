@@ -103,13 +103,15 @@ namespace Iot.Device.KeyMatrix
             KeyMatrixEvent args = null;
             currentOutput--;
 
-            do {
+            do
+            {
                 Thread.Sleep(ScanInterval);
 
                 currentOutput = (currentOutput + 1) % _outputPins.Length;
                 _gpioController.Write(_outputPins[currentOutput], PinValue.High);
 
-                for (var i = 0; i < _inputPins.Length; i++) { 
+                for (var i = 0; i < _inputPins.Length; i++)
+                {
                     int index = currentOutput * _inputPins.Length + i;
 
                     PinValue oldValue = _buttonValues[index];
