@@ -82,7 +82,7 @@ namespace Iot.Device.KeyMatrix
 
             if (scanInterval < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(scanInterval), "Scanning interval must be 0 or negative");
+                throw new ArgumentOutOfRangeException(nameof(scanInterval), "Scanning interval must be 0 or positive");
             }
 
             _outputPins = outputPins.ToArray();
