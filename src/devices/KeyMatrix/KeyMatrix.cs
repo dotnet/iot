@@ -47,7 +47,7 @@ namespace Iot.Device.KeyMatrix
         private GpioController _gpioController;
         private PinValue[] _buttonValues;
         private bool _pinsOpened;
-        private int currentOutput = 0;
+        private int _currentOutput = 0;
 
         /// <summary>
         /// Initialize key matrix
@@ -101,18 +101,18 @@ namespace Iot.Device.KeyMatrix
         public KeyMatrixEvent ReadKey()
         {
             KeyMatrixEvent args = null;
-            currentOutput--;
+            _currentOutput--;
 
             do
             {
                 Thread.Sleep(ScanInterval);
 
-                currentOutput = (currentOutput + 1) % _outputPins.Length;
-                _gpioController.Write(_outputPins[currentOutput], PinValue.High);
+                _currentOutput = (_currentOutput + 1) % _outputPins.Length;
+                _gpioController.Write(_outputPins[_currentOutput], PinValue.High);
 
                 for (var i = 0; i < _inputPins.Length; i++)
                 {
-                    int index = currentOutput * _inputPins.Length + i;
+                    int index = _currentOutput * _inputPins.Length + i;
 
                     PinValue oldValue = _buttonValues[index];
                     PinValue newValue = _gpioController.Read(_inputPins[i]);
@@ -120,12 +120,12 @@ namespace Iot.Device.KeyMatrix
 
                     if (newValue != oldValue)
                     {
-                        args = new KeyMatrixEvent(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, currentOutput, i);
+                        args = new KeyMatrixEvent(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, _currentOutput, i);
                         return args;
                     }
                 }
 
-                _gpioController.Write(_outputPins[currentOutput], PinValue.Low);
+                _gpioController.Write(_outputPins[_currentOutput], PinValue.Low);
             } while (_pinsOpened);
 
             return args;
@@ -150,6 +150,7 @@ namespace Iot.Device.KeyMatrix
             {
                 _gpioController.OpenPin(_outputPins[i], PinMode.Output);
             }
+
             for (int i = 0; i < _inputPins.Length; i++)
             {
                 _gpioController.OpenPin(_inputPins[i], PinMode.Input);
@@ -166,6 +167,7 @@ namespace Iot.Device.KeyMatrix
             {
                 _gpioController.ClosePin(_outputPins[i]);
             }
+
             for (int i = 0; i < _inputPins.Length; i++)
             {
                 _gpioController.ClosePin(_inputPins[i]);
