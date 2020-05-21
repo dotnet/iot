@@ -13,15 +13,18 @@ namespace System.Device.Pwm.Drivers
     /// <summary>Software PWM channel implementation</summary>
     public class SoftwarePwmChannel : PwmChannel
     {
+        private readonly int _pin;
+
         private readonly bool _shouldDispose;
+        private readonly bool _usePrecisionTimer;
 
-        private int _pin;
+        /* Frequency represents the number of times the pin should "pulse" (go from low to high and back) per second
+         * DutyCycle represents the percentage of time the pin should be in the high state
+         *
+         * So, if the Frequency is 1 and the Duty Cycle is 0.5, the pin will go High once per second and stay on for 0.5 seconds
+         * While if the Frequency is 400 and the Duty Cycle is 0.5, the pin will go High 400 times per second staying on for 0.00125 seconds each time, for a total of 0.5 seconds
+         */
 
-        // Frequency represents the number of times the pin should "pulse" (go from low to high and back) per second
-        // DutyCycle represents the percentage of time the pin should be in the high state
-        //
-        // So, if the Frequency is 1 and the Duty Cycle is 0.5, the pin will go High once per second and stay on for 0.5 seconds
-        // While if the Frequency is 400 and the Duty Cycle is 0.5, the pin will go High 400 times per second staying on for 0.00125 seconds each time, for a total of 0.5 seconds
         private int _frequency;
         private double _dutyCycle;
 
@@ -31,7 +34,6 @@ namespace System.Device.Pwm.Drivers
         private TimeSpan _pinLowTime;
 
         private Thread _thread;
-        private Stopwatch _stopwatch;
 
         private bool _isRunning;
         private bool _isTerminating;
@@ -116,8 +118,7 @@ namespace System.Device.Pwm.Drivers
 
             if (usePrecisionTimer)
             {
-                _stopwatch = new Stopwatch();
-                _stopwatch.Start();
+                _usePrecisionTimer = true;
                 _thread.Priority = ThreadPriority.Highest;
             }
 
@@ -139,6 +140,8 @@ namespace System.Device.Pwm.Drivers
 
         private void Run()
         {
+            bool allowThreadYield = !_usePrecisionTimer;
+
             while (!_isTerminating)
             {
                 if (!_isRunning)
@@ -150,40 +153,17 @@ namespace System.Device.Pwm.Drivers
                 if (_pinHighTime != TimeSpan.Zero)
                 {
                     _controller.Write(_pin, PinValue.High);
-                    Wait(_pinHighTime);
+                    DelayHelper.Delay(_pinHighTime, allowThreadYield);
                 }
 
                 if (_pinLowTime != TimeSpan.Zero)
                 {
                     _controller.Write(_pin, PinValue.Low);
-                    Wait(_pinLowTime);
+                    DelayHelper.Delay(_pinLowTime, allowThreadYield);
                 }
             }
 
             _controller.Write(_pin, PinValue.Low);
-        }
-
-        /// <summary>
-        /// A synchronous wait is used to avoid yielding the thread
-        /// This method calculates the number of CPU ticks will elapse in the specified time and spins
-        /// in a loop until that threshold is hit. This allows for very precise timing.
-        /// </summary>
-        /// <param name="timeout">The time to wait.</param>
-        private void Wait(TimeSpan timeout)
-        {
-            if (_stopwatch is null)
-            {
-                Thread.Sleep(timeout);
-                return;
-            }
-
-            TimeSpan elapsed = _stopwatch.Elapsed;
-            TimeSpan target = elapsed + timeout;
-
-            while (target > _stopwatch.Elapsed)
-            {
-                // nothing than waiting
-            }
         }
 
         /// <summary>Starts the PWM channel.</summary>
