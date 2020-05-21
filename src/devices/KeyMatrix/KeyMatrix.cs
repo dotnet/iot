@@ -126,7 +126,8 @@ namespace Iot.Device.KeyMatrix
                 }
 
                 _gpioController.Write(_outputPins[_currentOutput], PinValue.Low);
-            } while (_pinsOpened);
+            } 
+            while (_pinsOpened);
 
             return args;
         }
