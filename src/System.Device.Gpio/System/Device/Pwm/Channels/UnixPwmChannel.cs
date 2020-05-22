@@ -13,8 +13,6 @@ namespace System.Device.Pwm.Channels
     /// </summary>
     internal class UnixPwmChannel : PwmChannel
     {
-        private readonly int _chip;
-        private readonly int _channel;
         private readonly string _chipPath;
         private readonly string _channelPath;
 
@@ -36,10 +34,10 @@ namespace System.Device.Pwm.Channels
             int frequency = 400,
             double dutyCycle = 0.5)
         {
-            _chip = chip;
-            _channel = channel;
-            _chipPath = $"/sys/class/pwm/pwmchip{_chip}";
-            _channelPath = $"{_chipPath}/pwm{_channel}";
+            Chip = chip;
+            Channel = channel;
+            _chipPath = $"/sys/class/pwm/pwmchip{Chip}";
+            _channelPath = $"{_chipPath}/{ChannelName}";
 
             Validate();
             Open();
@@ -52,6 +50,16 @@ namespace System.Device.Pwm.Channels
             int currentDutyCycleNs = GetCurrentDutyCycleNs(dutyCycleFile);
             SetFrequency(frequency, dutyCycle, currentDutyCycleNs);
         }
+
+        /// <summary>The PWM chip number.</summary>
+        protected int Chip { get; }
+
+        /// <summary>The PWM channel number.</summary>
+        protected int Channel { get; }
+
+        /// <summary>The sysfs name of the PWM channel</summary>
+        /// <remarks>May be overriden to allow for non-standard sysfs naming.</remarks>
+        protected virtual string ChannelName => $"pwm{Channel}";
 
         private static int GetCurrentDutyCycleNs(FileStream dutyCycleFile)
         {
@@ -170,16 +178,16 @@ namespace System.Device.Pwm.Channels
         {
             if (!Directory.Exists(_chipPath))
             {
-                throw new ArgumentException($"The chip number {_chip} is invalid or is not enabled.");
+                throw new ArgumentException($"The chip number {Chip} is invalid or is not enabled.");
             }
 
             string npwmPath = $"{_chipPath}/npwm";
 
             if (int.TryParse(File.ReadAllText(npwmPath), out int numberOfSupportedChannels))
             {
-                if (_channel < 0 || _channel >= numberOfSupportedChannels)
+                if (Channel < 0 || Channel >= numberOfSupportedChannels)
                 {
-                    throw new ArgumentException($"The PWM chip {_chip} does not support the channel {_channel}.");
+                    throw new ArgumentException($"The PWM chip {Chip} does not support the channel {Channel}.");
                 }
             }
             else
@@ -196,7 +204,7 @@ namespace System.Device.Pwm.Channels
             if (Directory.Exists(_channelPath))
             {
                 Stop();
-                File.WriteAllText($"{_chipPath}/unexport", Convert.ToString(_channel));
+                File.WriteAllText($"{_chipPath}/unexport", Convert.ToString(Channel));
             }
         }
 
@@ -207,7 +215,7 @@ namespace System.Device.Pwm.Channels
         {
             if (!Directory.Exists(_channelPath))
             {
-                File.WriteAllText($"{_chipPath}/export", Convert.ToString(_channel));
+                File.WriteAllText($"{_chipPath}/export", Convert.ToString(Channel));
             }
 
             SysFsHelpers.EnsureDirectoryExistsAndHasReadWriteAccess(_channelPath);
