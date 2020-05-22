@@ -67,14 +67,27 @@ namespace System.Device.Pwm
                     frequency,
                     dutyCyclePercentage);
             }
-            else
+
+            if (IsBeagleBoneKernel())
             {
-                return new Channels.UnixPwmChannel(
-                    chip,
-                    channel,
-                    frequency,
-                    dutyCyclePercentage);
+                return new Channels.BeagleBonePwmChannel(
+                chip,
+                channel,
+                frequency,
+                dutyCyclePercentage);
             }
+
+            return new Channels.UnixPwmChannel(
+                chip,
+                channel,
+                frequency,
+                dutyCyclePercentage);
+        }
+
+        private static bool IsBeagleBoneKernel()
+        {
+            var kernelVersionInfo = System.IO.File.ReadAllText(@"/proc/version");
+            return kernelVersionInfo.Contains("beagle");
         }
     }
 }
