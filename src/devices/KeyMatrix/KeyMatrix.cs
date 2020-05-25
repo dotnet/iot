@@ -163,7 +163,7 @@ namespace Iot.Device.KeyMatrix
         private void ClosePins()
         {
             _pinsOpened = false;
-            Thread.Sleep(ScanInterval); //  wait for current scan to complete
+            Thread.Sleep(ScanInterval); // wait for current scan to complete
 
             for (int i = 0; i < _outputPins.Length; i++)
             {
