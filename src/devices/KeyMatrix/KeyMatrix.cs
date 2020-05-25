@@ -52,13 +52,13 @@ namespace Iot.Device.KeyMatrix
         /// <summary>
         /// Initialize key matrix
         /// </summary>
-        /// <param name="masterController">GPIO controller</param>
+        /// <param name="gpioController">GPIO controller</param>
         /// <param name="outputPins">Output pins</param>
         /// <param name="inputPins">Input pins</param>
         /// <param name="scanInterval">Scanning interval in milliseconds</param>
-        public KeyMatrix(GpioController masterController, IEnumerable<int> outputPins, IEnumerable<int> inputPins, int scanInterval)
+        public KeyMatrix(GpioController gpioController, IEnumerable<int> outputPins, IEnumerable<int> inputPins, int scanInterval)
         {
-            _gpioController = masterController ?? throw new ArgumentNullException(nameof(masterController));
+            _gpioController = gpioController ?? throw new ArgumentNullException(nameof(gpioController));
 
             if (outputPins == null)
             {
