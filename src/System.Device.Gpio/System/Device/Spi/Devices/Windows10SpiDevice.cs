@@ -30,7 +30,11 @@ namespace System.Device.Spi
             }
 
             _settings = settings;
-            var winSettings = new WinSpi.SpiConnectionSettings(_settings.ChipSelectLine)
+
+            // -1 means ignore Chip Select Line
+            int chipSelectLine = _settings.ChipSelectLine == -1 ? 0 : _settings.ChipSelectLine;
+
+            var winSettings = new WinSpi.SpiConnectionSettings(chipSelectLine)
             {
                 Mode = ToWinMode(settings.Mode),
                 DataBitLength = settings.DataBitLength,

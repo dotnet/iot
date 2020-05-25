@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Units\Units.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="CpuTemperature.cs" />
     <None Include="README.md" />
   </ItemGroup>

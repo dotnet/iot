@@ -9,7 +9,7 @@ using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Common;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Bmp180
 {
@@ -57,7 +57,7 @@ namespace Iot.Device.Bmp180
         /// </returns>
         public Temperature ReadTemperature()
         {
-            return Temperature.FromCelsius((CalculateTrueTemperature() + 8) / 160.0);
+            return Temperature.FromDegreesCelsius((CalculateTrueTemperature() + 8) / 160.0);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Iot.Device.Bmp180
             int p = (b7 < 0x80000000) ? (int)((b7 * 2) / b4) : (int)((b7 / b4) * 2);
             x1 = (((p * p) / 65536) * 3038) / 65536;
 
-            return Pressure.FromPascal(p + (((((p * p) / 65536) * 3038) / 65536) + ((-7357 * p) / 65536) + 3791) / 8);
+            return Pressure.FromPascals(p + (((((p * p) / 65536) * 3038) / 65536) + ((-7357 * p) / 65536) + 3791) / 8);
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace Iot.Device.Bmp180
         /// </returns>
         public double ReadAltitude()
         {
-            return ReadAltitude(Pressure.MeanSeaLevel);
+            return ReadAltitude(WeatherHelper.MeanSeaLevel);
         }
 
         /// <summary>

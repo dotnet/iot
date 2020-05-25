@@ -51,7 +51,10 @@ namespace System.Device.Spi
 
             lock (s_initializationLock)
             {
-                string deviceFileName = $"{DevicePath}{_settings.BusId}.{_settings.ChipSelectLine}";
+                // -1 means ignore Chip Select Line
+                int chipSelectLine = _settings.ChipSelectLine == -1 ? 0 : _settings.ChipSelectLine;
+
+                string deviceFileName = $"{DevicePath}{_settings.BusId}.{chipSelectLine}";
                 if (_deviceFileDescriptor >= 0)
                 {
                     return;

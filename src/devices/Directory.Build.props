@@ -8,4 +8,8 @@
     <IsPackable>false</IsPackable>
     <MainLibraryPath>$(MSBuildThisFileDirectory)../System.Device.Gpio/</MainLibraryPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
+  </ItemGroup>
 </Project>

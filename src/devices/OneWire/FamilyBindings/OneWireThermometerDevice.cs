@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.OneWire
 {

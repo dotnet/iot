@@ -11,7 +11,7 @@ You can find boards implementing this chip like on [bitWizard](http://bitwizard.
 ## Windows Requirements
 
 In order to have this FTDI board working and getting support for SPI, GPIO and I2C, you need to install in a path the ```LibFT4222.dll``` provided by FTDI Chip. You can find the latest version [here](https://www.ftdichip.com/Products/ICs/FT4222H.html).
-The version used to build this project is 1.4.2 and you can download it directly from FTDI [here](https://www.ftdichip.com/Support/SoftwareExamples/LibFT4222-v1.4.2.zip).
+The version used to build this project is 1.4.2 and you can download it directly from FTDI [here](https://www.ftdichip.com/Support/SoftwareExamples/LibFT4222-v1.4.3.zip).
 
 ### Running it on a Windows 64 bit version
 
@@ -27,9 +27,25 @@ Alternatively, you can register your dll globally. Run from the directory where 
 
 ## Linux Requirements
 
-For Linux, you need to download and install the proper version of ```libft4222.so```. The lib include the driver itself in a static binding. You can find the library [here](https://www.ftdichip.com/Support/SoftwareExamples/libft4222-linux-1.4.2.184.tgz). Once downloaded and extracted, run provided script ```install4222.sh``` as root. This will install the required library related to your system.
+For Linux, you need to download and install the proper version of ```libft4222.so```. The lib include the driver itself in a static binding. You can find the library [here](https://www.ftdichip.com/Support/SoftwareExamples/libft4222-linux-1.4.4.9.tgz). You can find the latest version [here](https://www.ftdichip.com/Products/ICs/FT4222H.html). Once downloaded and extracted, run provided script ```install4222.sh``` as root. This will install the required library related to your system.
 
-Alternately, you can copy your platform library into the same directory of your project if you don't want to install it. While writing this page, they all look like ```libft4222.so.1.4.2.184```. The library name needs ti be ```libft4222.so```.
+Alternately, you can copy your platform library into the same directory of your project if you don't want to install it. While writing this page, they all look like ```libft4222.so.1.4.2.184```. The library name needs to be ```libft4222.so```.
+
+## Mac OS Requirement
+
+For Mac OS, you'll need to download both the ```libft4222.dylib``` and the ```libftd2xx.dylib```. You can find the latest version of ```libft4222.dylib``` [here](https://www.ftdichip.com/Products/ICs/FT4222H.html), direct link on a known minimal working version [here](https://www.ftdichip.com/Support/SoftwareExamples/LibFT4222-mac-v1.4.4.14.zip). You can find the latest version of ```libftd2xx.dylib``` [here]https://www.ftdichip.com/Drivers/D2XX.htm.
+
+First install ```libftd2xx.dylib``` by follwing the instructions. To install ```libft4222.dylib``` you will need to follow the following steps. they are similar to the one installing ```libftd2xx.dylib```:
+
+From the path where you'll find the libft4222.x.x.x.x.dylib like for example: libfT4222.1.4.4.14.dylib
+```bash
+sudo cp libfT4222.1.4.4.14.dylib /usr/local/lib/libfT4222.1.4.4.14.dylib
+sudo ln -sf /usr/local/lib/libfT4222.1.4.4.14.dylib /usr/local/lib/libfT4222.dylib
+sudo cp /boost_libs/libboost_system.dylib /usr/local/lib/libboost_system.dylib
+sudo cp /boost_libs/libboost_thread-mt.dylib /usr/local/lib/libboost_thread-mt.dylib
+```
+
+This will install all what you need to then run properly any .NET Core IoT application using this specific FT4222 implementation. Be aware that at the first execution Mac OS will most likely reject the execution for security reasons. You'll have to manually go to the security settings and manually allow the libraries to execute. Once done, you will not be prompted again.
 
 ## Usage
 
@@ -155,9 +171,9 @@ For the moment this project supports only SPI and I2C in a Windows environement.
 - [x] I2C master support for Windows 64/32
 - [x] Basic GPIO support for Windows 64/32
 - [x] Advanced GPIO support for Windows 64/32
-- [ ] SPI support for MacOS 
-- [ ] I2C support for MacOS
-- [ ] GPIO support for MacOS
+- [X] SPI support for MacOS 
+- [X] I2C support for MacOS
+- [X] GPIO support for MacOS
 - [x] SPI support for Linux 64
 - [x] I2C support for Linux 64
 - [x] GPIO support for Linux 64
