@@ -1,6 +1,6 @@
 # Optomax digital liquid level switch
 
-Optomax digital liquid level switch is a device that can detect th presence of liquid/water. GPIO can be used to communicate with the device.
+Optomax digital liquid level switch is a device that can detect the presence of liquid/water. GPIO can be used to communicate with the device.
 
 [Datasheet](https://cdn-shop.adafruit.com/product-files/3397/3397_datasheet_actual.pdf) for the Optomax digital liquid level switch.
 
