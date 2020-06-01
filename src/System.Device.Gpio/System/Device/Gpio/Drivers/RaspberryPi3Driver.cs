@@ -41,12 +41,22 @@ namespace System.Device.Gpio.Drivers
             }
             else
             {
-                _internalDriver = new Windows10Driver();
+                _internalDriver = CreateWindows10GpioDriver();
                 _setSetRegister = (value) => throw new PlatformNotSupportedException();
                 _setClearRegister = (value) => throw new PlatformNotSupportedException();
                 _getSetRegister = () => throw new PlatformNotSupportedException();
                 _getClearRegister = () => throw new PlatformNotSupportedException();
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static GpioDriver CreateWindows10GpioDriver()
+        {
+            // This wrapper is needed to prevent Mono from loading Windows10Driver
+            // which causes all fields to be loaded - one of such fields is WinRT type which does not
+            // exist on Linux which causes TypeLoadException.
+            // Using NoInlining and no explicit type prevents this from happening.
+            return new Windows10Driver();
         }
 
         /// <inheritdoc/>
