@@ -6,7 +6,7 @@ Digital liquid level switches are devices that can detect the presence of liquid
 
 The implementation supports the following devices:
 
-- LLC200D3SH sensor ([Datasheet](https://cdn-shop.adafruit.com/product-files/3397/3397_datasheet_actual.pdf)
+- LLC200D3SH sensor ([Datasheet](https://cdn-shop.adafruit.com/product-files/3397/3397_datasheet_actual.pdf))
 
 ## Usage
 
