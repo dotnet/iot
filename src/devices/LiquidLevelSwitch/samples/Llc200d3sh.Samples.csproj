@@ -3,15 +3,20 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="rpi-llc200d3sh.fzz" />
     <None Remove="rpi-llc200d3sh_bb.png" />
-
   </ItemGroup>
+  
   <ItemGroup>
-    <ProjectReference Include="..\Llc200d3sh.csproj" />
+    <Compile Include="Llc200d3sh.sample.cs" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\LiquidLevelSwitch.csproj" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
   

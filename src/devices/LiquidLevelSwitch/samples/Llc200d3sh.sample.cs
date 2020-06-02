@@ -1,7 +1,11 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Threading;
 
-namespace Iot.Device.Llc200d3sh.Samples
+namespace Iot.Device.LiquidLevelSwitch.Samples
 {
     internal class Program
     {
@@ -12,7 +16,7 @@ namespace Iot.Device.Llc200d3sh.Samples
                 while (true)
                 {
                     // read liquid level switch
-                    Console.WriteLine($"Detected: {sensor.ReadValue()}");
+                    Console.WriteLine($"Detected: {sensor.IsLiquidPresent()}");
                     Console.WriteLine();
 
                     Thread.Sleep(1000);
