@@ -16,7 +16,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\LiquidLevelSwitch.csproj" />
+    <ProjectReference Include="..\LiquidLevel.csproj" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
   
