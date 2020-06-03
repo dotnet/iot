@@ -20,12 +20,11 @@ namespace Iot.Device.LiquidLevel
 
         /// <summary>Creates a new instance of the LiquidLevelSwitch.</summary>
         /// <param name="dataPin">The data pin</param>
-        /// <param name="liquidPresentPinState">Whether the pin value used to detect liquid is low or high</param>
+        /// <param name="liquidPresentPinState">Data pin state representing liquid being present</param>
         /// <param name="pinNumberingScheme">Use the logical or physical pin layout</param>
         /// <param name="gpioController">A Gpio Controller if you want to use a specific one</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public LiquidLevelSwitch(int dataPin, PinValue liquidPresentPinState, GpioController gpioController = null,
-                                 PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
+        public LiquidLevelSwitch(int dataPin, PinValue liquidPresentPinState, GpioController gpioController = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
         {
             _controller = gpioController ?? new GpioController(pinNumberingScheme);
             _dataPin = dataPin;
