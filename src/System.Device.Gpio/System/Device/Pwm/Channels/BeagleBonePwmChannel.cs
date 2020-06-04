@@ -31,12 +31,12 @@ namespace System.Device.Pwm.Channels
 
         /// <summary>The sysfs name of the PWM channel</summary>
         /// <returns>
-        /// A string like "pwm-X:Y" where X is the <see cref="UnixPwmChannel.Channel"/> and Y is the <see cref="UnixPwmChannel.Chip"/>.
+        /// A string like "pwm-X:Y" where X is the Channel number and Y is the Chip number.
         /// </returns>
         /// <remarks>
         /// The BeagleBone kernel uses a non-standard naming convention for PWM Channels.
         /// https://github.com/beagleboard/linux/commit/0e09cd3599153a865e87e212ffed6d485488dd4f
         /// </remarks>
-        protected override string ChannelName => $"pwm-{Chip}:{Channel}";
+        protected override string ChannelName => $"pwm-{_chip}:{_channel}";
     }
 }
