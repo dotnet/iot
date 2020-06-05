@@ -18,7 +18,7 @@ namespace Iot.Device.Apa102.Samples
 
             var spiDevice = SpiDevice.Create(new SpiConnectionSettings(0, 0)
             {
-                ClockFrequency = 30_000_000, // up to 30 MHz
+                ClockFrequency = 20_000_000,
                 DataFlow = DataFlow.MsbFirst,
                 Mode = SpiMode.Mode0 // ensure data is ready at clock rising edge
             });
