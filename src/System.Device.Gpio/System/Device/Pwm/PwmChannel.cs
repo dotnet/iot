@@ -87,8 +87,9 @@ namespace System.Device.Pwm
 
         private static bool IsBeagleBoneKernel()
         {
-            var kernelVersionInfo = System.IO.File.ReadAllText(@"/proc/version");
-            return kernelVersionInfo.Contains("beagle");
+            string kernelVersionInfo = System.IO.File.ReadAllText(@"/proc/version");
+            // The String.Contains(string, StringComparison) overload wasn't introduced until .Net Standard 2.1
+            return kernelVersionInfo.IndexOf("beagle", StringComparison.InvariantCulture) > 0;
         }
     }
 }
