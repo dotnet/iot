@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
+
 namespace System.Device.I2c
 {
     /// <summary>
@@ -67,12 +69,22 @@ namespace System.Device.I2c
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                return new Windows10I2cDevice(settings);
+                return CreateWindows10I2cDevice(settings);
             }
             else
             {
                 return new UnixI2cDevice(settings);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static I2cDevice CreateWindows10I2cDevice(I2cConnectionSettings settings)
+        {
+            // This wrapper is needed to prevent Mono from loading Windows10I2cDevice
+            // which causes all fields to be loaded - one of such fields is WinRT type which does not
+            // exist on Linux which causes TypeLoadException.
+            // Using NoInlining and no explicit type prevents this from happening.
+            return new Windows10I2cDevice(settings);
         }
 
         /// <inheritdoc cref="IDisposable.Dispose"/>
