@@ -31,7 +31,7 @@ namespace System.Device.Pwm.Channels
 
         /// <summary>The sysfs name of the PWM channel</summary>
         /// <returns>
-        /// A string like "pwm-X:Y" where X is the Channel number and Y is the Chip number.
+        /// A string like "pwm-X:Y" where X is the Chip number and Y is the Channel number.
         /// </returns>
         /// <remarks>
         /// The BeagleBone kernel uses a non-standard naming convention for PWM Channels.
