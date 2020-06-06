@@ -8,9 +8,9 @@ An M×N key matrix driver.
 
 These key matrices look like this:
 
-![4x4-Keypad](http://www.waveshare.net/photo/accBoard/4x4-Keypad/4x4-Keypad-3.jpg)
+![4x4-Keypad](https://www.waveshare.com/img/devkit/accBoard/4x4-Keypad/4x4-Keypad-1.jpg)
 
-This is a 4×4 matrix. And [here is the schematic](http://www.waveshare.net/w/upload/3/3d/4x4-Keypad_schematic.pdf)
+This is a 4×4 matrix. And [here is the schematic](https://www.waveshare.com/w/upload/e/ea/4x4-Keypad-Schematic.pdf)
 
 You can connect any M×N key matrix, theoretically, by using M+N GPIO pins.
 
@@ -26,4 +26,4 @@ You can also use any compatible GPIO controller like [Mcp23xxx](../Mcp23xxx) ins
 
 http://pcbheaven.com/wikipages/How_Key_Matrices_Works/
 
-http://www.waveshare.net/shop/4x4-Keypad.htm
+https://www.waveshare.com/wiki/4x4_Keypad
