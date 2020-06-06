@@ -48,7 +48,7 @@ namespace Iot.Device.Apa102
             for (var i = 0; i < _pixels.Length; i++)
             {
                 var pixel = _buffer.AsSpan((i + 1) * 4);
-                pixel[0] = (byte)((_pixels[i].A >> 3) | 0b11100000); // global brighrness (alpha)
+                pixel[0] = (byte)((_pixels[i].A >> 3) | 0b11100000); // global brightness (alpha)
                 pixel[1] = _pixels[i].B; // blue
                 pixel[2] = _pixels[i].G; // green
                 pixel[3] = _pixels[i].R; // red
