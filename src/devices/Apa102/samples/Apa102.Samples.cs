@@ -5,7 +5,6 @@
 using System;
 using System.Device.Spi;
 using System.Drawing;
-using System.Linq;
 using System.Threading;
 
 namespace Iot.Device.Apa102.Samples
@@ -26,7 +25,7 @@ namespace Iot.Device.Apa102.Samples
 
             while (true)
             {
-                for (var i = 0; i < apa102.Count(); i++)
+                for (var i = 0; i < apa102.Pixels.Length; i++)
                 {
                     apa102.Pixels[i] = Color.FromArgb(255, random.Next(256), random.Next(256), random.Next(256));
                 }
