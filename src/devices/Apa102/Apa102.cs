@@ -13,7 +13,7 @@ namespace Iot.Device.Apa102
     /// <summary>
     /// Driver for APA102. A double line transmission integrated control LED
     /// </summary>
-    public class Apa102 : IDisposable, IEnumerable<Color>
+    public class Apa102 : IDisposable
     {
         /// <summary>
         /// Colors of LEDs
@@ -64,17 +64,6 @@ namespace Iot.Device.Apa102
 
             _pixels = null;
             _buffer = null;
-        }
-
-        /// <inheritdoc/>
-        public IEnumerator<Color> GetEnumerator()
-        {
-            return ((IEnumerable<Color>)_pixels).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _pixels.GetEnumerator();
         }
     }
 }
