@@ -1,17 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="samples\**" />
-    <EmbeddedResource Remove="samples\**" />
-    <None Remove="samples\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="1.0.0" />
+    <Compile Include="*.cs" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <PackageReference Include="System.Memory" Version="4.5.3" />
+    <None Include="README.md" />
   </ItemGroup>
 
 </Project>

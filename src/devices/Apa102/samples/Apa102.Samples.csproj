@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
     <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Apa102.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>
