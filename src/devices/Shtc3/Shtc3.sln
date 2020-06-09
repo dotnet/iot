@@ -9,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{71FB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shtc3.Samples", "samples\Shtc3.Samples.csproj", "{299AE1A7-B530-4DD3-9384-C7E0A3960041}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Device.Gpio", "..\..\System.Device.Gpio\System.Device.Gpio.csproj", "{A81F4110-9D79-426B-BFD5-77C1CFADD15A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\Iot\Device\Common\CommonHelpers.csproj", "{DBAA1AE9-49B0-4148-A7FB-6F9583061FEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +27,14 @@ Global
 		{299AE1A7-B530-4DD3-9384-C7E0A3960041}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{299AE1A7-B530-4DD3-9384-C7E0A3960041}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{299AE1A7-B530-4DD3-9384-C7E0A3960041}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A81F4110-9D79-426B-BFD5-77C1CFADD15A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A81F4110-9D79-426B-BFD5-77C1CFADD15A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A81F4110-9D79-426B-BFD5-77C1CFADD15A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A81F4110-9D79-426B-BFD5-77C1CFADD15A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBAA1AE9-49B0-4148-A7FB-6F9583061FEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBAA1AE9-49B0-4148-A7FB-6F9583061FEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBAA1AE9-49B0-4148-A7FB-6F9583061FEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBAA1AE9-49B0-4148-A7FB-6F9583061FEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

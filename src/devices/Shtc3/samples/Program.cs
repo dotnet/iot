@@ -6,6 +6,7 @@ using System;
 using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Common;
+using UnitsNet;
 
 namespace Iot.Device.Shtc3.Samples
 {
@@ -25,17 +26,17 @@ namespace Iot.Device.Shtc3.Samples
                     sensor.Status = Status.Idle;
 
                     // Try sensor measurement in normal power mode
-                    if (sensor.TryGetTempAndHumi(out var sensorMeasure))
+                    if (sensor.TryGetTemperatureAndHumidity(out var temperature, out var relativeHumidity))
                     {
                         Console.WriteLine($"====================In normal power mode===========================");
-                        ConsoleWriteInfo(sensorMeasure);
+                        ConsoleWriteInfo(temperature, relativeHumidity);
                     }
 
                     // Try sensor measurement in low power mode
-                    if (sensor.TryGetTempAndHumi(out sensorMeasure, LowPower: true))
+                    if (sensor.TryGetTemperatureAndHumidity(out temperature, out relativeHumidity, lowPower: true))
                     {
                         Console.WriteLine($"====================In low power mode===========================");
-                        ConsoleWriteInfo(sensorMeasure);
+                        ConsoleWriteInfo(temperature, relativeHumidity);
                     }
 
                     // Set sensor in sleep mode
@@ -47,13 +48,13 @@ namespace Iot.Device.Shtc3.Samples
             }
         }
 
-        private static void ConsoleWriteInfo(Measure sensorMeasure)
+        private static void ConsoleWriteInfo(Temperature temperature, double relativeHumidity)
         {
-            Console.WriteLine($"Temperature: {sensorMeasure.Temperature.Celsius:0.#}\u00B0C");
-            Console.WriteLine($"Humidity: {sensorMeasure.Humidity:0.#}%");
+            Console.WriteLine($"Temperature: {temperature.DegreesCelsius:0.#}\u00B0C");
+            Console.WriteLine($"Humidity: {relativeHumidity:0.#}%");
             // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
-            Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(sensorMeasure.Temperature, sensorMeasure.Humidity).Celsius:0.#}\u00B0C");
-            Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(sensorMeasure.Temperature, sensorMeasure.Humidity).Celsius:0.#}\u00B0C");
+            Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(temperature, relativeHumidity).DegreesCelsius:0.#}\u00B0C");
+            Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(temperature, relativeHumidity).DegreesCelsius:0.#}\u00B0C");
         }
 
     }

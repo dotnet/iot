@@ -3,10 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers.Binary;
 using System.Device;
 using System.Device.I2c;
 using System.Threading;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Shtc3
 {
@@ -25,6 +26,7 @@ namespace Iot.Device.Shtc3
         public const int I2cAddress = 0x70;
 
         private I2cDevice _i2cDevice;
+        private int? _id = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Shtc3"/> class.
@@ -58,13 +60,18 @@ namespace Iot.Device.Shtc3
                     return;
                 }
 
-                if (value == Status.Idle)
+                switch (value)
                 {
-                    Wakeup();
-                }
-                else
-                {
-                    Sleep();
+                    case Status.Idle:
+                        // Change to idle awake sensor
+                        Wakeup();
+                        break;
+                    case Status.Sleep:
+                        // Change to sleep making sensor in sleeping mode
+                        Sleep();
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 _status = value;
@@ -74,23 +81,25 @@ namespace Iot.Device.Shtc3
         /// <summary>
         /// Try read Temperature and Humidity
         /// </summary>
-        /// <param name="sensorMeasure">measure return by sensor</param>
-        /// <param name="LowPower">"true" measure in low power mode, "false"(default) measure in normal power mode</param>
-        /// <param name="ClockStretching">"true" allow clock stretching, "false"(default) without clock stretching</param>
+        /// <param name="temperature">Temperature return by sensor</param>
+        /// <param name="relativeHumidity">Humidity return by sensor</param>
+        /// <param name="lowPower">"true" measure in low power mode, "false"(default) measure in normal power mode</param>
+        /// <param name="clockStretching">"true" allow clock stretching, "false"(default) without clock stretching</param>
         /// <returns></returns>
-        public bool TryGetTempAndHumi(out Measure sensorMeasure, bool LowPower = false, bool ClockStretching = false)
+        public bool TryGetTemperatureAndHumidity(out Temperature temperature, out double relativeHumidity, bool lowPower = false, bool clockStretching = false)
         {
-            Register cmd = GetMeasurementCmd(LowPower, ClockStretching);
+            Register cmd = GetMeasurementCmd(lowPower, clockStretching);
 
             if (!TryReadSensorData(cmd, out var st, out var srh))
             {
-                sensorMeasure = default(Measure);
+                temperature = default(Temperature);
+                relativeHumidity = double.NaN;
                 return false;
             }
 
             // Details in the Datasheet P9
-            sensorMeasure = new Measure(Temperature.FromCelsius(Math.Round(st * 175 / 65536.0 - 45, 1)),
-                                                 Math.Round(srh * 100 / 65536.0, 1));
+            temperature = Temperature.FromDegreesCelsius(Math.Round(st * 175 / 65536.0 - 45, 1));
+            relativeHumidity = Math.Round(srh * 100 / 65536.0, 1);
             return true;
         }
 
@@ -103,13 +112,13 @@ namespace Iot.Device.Shtc3
             _i2cDevice.Read(readBuff);
 
             // Details in the Datasheet P7
-            int st = (readBuff[0] << 8) | readBuff[1];      // Temp
-            int srh = (readBuff[3] << 8) | readBuff[4];     // Humi
+            int st = BinaryPrimitives.ReadInt16BigEndian(readBuff.Slice(0, 2));      // Temp
+            int srh = BinaryPrimitives.ReadInt16BigEndian(readBuff.Slice(3, 2));     // Humi
 
             // check 8-bit crc
             bool tCrc = CheckCrc8(readBuff.Slice(0, 2), readBuff[2]);
             bool rhCrc = CheckCrc8(readBuff.Slice(3, 2), readBuff[5]);
-            if (tCrc == false || rhCrc == false)
+            if (!tCrc || !rhCrc)
             {
                 temperature = double.NaN;
                 humidity = double.NaN;
@@ -121,12 +130,12 @@ namespace Iot.Device.Shtc3
             return true;
         }
 
-        private static Register GetMeasurementCmd(bool LowPower, bool ClockStretching)
+        private static Register GetMeasurementCmd(bool lowPower, bool clockStretching)
         {
             Register mea = Register.SHTC3_MEAS_T_RH_POLLING_NPM;
-            if (LowPower)
+            if (lowPower)
             {
-                if (ClockStretching)
+                if (clockStretching)
                 {
                     mea = Register.SHTC3_MEAS_T_RH_CLOCKSTR_LPM;
                 }
@@ -137,7 +146,7 @@ namespace Iot.Device.Shtc3
             }
             else
             {
-                if (ClockStretching)
+                if (clockStretching)
                 {
                     mea = Register.SHTC3_MEAS_T_RH_CLOCKSTR_NPM;
                 }
@@ -170,32 +179,26 @@ namespace Iot.Device.Shtc3
             Write(Register.SHTC3_RESET);
         }
 
-        private int _id = 0;
-
         /// <summary>
         /// Sensor Id
         /// </summary>
-        public int Id
+        public int? Id
         {
             get
             {
-                if (_id == 0)
+                if (_id is null)
                 {
-                    Id = ReadId();
+                    _id = ReadId();
                 }
 
                 return _id;
-            }
-            set
-            {
-                _id = value;
             }
         }
 
         /// <summary>
         /// Read Id
         /// </summary>
-        private int ReadId()
+        private int? ReadId()
         {
             Write(Register.SHTC3_ID);
 
@@ -206,15 +209,15 @@ namespace Iot.Device.Shtc3
             // check 8-bit crc
             if (!CheckCrc8(readBuff.Slice(0, 2), readBuff[2]))
             {
-                return 0;
+                return null;
             }
 
-            var id = (readBuff[0] << 8) | readBuff[1];
+            var id = BinaryPrimitives.ReadInt16BigEndian(readBuff.Slice(0, 2));
 
             // check the result match to the SHTC3 product code
             if (!ValidShtc3Id(id))
             {
-                return 0;
+                return null;
             }
 
             return id;
@@ -263,14 +266,8 @@ namespace Iot.Device.Shtc3
 
         private void Write(Register register)
         {
-            byte msb = (byte)((short)register >> 8);
-            byte lsb = (byte)((short)register & 0xFF);
-
-            Span<byte> writeBuff = stackalloc byte[]
-            {
-                msb,
-                lsb
-            };
+            Span<byte> writeBuff = stackalloc byte[2];
+            BinaryPrimitives.WriteInt16BigEndian(writeBuff, (short)register);
 
             _i2cDevice.Write(writeBuff);
 
