@@ -2,36 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <!--Disabling default items so samples source won't get build by the main library-->
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="samples\**" />
-    <Compile Remove="tests\**" />
-    <EmbeddedResource Remove="samples\**" />
-    <EmbeddedResource Remove="tests\**" />
-    <None Remove="samples\**" />
-    <None Remove="tests\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="category.txt" />
-    <None Remove="README.md" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="common\DelayHelper.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="common\" />
+    <Compile Include="*.cs" />
+    <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />
+    <None Include="README.md" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="UnitsNet" Version="4.58.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>
