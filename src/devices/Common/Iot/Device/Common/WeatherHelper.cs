@@ -27,7 +27,7 @@ namespace Iot.Device.Common
         /// than it actually is. The heat index is usually used for afternoon high temperatures.
         /// </summary>
         /// <param name="airTemperature">The dry air temperature</param>
-        /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
+        /// <param name="relativeHumidity">The relative humidity (RH) expressed as a ratio</param>
         /// <returns>The heat index, also known as the apparent temperature</returns>
         public static Temperature CalculateHeatIndex(Temperature airTemperature, Ratio relativeHumidity)
         {
@@ -103,7 +103,7 @@ namespace Iot.Device.Common
         /// Calculates the actual vapor pressure.
         /// </summary>
         /// <param name="airTemperature">The dry air temperature</param>
-        /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
+        /// <param name="relativeHumidity">The relative humidity (RH)</param>
         /// <returns>The actual vapor pressure</returns>
         public static Pressure CalculateActualVaporPressure(Temperature airTemperature, Ratio relativeHumidity)
         {
@@ -114,7 +114,7 @@ namespace Iot.Device.Common
         /// Calculates the dew point.
         /// </summary>
         /// <param name="airTemperature">The dry air temperature</param>
-        /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
+        /// <param name="relativeHumidity">The relative humidity (RH)</param>
         /// <returns>The dew point</returns>
         /// <remarks>
         /// Source https://en.wikipedia.org/wiki/Dew_point
@@ -133,7 +133,7 @@ namespace Iot.Device.Common
         /// Calculates the absolute humidity in g/m³
         /// </summary>
         /// <param name="airTemperature">The dry air temperature</param>
-        /// <param name="relativeHumidity">The relative humidity (RH) expressed as a percentage</param>
+        /// <param name="relativeHumidity">The relative humidity (RH)</param>
         /// <returns>The absolute humidity in g/m³</returns>
         /// <remarks>
         /// Source https://de.wikipedia.org/wiki/Luftfeuchtigkeit#Absolute_Luftfeuchtigkeit

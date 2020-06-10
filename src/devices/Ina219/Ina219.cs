@@ -264,7 +264,7 @@ namespace Iot.Device.Adc
         /// <summary>
         /// Read the measured shunt voltage.
         /// </summary>
-        /// <returns>The shunt voltage in Volts</returns>
+        /// <returns>The shunt potential difference</returns>
         public ElectricPotential ReadShuntVoltage()
         {
             // read the shunt voltage. LSB = 10uV then convert to Volts
@@ -274,7 +274,7 @@ namespace Iot.Device.Adc
         /// <summary>
         /// Read the measured Bus voltage.
         /// </summary>
-        /// <returns>The Bus voltage in Volts</returns>
+        /// <returns>The Bus potential (voltage)</returns>
         public ElectricPotential ReadBusVoltage()
         {
             // read the bus voltage. LSB = 4mV then convert to Volts
@@ -287,7 +287,7 @@ namespace Iot.Device.Adc
         /// <remarks>
         /// This value is determined by an internal calculation using the calibration register and the read shunt voltage and then scaled.
         /// </remarks>
-        /// <returns>The calculated current in Amperes</returns>
+        /// <returns>The calculated current</returns>
         public ElectricCurrent ReadCurrent()
         {
             // According to Adafruit then large changes in load will reset the cal register
@@ -305,7 +305,7 @@ namespace Iot.Device.Adc
         /// <remarks>
         /// This value is determined by an internal calculation using the calulated current and the read bus voltage and then scaled.
         /// </remarks>
-        /// <returns>The calculated power in Watts</returns>
+        /// <returns>The calculated electric power</returns>
         public Power ReadPower()
         {
             // According to Adafruit then large changes in load will reset the cal register

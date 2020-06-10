@@ -89,7 +89,7 @@ namespace Iot.Device.Bh1750fvi
         /// <summary>
         /// Get BH1750FVI Illuminance
         /// </summary>
-        /// <returns>Illuminance (Lux)</returns>
+        /// <returns>Illuminance (Default unit: Lux)</returns>
         private Illuminance GetIlluminance()
         {
             if (MeasuringMode == MeasuringMode.OneTimeHighResolutionMode || MeasuringMode == MeasuringMode.OneTimeHighResolutionMode2 || MeasuringMode == MeasuringMode.OneTimeLowResolutionMode)

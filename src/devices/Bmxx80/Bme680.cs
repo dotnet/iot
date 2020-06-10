@@ -417,8 +417,8 @@ namespace Iot.Device.Bmxx80
         /// Reads the gas resistance. A return value indicates whether the reading succeeded.
         /// </summary>
         /// <param name="gasResistance">
-        /// Contains the measured gas resistance in Ohm if the heater module reached the target temperature and
-        /// the measurement was valid. Contains <see cref="double.NaN"/> otherwise.
+        /// Contains the measured gas resistance if the heater module reached the target temperature and
+        /// the measurement was valid. Undefined otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
         public bool TryReadGasResistance(out ElectricResistance gasResistance)
@@ -490,7 +490,7 @@ namespace Iot.Device.Bmxx80
         /// Compensates the pressure.
         /// </summary>
         /// <param name="adcPressure">The pressure value read from the device.</param>
-        /// <returns>The pressure in Pa.</returns>
+        /// <returns>The measured pressure.</returns>
         private Pressure CompensatePressure(long adcPressure)
         {
             // Calculate the pressure.

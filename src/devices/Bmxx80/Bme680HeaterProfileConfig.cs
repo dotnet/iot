@@ -18,7 +18,7 @@ namespace Iot.Device.Bmxx80
         public Bme680HeaterProfile HeaterProfile { get; set; }
 
         /// <summary>
-        /// The heater resistance.
+        /// The heater resistance (internal representation)
         /// </summary>
         public ushort HeaterResistance { get; set; }
 
@@ -32,7 +32,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="profile">The used heater profile.</param>
         /// <param name="heaterResistance">The heater resistance in Ohm.</param>
-        /// <param name="heaterDuration">The heating duration in ms.</param>
+        /// <param name="heaterDuration">The heating duration.</param>
         /// <exception cref="ArgumentOutOfRangeException">Unknown profile setting used</exception>
         public Bme680HeaterProfileConfig(Bme680HeaterProfile profile, ushort heaterResistance, Duration heaterDuration)
         {
