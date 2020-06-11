@@ -46,12 +46,12 @@ namespace Iot.Device.Sht3x
         /// <summary>
         /// SHT3x Relative Humidity (%)
         /// </summary>
-        public double Humidity
+        public Ratio Humidity
         {
             get
             {
                 ReadTempAndHumi();
-                return _humidity;
+                return Ratio.FromPercent(_humidity);
             }
         }
 

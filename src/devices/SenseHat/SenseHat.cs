@@ -117,7 +117,7 @@ namespace Iot.Device.SenseHat
         /// <summary>
         /// Gets humidity from temperature and humidity sensor
         /// </summary>
-        public float Humidity => _temp.Humidity;
+        public Ratio Humidity => _temp.Humidity;
 
         // PRESSURE AND TEMPERATURE
 
