@@ -18,7 +18,7 @@ namespace Iot.Device.Bmxx80
         public Bme680HeaterProfile HeaterProfile { get; set; }
 
         /// <summary>
-        /// The heater resistance (internal representation)
+        /// The heater resistance.
         /// </summary>
         public ushort HeaterResistance { get; set; }
 
