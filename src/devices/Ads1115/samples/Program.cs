@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Device.Gpio;
 using Iot.Device.Ads1115;
+using UnitsNet;
 
 namespace Ads1115.Samples
 {
@@ -33,7 +34,7 @@ namespace Ads1115.Samples
                     // read raw data form the sensor
                     short raw = adc.ReadRaw();
                     // raw data convert to voltage
-                    double voltage = adc.RawToVoltage(raw);
+                    ElectricPotential voltage = adc.RawToVoltage(raw);
 
                     Console.WriteLine($"ADS1115 Raw Data: {raw}");
                     Console.WriteLine($"Voltage: {voltage}");
@@ -55,16 +56,16 @@ namespace Ads1115.Samples
                 {
                     Console.Clear();
 
-                    double voltage0 = adc.ReadVoltage(InputMultiplexer.AIN0);
-                    double voltage1 = adc.ReadVoltage(InputMultiplexer.AIN1);
-                    double voltage2 = adc.ReadVoltage(InputMultiplexer.AIN2);
-                    double voltage3 = adc.ReadVoltage(InputMultiplexer.AIN3);
+                    ElectricPotential voltage0 = adc.ReadVoltage(InputMultiplexer.AIN0);
+                    ElectricPotential voltage1 = adc.ReadVoltage(InputMultiplexer.AIN1);
+                    ElectricPotential voltage2 = adc.ReadVoltage(InputMultiplexer.AIN2);
+                    ElectricPotential voltage3 = adc.ReadVoltage(InputMultiplexer.AIN3);
 
                     Console.WriteLine($"ADS1115 Voltages: (Any key to continue)");
-                    Console.WriteLine($"Channel0: {voltage0:F3}V");
-                    Console.WriteLine($"Channel1: {voltage1:F3}V");
-                    Console.WriteLine($"Channel2: {voltage2:F3}V");
-                    Console.WriteLine($"Channel3: {voltage3:F3}V");
+                    Console.WriteLine($"Channel0: {voltage0:s3}");
+                    Console.WriteLine($"Channel1: {voltage1:s3}");
+                    Console.WriteLine($"Channel2: {voltage2:s3}");
+                    Console.WriteLine($"Channel3: {voltage3:s3}");
                     Console.WriteLine();
 
                     // wait for 100ms
@@ -89,10 +90,10 @@ namespace Ads1115.Samples
                     Stopwatch w = Stopwatch.StartNew();
                     int totalInterruptsSeen = 0;
                     int previousNumberOfInterrupts = 0;
-                    double lastVoltage = 0;
+                    ElectricPotential lastVoltage = default;
                     adc.AlertReadyAsserted += () =>
                     {
-                        double voltage = adc.ReadVoltage();
+                        ElectricPotential voltage = adc.ReadVoltage();
                         lastVoltage = voltage;
                         totalInterruptsSeen++;
                     };
@@ -126,15 +127,15 @@ namespace Ads1115.Samples
                     Stopwatch w = Stopwatch.StartNew();
                     int totalInterruptsSeen = 0;
                     int previousNumberOfInterrupts = 0;
-                    double lastVoltage = 0;
+                    ElectricPotential lastVoltage = default;
                     adc.AlertReadyAsserted += () =>
                     {
-                        double voltage = adc.ReadVoltage();
+                        ElectricPotential voltage = adc.ReadVoltage();
                         lastVoltage = voltage;
                         totalInterruptsSeen++;
                     };
 
-                    adc.EnableComparator(adc.VoltageToRaw(1.8), adc.VoltageToRaw(2.0), ComparatorMode.Traditional, ComparatorQueue.AssertAfterTwo);
+                    adc.EnableComparator(adc.VoltageToRaw(ElectricPotential.FromVolts(1.8)), adc.VoltageToRaw(ElectricPotential.FromVolts(2.0)), ComparatorMode.Traditional, ComparatorQueue.AssertAfterTwo);
                     // Do something else, here we print the output (as the console operations use to much time in the interrupt callback)
                     while (Console.KeyAvailable == false)
                     {
@@ -151,7 +152,7 @@ namespace Ads1115.Samples
                             Console.WriteLine($"Current Voltage (no interrupts seen): {adc.ReadVoltage()}");
                         }
 
-                        lastVoltage = 0;
+                        lastVoltage = default;
                         w.Restart();
                         previousNumberOfInterrupts = totalInterruptsSeen;
                         // wait for 2s

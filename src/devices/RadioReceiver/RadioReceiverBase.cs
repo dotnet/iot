@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using UnitsNet;
 
 namespace Iot.Device.RadioReceiver
 {
@@ -14,7 +15,7 @@ namespace Iot.Device.RadioReceiver
         /// <summary>
         /// Radio receiver FM frequency.
         /// </summary>
-        public abstract double Frequency { get; set; }
+        public abstract Frequency Frequency { get; set; }
 
         /// <inheritdoc/>
         public void Dispose()

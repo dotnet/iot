@@ -8,6 +8,8 @@ using System.Threading;
 using System.Device;
 using System.Device.I2c;
 using System.Device.Gpio;
+using UnitsNet;
+using UnitsNet.Units;
 
 namespace Iot.Device.Ads1115
 {
@@ -217,7 +219,7 @@ namespace Iot.Device.Ads1115
 
         /// <summary>
         /// This event fires when a new value is available (in conversion ready mode) or the comparator threshold is exceeded.
-        /// Requires setup through <see cref="EnableConversionReady"/> or <see cref="EnableComparator(double, double, ComparatorMode, ComparatorQueue)"/>.
+        /// Requires setup through <see cref="EnableConversionReady"/> or <see cref="EnableComparator(ElectricPotential, ElectricPotential, ComparatorMode, ComparatorQueue)"/>.
         /// </summary>
         public event Action AlertReadyAsserted;
 
@@ -366,7 +368,7 @@ namespace Iot.Device.Ads1115
         /// <param name="mode">Traditional or Window comparator mode</param>
         /// <param name="queueLength">Minimum number of samples that must exceed the threshold to trigger the event</param>
         /// <exception cref="InvalidOperationException">The GPIO Controller for the interrupt handler has not been set up</exception>
-        public void EnableComparator(double lowerValue, double upperValue, ComparatorMode mode,
+        public void EnableComparator(ElectricPotential lowerValue, ElectricPotential upperValue, ComparatorMode mode,
             ComparatorQueue queueLength)
         {
             EnableComparator(VoltageToRaw(lowerValue), VoltageToRaw(upperValue), mode, queueLength);
@@ -534,21 +536,21 @@ namespace Iot.Device.Ads1115
         }
 
         /// <summary>
-        /// Returns the voltage of the currently selected input.
+        /// Returns the electric potential (voltage) of the currently selected input.
         /// </summary>
         /// <returns>The measured voltage of the currently selected input channel. In volts. </returns>
-        public double ReadVoltage()
+        public ElectricPotential ReadVoltage()
         {
             short raw = ReadRaw();
             return RawToVoltage(raw);
         }
 
         /// <summary>
-        /// Returns the voltage of the given channel, performs a measurement first
+        /// Returns the electric potential (voltage) of the given channel, performs a measurement first
         /// </summary>
         /// <param name="inputMultiplexer">Channel to use</param>
         /// <returns>The voltage at the selected channel</returns>
-        public double ReadVoltage(InputMultiplexer inputMultiplexer)
+        public ElectricPotential ReadVoltage(InputMultiplexer inputMultiplexer)
         {
             short raw = ReadRaw(inputMultiplexer, MeasuringRange, DataRate);
             return RawToVoltage(raw);
@@ -559,15 +561,14 @@ namespace Iot.Device.Ads1115
         /// </summary>
         /// <param name="val">Raw Data</param>
         /// <returns>Voltage, based on the current measuring range</returns>
-        public double RawToVoltage(short val)
+        public ElectricPotential RawToVoltage(short val)
         {
-            double maxVoltage;
             double resolution;
 
-            maxVoltage = MaxVoltageFromMeasuringRange(MeasuringRange);
+            ElectricPotential maxVoltage = MaxVoltageFromMeasuringRange(MeasuringRange);
 
             resolution = 32768.0;
-            return val * (maxVoltage / resolution);
+            return ElectricPotential.FromVolts(val * (maxVoltage.Volts / resolution));
         }
 
         /// <summary>
@@ -575,21 +576,20 @@ namespace Iot.Device.Ads1115
         /// </summary>
         /// <param name="voltage">Input voltage</param>
         /// <returns>Corresponding raw value, based on the current measuring range</returns>
-        public short VoltageToRaw(double voltage)
+        public short VoltageToRaw(ElectricPotential voltage)
         {
             double resolution;
-            double maxVoltage;
-            maxVoltage = MaxVoltageFromMeasuringRange(MeasuringRange);
+            ElectricPotential maxVoltage = MaxVoltageFromMeasuringRange(MeasuringRange);
             resolution = 32768.0;
-            return (short)Math.Round(voltage / (maxVoltage / resolution));
+            return (short)Math.Round(voltage.Volts / (maxVoltage.Volts / resolution));
         }
 
         /// <summary>
         /// Returns the voltage assigned to the given MeasuringRange enumeration value.
         /// </summary>
         /// <param name="measuringRange">One of the <see cref="MeasuringRange"/> enumeration members</param>
-        /// <returns>A voltage, as double.</returns>
-        public double MaxVoltageFromMeasuringRange(MeasuringRange measuringRange)
+        /// <returns>An electric potential (voltage).</returns>
+        public ElectricPotential MaxVoltageFromMeasuringRange(MeasuringRange measuringRange)
         {
             double voltage;
             switch (measuringRange)
@@ -616,7 +616,7 @@ namespace Iot.Device.Ads1115
                     throw new ArgumentOutOfRangeException(nameof(measuringRange), "Unknown measuring range used");
             }
 
-            return voltage;
+            return ElectricPotential.FromVolts(voltage);
         }
 
         /// <summary>
