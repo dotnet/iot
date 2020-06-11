@@ -18,14 +18,16 @@ Due to the capacity limitation of the SPI output buffer, a buffer overflow excep
 
 # Datasheet
 
-[LS013B7DH03](https://www.mouser.com/datasheet/2/365/LS013B7DH03%20SPEC_SMA-1203020.pdf)
+[LS013B7DH03](https://media.digikey.com/pdf/Data%20Sheets/Sharp%20PDFs/LS013B7DH03_Spec.pdf)
 
-[LS013B7DH05](https://www.waveshare.com/w/upload/8/8b/1.3inch_Memory_LCD_DS.pdf)
+[LS013B7DH05](https://media.digikey.com/pdf/Data%20Sheets/Sharp%20PDFs/LS013B7DH05.pdf)
 
-[LS027B7DH01](https://pdf1.alldatasheetcn.com/datasheet-pdf/view/433405/SHARP/LS027B7DH01.html)
+[LS027B7DH01](https://media.digikey.com/pdf/Data%20Sheets/Sharp%20PDFs/LS027B7DH01_Rev_Jun_2010.pdf)
 
 # Reference
 
 https://www.sharpsma.com/sharp-memory-lcd-technology
 
 https://www.sharpsma.com/products?sharpCategory=Memory%20LCD
+
+https://www.sharpsma.com/documents/1468207/1565928/Sharp+Memory+LCD+2016+Brochure
