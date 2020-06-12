@@ -16,6 +16,18 @@ namespace Iot.Device.Rtc
         RTC_DATE_REG_ADDR = 0x04,
         RTC_MONTH_REG_ADDR = 0x05,
         RTC_YEAR_REG_ADDR = 0x06,
+
+        RTC_ALM1_SEC_REG_ADDR = 0x07,
+        RTC_ALM1_MIN_REG_ADDR = 0x08,
+        RTC_ALM1_HOUR_REG_ADDR = 0x09,
+        RTC_ALM1_DATE_REG_ADDR = 0x0A,
+
+        RTC_ALM2_MIN_REG_ADDR = 0x0B,
+        RTC_ALM2_HOUR_REG_ADDR = 0x0C,
+        RTC_ALM2_DATE_REG_ADDR = 0x0D,
+
+        RTC_CTRL_REG_ADDR = 0x0E,
+        RTC_STAT_REG_ADDR = 0x0F,
         RTC_TEMP_MSB_REG_ADDR = 0x11,
         RTC_TEMP_LSB_REG_ADDR = 0x12,
     }
