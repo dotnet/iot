@@ -35,7 +35,7 @@ namespace Iot.Device.Rtc
         DayOfMonthHourMinuteSecond = 0x00,
 
         /// <summary>
-        /// Alarm triggers when the day of the week, hours, minutes and seconda match
+        /// Alarm triggers when the day of the week, hours, minutes and seconda match. Monday is day 1
         /// </summary>
         DayOfWeekHourMinuteSecond = 0x10
     }
