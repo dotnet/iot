@@ -186,12 +186,7 @@ namespace Iot.Device.Shtc3
         {
             get
             {
-                if (_id is null)
-                {
-                    _id = ReadId();
-                }
-
-                return _id;
+                return _id = _id ?? ReadId();
             }
         }
 

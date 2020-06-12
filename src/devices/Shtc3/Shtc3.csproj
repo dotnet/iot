@@ -13,8 +13,4 @@
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="UnitsNet" Version="4.58.0" />
-  </ItemGroup>
-
 </Project>
