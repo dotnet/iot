@@ -145,14 +145,14 @@ namespace Iot.Device.Rtc
                 throw new ArgumentOutOfRangeException("alarm", "Hour must be between 0 and 23.");
             }
 
-            if (alarm.MatchMode == Ds3231Alarm1MatchMode.DayOfWeekHourMinuteSecond)
+            if (alarm.MatchMode == Ds3231Alarm1MatchMode.DayOfWeekHoursMinutesSeconds)
             {
                 if (alarm.DayOfMonthOrWeek < 1 || alarm.DayOfMonthOrWeek > 7)
                 {
                     throw new ArgumentOutOfRangeException("alarm", "Day of week must be between 1 and 7.");
                 }
             }
-            else if (alarm.MatchMode == Ds3231Alarm1MatchMode.DayOfMonthHourMinuteSecond)
+            else if (alarm.MatchMode == Ds3231Alarm1MatchMode.DayOfMonthHoursMinutesSeconds)
             {
                 if (alarm.DayOfMonthOrWeek < 1 || alarm.DayOfMonthOrWeek > 31)
                 {
@@ -235,14 +235,14 @@ namespace Iot.Device.Rtc
                 throw new ArgumentOutOfRangeException("alarm", "Hour must be between 0 and 23.");
             }
 
-            if (alarm.MatchMode == Ds3231Alarm2MatchMode.DayOfWeekHourMinute)
+            if (alarm.MatchMode == Ds3231Alarm2MatchMode.DayOfWeekHoursMinutes)
             {
                 if (alarm.DayOfMonthOrWeek < 1 || alarm.DayOfMonthOrWeek > 7)
                 {
                     throw new ArgumentOutOfRangeException("alarm", "Day of week must be between 1 and 7.");
                 }
             }
-            else if (alarm.MatchMode == Ds3231Alarm2MatchMode.DayOfMonthHourMinute)
+            else if (alarm.MatchMode == Ds3231Alarm2MatchMode.DayOfMonthHoursMinutes)
             {
                 if (alarm.DayOfMonthOrWeek < 1 || alarm.DayOfMonthOrWeek > 31)
                 {
@@ -281,37 +281,31 @@ namespace Iot.Device.Rtc
         }
 
         /// <summary>
-        /// Enables an alarm to trigger
+        /// Reads whether an alarm is enabled
         /// </summary>
-        /// <param name="alarm">Alarm to enable</param>
-        public void EnableAlarm(Ds3231Alarm alarm)
+        /// <param name="alarm">Alarm to read</param>
+        public bool ReadAlarmEnabled(Ds3231Alarm alarm)
         {
-            ResetAlarmState(alarm);
-
             Span<byte> getData = stackalloc byte[1];
             _i2cDevice.WriteByte((byte)Ds3231Register.RTC_CTRL_REG_ADDR);
             _i2cDevice.Read(getData);
 
-            Span<byte> setData = stackalloc byte[2];
-            setData[0] = (byte)Ds3231Register.RTC_CTRL_REG_ADDR;
-
             if (alarm == Ds3231Alarm.Alarm1)
             {
-                setData[1] = Convert.ToByte(getData[0] | 0x01); // Set A1IE bit
+                return (getData[0] & 1) != 0; // A1IE bit
             }
             else
             {
-                setData[1] = Convert.ToByte(getData[0] | (0x01 << 1)); // Set A2IE bit
+                return (getData[0] & (1 << 1)) != 0; // A2IE bit
             }
-
-            _i2cDevice.Write(setData);
         }
 
         /// <summary>
-        /// Disables an alarm from triggering
+        /// Enables or disables an alarm from triggering
         /// </summary>
-        /// <param name="alarm">Alarm to disable</param>
-        public void DisableAlarm(Ds3231Alarm alarm)
+        /// <param name="alarm">Alarm to enable or disable</param>
+        /// <param name="enabled">Enable or disable the alarm</param>
+        public void SetAlarmEnabled(Ds3231Alarm alarm, bool enabled)
         {
             Span<byte> getData = stackalloc byte[1];
             _i2cDevice.WriteByte((byte)Ds3231Register.RTC_CTRL_REG_ADDR);
@@ -319,25 +313,29 @@ namespace Iot.Device.Rtc
 
             Span<byte> setData = stackalloc byte[2];
             setData[0] = (byte)Ds3231Register.RTC_CTRL_REG_ADDR;
+            setData[1] = getData[0];
 
-            if (alarm == Ds3231Alarm.Alarm1)
+            if (alarm == Ds3231Alarm.Alarm1) // A1IE bit
             {
-                setData[1] = Convert.ToByte(getData[0] & ~0x01); // Clear A1IE bit
+                setData[1] &= unchecked((byte)~1); // Clear
+                setData[1] |= Convert.ToByte(enabled); // Set
             }
-            else
+            else // A2IE bit
             {
-                setData[1] = Convert.ToByte(getData[0] & ~(0x01 << 1)); // Clear A2IE bit
+                setData[1] &= unchecked((byte)~(1 << 1)); // Clear
+                setData[1] |= (byte)(Convert.ToByte(enabled) << 1); // Set
             }
 
             _i2cDevice.Write(setData);
+            ResetAlarmTriggeredState(alarm);
         }
 
         /// <summary>
         /// Resets the triggered state of an alarm, allowing it to trigger again. Must be
-        /// called after every trigger otherwise the alarm will trigger again
+        /// called after every trigger otherwise the alarm will not trigger again
         /// </summary>
         /// <param name="alarm">Alarm to reset</param>
-        public void ResetAlarmState(Ds3231Alarm alarm)
+        public void ResetAlarmTriggeredState(Ds3231Alarm alarm)
         {
             Span<byte> getData = stackalloc byte[1];
             _i2cDevice.WriteByte((byte)Ds3231Register.RTC_STAT_REG_ADDR);
