@@ -100,6 +100,19 @@ namespace Iot.Device.Rtc
         }
 
         /// <summary>
+        /// Checks whether the date and time stored on the RTC is valid
+        /// </summary>
+        /// <returns>The validity of the date and time stored on the RTC</returns>
+        public bool ReadDateTimeValidity()
+        {
+            Span<byte> getData = stackalloc byte[1];
+            _i2cDevice.WriteByte((byte)Ds3231Register.RTC_STAT_REG_ADDR);
+            _i2cDevice.Read(getData);
+
+            return (getData[0] & (1 << 7)) != 0; // Get OSF bit
+        }
+
+        /// <summary>
         /// Reads the currently set alarm 1
         /// </summary>
         /// <returns>Alarm 1</returns>
