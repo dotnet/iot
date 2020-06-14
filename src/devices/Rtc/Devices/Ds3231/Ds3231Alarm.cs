@@ -10,12 +10,17 @@ namespace Iot.Device.Rtc
     public enum Ds3231Alarm
     {
         /// <summary>
-        /// First alarm on the DS3231
+        /// Indicates none of the alarms
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Indicates the first alarm
         /// </summary>
         Alarm1,
 
         /// <summary>
-        /// Second alarm on the DS3231
+        /// Indicates the second alarm
         /// </summary>
         Alarm2
     }

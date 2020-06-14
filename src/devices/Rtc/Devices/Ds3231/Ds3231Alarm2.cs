@@ -5,12 +5,12 @@
 namespace Iot.Device.Rtc
 {
     /// <summary>
-    /// Represents alarm 2 in the DS3231
+    /// Represents alarm 2 on the DS3231
     /// </summary>
     public class Ds3231Alarm2
     {
         /// <summary>
-        /// Day of the month of day of the week of the alarm. Which one depends on the match mode
+        /// Day of month or day of week of the alarm. Which one it is depends on the match mode
         /// </summary>
         public int DayOfMonthOrWeek { get; set; }
 
@@ -30,9 +30,9 @@ namespace Iot.Device.Rtc
         public Ds3231Alarm2MatchMode MatchMode { get; set; }
 
         /// <summary>
-        /// Creates a new instance of the DS3231 alarm 2
+        /// Creates a new instance of alarm 2 on the DS3231
         /// </summary>
-        /// <param name="dayOfMonthOrWeek">Day of the month of day of the week of the alarm. Which one depends on the match mode</param>
+        /// <param name="dayOfMonthOrWeek">Day of month or day of week of the alarm. Which one it is depends on the match mode</param>
         /// <param name="hour">Hour of the alarm</param>
         /// <param name="minute">Minute of the alarm</param>
         /// <param name="matchMode">Mode to use to determine when to trigger the alarm</param>
