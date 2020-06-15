@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <Compile Include="Sn74hc595.cs" />
+    <Compile Include="GpioControllerExtensions.cs" />
+  </ItemGroup>
+
+    <ItemGroup>
+    <None Remove="README.md" />
+  </ItemGroup>
+
+</Project>
