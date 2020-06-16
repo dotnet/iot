@@ -3,16 +3,22 @@ using System.Device.Gpio;
 using System.Threading;
 using Iot.Device.ShiftRegister;
 
-namespace shift_register
+namespace ShiftRegister
 {
-    class Program
+    /// <summary>
+    /// Test application
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Application entrypoint
+        /// </summary>
+        public static void Main()
         {
             Console.WriteLine("Hello World!");
 
             var controller = new GpioController();
-            var sr = new Sn74hc595(Sn74hc595.PinMapping.Standard, controller,true);
+            var sr = new Sn74hc595(Sn74hc595.PinMapping.Standard, controller, true);
 
             var cancellationSource = new CancellationTokenSource();
             Console.CancelKeyPress += (s, e) =>
@@ -34,14 +40,13 @@ namespace shift_register
             Console.ReadLine();
 
             sr.ShiftClear();
-            
             Console.WriteLine($"Light up all LEDs, with {nameof(sr.Shift)}");
 
             for (int i = 0; i < sr.Bits; i++)
             {
                 sr.Shift(1);
             }
-            
+
             sr.Latch();
             Console.ReadLine();
 
@@ -53,10 +58,9 @@ namespace shift_register
             {
                 sr.Shift(0);
             }
-            
+
             sr.Latch();
             Console.ReadLine();
-
 
             if (cancellationSource.IsCancellationRequested)
             {
@@ -64,7 +68,7 @@ namespace shift_register
             }
 
             Console.WriteLine($"Write a set of values with {nameof(sr.ShiftByte)}");
-            var values = new byte[]{23, 56, 127, 128, 250};
+            var values = new byte[] { 23, 56, 127, 128, 250 };
             foreach (var value in values)
             {
                 Console.WriteLine($"Value: {value}");
@@ -85,9 +89,9 @@ namespace shift_register
             {
                 sr.ShiftByte(255);
             }
+
             sr.Latch();
             Console.ReadLine();
-
 
             Console.WriteLine("Output disable");
             sr.OutputDisable();
@@ -108,7 +112,7 @@ namespace shift_register
             sr.ClearStorage();
             sr.Latch();
             Console.ReadLine();
-         
+
             Console.WriteLine($"Write 0 through 255-1");
             for (var i = 0; i < 255; i++)
             {

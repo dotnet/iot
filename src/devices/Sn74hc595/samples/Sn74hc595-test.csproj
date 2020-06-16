@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="../Sn74hc595.csproj" />
   </ItemGroup>
 
 </Project>
