@@ -8,7 +8,6 @@
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="Sn74hc595.cs" />
-    <Compile Include="GpioControllerExtensions.cs" />
   </ItemGroup>
 
     <ItemGroup>

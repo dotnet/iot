@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Device.Gpio;
 
 namespace Iot.Device.ShiftRegister
@@ -81,7 +85,8 @@ namespace Iot.Device.ShiftRegister
         {
             if (_mapping.SRCLR > 0)
             {
-                _controller.WriteValuesToPin(_mapping.SRCLR, 0, 1);
+                _controller.Write(_mapping.SRCLR, 0);
+                _controller.Write(_mapping.SRCLR, 1);
             }
             else
             {
@@ -111,7 +116,8 @@ namespace Iot.Device.ShiftRegister
         {
             _controller.Write(_ser, value);
             _controller.Write(_srclk, 1);
-            _controller.WriteValueToPins(0, _ser, _srclk);
+            _controller.Write(_ser, 0);
+            _controller.Write(_srclk, 0);
         }
 
         /// <summary>
@@ -120,7 +126,8 @@ namespace Iot.Device.ShiftRegister
         /// </summary>
         public void Latch()
         {
-            _controller.WriteValuesToPin(_rclk, 1, 0);
+            _controller.Write(_rclk, 1);
+            _controller.Write(_rclk, 0);
         }
 
         /// <summary>
@@ -171,13 +178,24 @@ namespace Iot.Device.ShiftRegister
 
         private void Setup()
         {
-            _controller.OpenPins(PinMode.Output, _ser, _rclk, _srclk, _mapping.SRCLR);
-            _controller.WriteValueToPins(0, _ser, _rclk, _rclk);
+            OpenPins(_ser, _rclk, _srclk, _mapping.SRCLR);
+            _controller.Write(_ser, 0);
+            _controller.Write(_rclk, 0);
+            _controller.Write(_rclk, 0);
             _controller.Write(_mapping.SRCLR, 1);
 
             if (_mapping.OE > 0)
             {
-                _controller.OpenPinAndWrite(_mapping.OE, 0);
+                _controller.OpenPin(_mapping.OE, PinMode.Output);
+                _controller.Write(_mapping.OE, 0);
+            }
+
+            void OpenPins(params int[] pins)
+            {
+                foreach (var pin in pins)
+                {
+                    _controller.OpenPin(pin, PinMode.Output);
+                }
             }
         }
 
