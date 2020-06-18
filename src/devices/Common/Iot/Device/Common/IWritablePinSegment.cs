@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device.Gpio;
 
 namespace Iot.Device.Common
 {
@@ -17,8 +18,8 @@ namespace Iot.Device.Common
         int Length { get; }
 
         /// <summary>
-        /// Writes a high or low value to pin
+        /// Writes a PinValue
         /// </summary>
-        void Write(int pin, int value);
+        void Write(int pin, PinValue value);
     }
 }

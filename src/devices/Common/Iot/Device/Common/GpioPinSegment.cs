@@ -43,9 +43,9 @@ namespace Iot.Device.Common
         public int Length => _pins.Length;
 
         /// <summary>
-        /// Write operation to the underlying GpioController.
+        /// Writes a PinValue to the underlying GpioController.
         /// </summary>
-        public void Write(int pin, int value)
+        public void Write(int pin, PinValue value)
         {
             _controller.Write(_pins[pin], value);
         }
