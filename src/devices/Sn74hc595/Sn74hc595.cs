@@ -65,18 +65,6 @@ namespace Iot.Device.ShiftRegister
         /// </summary>
         public int Bits => _count * 8;
 
-        /// <summary>
-        /// Cleanup.
-        /// Failing to dispose this class, especially when callbacks are active, may lead to undefined behavior.
-        /// </summary>
-        public void Dispose()
-        {
-            if (_shouldDispose)
-            {
-                _controller?.Dispose();
-                _controller = null;
-            }
-        }
 
         /// <summary>
         /// Clear storage registers.
@@ -112,22 +100,12 @@ namespace Iot.Device.ShiftRegister
         /// Shift single value to next register
         /// Does not perform latch.
         /// </summary>
-        public void Shift(int value)
+        public void Shift(PinValue value)
         {
             _controller.Write(_ser, value);
             _controller.Write(_srclk, 1);
             _controller.Write(_ser, 0);
             _controller.Write(_srclk, 0);
-        }
-
-        /// <summary>
-        /// Latches values in registers.
-        /// Essentially a "publish" command.
-        /// </summary>
-        public void Latch()
-        {
-            _controller.Write(_rclk, 1);
-            _controller.Write(_rclk, 0);
         }
 
         /// <summary>
@@ -142,6 +120,16 @@ namespace Iot.Device.ShiftRegister
                 var data = (128 >> i) & value;
                 Shift(data);
             }
+        }
+
+        /// <summary>
+        /// Latches values in data register.
+        /// Essentially a "publish" command.
+        /// </summary>
+        public void Latch()
+        {
+            _controller.Write(_rclk, 1);
+            _controller.Write(_rclk, 0);
         }
 
         /// <summary>
@@ -173,6 +161,19 @@ namespace Iot.Device.ShiftRegister
             else
             {
                 throw new ArgumentNullException($"{nameof(OutputEnable)}: {nameof(_mapping.OE)} not mapped to non-zero pin value");
+            }
+        }
+        
+        /// <summary>
+        /// Cleanup.
+        /// Failing to dispose this class, especially when callbacks are active, may lead to undefined behavior.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null;
             }
         }
 
