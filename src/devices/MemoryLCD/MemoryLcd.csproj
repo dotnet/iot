@@ -1,18 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="samples\**" />
-    <EmbeddedResource Remove="samples\**" />
-    <None Remove="samples\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="1.0.0" />
-    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <Compile Include="*.cs" />
   </ItemGroup>
 
 </Project>
