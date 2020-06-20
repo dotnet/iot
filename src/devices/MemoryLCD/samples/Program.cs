@@ -18,15 +18,20 @@ namespace MemoryLcd.Samples
     {
         private static void Main(string[] args)
         {
+            // LSxxxB7DHxx's chip select is high-level votage enabled
+            // You can use default ChipSelectLineActiveState value and a NOT gate to inverse this signal
+            // If you use gpio pins to control SCS, ChipSelectLineActiveState is optional
             SpiDevice spi = SpiDevice.Create(new SpiConnectionSettings(0, 0)
             {
-                ChipSelectLineActiveState = 1,
+                ChipSelectLineActiveState = 1, // optional
                 ClockFrequency = 2_000_000,
                 DataFlow = DataFlow.MsbFirst,
                 Mode = 0
             });
+
+            // You can fix DISP and EXTCOMIN in your circuit and use SPI's CE line to economize the GPIO pins
             GpioController gpio = new GpioController(PinNumberingScheme.Logical);
-            LSxxxB7DHxx mlcd = new LS013B7DH03(spi, gpio, 25, 24, 23);
+            LSxxxB7DHxx mlcd = new LS027B7DH01(spi, gpio, 25, 24, 23);
 
             Random random = new Random();
 

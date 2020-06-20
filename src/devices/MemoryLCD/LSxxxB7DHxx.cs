@@ -57,8 +57,8 @@ namespace Iot.Device.MemoryLcd
         // private static readonly int s_scs_high_delay = 1; // (>3us)
         // private static readonly int s_scs_low_delay = 1; // (>1us)
         // private static readonly int s_interframe_delay = 1; // (>1us)
-        private static readonly int s_ts_scs = 1; // >6us
-        private static readonly int s_th_scs = 1; // >2us
+        // private static readonly int s_ts_scs = 1; // >6us
+        // private static readonly int s_th_scs = 1; // >2us
         #endregion
 
         private readonly GpioController _gpio;
@@ -75,7 +75,7 @@ namespace Iot.Device.MemoryLcd
         internal LSxxxB7DHxx(SpiDevice spi, GpioController gpio, int scs, int disp, int extcomin)
         {
             _spi = spi ?? throw new ArgumentNullException(nameof(spi));
-            _gpio = gpio ?? throw new ArgumentNullException(nameof(spi));
+            _gpio = gpio;
             _scs = scs;
             _disp = disp;
             _extcomin = extcomin;
@@ -191,11 +191,16 @@ namespace Iot.Device.MemoryLcd
 
         private void WriteSpi(ReadOnlySpan<byte> bytes)
         {
-            _gpio.Write(_scs, PinValue.High);
-            Thread.Sleep(s_ts_scs);
-            _spi.Write(bytes);
-            Thread.Sleep(s_th_scs);
-            _gpio.Write(_scs, PinValue.Low);
+            if (_gpio != null && _scs > -1)
+            {
+                _gpio.Write(_scs, PinValue.High);
+                _spi.Write(bytes);
+                _gpio.Write(_scs, PinValue.Low);
+            }
+            else
+            {
+                _spi.Write(bytes);
+            }
         }
     }
 }

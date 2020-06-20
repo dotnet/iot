@@ -20,7 +20,7 @@ namespace Iot.Device.MemoryLcd
         /// <param name="scs">Chip select signal</param>
         /// <param name="disp">Display ON/OFF signal</param>
         /// <param name="extcomin">External COM inversion signal input</param>
-        public LS013B7DH03(SpiDevice spi, GpioController gpio, int scs, int disp = -1, int extcomin = -1)
+        public LS013B7DH03(SpiDevice spi, GpioController gpio = null, int scs = -1, int disp = -1, int extcomin = -1)
             : base(spi, gpio, scs, disp, extcomin)
         {
         }
