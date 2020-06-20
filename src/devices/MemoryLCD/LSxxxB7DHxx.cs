@@ -54,11 +54,11 @@ namespace Iot.Device.MemoryLcd
 
         private static readonly int s_powerup_disp_delay = 1; // (>30us)
         private static readonly int s_powerup_extcomin_delay = 1; // (>30us)
-        // private static readonly int s_scs_high_delay = 1; // (>3us)
-        // private static readonly int s_scs_low_delay = 1; // (>1us)
-        // private static readonly int s_interframe_delay = 1; // (>1us)
-        // private static readonly int s_ts_scs = 1; // >6us
-        // private static readonly int s_th_scs = 1; // >2us
+        // private static readonly int s_scs_high_delay = 0; // (>3us)
+        // private static readonly int s_scs_low_delay = 0; // (>1us)
+        // private static readonly int s_interframe_delay = 0; // (>1us)
+        private static readonly int s_ts_scs = 0; // >6us
+        private static readonly int s_th_scs = 0; // >2us
         #endregion
 
         private readonly GpioController _gpio;
@@ -194,7 +194,9 @@ namespace Iot.Device.MemoryLcd
             if (_gpio != null && _scs > -1)
             {
                 _gpio.Write(_scs, PinValue.High);
+                Thread.Sleep(s_ts_scs);
                 _spi.Write(bytes);
+                Thread.Sleep(s_th_scs);
                 _gpio.Write(_scs, PinValue.Low);
             }
             else
