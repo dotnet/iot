@@ -10,7 +10,9 @@ LS013B7DH03 | 1.28" | 128x128    | 65  | 3V (3.3V max) | 1.1MHz
 LS013B7DH05 | 1.26" | 144x168    | 60  | 3V (3.3V max) | 1.1MHz
 LS027B7DH01 | 2.7"  | 400x240    | 20  | 5V (5.5V max) | 2MHz
 
-* Interface is all 3V Serial
+* LS027B7DH01 can also use 3V power source while recommended value is 5V.
+
+* Interface is all 3V Serial.
 
 # Notice
 
