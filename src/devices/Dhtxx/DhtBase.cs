@@ -65,7 +65,7 @@ namespace Iot.Device.DHTxx
             get
             {
                 ReadData();
-                return IsLastReadSuccessful ? GetTemperature(_readBuff) : Temperature.FromDegreesCelsius(double.NaN);
+                return IsLastReadSuccessful ? GetTemperature(_readBuff) : default(Temperature);
             }
         }
 
