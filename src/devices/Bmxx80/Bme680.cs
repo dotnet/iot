@@ -19,7 +19,8 @@ namespace Iot.Device.Bmxx80
     /// </summary>
     public class Bme680 : Bmxx80Base
     {
-        private readonly Temperature _ambientTemperatureDefault;
+        private static readonly Temperature DefaultAmbientTemperature = Temperature.FromDegreesCelsius(20);
+        private readonly Temperature _ambientTemperatureUserDefault;
 
         /// <summary>
         /// Default I2C bus address.
@@ -66,7 +67,7 @@ namespace Iot.Device.Bmxx80
         public Bme680(I2cDevice i2cDevice, Temperature ambientTemperatureDefault)
             : base(DeviceId, i2cDevice)
         {
-            _ambientTemperatureDefault = ambientTemperatureDefault;
+            _ambientTemperatureUserDefault = ambientTemperatureDefault;
             _communicationProtocol = CommunicationProtocol.I2c;
         }
 
@@ -75,7 +76,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
         public Bme680(I2cDevice i2cDevice)
-            : this(i2cDevice, Temperature.FromDegreesCelsius(20))
+            : this(i2cDevice, DefaultAmbientTemperature)
         {
         }
 
@@ -466,7 +467,7 @@ namespace Iot.Device.Bmxx80
             _bme680Calibration = (Bme680CalibrationData)_calibrationData;
             if (!TryReadTemperature(out var temp))
             {
-                temp = _ambientTemperatureDefault;
+                temp = _ambientTemperatureUserDefault;
             }
 
             ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, Temperature.FromDegreesCelsius(320), Duration.FromMilliseconds(150), temp);
