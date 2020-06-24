@@ -83,10 +83,12 @@ namespace Iot.Device.Bmxx80.Tests
             Assert.Equal(25.08, temperature.DegreesCelsius, 2);
             sensor.TryReadPressure(out Pressure pressure);
             Assert.Equal(100653.27, pressure.Pascals, 2);
+            sensor.Dispose();
         }
 
         public void Dispose()
         {
+            _i2cDevice.Dispose();
         }
     }
 }
