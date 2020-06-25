@@ -230,30 +230,23 @@ namespace Iot.Device.MemoryLcd
                 throw new ArgumentException($"The height of the image should be {PixelHeight}", nameof(image));
             }
 
-            try
+            for (int y = 0; y < image.Height; y++)
             {
-                for (int y = 0; y < image.Height; y++)
+                for (int x = 0; x < image.Width; x += 8)
                 {
-                    for (int x = 0; x < image.Width; x += 8)
-                    {
-                        int bx = x / 8;
-                        byte dataByte = (byte)(
-                            (image.GetPixel(x + 0, y).GetBrightness() > 0.5 ? 0b10000000 : 0) |
-                            (image.GetPixel(x + 1, y).GetBrightness() > 0.5 ? 0b01000000 : 0) |
-                            (image.GetPixel(x + 2, y).GetBrightness() > 0.5 ? 0b00100000 : 0) |
-                            (image.GetPixel(x + 3, y).GetBrightness() > 0.5 ? 0b00010000 : 0) |
-                            (image.GetPixel(x + 4, y).GetBrightness() > 0.5 ? 0b00001000 : 0) |
-                            (image.GetPixel(x + 5, y).GetBrightness() > 0.5 ? 0b00000100 : 0) |
-                            (image.GetPixel(x + 6, y).GetBrightness() > 0.5 ? 0b00000010 : 0) |
-                            (image.GetPixel(x + 7, y).GetBrightness() > 0.5 ? 0b00000001 : 0));
+                    int bx = x / 8;
+                    byte dataByte = (byte)(
+                        (image.GetPixel(x + 0, y).GetBrightness() > 0.5 ? 0b10000000 : 0) |
+                        (image.GetPixel(x + 1, y).GetBrightness() > 0.5 ? 0b01000000 : 0) |
+                        (image.GetPixel(x + 2, y).GetBrightness() > 0.5 ? 0b00100000 : 0) |
+                        (image.GetPixel(x + 3, y).GetBrightness() > 0.5 ? 0b00010000 : 0) |
+                        (image.GetPixel(x + 4, y).GetBrightness() > 0.5 ? 0b00001000 : 0) |
+                        (image.GetPixel(x + 5, y).GetBrightness() > 0.5 ? 0b00000100 : 0) |
+                        (image.GetPixel(x + 6, y).GetBrightness() > 0.5 ? 0b00000010 : 0) |
+                        (image.GetPixel(x + 7, y).GetBrightness() > 0.5 ? 0b00000001 : 0));
 
-                        _frameBuffer[bx + y * BytesPerLine] = dataByte;
-                    }
+                    _frameBuffer[bx + y * BytesPerLine] = dataByte;
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
             }
         }
 
