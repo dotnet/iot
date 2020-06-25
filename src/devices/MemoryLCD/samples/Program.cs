@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Device.Gpio;
-using System.Device.I2c;
 using System.Device.Spi;
-using System.IO;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Net;
-using System.Threading;
 using System.Drawing;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Iot.Device.MemoryLcd;
 
 namespace MemoryLcd.Samples
@@ -18,7 +13,7 @@ namespace MemoryLcd.Samples
     {
         private static void Main(string[] args)
         {
-            // LSxxxB7DHxx's chip select is high-level votage enabled
+            // *** LSxxxB7DHxx's chip select is high-level votage enabled ***
             // You can use default ChipSelectLineActiveState value and a NOT gate to inverse this signal
             // If you use gpio pins to control SCS, ChipSelectLineActiveState is optional
             SpiDevice spi = SpiDevice.Create(new SpiConnectionSettings(0, 0)
@@ -30,6 +25,10 @@ namespace MemoryLcd.Samples
             });
 
             // You can fix DISP and EXTCOMIN in your circuit and use SPI's CE line to economize the GPIO pins
+            // DISP -- HIGH
+            // EXTCOMIN -- LOW
+            // EXTMODE -- LOW
+            // LSxxxB7DHxx mlcd = new LS027B7DH01(spi);
             GpioController gpio = new GpioController(PinNumberingScheme.Logical);
             LSxxxB7DHxx mlcd = new LS027B7DH01(spi, gpio, 25, 24, 23);
 
@@ -62,7 +61,7 @@ namespace MemoryLcd.Samples
             byte[] frameBuffer = new byte[mlcd.BytesPerLine * mlcd.PixelHeight];
 
             // LS027B7DH01 needs split bytes into 4 spans on RaspberryPi
-            int frameSplit = mlcd is LS027B7DH01 ? 4 : 1;
+            int frameSplit = 4; // mlcd is LS027B7DH01 ? 4 : 1;
             int linesToSend = mlcd.PixelHeight / frameSplit;
             int bytesToSend = frameBuffer.Length / frameSplit;
 
@@ -75,8 +74,57 @@ namespace MemoryLcd.Samples
                 mlcd.DataUpdateMultipleLines(lineNumbers, bytes);
             }
 
-            Console.WriteLine("All done. Press any key to exit...");
+            Console.WriteLine("Show image. Press any key to continue...");
             Console.ReadKey();
+
+            Bitmap image = new Bitmap(mlcd.PixelWidth, mlcd.PixelHeight);
+            Graphics graphics = Graphics.FromImage(image);
+            graphics.Clear(Color.White);
+
+            graphics.DrawImage(Image.FromFile("./images/dotnet-bot.bmp"), 4, 4);
+            graphics.DrawImage(Image.FromFile("./images/github-dotnet-iot-black.bmp"), 136, 4);
+            graphics.DrawImage(Image.FromFile("./images/shapes.bmp"), 268, 4);
+
+            Brush clearScreenBrush = new SolidBrush(Color.White);
+            Brush textBrush = new SolidBrush(Color.Black);
+            Font textFont = new Font("Sans Serif", 12, FontStyle.Regular);
+
+            int fpsCpunter = 0;
+            int fps = 0;
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    fps = fpsCpunter;
+                    fpsCpunter = 0;
+                    Thread.Sleep(1000 - DateTime.Now.Millisecond);
+                }
+            });
+
+            while (true)
+            {
+                graphics.FillRectangle(clearScreenBrush, 4, 40, 392, 196);
+
+                DateTime time = DateTime.Now;
+                string message = string.Join(Environment.NewLine, new[]
+                {
+                    $"Memory LCD model: {mlcd.GetType().Name}",
+                    string.Empty,
+                    $"Pixels: {mlcd.PixelWidth} x {mlcd.PixelHeight}",
+                    string.Empty,
+                    $"Current time: {time}",
+                    string.Empty,
+                    $"Current time ticks: {time.Ticks}",
+                    string.Empty,
+                    $"FPS: {fps}",
+                });
+                graphics.DrawString(message, textFont, textBrush, 4, 40);
+
+                mlcd.ShowImage(image, 4);
+
+                fpsCpunter++;
+                Thread.Sleep(0);
+            }
         }
     }
 }
