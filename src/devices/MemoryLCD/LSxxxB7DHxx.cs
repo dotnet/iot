@@ -14,7 +14,7 @@ namespace Iot.Device.MemoryLcd
     /// <summary>
     /// Memory LCD
     /// </summary>
-    public abstract class LSxxxB7DHxx
+    public abstract class LSxxxB7DHxx : IDisposable
     {
         #region Screen specification
 
@@ -32,9 +32,6 @@ namespace Iot.Device.MemoryLcd
         /// Memory LCD bytes per line
         /// </summary>
         public int BytesPerLine { get; }
-
-        private readonly byte[] _lineNumberBuffer;
-        private readonly byte[] _frameBuffer;
         #endregion
 
         #region GPIO config
@@ -66,8 +63,10 @@ namespace Iot.Device.MemoryLcd
         private static readonly int s_th_scs = 0; // >2us
         #endregion
 
-        private readonly GpioController _gpio;
-        private readonly SpiDevice _spi;
+        private GpioController _gpio;
+        private SpiDevice _spi;
+        private byte[] _lineNumberBuffer;
+        private byte[] _frameBuffer;
 
         /// <summary>
         /// Create a memory LCD device
@@ -272,6 +271,18 @@ namespace Iot.Device.MemoryLcd
             {
                 _spi.Write(bytes);
             }
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            _gpio?.Dispose();
+            _spi?.Dispose();
+
+            _gpio = null;
+            _spi = null;
+            _lineNumberBuffer = null;
+            _frameBuffer = null;
         }
     }
 }
