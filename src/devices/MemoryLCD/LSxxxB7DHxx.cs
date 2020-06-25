@@ -5,6 +5,8 @@
 using System;
 using System.Device.Gpio;
 using System.Device.Spi;
+using System.Drawing;
+using System.Linq;
 using System.Threading;
 
 namespace Iot.Device.MemoryLcd
@@ -30,6 +32,9 @@ namespace Iot.Device.MemoryLcd
         /// Memory LCD bytes per line
         /// </summary>
         public int BytesPerLine { get; }
+
+        private readonly byte[] _lineNumberBuffer;
+        private readonly byte[] _frameBuffer;
         #endregion
 
         #region GPIO config
@@ -37,17 +42,17 @@ namespace Iot.Device.MemoryLcd
         /// <summary>
         /// Chip select signal
         /// </summary>
-        private int _scs;
+        private readonly int _scs;
 
         /// <summary>
         /// Display ON/OFF signal<br/>The display ON/OFF signal is only for display. Data in the memory will be saved at the time of ON/OFF.<br/>When it’s "H", data in the memory will display, when it’s "L", white color will diaplay and data in the memory will be saved.
         /// </summary>
-        private int _disp;
+        private readonly int _disp;
 
         /// <summary>
         /// External COM inversion signal input (H: enable)<br/>When EXTMODE is "Lo", connect the EXTCOMIN to VSS.
         /// </summary>
-        private int _extcomin;
+        private readonly int _extcomin;
         #endregion
 
         #region  Delay constants for LCD timing
@@ -82,6 +87,9 @@ namespace Iot.Device.MemoryLcd
 
             BytesPerLine = (PixelWidth + 7) / 8;
 
+            _lineNumberBuffer = Enumerable.Range(0, PixelHeight).Select(m => (byte)m).ToArray();
+            _frameBuffer = new byte[BytesPerLine * PixelHeight];
+
             Init();
         }
 
@@ -96,7 +104,7 @@ namespace Iot.Device.MemoryLcd
             }
 
             // m(1), ag(1), d(18), dummy(2)
-            var buffer = new byte[BytesPerLine + 4];
+            byte[] buffer = new byte[BytesPerLine + 4];
 
             buffer[0] = (byte)(ModeSelectionPeriodByte.Mode | (frameInversion ? ModeSelectionPeriodByte.FrameInversion : ModeSelectionPeriodByte.Dummy));
             buffer[1] = Utility.GetAgByte(lineIndex);
@@ -118,14 +126,14 @@ namespace Iot.Device.MemoryLcd
             }
 
             // m(1), ag1(1), d1(18), dummy2(1), ag2(1), d2(18), ... , dummyn(1), agn(1), dn(18), dummy(2)
-            var buffer = new byte[2 + (2 + BytesPerLine) * lineIndex.Length];
+            byte[] buffer = new byte[2 + (2 + BytesPerLine) * lineIndex.Length];
 
             buffer[0] = (byte)(ModeSelectionPeriodByte.Mode | (frameInversion ? ModeSelectionPeriodByte.FrameInversion : ModeSelectionPeriodByte.Dummy));
 
-            for (var i = 0; i < lineIndex.Length; i++)
+            for (int i = 0; i < lineIndex.Length; i++)
             {
-                var from = BytesPerLine * i;
-                var to = 1 + (2 + BytesPerLine) * i;
+                int from = BytesPerLine * i;
+                int to = 1 + (2 + BytesPerLine) * i;
 
                 buffer[to] = Utility.GetAgByte(lineIndex[i] + 1);
 
@@ -144,7 +152,7 @@ namespace Iot.Device.MemoryLcd
         public void Display(bool frameInversion = false)
         {
             // m(1), dummy(1)
-            var buffer = new byte[2];
+            byte[] buffer = new byte[2];
 
             buffer[0] = (byte)(frameInversion ? ModeSelectionPeriodByte.FrameInversion : ModeSelectionPeriodByte.Dummy);
 
@@ -157,11 +165,33 @@ namespace Iot.Device.MemoryLcd
         public void AllClear(bool frameInversion = false)
         {
             // m(1), dummy(1)
-            var buffer = new byte[2];
+            byte[] buffer = new byte[2];
 
             buffer[0] = (byte)(ModeSelectionPeriodByte.AllClear | (frameInversion ? ModeSelectionPeriodByte.FrameInversion : ModeSelectionPeriodByte.Dummy));
 
             WriteSpi(buffer);
+        }
+
+        /// <summary>
+        /// Show image to device
+        /// </summary>
+        /// <param name="image">Image to show</param>
+        /// <param name="split">Number to splits<br/>To avoid buffer overflow exceptions, it needs to split one frame into multiple sends for some device.</param>
+        /// <param name="frameInversion">Frame inversion flag</param>
+        public void ShowImage(Bitmap image, int split = 1, bool frameInversion = false)
+        {
+            FillImageBufferWithImage(image);
+
+            int linesToSend = PixelHeight / split;
+            int bytesToSend = _frameBuffer.Length / split;
+
+            for (int fs = 0; fs < split; fs++)
+            {
+                Span<byte> lineNumbers = _lineNumberBuffer.AsSpan(linesToSend * fs, linesToSend);
+                Span<byte> bytes = _frameBuffer.AsSpan(bytesToSend * fs, bytesToSend);
+
+                DataUpdateMultipleLines(lineNumbers, bytes, frameInversion);
+            }
         }
 
         private void Init()
@@ -186,6 +216,45 @@ namespace Iot.Device.MemoryLcd
                     _gpio.Write(_extcomin, PinValue.Low);
                     Thread.Sleep(s_powerup_extcomin_delay);
                 }
+            }
+        }
+
+        private void FillImageBufferWithImage(Bitmap image)
+        {
+            if (image.Width != PixelWidth)
+            {
+                throw new ArgumentException($"The width of the image should be {PixelWidth}", nameof(image));
+            }
+
+            if (image.Height != PixelHeight)
+            {
+                throw new ArgumentException($"The height of the image should be {PixelHeight}", nameof(image));
+            }
+
+            try
+            {
+                for (int y = 0; y < image.Height; y++)
+                {
+                    for (int x = 0; x < image.Width; x += 8)
+                    {
+                        int bx = x / 8;
+                        byte dataByte = (byte)(
+                            (image.GetPixel(x + 0, y).GetBrightness() > 0.5 ? 0b10000000 : 0) |
+                            (image.GetPixel(x + 1, y).GetBrightness() > 0.5 ? 0b01000000 : 0) |
+                            (image.GetPixel(x + 2, y).GetBrightness() > 0.5 ? 0b00100000 : 0) |
+                            (image.GetPixel(x + 3, y).GetBrightness() > 0.5 ? 0b00010000 : 0) |
+                            (image.GetPixel(x + 4, y).GetBrightness() > 0.5 ? 0b00001000 : 0) |
+                            (image.GetPixel(x + 5, y).GetBrightness() > 0.5 ? 0b00000100 : 0) |
+                            (image.GetPixel(x + 6, y).GetBrightness() > 0.5 ? 0b00000010 : 0) |
+                            (image.GetPixel(x + 7, y).GetBrightness() > 0.5 ? 0b00000001 : 0));
+
+                        _frameBuffer[bx + y * BytesPerLine] = dataByte;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
         }
 
