@@ -174,8 +174,13 @@ namespace Iot.Device.ShiftRegister
         /// Shifts multiple bytes to multiple daisy-chained shift registers
         /// Latches by default.
         /// </summary>
-        public void ShiftBytes(Sn74hc595 sr, int value, int count)
+        public void ShiftBytes(Sn74hc595 sr, int value, int count = 0)
         {
+            if (count == 0)
+            {
+                count = sr.Count;
+            }
+
             if (count == 1 || count > 4)
             {
                 throw new ArgumentException($"{nameof(ShiftBytes)}: count must be  2, 3, or 4.");
