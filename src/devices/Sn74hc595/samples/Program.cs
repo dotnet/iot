@@ -1,9 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
-using System;
+﻿using System;
 using System.Device.Gpio;
+using System.Device.Spi;
 using System.Threading;
 using Iot.Device.ShiftRegister;
 
@@ -17,12 +14,13 @@ namespace ShiftRegister
         /// <summary>
         /// Application entrypoint
         /// </summary>
-        public static void Main()
+        public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-
             var controller = new GpioController();
-            var sr = new Sn74hc595(Sn74hc595.PinMapping.Standard, controller, true);
+            // var sr = new Sn74hc595(Sn74hc595.PinMapping.Standard, controller, true, 2);
+            var settings = new SpiConnectionSettings(0, 0);
+            var spiDevice = SpiDevice.Create(settings);
+            var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard, controller, true, 2);
 
             var cancellationSource = new CancellationTokenSource();
             Console.CancelKeyPress += (s, e) =>
@@ -33,6 +31,20 @@ namespace ShiftRegister
 
             Console.WriteLine("****Information:");
             Console.WriteLine($"Bit count: {sr.Bits}");
+            var interfaceType = sr.UsesSpi ? "SPI" : "GPIO";
+            Console.WriteLine($"Using {interfaceType}");
+
+            if (!sr.UsesSpi)
+            {
+                ShiftBits(sr, cancellationSource);
+            }
+
+            ShiftBytes(sr, cancellationSource);
+            BinaryCounter(sr, cancellationSource);
+        }
+
+        private static void ShiftBits(Sn74hc595 sr, CancellationTokenSource cancellationSource)
+        {
             sr.ShiftClear();
 
             Console.WriteLine("Light up three of first four LEDs");
@@ -44,6 +56,7 @@ namespace ShiftRegister
             Console.ReadLine();
 
             sr.ShiftClear();
+
             Console.WriteLine($"Light up all LEDs, with {nameof(sr.Shift)}");
 
             for (int i = 0; i < sr.Bits; i++)
@@ -66,24 +79,25 @@ namespace ShiftRegister
             sr.Latch();
             Console.ReadLine();
 
-            if (cancellationSource.IsCancellationRequested)
+            if (IsCanceled(sr, cancellationSource))
             {
                 return;
             }
+        }
 
+        private static void ShiftBytes(Sn74hc595 sr, CancellationTokenSource cancellationSource)
+        {
             Console.WriteLine($"Write a set of values with {nameof(sr.ShiftByte)}");
             var values = new byte[] { 23, 56, 127, 128, 250 };
             foreach (var value in values)
             {
                 Console.WriteLine($"Value: {value}");
                 sr.ShiftByte(value);
-                sr.Latch();
                 Console.ReadLine();
                 sr.ShiftClear();
 
-                if (cancellationSource.IsCancellationRequested)
+                if (IsCanceled(sr, cancellationSource))
                 {
-                    sr.ShiftClear();
                     return;
                 }
             }
@@ -91,10 +105,9 @@ namespace ShiftRegister
             Console.WriteLine($"Write 255 to each register with {nameof(sr.ShiftByte)}");
             for (int i = 0; i < sr.Count; i++)
             {
-                sr.ShiftByte(255);
+                sr.ShiftByte(255, false);
             }
 
-            sr.Latch();
             Console.ReadLine();
 
             Console.WriteLine("Output disable");
@@ -108,26 +121,21 @@ namespace ShiftRegister
             Console.WriteLine($"Write 23 then 56 with {nameof(sr.ShiftByte)}");
             sr.ShiftByte(23);
             sr.ShiftByte(56);
-            sr.Latch();
             Console.ReadLine();
             sr.ShiftClear();
+        }
 
-            Console.WriteLine($"Clear storage with {nameof(sr.ClearStorage)} and then latch");
-            sr.ClearStorage();
-            sr.Latch();
-            Console.ReadLine();
-
-            Console.WriteLine($"Write 0 through 255-1");
+        private static void BinaryCounter(Sn74hc595 sr, CancellationTokenSource cancellationSource)
+        {
+            Console.WriteLine($"Write 0 through 255");
             for (var i = 0; i < 255; i++)
             {
                 sr.ShiftByte((byte)i);
-                sr.Latch();
                 Thread.Sleep(100);
                 sr.ClearStorage();
 
-                if (cancellationSource.IsCancellationRequested)
+                if (IsCanceled(sr, cancellationSource))
                 {
-                    sr.ShiftClear();
                     return;
                 }
             }
@@ -136,19 +144,15 @@ namespace ShiftRegister
 
             if (sr.Count > 1)
             {
-                Console.WriteLine($"Write 256 through 4096-1; pick up the pace");
-                for (var i = 256; i < 4096; i++)
+                Console.WriteLine($"Write 256 through 4095; pick up the pace");
+                for (var i = 256; i < 4095; i++)
                 {
-                    var downShiftedValue = i >> 8;
-                    sr.ShiftByte((byte)downShiftedValue);
-                    sr.ShiftByte((byte)i);
-                    sr.Latch();
+                    sr.ShiftBytes(sr, i, sr.Count);
                     Thread.Sleep(10);
                     sr.ClearStorage();
 
-                    if (cancellationSource.IsCancellationRequested)
+                    if (IsCanceled(sr, cancellationSource))
                     {
-                        sr.ShiftClear();
                         return;
                     }
                 }
@@ -158,13 +162,26 @@ namespace ShiftRegister
             Console.ReadLine();
 
             sr.ShiftClear();
+        }
 
-            /*
+        private static bool IsCanceled(Sn74hc595 sr, CancellationTokenSource cancellationSource)
+        {
+            if (cancellationSource.IsCancellationRequested)
+            {
+                sr.ShiftClear();
+                return true;
+            }
+
+            return false;
+        }
+    }
+}
+
+        /*
             Using the shift register w/o a binding
 
             while (!cancellationSource.IsCancellationRequested)
             {
-                // set bits high, one at a time
                 for (int i = 0; i < 8; i++)
                 {
                     controller.Write(SER,PinValue.High);
@@ -180,7 +197,6 @@ namespace ShiftRegister
                 Thread.Sleep(500);
             }
 
-            // set bits low, all at once
             for (int i = 0; i < 8; i++)
             {
                 controller.Write(SER,PinValue.Low);
@@ -190,6 +206,3 @@ namespace ShiftRegister
 
             controller.Write(RCLK,PinValue.High);
             */
-        }
-    }
-}

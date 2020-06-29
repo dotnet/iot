@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.Gpio;
+using System.Device.Spi;
 
 namespace Iot.Device.ShiftRegister
 {
@@ -14,24 +15,29 @@ namespace Iot.Device.ShiftRegister
     {
         // Spec: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
         // Tutorial: https://www.youtube.com/watch?v=6fVbJbNPrEU
+        // Using with SPI:
+        // https://forum.arduino.cc/index.php?topic=571144.0
+        // http://www.cupidcontrols.com/2013/12/turn-on-the-spi-lights-spi-output-shift-registers-and-leds/
         private GpioController _controller;
+        private SpiDevice _spiDevice;
         private bool _shouldDispose;
-        private PinMapping _mapping;
-        private int _ser;
+        private PinMapping _pinMapping;
+        private int _data;
         private int _srclk;
         private int _rclk;
 
         private int _count;
 
         /// <summary>
-        /// Initialize a new Sn74hc595 device connected through GPIO (up to 5 pins)
+        /// Initialize a new Sn74hc595 device connected through GPIO (uses 3-5 pins)
         /// </summary>
-        /// <param name="pinMapping">The pin mapping to use by the binding</param>
-        /// <param name="gpioController">The GPIO Controller used for interrupt handling</param>
-        /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance</param>
-        /// <param name="count">Count of (daisy-chained) shift registers. Minimum is 1.</param>
+        /// <param name="pinMapping">The pin mapping to use by the binding.</param>
+        /// <param name="gpioController">The GPIO Controller used for interrupt handling.</param>
+        /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
+        /// <param name="count">Count of (daisy-chained) shift registers. Default/minimum is 1.</param>
         public Sn74hc595(PinMapping pinMapping, GpioController gpioController = null,  bool shouldDispose = true, int count = 1)
         {
+            pinMapping.Validate();
             if (gpioController == null)
             {
                 gpioController = new GpioController();
@@ -39,17 +45,37 @@ namespace Iot.Device.ShiftRegister
 
             _controller = gpioController;
             _shouldDispose = shouldDispose;
-            if (!pinMapping.Validate())
-            {
-                throw new ArgumentException(nameof(Sn74hc595));
-            }
-
-            _mapping = pinMapping;
-            _ser = _mapping.SER;
-            _srclk = _mapping.SRCLK;
-            _rclk = _mapping.RCLK;
+            _pinMapping = pinMapping;
+            _data = _pinMapping.Data;
+            _srclk = _pinMapping.SrClk;
+            _rclk = _pinMapping.RClk;
             _count = count;
-            Setup();
+            SetupPins();
+        }
+
+        /// <summary>
+        /// Initialize a new Sn74hc595 device connected through SPI (uses 3 pins)
+        /// </summary>
+        /// <param name="spiDevice">SpiDevice used for serial communication.</param>
+        /// <param name="count">Count of (daisy-chained) shift registers. Default/minimum is 1.</param>
+        public Sn74hc595(SpiDevice spiDevice, int count = 1)
+        {
+            _spiDevice = spiDevice;
+            _count = count;
+        }
+
+        /// <summary>
+        /// Initialize a new Sn74hc595 device connected through both SPI and GPIO (SPI for writing data; GPIO for configuration; use 4-5 pins)
+        /// </summary>
+        /// <param name="spiDevice">SpiDevice used for serial communication.</param>
+        /// <param name="pinMapping">The pin mapping to use by the binding</param>
+        /// <param name="gpioController">The GPIO Controller used for interrupt handling</param>
+        /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance</param>
+        /// <param name="count">Count of (daisy-chained) shift registers. Default/minimum is 1.</param>
+        public Sn74hc595(SpiDevice spiDevice, PinMapping pinMapping, GpioController gpioController = null, bool shouldDispose = true, int count = 1)
+                  : this(pinMapping, gpioController, shouldDispose, count)
+        {
+            _spiDevice = spiDevice;
         }
 
         /// <summary>
@@ -65,61 +91,103 @@ namespace Iot.Device.ShiftRegister
         /// </summary>
         public int Bits => _count * 8;
 
+        /// <summary>
+        /// Reports if Sn74hc595 is controlled with SPI.
+        /// </summary>
+        public bool UsesSpi => _spiDevice is object;
+
+        /// <summary>
+        /// Reports if Sn74hc595 is controlled with GPIO.
+        /// </summary>
+        public bool UsesGpio => _controller is object;
 
         /// <summary>
         /// Clear storage registers.
         /// </summary>
         public void ClearStorage()
         {
-            if (_mapping.SRCLR > 0)
+            if (_controller is null || _pinMapping.SrClr == 0)
             {
-                _controller.Write(_mapping.SRCLR, 0);
-                _controller.Write(_mapping.SRCLR, 1);
+                throw new ArgumentNullException($"{nameof(ClearStorage)}: GpioController was not provided or {nameof(_pinMapping.SrClr)} not mapped to pin");
             }
-            else
-            {
-                throw new ArgumentNullException($"{nameof(ClearStorage)}: {nameof(_mapping.SRCLR)} not mapped to non-zero pin value");
-            }
+
+            _controller.Write(_pinMapping.SrClr, 0);
+            _controller.Write(_pinMapping.SrClr, 1);
         }
 
         /// <summary>
-        /// Shift zeros and latch.
+        /// Shifts zeros.
         /// Will dim all connected LEDs, for example.
         /// </summary>
         public void ShiftClear()
         {
-            for (int i = 0; i < Bits; i++)
+            for (int i = 0; i < Count; i++)
             {
-                Shift(0);
+                ShiftByte(0);
             }
-
-            Latch();
         }
 
         /// <summary>
-        /// Shift single value to next register
+        /// Shifts single value to next register
         /// Does not perform latch.
         /// </summary>
         public void Shift(PinValue value)
         {
-            _controller.Write(_ser, value);
+            if (_controller is null || _pinMapping.Data == 0)
+            {
+                throw new ArgumentNullException($"{nameof(Shift)}: GpioController was not provided or {nameof(_pinMapping.Data)} not mapped to pin");
+            }
+
+            _controller.Write(_data, value);
             _controller.Write(_srclk, 1);
-            _controller.Write(_ser, 0);
+            _controller.Write(_data, 0);
             _controller.Write(_srclk, 0);
         }
 
         /// <summary>
-        /// Shift a byte -- 8 bits -- to the 8 registers.
+        /// Shifts a byte -- 8 bits -- to the 8 registers.
         /// Pushes / overwrites any existing values.
-        /// Does not perform latch.
+        /// Latches by default.
         /// </summary>
-        public void ShiftByte(byte value)
+        public void ShiftByte(byte value, bool latch = true)
         {
+            if (_spiDevice is object)
+            {
+                _spiDevice.WriteByte(value);
+                return;
+            }
+
             for (int i = 0; i < 8; i++)
             {
                 var data = (128 >> i) & value;
                 Shift(data);
             }
+
+            if (latch)
+            {
+                Latch();
+            }
+        }
+
+        /// <summary>
+        /// Shifts multiple bytes to multiple daisy-chained shift registers
+        /// Latches by default.
+        /// </summary>
+        public void ShiftBytes(Sn74hc595 sr, int value, int count)
+        {
+            if (count == 1 || count > 4)
+            {
+                throw new ArgumentException($"{nameof(ShiftBytes)}: count must be  2, 3, or 4.");
+            }
+
+            for (int i = count - 1; i > 0; i--)
+            {
+                var shift = i * 8;
+                var downShiftedValue = value >> shift;
+                ShiftByte((byte)downShiftedValue);
+            }
+
+            ShiftByte((byte)value);
         }
 
         /// <summary>
@@ -138,14 +206,12 @@ namespace Iot.Device.ShiftRegister
         /// </summary>
         public void OutputDisable()
         {
-            if (_mapping.OE > 0)
+            if (_controller is null || _pinMapping.OE == 0)
             {
-                _controller.Write(_mapping.OE, 1);
+                throw new ArgumentNullException($"{nameof(OutputDisable)}: {nameof(_pinMapping.OE)} not mapped to non-zero pin value");
             }
-            else
-            {
-                throw new ArgumentNullException($"{nameof(OutputDisable)}: {nameof(_mapping.OE)} not mapped to non-zero pin value");
-            }
+
+            _controller.Write(_pinMapping.OE, 1);
         }
 
         /// <summary>
@@ -154,16 +220,14 @@ namespace Iot.Device.ShiftRegister
         /// </summary>
         public void OutputEnable()
         {
-            if (_mapping.OE > 0)
+            if (_controller is null || _pinMapping.OE == 0)
             {
-                _controller.Write(_mapping.OE, 0);
+                throw new ArgumentNullException($"{nameof(OutputEnable)}: {nameof(_pinMapping.OE)} not mapped to non-zero pin value");
             }
-            else
-            {
-                throw new ArgumentNullException($"{nameof(OutputEnable)}: {nameof(_mapping.OE)} not mapped to non-zero pin value");
-            }
+
+            _controller.Write(_pinMapping.OE, 0);
         }
-        
+
         /// <summary>
         /// Cleanup.
         /// Failing to dispose this class, especially when callbacks are active, may lead to undefined behavior.
@@ -177,27 +241,30 @@ namespace Iot.Device.ShiftRegister
             }
         }
 
-        private void Setup()
+        private void SetupPins()
         {
-            OpenPins(_ser, _rclk, _srclk, _mapping.SRCLR);
-            _controller.Write(_ser, 0);
-            _controller.Write(_rclk, 0);
-            _controller.Write(_rclk, 0);
-            _controller.Write(_mapping.SRCLR, 1);
-
-            if (_mapping.OE > 0)
+            if (_spiDevice is null)
             {
-                _controller.OpenPin(_mapping.OE, PinMode.Output);
-                _controller.Write(_mapping.OE, 0);
+                OpenPinAndWrite(_data, 0);
+                OpenPinAndWrite(_rclk, 0);
+                OpenPinAndWrite(_srclk, 0);
             }
 
-            void OpenPins(params int[] pins)
+            if (_pinMapping.OE > 0)
             {
-                foreach (var pin in pins)
-                {
-                    _controller.OpenPin(pin, PinMode.Output);
-                }
+                OpenPinAndWrite(_pinMapping.OE, 0);
             }
+
+            if (_pinMapping.SrClr > 0)
+            {
+                OpenPinAndWrite(_pinMapping.SrClr, 1);
+            }
+        }
+
+        private void OpenPinAndWrite(int pin, PinValue value)
+        {
+            _controller.OpenPin(pin, PinMode.Output);
+            _controller.Write(pin, value);
         }
 
         /// <summary>
@@ -205,36 +272,49 @@ namespace Iot.Device.ShiftRegister
         /// </summary>
         public struct PinMapping
         {
-            // 5 pins
-
-            /// <param name="ser">Data pin</param>
+            /// <param name="data">Data pin</param>
             /// <param name="oe">Output enable pin</param>
             /// <param name="rclk">Register clock pin (latch)</param>
             /// <param name="srclk">Shift register pin (shift to data register)</param>
             /// <param name="srclr">Shift register clear pin (shift register is cleared)</param>
-            public PinMapping(int ser, int oe, int rclk, int srclk, int srclr)
+            public PinMapping(int data, int oe, int rclk, int srclk, int srclr)
             {
-                SER = ser;              // data in;     SR pin 14
+                Data = data;            // data in;     SR pin 14
                 OE = oe;                // blank;       SR pin 13
-                RCLK = rclk;            // latch;       SR pin 12
-                SRCLK = srclk;          // clock;       SR pin 11
-                SRCLR = srclr;          // clear;       SR pin 10
+                RClk = rclk;            // latch;       SR pin 12
+                SrClk = srclk;          // clock;       SR pin 11
+                SrClr = srclr;          // clear;       SR pin 10
+                                        // daisy chain  SR pin 9 (QH` not mapped; for SR -> SR communication)
             }
 
             /// <summary>
             /// Standard pin bindings for the Sn74hc595.
             /// </summary>
             public static PinMapping Standard => new PinMapping(25, 12, 16, 20, 21);
+            /*
+                Data    = 25    // data
+                OE      = 12    // blank
+                RClk    = 16    // latch / publish storage register
+                SrClk   = 20    // storage register clock
+                SrClr   = 21    // clear
+            */
 
             /// <summary>
             /// Matching pin bindings for the Sn74hc595 (Pi and shift register pin numbers match).
             /// </summary>
             public static PinMapping Matching => new PinMapping(14, 13, 12, 11, 10);
+            /*
+                Data    = 14    // data
+                OE      = 13    // blank
+                RClk    = 12    // latch / publish storage register
+                SrClk   = 11    // storage register clock
+                SrClr   = 10    // clear
+            */
 
             /// <summary>
             /// SER (data) pin number.
             /// </summary>
-            public int SER { get; set; }
+            public int Data { get; set; }
 
             /// <summary>
             /// OE (output enable) pin number.
@@ -244,25 +324,34 @@ namespace Iot.Device.ShiftRegister
             /// <summary>
             /// RCLK (latch) pin number.
             /// </summary>
-            public int RCLK { get; set; }
+            public int RClk { get; set; }
 
             /// <summary>
             /// SRCLK (shift) pin number.
             /// </summary>
-            public int SRCLK { get; set; }
+            public int SrClk { get; set; }
 
             /// <summary>
             /// SRCLR (clear register) pin number.
             /// </summary>
-            public int SRCLR { get; set; }
+            public int SrClr { get; set; }
 
-            internal bool Validate()
+            /// <summary>
+            /// Validate that mapping is correct. Only relevant if GPIO is used as a serial protocol.
+            /// Data, RClk, and SrClk must be set (non-zero). SrClr and OE are optional.
+            /// </summary>
+            public bool Validate(bool throwOnError = true)
             {
-                if (SER > 0 &&
-                    RCLK > 0 &&
-                    SRCLK > 0)
+                if (Data > 0 &&
+                    RClk > 0 &&
+                    SrClk > 0)
                 {
                     return true;
+                }
+
+                if (throwOnError)
+                {
+                    throw new ArgumentException($"{nameof(PinMapping.Validate)} -- PinMapping values should be non-zero; Values: {nameof(Data)}: {Data}; {nameof(RClk)}: {RClk}; {nameof(SrClk)}: {SrClk};.");
                 }
 
                 return false;
