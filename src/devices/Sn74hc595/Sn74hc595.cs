@@ -10,6 +10,7 @@ namespace Iot.Device.ShiftRegister
 {
     /// <summary>
     /// SN74HC595 8-Bit Shift Registers With 3-State Output Registers
+    /// Supports SPI and GPIO control
     /// </summary>
     public class Sn74hc595
     {
@@ -159,7 +160,7 @@ namespace Iot.Device.ShiftRegister
 
             for (int i = 0; i < 8; i++)
             {
-                var data = (128 >> i) & value;
+                int data = (128 >> i) & value;
                 Shift(data);
             }
 
@@ -182,8 +183,8 @@ namespace Iot.Device.ShiftRegister
 
             for (int i = count - 1; i > 0; i--)
             {
-                var shift = i * 8;
-                var downShiftedValue = value >> shift;
+                int shift = i * 8;
+                int downShiftedValue = value >> shift;
                 ShiftByte((byte)downShiftedValue);
             }
 
