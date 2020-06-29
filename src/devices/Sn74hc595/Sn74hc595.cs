@@ -18,13 +18,13 @@ namespace Iot.Device.ShiftRegister
         // Using with SPI:
         // https://forum.arduino.cc/index.php?topic=571144.0
         // http://www.cupidcontrols.com/2013/12/turn-on-the-spi-lights-spi-output-shift-registers-and-leds/
+        private readonly bool _shouldDispose;
+        private readonly int _data;
+        private readonly int _srclk;
+        private readonly int _rclk;
         private GpioController _controller;
         private SpiDevice _spiDevice;
-        private bool _shouldDispose;
         private PinMapping _pinMapping;
-        private int _data;
-        private int _srclk;
-        private int _rclk;
 
         private int _count;
 
