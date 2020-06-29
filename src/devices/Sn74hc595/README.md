@@ -2,6 +2,8 @@
 
 A shift register enables controlling or interacting with multiple devices, like LEDs, from a small number of pins. It requires using 3-5 pins to control 8 outputs. Shift registers can be daisy chained without requiring additional pins, enabling addressing a larger number of devices, limited only by voltage and the algorithms you define.
 
+![shift-register](https://user-images.githubusercontent.com/2608468/84733283-ac3bca00-af52-11ea-8520-67c91a45c0f0.png)
+
 The [binding](Sn74hc595.cs) abstracts the interaction with the data register, the register clock and other shift register capabilities. The binding enables interaction via GPIO or SPI. The shift register is not exposed or advertised as an SPI device, however, the required protocol is  SPI compatible.
 
 The [SN74HC595 sample](samples/README.md) demonstrates how to use the shift register with GPIO and/or SPI.
@@ -13,9 +15,7 @@ The binding can use `GpioController` pins to control the shift register. It reli
 The following example code demonstrates how to use a shift register with GPIO.
 
 ```csharp
-var controller = new GpioController();
-
-var sr = new Sn74hc595(Sn74hc595.PinMapping.Matching, controller, true);
+var sr = new Sn74hc595(Sn74hc595.PinMapping.Matching);
 
 // Light up three of first four LEDs
 sr.Shift(1);
@@ -28,7 +28,7 @@ sr.Latch();
 sr.ShiftClear();
 
 // Write to all 8 registers with a byte value
-sr.ShiftByte(127);
+sr.ShiftByte(170);
 ```
 
 The following diagram demonstrates the required wiring using the `PinMapping.Matching` mapping.
@@ -49,13 +49,14 @@ var spiDevice = SpiDevice.Create(settings);
 var sr = new Sn74hc595(spiDevice);
 
 // Light up three of first four LEDs
+// The Shift() method is dissallowed when using SPI
 ShiftByte(11);
 
 // Clear register
 sr.ShiftClear();
 
 // Write to all 8 registers with a byte value
-sr.ShiftByte(127);
+sr.ShiftByte(170);
 ```
 
 The following diagram demonstrates the required wiring using SPI. If GPIO is also used, then two more wires would be required for shift register pins 13 and 10, which would be controlled with a `GpioController`. A constructor that takes both an `SpiDevice` and `GpioController` is provided for that case.

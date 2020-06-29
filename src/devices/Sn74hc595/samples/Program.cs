@@ -16,11 +16,11 @@ namespace ShiftRegister
         /// </summary>
         public static void Main(string[] args)
         {
-            var controller = new GpioController();
-            var sr = new Sn74hc595(Sn74hc595.PinMapping.Standard, controller, true);
+            using var controller = new GpioController();
+            var sr = new Sn74hc595(Sn74hc595.PinMapping.Standard, controller, false);
             // var settings = new SpiConnectionSettings(0, 0);
-            // var spiDevice = SpiDevice.Create(settings);
-            // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard, controller, true, 2);
+            // using var spiDevice = SpiDevice.Create(settings);
+            // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
             var cancellationSource = new CancellationTokenSource();
             Console.CancelKeyPress += (s, e) =>
             {

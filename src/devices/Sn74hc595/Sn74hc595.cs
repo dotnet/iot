@@ -12,7 +12,7 @@ namespace Iot.Device.ShiftRegister
     /// SN74HC595 8-Bit Shift Registers With 3-State Output Registers
     /// Supports SPI and GPIO control
     /// </summary>
-    public class Sn74hc595
+    public class Sn74hc595 : IDisposable
     {
         // Spec: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
         // Tutorial: https://www.youtube.com/watch?v=6fVbJbNPrEU
@@ -244,6 +244,8 @@ namespace Iot.Device.ShiftRegister
             {
                 _controller?.Dispose();
                 _controller = null;
+                _spiDevice?.Dispose();
+                _spiDevice = null;
             }
         }
 
