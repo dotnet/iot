@@ -17,11 +17,10 @@ namespace ShiftRegister
         public static void Main(string[] args)
         {
             var controller = new GpioController();
-            // var sr = new Sn74hc595(Sn74hc595.PinMapping.Standard, controller, true, 2);
-            var settings = new SpiConnectionSettings(0, 0);
-            var spiDevice = SpiDevice.Create(settings);
-            var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard, controller, true, 2);
-
+            var sr = new Sn74hc595(Sn74hc595.PinMapping.Standard, controller, true, 2);
+            // var settings = new SpiConnectionSettings(0, 0);
+            // var spiDevice = SpiDevice.Create(settings);
+            // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard, controller, true, 2);
             var cancellationSource = new CancellationTokenSource();
             Console.CancelKeyPress += (s, e) =>
             {
@@ -128,7 +127,7 @@ namespace ShiftRegister
         private static void BinaryCounter(Sn74hc595 sr, CancellationTokenSource cancellationSource)
         {
             Console.WriteLine($"Write 0 through 255");
-            for (var i = 0; i < 255; i++)
+            for (var i = 0; i < 256; i++)
             {
                 sr.ShiftByte((byte)i);
                 Thread.Sleep(100);
@@ -145,7 +144,7 @@ namespace ShiftRegister
             if (sr.Count > 1)
             {
                 Console.WriteLine($"Write 256 through 4095; pick up the pace");
-                for (var i = 256; i < 4095; i++)
+                for (var i = 256; i < 4096; i++)
                 {
                     sr.ShiftBytes(sr, i, sr.Count);
                     Thread.Sleep(10);
