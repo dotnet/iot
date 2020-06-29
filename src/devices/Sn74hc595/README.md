@@ -33,7 +33,7 @@ sr.ShiftByte(127);
 
 The following diagram demonstrates the required wiring using the `PinMapping.Matching` mapping.
 
-![shift-register](https://user-images.githubusercontent.com/2608468/84733283-ac3bca00-af52-11ea-8520-67c91a45c0f0.png)
+![shift-register](sn74hc595-led-bar-graph_bb.png)
 
 ## Using SPI
 
@@ -60,26 +60,29 @@ sr.ShiftByte(127);
 
 The following diagram demonstrates the required wiring using SPI. If GPIO is also used, then two more wires would be required for shift register pins 13 and 10, which would be controlled with a `GpioController`. A constructor that takes both an `SpiDevice` and `GpioController` is provided for that case.
 
-![sn74hc595-led-bar-graph-spi_bb](https://user-images.githubusercontent.com/2608468/86064482-190a9600-ba22-11ea-8b46-cd213a383902.png)
+![sn74hc595-led-bar-graph-spi_bb](sn74hc595-led-bar-graph-spi_bb.png)
 
 ## Daisy-chaining
 
 The binding supports daisy chaining, either GPIO or SPI. The GPIO-based example below demonstrates how to declare support for controlling/addressing two -- daisy-chained -- shift registers. This is specified by the last (integer) value in the constructor.
 
 ```csharp
-var sr = new Sn74hc595(Sn74hc595.PinMapping.Standard, controller, true, 2);
+var sr = new Sn74hc595(Sn74hc595.PinMapping.Matching, controller, true, 2);
 
 // Write 2 byte value to shift registers
 sr.ShiftBytes(4095);
 ```
 
-## Wiring diagram
+The following wiring diagram can be used to support 2 shift registers.
 
-![wiring diagram](sn74hc595-led-bar-graph_bb.png)
+![sn74hc595-led-bar-graph-spi_bb](sn74hc595-led-bar-graph-double-up_bb.png)
 
-* [Fritzing file -- one shift register](sn74hc595-led-bar-graph.fzz)
-* [Fritzing file -- two shift registers](sn74hc595-led-bar-graph-double-up.fzz)
-* [Fritzing image -- two shift registers](sn74hc595-led-bar-graph-double-up_bb.png)
+## Fritizing diagrams
+
+
+* [One shift register -- GPIO](sn74hc595-led-bar-graph.fzz)
+* [Two shift registers -- GPIO](sn74hc595-led-bar-graph-double-up.fzz)
+* [One shift register -- SPI](sn74hc595-led-bar-graph-spi.fzz)
 
 ## Resources
 
