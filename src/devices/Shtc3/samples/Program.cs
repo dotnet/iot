@@ -48,7 +48,7 @@ namespace Iot.Device.Shtc3.Samples
             }
         }
 
-        private static void ConsoleWriteInfo(Temperature temperature, double relativeHumidity)
+        private static void ConsoleWriteInfo(Temperature temperature, Ratio relativeHumidity)
         {
             Console.WriteLine($"Temperature: {temperature.DegreesCelsius:0.#}\u00B0C");
             Console.WriteLine($"Humidity: {relativeHumidity:0.#}%");
