@@ -269,11 +269,30 @@ namespace Iot.Device.MemoryLcd
         /// <inheritdoc/>
         public void Dispose()
         {
-            _gpio?.Dispose();
             _spi?.Dispose();
-
-            _gpio = null;
             _spi = null;
+
+            if (_gpio != null)
+            {
+                if (_scs > -1)
+                {
+                    _gpio.ClosePin(_scs);
+                }
+
+                if (_disp > -1)
+                {
+                    _gpio.ClosePin(_disp);
+                }
+
+                if (_extcomin > -1)
+                {
+                    _gpio.ClosePin(_extcomin);
+                }
+
+                _gpio.Dispose();
+                _gpio = null;
+            }
+
             _lineNumberBuffer = null;
             _frameBuffer = null;
         }
