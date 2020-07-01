@@ -64,7 +64,7 @@ The following diagram demonstrates the required wiring using SPI. If GPIO is als
 
 ## Daisy-chaining
 
-The binding supports daisy chaining, either GPIO or SPI. The GPIO-based example below demonstrates how to declare support for controlling/addressing two -- daisy-chained -- shift registers. This is specified by the last (integer) value in the constructor.
+The binding supports daisy chaining, using either GPIO or SPI. The GPIO-based example below demonstrates how to declare support for controlling/addressing two -- daisy-chained -- shift registers. This is specified by the last (integer) value in the constructor. You can use the same approach if using SPI to control the shift register.
 
 ```csharp
 using var controller = new GpioController();
@@ -77,6 +77,7 @@ You can write to multiple daisy chained device in one of several ways, as demons
 ```csharp
 // Write a value to each register bit
 // And latch
+// Only works with GPIO
 for (int i = 0; i < sr.Bits; i++)
 {
     sr.ShiftBit(1);
@@ -90,9 +91,8 @@ for (int i = 0; i < sr.DeviceCount; i++)
     sr.ShiftByte(170);
 }
 
-// Downshift a 32-bit number
-// to the desired number daisy-chained devices
-// Prints the following pattern across two registers: 0001001110001000
+// Downshift a 32-bit number to the desired number of daisy-chained devices
+// Prints the following pattern across two registers (order will be reversed): 0001001110001000
 // 5000 is the same as binary literal: 0b0001001110001000
 int value = 5000;
 for (int i = sr.DeviceCount - 1; i > 0; i--)
@@ -106,7 +106,7 @@ sr.ShiftByte((byte)value);
 
 // Print array of bytes
 // Results in the same outcome as the "5000" example above
-// The order has to be reversed; last byte will be left-most printed
+// The order has to be reversed (compared to example above); last byte will be left-most printed
 var bytes = new byte[] { 0b10001000, 0b00010011};
 foreach (var b in bytes)
 {
