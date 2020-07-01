@@ -27,7 +27,7 @@ namespace Iot.Device.ShiftRegister
         private SpiDevice _spiDevice;
         private PinMapping _pinMapping;
 
-        private int _count;
+        private int _deviceCount;
 
         /// <summary>
         /// Initialize a new Sn74hc595 device connected through GPIO (uses 3-5 pins)
@@ -35,8 +35,8 @@ namespace Iot.Device.ShiftRegister
         /// <param name="pinMapping">The pin mapping to use by the binding.</param>
         /// <param name="gpioController">The GPIO Controller used for interrupt handling.</param>
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
-        /// <param name="count">Count of (daisy-chained) shift registers. Default/minimum is 1.</param>
-        public Sn74hc595(PinMapping pinMapping, GpioController gpioController = null,  bool shouldDispose = true, int count = 1)
+        /// <param name="deviceCount">Count of (daisy-chained) shift registers. Default/minimum is 1.</param>
+        public Sn74hc595(PinMapping pinMapping, GpioController gpioController = null,  bool shouldDispose = true, int deviceCount = 1)
         {
             pinMapping.Validate();
             if (gpioController == null)
@@ -50,7 +50,7 @@ namespace Iot.Device.ShiftRegister
             _data = _pinMapping.Data;
             _srclk = _pinMapping.SrClk;
             _rclk = _pinMapping.RClk;
-            _count = count;
+            _deviceCount = deviceCount;
             SetupPins();
         }
 
@@ -58,11 +58,11 @@ namespace Iot.Device.ShiftRegister
         /// Initialize a new Sn74hc595 device connected through SPI (uses 3 pins)
         /// </summary>
         /// <param name="spiDevice">SpiDevice used for serial communication.</param>
-        /// <param name="count">Count of (daisy-chained) shift registers. Default/minimum is 1.</param>
-        public Sn74hc595(SpiDevice spiDevice, int count = 1)
+        /// <param name="deviceCount">Count of (daisy-chained) shift registers. Default/minimum is 1.</param>
+        public Sn74hc595(SpiDevice spiDevice, int deviceCount = 1)
         {
             _spiDevice = spiDevice;
-            _count = count;
+            _deviceCount = deviceCount;
         }
 
         /// <summary>
@@ -72,9 +72,9 @@ namespace Iot.Device.ShiftRegister
         /// <param name="pinMapping">The pin mapping to use by the binding</param>
         /// <param name="gpioController">The GPIO Controller used for interrupt handling</param>
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance</param>
-        /// <param name="count">Count of (daisy-chained) shift registers. Default/minimum is 1.</param>
-        public Sn74hc595(SpiDevice spiDevice, PinMapping pinMapping, GpioController gpioController = null, bool shouldDispose = true, int count = 1)
-                  : this(pinMapping, gpioController, shouldDispose, count)
+        /// <param name="deviceCount">Count of (daisy-chained) shift registers. Default/minimum is 1.</param>
+        public Sn74hc595(SpiDevice spiDevice, PinMapping pinMapping, GpioController gpioController = null, bool shouldDispose = true, int deviceCount = 1)
+                  : this(pinMapping, gpioController, shouldDispose, deviceCount)
         {
             _spiDevice = spiDevice;
         }
@@ -84,13 +84,13 @@ namespace Iot.Device.ShiftRegister
         /// The number of (daisy-chained) shift registers. Minimum is 1.
         /// Not the count of registers on a single unit.
         /// </summary>
-        public int Count => _count;
+        public int DeviceCount => _deviceCount;
 
         /// <summary>
         /// Count of total bits / registers across all (daisy-chained) shift registers.
         /// Minimum is 8.
         /// </summary>
-        public int Bits => _count * 8;
+        public int Bits => _deviceCount * 8;
 
         /// <summary>
         /// Reports if Sn74hc595 is controlled with SPI.
@@ -104,6 +104,7 @@ namespace Iot.Device.ShiftRegister
 
         /// <summary>
         /// Clear storage registers.
+        /// Requires use of GPIO controller.
         /// </summary>
         public void ClearStorage()
         {
@@ -119,10 +120,11 @@ namespace Iot.Device.ShiftRegister
         /// <summary>
         /// Shifts zeros.
         /// Will dim all connected LEDs, for example.
+        /// Supports GPIO controller or SPI device.
         /// </summary>
         public void ShiftClear()
         {
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < DeviceCount; i++)
             {
                 ShiftByte(0);
             }
@@ -131,12 +133,13 @@ namespace Iot.Device.ShiftRegister
         /// <summary>
         /// Shifts single value to next register
         /// Does not perform latch.
+        /// Requires use of GPIO controller.
         /// </summary>
-        public void Shift(PinValue value)
+        public void ShiftBit(PinValue value)
         {
             if (_controller is null || _pinMapping.Data == 0)
             {
-                throw new ArgumentNullException($"{nameof(Shift)}: GpioController was not provided or {nameof(_pinMapping.Data)} not mapped to pin");
+                throw new ArgumentNullException($"{nameof(ShiftBit)}: GpioController was not provided or {nameof(_pinMapping.Data)} not mapped to pin");
             }
 
             _controller.Write(_data, value);
@@ -161,7 +164,7 @@ namespace Iot.Device.ShiftRegister
             for (int i = 0; i < 8; i++)
             {
                 int data = (128 >> i) & value;
-                Shift(data);
+                ShiftBit(data);
             }
 
             if (latch)
@@ -171,37 +174,17 @@ namespace Iot.Device.ShiftRegister
         }
 
         /// <summary>
-        /// Shifts multiple bytes to multiple daisy-chained shift registers
-        /// Latches by default.
-        /// </summary>
-        public void ShiftBytes(Sn74hc595 sr, int value, int count = 0)
-        {
-            if (count == 0)
-            {
-                count = sr.Count;
-            }
-
-            if (count == 1 || count > 4)
-            {
-                throw new ArgumentException($"{nameof(ShiftBytes)}: count must be  2, 3, or 4.");
-            }
-
-            for (int i = count - 1; i > 0; i--)
-            {
-                int shift = i * 8;
-                int downShiftedValue = value >> shift;
-                ShiftByte((byte)downShiftedValue);
-            }
-
-            ShiftByte((byte)value);
-        }
-
-        /// <summary>
         /// Latches values in data register.
         /// Essentially a "publish" command.
+        /// Requires use of GPIO controller.
         /// </summary>
         public void Latch()
         {
+            if (_controller is null || _pinMapping.RClk == 0)
+            {
+                throw new ArgumentNullException($"{nameof(ShiftBit)}: GpioController was not provided or {nameof(_pinMapping.RClk)} not mapped to pin");
+            }
+
             _controller.Write(_rclk, 1);
             _controller.Write(_rclk, 0);
         }
@@ -209,6 +192,7 @@ namespace Iot.Device.ShiftRegister
         /// <summary>
         /// Switch output register to high-impedance state.
         /// Disables current output register.
+        /// Requires use of GPIO controller.
         /// </summary>
         public void OutputDisable()
         {
@@ -223,6 +207,7 @@ namespace Iot.Device.ShiftRegister
         /// <summary>
         /// Switch output register low-impedance state.
         /// Enables current register.
+        /// Requires use of GPIO controller.
         /// </summary>
         public void OutputEnable()
         {

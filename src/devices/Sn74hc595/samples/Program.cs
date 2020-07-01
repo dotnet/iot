@@ -17,7 +17,7 @@ namespace ShiftRegister
         public static void Main(string[] args)
         {
             using var controller = new GpioController();
-            var sr = new Sn74hc595(Sn74hc595.PinMapping.Standard, controller, false);
+            var sr = new Sn74hc595(Sn74hc595.PinMapping.Standard, controller, false, 2);
             // var settings = new SpiConnectionSettings(0, 0);
             // using var spiDevice = SpiDevice.Create(settings);
             // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
@@ -29,38 +29,39 @@ namespace ShiftRegister
             };
 
             Console.WriteLine("****Information:");
+            Console.WriteLine($"Device count: {sr.DeviceCount}");
             Console.WriteLine($"Bit count: {sr.Bits}");
             var interfaceType = sr.UsesSpi ? "SPI" : "GPIO";
             Console.WriteLine($"Using {interfaceType}");
 
             if (!sr.UsesSpi)
             {
-                ShiftBits(sr, cancellationSource);
+                DemonstrateShiftingBits(sr, cancellationSource);
             }
 
-            ShiftBytes(sr, cancellationSource);
+            DemonstrateShiftingBytes(sr, cancellationSource);
             BinaryCounter(sr, cancellationSource);
         }
 
-        private static void ShiftBits(Sn74hc595 sr, CancellationTokenSource cancellationSource)
+        private static void DemonstrateShiftingBits(Sn74hc595 sr, CancellationTokenSource cancellationSource)
         {
             sr.ShiftClear();
 
             Console.WriteLine("Light up three of first four LEDs");
-            sr.Shift(1);
-            sr.Shift(1);
-            sr.Shift(0);
-            sr.Shift(1);
+            sr.ShiftBit(1);
+            sr.ShiftBit(1);
+            sr.ShiftBit(0);
+            sr.ShiftBit(1);
             sr.Latch();
             Console.ReadLine();
 
             sr.ShiftClear();
 
-            Console.WriteLine($"Light up all LEDs, with {nameof(sr.Shift)}");
+            Console.WriteLine($"Light up all LEDs, with {nameof(sr.ShiftBit)}");
 
             for (int i = 0; i < sr.Bits; i++)
             {
-                sr.Shift(1);
+                sr.ShiftBit(1);
             }
 
             sr.Latch();
@@ -68,11 +69,11 @@ namespace ShiftRegister
 
             sr.ShiftClear();
 
-            Console.WriteLine($"Dim up all LEDs, with {nameof(sr.Shift)}");
+            Console.WriteLine($"Dim up all LEDs, with {nameof(sr.ShiftBit)}");
 
             for (int i = 0; i < sr.Bits; i++)
             {
-                sr.Shift(0);
+                sr.ShiftBit(0);
             }
 
             sr.Latch();
@@ -84,10 +85,11 @@ namespace ShiftRegister
             }
         }
 
-        private static void ShiftBytes(Sn74hc595 sr, CancellationTokenSource cancellationSource)
+        private static void DemonstrateShiftingBytes(Sn74hc595 sr, CancellationTokenSource cancellationSource)
         {
             Console.WriteLine($"Write a set of values with {nameof(sr.ShiftByte)}");
-            var values = new byte[] { 23, 56, 127, 128, 250 };
+            // this can be specified as ints or binary notation
+            var values = new byte[] { 0b1, 23, 56, 127, 128, 170, 0b10101010 };
             foreach (var value in values)
             {
                 Console.WriteLine($"Value: {value}");
@@ -102,9 +104,9 @@ namespace ShiftRegister
             }
 
             Console.WriteLine($"Write 255 to each register with {nameof(sr.ShiftByte)}");
-            for (int i = 0; i < sr.Count; i++)
+            for (int i = 0; i < sr.DeviceCount; i++)
             {
-                sr.ShiftByte(255, false);
+                sr.ShiftByte(255);
             }
 
             Console.ReadLine();
@@ -141,12 +143,12 @@ namespace ShiftRegister
 
             sr.ShiftClear();
 
-            if (sr.Count > 1)
+            if (sr.DeviceCount > 1)
             {
                 Console.WriteLine($"Write 256 through 4095; pick up the pace");
                 for (int i = 256; i < 4096; i++)
                 {
-                    sr.ShiftBytes(sr, i);
+                    ShiftBytes(sr, i);
                     Thread.Sleep(10);
                     sr.ClearStorage();
 
@@ -161,6 +163,28 @@ namespace ShiftRegister
             Console.ReadLine();
 
             sr.ShiftClear();
+        }
+
+        private static void ShiftBytes(Sn74hc595 sr, int value, int byteCount = 0)
+        {
+            if (byteCount > 4)
+            {
+                throw new ArgumentException($"{nameof(ShiftBytes)}: count must be  1-4.");
+            }
+
+            if (byteCount == 0)
+            {
+                byteCount = sr.DeviceCount;
+            }
+
+            for (int i = byteCount - 1; i > 0; i--)
+            {
+                int shift = i * 8;
+                int downShiftedValue = value >> shift;
+                sr.ShiftByte((byte)downShiftedValue);
+            }
+
+            sr.ShiftByte((byte)value);
         }
 
         private static bool IsCanceled(Sn74hc595 sr, CancellationTokenSource cancellationSource)
