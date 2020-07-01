@@ -18,10 +18,10 @@ The following example code demonstrates how to use a shift register with GPIO.
 var sr = new Sn74hc595(Sn74hc595.PinMapping.Matching);
 
 // Light up three of first four LEDs
-sr.Shift(1);
-sr.Shift(1);
-sr.Shift(0);
-sr.Shift(1);
+sr.ShiftBit(1);
+sr.ShiftBit(1);
+sr.ShiftBit(0);
+sr.ShiftBit(1);
 sr.Latch();
 
 // Clear register
@@ -69,9 +69,49 @@ The binding supports daisy chaining, either GPIO or SPI. The GPIO-based example 
 ```csharp
 using var controller = new GpioController();
 var sr = new Sn74hc595(Sn74hc595.PinMapping.Matching, controller, false, 2);
+```
 
-// Write 2 byte value to shift registers
-sr.ShiftBytes(4095);
+
+You can write to multiple daisy chained device in one of several ways, as demonstrated in the following code. You wouldn't typically use of all these approaches, but pick one.
+
+```csharp
+// Write a value to each register bit
+// And latch
+for (int i = 0; i < sr.Bits; i++)
+{
+    sr.ShiftBit(1);
+}
+sr.Latch();
+
+// Prints the following pattern to each register: 10101010
+// 170 is the same as the binary literal: 0b10101010
+for (int i = 0; i < sr.DeviceCount; i++)
+{
+    sr.ShiftByte(170);
+}
+
+// Downshift a 32-bit number
+// to the desired number daisy-chained devices
+// Prints the following pattern across two registers: 0001001110001000
+// 5000 is the same as binary literal: 0b0001001110001000
+int value = 5000;
+for (int i = sr.DeviceCount - 1; i > 0; i--)
+{
+    int shift = i * 8;
+    int downShiftedValue = value >> shift;
+    sr.ShiftByte((byte)downShiftedValue);
+}
+
+sr.ShiftByte((byte)value);
+
+// Print array of bytes
+// Results in the same outcome as the "5000" example above
+// The order has to be reversed; last byte will be left-most printed
+var bytes = new byte[] { 0b10001000, 0b00010011};
+foreach (var b in bytes)
+{
+    sr.ShiftByte(b);
+}
 ```
 
 The following wiring diagram can be used to support 2 shift registers.
