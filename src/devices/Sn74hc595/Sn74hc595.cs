@@ -228,12 +228,14 @@ namespace Iot.Device.ShiftRegister
         /// </summary>
         public void Dispose()
         {
+            // this condition only applies to GPIO devices
             if (_shouldDispose)
             {
                 _controller?.Dispose();
                 _controller = null;
             }
 
+            // SPI devices are always disposed
             _spiDevice?.Dispose();
             _spiDevice = null;
         }
