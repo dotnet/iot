@@ -32,7 +32,7 @@ namespace Iot.Device.Samples
             var i2cSettings = new I2cConnectionSettings(busId, Bme680.DefaultI2cAddress);
             var i2cDevice = I2cDevice.Create(i2cSettings);
 
-            using (var bme680 = new Bme680(i2cDevice))
+            using (var bme680 = new Bme680(i2cDevice, Temperature.FromDegreesCelsius(20.0)))
             {
                 while (true)
                 {

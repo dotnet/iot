@@ -161,10 +161,8 @@ namespace Iot.Device.Bmxx80
             var press = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
 
             // Convert the raw value to the pressure in Pa.
-            var pressPa = CompensatePressure(press >> 4);
+            pressure = CompensatePressure(press >> 4);
 
-            // Return the pressure as a Pressure instance.
-            pressure = Pressure.FromHectopascals(pressPa.Hectopascals / 256);
             return true;
         }
 
@@ -272,34 +270,31 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Compensates the pressure in Pa, in Q24.8 format (24 integer bits and 8 fractional bits).
+        /// Compensates the pressure in Pa, in double format
         /// </summary>
         /// <param name="adcPressure">The pressure value read from the device.</param>
-        /// <returns>Pressure in Hectopascals (hPa).</returns>
-        /// <remarks>
-        /// Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa.
-        /// </remarks>
+        /// <returns>Pressure as an instance of <see cref="Pressure"/>.</returns>
         private Pressure CompensatePressure(long adcPressure)
         {
             // Formula from the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
-            // The pressure is calculated using the compensation formula in the BMP280 datasheet
-            long var1 = TemperatureFine - 128000;
-            long var2 = var1 * var1 * (long)_calibrationData.DigP6;
-            var2 = var2 + ((var1 * (long)_calibrationData.DigP5) << 17);
-            var2 = var2 + ((long)_calibrationData.DigP4 << 35);
-            var1 = ((var1 * var1 * (long)_calibrationData.DigP3) >> 8) + ((var1 * (long)_calibrationData.DigP2) << 12);
-            var1 = ((((1L << 47) + var1)) * (long)_calibrationData.DigP1) >> 33;
-            if (var1 == 0)
+            // This uses the recommended approach with floating point math
+            double var1, var2, p;
+            var1 = (TemperatureFine / 2.0) - 64000.0;
+            var2 = var1 * var1 * ((double)_calibrationData.DigP6) / 32768.0;
+            var2 = var2 + var1 * ((double)_calibrationData.DigP5) * 2.0;
+            var2 = (var2 / 4.0) + (((double)_calibrationData.DigP4) * 65536.0);
+            var1 = (((double)_calibrationData.DigP3) * var1 * var1 / 524288.0 + ((double)_calibrationData.DigP2) * var1) / 524288.0;
+            var1 = (1.0 + var1 / 32768.0) * ((double)_calibrationData.DigP1);
+            if (var1 == 0.0)
             {
                 return Pressure.FromPascals(0); // Avoid exception caused by division by zero
             }
 
-            // Perform calibration operations
-            long p = 1048576 - adcPressure;
-            p = (((p << 31) - var2) * 3125) / var1;
-            var1 = ((long)_calibrationData.DigP9 * (p >> 13) * (p >> 13)) >> 25;
-            var2 = ((long)_calibrationData.DigP8 * p) >> 19;
-            p = ((p + var1 + var2) >> 8) + ((long)_calibrationData.DigP7 << 4);
+            p = 1048576.0 - (double)adcPressure;
+            p = (p - (var2 / 4096.0)) * 6250.0 / var1;
+            var1 = ((double)_calibrationData.DigP9) * p * p / 2147483648.0;
+            var2 = p * ((double)_calibrationData.DigP8) / 32768.0;
+            p = p + (var1 + var2 + ((double)_calibrationData.DigP7)) / 16.0;
 
             return Pressure.FromPascals(p);
         }

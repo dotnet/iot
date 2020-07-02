@@ -52,7 +52,7 @@ namespace Iot.Device.Bmxx80
         /// The variable TemperatureFine carries a fine resolution temperature value over to the
         /// pressure compensation formula and could be implemented as a global variable.
         /// </summary>
-        protected int TemperatureFine
+        protected double TemperatureFine
         {
             get;
             set;
@@ -82,11 +82,11 @@ namespace Iot.Device.Bmxx80
 
             if (readSignature != deviceId)
             {
-                throw new IOException($"Unable to find a chip with id {deviceId}");
+                throw new IOException($"Unable to find a chip with id {deviceId}. Found one with id {readSignature}");
             }
 
             ReadCalibrationData();
-            SetDefaultConfiguration();
+            Reset();
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace Iot.Device.Bmxx80
             double var2 = (adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0);
             var2 *= var2 * _calibrationData.DigT3 * TempCalibrationFactor;
 
-            TemperatureFine = (int)(var1 + var2);
+            TemperatureFine = var1 + var2;
 
             double temp = (var1 + var2) / 5120.0;
             return Temperature.FromDegreesCelsius(temp);
