@@ -163,7 +163,10 @@ namespace Iot.Device.ShiftRegister
 
             for (int i = 0; i < 8; i++)
             {
-                int data = (128 >> i) & value;
+                // create mask to determine value of bit
+                // starts left-most and ends up right-most (after 8th interation)
+                // 0b_1000_0000 is used; other algorithms use 128. They are the same value.
+                int data = (0b_1000_0000 >> i) & value;
                 ShiftBit(data);
             }
 
@@ -229,9 +232,10 @@ namespace Iot.Device.ShiftRegister
             {
                 _controller?.Dispose();
                 _controller = null;
-                _spiDevice?.Dispose();
-                _spiDevice = null;
             }
+
+            _spiDevice?.Dispose();
+            _spiDevice = null;
         }
 
         private void SetupPins()
