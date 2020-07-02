@@ -88,7 +88,7 @@ namespace ShiftRegister
         private static void DemonstrateShiftingBytes(Sn74hc595 sr, CancellationTokenSource cancellationSource)
         {
             Console.WriteLine($"Write a set of values with {nameof(sr.ShiftByte)}");
-            // this can be specified as ints or binary notation
+            // this can be specified as ints or binary notation -- its all the same
             var values = new byte[] { 0b1, 23, 56, 127, 128, 170, 0b10101010 };
             foreach (var value in values)
             {
@@ -103,10 +103,11 @@ namespace ShiftRegister
                 }
             }
 
-            Console.WriteLine($"Write 255 to each register with {nameof(sr.ShiftByte)}");
+            byte lit = 0b11111111;
+            Console.WriteLine($"Write {lit} to each register with {nameof(sr.ShiftByte)}");
             for (int i = 0; i < sr.DeviceCount; i++)
             {
-                sr.ShiftByte(255);
+                sr.ShiftByte(lit);
             }
 
             Console.ReadLine();

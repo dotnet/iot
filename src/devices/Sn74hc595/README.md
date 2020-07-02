@@ -92,9 +92,10 @@ for (int i = 0; i < sr.DeviceCount; i++)
 }
 
 // Downshift a 32-bit number to the desired number of daisy-chained devices
+// Same thing could be done with a 64-bit integer if you have more than four shift registers
 // Prints the following pattern across two registers (order will be reversed): 0001001110001000
 // 5000 is the same as binary literal: 0b0001001110001000
-int value = 5000;
+int value = 0b0001001110001000; // 5000
 for (int i = sr.DeviceCount - 1; i > 0; i--)
 {
     int shift = i * 8;
