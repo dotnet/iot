@@ -81,7 +81,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("The selected pin is already open.");
+                throw new InvalidOperationException($"Pin {logicalPinNumber} is already open.");
             }
 
             _driver.OpenPin(logicalPinNumber);
@@ -108,7 +108,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not close a pin that is not open.");
+                throw new InvalidOperationException($"Can not close pin {logicalPinNumber} because it is not open.");
             }
 
             _driver.ClosePin(logicalPinNumber);
@@ -125,12 +125,12 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not set a mode to a pin that is not open.");
+                throw new InvalidOperationException($"Can not set a mode to pin {logicalPinNumber} because it is not open.");
             }
 
             if (!_driver.IsPinModeSupported(logicalPinNumber, mode))
             {
-                throw new InvalidOperationException("The pin does not support the selected mode.");
+                throw new InvalidOperationException($"Pin {pinNumber} does not support mode {mode}.");
             }
 
             _driver.SetPinMode(logicalPinNumber, mode);
@@ -146,7 +146,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not get the mode of a pin that is not open.");
+                throw new InvalidOperationException($"Can not get the mode of pin {logicalPinNumber} because it is not open.");
             }
 
             return _driver.GetPinMode(logicalPinNumber);
@@ -185,7 +185,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not read from a pin that is not open.");
+                throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not open.");
             }
 
             return _driver.Read(logicalPinNumber);
@@ -201,12 +201,12 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not write to a pin that is not open.");
+                throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not open.");
             }
 
             if (_driver.GetPinMode(logicalPinNumber) != PinMode.Output)
             {
-                throw new InvalidOperationException("Can not write to a pin that is not set to Output mode.");
+                throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not set to Output mode.");
             }
 
             _driver.Write(logicalPinNumber, value);
@@ -239,7 +239,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not wait for events from a pin that is not open.");
+                throw new InvalidOperationException($"Can not wait for events from pin {logicalPinNumber} because it is not open.");
             }
 
             return _driver.WaitForEvent(logicalPinNumber, eventTypes, cancellationToken);
@@ -272,7 +272,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not wait for events from a pin that is not open.");
+                throw new InvalidOperationException($"Can not wait for events from pin {logicalPinNumber} because it is not open.");
             }
 
             return _driver.WaitForEventAsync(logicalPinNumber, eventTypes, token);
@@ -289,7 +289,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not add callback for a pin that is not open.");
+                throw new InvalidOperationException($"Can not add callback for pin {logicalPinNumber} because it is not open.");
             }
 
             _driver.AddCallbackForPinValueChangedEvent(logicalPinNumber, eventTypes, callback);
@@ -305,7 +305,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not remove callback for a pin that is not open.");
+                throw new InvalidOperationException($"Can not remove callback for pin {logicalPinNumber} because it is not open.");
             }
 
             _driver.RemoveCallbackForPinValueChangedEvent(logicalPinNumber, callback);
