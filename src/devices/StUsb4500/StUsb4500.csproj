@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <!--Disabling default items so samples source won't get build by the main library-->
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="*.cs" />
+    <Compile Include="Enumerations\CableConnection.cs" />
+    <Compile Include="Enumerations\StUsb4500Register.cs" />
+    <Compile Include="Enumerations\UsbPdControlMessageType.cs" />
+    <Compile Include="Enumerations\UsbPdDataMessageType.cs" />
+    <Compile Include="Objects\BatteryObject.cs" />
+    <Compile Include="Objects\FixedSupplyObject.cs" />
+    <Compile Include="Objects\ObjectBase.cs" />
+    <Compile Include="Objects\PowerDeliveryObject.cs" />
+    <Compile Include="Objects\RequestDataObject.cs" />
+    <Compile Include="Objects\UsbPdMessageHeader.cs" />
+    <Compile Include="Objects\VariableSupplyObject.cs" />
+    <None Include="README.md" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+  </ItemGroup>
+
+</Project>
