@@ -1,0 +1,59 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Device.Gpio;
+using System.Device.I2c;
+using System.Text;
+
+namespace Board.Tests
+{
+    internal class I2cDummyDevice : I2cDevice
+    {
+        private bool _disposed;
+        public I2cDummyDevice(I2cConnectionSettings settings, int[] pins)
+        {
+            ConnectionSettings = settings;
+            Pins = pins;
+            _disposed = false;
+        }
+
+        public override I2cConnectionSettings ConnectionSettings { get; }
+        public int[] Pins { get; }
+
+        public override byte ReadByte()
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException("This dummy instance is disposed");
+            }
+
+            return 0xFF;
+        }
+
+        public override void Read(Span<byte> buffer)
+        {
+            throw new Win32Exception(2, "No answer from device");
+        }
+
+        public override void WriteByte(byte value)
+        {
+            throw new Win32Exception(2, "No answer from device");
+        }
+
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            throw new Win32Exception(2, "No answer from device");
+        }
+
+        public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            throw new Win32Exception(2, "No answer from device");
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _disposed = true;
+            base.Dispose(disposing);
+        }
+    }
+}

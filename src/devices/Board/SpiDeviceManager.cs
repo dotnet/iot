@@ -1,0 +1,106 @@
+﻿using System;
+using System.Device.Spi;
+
+namespace Iot.Device.Board
+{
+    internal class SpiDeviceManager : SpiDevice
+    {
+        private readonly Board _board;
+        private readonly int[] _pins;
+        private SpiDevice _device;
+
+        public SpiDeviceManager(Board board, SpiConnectionSettings connectionSettings, int[] pins, Func<SpiConnectionSettings, int[], SpiDevice> createOperation)
+        {
+            _board = board;
+            ConnectionSettings = connectionSettings;
+            try
+            {
+                _board.ReservePin(pins[0], PinUsage.Spi, this);
+                _board.ReservePin(pins[1], PinUsage.Spi, this);
+                _board.ReservePin(pins[2], PinUsage.Spi, this);
+                if (pins.Length == 4)
+                {
+                    // The fourth pin, if provided, is the CS line. This may be handled manually, but if done in hardware, SPI
+                    // numbering must be used here I think. So the value would be 0 or 1 for CE0 and CE1 in ALT 0 mode, which are
+                    // the logical pins 7 and 8.
+                    _board.ReservePin(pins[3], PinUsage.Spi, this);
+                }
+
+                _device = createOperation(connectionSettings, pins);
+            }
+            catch (Exception x)
+            {
+                Console.WriteLine($"Exception: {x}");
+                _board.ReleasePin(pins[0], PinUsage.Spi, this);
+                _board.ReleasePin(pins[1], PinUsage.Spi, this);
+                _board.ReleasePin(pins[2], PinUsage.Spi, this);
+                if (pins.Length == 4)
+                {
+                    _board.ReleasePin(pins[3], PinUsage.Spi, this);
+                }
+
+                throw;
+            }
+
+            _pins = pins;
+        }
+
+        public override SpiConnectionSettings ConnectionSettings
+        {
+            get;
+        }
+
+        internal SpiDevice RawDevice
+        {
+            get
+            {
+                return _device;
+            }
+        }
+
+        public override byte ReadByte()
+        {
+            return _device.ReadByte();
+        }
+
+        public override void Read(Span<byte> buffer)
+        {
+            _device.Read(buffer);
+        }
+
+        public override void WriteByte(byte value)
+        {
+            _device.WriteByte(value);
+        }
+
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            _device.Write(buffer);
+        }
+
+        public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            _device.TransferFullDuplex(writeBuffer, readBuffer);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_device != null)
+                {
+                    _device.Dispose();
+                    foreach (int pin in _pins)
+                    {
+                        _board.ReleasePin(pin, PinUsage.Spi, this);
+                    }
+                }
+
+                // Do not release pins a second time
+                _device = null;
+            }
+
+            base.Dispose(disposing);
+        }
+    }
+}
