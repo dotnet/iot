@@ -22,14 +22,14 @@ for (int i = 0; i < charliePinCount; i++)
 
 The [Charlieplex](Charlieplex.cs) type uses an addressing scheme that can be thought of as depth then breadth. At each point, there are two loads present. You can see these in the following images. It is critical to understand the difference between anode (typically longer) and cathode legs.
 
-![Two LED charlieplex circuit](https://en.wikipedia.org/wiki/Charlieplexing#/media/File:2-pin_Charlieplexing_with_common_resistor.svg)
+![Two LED charlieplex circuit](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/2-pin_Charlieplexing_with_common_resistor.svg/1200px-2-pin_Charlieplexing_with_common_resistor.svg.png)
 
 In this image (from [Wikipedia](https://en.wikipedia.org/wiki/Charlieplexing)), you will see two [LEDs](https://en.wikipedia.org/wiki/Light-emitting_diode) connected to two pins. The first pin is connected anode-first and the second is connected cathode-first. The `Charlieplex` type will enable writing a high or low value to the first LED as LED 0 and the second LED as LED 1.
 
 
 If another pin is added, then the number of LEDs can be increased to 6.
 
-![Size LED charliplex circuit](https://en.wikipedia.org/wiki/Charlieplexing#/media/File:3-pin_Charlieplexing_with_common_resistors.svg)
+![Six LED charliplex circuit](https://upload.wikimedia.org/wikipedia/commons/3/3d/3-pin_Charlieplexing_with_common_resistors.svg)
 
 The first and fourth LEDs will be added in the same way as the first two, but connected between the second and third pins. The fifth and sixth pins are connected between the first and third pins, which is the only remaining unique connection for three pins. With each pair, the first is connected anode-first and second cathode-first.
 

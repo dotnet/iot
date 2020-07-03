@@ -131,10 +131,10 @@ namespace Iot.Device.Multiplex
             var pin = 0;
             var pinJump = 1;
             var firstLeg = false;
-            var pinsLength = pins.Length - 1;
+            var resetCount = pins.Length - 1;
             for (int i = 0; i < loadCount; i++)
             {
-                if (pin > 0 && pin % pinsLength == 0)
+                if (pin > 0 && pin % resetCount == 0)
                 {
                     pin = 0;
                     pinJump++;
