@@ -157,6 +157,12 @@ namespace System.Device.Gpio.Drivers
         /// <inheritdoc/>
         protected internal override int PinCount => _internalDriver.PinCount;
 
+        /// <summary>
+        /// The Raspberry Pi does support extended pin modes, but the this may depend on the actual driver implementation.
+        /// </summary>
+        /// <remarks>This returns true on Linux, false on Windows</remarks>
+        protected internal override bool ExtendedPinModeSupported => _internalDriver.ExtendedPinModeSupported;
+
         /// <inheritdoc/>
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => _internalDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
 
@@ -195,6 +201,18 @@ namespace System.Device.Gpio.Drivers
 
         /// <inheritdoc/>
         protected internal override void Write(int pinNumber, PinValue value) => _internalDriver.Write(pinNumber, value);
+
+        /// <inheritdoc />
+        protected internal override ExtendedPinMode GetExtendedPinMode(int pinNumber)
+        {
+            return _internalDriver.GetExtendedPinMode(pinNumber);
+        }
+
+        /// <inheritdoc />
+        protected internal override void SetExtendedPinMode(int pinNumber, ExtendedPinMode altMode)
+        {
+            _internalDriver.SetExtendedPinMode(pinNumber, altMode);
+        }
 
         /// <summary>
         /// Retrieve the current alternate pin mode for a given logical pin.
