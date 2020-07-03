@@ -18,6 +18,11 @@ namespace System.Device.Gpio
         protected internal abstract int PinCount { get; }
 
         /// <summary>
+        /// True if this driver supports extended pin mode settings.
+        /// </summary>
+        protected internal virtual bool ExtendedPinModeSupported => false;
+
+        /// <summary>
         /// Converts a board pin number to the driver's logical numbering scheme.
         /// </summary>
         /// <param name="pinNumber">The board pin number to convert.</param>
@@ -124,6 +129,34 @@ namespace System.Device.Gpio
         protected virtual void Dispose(bool disposing)
         {
             // Nothing to do in base class.
+        }
+
+        /// <summary>
+        /// Retrieve the current alternate pin mode for a given logical pin.
+        /// This works also with closed pins.
+        /// </summary>
+        /// <param name="logicalPinNumber">Pin number in the logical scheme of the driver</param>
+        /// <returns>An instance describing the active pin mode</returns>
+        protected internal virtual ExtendedPinMode GetExtendedPinMode(int logicalPinNumber)
+        {
+            // Virtual instead of abstract, so as not to be breaking.
+            // It is highly recommended to update the drivers to support this method though.
+            // Note that we cannot use the GetPinMode() method here to eventually return AlternatePinMode.Gpio, since that
+            // method requires the pin to be open, and this method must also work for closed pins, because it
+            // is illegal to open a pin in Gpio mode when it is not set to Gpio.
+            throw new NotSupportedException("This driver does not support alternate modes");
+        }
+
+        /// <summary>
+        /// Set the specified alternate mode for the given pin.
+        /// </summary>
+        /// <param name="logicalPinNumber">Pin number in the logcal scheme of the driver</param>
+        /// <param name="altMode">Alternate mode to set</param>
+        /// <exception cref="NotSupportedException">This mode is not supported by this driver (or by the given pin)</exception>
+        protected internal virtual void SetExtendedPinMode(int logicalPinNumber, ExtendedPinMode altMode)
+        {
+            // Virtual instead of abstract, so as not to be breaking.
+            throw new NotSupportedException("This driver does not support alternate modes");
         }
     }
 }

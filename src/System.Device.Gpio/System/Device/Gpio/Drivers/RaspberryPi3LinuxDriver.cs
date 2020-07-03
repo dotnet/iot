@@ -34,9 +34,6 @@ namespace System.Device.Gpio.Drivers
 
         private UnixDriver? _interruptDriver = null;
 
-        /// <summary>
-        /// Returns true if this is a Raspberry Pi4
-        /// </summary>
         public RaspberryPi3LinuxDriver()
         {
             _pinModes = new PinState[PinCount];
@@ -47,6 +44,15 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         protected internal override int PinCount => 28;
 
+        /// <summary>
+        /// This driver does support extended pin modes, called ALT0-ALT5. See the hardware spec sheet to get information about
+        /// the possible values for each pin.
+        /// </summary>
+        protected internal override bool ExtendedPinModeSupported => true;
+
+        /// <summary>
+        /// Returns true if this is a Raspberry Pi4
+        /// </summary>
         private bool IsPi4
         {
             get;
@@ -348,6 +354,96 @@ namespace System.Device.Gpio.Drivers
             for (int i = 0; i < 150; i++)
             {
             }
+        }
+
+        /// <inheritdoc />
+        protected internal override void SetExtendedPinMode(int pinNumber, ExtendedPinMode altMode)
+        {
+            Initialize();
+            ValidatePinNumber(pinNumber);
+
+            RaspberryPiExtendedPinMode? raspiMode = altMode as RaspberryPiExtendedPinMode;
+            if (ReferenceEquals(raspiMode, null))
+            {
+                throw new ArgumentException(nameof(altMode), $"Invalid extended mode: {raspiMode}");
+            }
+
+            /*
+             * There are 6 registers (4-byte ints) that control the mode for all pins. Each
+             * register controls the mode for 10 pins. Each pin uses 3 bits in the register
+             * containing the mode.
+             */
+
+            // Define the shift to get the right 3 bits in the register
+            int shift = (pinNumber % 10) * 3;
+            // Gets a pointer to the register that holds the mode for the pin
+            uint* registerPointer = &_registerViewPointer->GPFSEL[pinNumber / 10];
+            uint register = *registerPointer;
+            // Clear the 3 bits to 0 for the pin Number.
+            register &= ~(0b111U << shift);
+            // Set the 3 bits to the desired mode for that pin.
+            uint modeBits = 0; // Default: Gpio input
+
+            if (raspiMode == RaspberryPi3Driver.GpioMode)
+            {
+                // When setting back to Gpio, set to input, as this is the default
+                modeBits = 0;
+            }
+            else if (raspiMode.ModeValue < 8)
+            {
+                modeBits = raspiMode.ModeValue;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unknown Alternate pin mode value: {raspiMode.ModeValue}");
+            }
+
+            register |= (modeBits) << shift;
+            *registerPointer = register;
+        }
+
+        /// <inheritdoc />
+        protected internal override ExtendedPinMode GetExtendedPinMode(int pinNumber)
+        {
+            Initialize();
+            ValidatePinNumber(pinNumber);
+            /*
+             * There are 6 registers(4-byte ints) that control the mode for all pins. Each
+             * register controls the mode for 10 pins. Each pin uses 3 bits in the register
+             * containing the mode.
+             */
+
+            // Define the shift to get the right 3 bits in the register
+            int shift = (pinNumber % 10) * 3;
+            // Gets a pointer to the register that holds the mode for the pin
+            uint* registerPointer = &_registerViewPointer->GPFSEL[pinNumber / 10];
+            uint register = *registerPointer;
+            // get the three bits of the register
+            register = (register >> shift) & 0b111;
+
+            switch (register)
+            {
+                case 0b000:
+                    // Input
+                    return RaspberryPi3Driver.GpioMode;
+                case 0b001:
+                    return RaspberryPi3Driver.GpioMode;
+                case 0b100:
+                    return RaspberryPi3Driver.Alt0Mode;
+                case 0b101:
+                    return RaspberryPi3Driver.Alt1Mode;
+                case 0b110:
+                    return RaspberryPi3Driver.Alt2Mode;
+                case 0b111:
+                    return RaspberryPi3Driver.Alt3Mode;
+                case 0b011:
+                    return RaspberryPi3Driver.Alt4Mode;
+                case 0b010:
+                    return RaspberryPi3Driver.Alt5Mode;
+            }
+
+            // This cannot happen.
+            throw new InvalidOperationException("Invalid register value");
         }
 
         /// <summary>

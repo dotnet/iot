@@ -24,6 +24,41 @@ namespace System.Device.Gpio.Drivers
         private readonly Get_Register _getClearRegister;
 
         /// <summary>
+        /// Default Gpio mode. Use <see cref="SetPinMode"/> to switch between input and output.
+        /// </summary>
+        public static readonly ExtendedPinMode GpioMode = new RaspberryPiExtendedPinMode("GPIO", 0);
+
+        /// <summary>
+        /// Alternate mode 0 for Raspberry Pi
+        /// </summary>
+        public static readonly ExtendedPinMode Alt0Mode = new RaspberryPiExtendedPinMode("Alt0", 0b100);
+
+        /// <summary>
+        /// Alternate mode 1 for Raspberry Pi
+        /// </summary>
+        public static readonly ExtendedPinMode Alt1Mode = new RaspberryPiExtendedPinMode("Alt1", 0b101);
+
+        /// <summary>
+        /// Alternate mode 2 for Raspberry Pi
+        /// </summary>
+        public static readonly ExtendedPinMode Alt2Mode = new RaspberryPiExtendedPinMode("Alt2", 0b110);
+
+        /// <summary>
+        /// Alternate mode 3 for Raspberry Pi
+        /// </summary>
+        public static readonly ExtendedPinMode Alt3Mode = new RaspberryPiExtendedPinMode("Alt3", 0b111);
+
+        /// <summary>
+        /// Alternate mode 4 for Raspberry Pi
+        /// </summary>
+        public static readonly ExtendedPinMode Alt4Mode = new RaspberryPiExtendedPinMode("Alt4", 0b011);
+
+        /// <summary>
+        /// Alternate mode 5 for Raspberry Pi
+        /// </summary>
+        public static readonly ExtendedPinMode Alt5Mode = new RaspberryPiExtendedPinMode("Alt5", 0b010);
+
+        /// <summary>
         /// Creates an instance of the RaspberryPi3Driver.
         /// This driver works on Raspberry 3 or 4, both on Linux and on Windows
         /// </summary>
@@ -97,6 +132,12 @@ namespace System.Device.Gpio.Drivers
         /// <inheritdoc/>
         protected internal override int PinCount => _internalDriver.PinCount;
 
+        /// <summary>
+        /// The Raspberry Pi does support extended pin modes, but the this may depend on the actual driver implementation.
+        /// </summary>
+        /// <remarks>This returns true on Linux, false on Windows</remarks>
+        protected internal override bool ExtendedPinModeSupported => _internalDriver.ExtendedPinModeSupported;
+
         /// <inheritdoc/>
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => _internalDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
 
@@ -135,6 +176,18 @@ namespace System.Device.Gpio.Drivers
 
         /// <inheritdoc/>
         protected internal override void Write(int pinNumber, PinValue value) => _internalDriver.Write(pinNumber, value);
+
+        /// <inheritdoc />
+        protected internal override ExtendedPinMode GetExtendedPinMode(int pinNumber)
+        {
+            return _internalDriver.GetExtendedPinMode(pinNumber);
+        }
+
+        /// <inheritdoc />
+        protected internal override void SetExtendedPinMode(int pinNumber, ExtendedPinMode altMode)
+        {
+            _internalDriver.SetExtendedPinMode(pinNumber, altMode);
+        }
 
         /// <summary>
         /// Allows directly setting the "Set pin high" register. Used for special applications only
