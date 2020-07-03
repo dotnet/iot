@@ -133,7 +133,8 @@ namespace BoardSample
         {
             using var raspi = new RaspberryPiBoard(PinNumberingScheme.Logical);
             // PwmRaspiTest(raspi);
-            SpiRaspiTest(raspi);
+            SpiRaspiTestWithSoftwareCs(raspi);
+            SpiRaspiTestWithHardwareCs(raspi);
         }
 
         private static void PwmRaspiTest(RaspberryPiBoard raspi)
@@ -164,13 +165,52 @@ namespace BoardSample
                 pwm.Stop();
                 pwm.Dispose();
             }
+
+            Console.ReadKey(true);
         }
 
-        private static void SpiRaspiTest(Board raspi)
+        private static void SpiRaspiTestWithSoftwareCs(Board raspi)
         {
-            Console.WriteLine("MCP3008 SPI test");
+            Console.WriteLine("MCP3008 SPI Software CS Test");
 
+            // Runs a test communication against an MCP3008. The CS pin 8 is controlled explicitly by software (this binding
+            // fails to have support for this)
             SpiConnectionSettings spiSettings = new SpiConnectionSettings(0, -1) { ChipSelectLineActiveState = PinValue.Low };
+            using SpiDevice dev = raspi.CreateSpiDevice(spiSettings);
+            using Mcp3008 mcp = new Mcp3008(dev);
+            using GpioController ctrl = raspi.CreateGpioController(new[]
+            {
+                8
+            });
+
+            // Note that if we have only a single device attached to the SPI bus, we could just as well pull the CS line
+            // hard to low, but this is to show the concept.
+            ctrl.OpenPin(8, PinMode.Output);
+            ctrl.Write(8, PinValue.High);
+            while (!Console.KeyAvailable)
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    ctrl.Write(8, PinValue.Low);
+                    int value = mcp.Read(i);
+                    ctrl.Write(8, PinValue.High);
+                    Console.WriteLine($"Channel {i} has value {value}.");
+                    Thread.Sleep(100);
+                }
+
+                Thread.Sleep(500);
+            }
+
+            Console.ReadKey(true);
+        }
+
+        private static void SpiRaspiTestWithHardwareCs(Board raspi)
+        {
+            Console.WriteLine("MCP3008 SPI Hardware CS Test");
+
+            // Runs a test communication against an MCP3008. The CS pin 8 is expected to be controlled by the driver, as
+            // we specify it here (SPI0_CE0 is BCM pin 8 on ALT0)
+            SpiConnectionSettings spiSettings = new SpiConnectionSettings(0, 0) { ChipSelectLineActiveState = PinValue.Low };
             using SpiDevice dev = raspi.CreateSpiDevice(spiSettings);
             using Mcp3008 mcp = new Mcp3008(dev);
             while (!Console.KeyAvailable)
@@ -184,6 +224,8 @@ namespace BoardSample
 
                 Thread.Sleep(500);
             }
+
+            Console.ReadKey(true);
         }
     }
 }
