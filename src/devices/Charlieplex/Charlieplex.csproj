@@ -12,7 +12,7 @@
 <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="Charlieplex.cs" />
-    <Compile Include="CharlieLoad.cs" />
+    <Compile Include="CharlieplexNode.cs" />
   </ItemGroup>
 
 </Project>

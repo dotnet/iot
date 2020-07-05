@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Device.Gpio;
 
 namespace Iot.Device.Multiplex
 {
     /// <summary>
-    /// Provides support for Charlieplex multiplexing.
+    /// Represents a node in a Charlieplexed circuit.
     /// https://wikipedia.org/wiki/Charlieplexing
     /// </summary>
-    public struct CharlieLoad
+    public struct CharlieplexNode
     {
         /// <summary>
         /// Anode leg (power) for a device/load
@@ -17,5 +18,10 @@ namespace Iot.Device.Multiplex
         /// Cathode leg (ground) for a device/load
         /// </summary>
         public int Cathode;
+
+        /// <summary>
+        /// Value of node
+        /// </summary>
+        public PinValue Value;
     }
 }
