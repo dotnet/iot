@@ -9,6 +9,8 @@ netcoreapp2.2 -> netcoreapp3.1
 netcoreapp3.0 -> netcoreapp3.1
 $dotnetSdkVersion="2.1.507" -> $dotnetSdkVersion="3.1.300"
 
+Nb: I did bulk changes "Replace in Files" in VS Code.
+
 In global.json:
       "dotnet/x64": [
         "3.1.5"
