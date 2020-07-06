@@ -15,7 +15,7 @@ In global.json:
       ]
  ```  
  - The build action in the root runs to completion if the following project is removed from the tree (Not required in dotnet/iot version):  
-   MPU9250
+   ```Mpu9250```
 
 <hr>
 
