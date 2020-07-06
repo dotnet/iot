@@ -50,7 +50,7 @@ namespace Iot.Device.StUsb4500.Objects
 
         /// <summary>Initializes a new instance of the <see cref="FixedSupplyObject"/> class.</summary>
         /// <param name="value">The value.</param>
-        internal FixedSupplyObject(uint value)
+        public FixedSupplyObject(uint value)
             : base(value)
         {
         }

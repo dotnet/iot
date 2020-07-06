@@ -1,18 +1,32 @@
-﻿# StUsb4500
+﻿# STUSB4500 - Autonomous USB-C PD controller for Power Sinks / UFP
 
 ## Summary
-Provide a brief description on what the component is and its functionality.
+By default a USB Type-C port on your hardware can get only 5V from a USB-PD Power Source (Host / DFP)
+This product enables to automatically negociate with the Source a higher Voltage (>5V) up to 100W (20V@5A).
+For instance, if the Power brick can provide 4 power profiles (5V, 9V, 15V and 20V), then the STUSB4500 will request the highest voltage available (20V).
+Another example, if the Power brick can provide 4 power profiles (5V, 9V, 15V and 20V) but the Application needs 9V to boot, then the STUSB4500 can be programmed to always request 9V.
+This part can be easily implemented in a battery charger with USB-C input in the application.
 
-## Device Family
-Provide a list of component names and link to datasheets (if available) the binding will work with.
+The device doesn't need any software to run (it is automous). But it is possible to connect to this device by I2C to take control over the default device behavior, or to get the power information (Voltage/Current) of the attached power source at the other side of the cable. 
 
-**[Family Name Here]**: [Datasheet link here]
+## Usage
 
-## Binding Notes
+```C#
+I2cConnectionSettings settings = new I2cConnectionSettings(1, StUsb4500.DefaultI2cAddress);
+I2cDevice device = I2cDevice.Create(settings);
 
-Provide any specifics related to binding API.  This could include how to configure component for particular functions and example code.
-
-**NOTE**:  Don't repeat the basics related to System.Device.API* (e.g. connection settings, etc.).  This helps keep text/steps down to a minimum for maintainability.
+using(StUsb4500 stUsb = new StUsb4500(device))
+{
+    CableConnection connection = stUsb.CableConnection;
+    
+    if (connection != CableConnection.Disconnected)
+    {
+        double voltage = stUsb.RequestedVoltage;
+        RequestDataObject rdo = stUsb.RequestDataObject;
+        double availablePower = voltage * rdo.MaximalCurrent;
+    }
+}
+```
 
 ## References 
-Provide any references to other tutorials, blogs and hardware related to the component that could help others get started.
+https://github.com/usb-c/STUSB4500

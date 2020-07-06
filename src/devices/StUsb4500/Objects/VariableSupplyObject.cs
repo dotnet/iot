@@ -44,7 +44,7 @@ namespace Iot.Device.StUsb4500.Objects
 
         /// <summary>Initializes a new instance of the <see cref="VariableSupplyObject"/> class.</summary>
         /// <param name="value">The value.</param>
-        internal VariableSupplyObject(uint value)
+        public VariableSupplyObject(uint value)
             : base(value)
         {
         }

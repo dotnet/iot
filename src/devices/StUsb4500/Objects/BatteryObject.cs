@@ -44,7 +44,7 @@ namespace Iot.Device.StUsb4500.Objects
 
         /// <summary>Initializes a new instance of the <see cref="BatteryObject"/> class.</summary>
         /// <param name="value">The value.</param>
-        internal BatteryObject(uint value)
+        public BatteryObject(uint value)
             : base(value)
         {
         }
