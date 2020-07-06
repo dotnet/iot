@@ -51,7 +51,7 @@ namespace Iot.Device.Shtc3.Samples
         private static void ConsoleWriteInfo(Temperature temperature, Ratio relativeHumidity)
         {
             Console.WriteLine($"Temperature: {temperature.DegreesCelsius:0.#}\u00B0C");
-            Console.WriteLine($"Humidity: {relativeHumidity:0.#}%");
+            Console.WriteLine($"Humidity: {relativeHumidity.Percent:0.#}%");
             // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
             Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(temperature, relativeHumidity).DegreesCelsius:0.#}\u00B0C");
             Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(temperature, relativeHumidity).DegreesCelsius:0.#}\u00B0C");

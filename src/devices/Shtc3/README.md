@@ -16,7 +16,7 @@ using (Shtc3 sensor = new Shtc3(device))
         // temperature (℃)
         Console.WriteLine($"Temperature: {temperature.DegreesCelsius:0.#}\u00B0C");
         // humidity (%)
-        Console.WriteLine($"Humidity: {relativeHumidity:0.#}%");
+        Console.WriteLine($"Humidity: {relativeHumidity.Percent:0.#}%");
     }
 
     // Make sensor in sleep mode

@@ -112,8 +112,8 @@ namespace Iot.Device.Shtc3
             _i2cDevice.Read(readBuff);
 
             // Details in the Datasheet P7
-            int st = BinaryPrimitives.ReadInt16BigEndian(readBuff.Slice(0, 2));      // Temp
-            int srh = BinaryPrimitives.ReadInt16BigEndian(readBuff.Slice(3, 2));     // Humi
+            int st = BinaryPrimitives.ReadUInt16BigEndian(readBuff.Slice(0, 2));      // Temp
+            int srh = BinaryPrimitives.ReadUInt16BigEndian(readBuff.Slice(3, 2));     // Humi
 
             // check 8-bit crc
             bool tCrc = CheckCrc8(readBuff.Slice(0, 2), readBuff[2]);
@@ -207,7 +207,7 @@ namespace Iot.Device.Shtc3
                 return null;
             }
 
-            var id = BinaryPrimitives.ReadInt16BigEndian(readBuff.Slice(0, 2));
+            var id = BinaryPrimitives.ReadUInt16BigEndian(readBuff.Slice(0, 2));
 
             // check the result match to the SHTC3 product code
             if (!ValidShtc3Id(id))
@@ -262,7 +262,7 @@ namespace Iot.Device.Shtc3
         private void Write(Register register)
         {
             Span<byte> writeBuff = stackalloc byte[2];
-            BinaryPrimitives.WriteInt16BigEndian(writeBuff, (short)register);
+            BinaryPrimitives.WriteUInt16BigEndian(writeBuff, (ushort)register);
 
             _i2cDevice.Write(writeBuff);
 

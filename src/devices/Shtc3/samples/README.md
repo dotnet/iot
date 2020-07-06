@@ -27,7 +27,7 @@ using (Shtc3 sensor = new Shtc3(device))
             if (sensor.TryGetTemperatureAndHumidity(out var temperature, out var relativeHumidity))
             {
                 Console.WriteLine($"Temperature: {temperature.DegreesCelsius:0.#}\u00B0C");
-                Console.WriteLine($"Relative humidity: {relativeHumidity:0.#}%");
+                Console.WriteLine($"Relative humidity: {relativeHumidity.Percent:0.#}%");
                 // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
                 Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(temperature, relativeHumidity).DegreesCelsius:0.#}\u00B0C");
                 Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(temperature, relativeHumidity).DegreesCelsius:0.#}\u00B0C");
