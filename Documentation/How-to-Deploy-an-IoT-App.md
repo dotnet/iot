@@ -41,7 +41,7 @@ This provides information how to prepare a Publish Profile and deploy an applica
     <PublishProtocol>FileSystem</PublishProtocol>
     <Configuration>Release</Configuration>
     <Platform>Any CPU</Platform>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <PublishDir>C:\PublishedApps</PublishDir>
     <RuntimeIdentifier>linux-arm</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
