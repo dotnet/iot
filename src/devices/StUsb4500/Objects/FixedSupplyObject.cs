@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using UnitsNet;
 
 namespace Iot.Device.StUsb4500.Objects
 {
@@ -16,17 +17,17 @@ namespace Iot.Device.StUsb4500.Objects
 
         /// <summary>Gets or sets the operational current.</summary>
         /// <remarks>This is stored with the factor 100 as a 10-bit value (range 0 - 1023) => 0...10.23A.</remarks>
-        public double OperationalCurrent
+        public ElectricCurrent OperationalCurrent
         {
-            get => ((ushort)(Value & OperationalCurrentMask)) / 100.0;
+            get => ElectricCurrent.FromAmperes((ushort)(Value & OperationalCurrentMask) / 100.0);
             set => Value = (Value & ~OperationalCurrentMask) | (Convert.ToUInt32(value * 100) & OperationalCurrentMask);
         }
 
         /// <summary>Gets or sets the voltage.</summary>
         /// <remarks>This is stored with the factor 20 as a 10-bit value (range 0 - 1023) => 0...51.15V.</remarks>
-        public double Voltage
+        public ElectricPotentialDc Voltage
         {
-            get => ((ushort)((Value & VoltageMask) >> 10)) / 20.0;
+            get => ElectricPotentialDc.FromVoltsDc((ushort)((Value & VoltageMask) >> 10) / 20.0);
             set => Value = (Value & ~VoltageMask) | (Convert.ToUInt32(value * 20) << 10 & VoltageMask);
         }
 
@@ -46,7 +47,7 @@ namespace Iot.Device.StUsb4500.Objects
         public bool DualRolePower { get => GetBit(29); set => UpdateBit(29, value); }
 
         /// <summary>Gets the power of this PDO.</summary>
-        public override double Power => Voltage * OperationalCurrent;
+        public override Power Power => Power.FromWatts(Voltage.VoltsDc * OperationalCurrent.Amperes);
 
         /// <summary>Initializes a new instance of the <see cref="FixedSupplyObject"/> class.</summary>
         /// <param name="value">The value.</param>
@@ -57,6 +58,6 @@ namespace Iot.Device.StUsb4500.Objects
 
         /// <summary>Returns a string that represents the current object.</summary>
         /// <returns>A string that represents the current object.</returns>
-        public override string ToString() => $"{nameof(FixedSupplyObject)}: {Voltage:0.##}V * {OperationalCurrent:0.##}A = {Power:0.##}W";
+        public override string ToString() => $"{nameof(FixedSupplyObject)}: {Voltage:0.##} * {OperationalCurrent:0.##} = {Power:0.##}";
     }
 }

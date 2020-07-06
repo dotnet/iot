@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using UnitsNet;
 
 namespace Iot.Device.StUsb4500.Objects
 {
@@ -12,7 +13,7 @@ namespace Iot.Device.StUsb4500.Objects
     public abstract class PowerDeliveryObject : ObjectBase
     {
         /// <summary>Gets the power of this PDO.</summary>
-        public abstract double Power { get; }
+        public abstract Power Power { get; }
 
         /// <summary>Initializes a new instance of the <see cref="PowerDeliveryObject"/> class.</summary>
         /// <param name="value">The value.</param>

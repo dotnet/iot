@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using UnitsNet;
 
 namespace Iot.Device.StUsb4500.Objects
 {
@@ -17,17 +18,17 @@ namespace Iot.Device.StUsb4500.Objects
 
         /// <summary>Gets or sets the maximal current.</summary>
         /// <remarks>This is stored with the factor 100 as a 10-bit value (range 0 - 1023) => 0...10.23A.</remarks>
-        public double MaximalCurrent
+        public ElectricCurrent MaximalCurrent
         {
-            get => ((ushort)(Value & MaximalCurrentMask)) / 100.0;
+            get => ElectricCurrent.FromAmperes((ushort)(Value & MaximalCurrentMask) / 100.0);
             set => Value = (Value & MaximalCurrentMask) | (uint)(Convert.ToUInt16(value * 100) & MaximalCurrentMask);
         }
 
         /// <summary>Gets or sets the operational current.</summary>
         /// <remarks>This is stored with the factor 100 as a 10-bit value (range 0 - 1023) => 0...10.23A.</remarks>
-        public double OperatingCurrent
+        public ElectricCurrent OperatingCurrent
         {
-            get => ((ushort)(Value & OperatingCurrentMask) >> 10) / 100.0;
+            get => ElectricCurrent.FromAmperes(((ushort)(Value & OperatingCurrentMask) >> 10) / 100.0);
             set => Value = (Value & OperatingCurrentMask) | (ushort)(Convert.ToUInt16(value * 100) << 10 & OperatingCurrentMask);
         }
 

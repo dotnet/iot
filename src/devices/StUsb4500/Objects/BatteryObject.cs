@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using UnitsNet;
+using UnitsNet.Units;
 
 namespace Iot.Device.StUsb4500.Objects
 {
@@ -17,30 +19,30 @@ namespace Iot.Device.StUsb4500.Objects
 
         /// <summary>Gets or sets the operating power.</summary>
         /// <remarks>This is stored with the factor 4 as a 10-bit value (range 0 - 1023) => 0...255.75W.</remarks>
-        public double OperatingPower
+        public Power OperatingPower
         {
-            get => ((ushort)(Value & OperatingPowerMask)) / 4.0;
+            get => Power.FromWatts((ushort)(Value & OperatingPowerMask) / 4.0);
             set => Value = (Value & ~OperatingPowerMask) | (Convert.ToUInt32(value * 4) & OperatingPowerMask);
         }
 
         /// <summary>Gets or sets the minimal voltage.</summary>
         /// <remarks>This is stored with the factor 20 as a 10-bit value (range 0 - 1023) => 0...51.15V.</remarks>
-        public double MinimalVoltage
+        public ElectricPotentialDc MinimalVoltage
         {
-            get => ((ushort)((Value & MinVoltageMask) >> 10)) / 20.0;
+            get => ElectricPotentialDc.FromVoltsDc((ushort)((Value & MinVoltageMask) >> 10) / 20.0);
             set => Value = (Value & ~MinVoltageMask) | (Convert.ToUInt32(value * 20) << 10 & MinVoltageMask);
         }
 
         /// <summary>Gets or sets the maximal voltage.</summary>
         /// <remarks>This is stored with the factor 20 as a 10-bit value (range 0 - 1023) => 0...51.15V.</remarks>
-        public double MaximalVoltage
+        public ElectricPotentialDc MaximalVoltage
         {
-            get => ((ushort)((Value & MaxVoltageMask) >> 20)) / 20.0;
+            get => ElectricPotentialDc.FromVoltsDc((ushort)((Value & MaxVoltageMask) >> 20) / 20.0);
             set => Value = (Value & ~MaxVoltageMask) | (Convert.ToUInt32(value * 20) << 20 & MaxVoltageMask);
         }
 
         /// <summary>Gets the power of this PDO.</summary>
-        public override double Power => OperatingPower;
+        public override Power Power => OperatingPower;
 
         /// <summary>Initializes a new instance of the <see cref="BatteryObject"/> class.</summary>
         /// <param name="value">The value.</param>
@@ -51,6 +53,6 @@ namespace Iot.Device.StUsb4500.Objects
 
         /// <summary>Returns a string that represents the current object.</summary>
         /// <returns>A string that represents the current object.</returns>
-        public override string ToString() => $"{nameof(BatteryObject)}: {MinimalVoltage:0.##}V - {MaximalVoltage:0.##}V @ {OperatingPower:0.##}W";
+        public override string ToString() => $"{nameof(BatteryObject)}: {MinimalVoltage:0.##} - {MaximalVoltage:0.##} @ {OperatingPower:0.##}";
     }
 }

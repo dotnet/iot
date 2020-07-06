@@ -8,6 +8,8 @@ using System.Linq;
 using System.Threading;
 using Iot.Device.StUsb4500.Enumerations;
 using Iot.Device.StUsb4500.Objects;
+using UnitsNet;
+using UnitsNet.Units;
 
 namespace Iot.Device.StUsb4500
 {
@@ -37,7 +39,7 @@ namespace Iot.Device.StUsb4500
         public RequestDataObject RequestDataObject => ReadRdo();
 
         /// <summary>Gets the requested voltage.</summary>
-        public double RequestedVoltage => ReadRequestedVoltage();
+        public ElectricPotentialDc RequestedVoltage => ReadRequestedVoltage();
 
         /// <summary>Gets or sets the NVM data.</summary>
         public byte[] NvmData { get => ReadNvm(); set => WriteNvm(value); }
@@ -262,11 +264,11 @@ namespace Iot.Device.StUsb4500
 
         /// <summary>Reads the requested voltage.</summary>
         /// <returns>The requested voltage.</returns>
-        private double ReadRequestedVoltage()
+        private ElectricPotentialDc ReadRequestedVoltage()
         {
             _i2cDevice.WriteByte((byte)StUsb4500Register.MONITORING_CTRL_1);
             byte voltage = _i2cDevice.ReadByte();
-            return voltage / 10.0;
+            return ElectricPotentialDc.FromVoltsDc(voltage / 10.0);
         }
 
         /// <summary>Reads the NVM.</summary>

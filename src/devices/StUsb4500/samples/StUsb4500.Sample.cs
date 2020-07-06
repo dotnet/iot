@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading;
 using Iot.Device.StUsb4500.Enumerations;
 using Iot.Device.StUsb4500.Objects;
+using UnitsNet;
 
 namespace Iot.Device.StUsb4500.Samples
 {
@@ -103,17 +104,20 @@ namespace Iot.Device.StUsb4500.Samples
         /// <param name="stUsb">The device.</param>
         private static void PrintSourcePdo(StUsb4500 stUsb)
         {
-            double maxPower = 0;
+            Power maxPower = Power.Zero;
             Console.WriteLine("Source PDOs:");
             PowerDeliveryObject[] sourcePdos = stUsb.SourcePowerDeliveryObjects;
             for (int i = 0; i < sourcePdos.Length; i++)
             {
                 PowerDeliveryObject pdo = sourcePdos[i];
                 Console.WriteLine($"PDO #{i + 1}: {pdo}");
-                maxPower = Math.Max(maxPower, pdo.Power);
+                if (pdo.Power > maxPower)
+                {
+                    maxPower = pdo.Power;
+                }
             }
 
-            Console.WriteLine($"P(max) = {maxPower:0.##}W{Environment.NewLine}");
+            Console.WriteLine($"P(max) = {maxPower:0.##}{Environment.NewLine}");
         }
 
         /// <summary>Prints the RDO.</summary>
@@ -123,13 +127,13 @@ namespace Iot.Device.StUsb4500.Samples
             Console.WriteLine("RDO (negotiated power):");
             RequestDataObject rdo = stUsb.RequestDataObject;
             Console.WriteLine($"Requested position: PDO #{rdo.ObjectPosition}");
-            Console.WriteLine($"Operating current: {rdo.OperatingCurrent:0.##}A");
-            Console.WriteLine($"Max. current: {rdo.MaximalCurrent:0.##}A");
+            Console.WriteLine($"Operating current: {rdo.OperatingCurrent:0.##}");
+            Console.WriteLine($"Max. current: {rdo.MaximalCurrent:0.##}");
             Console.WriteLine($"USB communications capable: {rdo.UsbCommunicationsCapable}");
             Console.WriteLine($"Capability mismatch: {rdo.CapabilityMismatch}");
-            double voltage = stUsb.RequestedVoltage;
-            Console.WriteLine($"Requested voltage: {voltage:0.##}V");
-            Console.WriteLine($"Available Power: {(voltage * rdo.MaximalCurrent):0.##}W{Environment.NewLine}");
+            ElectricPotentialDc voltage = stUsb.RequestedVoltage;
+            Console.WriteLine($"Requested voltage: {voltage:0.##}");
+            Console.WriteLine($"Available Power: {Power.FromWatts(voltage.VoltsDc * rdo.MaximalCurrent.Amperes):0.##}{Environment.NewLine}");
         }
 
         /// <summary>Updates the local PDOs.</summary>
@@ -140,25 +144,33 @@ namespace Iot.Device.StUsb4500.Samples
             PowerDeliveryObject[] sinkPdos = stUsb.SinkPowerDeliveryObjects;
             if (sinkPdos.Length > 1 && sinkPdos[1] is FixedSupplyObject fixedSupplyObject1)
             {
-                fixedSupplyObject1.Voltage = 12;
-                fixedSupplyObject1.OperationalCurrent = 2.0;
+                fixedSupplyObject1.Voltage = ElectricPotentialDc.FromVoltsDc(12);
+                fixedSupplyObject1.OperationalCurrent = ElectricCurrent.FromAmperes(2.0);
             }
             else
             {
                 List<PowerDeliveryObject> objects = sinkPdos.ToList();
-                objects.Add(new FixedSupplyObject(sinkPdos.First().Value) { Voltage = 12, OperationalCurrent = 2.0 });
+                objects.Add(new FixedSupplyObject(sinkPdos.First().Value)
+                    {
+                        Voltage = ElectricPotentialDc.FromVoltsDc(12),
+                        OperationalCurrent = ElectricCurrent.FromAmperes(2.0)
+                    });
                 sinkPdos = objects.ToArray();
             }
 
             if (sinkPdos.Length > 2 && sinkPdos[2] is FixedSupplyObject fixedSupplyObject2)
             {
-                fixedSupplyObject2.Voltage = 20;
-                fixedSupplyObject2.OperationalCurrent = 1.25;
+                fixedSupplyObject2.Voltage = ElectricPotentialDc.FromVoltsDc(20);
+                fixedSupplyObject2.OperationalCurrent = ElectricCurrent.FromAmperes(1.25);
             }
             else
             {
                 List<PowerDeliveryObject> objects = sinkPdos.ToList();
-                objects.Add(new FixedSupplyObject(sinkPdos.First().Value) { Voltage = 20, OperationalCurrent = 1.25 });
+                objects.Add(new FixedSupplyObject(sinkPdos.First().Value)
+                    {
+                        Voltage = ElectricPotentialDc.FromVoltsDc(20),
+                        OperationalCurrent = ElectricCurrent.FromAmperes(1.25)
+                    });
                 sinkPdos = objects.ToArray();
             }
 
