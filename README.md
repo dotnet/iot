@@ -18,6 +18,7 @@ In global.json:
  ```  
  - The build action in the root runs to completion if the following project is removed from the tree (Not required in dotnet/iot version):  
    ```Mpu9250```
+ - This was raised as an Issue on dotnet/iot as [Issue #1127](https://github.com/dotnet/iot/issues/1127)
 
 <hr>
 
