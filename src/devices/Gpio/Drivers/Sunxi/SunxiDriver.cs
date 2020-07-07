@@ -123,19 +123,17 @@ namespace Iot.Device.Gpio.Drivers
             // Get register address, register pointer
             int cfgAddress, pulAddress;
             uint* cfgPointer, pulPointer;
+
+            cfgAddress = (CpuxPortBaseAddess + unmapped.PortController * 0x24 + cfgNum * 0x04) & _mapMask;
+            pulAddress = (CpuxPortBaseAddess + unmapped.PortController * 0x24 + (pulNum + 7) * 0x04) & _mapMask;
+
             if (unmapped.PortController < 10)
             {
-                cfgAddress = (CpuxPortBaseAddess + unmapped.PortController * 0x24 + cfgNum * 0x04) & _mapMask;
-                pulAddress = (CpuxPortBaseAddess + unmapped.PortController * 0x24 + (pulNum + 7) * 0x04) & _mapMask;
-
                 cfgPointer = (uint*)(_gpioPointer0 + cfgAddress);
                 pulPointer = (uint*)(_gpioPointer0 + pulAddress);
             }
             else
             {
-                cfgAddress = (CpusPortBaseAddess + unmapped.PortController * 0x24 + cfgNum * 0x04) & _mapMask;
-                pulAddress = (CpusPortBaseAddess + unmapped.PortController * 0x24 + (pulNum + 7) * 0x04) & _mapMask;
-
                 cfgPointer = (uint*)(_gpioPointer1 + cfgAddress);
                 pulPointer = (uint*)(_gpioPointer1 + pulAddress);
             }
@@ -190,16 +188,15 @@ namespace Iot.Device.Gpio.Drivers
 
             int dataAddress;
             uint* dataPointer;
+
+            dataAddress = (CpuxPortBaseAddess + unmapped.PortController * 0x24 + 0x10) & _mapMask;
+
             if (unmapped.PortController < 10)
             {
-                dataAddress = (CpuxPortBaseAddess + unmapped.PortController * 0x24 + 0x10) & _mapMask;
-
                 dataPointer = (uint*)(_gpioPointer0 + dataAddress);
             }
             else
             {
-                dataAddress = (CpusPortBaseAddess + unmapped.PortController * 0x24 + 0x10) & _mapMask;
-
                 dataPointer = (uint*)(_gpioPointer1 + dataAddress);
             }
 
@@ -228,16 +225,15 @@ namespace Iot.Device.Gpio.Drivers
 
             int dataAddress;
             uint* dataPointer;
+
+            dataAddress = (CpuxPortBaseAddess + unmapped.PortController * 0x24 + 0x10) & _mapMask;
+
             if (unmapped.PortController < 10)
             {
-                dataAddress = (CpuxPortBaseAddess + unmapped.PortController * 0x24 + 0x10) & _mapMask;
-
                 dataPointer = (uint*)(_gpioPointer0 + dataAddress);
             }
             else
             {
-                dataAddress = (CpusPortBaseAddess + unmapped.PortController * 0x24 + 0x10) & _mapMask;
-
                 dataPointer = (uint*)(_gpioPointer1 + dataAddress);
             }
 

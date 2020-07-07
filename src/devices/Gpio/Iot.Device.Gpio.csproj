@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../System.Device.Gpio/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="samples\**" />
+    <EmbeddedResource Remove="samples\**" />
+    <None Remove="samples\**" />
+  </ItemGroup>
+
+</Project>
