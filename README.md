@@ -8,9 +8,7 @@
 # Changes:
 
 global.json
-  - No changes
-  - There is alternative version global-3.1.5.json.alt  
-  The "dotnet/x64" value is set to "3.1.5" instead of "2.1.11"
+  - The "dotnet/x64" value is set to "3.1.5" instead of "2.1.11"
 
 In /Documentation
   - No changes
@@ -39,26 +37,15 @@ In /src/Device
     - Leave CommonHelpers.csproj as V2.1   as /src/Device/XXX/XXX.csproj uses that.
     - Update the test project to V3.1 though
 
-## Previous changes 
+In /src/Card
+  - CardRfid.csproj left as V2.1 as above
+  - The following avert an error in building Pn5180:
+    - CreditCard/CreditCardProcessing.csproj  left as V2.1
+    - Mifare/Mifare.csproj left as V2.1
+  
 
-- The x64 version in global.json is set to 3.1.5 from 2.1.1
-- Changes:
-```
-netcoreapp2.1 -> netcoreapp3.1
-netcoreapp2.2 -> netcoreapp3.1
-netcoreapp3.0 -> netcoreapp3.1
-$dotnetSdkVersion="2.1.507" -> $dotnetSdkVersion="3.1.300"
-
-Nb: I did bulk changes "Replace in Files" in VS Code.
-
-In global.json:
-      "dotnet/x64": [
-        "3.1.5"
-      ]
- ```  
- - The build action in the root runs to completion if the following project is removed from the tree (Not required in dotnet/iot version):  
-   ```Mpu9250```
- - This was raised as an Issue on dotnet/iot as [Issue #1127](https://github.com/dotnet/iot/issues/1127)
+From the root running ```.\Build`` runs to completion and tests pass.  
+Nb: In VS Code in Windows
 
 <hr>
 
