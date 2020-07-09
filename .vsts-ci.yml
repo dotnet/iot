@@ -10,6 +10,7 @@ pr:
     include:
     - master
     - release/3.0
+    - feature-boardAbstraction
     
 variables:
   # Cannot use key:value syntax in root defined variables
