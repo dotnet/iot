@@ -28,7 +28,7 @@ In /src/Iot.Device.Bindings
   - No change
 
 In /src/System.Device.GPIO
-  - No change,  .NET Standar 2.0 anyway
+  - No change,  .NET Standard 2.0 anyway
 
 In /src/Device
   - In each Device XXX folder:
