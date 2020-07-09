@@ -1,6 +1,46 @@
+**This repository is fored from dotnet/iot**
+
 # How is this fork different to dotnet/iot (Master Branch):
-- The sample apps are set to .NET Core 3.1 instead of 2.1
-  - A couple of other version changes as well
+  - Leave the code that apps will link to unchanged as .NET Core V2.1
+  - Samples and tests changed to .NET Core V3.1
+  - .NET Standrd left as V2.0
+
+# Changes:
+
+global.json
+  - No changes
+  - There is alternative version global-3.1.5.json.alt  
+  The "dotnet/x64" value is set to "3.1.5" instead of "2.1.11"
+
+In /Documentation
+  - No changes
+
+In /Samples
+  - Update all .NET Core projects to V3.1
+
+In /eng
+  - Update all .NET Core projects to V3.1
+
+In /Tools
+  - Update all .NET Core projects to V3.1
+
+In /src/Iot.Device.Bindings
+  - No change
+
+In /src/System.Device.GPIO
+  - No change,  .NET Standar 2.0 anyway
+
+In /src/Device
+  - In each Device XXX folder:
+    - Update the /src/Device/XXX/samples/XXX.csproj to V3.1
+      - But not /src/Device/XXX/XXX.csproj (Left as V2.1)
+  - Test projects updated to V3.1
+  - In /src/Device/Common
+    - Leave CommonHelpers.csproj as V2.1   as /src/Device/XXX/XXX.csproj uses that.
+    - Update the test project to V3.1 though
+
+## Previous changes 
+
 - The x64 version in global.json is set to 3.1.5 from 2.1.1
 - Changes:
 ```
