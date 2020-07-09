@@ -1,3 +1,27 @@
+# How is this fork different to dotnet/iot (Master Branch):
+- The sample apps are set to .NET Core 3.1 instead of 2.1
+  - A couple of other version changes as well
+- The x64 version in global.json is set to 3.1.5 from 2.1.1
+- Changes:
+```
+netcoreapp2.1 -> netcoreapp3.1
+netcoreapp2.2 -> netcoreapp3.1
+netcoreapp3.0 -> netcoreapp3.1
+$dotnetSdkVersion="2.1.507" -> $dotnetSdkVersion="3.1.300"
+
+Nb: I did bulk changes "Replace in Files" in VS Code.
+
+In global.json:
+      "dotnet/x64": [
+        "3.1.5"
+      ]
+ ```  
+ - The build action in the root runs to completion if the following project is removed from the tree (Not required in dotnet/iot version):  
+   ```Mpu9250```
+ - This was raised as an Issue on dotnet/iot as [Issue #1127](https://github.com/dotnet/iot/issues/1127)
+
+<hr>
+
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/iot)
 
 # .NET Core IoT Libraries
