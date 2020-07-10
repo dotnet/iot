@@ -75,7 +75,7 @@ to the **Samples\led-matrix-weather.csproj** and **Samples\led-more-blinking-lig
 - led-more-blinking-lights: V2.1
 - arduino-demo: V3.0
 
-Restoring these values, and NOT adding the System.Text.Json reference to any of these projects, enabled ```./Build``` to run successfully to completion.
+Restoring these values, and NOT adding the System.Text.Json reference to any of these projects with global.json x64 set to 2.1.11, enabled ```./Build``` to run successfully to completion.
 
 <hr>
 
