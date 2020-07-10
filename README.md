@@ -1,7 +1,7 @@
 **This repository is forked from dotnet/iot**
 
 # How is this fork different to dotnet/iot (Master Branch):
-  - Leave the code that apps will link to unchanged as .NET Core V2.1
+  - Leave the code so that apps .NET Core V2.1 apps vcan link unchanged.
   - Samples and tests changed to .NET Core V3.1
   - .NET Standrd left as V2.0
 
