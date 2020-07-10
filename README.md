@@ -44,7 +44,7 @@ In /src/Card
     - Mifare/Mifare.csproj left as V2.1
   
 
-From the root running ```.\Build`` runs to completion and tests pass.  
+From the root running ```.\Build``` runs to completion and tests pass.  
 Nb: In VS Code in Windows
 
 <hr>
