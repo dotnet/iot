@@ -49,6 +49,27 @@ Nb: In VS Code in Windows
 
 <hr>
 
+Nb: Setting The "dotnet/x64" value back to  "2.1.11"  
+The tests in  <root>\Samples fail to build/run.  
+Setting the projects Iot\Samples\XXX\.csproj back to V2.1 nearly solves this.  
+Then get some errors with respect to System.Text.Json in the weather Samples apps.  
+Not the weather in Devices\Common though!
+On looking this up in [Ms Dox](https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-overview), this is included in .NET Core V3.0.  
+You need to reference it in earlier versions. By adding:
+
+```
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="1.1.0-prerelease.20153.1" />
+    <PackageReference Include="Iot.Device.Bindings" Version="1.1.0-prerelease.20153.1" />
+    <PackageReference Include="System.Text.Json" Version="4.7.2"  />
+  </ItemGroup>
+```
+
+to the **Samples\led-matrix-weather.csproj** and **Samples\led-more-blinking-lights.csproj** (with x64 set to 2.1.11) ,/Build runs sucessfully to completion.
+
+
+<hr>
+
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/iot)
 
 # .NET Core IoT Libraries
