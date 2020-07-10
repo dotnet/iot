@@ -1,4 +1,4 @@
-**This repository is fored from dotnet/iot**
+**This repository is forked from dotnet/iot**
 
 # How is this fork different to dotnet/iot (Master Branch):
   - Leave the code that apps will link to unchanged as .NET Core V2.1
