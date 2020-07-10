@@ -44,7 +44,7 @@ In /src/Card
     - Mifare/Mifare.csproj left as V2.1
   
 
-From the root running ```.\Build``` runs to completion and tests pass.  
+From the root running ```./Build``` runs to completion and tests pass OK.  
 Nb: In VS Code in Windows
 
 <hr>
@@ -65,7 +65,7 @@ You need to reference it in earlier versions. By adding:
   </ItemGroup>
 ```
 
-to the **Samples\led-matrix-weather.csproj** and **Samples\led-more-blinking-lights.csproj** (with x64 set to 2.1.11) ,/Build runs sucessfully to completion.  
+to the **Samples\led-matrix-weather.csproj** and **Samples\led-more-blinking-lights.csproj** (with x64 set to 2.1.11) ```,/Build``` runs sucessfully to completion.  
 
 **Further:** Some of the Samples projects were set to other than V2.1 in dotnet/iot.
 
@@ -75,7 +75,7 @@ to the **Samples\led-matrix-weather.csproj** and **Samples\led-more-blinking-lig
 - led-more-blinking-lights: V2.1
 - arduino-demo: V3.0
 
-Restoring these values, and NOT adding the System.Text.Json reference to any of these projects, enabled ./Build to run to successfully to completion.
+Restoring these values, and NOT adding the System.Text.Json reference to any of these projects, enabled ```./Build``` to run to successfully to completion.
 
 <hr>
 
