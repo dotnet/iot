@@ -75,7 +75,7 @@ Further: Some of the Samples projects were set to other than V2.1 in dotnet/iot.
 - led-more-blinking-lights: V2.1
 - arduino-demo: V3.0
 
-Restoring these valuws, and NOT adding the System.Text.Json reference to any of these projects, enabled ./Build to run to successfullyto completion.
+Restoring these valuws, and NOT adding the System.Text.Json reference to any of these projects, enabled ./Build to run to successfully to completion.
 
 <hr>
 
