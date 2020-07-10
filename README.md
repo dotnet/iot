@@ -67,8 +67,15 @@ You need to reference it in earlier versions. By adding:
 
 to the **Samples\led-matrix-weather.csproj** and **Samples\led-more-blinking-lights.csproj** (with x64 set to 2.1.11) ,/Build runs sucessfully to completion.  
 
-Footnote: Some of the Samples projects were set to V3.0 in dotnet\Iiot, I guess to cover this issue.
+Further: Some of the Samples projects were set to other than V2.1 in dotnet/iot.
 
+- force-sensitive-resitor: V2.1
+- led-blink: V3.1
+- led-matrix-weather: V3.0
+- led-more-blinking-lights: V2.1
+- arduino-demo: V3.0
+
+Restoring these valuws, and NOT adding the System.Text.Json reference to any of these projects, enabled ./Build to run to successfullyto completion.
 
 <hr>
 
