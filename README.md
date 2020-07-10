@@ -65,7 +65,9 @@ You need to reference it in earlier versions. By adding:
   </ItemGroup>
 ```
 
-to the **Samples\led-matrix-weather.csproj** and **Samples\led-more-blinking-lights.csproj** (with x64 set to 2.1.11) ,/Build runs sucessfully to completion.
+to the **Samples\led-matrix-weather.csproj** and **Samples\led-more-blinking-lights.csproj** (with x64 set to 2.1.11) ,/Build runs sucessfully to completion.  
+
+Footnote: Some of the Samples projects were set to V3.0, I guess to cover this issue.
 
 
 <hr>
