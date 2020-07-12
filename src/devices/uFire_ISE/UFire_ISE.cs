@@ -42,7 +42,7 @@ namespace Iot.Device.UFire
         {
             Send_command((byte)Command.ISE_MEASURE_MV);
 
-            DelayHelper.DelayMicroseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
 
             _mV = Read_register((byte)Register.ISE_MV_REGISTER);
             _mV = Convert.ToSingle(Math.Round(_mV, 2));
@@ -58,7 +58,7 @@ namespace Iot.Device.UFire
         {
             Send_command((byte)Command.ISE_MEASURE_TEMP);
 
-            DelayHelper.DelayMicroseconds(ISE_TEMP_MEASURE_TIME, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(ISE_TEMP_MEASURE_TIME, allowThreadYield: true);
             _tempC = Read_register((byte)Register.ISE_TEMP_REGISTER);
 
             if (_tempC == -127.0)
@@ -93,7 +93,7 @@ namespace Iot.Device.UFire
             Write_register((byte)Register.ISE_SOLUTION_REGISTER, solutionmV);
             Send_command((byte)Command.ISE_CALIBRATE_SINGLE);
 
-            DelayHelper.DelayMicroseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Iot.Device.UFire
             Write_register((byte)Register.ISE_SOLUTION_REGISTER, solutionmV);
             Send_command((byte)Command.ISE_CALIBRATE_LOW);
 
-            DelayHelper.DelayMicroseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace Iot.Device.UFire
             Write_register((byte)Register.ISE_SOLUTION_REGISTER, solutionmV);
             Send_command((byte)Command.ISE_CALIBRATE_HIGH);
 
-            DelayHelper.DelayMicroseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
         }
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace Iot.Device.UFire
             bytes[0] = (byte)Register.ISE_TASK_REGISTER;
             bytes[1] = data;
             _device.Write(bytes);
-            DelayHelper.DelayMicroseconds(10, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(10, allowThreadYield: true);
         }
 
         private float Read_register(byte register)
@@ -284,7 +284,7 @@ namespace Iot.Device.UFire
                 dataArray = BitConverter.GetBytes(Round_total_digits(data.Value));
             }
 
-            Span<byte> bytes = stackalloc byte[4];
+            Span<byte> bytes = new Span<byte>(new byte[4]);
             bytes[0] = dataArray[0];
             bytes[1] = dataArray[1];
             bytes[3] = dataArray[2];
@@ -292,19 +292,19 @@ namespace Iot.Device.UFire
 
             Change_register(register);
             _device.Write(bytes);
-            DelayHelper.DelayMicroseconds(10, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(10, allowThreadYield: true);
         }
 
         private void Change_register(byte register)
         {
             _device.WriteByte(register);
-            DelayHelper.DelayMicroseconds(10, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(10, allowThreadYield: true);
         }
 
         private byte Read_byte(byte register)
         {
             Change_register(register);
-            DelayHelper.DelayMicroseconds(10, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(10, allowThreadYield: true);
 
             return _device.ReadByte();
         }
@@ -315,7 +315,7 @@ namespace Iot.Device.UFire
 
             _device.WriteByte(value);
 
-            DelayHelper.DelayMicroseconds(10, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(10, allowThreadYield: true);
 
         }
 
@@ -336,9 +336,15 @@ namespace Iot.Device.UFire
             return float.IsNaN(x) || x == 0 ? 0 : (int)Math.Floor(Math.Log10(Math.Abs(x))) + 1;
         }
 
-        private float Round_total_digits(float x, int?digits = 7)
+        private float Round_total_digits(float x, int? digits = 7)
         {
-            return (float)Math.Round(x, digits.Value - Magnitude(x));
+            int numberOfDigits = digits.Value - Magnitude(x);
+            if (numberOfDigits > 15)
+            {
+                numberOfDigits = 15;
+
+            }
+            return (float)Math.Round(x, numberOfDigits);
         }
 
         /// <inheritdoc/>
