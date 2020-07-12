@@ -65,6 +65,7 @@
 * [Still image recording library](Media/README.md)
 * [TCS3472x Sensors](Tcs3472x/README.md)
 * [TM1637 - Segment Display](Tm1637/README.md)
+* [uFire_ISE - I2C Driver](uFire_ISE/README.md)
 * [VL53L0X - distance sensor](Vl53L0X/README.md)
 * [Ws28xx LED drivers](Ws28xx/README.md)
 </devices>
