@@ -287,8 +287,8 @@ namespace Iot.Device.UFire
             Span<byte> bytes = new Span<byte>(new byte[4]);
             bytes[0] = dataArray[0];
             bytes[1] = dataArray[1];
-            bytes[3] = dataArray[2];
-            bytes[4] = dataArray[3];
+            bytes[2] = dataArray[2];
+            bytes[3] = dataArray[3];
 
             Change_register(register);
             _device.Write(bytes);
