@@ -19,6 +19,9 @@ namespace Iot.Device.Bmxx80
     /// </summary>
     public class Bme680 : Bmxx80Base
     {
+        private static readonly Temperature DefaultAmbientTemperature = Temperature.FromDegreesCelsius(20);
+        private readonly Temperature _ambientTemperatureUserDefault;
+
         /// <summary>
         /// Default I2C bus address.
         /// </summary>
@@ -59,10 +62,22 @@ namespace Iot.Device.Bmxx80
         /// Initialize a new instance of the <see cref="Bme680"/> class.
         /// </summary>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
-        public Bme680(I2cDevice i2cDevice)
+        /// <param name="ambientTemperatureDefault">Assumed ambient temperature for startup. Used for initialization of the gas measurement
+        /// if the temperature cannot be read during a reset.</param>
+        public Bme680(I2cDevice i2cDevice, Temperature ambientTemperatureDefault)
             : base(DeviceId, i2cDevice)
         {
+            _ambientTemperatureUserDefault = ambientTemperatureDefault;
             _communicationProtocol = CommunicationProtocol.I2c;
+        }
+
+        /// <summary>
+        /// Initialize a new instance of the <see cref="Bme680"/> class.
+        /// </summary>
+        /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
+        public Bme680(I2cDevice i2cDevice)
+            : this(i2cDevice, DefaultAmbientTemperature)
+        {
         }
 
         /// <summary>
@@ -450,7 +465,11 @@ namespace Iot.Device.Bmxx80
             FilterMode = Bme680FilteringMode.C0;
 
             _bme680Calibration = (Bme680CalibrationData)_calibrationData;
-            TryReadTemperature(out var temp);
+            if (!TryReadTemperature(out var temp))
+            {
+                temp = _ambientTemperatureUserDefault;
+            }
+
             ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, Temperature.FromDegreesCelsius(320), Duration.FromMilliseconds(150), temp);
             HeaterProfile = Bme680HeaterProfile.Profile1;
 

@@ -1,0 +1,133 @@
+# SN74HC595 -- 8-Bit Shift Register
+
+A shift register enables controlling multiple devices, like LEDs, from a small number of pins. It requires using 3-5 pins to control 8 outputs. Shift registers can be daisy chained without requiring additional pins, enabling addressing a larger number of devices, limited only by voltage and the algorithms you define.
+
+![shift-register](https://user-images.githubusercontent.com/2608468/84733283-ac3bca00-af52-11ea-8520-67c91a45c0f0.png)
+
+The [binding](Sn74hc595.cs) abstracts the interaction with the data register, the register clock and other shift register capabilities. The binding enables interaction via GPIO or SPI. The shift register is not exposed or advertised as an SPI device, however, the required protocol is  SPI compatible.
+
+The [SN74HC595 sample](samples/README.md) demonstrates how to use the shift register with GPIO and/or SPI.
+
+## Using GPIO
+
+The binding can use `GpioController` pins to control the shift register. It relies on a GPIO pin mapping to describe the 3-5 required  pins that will be used.
+
+The following example code demonstrates how to use a shift register with GPIO.
+
+```csharp
+var sr = new Sn74hc595(Sn74hc595.PinMapping.Matching);
+
+// Light up three of first four LEDs
+sr.ShiftBit(1);
+sr.ShiftBit(1);
+sr.ShiftBit(0);
+sr.ShiftBit(1);
+sr.Latch();
+
+// Clear register
+sr.ShiftClear();
+
+// Write to all 8 registers with a byte value
+sr.ShiftByte(170);
+```
+
+The following diagram demonstrates the required wiring using the `PinMapping.Matching` mapping.
+
+![shift-register](sn74hc595-led-bar-graph_bb.png)
+
+## Using SPI
+
+The bindings can use a `SpiDevice` to control the shift register. The SPI protocol maps to the three required GPIO pins. The additional two GPIO pins, for *output enable* and  *shift register clear* are optional and can still be used.
+
+
+The following example code demonstrates how to use a shift register with SPI.
+
+```csharp
+var settings = new SpiConnectionSettings(0, 0);
+var spiDevice = SpiDevice.Create(settings);
+var sr = new Sn74hc595(spiDevice);
+
+// Light up three of first four LEDs
+// The Shift() method is dissallowed when using SPI
+ShiftByte(11);
+
+// Clear register
+sr.ShiftClear();
+
+// Write to all 8 registers with a byte value
+sr.ShiftByte(170);
+```
+
+The following diagram demonstrates the required wiring using SPI. If GPIO is also used, then two more wires would be required for shift register pins 13 and 10, which would be controlled with a `GpioController`. A constructor that takes both an `SpiDevice` and `GpioController` is provided for that case.
+
+![sn74hc595-led-bar-graph-spi_bb](sn74hc595-led-bar-graph-spi_bb.png)
+
+## Daisy-chaining
+
+The binding supports daisy chaining, using either GPIO or SPI. The GPIO-based example below demonstrates how to declare support for controlling/addressing two -- daisy-chained -- shift registers. This is specified by the last (integer) value in the constructor. You can use the same approach if using SPI to control the shift register.
+
+```csharp
+using var controller = new GpioController();
+var sr = new Sn74hc595(Sn74hc595.PinMapping.Matching, controller, false, 2);
+```
+
+
+You can write to multiple daisy chained device in one of several ways, as demonstrated in the following code. You wouldn't typically use of all these approaches, but pick one.
+
+```csharp
+// Write a value to each register bit
+// And latch
+// Only works with GPIO
+for (int i = 0; i < sr.Bits; i++)
+{
+    sr.ShiftBit(1);
+}
+sr.Latch();
+
+// Prints the following pattern to each register: 10101010
+// 170 is the same as the binary literal: 0b10101010
+for (int i = 0; i < sr.DeviceCount; i++)
+{
+    sr.ShiftByte(170);
+}
+
+// Downshift a 32-bit number to the desired number of daisy-chained devices
+// Same thing could be done with a 64-bit integer if you have more than four shift registers
+// Prints the following pattern across two registers (order will be reversed): 0001001110001000
+// 5000 is the same as binary literal: 0b0001001110001000
+int value = 0b0001001110001000; // 5000
+for (int i = sr.DeviceCount - 1; i > 0; i--)
+{
+    int shift = i * 8;
+    int downShiftedValue = value >> shift;
+    sr.ShiftByte((byte)downShiftedValue);
+}
+
+sr.ShiftByte((byte)value);
+
+// Print array of bytes
+// Results in the same outcome as the "5000" example above
+// The order has to be reversed (compared to example above); last byte will be left-most printed
+var bytes = new byte[] { 0b10001000, 0b00010011};
+foreach (var b in bytes)
+{
+    sr.ShiftByte(b);
+}
+```
+
+The following wiring diagram can be used to support 2 shift registers.
+
+![sn74hc595-led-bar-graph-spi_bb](sn74hc595-led-bar-graph-double-up_bb.png)
+
+## Fritizing diagrams
+
+
+* [One shift register -- GPIO](sn74hc595-led-bar-graph.fzz)
+* [Two shift registers -- GPIO](sn74hc595-led-bar-graph-double-up.fzz)
+* [One shift register -- SPI](sn74hc595-led-bar-graph-spi.fzz)
+
+## Resources
+
+* Datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
+* Adafruit: https://www.adafruit.com/product/450
+* Tutotial: https://www.youtube.com/watch?v=6fVbJbNPrEU

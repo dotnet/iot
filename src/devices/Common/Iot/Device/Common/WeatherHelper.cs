@@ -243,7 +243,8 @@ namespace Iot.Device.Common
         /// <param name="measuredPressure">Measured pressure at the observation point</param>
         /// <param name="measuredTemperature">Measured temperature at the observation point</param>
         /// <param name="measurementAltitude">Height over sea level of the observation point (to be really precise, geopotential heights have
-        /// to be used above ~750m)</param>
+        /// to be used above ~750m). Do not use the height obtained by calling <see cref="CalculateAltitude(UnitsNet.Pressure)"/>
+        /// or any of its overloads, since what would use redundant data.</param>
         /// <returns>The barometric pressure at the point of observation</returns>
         /// <remarks>
         /// From https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Anwendungen
