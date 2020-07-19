@@ -3,9 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Device.Spi;
 using System.Drawing;
+using CommandLine;
 using Iot.Device.Graphics;
+using Ws28xx.Samples;
 
 namespace Iot.Device.Ws28xx.Samples
 {
@@ -13,47 +17,174 @@ namespace Iot.Device.Ws28xx.Samples
     {
         // Configure the count of pixels
         private const int Count = 8;
+        private static Ws28xx s_neo;
+        public static void Main(string[] args)
+        {
+            Console.Clear();
+            Console.CancelKeyPress += new ConsoleCancelEventHandler(CancelHandler);
 
-        public static void Main()
+            CommandLine.Parser.Default.ParseArguments<Options>(args)
+                           .WithParsed(RunOptions)
+                           .WithNotParsed(HandleParseError);
+
+        }
+
+        private static void RunOptions(Options opts)
         {
             var settings = new SpiConnectionSettings(0, 0)
             {
-                ClockFrequency = 2_400_000, Mode = SpiMode.Mode0, DataBitLength = 8
+                ClockFrequency = 2_400_000,
+                Mode = SpiMode.Mode0,
+                DataBitLength = 8
             };
-
-            // Create a Neo Pixel x8 stick on spi 0.0
             var spi = SpiDevice.Create(settings);
 
 #if WS2808
-            var neo = new Ws2808(spi, count);
+            _neo = new Ws2808(spi, count);
 #else
-            var neo = new Ws2812b(spi, Count);
+            s_neo = new Ws2812b(spi, Count);
 #endif
-
-            // Display basic colors for 5 sec
-            BitmapImage img = neo.Image;
-            img.Clear();
-            img.SetPixel(0, 0, Color.White);
-            img.SetPixel(1, 0, Color.Red);
-            img.SetPixel(2, 0, Color.Green);
-            img.SetPixel(3, 0, Color.Blue);
-            img.SetPixel(4, 0, Color.Yellow);
-            img.SetPixel(5, 0, Color.Cyan);
-            img.SetPixel(6, 0, Color.Magenta);
-            img.SetPixel(7, 0, Color.FromArgb(unchecked((int)0xffff8000)));
-            neo.Update();
-            System.Threading.Thread.Sleep(5000);
-
-            // Fade in first pixel
-            byte b = 0;
-            img.Clear();
             while (true)
             {
-                img.SetPixel(0, 0, Color.FromArgb(0xff, b, b, b));
+                if (opts.ColorWipe)
+                {
+                    foreach (var color in opts.Colors)
+                    {
+                        ColorWipe(s_neo, Color.FromName(color), (int)opts.LEDCount);
+                    }
+                }
+
+                if (opts.TheaterChase)
+                {
+                    foreach (var color in opts.Colors)
+                    {
+                        TheatreChase(s_neo, Color.FromName(color), (int)opts.LEDCount);
+                    }
+                }
+
+                if (opts.Rainbows)
+                {
+                    Rainbow(s_neo, (int)opts.LEDCount);
+                    RainbowCycle(s_neo, (int)opts.LEDCount);
+                    TheaterChaseRainbow(s_neo, (int)opts.LEDCount);
+                }
+            }
+
+        }
+
+        private static void HandleParseError(IEnumerable<Error> errs)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void CancelHandler(object sender, ConsoleCancelEventArgs e)
+        {
+            BitmapImage img = s_neo.Image;
+            img.Clear();
+            s_neo.Update();
+            Console.Clear();
+        }
+
+        public static void ColorWipe(Ws28xx neo, Color color, int count)
+        {
+            BitmapImage img = neo.Image;
+            for (var i = 0; i < count; i++)
+            {
+                img.SetPixel(i, 0, color);
                 neo.Update();
-                System.Threading.Thread.Sleep(10);
-                b++;
             }
         }
+
+        public static void TheatreChase(Ws28xx neo, Color color, int count, int iterations = 10)
+        {
+            BitmapImage img = neo.Image;
+            for (var i = 0; i < iterations; i++)
+            {
+                for (var j = 0; j < 3; j++)
+                {
+                    for (var k = 0; k < count; k += 3)
+                    {
+                        img.SetPixel(j + k, 0, color);
+                    }
+
+                    neo.Update();
+                    System.Threading.Thread.Sleep(100);
+                    for (var k = 0; k < count; k += 3)
+                    {
+                        img.SetPixel(j + k, 0, Color.Black);
+                    }
+                }
+            }
+        }
+
+        public static Color Wheel(int position)
+        {
+            if (position < 85)
+            {
+                return Color.FromArgb(position * 3, 255 - position * 3, 0);
+            }
+            else if (position < 170)
+            {
+                position -= 85;
+                return Color.FromArgb(255 - position * 3, 0, position * 3);
+            }
+            else
+            {
+                position -= 170;
+                return Color.FromArgb(0, position * 3, 255 - position * 3);
+            }
+        }
+
+        public static void Rainbow(Ws28xx neo, int count, int iterations = 1)
+        {
+            BitmapImage img = neo.Image;
+            for (var i = 0; i < 255 * iterations; i++)
+            {
+                for (var j = 0; j < count; j++)
+                {
+                    img.SetPixel(j, 0, Wheel((i + j) & 255));
+                }
+
+                neo.Update();
+            }
+        }
+
+        public static void RainbowCycle(Ws28xx neo, int count, int iterations = 1)
+        {
+            BitmapImage img = neo.Image;
+            for (var i = 0; i < 255 * iterations; i++)
+            {
+                for (var j = 0; j < count; j++)
+                {
+                    img.SetPixel(j, 0, Wheel(((int)(j * 255 / count) + i) & 255));
+                }
+
+                neo.Update();
+            }
+        }
+
+        public static void TheaterChaseRainbow(Ws28xx neo, int count)
+        {
+            BitmapImage img = neo.Image;
+            for (var i = 0; i < 255; i++)
+            {
+                for (var j = 0; j < 3; j++)
+                {
+                    for (var k = 0; k < count; k += 3)
+                    {
+                        img.SetPixel(k + j, 0, Wheel((k + i) % 255));
+                    }
+
+                    neo.Update();
+                    System.Threading.Thread.Sleep(100);
+
+                    for (var k = 0; k < count; k += 3)
+                    {
+                        img.SetPixel(k + j, 0, Color.Black);
+                    }
+                }
+            }
+        }
+
     }
 }
