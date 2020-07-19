@@ -13,30 +13,30 @@ namespace CharlieTest
         /// </summary>
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Hello World6!");
 
             var pins = new int[] { 6, 13, 19, 26 };
-            var charliePinCount = 8;
+            var charlieSegmentLength = 8;
             // calling this method helps with determing the correct pin circuit to use
-            var charliePins = Charlieplex.GetCharlieLoads(pins, 12);
-            var charlie = new Charlieplex(pins, charliePinCount);
+            var charlieNodes = Charlieplex.GetCharlieNodes(pins, charlieSegmentLength);
+            var charlie = new Charlieplex(pins, charlieSegmentLength);
 
-            Console.WriteLine("Light 1st LED -- 1s");
-            charlie.Write(0, 1, 1000);
-
-            Console.ReadLine();
-            charlie.Write(0, 0, 0);
-
-            Console.WriteLine("Light all LEDs -- 50ms");
-            for (int i = 0; i < charliePinCount; i++)
+            for (int j = 0; j < 2; j++)
             {
-                charlie.Write(i, 1, 50);
-            }
+                var delay = 10 / (j + 1);
+                Console.WriteLine($"Light all LEDs -- {delay}ms");
+                for (int i = 0; i < charlieSegmentLength; i++)
+                {
+                    Console.WriteLine($"light pin {i}");
+                    charlie.Write(i, 1, delay);
+                }
 
-            Console.WriteLine("Dim all LEDs -- 50ms");
-            for (int i = 0; i < charliePinCount; i++)
-            {
-                charlie.Write(i, 0, 50);
+                Console.WriteLine($"Dim all LEDs -- {delay}ms");
+                for (int i = 0; i < charlieSegmentLength; i++)
+                {
+                    Console.WriteLine($"dim pin {i}");
+                    charlie.Write(i, 0, delay);
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Device.Gpio;
+using System.Diagnostics;
 using System.Threading;
 
 namespace Iot.Device.Multiplex
@@ -13,8 +14,11 @@ namespace Iot.Device.Multiplex
         private readonly bool _shouldDispose;
         private GpioController _controller;
         private int[] _pins;
+        private int _anodePin;
+        private int _cathodePin;
         private int _nodeCount;
         private CharlieplexNode[] _charlieNodes;
+        private CharlieplexNode _lastNode;
 
         /// <summary>
         /// Initializes a new Charlieplex type that can be use for multiplex over a relatively small number of GPIO pins.
@@ -41,27 +45,36 @@ namespace Iot.Device.Multiplex
                 nodeCount = charlieCount;
             }
 
-            if (gpioController == null)
+            if (gpioController is null)
             {
                 gpioController = new GpioController();
             }
 
-            foreach (var pin in pins)
+            gpioController.OpenPin(pins[0]);
+            gpioController.OpenPin(pins[1]);
+            gpioController.SetPinMode(pins[0], PinMode.Output);
+            gpioController.SetPinMode(pins[1], PinMode.Output);
+
+            for (int i = 2; i < pins.Length; i++)
             {
-                gpioController.OpenPin(pin, PinMode.Input);
+                gpioController.OpenPin(pins[i]);
+                gpioController.SetPinMode(pins[i], PinMode.Input);
             }
 
+            _anodePin = pins[1];
+            _cathodePin = pins[0];
             _controller = gpioController;
             _shouldDispose = shouldDispose;
             _pins = pins;
             _nodeCount = nodeCount;
-            _charlieNodes = GetCharlieLoads(pins, nodeCount);
+            _charlieNodes = GetCharlieNodes(pins, nodeCount);
+            _lastNode = _charlieNodes[_charlieNodes.Length - 1];
         }
 
         /// <summary>
         /// The number of load devices (like LEDs) that can be addressed.
         /// </summary>
-        public int LoadCount => _nodeCount;
+        public int NodeCount => _nodeCount;
 
         /// <summary>
         /// Write a PinValue to a load.
@@ -71,13 +84,87 @@ namespace Iot.Device.Multiplex
         {
             _charlieNodes[node].Value = value;
 
-            for (int i = 0; i < delay; i++)
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var exitTime = DateTime.Now.AddMilliseconds(delay);
+            WriteSegment();
+            while (DateTime.Now < exitTime)
             {
-                WriteSegment();
+                WriteSegment2();
             }
+
+            // _controller.Write(_lastNode.Anode, 0);
+            stopwatch.Stop();
+            Console.WriteLine($"Delay: {delay}; Elapsed time: {stopwatch.ElapsedMilliseconds}ms");
         }
 
         private void WriteSegment()
+        {
+            /*
+                Cases to consider
+                node.Cathode == _cathodePin
+                node.Cathode == _anodePin -- drop low
+                node.Anode == _cathodePin
+                node.Anode == _anodePin
+                node.Anode != _cathodePin | _anodePin
+                node.Cathode != _cathodePin | _anodePin
+            */
+
+            // int delay = 1;
+            // Console.WriteLine($"In {nameof(WriteSegment)}");
+            for (int i = 0; i < _charlieNodes.Length; i++)
+            {
+                // PrintPinState($"Enter [{i}] A: {_anodePin}; C: {_cathodePin}; ");
+                var node = _charlieNodes[i];
+                Console.WriteLine($"Node: {i}; n.Anode: {node.Anode}; n.Cathode: {node.Cathode}; _anode: {_anodePin}; _cathode: {_cathodePin}");
+                PrintEnvironmentState(node);
+
+                // try to skip resetting pinmode if possible
+                // set ground on cathode leg
+                if (node.Cathode == _anodePin)
+                {
+                    _controller.Write(node.Cathode, 0);
+                }
+
+                if (_anodePin != node.Anode && _anodePin != node.Cathode)
+                {
+                    if (_controller.GetPinMode(_anodePin) == PinMode.Input)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("55555555555555555555555555555555555555555555");
+                        Console.WriteLine($"{_anodePin} is input");
+                    }
+
+                    _controller.Write(_anodePin, 0);
+                    _controller.SetPinMode(_anodePin, PinMode.Input);
+                }
+
+                if (_cathodePin != node.Anode && _cathodePin != node.Cathode)
+                {
+                    _controller.SetPinMode(_cathodePin, PinMode.Input);
+                }
+
+                if (node.Cathode != _anodePin && node.Cathode != _cathodePin)
+                {
+                    _controller.SetPinMode(node.Cathode, PinMode.Output);
+                }
+
+                if (node.Anode != _anodePin && node.Anode != _cathodePin)
+                {
+                    _controller.SetPinMode(node.Anode, PinMode.Output);
+                }
+
+                Console.WriteLine($"value: {node.Value}; anode pin: {node.Anode}");
+
+                _controller.Write(node.Anode, node.Value);
+
+                PrintEnvironmentState(node);
+                _anodePin = node.Anode;
+                _cathodePin = node.Cathode;
+            }
+        }
+
+        private void WriteSegment2()
         {
             // int delay = 1;
             // configure the circuit back to a neutral configuration
@@ -89,10 +176,6 @@ namespace Iot.Device.Multiplex
             for (int i = 0; i < _charlieNodes.Length; i++)
             {
                 var node = _charlieNodes[i];
-                if (node.Value == PinValue.Low)
-                {
-                    continue;
-                }
 
                 // set ground on Cathode leg
                 _controller.SetPinMode(node.Cathode, PinMode.Output);
@@ -100,19 +183,43 @@ namespace Iot.Device.Multiplex
 
                 // set power on Anode leg
                 _controller.SetPinMode(node.Anode, PinMode.Output);
-                _controller.Write(node.Anode, 1);
+                _controller.Write(node.Anode, node.Value);
                 // Thread.Sleep(delay);
                 _controller.SetPinMode(node.Anode, PinMode.Input);
                 _controller.SetPinMode(node.Cathode, PinMode.Input);
             }
+        }
 
+        private void PrintEnvironmentState(CharlieplexNode node)
+        {
+            foreach (var pin in _pins)
+            {
+                Console.Write($"{pin}: {_controller.GetPinMode(pin)} -- {_controller.Read(pin)}; ");
+            }
+
+            Console.WriteLine();
+        }
+
+        private void PrintPinState(string message = null)
+        {
+            if (message is object)
+            {
+                Console.Write($"{message} --");
+            }
+
+            foreach (var pin in _pins)
+            {
+                Console.Write($"{pin}: {_controller.GetPinMode(pin)}; ");
+            }
+
+            Console.WriteLine();
         }
 
         /// <summary>
         /// Provides the set of Charlie loads given the set of pins and the count provided.
         /// If count = 0, then the Charlieplex maximum is used for the pins provided (n^2-n).
         /// </summary>
-        public static CharlieplexNode[] GetCharlieLoads(int[] pins, int loadCount = 0)
+        public static CharlieplexNode[] GetCharlieNodes(int[] pins, int loadCount = 0)
         {
             var pinCount = pins.Length;
 
