@@ -1,24 +1,91 @@
+**This repository is forked from dotnet/iot**
+
 # How is this fork different to dotnet/iot (Master Branch):
-- The sample apps are set to .NET Core 3.1 instead of 2.1
-  - A couple of other version changes as well
-- The x64 version in global.json is set to 3.1.5 from 2.1.1
-- Changes:
+  - Leave the code so that .NET Core V2.1 apps can link unchanged.
+  - Samples and tests changed to .NET Core V3.1
+  - .NET Standrd left as V2.0
+
+# Changes:
+
+global.json
+  - The "dotnet/x64" value is set to "3.1.5" instead of "2.1.11"
+
+In /Documentation
+  - No changes
+
+In /Samples
+  - Update all .NET Core projects to V3.1
+
+In /eng
+  - Update all .NET Core projects to V3.1
+
+In /Tools
+  - Update all .NET Core projects to V3.1
+
+In /src/Iot.Device.Bindings
+  - No change
+
+In /src/System.Device.GPIO
+  - No change,  .NET Standard 2.0 anyway
+
+In /src/Device
+  - In each Device XXX folder:
+    - Update the /src/Device/XXX/samples/XXX.csproj to V3.1
+      - But not /src/Device/XXX/XXX.csproj (Left as V2.1)
+  - Test projects updated to V3.1
+  - In /src/Device/Common
+    - Leave CommonHelpers.csproj as V2.1   as /src/Device/XXX/XXX.csproj uses that.
+    - Update the test project to V3.1 though
+
+In /src/Card
+  - CardRfid.csproj left as V2.1 as above
+  - The following avert an error in building Pn5180:
+    - CreditCard/CreditCardProcessing.csproj  left as V2.1
+    - Mifare/Mifare.csproj left as V2.1
+  
+
+From the root running ```./Build``` runs to completion and tests pass OK.  
+Nb: In VS Code in Windows
+
+<hr>
+
+Nb: Setting The "dotnet/x64" value back to  "2.1.11"  
+The tests in  <root>\Samples fail to build/run.  
+Setting the projects Iot\Samples\XXX\.csproj back to V2.1 nearly solves this.  
+Then get some errors with respect to System.Text.Json in the weather Samples apps.  
+Not the weather in Devices\Common though!
+On looking this up in [Ms Dox](https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-overview), this is included in .NET Core V3.0.  
+You need to reference it in earlier versions. By adding:
+
 ```
-netcoreapp2.1 -> netcoreapp3.1
-netcoreapp2.2 -> netcoreapp3.1
-netcoreapp3.0 -> netcoreapp3.1
-$dotnetSdkVersion="2.1.507" -> $dotnetSdkVersion="3.1.300"
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="1.1.0-prerelease.20153.1" />
+    <PackageReference Include="Iot.Device.Bindings" Version="1.1.0-prerelease.20153.1" />
+    <PackageReference Include="System.Text.Json" Version="4.7.2"  />
+  </ItemGroup>
+```
 
-Nb: I did bulk changes "Replace in Files" in VS Code.
+to the **Samples\led-matrix-weather.csproj** and **Samples\led-more-blinking-lights.csproj** (with x64 set to 2.1.11) ```,/Build``` runs sucessfully to completion.  
 
-In global.json:
-      "dotnet/x64": [
-        "3.1.5"
-      ]
- ```  
- - The build action in the root runs to completion if the following project is removed from the tree (Not required in dotnet/iot version):  
-   ```Mpu9250```
- - This was raised as an Issue on dotnet/iot as [Issue #1127](https://github.com/dotnet/iot/issues/1127)
+**Further:** Some of the Samples projects were set to other than V2.1 in dotnet/iot.
+
+- force-sensitive-resitor: V2.1
+- led-blink: V3.1
+- led-matrix-weather: V3.0
+- led-more-blinking-lights: V2.1
+- arduino-demo: V3.0
+
+Restoring these values, and NOT adding the System.Text.Json reference to any of these projects with global.json x64 set to 2.1.11, enabled ```./Build``` to run successfully to completion.
+
+<hr>
+
+**Hint:** If you want to build a specific sample on its own, in situ then change the SDK version in global.json to 3.1:
+
+```
+  "sdk": {
+    "version": "3.1"
+  },
+ ```
 
 <hr>
 
