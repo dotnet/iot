@@ -30,9 +30,10 @@ namespace CharlieTest
                 }
             }
 
-            charlie.DisplaySegment(2000);
+            var span = TimeSpan.FromSeconds(2);
+            charlie.DisplaySegment(span);
             Thread.Sleep(1000);
-            charlie.DisplaySegment(2000);
+            charlie.DisplaySegment(span);
 
             for (int i = 0; i < 8; i++)
             {
@@ -40,7 +41,7 @@ namespace CharlieTest
             }
 
             var delayLengths = new int[] { 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 1500 };
-            foreach (var delay in delayLengths.Reverse())
+            foreach (var delay in delayLengths)
             {
                 Console.WriteLine($"Light one LED at a time -- Delay {delay}");
                 for (int i = 0; i < charlieSegmentLength; i++)
@@ -50,7 +51,7 @@ namespace CharlieTest
                 }
             }
 
-            foreach (var delay in delayLengths)
+            foreach (var delay in delayLengths.Reverse())
             {
                 Console.WriteLine($"Light and then dim all LEDs, in sequence. Delay: {delay}");
 

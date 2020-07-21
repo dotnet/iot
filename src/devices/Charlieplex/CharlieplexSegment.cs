@@ -80,27 +80,26 @@ namespace Iot.Device.Multiplexer
         /// <summary>
         /// Write a PinValue to a node, to update Charlieplex segment.
         /// Address scheme is 0-based. Given 8 nodes, addresses would be 0-7.
-        /// Delay is length of time that the segment should be displayed, in milliseconds.
+        /// Displays nodes in their updated configuration for the specified duration.
         /// </summary>
         /// <param name="node">Node to update.</param>
         /// <param name="value">Value to write.</param>
-        /// <param name="time">Time to display segment.</param>
-        public void Write(int node, PinValue value, int time = 10)
+        /// <param name="duration">Time to display segment, in milliseconds.</param>
+        public void Write(int node, PinValue value, int duration = 10)
         {
             _charlieNodes[node].Value = value;
 
-            if (time > 0)
+            if (duration > 0)
             {
-                DisplaySegment(time);
+                DisplaySegment(TimeSpan.FromMilliseconds(duration));
             }
         }
 
         /// <summary>
-        /// Displays nodes in their current configuration.
-        /// Delay is length of time that the segment should be displayed, in milliseconds.
+        /// Displays nodes in their current configuration for the specified duration.
         /// </summary>
-        /// <param name="time">Time to display segment.</param>
-        public void DisplaySegment(int time)
+        /// <param name="duration">Time to display segment.</param>
+        public void DisplaySegment(TimeSpan duration)
         {
             /*
                 Cases to consider
@@ -112,7 +111,6 @@ namespace Iot.Device.Multiplexer
                 node.Cathode != _lastNode.Cathode | _lastNode.Anode
             */
 
-            var endTime = TimeSpan.FromMilliseconds(time);
             var watch = new Stopwatch();
             watch.Start();
             do
@@ -151,7 +149,7 @@ namespace Iot.Device.Multiplexer
                     _lastNode.Cathode = node.Cathode;
                 }
             }
-            while (watch.Elapsed < endTime);
+            while (watch.Elapsed < duration);
 
         }
 

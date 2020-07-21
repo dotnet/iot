@@ -8,7 +8,7 @@ The following code demonstrates addressing 8 LEDs with 4 pins. 4 pins could be u
 
 var pins = new int[] { 6, 13, 19, 26 };
 var charliePinCount = 8;
-var charlie = new Charlieplex(pins, charliePinCount);
+var charlie = new CharlieplexSegment(pins, charliePinCount);
 
 for (int i = 0; i < charliePinCount; i++)
 {
