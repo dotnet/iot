@@ -1,5 +1,7 @@
 ﻿using System;
-using Iot.Device.Multiplex;
+using System.Linq;
+using System.Threading;
+using Iot.Device.Multiplexer;
 
 namespace CharlieTest
 {
@@ -13,29 +15,55 @@ namespace CharlieTest
         /// </summary>
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World6!");
-
             var pins = new int[] { 6, 13, 19, 26 };
             var charlieSegmentLength = 8;
             // calling this method helps with determing the correct pin circuit to use
-            var charlieNodes = Charlieplex.GetCharlieNodes(pins, charlieSegmentLength);
-            var charlie = new Charlieplex(pins, charlieSegmentLength);
+            // var nodes = CharlieplexSegment.GetCharlieNodes(pins, charlieSegmentLength);
+            var charlie = new CharlieplexSegment(pins, charlieSegmentLength);
 
-            for (int j = 0; j < 2; j++)
+            Console.WriteLine("Write data -- light odd values -- and then display.");
+            for (int i = 0; i < 8; i++)
             {
-                var delay = 10 / (j + 1);
-                Console.WriteLine($"Light all LEDs -- {delay}ms");
+                if (i % 2 == 1)
+                {
+                    charlie.Write(i, 1, 0);
+                }
+            }
+
+            charlie.DisplaySegment(2000);
+            Thread.Sleep(1000);
+            charlie.DisplaySegment(2000);
+
+            for (int i = 0; i < 8; i++)
+            {
+                charlie.Write(i, 0, 0);
+            }
+
+            var delayLengths = new int[] { 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 1500 };
+            foreach (var delay in delayLengths.Reverse())
+            {
+                Console.WriteLine($"Light one LED at a time -- Delay {delay}");
+                for (int i = 0; i < charlieSegmentLength; i++)
+                {
+                    charlie.Write(i, 1, delay);
+                    charlie.Write(i, 0, delay / 2);
+                }
+            }
+
+            foreach (var delay in delayLengths)
+            {
+                Console.WriteLine($"Light and then dim all LEDs, in sequence. Delay: {delay}");
+
                 for (int i = 0; i < charlieSegmentLength; i++)
                 {
                     Console.WriteLine($"light pin {i}");
                     charlie.Write(i, 1, delay);
                 }
 
-                Console.WriteLine($"Dim all LEDs -- {delay}ms");
                 for (int i = 0; i < charlieSegmentLength; i++)
                 {
                     Console.WriteLine($"dim pin {i}");
-                    charlie.Write(i, 0, delay);
+                    charlie.Write(i, 0, delay / 2);
                 }
             }
         }

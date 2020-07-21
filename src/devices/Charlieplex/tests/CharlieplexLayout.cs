@@ -1,6 +1,6 @@
 ﻿using System;
 using Xunit;
-using Iot.Device.Multiplex;
+using Iot.Device.Multiplexer;
 
 namespace Charlietests
 {
@@ -11,10 +11,10 @@ namespace Charlietests
         {
             var pins = new int[] { 1, 2 };
 
-            var loads = Charlieplex.GetCharlieNodes(pins);
-            Assert.True(loads.Length == 2);
-            Assert.True(loads[0].Anode == 1 && loads[0].Cathode == 2);
-            Assert.True(loads[1].Anode == 2 && loads[1].Cathode == 1);
+            var nodes = CharlieplexSegment.GetNodes(pins);
+            Assert.True(nodes.Length == 2);
+            Assert.True(nodes[0].Anode == 1 && nodes[0].Cathode == 2);
+            Assert.True(nodes[1].Anode == 2 && nodes[1].Cathode == 1);
         }
 
         [Fact]
@@ -22,64 +22,64 @@ namespace Charlietests
         {
             var pins = new int[] { 1, 2, 3 };
 
-            var loads = Charlieplex.GetCharlieNodes(pins);
-            Assert.True(loads.Length == 6);
-            Assert.True(loads[0].Anode == 1 && loads[0].Cathode == 2);
-            Assert.True(loads[1].Anode == 2 && loads[1].Cathode == 1);
-            Assert.True(loads[2].Anode == 2 && loads[2].Cathode == 3);
-            Assert.True(loads[3].Anode == 3 && loads[3].Cathode == 2);
-            Assert.True(loads[4].Anode == 1 && loads[4].Cathode == 3);
-            Assert.True(loads[5].Anode == 3 && loads[5].Cathode == 1);
+            var nodes = CharlieplexSegment.GetNodes(pins);
+            Assert.True(nodes.Length == 6);
+            Assert.True(nodes[0].Anode == 1 && nodes[0].Cathode == 2);
+            Assert.True(nodes[1].Anode == 2 && nodes[1].Cathode == 1);
+            Assert.True(nodes[2].Anode == 2 && nodes[2].Cathode == 3);
+            Assert.True(nodes[3].Anode == 3 && nodes[3].Cathode == 2);
+            Assert.True(nodes[4].Anode == 1 && nodes[4].Cathode == 3);
+            Assert.True(nodes[5].Anode == 3 && nodes[5].Cathode == 1);
         }
 
         [Fact]
         public void FourPinLayout()
         {
             var pins = new int[] { 1, 2, 3, 4 };
-            var loads = Charlieplex.GetCharlieNodes(pins);
+            var nodes = CharlieplexSegment.GetNodes(pins);
             Assert.True(true);
-            Assert.True(loads.Length == 12);
-            Assert.True(loads[0].Anode == 1 && loads[0].Cathode == 2);
-            Assert.True(loads[1].Anode == 2 && loads[1].Cathode == 1);
-            Assert.True(loads[2].Anode == 2 && loads[2].Cathode == 3);
-            Assert.True(loads[3].Anode == 3 && loads[3].Cathode == 2);
-            Assert.True(loads[4].Anode == 3 && loads[4].Cathode == 4);
-            Assert.True(loads[5].Anode == 4 && loads[5].Cathode == 3);
-            Assert.True(loads[6].Anode == 1 && loads[6].Cathode == 3);
-            Assert.True(loads[7].Anode == 3 && loads[7].Cathode == 1);
-            Assert.True(loads[8].Anode == 2 && loads[8].Cathode == 4);
-            Assert.True(loads[9].Anode == 4 && loads[9].Cathode == 2);
-            Assert.True(loads[10].Anode == 1 && loads[10].Cathode == 4);
-            Assert.True(loads[11].Anode == 4 && loads[11].Cathode == 1);
+            Assert.True(nodes.Length == 12);
+            Assert.True(nodes[0].Anode == 1 && nodes[0].Cathode == 2);
+            Assert.True(nodes[1].Anode == 2 && nodes[1].Cathode == 1);
+            Assert.True(nodes[2].Anode == 2 && nodes[2].Cathode == 3);
+            Assert.True(nodes[3].Anode == 3 && nodes[3].Cathode == 2);
+            Assert.True(nodes[4].Anode == 3 && nodes[4].Cathode == 4);
+            Assert.True(nodes[5].Anode == 4 && nodes[5].Cathode == 3);
+            Assert.True(nodes[6].Anode == 1 && nodes[6].Cathode == 3);
+            Assert.True(nodes[7].Anode == 3 && nodes[7].Cathode == 1);
+            Assert.True(nodes[8].Anode == 2 && nodes[8].Cathode == 4);
+            Assert.True(nodes[9].Anode == 4 && nodes[9].Cathode == 2);
+            Assert.True(nodes[10].Anode == 1 && nodes[10].Cathode == 4);
+            Assert.True(nodes[11].Anode == 4 && nodes[11].Cathode == 1);
         }
 
         [Fact]
         public void FivePinLayout()
         {
             var pins = new int[] { 1, 2, 3, 4, 5 };
-            var loads = Charlieplex.GetCharlieNodes(pins);
+            var nodes = CharlieplexSegment.GetNodes(pins);
             Assert.True(true);
-            Assert.True(loads.Length == 20);
-            Assert.True(loads[0].Anode == 1 && loads[0].Cathode == 2);
-            Assert.True(loads[1].Anode == 2 && loads[1].Cathode == 1);
-            Assert.True(loads[2].Anode == 2 && loads[2].Cathode == 3);
-            Assert.True(loads[3].Anode == 3 && loads[3].Cathode == 2);
-            Assert.True(loads[4].Anode == 3 && loads[4].Cathode == 4);
-            Assert.True(loads[5].Anode == 4 && loads[5].Cathode == 3);
-            Assert.True(loads[6].Anode == 4 && loads[6].Cathode == 5);
-            Assert.True(loads[7].Anode == 5 && loads[7].Cathode == 4);
-            Assert.True(loads[8].Anode == 1 && loads[8].Cathode == 3);
-            Assert.True(loads[9].Anode == 3 && loads[9].Cathode == 1);
-            Assert.True(loads[10].Anode == 2 && loads[10].Cathode == 4);
-            Assert.True(loads[11].Anode == 4 && loads[11].Cathode == 2);
-            Assert.True(loads[12].Anode == 3 && loads[12].Cathode == 5);
-            Assert.True(loads[13].Anode == 5 && loads[13].Cathode == 3);
-            Assert.True(loads[14].Anode == 1 && loads[14].Cathode == 4);
-            Assert.True(loads[15].Anode == 4 && loads[15].Cathode == 1);
-            Assert.True(loads[16].Anode == 2 && loads[16].Cathode == 5);
-            Assert.True(loads[17].Anode == 5 && loads[17].Cathode == 2);
-            Assert.True(loads[18].Anode == 1 && loads[18].Cathode == 5);
-            Assert.True(loads[19].Anode == 5 && loads[19].Cathode == 1);
+            Assert.True(nodes.Length == 20);
+            Assert.True(nodes[0].Anode == 1 && nodes[0].Cathode == 2);
+            Assert.True(nodes[1].Anode == 2 && nodes[1].Cathode == 1);
+            Assert.True(nodes[2].Anode == 2 && nodes[2].Cathode == 3);
+            Assert.True(nodes[3].Anode == 3 && nodes[3].Cathode == 2);
+            Assert.True(nodes[4].Anode == 3 && nodes[4].Cathode == 4);
+            Assert.True(nodes[5].Anode == 4 && nodes[5].Cathode == 3);
+            Assert.True(nodes[6].Anode == 4 && nodes[6].Cathode == 5);
+            Assert.True(nodes[7].Anode == 5 && nodes[7].Cathode == 4);
+            Assert.True(nodes[8].Anode == 1 && nodes[8].Cathode == 3);
+            Assert.True(nodes[9].Anode == 3 && nodes[9].Cathode == 1);
+            Assert.True(nodes[10].Anode == 2 && nodes[10].Cathode == 4);
+            Assert.True(nodes[11].Anode == 4 && nodes[11].Cathode == 2);
+            Assert.True(nodes[12].Anode == 3 && nodes[12].Cathode == 5);
+            Assert.True(nodes[13].Anode == 5 && nodes[13].Cathode == 3);
+            Assert.True(nodes[14].Anode == 1 && nodes[14].Cathode == 4);
+            Assert.True(nodes[15].Anode == 4 && nodes[15].Cathode == 1);
+            Assert.True(nodes[16].Anode == 2 && nodes[16].Cathode == 5);
+            Assert.True(nodes[17].Anode == 5 && nodes[17].Cathode == 2);
+            Assert.True(nodes[18].Anode == 1 && nodes[18].Cathode == 5);
+            Assert.True(nodes[19].Anode == 5 && nodes[19].Cathode == 1);
         }
     }
 }

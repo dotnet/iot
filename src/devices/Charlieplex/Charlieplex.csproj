@@ -11,8 +11,7 @@
 
 <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-    <Compile Include="Charlieplex.cs" />
-    <Compile Include="CharlieplexNode.cs" />
+    <Compile Include="CharlieplexSegment.cs" />
   </ItemGroup>
 
 </Project>
