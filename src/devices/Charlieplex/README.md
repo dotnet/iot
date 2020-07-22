@@ -1,4 +1,4 @@
-# Charlieplexing binding
+# Charlieplex Segment binding
 
 [Charliplexing](https://en.wikipedia.org/wiki/Charlieplexing) is a multiplexing scheme that enables controlling a significantly larger number of LEDs or other load or sensor than a [more traditional wiring scheme](https://github.com/dotnet/iot/tree/master/samples/led-blink) would allow. Charlieplexing enables addressing up to `n^2-n` LEDs where n is the number of pins available. For example, 3 pins can be used to address up to 6 LEDs, 4 pins can address 12, and 5 pins can address 20. That sounds great, however charlieplexed circuits are hard to wire due to their complexity. 
 
@@ -47,18 +47,18 @@ Node 5 -- Anode: 19; Cathode: 6
 ```
 
 Given a 6 LED circut, `charlie.Write(5,1)` will light LED6 in the diagram. The API uses a 0-based scheme. As a result, `charlie.Write(6,1)` will throw an exception.
-
-This image demonstrates a 2-pin circuit. There isn't any reason to use a 2-pin charlieplex circuit other than as a learning exercise.
  
 ![Two LED charlieplex circuit](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/2-pin_Charlieplexing_with_common_resistor.svg/1200px-2-pin_Charlieplexing_with_common_resistor.svg.png)
 
-This image demonstrates a 3-pin circuit.
+This image demonstrates a 2-pin circuit. There isn't any reason to use a 2-pin charlieplex circuit other than as a learning exercise.
 
 ![Three LED charlieplex circuit](https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/3-pin_Charlieplexing_with_common_resistors.svg/800px-3-pin_Charlieplexing_with_common_resistors.svg.png)
 
-This image demonstrates a 6-pin circuit.
+This image demonstrates a 3-pin circuit.
 
 ![Six LED charliplex circuit](https://upload.wikimedia.org/wikipedia/commons/3/3d/3-pin_Charlieplexing_with_common_resistors.svg)
+
+This image demonstrates a 6-pin circuit.
 
 The [Controlling 20 Led's From 5 Arduino Pins Using Charlieplexing](https://www.instructables.com/id/Controlling-20-Leds-from-5-Arduino-pins-using-Cha/) includes larger wiring diagrams that match the scheme used by this binding.
 
