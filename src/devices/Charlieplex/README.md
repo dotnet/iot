@@ -4,12 +4,6 @@
 
 An even bigger challenge is that the scheme (at least in its basic form) only allows for lighting a single LED at once. On the face of it, that would seem to be a big problem. Don't worry. The LEDs change very quickly such that the eye is tricked into thinking multiple LEDs are lit at the same time. This means that your code that cannot be doing something else while the LEDs are lit. This is why the API accepts timing information. This is not what you'd expect if you are used to lighting LEDs directly from GPIO pins or via a shift register.
 
-The following image demonstrates a 3-pin charlieplex circuit, which is the starting point for charlieplexing. There are 6 LEDs in the circuit in groups of two. In each group of two, the LEDs connect to the same two GPIO pins, but with the opposite polarity (anode and cathodes are switched).
-
-![20200721_213922059_iOS (2)](https://user-images.githubusercontent.com/2608468/88128814-90e46000-cb8b-11ea-82a3-43cd8d2ce98d.jpg)
-
-[Video](https://youtu.be/eR0fdzPZgcI)
-
 ## Usage
 
 The following sample demonstrates addressing 6 LEDs with 3 pins.
@@ -27,6 +21,22 @@ for (int i = 0; i < ledCount; i++)
     charlie.Write(i, 0);
 }
 ```
+
+## Using with LEDs
+
+The following image demonstrates a 3-pin charlieplex circuit, which is the starting point for charlieplexing. There are 6 LEDs in the circuit in groups of two. In each group of two, the LEDs connect to the same two GPIO pins, but with the opposite polarity (anode and cathodes are switched).
+
+<img src="https://user-images.githubusercontent.com/2608468/88128814-90e46000-cb8b-11ea-82a3-43cd8d2ce98d.jpg" height="500px">
+
+[Video](https://youtu.be/eR0fdzPZgcI)
+
+## Using with an LED bar graph
+
+The image above demonstrates using LEDs within a charlieplex circuit. LEDs are straightforward to use since you can switch their anode/cathode orientation. You cannot do that with an [LED bar graph](https://www.adafruit.com/product/1815) since the anode and cathode legs are fixed. Instead, you need to create your own circuit on a breadboard, and then feed that to the appropriate legs. That's what you see happening in the image below.
+
+<img src="https://user-images.githubusercontent.com/2608468/88133056-09e8b500-cb96-11ea-806b-374a9881e10d.jpg" height="500px">
+
+[Video](https://youtu.be/INu0yyVbmho)
 
 ## Circuit addressing scheme
 
@@ -61,14 +71,6 @@ This image demonstrates a 3-pin circuit.
 This image demonstrates a 6-pin circuit.
 
 The [Controlling 20 Led's From 5 Arduino Pins Using Charlieplexing](https://www.instructables.com/id/Controlling-20-Leds-from-5-Arduino-pins-using-Cha/) includes larger wiring diagrams that match the scheme used by this binding.
-
-## Using an LED bar graph
-
-The image above demonstrates using LEDs within a charlieplex circuit. LEDs are straightforward to use since you can switch their anode/cathode orientation. You cannot do that with an [LED bar graph](https://www.adafruit.com/product/1815) since the anode and cathode legs are fixed. Instead, you need to create your own circuit on a breadboard, and then feed that to the appropriate legs. That's what you see happening in the image below.
-
-![20200722_003744342_iOS (2)](https://user-images.githubusercontent.com/2608468/88133056-09e8b500-cb96-11ea-806b-374a9881e10d.jpg)
-
-[Video](https://youtu.be/INu0yyVbmho)
 
 ## Alternatives
 
