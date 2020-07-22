@@ -6,7 +6,7 @@ An even bigger challenge is that the scheme (at least in its basic form) only al
 
 ## Usage
 
-The following sample demonstrates addressing 6 LEDs with 3 pins.
+The following code sample demonstrates addressing 6 LEDs with 3 pins.
 
 ```csharp
 
@@ -21,6 +21,8 @@ for (int i = 0; i < ledCount; i++)
     charlie.Write(i, 0);
 }
 ```
+
+The [charlieplex-test sample](samples/Program.cs) exercises a broader use of the API.
 
 ## Using with LEDs
 
@@ -44,7 +46,7 @@ The [CharlieplexSegment](CharlieplexSegment.cs) type uses an addressing scheme t
 
 It is critical to understand the difference between anode (typically longer) and cathode legs of LEDs. You will be checking these with each placement.
 
-The binding includes an API that returns a description of the circuit you need to use. The [sample](Samples/Program.cs) calls this API and prints this information to the terminal, using the same pins as the code example above. This information is very helpful to have to configure the circuit correctly.
+The binding includes an API that returns a description of the circuit you need to use. The [sample](samples/Program.cs) calls this API and prints this information to the terminal, using the same pins as the code example above. This information is very helpful to have to configure the circuit correctly.
 
 ```console
 pi@raspberrypi:~ $ ./charlie/charlieplex-test
@@ -55,6 +57,8 @@ Node 3 -- Anode: 19; Cathode: 13
 Node 4 -- Anode: 6; Cathode: 19
 Node 5 -- Anode: 19; Cathode: 6
 ```
+
+The tests in [CharlieplexLayout.cs](tests/CharlieplexLayout.cs) call this same API and demonstrate the circuit address scheme with varying numbers of pins.
 
 Given a 6 LED circut, `charlie.Write(5,1)` will light LED6 in the diagram. The API uses a 0-based scheme. As a result, `charlie.Write(6,1)` will throw an exception.
  
