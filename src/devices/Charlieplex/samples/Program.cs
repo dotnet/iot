@@ -18,11 +18,35 @@ namespace CharlieTest
             var pins = new int[] { 6, 13, 19, 26 };
             var charlieSegmentLength = 8;
             // calling this method helps with determing the correct pin circuit to use
-            // var nodes = CharlieplexSegment.GetCharlieNodes(pins, charlieSegmentLength);
+            var nodes = CharlieplexSegment.GetNodes(pins, charlieSegmentLength);
+            for (int i = 0; i < charlieSegmentLength; i++)
+            {
+                var node = nodes[i];
+                Console.WriteLine($"Node {i} -- Anode: {node.Anode}; Cathode: {node.Cathode}");
+            }
+
             var charlie = new CharlieplexSegment(pins, charlieSegmentLength);
+            var twoSeconds = TimeSpan.FromSeconds(2);
+
+            Console.WriteLine("Light all LEDs");
+            for (int i = 0; i < charlieSegmentLength; i++)
+            {
+                charlie.Write(i, 1, 0);
+            }
+
+            charlie.DisplaySegment(twoSeconds);
+
+            Console.WriteLine("Hit enter to continue.");
+            Console.ReadLine();
+
+            Console.WriteLine("Dim all LEDs");
+            for (int i = 0; i < charlieSegmentLength; i++)
+            {
+                charlie.Write(i, 0, 0);
+            }
 
             Console.WriteLine("Write data -- light odd values -- and then display.");
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < charlieSegmentLength; i++)
             {
                 if (i % 2 == 1)
                 {
@@ -30,12 +54,11 @@ namespace CharlieTest
                 }
             }
 
-            var span = TimeSpan.FromSeconds(2);
-            charlie.DisplaySegment(span);
+            charlie.DisplaySegment(twoSeconds);
             Thread.Sleep(1000);
-            charlie.DisplaySegment(span);
+            charlie.DisplaySegment(twoSeconds);
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < charlieSegmentLength; i++)
             {
                 charlie.Write(i, 0, 0);
             }
@@ -54,7 +77,6 @@ namespace CharlieTest
             foreach (var delay in delayLengths.Reverse())
             {
                 Console.WriteLine($"Light and then dim all LEDs, in sequence. Delay: {delay}");
-
                 for (int i = 0; i < charlieSegmentLength; i++)
                 {
                     Console.WriteLine($"light pin {i}");

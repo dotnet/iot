@@ -15,7 +15,7 @@ namespace Iot.Device.Multiplexer
         private GpioController _controller;
         private int[] _pins;
         private int _nodeCount;
-        private Node[] _charlieNodes;
+        private Node[] _nodes;
         private Node _lastNode;
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Iot.Device.Multiplexer
             _shouldDispose = shouldDispose;
             _pins = pins;
             _nodeCount = nodeCount;
-            _charlieNodes = GetNodes(pins, nodeCount);
+            _nodes = GetNodes(pins, nodeCount);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace Iot.Device.Multiplexer
         /// <param name="duration">Time to display segment, in milliseconds.</param>
         public void Write(int node, PinValue value, int duration = 10)
         {
-            _charlieNodes[node].Value = value;
+            _nodes[node].Value = value;
 
             if (duration > 0)
             {
@@ -111,13 +111,12 @@ namespace Iot.Device.Multiplexer
                 node.Cathode != _lastNode.Cathode | _lastNode.Anode
             */
 
-            var watch = new Stopwatch();
-            watch.Start();
+            var watch = Stopwatch.StartNew();
             do
             {
-                for (int i = 0; i < _charlieNodes.Length; i++)
+                for (int i = 0; i < _nodes.Length; i++)
                 {
-                    var node = _charlieNodes[i];
+                    var node = _nodes[i];
 
                     // skip updating pinmode when possible
                     if (_lastNode.Anode != node.Anode && _lastNode.Anode != node.Cathode)
@@ -150,6 +149,7 @@ namespace Iot.Device.Multiplexer
                 }
             }
             while (watch.Elapsed < duration);
+            watch.Stop();
 
         }
 
