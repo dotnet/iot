@@ -22,6 +22,7 @@ namespace Iot.Device.Uln2003
         private int _steps = 0;
         private int _engineStep = 0;
         private int _currentStep = 0;
+        private int _stepsToRotate = 4096;
         private StepperMode _mode = StepperMode.HalfStep;
         private bool[,] _currentSwitchingSequence = _halfStepSequence;
         private bool _isClockwise = true;
@@ -102,12 +103,15 @@ namespace Iot.Device.Uln2003
                 {
                     case StepperMode.HalfStep:
                         _currentSwitchingSequence = _halfStepSequence;
+                        _stepsToRotate = 4096;
                         break;
                     case StepperMode.FullStepSinglePhase:
                         _currentSwitchingSequence = _fullStepSinglePhaseSequence;
+                        _stepsToRotate = 2048;
                         break;
                     case StepperMode.FullStepDualPhase:
                         _currentSwitchingSequence = _fullStepDualPhaseSequence;
+                        _stepsToRotate = 2048;
                         break;
                 }
             }
@@ -136,7 +140,7 @@ namespace Iot.Device.Uln2003
             _stopwatch.Restart();
             _isClockwise = steps >= 0;
             _steps = Math.Abs(steps);
-            _stepMicrosecondsDelay = RPM > 0 ? 60 * 1000 * 1000 / _steps / RPM : StepperMotorDefaultDelay;
+            _stepMicrosecondsDelay = RPM > 0 ? 60 * 1000 * 1000 / _stepsToRotate / RPM : StepperMotorDefaultDelay;
             _currentStep = 0;
 
             while (_currentStep < _steps)
