@@ -15,8 +15,8 @@ namespace CharlieTest
         /// </summary>
         public static void Main(string[] args)
         {
-            var pins = new int[] { 6, 13, 19, 26 };
-            var charlieSegmentLength = 8;
+            var pins = new int[] { 6, 13, 19 };
+            var charlieSegmentLength = 6;
             // calling this method helps with determing the correct pin circuit to use
             var nodes = CharlieplexSegment.GetNodes(pins, charlieSegmentLength);
             for (int i = 0; i < charlieSegmentLength; i++)
