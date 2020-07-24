@@ -13,10 +13,10 @@ namespace Iot.Device.Multiplexer
     {
         private readonly bool _shouldDispose;
         private readonly int[] _pins;
-        private readonly Node[] _nodes;
+        private readonly CharlieplexSegmentNode[] _nodes;
         private readonly int _nodeCount;
         private GpioController _controller;
-        private Node _lastNode;
+        private CharlieplexSegmentNode _lastNode;
 
         /// <summary>
         /// Initializes a new Charlieplex type that can be use for multiplex over a relatively small number of GPIO pins.
@@ -59,7 +59,7 @@ namespace Iot.Device.Multiplexer
                 gpioController.OpenPin(pins[i], PinMode.Input);
             }
 
-            _lastNode = new Node()
+            _lastNode = new CharlieplexSegmentNode()
             {
                 Anode = pins[1],
                 Cathode = pins[0]
@@ -115,7 +115,7 @@ namespace Iot.Device.Multiplexer
             {
                 for (int i = 0; i < _nodes.Length; i++)
                 {
-                    Node node = _nodes[i];
+                    CharlieplexSegmentNode node = _nodes[i];
 
                     // skip updating pinmode when possible
                     if (_lastNode.Anode != node.Anode && _lastNode.Anode != node.Cathode)
@@ -156,7 +156,7 @@ namespace Iot.Device.Multiplexer
         /// </summary>
         /// <param name="pins">The pins to use for the segment.</param>
         /// <param name="nodeCount">The number of nodes to use. Default is the Charlieplex maximum.</param>
-        public static Node[] GetNodes(int[] pins, int nodeCount = 0)
+        public static CharlieplexSegmentNode[] GetNodes(int[] pins, int nodeCount = 0)
         {
             int pinCount = pins.Length;
 
@@ -165,7 +165,7 @@ namespace Iot.Device.Multiplexer
                 nodeCount = (int)Math.Pow(pinCount, 2) - pinCount;
             }
 
-            Node[] nodes = new Node[nodeCount];
+            CharlieplexSegmentNode[] nodes = new CharlieplexSegmentNode[nodeCount];
 
             int pin = 0;
             int pinJump = 1;
@@ -179,7 +179,7 @@ namespace Iot.Device.Multiplexer
                     pinJump++;
                 }
 
-                Node node = new Node();
+                CharlieplexSegmentNode node = new CharlieplexSegmentNode();
 
                 if (!firstLeg)
                 {
@@ -213,28 +213,6 @@ namespace Iot.Device.Multiplexer
                 _controller?.Dispose();
                 _controller = null;
             }
-        }
-
-        /// <summary>
-        /// Represents a node in a Charlieplexed circuit.
-        /// https://wikipedia.org/wiki/Charlieplexing
-        /// </summary>
-        public struct Node
-        {
-            /// <summary>
-            /// Anode leg (power) for a device/load
-            /// </summary>
-            public int Anode;
-
-            /// <summary>
-            /// Cathode leg (ground) for a device/load
-            /// </summary>
-            public int Cathode;
-
-            /// <summary>
-            /// Value of node
-            /// </summary>
-            public PinValue Value;
         }
     }
 }
