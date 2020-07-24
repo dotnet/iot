@@ -84,7 +84,7 @@ namespace Iot.Device.Multiplexer
         /// <param name="node">Node to update.</param>
         /// <param name="value">Value to write.</param>
         /// <param name="duration">Time to display segment, in milliseconds.</param>
-        public void Write(int node, PinValue value, int duration = 10)
+        public void Write(int node, PinValue value, int duration = 1)
         {
             _nodes[node].Value = value;
 

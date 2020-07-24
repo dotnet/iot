@@ -63,7 +63,7 @@ namespace CharlieTest
                 charlie.Write(i, 0, 0);
             }
 
-            var delayLengths = new int[] { 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 1500 };
+            var delayLengths = new int[] { 1, 5, 10, 25, 50, 100, 250, 500, 1000 };
             foreach (var delay in delayLengths)
             {
                 Console.WriteLine($"Light one LED at a time -- Delay {delay}");
