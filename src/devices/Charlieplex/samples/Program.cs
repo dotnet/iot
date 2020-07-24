@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
-using Iot.Device.Multiplexer;
+using Iot.Device.Multiplexing;
 
 namespace CharlieTest
 {

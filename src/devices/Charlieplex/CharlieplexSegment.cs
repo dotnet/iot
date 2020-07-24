@@ -3,7 +3,7 @@ using System.Device.Gpio;
 using System.Diagnostics;
 using System.Threading;
 
-namespace Iot.Device.Multiplexer
+namespace Iot.Device.Multiplexing
 {
     /// <summary>
     /// Provides support for Charlieplex multiplexing.

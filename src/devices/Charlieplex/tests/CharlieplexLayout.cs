@@ -1,6 +1,6 @@
 ﻿using System;
 using Xunit;
-using Iot.Device.Multiplexer;
+using Iot.Device.Multiplexing;
 
 namespace Charlietests
 {
