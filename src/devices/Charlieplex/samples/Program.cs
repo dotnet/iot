@@ -31,7 +31,7 @@ namespace CharlieTest
             Console.WriteLine("Light all LEDs");
             for (int i = 0; i < charlieSegmentLength; i++)
             {
-                charlie.Write(i, 1, 0);
+                charlie.Write(i, 1);
             }
 
             charlie.DisplaySegment(twoSeconds);
@@ -42,7 +42,7 @@ namespace CharlieTest
             Console.WriteLine("Dim all LEDs");
             for (int i = 0; i < charlieSegmentLength; i++)
             {
-                charlie.Write(i, 0, 0);
+                charlie.Write(i, 0);
             }
 
             Console.WriteLine("Write data -- light odd values -- and then display.");
@@ -50,7 +50,7 @@ namespace CharlieTest
             {
                 if (i % 2 == 1)
                 {
-                    charlie.Write(i, 1, 0);
+                    charlie.Write(i, 1);
                 }
             }
 
