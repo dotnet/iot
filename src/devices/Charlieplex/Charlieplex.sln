@@ -5,9 +5,9 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charlieplex", "Charlieplex.csproj", "{68F07EB5-439B-4891-8982-174C1E2AA960}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "charlieplex-test", "samples\charlieplex-test.csproj", "{C3457832-144C-4C68-88C0-240E39404921}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charlieplex-sample", "samples\Charlieplex-sample.csproj", "{C3457832-144C-4C68-88C0-240E39404921}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{4CCD2B85-D98F-4411-91A8-397742069385}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\Charlieplex.Tests.csproj", "{4CCD2B85-D98F-4411-91A8-397742069385}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

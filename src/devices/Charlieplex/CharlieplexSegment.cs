@@ -12,10 +12,10 @@ namespace Iot.Device.Multiplexer
     public class CharlieplexSegment : IDisposable
     {
         private readonly bool _shouldDispose;
+        private readonly int[] _pins;
+        private readonly Node[] _nodes;
+        private readonly int _nodeCount;
         private GpioController _controller;
-        private int[] _pins;
-        private int _nodeCount;
-        private Node[] _nodes;
         private Node _lastNode;
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Iot.Device.Multiplexer
                 throw new ArgumentException($"{nameof(CharlieplexSegment)}: 2 or more pins must be provided.");
             }
 
-            var charlieCount = (int)Math.Pow(pins.Length, 2) - pins.Length;
+            int charlieCount = (int)Math.Pow(pins.Length, 2) - pins.Length;
             if (nodeCount > charlieCount)
             {
                 throw new ArgumentException($"{nameof(CharlieplexSegment)}: maximum count is {charlieCount} based on {pins.Length} pins. {nodeCount} was specified as the count.");
@@ -49,15 +49,14 @@ namespace Iot.Device.Multiplexer
             }
 
             // first two pins will be needed as Output.
-            gpioController.OpenPin(pins[0]);
-            gpioController.OpenPin(pins[1]);
-            gpioController.SetPinMode(pins[0], PinMode.Output);
-            gpioController.SetPinMode(pins[1], PinMode.Output);
+            gpioController.OpenPin(pins[0], PinMode.Output);
+            gpioController.OpenPin(pins[1], PinMode.Output);
 
+            // remaining pins should be input type
+            // prevents participating in the circuit until needed
             for (int i = 2; i < pins.Length; i++)
             {
-                gpioController.OpenPin(pins[i]);
-                gpioController.SetPinMode(pins[i], PinMode.Input);
+                gpioController.OpenPin(pins[i], PinMode.Input);
             }
 
             _lastNode = new Node()
@@ -111,12 +110,12 @@ namespace Iot.Device.Multiplexer
                 node.Cathode != _lastNode.Cathode | _lastNode.Anode
             */
 
-            var watch = Stopwatch.StartNew();
+            Stopwatch watch = Stopwatch.StartNew();
             do
             {
                 for (int i = 0; i < _nodes.Length; i++)
                 {
-                    var node = _nodes[i];
+                    Node node = _nodes[i];
 
                     // skip updating pinmode when possible
                     if (_lastNode.Anode != node.Anode && _lastNode.Anode != node.Cathode)
@@ -149,8 +148,6 @@ namespace Iot.Device.Multiplexer
                 }
             }
             while (watch.Elapsed < duration);
-            watch.Stop();
-
         }
 
         /// <summary>
@@ -161,20 +158,19 @@ namespace Iot.Device.Multiplexer
         /// <param name="nodeCount">The number of nodes to use. Default is the Charlieplex maximum.</param>
         public static Node[] GetNodes(int[] pins, int nodeCount = 0)
         {
-            var pinCount = pins.Length;
+            int pinCount = pins.Length;
 
             if (nodeCount == 0)
             {
-                var charlieCount = (int)Math.Pow(pinCount, 2) - pinCount;
-                nodeCount = charlieCount;
+                nodeCount = (int)Math.Pow(pinCount, 2) - pinCount;
             }
 
-            var charliePins = new Node[nodeCount];
+            Node[] nodes = new Node[nodeCount];
 
-            var pin = 0;
-            var pinJump = 1;
-            var firstLeg = false;
-            var resetCount = pinCount - 1;
+            int pin = 0;
+            int pinJump = 1;
+            int resetCount = pinCount - 1;
+            bool firstLeg = false;
             for (int i = 0; i < nodeCount; i++)
             {
                 if ((pin > 0 && pin % resetCount == 0) || pin + pinJump > resetCount)
@@ -183,26 +179,26 @@ namespace Iot.Device.Multiplexer
                     pinJump++;
                 }
 
-                var charliePin = new Node();
+                Node node = new Node();
 
                 if (!firstLeg)
                 {
-                    charliePin.Anode = pins[pin];
-                    charliePin.Cathode = pins[pin + pinJump];
+                    node.Anode = pins[pin];
+                    node.Cathode = pins[pin + pinJump];
                     firstLeg = true;
                 }
                 else
                 {
-                    charliePin.Anode = pins[pin + pinJump];
-                    charliePin.Cathode = pins[pin];
+                    node.Anode = pins[pin + pinJump];
+                    node.Cathode = pins[pin];
                     firstLeg = false;
                     pin++;
                 }
 
-                charliePins[i] = charliePin;
+                nodes[i] = node;
             }
 
-            return charliePins;
+            return nodes;
         }
 
         /// <summary>
