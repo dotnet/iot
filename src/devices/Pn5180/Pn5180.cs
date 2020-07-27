@@ -1040,14 +1040,15 @@ namespace Iot.Device.Pn5180
                     // NVB = Number of valid bits
                     uidSak[1] = 0x20;
                     SendDataToCard(uidSak.Slice(0, 2));
-                    // Check if 5 bytes are received, we can't proceed if we did not receive 5 bytes. 
+                    // Check if 5 bytes are received, we can't proceed if we did not receive 5 bytes.
                     (numBytes, _) = GetNumberOfBytesReceivedAndValidBits();
                     if (numBytes != 5)
                     {
-                        //This can happen if a card is pulled out of the field
+                        // This can happen if a card is pulled out of the field
                         LogInfo.Log($"SAK length not 5", LogLevel.Debug);
                         return false;
                     }
+                    
                     // Read 5 bytes sak. Byte 1 will tell us if we have the full UID or if we need to read more
                     ReadDataFromCard(sakInterm.Slice(0, 5));
                     // Switches back on the CRC off in RX and TX direction
