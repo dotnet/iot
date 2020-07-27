@@ -1048,7 +1048,7 @@ namespace Iot.Device.Pn5180
                         LogInfo.Log($"SAK length not 5", LogLevel.Debug);
                         return false;
                     }
-                    
+
                     // Read 5 bytes sak. Byte 1 will tell us if we have the full UID or if we need to read more
                     ReadDataFromCard(sakInterm.Slice(0, 5));
                     // Switches back on the CRC off in RX and TX direction
