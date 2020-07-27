@@ -1007,7 +1007,7 @@ namespace Iot.Device.Pn5180
                     // Clears all interrupt
                     SpiWriteRegister(Command.WRITE_REGISTER, Register.IRQ_CLEAR, new byte[] { 0xFF, 0xFF, 0x0F, 0x00 });
                     // Sets the PN5180 into IDLE state
-                    SpiWriteRegister(Command.WRITE_REGISTER_AND_MASK, Register.SYSTEM_CONFIG, new byte[] { 0xF8, 0xFF, 0xFF, 0xFF });
+                    SpiWriteRegister(Command.WRITE_REGISTER_AND_MASK, Register.SYSTEM_CONFIG, new byte[] { 0xB8, 0xFF, 0xFF, 0xFF });
                     // Activates TRANSCEIVE routine
                     SpiWriteRegister(Command.WRITE_REGISTER_OR_MASK, Register.SYSTEM_CONFIG, new byte[] { 0x03, 0x00, 0x00, 0x00 });
                     // Sends REQB command
@@ -1040,6 +1040,14 @@ namespace Iot.Device.Pn5180
                     // NVB = Number of valid bits
                     uidSak[1] = 0x20;
                     SendDataToCard(uidSak.Slice(0, 2));
+                    // Check if 5 bytes are received, we can't proceed if we did not receive 5 bytes. 
+                    (numBytes, _) = GetNumberOfBytesReceivedAndValidBits();
+                    if (numBytes != 5)
+                    {
+                        //This can happen if a card is pulled out of the field
+                        LogInfo.Log($"SAK length not 5", LogLevel.Debug);
+                        return false;
+                    }
                     // Read 5 bytes sak. Byte 1 will tell us if we have the full UID or if we need to read more
                     ReadDataFromCard(sakInterm.Slice(0, 5));
                     // Switches back on the CRC off in RX and TX direction
