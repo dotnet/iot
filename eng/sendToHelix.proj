@@ -34,7 +34,7 @@
   <ItemGroup Condition="'$(TestOS)' == 'Windows_NT'">
     <!-- Xunit project to test -->
     <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
-      <TargetFramework>netcoreapp3.1</TargetFramework>
+      <TargetFramework>netcoreapp2.1</TargetFramework>
       <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
     </XUnitProject>
     <!-- Target queues -->
@@ -53,7 +53,7 @@
   <ItemGroup Condition="'$(TestOS)' == 'Unix'">
     <!-- Xunit project to test -->
     <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
-      <TargetFramework>netcoreapp3.1</TargetFramework>
+      <TargetFramework>netcoreapp2.1</TargetFramework>
       <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
     </XUnitProject>
     <!-- Target queues -->

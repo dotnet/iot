@@ -88,7 +88,7 @@ function SetupCredProvider {
 #Workaround for https://github.com/microsoft/msbuild/issues/4430
 function InstallDotNetSdkAndRestoreArcade {
   $dotnetTempDir = "$RepoRoot\dotnet"
-  $dotnetSdkVersion="3.1.300" # After experimentation we know this version works when restoring the SDK (compared to 3.0.*)
+  $dotnetSdkVersion="2.1.507" # After experimentation we know this version works when restoring the SDK (compared to 3.0.*)
   $dotnet = "$dotnetTempDir\dotnet.exe"
   $restoreProjPath = "$PSScriptRoot\restore.proj"
   

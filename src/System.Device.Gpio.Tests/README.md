@@ -49,7 +49,7 @@ Alternatively, you can run the tests using the xunit console runner, which allow
 
 XUnit.console.runner is installed as a nuget package on the system in your home directory during the build. From the root of the project directory, execute:
 ```
-pi@raspberrypi:~/projects/iot $ dotnet exec ~/.nuget/packages/xunit.runner.console/2.4.1/tools/netcoreapp2.0/xunit.console.dll artifacts/bin/System.Device.Gpio.Tests/Debug/netcoreapp3.1/System.Device.Gpio.Tests.dll -notrait "SkipOnTestRun=Windows_NT" -notrait "feature=i2c"
+pi@raspberrypi:~/projects/iot $ dotnet exec ~/.nuget/packages/xunit.runner.console/2.4.1/tools/netcoreapp2.0/xunit.console.dll artifacts/bin/System.Device.Gpio.Tests/Debug/netcoreapp2.1/System.Device.Gpio.Tests.dll -notrait "SkipOnTestRun=Windows_NT" -notrait "feature=i2c"
 ```
 This runs the tests excluding the I2C tests (-notrait "feature-i2c") and excluding the Windows tests (-notrait "SkipOnTestRun=Windows_NT"). 
 
