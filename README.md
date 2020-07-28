@@ -10,6 +10,10 @@ The repository also contains [Iot.Device.Bindings](https://www.nuget.org/package
 
 **NOTE**: This repository is still in experimental stage and all APIs are subject to changes.
 
+# .NET Core Versions
+
+Whilst most of the projects are set to .NET Core 2.1 for backward compatibility, the sample projects are set to .NET Core 3.1. This applies to the sample projects with each device as well as the /samples example projects. .NET Standard projects remain at version 2.0.
+
 # How to Install
 
 You can install the latest daily pre-release build of the .NET Core System.Device.Gpio and Iot.Device.Bindings NuGet packages from the blob feed.
