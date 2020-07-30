@@ -16,8 +16,7 @@ namespace Iot.Device.Multiplexing
         /// <param name="oe">Output enable pin</param>
         /// <param name="rclk">Register clock pin (latch)</param>
         /// <param name="srclk">Shift register pin (shift to data register)</param>
-        /// <param name="srclr">Shift register clear pin (shift register is cleared)</param>
-        public ShiftRegisterPinMapping(int data, int oe, int rclk, int srclk, int srclr)
+        public ShiftRegisterPinMapping(int data, int oe, int rclk, int srclk)
         {
             Data = data;            // data in;     SR pin 14
             OE = oe;                // blank;       SR pin 13
@@ -28,24 +27,13 @@ namespace Iot.Device.Multiplexing
         /// <summary>
         /// Standard pin bindings for the Sn74hc595.
         /// </summary>
-        public static ShiftRegisterPinMapping Standard => new ShiftRegisterPinMapping(25, 12, 16, 20, 21);
+        public static ShiftRegisterPinMapping Standard => new ShiftRegisterPinMapping(25, 12, 16, 20);
         /*
             Data    = 25    // data
             OE      = 12    // blank
             RClk    = 16    // latch / publish storage register
             SrClk   = 20    // storage register clock
             SrClr   = 21    // clear
-        */
-
-        /// <summary>
-        /// Matching pin bindings for the Sn74hc595 (Pi and shift register pin numbers match).
-        /// </summary>
-        public static ShiftRegisterPinMapping Sn74hc595 => new ShiftRegisterPinMapping(14, 13, 12, 11, 10);
-        /*
-            Data    = 14    // data
-            OE      = 13    // blank
-            RClk    = 12    // latch / publish storage register
-            SrClk   = 11    // storage register clock
         */
 
         /// <summary>

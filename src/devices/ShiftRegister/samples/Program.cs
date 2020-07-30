@@ -31,7 +31,8 @@ namespace ShiftRegisterDriver
                 cancellationSource.Cancel();
             };
 
-            Console.WriteLine($"Register bit legnth: {sr.BitLength}");
+            Console.WriteLine($"Driver for {nameof(Iot.Device.Multiplexing.ShiftRegister)}");
+            Console.WriteLine($"Register bit length: {sr.BitLength}");
             var interfaceType = sr.UsesSpi ? "SPI" : "GPIO";
             Console.WriteLine($"Using {interfaceType}");
 
@@ -46,6 +47,7 @@ namespace ShiftRegisterDriver
 
         private static void DemonstrateShiftingBits(ShiftRegister sr, CancellationTokenSource cancellationSource)
         {
+            int delay = 1000;
             sr.ShiftClear();
 
             Console.WriteLine("Light up three of first four LEDs");
@@ -54,7 +56,7 @@ namespace ShiftRegisterDriver
             sr.ShiftBit(0);
             sr.ShiftBit(1);
             sr.Latch();
-            Console.ReadLine();
+            Thread.Sleep(delay);
 
             sr.ShiftClear();
 
@@ -66,7 +68,7 @@ namespace ShiftRegisterDriver
             }
 
             sr.Latch();
-            Console.ReadLine();
+            Thread.Sleep(delay);
 
             sr.ShiftClear();
 
@@ -78,7 +80,7 @@ namespace ShiftRegisterDriver
             }
 
             sr.Latch();
-            Console.ReadLine();
+            Thread.Sleep(delay);
 
             if (IsCanceled(sr, cancellationSource))
             {
@@ -88,14 +90,15 @@ namespace ShiftRegisterDriver
 
         private static void DemonstrateShiftingBytes(ShiftRegister sr, CancellationTokenSource cancellationSource)
         {
+            int delay = 1000;
             Console.WriteLine($"Write a set of values with {nameof(sr.ShiftByte)}");
             // this can be specified as ints or binary notation -- its all the same
-            var values = new byte[] { 0b1, 23, 56, 127, 128, 170, 0b10101010 };
+            var values = new byte[] { 0b1, 23, 56, 127, 128, 170, 0b_1010_1010 };
             foreach (var value in values)
             {
                 Console.WriteLine($"Value: {value}");
                 sr.ShiftByte(value);
-                Thread.Sleep(1500);
+                Thread.Sleep(delay);
                 sr.ShiftClear();
 
                 if (IsCanceled(sr, cancellationSource))
@@ -104,22 +107,22 @@ namespace ShiftRegisterDriver
                 }
             }
 
-            byte lit = 0b11111111;
+            byte lit = 0b_1111_1111; // 255
             Console.WriteLine($"Write {lit} to each register with {nameof(sr.ShiftByte)}");
             for (int i = 0; i < sr.BitLength / 8; i++)
             {
                 sr.ShiftByte(lit);
             }
 
-            Console.ReadLine();
+            Thread.Sleep(delay);
 
             Console.WriteLine("Output disable");
             sr.OutputDisable();
-            Thread.Sleep(2000);
+            Thread.Sleep(delay * 2);
 
             Console.WriteLine("Output enable");
             sr.OutputEnable();
-            Thread.Sleep(2000);
+            Thread.Sleep(delay * 2);
 
             Console.WriteLine($"Write 23 then 56 with {nameof(sr.ShiftByte)}");
             sr.ShiftByte(23);

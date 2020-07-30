@@ -65,6 +65,16 @@ namespace Iot.Device.Multiplexing
         }
 
         /// <summary>
+        /// GPIO controller.
+        /// </summary>
+        protected GpioController GpioController => _controller;
+
+        /// <summary>
+        /// SPI device.
+        /// </summary>
+        protected SpiDevice SpiDevice => _spiDevice;
+
+        /// <summary>
         /// Bit length across all connected registers.
         /// </summary>
         public int BitLength => _bitLength;
