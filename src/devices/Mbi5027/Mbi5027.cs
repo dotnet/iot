@@ -62,29 +62,12 @@ namespace Iot.Device.Multiplexing
                  0   0   0   1   0
             */
 
-            ToggleMode(1, 0);            
-            ToggleMode(0, 0);            
-            ToggleMode(1, 0);            
-            ToggleMode(1, 1);            
-            ToggleMode(1, 0);
-        }
-
-        /// <summary>
-        /// Clear storage registers.
-        /// Requires use of GPIO controller.
-        /// </summary>
-        public void ReadErrorStatus()
-        {
-            /*  Required timing waveform
-                  1   2   3   4   5   6   7   8   9   10
-            CLK _↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|⋯
-            
-            OE  ‾‾‾|___________________|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾⋯
-                 1   0   0   0   0   0   1   1   1   1  ⋯
-            SDO                          Read error codes starting with bit 15
-            */
-
-            GpioController.Write()
+            ChangeModeSignal(1, 0);
+            ChangeModeSignal(0, 0);
+            ChangeModeSignal(1, 0);
+            ChangeModeSignal(1, 1);
+            ChangeModeSignal(1, 0);
+            GpioController.Write(_pinMapping.OE, 0);
         }
 
         /// <summary>
@@ -108,19 +91,45 @@ namespace Iot.Device.Multiplexing
                  0   0   0   0   0
             */
 
-            ToggleMode(1, 0);            
-            ToggleMode(0, 0);            
-            ToggleMode(1, 0);            
-            ToggleMode(1, 0);            
-            ToggleMode(1, 0);            
+            ChangeModeSignal(1, 0);
+            ChangeModeSignal(0, 0);
+            ChangeModeSignal(1, 0);
+            ChangeModeSignal(1, 0);
+            ChangeModeSignal(1, 0);
+            GpioController.Write(_pinMapping.OE, 0);
         }
 
-        private void ToggleMode(PinValue oe, PinValue le)
+        private void ChangeModeSignal(PinValue oe, PinValue le)
         {
             GpioController.Write(_pinMapping.OE, oe);
             GpioController.Write(_pinMapping.LE, le);
             GpioController.Write(_pinMapping.Clk, 1);
             GpioController.Write(_pinMapping.Clk, 0);
         }
+
+        /// <summary>
+        /// Clear storage registers.
+        /// Requires use of GPIO controller.
+        /// </summary>
+        public void ReadErrorStatus()
+        {
+            /*  Required timing waveform
+                  1   2   3   4   5   6   7   8   9   10
+            CLK _↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|⋯
+            
+            OE  ‾‾‾|___________________|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾⋯
+                 1   0   0   0   0   0   1   1   1   1  ⋯
+            SDO                          Read error codes starting with bit 15
+            */
+
+            // one clock cycle with OE high
+            GpioController.Write(_pinMapping.OE, 1);
+            GpioController.Write(_pinMapping.Clk, 1);
+            GpioController.Write(_pinMapping.Clk, 0);
+
+            // 
+        }
+
+
     }
 }
