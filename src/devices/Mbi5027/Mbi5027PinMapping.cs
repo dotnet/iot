@@ -16,13 +16,14 @@ namespace Iot.Device.Multiplexing
         /// <param name="oe">Output enable pin</param>
         /// <param name="le">Register clock pin (latch)</param>
         /// <param name="clk">Shift register pin (shift to data register)</param>
-        public Mbi5027PinMapping(int sdi, int oe, int le, int clk)
+        /// <param name="sdo">Serial data out pin -- required for open circuit detection</param>
+        public Mbi5027PinMapping(int sdi, int oe, int le, int clk, int sdo = 0)
         {
-            Sdi = sdi;            // data in;     SR pin 14
-            OE = oe;                // blank;       SR pin 13
-            LE = le;            // latch;       SR pin 12
-            Clk = clk;          // clock;       SR pin 11
-                                    // daisy chain  SR pin 9 (QH` not mapped; for SR -> SR communication)
+            Sdi = sdi;          // data in;     SR pin 2
+            OE = oe;            // blank;       SR pin 21
+            LE = le;            // latch;       SR pin 4
+            Clk = clk;          // clock;       SR pin 3
+            Sdo = sdo;          // data out;    SR pin 22
         }
 
         /// <summary>
@@ -38,21 +39,15 @@ namespace Iot.Device.Multiplexing
         */
 
         /// <summary>
-        /// Matching pin bindings for the MBI5027 (Pi and shift register pin numbers match).
-        /// </summary>
-        public static Mbi5027PinMapping Matching => new Mbi5027PinMapping(14, 13, 12, 11);
-        /*
-            Data    = 14    // data
-            OE      = 13    // blank
-            RClk    = 12    // latch / publish storage register
-            SrClk   = 11    // storage register clock
-            SrClr   = 10    // clear
-        */
-
-        /// <summary>
-        /// SER (data) pin number.
+        /// Serial data in pin number.
         /// </summary>
         public int Sdi { get; set; }
+
+        /// <summary>
+        /// Serial data out pin number.
+        /// Only used for open circuit detection.
+        /// </summary>
+        public int Sdo { get; set; }
 
         /// <summary>
         /// OE (output enable) pin number.

@@ -55,9 +55,9 @@ namespace Iot.Device.Multiplexing
             /*  Required timing waveform
                   1   2   3   4   5
             CLK _↑‾|_↑‾|_↑‾|_↑‾|_↑‾|
-            
+
             OE  ‾‾‾|___|‾‾‾‾‾‾‾‾‾‾‾‾
-                 1   0   1   1   1 
+                 1   0   1   1   1
             LE  ___________|‾‾‾|____
                  0   0   0   1   0
             */
@@ -78,15 +78,15 @@ namespace Iot.Device.Multiplexing
         {
             if (GpioController is null || _pinMapping.Clk == 0 || _pinMapping.OE == 0 || _pinMapping.LE == 0)
             {
-                throw new ArgumentNullException($"{nameof(EnableDetectionMode)}: GpioController was not provided or {nameof(_pinMapping.SrClk)}, {nameof(_pinMapping.RClk)}, or {nameof(_pinMapping.OE)} not mapped to pin");
+                throw new ArgumentNullException($"{nameof(EnableDetectionMode)}: GpioController was not provided or {nameof(_pinMapping.Clk)}, {nameof(_pinMapping.LE)}, or {nameof(_pinMapping.OE)} not mapped to pin");
             }
 
             /*  Required timing waveform
                   1   2   3   4   5
             CLK _↑‾|_↑‾|_↑‾|_↑‾|_↑‾|
-            
+
             OE  ‾‾‾|___|‾‾‾‾‾‾‾‾‾‾‾‾
-                 1   0   1   1   1 
+                 1   0   1   1   1
             LE  ____________________
                  0   0   0   0   0
             */
@@ -116,20 +116,38 @@ namespace Iot.Device.Multiplexing
             /*  Required timing waveform
                   1   2   3   4   5   6   7   8   9   10
             CLK _↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|_↑‾|⋯
-            
+
             OE  ‾‾‾|___________________|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾⋯
                  1   0   0   0   0   0   1   1   1   1  ⋯
             SDO                          Read error codes starting with bit 15
             */
 
-            // one clock cycle with OE high
+            // first clock cycle, with OE high
             GpioController.Write(_pinMapping.OE, 1);
             GpioController.Write(_pinMapping.Clk, 1);
             GpioController.Write(_pinMapping.Clk, 0);
 
-            // 
+            // three clock cycles, with OE low
+            GpioController.Write(_pinMapping.OE, 0);
+            for (int i = 0; i < 3; i++)
+            {
+                GpioController.Write(_pinMapping.Clk, 1);
+                GpioController.Write(_pinMapping.Clk, 0);
+            }
+
+            // read error codes from SDO, with OE high
+            GpioController.Write(_pinMapping.OE, 1);
+            for (int i = 0; i < 16; i++)
+            {
+                GpioController.Write(_pinMapping.Clk, 0);
+                var sdo = GpioController.Read(_pinMapping.Sdo);
+                Console.WriteLine($"Bit {15 - i}: {sdo}");
+                GpioController.Write(_pinMapping.Clk, 1);
+            }
+
+            // reset back to default state
+            GpioController.Write(_pinMapping.OE, 0);
+            GpioController.Write(_pinMapping.Clk, 0);
         }
-
-
     }
 }

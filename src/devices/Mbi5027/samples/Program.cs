@@ -16,7 +16,7 @@ namespace ShiftRegisterDriver
         /// </summary>
         public static void Main(string[] args)
         {
-            var sr = new Sn74hc595(Sn74hc595PinMapping.Standard);
+            var sr = new Mbi5027(Mbi5027PinMapping.Standard);
             // var settings = new SpiConnectionSettings(0, 0);
             // using var spiDevice = SpiDevice.Create(settings);
             // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
@@ -27,7 +27,7 @@ namespace ShiftRegisterDriver
                 cancellationSource.Cancel();
             };
 
-            Console.WriteLine($"Driver for {nameof(Iot.Device.Multiplexing.Sn74hc595)}");
+            Console.WriteLine($"Driver for {nameof(Iot.Device.Multiplexing.Mbi5027)}");
             Console.WriteLine($"Register bit length: {sr.BitLength}");
             var interfaceType = sr.UsesSpi ? "SPI" : "GPIO";
             Console.WriteLine($"Using {interfaceType}");
@@ -41,7 +41,7 @@ namespace ShiftRegisterDriver
             BinaryCounter(sr, cancellationSource);
         }
 
-        private static void DemonstrateShiftingBits(Sn74hc595 sr, CancellationTokenSource cancellationSource)
+        private static void DemonstrateShiftingBits(ShiftRegister sr, CancellationTokenSource cancellationSource)
         {
             int delay = 1000;
             sr.ShiftClear();
@@ -84,7 +84,7 @@ namespace ShiftRegisterDriver
             }
         }
 
-        private static void DemonstrateShiftingBytes(Sn74hc595 sr, CancellationTokenSource cancellationSource)
+        private static void DemonstrateShiftingBytes(ShiftRegister sr, CancellationTokenSource cancellationSource)
         {
             int delay = 1000;
             Console.WriteLine($"Write a set of values with {nameof(sr.ShiftByte)}");
@@ -126,14 +126,14 @@ namespace ShiftRegisterDriver
             sr.ShiftClear();
         }
 
-        private static void BinaryCounter(Sn74hc595 sr, CancellationTokenSource cancellationSource)
+        private static void BinaryCounter(ShiftRegister sr, CancellationTokenSource cancellationSource)
         {
             Console.WriteLine($"Write 0 through 255");
             for (int i = 0; i < 256; i++)
             {
                 sr.ShiftByte((byte)i);
                 Thread.Sleep(50);
-                sr.ClearStorage();
+                sr.ShiftClear();
 
                 if (IsCanceled(sr, cancellationSource))
                 {
@@ -150,7 +150,7 @@ namespace ShiftRegisterDriver
                 {
                     ShiftBytes(sr, i);
                     Thread.Sleep(25);
-                    sr.ClearStorage();
+                    sr.ShiftClear();
 
                     if (IsCanceled(sr, cancellationSource))
                     {
@@ -162,7 +162,7 @@ namespace ShiftRegisterDriver
             sr.ShiftClear();
         }
 
-        private static void ShiftBytes(Sn74hc595 sr, int value)
+        private static void ShiftBytes(ShiftRegister sr, int value)
         {
             if (sr.BitLength > 32)
             {
@@ -179,7 +179,7 @@ namespace ShiftRegisterDriver
             sr.ShiftByte((byte)value);
         }
 
-        private static bool IsCanceled(Sn74hc595 sr, CancellationTokenSource cancellationSource)
+        private static bool IsCanceled(ShiftRegister sr, CancellationTokenSource cancellationSource)
         {
             if (cancellationSource.IsCancellationRequested)
             {
