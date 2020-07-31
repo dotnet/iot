@@ -28,6 +28,7 @@ namespace Iot.Device.Multiplexing
         : base(new ShiftRegisterPinMapping(pinMapping.Sdi, pinMapping.OE, pinMapping.LE, pinMapping.Clk), bitLength, gpioController, shouldDispose)
         {
             _pinMapping = pinMapping;
+            SetupPins();
         }
 
         /// <summary>
@@ -143,9 +144,16 @@ namespace Iot.Device.Multiplexing
                 GpioController.Write(_pinMapping.Clk, 1);
             }
 
-            // reset back to default state
-            GpioController.Write(_pinMapping.OE, 0);
+            // reset clock
             GpioController.Write(_pinMapping.Clk, 0);
+        }
+
+        private void SetupPins()
+        {
+            if (_pinMapping.Sdo > 0)
+            {
+                GpioController.OpenPin(_pinMapping.Sdo, PinMode.Output);
+            }
         }
     }
 }

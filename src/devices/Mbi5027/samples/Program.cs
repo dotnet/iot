@@ -16,7 +16,9 @@ namespace ShiftRegisterDriver
         /// </summary>
         public static void Main(string[] args)
         {
-            var sr = new Mbi5027(Mbi5027PinMapping.Standard);
+            var mapping = Mbi5027PinMapping.Standard;
+            mapping.Sdo = 21;
+            var sr = new Mbi5027(mapping);
             // var settings = new SpiConnectionSettings(0, 0);
             // using var spiDevice = SpiDevice.Create(settings);
             // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
