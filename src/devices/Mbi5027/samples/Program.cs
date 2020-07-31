@@ -34,6 +34,7 @@ namespace ShiftRegisterDriver
 
             if (!sr.UsesSpi)
             {
+                CheckCircuit(sr);
                 DemonstrateShiftingBits(sr, cancellationSource);
             }
 
@@ -177,6 +178,14 @@ namespace ShiftRegisterDriver
             }
 
             sr.ShiftByte((byte)value);
+        }
+
+        private static void CheckCircuit(Mbi5027 sr)
+        {
+            Console.WriteLine("Checking circuit");
+            sr.EnableDetectionMode();
+            sr.ReadErrorStatus();
+            sr.EnableNormalMode();
         }
 
         private static bool IsCanceled(ShiftRegister sr, CancellationTokenSource cancellationSource)
