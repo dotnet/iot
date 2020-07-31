@@ -67,7 +67,6 @@ namespace Iot.Device.Multiplexing
             ChangeModeSignal(1, 0);
             ChangeModeSignal(1, 1);
             ChangeModeSignal(1, 0);
-            GpioController.Write(_pinMapping.OE, 0);
         }
 
         /// <summary>
@@ -122,14 +121,13 @@ namespace Iot.Device.Multiplexing
             SDO                          Read error codes starting with bit 15
             */
 
-            // first clock cycle, with OE high
-            GpioController.Write(_pinMapping.OE, 1);
+            // first clock cycle; OE expected to be high
             GpioController.Write(_pinMapping.Clk, 1);
             GpioController.Write(_pinMapping.Clk, 0);
 
             // three clock cycles, with OE low
             GpioController.Write(_pinMapping.OE, 0);
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 2; i++)
             {
                 GpioController.Write(_pinMapping.Clk, 1);
                 GpioController.Write(_pinMapping.Clk, 0);
