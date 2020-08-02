@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Device.Spi;
 using System.Drawing;
-using CommandLine;
 using Iot.Device.Graphics;
 
 namespace Iot.Device.Ws28xx.Samples
@@ -56,11 +55,6 @@ namespace Iot.Device.Ws28xx.Samples
 
             }
 
-        }
-
-        private static void HandleParseError(IEnumerable<Error> errs)
-        {
-            throw new NotImplementedException();
         }
 
         private static void CancelHandler(object sender, ConsoleCancelEventArgs e)
