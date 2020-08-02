@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Spi;
 
@@ -24,7 +25,7 @@ namespace Iot.Device.Multiplexing
         /// <param name="bitLength">Bit length of register, including chained registers. Default is 8 bits.</param>
         /// <param name="gpioController">The GPIO Controller used for interrupt handling.</param>
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
-        public Mbi5027(Mbi5027PinMapping pinMapping, int bitLength = 8, GpioController gpioController = null,  bool shouldDispose = true)
+        public Mbi5027(Mbi5027PinMapping pinMapping, int bitLength = 16, GpioController gpioController = null,  bool shouldDispose = true)
         : base(new ShiftRegisterPinMapping(pinMapping.Sdi, pinMapping.OE, pinMapping.LE, pinMapping.Clk), bitLength, gpioController, shouldDispose)
         {
             _pinMapping = pinMapping;
@@ -37,7 +38,7 @@ namespace Iot.Device.Multiplexing
         /// </summary>
         /// <param name="spiDevice">SpiDevice used for serial communication.</param>
         /// <param name="bitLength">Bit length of register, including chained registers. Default is 8 bits.</param>
-        public Mbi5027(SpiDevice spiDevice, int bitLength = 8)
+        public Mbi5027(SpiDevice spiDevice, int bitLength = 16)
         : base(spiDevice, bitLength)
         {
         }
@@ -111,7 +112,7 @@ namespace Iot.Device.Multiplexing
         /// Clear storage registers.
         /// Requires use of GPIO controller.
         /// </summary>
-        public void ReadErrorStatus()
+        public IEnumerable<PinValue> ReadErrorStatus()
         {
             /*  Required timing waveform
                   1   2   3   4   5   6   7   8   9   10
@@ -122,13 +123,18 @@ namespace Iot.Device.Multiplexing
             SDO                          Read error codes starting with bit 15
             */
 
-            // first clock cycle; OE expected to be high
-            GpioController.Write(_pinMapping.Clk, 1);
-            GpioController.Write(_pinMapping.Clk, 0);
+            // n cycles of test data with OE high
+            for (int i = 0; i < BitLength; i++)
+            {
+                ShiftBit(1);
+            }
+
+            // latch test data
+            Latch();
 
             // three clock cycles, with OE low
             GpioController.Write(_pinMapping.OE, 0);
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 3; i++)
             {
                 GpioController.Write(_pinMapping.Clk, 1);
                 GpioController.Write(_pinMapping.Clk, 0);
@@ -136,23 +142,20 @@ namespace Iot.Device.Multiplexing
 
             // read error codes from SDO, with OE high
             GpioController.Write(_pinMapping.OE, 1);
-            for (int i = 0; i < 16; i++)
+            for (int i = 0; i < BitLength; i++)
             {
-                GpioController.Write(_pinMapping.Clk, 0);
                 var sdo = GpioController.Read(_pinMapping.Sdo);
-                Console.WriteLine($"Bit {15 - i}: {sdo}");
+                yield return sdo;
                 GpioController.Write(_pinMapping.Clk, 1);
+                GpioController.Write(_pinMapping.Clk, 0);
             }
-
-            // reset clock
-            GpioController.Write(_pinMapping.Clk, 0);
         }
 
         private void SetupPins()
         {
             if (_pinMapping.Sdo > 0)
             {
-                GpioController.OpenPin(_pinMapping.Sdo, PinMode.Output);
+                GpioController.OpenPin(_pinMapping.Sdo, PinMode.Input);
             }
         }
     }
