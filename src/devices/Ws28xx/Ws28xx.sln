@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30218.91
+# Visual Studio 15
+VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{B2C3D1C3-4F59-4544-982C-E205F522DF27}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ws28xx.Samples", "samples\Ws28xx.Samples.csproj", "{D97F0DC4-777E-4F1A-BF18-A63DA22707ED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ws28xx.Samples", "samples\Ws28xx.Samples.csproj", "{D97F0DC4-777E-4F1A-BF18-A63DA22707ED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ws28xx", "Ws28xx.csproj", "{D909238E-13C4-45C4-B044-CCBB08B51647}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ws28xx", "Ws28xx.csproj", "{D909238E-13C4-45C4-B044-CCBB08B51647}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,6 +17,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D97F0DC4-777E-4F1A-BF18-A63DA22707ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -44,13 +47,7 @@ Global
 		{D909238E-13C4-45C4-B044-CCBB08B51647}.Release|x86.ActiveCfg = Release|Any CPU
 		{D909238E-13C4-45C4-B044-CCBB08B51647}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D97F0DC4-777E-4F1A-BF18-A63DA22707ED} = {B2C3D1C3-4F59-4544-982C-E205F522DF27}
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4146C7F5-8CDD-4E9B-964E-AAFD7263F0C6}
 	EndGlobalSection
 EndGlobal

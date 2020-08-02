@@ -18,18 +18,14 @@ namespace Iot.Device.Ws28xx.Samples
         // Configure the count of pixels
         private const int Count = 8;
         private static Ws28xx s_neo;
-        public static void Main(string[] args)
+        public static void Main()
         {
             Console.Clear();
             Console.CancelKeyPress += new ConsoleCancelEventHandler(CancelHandler);
-
-            CommandLine.Parser.Default.ParseArguments<Options>(args)
-                           .WithParsed(RunOptions)
-                           .WithNotParsed(HandleParseError);
-
+            Run();
         }
 
-        private static void RunOptions(Options opts)
+        private static void Run()
         {
             var settings = new SpiConnectionSettings(0, 0)
             {
@@ -40,34 +36,26 @@ namespace Iot.Device.Ws28xx.Samples
             var spi = SpiDevice.Create(settings);
 
 #if WS2808
-            _neo = new Ws2808(spi, count);
+            s_neo = new Ws2808(spi, count);
 #else
             s_neo = new Ws2812b(spi, Count);
 #endif
             while (true)
             {
-                if (opts.ColorWipe)
-                {
-                    foreach (var color in opts.Colors)
-                    {
-                        ColorWipe(s_neo, Color.FromName(color), (int)opts.LEDCount);
-                    }
-                }
+                ColorWipe(s_neo, Color.White, Count);
+                ColorWipe(s_neo, Color.Red, Count);
+                ColorWipe(s_neo, Color.Green, Count);
+                ColorWipe(s_neo, Color.Blue, Count);
 
-                if (opts.TheaterChase)
-                {
-                    foreach (var color in opts.Colors)
-                    {
-                        TheatreChase(s_neo, Color.FromName(color), (int)opts.LEDCount);
-                    }
-                }
+                TheatreChase(s_neo, Color.White, Count);
+                TheatreChase(s_neo, Color.Red, Count);
+                TheatreChase(s_neo, Color.Green, Count);
+                TheatreChase(s_neo, Color.Blue, Count);
 
-                if (opts.Rainbows)
-                {
-                    Rainbow(s_neo, (int)opts.LEDCount);
-                    RainbowCycle(s_neo, (int)opts.LEDCount);
-                    TheaterChaseRainbow(s_neo, (int)opts.LEDCount);
-                }
+                Rainbow(s_neo, Count);
+                RainbowCycle(s_neo, Count);
+                TheaterChaseRainbow(s_neo, Count);
+
             }
 
         }
