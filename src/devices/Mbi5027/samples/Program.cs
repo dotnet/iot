@@ -17,7 +17,7 @@ namespace ShiftRegisterDriver
         public static void Main(string[] args)
         {
             var mapping = Mbi5027PinMapping.Standard;
-            mapping.Sdo = 21;
+            // mapping.Sdo = 21;
             var sr = new Mbi5027(mapping);
             var cancellationSource = new CancellationTokenSource();
             Console.CancelKeyPress += (s, e) =>
@@ -29,17 +29,18 @@ namespace ShiftRegisterDriver
             Console.WriteLine($"Driver for {nameof(Mbi5027)}");
             Console.WriteLine($"Register bit length: {sr.BitLength}");
 
-            CheckCircuit(sr);
+            // CheckCircuit(sr);
             BinaryCounter(sr, cancellationSource);
         }
 
         private static void BinaryCounter(ShiftRegister sr, CancellationTokenSource cancellationSource)
         {
             Console.WriteLine($"Write 0 through 4095");
+            var delay = 10;
             for (int i = 0; i < 4095; i++)
             {
                 sr.ShiftByte((byte)i);
-                Thread.Sleep(50);
+                Thread.Sleep(delay);
                 sr.ShiftClear();
 
                 if (IsCanceled(sr, cancellationSource))

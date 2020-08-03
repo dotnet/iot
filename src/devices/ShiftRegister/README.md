@@ -1,21 +1,23 @@
-# SN74HC595 -- 8-Bit Shift Register
+# Generic shift register binding
 
-A shift register enables controlling multiple devices, like LEDs, from a small number of pins. It requires using 3-5 pins to control 8 outputs. Shift registers can be daisy chained without requiring additional pins, enabling addressing a larger number of devices, limited only by voltage and the algorithms you define.
+A shift register enables controlling multiple devices, like LEDs, using a small number of pins (minimum of 3). Shift registers can be daisy-chained without requiring additional pins, enabling addressing a larger number of devices, limited only by voltage and the algorithms you define.
 
 ![shift-register](https://user-images.githubusercontent.com/2608468/84733283-ac3bca00-af52-11ea-8520-67c91a45c0f0.png)
 
-The [binding](Sn74hc595.cs) abstracts the interaction with the data register, the register clock and other shift register capabilities. The binding enables interaction via GPIO or SPI. The shift register is not exposed or advertised as an SPI device, however, the required protocol is  SPI compatible.
+The [ShiftRegister](ShiftRegister.cs) binding is used as the base class for [Sn74hc595](../Sn74hc595/README.md) and [Mbi5027](../Mbi5027/README.md) bindings. It can be used directly, or you can rely on it as an implementation detail of hose other, more specific, bindings. It has been tested with with SN74HC595, MBI5027, and MBI5168 shift registers.
 
-The [SN74HC595 sample](samples/README.md) demonstrates how to use the shift register with GPIO and/or SPI.
+The [binding](ShiftRegister.cs) abstracts the interaction with the data register, the register clock and other shift register capabilities. The binding enables interaction via GPIO or SPI.
+
+The [sample](samples/README.md) demonstrates how to use the shift register in some basic ways.
 
 ## Using GPIO
 
-The binding can use `GpioController` pins to control the shift register. It relies on a GPIO pin mapping to describe the 3-5 required  pins that will be used.
+The binding can use `GpioController` pins to control the shift register. It relies on a GPIO [pin mapping](ShiftRegisterMapping.cs) to describe the pins that will be used.
 
 The following example code demonstrates how to use a shift register with GPIO.
 
 ```csharp
-var sr = new Sn74hc595(Sn74hc595.PinMapping.Matching);
+var sr = new ShiftRegister(ShiftRegisterPinMapping.Standard);
 
 // Light up three of first four LEDs
 sr.ShiftBit(1);
@@ -28,24 +30,19 @@ sr.Latch();
 sr.ShiftClear();
 
 // Write to all 8 registers with a byte value
-sr.ShiftByte(170);
+sr.ShiftByte(0b_1010_1010); //same as integer 170
 ```
-
-The following diagram demonstrates the required wiring using the `PinMapping.Matching` mapping.
-
-![shift-register](sn74hc595-led-bar-graph_bb.png)
 
 ## Using SPI
 
-The bindings can use a `SpiDevice` to control the shift register. The SPI protocol maps to the three required GPIO pins. The additional two GPIO pins, for *output enable* and  *shift register clear* are optional and can still be used.
-
+The bindings can use a `SpiDevice` to control the shift register. The SPI protocol maps to the three required GPIO pins.
 
 The following example code demonstrates how to use a shift register with SPI.
 
 ```csharp
 var settings = new SpiConnectionSettings(0, 0);
 var spiDevice = SpiDevice.Create(settings);
-var sr = new Sn74hc595(spiDevice);
+var sr = new ShiftRegister(spiDevice);
 
 // Light up three of first four LEDs
 // The Shift() method is dissallowed when using SPI
@@ -55,7 +52,7 @@ ShiftByte(11);
 sr.ShiftClear();
 
 // Write to all 8 registers with a byte value
-sr.ShiftByte(170);
+sr.ShiftByte(0b_1010_1010);
 ```
 
 The following diagram demonstrates the required wiring using SPI. If GPIO is also used, then two more wires would be required for shift register pins 13 and 10, which would be controlled with a `GpioController`. A constructor that takes both an `SpiDevice` and `GpioController` is provided for that case.

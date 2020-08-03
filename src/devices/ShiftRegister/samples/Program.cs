@@ -20,7 +20,7 @@ namespace ShiftRegisterDriver
         public static void Main(string[] args)
         {
             using var controller = new GpioController();
-            var sr = new ShiftRegister(ShiftRegisterPinMapping.Standard, 8, controller, false);
+            var sr = new ShiftRegister(ShiftRegisterPinMapping.Standard, 16, controller, false);
             // var settings = new SpiConnectionSettings(0, 0);
             // using var spiDevice = SpiDevice.Create(settings);
             // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
@@ -31,7 +31,7 @@ namespace ShiftRegisterDriver
                 cancellationSource.Cancel();
             };
 
-            Console.WriteLine($"Driver for {nameof(Iot.Device.Multiplexing.ShiftRegister)}");
+            Console.WriteLine($"Driver for {nameof(ShiftRegister)}");
             Console.WriteLine($"Register bit length: {sr.BitLength}");
             var interfaceType = sr.UsesSpi ? "SPI" : "GPIO";
             Console.WriteLine($"Using {interfaceType}");

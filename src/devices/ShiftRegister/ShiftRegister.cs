@@ -14,17 +14,18 @@ namespace Iot.Device.Multiplexing
     /// </summary>
     public class ShiftRegister : IDisposable
     {
-        // Spec: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
+        // Datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
+        // Datasheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf
         // Tutorial: https://www.youtube.com/watch?v=6fVbJbNPrEU
         // Using with SPI:
         // https://forum.arduino.cc/index.php?topic=571144.0
         // http://www.cupidcontrols.com/2013/12/turn-on-the-spi-lights-spi-output-shift-registers-and-leds/
-        private readonly bool _shouldDispose;
-        private readonly int _data;
-        private readonly int _srclk;
-        private readonly int _rclk;
-        private readonly int _bitLength;
         private readonly ShiftRegisterPinMapping _pinMapping;
+        private readonly int _sdi;
+        private readonly int _clk;
+        private readonly int _latch;
+        private readonly int _bitLength;
+        private readonly bool _shouldDispose;
         private GpioController _controller;
         private SpiDevice _spiDevice;
 
@@ -45,16 +46,16 @@ namespace Iot.Device.Multiplexing
             _controller = gpioController;
             _shouldDispose = shouldDispose;
             _pinMapping = pinMapping;
-            _data = _pinMapping.Data;
-            _srclk = _pinMapping.SrClk;
-            _rclk = _pinMapping.RClk;
+            _sdi = _pinMapping.Sdi;
+            _clk = _pinMapping.Clk;
+            _latch = _pinMapping.LE;
             _bitLength = bitLength;
             SetupPins();
         }
 
         /// <summary>
         /// Initialize a new shift register device connected through SPI.
-        /// Uses 3 pins (MOSI -> Data, SCLK -> SCLK, CE0 -> RCLK)
+        /// Uses 3 pins (SDI -> SDI, SCLK -> SCLK, CE0 -> LE)
         /// </summary>
         /// <param name="spiDevice">SpiDevice used for serial communication.</param>
         /// <param name="bitLength">Bit length of register, including chained registers.</param>
@@ -109,24 +110,25 @@ namespace Iot.Device.Multiplexing
         }
 
         /// <summary>
-        /// Writes high or low value to storage register.
-        /// This will shift the existing values to the next storage slot.
-        /// Does not perform latch.
+        /// Writes PinValue value to storage register.
+        /// This will shift existing values to the next storage slot.
+        /// Does not latch.
         /// Requires use of GPIO controller.
         /// </summary>
         public void ShiftBit(PinValue value)
         {
-            if (_controller is null || _pinMapping.Data == 0)
+            if (_controller is null || _pinMapping.Sdi == 0)
             {
-                throw new ArgumentNullException($"{nameof(ShiftBit)}: GpioController was not provided or {nameof(_pinMapping.Data)} not mapped to pin");
+                throw new ArgumentNullException($"{nameof(ShiftBit)}: GpioController was not provided or {nameof(_pinMapping.Sdi)} not mapped to pin");
             }
 
-            _controller.Write(_data, value);
-            // data is written to the storage register on the rising edge of the storage register clock.
-            _controller.Write(_srclk, 1);
-            // values are reset to low in preparation for next use.
-            _controller.Write(_data, 0);
-            _controller.Write(_srclk, 0);
+            // writes value to serial data pin
+            _controller.Write(_sdi, value);
+            // data is written to the storage register on the rising edge of the storage register clock
+            _controller.Write(_clk, 1);
+            // values are reset to low
+            _controller.Write(_sdi, 0);
+            _controller.Write(_clk, 0);
         }
 
         /// <summary>
@@ -147,10 +149,10 @@ namespace Iot.Device.Multiplexing
             {
                 // 0b_1000_0000 (same as integer 128) used as input to create mask
                 // determines value of i bit in byte value
-                // logical equivalent of value[i] (which isn't supported in C#)
+                // logical equivalent of value[i] (which isn't supported for byte type in C#)
                 // starts left-most and ends up right-most
                 int data = (0b_1000_0000 >> i) & value;
-                // writes value to register
+                // writes value to storage register
                 ShiftBit(data);
             }
 
@@ -166,15 +168,15 @@ namespace Iot.Device.Multiplexing
         /// </summary>
         public void Latch()
         {
-            if (_controller is null || _pinMapping.RClk == 0)
+            if (_controller is null || _pinMapping.LE == 0)
             {
-                throw new ArgumentNullException($"{nameof(Latch)}: GpioController was not provided or {nameof(_pinMapping.RClk)} not mapped to pin");
+                throw new ArgumentNullException($"{nameof(Latch)}: GpioController was not provided or {nameof(_pinMapping.LE)} not mapped to pin");
             }
 
-            // latches value on rising edge of register clock
-            _controller.Write(_rclk, 1);
+            // latches value on rising edge of register clock (LE)
+            _controller.Write(_latch, 1);
             // value reset to low in preparation for next use.
-            _controller.Write(_rclk, 0);
+            _controller.Write(_latch, 0);
         }
 
         /// <summary>
@@ -228,17 +230,17 @@ namespace Iot.Device.Multiplexing
         private void SetupPins()
         {
             // these three pins are required
-            if (_data > 0 &&
-                _rclk > 0 &&
-                _srclk > 0)
+            if (_sdi > 0 &&
+                _latch > 0 &&
+                _clk > 0)
             {
-                OpenPinAndWrite(_data, 0);
-                OpenPinAndWrite(_rclk, 0);
-                OpenPinAndWrite(_srclk, 0);
+                OpenPinAndWrite(_sdi, 0);
+                OpenPinAndWrite(_latch, 0);
+                OpenPinAndWrite(_clk, 0);
             }
             else
             {
-                throw new ArgumentException($"{nameof(ShiftRegister)} -- {nameof(ShiftRegisterPinMapping)} values must be non-zero; Values: {nameof(ShiftRegisterPinMapping.Data)}: {_data}; {nameof(ShiftRegisterPinMapping.RClk)}: {_rclk}; {nameof(ShiftRegisterPinMapping.SrClk)}: {_srclk};.");
+                throw new ArgumentException($"{nameof(ShiftRegister)} -- {nameof(ShiftRegisterPinMapping)} values must be non-zero; Values: {nameof(ShiftRegisterPinMapping.Sdi)}: {_sdi}; {nameof(ShiftRegisterPinMapping.LE)}: {_latch}; {nameof(ShiftRegisterPinMapping.Clk)}: {_clk};.");
             }
 
             // this pin assignment is optional
