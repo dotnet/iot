@@ -1,4 +1,6 @@
-# Generic shift register binding
+# Generic shift register
+
+The [ShiftRegister](ShiftRegister.cs) binding abstracts the interaction with the storage register, the storage clock, the register clock and other shift register capabilities. This binding enables interaction via GPIO or SPI.
 
 A shift register enables controlling multiple devices, like LEDs, using a small number of pins (minimum of 3 -- data, data clock and register latch). Shift registers can be daisy-chained without requiring using additional pins, enabling addressing a large number of devices, limited only by current and the algorithms you use.
 
@@ -9,8 +11,6 @@ The following image is of the popular SN74HC595 8-bit shift register:
 The following image is of the larger MBI5027 16-bit shift register:
 
 ![MBI5027](https://user-images.githubusercontent.com/2608468/89208974-4216cd00-d572-11ea-98eb-14a9a9b4614f.png)
-
-The [ShiftRegister](ShiftRegister.cs) binding abstracts the interaction with the storage register, the storage clock, the register clock and other shift register capabilities. This binding enables interaction via GPIO or SPI.
 
 [ShiftRegister](ShiftRegister.cs) is used as the base class for [Sn74hc595](../Sn74hc595/README.md) and [Mbi5027](../Mbi5027/README.md) bindings. It can be used directly, or you can rely on it as an implementation detail of those more specific bindings. It has been tested with with [SN74HC595](https://www.ti.com/lit/ds/symlink/sn74hc595.pdf), [MBI5027](http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf), and [MBI5168](http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf) shift registers.
 

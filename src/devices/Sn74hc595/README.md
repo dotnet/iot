@@ -1,4 +1,4 @@
-# SN74HC595 -- 8-Bit Shift Register
+# SN74HC595 -- 8-bit shift register
 
 [SN74HC595](https://www.ti.com/lit/ds/symlink/sn74hc595.pdf) is a 8-bit shift register. Per the datasheet, the SN74HC595 is a "8-Bit Shift Register With 3-State Output Register". The [`Sn74hc595` binding](Sn74hc595.cs) is based on and is compatible with the more general [`ShiftRegister`](../ShiftRegister/README.md) binding. The `Sn74hc595` binding adds the ability clear the storage register with a single pin. Either binding can be used to control the SN74HC595.
 
