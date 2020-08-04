@@ -58,7 +58,6 @@ foreach (var device in devices)
 {
     Console.WriteLine($"Description: {device.Description}");
     Console.WriteLine($"Flags: {device.Flags}");
-    Console.WriteLine($"Handle: {device.FtHandle}");
     Console.WriteLine($"Id: {device.Id}");
     Console.WriteLine($"Location Id: {device.LocId}");
     Console.WriteLine($"Serial Number: {device.SerialNumber}");
