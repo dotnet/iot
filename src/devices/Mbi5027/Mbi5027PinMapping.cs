@@ -31,7 +31,7 @@ namespace Iot.Device.Multiplexing
         /// </summary>
         public static Mbi5027PinMapping Standard => new Mbi5027PinMapping(16, 20, 21, 12, 25);
         /*
-            Sdi  = 16     // SR pin 2   -- serial data in
+            Sdi   = 16    // SR pin 2   -- serial data in
             Clk   = 20    // SR pin 3   -- storage register clock
             LE    = 21    // SR pin 4   -- latch / publish storage register
             OE    = 12    // SR pin 21  -- blank
