@@ -120,6 +120,10 @@ foreach (var b in bytes)
 }
 ```
 
+The following diagram demonstrates the required wiring for using the SN74HC595 with daisy-chaining. Other shift registers will be similar.
+
+![sn74hc595-led-bar-graph-double-up_bb](../Sn74hc595/sn74hc595-led-bar-graph-double-up_bb.png)
+
 ## Resources
 
 * SN74HC595 datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf

@@ -39,6 +39,7 @@ If you want to use SPI, see the [`ShiftRegister`](../ShiftRegister/README.md) bi
 
 * [SN74HC595 -- GPIO](sn74hc595-led-bar-graph.fzz)
 * [SN74HC595 -- SPI](sn74hc595-led-bar-graph-spi.fzz)
+* [SN74HC595 -- Daisy chaining](sn74hc595-led-bar-graph-double-up.fzz)
 
 ## Resources
 
