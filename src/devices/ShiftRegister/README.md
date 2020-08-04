@@ -18,7 +18,7 @@ The [sample](samples/README.md) demonstrates how to use the shift register in so
 
 ## Using GPIO
 
-The binding can use `GpioController` pins to control the shift register. It relies on [ShiftRegisterMapping](ShiftRegisterMapping.cs) to describe the pins that will be used.
+The binding can use `GpioController` pins to control the shift register. It uses [ShiftRegisterPinMapping](ShiftRegisterPinMapping.cs) to describe the pins that will be used.
 
 The following example code demonstrates how to use a shift register with GPIO.
 
@@ -39,6 +39,10 @@ sr.ShiftClear();
 // Write to all 8 registers with a byte value
 sr.ShiftByte(0b_1010_1010); //same as integer 170
 ```
+
+The following diagram demonstrates the required wiring for using the SN74HC595 with GPIO. Other shift registers will be similar.
+
+![sn74hc595-led-bar-graph-spi_bb](../Sn74hc595/sn74hc595-led-bar-graph_bb.png)
 
 ## Using SPI
 
@@ -65,7 +69,7 @@ sr.ShiftByte(0b_1010_1010); //same as integer 170
 
 The following diagram demonstrates the required wiring for using the SN74HC595 with SPI. Other shift registers will be similar.
 
-![sn74hc595-led-bar-graph-spi_bb](./Sn74hc595/sn74hc595-led-bar-graph-spi_bb.png)
+![sn74hc595-led-bar-graph-spi_bb](../Sn74hc595/sn74hc595-led-bar-graph-spi_bb.png)
 
 ## Daisy-chaining
 

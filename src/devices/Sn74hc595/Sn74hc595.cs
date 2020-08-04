@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -14,7 +13,7 @@ namespace Iot.Device.Multiplexing
     /// </summary>
     public class Sn74hc595 : ShiftRegister
     {
-        // Spec: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
+        // Datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
         private Sn74hc595PinMapping _pinMapping;
 
         /// <summary>
