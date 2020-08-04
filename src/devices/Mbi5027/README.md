@@ -1,21 +1,27 @@
-# SN74HC595 -- 8-Bit Shift Register
+# MBI5027 -- 16-Bit shift register
 
-A shift register enables controlling multiple devices, like LEDs, from a small number of pins. It requires using 3-5 pins to control 8 outputs. Shift registers can be daisy chained without requiring additional pins, enabling addressing a larger number of devices, limited only by voltage and the algorithms you define.
+[MBI5027](http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf) is a 16-bit shift register. Per the datasheet, the MBI5027 is a "16-bit Constant Current LED Sink Driver with Open/Short Circuit Detection". The [`Mbi5027` binding](Mbi5027.cs) is based on and is compatible with the more general [`ShiftRegister`](../ShiftRegister/README.md) binding. The `Mbi5027` binding adds error detection functionality. Either binding can be used to control the MBI5027.
 
-![shift-register](https://user-images.githubusercontent.com/2608468/84733283-ac3bca00-af52-11ea-8520-67c91a45c0f0.png)
+![MBI5027](https://user-images.githubusercontent.com/2608468/89208974-4216cd00-d572-11ea-98eb-14a9a9b4614f.png)
 
-The [binding](Sn74hc595.cs) abstracts the interaction with the data register, the register clock and other shift register capabilities. The binding enables interaction via GPIO or SPI. The shift register is not exposed or advertised as an SPI device, however, the required protocol is  SPI compatible.
+The MBI5027 is similar to the commonly used [SN74HC595](../Sn74hc595/README.md) shift register, with some key differences.
 
-The [SN74HC595 sample](samples/README.md) demonstrates how to use the shift register with GPIO and/or SPI.
+* The MBI5027 has 16 outputs while the SN74HC595 has 8.
+* The MBI5027 is a current sink (as opposed to source), which means you connect the cathode (ground), not anode (power) legs, to the outputs. The current comes towards the sink, not away from it.
+* The MBI5027 provides a configurable constant current, which means that resistors are not needed per output. A single resistor is used, connected to R-EXT, to configure the currrent.
+* The MBI5027 provides the ability to detect errors, per output.
+* The SN74HC595 provides a storage register clear capability, which the MBI5027 lacks.
 
-## Using GPIO
+Note: The [MBI5168](http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf) is an 8-bit constant current sink without error detection, making it a more direct comparison to the SN74HC595.
 
-The binding can use `GpioController` pins to control the shift register. It relies on a GPIO pin mapping to describe the 3-5 required  pins that will be used.
+The [MBI5027 sample](samples/README.md) demonstrates how to use the shift register. The [generic shift register sample](../ShiftRegister/samples/README.md) is more extensive and is compatible with the MBI5027.
 
-The following example code demonstrates how to use a shift register with GPIO.
+## Usage
+
+The following example code demonstrates how to use the MBI5027 with its most basic functions.
 
 ```csharp
-var sr = new Sn74hc595(Sn74hc595.PinMapping.Matching);
+var sr = new Mbi5027(Mbi5027PinMapping.Standard);
 
 // Light up three of first four LEDs
 sr.ShiftBit(1);
@@ -28,106 +34,58 @@ sr.Latch();
 sr.ShiftClear();
 
 // Write to all 8 registers with a byte value
-sr.ShiftByte(170);
+sr.ShiftByte(0b_1010_1010);
 ```
 
-The following diagram demonstrates the required wiring using the `PinMapping.Matching` mapping.
+If you want to use SPI, see the [`ShiftRegister`](../ShiftRegister/README.md) binding, which includes more information on SPI. 
 
-![shift-register](sn74hc595-led-bar-graph_bb.png)
+## Error detection
 
-## Using SPI
+The MBI5027 provides the ability to detect errors, per output. This is very useful for remote deployments, to determine if repairs are required (for a traffic sign, for example). The MBI5027 requires transitioning to an error detection mode to detect errors and then back to normal mode for normal operation.
 
-The bindings can use a `SpiDevice` to control the shift register. The SPI protocol maps to the three required GPIO pins. The additional two GPIO pins, for *output enable* and  *shift register clear* are optional and can still be used.
-
-
-The following example code demonstrates how to use a shift register with SPI.
+The following example code demonstrates how to detect output errors with the MBI5027.
 
 ```csharp
-var settings = new SpiConnectionSettings(0, 0);
-var spiDevice = SpiDevice.Create(settings);
-var sr = new Sn74hc595(spiDevice);
+var sr = new Mbi5027(Mbi5027PinMapping.Standard);
 
-// Light up three of first four LEDs
-// The Shift() method is dissallowed when using SPI
-ShiftByte(11);
+// switch to error detection mode
+sr.EnableDetectionMode();
 
-// Clear register
-sr.ShiftClear();
+// read error states, per output
+var index = sr.BitLength - 1;
+foreach (var value in sr.ReadOutputErrorStatus())
+{
+    Console.WriteLine($"Bit {index--}: {value}");
+}
 
-// Write to all 8 registers with a byte value
-sr.ShiftByte(170);
+// switch back to normal mode
+sr.EnableNormalMode();
 ```
 
-The following diagram demonstrates the required wiring using SPI. If GPIO is also used, then two more wires would be required for shift register pins 13 and 10, which would be controlled with a `GpioController`. A constructor that takes both an `SpiDevice` and `GpioController` is provided for that case.
+Per the datasheet, data can be shifted into the storage register while reading the output error status and before re-entering normal mode.
 
-![sn74hc595-led-bar-graph-spi_bb](sn74hc595-led-bar-graph-spi_bb.png)
+When all 16 outputs are in use, and no errors are detected, you will see the following output. A `Low` state would be shown if the output is unused, is misconfigured or other error condition.
 
-## Daisy-chaining
-
-The binding supports daisy chaining, using either GPIO or SPI. The GPIO-based example below demonstrates how to declare support for controlling/addressing two -- daisy-chained -- shift registers. This is specified by the last (integer) value in the constructor. You can use the same approach if using SPI to control the shift register.
-
-```csharp
-using var controller = new GpioController();
-var sr = new Sn74hc595(Sn74hc595.PinMapping.Matching, controller, false, 2);
+```console
+Bit 15: High
+Bit 14: High
+Bit 13: High
+Bit 12: High
+Bit 11: High
+Bit 10: High
+Bit 9: High
+Bit 8: High
+Bit 7: High
+Bit 6: High
+Bit 5: High
+Bit 4: High
+Bit 3: High
+Bit 2: High
+Bit 1: High
+Bit 0: High
 ```
-
-
-You can write to multiple daisy chained device in one of several ways, as demonstrated in the following code. You wouldn't typically use of all these approaches, but pick one.
-
-```csharp
-// Write a value to each register bit
-// And latch
-// Only works with GPIO
-for (int i = 0; i < sr.Bits; i++)
-{
-    sr.ShiftBit(1);
-}
-sr.Latch();
-
-// Prints the following pattern to each register: 10101010
-// 170 is the same as the binary literal: 0b10101010
-for (int i = 0; i < sr.DeviceCount; i++)
-{
-    sr.ShiftByte(170);
-}
-
-// Downshift a 32-bit number to the desired number of daisy-chained devices
-// Same thing could be done with a 64-bit integer if you have more than four shift registers
-// Prints the following pattern across two registers (order will be reversed): 0001001110001000
-// 5000 is the same as binary literal: 0b0001001110001000
-int value = 0b0001001110001000; // 5000
-for (int i = sr.DeviceCount - 1; i > 0; i--)
-{
-    int shift = i * 8;
-    int downShiftedValue = value >> shift;
-    sr.ShiftByte((byte)downShiftedValue);
-}
-
-sr.ShiftByte((byte)value);
-
-// Print array of bytes
-// Results in the same outcome as the "5000" example above
-// The order has to be reversed (compared to example above); last byte will be left-most printed
-var bytes = new byte[] { 0b10001000, 0b00010011};
-foreach (var b in bytes)
-{
-    sr.ShiftByte(b);
-}
-```
-
-The following wiring diagram can be used to support 2 shift registers.
-
-![sn74hc595-led-bar-graph-spi_bb](sn74hc595-led-bar-graph-double-up_bb.png)
-
-## Fritizing diagrams
-
-
-* [One shift register -- GPIO](sn74hc595-led-bar-graph.fzz)
-* [Two shift registers -- GPIO](sn74hc595-led-bar-graph-double-up.fzz)
-* [One shift register -- SPI](sn74hc595-led-bar-graph-spi.fzz)
 
 ## Resources
 
-* Datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
-* Adafruit: https://www.adafruit.com/product/450
-* Tutotial: https://www.youtube.com/watch?v=6fVbJbNPrEU
+* Datasheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf
+* Purchase: Not widely available. [aliexpress.com/](https://www.aliexpress.com/) was used to purchase the unit used to write this binding.

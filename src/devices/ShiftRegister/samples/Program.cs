@@ -20,7 +20,9 @@ namespace ShiftRegisterDriver
         public static void Main(string[] args)
         {
             using var controller = new GpioController();
-            var sr = new ShiftRegister(ShiftRegisterPinMapping.Standard, 16, controller, false);
+            var sr = new ShiftRegister(ShiftRegisterPinMapping.Standard, 8, controller, false);
+
+            // Uncomment this code to use SPI (and comment the line above)
             // var settings = new SpiConnectionSettings(0, 0);
             // using var spiDevice = SpiDevice.Create(settings);
             // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
@@ -43,6 +45,7 @@ namespace ShiftRegisterDriver
 
             DemonstrateShiftingBytes(sr, cancellationSource);
             BinaryCounter(sr, cancellationSource);
+            Console.WriteLine("done");
         }
 
         private static void DemonstrateShiftingBits(ShiftRegister sr, CancellationTokenSource cancellationSource)
@@ -107,11 +110,11 @@ namespace ShiftRegisterDriver
                 }
             }
 
-            byte lit = 0b_1111_1111; // 255
-            Console.WriteLine($"Write {lit} to each register with {nameof(sr.ShiftByte)}");
+            byte litPattern = 0b_1111_1111; // 255
+            Console.WriteLine($"Write {litPattern} to each register with {nameof(sr.ShiftByte)}");
             for (int i = 0; i < sr.BitLength / 8; i++)
             {
-                sr.ShiftByte(lit);
+                sr.ShiftByte(litPattern);
             }
 
             Thread.Sleep(delay);
@@ -126,6 +129,7 @@ namespace ShiftRegisterDriver
 
             Console.WriteLine($"Write 23 then 56 with {nameof(sr.ShiftByte)}");
             sr.ShiftByte(23);
+            Thread.Sleep(delay);
             sr.ShiftByte(56);
             sr.ShiftClear();
         }
@@ -163,7 +167,6 @@ namespace ShiftRegisterDriver
                 }
             }
 
-            Console.WriteLine("done");
             sr.ShiftClear();
         }
 

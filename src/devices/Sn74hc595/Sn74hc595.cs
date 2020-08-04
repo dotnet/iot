@@ -25,27 +25,17 @@ namespace Iot.Device.Multiplexing
         /// <param name="gpioController">The GPIO Controller used for interrupt handling.</param>
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
         public Sn74hc595(Sn74hc595PinMapping pinMapping, int bitLength = 8, GpioController gpioController = null,  bool shouldDispose = true)
-        : base(new ShiftRegisterPinMapping(pinMapping.Data, pinMapping.OE, pinMapping.RClk, pinMapping.SrClk), bitLength, gpioController, shouldDispose)
+        : base(new ShiftRegisterPinMapping(pinMapping.Ser, pinMapping.SrClk, pinMapping.RClk, pinMapping.OE), bitLength, gpioController, shouldDispose)
         {
             _pinMapping = pinMapping;
+            SetupPins();
         }
 
         /// <summary>
-        /// Initialize a new shift register device connected through SPI.
-        /// Uses 3 pins (MOSI -> Data, SCLK -> SCLK, CE0 -> RCLK)
-        /// </summary>
-        /// <param name="spiDevice">SpiDevice used for serial communication.</param>
-        /// <param name="bitLength">Bit length of register, including chained registers. Default is 8 bits.</param>
-        public Sn74hc595(SpiDevice spiDevice, int bitLength = 8)
-        : base(spiDevice, bitLength)
-        {
-        }
-
-        /// <summary>
-        /// Clear storage registers.
+        /// Clear storage register.
         /// Requires use of GPIO controller.
         /// </summary>
-        public void ClearStorage()
+        public void ClearStorage(bool latch = true)
         {
             if (GpioController is null || _pinMapping.SrClr == 0)
             {
@@ -54,6 +44,20 @@ namespace Iot.Device.Multiplexing
 
             GpioController.Write(_pinMapping.SrClr, 0);
             GpioController.Write(_pinMapping.SrClr, 1);
+
+            if (latch)
+            {
+                Latch();
+            }
+        }
+
+        private void SetupPins()
+        {
+            if (_pinMapping.SrClr > 0)
+            {
+                GpioController.OpenPin(_pinMapping.SrClr, PinMode.Output);
+                GpioController.Write(_pinMapping.SrClr, 1);
+            }
         }
     }
 }

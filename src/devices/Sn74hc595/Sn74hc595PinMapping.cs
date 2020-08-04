@@ -12,54 +12,41 @@ namespace Iot.Device.Multiplexing
     /// </summary>
     public struct Sn74hc595PinMapping
     {
-        /// <param name="data">Data pin</param>
+        /// <param name="ser">Data pin</param>
         /// <param name="oe">Output enable pin</param>
         /// <param name="rclk">Register clock pin (latch)</param>
         /// <param name="srclk">Shift register pin (shift to data register)</param>
         /// <param name="srclr">Shift register clear pin (shift register is cleared)</param>
-        public Sn74hc595PinMapping(int data, int oe, int rclk, int srclk, int srclr)
+        public Sn74hc595PinMapping(int ser, int srclk, int rclk, int oe = 0, int srclr = 0)
         {
-            Data = data;            // data in;     SR pin 14
-            OE = oe;                // blank;       SR pin 13
-            RClk = rclk;            // latch;       SR pin 12
-            SrClk = srclk;          // clock;       SR pin 11
-            SrClr = srclr;          // clear;       SR pin 10
-                                    // daisy chain  SR pin 9 (QH` not mapped; for SR -> SR communication)
+            Ser = ser;
+            SrClk = srclk;
+            RClk = rclk;
+            OE = oe;
+            SrClr = srclr;
         }
 
         /// <summary>
         /// Standard pin bindings for the Sn74hc595.
         /// </summary>
-        public static Sn74hc595PinMapping Standard => new Sn74hc595PinMapping(25, 12, 16, 20, 21);
+        public static Sn74hc595PinMapping Standard => new Sn74hc595PinMapping(16, 20, 21, 12, 25);
         /*
-            Data    = 25    // data
-            OE      = 12    // blank
-            RClk    = 16    // latch / publish storage register
+            Ser     = 16    // data
             SrClk   = 20    // storage register clock
-            SrClr   = 21    // clear
-        */
-
-        /// <summary>
-        /// Matching pin bindings for the Sn74hc595 (Pi and shift register pin numbers match).
-        /// </summary>
-        public static Sn74hc595PinMapping Matching => new Sn74hc595PinMapping(14, 13, 12, 11, 10);
-        /*
-            Data    = 14    // data
-            OE      = 13    // blank
-            RClk    = 12    // latch / publish storage register
-            SrClk   = 11    // storage register clock
-            SrClr   = 10    // clear
+            RClk    = 21    // latch / publish storage register
+            OE      = 12    // blank
+            SrClr   = 25    // clear
         */
 
         /// <summary>
         /// SER (data) pin number.
         /// </summary>
-        public int Data { get; set; }
+        public int Ser { get; set; }
 
         /// <summary>
-        /// OE (output enable) pin number.
+        /// SRCLK (shift) pin number.
         /// </summary>
-        public int OE { get; set; }
+        public int SrClk { get; set; }
 
         /// <summary>
         /// RCLK (latch) pin number.
@@ -67,9 +54,9 @@ namespace Iot.Device.Multiplexing
         public int RClk { get; set; }
 
         /// <summary>
-        /// SRCLK (shift) pin number.
+        /// OE (output enable) pin number.
         /// </summary>
-        public int SrClk { get; set; }
+        public int OE { get; set; }
 
         /// <summary>
         /// SRCLR (clear register) pin number.

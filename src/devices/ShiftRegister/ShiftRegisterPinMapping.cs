@@ -14,11 +14,12 @@ namespace Iot.Device.Multiplexing
     {
         // Datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
         // Datasheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf
+
         /// <param name="sdi">Serial data in pin</param>
         /// <param name="oe">Output enable pin</param>
         /// <param name="le">Register clock pin (latch)</param>
         /// <param name="clk">Shift register pin (shift to data register)</param>
-        public ShiftRegisterPinMapping(int sdi, int clk, int le, int oe)
+        public ShiftRegisterPinMapping(int sdi, int clk, int le, int oe = 0)
         {
             Sdi = sdi;              // serial data in
             Clk = clk;              // storage register clock
@@ -29,11 +30,11 @@ namespace Iot.Device.Multiplexing
         /// <summary>
         /// Standard pin bindings for the Sn74hc595.
         /// </summary>
-        public static ShiftRegisterPinMapping Standard => new ShiftRegisterPinMapping(25, 20, 16, 12);
+        public static ShiftRegisterPinMapping Standard => new ShiftRegisterPinMapping(16, 20, 21, 12);
         /*
-            Sdi   = 25    // data
+            Sdi   = 16    // data
             Clk   = 20    // storage register clock
-            LE    = 16    // latch / publish storage register
+            LE    = 21    // latch / publish storage register
             OE    = 12    // blank
         */
 

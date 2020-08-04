@@ -13,54 +13,54 @@ namespace Iot.Device.Multiplexing
     public struct Mbi5027PinMapping
     {
         /// <param name="sdi">Serial data in pin</param>
-        /// <param name="oe">Output enable pin</param>
-        /// <param name="le">Register clock pin (latch)</param>
         /// <param name="clk">Shift register pin (shift to data register)</param>
+        /// <param name="le">Register clock pin (latch)</param>
+        /// <param name="oe">Output enable pin</param>
         /// <param name="sdo">Serial data out pin -- required for open circuit detection</param>
-        public Mbi5027PinMapping(int sdi, int oe, int le, int clk, int sdo = 0)
+        public Mbi5027PinMapping(int sdi, int clk, int le, int oe = 0, int sdo = 0)
         {
-            Sdi = sdi;          // data in;     SR pin 2
-            OE = oe;            // blank;       SR pin 21
-            LE = le;            // latch;       SR pin 4
-            Clk = clk;          // clock;       SR pin 3
-            Sdo = sdo;          // data out;    SR pin 22
+            Sdi = sdi;
+            Clk = clk;
+            LE = le;
+            OE = oe;
+            Sdo = sdo;
         }
 
         /// <summary>
         /// Standard pin bindings for the MBI5027.
         /// </summary>
-        public static Mbi5027PinMapping Standard => new Mbi5027PinMapping(25, 12, 16, 20);
+        public static Mbi5027PinMapping Standard => new Mbi5027PinMapping(16, 20, 21, 12, 25);
         /*
-            Data    = 25    // data
-            OE      = 12    // blank
-            RClk    = 16    // latch / publish storage register
-            SrClk   = 20    // storage register clock
-            SrClr   = 21    // clear
+            Sdi  = 16     // SR pin 2   -- serial data in
+            Clk   = 20    // SR pin 3   -- storage register clock
+            LE    = 21    // SR pin 4   -- latch / publish storage register
+            OE    = 12    // SR pin 21  -- blank
+            Sdo   = 25    // SR pin 22  -- clear
         */
 
         /// <summary>
-        /// Serial data in pin number.
+        /// Serial data in pin.
         /// </summary>
         public int Sdi { get; set; }
 
         /// <summary>
-        /// Serial data out pin number.
-        /// Only used for open circuit detection.
+        /// Serial data out pin.
+        /// Only used (directly) for open circuit detection.
         /// </summary>
         public int Sdo { get; set; }
 
         /// <summary>
-        /// OE (output enable) pin number.
+        /// OE (output enable) pin .
         /// </summary>
         public int OE { get; set; }
 
         /// <summary>
-        /// RCLK (latch) pin number.
+        /// LE (shift register clock/latch) pin.
         /// </summary>
         public int LE { get; set; }
 
         /// <summary>
-        /// SRCLK (shift) pin number.
+        /// Clk (data register clock) pin number.
         /// </summary>
         public int Clk { get; set; }
     }
