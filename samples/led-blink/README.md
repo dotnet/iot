@@ -11,7 +11,8 @@ controller.OpenPin(pin, PinMode.Output);
 
 int lightTimeInMilliseconds = 1000;
 int dimTimeInMilliseconds = 200;
-            
+
+// turn LED on and off
 while (true)
 {
     Console.WriteLine($"Light for {lightTimeInMilliseconds}ms");
@@ -47,17 +48,35 @@ foreach (var pin in pins)
 
 while (true)
 {
+    // turn each LED on and off, one at a time
     foreach (var pin in pins)
     {
-        Console.WriteLine($"Light for {lightTimeInMilliseconds}ms");
+        Console.WriteLine($"Light LED at pin {pin} for {lightTimeInMilliseconds}ms");
         controller.Write(pin, PinValue.High);
         Thread.Sleep(lightTimeInMilliseconds);
 
-        Console.WriteLine($"Dim for {dimTimeInMilliseconds}ms");
+        Console.WriteLine($"Dim LED at pin {pin} for {dimTimeInMilliseconds}ms");
         controller.Write(pin, PinValue.Low);
         Thread.Sleep(dimTimeInMilliseconds);
     }
+
+    // turn on all pins, then off
+    for (int i = 1; i < 3; i++)
+    {
+        // quick math to get a `1` or a `0`
+        var pinValue = i % 2;
+
+            foreach (var pin in pins)
+            {
+                Console.WriteLine($"Set pin {pin} as {(PinValue)pinValue} for {lightTimeInMilliseconds}ms");
+                controller.Write(pin, pinValue);
+                Thread.Sleep(lightTimeInMilliseconds);
+            }
+    }
 }
+
+
+
 ```
 
 The following [fritzing diagram](rpi-led-multiple.fzz) demonstrates how you should wire your device to match the code above.
