@@ -30,53 +30,65 @@ The following [fritzing diagram](rpi-led.fzz) demonstrates how you should wire y
 
 ## Extending the sample to multiple LEDs
 
-The sample can be be adapted to use multiple LEDs.
+The sample can be be adapted to use multiple LEDs. The following code defines an array of integers that specifies the pins that will be connected to LEDs. You can add or remove integers from the array, to account for the LEDs you want to use. The rest of the program iterates on the array in various ways.
 
 ```csharp
-var pins = new int[] {18, 24, 25};;
-var lightTimeInMilliseconds = 1000;
-var dimTimeInMilliseconds = 200;
+var pins = new int[] {18, 24, 25};
+var lightTime = 1000;
+var dimTime = 200;
 
 Console.WriteLine($"Let's blink an LED!");
 using GpioController controller = new GpioController();
 
+Console.CancelKeyPress += (s, e) =>
+{
+    // turn off all pins when the program is terminated, with CTRL-C
+    foreach (var pin in pins)
+    {
+        Console.WriteLine($"Dim pin {pin}");
+        controller.Write(pin, PinValue.Low);
+    }
+};
+
+// open pins as output mode
 foreach (var pin in pins)
 {
     controller.OpenPin(pin, PinMode.Output);
     Console.WriteLine($"GPIO pin enabled for use: {pin}");
 }
 
+// LED behavior
 while (true)
 {
     // turn each LED on and off, one at a time
     foreach (var pin in pins)
     {
-        Console.WriteLine($"Light LED at pin {pin} for {lightTimeInMilliseconds}ms");
+        Console.WriteLine($"Light LED at pin {pin} for {lightTime}ms");
         controller.Write(pin, PinValue.High);
-        Thread.Sleep(lightTimeInMilliseconds);
+        Thread.Sleep(lightTime);
 
-        Console.WriteLine($"Dim LED at pin {pin} for {dimTimeInMilliseconds}ms");
+        Console.WriteLine($"Dim LED at pin {pin} for {dimTime}ms");
         controller.Write(pin, PinValue.Low);
-        Thread.Sleep(dimTimeInMilliseconds);
+        Thread.Sleep(dimTime);
     }
 
-    // turn on all pins, then off
-    for (int i = 1; i < 3; i++)
+    // turns the pins on and off and various intervals
+    // uses modulus math to turn on an arbitrary number of the LEDs with each iteration
+    for (int i = 0; i < 6; i++)
     {
-        // quick math to get a `1` or a `0`
-        var pinValue = i % 2;
+        // Light or dim each LED
+        for (int j = 0; j < pins.Length; j++)
+        {
+            var pin = pins[j];
+            // need a `0` or a `1` for the PinValue
+            var pinValue = (i + j) % 2;
+            Console.WriteLine($"Set pin {pin} as {(PinValue)pinValue} for {lightTime}ms");
+            controller.Write(pin, pinValue);
+        }
 
-            foreach (var pin in pins)
-            {
-                Console.WriteLine($"Set pin {pin} as {(PinValue)pinValue} for {lightTimeInMilliseconds}ms");
-                controller.Write(pin, pinValue);
-                Thread.Sleep(lightTimeInMilliseconds);
-            }
+        Thread.Sleep(lightTime);
     }
 }
-
-
-
 ```
 
 The following [fritzing diagram](rpi-led-multiple.fzz) demonstrates how you should wire your device to match the code above.

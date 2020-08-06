@@ -29,4 +29,5 @@ We primarily test the IoT APIs on Debian Linux, although we expect them to work 
 ## Resources
 
 * [dotnet/iot Documentation](../Documentation/README.md)
+* [Deploying an IoT app](../Documentation/How-to-Deploy-an-IoT-App.md)
 * [Device bindings](../src/devices/README.md)
