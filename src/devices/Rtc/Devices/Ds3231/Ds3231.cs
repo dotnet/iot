@@ -27,6 +27,12 @@ namespace Iot.Device.Rtc
         public Temperature Temperature => Temperature.FromCelsius(ReadTemperature());
 
         /// <summary>
+        /// Determines whether the date and time stored on the RTC is valid by looking at whether
+        /// the oscillator is or was at some point stopped
+        /// </summary>
+        public bool IsDateTimeValid => ReadDateTimeValidity();
+
+        /// <summary>
         /// Creates a new instance of the DS3231
         /// </summary>
         /// <param name="i2cDevice">The I2C device used for communication.</param>
@@ -100,16 +106,17 @@ namespace Iot.Device.Rtc
         }
 
         /// <summary>
-        /// Checks whether the date and time stored on the RTC is valid
+        /// Determines whether the date and time stored on the RTC is valid by looking at whether
+        /// the oscillator is or was at some point stopped
         /// </summary>
         /// <returns>The validity of the date and time stored on the RTC</returns>
-        public bool ReadDateTimeValidity()
+        protected bool ReadDateTimeValidity()
         {
             Span<byte> getData = stackalloc byte[1];
             _i2cDevice.WriteByte((byte)Ds3231Register.RTC_STAT_REG_ADDR);
             _i2cDevice.Read(getData);
 
-            return (getData[0] & (1 << 7)) != 0; // Get OSF bit
+            return (getData[0] & (1 << 7)) == 0; // Get OSF bit
         }
 
         /// <summary>
