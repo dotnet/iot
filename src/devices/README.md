@@ -189,6 +189,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [On-board LED driver](BoardLed/README.md)
+* [Pimoroni Blinkt! (8 RGB LED strip)](Blinkt/README.md)
 * [Segment display driver (HT16K33)](Display/README.md)
 * [Ws28xx LED drivers](Ws28xx/README.md)
 
