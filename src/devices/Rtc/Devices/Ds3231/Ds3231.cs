@@ -33,6 +33,11 @@ namespace Iot.Device.Rtc
         public bool IsDateTimeValid => ReadDateTimeValidity();
 
         /// <summary>
+        /// Gets or sets which of the two alarms is enabled
+        /// </summary>
+        public Ds3231Alarm EnabledAlarm { get => ReadEnabledAlarm(); set => SetEnabledAlarm(value); }
+
+        /// <summary>
         /// Creates a new instance of the DS3231
         /// </summary>
         /// <param name="i2cDevice">The I2C device used for communication.</param>
@@ -280,7 +285,7 @@ namespace Iot.Device.Rtc
         /// Reads which alarm is enabled
         /// </summary>
         /// <returns>The enabled alarm</returns>
-        public Ds3231Alarm ReadEnabledAlarm()
+        protected Ds3231Alarm ReadEnabledAlarm()
         {
             Span<byte> getData = stackalloc byte[1];
             _i2cDevice.WriteByte((byte)Ds3231Register.RTC_CTRL_REG_ADDR);
@@ -304,10 +309,10 @@ namespace Iot.Device.Rtc
         }
 
         /// <summary>
-        /// Sets which alarm is enabled and resets the alarm triggered states
+        /// Sets which alarm is enabled
         /// </summary>
         /// <param name="alarmMode">Alarm to enable</param>
-        public void SetEnabledAlarm(Ds3231Alarm alarmMode)
+        protected void SetEnabledAlarm(Ds3231Alarm alarmMode)
         {
             Span<byte> getData = stackalloc byte[1];
             _i2cDevice.WriteByte((byte)Ds3231Register.RTC_CTRL_REG_ADDR);
@@ -330,12 +335,11 @@ namespace Iot.Device.Rtc
             }
 
             _i2cDevice.Write(setData);
-            ResetAlarmTriggeredStates();
         }
 
         /// <summary>
-        /// Resets the triggered state of both alarms, allowing them to trigger again. This must
-        /// be called after every alarm trigger otherwise the alarms cannot trigger again
+        /// Resets the triggered state of both alarms. This must be called after every alarm
+        /// trigger otherwise the alarm cannot trigger again
         /// </summary>
         public void ResetAlarmTriggeredStates()
         {
