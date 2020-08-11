@@ -142,8 +142,8 @@ while (!ccs811.IsDataReady)
     Thread.Sleep(10);
 }
 
-var error = ccs811.ReadGasData(out int eCO2, out int eTVOC, out int curr, out int adc);
-Console.WriteLine($"Success: {error}, eCO2: {eCO2} ppm, eTVOC: {eTVOC} ppb, Current: {curr} µA, ADC: {adc} = {adc * 1.65 / 1023} V.");
+var error = ccs811.TryReadGasData(out VolumeConcentration eCO2, out VolumeConcentration eTVOC, out ElectricCurrent curr, out int adc);
+Console.WriteLine($"Success: {error}, eCO2: {eCO2.PartsPerMillion} ppm, eTVOC: {eTVOC.PartsPerBillion} ppb, Current: {curr.Microamperes} µA, ADC: {adc} = {adc * 1.65 / 1023} V.");
 ```
 
 #### Case of using the Interrupt pin
@@ -157,8 +157,8 @@ ccs811.MeasurementReady += Ccs811MeasurementReady;
 // And a function to be called when a measurement is ready
 private static void Ccs811MeasurementReady(object sender, MeasurementThresholdArgs args)
 {
-    Console.WriteLine($"Measurement Event: Success: {args.MeasurementSuccess}, eCO2: {args.EquivalentCO2InPpm} ppm, " +
-        $"eTVOC: {args.EquivalentTotalVolatileOrganicCompoundInPpb} ppb, Current: {args.RawCurrentSelected} µA, " +
+    Console.WriteLine($"Measurement Event: Success: {args.MeasurementSuccess}, eCO2: {args.EquivalentCO2.PartsPerMillion} ppm, " +
+        $"eTVOC: {args.EquivalentTotalVolatileOrganicCompound.PartsPerBillion} ppb, Current: {args.RawCurrentSelected.Microamperes} µA, " +
         $"ADC: {args.RawAdcReading} = {args.RawAdcReading * 1.65 / 1023} V.");
 }
 ```
@@ -169,7 +169,7 @@ This feature is only available if the interruption pin is used. Events needs to 
 
 ```csharp
 ccs811.MeasurementReady += Ccs811MeasurementReady;
-ccs811.SetThreshold(400, 600);
+ccs811.SetThreshold(VolumeConcentration.FromPartsPerMillion(400), VolumeConcentration.FromPartsPerMillion(600));
 ```
 
 You will then receive an event with the first data point crossing up the threshold. No other data point will raise an event.
@@ -179,7 +179,7 @@ You will then receive an event with the first data point crossing up the thresho
 The calculation is sensitive to temperature and humidity. It is recommended to adjust the default values with an accurate temperature and relative humidity source sensor. Default values are 25°C for the temperature and 50% for the relative humidity. The following example shows how to adjust for 21.3°C and 42.5%:
 
 ```csharp
-ccs811.SetEnvironmentData(21.3, 42.5);
+ccs811.SetEnvironmentData(Temperature.FromDegreesCelsius(21.3), Ratio.FromPercent(42.5));
 ```
 
 ### Reading and loading the baseline

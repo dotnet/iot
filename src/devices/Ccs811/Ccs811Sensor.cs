@@ -8,8 +8,8 @@ using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.IO;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
+using UnitsNet;
 
 namespace Iot.Device.Ccs811
 {
@@ -46,13 +46,14 @@ namespace Iot.Device.Ccs811
         private int _pinReset = -1;
         private bool _shouldDispose;
         private bool _running = false;
+        private bool _isRunning = false;
 
         /// <summary>
         /// Event raised when interruption pin is selected
         /// </summary>
         /// <param name="sender">This sensor</param>
         /// <param name="args">The measurement</param>
-        public delegate void MeasurementReadyHandler(object sender, MeasurementThresholdArgs args);
+        public delegate void MeasurementReadyHandler(object sender, MeasurementArgs args);
 
         /// <summary>
         /// The event handler for the measurement
@@ -62,15 +63,15 @@ namespace Iot.Device.Ccs811
         /// <summary>
         /// The CCS811 sensor constructor
         /// </summary>
-        /// <param name="i2CDevice">A valid I2C device</param>
+        /// <param name="i2cDevice">A valid I2C device</param>
         /// <param name="gpioController">An optional controller, either the default one will be used, either none will be created if any pin is used</param>
         /// <param name="pinWake">An awake pin, it is optional, this pin can be set to the ground if the sensor is always on</param>
         /// <param name="pinInterruption">An interruption pin when a measurement is ready, best use when you specify a threshold</param>
         /// <param name="pinReset">An optional hard reset pin</param>
         /// <param name="shouldDispose">Should the GPIO controller be disposed at the end</param>
-        public Ccs811Sensor(I2cDevice i2CDevice, GpioController gpioController = null, int pinWake = -1, int pinInterruption = -1, int pinReset = -1, bool shouldDispose = true)
+        public Ccs811Sensor(I2cDevice i2cDevice, GpioController gpioController = null, int pinWake = -1, int pinInterruption = -1, int pinReset = -1, bool shouldDispose = true)
         {
-            _i2cDevice = i2CDevice;
+            _i2cDevice = i2cDevice;
             _pinWake = pinWake;
             _pinInterruption = pinInterruption;
             _pinReset = pinReset;
@@ -78,6 +79,7 @@ namespace Iot.Device.Ccs811
             // We need a GPIO controller only if we are using any of the pin
             if ((_pinInterruption >= 0) || (_pinReset >= 0) || (_pinWake >= 0))
             {
+                _shouldDispose = _shouldDispose || gpioController == null;
                 _controller = gpioController ?? new GpioController();
             }
 
@@ -149,25 +151,31 @@ namespace Iot.Device.Ccs811
                 // Start a new thread to monitor the events
                 new Thread(() =>
                 {
+                    _isRunning = true;
                     while (_running)
                     {
                         var res = _controller.WaitForEvent(_pinInterruption, PinEventTypes.Falling, new TimeSpan(0, 0, 0, 0, 50));
                         if ((!res.TimedOut) && (res.EventTypes != PinEventTypes.None))
                         {
                             InterruptReady(_controller, new PinValueChangedEventArgs(res.EventTypes, _pinInterruption));
+                            // We know we won't get any new measurement in next 250 milliseconds at least
+                            // Waiting to make sure the sensor will have time to remove the interrupt pin
+                            Thread.Sleep(50);
                         }
                     }
+
+                    _isRunning = false;
                 }).Start();
             }
         }
 
         private void InterruptReady(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
         {
-            MeasurementThresholdArgs measurement = new MeasurementThresholdArgs();
-            var success = ReadGasData(out int eCo2, out int eTvoc, out int current, out int adc);
+            MeasurementArgs measurement = new MeasurementArgs();
+            var success = TryReadGasData(out VolumeConcentration eCo2, out VolumeConcentration eTvoc, out ElectricCurrent current, out int adc);
             measurement.MeasurementSuccess = success;
-            measurement.EquivalentCO2InPpm = eCo2;
-            measurement.EquivalentTotalVolatileOrganicCompoundInPpb = eTvoc;
+            measurement.EquivalentCO2 = eCo2;
+            measurement.EquivalentTotalVolatileOrganicCompound = eTvoc;
             measurement.RawCurrentSelected = current;
             measurement.RawAdcReading = adc;
             MeasurementReady?.Invoke(this, measurement);
@@ -265,47 +273,53 @@ namespace Iot.Device.Ccs811
         /// <summary>
         /// Read the equivalent CO2 in ppm and equivalent Total Volatile Compound in ppb
         /// </summary>
-        /// <param name="equivalentCO2InPpm">The equivalent CO2 (eCO2) output range for CCS811 is from
+        /// <param name="equivalentCO2">The equivalent CO2 (eCO2) output range for CCS811 is from
         /// 400ppm up to 29206ppm.</param>
-        /// <param name="equivalentTotalVolatilOrganicCompoundInPpb">The equivalent Total Volatile Organic Compound (eTVOC)
+        /// <param name="equivalentTotalVolatilOrganicCompound">The equivalent Total Volatile Organic Compound (eTVOC)
         /// output range for CCS811 is from 0ppb up to 32768ppb</param>
         /// <param name="rawCurrentSelected">Raw data containing the value of the
         /// current through the sensor(0μA to 63μA)</param>
         /// <param name="rawAdcReading">Raw data containing  the
         /// readings of the voltage across the sensor with the selected
-        /// current(1023 = 1.65V)</param>
+        /// current(1023 = 1.65V) where 1023 is the maximum value</param>
         /// <returns>True if success</returns>
-        public bool ReadGasData(out int equivalentCO2InPpm, out int equivalentTotalVolatilOrganicCompoundInPpb, out int rawCurrentSelected, out int rawAdcReading)
+        public bool TryReadGasData(out VolumeConcentration equivalentCO2, out VolumeConcentration equivalentTotalVolatilOrganicCompound, out ElectricCurrent rawCurrentSelected, out int rawAdcReading)
         {
-            equivalentCO2InPpm = -1;
-            equivalentTotalVolatilOrganicCompoundInPpb = -1;
-            rawCurrentSelected = -1;
+            int equivalentCO2InPpm = -1;
+            int equivalentTotalVolatilOrganicCompoundInPpb = -1;
+            int rawCurrent = -1;
             rawAdcReading = -1;
             Span<byte> toRead = stackalloc byte[8];
             ReadRegister(Register.ALG_RESULT_DATA, toRead);
             if (toRead[5] != (byte)Error.NoError)
             {
+                equivalentCO2 = VolumeConcentration.Zero;
+                equivalentTotalVolatilOrganicCompound = VolumeConcentration.Zero;
+                rawCurrentSelected = ElectricCurrent.Zero;
                 return false;
             }
 
             equivalentCO2InPpm = BinaryPrimitives.ReadInt16BigEndian(toRead.Slice(0, 2));
             equivalentTotalVolatilOrganicCompoundInPpb = BinaryPrimitives.ReadInt16BigEndian(toRead.Slice(2, 2));
-            rawCurrentSelected = toRead[6] >> 2;
+            rawCurrent = toRead[6] >> 2;
             rawAdcReading = ((toRead[6] & 0b0000_0011) << 2) + toRead[7];
+            equivalentCO2 = VolumeConcentration.FromPartsPerMillion(equivalentCO2InPpm);
+            equivalentTotalVolatilOrganicCompound = VolumeConcentration.FromPartsPerBillion(equivalentTotalVolatilOrganicCompoundInPpb);
+            rawCurrentSelected = ElectricCurrent.FromMicroamperes(rawCurrent);
             return ((equivalentCO2InPpm >= 400) && (equivalentCO2InPpm <= 29206) && (equivalentTotalVolatilOrganicCompoundInPpb >= 0) && (equivalentTotalVolatilOrganicCompoundInPpb <= 32768));
         }
 
         /// <summary>
         /// Read the equivalent CO2 in ppm and equivalent Total Volatile Compound in ppb
         /// </summary>
-        /// <param name="equivalentCO2InPpm">The equivalent CO2 (eCO2) output range for CCS811 is from
+        /// <param name="equivalentCO2">The equivalent CO2 (eCO2) output range for CCS811 is from
         /// 400ppm up to 29206ppm.</param>
-        /// <param name="equivalentTotalVolatilOrganicCompoundInPpb">The equivalent Total Volatile Organic Compound (eTVOC)
+        /// <param name="equivalentTotalVolatilOrganicCompound">The equivalent Total Volatile Organic Compound (eTVOC)
         /// output range for CCS811 is from 0ppb up to 32768ppb</param>
         /// <returns>True if success</returns>
-        public bool ReadGasData(out int equivalentCO2InPpm, out int equivalentTotalVolatilOrganicCompoundInPpb)
+        public bool TryReadGasData(out VolumeConcentration equivalentCO2, out VolumeConcentration equivalentTotalVolatilOrganicCompound)
         {
-            return ReadGasData(out equivalentCO2InPpm, out equivalentTotalVolatilOrganicCompoundInPpb, out int curr, out int adc);
+            return TryReadGasData(out equivalentCO2, out equivalentTotalVolatilOrganicCompound, out ElectricCurrent curr, out int adc);
         }
 
         /// <summary>
@@ -337,23 +351,24 @@ namespace Iot.Device.Ccs811
         /// Set the environmental data, this is impacting the equivalent calculation
         /// of the gas.
         /// </summary>
-        /// <param name="temperatureCelsius">The temperature in Celsius</param>
-        /// <param name="humidityPerCent">The relative humidity from 0 to 100%</param>
-        public void SetEnvironmentData(double temperatureCelsius, double humidityPerCent)
+        /// <param name="temperature">The temperature in Celsius</param>
+        /// <param name="humidity">The relative humidity from 0 to 100%</param>
+        public void SetEnvironmentData(Temperature temperature, Ratio humidity)
         {
-            if ((humidityPerCent < 0) || (humidityPerCent > 100))
+            if ((humidity.Percent < 0) || (humidity.Percent > 100))
             {
                 throw new ArgumentException($"Humidity can only be between 0 and 100.");
             }
 
             Span<byte> environment = stackalloc byte[4];
             // convert the humidity first
-            ConvertForEnvironement(humidityPerCent, environment.Slice(0, 2));
+            ConvertForEnvironement(humidity.Percent, environment.Slice(0, 2));
             // Cap the temperature to the minimum or maximum according to documentation
-            temperatureCelsius += 25;
-            temperatureCelsius = Math.Max(temperatureCelsius, 0);
-            temperatureCelsius = Math.Min(temperatureCelsius, 127);
-            ConvertForEnvironement(temperatureCelsius, environment.Slice(2, 2));
+            var temp = temperature.DegreesCelsius;
+            temp += 25;
+            temp = Math.Max(temp, 0);
+            temp = Math.Min(temp, 127);
+            ConvertForEnvironement(temp, environment.Slice(2, 2));
             WriteRegister(Register.ENV_DATA, environment);
         }
 
@@ -378,11 +393,21 @@ namespace Iot.Device.Ccs811
         /// <returns>True if success</returns>
         /// <remarks>Difference between the low and high value should be more than 50. This is called
         /// the hysteresis value.</remarks>
-        public bool SetThreshold(ushort lowEquivalentCO2, ushort highEquivalentCO2)
+        public bool SetThreshold(VolumeConcentration lowEquivalentCO2, VolumeConcentration highEquivalentCO2)
         {
             if (_pinInterruption < 0)
             {
                 return false;
+            }
+
+            if (!IsPpmValidThreshold(lowEquivalentCO2))
+            {
+                throw new ArgumentException($"{lowEquivalentCO2} can only be between 0 and {ushort.MaxValue}");
+            }
+
+            if (!IsPpmValidThreshold(highEquivalentCO2))
+            {
+                throw new ArgumentException($"{highEquivalentCO2} can only be between 0 and {ushort.MaxValue}");
             }
 
             if (lowEquivalentCO2 > highEquivalentCO2)
@@ -392,14 +417,14 @@ namespace Iot.Device.Ccs811
                 lowEquivalentCO2 = temp;
             }
 
-            if (highEquivalentCO2 - lowEquivalentCO2 < 50)
+            if (highEquivalentCO2 - lowEquivalentCO2 < VolumeConcentration.FromPartsPerMillion(50))
             {
                 throw new ArgumentException($"{highEquivalentCO2}-{lowEquivalentCO2} should be more than 50");
             }
 
             Span<byte> toSend = stackalloc byte[4];
-            BinaryPrimitives.WriteUInt16BigEndian(toSend.Slice(0, 2), lowEquivalentCO2);
-            BinaryPrimitives.WriteUInt16BigEndian(toSend.Slice(2, 2), highEquivalentCO2);
+            BinaryPrimitives.WriteUInt16BigEndian(toSend.Slice(0, 2), (ushort)lowEquivalentCO2.PartsPerMillion);
+            BinaryPrimitives.WriteUInt16BigEndian(toSend.Slice(2, 2), (ushort)highEquivalentCO2.PartsPerMillion);
             WriteRegister(Register.THRESHOLDS, toSend);
             // Activate the interrupt threshold as well
             byte mode = ReadRegister(Register.MEAS_MODE);
@@ -409,12 +434,27 @@ namespace Iot.Device.Ccs811
             return !Status.HasFlag(Status.ERROR);
         }
 
+        private bool IsPpmValidThreshold(VolumeConcentration ppm)
+        {
+            if ((ppm < VolumeConcentration.Zero) || (ppm > VolumeConcentration.FromPartsPerMillion(ushort.MaxValue)))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Dispose the sensor
         /// </summary>
         public void Dispose()
         {
             _running = false;
+            while (_isRunning)
+            {
+                Thread.Sleep(1);
+            }
+
             if (_pinInterruption >= 0)
             {
                 _controller.UnregisterCallbackForPinValueChangedEvent(_pinInterruption, InterruptReady);

@@ -9,6 +9,7 @@ using System.IO;
 using System.Threading;
 using Iot.Device.Ccs811;
 using Iot.Device.Ft4222;
+using UnitsNet;
 
 namespace Ccs811sample
 {
@@ -52,7 +53,7 @@ namespace Ccs811sample
             if (platformChoice.KeyChar == '1')
             {
                 Console.WriteLine("Creating an instance of a CCS811 using the platform drivers.");
-                ccs811 = new Ccs811Sensor(I2cDevice.Create(new I2cConnectionSettings(1, addressChoice.KeyChar == '1' ? Ccs811Sensor.I2cFirstAddress : Ccs811Sensor.I2cSecondAddress)), pinWake: pinWake, pinInterruption: pinInterrupt, pinReset: pinReset);
+                ccs811 = new Ccs811Sensor(I2cDevice.Create(new I2cConnectionSettings(3, addressChoice.KeyChar == '1' ? Ccs811Sensor.I2cFirstAddress : Ccs811Sensor.I2cSecondAddress)), pinWake: pinWake, pinInterruption: pinInterrupt, pinReset: pinReset);
             }
             else if (platformChoice.KeyChar == '2')
             {
@@ -201,10 +202,10 @@ namespace Ccs811sample
             return -1;
         }
 
-        private static void Ccs811MeasurementReady(object sender, MeasurementThresholdArgs args)
+        private static void Ccs811MeasurementReady(object sender, MeasurementArgs args)
         {
-            Console.WriteLine($"Measurement Event: Success: {args.MeasurementSuccess}, eCO2: {args.EquivalentCO2InPpm} ppm, " +
-                $"eTVOC: {args.EquivalentTotalVolatileOrganicCompoundInPpb} ppb, Current: {args.RawCurrentSelected} µA, " +
+            Console.WriteLine($"Measurement Event: Success: {args.MeasurementSuccess}, eCO2: {args.EquivalentCO2.PartsPerMillion} ppm, " +
+                $"eTVOC: {args.EquivalentTotalVolatileOrganicCompound.PartsPerBillion} ppb, Current: {args.RawCurrentSelected.Microamperes} µA, " +
                 $"ADC: {args.RawAdcReading} = {args.RawAdcReading * 1.65 / 1023} V.");
         }
 
@@ -233,28 +234,28 @@ namespace Ccs811sample
                 "In real life, we'll get normal data and won't change them that often. " +
                 "The system does not react the best way when shake like this");
             // First use with the default ones, no changes should appear
-            double temp = 25;
-            double hum = 50;
-            Console.WriteLine($"Changing temperature and humidity reference to {temp:0.00} C, {hum:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
+            Temperature temp = Temperature.FromDegreesCelsius(25);
+            Ratio hum = Ratio.FromPercent(50);
+            Console.WriteLine($"Changing temperature and humidity reference to {temp.DegreesCelsius:0.00} C, {hum.Percent:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
             ccs811.SetEnvironmentData(temp, hum);
             ReadAndDisplayDetails(ccs811, 100);
             // Changing with very different temperature
-            temp = 70;
-            hum = 53.8;
-            Console.WriteLine($"Changing temperature and humidity reference to {temp:0.00} C, {hum:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
+            temp = Temperature.FromDegreesCelsius(70);
+            hum = Ratio.FromPercent(53.8);
+            Console.WriteLine($"Changing temperature and humidity reference to {temp.DegreesCelsius:0.00} C, {hum.Percent:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
             ccs811.SetEnvironmentData(temp, hum);
             ReadAndDisplayDetails(ccs811, 100);
 
-            temp = -25;
-            hum = 0.5;
-            Console.WriteLine($"Changing temperature and humidity reference to {temp:0.00} C, {hum:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
+            temp = Temperature.FromDegreesCelsius(-25);
+            hum = Ratio.FromPercent(0.5);
+            Console.WriteLine($"Changing temperature and humidity reference to {temp.DegreesCelsius:0.00} C, {hum.Percent:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
             ccs811.SetEnvironmentData(temp, hum);
             ReadAndDisplayDetails(ccs811, 100);
             // Back to normal which still can lead to different results than initially
             // This is due to the baseline
-            temp = 25;
-            hum = 50;
-            Console.WriteLine($"Changing temperature and humidity reference to {temp:0.00} C, {hum:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
+            temp = Temperature.FromDegreesCelsius(25);
+            hum = Ratio.FromPercent(50);
+            Console.WriteLine($"Changing temperature and humidity reference to {temp.DegreesCelsius:0.00} C, {hum.Percent:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
             ccs811.SetEnvironmentData(temp, hum);
             ReadAndDisplayDetails(ccs811, 100);
         }
@@ -271,9 +272,9 @@ namespace Ccs811sample
 
             ccs811.MeasurementReady += Ccs811MeasurementReady;
             // Setting up a range where we will see something in a normal environment
-            ushort low = 400;
-            ushort high = 600;
-            Console.WriteLine($"Setting up {low}-{high} range, in clear environment, that should raise interrupts. Wait 3 minutes and change mode. Blow on the sensor and wait a bit.");
+            VolumeConcentration low = VolumeConcentration.FromPartsPerMillion(400);
+            VolumeConcentration high = VolumeConcentration.FromPartsPerMillion(600);
+            Console.WriteLine($"Setting up {low.PartsPerMillion}-{high.PartsPerMillion} range, in clear environment, that should raise interrupts. Wait 3 minutes and change mode. Blow on the sensor and wait a bit.");
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Warning: only the first measurement to cross the threshold is raised.");
             Console.ResetColor();
@@ -284,9 +285,9 @@ namespace Ccs811sample
                 Thread.Sleep(10);
             }
 
-            low = 15000;
-            high = 20000;
-            Console.WriteLine($"Changing threshold for {low}-{high}, a non reachable range in clear environment. No measurement should appear in next 3 minutes");
+            low = VolumeConcentration.FromPartsPerMillion(15000);
+            high = VolumeConcentration.FromPartsPerMillion(20000);
+            Console.WriteLine($"Changing threshold for {low.PartsPerMillion}-{high.PartsPerMillion}, a non reachable range in clear environment. No measurement should appear in next 3 minutes");
             dt = DateTime.Now.AddMinutes(3);
             ccs811.SetThreshold(low, high);
             while (dt > DateTime.Now)
@@ -309,8 +310,8 @@ namespace Ccs811sample
                         Thread.Sleep(10);
                     }
 
-                    var error = ccs811.ReadGasData(out int eCO2, out int eTVOC, out int curr, out int adc);
-                    toWrite = $"{DateTime.Now};{error};{eCO2};{eTVOC};{curr};{adc};{adc * 1.65 / 1023};{ccs811.BaselineAlgorithmCalculation}";
+                    var error = ccs811.TryReadGasData(out VolumeConcentration eCO2, out VolumeConcentration eTVOC, out ElectricCurrent curr, out int adc);
+                    toWrite = $"{DateTime.Now};{error};{eCO2.PartsPerMillion};{eTVOC.PartsPerBillion};{curr.Microamperes};{adc};{adc * 1.65 / 1023};{ccs811.BaselineAlgorithmCalculation}";
                     fl.WriteLine(toWrite);
                     Console.WriteLine(toWrite);
                     if (i % 100 == 0)
@@ -330,8 +331,8 @@ namespace Ccs811sample
                     Thread.Sleep(10);
                 }
 
-                var error = ccs811.ReadGasData(out int eCO2, out int eTVOC);
-                Console.WriteLine($"Success: {error}, eCO2: {eCO2} ppm, eTVOC: {eTVOC} ppb");
+                var error = ccs811.TryReadGasData(out VolumeConcentration eCO2, out VolumeConcentration eTVOC);
+                Console.WriteLine($"Success: {error}, eCO2: {eCO2.PartsPerMillion} ppm, eTVOC: {eTVOC.PartsPerBillion} ppb");
             }
         }
 
@@ -344,8 +345,8 @@ namespace Ccs811sample
                     Thread.Sleep(10);
                 }
 
-                var error = ccs811.ReadGasData(out int eCO2, out int eTVOC, out int curr, out int adc);
-                Console.WriteLine($"Success: {error}, eCO2: {eCO2} ppm, eTVOC: {eTVOC} ppb, Current: {curr} µA, ADC: {adc} = {adc * 1.65 / 1023} V.");
+                var error = ccs811.TryReadGasData(out VolumeConcentration eCO2, out VolumeConcentration eTVOC, out ElectricCurrent curr, out int adc);
+                Console.WriteLine($"Success: {error}, eCO2: {eCO2.PartsPerMillion} ppm, eTVOC: {eTVOC.PartsPerBillion} ppb, Current: {curr.Microamperes} µA, ADC: {adc} = {adc * 1.65 / 1023} V.");
             }
         }
     }
