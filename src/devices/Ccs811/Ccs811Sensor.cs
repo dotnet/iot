@@ -351,8 +351,8 @@ namespace Iot.Device.Ccs811
         /// Set the environmental data, this is impacting the equivalent calculation
         /// of the gas.
         /// </summary>
-        /// <param name="temperature">The temperature in Celsius</param>
-        /// <param name="humidity">The relative humidity from 0 to 100%</param>
+        /// <param name="temperature">The temperature</param>
+        /// <param name="humidity">The relative humidity, best to use Percent from 0 to 100</param>
         public void SetEnvironmentData(Temperature temperature, Ratio humidity)
         {
             if ((humidity.Percent < 0) || (humidity.Percent > 100))
@@ -388,8 +388,8 @@ namespace Iot.Device.Ccs811
         /// Set the threshold for the equivalent CO2. The pinInterrupt should be existing so
         /// interruptions are activated. If not, then the function will return false
         /// </summary>
-        /// <param name="lowEquivalentCO2">The low value for the threshold in ppm</param>
-        /// <param name="highEquivalentCO2">The high value for the threshold in ppm</param>
+        /// <param name="lowEquivalentCO2">The low value for the threshold</param>
+        /// <param name="highEquivalentCO2">The high value for the threshold</param>
         /// <returns>True if success</returns>
         /// <remarks>Difference between the low and high value should be more than 50. This is called
         /// the hysteresis value.</remarks>

@@ -18,17 +18,17 @@ namespace Iot.Device.Ccs811
         public bool MeasurementSuccess { get; set; }
 
         /// <summary>
-        /// Equivalent CO2 in ppm
+        /// Equivalent CO2, best is to use PartsPerMilion for a readable range
         /// </summary>
         public VolumeConcentration EquivalentCO2 { get; set; }
 
         /// <summary>
-        /// Equivalent Total Volatile Organic Compound in ppb
+        /// Equivalent Total Volatile Organic Compound, best is to use PartsPerBilion for a readable range
         /// </summary>
         public VolumeConcentration EquivalentTotalVolatileOrganicCompound { get; set; }
 
         /// <summary>
-        /// Raw current selected
+        /// Raw current selected, best to use MicroAmpere for a readable range
         /// </summary>
         public ElectricCurrent RawCurrentSelected { get; set; }
 
