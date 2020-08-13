@@ -275,7 +275,7 @@ namespace Iot.Device.Ccs811
         /// </summary>
         /// <param name="equivalentCO2">The equivalent CO2 (eCO2) output range for CCS811 is from
         /// 400ppm up to 29206ppm.</param>
-        /// <param name="equivalentTotalVolatilOrganicCompound">The equivalent Total Volatile Organic Compound (eTVOC)
+        /// <param name="equivalentTotalVolatileOrganicCompound">The equivalent Total Volatile Organic Compound (eTVOC)
         /// output range for CCS811 is from 0ppb up to 32768ppb</param>
         /// <param name="rawCurrentSelected">Raw data containing the value of the
         /// current through the sensor(0μA to 63μA)</param>
@@ -283,10 +283,10 @@ namespace Iot.Device.Ccs811
         /// readings of the voltage across the sensor with the selected
         /// current(1023 = 1.65V) where 1023 is the maximum value</param>
         /// <returns>True if success</returns>
-        public bool TryReadGasData(out VolumeConcentration equivalentCO2, out VolumeConcentration equivalentTotalVolatilOrganicCompound, out ElectricCurrent rawCurrentSelected, out int rawAdcReading)
+        public bool TryReadGasData(out VolumeConcentration equivalentCO2, out VolumeConcentration equivalentTotalVolatileOrganicCompound, out ElectricCurrent rawCurrentSelected, out int rawAdcReading)
         {
             int equivalentCO2InPpm = -1;
-            int equivalentTotalVolatilOrganicCompoundInPpb = -1;
+            int equivalentTotalVolatileOrganicCompoundInPpb = -1;
             int rawCurrent = -1;
             rawAdcReading = -1;
             Span<byte> toRead = stackalloc byte[8];
@@ -294,19 +294,19 @@ namespace Iot.Device.Ccs811
             if (toRead[5] != (byte)Error.NoError)
             {
                 equivalentCO2 = VolumeConcentration.Zero;
-                equivalentTotalVolatilOrganicCompound = VolumeConcentration.Zero;
+                equivalentTotalVolatileOrganicCompound = VolumeConcentration.Zero;
                 rawCurrentSelected = ElectricCurrent.Zero;
                 return false;
             }
 
             equivalentCO2InPpm = BinaryPrimitives.ReadInt16BigEndian(toRead.Slice(0, 2));
-            equivalentTotalVolatilOrganicCompoundInPpb = BinaryPrimitives.ReadInt16BigEndian(toRead.Slice(2, 2));
+            equivalentTotalVolatileOrganicCompoundInPpb = BinaryPrimitives.ReadInt16BigEndian(toRead.Slice(2, 2));
             rawCurrent = toRead[6] >> 2;
             rawAdcReading = ((toRead[6] & 0b0000_0011) << 2) + toRead[7];
             equivalentCO2 = VolumeConcentration.FromPartsPerMillion(equivalentCO2InPpm);
-            equivalentTotalVolatilOrganicCompound = VolumeConcentration.FromPartsPerBillion(equivalentTotalVolatilOrganicCompoundInPpb);
+            equivalentTotalVolatileOrganicCompound = VolumeConcentration.FromPartsPerBillion(equivalentTotalVolatileOrganicCompoundInPpb);
             rawCurrentSelected = ElectricCurrent.FromMicroamperes(rawCurrent);
-            return ((equivalentCO2InPpm >= 400) && (equivalentCO2InPpm <= 29206) && (equivalentTotalVolatilOrganicCompoundInPpb >= 0) && (equivalentTotalVolatilOrganicCompoundInPpb <= 32768));
+            return ((equivalentCO2InPpm >= 400) && (equivalentCO2InPpm <= 29206) && (equivalentTotalVolatileOrganicCompoundInPpb >= 0) && (equivalentTotalVolatileOrganicCompoundInPpb <= 32768));
         }
 
         /// <summary>
@@ -314,12 +314,12 @@ namespace Iot.Device.Ccs811
         /// </summary>
         /// <param name="equivalentCO2">The equivalent CO2 (eCO2) output range for CCS811 is from
         /// 400ppm up to 29206ppm.</param>
-        /// <param name="equivalentTotalVolatilOrganicCompound">The equivalent Total Volatile Organic Compound (eTVOC)
+        /// <param name="equivalentTotalVolatileOrganicCompound">The equivalent Total Volatile Organic Compound (eTVOC)
         /// output range for CCS811 is from 0ppb up to 32768ppb</param>
         /// <returns>True if success</returns>
-        public bool TryReadGasData(out VolumeConcentration equivalentCO2, out VolumeConcentration equivalentTotalVolatilOrganicCompound)
+        public bool TryReadGasData(out VolumeConcentration equivalentCO2, out VolumeConcentration equivalentTotalVolatileOrganicCompound)
         {
-            return TryReadGasData(out equivalentCO2, out equivalentTotalVolatilOrganicCompound, out ElectricCurrent curr, out int adc);
+            return TryReadGasData(out equivalentCO2, out equivalentTotalVolatileOrganicCompound, out ElectricCurrent curr, out int adc);
         }
 
         /// <summary>
