@@ -255,7 +255,7 @@ iot/
           Foo.Tests.cs
 ```
 
-When creating a new binding, please follow the recommendations [from corefx coding guideliness](https://github.com/dotnet/corefx/tree/master/Documentation#coding-guidelines). On top, we recommend to use very descriptive namings, self explanatory names. Please make sure you don't use abbreviation. Describe any unit a sensor may use as well as the usual range of values. Check as well [the devices convention](../../Documentation/Devices-conventions.md). You will find below couple of examples of do and don't.
+When creating a new binding, please follow the recommendations [from the C# Coding Syle](https://github.com/dotnet/runtime/blob/master/docs/coding-guidelines/coding-style.md) and more generally the [.NET Coding Guidelinhes](https://github.com/dotnet/runtime/tree/master/docs/coding-guidelines). On top, we recommend to use very descriptive namings, self explanatory names. Please make sure you don't use abbreviation. Describe any unit a sensor may use as well as the usual range of values. Check as well [the devices convention](../../Documentation/Devices-conventions.md). You will find below couple of examples of do and don't.
 
 ### Using units
 
@@ -283,7 +283,7 @@ When creating a new binding, please follow the recommendations [from corefx codi
 |---|
 | When reading a sensor can fail prefix a method name with ```Try``` for example: |
 | ```public bool TryGetTemperature(out Temperature temperature)``` |
-| This makes it easy to understand that if you read and the retruned value is ```false``` the reading is not correct. And this means as well this function should not raise an exception when trying to read the sensor data. |
+| This makes it easy to understand that if you read and the retruned value is ```false``` the reading is not correct. And this means as well this function should not raise an exception when trying to read the sensor data if the data is not valid for example. You still can get exceptions like IO Errors or user errors. For example if the function takes parameters with a specific range, and the user is out of this range, then an Argument Exception can be raised. |
 
 | Do|
 |---|
@@ -322,6 +322,7 @@ public OperationMode OperationMode
 |---|---|
 | Use full name like ```EquivalentTotalVolatileOrganicCompound``` | Don't use the abbreviation ```eTVOC``` |
 | This makes it easy for non specialist to use a binding. | If you are not a specialist or depending of the context, the abbreviation is complicated to understand. |
+| You can use abbreviation for the very common ones like Html, Xml, Jpeg or any other very well known. But those abreviation has to be very common one and used like this everywhere ||
 
 ### Commenting the code
 
@@ -359,14 +360,14 @@ DelayHelper.DelayMicroseconds(50, true);
 ```csharp
 private GpioController _controller;
 private bool _shouldDispose;
-private int _thePinToUse;
+private int _pinToUse;
 
-public MyBinding(int thePinToUse, GpioController controller = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
+public MyBinding(int pinToUse, GpioController controller = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
 {
-  _shouldDispose = gpioController == null ? true : shouldDispose;
+  _shouldDispose = gpioController == null || shouldDispose;
   _controller = gpioController ?? new GpioController(pinNumberingScheme);  
-  _thePinToUse = thePinToUse;
-  _controller.OpenPin(_thePinToUse);
+  _pinToUse = pinToUse;
+  _controller.OpenPin(_pinToUse);
   // Initialize the rest of initialization
 }
 
