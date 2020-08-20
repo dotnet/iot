@@ -32,7 +32,7 @@ There is no specific guidelines what simple and main scenario is but you should 
 
 ## Units
 
-Use [UnitsNet](https://github.com/angularsen/UnitsNet) whenever it is possible on any public functions, event or properties. This supports a lot of different type of units. 
+Use [UnitsNet](https://github.com/angularsen/UnitsNet) whenever it is possible on any public functions, event or properties. This supports a lot of different types of units. 
 
 If your sensor/binding unit is not present in UnitsNet, then most common case units should match [International System of Units (aka. SI)](https://en.wikipedia.org/wiki/International_System_of_Units).
 
