@@ -232,7 +232,7 @@ Bindings must:
   * Best if you include the coverage of the binding. If you did not implement all features, mention what has been implemented and what is not. It is ok not to implement every features but it's important to know what is missing
   * Refer to multiple manufacturer and add links where the binding can be found. Sometimes, they have different names depending on where you can find them while it's the same chipset used or compatible ones 
 * include a buildable sample (layout will be described below).
-  * Best if you include a sample that covers usage of all available fonctions and properties
+  * Best if you include a sample that covers usage of all available functions and properties
   * Best if you create mutliple paths to show what the sensor can do
 * use the System.Device API.
 * (*Optional*) Include a unit test project that **DOES NOT** require hardware for testing. We will be running these tests as part of our CI and we won't have sensors plugged in to the microcontrollers, which is why test projects should only contain unit tests for small components in your binding.
@@ -261,7 +261,7 @@ When creating a new binding, please follow the recommendations [from corefx codi
 
 | Do | Don't |
 |---|---|
-| Always use [UnitsNet](https://github.com/angularsen/UnitsNet) when possible: | Don't implement you own: |
+| Always use [UnitsNet](https://github.com/angularsen/UnitsNet) when possible: | Don't implement your own: |
 | ```public void SetEnvironmentData(Temperature temperature, Ratio humidity)``` | ```public void SetEnvironmentData(float temperature, float humidity)``` |
 | Temperature is a classic one, you have lots of available units available, [check here](https://github.com/angularsen/UnitsNet/tree/master/UnitsNet/GeneratedCode/Units) if anything exists before starting|In this case, there are existing units, use the existing one |
 
@@ -281,7 +281,7 @@ When creating a new binding, please follow the recommendations [from corefx codi
 
 | Do |
 |---|
-| When reading a sensor and outputting data, use ```Try``` for example: |
+| When reading a sensor can fail prefix a method name with ```Try``` for example: |
 | ```public bool TryGetTemperature(out Temperature temperature)``` |
 | This makes it easy to understand that if you read and the retruned value is ```false``` the reading is not correct. And this means as well this function should not raise an exception when trying to read the sensor data. |
 
@@ -340,7 +340,7 @@ public OperationMode OperationMode
 
 | Do |
 |---|
-| Always reference specific elements with a poiunter documentation/reference to a specific part of the docuementation. This does including specific timing wait, intiailization phase and anything that would trigger a question like ```why this wait?``` or ```Why this function has to be called 2 times in a row```. If the documentation is the same for all the sensor implementation, refer the documentation once at the beginning and then mention the page. |
+| Always reference specific elements with a pointer documentation/reference to a specific part of the documentation. This does including specific timing wait, initialization phase and anything that would trigger a question like ```why this wait?``` or ```Why this function has to be called 2 times in a row```. If the documentation is the same for all the sensor implementation, refer the documentation once at the beginning and then mention the page. |
 | For example: |
 
 ```csharp
@@ -353,7 +353,7 @@ DelayHelper.DelayMicroseconds(50, true);
 
 | Do|
 |---|
-| In a constructor if you are using a ```GpioController``` make sure you are using as well a bollean ```_shouldDispose```. Some platforms or some specific doungles like FT4222 does allow the creation of one controller so if used with multiple bindings, it can't be disposed just like that. In the ```Dispose``` function, make sure you close the possible open pins if ```_shouldDispose``` is false. |
+| In a constructor if you are using a ```GpioController``` make sure you are using as well a boolean ```_shouldDispose```. Some platforms or some specific dongles like FT4222 does allow the creation of one controller so if used with multiple bindings, it can't be disposed just like that. In the ```Dispose``` function, make sure you close the possible open pins if ```_shouldDispose``` is false. |
 | Example of an correct implementation: |
 
 ```csharp
@@ -388,5 +388,3 @@ public Dispose()
 We are currently not accepting samples that rely on native libraries for hardware interaction. This is for two reasons: we want feedback on the System.Device API and we want to encourage the use of 100% portable .NET solutions. If a native library is used to enable precise timing, please file an issue so that we can discuss your proposed contribution further.
 
 We will only accept samples that use the MIT or compatible licenses (BSD, Apache 2, ...). We will not accept samples that use GPL code or were based on an existing GPL implementation. It is critical that these samples can be used for commercial applications without any concern for licensing.
-
-
