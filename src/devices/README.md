@@ -353,7 +353,7 @@ DelayHelper.DelayMicroseconds(50, true);
 
 | Do|
 |---|
-| In a constructor if you are using a ```GpioController``` make sure you are using as well a bollean ```_shouldDispose```. Some platforms or some specific doungles like FT4222 does allow the creation of one controller so if used with multiple bindings, it can't be disposed just like that. In the ```Dispose``` function, make sure you close the possible open pins if ```_shouldDispose``` is false. |
+| In a constructor if you are using a ```GpioController``` make sure you are using as well a boolean ```_shouldDispose```. Some platforms or some specific dongles like FT4222 does allow the creation of one controller so if used with multiple bindings, it can't be disposed just like that. In the ```Dispose``` function, make sure you close the possible open pins if ```_shouldDispose``` is false. |
 | Example of an correct implementation: |
 
 ```csharp
