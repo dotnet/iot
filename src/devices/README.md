@@ -340,7 +340,7 @@ public OperationMode OperationMode
 
 | Do |
 |---|
-| Always reference specific elements with a poiunter documentation/reference to a specific part of the docuementation. This does including specific timing wait, intiailization phase and anything that would trigger a question like ```why this wait?``` or ```Why this function has to be called 2 times in a row```. If the documentation is the same for all the sensor implementation, refer the documentation once at the beginning and then mention the page. |
+| Always reference specific elements with a pointer documentation/reference to a specific part of the documentation. This does including specific timing wait, initialization phase and anything that would trigger a question like ```why this wait?``` or ```Why this function has to be called 2 times in a row```. If the documentation is the same for all the sensor implementation, refer the documentation once at the beginning and then mention the page. |
 | For example: |
 
 ```csharp
