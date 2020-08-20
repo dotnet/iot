@@ -261,7 +261,7 @@ When creating a new binding, please follow the recommendations [from corefx codi
 
 | Do | Don't |
 |---|---|
-| Always use [UnitsNet](https://github.com/angularsen/UnitsNet) when possible: | Don't implement you own: |
+| Always use [UnitsNet](https://github.com/angularsen/UnitsNet) when possible: | Don't implement your own: |
 | ```public void SetEnvironmentData(Temperature temperature, Ratio humidity)``` | ```public void SetEnvironmentData(float temperature, float humidity)``` |
 | Temperature is a classic one, you have lots of available units available, [check here](https://github.com/angularsen/UnitsNet/tree/master/UnitsNet/GeneratedCode/Units) if anything exists before starting|In this case, there are existing units, use the existing one |
 
@@ -388,4 +388,3 @@ public Dispose()
 We are currently not accepting samples that rely on native libraries for hardware interaction. This is for two reasons: we want feedback on the System.Device API and we want to encourage the use of 100% portable .NET solutions. If a native library is used to enable precise timing, please file an issue so that we can discuss your proposed contribution further.
 
 We will only accept samples that use the MIT or compatible licenses (BSD, Apache 2, ...). We will not accept samples that use GPL code or were based on an existing GPL implementation. It is critical that these samples can be used for commercial applications without any concern for licensing.
-
