@@ -283,7 +283,7 @@ When creating a new binding, please follow the recommendations [from the C# Codi
 |---|
 | When reading a sensor can fail prefix a method name with ```Try``` for example: |
 | ```public bool TryGetTemperature(out Temperature temperature)``` |
-| This makes it easy to understand that if you read and the retruned value is ```false``` the reading is not correct. And this means as well this function should not raise an exception when trying to read the sensor data if the data is not valid for example. You still can get exceptions like IO Errors or user errors. For example if the function takes parameters with a specific range, and the user is out of this range, then an Argument Exception can be raised. |
+| This makes it easy to understand that if you read and the returned value is ```false``` the reading is not correct. And this means as well this function should not raise an exception when trying to read the sensor data if the data is not valid for example. You still can get exceptions like IO Errors or user errors. For example if the function takes parameters with a specific range, and the user is out of this range, then an Argument Exception can be raised. |
 
 | Do|
 |---|
