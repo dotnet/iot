@@ -387,25 +387,28 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void WaitForEventFallingEdgeTest()
         {
-            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            TimeoutHelper.CompletesInTime(() =>
             {
-                CancellationTokenSource tokenSource = new CancellationTokenSource();
-                controller.OpenPin(InputPin, PinMode.Input);
-                controller.OpenPin(OutputPin, PinMode.Output);
-                controller.Write(OutputPin, PinValue.Low);
-
-                Task.Run(() =>
+                using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
                 {
-                    controller.Write(OutputPin, PinValue.High);
-                    Thread.Sleep(WaitMilliseconds);
+                    CancellationTokenSource tokenSource = new CancellationTokenSource();
+                    controller.OpenPin(InputPin, PinMode.Input);
+                    controller.OpenPin(OutputPin, PinMode.Output);
                     controller.Write(OutputPin, PinValue.Low);
-                });
 
-                WaitForEventResult result = controller.WaitForEvent(InputPin, PinEventTypes.Falling, tokenSource.Token);
+                    Task.Run(() =>
+                    {
+                        controller.Write(OutputPin, PinValue.High);
+                        Thread.Sleep(WaitMilliseconds);
+                        controller.Write(OutputPin, PinValue.Low);
+                    });
 
-                Assert.False(result.TimedOut);
-                Assert.Equal(PinEventTypes.Falling, result.EventTypes);
-            }
+                    WaitForEventResult result = controller.WaitForEvent(InputPin, PinEventTypes.Falling, tokenSource.Token);
+
+                    Assert.False(result.TimedOut);
+                    Assert.Equal(PinEventTypes.Falling, result.EventTypes);
+                }
+            }, TimeSpan.FromSeconds(30));
         }
 
         [Fact]
