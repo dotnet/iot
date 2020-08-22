@@ -4,10 +4,12 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <LangVersion>preview</LangVersion>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../Media.csproj" />
+    <Compile Include="*.cs" />
   </ItemGroup>
 
 </Project>

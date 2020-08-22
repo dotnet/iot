@@ -70,12 +70,30 @@ namespace Iot.Device.Media
         /// <param name="outputStream">Recording save stream.</param>
         public abstract void Record(uint recordTimeSeconds, Stream outputStream);
 
+        /// <summary>
+        /// Start a continuous recording
+        /// </summary>
+        /// <param name="outputFilePath">The path of the output file</param>
+        public abstract void StartRecording(string outputFilePath);
+
+        /// <summary>
+        /// Stop the continuous recording
+        /// </summary>
+        public abstract void StopRecording();
+
         /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        /// <summary>
+        /// Write a header in a Stream
+        /// </summary>
+        /// <param name="wavStream">A wave stream</param>
+        /// <param name="header">The header to add</param>
+        public abstract void WriteWavHeader(Stream wavStream, WavHeader header);
 
         /// <summary>
         /// Releases the unmanaged resources used by the SoundDevice and optionally releases the managed resources.

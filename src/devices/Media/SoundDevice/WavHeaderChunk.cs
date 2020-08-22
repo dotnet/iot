@@ -4,10 +4,19 @@
 
 namespace Iot.Device.Media
 {
-    internal struct WavHeaderChunk
+    /// <summary>
+    /// Wave header chunk
+    /// </summary>
+    public struct WavHeaderChunk
     {
+        /// <summary>
+        /// The chunk id of the wave header chunk
+        /// </summary>
         public char[] ChunkId { get; set; }
 
+        /// <summary>
+        /// The size of the wave header chunk
+        /// </summary>
         public uint ChunkSize { get; set; }
     }
 }
