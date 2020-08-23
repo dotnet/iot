@@ -12,8 +12,9 @@ namespace Iot.Device.UFire.Sample
     /// </summary>
     public static class Program
     {
-        private const int BUSID = 1;
-        private const int I2CADDRESS = 0x3F;
+        private const int BusId = 1;
+        // 0x3F is the default address of all sensors
+        private const int I2cAddress = 0x3F;
 
         private static void PrintHelp()
         {
@@ -30,7 +31,7 @@ namespace Iot.Device.UFire.Sample
         /// <param name="args">Command line arguments see <see cref="PrintHelp"/></param>
         public static void Main(string[] args)
         {
-            I2cConnectionSettings settings = new I2cConnectionSettings(BUSID, I2CADDRESS);
+            I2cConnectionSettings settings = new I2cConnectionSettings(BusId, I2cAddress);
             I2cDevice device = I2cDevice.Create(settings);
 
             Console.WriteLine(
@@ -64,7 +65,7 @@ namespace Iot.Device.UFire.Sample
 
         private static void Basic(I2cDevice device)
         {
-            using (UFire_ISE uFire_ISE = new UFire_ISE(device))
+            using (UFireIse uFire_ISE = new UFireIse(device))
             {
                 Console.WriteLine("mV:" + uFire_ISE.MeasuremV());
             }
@@ -72,7 +73,7 @@ namespace Iot.Device.UFire.Sample
 
         private static void Orp(I2cDevice device)
         {
-            using (UFire_orp uFire_orp = new UFire_orp(device))
+            using (UFireOrp uFire_orp = new UFireOrp(device))
             {
                 Console.WriteLine("mV:" + uFire_orp.MeasuremV());
                 Console.WriteLine("Eh:" + uFire_orp.Eh);
@@ -81,11 +82,11 @@ namespace Iot.Device.UFire.Sample
 
         private static void Ph(I2cDevice device)
         {
-            using (UFire_pH uFire_pH = new UFire_pH(device))
+            using (UFirePh  uFire_pH = new UFirePh (device))
             {
                 Console.WriteLine("mV:" + uFire_pH.MeasuremV());
                 Console.WriteLine("pH:" + uFire_pH.MeasurepH());
-                Console.WriteLine("pOH:" + uFire_pH.POH);
+                Console.WriteLine("pOH:" + uFire_pH.Poh);
             }
         }
     }

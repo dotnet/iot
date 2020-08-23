@@ -14,8 +14,8 @@
     <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>
-  
-<ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 

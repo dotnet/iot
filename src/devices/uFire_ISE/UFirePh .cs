@@ -4,95 +4,101 @@
 
 using System;
 using System.Device.I2c;
+using UnitsNet;
 
 namespace Iot.Device.UFire
 {
     /// <summary>
     /// Get pH measuremens from μFire ISE Probe Interface
     /// </summary>
-    public class UFire_pH : UFire_ISE
+    public class UFirePh : UFireIse
     {
         private const float PROBE_MV_TO_PH = 59.2F;
         private const float TEMP_CORRECTION_FACTOR = 0.03F;
 
         /// <summary>
-        /// pH measuremen
+        /// pH (Power of Hydrogen) units measurement
         /// </summary>
-        public float PH = 0;
+        public float Ph = 0;
 
         /// <summary>
-        /// poH measuremen
+        /// pOH units measurement
         /// </summary>
-        public float POH = 0;
+        public float Poh = 0;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UFire_pH"/> class.
+        /// Initializes a new instance of the <see cref="UFirePh "/> class.
         /// </summary>
         /// <param name="i2cDevice">The I2C device to be used</param>
-        public UFire_pH(I2cDevice i2cDevice)
+        public UFirePh(I2cDevice i2cDevice)
             : base(i2cDevice)
         {
         }
 
         /// <summary>
-        /// Starts a pH measurement.
+        /// Tries to measurer pH (Power of Hydrogen) .
         /// </summary>
+        /// <param name="pH">The measure pH value</param>
         /// <param name="temp">Temperature compensation is available by passing the temperature.</param>
-        /// <returns>The measured result in pH, or -1 on error. If the probe is unconnected, the value will float</returns>
-        public float MeasurepH(float? temp = null)
+        /// <returns>True if it could measure pH (Power of Hydrogen) else false</returns>
+        public bool TryMeasurepH(out float pH, Temperature? temp = null)
         {
-            float mV = MeasuremV();
-            if (mV == -1)
+            ElectricPotential mV = MeasuremV();
+            if (mV.Value == -1)
             {
-                PH = -1;
-                POH = -1;
+                pH = -1;
+                Poh = -1;
 
-                return -1;
+                return false;
             }
 
-            PH = Convert.ToSingle(Math.Abs(7.0 - (mV / PROBE_MV_TO_PH)));
+            pH = Convert.ToSingle(Math.Abs(7.0 - (mV.Millivolts / PROBE_MV_TO_PH)));
 
             if (temp != null)
             {
-                double distance_from_7 = Math.Abs(7 - Math.Round(PH));
-                double distance_from_25 = Math.Floor(Math.Abs(25 - Math.Round(temp.Value)) / 10);
+                double distance_from_7 = Math.Abs(7 - Math.Round(Ph));
+                double distance_from_25 = Math.Floor(Math.Abs(25 - Math.Round(temp.Value.DegreesCelsius)) / 10);
                 double temp_multiplier = (distance_from_25 * distance_from_7) * TEMP_CORRECTION_FACTOR;
 
-                if ((PH >= 8.0) && (temp >= 35))
+                if ((Ph >= 8.0) && (temp.Value.DegreesCelsius >= 35))
                 {
                     temp_multiplier *= -1;
                 }
 
-                if ((PH <= 6.0) && (temp <= 15))
+                if ((Ph <= 6.0) && (temp.Value.DegreesCelsius <= 15))
                 {
                     temp_multiplier *= -1;
                 }
 
-                PH += Convert.ToSingle(temp_multiplier);
+                Ph += Convert.ToSingle(temp_multiplier);
             }
 
-            POH = Math.Abs(PH - 14);
+            Poh = Math.Abs(Ph - 14);
 
-            if (PH <= 0.0 || PH >= 14.0)
+            if (Ph <= 0.0 || Ph >= 14.0)
             {
-                PH = -1;
-                POH = -1;
+                pH = -1;
+                pH = -1;
+
+                return false;
             }
 
-            if (float.IsNaN(PH) || float.IsInfinity(PH))
+            if (float.IsNaN(Ph) || float.IsInfinity(Ph))
             {
-                PH = -1;
-                POH = -1;
+                pH = -1;
+                pH = -1;
+
+                return false;
             }
 
-            return PH;
+            return true;
         }
 
         /// <summary>
         /// Calibrates the probe using a single point using a pH value.
         /// </summary>
         /// <param name="solutionpH">pH value</param>
-        public new void CalibrateSingle(float solutionpH)
+        public void CalibrateSingle(float solutionpH)
         {
             CalibrateSingle(PHtomV(solutionpH));
         }
@@ -101,7 +107,7 @@ namespace Iot.Device.UFire
         /// Calibrates the dual-point values for the high reading and saves them in the devices's EEPROM.
         /// </summary>
         /// <param name="solutionpH">The pH of the calibration solution</param>
-        public new void CalibrateProbeHigh(float solutionpH)
+        public void CalibrateProbeHigh(float solutionpH)
         {
             CalibrateProbeHigh(PHtomV(solutionpH));
         }
@@ -128,7 +134,7 @@ namespace Iot.Device.UFire
         /// Calibrates the dual-point values for the low reading and saves them in the devices's EEPROM.
         /// </summary>
         /// <param name="solutionpH"> the pH of the calibration solution</param>
-        public new void CalibrateProbeLow(float solutionpH)
+        public void CalibrateProbeLow(float solutionpH)
         {
             CalibrateProbeLow(PHtomV(solutionpH));
         }
