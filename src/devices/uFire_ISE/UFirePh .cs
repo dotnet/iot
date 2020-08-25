@@ -9,7 +9,7 @@ using UnitsNet;
 namespace Iot.Device.UFire
 {
     /// <summary>
-    /// Get pH measuremens from μFire ISE Probe Interface
+    /// Get pH measuremens from μFire ISE (ion-selective electrode) Probe Interface
     /// </summary>
     public class UFirePh : UFireIse
     {
@@ -22,7 +22,7 @@ namespace Iot.Device.UFire
         public float Ph = 0;
 
         /// <summary>
-        /// pOH units measurement
+        /// pOH units measurement, for the relationship between pH and pOH see https://www.chem.purdue.edu/gchelp/howtosolveit/Equilibrium/Calculating_pHandpOH.htm#pOH
         /// </summary>
         public float Poh = 0;
 
@@ -36,14 +36,14 @@ namespace Iot.Device.UFire
         }
 
         /// <summary>
-        /// Tries to measurer pH (Power of Hydrogen) .
+        /// Tries to measure pH (Power of Hydrogen) .
         /// </summary>
         /// <param name="pH">The measure pH value</param>
         /// <param name="temp">Temperature compensation is available by passing the temperature.</param>
         /// <returns>True if it could measure pH (Power of Hydrogen) else false</returns>
         public bool TryMeasurepH(out float pH, Temperature? temp = null)
         {
-            ElectricPotential mV = MeasuremV();
+            ElectricPotential mV = Measure();
             if (mV.Value == -1)
             {
                 pH = -1;

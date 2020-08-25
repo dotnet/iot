@@ -14,9 +14,17 @@ namespace Iot.Device.UFire
     /// </summary>
     public class UFireIse : IDisposable
     {
+        /// <summary>
+        /// 0x3F is the default address of all sensors
+        /// </summary>
+        public static byte I2cAddress = 0x3F;
+
+        // A temperature measurement takes 750ms, see https://www.ufire.co/docs/uFire_ISE/#use
         private const int ISE_TEMP_MEASURE_TIME = 750;
-        private const int ISE_MV_MEASURE_TIME = 250;
-        private const int ISE_COMMUNICATION_DELAY = 10;
+        // A mV measurement takes 750 ms, see https://www.ufire.co/docs/uFire_ISE/#use
+        private const int ISE_MV_MEASURE_TIME = 750;
+
+        private const int IseCommunicationDelay = 10;
 
         private const bool ISE_DUALPOINT_CONFIG_BIT = false;
         private const int ISE_TEMP_COMPENSATION_CONFIG_BIT = 1;
@@ -42,11 +50,11 @@ namespace Iot.Device.UFire
             {
                 _temperatureCompensation = value;
 
-                byte retval = Read_byte((byte)Register.ISE_CONFIG_REGISTER);
+                byte retval = ReadByte((byte)Register.ISE_CONFIG_REGISTER);
 
                 retval = (byte)Bit_set((int)retval, ISE_TEMP_COMPENSATION_CONFIG_BIT, _temperatureCompensation);
 
-                Write_byte((byte)Register.ISE_CONFIG_REGISTER, retval);
+                WriteByte((byte)Register.ISE_CONFIG_REGISTER, retval);
             }
         }
 
@@ -60,16 +68,16 @@ namespace Iot.Device.UFire
         }
 
         /// <summary>
-        /// Measure mV
+        /// Measure a value from the ISE Probe Interface, typical measure are in the millivolt range
         /// </summary>
-        /// <returns>mV read from ISE Probe Interface</returns>
-        public ElectricPotential MeasuremV()
+        /// <returns>value from ISE Probe Interface, typical measure are in the millivolt range</returns>
+        public ElectricPotential Measure()
         {
-            Send_command((byte)Command.ISE_MEASURE_MV);
+            SendCommand((byte)Command.ISE_MEASURE_MV);
 
             DelayHelper.DelayMilliseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
 
-            _mV = Read_register((byte)Register.ISE_MV_REGISTER);
+            _mV = ReadRegister((byte)Register.ISE_MV_REGISTER);
             _mV = Convert.ToSingle(Math.Round(_mV, 2));
 
             return new ElectricPotential(_mV, UnitsNet.Units.ElectricPotentialUnit.Millivolt);
@@ -79,23 +87,23 @@ namespace Iot.Device.UFire
         /// Measure temperature
         /// </summary>
         /// <returns>Temperature. Temperature range: -2 to 35 C. Temperature Precision: 0.05 C</returns>
-        public Temperature MeasureTemp()
+        public Temperature MeasureTemperature()
         {
-            Send_command((byte)Command.ISE_MEASURE_TEMP);
+            SendCommand((byte)Command.ISE_MEASURE_TEMP);
 
             DelayHelper.DelayMilliseconds(ISE_TEMP_MEASURE_TIME, allowThreadYield: true);
-            _temp = new Temperature(Read_register((byte)Register.ISE_TEMP_REGISTER), UnitsNet.Units.TemperatureUnit.DegreeCelsius);
+            _temp = new Temperature(ReadRegister((byte)Register.ISE_TEMP_REGISTER), UnitsNet.Units.TemperatureUnit.DegreeCelsius);
 
             return _temp;
         }
 
         /// <summary>
-        /// Set temperature
+        /// Set temperature compensation
         /// </summary>
-        /// <param name="temp">Temperature</param>
-        public void SetTemp(Temperature temp)
+        /// <param name="temp">Compensation temperature</param>
+        public void SetTemperatureCompensation(Temperature temp)
         {
-            Write_register((byte)Register.ISE_TEMP_REGISTER, Convert.ToSingle(temp.DegreesCelsius));
+            WriteRegister((byte)Register.ISE_TEMP_REGISTER, Convert.ToSingle(temp.DegreesCelsius));
             _temp = temp;
         }
 
@@ -107,8 +115,8 @@ namespace Iot.Device.UFire
         {
             if (solution.Millivolts >= -1024 && solution.Millivolts <= 1024)
             {
-                Write_register((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
-                Send_command((byte)Command.ISE_CALIBRATE_SINGLE);
+                WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
+                SendCommand((byte)Command.ISE_CALIBRATE_SINGLE);
 
                 DelayHelper.DelayMilliseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
             }
@@ -122,8 +130,8 @@ namespace Iot.Device.UFire
         {
             if (solution.Millivolts >= -1024 && solution.Millivolts <= 1024)
             {
-                Write_register((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
-                Send_command((byte)Command.ISE_CALIBRATE_LOW);
+                WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
+                SendCommand((byte)Command.ISE_CALIBRATE_LOW);
 
                 DelayHelper.DelayMilliseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
             }
@@ -137,8 +145,8 @@ namespace Iot.Device.UFire
         {
             if (solution.Millivolts >= -1024 && solution.Millivolts <= 1024)
             {
-                Write_register((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
-                Send_command((byte)Command.ISE_CALIBRATE_HIGH);
+                WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
+                SendCommand((byte)Command.ISE_CALIBRATE_HIGH);
 
                 DelayHelper.DelayMilliseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
             }
@@ -150,7 +158,7 @@ namespace Iot.Device.UFire
         /// <returns>Firmware version</returns>
         public Version GetVersion()
         {
-            return new Version(Read_register((byte)Register.ISE_VERSION_REGISTER).ToString());
+            return new Version(ReadRegister((byte)Register.ISE_VERSION_REGISTER).ToString());
         }
 
         /// <summary>
@@ -160,7 +168,7 @@ namespace Iot.Device.UFire
         /// <returns>The known value (reference value) for calibrate the high value</returns>
         public ElectricPotential GetCalibrateHighReference()
         {
-            return new ElectricPotential(Read_register((byte)Register.ISE_CALIBRATE_REFHIGH_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
+            return new ElectricPotential(ReadRegister((byte)Register.ISE_CALIBRATE_REFHIGH_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
         }
 
         /// <summary>
@@ -170,7 +178,7 @@ namespace Iot.Device.UFire
         /// <returns>The known value (reference value) for calibrate the low value</returns>
         public ElectricPotential GetCalibrateLowReference()
         {
-            return new ElectricPotential(Read_register((byte)Register.ISE_CALIBRATE_REFLOW_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
+            return new ElectricPotential(ReadRegister((byte)Register.ISE_CALIBRATE_REFLOW_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
         }
 
         /// <summary>
@@ -180,7 +188,7 @@ namespace Iot.Device.UFire
         /// <returns>The measured value (reading value) for calibrate the high value</returns>
         public ElectricPotential GetCalibrateHighReading()
         {
-            return new ElectricPotential(Read_register((byte)Register.ISE_CALIBRATE_READHIGH_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
+            return new ElectricPotential(ReadRegister((byte)Register.ISE_CALIBRATE_READHIGH_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
 
         }
 
@@ -191,7 +199,7 @@ namespace Iot.Device.UFire
         /// <returns>The measured value (reading value) for calibrate the low value</returns>
         public ElectricPotential GetCalibrateLowReading()
         {
-            return new ElectricPotential(Read_register((byte)Register.ISE_CALIBRATE_READLOW_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
+            return new ElectricPotential(ReadRegister((byte)Register.ISE_CALIBRATE_READLOW_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
         }
 
         /// <summary>
@@ -199,11 +207,11 @@ namespace Iot.Device.UFire
         /// </summary>
         public void Reset()
         {
-            Write_register((byte)Register.ISE_CALIBRATE_SINGLE_REGISTER, null);
-            Write_register((byte)Register.ISE_CALIBRATE_REFHIGH_REGISTER, null);
-            Write_register((byte)Register.ISE_CALIBRATE_REFLOW_REGISTER, null);
-            Write_register((byte)Register.ISE_CALIBRATE_READHIGH_REGISTER, null);
-            Write_register((byte)Register.ISE_CALIBRATE_READLOW_REGISTER, null);
+            WriteRegister((byte)Register.ISE_CALIBRATE_SINGLE_REGISTER, null);
+            WriteRegister((byte)Register.ISE_CALIBRATE_REFHIGH_REGISTER, null);
+            WriteRegister((byte)Register.ISE_CALIBRATE_REFLOW_REGISTER, null);
+            WriteRegister((byte)Register.ISE_CALIBRATE_READHIGH_REGISTER, null);
+            WriteRegister((byte)Register.ISE_CALIBRATE_READLOW_REGISTER, null);
         }
 
         /// <summary>
@@ -220,10 +228,10 @@ namespace Iot.Device.UFire
                 readLow.Millivolts >= -1024 && readLow.Millivolts <= 1024 &&
                 readHigh.Millivolts >= -1024 && readHigh.Millivolts <= 1024)
             {
-                Write_register((byte)Register.ISE_CALIBRATE_REFLOW_REGISTER, Convert.ToSingle(refLow.Millivolts));
-                Write_register((byte)Register.ISE_CALIBRATE_REFHIGH_REGISTER, Convert.ToSingle(refHigh));
-                Write_register((byte)Register.ISE_CALIBRATE_READLOW_REGISTER, Convert.ToSingle(readLow));
-                Write_register((byte)Register.ISE_CALIBRATE_READHIGH_REGISTER, Convert.ToSingle(readHigh));
+                WriteRegister((byte)Register.ISE_CALIBRATE_REFLOW_REGISTER, Convert.ToSingle(refLow.Millivolts));
+                WriteRegister((byte)Register.ISE_CALIBRATE_REFHIGH_REGISTER, Convert.ToSingle(refHigh));
+                WriteRegister((byte)Register.ISE_CALIBRATE_READLOW_REGISTER, Convert.ToSingle(readLow));
+                WriteRegister((byte)Register.ISE_CALIBRATE_READHIGH_REGISTER, Convert.ToSingle(readHigh));
             }
         }
 
@@ -235,8 +243,12 @@ namespace Iot.Device.UFire
         {
             if (i2cAddress >= 1 && i2cAddress <= 127)
             {
-                Write_register((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToByte(i2cAddress));
-                Send_command((byte)Command.ISE_I2C);
+                WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToByte(i2cAddress));
+                SendCommand((byte)Command.ISE_I2C);
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -245,16 +257,12 @@ namespace Iot.Device.UFire
         /// </summary>
         /// <param name="address">Address to read</param>
         /// <returns>Low level data from EEPROM</returns>
-        public float ReadEEPROM(float address)
+        public float ReadEeprom(byte address)
         {
-            if (address < 0xff)
-            {
-                Write_register((byte)Register.ISE_SOLUTION_REGISTER, address);
-                Send_command((byte)Command.ISE_MEMORY_READ);
-                return Read_register((byte)Register.ISE_BUFFER_REGISTER);
-            }
+            WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, address);
+            SendCommand((byte)Command.ISE_MEMORY_READ);
 
-            return 0;
+            return ReadRegister((byte)Register.ISE_BUFFER_REGISTER);
         }
 
         /// <summary>
@@ -262,14 +270,11 @@ namespace Iot.Device.UFire
         /// </summary>
         /// <param name="address">Address</param>
         /// <param name="data">Data to write to the address</param>
-        public void WriteEEPROM(float address, float data)
+        public void WriteEeprom(byte address, float data)
         {
-            if (address < 0xff)
-            {
-                Write_register((byte)Register.ISE_SOLUTION_REGISTER, address);
-                Write_register((byte)Register.ISE_BUFFER_REGISTER, data);
-                Send_command((byte)Command.ISE_MEMORY_WRITE);
-            }
+            WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, address);
+            WriteRegister((byte)Register.ISE_BUFFER_REGISTER, data);
+            SendCommand((byte)Command.ISE_MEMORY_WRITE);
         }
 
         /// <summary>
@@ -278,40 +283,40 @@ namespace Iot.Device.UFire
         /// <returns>The version of the firmware</returns>
         public Version GetFirmwareVersion()
         {
-            return new Version(Read_byte((byte)Register.ISE_FW_VERSION_REGISTER).ToString());
+            return new Version(ReadByte((byte)Register.ISE_FW_VERSION_REGISTER).ToString());
 
         }
 
-        private void Send_command(byte data)
+        private void SendCommand(byte data)
         {
             Span<byte> bytes = stackalloc byte[2];
             bytes[0] = (byte)Register.ISE_TASK_REGISTER;
             bytes[1] = data;
             _device.Write(bytes);
-            DelayHelper.DelayMilliseconds(ISE_COMMUNICATION_DELAY, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(IseCommunicationDelay, allowThreadYield: true);
         }
 
-        private float Read_register(byte register)
+        private float ReadRegister(byte register)
         {
             byte[] data = { 0, 0, 0, 0 };
 
-            Change_register(register);
+            ChangeRegister(register);
 
             data[0] = _device.ReadByte();
             data[1] = _device.ReadByte();
             data[2] = _device.ReadByte();
             data[3] = _device.ReadByte();
 
-            return Convert.ToSingle(Round_total_digits(BitConverter.ToSingle(data, 0), 7));
+            return Convert.ToSingle(RoundTotalDigits(BitConverter.ToSingle(data, 0), 7));
         }
 
-        private void Write_register(byte register, float? data)
+        private void WriteRegister(byte register, float? data)
         {
-            byte[] dataArray = { 0, 0, 0, 0 };
+            byte[] dataArray = null;
 
             if (data != null)
             {
-                dataArray = BitConverter.GetBytes(Round_total_digits(data.Value));
+                dataArray = BitConverter.GetBytes(RoundTotalDigits(data.Value));
             }
 
             Span<byte> bytes = stackalloc byte[4];
@@ -320,32 +325,32 @@ namespace Iot.Device.UFire
             bytes[2] = dataArray[2];
             bytes[3] = dataArray[3];
 
-            Change_register(register);
+            ChangeRegister(register);
             _device.Write(bytes);
-            DelayHelper.DelayMilliseconds(ISE_COMMUNICATION_DELAY, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(IseCommunicationDelay, allowThreadYield: true);
         }
 
-        private void Change_register(byte register)
+        private void ChangeRegister(byte register)
         {
             _device.WriteByte(register);
-            DelayHelper.DelayMilliseconds(ISE_COMMUNICATION_DELAY, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(IseCommunicationDelay, allowThreadYield: true);
         }
 
-        private byte Read_byte(byte register)
+        private byte ReadByte(byte register)
         {
-            Change_register(register);
-            DelayHelper.DelayMilliseconds(ISE_COMMUNICATION_DELAY, allowThreadYield: true);
+            ChangeRegister(register);
+            DelayHelper.DelayMilliseconds(IseCommunicationDelay, allowThreadYield: true);
 
             return _device.ReadByte();
         }
 
-        private void Write_byte(byte register, byte value)
+        private void WriteByte(byte register, byte value)
         {
-            Change_register(register);
+            ChangeRegister(register);
 
             _device.WriteByte(value);
 
-            DelayHelper.DelayMilliseconds(ISE_COMMUNICATION_DELAY, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(IseCommunicationDelay, allowThreadYield: true);
 
         }
 
@@ -366,7 +371,7 @@ namespace Iot.Device.UFire
             return float.IsNaN(x) || x == 0 ? 0 : (int)Math.Floor(Math.Log10(Math.Abs(x))) + 1;
         }
 
-        private float Round_total_digits(float x, int? digits = 7)
+        private float RoundTotalDigits(float x, int? digits = 7)
         {
             int numberOfDigits = digits.Value - Magnitude(x);
             if (numberOfDigits > 15)

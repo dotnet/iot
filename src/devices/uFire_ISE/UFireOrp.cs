@@ -2,28 +2,27 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Device.I2c;
 using UnitsNet;
 
 namespace Iot.Device.UFire
 {
     /// <summary>
-    /// Get ORP measuremens from μFire ISE Probe Interface
+    /// Get ORP (oxidation-reduction potential) measuremens from μFire ISE (ion-selective electrode) Probe Interface
     /// </summary>
     public class UFireOrp : UFireIse
     {
-        private const float POTENTIAL_REGISTER_ADDRESS = 0x64;
+        private const byte POTENTIAL_REGISTER_ADDRESS = 0x64;
 
         /// <summary>
-        /// ORP measuremens
+        /// Oxidation-reduction potential (ORP) measuremens
         /// </summary>
-        public ElectricPotential ORP = new ElectricPotential();
+        public ElectricPotential OxidationReducationPotential = new ElectricPotential();
 
         /// <summary>
-        /// Eh measuremens
+        /// Reduction potential (Eh) measuremens (see https://www.eosremediation.com/converting-field-orp-measurements-into-eh/)
         /// </summary>
-        public ElectricPotential Eh = new ElectricPotential();
+        public ElectricPotential ReductionPotential = new ElectricPotential();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UFireOrp"/> class.
@@ -37,30 +36,23 @@ namespace Iot.Device.UFire
         /// <summary>
         /// The probe potential
         /// </summary>
-        public ElectricPotential ProbePotential
-        {
-            get
-            {
-                return ElectricPotential.FromMillivolts(ReadEEPROM(POTENTIAL_REGISTER_ADDRESS));
-            }
-
-        }
+        public ElectricPotential ProbePotential => ElectricPotential.FromMillivolts(ReadEeprom(POTENTIAL_REGISTER_ADDRESS));
 
         /// <summary>
-        /// Tries to measurer ORP (Oxidation-Reduction Potential).
+        /// Tries to measure ORP (Oxidation-Reduction Potential).
         /// </summary>
         /// <param name="orp">ORP (Oxidation-Reduction Potential) measurement</param>
         /// <returns>True if it could measure ORP (Oxidation-Reduction Potential) else false</returns>
-        public bool TryMeasureORP(out ElectricPotential orp)
+        public bool TryMeasureOxidationReducationPotential(out ElectricPotential orp)
         {
-            ElectricPotential mV = MeasuremV();
-            ORP = mV;
-            Eh = new ElectricPotential(mV.Millivolts + GetProbePotential(), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
+            ElectricPotential mV = Measure();
+            OxidationReducationPotential = mV;
+            ReductionPotential = new ElectricPotential(mV.Millivolts + GetProbePotential(), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
 
-            if (double.IsNaN(ORP.Value) || double.IsInfinity(mV.Value))
+            if (double.IsNaN(OxidationReducationPotential.Value) || double.IsInfinity(mV.Value))
             {
-                ORP = new ElectricPotential();
-                Eh = new ElectricPotential();
+                OxidationReducationPotential = new ElectricPotential();
+                ReductionPotential = new ElectricPotential();
             }
 
             orp = mV;
@@ -69,7 +61,7 @@ namespace Iot.Device.UFire
 
         private float GetProbePotential()
         {
-            return ReadEEPROM(POTENTIAL_REGISTER_ADDRESS);
+            return ReadEeprom(POTENTIAL_REGISTER_ADDRESS);
         }
     }
 }

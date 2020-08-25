@@ -13,8 +13,6 @@ namespace Iot.Device.UFire.Sample
     public static class Program
     {
         private const int BusId = 1;
-        // 0x3F is the default address of all sensors
-        private const int I2cAddress = 0x3F;
 
         private static void PrintHelp()
         {
@@ -31,7 +29,7 @@ namespace Iot.Device.UFire.Sample
         /// <param name="args">Command line arguments see <see cref="PrintHelp"/></param>
         public static void Main(string[] args)
         {
-            I2cConnectionSettings settings = new I2cConnectionSettings(BusId, I2cAddress);
+            I2cConnectionSettings settings = new I2cConnectionSettings(BusId, UFireIse.I2cAddress);
             I2cDevice device = I2cDevice.Create(settings);
 
             Console.WriteLine(
@@ -67,7 +65,7 @@ namespace Iot.Device.UFire.Sample
         {
             using (UFireIse uFire_ISE = new UFireIse(device))
             {
-                Console.WriteLine("mV:" + uFire_ISE.MeasuremV());
+                Console.WriteLine("mV:" + uFire_ISE.Measure().Millivolts);
             }
         }
 
@@ -75,18 +73,26 @@ namespace Iot.Device.UFire.Sample
         {
             using (UFireOrp uFire_orp = new UFireOrp(device))
             {
-                Console.WriteLine("mV:" + uFire_orp.MeasuremV());
-                Console.WriteLine("Eh:" + uFire_orp.Eh);
+                Console.WriteLine("mV:" + uFire_orp.Measure().Millivolts);
+                Console.WriteLine("Eh:" + uFire_orp.ReductionPotential);
             }
         }
 
         private static void Ph(I2cDevice device)
         {
-            using (UFirePh  uFire_pH = new UFirePh (device))
+            using (UFirePh uFire_pH = new UFirePh(device))
             {
-                Console.WriteLine("mV:" + uFire_pH.MeasuremV());
-                Console.WriteLine("pH:" + uFire_pH.MeasurepH());
-                Console.WriteLine("pOH:" + uFire_pH.Poh);
+                Console.WriteLine("mV:" + uFire_pH.Measure().Millivolts);
+
+                if (uFire_pH.TryMeasurepH(out float pH))
+                {
+                    Console.WriteLine("pH:" + pH);
+                    Console.WriteLine("pOH:" + uFire_pH.Poh);
+                }
+                else
+                {
+                    Console.WriteLine("Not possible to measure pH");
+                }
             }
         }
     }
