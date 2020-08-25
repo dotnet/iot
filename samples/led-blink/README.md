@@ -40,6 +40,13 @@ var dimTime = 200;
 Console.WriteLine($"Let's blink an LED!");
 using GpioController controller = new GpioController();
 
+// open pins as output mode
+foreach (var pin in pins)
+{
+    controller.OpenPin(pin, PinMode.Output);
+    Console.WriteLine($"GPIO pin enabled for use: {pin}");
+}
+
 Console.CancelKeyPress += (s, e) =>
 {
     // turn off all pins when the program is terminated, with CTRL-C
@@ -49,13 +56,6 @@ Console.CancelKeyPress += (s, e) =>
         controller.Write(pin, PinValue.Low);
     }
 };
-
-// open pins as output mode
-foreach (var pin in pins)
-{
-    controller.OpenPin(pin, PinMode.Output);
-    Console.WriteLine($"GPIO pin enabled for use: {pin}");
-}
 
 // LED behavior
 while (true)
