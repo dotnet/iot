@@ -58,7 +58,7 @@ namespace Iot.Device.DHTxx
         /// Get the last read temperature
         /// </summary>
         /// <remarks>
-        /// If last read was not successfull, it returns <code>default(Temperature)</code>
+        /// If last read was not successful, it returns <code>default(Temperature)</code>
         /// </remarks>
         public virtual Temperature Temperature
         {
@@ -73,7 +73,7 @@ namespace Iot.Device.DHTxx
         /// Get the last read of relative humidity in percentage
         /// </summary>
         /// <remarks>
-        /// If last read was not successfull, it returns <code>default(Ratio)</code>
+        /// If last read was not successful, it returns <code>default(Ratio)</code>
         /// </remarks>
         public virtual Ratio Humidity
         {
@@ -280,6 +280,10 @@ namespace Iot.Device.DHTxx
             if (_shouldDispose)
             {
                 _controller?.Dispose();
+            }
+            else
+            {
+                _controller.ClosePin(_pin);
             }
 
             _i2cDevice?.Dispose();
