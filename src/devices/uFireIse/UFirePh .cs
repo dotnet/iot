@@ -13,8 +13,8 @@ namespace Iot.Device.UFire
     /// </summary>
     public class UFirePh : UFireIse
     {
-        private const float PROBE_MV_TO_PH = 59.2F;
-        private const float TEMP_CORRECTION_FACTOR = 0.03F;
+        private const float ProbeMvToPh = 59.2F;
+        private const float TemperatureCorrectionFactor = 0.03F;
 
         /// <summary>
         /// pH (Power of Hydrogen) units measurement
@@ -36,7 +36,7 @@ namespace Iot.Device.UFire
         }
 
         /// <summary>
-        /// Tries to measure pH (Power of Hydrogen) .
+        /// Tries to measure pH (Power of Hydrogen).
         /// </summary>
         /// <param name="pH">The measure pH value</param>
         /// <param name="temp">Temperature compensation is available by passing the temperature.</param>
@@ -48,35 +48,36 @@ namespace Iot.Device.UFire
             if (mV.Value == -1)
             {
                 pH = float.NaN;
+                Ph = pH;
 
                 return false;
             }
 
-            pH = Convert.ToSingle(Math.Abs(7.0 - (mV.Millivolts / PROBE_MV_TO_PH)));
+            pH = Convert.ToSingle(Math.Abs(7.0 - (mV.Millivolts / ProbeMvToPh)));
 
             if (temp != null)
             {
-                double distance_from_7 = Math.Abs(7 - Math.Round(Ph));
-                double distance_from_25 = Math.Floor(Math.Abs(25 - Math.Round(temp.Value.DegreesCelsius)) / 10);
-                double temp_multiplier = (distance_from_25 * distance_from_7) * TEMP_CORRECTION_FACTOR;
+                double distanceFrom7 = Math.Abs(7 - Math.Round(Ph));
+                double distanceFrom25 = Math.Floor(Math.Abs(25 - Math.Round(temp.Value.DegreesCelsius)) / 10);
+                double temperatureMultiplier = (distanceFrom25 * distanceFrom7) * TemperatureCorrectionFactor;
 
                 if ((Ph >= 8.0) && (temp.Value.DegreesCelsius >= 35))
                 {
-                    temp_multiplier *= -1;
+                    temperatureMultiplier *= -1;
                 }
 
                 if ((Ph <= 6.0) && (temp.Value.DegreesCelsius <= 15))
                 {
-                    temp_multiplier *= -1;
+                    temperatureMultiplier *= -1;
                 }
 
-                Ph += Convert.ToSingle(temp_multiplier);
+                Ph += Convert.ToSingle(temperatureMultiplier);
             }
 
             if (Ph <= 0.0 || Ph >= 14.0)
             {
                 pH = float.NaN;
-                pH = float.NaN;
+                Ph = pH;
 
                 return false;
             }
@@ -84,10 +85,12 @@ namespace Iot.Device.UFire
             if (float.IsNaN(Ph) || float.IsInfinity(Ph))
             {
                 pH = float.NaN;
-                pH = float.NaN;
+                Ph = pH;
 
                 return false;
             }
+
+            Ph = pH;
 
             return true;
         }
@@ -157,12 +160,12 @@ namespace Iot.Device.UFire
 
         private float PHtomV(float pH)
         {
-            return (7 - pH) * PROBE_MV_TO_PH;
+            return (7 - pH) * ProbeMvToPh;
         }
 
         private float MVtopH(float mV)
         {
-            return Convert.ToSingle(Math.Abs(7.0 - (mV / PROBE_MV_TO_PH)));
+            return Convert.ToSingle(Math.Abs(7.0 - (mV / ProbeMvToPh)));
         }
 
     }

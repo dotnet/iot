@@ -49,7 +49,7 @@ namespace Iot.Device.UFire
             OxidationReducationPotential = mV;
             ReductionPotential = new ElectricPotential(mV.Millivolts + GetProbePotential(), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
 
-            if (double.IsNaN(OxidationReducationPotential.Value) || double.IsInfinity(mV.Value))
+            if (double.IsNaN(mV.Value) || double.IsInfinity(mV.Value))
             {
                 OxidationReducationPotential = new ElectricPotential();
                 ReductionPotential = new ElectricPotential();

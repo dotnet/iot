@@ -8,11 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\..\..\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
+    <ProjectReference Include="..\uFireIse.csproj" />
   </ItemGroup>
 
 </Project>

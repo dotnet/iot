@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.I2c;
+using UnitsNet;
 
 namespace Iot.Device.UFire.Sample
 {
@@ -73,8 +74,14 @@ namespace Iot.Device.UFire.Sample
         {
             using (UFireOrp uFireOrp = new UFireOrp(device))
             {
-                Console.WriteLine("mV:" + uFireOrp.Measure().Millivolts);
-                Console.WriteLine("Eh:" + uFireOrp.ReductionPotential);
+                if (uFireOrp.TryMeasureOxidationReducationPotential(out ElectricPotential orp))
+                {
+                    Console.WriteLine("Eh:" + orp.Millivolts);
+                }
+                else
+                {
+                    Console.WriteLine("Not possible to measure pH");
+                }
             }
         }
 

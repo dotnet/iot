@@ -298,32 +298,34 @@ namespace Iot.Device.UFire
 
         private float ReadRegister(byte register)
         {
-            byte[] data = { 0, 0, 0, 0 };
-
             ChangeRegister(register);
 
-            data[0] = _device.ReadByte();
-            data[1] = _device.ReadByte();
-            data[2] = _device.ReadByte();
-            data[3] = _device.ReadByte();
+            Span<byte> data = stackalloc byte[4]
+            {
+                0,
+                0,
+                0,
+                0
+            };
+            _device.Read(data);
 
-            return Convert.ToSingle(RoundTotalDigits(BitConverter.ToSingle(data, 0), 7));
+            return Convert.ToSingle(RoundTotalDigits(BitConverter.ToSingle(data.ToArray(), 0), 7));
         }
 
         private void WriteRegister(byte register, float? data)
         {
-            byte[] dataArray = null;
+            Span<byte> bytes = stackalloc byte[4]
+             {
+                0,
+                0,
+                0,
+                0
+             };
 
             if (data != null)
             {
-                dataArray = BitConverter.GetBytes(RoundTotalDigits(data.Value));
+                bytes = BitConverter.GetBytes(RoundTotalDigits(data.Value));
             }
-
-            Span<byte> bytes = stackalloc byte[4];
-            bytes[0] = dataArray[0];
-            bytes[1] = dataArray[1];
-            bytes[2] = dataArray[2];
-            bytes[3] = dataArray[3];
 
             ChangeRegister(register);
             _device.Write(bytes);

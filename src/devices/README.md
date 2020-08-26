@@ -211,7 +211,6 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [MotorHat](MotorHat/README.md)
 * [Pca9685 - I2C PWM Driver](Pca9685/README.md)
-* [uFire_ISE - I2C Driver](uFire_ISE/README.md)
 * [Software PWM](SoftPwm/README.md)
 * [Software SPI](SoftwareSpi/README.md)
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
