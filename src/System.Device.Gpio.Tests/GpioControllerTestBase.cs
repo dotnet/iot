@@ -92,6 +92,30 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
+        public void SharedControllerManagesItsOwnPinsTest()
+        {
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                // Open pin in input mode (default)
+                Assert.False(controller.IsPinOpen(LedPin));
+                controller.OpenPin(LedPin, PinMode.Input);
+                Assert.True(controller.IsPinOpen(LedPin));
+
+                var sharedController = new SharedGpioController(controller);
+                sharedController.OpenPin(10, PinMode.Input);
+                Assert.True(sharedController.IsPinOpen(10));
+                Assert.True(controller.IsPinOpen(10));
+
+                sharedController.ClosePin(10);
+                Assert.False(sharedController.IsPinOpen(10));
+                Assert.False(controller.IsPinOpen(10));
+
+                controller.ClosePin(LedPin);
+                Assert.False(controller.IsPinOpen(LedPin));
+            }
+        }
+
+        [Fact]
         public void IsPinOpenOnOutputTest()
         {
             // Separate test to check the IsPinOpen works also when the PinMode is Output, See Bug #776
@@ -108,6 +132,21 @@ namespace System.Device.Gpio.Tests
                 controller.Write(LedPin, PinValue.Low);
                 Assert.True(controller.IsPinOpen(LedPin));
                 controller.ClosePin(LedPin);
+                Assert.False(controller.IsPinOpen(LedPin));
+            }
+        }
+
+        [Fact]
+        public void CanClosePinsViaDisposableTest()
+        {
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                Assert.False(controller.IsPinOpen(LedPin));
+
+                var openPin = controller.OpenPin(LedPin, PinMode.Output);
+                Assert.True(controller.IsPinOpen(LedPin));
+
+                openPin.Dispose();
                 Assert.False(controller.IsPinOpen(LedPin));
             }
         }
@@ -245,6 +284,52 @@ namespace System.Device.Gpio.Tests
                     if (fallingEventOccurredCount == 4)
                     {
                         controller.UnregisterCallbackForPinValueChangedEvent(InputPin, Callback);
+                    }
+                });
+                controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Falling, (o, e) =>
+                {
+                    fallingEventOccurredCount++;
+                });
+
+                for (int i = 0; i < 10; i++)
+                {
+                    controller.Write(OutputPin, PinValue.High);
+                    Thread.Sleep(WaitMilliseconds);
+                    controller.Write(OutputPin, PinValue.Low);
+                    Thread.Sleep(WaitMilliseconds);
+                }
+
+                Assert.Equal(25, risingEventOccurredCount);
+                Assert.Equal(10, fallingEventOccurredCount);
+
+                void Callback(object sender, PinValueChangedEventArgs e)
+                {
+                    risingEventOccurredCount++;
+                }
+            }
+        }
+
+        [Fact]
+        public void AddCallbackDisposeCallbackTest()
+        {
+            int risingEventOccurredCount = 0, fallingEventOccurredCount = 0;
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                controller.OpenPin(InputPin, PinMode.Input);
+                controller.OpenPin(OutputPin, PinMode.Output);
+                controller.Write(OutputPin, PinValue.Low);
+
+                controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, (o, e) =>
+                {
+                    risingEventOccurredCount++;
+                });
+                var callbackToDispose = controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, Callback);
+                controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, (o, e) =>
+                {
+                    risingEventOccurredCount++;
+                    if (fallingEventOccurredCount == 4)
+                    {
+                        callbackToDispose.Dispose();
                     }
                 });
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Falling, (o, e) =>

@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Device.Gpio.Drivers;
+using System.Disposables;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -15,7 +16,7 @@ namespace System.Device.Gpio
     /// <summary>
     /// Represents a general-purpose I/O (GPIO) controller.
     /// </summary>
-    public sealed class GpioController : IDisposable
+    public sealed class GpioController : IGpioController
     {
         // Constants used to check the hardware on linux
         private const string CpuInfoPath = "/proc/cpuinfo";
@@ -52,14 +53,10 @@ namespace System.Device.Gpio
             _openPins = new HashSet<int>();
         }
 
-        /// <summary>
-        /// The numbering scheme used to represent pins provided by the controller.
-        /// </summary>
+        /// <inheritdoc/>
         public PinNumberingScheme NumberingScheme { get; }
 
-        /// <summary>
-        /// The number of pins provided by the controller.
-        /// </summary>
+        /// <inheritdoc/>
         public int PinCount => _driver.PinCount;
 
         /// <summary>
@@ -72,11 +69,8 @@ namespace System.Device.Gpio
             return (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : _driver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
         }
 
-        /// <summary>
-        /// Opens a pin in order for it to be ready to use.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        public void OpenPin(int pinNumber)
+        /// <inheritdoc/>
+        public IDisposable OpenPin(int pinNumber)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (_openPins.Contains(logicalPinNumber))
@@ -86,23 +80,18 @@ namespace System.Device.Gpio
 
             _driver.OpenPin(logicalPinNumber);
             _openPins.Add(logicalPinNumber);
+            return Disposable.Create(() => ClosePin(pinNumber));
         }
 
-        /// <summary>
-        /// Opens a pin and sets it to a specific mode.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="mode">The mode to be set.</param>
-        public void OpenPin(int pinNumber, PinMode mode)
+        /// <inheritdoc/>
+        public IDisposable OpenPin(int pinNumber, PinMode mode)
         {
             OpenPin(pinNumber);
             SetPinMode(pinNumber, mode);
+            return Disposable.Create(() => ClosePin(pinNumber));
         }
 
-        /// <summary>
-        /// Closes an open pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        /// <inheritdoc/>
         public void ClosePin(int pinNumber)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
@@ -115,11 +104,7 @@ namespace System.Device.Gpio
             _openPins.Remove(logicalPinNumber);
         }
 
-        /// <summary>
-        /// Sets the mode to a pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="mode">The mode to be set.</param>
+        /// <inheritdoc/>
         public void SetPinMode(int pinNumber, PinMode mode)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
@@ -136,11 +121,7 @@ namespace System.Device.Gpio
             _driver.SetPinMode(logicalPinNumber, mode);
         }
 
-        /// <summary>
-        /// Gets the mode of a pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <returns>The mode of the pin.</returns>
+        /// <inheritdoc/>
         public PinMode GetPinMode(int pinNumber)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
@@ -152,34 +133,21 @@ namespace System.Device.Gpio
             return _driver.GetPinMode(logicalPinNumber);
         }
 
-        /// <summary>
-        /// Checks if a specific pin is open.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <returns>The status if the pin is open or closed.</returns>
+        /// <inheritdoc/>
         public bool IsPinOpen(int pinNumber)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             return _openPins.Contains(logicalPinNumber);
         }
 
-        /// <summary>
-        /// Checks if a pin supports a specific mode.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="mode">The mode to check.</param>
-        /// <returns>The status if the pin supports the mode.</returns>
+        /// <inheritdoc/>
         public bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             return _driver.IsPinModeSupported(logicalPinNumber, mode);
         }
 
-        /// <summary>
-        /// Reads the current value of a pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <returns>The value of the pin.</returns>
+        /// <inheritdoc/>
         public PinValue Read(int pinNumber)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
@@ -191,11 +159,7 @@ namespace System.Device.Gpio
             return _driver.Read(logicalPinNumber);
         }
 
-        /// <summary>
-        /// Writes a value to a pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="value">The value to be written to the pin.</param>
+        /// <inheritdoc/>
         public void Write(int pinNumber, PinValue value)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
@@ -212,13 +176,7 @@ namespace System.Device.Gpio
             _driver.Write(logicalPinNumber, value);
         }
 
-        /// <summary>
-        /// Blocks execution until an event of type eventType is received or a period of time has expired.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="eventTypes">The event types to wait for.</param>
-        /// <param name="timeout">The time to wait for the event.</param>
-        /// <returns>A structure that contains the result of the waiting operation.</returns>
+        /// <inheritdoc/>
         public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
         {
             using (CancellationTokenSource tokenSource = new CancellationTokenSource(timeout))
@@ -227,13 +185,7 @@ namespace System.Device.Gpio
             }
         }
 
-        /// <summary>
-        /// Blocks execution until an event of type eventType is received or a cancellation is requested.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="eventTypes">The event types to wait for.</param>
-        /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
-        /// <returns>A structure that contains the result of the waiting operation.</returns>
+        /// <inheritdoc/>
         public WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
@@ -245,13 +197,7 @@ namespace System.Device.Gpio
             return _driver.WaitForEvent(logicalPinNumber, eventTypes, cancellationToken);
         }
 
-        /// <summary>
-        /// Async call to wait until an event of type eventType is received or a period of time has expired.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="eventTypes">The event types to wait for.</param>
-        /// <param name="timeout">The time to wait for the event.</param>
-        /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation.</returns>
+        /// <inheritdoc/>
         public async ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, TimeSpan timeout)
         {
             using (CancellationTokenSource tokenSource = new CancellationTokenSource(timeout))
@@ -260,13 +206,7 @@ namespace System.Device.Gpio
             }
         }
 
-        /// <summary>
-        /// Async call until an event of type eventType is received or a cancellation is requested.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="eventTypes">The event types to wait for.</param>
-        /// <param name="token">The cancellation token of when the operation should stop waiting for an event.</param>
-        /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
+        /// <inheritdoc/>
         public ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken token)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
@@ -278,13 +218,8 @@ namespace System.Device.Gpio
             return _driver.WaitForEventAsync(logicalPinNumber, eventTypes, token);
         }
 
-        /// <summary>
-        /// Adds a callback that will be invoked when pinNumber has an event of type eventType.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="eventTypes">The event types to wait for.</param>
-        /// <param name="callback">The callback method that will be invoked.</param>
-        public void RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
+        /// <inheritdoc/>
+        public IDisposable RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
@@ -293,13 +228,11 @@ namespace System.Device.Gpio
             }
 
             _driver.AddCallbackForPinValueChangedEvent(logicalPinNumber, eventTypes, callback);
+
+            return Disposable.Create(() => UnregisterCallbackForPinValueChangedEvent(pinNumber, callback));
         }
 
-        /// <summary>
-        /// Removes a callback that was being invoked for pin at pinNumber.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="callback">The callback method that will be invoked.</param>
+        /// <inheritdoc/>
         public void UnregisterCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
@@ -328,10 +261,7 @@ namespace System.Device.Gpio
             Dispose(true);
         }
 
-        /// <summary>
-        /// Write the given pins with the given values.
-        /// </summary>
-        /// <param name="pinValuePairs">The pin/value pairs to write.</param>
+        /// <inheritdoc/>
         public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
         {
             for (int i = 0; i < pinValuePairs.Length; i++)
@@ -340,10 +270,7 @@ namespace System.Device.Gpio
             }
         }
 
-        /// <summary>
-        /// Read the given pins with the given pin numbers.
-        /// </summary>
-        /// <param name="pinValuePairs">The pin/value pairs to read.</param>
+        /// <inheritdoc/>
         public void Read(Span<PinValuePair> pinValuePairs)
         {
             for (int i = 0; i < pinValuePairs.Length; i++)
