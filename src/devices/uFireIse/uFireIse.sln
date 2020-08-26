@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{23706C17-8A17-4828-A0DA-C8DF324FA99A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uFireIse.Sample", "samples\uFireIse.Sample.csproj", "{232D9DAA-0270-4B12-8C20-71CCF109D05F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UFireIse.Sample", "samples\UFireIse.Sample.csproj", "{232D9DAA-0270-4B12-8C20-71CCF109D05F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uFireIse", "uFireIse.csproj", "{1D69A099-215D-4625-B743-037BCD9BA633}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UFireIse", "UFireIse.csproj", "{1D69A099-215D-4625-B743-037BCD9BA633}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
