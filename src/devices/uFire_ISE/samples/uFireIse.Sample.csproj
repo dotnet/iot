@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)\..\..\..\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
-    <ProjectReference Include="..\uFire_ISE.csproj" />
   </ItemGroup>
 
 </Project>

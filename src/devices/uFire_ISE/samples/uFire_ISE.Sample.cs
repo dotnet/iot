@@ -63,18 +63,18 @@ namespace Iot.Device.UFire.Sample
 
         private static void Basic(I2cDevice device)
         {
-            using (UFireIse uFire_ISE = new UFireIse(device))
+            using (UFireIse uFireIse = new UFireIse(device))
             {
-                Console.WriteLine("mV:" + uFire_ISE.Measure().Millivolts);
+                Console.WriteLine("mV:" + uFireIse.Measure().Millivolts);
             }
         }
 
         private static void Orp(I2cDevice device)
         {
-            using (UFireOrp uFire_orp = new UFireOrp(device))
+            using (UFireOrp uFireOrp = new UFireOrp(device))
             {
-                Console.WriteLine("mV:" + uFire_orp.Measure().Millivolts);
-                Console.WriteLine("Eh:" + uFire_orp.ReductionPotential);
+                Console.WriteLine("mV:" + uFireOrp.Measure().Millivolts);
+                Console.WriteLine("Eh:" + uFireOrp.ReductionPotential);
             }
         }
 

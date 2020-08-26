@@ -20,19 +20,19 @@ namespace Iot.Device.UFire
         public static byte I2cAddress = 0x3F;
 
         // A temperature measurement takes 750ms, see https://www.ufire.co/docs/uFire_ISE/#use
-        private const int ISE_TEMP_MEASURE_TIME = 750;
+        private const int IseTemperatureMeasureTime = 750;
         // A mV measurement takes 750 ms, see https://www.ufire.co/docs/uFire_ISE/#use
-        private const int ISE_MV_MEASURE_TIME = 750;
+        private const int IseMvMeasureTime = 750;
 
         private const int IseCommunicationDelay = 10;
 
-        private const bool ISE_DUALPOINT_CONFIG_BIT = false;
-        private const int ISE_TEMP_COMPENSATION_CONFIG_BIT = 1;
+        private const bool IseDualPointConfigBit = false;
+        private const int IseTemperatureCompensationConfigBit = 1;
 
         private I2cDevice _device;
 
-        private float _mV = 0;
-        private Temperature _temp = new Temperature();
+        private float _measurement = 0;
+        private Temperature _temperature = new Temperature();
 
         private bool _temperatureCompensation = false;
 
@@ -52,7 +52,7 @@ namespace Iot.Device.UFire
 
                 byte retval = ReadByte((byte)Register.ISE_CONFIG_REGISTER);
 
-                retval = (byte)Bit_set((int)retval, ISE_TEMP_COMPENSATION_CONFIG_BIT, _temperatureCompensation);
+                retval = (byte)Bit_set((int)retval, IseTemperatureCompensationConfigBit, _temperatureCompensation);
 
                 WriteByte((byte)Register.ISE_CONFIG_REGISTER, retval);
             }
@@ -68,19 +68,19 @@ namespace Iot.Device.UFire
         }
 
         /// <summary>
-        /// Measure a value from the ISE Probe Interface, typical measure are in the millivolt range
+        /// Measure a value from the ISE Probe Interface, typical measure are in the millivolt range.
         /// </summary>
-        /// <returns>value from ISE Probe Interface, typical measure are in the millivolt range</returns>
+        /// <returns>value from ISE Probe Interface, typical measure are in the millivolt range. On error it return -1 as value</returns>
         public ElectricPotential Measure()
         {
             SendCommand((byte)Command.ISE_MEASURE_MV);
 
-            DelayHelper.DelayMilliseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
+            DelayHelper.DelayMilliseconds(IseMvMeasureTime, allowThreadYield: true);
 
-            _mV = ReadRegister((byte)Register.ISE_MV_REGISTER);
-            _mV = Convert.ToSingle(Math.Round(_mV, 2));
+            _measurement = ReadRegister((byte)Register.ISE_MV_REGISTER);
+            _measurement = Convert.ToSingle(Math.Round(_measurement, 2));
 
-            return new ElectricPotential(_mV, UnitsNet.Units.ElectricPotentialUnit.Millivolt);
+            return new ElectricPotential(_measurement, UnitsNet.Units.ElectricPotentialUnit.Millivolt);
         }
 
         /// <summary>
@@ -91,10 +91,10 @@ namespace Iot.Device.UFire
         {
             SendCommand((byte)Command.ISE_MEASURE_TEMP);
 
-            DelayHelper.DelayMilliseconds(ISE_TEMP_MEASURE_TIME, allowThreadYield: true);
-            _temp = new Temperature(ReadRegister((byte)Register.ISE_TEMP_REGISTER), UnitsNet.Units.TemperatureUnit.DegreeCelsius);
+            DelayHelper.DelayMilliseconds(IseTemperatureMeasureTime, allowThreadYield: true);
+            _temperature = new Temperature(ReadRegister((byte)Register.ISE_TEMP_REGISTER), UnitsNet.Units.TemperatureUnit.DegreeCelsius);
 
-            return _temp;
+            return _temperature;
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace Iot.Device.UFire
         public void SetTemperatureCompensation(Temperature temp)
         {
             WriteRegister((byte)Register.ISE_TEMP_REGISTER, Convert.ToSingle(temp.DegreesCelsius));
-            _temp = temp;
+            _temperature = temp;
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Iot.Device.UFire
                 WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
                 SendCommand((byte)Command.ISE_CALIBRATE_SINGLE);
 
-                DelayHelper.DelayMilliseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
+                DelayHelper.DelayMilliseconds(IseMvMeasureTime, allowThreadYield: true);
             }
         }
 
@@ -133,7 +133,7 @@ namespace Iot.Device.UFire
                 WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
                 SendCommand((byte)Command.ISE_CALIBRATE_LOW);
 
-                DelayHelper.DelayMilliseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
+                DelayHelper.DelayMilliseconds(IseMvMeasureTime, allowThreadYield: true);
             }
         }
 
@@ -148,7 +148,7 @@ namespace Iot.Device.UFire
                 WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
                 SendCommand((byte)Command.ISE_CALIBRATE_HIGH);
 
-                DelayHelper.DelayMilliseconds(ISE_MV_MEASURE_TIME, allowThreadYield: true);
+                DelayHelper.DelayMilliseconds(IseMvMeasureTime, allowThreadYield: true);
             }
         }
 

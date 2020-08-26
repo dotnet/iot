@@ -24,7 +24,7 @@ namespace Iot.Device.UFire
         /// <summary>
         /// pOH units measurement, for the relationship between pH and pOH see https://www.chem.purdue.edu/gchelp/howtosolveit/Equilibrium/Calculating_pHandpOH.htm#pOH
         /// </summary>
-        public float Poh = 0;
+        public float Poh => Ph >= 0 ? Math.Abs(14 - Ph) : float.NaN;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UFirePh "/> class.
@@ -43,11 +43,11 @@ namespace Iot.Device.UFire
         /// <returns>True if it could measure pH (Power of Hydrogen) else false</returns>
         public bool TryMeasurepH(out float pH, Temperature? temp = null)
         {
+            // It return -1 on error
             ElectricPotential mV = Measure();
             if (mV.Value == -1)
             {
-                pH = -1;
-                Poh = -1;
+                pH = float.NaN;
 
                 return false;
             }
@@ -73,20 +73,18 @@ namespace Iot.Device.UFire
                 Ph += Convert.ToSingle(temp_multiplier);
             }
 
-            Poh = Math.Abs(Ph - 14);
-
             if (Ph <= 0.0 || Ph >= 14.0)
             {
-                pH = -1;
-                pH = -1;
+                pH = float.NaN;
+                pH = float.NaN;
 
                 return false;
             }
 
             if (float.IsNaN(Ph) || float.IsInfinity(Ph))
             {
-                pH = -1;
-                pH = -1;
+                pH = float.NaN;
+                pH = float.NaN;
 
                 return false;
             }
