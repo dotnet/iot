@@ -6,9 +6,13 @@
     <AssemblyName>Iot.Device.UFire.Sample</AssemblyName>
     <RootNamespace>Iot.Device.UFire.Sample</RootNamespace>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\uFireIse.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\..\..\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
   </ItemGroup>
 
 </Project>
