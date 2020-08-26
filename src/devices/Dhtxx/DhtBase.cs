@@ -283,7 +283,7 @@ namespace Iot.Device.DHTxx
             }
             else
             {
-                _controller.ClosePin(_pin);
+                _controller?.ClosePin(_pin);
             }
 
             _i2cDevice?.Dispose();
