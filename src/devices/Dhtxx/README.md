@@ -67,7 +67,7 @@ using (Dht12 dht = new Dht12(device))
             $"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
         Console.WriteLine(
             $"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
-}   }
+    }
     else
     {
         Console.WriteLine("Error reading DHT sensor");
