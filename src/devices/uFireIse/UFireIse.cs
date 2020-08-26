@@ -300,13 +300,8 @@ namespace Iot.Device.UFire
         {
             ChangeRegister(register);
 
-            Span<byte> data = stackalloc byte[4]
-            {
-                0,
-                0,
-                0,
-                0
-            };
+            Span<byte> data = stackalloc byte[4];
+
             _device.Read(data);
 
             return Convert.ToSingle(RoundTotalDigits(BitConverter.ToSingle(data.ToArray(), 0), 7));
