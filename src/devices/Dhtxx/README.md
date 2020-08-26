@@ -41,7 +41,7 @@ using (Dht11 dht = new Dht11(26))
     }
 }
 ```
-**Note:** _Specifically on the RPi with the DHT22, 1-Wire works using Raspian but not with Windows 10 IoT Core. The device has to switch the 1-wire pin between input and output and vice versa. It seems that Windows IoT Core OS can't switch the pin direction quick enough. There have been suggestions for using two pins; one for input and one for output. This solution has not been implemented here, but these are some handy links that may help setting that up:_
+**Note:** _On the RPi with any of the DHT sensor, 1-Wire works using Raspian but not with Windows 10 IoT Core. The device has to switch the 1-wire pin between input and output and vice versa. It seems that Windows IoT Core OS can't switch the pin direction quick enough. There have been suggestions for using two pins; one for input and one for output. This solution has not been implemented here, but these are some handy links that may help setting that up:_
 - https://github.com/ms-iot/samples/tree/develop/GpioOneWire
 - And on Hackster.io: https://www.hackster.io/porrey/go-native-c-with-the-dht22-a8e8eb
 
@@ -124,6 +124,14 @@ var controller = new GpioController(PinNumberingScheme.Logical, driver);
 // This uses pin 4 in the logical schema so pin 7 in the physical schema
 var dht = new Dht11(4, gpioController: controller);
 ```
+
+**My DHT sensor using 1 wire protocol is not working on my Raspberry Pi with Windows 10 IoT Core, what can I do?**
+
+On the RPi with any of the DHT sensor, 1-Wire works using Raspian but not with Windows 10 IoT Core. The device has to switch the 1-wire pin between input and output and vice versa. It seems that Windows IoT Core OS can't switch the pin direction quick enough. There have been suggestions for using two pins; one for input and one for output. This solution has not been implemented here, but these are some handy links that may help setting that up:_
+- https://github.com/ms-iot/samples/tree/develop/GpioOneWire
+- And on Hackster.io: https://www.hackster.io/porrey/go-native-c-with-the-dht22-a8e8eb
+
+Now if your sensor is an I2C sensor, it should just work perfectly on Windows 10 IoT Core.
 
 ## References
 
