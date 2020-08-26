@@ -26,16 +26,14 @@ namespace System.Device.Gpio
         /// Opens a pin in order for it to be ready to use.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <returns>A disposable that will close the pin if disposed.</returns>
-        IDisposable OpenPin(int pinNumber);
+        void OpenPin(int pinNumber);
 
         /// <summary>
         /// Opens a pin and sets it to a specific mode.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <param name="mode">The mode to be set.</param>
-        /// <returns>A disposable that will close the pin if disposed.</returns>
-        IDisposable OpenPin(int pinNumber, PinMode mode);
+        void OpenPin(int pinNumber, PinMode mode);
 
         /// <summary>
         /// Closes an open pin.
@@ -128,8 +126,7 @@ namespace System.Device.Gpio
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <param name="eventTypes">The event types to wait for.</param>
         /// <param name="callback">The callback method that will be invoked.</param>
-        /// <returns>A disposable object that will remove the added callback </returns>
-        IDisposable RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback);
+        void RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback);
 
         /// <summary>
         /// Removes a callback that was being invoked for pin at pinNumber.

@@ -43,19 +43,17 @@ namespace System.Device.Gpio
         public int PinCount => _controller.PinCount;
 
         /// <inheritdoc/>
-        public IDisposable OpenPin(int pinNumber)
+        public void OpenPin(int pinNumber)
         {
             _controller.OpenPin(pinNumber);
             _openPins.Add(pinNumber);
-            return Disposable.Create(() => ClosePin(pinNumber));
         }
 
         /// <inheritdoc/>
-        public IDisposable OpenPin(int pinNumber, PinMode mode)
+        public void OpenPin(int pinNumber, PinMode mode)
         {
             _controller.OpenPin(pinNumber, mode);
             _openPins.Add(pinNumber);
-            return Disposable.Create(() => ClosePin(pinNumber));
         }
 
         /// <inheritdoc/>
@@ -128,11 +126,9 @@ namespace System.Device.Gpio
         }
 
         /// <inheritdoc/>
-        public IDisposable RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
+        public void RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             _controller.RegisterCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
-
-            return Disposable.Create(() => UnregisterCallbackForPinValueChangedEvent(pinNumber, callback));
         }
 
         /// <inheritdoc/>

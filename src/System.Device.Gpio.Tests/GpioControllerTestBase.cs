@@ -143,7 +143,7 @@ namespace System.Device.Gpio.Tests
             {
                 Assert.False(controller.IsPinOpen(LedPin));
 
-                var openPin = controller.OpenPin(LedPin, PinMode.Output);
+                var openPin = controller.OpenPinAsDisposable(LedPin, PinMode.Output);
                 Assert.True(controller.IsPinOpen(LedPin));
 
                 openPin.Dispose();
@@ -323,7 +323,7 @@ namespace System.Device.Gpio.Tests
                 {
                     risingEventOccurredCount++;
                 });
-                var callbackToDispose = controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, Callback);
+                var callbackToDispose = controller.RegisterCallbackForPinValueChangedEventAsDisposable(InputPin, PinEventTypes.Rising, Callback);
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, (o, e) =>
                 {
                     risingEventOccurredCount++;

@@ -70,7 +70,7 @@ namespace System.Device.Gpio
         }
 
         /// <inheritdoc/>
-        public IDisposable OpenPin(int pinNumber)
+        public void OpenPin(int pinNumber)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (_openPins.Contains(logicalPinNumber))
@@ -80,15 +80,13 @@ namespace System.Device.Gpio
 
             _driver.OpenPin(logicalPinNumber);
             _openPins.Add(logicalPinNumber);
-            return Disposable.Create(() => ClosePin(pinNumber));
         }
 
         /// <inheritdoc/>
-        public IDisposable OpenPin(int pinNumber, PinMode mode)
+        public void OpenPin(int pinNumber, PinMode mode)
         {
             OpenPin(pinNumber);
             SetPinMode(pinNumber, mode);
-            return Disposable.Create(() => ClosePin(pinNumber));
         }
 
         /// <inheritdoc/>
@@ -219,7 +217,7 @@ namespace System.Device.Gpio
         }
 
         /// <inheritdoc/>
-        public IDisposable RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
+        public void RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
@@ -228,8 +226,6 @@ namespace System.Device.Gpio
             }
 
             _driver.AddCallbackForPinValueChangedEvent(logicalPinNumber, eventTypes, callback);
-
-            return Disposable.Create(() => UnregisterCallbackForPinValueChangedEvent(pinNumber, callback));
         }
 
         /// <inheritdoc/>
