@@ -21,9 +21,10 @@ namespace Iot.Device.UFire
 
         // A temperature measurement takes 750ms, see https://www.ufire.co/docs/uFire_ISE/#use
         private const int IseTemperatureMeasureTime = 750;
-        // A mV measurement takes 750 ms, see https://www.ufire.co/docs/uFire_ISE/#use
+        // A measurement takes 750 ms, see https://www.ufire.co/docs/uFire_ISE/#use
         private const int IseMvMeasureTime = 750;
 
+        // Implement short delays, required for the device to operate reliably, see https://www.ufire.co/docs/uFire_ISE/#use
         private const int IseCommunicationDelay = 10;
 
         private const bool IseDualPointConfigBit = false;
