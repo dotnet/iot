@@ -87,7 +87,7 @@ This example can also be cross-compiled on another machine and then executed on 
 
 * Synchronize published folder to the RaspPi via rsync over ssh
 
-        rsync -avz -e 'ssh' bin/Release/netcoreapp2.1/linux-arm/publish/  pi@192.168.1.192:/home/pi/max-sample/
+        rsync -avz -e 'ssh' bin/Release/netcoreapp3.1/linux-arm/publish/  pi@192.168.1.192:/home/pi/max-sample/
 
 * Execute the program on the RaspPi or remote via SSH
 
