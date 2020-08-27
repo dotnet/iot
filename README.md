@@ -12,7 +12,7 @@ The repository also contains [Iot.Device.Bindings](https://www.nuget.org/package
 
 # .NET Core Versions
 
-Whilst most of the projects are set to .NET Core 2.1 for backward compatibility, the sample projects are set to .NET Core 3.1. This applies to the sample projects with each device as well as the /samples example projects. .NET Standard projects remain at version 2.0.
+Whilst most of the device binding projects target .NET Core 2.1 for backward compatibility, the sample projects target the latest stable .NET Core. This applies to the sample projects with each device as well as the example projects on the `/samples` directory.
 
 # How to Install
 
