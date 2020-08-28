@@ -21,7 +21,7 @@ namespace Iot.Device.Gpio.Drivers
     /// It can even drive the internal pins that are not drawn out.
     /// Before you operate, you must be clear about what you are doing.
     /// </remarks>
-    public unsafe partial class SunxiDriver : GpioDriver
+    public unsafe partial class SunxiDriver : UnixDriver
     {
         private const string GpioMemoryFilePath = "/dev/mem";
         private readonly IDictionary<int, PinState> _pinModes = new Dictionary<int, PinState>();
