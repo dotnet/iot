@@ -23,27 +23,33 @@ namespace Iot.Device.Gpio.Drivers
     /// </remarks>
     public unsafe partial class SunxiDriver : GpioDriver
     {
+        private const string GpioMemoryFilePath = "/dev/mem";
+        private readonly IDictionary<int, PinState> _pinModes = new Dictionary<int, PinState>();
+
         private IntPtr _gpioPointer0;
         private IntPtr _gpioPointer1;
 
         /// <summary>
-        /// CPUX-PORT base address. 
+        /// CPUX-PORT base address.
         /// </summary>
         protected virtual int CpuxPortBaseAddess { get; }
+
         /// <summary>
         /// CPUS-PORT base address.
         /// </summary>
         protected virtual int CpusPortBaseAddess { get; }
         // final_address = mapped_address + (target_address & map_mask) https://stackoverflow.com/a/37922968
         private readonly int _mapMask = Environment.SystemPageSize - 1;
-
         private static readonly object s_initializationLock = new object();
         private static readonly object s_sysFsInitializationLock = new object();
-        private const string GpioMemoryFilePath = "/dev/mem";
         private UnixDriver _interruptDriver;
-        private readonly IDictionary<int, PinState> _pinModes = new Dictionary<int, PinState>();
 
-        protected SunxiDriver() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SunxiDriver"/> class.
+        /// </summary>
+        protected SunxiDriver()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SunxiDriver"/>.
@@ -96,7 +102,7 @@ namespace Iot.Device.Gpio.Drivers
                     Write(pinNumber, PinValue.Low);
                     SetPinMode(pinNumber, PinMode.Input);
                 }
-                
+
                 _pinModes.Remove(pinNumber);
             }
         }
@@ -114,7 +120,7 @@ namespace Iot.Device.Gpio.Drivers
             }
 
             // Get port controller, port number and shift
-            var unmapped = UnmapPinNumber(pinNumber);
+            (int PortController, int Port) unmapped = UnmapPinNumber(pinNumber);
             int cfgNum = unmapped.Port / 8;
             int cfgShift = unmapped.Port % 8;
             int pulNum = unmapped.Port / 16;
@@ -184,7 +190,7 @@ namespace Iot.Device.Gpio.Drivers
         /// <param name="value">The value to be written to the pin.</param>
         protected internal override void Write(int pinNumber, PinValue value)
         {
-            var unmapped = UnmapPinNumber(pinNumber);
+            (int PortController, int Port) unmapped = UnmapPinNumber(pinNumber);
 
             int dataAddress;
             uint* dataPointer;
@@ -221,7 +227,7 @@ namespace Iot.Device.Gpio.Drivers
         /// <returns>The value of the pin.</returns>
         protected internal unsafe override PinValue Read(int pinNumber)
         {
-            var unmapped = UnmapPinNumber(pinNumber);
+            (int PortController, int Port) unmapped = UnmapPinNumber(pinNumber);
 
             int dataAddress;
             uint* dataPointer;
@@ -334,6 +340,7 @@ namespace Iot.Device.Gpio.Drivers
             return _pinModes[pinNumber].CurrentPinMode;
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (_gpioPointer0 != default)

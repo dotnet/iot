@@ -9,7 +9,10 @@ namespace Iot.Device.Gpio.Drivers
     /// </summary>
     public class Sun50iw6p1Driver : SunxiDriver
     {
+        /// <inheritdoc/>
         protected override int CpuxPortBaseAddess => 0x0300B000;
+
+        /// <inheritdoc/>
         protected override int CpusPortBaseAddess => 0x07022000;
     }
 }
