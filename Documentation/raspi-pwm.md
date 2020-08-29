@@ -52,8 +52,7 @@ Unhandled exception. System.UnauthorizedAccessException: Access to the path '/sy
 
 In order to have the hardware PWM activated on the Raspberry Pi, you'll have to edit the /boot/config.txt file and add an overlay.
 
-Main https://github.com/raspberrypi/linux/blob/04c8e47067d4873c584395e5cb260b4f170a99ea/arch/arm/boot/dts/overlays/README#L925
-Main Raspberry Pi kernel documentation gives 2 possibilities. Either a [single channel](), either a [dual channel](https://github.com/raspberrypi/linux/blob/04c8e47067d4873c584395e5cb260b4f170a99ea/arch/arm/boot/dts/overlays/README#L944).
+Main Raspberry Pi kernel documentation gives 2 possibilities. Either a [single channel](https://github.com/raspberrypi/linux/blob/04c8e47067d4873c584395e5cb260b4f170a99ea/arch/arm/boot/dts/overlays/README#L925), either a [dual channel](https://github.com/raspberrypi/linux/blob/04c8e47067d4873c584395e5cb260b4f170a99ea/arch/arm/boot/dts/overlays/README#L944).
 
 Here are the possible options for each PWM channel:
 
@@ -154,6 +153,7 @@ sudo ./yourapplication
 
 ### Adding your user to the right permission group
 
+If you're running, or just upgrated to a version published after Auguste 2020, this should be already done. 
 You will have to create a [specific group in udev](https://raspberrypi.stackexchange.com/questions/66890/accessing-pwm-module-without-root-permissions).
 
 ```bash
