@@ -35,14 +35,14 @@ namespace Iot.Device.DHTxx
         protected readonly I2cDevice _i2cDevice;
 
         /// <summary>
-        /// <see cref="GpioController"/> related with the <see cref="_pin"/>.
-        /// </summary>
-        protected readonly GpioController _controller;
-
-        /// <summary>
         /// True to dispose the Gpio Controller
         /// </summary>
         protected readonly bool _shouldDispose;
+
+        /// <summary>
+        /// <see cref="GpioController"/> related with the <see cref="_pin"/>.
+        /// </summary>
+        protected GpioController _controller;
 
         // wait about 1 ms
         private readonly uint _loopCount = 10000;
@@ -280,6 +280,7 @@ namespace Iot.Device.DHTxx
             if (_shouldDispose)
             {
                 _controller?.Dispose();
+                _controller = null;
             }
             else
             {
