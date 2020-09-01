@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="../../System.Device.Gpio/Interop/Unix/**/*.cs" />
-    <Compile Include="../../System.Device.Gpio/System/Device/Gpio/**/*.cs" />
   </ItemGroup>
 
   <ItemGroup>
