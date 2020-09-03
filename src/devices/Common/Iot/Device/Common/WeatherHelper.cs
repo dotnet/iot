@@ -138,11 +138,36 @@ namespace Iot.Device.Common
         /// <remarks>
         /// Source https://de.wikipedia.org/wiki/Luftfeuchtigkeit#Absolute_Luftfeuchtigkeit
         /// </remarks>
-        public static double CalculateAbsoluteHumidity(Temperature airTemperature, Ratio relativeHumidity)
+        public static Density CalculateAbsoluteHumidity(Temperature airTemperature, Ratio relativeHumidity)
         {
             var avp = CalculateActualVaporPressure(airTemperature, relativeHumidity).Pascals;
-            return avp / (airTemperature.Kelvins * 461.5) * 1000;
+            double gramsPerCubicMeter = avp / (airTemperature.Kelvins * 461.5) * 1000;
+            return Density.FromGramsPerCubicMeter(gramsPerCubicMeter);
         }
+
+        /// <summary>
+        /// Calculates a corrected relative humidity. This is useful if you have a temperature/humidity sensor that is
+        /// placed in a location where the temperature is different from the real ambient temperature (like it sits inside a hot case)
+        /// and another temperature-only sensor that gives more reasonable ambient temperature readings.
+        /// Do note that the relative humidity is dependent on the temperature, because it depends on how much water a volume of air
+        /// can contain, which increases with temperature.
+        /// </summary>
+        /// <param name="airTemperatureFromHumiditySensor">Temperature measured by the humidity sensor</param>
+        /// <param name="relativeHumidityMeasured">Humidity measured</param>
+        /// <param name="airTemperatureFromBetterPlacedSensor">Temperature measured by better placed sensor</param>
+        /// <returns>A corrected humidity. The value will be lower than the input value if the better placed sensor is cooler than
+        /// the "bad" sensor.</returns>
+        public static Ratio CorrectRelativeHumidityFromDifferentSensor(Temperature airTemperatureFromHumiditySensor,
+            Ratio relativeHumidityMeasured, Temperature airTemperatureFromBetterPlacedSensor)
+        {
+            Density absoluteHumidity =
+                CalculateAbsoluteHumidity(airTemperatureFromHumiditySensor, relativeHumidityMeasured);
+            double avp = absoluteHumidity.GramsPerCubicMeter * (airTemperatureFromBetterPlacedSensor.Kelvins * 461.5) / 1000;
+            double ret = avp / CalculateSaturatedVaporPressureOverWater(airTemperatureFromBetterPlacedSensor).Hectopascals;
+            return Ratio.FromPercent(ret);
+
+        }
+
         #endregion TemperatureAndRelativeHumidity
 
         #region Pressure

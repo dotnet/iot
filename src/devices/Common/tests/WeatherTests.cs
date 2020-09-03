@@ -78,7 +78,7 @@ namespace Iot.Device.Common.Tests
         public void AbsoluteHumidityIsCalculatedCorrectly(double expected, double fahrenheit, double relativeHumidity)
         {
             var absoluteHumidity = WeatherHelper.CalculateAbsoluteHumidity(Temperature.FromDegreesFahrenheit(fahrenheit), Ratio.FromPercent(relativeHumidity));
-            Assert.Equal(expected, Math.Round(absoluteHumidity, 0));
+            Assert.Equal(expected, absoluteHumidity.GramsPerCubicMeter, 0);
         }
 
         [Theory]
@@ -172,6 +172,19 @@ namespace Iot.Device.Common.Tests
             var result = WeatherHelper.CalculateBarometricPressure(Pressure.FromHectopascals(measuredValue),
                 Temperature.FromDegreesCelsius(temperature), Length.FromMeters(altitude), Ratio.FromPercent(relativeHumidity));
             Assert.Equal(expected, result.Hectopascals, 2);
+        }
+
+        [Theory]
+        [InlineData(20, 40.2, 20, 40.2)]
+        [InlineData(30, 40.2, 20, 70.569)]
+        [InlineData(27.8, 38.1, 20.0, 59.317)] // in data from BMP280 (in case), thermometer 1 meter away shows 20.0°, 57%
+        public void CorrectRelativeHumidityFromDifferentSensor(double inTemp, double inHumidity, double outTemp, double outHumidityExpected)
+        {
+            var result = WeatherHelper.CorrectRelativeHumidityFromDifferentSensor(
+                Temperature.FromDegreesCelsius(inTemp),
+                Ratio.FromPercent(inHumidity), Temperature.FromDegreesCelsius(outTemp));
+
+            Assert.Equal(outHumidityExpected, result.Percent, 3);
         }
     }
 }
