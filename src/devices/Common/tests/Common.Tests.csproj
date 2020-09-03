@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
-    <ProjectReference Include="..\Iot\Device\Common\CommonHelpers.csproj" />
+    <ProjectReference Include="..\CommonHelpers.csproj" />
     
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
