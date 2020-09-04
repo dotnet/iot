@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.IO.Ports;
 
 namespace Iot.Device.HuskyLens.Samples
@@ -35,7 +37,6 @@ namespace Iot.Device.HuskyLens.Samples
             Console.WriteLine("Switching to face recognition");
             device.SetAlgorithm(Algorithm.FACE_RECOGNITION);
 
-
             Console.WriteLine("Press enter");
             Console.ReadLine();
             Console.WriteLine("Switching to object tracking");
@@ -44,6 +45,23 @@ namespace Iot.Device.HuskyLens.Samples
             Console.WriteLine("Press enter");
             Console.ReadLine();
 
+            var cancellationSource = new CancellationTokenSource();
+
+            Task.Run(() =>
+            {
+                Console.WriteLine("Continuously fetching objects, press Enter to exit");
+                while (!cancellationSource.IsCancellationRequested)
+                {
+                    foreach (var o in device.GetAllObjects())
+                    {
+                        Console.WriteLine($"{o.ToString()}");
+                    }
+                }
+            },
+            cancellationSource.Token);
+
+            Console.ReadLine();
+            cancellationSource.Cancel(false);
             sp.Close();
         }
     }

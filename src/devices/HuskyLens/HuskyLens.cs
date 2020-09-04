@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.IO.Ports;
 
@@ -43,6 +44,52 @@ namespace Iot.Device.HuskyLens
             WaitForOK();
         }
 
+        /// <summary>
+        /// Gets all recognized objects
+        /// </summary>
+        public IReadOnlyCollection<HuskyObject> GetAllObjects()
+        {
+            var command = new byte[] { 0x55, 0xAA, 0x11, 0x00, 0x20, 0x30 };
+            _connection.Write(command);
+
+            // wait for COMMAND_RETURN_INFO
+            var response = new DataFrame(_connection.Read(0x0A + 6));
+            if (!response.Valid() || response.Command != Command.COMMAND_RETURN_INFO)
+            {
+                // error
+                throw new NotImplementedException();
+            }
+
+            // read # of blocks&arrows
+            var count = response.Data[0] + response.Data[1] * 0x100;
+            Console.WriteLine($"Reading {count} objects");
+            var huskyObjects = new List<HuskyObject>();
+            for (int i = 0; i < count; i++)
+            {
+                response = new DataFrame(_connection.Read(0x0A + 6));
+                if (!response.Valid())
+                {
+                    // error
+                    throw new NotImplementedException();
+                }
+
+                switch (response.Command)
+                {
+                    case Command.COMMAND_RETURN_BLOCK:
+                        huskyObjects.Add(Block.FromData(response.Data));
+                        break;
+                    case Command.COMMAND_RETURN_ARROW:
+                        huskyObjects.Add(Arrow.FromData(response.Data));
+                        break;
+                    default:
+                        // error
+                        throw new NotImplementedException();
+                }
+            }
+
+            return huskyObjects;
+        }
+
         private void WaitForOK()
         {
             // COMMAND_RETURN_OK(0x2E):
@@ -55,32 +102,5 @@ namespace Iot.Device.HuskyLens
                 throw new Exception();
             }
         }
-    }
-
-    /// <summary>
-    /// Algorithms for HuskyLens
-    /// </summary>
-    public enum Algorithm : byte
-    {
-        /// FACE_RECOGNITION
-        FACE_RECOGNITION = 0x00,
-
-        /// OBJECT_TRACKING
-        OBJECT_TRACKING = 0x01,
-
-        /// OBJECT_RECOGNITION
-        OBJECT_RECOGNITION = 0x02,
-
-        /// LINE_TRACKING
-        LINE_TRACKING = 0x03,
-
-        /// COLOR_RECOGNITION
-        COLOR_RECOGNITION = 0x04,
-
-        /// TAG_RECOGNITION
-        TAG_RECOGNITION = 0x05,
-
-        /// OBJECT_CLASSIFICATION
-        OBJECT_CLASSIFICATION = 0x06,
     }
 }
