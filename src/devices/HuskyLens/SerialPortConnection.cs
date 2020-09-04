@@ -26,10 +26,15 @@ namespace Iot.Device.HuskyLens
         }
 
         /// <inheritdoc/>
-        public ReadOnlySpan<byte> Read()
+        public ReadOnlySpan<byte> Read(int count)
         {
-            byte[] buffer = new byte[1024];
-            int count = _serialPort.Read(buffer, 0, buffer.Length);
+            byte[] buffer = new byte[count];
+            int c = 0;
+            while (c < count)
+            {
+                c += _serialPort.Read(buffer, c, count - c);
+            }
+
             return new ReadOnlySpan<byte>(buffer, 0, count);
         }
     }
@@ -48,7 +53,8 @@ namespace Iot.Device.HuskyLens
         /// <summary>
         /// Reads any bytes that are available from the device
         /// </summary>
+        /// <param name="count">number of bytes to read</param>
         /// <returns>whatever was read, obviously. Duh!</returns>
-        ReadOnlySpan<byte> Read();
+        ReadOnlySpan<byte> Read(int count);
     }
 }
