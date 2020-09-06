@@ -27,7 +27,7 @@ namespace Iot.Device.Ahtxx.Samples
 
             while (true)
             {
-                Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {aht20Sensor.Temperature}, {aht20Sensor.Humidity}");
+                Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {aht20Sensor.GetTemperature()}, {aht20Sensor.GetHumidity()}");
                 Thread.Sleep(1000);
             }
         }

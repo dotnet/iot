@@ -61,26 +61,20 @@ namespace Iot.Device.Ahtxx
         /// Gets the current temperature reading from the sensor.
         /// </summary>
         /// <returns>Temperature reading</returns>
-        public Temperature Temperature
+        public Temperature GetTemperature()
         {
-            get
-            {
-                Measure();
-                return new Temperature(_temperature, UnitsNet.Units.TemperatureUnit.DegreeCelsius);
-            }
+            Measure();
+            return new Temperature(_temperature, UnitsNet.Units.TemperatureUnit.DegreeCelsius);
         }
 
         /// <summary>
         /// Gets the current humidity reading from the sensor.
         /// </summary>
         /// <returns>Temperature reading</returns>
-        public Ratio Humidity
+        public Ratio GetHumidity()
         {
-            get
-            {
-                Measure();
-                return new Ratio(_humidity, UnitsNet.Units.RatioUnit.Percent);
-            }
+            Measure();
+            return new Ratio(_humidity, UnitsNet.Units.RatioUnit.Percent);
         }
 
         /// <summary>
