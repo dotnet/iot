@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.IO.Ports;
 
 namespace Iot.Device.HuskyLens
 {
@@ -12,19 +10,19 @@ namespace Iot.Device.HuskyLens
         /// <summary>
         /// Origin of the arrow
         /// </summary>
-        public Point Origin { get; private set; }
+        public Point Origin { get; }
 
         /// <summary>
         /// Trget of the arrow
         /// </summary>
-        public Point Target { get; private set; }
+        public Point Target { get; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="origin">Origin of the arrow</param>
         /// <param name="target">Target of the arrow</param>
-        /// <param name="id">Learnt Id</param>
+        /// <param name="id">Learned Id</param>
         public Arrow(Point origin, Point target, int id = 0)
         : base(id)
         {

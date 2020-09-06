@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO.Ports;
 
 namespace Iot.Device.HuskyLens
 {
@@ -10,15 +9,21 @@ namespace Iot.Device.HuskyLens
     /// </summary>
     public class HuskyLens
     {
-        private IBinaryConnection _connection;
+        private readonly IBinaryConnection _connection;
 
         /// <summary>
-        /// todo
+        /// Algorithm currently used.
+        /// </summary>
+        public Algorithm Algorithm { get; private set; }
+
+        /// <summary>
+        /// Constructor
         /// </summary>
         /// <param name="connection">guess</param>
-        public HuskyLens(SerialPort connection)
+        public HuskyLens(IBinaryConnection connection)
         {
-            _connection = new SerialPortConnection(connection);
+            _connection = connection;
+            Algorithm = Algorithm.Undefined;
         }
 
         /// <summary>
@@ -38,6 +43,12 @@ namespace Iot.Device.HuskyLens
         /// <param name="algorithm">the algorithm</param>
         public void SetAlgorithm(Algorithm algorithm)
         {
+            if (algorithm == Algorithm.Undefined)
+            {
+                throw new ArgumentException("Not supported", nameof(algorithm));
+            }
+
+            Algorithm = algorithm;
             var command = new byte[] { 0x55, 0xAA, 0x11, 0x02, 0x2D, (byte)algorithm, 0x00, 0x00 };
             command[7] = (byte)(command.Aggregate(0x00, (a, b) => a + b) & 0xFF);
             _connection.Write(command);

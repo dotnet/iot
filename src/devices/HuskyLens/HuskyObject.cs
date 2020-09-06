@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.IO.Ports;
-
-namespace Iot.Device.HuskyLens
+﻿namespace Iot.Device.HuskyLens
 {
     /// <summary>
     /// Represent the base type for object detected by the Huskylens camera
@@ -10,15 +6,15 @@ namespace Iot.Device.HuskyLens
     public abstract class HuskyObject
     {
         /// <summary>
-        /// Learnt id
+        /// Learned id
         /// </summary>
-        /// <value>the id of the value learnt, 0 if unknown</value>
-        public int Id { get; private set; }
+        /// <value>the id of the value learned, 0 if unknown</value>
+        public int Id { get; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="id">The learnt id</param>
+        /// <param name="id">The learned id</param>
         protected HuskyObject(int id)
         {
             Id = id;

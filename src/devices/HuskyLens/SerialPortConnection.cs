@@ -38,23 +38,4 @@ namespace Iot.Device.HuskyLens
             return new ReadOnlySpan<byte>(buffer, 0, count);
         }
     }
-
-    /// <summary>
-    /// todo
-    /// </summary>
-    public interface IBinaryConnection
-    {
-        /// <summary>
-        /// Writes the buffer to the connected device
-        /// </summary>
-        /// <param name="buffer">todo</param>
-        void Write(ReadOnlySpan<byte> buffer);
-
-        /// <summary>
-        /// Reads any bytes that are available from the device
-        /// </summary>
-        /// <param name="count">number of bytes to read</param>
-        /// <returns>whatever was read, obviously. Duh!</returns>
-        ReadOnlySpan<byte> Read(int count);
-    }
 }

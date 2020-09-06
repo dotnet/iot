@@ -23,7 +23,7 @@ namespace Iot.Device.HuskyLens.Samples
 
             Console.WriteLine($"IsOpen: {sp.IsOpen}");
 
-            var device = new HuskyLens(sp);
+            var device = new HuskyLens(new SerialPortConnection(sp));
             Console.WriteLine("Pinging HuskyLens");
             if (device.Ping())
             {
@@ -35,12 +35,12 @@ namespace Iot.Device.HuskyLens.Samples
             }
 
             Console.WriteLine("Switching to face recognition");
-            device.SetAlgorithm(Algorithm.FACE_RECOGNITION);
+            device.SetAlgorithm(Algorithm.FaceRecognition);
 
             Console.WriteLine("Press enter");
             Console.ReadLine();
             Console.WriteLine("Switching to object tracking");
-            device.SetAlgorithm(Algorithm.OBJECT_TRACKING);
+            device.SetAlgorithm(Algorithm.ObjectTracking);
 
             Console.WriteLine("Press enter");
             Console.ReadLine();

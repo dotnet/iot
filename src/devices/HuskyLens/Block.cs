@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.IO.Ports;
 
 namespace Iot.Device.HuskyLens
 {
@@ -12,31 +10,31 @@ namespace Iot.Device.HuskyLens
         /// <summary>
         /// Center of the block
         /// </summary>
-        public Point Center { get; private set; }
+        public Point Center { get; }
 
         /// <summary>
-        /// Witdh of the block , range:0-319
+        /// Width of the block , range:0-319
         /// </summary>
-        public int Width { get; private set; }
+        public int Width { get; }
 
         /// <summary>
         /// Height of the block, range:0-239
         /// </summary>
         /// <value></value>
-        public int Height { get; private set; }
+        public int Height { get; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="center">The center</param>
-        /// <param name="witdh">The witdth</param>
+        /// <param name="width">The width</param>
         /// <param name="height">The Height</param>
-        /// <param name="id">The learnt id</param>
-        public Block(Point center, int witdh, int height, int id = 0)
+        /// <param name="id">The learned id</param>
+        public Block(Point center, int width, int height, int id = 0)
         : base(id)
         {
             Center = center;
-            Width = witdh;
+            Width = width;
             Height = height;
         }
 
