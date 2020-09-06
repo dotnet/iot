@@ -1,18 +1,16 @@
 ﻿# Ahtxx
 
 ## Summary
-Provide a brief description on what the component is and its functionality.
+AHTxx temperature and humidity sensor family.
 
 ## Device Family
-Provide a list of component names and link to datasheets (if available) the binding will work with.
-
-**[Family Name Here]**: [Datasheet link here]
+The binding supports the following types:
+* AHT10 - http://www.aosong.com/en/products-40.html (not tested, yet)
+* AHT20 - http://www.aosong.com/en/products-32.html
 
 ## Binding Notes
 
-Provide any specifics related to binding API.  This could include how to configure component for particular functions and example code.
+The AHT-devices can be accessed as an I2C bus device. However, you can use only one device per bus as the address is fix.
 
-**NOTE**:  Don't repeat the basics related to System.Device.API* (e.g. connection settings, etc.).  This helps keep text/steps down to a minimum for maintainability.
 
-## References 
-Provide any references to other tutorials, blogs and hardware related to the component that could help others get started.
+

@@ -13,14 +13,23 @@ namespace Iot.Device.Ahtxx.Samples
     /// <summary>
     /// Samples for Ahtxx
     /// </summary>
-    public class Program
+    internal class Program
     {
         /// <summary>
         /// Main entry point
         /// </summary>
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello Ahtxx Sample!");
+            const int I2cBus = 1;
+            I2cConnectionSettings i2cSettings = new I2cConnectionSettings(I2cBus, Aht20.DeviceAddress);
+            I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
+            Aht20 aht20Sensor = new Aht20(i2cDevice);
+
+            while (true)
+            {
+                Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {aht20Sensor.Temperature}, {aht20Sensor.Humidity}");
+                Thread.Sleep(1000);
+            }
         }
     }
 }

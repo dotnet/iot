@@ -11,9 +11,8 @@ namespace Iot.Device.Ahtxx
 {
     /// <summary>
     /// AHT temperature and humidity sensor family.
-    /// It has been tested with AHT20, but should work with AHT10 and AHT15 as well.
-    /// Up to now all functions are contained in the base class as I'm not aware of differences
-    /// between the sensors.
+    /// Note: has been tested with AHT20 only, but should work with AHT10 and AHT15 as well.
+    /// Up to now all functions are contained in the base class, though there might be differences between the sensors types.
     /// </summary>
     public class AhtBase : IDisposable
     {
@@ -105,19 +104,6 @@ namespace Iot.Device.Ahtxx
             buffer = stackalloc byte[6];
             _i2cDevice.Read(buffer);
 
-            // Int32 rawHumidity;
-            // rawHumidity = buffer[1] << 8;
-            // rawHumidity |= buffer[2];
-            // rawHumidity <<= 4;
-            // rawHumidity |= buffer[3] >> 4;
-            // _humidity = ((double)rawHumidity * 100) / 0x100000;
-
-            // Int32 rawTemperature = buffer[3] & 0x0F;
-            // rawTemperature <<= 8;
-            // rawTemperature |= buffer[4];
-            // rawTemperature <<= 8;
-            // rawTemperature |= buffer[5];
-            // _temperature = ((double)rawTemperature * 200 / 0x100000) - 50;
             Int32 rawHumidity = (buffer[1] << 12) | (buffer[2] << 4) | (buffer[3] >> 4);
             _humidity = (rawHumidity * 100.0) / 0x100000;
             Int32 rawTemperature = ((buffer[3] & 0xF) << 16) | (buffer[4] << 8) | buffer[5];
