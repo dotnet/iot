@@ -30,14 +30,14 @@ namespace Iot.Device.DHTxx
         protected readonly int _pin;
 
         /// <summary>
-        /// I2C device used to communicate with the device
-        /// </summary>
-        protected readonly I2cDevice _i2cDevice;
-
-        /// <summary>
         /// True to dispose the Gpio Controller
         /// </summary>
         protected readonly bool _shouldDispose;
+
+        /// <summary>
+        /// I2C device used to communicate with the device
+        /// </summary>
+        protected I2cDevice _i2cDevice;
 
         /// <summary>
         /// <see cref="GpioController"/> related with the <see cref="_pin"/>.
@@ -284,10 +284,17 @@ namespace Iot.Device.DHTxx
             }
             else
             {
-                _controller?.ClosePin(_pin);
+                if (_controller != null)
+                {
+                    if (_controller.IsPinOpen(_pin))
+                    {
+                        _controller.ClosePin(_pin);
+                    }
+                }
             }
 
             _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
     }
 }
