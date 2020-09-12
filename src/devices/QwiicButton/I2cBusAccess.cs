@@ -20,7 +20,7 @@ namespace Iot.Device.QwiicButton
         /*------------------------- Internal I2C Abstraction ---------------- */
         internal byte ReadSingleRegister(Register register)
         {
-            var readBuffer = new Span<byte>();
+            Span<byte> readBuffer = new byte[1];
             _device.WriteRead(ToReadOnlySpan(register), readBuffer);
             if (readBuffer.IsEmpty)
             {

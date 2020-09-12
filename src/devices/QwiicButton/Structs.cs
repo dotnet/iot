@@ -2,10 +2,45 @@
 //// The .NET Foundation licenses this file to you under the MIT license.
 //// See the LICENSE file in the project root for more information.
 
+using System;
 using System.Runtime.InteropServices;
 
 namespace Iot.Device.QwiicButton
 {
+    [Flags]
+    internal enum StatusRegister
+    {
+        None = 0,
+        EventAvailable = 1,
+        HasBeenClicked = 2,
+        IsPressed = 4,
+    }
+
+    internal class StatusRegisterBitField2
+    {
+        public StatusRegisterBitField2(byte statusRegisterValue)
+        {
+            StatusRegisterValue = statusRegisterValue;
+        }
+
+        public byte StatusRegisterValue { get; }
+
+        public bool EventAvailable
+        {
+            get { return (((StatusRegister)StatusRegisterValue) & StatusRegister.EventAvailable) != StatusRegister.None; }
+        }
+
+        public bool IsPressed
+        {
+            get { return (((StatusRegister)StatusRegisterValue) & StatusRegister.IsPressed) != StatusRegister.None; }
+        }
+
+        public bool HasBeenClicked
+        {
+            get { return (((StatusRegister)StatusRegisterValue) & StatusRegister.HasBeenClicked) != StatusRegister.None; }
+        }
+    }
+
     /// <summary>
     /// TODO
     /// </summary>
