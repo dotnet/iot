@@ -7,7 +7,7 @@ using System.Device.I2c;
 namespace Iot.Device.Ahtxx
 {
     /// <summary>
-    /// Add documentation here
+    /// AHT20 temperature and humidity sensor binding.
     /// </summary>
     public class Aht20 : AhtBase
     {
