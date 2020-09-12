@@ -42,20 +42,6 @@ Development environment specifics:
             _i2cBus = new I2cBusAccess(device);
         }
 
-        // public bool Begin(byte address, TwoWire &wirePort)
-        // {
-        //     _deviceAddress = address; //grab the address that the sensor is on
-        //     _i2cPort = &wirePort;     //grab the port that the user wants to use
-        //     return IsConnected() && CheckDeviceId();
-        // }
-
-        // public bool IsConnected()
-        // {
-
-        // _i2cPort->beginTransmission(_deviceAddress);
-        // return _i2cPort->endTransmission() == 0;
-        // }
-
         /// <summary>
         /// TODO
         /// </summary>
@@ -143,9 +129,9 @@ Development environment specifics:
         /// </summary>
         public bool IsPressed()
         {
-            var statusRegister = new StatusRegisterBitField();
-            statusRegister.ByteWrapped = _i2cBus.ReadSingleRegister(Register.BUTTON_STATUS);
-            return statusRegister.IsPressed;
+            var status = new StatusRegisterBitField2(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS));
+            // Console.WriteLine($"StatusRegisterValue: {Convert.ToString(status.StatusRegisterValue, toBase: 2)}");
+            return status.IsPressed;
         }
 
         /// <summary>
