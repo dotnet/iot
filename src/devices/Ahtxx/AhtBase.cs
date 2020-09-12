@@ -35,6 +35,7 @@ namespace Iot.Device.Ahtxx
             Measure = 0xac
         }
 
+        private bool _disposed = false;
         private I2cDevice _i2cDevice = null;
         private double _temperature;
         private double _humidity;
@@ -59,16 +60,18 @@ namespace Iot.Device.Ahtxx
 
         /// <summary>
         /// Gets the current temperature reading from the sensor.
+        /// Reading the temperature takes between 10 ms and 80 ms.
         /// </summary>
         /// <returns>Temperature reading</returns>
         public Temperature GetTemperature()
         {
             Measure();
-            return new Temperature(_temperature, UnitsNet.Units.TemperatureUnit.DegreeCelsius);
+            return Temperature.FromDegreesCelsius(_temperature);
         }
 
         /// <summary>
         /// Gets the current humidity reading from the sensor.
+        /// Reading the humidity takes between 10 ms and 80 ms.
         /// </summary>
         /// <returns>Temperature reading</returns>
         public Ratio GetHumidity()
@@ -90,6 +93,8 @@ namespace Iot.Device.Ahtxx
             };
             _i2cDevice.Write(buffer);
 
+            // According to the datasheet the measurement takes 80 ms and completion is indicated by the status bit.
+            // However, it seems to be faster at around 10 ms and sometimes up to 50 ms.
             while (IsBusy())
             {
                 Thread.Sleep(10);
@@ -98,9 +103,15 @@ namespace Iot.Device.Ahtxx
             buffer = stackalloc byte[6];
             _i2cDevice.Read(buffer);
 
+            // data format: 20 bit humidity, 20 bit temperature
+            // 7               0 7              0 7             4           0 7          0 7         0
+            // [humidity 19..12] [humidity 11..4] [humidity 3..0|temp 19..16] [temp 15..8] [temp 7..0]
+            // c.f. datasheet ch. 5.4.5
             Int32 rawHumidity = (buffer[1] << 12) | (buffer[2] << 4) | (buffer[3] >> 4);
-            _humidity = (rawHumidity * 100.0) / 0x100000;
             Int32 rawTemperature = ((buffer[3] & 0xF) << 16) | (buffer[4] << 8) | buffer[5];
+            // RH[%] = Hraw / 2^20 * 100%, c.f. datasheet ch. 6.1
+            _humidity = (rawHumidity * 100.0) / 0x100000;
+            // T[°C] = Traw / 2^20 * 200 - 50, c.f. datasheet ch. 6.1
             _temperature = ((rawTemperature * 200.0) / 0x100000) - 50;
         }
 
@@ -146,14 +157,27 @@ namespace Iot.Device.Ahtxx
             return (GetStatusByte() & (byte)StatusBit.Calibrated) == (byte)StatusBit.Calibrated;
         }
 
-        /// <inheritdoc />
-        public void Dispose()
+        /// <inheritdoc cref="IDisposable" />
+        public void Dispose() => Dispose(true);
+
+        /// <inheritdoc cref="IDisposable" />
+        protected virtual void Dispose(bool disposing)
         {
-            if (_i2cDevice != null)
+            if (_disposed)
             {
-                _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                return;
             }
+
+            if (disposing)
+            {
+                if (_i2cDevice != null)
+                {
+                    _i2cDevice?.Dispose();
+                    _i2cDevice = null;
+                }
+            }
+
+            _disposed = true;
         }
     }
 }
