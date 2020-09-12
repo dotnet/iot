@@ -21,23 +21,17 @@ namespace Iot.Device.QwiicButton.Samples
             var deviceBusId = GetDeviceBusId();
             var deviceAddress = GetDeviceAddress();
             var sampleNumber = GetSampleNumber();
+            var button = new QwiicButton(deviceBusId, deviceAddress);
 
-            // Console.WriteLine($"Bus={deviceBusId}, Address={deviceAddress}, Sample={sampleNumber}");
-            // Console.ReadKey();
-
-            // var button = new QwiicButton(deviceBusId, deviceAddress);
             switch (sampleNumber)
             {
                 case 1:
-                    // PrintButtonStatus.Run(button);
-                    Console.WriteLine("PrintButtonStatus ...");
+                    PrintButtonStatus.Run(button);
                     break;
                 default:
                     Console.WriteLine("No sample chosen - exiting...");
                     break;
             }
-
-            Console.ReadKey(); // TODO: Remove
         }
 
         private static int GetDeviceBusId()
