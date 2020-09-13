@@ -129,7 +129,7 @@ Development environment specifics:
         /// </summary>
         public bool IsPressed()
         {
-            var status = new StatusRegisterBitField2(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS));
+            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS));
             // Console.WriteLine($"StatusRegisterValue: {Convert.ToString(status.StatusRegisterValue, toBase: 2)}");
             return status.IsPressed;
         }
@@ -139,9 +139,33 @@ Development environment specifics:
         /// </summary>
         public bool HasBeenClicked()
         {
-            var statusRegister = new StatusRegisterBitField();
-            statusRegister.ByteWrapped = _i2cBus.ReadSingleRegister(Register.BUTTON_STATUS);
-            return statusRegister.HasBeenClicked;
+            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS));
+            return status.HasBeenClicked;
+        }
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        public bool Available()
+        {
+            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS));
+            return status.EventAvailable;
+        }
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        public byte ClearEventBits()
+        {
+            /* TODO
+            StatusRegisterBitField buttonStatus = new StatusRegisterBitField();
+            buttonStatus.ByteWrapped = _i2cBus.ReadSingleRegister(Register.BUTTON_STATUS);
+            buttonStatus.IsPressed = false;
+            buttonStatus.HasBeenClicked = false;
+            buttonStatus.EventAvailable = false;
+            return _i2cBus.WriteSingleRegisterWithReadback(Register.BUTTON_STATUS, buttonStatus.ByteWrapped);
+            */
+            return 0;
         }
 
         /// <summary>
@@ -204,29 +228,6 @@ Development environment specifics:
             interruptConfigure.ByteWrapped = _i2cBus.ReadSingleRegister(Register.INTERRUPT_CONFIG);
             interruptConfigure.ClickedEnable = false;
             return _i2cBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interruptConfigure.ByteWrapped);
-        }
-
-        /// <summary>
-        /// TODO
-        /// </summary>
-        public bool Available()
-        {
-            var buttonStatus = new StatusRegisterBitField();
-            buttonStatus.ByteWrapped = _i2cBus.ReadSingleRegister(Register.BUTTON_STATUS);
-            return buttonStatus.EventAvailable;
-        }
-
-        /// <summary>
-        /// TODO
-        /// </summary>
-        public byte ClearEventBits()
-        {
-            StatusRegisterBitField buttonStatus = new StatusRegisterBitField();
-            buttonStatus.ByteWrapped = _i2cBus.ReadSingleRegister(Register.BUTTON_STATUS);
-            buttonStatus.IsPressed = false;
-            buttonStatus.HasBeenClicked = false;
-            buttonStatus.EventAvailable = false;
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.BUTTON_STATUS, buttonStatus.ByteWrapped);
         }
 
         /// <summary>
