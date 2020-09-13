@@ -157,15 +157,13 @@ Development environment specifics:
         /// </summary>
         public byte ClearEventBits()
         {
-            /* TODO
-            StatusRegisterBitField buttonStatus = new StatusRegisterBitField();
-            buttonStatus.ByteWrapped = _i2cBus.ReadSingleRegister(Register.BUTTON_STATUS);
-            buttonStatus.IsPressed = false;
-            buttonStatus.HasBeenClicked = false;
-            buttonStatus.EventAvailable = false;
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.BUTTON_STATUS, buttonStatus.ByteWrapped);
-            */
-            return 0;
+            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS))
+            {
+                EventAvailable = false,
+                HasBeenClicked = false,
+                IsPressed = false
+            };
+            return _i2cBus.WriteSingleRegisterWithReadback(Register.BUTTON_STATUS, status.StatusRegisterValue);
         }
 
         /// <summary>

@@ -11,7 +11,6 @@ namespace Iot.Device.QwiicButton
         [Flags]
         private enum StatusRegisterBits
         {
-            None = 0,
             EventAvailable = 1,
             HasBeenClicked = 2,
             IsPressed = 4,
@@ -22,14 +21,15 @@ namespace Iot.Device.QwiicButton
             StatusRegisterValue = statusRegisterValue;
         }
 
-        public byte StatusRegisterValue { get; }
+        public byte StatusRegisterValue { get; set; }
 
         /// <summary>
         /// User mutable, gets set to 1 when a new event occurs. User is expected to write 0 to clear the flag.
         /// </summary>
         public bool EventAvailable
         {
-            get { return (((StatusRegisterBits)StatusRegisterValue) & StatusRegisterBits.EventAvailable) != StatusRegisterBits.None; }
+            get { return FlagsHelper.IsSet((StatusRegisterBits)StatusRegisterValue, StatusRegisterBits.EventAvailable); }
+            set { StatusRegisterValue = (byte)FlagsHelper.SetValue((StatusRegisterBits)StatusRegisterValue, StatusRegisterBits.EventAvailable, value); }
         }
 
         /// <summary>
@@ -37,7 +37,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsPressed
         {
-            get { return (((StatusRegisterBits)StatusRegisterValue) & StatusRegisterBits.IsPressed) != StatusRegisterBits.None; }
+            get { return FlagsHelper.IsSet((StatusRegisterBits)StatusRegisterValue, StatusRegisterBits.IsPressed); }
+            set { StatusRegisterValue = (byte)FlagsHelper.SetValue((StatusRegisterBits)StatusRegisterValue, StatusRegisterBits.IsPressed, value); }
         }
 
         /// <summary>
@@ -45,7 +46,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool HasBeenClicked
         {
-            get { return (((StatusRegisterBits)StatusRegisterValue) & StatusRegisterBits.HasBeenClicked) != StatusRegisterBits.None; }
+            get { return FlagsHelper.IsSet((StatusRegisterBits)StatusRegisterValue, StatusRegisterBits.HasBeenClicked); }
+            set { StatusRegisterValue = (byte)FlagsHelper.SetValue((StatusRegisterBits)StatusRegisterValue, StatusRegisterBits.HasBeenClicked, value); }
         }
     }
 }
