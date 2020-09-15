@@ -30,19 +30,19 @@ namespace Iot.Device.DHTxx
         protected readonly int _pin;
 
         /// <summary>
+        /// True to dispose the Gpio Controller
+        /// </summary>
+        protected readonly bool _shouldDispose;
+
+        /// <summary>
         /// I2C device used to communicate with the device
         /// </summary>
-        protected readonly I2cDevice _i2cDevice;
+        protected I2cDevice _i2cDevice;
 
         /// <summary>
         /// <see cref="GpioController"/> related with the <see cref="_pin"/>.
         /// </summary>
-        protected readonly GpioController _controller;
-
-        /// <summary>
-        /// True to dispose the Gpio Controller
-        /// </summary>
-        protected readonly bool _shouldDispose;
+        protected GpioController _controller;
 
         // wait about 1 ms
         private readonly uint _loopCount = 10000;
@@ -58,7 +58,7 @@ namespace Iot.Device.DHTxx
         /// Get the last read temperature
         /// </summary>
         /// <remarks>
-        /// If last read was not successfull, it returns <code>default(Temperature)</code>
+        /// If last read was not successful, it returns <code>default(Temperature)</code>
         /// </remarks>
         public virtual Temperature Temperature
         {
@@ -73,7 +73,7 @@ namespace Iot.Device.DHTxx
         /// Get the last read of relative humidity in percentage
         /// </summary>
         /// <remarks>
-        /// If last read was not successfull, it returns <code>default(Ratio)</code>
+        /// If last read was not successful, it returns <code>default(Ratio)</code>
         /// </remarks>
         public virtual Ratio Humidity
         {
@@ -280,9 +280,21 @@ namespace Iot.Device.DHTxx
             if (_shouldDispose)
             {
                 _controller?.Dispose();
+                _controller = null;
+            }
+            else
+            {
+                if (_controller != null)
+                {
+                    if (_controller.IsPinOpen(_pin))
+                    {
+                        _controller.ClosePin(_pin);
+                    }
+                }
             }
 
             _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
     }
 }
