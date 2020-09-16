@@ -31,6 +31,9 @@ namespace Iot.Device.QwiicButton.Samples
                 case 2:
                     LightWhenPressed.Run(button);
                     break;
+                case 3:
+                    OnOffButtonWithLight.Run(button);
+                    break;
                 default:
                     Console.WriteLine("No sample chosen - exiting...");
                     break;
@@ -77,6 +80,7 @@ namespace Iot.Device.QwiicButton.Samples
             Console.WriteLine();
             Console.WriteLine("1. Print button status");
             Console.WriteLine("2. Light when button pressed");
+            Console.WriteLine("3. ON/OFF button with light when ON");
 
             string sampleNumber = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(sampleNumber))
