@@ -365,10 +365,27 @@ Development environment specifics:
             return tempData;
         }
 
-        /*------------------------ LED Configuration ------------------------ */
+        #region LED Configuration
 
         /// <summary>
-        /// TODO
+        /// Turns the onboard LED on with the specified brightness.
+        /// <param name="brightness">LED brightness value between 0 (off) and 255 (max). Defaults to max.</param>
+        /// </summary>
+        public bool LedOn(byte brightness = 255)
+        {
+            return LedConfig(brightness, 0, 0);
+        }
+
+        /// <summary>
+        /// Turns the onboard LED off.
+        /// </summary>
+        public bool LedOff()
+        {
+            return LedConfig(0, 0, 0);
+        }
+
+        /// <summary>
+        /// Configures the onboard LED with the given max brightness, granularity (1 is fine for most applications), cycle time, and off time.
         /// </summary>
         public bool LedConfig(byte brightness, ushort cycleTime, ushort offTime, byte granularity = 1)
         {
@@ -379,21 +396,7 @@ Development environment specifics:
             return success;
         }
 
-        /// <summary>
-        /// TODO
-        /// </summary>
-        public bool LedOff()
-        {
-            return LedConfig(0, 0, 0);
-        }
-
-        /// <summary>
-        /// TODO
-        /// </summary>
-        public bool LedOn(byte brightness = 255)
-        {
-            return LedConfig(brightness, 0, 0);
-        }
+        #endregion
 
         /// <inheritdoc />
         public void Dispose()
