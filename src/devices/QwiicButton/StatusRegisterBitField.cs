@@ -16,6 +16,10 @@ namespace Iot.Device.QwiicButton
             IsPressed = 4,
         }
 
+        public StatusRegisterBitField()
+        {
+        }
+
         public StatusRegisterBitField(byte statusRegisterValue)
         {
             StatusRegisterValue = statusRegisterValue;
@@ -24,7 +28,8 @@ namespace Iot.Device.QwiicButton
         public byte StatusRegisterValue { get; set; }
 
         /// <summary>
-        /// User mutable, gets set to 1 when a new event occurs. User is expected to write 0 to clear the flag.
+        /// Gets set to true when a new event occurs.
+        /// Must be manually set to false to clear the flag.
         /// </summary>
         public bool EventAvailable
         {
@@ -33,7 +38,7 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
-        /// Gets set to one if button is pushed.
+        /// Gets set to true if button is pushed.
         /// </summary>
         public bool IsPressed
         {
@@ -42,7 +47,8 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
-        /// Defaults to zero on POR. Gets set to one when the button gets clicked. Must be cleared by the user.
+        /// Gets set to true when the button gets clicked.
+        /// Must be manually set to false to clear the flag.
         /// </summary>
         public bool HasBeenClicked
         {
