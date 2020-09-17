@@ -21,9 +21,6 @@ namespace Iot.Device.QwiicButton.Samples
         {
             _button = button;
 
-            Console.WriteLine("Print button status (interrupt based) sample started - press ESC to stop");
-            Console.WriteLine("------------------------------------------------------------------------");
-
             var gpioDriver = GetGpioDriver();
             if (gpioDriver == null)
             {
@@ -38,17 +35,24 @@ namespace Iot.Device.QwiicButton.Samples
                 return;
             }
 
+            Console.WriteLine();
+            Console.WriteLine("Print button status (interrupt based) sample started - press any key to stop");
+            Console.WriteLine("----------------------------------------------------------------------------");
+
             Initialize(gpioDriver, interruptPinNumber.Value);
+            Console.ReadKey();
         }
 
         private GpioDriver GetGpioDriver()
         {
+            Console.WriteLine();
             Console.WriteLine("Choose GPIO driver:");
             Console.WriteLine("1. Raspberry Pi 3/4 (Linux/Windows)");
             Console.WriteLine("2. HummingBoard");
             Console.WriteLine("3. Windows 10 IoT");
-            Console.WriteLine("4. Unix");
+            Console.WriteLine("4. Unix (sysfs)");
             Console.WriteLine("5. Libgpiod");
+            Console.WriteLine();
 
             string sampleNumber = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(sampleNumber))
@@ -59,14 +63,19 @@ namespace Iot.Device.QwiicButton.Samples
             switch (int.Parse(sampleNumber))
             {
                 case 1:
+                    Console.WriteLine("You chose Raspberry Pi 3/4 driver");
                     return new RaspberryPi3Driver();
                 case 2:
+                    Console.WriteLine("You chose HummingBoard driver");
                     return new HummingBoardDriver();
                 case 3:
+                    Console.WriteLine("You chose Windows 10 IoT driver");
                     return new Windows10Driver();
                 case 4:
+                    Console.WriteLine("You chose Unix (sysfs) driver");
                     return new SysFsDriver();
                 case 5:
+                    Console.WriteLine("You chose Libgpiod driver");
                     return new LibGpiodDriver();
                 default:
                     return null;
@@ -81,6 +90,7 @@ namespace Iot.Device.QwiicButton.Samples
                 return null;
             }
 
+            Console.WriteLine($"You chose pin {interruptPinNumber}");
             return interruptPinNumber;
         }
 
@@ -104,6 +114,8 @@ namespace Iot.Device.QwiicButton.Samples
             {
                 return;
             }
+
+            Console.WriteLine("Pin value changed - interrupt received!");
 
             if (_button.IsPressed())
             {
