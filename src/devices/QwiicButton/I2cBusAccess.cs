@@ -116,16 +116,8 @@ namespace Iot.Device.QwiicButton
 
         internal bool WriteSingleRegister(Register register, byte data)
         {
-            _device.WriteByte((byte)register);
-            _device.WriteByte(data);
+            _device.Write(new[] { (byte)register, data });
             return true;
-
-            // _i2cPort->beginTransmission(_deviceAddress);
-            // _i2cPort->write(reg);
-            // _i2cPort->write(data);
-            // if (_i2cPort->endTransmission() == 0)
-            //     return true;
-            // return false;
         }
 
         internal bool WriteDoubleRegister(Register register, ushort data)
