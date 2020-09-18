@@ -37,6 +37,8 @@ namespace ShiftRegisterDriver
             var interfaceType = sr.UsesSpi ? "SPI" : "GPIO";
             Console.WriteLine($"Using {interfaceType}");
 
+            sr.OutputEnable = true;
+
             DemonstrateShiftingBits(sr, cancellationSource);
             DemonstrateShiftingBytes(sr, cancellationSource);
             BinaryCounter(sr, cancellationSource);

@@ -117,7 +117,7 @@ namespace Iot.Device.Multiplexing
         /// </summary>
         public void ShiftBit(PinValue value)
         {
-            if (_controller is null || _pinMapping.SerialDataInput == 0)
+            if (_controller is null || _pinMapping.SerialDataInput < 0)
             {
                 throw new ArgumentNullException($"{nameof(ShiftBit)}: GpioController was not provided or {nameof(_pinMapping.SerialDataInput)} not mapped to pin");
             }
@@ -168,7 +168,7 @@ namespace Iot.Device.Multiplexing
         /// </summary>
         public void Latch()
         {
-            if (_controller is null || _pinMapping.LatchEnable == 0)
+            if (_controller is null || _pinMapping.LatchEnable < 0)
             {
                 throw new ArgumentNullException($"{nameof(Latch)}: GpioController was not provided or {nameof(_pinMapping.LatchEnable)} not mapped to pin");
             }
@@ -188,12 +188,12 @@ namespace Iot.Device.Multiplexing
         {
             set
             {
-                if (_controller is null || _pinMapping.OutputEnable == 0)
+                if (_controller is null || _pinMapping.OutputEnable < 0)
                 {
                     throw new ArgumentNullException($"{nameof(OutputEnable)}: {nameof(_pinMapping.OutputEnable)} not mapped to non-zero pin value");
                 }
 
-                _controller.Write(_pinMapping.OutputEnable, value ? 1 : 0);
+                _controller.Write(_pinMapping.OutputEnable, value ? 0 : 1);
             }
         }
 
@@ -218,9 +218,9 @@ namespace Iot.Device.Multiplexing
         private void SetupPins()
         {
             // these three pins are required
-            if (_serial > 0 &&
-                _latch > 0 &&
-                _clock > 0)
+            if (_serial >= 0 &&
+                _latch >= 0 &&
+                _clock >= 0)
             {
                 OpenPinAndWrite(_serial, 0);
                 OpenPinAndWrite(_latch, 0);
