@@ -29,14 +29,24 @@ namespace Iot.Device.Multiplexing
         }
 
         /// <summary>
-        /// Standard pin bindings for the Sn74hc595.
+        /// Minimal pin bindings for the Sn74hc595.
         /// </summary>
-        public static ShiftRegisterPinMapping Standard => new ShiftRegisterPinMapping(16, 20, 21, 12);
+        public static ShiftRegisterPinMapping Minimal => new ShiftRegisterPinMapping(16, 20, 21);
         /*
-            SerialDataInput = 16    // data
-            Clock           = 20    // storage register clock
-            LatchEnable     = 21    // raise latch to publish storage register
-            OutputEnable    = 12    // enable and disable output
+            SerialDataInput = 16    -- serial data in
+            Clock           = 20    -- storage register clock
+            LatchEnable     = 21    -- enable latch to publish storage register
+        */
+
+        /// <summary>
+        /// Complete pin bindings for the Sn74hc595.
+        /// </summary>
+        public static ShiftRegisterPinMapping Complete => new ShiftRegisterPinMapping(16, 20, 21, 12);
+        /*
+            SerialDataInput = 16    -- serial data in
+            Clock           = 20    -- storage register clock
+            LatchEnable     = 21    -- enable latch to publish storage register
+            OutputEnable    = 12    -- output enable or disable
         */
 
         /// <summary>

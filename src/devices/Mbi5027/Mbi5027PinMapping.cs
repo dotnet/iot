@@ -17,7 +17,7 @@ namespace Iot.Device.Multiplexing
         /// <param name="le">Register clock pin (latch)</param>
         /// <param name="oe">Output enable pin</param>
         /// <param name="sdo">Serial data out pin -- required for open circuit detection</param>
-        public Mbi5027PinMapping(int sdi, int clk, int le, int oe = 0, int sdo = 0)
+        public Mbi5027PinMapping(int sdi, int clk, int le, int oe = -1, int sdo = -1)
         {
             Sdi = sdi;
             Clk = clk;
@@ -27,15 +27,25 @@ namespace Iot.Device.Multiplexing
         }
 
         /// <summary>
-        /// Standard pin bindings for the MBI5027.
+        /// Minimal pin bindings for the MBI5027.
         /// </summary>
-        public static Mbi5027PinMapping Standard => new Mbi5027PinMapping(16, 20, 21, 12, 25);
+        public static Mbi5027PinMapping Minimal => new Mbi5027PinMapping(16, 20, 21);
         /*
-            Sdi   = 16    // SR pin 2   -- serial data in
-            Clk   = 20    // SR pin 3   -- storage register clock
-            LE    = 21    // SR pin 4   -- latch / publish storage register
-            OE    = 12    // SR pin 21  -- blank
-            Sdo   = 25    // SR pin 22  -- clear
+            Sdi   = 16      SR 2   -- serial data in
+            Clk   = 20      SR 3   -- storage register clock
+            LE    = 21      SR 4   -- enable latch to publish storage register
+        */
+
+        /// <summary>
+        /// Complete pin bindings for the MBI5027.
+        /// </summary>
+        public static Mbi5027PinMapping Complete => new Mbi5027PinMapping(16, 20, 21, 12, 25);
+        /*
+            Sdi   = 16      SR 2   -- serial data in
+            Clk   = 20      SR 3   -- storage register clock
+            LE    = 21      SR 4   -- enable latch to publish storage register
+            OE    = 12      SR 21  -- output enable or disable
+            Sdo   = 25      SR 22  -- Serial data out - required for open circuit detection
         */
 
         /// <summary>

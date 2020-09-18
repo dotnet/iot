@@ -19,7 +19,7 @@ namespace ShiftRegisterDriver
         /// </summary>
         public static void Main(string[] args)
         {
-            var sr = new ShiftRegister(ShiftRegisterPinMapping.Standard, 8);
+            var sr = new ShiftRegister(ShiftRegisterPinMapping.Complete, 8);
 
             // Uncomment this code to use SPI (and comment the line above)
             // var settings = new SpiConnectionSettings(0, 0);

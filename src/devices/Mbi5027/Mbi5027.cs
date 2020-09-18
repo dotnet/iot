@@ -48,7 +48,7 @@ namespace Iot.Device.Multiplexing
         /// </summary>
         public void EnableDetectionMode()
         {
-            if (GpioController is null || _pinMapping.Clk == 0 || _pinMapping.OE == 0 || _pinMapping.LE == 0)
+            if (GpioController is null || _pinMapping.Clk < 0 || _pinMapping.OE < 0 || _pinMapping.LE < 0)
             {
                 throw new ArgumentNullException($"{nameof(EnableDetectionMode)}: GpioController was not provided or {nameof(_pinMapping.Clk)}, {nameof(_pinMapping.LE)}, or {nameof(_pinMapping.OE)} not mapped to pin");
             }
@@ -144,7 +144,7 @@ namespace Iot.Device.Multiplexing
         /// </summary>
         public void EnableNormalMode()
         {
-            if (GpioController is null || _pinMapping.Clk == 0 || _pinMapping.OE == 0 || _pinMapping.LE == 0)
+            if (GpioController is null || _pinMapping.Clk < 0 || _pinMapping.OE < 0 || _pinMapping.LE < 0)
             {
                 throw new ArgumentNullException($"{nameof(EnableDetectionMode)}: GpioController was not provided or {nameof(_pinMapping.Clk)}, {nameof(_pinMapping.LE)}, or {nameof(_pinMapping.OE)} not mapped to pin");
             }
@@ -177,7 +177,7 @@ namespace Iot.Device.Multiplexing
 
         private void SetupPins()
         {
-            if (_pinMapping.Sdo > 0)
+            if (_pinMapping.Sdo >= 0)
             {
                 GpioController.OpenPin(_pinMapping.Sdo, PinMode.Input);
             }

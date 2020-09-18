@@ -19,7 +19,7 @@ namespace ShiftRegisterDriver
         /// </summary>
         public static void Main(string[] args)
         {
-            var sr = new Mbi5027(Mbi5027PinMapping.Standard);
+            var sr = new Mbi5027(Mbi5027PinMapping.Complete);
             var cancellationSource = new CancellationTokenSource();
             Console.CancelKeyPress += (s, e) =>
             {
