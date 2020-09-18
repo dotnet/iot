@@ -14,6 +14,14 @@ namespace Iot.Device.Gpio.Drivers
     /// </remarks>
     public class OrangePiZeroDriver : Sun8iw7p1Driver
     {
+        private readonly int[] _pinNumberConverter = new int[27]
+        {
+            -1, -1, -1, MapPinNumber('A', 12), -1, MapPinNumber('A', 11), -1, MapPinNumber('A', 6), MapPinNumber('G', 6), -1,
+            MapPinNumber('G', 7), MapPinNumber('A', 1), MapPinNumber('A', 7), MapPinNumber('A', 0), -1, MapPinNumber('A', 3),
+            MapPinNumber('A', 19), -1, MapPinNumber('A', 18), MapPinNumber('A', 15), -1, MapPinNumber('A', 16), MapPinNumber('A', 2),
+            MapPinNumber('A', 14), MapPinNumber('A', 13), -1, MapPinNumber('A', 10)
+        };
+
         /// <summary>
         /// Orange Pi Zero has 17 GPIO pins.
         /// </summary>
@@ -26,27 +34,9 @@ namespace Iot.Device.Gpio.Drivers
         /// <returns>The pin number in the driver's logical numbering scheme.</returns>
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
-            return pinNumber switch
-            {
-                3 => MapPinNumber('A', 12),
-                5 => MapPinNumber('A', 11),
-                7 => MapPinNumber('A', 6),
-                8 => MapPinNumber('G', 6),
-                10 => MapPinNumber('G', 7),
-                11 => MapPinNumber('A', 1),
-                12 => MapPinNumber('A', 7),
-                13 => MapPinNumber('A', 0),
-                15 => MapPinNumber('A', 3),
-                16 => MapPinNumber('A', 19),
-                18 => MapPinNumber('A', 18),
-                19 => MapPinNumber('A', 15),
-                21 => MapPinNumber('A', 16),
-                22 => MapPinNumber('A', 2),
-                23 => MapPinNumber('A', 14),
-                24 => MapPinNumber('A', 13),
-                26 => MapPinNumber('A', 10),
-                _ => throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber))
-            };
+            int num = _pinNumberConverter[pinNumber];
+
+            return num != -1 ? num : throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber));
         }
     }
 }

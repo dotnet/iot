@@ -32,12 +32,13 @@ namespace Iot.Device.Gpio.Drivers
         /// <summary>
         /// CPUX-PORT base address.
         /// </summary>
-        protected virtual int CpuxPortBaseAddess { get; }
+        protected virtual int CpuxPortBaseAddress { get; }
 
         /// <summary>
         /// CPUS-PORT base address.
         /// </summary>
-        protected virtual int CpusPortBaseAddess { get; }
+        protected virtual int CpusPortBaseAddress { get; }
+
         // final_address = mapped_address + (target_address & map_mask) https://stackoverflow.com/a/37922968
         private readonly int _mapMask = Environment.SystemPageSize - 1;
         private static readonly object s_initializationLock = new object();
@@ -54,12 +55,12 @@ namespace Iot.Device.Gpio.Drivers
         /// <summary>
         /// Initializes a new instance of the <see cref="SunxiDriver"/>.
         /// </summary>
-        /// <param name="cpuxPortBaseAddess">CPUX-PORT base address (This can be find in the corresponding SoC datasheet).</param>
-        /// <param name="cpusPortBaseAddess">CPUS-PORT base address (This can be find in the corresponding SoC datasheet).</param>
-        public SunxiDriver(int cpuxPortBaseAddess, int cpusPortBaseAddess)
+        /// <param name="cpuxPortBaseAddress">CPUX-PORT base address (This can be find in the corresponding SoC datasheet).</param>
+        /// <param name="cpusPortBaseAddress">CPUS-PORT base address (This can be find in the corresponding SoC datasheet).</param>
+        public SunxiDriver(int cpuxPortBaseAddress, int cpusPortBaseAddress)
         {
-            CpuxPortBaseAddess = cpuxPortBaseAddess;
-            CpusPortBaseAddess = cpusPortBaseAddess;
+            CpuxPortBaseAddress = cpuxPortBaseAddress;
+            CpusPortBaseAddress = cpusPortBaseAddress;
         }
 
         /// <summary>
@@ -130,8 +131,8 @@ namespace Iot.Device.Gpio.Drivers
             int cfgAddress, pulAddress;
             uint* cfgPointer, pulPointer;
 
-            cfgAddress = (CpuxPortBaseAddess + unmapped.PortController * 0x24 + cfgNum * 0x04) & _mapMask;
-            pulAddress = (CpuxPortBaseAddess + unmapped.PortController * 0x24 + (pulNum + 7) * 0x04) & _mapMask;
+            cfgAddress = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + cfgNum * 0x04) & _mapMask;
+            pulAddress = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + (pulNum + 7) * 0x04) & _mapMask;
 
             if (unmapped.PortController < 10)
             {
@@ -195,7 +196,7 @@ namespace Iot.Device.Gpio.Drivers
             int dataAddress;
             uint* dataPointer;
 
-            dataAddress = (CpuxPortBaseAddess + unmapped.PortController * 0x24 + 0x10) & _mapMask;
+            dataAddress = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + 0x10) & _mapMask;
 
             if (unmapped.PortController < 10)
             {
@@ -232,7 +233,7 @@ namespace Iot.Device.Gpio.Drivers
             int dataAddress;
             uint* dataPointer;
 
-            dataAddress = (CpuxPortBaseAddess + unmapped.PortController * 0x24 + 0x10) & _mapMask;
+            dataAddress = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + 0x10) & _mapMask;
 
             if (unmapped.PortController < 10)
             {
@@ -343,16 +344,16 @@ namespace Iot.Device.Gpio.Drivers
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            if (_gpioPointer0 != default)
+            if (_gpioPointer0 != IntPtr.Zero)
             {
                 Interop.munmap(_gpioPointer0, 0);
-                _gpioPointer0 = default;
+                _gpioPointer0 = IntPtr.Zero;
             }
 
-            if (_gpioPointer1 != default)
+            if (_gpioPointer1 != IntPtr.Zero)
             {
                 Interop.munmap(_gpioPointer1, 0);
-                _gpioPointer1 = default;
+                _gpioPointer1 = IntPtr.Zero;
             }
 
             if (_interruptDriver != default)
@@ -376,14 +377,14 @@ namespace Iot.Device.Gpio.Drivers
 
         private void Initialize()
         {
-            if (_gpioPointer0 != default)
+            if (_gpioPointer0 != IntPtr.Zero)
             {
                 return;
             }
 
             lock (s_initializationLock)
             {
-                if (_gpioPointer0 != default)
+                if (_gpioPointer0 != IntPtr.Zero)
                 {
                     return;
                 }
@@ -394,10 +395,20 @@ namespace Iot.Device.Gpio.Drivers
                     throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
                 }
 
-                IntPtr mapPointer0 = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize - 1, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, CpuxPortBaseAddess & ~_mapMask);
-                IntPtr mapPointer1 = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize - 1, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, CpusPortBaseAddess & ~_mapMask);
+                IntPtr mapPointer0 = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize - 1, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, CpuxPortBaseAddress & ~_mapMask);
+                IntPtr mapPointer1 = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize - 1, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, CpusPortBaseAddress & ~_mapMask);
                 if (mapPointer0.ToInt64() == -1 || mapPointer1.ToInt64() == -1)
                 {
+                    if (mapPointer0.ToInt64() != -1)
+                    {
+                        Interop.munmap(mapPointer0, 0);
+                    }
+
+                    if (mapPointer1.ToInt64() != -1)
+                    {
+                        Interop.munmap(mapPointer1, 0);
+                    }
+
                     throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
                 }
 
@@ -433,23 +444,7 @@ namespace Iot.Device.Gpio.Drivers
 
         private static int MapPortController(char portController)
         {
-            return portController switch
-            {
-                'A' => 0,
-                'B' => 1,
-                'C' => 2,
-                'D' => 3,
-                'E' => 4,
-                'F' => 5,
-                'G' => 6,
-                'H' => 7,
-                'I' => 8,
-                'J' => 9,
-                'K' => 10,
-                'L' => 11,
-                'M' => 12,
-                _ => throw new Exception()
-            };
+            return (portController >= 'A' && portController <= 'M') ? portController - 'A' : throw new Exception();
         }
 
         private class PinState
@@ -460,17 +455,9 @@ namespace Iot.Device.Gpio.Drivers
                 InUseByInterruptDriver = false;
             }
 
-            public PinMode CurrentPinMode
-            {
-                get;
-                set;
-            }
+            public PinMode CurrentPinMode { get; set; }
 
-            public bool InUseByInterruptDriver
-            {
-                get;
-                set;
-            }
+            public bool InUseByInterruptDriver { get; set; }
         }
     }
 }
