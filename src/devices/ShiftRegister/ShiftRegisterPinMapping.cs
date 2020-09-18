@@ -14,17 +14,18 @@ namespace Iot.Device.Multiplexing
     {
         // Datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
         // Datasheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf
+        // Datasheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf
 
-        /// <param name="sdi">Serial data in pin</param>
-        /// <param name="oe">Output enable pin</param>
-        /// <param name="le">Register clock pin (latch)</param>
-        /// <param name="clk">Shift register pin (shift to data register)</param>
-        public ShiftRegisterPinMapping(int sdi, int clk, int le, int oe = 0)
+        /// <param name="serialData">Serial data in pin</param>
+        /// <param name="clock">Shift register clock pin</param>
+        /// <param name="latch">Register clock pin (latch)</param>
+        /// <param name="outputEnable">Output enable pin</param>
+        public ShiftRegisterPinMapping(int serialData, int clock, int latch, int outputEnable = 0)
         {
-            Sdi = sdi;              // serial data in
-            Clk = clk;              // storage register clock
-            LE = le;                // shift register latch
-            OE = oe;                // output enable / disable (blank)
+            SerialDataInput = serialData;
+            Clock = clock;
+            LatchEnable = latch;
+            OutputEnable = outputEnable;
         }
 
         /// <summary>
@@ -32,30 +33,30 @@ namespace Iot.Device.Multiplexing
         /// </summary>
         public static ShiftRegisterPinMapping Standard => new ShiftRegisterPinMapping(16, 20, 21, 12);
         /*
-            Sdi   = 16    // data
-            Clk   = 20    // storage register clock
-            LE    = 21    // latch / publish storage register
-            OE    = 12    // blank
+            SerialDataInput = 16    // data
+            Clock           = 20    // storage register clock
+            LatchEnable     = 21    // raise latch to publish storage register
+            OutputEnable    = 12    // enable and disable output
         */
 
         /// <summary>
         /// Serial data in pin.
         /// </summary>
-        public int Sdi { get; set; }
+        public int SerialDataInput { get; set; }
 
         /// <summary>
         /// Storage register clock pin.
         /// </summary>
-        public int Clk { get; set; }
+        public int Clock { get; set; }
 
         /// <summary>
         /// Shift register clock pin.
         /// </summary>
-        public int LE { get; set; }
+        public int LatchEnable { get; set; }
 
         /// <summary>
         /// Output enable pin.
         /// </summary>
-        public int OE { get; set; }
+        public int OutputEnable { get; set; }
     }
 }

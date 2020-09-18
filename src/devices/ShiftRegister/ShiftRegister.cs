@@ -21,8 +21,8 @@ namespace Iot.Device.Multiplexing
         // https://forum.arduino.cc/index.php?topic=571144.0
         // http://www.cupidcontrols.com/2013/12/turn-on-the-spi-lights-spi-output-shift-registers-and-leds/
         private readonly ShiftRegisterPinMapping _pinMapping;
-        private readonly int _sdi;
-        private readonly int _clk;
+        private readonly int _serial;
+        private readonly int _clock;
         private readonly int _latch;
         private readonly int _bitLength;
         private readonly bool _shouldDispose;
@@ -46,9 +46,9 @@ namespace Iot.Device.Multiplexing
             _controller = gpioController;
             _shouldDispose = shouldDispose;
             _pinMapping = pinMapping;
-            _sdi = _pinMapping.Sdi;
-            _clk = _pinMapping.Clk;
-            _latch = _pinMapping.LE;
+            _serial = _pinMapping.SerialDataInput;
+            _clock = _pinMapping.Clock;
+            _latch = _pinMapping.LatchEnable;
             _bitLength = bitLength;
             SetupPins();
         }
@@ -117,18 +117,18 @@ namespace Iot.Device.Multiplexing
         /// </summary>
         public void ShiftBit(PinValue value)
         {
-            if (_controller is null || _pinMapping.Sdi == 0)
+            if (_controller is null || _pinMapping.SerialDataInput == 0)
             {
-                throw new ArgumentNullException($"{nameof(ShiftBit)}: GpioController was not provided or {nameof(_pinMapping.Sdi)} not mapped to pin");
+                throw new ArgumentNullException($"{nameof(ShiftBit)}: GpioController was not provided or {nameof(_pinMapping.SerialDataInput)} not mapped to pin");
             }
 
             // writes value to serial data pin
-            _controller.Write(_sdi, value);
+            _controller.Write(_serial, value);
             // data is written to the storage register on the rising edge of the storage register clock
-            _controller.Write(_clk, 1);
+            _controller.Write(_clock, 1);
             // values are reset to low
-            _controller.Write(_sdi, 0);
-            _controller.Write(_clk, 0);
+            _controller.Write(_serial, 0);
+            _controller.Write(_clock, 0);
         }
 
         /// <summary>
@@ -168,9 +168,9 @@ namespace Iot.Device.Multiplexing
         /// </summary>
         public void Latch()
         {
-            if (_controller is null || _pinMapping.LE == 0)
+            if (_controller is null || _pinMapping.LatchEnable == 0)
             {
-                throw new ArgumentNullException($"{nameof(Latch)}: GpioController was not provided or {nameof(_pinMapping.LE)} not mapped to pin");
+                throw new ArgumentNullException($"{nameof(Latch)}: GpioController was not provided or {nameof(_pinMapping.LatchEnable)} not mapped to pin");
             }
 
             // latches value on rising edge of register clock (LE)
@@ -180,33 +180,21 @@ namespace Iot.Device.Multiplexing
         }
 
         /// <summary>
-        /// Switch output register to high-impedance state.
-        /// Temporarily disables register outputs, but does not delete values.
+        /// Switch output register to high or low-impedance state.
+        /// Enables or disables register outputs, but does not delete values.
         /// Requires use of GPIO controller.
         /// </summary>
-        public void OutputDisable()
+        public bool OutputEnable
         {
-            if (_controller is null || _pinMapping.OE == 0)
+            set
             {
-                throw new ArgumentNullException($"{nameof(OutputDisable)}: {nameof(_pinMapping.OE)} not mapped to non-zero pin value");
+                if (_controller is null || _pinMapping.OutputEnable == 0)
+                {
+                    throw new ArgumentNullException($"{nameof(OutputEnable)}: {nameof(_pinMapping.OutputEnable)} not mapped to non-zero pin value");
+                }
+
+                _controller.Write(_pinMapping.OutputEnable, value ? 1 : 0);
             }
-
-            _controller.Write(_pinMapping.OE, 1);
-        }
-
-        /// <summary>
-        /// Switch output register low-impedance state.
-        /// Enables register outputs with existing values.
-        /// Requires use of GPIO controller.
-        /// </summary>
-        public void OutputEnable()
-        {
-            if (_controller is null || _pinMapping.OE == 0)
-            {
-                throw new ArgumentNullException($"{nameof(OutputEnable)}: {nameof(_pinMapping.OE)} not mapped to non-zero pin value");
-            }
-
-            _controller.Write(_pinMapping.OE, 0);
         }
 
         /// <summary>
@@ -230,24 +218,24 @@ namespace Iot.Device.Multiplexing
         private void SetupPins()
         {
             // these three pins are required
-            if (_sdi > 0 &&
+            if (_serial > 0 &&
                 _latch > 0 &&
-                _clk > 0)
+                _clock > 0)
             {
-                OpenPinAndWrite(_sdi, 0);
+                OpenPinAndWrite(_serial, 0);
                 OpenPinAndWrite(_latch, 0);
-                OpenPinAndWrite(_clk, 0);
+                OpenPinAndWrite(_clock, 0);
             }
             else
             {
-                throw new ArgumentException($"{nameof(ShiftRegister)} -- {nameof(ShiftRegisterPinMapping)} values must be non-zero; Values: {nameof(ShiftRegisterPinMapping.Sdi)}: {_sdi}; {nameof(ShiftRegisterPinMapping.LE)}: {_latch}; {nameof(ShiftRegisterPinMapping.Clk)}: {_clk};.");
+                throw new ArgumentException($"{nameof(ShiftRegister)} -- {nameof(ShiftRegisterPinMapping)} values must be non-zero; Values: {nameof(ShiftRegisterPinMapping.SerialDataInput)}: {_serial}; {nameof(ShiftRegisterPinMapping.LatchEnable)}: {_latch}; {nameof(ShiftRegisterPinMapping.Clock)}: {_clock};.");
             }
 
             // this pin assignment is optional
             // if not assigned, must be tied to ground
-            if (_pinMapping.OE > 0)
+            if (_pinMapping.OutputEnable > 0)
             {
-                OpenPinAndWrite(_pinMapping.OE, 0);
+                OpenPinAndWrite(_pinMapping.OutputEnable, 0);
             }
         }
 

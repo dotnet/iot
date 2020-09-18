@@ -19,8 +19,7 @@ namespace ShiftRegisterDriver
         /// </summary>
         public static void Main(string[] args)
         {
-            using var controller = new GpioController();
-            var sr = new ShiftRegister(ShiftRegisterPinMapping.Standard, 8, controller, false);
+            var sr = new ShiftRegister(ShiftRegisterPinMapping.Standard, 8);
 
             // Uncomment this code to use SPI (and comment the line above)
             // var settings = new SpiConnectionSettings(0, 0);
@@ -38,11 +37,7 @@ namespace ShiftRegisterDriver
             var interfaceType = sr.UsesSpi ? "SPI" : "GPIO";
             Console.WriteLine($"Using {interfaceType}");
 
-            if (!sr.UsesSpi)
-            {
-                DemonstrateShiftingBits(sr, cancellationSource);
-            }
-
+            DemonstrateShiftingBits(sr, cancellationSource);
             DemonstrateShiftingBytes(sr, cancellationSource);
             BinaryCounter(sr, cancellationSource);
             Console.WriteLine("done");
@@ -50,6 +45,11 @@ namespace ShiftRegisterDriver
 
         private static void DemonstrateShiftingBits(ShiftRegister sr, CancellationTokenSource cancellationSource)
         {
+            if (sr.UsesSpi)
+            {
+                return;
+            }
+
             int delay = 1000;
             sr.ShiftClear();
 
@@ -120,11 +120,11 @@ namespace ShiftRegisterDriver
             Thread.Sleep(delay);
 
             Console.WriteLine("Output disable");
-            sr.OutputDisable();
+            sr.OutputEnable = false;
             Thread.Sleep(delay * 2);
 
             Console.WriteLine("Output enable");
-            sr.OutputEnable();
+            sr.OutputEnable = true;
             Thread.Sleep(delay * 2);
 
             Console.WriteLine($"Write 23 then 56 with {nameof(sr.ShiftByte)}");
@@ -199,33 +199,3 @@ namespace ShiftRegisterDriver
         }
     }
 }
-
-        /*
-            Using the shift register w/o a binding
-
-            while (!cancellationSource.IsCancellationRequested)
-            {
-                for (int i = 0; i < 8; i++)
-                {
-                    controller.Write(SER,PinValue.High);
-                    controller.Write(SRCLK,PinValue.High);
-                    controller.Write(SER,PinValue.Low);
-                    controller.Write(SRCLK,PinValue.Low);
-
-                    controller.Write(RCLK,PinValue.High);
-                    controller.Write(RCLK,PinValue.Low);
-
-                    Thread.Sleep(100);
-                }
-                Thread.Sleep(500);
-            }
-
-            for (int i = 0; i < 8; i++)
-            {
-                controller.Write(SER,PinValue.Low);
-                controller.Write(SRCLK,PinValue.High);
-                controller.Write(SRCLK,PinValue.Low);
-            }
-
-            controller.Write(RCLK,PinValue.High);
-            */
