@@ -19,7 +19,7 @@ namespace ShiftRegisterDriver
         /// </summary>
         public static void Main(string[] args)
         {
-            var sr = new Sn74hc595(Sn74hc595PinMapping.Standard);
+            var sr = new Sn74hc595(Sn74hc595PinMapping.Complete);
             // var settings = new SpiConnectionSettings(0, 0);
             // using var spiDevice = SpiDevice.Create(settings);
             // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
@@ -116,11 +116,11 @@ namespace ShiftRegisterDriver
             Thread.Sleep(delay);
 
             Console.WriteLine("Output disable");
-            sr.OutputDisable();
+            sr.OutputEnable = false;
             Thread.Sleep(delay * 2);
 
             Console.WriteLine("Output enable");
-            sr.OutputEnable();
+            sr.OutputEnable = true;
             Thread.Sleep(delay * 2);
 
             Console.WriteLine($"Write 23 then 56 with {nameof(sr.ShiftByte)}");
