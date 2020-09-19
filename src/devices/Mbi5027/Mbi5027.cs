@@ -48,9 +48,9 @@ namespace Iot.Device.Multiplexing
         /// </summary>
         public void EnableDetectionMode()
         {
-            if (GpioController is null || _pinMapping.Clk < 0 || _pinMapping.OE < 0 || _pinMapping.LE < 0)
+            if (GpioController is null || _pinMapping.Clk < 0 || _pinMapping.OE < 0 || _pinMapping.LE < 0 || _pinMapping.Sdo < 0)
             {
-                throw new ArgumentNullException($"{nameof(EnableDetectionMode)}: GpioController was not provided or {nameof(_pinMapping.Clk)}, {nameof(_pinMapping.LE)}, or {nameof(_pinMapping.OE)} not mapped to pin");
+                throw new ArgumentNullException($"{nameof(EnableDetectionMode)}: GpioController was not provided or {nameof(_pinMapping.Clk)}, {nameof(_pinMapping.LE)}, {nameof(_pinMapping.OE)}, or {nameof(_pinMapping.Sdo)} not mapped to pin");
             }
 
             /*  Required timing waveform

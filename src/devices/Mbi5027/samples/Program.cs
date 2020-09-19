@@ -32,11 +32,13 @@ namespace ShiftRegisterDriver
 
             CheckCircuit(sr);
             BinaryCounter(sr, cancellationSource);
+            CheckCircuit(sr);
+            sr.ShiftClear();
         }
 
         private static void BinaryCounter(ShiftRegister sr, CancellationTokenSource cancellationSource)
         {
-            int endValue = 4095;
+            int endValue = 1000;
             Console.WriteLine($"Write 0 through {endValue}");
             var delay = 10;
             for (int i = 0; i < endValue; i++)

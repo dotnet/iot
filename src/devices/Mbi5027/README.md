@@ -37,7 +37,14 @@ sr.ShiftClear();
 sr.ShiftByte(0b_1010_1010);
 ```
 
-If you want to use SPI, see the [`ShiftRegister`](../ShiftRegister/README.md) binding, which includes more information on SPI. 
+If you want to use SPI, see the [`ShiftRegister`](../ShiftRegister/README.md) binding, which includes more information on SPI.
+
+## Example circuit
+
+The following breadboard circuit demonstrates the correct wiring pattern, including error detection.
+
+![MBI5027_BB_topview](https://user-images.githubusercontent.com/2608468/93656940-22811a00-f9e3-11ea-84db-94615a2e1a2b.png)
+
 
 ## Error detection
 
@@ -84,6 +91,8 @@ Bit 2: High
 Bit 1: High
 Bit 0: High
 ```
+
+Note: Error detection was found to work only with 5v power. When 3.3v power was used, error detection did not work correctly.
 
 ## Resources
 
