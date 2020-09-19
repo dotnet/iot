@@ -38,13 +38,8 @@ namespace Iot.Device.Multiplexing
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
         public ShiftRegister(ShiftRegisterPinMapping pinMapping, int bitLength, GpioController gpioController = null,  bool shouldDispose = true)
         {
-            if (gpioController == null)
-            {
-                gpioController = new GpioController();
-            }
-
-            _controller = gpioController;
-            _shouldDispose = shouldDispose;
+            _shouldDispose = shouldDispose || (GpioController == null);
+            _controller = gpioController ?? new GpioController();
             _pinMapping = pinMapping;
             _serial = _pinMapping.SerialDataInput;
             _clock = _pinMapping.Clock;
