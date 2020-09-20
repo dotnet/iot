@@ -258,11 +258,10 @@ Development environment specifics:
             return interruptValue;
         }
 
-        /*------------------------- Queue Manipulation ---------------------- */
-        // pressed queue manipulation
+        #region Queue Manipulation
 
         /// <summary>
-        /// TODO
+        /// Returns whether the queue of button press timestamps is full.
         /// </summary>
         public bool IsPressedQueueFull()
         {
@@ -271,7 +270,7 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// TODO
+        /// Returns whether the queue of button press timestamps is empty.
         /// </summary>
         public bool IsPressedQueueEmpty()
         {
@@ -280,27 +279,29 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// TODO
+        /// Returns how many milliseconds it has been since the last button press.
+        /// Since this returns a 32-bit unsigned int, it will roll over about every 50 days.
         /// </summary>
-        public ulong TimeSinceLastPress()
+        public uint TimeSinceLastPress()
         {
             return _i2cBus.ReadQuadRegister(Register.PRESSED_QUEUE_FRONT);
         }
 
         /// <summary>
-        /// TODO
+        /// Returns how many milliseconds it has been since the first button press.
+        /// Since this returns a 32-bit unsigned int, it will roll over about every 50 days.
         /// </summary>
-        public ulong TimeSinceFirstPress()
+        public uint TimeSinceFirstPress()
         {
             return _i2cBus.ReadQuadRegister(Register.PRESSED_QUEUE_BACK);
         }
 
         /// <summary>
-        /// TODO
+        /// Returns the oldest value in the queue (milliseconds since first button press), and then removes it.
         /// </summary>
-        public ulong PopPressedQueue()
+        public uint PopPressedQueue()
         {
-            ulong tempData = TimeSinceFirstPress(); // Take the oldest value on the queue
+            var timeSinceFirstPress = TimeSinceFirstPress(); // Take the oldest value on the queue
 
             var pressedQueue =
                 new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.PRESSED_QUEUE_STATUS))
@@ -311,11 +312,11 @@ Development environment specifics:
             // Remove the oldest value from the queue
             _i2cBus.WriteSingleRegister(Register.PRESSED_QUEUE_STATUS, pressedQueue.QueueStatusValue);
 
-            return tempData; // Return the value we popped
+            return timeSinceFirstPress; // Return the value we popped
         }
 
         /// <summary>
-        /// Clicked queue manipulation.
+        /// Returns whether the queue of button click timestamps is full.
         /// </summary>
         public bool IsClickedQueueFull()
         {
@@ -324,7 +325,7 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// TODO
+        /// Returns whether the queue of button click timestamps is empty.
         /// </summary>
         public bool IsClickedQueueEmpty()
         {
@@ -333,27 +334,29 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// TODO
+        /// Returns how many milliseconds it has been since the last button click.
+        /// Since this returns a 32-bit unsigned int, it will roll over about every 50 days.
         /// </summary>
-        public ulong TimeSinceLastClick()
+        public uint TimeSinceLastClick()
         {
             return _i2cBus.ReadQuadRegister(Register.CLICKED_QUEUE_FRONT);
         }
 
         /// <summary>
-        /// TODO
+        /// Returns how many milliseconds it has been since the first button click.
+        /// Since this returns a 32-bit unsigned int, it will roll over about every 50 days.
         /// </summary>
-        public ulong TimeSinceFirstClick()
+        public uint TimeSinceFirstClick()
         {
             return _i2cBus.ReadQuadRegister(Register.CLICKED_QUEUE_BACK);
         }
 
         /// <summary>
-        /// TODO
+        /// Returns the oldest value in the queue (milliseconds since first button click), and then removes it.
         /// </summary>
-        public ulong PopClickedQueue()
+        public uint PopClickedQueue()
         {
-            ulong tempData = TimeSinceFirstClick();
+            var timeSinceFirstClick = TimeSinceFirstClick();
 
             var clickedQueue =
                 new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.CLICKED_QUEUE_STATUS))
@@ -362,8 +365,10 @@ Development environment specifics:
                 };
             _i2cBus.WriteSingleRegister(Register.CLICKED_QUEUE_STATUS, clickedQueue.QueueStatusValue);
 
-            return tempData;
+            return timeSinceFirstClick;
         }
+
+        #endregion
 
         #region LED Configuration
 
