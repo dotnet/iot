@@ -26,16 +26,22 @@ namespace Iot.Device.QwiicButton.Samples
             switch (sampleNumber)
             {
                 case 1:
-                    PrintButtonStatus.Run(button);
+                    PrintButtonConfiguration.Run(button);
                     break;
                 case 2:
-                    new PrintButtonStatusInterruptBased().Run(button);
+                    PrintButtonStatus.Run(button);
                     break;
                 case 3:
-                    LightWhenPressed.Run(button);
+                    new PrintButtonStatusInterruptBased().Run(button);
                     break;
                 case 4:
+                    LightWhenPressed.Run(button);
+                    break;
+                case 5:
                     OnOffButtonWithLight.Run(button);
+                    break;
+                case 6:
+                    QueueUsage.Run(button);
                     break;
                 default:
                     Console.WriteLine("No sample chosen - exiting...");
@@ -81,10 +87,12 @@ namespace Iot.Device.QwiicButton.Samples
         {
             Console.WriteLine("Choose a sample by typing the corresponding number:");
             Console.WriteLine();
-            Console.WriteLine("1. Print button status");
-            Console.WriteLine("2. Print button status - interrupt based");
-            Console.WriteLine("3. Light when button pressed");
-            Console.WriteLine("4. ON/OFF button with light when ON");
+            Console.WriteLine("1. Print button configuration");
+            Console.WriteLine("2. Print button status");
+            Console.WriteLine("3. Print button status - interrupt based");
+            Console.WriteLine("4. Light when button pressed");
+            Console.WriteLine("5. ON/OFF button with light when ON");
+            Console.WriteLine("6. Clicked queue and pressed queue usage");
 
             string sampleNumber = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(sampleNumber))
