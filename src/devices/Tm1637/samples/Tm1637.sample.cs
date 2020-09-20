@@ -18,7 +18,7 @@ namespace Tm1637Sample
             tm1637.ScreenOn = true;
             tm1637.ClearDisplay();
             // Displays 4 Characters
-            // If you have a 4 display, all 4 will be displayed as well as on a 6
+            // If you have a 4 character display, all 4 will be displayed as well as on a 6
             Character[] toDisplay = new Character[4]
             {
                 Character.Digit4, Character.Digit2 | Character.Dot, Character.Digit3, Character.Digit8
@@ -38,7 +38,7 @@ namespace Tm1637Sample
             Thread.Sleep(3000);
 
             // Changing order of the segments
-            tm1637.SegmentOrder = new byte[] { 2, 1, 0, 5, 4, 3 };
+            tm1637.CharacterOrder = new byte[] { 2, 1, 0, 5, 4, 3 };
 
             // Displays couple of raw data
             Character[] rawData = new Character[6]
@@ -79,7 +79,7 @@ namespace Tm1637Sample
             Thread.Sleep(3000);
 
             // Revert order of the segments
-            tm1637.SegmentOrder = new byte[] { 0, 1, 2, 3, 4, 5 };
+            tm1637.CharacterOrder = new byte[] { 0, 1, 2, 3, 4, 5 };
 
             // Blink the screen by switching on and off
             for (int i = 0; i < 10; i++)
