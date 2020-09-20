@@ -21,6 +21,11 @@ Development environment specifics:
     Qwiic Button Version: 1.0.0
     Qwiic Switch Version: 1.0.0
 
+    Qwiic Button is an I2C based button that records any button presses to a queue.
+    Qwiic Button maintains a queue of events. To remove events from the queue write
+    the appropriate register (timeSinceLastButtonClicked or timeSinceLastButtonPressed)
+    to zero. The register will then be filled with the next available event time.
+
 ******************************************************************************/
         private const int DefaultAddress = 0x6F; // default I2C address of the button
         private I2cBusAccess _i2CBus;
@@ -60,14 +65,24 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// Returns the firmware version of the attached device as a 16-bit integer.
+        /// Returns the firmware version of the button as a 16-bit integer.
         /// The leftmost (high) byte is the major revision number, and the rightmost (low) byte is the minor revision number.
         /// </summary>
-        public ushort GetFirmwareVersion()
+        public ushort GetFirmwareVersionAsInteger()
         {
             ushort version = (ushort)(_i2CBus.ReadSingleRegister(Register.FIRMWARE_MAJOR) << 8);
             version |= _i2CBus.ReadSingleRegister(Register.FIRMWARE_MINOR);
             return version;
+        }
+
+        /// <summary>
+        /// Returns the firmware version of the button as a [major revision].[minor revision] string.
+        /// </summary>
+        public string GetFirmwareVersionAsString()
+        {
+            var major = _i2CBus.ReadSingleRegister(Register.FIRMWARE_MAJOR);
+            var minor = _i2CBus.ReadSingleRegister(Register.FIRMWARE_MINOR);
+            return major + "." + minor;
         }
 
         /// <summary>
@@ -361,7 +376,11 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// Configures the onboard LED with the given max brightness, granularity (1 is fine for most applications), cycle time, and off time.
+        /// Configures the onboard LED with the given max brightness, granularity, cycle time, and off time.
+        /// <param name="brightness">LED brightness value between 0 (off) and 255 (max). Default is 255.</param>
+        /// <param name="cycleTime">Total pulse cycle time (in ms). Does not include off time.</param>
+        /// <param name="offTime">Off time between pulses (in ms). Default is 500 ms.</param>
+        /// <param name="granularity">Amount of steps it takes to get to the set brightness level (1 is fine for most applications).</param>
         /// </summary>
         public bool LedConfig(byte brightness, ushort cycleTime, ushort offTime, byte granularity = 1)
         {

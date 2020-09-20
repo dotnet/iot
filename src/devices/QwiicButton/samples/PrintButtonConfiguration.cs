@@ -13,11 +13,12 @@ namespace Iot.Device.QwiicButton.Samples
     {
         public static void Run(QwiicButton button)
         {
+            Console.WriteLine("Qwiic Button Configuration");
+            Console.WriteLine("--------------------------");
             Console.WriteLine($"I2C bus ID: {button.I2CBusId}");
-            Console.WriteLine($"I2C bus address: {BitConverter.ToString(new[] { button.I2CAddress })} ({button.I2CAddress})");
+            Console.WriteLine($"I2C bus address: 0x{BitConverter.ToString(new[] { button.I2CAddress })} ({button.I2CAddress})");
             Console.WriteLine($"Device ID: {button.GetDeviceId()}");
-            Console.WriteLine($"Firmware version: {button.GetFirmwareVersion()}");
-            Console.WriteLine($"Debounce time: {button.GetDebounceTime()}ms");
+            Console.WriteLine($"Firmware version: {button.GetFirmwareVersionAsString()}");
         }
     }
 }
