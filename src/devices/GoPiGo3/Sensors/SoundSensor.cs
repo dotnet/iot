@@ -12,12 +12,14 @@ namespace Iot.Device.GoPiGo3.Sensors
     public class SoundSensor : AnalogSensor
     {
         /// <summary>
-        /// 
+        /// Creates a new instance of <see cref="SoundSensor"/>.
         /// </summary>
         /// <param name="goPiGo">The GoPiGo3 class</param>
         /// <param name="port">The Grove Port, need to be in the list of SupportedPorts</param>
-        public SoundSensor(GoPiGo goPiGo, GrovePort port) : base(goPiGo, port)
-        { }
+        public SoundSensor(GoPiGo goPiGo, GrovePort port)
+            : base(goPiGo, port)
+        {
+        }
 
         /// <summary>
         /// Get the sensor name "Sound Sensor"

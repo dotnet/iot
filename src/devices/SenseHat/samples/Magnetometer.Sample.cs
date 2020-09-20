@@ -51,7 +51,7 @@ namespace Iot.Device.SenseHat.Samples
                     // fading
                     for (int i = 0; i < 64; i++)
                     {
-                        data[i] = Color.FromArgb((byte)Math.Clamp(data[i].R - 1, 0, 255), data[i].G, data[i].B);;
+                        data[i] = Color.FromArgb((byte)Math.Clamp(data[i].R - 1, 0, 255), data[i].G, data[i].B);
                     }
 
                     Color col = data[idx];

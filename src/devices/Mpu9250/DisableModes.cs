@@ -7,7 +7,7 @@ using System;
 namespace Iot.Device.Imu
 {
     /// <summary>
-    /// Disable modes for the gyroscope and accelerometer axes 
+    /// Disable modes for the gyroscope and accelerometer axes
     /// </summary>
     [Flags]
     public enum DisableModes
@@ -16,26 +16,32 @@ namespace Iot.Device.Imu
         /// Disable None
         /// </summary>
         DisableNone = 0,
+
         /// <summary>
         /// Disable Accelerometer X
         /// </summary>
         DisableAccelerometerX = 0b0010_0000,
+
         /// <summary>
         /// Disable Accelerometer Y
         /// </summary>
         DisableAccelerometerY = 0b0001_0000,
+
         /// <summary>
         /// Disable Accelerometer Z
         /// </summary>
         DisableAccelerometerZ = 0b0000_1000,
+
         /// <summary>
         /// Disable Gyroscope X
         /// </summary>
         DisableGyroscopeX = 0b0000_0100,
+
         /// <summary>
         /// Disable Gyroscope Y
         /// </summary>
         DisableGyroscopeY = 0b0000_0010,
+
         /// <summary>
         /// Disable Gyroscope Z
         /// </summary>

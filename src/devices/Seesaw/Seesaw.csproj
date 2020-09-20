@@ -10,9 +10,7 @@
     <Compile Include="*.cs" />
     <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />    
     <None Include="README.md" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>

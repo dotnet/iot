@@ -10,18 +10,25 @@ using Iot.Device.Adxl345;
 
 namespace Adxl345.Samples
 {
-    class Program
+    /// <summary>
+    /// Test program main class
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Entry point for example program
+        /// </summary>
+        /// <param name="args">Command line arguments</param>
+        public static void Main(string[] args)
         {
             SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
             {
                 ClockFrequency = Iot.Device.Adxl345.Adxl345.SpiClockFrequency,
                 Mode = Iot.Device.Adxl345.Adxl345.SpiMode
             };
-            
+
             var device = SpiDevice.Create(settings);
-            
+
             // set gravity measurement range ±4G
             using (Iot.Device.Adxl345.Adxl345 sensor = new Iot.Device.Adxl345.Adxl345(device, GravityRange.Range04))
             {

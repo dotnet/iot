@@ -23,7 +23,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// ATR_RES when the PN532 is in initiator mode.A target is considered as mute if no
         /// valid ATR_RES is received within this timeout value. In this way, the PN532 can
         /// easily detect non TPE target in passive 212-424 kbps mode.
-        /// The default value for this parameter is 0x0B (102.4 ms). 
+        /// The default value for this parameter is 0x0B (102.4 ms).
         /// </summary>
         public RfTimeout AnsweToRequestResponseTimeout { get; set; } = RfTimeout.T102400MicroSeconds;
 
@@ -33,7 +33,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// target in case of no answer.
         /// The default value for this parameter is 0x0A (51.2 ms).
         /// This timeout definition is also used with InDataExchange(§7.3.8, p: 127) when
-        /// the target is a FeliCa or a Mifare card(Ultralight, Standard…). 
+        /// the target is a FeliCa or a Mifare card(Ultralight, Standard…).
         /// </summary>
         public RfTimeout RetryTimeout { get; set; } = RfTimeout.T51200MicroSeconds;
 

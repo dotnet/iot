@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.Spi;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Iot.Device.Adc
 {
@@ -12,12 +13,13 @@ namespace Iot.Device.Adc
     /// </summary>
     public abstract class Mcp3xxx : Mcp3Base
     {
+        private byte _adcResolutionBits;
+
         /// <summary>
         /// the number of single ended input channel on the ADC
         /// </summary>
+        [SuppressMessage("Microsoft Naming", "SA1306", Justification = "Needs to be checked for breaking changes")]
         protected byte ChannelCount;
-
-        private byte _adcResolutionBits;
 
         /// <summary>
         /// Constructs Mcp3xxx instance
@@ -25,7 +27,8 @@ namespace Iot.Device.Adc
         /// <param name="spiDevice">Device used for SPI communication</param>
         /// <param name="channelCount">Value representing the number of single ended input channels available on the device.</param>
         /// <param name="adcResolutionBits">The number of bits of resolution for the ADC.</param>
-        public Mcp3xxx(SpiDevice spiDevice, byte channelCount, byte adcResolutionBits) : base(spiDevice)
+        public Mcp3xxx(SpiDevice spiDevice, byte channelCount, byte adcResolutionBits)
+            : base(spiDevice)
         {
             ChannelCount = channelCount;
             _adcResolutionBits = adcResolutionBits;
@@ -40,7 +43,8 @@ namespace Iot.Device.Adc
         {
             if (channel < 0 || channel > channelCount - 1)
             {
-                throw new ArgumentOutOfRangeException($"ADC channel must be within the range 0-{channelCount - 1}.", nameof(channel));
+                throw new ArgumentOutOfRangeException($"ADC channel must be within the range 0-{channelCount - 1}.",
+                    nameof(channel));
             }
         }
 
@@ -59,7 +63,9 @@ namespace Iot.Device.Adc
             // would be CH0 and CH1, CH2 and CH3, CH4 and CH5, CH6 and CH7 and thus to work out which channel pairing a channel is in then the channel number can be divided by 2.
             if (valueChannel / 2 != referenceChannel / 2 || valueChannel == referenceChannel)
             {
-                throw new ArgumentException($"ADC differential channels must be different and part of the same channel pairing.", nameof(valueChannel) + " " + nameof(referenceChannel));
+                throw new ArgumentException(
+                    $"ADC differential channels must be different and part of the same channel pairing.",
+                    nameof(valueChannel) + " " + nameof(referenceChannel));
             }
         }
 
@@ -79,8 +85,10 @@ namespace Iot.Device.Adc
             // ensure that the channels are part of the same pairing
             CheckChannelPairing(valueChannel, referenceChannel);
 
-            // read and return the value. the value passsed to the channel represents the channel pair. 
-            return ReadInternal(channel: valueChannel / 2, valueChannel > referenceChannel ? InputType.InvertedDifferential : InputType.Differential, _adcResolutionBits);
+            // read and return the value. the value passsed to the channel represents the channel pair.
+            return ReadInternal(channel: valueChannel / 2,
+                valueChannel > referenceChannel ? InputType.InvertedDifferential : InputType.Differential,
+                _adcResolutionBits);
         }
 
         /// <summary>
@@ -100,7 +108,8 @@ namespace Iot.Device.Adc
 
             if (valueChannel == referenceChannel)
             {
-                throw new ArgumentException($"ADC differential channels must be different.", nameof(valueChannel) + " " + nameof(referenceChannel));
+                throw new ArgumentException($"ADC differential channels must be different.",
+                    nameof(valueChannel) + " " + nameof(referenceChannel));
             }
 
             return ReadInternal(valueChannel, InputType.SingleEnded, _adcResolutionBits) -
@@ -148,8 +157,8 @@ namespace Iot.Device.Adc
                     break;
             }
 
-            // create a value to represent the request to the ADC 
-            switch(ChannelCount)
+            // create a value to represent the request to the ADC
+            switch (ChannelCount)
             {
                 case 4:
                 case 8:

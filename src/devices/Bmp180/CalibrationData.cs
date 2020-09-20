@@ -31,10 +31,10 @@ namespace Iot.Device.Bmp180
 
             B1 = (short)bmp180.Read16BitsFromRegisterBE((byte)Register.B1);
             B2 = (short)bmp180.Read16BitsFromRegisterBE((byte)Register.B2);
-           
+
             MB = (short)bmp180.Read16BitsFromRegisterBE((byte)Register.MB);
             MC = (short)bmp180.Read16BitsFromRegisterBE((byte)Register.MC);
-            MD = (short)bmp180.Read16BitsFromRegisterBE((byte)Register.MD);            
+            MD = (short)bmp180.Read16BitsFromRegisterBE((byte)Register.MD);
         }
     }
 }

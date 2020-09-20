@@ -12,19 +12,23 @@ namespace Iot.Device.Hcsr501
     /// </summary>
     public class Hcsr501 : IDisposable
     {
-        private GpioController _controller;
         private readonly int _outPin;
+        private GpioController _controller;
+        private bool _shouldDispose;
 
         /// <summary>
         /// Creates a new instance of the HC-SCR501.
         /// </summary>
         /// <param name="outPin">OUT Pin</param>
         /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
-        public Hcsr501(int outPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+        /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Hcsr501(int outPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController gpioController = null, bool shouldDispose = true)
         {
             _outPin = outPin;
 
-            _controller = new GpioController(pinNumberingScheme);
+            _shouldDispose = gpioController == null ? true : shouldDispose;
+            _controller = gpioController ?? new GpioController(pinNumberingScheme);
             _controller.OpenPin(outPin, PinMode.Input);
             _controller.RegisterCallbackForPinValueChangedEvent(outPin, PinEventTypes.Falling, Sensor_ValueChanged);
             _controller.RegisterCallbackForPinValueChangedEvent(outPin, PinEventTypes.Rising, Sensor_ValueChanged);
@@ -40,10 +44,13 @@ namespace Iot.Device.Hcsr501
         /// </summary>
         public void Dispose()
         {
-            if(_controller != null)
+            if (_shouldDispose)
             {
-                _controller.Dispose();
-                _controller = null;
+                if (_controller != null)
+                {
+                    _controller.Dispose();
+                    _controller = null;
+                }
             }
         }
 
@@ -61,7 +68,10 @@ namespace Iot.Device.Hcsr501
 
         private void Sensor_ValueChanged(object sender, PinValueChangedEventArgs e)
         {
-            Hcsr501ValueChanged(sender, new Hcsr501ValueChangedEventArgs(_controller.Read(_outPin)));
+            if (Hcsr501ValueChanged != null)
+            {
+                Hcsr501ValueChanged(sender, new Hcsr501ValueChangedEventArgs(_controller.Read(_outPin)));
+            }
         }
     }
 }

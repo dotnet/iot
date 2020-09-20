@@ -19,53 +19,58 @@ namespace Iot.Device.Graphics
         /// <summary>
         /// Character width
         /// </summary>
-        public int Width  { private set; get; }
+        public int Width { get; private set; }
 
         /// <summary>
         /// Character height
         /// </summary>
-        public int Height { private set; get; }
+        public int Height { get; private set; }
 
         /// <summary>
         /// X displacement of the character
         /// </summary>
-        public int XDisplacement { private set; get; }
+        public int XDisplacement { get; private set; }
 
         /// <summary>
         /// Y Displacement of the character
         /// </summary>
-        public int YDisplacement { private set; get; }
+        public int YDisplacement { get; private set; }
 
         /// <summary>
         /// Default character
         /// </summary>
-        public int DefaultChar  { private set; get; }
+        public int DefaultChar { get; private set; }
 
         /// <summary>
         /// Number of characters
         /// </summary>
-        public int CharsCount   { private set; get; }
+        public int CharsCount { get; private set; }
 
         // GlyphMapper is mapping from the character number to the index of the character bitmap data in the buffer GlyphUshortData.
-        private Dictionary<int, int> GlyphMapper { set; get; }
-        private int BytesPerGlyph { set; get; }
-        private ushort[] GlyphUshortData { set; get; }
+        private Dictionary<int, int> GlyphMapper { get; set; }
+        private int BytesPerGlyph { get; set; }
+        private ushort[] GlyphUshortData { get; set; }
 
-        private static readonly string s_fontBoundingBox    = "FONTBOUNDINGBOX ";
-        private static readonly string s_charSet            = "CHARSET_REGISTRY ";
-        private static readonly string s_isoCharset         = "\"ISO10646\"";
-        private static readonly string s_defaultChar        = "DEFAULT_CHAR ";
-        private static readonly string s_Chars              = "CHARS ";
-        private static readonly string s_startChar          = "STARTCHAR ";
-        private static readonly string s_encoding           = "ENCODING ";
+        private static readonly string s_fontBoundingBox = "FONTBOUNDINGBOX ";
+        private static readonly string s_charSet = "CHARSET_REGISTRY ";
+        private static readonly string s_isoCharset = "\"ISO10646\"";
+        private static readonly string s_defaultChar = "DEFAULT_CHAR ";
+        private static readonly string s_Chars = "CHARS ";
+        private static readonly string s_startChar = "STARTCHAR ";
+
+        private static readonly string s_encoding = "ENCODING ";
+
         // private static readonly string s_sWidth             = "SWIDTH";
         // private static readonly string s_dWidth             = "DWIDTH";
-        private static readonly string s_bbx                = "BBX ";
-        // private static readonly string s_vVector            = "VVECTOR";
-        private static readonly string s_endChar            = "ENDCHAR";
-        private static readonly string s_bitmap             = "BITMAP";
+        private static readonly string s_bbx = "BBX ";
 
-        private BdfFont() { }
+        // private static readonly string s_vVector            = "VVECTOR";
+        private static readonly string s_endChar = "ENDCHAR";
+        private static readonly string s_bitmap = "BITMAP";
+
+        private BdfFont()
+        {
+        }
 
         /// <summary>
         /// Loads BdfFont from a specified path
@@ -123,8 +128,8 @@ namespace Iot.Device.Graphics
         /// <summary>
         /// Get character data or data for default character
         /// </summary>
-        /// <param name="character">Character whch data needs to be retrieved</param>
-        /// <param name="charData"></param>
+        /// <param name="character">Character whose data needs to be retrieved</param>
+        /// <param name="charData">Character data</param>
         public void GetCharData(char character, out ReadOnlySpan<ushort> charData)
         {
             if (!GlyphMapper.TryGetValue((int)character, out int index))
@@ -204,7 +209,8 @@ namespace Iot.Device.Graphics
                 ReadOnlySpan<char> span = sr.ReadLine().AsSpan().Trim();
                 if (!span.StartsWith(s_startChar, StringComparison.Ordinal))
                 {
-                    throw new InvalidDataException("The font data is not well formed. expected STARTCHAR tag in the beginning of glyoh data.");
+                    throw new InvalidDataException(
+                        "The font data is not well formed. expected STARTCHAR tag in the beginning of glyoh data.");
                 }
 
                 span = sr.ReadLine().AsSpan().Trim();
@@ -212,6 +218,7 @@ namespace Iot.Device.Graphics
                 {
                     throw new InvalidDataException("The font data is not well formed. expected ENCODING tag.");
                 }
+
                 span = span.Slice(s_encoding.Length).Trim();
                 int charNumber = ReadNextDecimalNumber(ref span);
                 GlyphMapper.Add(charNumber, index);
@@ -219,15 +226,17 @@ namespace Iot.Device.Graphics
                 do
                 {
                     span = sr.ReadLine().AsSpan().Trim();
-                } while (!span.StartsWith(s_bbx, StringComparison.Ordinal));
+                }
+                while (!span.StartsWith(s_bbx, StringComparison.Ordinal));
 
                 span = span.Slice(s_bbx.Length).Trim();
                 if (ReadNextDecimalNumber(ref span) != Width ||
                     ReadNextDecimalNumber(ref span) != Height ||
                     ReadNextDecimalNumber(ref span) != XDisplacement ||
-                    ReadNextDecimalNumber(ref span) != YDisplacement )
+                    ReadNextDecimalNumber(ref span) != YDisplacement)
                 {
-                    throw new NotSupportedException("We don't support fonts have BBX values different than FONTBOUNDINGBOX values.");
+                    throw new NotSupportedException(
+                        "We don't support fonts have BBX values different than FONTBOUNDINGBOX values.");
                 }
 
                 span = sr.ReadLine().AsSpan().Trim();
@@ -257,7 +266,8 @@ namespace Iot.Device.Graphics
                 span = sr.ReadLine().AsSpan().Trim();
                 if (!span.StartsWith(s_endChar, StringComparison.Ordinal))
                 {
-                    throw new InvalidDataException("The font data is not well formed. expected ENDCHAR tag in the beginning of glyoh data.");
+                    throw new InvalidDataException(
+                        "The font data is not well formed. expected ENDCHAR tag in the beginning of glyph data.");
                 }
             }
         }

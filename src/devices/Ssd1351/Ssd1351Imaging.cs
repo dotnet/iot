@@ -17,7 +17,7 @@ namespace Iot.Device.Ssd1351
         /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
         public void SendBitmap(Bitmap bm)
         {
-            SendBitmap(bm, new Point(0, 0), new Rectangle(0, 0, SCREEN_WIDTH_PX, SCREEN_WIDTH_PX));
+            SendBitmap(bm, new Point(0, 0), new Rectangle(0, 0, ScreenWidthPx, ScreenWidthPx));
         }
 
         /// <summary>
@@ -38,7 +38,6 @@ namespace Iot.Device.Ssd1351
         /// <param name="destinationRect">A rectangle that defines where in the display the bitmap is written. Note that no scaling is done.</param>
         public void SendBitmap(Bitmap bm, Point sourcePoint, Rectangle destinationRect)
         {
-
             if (bm == null)
             {
                 throw new ArgumentNullException(nameof(bm));
@@ -94,7 +93,7 @@ namespace Iot.Device.Ssd1351
             bitmapData = new byte[sourceRect.Width * sourceRect.Height * 4];
             outputBuffer = new byte[sourceRect.Width * sourceRect.Height * (_colorDepth == ColorDepth.ColourDepth65K ? 2 : 3)];
 
-            //get the raw pixel data for the bitmap
+            // get the raw pixel data for the bitmap
             bmd = bm.LockBits(sourceRect, ImageLockMode.ReadOnly, bm.PixelFormat);
 
             Marshal.Copy(bmd.Scan0, bitmapData, 0, bitmapData.Length);

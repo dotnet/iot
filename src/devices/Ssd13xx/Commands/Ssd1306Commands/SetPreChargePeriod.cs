@@ -18,7 +18,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
         /// <param name="phase1Period">Phase 1 period with a range of 1-15.</param>
         /// <param name="phase2Period">Phase 2 period with a range of 1-15.</param>
         public SetPreChargePeriod(byte phase1Period = 0x02, byte phase2Period = 0x02)
-        {            
+        {
             if (!Ssd13xx.InRange(phase1Period, 0x01, 0x0F))
             {
                 throw new ArgumentOutOfRangeException(nameof(phase1Period));

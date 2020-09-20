@@ -21,7 +21,9 @@ namespace Iot.Device.Buzzer
         /// </summary>
         /// <param name="pinNumber">Pin connected to buzzer</param>
         public Buzzer(int pinNumber)
-            : this(new SoftwarePwmChannel(pinNumber)) { }
+            : this(new SoftwarePwmChannel(pinNumber))
+        {
+        }
 
         /// <summary>
         /// Create Buzzer class instance with output on specified pin with specified channel.
@@ -29,7 +31,9 @@ namespace Iot.Device.Buzzer
         /// <param name="chip">The GPIO pin number in case of a software PWM. The chip in case of a hardware PWM.</param>
         /// <param name="channel">The channel to use in case of a hardware PWM.</param>
         public Buzzer(int chip, int channel)
-            : this(PwmChannel.Create(chip, channel)) { }
+            : this(PwmChannel.Create(chip, channel))
+        {
+        }
 
         /// <summary>
         /// Create Buzzer class instance with output on specified pin with specified channel using passed PWM controller.

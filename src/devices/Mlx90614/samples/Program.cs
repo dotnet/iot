@@ -8,9 +8,9 @@ using System.Threading;
 
 namespace Iot.Device.Mlx90614.Sample
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             I2cConnectionSettings settings = new I2cConnectionSettings(1, Mlx90614.DefaultI2cAddress);
             I2cDevice i2cDevice = I2cDevice.Create(settings);
@@ -19,8 +19,8 @@ namespace Iot.Device.Mlx90614.Sample
             {
                 while (true)
                 {
-                    Console.WriteLine($"Ambient: {sensor.ReadAmbientTemperature().Celsius} ℃");
-                    Console.WriteLine($"Object: {sensor.ReadObjectTemperature().Celsius} ℃");
+                    Console.WriteLine($"Ambient: {sensor.ReadAmbientTemperature().DegreesCelsius} ℃");
+                    Console.WriteLine($"Object: {sensor.ReadObjectTemperature().DegreesCelsius} ℃");
                     Console.WriteLine();
 
                     Thread.Sleep(1000);

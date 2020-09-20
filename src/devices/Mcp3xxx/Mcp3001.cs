@@ -15,7 +15,10 @@ namespace Iot.Device.Adc
         /// Constructs Mcp3008 instance
         /// </summary>
         /// <param name="spiDevice">Device used for SPI communication</param>
-        public Mcp3001(SpiDevice spiDevice) : base(spiDevice) { }
+        public Mcp3001(SpiDevice spiDevice)
+            : base(spiDevice)
+        {
+        }
 
         /// <summary>
         /// Reads a 10-bit (0..1023) value from the device

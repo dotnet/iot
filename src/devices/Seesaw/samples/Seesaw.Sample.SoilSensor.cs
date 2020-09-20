@@ -8,9 +8,9 @@ using System.Device.Gpio;
 
 namespace Iot.Device.Seesaw.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             const byte AdafruitSeesawSoilSensorI2cAddress = 0x36;
             const byte AdafruitSeesawSoilSensorI2cBus = 0x1;

@@ -5,6 +5,8 @@
 using System;
 using System.Drawing;
 using System.Threading;
+using Iot.Device.Common;
+using UnitsNet;
 
 namespace Iot.Device.SenseHat.Samples
 {
@@ -20,6 +22,9 @@ namespace Iot.Device.SenseHat.Samples
             // TemperatureAndHumidity.Run();
             // PressureAndTemperature.Run();
 
+            // set this to the current sea level pressure in the area for correct altitude readings
+            var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
+
             using (var sh = new SenseHat())
             {
                 int n = 0;
@@ -32,7 +37,9 @@ namespace Iot.Device.SenseHat.Samples
                     (int dx, int dy, bool holding) = JoystickState(sh);
 
                     if (holding)
+                    {
                         n++;
+                    }
 
                     x = (x + 8 + dx) % 8;
                     y = (y + 8 + dy) % 8;
@@ -40,12 +47,27 @@ namespace Iot.Device.SenseHat.Samples
                     sh.Fill(n % 2 == 0 ? Color.DarkBlue : Color.DarkRed);
                     sh.SetPixel(x, y, Color.Yellow);
 
-                    Console.WriteLine($"Temperature: Sensor1: {sh.Temperature.Celsius} °C   Sensor2: {sh.Temperature2.Celsius} °C");
-                    Console.WriteLine($"Humidity: {sh.Humidity} %rH");
-                    Console.WriteLine($"Pressure: {sh.Pressure} hPa");
-                    Console.WriteLine($"Acceleration: {sh.Acceleration} g");
-                    Console.WriteLine($"Angular rate: {sh.AngularRate} DPS");
-                    Console.WriteLine($"Magnetic induction: {sh.MagneticInduction} gauss");
+                    var tempValue = sh.Temperature;
+                    var temp2Value = sh.Temperature2;
+                    var preValue = sh.Pressure;
+                    var humValue = sh.Humidity;
+                    var accValue = sh.Acceleration;
+                    var angValue = sh.AngularRate;
+                    var magValue = sh.MagneticInduction;
+                    var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
+
+                    Console.WriteLine($"Temperature Sensor 1: {tempValue.DegreesCelsius:0.#}\u00B0C");
+                    Console.WriteLine($"Temperature Sensor 2: {temp2Value.DegreesCelsius:0.#}\u00B0C");
+                    Console.WriteLine($"Pressure: {preValue:0.##}hPa");
+                    Console.WriteLine($"Altitude: {altValue:0.##}m");
+                    Console.WriteLine($"Acceleration: {sh.Acceleration}g");
+                    Console.WriteLine($"Angular rate: {sh.AngularRate}DPS");
+                    Console.WriteLine($"Magnetic induction: {sh.MagneticInduction}gauss");
+                    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+
+                    // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
+                    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
+                    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
 
                     Thread.Sleep(1000);
                 }
@@ -60,16 +82,24 @@ namespace Iot.Device.SenseHat.Samples
             int dy = 0;
 
             if (sh.HoldingUp)
+            {
                 dy--; // y goes down
+            }
 
             if (sh.HoldingDown)
+            {
                 dy++;
+            }
 
             if (sh.HoldingLeft)
+            {
                 dx--;
+            }
 
             if (sh.HoldingRight)
+            {
                 dx++;
+            }
 
             return (dx, dy, sh.HoldingButton);
         }

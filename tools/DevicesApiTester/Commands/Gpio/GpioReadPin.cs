@@ -18,7 +18,7 @@ namespace DeviceApiTester.Commands.Gpio
         /// <summary>Executes the command asynchronously.</summary>
         /// <returns>The command's exit code.</returns>
         /// <remarks>
-        ///     NOTE: This test app uses the base class's <see cref="CreateGpioController"/> method to create a device.<br/>
+        ///     NOTE: This test app uses the base class's <see cref="GpioCommand.CreateGpioController"/> method to create a device.<br/>
         ///     Real-world usage would simply create an instance of <see cref="GpioController"/>:
         ///     <code>using (var controller = new GpioController())</code>
         /// </remarks>

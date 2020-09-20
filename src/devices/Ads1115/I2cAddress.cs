@@ -15,14 +15,17 @@ namespace Iot.Device.Ads1115
         /// ADDR Pin connect to GND
         /// </summary>
         GND = 0x48,
+
         /// <summary>
         /// ADDR Pin connect to VCC
-        /// </summary>     
+        /// </summary>
         VCC = 0x49,
+
         /// <summary>
         /// ADDR Pin connect to SDA
         /// </summary>
         SDA = 0x4A,
+
         /// <summary>
         /// ADDR Pin connect to SCL
         /// </summary>

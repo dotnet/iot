@@ -35,25 +35,25 @@ namespace Iot.Device.Seesaw
         }
 
         /// <summary>
-        /// Version of the SeeSaw module. 
+        /// Version of the SeeSaw module.
         /// </summary>
         public uint Version { get; private set; }
 
         /// <summary>
-        /// Reads the temperature of the SeeSaw device. 
+        /// Reads the temperature of the SeeSaw device.
         /// </summary>
         /// <returns>A float that represents the temperature in degrees celcius.</returns>
         public float GetTemperature() => (1.0F / (1UL << 16)) * BinaryPrimitives.ReadUInt32BigEndian(Read(SeesawModule.Status, SeesawFunction.StatusTemp, 4, 1000));
 
         /// <summary>
-        /// Tests to see if a module has been compiled into the SeeSaw firmware. 
+        /// Tests to see if a module has been compiled into the SeeSaw firmware.
         /// </summary>
         /// <param name="moduleAddress">>An Seesaw_Module enum that represents the mdule to test for.</param>
         /// <returns>Returns true if the functionality associated with the module is available.</returns>
         public bool HasModule(SeesawModule moduleAddress) => (_options & (1 << (byte)moduleAddress)) != 0;
 
         /// <summary>
-        /// Performs a soft reset of the SeeSaw module. 
+        /// Performs a soft reset of the SeeSaw module.
         /// </summary>
         public void SoftwareReset()
         {
@@ -61,7 +61,7 @@ namespace Iot.Device.Seesaw
         }
 
         /// <summary>
-        /// Initializes the Seesaw device. 
+        /// Initializes the Seesaw device.
         /// <param name="i2cDevice">The I2cDevice to initialize the Seesaw device with.</param>
         /// </summary>
         protected void Initialize(I2cDevice i2cDevice)
@@ -82,7 +82,7 @@ namespace Iot.Device.Seesaw
         }
 
         /// <summary>
-        /// Get the firmware version of the Seesaw board. 
+        /// Get the firmware version of the Seesaw board.
         /// </summary>
         /// <returns>Returns the seesaw version.</returns>
         protected uint GetVersion() => BinaryPrimitives.ReadUInt32BigEndian(Read(SeesawModule.Status, SeesawFunction.StatusVersion, 4));
@@ -94,7 +94,7 @@ namespace Iot.Device.Seesaw
         protected uint GetOptions() => BinaryPrimitives.ReadUInt32BigEndian(Read(SeesawModule.Status, SeesawFunction.StatusOptions, 4));
 
         /// <summary>
-        /// Write a byte to the I2cDevice connected to the Seesaw board. 
+        /// Write a byte to the I2cDevice connected to the Seesaw board.
         /// </summary>
         /// <param name="moduleAddress">An Seesaw_Module enum that represents the module that we are writing to.</param>
         /// <param name="functionAddress">An Seesaw_Function enum that represents the Seesaw function to be called.</param>
@@ -105,7 +105,7 @@ namespace Iot.Device.Seesaw
         }
 
         /// <summary>
-        /// Write a series of bytes to the I2cDevice connected to the Seesaw board. 
+        /// Write a series of bytes to the I2cDevice connected to the Seesaw board.
         /// </summary>
         /// <param name="moduleAddress">An Seesaw_Module enum that represents the module that we are writing to.</param>
         /// <param name="functionAddress">An Seesaw_Function enum that represents the Seesaw function to be called.</param>
@@ -124,7 +124,7 @@ namespace Iot.Device.Seesaw
         }
 
         /// <summary>
-        /// Read a byte from the I2cDevice connected to the Seesaw board. 
+        /// Read a byte from the I2cDevice connected to the Seesaw board.
         /// </summary>
         /// <param name="moduleAddress">A Seesaw_Module enum that represents the module that we are reading from.</param>
         /// <param name="functionAddress">A Seesaw_Function enum that represents the Seesaw function to be called.</param>
@@ -133,7 +133,7 @@ namespace Iot.Device.Seesaw
         protected byte ReadByte(SeesawModule moduleAddress, SeesawFunction functionAddress, short readDelayMicroSeconds = 0) => Read(moduleAddress, functionAddress, 1, readDelayMicroSeconds)[0];
 
         /// <summary>
-        /// Read a byte array from the I2cDevice connected to the Seesaw board. 
+        /// Read a byte array from the I2cDevice connected to the Seesaw board.
         /// </summary>
         /// <param name="moduleAddress">A Seesaw_Module enum that represents the module that we are reading from.</param>
         /// <param name="functionAddress">A Seesaw_Function enum that represents the Seesaw function to be called.</param>
@@ -144,10 +144,13 @@ namespace Iot.Device.Seesaw
         {
             byte[] retval = new byte[length];
 
-            Span<byte> bytesToWrite = stackalloc byte[2] { (byte)moduleAddress, (byte)functionAddress };
+            Span<byte> bytesToWrite = stackalloc byte[2]
+            {
+                (byte)moduleAddress, (byte)functionAddress
+            };
 
             I2cDevice.Write(bytesToWrite);
-            
+
             if (readDelayMicroSeconds > 0)
             {
                 DelayHelper.DelayMicroseconds(readDelayMicroSeconds, true);

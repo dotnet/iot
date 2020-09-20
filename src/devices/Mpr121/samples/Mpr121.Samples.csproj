@@ -6,10 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-  	<ProjectReference Include="../Mpr121.csproj" />
-  	<ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+      <ProjectReference Include="../Mpr121.csproj" />
+      <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>

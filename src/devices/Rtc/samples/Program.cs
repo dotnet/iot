@@ -5,12 +5,11 @@ using Iot.Device.Rtc;
 
 namespace RealtimeClock.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             // This project contains DS1307, DS3231, PCF8563
-
             I2cConnectionSettings settings = new I2cConnectionSettings(1, Ds3231.DefaultI2cAddress);
             I2cDevice device = I2cDevice.Create(settings);
 
@@ -26,7 +25,7 @@ namespace RealtimeClock.Samples
                     DateTime dt = rtc.DateTime;
 
                     Console.WriteLine($"Time: {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
-                    Console.WriteLine($"Temperature: {rtc.Temperature.Celsius} ℃");
+                    Console.WriteLine($"Temperature: {rtc.Temperature.DegreesCelsius} ℃");
                     Console.WriteLine();
 
                     // wait for a second

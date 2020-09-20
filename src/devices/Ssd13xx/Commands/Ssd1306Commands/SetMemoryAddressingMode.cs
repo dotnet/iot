@@ -50,6 +50,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
             /// the pointers are reset to column start address and page start address.
             /// </summary>
             Horizontal = 0x00,
+
             /// <summary>
             /// In vertical addressing mode, after the display RAM is read/written, the page address pointer
             /// is increased automatically by 1. If the page address pointer reaches the page end address,
@@ -58,6 +59,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
             /// pointers are reset to column start address and page start address.
             /// </summary>
             Vertical = 0x01,
+
             /// <summary>
             /// In page addressing mode, after the display RAM is read/written, the column address pointer
             /// is increased automatically by 1. If the column address pointer reaches column end address,

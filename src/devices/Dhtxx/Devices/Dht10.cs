@@ -5,7 +5,7 @@
 using System;
 using System.Device;
 using System.Device.I2c;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.DHTxx
 {
@@ -19,12 +19,12 @@ namespace Iot.Device.DHTxx
         /// </summary>
         public const byte DefaultI2cAddress = 0x38;
 
-        // state, humi[20-13], humi[12-5], humi[4-1]temp[20-17], temp[16-9], temp[8-1]
-        private byte[] _dht10ReadBuff = new byte[6];
-
         private const byte DHT10_CMD_INIT = 0b_1110_0001;
         private const byte DHT10_CMD_START = 0b_1010_1100;
         private const byte DHT10_CMD_SOFTRESET = 0b_1011_1010;
+
+        // state, humi[20-13], humi[12-5], humi[4-1]temp[20-17], temp[16-9], temp[8-1]
+        private byte[] _dht10ReadBuff = new byte[6];
 
         /// <summary>
         /// Get the last read of relative humidity in percentage
@@ -32,7 +32,7 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.NaN
         /// </remarks>
-        public override double Humidity
+        public override Ratio Humidity
         {
             get
             {
@@ -81,18 +81,18 @@ namespace Iot.Device.DHTxx
             _i2cDevice.Read(_dht10ReadBuff);
         }
 
-        internal override double GetHumidity(byte[] readBuff)
+        internal override Ratio GetHumidity(byte[] readBuff)
         {
             int raw = (((readBuff[1] << 8) | readBuff[2]) << 4) | readBuff[3] >> 4;
 
-            return raw / Math.Pow(2, 20) * 100;
+            return Ratio.FromDecimalFractions(raw / Math.Pow(2, 20));
         }
 
         internal override Temperature GetTemperature(byte[] readBuff)
         {
             int raw = ((((readBuff[3] & 0b_0000_1111) << 8) | readBuff[4]) << 8) | readBuff[5];
 
-            return Temperature.FromCelsius(raw / Math.Pow(2, 20) * 200 - 50);
+            return Temperature.FromDegreesCelsius(raw / Math.Pow(2, 20) * 200 - 50);
         }
     }
 }

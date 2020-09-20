@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -51,13 +51,13 @@ namespace Iot.Device.LEDMatrix
         /// Default mapping for 32x32 matrix using bonnet
         /// </summary>
         public static PinMapping MatrixBonnetMapping32 =>
-            new PinMapping(r1: 5, g1: 13, b1:6, r2: 12, g2: 16, b2:23, oe: 4, clock: 17, latch: 21, a: 22, b: 26, c: 27, d: 20, e: 24);
+            new PinMapping(r1: 5, g1: 13, b1: 6, r2: 12, g2: 16, b2: 23, oe: 4, clock: 17, latch: 21, a: 22, b: 26, c: 27, d: 20, e: 24);
 
         /// <summary>
         /// Default mapping for 64x64 matrix using bonnet
         /// </summary>
         public static PinMapping MatrixBonnetMapping64 =>
-            new PinMapping(r1: 5, g1: 6, b1:13, r2: 12, g2: 23, b2:16, oe: 4, clock: 17, latch: 21, a: 22, b: 26, c: 27, d: 20, e: 24);
+            new PinMapping(r1: 5, g1: 6, b1: 13, r2: 12, g2: 23, b2: 16, oe: 4, clock: 17, latch: 21, a: 22, b: 26, c: 27, d: 20, e: 24);
 
         // Color Pins
 

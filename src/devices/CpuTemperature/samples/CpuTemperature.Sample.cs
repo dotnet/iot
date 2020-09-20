@@ -8,9 +8,9 @@ using Iot.Device.CpuTemperature;
 
 namespace Iot.Device.CpuTemperature.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             CpuTemperature cpuTemperature = new CpuTemperature();
 
@@ -18,7 +18,7 @@ namespace Iot.Device.CpuTemperature.Samples
             {
                 if (cpuTemperature.IsAvailable)
                 {
-                    double temperature = cpuTemperature.Temperature.Celsius;
+                    double temperature = cpuTemperature.Temperature.DegreesCelsius;
                     if (!double.IsNaN(temperature))
                     {
                         Console.WriteLine($"CPU Temperature: {temperature} C");

@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Magnetometer;
-using Iot.Units;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
@@ -13,6 +11,8 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 using System.Threading;
+using Iot.Device.Magnetometer;
+using UnitsNet;
 
 namespace Iot.Device.Imu
 {
@@ -52,7 +52,10 @@ namespace Iot.Device.Imu
             Reset();
             PowerOn();
             if (!CheckVersion())
+            {
                 throw new IOException($"This device does not contain the correct signature 0x70 for a MPU6500");
+            }
+
             GyroscopeBandwidth = GyroscopeBandwidth.Bandwidth0250Hz;
             GyroscopeRange = GyroscopeRange.Range0250Dps;
             AccelerometerBandwidth = AccelerometerBandwidth.Bandwidth1130Hz;
@@ -63,7 +66,8 @@ namespace Iot.Device.Imu
         /// Used to create the class for the MPU9250. Initialization is a bit different than for the MPU65000
         /// </summary>
         internal Mpu6500()
-        { }
+        {
+        }
 
         #region Accelerometer
 
@@ -86,7 +90,9 @@ namespace Iot.Device.Imu
                 // This allow as well to make sure the stored data is the same as the one read
                 _accelerometerRange = (AccelerometerRange)(ReadByte(Register.ACCEL_CONFIG) >> 3);
                 if (_accelerometerRange != value)
+                {
                     throw new IOException($"Can set {nameof(AccelerometerRange)}, desired value {value}, stored value {_accelerometerRange}");
+                }
             }
         }
 
@@ -102,7 +108,9 @@ namespace Iot.Device.Imu
                 WriteRegister(Register.ACCEL_CONFIG_2, (byte)value);
                 _accelerometerBandwidth = (AccelerometerBandwidth)ReadByte(Register.ACCEL_CONFIG_2);
                 if (_accelerometerBandwidth != value)
+                {
                     throw new IOException($"Can set {nameof(AccelerometerBandwidth)}, desired value {value}, stored value {_accelerometerBandwidth}");
+                }
             }
         }
 
@@ -156,7 +164,10 @@ namespace Iot.Device.Imu
 
         private Vector3 GetRawAccelerometer()
         {
-            Span<byte> rawData = stackalloc byte[6] { 0, 0, 0, 0, 0, 0 };
+            Span<byte> rawData = stackalloc byte[6]
+            {
+                0, 0, 0, 0, 0, 0
+            };
             Vector3 ace = new Vector3();
             ReadBytes(Register.ACCEL_XOUT_H, rawData);
             ace.X = BinaryPrimitives.ReadInt16BigEndian(rawData);
@@ -195,7 +206,9 @@ namespace Iot.Device.Imu
                 WriteRegister(Register.GYRO_CONFIG, (byte)((byte)value << 3));
                 _gyroscopeRange = (GyroscopeRange)(ReadByte(Register.GYRO_CONFIG) >> 3);
                 if (_gyroscopeRange != value)
+                {
                     throw new IOException($"Can set {nameof(GyroscopeRange)}, desired value {value}, stored value {_gyroscopeRange}");
+                }
             }
         }
 
@@ -224,13 +237,22 @@ namespace Iot.Device.Imu
 
                 var retConf = ReadByte(Register.GYRO_CONFIG);
                 if ((retConf & 0x01) == 0x01)
+                {
                     _gyroscopeBandwidth = GyroscopeBandwidth.Bandwidth8800HzFS32;
+                }
                 else if ((retConf & 0x03) == 0x00)
+                {
                     _gyroscopeBandwidth = (GyroscopeBandwidth)ReadByte(Register.CONFIG);
+                }
                 else
+                {
                     _gyroscopeBandwidth = GyroscopeBandwidth.Bandwidth3600HzFS32;
+                }
+
                 if (_gyroscopeBandwidth != value)
+                {
                     throw new IOException($"Can set {nameof(GyroscopeBandwidth)}, desired value {value}, stored value {_gyroscopeBandwidth}");
+                }
             }
         }
 
@@ -265,7 +287,10 @@ namespace Iot.Device.Imu
                 // the sample rate diver only apply for the non FS modes
                 if ((GyroscopeBandwidth != GyroscopeBandwidth.Bandwidth3600HzFS32) &&
                     (GyroscopeBandwidth != GyroscopeBandwidth.Bandwidth8800HzFS32))
+                {
                     return val / (1 + SampleRateDivider);
+                }
+
                 return val;
             }
         }
@@ -288,7 +313,10 @@ namespace Iot.Device.Imu
 
         private Vector3 GetRawGyroscope()
         {
-            Span<byte> rawData = stackalloc byte[6] { 0, 0, 0, 0, 0, 0 };
+            Span<byte> rawData = stackalloc byte[6]
+            {
+                0, 0, 0, 0, 0, 0
+            };
             Vector3 gyro = new Vector3();
             ReadBytes(Register.GYRO_XOUT_H, rawData);
             gyro.X = BinaryPrimitives.ReadInt16BigEndian(rawData);
@@ -306,10 +334,13 @@ namespace Iot.Device.Imu
         /// </summary>
         public Temperature GetTemperature()
         {
-            Span<byte> rawData = stackalloc byte[2] { 0, 0 };
+            Span<byte> rawData = stackalloc byte[2]
+            {
+                0, 0
+            };
             ReadBytes(Register.TEMP_OUT_H, rawData);
             // formula from the documentation
-            return Temperature.FromCelsius((BinaryPrimitives.ReadInt16BigEndian(rawData) - 21) / 333.87 + 21);
+            return Temperature.FromDegreesCelsius((BinaryPrimitives.ReadInt16BigEndian(rawData) - 21) / 333.87 + 21);
         }
 
         #endregion
@@ -329,12 +360,15 @@ namespace Iot.Device.Imu
             // Using documentation page 31 of Product Specification to setup
             _wakeOnMotion = true;
             if (accelerometerThreshold > 1020)
+            {
                 throw new ArgumentException($"{nameof(accelerometerThreshold)} has to be between 0mg and 1020mg");
+            }
+
             // LSB = 4mg
             accelerometerThreshold /= 4;
             // Make sure we start from a clean soft reset
             PowerOn();
-            //  PWR_MGMT_1 (0x6B) make CYCLE =0, SLEEP = 0  and STANDBY = 0 
+            // PWR_MGMT_1 (0x6B) make CYCLE =0, SLEEP = 0  and STANDBY = 0
             WriteRegister(Register.PWR_MGMT_1, (byte)ClockSource.Internal20MHz);
             // PWR_MGMT_2 (0x6C) set DIS_XA, DIS_YA, DIS_ZA = 0 and DIS_XG, DIS_YG, DIS_ZG = 1
             // Remove the Gyroscope
@@ -399,7 +433,7 @@ namespace Iot.Device.Imu
         }
 
         /// <summary>
-        /// Get or set the elements to disable. 
+        /// Get or set the elements to disable.
         /// It can be any axes of the accelerometer and or the gyroscope
         /// </summary>
         public DisableModes DisableModes
@@ -419,7 +453,10 @@ namespace Iot.Device.Imu
         {
             get
             {
-                Span<byte> rawData = stackalloc byte[2] { 0, 0 };
+                Span<byte> rawData = stackalloc byte[2]
+                {
+                    0, 0
+                };
                 ReadBytes(Register.FIFO_COUNTH, rawData);
                 return BinaryPrimitives.ReadUInt16BigEndian(rawData);
             }
@@ -430,7 +467,10 @@ namespace Iot.Device.Imu
         /// </summary>
         public FifoModes FifoModes
         {
-            get { return (FifoModes)(ReadByte(Register.FIFO_EN)); }
+            get
+            {
+                return (FifoModes)(ReadByte(Register.FIFO_EN));
+            }
             set
             {
                 if (value != FifoModes.None)
@@ -447,6 +487,7 @@ namespace Iot.Device.Imu
                     usrCtl = usrCtl & ~UserControls.FIFO_RST;
                     WriteRegister(Register.USER_CTRL, (byte)usrCtl);
                 }
+
                 WriteRegister(Register.FIFO_EN, (byte)value);
             }
         }
@@ -458,7 +499,7 @@ namespace Iot.Device.Imu
         /// You will read only data you have selected in FifoModes.
         /// Data are in the order of the Register from 0x3B to 0x60.
         /// ACCEL_XOUT_H and ACCEL_XOUT_L
-        /// ACCEL_YOUT_H and ACCEL_YOUT_L 
+        /// ACCEL_YOUT_H and ACCEL_YOUT_L
         /// ACCEL_ZOUT_H and ACCEL_ZOUT_L
         /// TEMP_OUT_H and TEMP_OUT_L
         /// GYRO_XOUT_H and GYRO_XOUT_L
@@ -554,6 +595,7 @@ namespace Iot.Device.Imu
                 acceBias += accel_temp;
                 gyroBias += gyro_temp;
             }
+
             // Make the average
             acceBias /= packetCount;
             gyroBias /= packetCount;
@@ -561,7 +603,7 @@ namespace Iot.Device.Imu
             // bias on Z is cumulative
             acceBias.Z += acceBias.Z > 0 ? -AccSensitivity : AccSensitivity;
 
-            // Divide by 4 to get 32.9 LSB per deg/s 
+            // Divide by 4 to get 32.9 LSB per deg/s
             // Biases are additive, so change sign on calculated average gyro biases
             rawData[0] = (byte)(((int)(-gyroBias.X / 4) >> 8) & 0xFF);
             rawData[1] = (byte)((int)(-gyroBias.X / 4) & 0xFF);
@@ -602,7 +644,6 @@ namespace Iot.Device.Imu
 
             // Define mask for temperature compensation bit 0 of lower byte of
             // accelerometer bias registers
-
             uint mask = 0x01;
             // Define array to hold mask bit for each accelerometer bias axis
             Span<byte> mask_bit = stackalloc byte[3];
@@ -647,27 +688,27 @@ namespace Iot.Device.Imu
         /// <summary>
         /// <![CDATA[
         /// Run a self test and returns the gyroscope and accelerometer vectores
-        /// a. If factory Self-Test values ST_OTP≠0, compare the current Self-Test response (GXST, GYST, GZST, AXST, AYST and AZST) 
-        /// to the factory Self-Test values (ST_OTP) and report Self-Test is passing if all the following criteria are fulfilled: 
-        /// Axis    | Pass criteria 
-        /// X-gyro  | (GXST / GXST_OTP) > 0.5 
-        /// Y-gyro  | (GYST / GYST_OTP) > 0.5 
+        /// a. If factory Self-Test values ST_OTP≠0, compare the current Self-Test response (GXST, GYST, GZST, AXST, AYST and AZST)
+        /// to the factory Self-Test values (ST_OTP) and report Self-Test is passing if all the following criteria are fulfilled:
+        /// Axis    | Pass criteria
+        /// X-gyro  | (GXST / GXST_OTP) > 0.5
+        /// Y-gyro  | (GYST / GYST_OTP) > 0.5
         /// Z-gyro  | (GZST / GZST_OTP) > 0.5
         /// X-Accel |  0.5 < (AXST / AXST_OTP) < 1.5
         /// Y-Accel | 0.5 < (AYST / AYST_OTP) < 1.5
         /// Z-Accel | 0.5 < (AZST / AZST_OTP) < 1.5
-        /// b. If factory Self-Test values ST_OTP=0, compare the current Self-Test response (GXST, GYST, GZST, AXST, AYST and AZST) 
-        /// to the ST absolute limits (ST_AL) and report Self-Test is passing if all the  following criteria are fulfilled.  
+        /// b. If factory Self-Test values ST_OTP=0, compare the current Self-Test response (GXST, GYST, GZST, AXST, AYST and AZST)
+        /// to the ST absolute limits (ST_AL) and report Self-Test is passing if all the  following criteria are fulfilled.
         /// Axis   | Pass criteria
-        /// X-gyro | |GXST| ≥ 60dps  
-        /// Y-gyro | |GYST| ≥ 60dps 
-        /// Z-gyro | |GZST| ≥ 60dps 
+        /// X-gyro | |GXST| ≥ 60dps
+        /// Y-gyro | |GYST| ≥ 60dps
+        /// Z-gyro | |GZST| ≥ 60dps
         /// X-Accel| 225mgee ≤ |AXST| ≤ 675mgee
         /// Y-Accel| 225mgee ≤ |AXST| ≤ 675mgee
         /// Z-Accel| 225mgee ≤ |AXST| ≤ 675mgee
-        /// c. If the Self-Test passes criteria (a) and (b), it’s necessary to check gyro offset values. 
-        /// Report passing Self-Test if the following criteria fulfilled. 
-        /// Axis   | Pass criteria 
+        /// c. If the Self-Test passes criteria (a) and (b), it’s necessary to check gyro offset values.
+        /// Report passing Self-Test if the following criteria fulfilled.
+        /// Axis   | Pass criteria
         /// X-gyro | |GXOFFSET| ≤ 20dps
         /// Y-gyro | |GYOFFSET| ≤ 20dps
         /// Z-gyro | |GZOFFSET| ≤ 20dps
@@ -691,21 +732,20 @@ namespace Iot.Device.Imu
             // Tests done with slower GyroScale and Accelerator so 2G so value is 0 in both cases
             byte gyroAccScale = 0;
 
-            // Setup the registers for Gyroscope as in documentation 
-            // DLPF Config | LPF BW | Sampling Rate | Filter Delay 
-            // 2           | 92Hz   | 1kHz          | 3.9ms 
+            // Setup the registers for Gyroscope as in documentation
+            // DLPF Config | LPF BW | Sampling Rate | Filter Delay
+            // 2           | 92Hz   | 1kHz          | 3.9ms
             WriteRegister(Register.SMPLRT_DIV, 0x00);
             WriteRegister(Register.CONFIG, 0x02);
             GyroscopeRange = GyroscopeRange.Range0250Dps;
             // Set full scale range for the gyro to 250 dps
             // Setup the registers for accelerometer as in documentation
-            // DLPF Config | LPF BW | Sampling Rate | Filter Delay 
-            // 2           | 92Hz   | 1kHz          | 7.8ms 
+            // DLPF Config | LPF BW | Sampling Rate | Filter Delay
+            // 2           | 92Hz   | 1kHz          | 7.8ms
             WriteRegister(Register.ACCEL_CONFIG_2, 0x02);
             AccelerometerRange = AccelerometerRange.Range02G;
 
             // Read the data 200 times as per the documentation page 5
-
             for (int reading = 0; reading < numCycles; reading++)
             {
                 gyroAvegage = GetRawGyroscope();
@@ -715,14 +755,14 @@ namespace Iot.Device.Imu
             accAverage /= numCycles;
             gyroAvegage /= numCycles;
 
-            // Set USR_Reg: (1Bh) Gyro_Config, gdrive_axisCTST [0-2] to b111 to enable Self-Test. 
+            // Set USR_Reg: (1Bh) Gyro_Config, gdrive_axisCTST [0-2] to b111 to enable Self-Test.
             WriteRegister(Register.ACCEL_CONFIG, 0xE0);
-            // Set USR_Reg: (1Ch) Accel_Config, AX/Y/Z_ST_EN   [0-2] to b111 to enable Self-Test. 
+            // Set USR_Reg: (1Ch) Accel_Config, AX/Y/Z_ST_EN   [0-2] to b111 to enable Self-Test.
             WriteRegister(Register.GYRO_CONFIG, 0xE0);
-            // Wait 20ms for oscillations to stabilize 
+            // Wait 20ms for oscillations to stabilize
             Thread.Sleep(20);
 
-            // Read the gyroscope and accelerometer output at a 1kHz rate and average 200 readings. 
+            // Read the gyroscope and accelerometer output at a 1kHz rate and average 200 readings.
             // The averaged values will be the LSB of GX_ST_OS, GY_ST_OS, GZ_ST_OS, AX_ST_OS, AY_ST_OS and AZ_ST_OS in the software
             for (int reading = 0; reading < numCycles; reading++)
             {
@@ -830,7 +870,10 @@ namespace Iot.Device.Imu
         {
             // I2C_SLVx_ADDR += 3 * i2cChannel
             byte slvAddress = (byte)((byte)Register.I2C_SLV0_ADDR + 3 * (byte)i2cChannel);
-            Span<byte> dataout = stackalloc byte[2] { slvAddress, address };
+            Span<byte> dataout = stackalloc byte[2]
+            {
+                slvAddress, address
+            };
             _i2cDevice.Write(dataout);
             // I2C_SLVx_REG = I2C_SLVx_ADDR + 1
             dataout[0] = (byte)(slvAddress + 1);
@@ -858,9 +901,15 @@ namespace Iot.Device.Imu
         public void ReadByteFromSlaveDevice(I2cChannel i2cChannel, byte address, byte register, Span<byte> readBytes)
         {
             if (readBytes.Length > 24)
+            {
                 throw new ArgumentException($"Can't read more than 24 bytes at once");
+            }
+
             byte slvAddress = (byte)((byte)Register.I2C_SLV0_ADDR + 3 * (byte)i2cChannel);
-            Span<byte> dataout = stackalloc byte[2] { slvAddress, (byte)(address | 0x80) };
+            Span<byte> dataout = stackalloc byte[2]
+            {
+                slvAddress, (byte)(address | 0x80)
+            };
             _i2cDevice.Write(dataout);
             dataout[0] = (byte)(slvAddress + 1);
             dataout[1] = (byte)register;
@@ -877,7 +926,10 @@ namespace Iot.Device.Imu
 
         internal void WriteRegister(Register reg, byte data)
         {
-            Span<byte> dataout = stackalloc byte[] { (byte)reg, data };
+            Span<byte> dataout = stackalloc byte[]
+            {
+                (byte)reg, data
+            };
             _i2cDevice.Write(dataout);
         }
 

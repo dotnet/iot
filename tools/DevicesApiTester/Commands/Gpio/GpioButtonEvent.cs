@@ -29,7 +29,7 @@ namespace DeviceApiTester.Commands.Gpio
         /// <summary>Executes the command asynchronously.</summary>
         /// <returns>The command's exit code.</returns>
         /// <remarks>
-        ///     NOTE: This test app uses the base class's <see cref="CreateGpioController"/> method to create a device.<br/>
+        ///     NOTE: This test app uses the base class's <see cref="GpioCommand.CreateGpioController"/> method to create a device.<br/>
         ///     Real-world usage would simply create an instance of <see cref="GpioController"/>:
         ///     <code>using (var controller = new GpioController())</code>
         /// </remarks>
@@ -78,14 +78,14 @@ namespace DeviceApiTester.Commands.Gpio
                     // Wait for the cancel (Ctrl+C) console event.
                     cancelEvent.WaitOne();
 
+                    // Unregister the event handler for changes to the pin value
+                    controller.UnregisterCallbackForPinValueChangedEvent(ButtonPin, valueChangeHandler);
+
                     controller.ClosePin(ButtonPin);
                     if (LedPin != null)
                     {
                         controller.ClosePin(LedPin.Value);
                     }
-
-                    // Unregister the event handler for changes to the pin value
-                    controller.UnregisterCallbackForPinValueChangedEvent(ButtonPin, valueChangeHandler);
 
                     Console.WriteLine("Operation cancelled. Exiting.");
                     Console.OpenStandardOutput().Flush();

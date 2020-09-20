@@ -44,7 +44,7 @@ namespace Iot.Device.Mcp3428
         /// Accuracy of the voltage measurement
         /// </summary>
         /// <value>The LSB value.</value>
-        public double Accuracy => (double)1 / VoltageDivisor;
+        public double Accuracy => 1.0 / VoltageDivisor;
 
         /// <summary>
         /// Gets the voltage.

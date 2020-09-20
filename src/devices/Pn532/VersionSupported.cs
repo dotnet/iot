@@ -18,10 +18,12 @@ namespace Iot.Device.Pn532
         /// Iso 18092
         /// </summary>
         Iso18092 = 0b0000_0100,
+
         /// <summary>
         /// Iso/Iec 14443 Type B
         /// </summary>
         IsoIec14443TypeB = 0b0000_0010,
+
         /// <summary>
         /// Iso/Iec 14443 Type A
         /// </summary>

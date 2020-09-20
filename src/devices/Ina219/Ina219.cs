@@ -7,12 +7,13 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Device;
 using System.Device.I2c;
+using UnitsNet;
 
 namespace Iot.Device.Adc
 {
     /// <summary>
     /// Binding that exposes an INA219 Bidirectional Current/Power monitor.
-    /// 
+    ///
     /// The INA219 is a high-side current shunt and power monitor with an I2C interface.
     /// The INA219 monitors both shunt drop and supply voltage, with programmable conversion
     /// times and filtering. A programmable calibration value, combined with an internal multiplier,
@@ -48,7 +49,7 @@ namespace Iot.Device.Adc
         /// <summary>
         /// Method to initialize values during device construction
         /// </summary>
-        /// <param name="i2cDevice"></param>        
+        /// <param name="i2cDevice">Interface to I2C device access</param>
         private void Initialize(I2cDevice i2cDevice)
         {
             _currentLsb = 1F;
@@ -241,7 +242,9 @@ namespace Iot.Device.Adc
             WriteRegister(Ina219Register.Calibration, calibrationValue);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Dispose instance
+        /// </summary>
         protected virtual void Dispose(bool disposing)
         {
             if (_disposeI2cDevice & disposing)
@@ -261,21 +264,21 @@ namespace Iot.Device.Adc
         /// <summary>
         /// Read the measured shunt voltage.
         /// </summary>
-        /// <returns>The shunt voltage in Volts</returns>
-        public float ReadShuntVoltage()
+        /// <returns>The shunt potential difference</returns>
+        public ElectricPotential ReadShuntVoltage()
         {
             // read the shunt voltage. LSB = 10uV then convert to Volts
-            return (short)ReadRegister(Ina219Register.ShuntVoltage, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * 10 / 1000000F;
+            return ElectricPotential.FromVolts(ReadRegister(Ina219Register.ShuntVoltage, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * 10.0 / 1000000.0);
         }
 
         /// <summary>
         /// Read the measured Bus voltage.
         /// </summary>
-        /// <returns>The Bus voltage in Volts</returns>
-        public float ReadBusVoltage()
+        /// <returns>The Bus potential (voltage)</returns>
+        public ElectricPotential ReadBusVoltage()
         {
             // read the bus voltage. LSB = 4mV then convert to Volts
-            return ((short)ReadRegister(Ina219Register.BusVoltage, s_readDelays[_busAdcResSamp]) >> 3) * 4 / 1000F;
+            return ElectricPotential.FromVolts(((short)ReadRegister(Ina219Register.BusVoltage, s_readDelays[_busAdcResSamp]) >> 3) * 4 / 1000.0);
         }
 
         /// <summary>
@@ -284,8 +287,8 @@ namespace Iot.Device.Adc
         /// <remarks>
         /// This value is determined by an internal calculation using the calibration register and the read shunt voltage and then scaled.
         /// </remarks>
-        /// <returns>The calculated current in Amperes</returns>
-        public float ReadCurrent()
+        /// <returns>The calculated current</returns>
+        public ElectricCurrent ReadCurrent()
         {
             // According to Adafruit then large changes in load will reset the cal register
             // meaning that the current and power values will be unavailable.
@@ -293,7 +296,7 @@ namespace Iot.Device.Adc
             // whenever needed.
             SetCalibration(_calibrationValue, _currentLsb);
 
-            return (float)(short)ReadRegister(Ina219Register.Current, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * _currentLsb;
+            return ElectricCurrent.FromAmperes(ReadRegister(Ina219Register.Current, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * _currentLsb);
         }
 
         /// <summary>
@@ -302,8 +305,8 @@ namespace Iot.Device.Adc
         /// <remarks>
         /// This value is determined by an internal calculation using the calulated current and the read bus voltage and then scaled.
         /// </remarks>
-        /// <returns>The calculated power in Watts</returns>
-        public float ReadPower()
+        /// <returns>The calculated electric power</returns>
+        public Power ReadPower()
         {
             // According to Adafruit then large changes in load will reset the cal register
             // meaning that the current and power values will be unavailable.
@@ -311,7 +314,7 @@ namespace Iot.Device.Adc
             // whenever needed.
             SetCalibration(_calibrationValue, _currentLsb);
 
-            return (float)ReadRegister(Ina219Register.Power, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * _currentLsb * 20;
+            return Power.FromWatts(ReadRegister(Ina219Register.Power, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * _currentLsb * 20);
         }
 
         /// <summary>

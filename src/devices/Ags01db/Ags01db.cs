@@ -14,13 +14,12 @@ namespace Iot.Device.Ags01db
     /// </summary>
     public class Ags01db : IDisposable
     {
-        private I2cDevice _i2cDevice;
-
-        private int _lastMeasurment = 0;
-
         // CRC const
         private const byte CRC_POLYNOMIAL = 0x31;
         private const byte CRC_INIT = 0xFF;
+        private I2cDevice _i2cDevice;
+
+        private int _lastMeasurment = 0;
 
         /// <summary>
         /// ASG01DB VOC (Volatile Organic Compounds) Gas Concentration (ppm)
@@ -69,7 +68,10 @@ namespace Iot.Device.Ags01db
 
             // Details in the Datasheet P5
             // Write command MSB, LSB
-            Span<byte> writeBuff = stackalloc byte[2] { (byte)Register.ASG_DATA_MSB, (byte)Register.ASG_DATA_LSB };
+            Span<byte> writeBuff = stackalloc byte[2]
+            {
+                (byte)Register.ASG_DATA_MSB, (byte)Register.ASG_DATA_LSB
+            };
             // Return data MSB, LSB, CRC checksum
             Span<byte> readBuff = stackalloc byte[3];
 
@@ -97,7 +99,10 @@ namespace Iot.Device.Ags01db
         {
             // Details in the Datasheet P5
             // Write command MSB, LSB
-            Span<byte> writeBuff = stackalloc byte[2] { (byte)Register.ASG_VERSION_MSB, (byte)Register.ASG_VERSION_LSB };
+            Span<byte> writeBuff = stackalloc byte[2]
+            {
+                (byte)Register.ASG_VERSION_MSB, (byte)Register.ASG_VERSION_LSB
+            };
             // Return version, CRC checksum
             Span<byte> readBuff = stackalloc byte[2];
 
@@ -131,16 +136,24 @@ namespace Iot.Device.Ags01db
                 for (int j = 8; j > 0; j--)
                 {
                     if ((crc & 0x80) != 0)
+                    {
                         crc = (byte)((crc << 1) ^ CRC_POLYNOMIAL);
+                    }
                     else
+                    {
                         crc = (byte)(crc << 1);
+                    }
                 }
             }
 
             if (crc == crc8)
+            {
                 return true;
+            }
             else
+            {
                 return false;
+            }
         }
     }
 }

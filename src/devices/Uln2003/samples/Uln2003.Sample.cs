@@ -3,22 +3,28 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using Iot.Device.Uln2003;
 
 namespace Iot.Device.Uln2003.Samples
 {
-    using Iot.Device.Uln2003;
-
-    class Program
+    /// <summary>
+    /// Test program for Uln2003
+    /// </summary>
+    public class Program
     {
-        const int bluePin = 4;
-        const int pinkPin = 17;
-        const int yellowPin = 27;
-        const int orangePin = 22;
+        private const int BluePin = 4;
+        private const int PinkPin = 17;
+        private const int YellowPin = 27;
+        private const int OrangePin = 22;
 
-        static void Main(string[] args)
+        /// <summary>
+        /// Main entry point
+        /// </summary>
+        /// <param name="args">Unused</param>
+        public static void Main(string[] args)
         {
             Console.WriteLine($"Let's go!");
-            using (Uln2003 motor = new Uln2003(bluePin, pinkPin, yellowPin, orangePin))
+            using (Uln2003 motor = new Uln2003(BluePin, PinkPin, YellowPin, OrangePin))
             {
                 Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs eventArgs) =>
                 {
@@ -29,7 +35,7 @@ namespace Iot.Device.Uln2003.Samples
                 {
                     // Set the motor speed to 15 revolutions per minute.
                     motor.RPM = 15;
-                    // Set the motor mode.  
+                    // Set the motor mode.
                     motor.Mode = StepperMode.HalfStep;
                     // The motor rotate 2048 steps clockwise (180 degrees for HalfStep mode).
                     motor.Step(2048);

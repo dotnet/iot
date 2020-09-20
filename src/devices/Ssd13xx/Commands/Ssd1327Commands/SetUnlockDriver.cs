@@ -26,7 +26,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
         /// <summary>
         /// The value that represents if driver should be unlocked.
         /// </summary>
-        byte SetUnlock { get; }
+        private byte SetUnlock { get; }
 
         /// <summary>
         /// Gets the bytes that represent the command.

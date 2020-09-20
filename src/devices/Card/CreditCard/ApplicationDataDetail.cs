@@ -25,7 +25,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         public byte End { get; set; }
 
         /// <summary>
-        /// The number of records 
+        /// The number of records
         /// </summary>
         public byte NumberOfRecords { get; set; }
     }

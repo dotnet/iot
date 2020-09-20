@@ -33,10 +33,12 @@ namespace Iot.Device.Mcp3428.Samples
                             {
                                 Console.Write($"{b:X} ");
                             }
+
                             Console.WriteLine();
                             Console.WriteLine($"ADC Channel[{adc.LastChannel + 1}] read in {watch.ElapsedMilliseconds - last} ms, value: {value} V");
                             await Task.Delay(500);
                         }
+
                         Console.WriteLine($"mode {adc.Mode}, gain {adc.InputGain}, res {adc.Resolution}");
                         await Task.Delay(1000);
                     }

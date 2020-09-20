@@ -14,13 +14,15 @@ namespace Iot.Device.Pn532
         /// High Speed UART
         /// </summary>
         HighSpeedUart = 0b0000_0000,
+
         /// <summary>
         /// I2C
         /// </summary>
         I2c = 0b0000_0010,
+
         /// <summary>
         /// SPI
         /// </summary>
-        Spi = 0b0000_0001,        
+        Spi = 0b0000_0001,
     }
 }

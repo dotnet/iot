@@ -25,8 +25,9 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="masterController">
         /// The controller for the reset and interrupt pins. If not specified, the default controller will be used.
         /// </param>
-        public Mcp23008(I2cDevice i2cDevice, int reset = -1, int interrupt = -1, GpioController masterController = null)
-            : base(CreateAdapter(i2cDevice), reset, interrupt, masterController)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Mcp23008(I2cDevice i2cDevice, int reset = -1, int interrupt = -1, GpioController masterController = null, bool shouldDispose = true)
+            : base(CreateAdapter(i2cDevice), reset, interrupt, masterController, shouldDispose)
         {
         }
 
@@ -37,6 +38,7 @@ namespace Iot.Device.Mcp23xxx
             {
                 throw new ArgumentOutOfRangeException(nameof(i2cDevice), "The Mcp23008 address must be between 32 (0x20) and 39 (0x27).");
             }
+
             return new I2cAdapter(i2cDevice);
         }
     }

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -20,11 +20,14 @@ namespace Iot.Device.DCMotor
             PwmChannel pwmChannel,
             int pin0,
             int pin1,
-            GpioController controller)
-            : base(controller ?? new GpioController())
+            GpioController controller,
+            bool shouldDispose)
+            : base(controller ?? new GpioController(), controller == null ? true : shouldDispose)
         {
             if (pwmChannel == null)
+            {
                 throw new ArgumentNullException(nameof(pwmChannel));
+            }
 
             _pwm = pwmChannel;
 
@@ -58,7 +61,9 @@ namespace Iot.Device.DCMotor
                 double val = Math.Clamp(value, -1.0, 1.0);
 
                 if (_speed == val)
+                {
                     return;
+                }
 
                 if (val == 0.0)
                 {

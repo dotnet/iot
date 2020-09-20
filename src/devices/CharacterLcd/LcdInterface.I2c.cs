@@ -44,7 +44,6 @@ namespace Iot.Device.CharacterLcd
             // controllers with I2c functionality built-in. This driver was written using the
             // PCF2119x datasheet as reference. Other chipsets are compatible with the addressing
             // scheme (Sitronix ST7036, Aiptek AIP31068L, probably others).
-
             private readonly I2cDevice _device;
 
             public I2c(I2cDevice device)
@@ -59,11 +58,26 @@ namespace Iot.Device.CharacterLcd
 
             public override bool EightBitMode => true;
 
-            public override bool BacklightOn { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public override bool BacklightOn
+            {
+                get
+                {
+                    // Setting the backlight on or off is not supported with 8 bit commands, according to the docs.
+                    return true;
+                }
+                set
+                {
+                    // Ignore setting the backlight. Exceptions are not expected by user code here, as it is normal to
+                    // enable this during initialization, so that it is enabled whether switching it is supported or not.
+                }
+            }
 
             public override void SendCommand(byte command)
             {
-                Span<byte> buffer = stackalloc byte[] { 0x00, command };
+                Span<byte> buffer = stackalloc byte[]
+                {
+                    0x00, command
+                };
                 _device.Write(buffer);
             }
 
@@ -72,9 +86,11 @@ namespace Iot.Device.CharacterLcd
                 // There is a limit to how much data the controller can accept at once. Haven't found documentation
                 // for this yet, can probably iterate a bit more on this to find a true "max". Not adding additional
                 // logic like SendData as we don't expect a need to send more than a handful of commands at a time.
-
                 if (commands.Length > 20)
+                {
                     throw new ArgumentOutOfRangeException(nameof(commands), "Too many commands in one request.");
+                }
+
                 Span<byte> buffer = stackalloc byte[commands.Length + 1];
                 buffer[0] = 0x00;
                 commands.CopyTo(buffer.Slice(1));
@@ -83,7 +99,10 @@ namespace Iot.Device.CharacterLcd
 
             public override void SendData(byte value)
             {
-                Span<byte> buffer = stackalloc byte[] { (byte)ControlByteFlags.RegisterSelect, value };
+                Span<byte> buffer = stackalloc byte[]
+                {
+                    (byte)ControlByteFlags.RegisterSelect, value
+                };
                 _device.Write(buffer);
             }
 
@@ -91,7 +110,6 @@ namespace Iot.Device.CharacterLcd
             {
                 // There is a limit to how much data the controller can accept at once. Haven't found documentation
                 // for this yet, can probably iterate a bit more on this to find a true "max". 40 was too much.
-
                 const int MaxCopy = 20;
                 Span<byte> buffer = stackalloc byte[MaxCopy + 1];
                 buffer[0] = (byte)ControlByteFlags.RegisterSelect;

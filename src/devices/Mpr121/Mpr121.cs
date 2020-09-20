@@ -44,7 +44,10 @@ namespace Iot.Device.Mpr121
         /// </remark>
         public int PeriodRefresh
         {
-            get { return _periodRefresh; }
+            get
+            {
+                return _periodRefresh;
+            }
 
             set
             {
@@ -227,7 +230,10 @@ namespace Iot.Device.Mpr121
 
         private void SetRegister(Registers register, byte value)
         {
-            Span<byte> data = stackalloc byte[] { (byte)register, value };
+            Span<byte> data = stackalloc byte[]
+            {
+                (byte)register, value
+            };
             _device.Write(data);
         }
 

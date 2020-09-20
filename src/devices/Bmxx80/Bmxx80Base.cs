@@ -8,7 +8,7 @@ using System.Device.I2c;
 using System.IO;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.Register;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Bmxx80
 {
@@ -49,15 +49,19 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// The variable _temperatureFine carries a fine resolution temperature value over to the
+        /// The variable TemperatureFine carries a fine resolution temperature value over to the
         /// pressure compensation formula and could be implemented as a global variable.
         /// </summary>
-        protected int TemperatureFine;
+        protected double TemperatureFine
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// The temperature calibration factor.
         /// </summary>
-        protected virtual int _tempCalibrationFactor => 1;
+        protected virtual int TempCalibrationFactor => 1;
 
         private Sampling _temperatureSampling;
         private Sampling _pressureSampling;
@@ -77,10 +81,12 @@ namespace Iot.Device.Bmxx80
             byte readSignature = _i2cDevice.ReadByte();
 
             if (readSignature != deviceId)
-                throw new IOException($"Unable to find a chip with id {deviceId}");
+            {
+                throw new IOException($"Unable to find a chip with id {deviceId}. Found one with id {readSignature}");
+            }
 
             ReadCalibrationData();
-            SetDefaultConfiguration();
+            Reset();
         }
 
         /// <summary>
@@ -96,7 +102,10 @@ namespace Iot.Device.Bmxx80
                 status = (byte)(status & 0b1110_0011);
                 status = (byte)(status | (byte)value << 2);
 
-                Span<byte> command = stackalloc[] { _controlRegister, status };
+                Span<byte> command = stackalloc[]
+                {
+                    _controlRegister, status
+                };
                 _i2cDevice.Write(command);
                 _pressureSampling = value;
             }
@@ -115,7 +124,10 @@ namespace Iot.Device.Bmxx80
                 status = (byte)(status & 0b0001_1111);
                 status = (byte)(status | (byte)value << 5);
 
-                Span<byte> command = stackalloc[] { _controlRegister, status };
+                Span<byte> command = stackalloc[]
+                {
+                    _controlRegister, status
+                };
                 _i2cDevice.Write(command);
                 _temperatureSampling = value;
             }
@@ -128,7 +140,10 @@ namespace Iot.Device.Bmxx80
         public void Reset()
         {
             const byte resetCommand = 0xB6;
-            Span<byte> command = stackalloc[] { (byte)Bmxx80Register.RESET, resetCommand };
+            Span<byte> command = stackalloc[]
+            {
+                (byte)Bmxx80Register.RESET, resetCommand
+            };
             _i2cDevice.Write(command);
 
             SetDefaultConfiguration();
@@ -165,12 +180,12 @@ namespace Iot.Device.Bmxx80
             // See: https://cdn-shop.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
             double var1 = ((adcTemperature / 16384.0) - (_calibrationData.DigT1 / 1024.0)) * _calibrationData.DigT2;
             double var2 = (adcTemperature / 131072.0) - (_calibrationData.DigT1 / 8192.0);
-            var2 *= var2 * _calibrationData.DigT3 * _tempCalibrationFactor;
+            var2 *= var2 * _calibrationData.DigT3 * TempCalibrationFactor;
 
-            TemperatureFine = (int)(var1 + var2);
+            TemperatureFine = var1 + var2;
 
             double temp = (var1 + var2) / 5120.0;
-            return Temperature.FromCelsius(temp);
+            return Temperature.FromDegreesCelsius(temp);
         }
 
         /// <summary>
@@ -187,7 +202,9 @@ namespace Iot.Device.Bmxx80
                 return value;
             }
             else
+            {
                 throw new NotImplementedException();
+            }
         }
 
         /// <summary>
@@ -253,7 +270,9 @@ namespace Iot.Device.Bmxx80
         {
             // Values >=5 equals UltraHighResolution.
             if (value >= 5)
+            {
                 return Sampling.UltraHighResolution;
+            }
 
             return (Sampling)value;
         }

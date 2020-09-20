@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -8,9 +8,16 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Bh1745.Samples
 {
-    class Program
+    /// <summary>
+    /// Test program main class
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Entry point for example program
+        /// </summary>
+        /// <param name="args">Command line arguments</param>
+        public static void Main(string[] args)
         {
             // bus id on the raspberry pi 3
             const int busId = 1;
@@ -21,7 +28,6 @@ namespace Iot.Device.Bh1745.Samples
 
             using (var i2cBh1745 = new Bh1745(i2cDevice))
             {
-
                 // multipliers affect the compensated values
                 i2cBh1745.ChannelCompensationMultipliers.Red = 2.5;
                 i2cBh1745.ChannelCompensationMultipliers.Green = 0.9;
@@ -39,7 +45,6 @@ namespace Iot.Device.Bh1745.Samples
                 i2cBh1745.LatchBehavior = LatchBehavior.LatchEachMeasurement;
                 i2cBh1745.InterruptPersistence = InterruptPersistence.UpdateMeasurementEnd;
                 i2cBh1745.InterruptIsEnabled = true;
-
 
                 // wait for first measurement
                 Task.Delay(i2cBh1745.MeasurementTime.ToMilliseconds()).Wait();

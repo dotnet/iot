@@ -11,7 +11,7 @@ namespace Iot.Device.Pn532.RfConfiguration
     /// (ConfigurationData[]) for the following internal registers:
     /// Except for these two specific settings, the 8 remaining analog settings are the
     /// same as the CfgItem 106 kbps type A.
-    /// CIU = Contactless Interface Unit 
+    /// CIU = Contactless Interface Unit
     /// Please refer to https://www.nxp.com/docs/en/nxp/data-sheets/PN532_C1.pdf page 144
     /// </summary>
     public class AnalogSettingsTypeBMode
@@ -42,7 +42,8 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// <returns>Serialized value</returns>
         public byte[] Serialize()
         {
-            return new byte[3] {
+            return new byte[3]
+            {
                 GsNOn,
                 ModGsP,
                 RxThreshold,

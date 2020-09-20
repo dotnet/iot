@@ -8,9 +8,7 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <None Include="README.md" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Lsm9Ds1\Lsm9Ds1.csproj" />
     <ProjectReference Include="..\Hts221\Hts221.csproj" />
     <ProjectReference Include="..\Lps25h\Lps25h.csproj" />

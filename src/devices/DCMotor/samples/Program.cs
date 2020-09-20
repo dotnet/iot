@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -10,11 +10,11 @@ using System.Diagnostics;
 using System.Threading;
 using Iot.Device.DCMotor;
 
-namespace samples
+namespace Iot.Device.DCMotor.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             const double Period = 10.0;
             Stopwatch sw = Stopwatch.StartNew();

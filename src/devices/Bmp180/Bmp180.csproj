@@ -10,10 +10,8 @@
     <Compile Include="CalibrationData.cs" />
     <Compile Include="Register.cs" />
     <Compile Include="Sampling.cs" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="..\Units\Units.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Common\Iot\Device\Common\CommonHelpers.csproj" />
     <None Include="README.md"/>
   </ItemGroup>
 

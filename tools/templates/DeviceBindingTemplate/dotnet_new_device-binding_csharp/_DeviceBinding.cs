@@ -9,12 +9,19 @@ using System.Device.Spi;
 
 namespace Iot.Device._DeviceBinding
 {
+    /// <summary>
+    /// Add documentation here
+    /// </summary>
     public class _DeviceBinding : IDisposable
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="_DeviceBinding"/> class.
+        /// </summary>
         public _DeviceBinding()
         {
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
         }

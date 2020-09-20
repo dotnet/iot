@@ -13,6 +13,7 @@ namespace Iot.Device.Nrf24l01
         /// nRF24L01 On
         /// </summary>
         UP = 0x01,
+
         /// <summary>
         /// nRF24L01 Off
         /// </summary>

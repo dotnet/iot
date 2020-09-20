@@ -7,6 +7,8 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
+using Iot.Device.Common;
+using UnitsNet;
 
 namespace Iot.Device.Samples
 {
@@ -18,17 +20,19 @@ namespace Iot.Device.Samples
         /// <summary>
         /// Main entry point for the program.
         /// </summary>
-        static void Main()
+        public static void Main()
         {
             Console.WriteLine("Hello BME680!");
 
             // The I2C bus ID on the Raspberry Pi 3.
             const int busId = 1;
+            // set this to the current sea level pressure in the area for correct altitude readings
+            var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bme680.DefaultI2cAddress);
             var i2cDevice = I2cDevice.Create(i2cSettings);
 
-            using (var bme680 = new Bme680(i2cDevice))
+            using (var bme680 = new Bme680(i2cDevice, Temperature.FromDegreesCelsius(20.0)))
             {
                 while (true)
                 {
@@ -42,15 +46,24 @@ namespace Iot.Device.Samples
                         bme680.SetPowerMode(Bme680PowerMode.Forced);
 
                         // wait while measurement is being taken
-                        Thread.Sleep(measurementDuration);
+                        Thread.Sleep(measurementDuration.ToTimeSpan());
 
                         // Print out the measured data
-                        bme680.TryReadTemperature(out var temperature);
-                        bme680.TryReadPressure(out var pressure);
-                        bme680.TryReadHumidity(out var humidity);
+                        bme680.TryReadTemperature(out var tempValue);
+                        bme680.TryReadPressure(out var preValue);
+                        bme680.TryReadHumidity(out var humValue);
                         bme680.TryReadGasResistance(out var gasResistance);
+                        var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
 
-                        Console.WriteLine($"{temperature.Celsius:N2} \u00B0C | {pressure.Hectopascal:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
+                        Console.WriteLine($"Gas resistance: {gasResistance:0.##}Ohm");
+                        Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
+                        Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
+                        Console.WriteLine($"Altitude: {altValue:0.##}m");
+                        Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+
+                        // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
+                        Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
+                        Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
 
                         // when measuring the gas resistance on each cycle it is important to wait a certain interval
                         // because a heating plate is activated which will heat up the sensor without sleep, this can
@@ -63,7 +76,7 @@ namespace Iot.Device.Samples
                     bme680.HumiditySampling = Sampling.UltraHighResolution;
                     bme680.PressureSampling = Sampling.Skipped;
 
-                    bme680.ConfigureHeatingProfile(Bme680HeaterProfile.Profile2, 280, 80, 24);
+                    bme680.ConfigureHeatingProfile(Bme680HeaterProfile.Profile2, Temperature.FromDegreesCelsius(280), Duration.FromMilliseconds(80), Temperature.FromDegreesCelsius(24));
                     bme680.HeaterProfile = Bme680HeaterProfile.Profile2;
 
                     measurementDuration = bme680.GetMeasurementDuration(bme680.HeaterProfile);
@@ -73,15 +86,24 @@ namespace Iot.Device.Samples
                     {
                         // perform the measurement
                         bme680.SetPowerMode(Bme680PowerMode.Forced);
-                        Thread.Sleep(measurementDuration);
+                        Thread.Sleep(measurementDuration.ToTimeSpan());
 
                         // Print out the measured data
-                        bme680.TryReadTemperature(out var temperature);
-                        bme680.TryReadPressure(out var pressure);
-                        bme680.TryReadHumidity(out var humidity);
+                        bme680.TryReadTemperature(out var tempValue);
+                        bme680.TryReadPressure(out var preValue);
+                        bme680.TryReadHumidity(out var humValue);
                         bme680.TryReadGasResistance(out var gasResistance);
+                        var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
 
-                        Console.WriteLine($"{temperature.Celsius:N2} \u00B0C | {pressure.Hectopascal:N2} hPa | {humidity:N2} %rH | {gasResistance:N2} Ohm");
+                        Console.WriteLine($"Gas resistance: {gasResistance:0.##}Ohm");
+                        Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
+                        Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
+                        Console.WriteLine($"Altitude: {altValue:0.##}m");
+                        Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+
+                        // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
+                        Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
+                        Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
                         Thread.Sleep(1000);
                     }
 

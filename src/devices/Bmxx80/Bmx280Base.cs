@@ -2,16 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-//Ported from https://github.com/adafruit/Adafruit_BMP280_Library/blob/master/Adafruit_BMP280.cpp
-//Formulas and code examples can also be found in the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
-
+// Ported from https://github.com/adafruit/Adafruit_BMP280_Library/blob/master/Adafruit_BMP280.cpp
+// Formulas and code examples can also be found in the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
 using System;
 using System.Device.I2c;
 using System.IO;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
 using Iot.Device.Bmxx80.FilteringMode;
-using Iot.Units;
+using Iot.Device.Common;
+using UnitsNet;
 
 namespace Iot.Device.Bmxx80
 {
@@ -44,7 +44,9 @@ namespace Iot.Device.Bmxx80
         /// <param name="deviceId">The ID of the device.</param>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
         protected Bmx280Base(byte deviceId, I2cDevice i2cDevice)
-            : base(deviceId, i2cDevice) { }
+            : base(deviceId, i2cDevice)
+        {
+        }
 
         /// <summary>
         /// Gets or sets the IIR filter mode.
@@ -58,7 +60,10 @@ namespace Iot.Device.Bmxx80
                 byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
                 current = (byte)((current & 0b_1110_0011) | (byte)value << 2);
 
-                Span<byte> command = stackalloc[] { (byte)Bmx280Register.CONFIG, current };
+                Span<byte> command = stackalloc[]
+                {
+                    (byte)Bmx280Register.CONFIG, current
+                };
                 _i2cDevice.Write(command);
                 _filteringMode = value;
             }
@@ -76,7 +81,10 @@ namespace Iot.Device.Bmxx80
                 byte current = Read8BitsFromRegister((byte)Bmx280Register.CONFIG);
                 current = (byte)((current & 0b_0001_1111) | (byte)value << 5);
 
-                Span<byte> command = stackalloc[] { (byte)Bmx280Register.CONFIG, current };
+                Span<byte> command = stackalloc[]
+                {
+                    (byte)Bmx280Register.CONFIG, current
+                };
                 _i2cDevice.Write(command);
                 _standbyTime = value;
             }
@@ -94,7 +102,7 @@ namespace Iot.Device.Bmxx80
         {
             if (TemperatureSampling == Sampling.Skipped)
             {
-                temperature = Temperature.FromCelsius(double.NaN);
+                temperature = Temperature.FromDegreesCelsius(double.NaN);
                 return false;
             }
 
@@ -142,7 +150,7 @@ namespace Iot.Device.Bmxx80
         {
             if (PressureSampling == Sampling.Skipped)
             {
-                pressure = Pressure.FromPascal(double.NaN);
+                pressure = Pressure.FromPascals(double.NaN);
                 return false;
             }
 
@@ -152,11 +160,9 @@ namespace Iot.Device.Bmxx80
             // Read pressure data.
             var press = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
 
-            //Convert the raw value to the pressure in Pa.
-            var pressPa = CompensatePressure(press >> 4);
+            // Convert the raw value to the pressure in Pa.
+            pressure = CompensatePressure(press >> 4);
 
-            //Return the pressure as a Pressure instance.
-            pressure = Pressure.FromHectopascal(pressPa.Hectopascal / 256);
             return true;
         }
 
@@ -179,11 +185,19 @@ namespace Iot.Device.Bmxx80
                 return false;
             }
 
-            // Calculate and return the altitude using the international barometric formula.
-            altitude = 44330.0 * (1.0 - Math.Pow(pressure.Hectopascal / seaLevelPressure.Hectopascal, 0.1903));
+            // Then read the temperature.
+            success = TryReadTemperature(out var temperature);
+            if (!success)
+            {
+                altitude = double.NaN;
+                return false;
+            }
+
+            // Calculate and return the altitude using the hypsometric formula.
+            altitude = WeatherHelper.CalculateAltitude(pressure, seaLevelPressure, temperature);
             return true;
-        }        
-        
+        }
+
         /// <summary>
         /// Calculates the altitude in meters from the mean sea-level pressure.
         /// </summary>
@@ -194,7 +208,7 @@ namespace Iot.Device.Bmxx80
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
         public bool TryReadAltitude(out double altitude)
         {
-            return TryReadAltitude(Pressure.MeanSeaLevel, out altitude);
+            return TryReadAltitude(WeatherHelper.MeanSeaLevel, out altitude);
         }
 
         /// <summary>
@@ -229,7 +243,10 @@ namespace Iot.Device.Bmxx80
             // Clear last 2 bits.
             var cleared = (byte)(read & 0b_1111_1100);
 
-            Span<byte> command = stackalloc[] { _controlRegister, (byte)(cleared | (byte)powerMode) };
+            Span<byte> command = stackalloc[]
+            {
+                _controlRegister, (byte)(cleared | (byte)powerMode)
+            };
             _i2cDevice.Write(command);
         }
 
@@ -253,35 +270,33 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Compensates the pressure in Pa, in Q24.8 format (24 integer bits and 8 fractional bits).
+        /// Compensates the pressure in Pa, in double format
         /// </summary>
         /// <param name="adcPressure">The pressure value read from the device.</param>
-        /// <returns>Pressure in Hectopascals (hPa).</returns>
-        /// <remarks>
-        /// Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa.
-        /// </remarks>
+        /// <returns>Pressure as an instance of <see cref="Pressure"/>.</returns>
         private Pressure CompensatePressure(long adcPressure)
         {
             // Formula from the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
-            // The pressure is calculated using the compensation formula in the BMP280 datasheet
-            long var1 = TemperatureFine - 128000;
-            long var2 = var1 * var1 * (long)_calibrationData.DigP6;
-            var2 = var2 + ((var1 * (long)_calibrationData.DigP5) << 17);
-            var2 = var2 + ((long)_calibrationData.DigP4 << 35);
-            var1 = ((var1 * var1 * (long)_calibrationData.DigP3) >> 8) + ((var1 * (long)_calibrationData.DigP2) << 12);
-            var1 = (((((long)1 << 47) + var1)) * (long)_calibrationData.DigP1) >> 33;
-            if (var1 == 0)
+            // This uses the recommended approach with floating point math
+            double var1, var2, p;
+            var1 = (TemperatureFine / 2.0) - 64000.0;
+            var2 = var1 * var1 * ((double)_calibrationData.DigP6) / 32768.0;
+            var2 = var2 + var1 * ((double)_calibrationData.DigP5) * 2.0;
+            var2 = (var2 / 4.0) + (((double)_calibrationData.DigP4) * 65536.0);
+            var1 = (((double)_calibrationData.DigP3) * var1 * var1 / 524288.0 + ((double)_calibrationData.DigP2) * var1) / 524288.0;
+            var1 = (1.0 + var1 / 32768.0) * ((double)_calibrationData.DigP1);
+            if (var1 == 0.0)
             {
-                return Pressure.FromPascal(0); //Avoid exception caused by division by zero
+                return Pressure.FromPascals(0); // Avoid exception caused by division by zero
             }
-            //Perform calibration operations
-            long p = 1048576 - adcPressure;
-            p = (((p << 31) - var2) * 3125) / var1;
-            var1 = ((long)_calibrationData.DigP9 * (p >> 13) * (p >> 13)) >> 25;
-            var2 = ((long)_calibrationData.DigP8 * p) >> 19;
-            p = ((p + var1 + var2) >> 8) + ((long)_calibrationData.DigP7 << 4);
 
-            return Pressure.FromPascal(p);
+            p = 1048576.0 - (double)adcPressure;
+            p = (p - (var2 / 4096.0)) * 6250.0 / var1;
+            var1 = ((double)_calibrationData.DigP9) * p * p / 2147483648.0;
+            var2 = p * ((double)_calibrationData.DigP8) / 32768.0;
+            p = p + (var1 + var2 + ((double)_calibrationData.DigP7)) / 16.0;
+
+            return Pressure.FromPascals(p);
         }
     }
 }

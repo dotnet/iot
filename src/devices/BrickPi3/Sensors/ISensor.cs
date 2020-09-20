@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,12 +6,11 @@ using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
-    
-	/// <summary>
-	/// Interface for a sensor 
-	/// </summary>
+    /// <summary>
+    /// Interface for a sensor
+    /// </summary>
     public interface ISensor
-	{
+    {
         /// <summary>
         /// Property to return the raw value of the sensor as an int
         /// </summary>
@@ -21,18 +20,18 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Property to return the raw value of the sensort as a string
         /// </summary>
         string ValueAsString { get; }
-        
+
         /// <summary>
         /// To update sensors
         /// </summary>
         void UpdateSensor(object state);
-		
+
         /// <summary>
-		/// Reads the sensor value as a string.
-		/// </summary>
-		/// <returns>
-		/// The value as a string
-		/// </returns>
+        /// Reads the sensor value as a string.
+        /// </summary>
+        /// <returns>
+        /// The value as a string
+        /// </returns>
         string ReadAsString();
 
         /// <summary>
@@ -45,36 +44,35 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Gets the name of the sensor.
         /// </summary>
         /// <returns>The sensor name.</returns>
-		string GetSensorName();
-		
-		/// <summary>
-		/// Selects the next mode.
-		/// </summary>
-		void SelectNextMode();
-		
-		/// <summary>
-		/// Selects the previous mode.
-		/// </summary>
-		void SelectPreviousMode();
-		
-		/// <summary>
-		/// Numbers the of modes.
-		/// </summary>
-		/// <returns>The number of modes</returns>
-		int NumberOfModes();
-        
+        string GetSensorName();
+
+        /// <summary>
+        /// Selects the next mode.
+        /// </summary>
+        void SelectNextMode();
+
+        /// <summary>
+        /// Selects the previous mode.
+        /// </summary>
+        void SelectPreviousMode();
+
+        /// <summary>
+        /// Numbers the of modes.
+        /// </summary>
+        /// <returns>The number of modes</returns>
+        int NumberOfModes();
+
         /// <summary>
         /// Returned the name of the selectd mode
         /// </summary>
         /// <returns>The mode.</returns>
         string SelectedMode();
-        
-        /// <summary>
-		/// Sensor port
-		/// </summary>
-		/// <returns>The sensor port</returns>
-		SensorPort Port { get; }
-        
-	}
-}
 
+        /// <summary>
+        /// Sensor port
+        /// </summary>
+        /// <returns>The sensor port</returns>
+        SensorPort Port { get; }
+
+    }
+}

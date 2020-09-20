@@ -42,11 +42,11 @@ namespace Iot.Device.Rtc
             _i2cDevice.Read(readBuffer);
 
             // Details in the Datasheet P8
-            return new DateTime(2000 + NumberHelper.Bcd2Dec(readBuffer[6]), 
-                                NumberHelper.Bcd2Dec(readBuffer[5]), 
-                                NumberHelper.Bcd2Dec(readBuffer[4]), 
+            return new DateTime(2000 + NumberHelper.Bcd2Dec(readBuffer[6]),
+                                NumberHelper.Bcd2Dec(readBuffer[5]),
+                                NumberHelper.Bcd2Dec(readBuffer[4]),
                                 NumberHelper.Bcd2Dec(readBuffer[2]),
-                                NumberHelper.Bcd2Dec(readBuffer[1]), 
+                                NumberHelper.Bcd2Dec(readBuffer[1]),
                                 NumberHelper.Bcd2Dec((byte)(readBuffer[0] & 0b_0111_1111)));
         }
 

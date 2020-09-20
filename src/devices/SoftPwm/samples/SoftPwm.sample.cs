@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,20 +6,29 @@ using System;
 using System.Device.Pwm.Drivers;
 using System.Threading;
 
-class Program
+namespace System.Device.Pwm.Samples
 {
-
-    static void Main(string[] args)
+    /// <summary>
+    /// Test program main class
+    /// </summary>
+    public class Program
     {
-        Console.WriteLine("Hello PWM!");
-
-        using (var pwmChannel = new SoftwarePwmChannel(17, 200, 0))
+        /// <summary>
+        /// Entry point for example program
+        /// </summary>
+        /// <param name="args">Command line arguments</param>
+        public static void Main(string[] args)
         {
-            pwmChannel.Start();
-            for (double fill = 0.0; fill <= 1.0; fill += 0.01)
+            Console.WriteLine("Hello PWM!");
+
+            using (var pwmChannel = new SoftwarePwmChannel(17, 200, 0))
             {
-                pwmChannel.DutyCycle = fill;
-                Thread.Sleep(500);
+                pwmChannel.Start();
+                for (double fill = 0.0; fill <= 1.0; fill += 0.01)
+                {
+                    pwmChannel.DutyCycle = fill;
+                    Thread.Sleep(500);
+                }
             }
         }
     }

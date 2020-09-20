@@ -2,6 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// Disable these StyleCop rules for this file, as we are using native names here.
+#pragma warning disable SA1300 // Element should begin with upper-case letter
+#pragma warning disable SA1307 // Field should begin with upper-case letter
+
 using System;
 using System.Runtime.InteropServices;
 using Iot.Device.Media;
@@ -42,7 +46,7 @@ internal enum v4l2_ctrl_type : uint
     V4L2_CTRL_TYPE_U8 = 0x0100,
     V4L2_CTRL_TYPE_U16 = 0x0101,
     V4L2_CTRL_TYPE_U32 = 0x0102,
-};
+}
 
 [StructLayout(LayoutKind.Sequential)]
 internal struct v4l2_queryctrl
@@ -58,7 +62,7 @@ internal struct v4l2_queryctrl
     public uint flags;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
     public uint[] reserved;
-};
+}
 
 [StructLayout(LayoutKind.Sequential)]
 internal struct v4l2_control
@@ -309,6 +313,7 @@ internal struct v4l2_buffer
         public uint tv_sec;
         public uint tv_usec;
     }
+
     public timeval timestamp;
 
     public v4l2_timecode timecode;
@@ -323,6 +328,7 @@ internal struct v4l2_buffer
         [FieldOffset(0)]
         public uint userptr;
     }
+
     public m_union m;
 
     public uint length;
@@ -358,7 +364,7 @@ internal struct v4l2_frmsize_stepwise
     public uint min_height;
     public uint max_height;
     public uint step_height;
-};
+}
 
 internal enum v4l2_frmsizetypes : uint
 {

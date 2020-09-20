@@ -5,7 +5,7 @@
 using System;
 using System.Device.I2c;
 using Iot.Device.Common;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Rtc
 {
@@ -24,7 +24,7 @@ namespace Iot.Device.Rtc
         /// <summary>
         /// DS3231 Temperature
         /// </summary>
-        public Temperature Temperature => Temperature.FromCelsius(ReadTemperature());
+        public Temperature Temperature => Temperature.FromDegreesCelsius(ReadTemperature());
 
         /// <summary>
         /// Creates a new instance of the DS3231

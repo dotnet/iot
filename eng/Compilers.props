@@ -3,9 +3,15 @@
     <!-- This is set to false by default when using the compilers' NuGet package. -->
     <UseSharedCompilation>true</UseSharedCompilation>
 
-    <CompilerVersion>3.1.0-beta1-19127-06</CompilerVersion>
+    <CompilerVersion>3.6.0-2.20166.2</CompilerVersion>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <_IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase))">true</_IsTestProject>
+    <NoWarn Condition="'$(_IsTestProject)' != 'true'">$(NoWarn.Replace("1591", ""))</NoWarn> <!-- Removing CS1591 from warning exclusion list as we want to make sure documentation is enforced -->
+    <GenerateDocumentationFile Condition="'$(_IsTestProject)' != 'true'">true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Condition="'$(UseSdkCompilers)' != 'true'" Include="Microsoft.Net.Compilers.Toolset" Version="$(CompilerVersion)" IsImplicitlyDefined="true" PrivateAssets="all" />
   </ItemGroup>

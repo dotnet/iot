@@ -13,6 +13,7 @@ namespace Iot.Device.Sht3x
         /// ADDR (pin2) connected to logic low (Default)
         /// </summary>
         AddrLow = 0x44,
+
         /// <summary>
         /// ADDR (pin2) connected to logic high
         /// </summary>

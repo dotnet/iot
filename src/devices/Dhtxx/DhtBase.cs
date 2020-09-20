@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -8,7 +8,7 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Diagnostics;
 using System.Threading;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.DHTxx
 {
@@ -30,14 +30,19 @@ namespace Iot.Device.DHTxx
         protected readonly int _pin;
 
         /// <summary>
+        /// True to dispose the Gpio Controller
+        /// </summary>
+        protected readonly bool _shouldDispose;
+
+        /// <summary>
         /// I2C device used to communicate with the device
         /// </summary>
-        protected readonly I2cDevice _i2cDevice;
+        protected I2cDevice _i2cDevice;
 
         /// <summary>
         /// <see cref="GpioController"/> related with the <see cref="_pin"/>.
         /// </summary>
-        protected readonly GpioController _controller;
+        protected GpioController _controller;
 
         // wait about 1 ms
         private readonly uint _loopCount = 10000;
@@ -53,14 +58,14 @@ namespace Iot.Device.DHTxx
         /// Get the last read temperature
         /// </summary>
         /// <remarks>
-        /// If last read was not successfull, it returns double.NaN
+        /// If last read was not successful, it returns <code>default(Temperature)</code>
         /// </remarks>
         public virtual Temperature Temperature
         {
             get
             {
                 ReadData();
-                return IsLastReadSuccessful ? GetTemperature(_readBuff) : Temperature.FromCelsius(double.NaN);
+                return IsLastReadSuccessful ? GetTemperature(_readBuff) : default(Temperature);
             }
         }
 
@@ -68,14 +73,14 @@ namespace Iot.Device.DHTxx
         /// Get the last read of relative humidity in percentage
         /// </summary>
         /// <remarks>
-        /// If last read was not successfull, it returns double.NaN
+        /// If last read was not successful, it returns <code>default(Ratio)</code>
         /// </remarks>
-        public virtual double Humidity
+        public virtual Ratio Humidity
         {
             get
             {
                 ReadData();
-                return IsLastReadSuccessful ? GetHumidity(_readBuff) : double.NaN;
+                return IsLastReadSuccessful ? GetHumidity(_readBuff) : default(Ratio);
             }
         }
 
@@ -84,10 +89,13 @@ namespace Iot.Device.DHTxx
         /// </summary>
         /// <param name="pin">The pin number (GPIO number)</param>
         /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
-        public DhtBase(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+        /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public DhtBase(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController gpioController = null, bool shouldDispose = true)
         {
             _protocol = CommunicationProtocol.OneWire;
-            _controller = new GpioController(pinNumberingScheme);
+            _shouldDispose = gpioController == null ? true : shouldDispose;
+            _controller = gpioController ?? new GpioController(pinNumberingScheme);
             _pin = pin;
 
             _controller.OpenPin(_pin);
@@ -112,12 +120,18 @@ namespace Iot.Device.DHTxx
         {
             // The time of two measurements should be more than 1s.
             if (Environment.TickCount - _lastMeasurement < 1000)
+            {
                 return;
+            }
 
             if (_protocol == CommunicationProtocol.OneWire)
+            {
                 ReadThroughOneWire();
+            }
             else
+            {
                 ReadThroughI2c();
+            }
         }
 
         /// <summary>
@@ -194,6 +208,7 @@ namespace Iot.Device.DHTxx
                         return;
                     }
                 }
+
                 _stopwatch.Stop();
 
                 // bit to byte
@@ -250,7 +265,7 @@ namespace Iot.Device.DHTxx
         /// </summary>
         /// <param name="readBuff">Data</param>
         /// <returns>Humidity</returns>
-        internal abstract double GetHumidity(byte[] readBuff);
+        internal abstract Ratio GetHumidity(byte[] readBuff);
 
         /// <summary>
         /// Converting data to Temperature
@@ -262,8 +277,24 @@ namespace Iot.Device.DHTxx
         /// <inheritdoc/>
         public void Dispose()
         {
-            _controller?.Dispose();
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null;
+            }
+            else
+            {
+                if (_controller != null)
+                {
+                    if (_controller.IsPinOpen(_pin))
+                    {
+                        _controller.ClosePin(_pin);
+                    }
+                }
+            }
+
             _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
     }
 }

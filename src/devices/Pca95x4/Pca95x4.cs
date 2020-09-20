@@ -13,9 +13,10 @@ namespace Iot.Device.Pca95x4
     /// </summary>
     public class Pca95x4 : IDisposable
     {
+        private readonly int? _interrupt;
         private I2cDevice _i2cDevice;
         private GpioController _masterGpioController;
-        private readonly int? _interrupt;
+        private bool _shouldDispose;
 
         /// <summary>
         /// Initializes new instance of Pca95x4.
@@ -23,12 +24,15 @@ namespace Iot.Device.Pca95x4
         /// </summary>
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="interrupt">The input pin number that is connected to the interrupt (INT).</param>
-        public Pca95x4(I2cDevice i2cDevice, int? interrupt = null)
+        /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Pca95x4(I2cDevice i2cDevice, int? interrupt = null, GpioController gpioController = null, bool shouldDispose = true)
         {
             _i2cDevice = i2cDevice;
             _interrupt = interrupt;
+            _shouldDispose = gpioController == null ? true : shouldDispose;
 
-            InitializeMasterGpioController();
+            InitializeMasterGpioController(gpioController);
         }
 
         private static void ValidateBitNumber(int bitNumber)
@@ -57,12 +61,12 @@ namespace Iot.Device.Pca95x4
             return ((data >> bitNumber) & 1) == 1;
         }
 
-        private void InitializeMasterGpioController()
+        private void InitializeMasterGpioController(GpioController gpioController)
         {
             // Only need master controller if there is external pin provided.
             if (_interrupt != null)
             {
-                _masterGpioController = new GpioController();
+                _masterGpioController = gpioController ?? new GpioController();
                 _masterGpioController.OpenPin((int)_interrupt, PinMode.Input);
             }
         }
@@ -168,8 +172,11 @@ namespace Iot.Device.Pca95x4
         {
             _i2cDevice?.Dispose();
             _i2cDevice = null;
-            _masterGpioController?.Dispose();
-            _masterGpioController = null;
+            if (_shouldDispose)
+            {
+                _masterGpioController?.Dispose();
+                _masterGpioController = null;
+            }
         }
     }
 }

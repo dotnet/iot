@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Ssd13xx.Commands;
-using Iot.Device.Ssd13xx.Commands.Ssd1306Commands;
 using System;
 using Xunit;
+using Iot.Device.Ssd13xx.Commands;
+using Iot.Device.Ssd13xx.Commands.Ssd1306Commands;
 
 namespace Iot.Device.Ssd13xx.Tests
 {
@@ -31,7 +31,7 @@ namespace Iot.Device.Ssd13xx.Tests
         [InlineData(0x0E, 0x0F, new byte[] { 0xD5, 0xFE })]
         public void Get_Bytes(byte displayClockDivideRatio, byte oscillatorFrequency, byte[] expectedBytes)
         {
-            SetDisplayClockDivideRatioOscillatorFrequency setDisplayClockDivideRatioOscillatorFrequency = 
+            SetDisplayClockDivideRatioOscillatorFrequency setDisplayClockDivideRatioOscillatorFrequency =
                 new SetDisplayClockDivideRatioOscillatorFrequency(displayClockDivideRatio, oscillatorFrequency);
             byte[] actualBytes = setDisplayClockDivideRatioOscillatorFrequency.GetBytes();
             Assert.Equal(expectedBytes, actualBytes);

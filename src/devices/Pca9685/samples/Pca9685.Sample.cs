@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -7,25 +7,25 @@ using System.Collections.Generic;
 using System.Device.I2c;
 using System.Device.Pwm;
 using System.Diagnostics;
-using Iot.Device.ServoMotor;
 using System.Threading;
 using System.Linq;
+using Iot.Device.ServoMotor;
 
 namespace Iot.Device.Pwm.Pca9685Samples
 {
     /// <summary>
     /// This sample is for Raspberry Pi Model 3B+
     /// </summary>
-    class Program
+    public class Program
     {
         // Some SG90s can do 180 angle range but some other will be oscillating on the edge values
         // Max angle which doesn't cause any issues found experimentally was as below.
         // The ones which can do 180 will have the minimum pulse width at around 520uS.
-        const int AngleRange = 173;
-        const int MinPulseWidthMicroseconds = 600;
-        const int MaxPulseWidthMicroseconds = 2590;
+        private const int AngleRange = 173;
+        private const int MinPulseWidthMicroseconds = 600;
+        private const int MaxPulseWidthMicroseconds = 2590;
 
-        static void PrintHelp()
+        private static void PrintHelp()
         {
             Console.WriteLine("Command:");
             Console.WriteLine("    F {freq_hz}          set PWM frequency (Hz)");
@@ -37,10 +37,14 @@ namespace Iot.Device.Pwm.Pca9685Samples
             Console.WriteLine();
         }
 
-        static void Main(string[] args)
+        /// <summary>
+        /// Example program main entry point
+        /// </summary>
+        /// <param name="args">Command line arguments, see <see cref="PrintHelp"/></param>
+        public static void Main(string[] args)
         {
             var busId = 1;
-            var selectedI2cAddress = 0b000000;     // A5 A4 A3 A2 A1 A0
+            var selectedI2cAddress = 0b000000; // A5 A4 A3 A2 A1 A0
             var deviceAddress = Pca9685.I2cAddressBase + selectedI2cAddress;
 
             var settings = new I2cConnectionSettings(busId, deviceAddress);
@@ -48,7 +52,8 @@ namespace Iot.Device.Pwm.Pca9685Samples
 
             using (var pca9685 = new Pca9685(device))
             {
-                Console.WriteLine($"PCA9685 is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
+                Console.WriteLine(
+                    $"PCA9685 is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
                 Console.WriteLine($"PWM Frequency: {pca9685.PwmFrequency}Hz");
                 Console.WriteLine();
                 PrintHelp();
@@ -73,33 +78,38 @@ namespace Iot.Device.Pwm.Pca9685Samples
                             Console.WriteLine($"PWM Frequency has been set to {pca9685.PwmFrequency}Hz");
                             break;
                         }
+
                         case 'd':
                         {
                             switch (command.Length)
                             {
                                 case 2:
-                                    {
-                                        double value = double.Parse(command[1]);
-                                        pca9685.SetDutyCycleAllChannels(value);
-                                        Console.WriteLine($"PWM duty cycle has been set to {value}");
-                                        break;
-                                    }
+                                {
+                                    double value = double.Parse(command[1]);
+                                    pca9685.SetDutyCycleAllChannels(value);
+                                    Console.WriteLine($"PWM duty cycle has been set to {value}");
+                                    break;
+                                }
+
                                 case 3:
-                                    {
-                                        int channel = int.Parse(command[1]);
-                                        double value = double.Parse(command[2]);
-                                        pca9685.SetDutyCycle(channel, value);
-                                        Console.WriteLine($"PWM duty cycle has been set to {value}");
-                                        break;
-                                    }
+                                {
+                                    int channel = int.Parse(command[1]);
+                                    double value = double.Parse(command[2]);
+                                    pca9685.SetDutyCycle(channel, value);
+                                    Console.WriteLine($"PWM duty cycle has been set to {value}");
+                                    break;
+                                }
                             }
+
                             break;
                         }
+
                         case 'h':
                         {
                             PrintHelp();
                             break;
                         }
+
                         case 't':
                         {
                             int channel = int.Parse(command[1]);
@@ -112,14 +122,14 @@ namespace Iot.Device.Pwm.Pca9685Samples
             }
         }
 
-        static ServoMotor.ServoMotor CreateServo(Pca9685 pca9685, int channel)
+        private static ServoMotor.ServoMotor CreateServo(Pca9685 pca9685, int channel)
         {
             return new ServoMotor.ServoMotor(
                 pca9685.CreatePwmChannel(channel),
                 AngleRange, MinPulseWidthMicroseconds, MaxPulseWidthMicroseconds);
         }
 
-        static void PrintServoDemoHelp()
+        private static void PrintServoDemoHelp()
         {
             Console.WriteLine("Q                   return to previous menu");
             Console.WriteLine("C                   calibrate");
@@ -127,7 +137,7 @@ namespace Iot.Device.Pwm.Pca9685Samples
             Console.WriteLine();
         }
 
-        static void ServoDemo(Pca9685 pca9685, int channel)
+        private static void ServoDemo(Pca9685 pca9685, int channel)
         {
             using (var servo = CreateServo(pca9685, channel))
             {
@@ -156,7 +166,7 @@ namespace Iot.Device.Pwm.Pca9685Samples
             }
         }
 
-        static void CalibrateServo(ServoMotor.ServoMotor servo)
+        private static void CalibrateServo(ServoMotor.ServoMotor servo)
         {
             int maximumAngle = 180;
             int minimumPulseWidthMicroseconds = 520;
@@ -170,7 +180,8 @@ namespace Iot.Device.Pwm.Pca9685Samples
             CalibratePulseWidth(servo, ref maximumPulseWidthMicroseconds);
 
             Console.WriteLine("Searching for angle range");
-            Console.WriteLine("What is the angle range? (type integer with your angle range or enter to move to MIN/MAX)");
+            Console.WriteLine(
+                "What is the angle range? (type integer with your angle range or enter to move to MIN/MAX)");
 
             while (true)
             {
@@ -196,7 +207,7 @@ namespace Iot.Device.Pwm.Pca9685Samples
             Console.WriteLine($"Max PW [uS]: {maximumPulseWidthMicroseconds}");
         }
 
-        static void CalibratePulseWidth(ServoMotor.ServoMotor servo, ref int pulseWidthMicroSeconds)
+        private static void CalibratePulseWidth(ServoMotor.ServoMotor servo, ref int pulseWidthMicroSeconds)
         {
             void SetPulseWidth(ref int pulseWidth)
             {

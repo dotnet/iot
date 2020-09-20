@@ -21,10 +21,15 @@ using (Si7021 sensor = new Si7021(device, Resolution.Resolution1))
 {
     while (true)
     {
-        // read temperature
-        Console.WriteLine($"Temperature: {sensor.Temperature.Celsius}℃");
-        // read humidity
-        Console.WriteLine($"Humidity: {sensor.Humidity}%");
+        var tempValue = sensor.Temperature;
+        var humValue = sensor.Humidity;
+
+        Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
+        Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+
+        // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
+        Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
+        Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
         Console.WriteLine();
 
         Thread.Sleep(1000);

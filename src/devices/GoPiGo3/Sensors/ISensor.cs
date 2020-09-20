@@ -2,14 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.GoPiGo3.Models;
 using System.Collections.Generic;
+using Iot.Device.GoPiGo3.Models;
 
 namespace Iot.Device.GoPiGo3.Sensors
 {
     /// <summary>
-	/// Interface for a sensor 
-	/// </summary>
+    /// Interface for a sensor
+    /// </summary>
     public interface ISensor
     {
         /// <summary>

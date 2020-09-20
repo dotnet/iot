@@ -6,13 +6,14 @@ using System;
 using System.Device.I2c;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.Register;
+using UnitsNet;
 
 namespace Iot.Device.Bmxx80
 {
     /// <summary>
     /// Represents a BME280 temperature, barometric pressure and humidity sensor.
     /// </summary>
-    public sealed class Bme280 : Bmx280Base
+    public class Bme280 : Bmx280Base
     {
         /// <summary>
         /// The expected chip ID of the BME280.
@@ -47,19 +48,27 @@ namespace Iot.Device.Bmxx80
             set
             {
                 if (!Enum.IsDefined(typeof(Sampling), value))
+                {
                     throw new ArgumentOutOfRangeException();
+                }
 
                 byte status = Read8BitsFromRegister((byte)Bme280Register.CTRL_HUM);
                 status = (byte)(status & 0b_1111_1000);
                 status = (byte)(status | (byte)value);
 
-                Span<byte> command = stackalloc[] {(byte)Bme280Register.CTRL_HUM, status};
+                Span<byte> command = stackalloc[]
+                {
+                    (byte)Bme280Register.CTRL_HUM, status
+                };
                 _i2cDevice.Write(command);
 
                 // Changes to the above register only become effective after a write operation to "CTRL_MEAS".
                 byte measureState = Read8BitsFromRegister((byte)Bmx280Register.CTRL_MEAS);
 
-                command = stackalloc[] {(byte)Bmx280Register.CTRL_MEAS, measureState};
+                command = stackalloc[]
+                {
+                    (byte)Bmx280Register.CTRL_MEAS, measureState
+                };
                 _i2cDevice.Write(command);
                 _humiditySampling = value;
             }
@@ -70,14 +79,14 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="humidity">
         /// Contains the measured humidity as %rH if the <see cref="HumiditySampling"/> was not set to <see cref="Sampling.Skipped"/>.
-        /// Contains <see cref="double.NaN"/> otherwise.
+        /// Contains an undefined value if the return value is false.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadHumidity(out double humidity)
+        public bool TryReadHumidity(out Ratio humidity)
         {
             if (HumiditySampling == Sampling.Skipped)
             {
-                humidity = double.NaN;
+                humidity = default;
                 return false;
             }
 
@@ -112,8 +121,8 @@ namespace Iot.Device.Bmxx80
         /// Compensates the humidity.
         /// </summary>
         /// <param name="adcHumidity">The humidity value read from the device.</param>
-        /// <returns>The percentage relative humidity.</returns>
-        private double CompensateHumidity(int adcHumidity)
+        /// <returns>The relative humidity (Ratio, typically used as percent).</returns>
+        private Ratio CompensateHumidity(int adcHumidity)
         {
             // The humidity is calculated using the compensation formula in the BME280 datasheet.
             double varH = TemperatureFine - 76800.0;
@@ -131,7 +140,7 @@ namespace Iot.Device.Bmxx80
                 varH = 0;
             }
 
-            return varH;
+            return Ratio.FromPercent(varH);
         }
     }
 }

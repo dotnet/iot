@@ -53,7 +53,7 @@ namespace Iot.Device.CharacterLcd
         /// we're exposing a multiplier for any "hard coded" waits. This can also be
         /// used to reduce the wait time when the clock runs faster or other overhead
         /// (time spent in other code) allows for more aggressive timing.
-        /// 
+        ///
         /// There is a busy signal that can be checked that could make this moot, but
         /// currently we are unable to check the signal fast enough to make gains (or
         /// even equal) going off hard timings. The busy signal also requires having a
@@ -121,21 +121,30 @@ namespace Iot.Device.CharacterLcd
         /// <param name="backlightBrightness">The brightness of the backlight. 0.0 for off, 1.0 for on.</param>
         /// <param name="readWritePin">The optional pin that controls the read and write switch.</param>
         /// <param name="controller">The controller to use with the LCD. If not specified, uses the platform default.</param>
-        public static LcdInterface CreateGpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController controller = null)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public static LcdInterface CreateGpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController controller = null, bool shouldDispose = true)
         {
-            return new Gpio(registerSelectPin, enablePin, dataPins, backlightPin, backlightBrightness, readWritePin, controller);
+            return new Gpio(registerSelectPin, enablePin, dataPins, backlightPin, backlightBrightness, readWritePin, controller, shouldDispose);
         }
 
         /// <summary>
         /// Create an integrated I2c based interface for the LCD.
         /// </summary>
         /// <remarks>
-        /// This is for on-chip I2c support. For connecting via I2c GPIO expanders, use the GPIO interface <see cref="CreateGpio(int, int, int[], int, float, int, GpioController)"/>.
+        /// This is for on-chip I2c support. For connecting via I2c GPIO expanders, use the GPIO interface <see cref="CreateGpio(int, int, int[], int, float, int, GpioController, bool)"/>.
         /// </remarks>
         /// <param name="device">The I2c device for the LCD.</param>
-        public static LcdInterface CreateI2c(I2cDevice device)
+        /// <param name="uses8Bit">True if the device uses 8 Bit commands, false if it handles only 4 bit commands.</param>
+        public static LcdInterface CreateI2c(I2cDevice device, bool uses8Bit = true)
         {
-            return new I2c(device);
+            if (uses8Bit)
+            {
+                return new I2c(device);
+            }
+            else
+            {
+                return new I2c4Bit(device);
+            }
         }
     }
 }

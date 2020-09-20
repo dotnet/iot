@@ -2,6 +2,7 @@
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
   <Import Project="$(RepositoryEngineeringDir)Compilers.props" />
+  <Import Project="$(RepositoryEngineeringDir)Analyzers.props" />
 
   <PropertyGroup>
     <Copyright>$(CopyrightNetFoundation)</Copyright>
@@ -11,8 +12,6 @@
 
   <PropertyGroup>
     <Language>C#</Language>
-    <TargetsWindows Condition="$(RuntimeIdentifier.StartsWith('win'))">true</TargetsWindows>
-    <TargetsLinux Condition="$(RuntimeIdentifier.StartsWith('linux'))">true</TargetsLinux>
     <LangVersion>Latest</LangVersion>
     <!-- Generate snupkg package -->
     <IncludeSymbols>true</IncludeSymbols>

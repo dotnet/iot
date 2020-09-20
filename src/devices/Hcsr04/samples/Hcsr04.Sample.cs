@@ -11,18 +11,18 @@ using Iot.Device.Hcsr04;
 
 namespace Iot.Device.Hcsr04.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello Hcsr04 Sample!");
 
-            using(var sonar = new Hcsr04(4, 17))
+            using (var sonar = new Hcsr04(4, 17))
             {
-                while(true)
+                while (true)
                 {
                     Console.WriteLine($"Distance: {sonar.Distance} cm");
-                    System.Threading.Thread.Sleep(1000);
+                    Thread.Sleep(1000);
                 }
             }
         }

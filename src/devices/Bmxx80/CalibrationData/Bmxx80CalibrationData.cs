@@ -22,7 +22,7 @@ namespace Iot.Device.Bmxx80.CalibrationData
         public short DigP7 { get; set; }
         public short DigP8 { get; set; }
         public short DigP9 { get; set; }
-        
+
         /// <summary>
         /// Read coefficient data from device.
         /// </summary>

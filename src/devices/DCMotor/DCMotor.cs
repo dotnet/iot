@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -15,18 +15,16 @@ namespace Iot.Device.DCMotor
     public abstract class DCMotor : IDisposable
     {
         private const int DefaultPwmFrequency = 50;
-
-        /// <summary>
-        /// <see cref="GpioController"/> related with operations on pins
-        /// </summary>
-        protected GpioController Controller;
+        private bool _shouldDispose;
 
         /// <summary>
         /// Constructs generic <see cref="DCMotor"/> instance
         /// </summary>
         /// <param name="controller"><see cref="GpioController"/> related with operations on pins</param>
-        protected DCMotor(GpioController controller)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        protected DCMotor(GpioController controller, bool shouldDispose)
         {
+            _shouldDispose = shouldDispose;
             Controller = controller;
         }
 
@@ -35,6 +33,15 @@ namespace Iot.Device.DCMotor
         /// 1 means maximum speed, 0 means no movement and -1 means movement in opposite direction.
         /// </summary>
         public abstract double Speed { get; set; }
+
+        /// <summary>
+        /// <see cref="GpioController"/> related with operations on pins
+        /// </summary>
+        protected GpioController Controller
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Disposes the <see cref="DCMotor"/> class
@@ -53,8 +60,11 @@ namespace Iot.Device.DCMotor
         {
             if (disposing)
             {
-                Controller?.Dispose();
-                Controller = null;
+                if (_shouldDispose)
+                {
+                    Controller?.Dispose();
+                    Controller = null;
+                }
             }
         }
 
@@ -71,9 +81,11 @@ namespace Iot.Device.DCMotor
         public static DCMotor Create(PwmChannel speedControlChannel)
         {
             if (speedControlChannel == null)
+            {
                 throw new ArgumentNullException(nameof(speedControlChannel));
+            }
 
-            return new DCMotor2PinNoEnable(speedControlChannel, -1, null);
+            return new DCMotor2PinNoEnable(speedControlChannel, -1, null, true);
         }
 
         /// <summary>
@@ -81,22 +93,26 @@ namespace Iot.Device.DCMotor
         /// </summary>
         /// <param name="speedControlPin">Pin used to control the speed of the motor with software PWM (frequency will default to 50Hz)</param>
         /// <param name="controller"><see cref="GpioController"/> related to the <paramref name="speedControlPin"/></param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
         /// <paramref name="speedControlPin"/> can be connected to either enable pin of the H-bridge.
         /// or directly to the input related with the motor (if H-bridge allows inputs to change frequently).
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(int speedControlPin, GpioController controller = null)
+        public static DCMotor Create(int speedControlPin, GpioController controller = null, bool shouldDispose = true)
         {
             if (speedControlPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(speedControlPin));
+            }
 
             controller = controller ?? new GpioController();
             return new DCMotor2PinNoEnable(
                 new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller),
                 -1,
-                controller);
+                controller,
+                shouldDispose);
         }
 
         /// <summary>
@@ -105,6 +121,7 @@ namespace Iot.Device.DCMotor
         /// <param name="speedControlChannel"><see cref="PwmChannel"/> used to control the speed of the motor</param>
         /// <param name="directionPin">Pin used to control the direction of the motor</param>
         /// <param name="controller"><see cref="GpioController"/> related to the <paramref name="directionPin"/></param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
         /// <paramref name="speedControlChannel"/> can be connected to either enable pin of the H-bridge.
@@ -112,23 +129,28 @@ namespace Iot.Device.DCMotor
         /// <paramref name="directionPin"/> should be connected to H-bridge input corresponding to one of the motor inputs.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, GpioController controller = null)
+        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, GpioController controller = null, bool shouldDispose = true)
         {
             if (speedControlChannel == null)
+            {
                 throw new ArgumentNullException(nameof(speedControlChannel));
+            }
 
             if (directionPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(directionPin));
+            }
 
-            return new DCMotor2PinNoEnable(speedControlChannel, directionPin, controller);
+            return new DCMotor2PinNoEnable(speedControlChannel, directionPin, controller, shouldDispose);
         }
-        
+
         /// <summary>
         /// Creates <see cref="DCMotor"/> instance which allows to control speed in both directions.
         /// </summary>
         /// <param name="speedControlPin">Pin used to control the speed of the motor with software PWM (frequency will default to 50Hz)</param>
         /// <param name="directionPin">Pin used to control the direction of the motor</param>
         /// <param name="controller">GPIO controller related to <paramref name="speedControlPin"/> and <paramref name="directionPin"/></param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
         /// PWM pin <paramref name="speedControlPin"/> can be connected to either enable pin of the H-bridge.
@@ -136,28 +158,34 @@ namespace Iot.Device.DCMotor
         /// <paramref name="directionPin"/> should be connected to H-bridge input corresponding to one of the motor inputs.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(int speedControlPin, int directionPin, GpioController controller = null)
+        public static DCMotor Create(int speedControlPin, int directionPin, GpioController controller = null, bool shouldDispose = true)
         {
             if (speedControlPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(speedControlPin));
+            }
 
             if (directionPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(directionPin));
+            }
 
             controller = controller ?? new GpioController();
             return new DCMotor2PinNoEnable(
                 new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller),
                 directionPin,
-                controller);
+                controller,
+                shouldDispose);
         }
 
         /// <summary>
         /// Creates <see cref="DCMotor"/> instance which allows to control speed in both directions.
         /// </summary>
         /// <param name="speedControlChannel"><see cref="PwmChannel"/> used to control the speed of the motor</param>
-        /// <param name="directionPin">Pin used to control the direction of the motor</param>
-        /// <param name="otherDirectionPin">Pin used to control the direction of the motor</param>
+        /// <param name="directionPin">First pin used to control the direction of the motor</param>
+        /// <param name="otherDirectionPin">Second pin used to control the direction of the motor</param>
         /// <param name="controller"><see cref="GpioController"/> related to <paramref name="directionPin"/> and <paramref name="otherDirectionPin"/></param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
         /// When speed is non-zero the value of <paramref name="otherDirectionPin"/> will always be opposite to that of <paramref name="directionPin"/>.
@@ -166,31 +194,39 @@ namespace Iot.Device.DCMotor
         /// <paramref name="otherDirectionPin"/> should be connected to H-bridge input corresponding to the remaining motor input.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, int otherDirectionPin, GpioController controller = null)
+        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, int otherDirectionPin, GpioController controller = null, bool shouldDispose = true)
         {
             if (speedControlChannel == null)
+            {
                 throw new ArgumentNullException(nameof(speedControlChannel));
+            }
 
             if (directionPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(directionPin));
+            }
 
             if (otherDirectionPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(otherDirectionPin));
+            }
 
             return new DCMotor3Pin(
                 speedControlChannel,
                 directionPin,
                 otherDirectionPin,
-                controller);
+                controller,
+                shouldDispose);
         }
 
         /// <summary>
         /// Creates <see cref="DCMotor"/> instance which allows to control speed in both directions.
         /// </summary>
         /// <param name="speedControlPin">Pin used to control the speed of the motor with software PWM (frequency will default to 50Hz)</param>
-        /// <param name="directionPin">Pin used to control the direction of the motor</param>
-        /// <param name="otherDirectionPin">Pin used to control the direction of the motor</param>
+        /// <param name="directionPin">First pin used to control the direction of the motor</param>
+        /// <param name="otherDirectionPin">Second pin used to control the direction of the motor</param>
         /// <param name="controller"><see cref="GpioController"/> related to <paramref name="speedControlPin"/>, <paramref name="directionPin"/> and <paramref name="otherDirectionPin"/></param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
         /// When speed is non-zero the value of <paramref name="otherDirectionPin"/> will always be opposite to that of <paramref name="directionPin"/>
@@ -199,23 +235,30 @@ namespace Iot.Device.DCMotor
         /// <paramref name="otherDirectionPin"/> should be connected to H-bridge input corresponding to the remaining motor input.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(int speedControlPin, int directionPin, int otherDirectionPin, GpioController controller = null)
+        public static DCMotor Create(int speedControlPin, int directionPin, int otherDirectionPin, GpioController controller = null, bool shouldDispose = true)
         {
             if (speedControlPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(speedControlPin));
+            }
 
             if (directionPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(directionPin));
+            }
 
             if (otherDirectionPin == -1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(otherDirectionPin));
+            }
 
             controller = controller ?? new GpioController();
             return new DCMotor3Pin(
                 new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller),
                 directionPin,
                 otherDirectionPin,
-                controller);
+                controller,
+                shouldDispose);
         }
     }
 }

@@ -45,9 +45,11 @@ namespace Iot.Device.Mcp23xxx.Tests
 
             // Check the output latches after enabling and setting
             // different bits.
-            device.Enable(); 
+            device.Enable();
             for (int i = 0; i < 4; i++)
+            {
                 controller.OpenPin(i, PinMode.Output);
+            }
 
             controller.Write(0, PinValue.High);
             Assert.Equal(1, device.ReadByte(Register.OLAT));

@@ -39,6 +39,8 @@ namespace Iot.Device.Rtc
         /// Releases the unmanaged resources used by the RtcBase and optionally releases the managed resources.
         /// </summary>
         /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing) { }
+        protected virtual void Dispose(bool disposing)
+        {
+        }
     }
 }

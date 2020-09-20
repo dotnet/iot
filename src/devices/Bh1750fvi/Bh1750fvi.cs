@@ -5,6 +5,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using UnitsNet;
 
 namespace Iot.Device.Bh1750fvi
 {
@@ -40,7 +41,7 @@ namespace Iot.Device.Bh1750fvi
         /// <summary>
         /// BH1750FVI Illuminance (Lux)
         /// </summary>
-        public double Illuminance => Math.Round(GetIlluminance(), 1);
+        public Illuminance Illuminance => GetIlluminance();
 
         /// <summary>
         /// Creates a new instance of the BH1750FVI
@@ -88,11 +89,13 @@ namespace Iot.Device.Bh1750fvi
         /// <summary>
         /// Get BH1750FVI Illuminance
         /// </summary>
-        /// <returns>Illuminance (Lux)</returns>
-        private double GetIlluminance()
+        /// <returns>Illuminance (Default unit: Lux)</returns>
+        private Illuminance GetIlluminance()
         {
             if (MeasuringMode == MeasuringMode.OneTimeHighResolutionMode || MeasuringMode == MeasuringMode.OneTimeHighResolutionMode2 || MeasuringMode == MeasuringMode.OneTimeLowResolutionMode)
+            {
                 _i2cDevice.WriteByte((byte)Command.PowerOn);
+            }
 
             Span<byte> readBuff = stackalloc byte[2];
 
@@ -104,9 +107,11 @@ namespace Iot.Device.Bh1750fvi
             double result = raw / (1.2 * _lightTransmittance);
 
             if (MeasuringMode == MeasuringMode.ContinuouslyHighResolutionMode2 || MeasuringMode == MeasuringMode.OneTimeHighResolutionMode2)
+            {
                 result *= 2;
+            }
 
-            return result;
+            return Illuminance.FromLux(result);
         }
     }
 }

@@ -16,10 +16,12 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// None
         /// </summary>
         None = 0b0000_0000,
+
         /// <summary>
         /// Auto radio frequency CA
         /// </summary>
         AutoRFCA = 0b0000_0010,
+
         /// <summary>
         /// Radio frequency
         /// </summary>

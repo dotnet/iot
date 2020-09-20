@@ -15,9 +15,9 @@ using Iot.Device.Mcp25xxx.Register.MessageTransmit;
 
 namespace Iot.Device.Mcp25xxx.Samples
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello Mcp25xxx Sample!");
 
@@ -35,8 +35,8 @@ namespace Iot.Device.Mcp25xxx.Samples
                 // RxStatus(mcp25xxx);
                 // BitModify(mcp25xxx);
                 // TransmitMessage(mcp25xxx);
-                //LoopbackMode(mcp25xxx);
-                //ReadAllRegisters(mcp25xxx);
+                // LoopbackMode(mcp25xxx);
+                // ReadAllRegisters(mcp25xxx);
             }
         }
 
@@ -70,14 +70,13 @@ namespace Iot.Device.Mcp25xxx.Samples
             Console.WriteLine("Read All Registers");
             Console.WriteLine();
 
-
             ReadAllMessageTransmitRegistersWithDetails(mcp25xxx);
-            //ReadAllMessageReceiveRegistersWithDetails(mcp25xxx);
-            //ReadAllAcceptanceFilterRegistersWithDetails(mcp25xxx);
-            //ReadAllBitTimeConfigurationRegistersWithDetails(mcp25xxx);
-            //ReadAllErrorDetectionRegistersWithDetails(mcp25xxx);
-            //ReadAllInterruptRegistersWithDetails(mcp25xxx);
-            //ReadAllCanControlRegistersWithDetails(mcp25xxx);
+            ////ReadAllMessageReceiveRegistersWithDetails(mcp25xxx);
+            ////ReadAllAcceptanceFilterRegistersWithDetails(mcp25xxx);
+            ////ReadAllBitTimeConfigurationRegistersWithDetails(mcp25xxx);
+            ////ReadAllErrorDetectionRegistersWithDetails(mcp25xxx);
+            ////ReadAllInterruptRegistersWithDetails(mcp25xxx);
+            ////ReadAllCanControlRegistersWithDetails(mcp25xxx);
         }
 
         private static byte ConsoleWriteRegisterAddressDetails(Mcp25xxx mcp25xxx, Address address)
@@ -91,7 +90,7 @@ namespace Iot.Device.Mcp25xxx.Samples
         {
             foreach (System.Reflection.PropertyInfo property in register.GetType().GetProperties())
             {
-                Console.WriteLine($"{property.Name, 15}: {property.GetValue(register, null)}");
+                Console.WriteLine($"{property.Name,15}: {property.GetValue(register, null)}");
             }
         }
 
@@ -99,13 +98,20 @@ namespace Iot.Device.Mcp25xxx.Samples
         {
             Console.WriteLine("Message Transmit Registers");
 
-            ConsoleWriteRegisterItemDetails(new TxRtsCtrl(ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxRtsCtrl)));
-            ConsoleWriteRegisterItemDetails(new TxBxCtrl(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Ctrl)));
-            ConsoleWriteRegisterItemDetails(new TxBxSidh(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Sidh)));
-            ConsoleWriteRegisterItemDetails(new TxBxSidl(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Sidl)));
-            ConsoleWriteRegisterItemDetails(new TxBxEid8(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Eid8)));
-            ConsoleWriteRegisterItemDetails(new TxBxEid0(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Eid0)));
-            ConsoleWriteRegisterItemDetails(new TxBxDlc(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Dlc)));
+            ConsoleWriteRegisterItemDetails(
+                new TxRtsCtrl(ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxRtsCtrl)));
+            ConsoleWriteRegisterItemDetails(new TxBxCtrl(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Ctrl)));
+            ConsoleWriteRegisterItemDetails(new TxBxSidh(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Sidh)));
+            ConsoleWriteRegisterItemDetails(new TxBxSidl(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Sidl)));
+            ConsoleWriteRegisterItemDetails(new TxBxEid8(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Eid8)));
+            ConsoleWriteRegisterItemDetails(new TxBxEid0(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Eid0)));
+            ConsoleWriteRegisterItemDetails(new TxBxDlc(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0Dlc)));
 
             new TxBxDn(0, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D0));
             new TxBxDn(0, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D1));
@@ -116,12 +122,18 @@ namespace Iot.Device.Mcp25xxx.Samples
             new TxBxDn(0, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D6));
             new TxBxDn(0, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB0D7));
 
-            ConsoleWriteRegisterItemDetails(new TxBxCtrl(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Ctrl)));
-            ConsoleWriteRegisterItemDetails(new TxBxSidh(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Sidh)));
-            ConsoleWriteRegisterItemDetails(new TxBxSidl(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Sidl)));
-            ConsoleWriteRegisterItemDetails(new TxBxEid8(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Eid8)));
-            ConsoleWriteRegisterItemDetails(new TxBxEid0(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Eid0)));
-            ConsoleWriteRegisterItemDetails(new TxBxDlc(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Dlc)));
+            ConsoleWriteRegisterItemDetails(new TxBxCtrl(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Ctrl)));
+            ConsoleWriteRegisterItemDetails(new TxBxSidh(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Sidh)));
+            ConsoleWriteRegisterItemDetails(new TxBxSidl(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Sidl)));
+            ConsoleWriteRegisterItemDetails(new TxBxEid8(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Eid8)));
+            ConsoleWriteRegisterItemDetails(new TxBxEid0(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Eid0)));
+            ConsoleWriteRegisterItemDetails(new TxBxDlc(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1Dlc)));
 
             new TxBxDn(1, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D0));
             new TxBxDn(1, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D1));
@@ -132,12 +144,18 @@ namespace Iot.Device.Mcp25xxx.Samples
             new TxBxDn(1, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D6));
             new TxBxDn(1, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB1D7));
 
-            ConsoleWriteRegisterItemDetails(new TxBxCtrl(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Ctrl)));
-            ConsoleWriteRegisterItemDetails(new TxBxSidh(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Sidh)));
-            ConsoleWriteRegisterItemDetails(new TxBxSidl(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Sidl)));
-            ConsoleWriteRegisterItemDetails(new TxBxEid8(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Eid8)));
-            ConsoleWriteRegisterItemDetails(new TxBxEid0(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Eid0)));
-            ConsoleWriteRegisterItemDetails(new TxBxDlc(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Dlc)));
+            ConsoleWriteRegisterItemDetails(new TxBxCtrl(2,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Ctrl)));
+            ConsoleWriteRegisterItemDetails(new TxBxSidh(2,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Sidh)));
+            ConsoleWriteRegisterItemDetails(new TxBxSidl(2,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Sidl)));
+            ConsoleWriteRegisterItemDetails(new TxBxEid8(2,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Eid8)));
+            ConsoleWriteRegisterItemDetails(new TxBxEid0(2,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Eid0)));
+            ConsoleWriteRegisterItemDetails(new TxBxDlc(2,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2Dlc)));
 
             new TxBxDn(2, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D0));
             new TxBxDn(2, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.TxB2D1));
@@ -154,13 +172,20 @@ namespace Iot.Device.Mcp25xxx.Samples
             Console.WriteLine("Message Receive Registers");
 
             ConsoleWriteRegisterItemDetails(new BfpCtrl(ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.BfpCtrl)));
-            ConsoleWriteRegisterItemDetails(new RxB0Ctrl(ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Ctrl)));
-            ConsoleWriteRegisterItemDetails(new RxB1Ctrl(ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Ctrl)));
-            ConsoleWriteRegisterItemDetails(new RxBxSidh(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Sidh)));
-            ConsoleWriteRegisterItemDetails(new RxBxSidl(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Sidl)));
-            ConsoleWriteRegisterItemDetails(new RxBxEid8(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Eid8)));
-            ConsoleWriteRegisterItemDetails(new RxBxEid0(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Eid0)));
-            ConsoleWriteRegisterItemDetails(new RxBxDlc(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Dlc)));
+            ConsoleWriteRegisterItemDetails(
+                new RxB0Ctrl(ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Ctrl)));
+            ConsoleWriteRegisterItemDetails(
+                new RxB1Ctrl(ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Ctrl)));
+            ConsoleWriteRegisterItemDetails(new RxBxSidh(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Sidh)));
+            ConsoleWriteRegisterItemDetails(new RxBxSidl(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Sidl)));
+            ConsoleWriteRegisterItemDetails(new RxBxEid8(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Eid8)));
+            ConsoleWriteRegisterItemDetails(new RxBxEid0(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Eid0)));
+            ConsoleWriteRegisterItemDetails(new RxBxDlc(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0Dlc)));
 
             new RxBxDn(0, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D0));
             new RxBxDn(0, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D1));
@@ -171,11 +196,16 @@ namespace Iot.Device.Mcp25xxx.Samples
             new RxBxDn(0, 6, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D6));
             new RxBxDn(0, 7, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB0D7));
 
-            ConsoleWriteRegisterItemDetails(new RxBxSidh(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Sidh)));
-            ConsoleWriteRegisterItemDetails(new RxBxSidl(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Sidl)));
-            ConsoleWriteRegisterItemDetails(new RxBxEid8(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Eid8)));
-            ConsoleWriteRegisterItemDetails(new RxBxEid0(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Eid0)));
-            ConsoleWriteRegisterItemDetails(new RxBxDlc(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Dlc)));
+            ConsoleWriteRegisterItemDetails(new RxBxSidh(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Sidh)));
+            ConsoleWriteRegisterItemDetails(new RxBxSidl(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Sidl)));
+            ConsoleWriteRegisterItemDetails(new RxBxEid8(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Eid8)));
+            ConsoleWriteRegisterItemDetails(new RxBxEid0(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Eid0)));
+            ConsoleWriteRegisterItemDetails(new RxBxDlc(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1Dlc)));
 
             new RxBxDn(1, 0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D0));
             new RxBxDn(1, 1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxB1D1));
@@ -191,38 +221,70 @@ namespace Iot.Device.Mcp25xxx.Samples
         {
             Console.WriteLine("Acceptance Filter Registers");
 
-            ConsoleWriteRegisterItemDetails(new RxFxSidh(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Sidh)));
-            ConsoleWriteRegisterItemDetails(new RxFxSidl(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Sidl)));
-            ConsoleWriteRegisterItemDetails(new RxFxEid8(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Eid8)));
-            ConsoleWriteRegisterItemDetails(new RxFxEid0(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Eid0)));
-            ConsoleWriteRegisterItemDetails(new RxFxSidh(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Sidh)));
-            ConsoleWriteRegisterItemDetails(new RxFxSidl(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Sidl)));
-            ConsoleWriteRegisterItemDetails(new RxFxEid8(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Eid8)));
-            ConsoleWriteRegisterItemDetails(new RxFxEid0(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Eid0)));
-            ConsoleWriteRegisterItemDetails(new RxFxSidh(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Sidh)));
-            ConsoleWriteRegisterItemDetails(new RxFxSidl(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Sidl)));
-            ConsoleWriteRegisterItemDetails(new RxFxEid8(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Eid8)));
-            ConsoleWriteRegisterItemDetails(new RxFxEid0(2, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Eid0)));
-            ConsoleWriteRegisterItemDetails(new RxFxSidh(3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Sidh)));
-            ConsoleWriteRegisterItemDetails(new RxFxSidl(3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Sidl)));
-            ConsoleWriteRegisterItemDetails(new RxFxEid8(3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Eid8)));
-            ConsoleWriteRegisterItemDetails(new RxFxEid0(3, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Eid0)));
-            ConsoleWriteRegisterItemDetails(new RxFxSidh(4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Sidh)));
-            ConsoleWriteRegisterItemDetails(new RxFxSidl(4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Sidl)));
-            ConsoleWriteRegisterItemDetails(new RxFxEid8(4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Eid8)));
-            ConsoleWriteRegisterItemDetails(new RxFxEid0(4, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Eid0)));
-            ConsoleWriteRegisterItemDetails(new RxFxSidh(5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Sidh)));
-            ConsoleWriteRegisterItemDetails(new RxFxSidl(5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Sidl)));
-            ConsoleWriteRegisterItemDetails(new RxFxEid8(5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Eid8)));
-            ConsoleWriteRegisterItemDetails(new RxFxEid0(5, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Eid0)));
-            ConsoleWriteRegisterItemDetails(new RxMxSidh(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM0Sidh)));
-            ConsoleWriteRegisterItemDetails(new RxMxSidl(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM0Sidl)));
-            ConsoleWriteRegisterItemDetails(new RxMxEid8(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM0Eid8)));
-            ConsoleWriteRegisterItemDetails(new RxMxEid0(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM0Eid0)));
-            ConsoleWriteRegisterItemDetails(new RxMxSidh(0, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM1Sidh)));
-            ConsoleWriteRegisterItemDetails(new RxMxSidl(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM1Sidl)));
-            ConsoleWriteRegisterItemDetails(new RxMxEid8(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM1Eid8)));
-            ConsoleWriteRegisterItemDetails(new RxMxEid0(1, ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM1Eid0)));
+            ConsoleWriteRegisterItemDetails(new RxFxSidh(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Sidh)));
+            ConsoleWriteRegisterItemDetails(new RxFxSidl(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Sidl)));
+            ConsoleWriteRegisterItemDetails(new RxFxEid8(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Eid8)));
+            ConsoleWriteRegisterItemDetails(new RxFxEid0(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF0Eid0)));
+            ConsoleWriteRegisterItemDetails(new RxFxSidh(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Sidh)));
+            ConsoleWriteRegisterItemDetails(new RxFxSidl(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Sidl)));
+            ConsoleWriteRegisterItemDetails(new RxFxEid8(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Eid8)));
+            ConsoleWriteRegisterItemDetails(new RxFxEid0(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF1Eid0)));
+            ConsoleWriteRegisterItemDetails(new RxFxSidh(2,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Sidh)));
+            ConsoleWriteRegisterItemDetails(new RxFxSidl(2,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Sidl)));
+            ConsoleWriteRegisterItemDetails(new RxFxEid8(2,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Eid8)));
+            ConsoleWriteRegisterItemDetails(new RxFxEid0(2,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF2Eid0)));
+            ConsoleWriteRegisterItemDetails(new RxFxSidh(3,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Sidh)));
+            ConsoleWriteRegisterItemDetails(new RxFxSidl(3,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Sidl)));
+            ConsoleWriteRegisterItemDetails(new RxFxEid8(3,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Eid8)));
+            ConsoleWriteRegisterItemDetails(new RxFxEid0(3,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF3Eid0)));
+            ConsoleWriteRegisterItemDetails(new RxFxSidh(4,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Sidh)));
+            ConsoleWriteRegisterItemDetails(new RxFxSidl(4,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Sidl)));
+            ConsoleWriteRegisterItemDetails(new RxFxEid8(4,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Eid8)));
+            ConsoleWriteRegisterItemDetails(new RxFxEid0(4,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF4Eid0)));
+            ConsoleWriteRegisterItemDetails(new RxFxSidh(5,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Sidh)));
+            ConsoleWriteRegisterItemDetails(new RxFxSidl(5,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Sidl)));
+            ConsoleWriteRegisterItemDetails(new RxFxEid8(5,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Eid8)));
+            ConsoleWriteRegisterItemDetails(new RxFxEid0(5,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxF5Eid0)));
+            ConsoleWriteRegisterItemDetails(new RxMxSidh(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM0Sidh)));
+            ConsoleWriteRegisterItemDetails(new RxMxSidl(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM0Sidl)));
+            ConsoleWriteRegisterItemDetails(new RxMxEid8(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM0Eid8)));
+            ConsoleWriteRegisterItemDetails(new RxMxEid0(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM0Eid0)));
+            ConsoleWriteRegisterItemDetails(new RxMxSidh(0,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM1Sidh)));
+            ConsoleWriteRegisterItemDetails(new RxMxSidl(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM1Sidl)));
+            ConsoleWriteRegisterItemDetails(new RxMxEid8(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM1Eid8)));
+            ConsoleWriteRegisterItemDetails(new RxMxEid0(1,
+                ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.RxM1Eid0)));
         }
 
         private static void ReadAllBitTimeConfigurationRegistersWithDetails(Mcp25xxx mcp25xxx)
@@ -240,7 +302,7 @@ namespace Iot.Device.Mcp25xxx.Samples
 
             ConsoleWriteRegisterItemDetails(new Tec(ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.Tec)));
             ConsoleWriteRegisterItemDetails(new Rec(ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.Rec)));
-            ConsoleWriteRegisterItemDetails(new Eflg(ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.Eflg)));            
+            ConsoleWriteRegisterItemDetails(new Eflg(ConsoleWriteRegisterAddressDetails(mcp25xxx, Address.Eflg)));
         }
 
         private static void ReadAllInterruptRegistersWithDetails(Mcp25xxx mcp25xxx)
@@ -294,7 +356,8 @@ namespace Iot.Device.Mcp25xxx.Samples
         private static void LoadTxBuffer(Mcp25xxx mcp25xxx)
         {
             Console.WriteLine("Load Tx Buffer Instruction");
-            mcp25xxx.LoadTxBuffer(TxBufferAddressPointer.TxB0D0, new byte[] { 0b0000_0001, 0b0010_0011, 0b0100_0101, 0b0110_0111 });
+            mcp25xxx.LoadTxBuffer(TxBufferAddressPointer.TxB0D0,
+                new byte[] { 0b0000_0001, 0b0010_0011, 0b0100_0101, 0b0110_0111 });
             mcp25xxx.LoadTxBuffer(TxBufferAddressPointer.TxB0Sidh, new byte[] { 0b1001_0110 });
         }
 
@@ -345,10 +408,10 @@ namespace Iot.Device.Mcp25xxx.Samples
 
             mcp25xxx.WriteByte(
                 new CanCtrl(CanCtrl.PinPrescaler.ClockDivideBy8,
-                false,
-                false,
-                false,
-                Tests.Register.CanControl.OperationMode.NormalOperation));
+                    false,
+                    false,
+                    false,
+                    Tests.Register.CanControl.OperationMode.NormalOperation));
 
             byte[] data = new byte[] { 0b0000_0001, 0b0010_0011, 0b0100_0101, 0b0110_0111, 0b1000_1001 };
 
@@ -356,10 +419,8 @@ namespace Iot.Device.Mcp25xxx.Samples
                 Address.TxB0Sidh,
                 new byte[]
                 {
-                    new TxBxSidh(0, 0b0000_1001).ToByte(),
-                    new TxBxSidl(0, 0b001, false, 0b00).ToByte(),
-                    new TxBxEid8(0, 0b0000_0000).ToByte(),
-                    new TxBxEid0(0, 0b0000_0000).ToByte(),
+                    new TxBxSidh(0, 0b0000_1001).ToByte(), new TxBxSidl(0, 0b001, false, 0b00).ToByte(),
+                    new TxBxEid8(0, 0b0000_0000).ToByte(), new TxBxEid0(0, 0b0000_0000).ToByte(),
                     new TxBxDlc(0, data.Length, false).ToByte()
                 });
 

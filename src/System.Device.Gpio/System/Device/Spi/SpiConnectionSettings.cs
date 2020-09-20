@@ -11,14 +11,16 @@ namespace System.Device.Spi
     /// </summary>
     public sealed class SpiConnectionSettings
     {
-        private SpiConnectionSettings() { }
+        private SpiConnectionSettings()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SpiConnectionSettings"/> class.
         /// </summary>
         /// <param name="busId">The bus ID the device is connected to.</param>
-        /// <param name="chipSelectLine">The chip select line used on the bus.</param>
-        public SpiConnectionSettings(int busId, int chipSelectLine)
+        /// <param name="chipSelectLine">The chip select line used on the bus. Optional, -1 if not used</param>
+        public SpiConnectionSettings(int busId, int chipSelectLine = -1)
         {
             BusId = busId;
             ChipSelectLine = chipSelectLine;

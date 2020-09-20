@@ -17,9 +17,9 @@ namespace Iot.Device.GrovePiDevice
     /// </summary>
     public class GrovePi : IDisposable
     {
-        private I2cDevice _i2cDevice;
-        private readonly bool _autoDispose;
         private const byte MaxRetries = 4;
+        private readonly bool _autoDispose;
+        private I2cDevice _i2cDevice;
 
         /// <summary>
         /// The default GrovePi I2C address is 0x04
@@ -79,7 +79,10 @@ namespace Iot.Device.GrovePiDevice
         /// <param name="param2">Second parameter</param>
         public void WriteCommand(GrovePiCommand command, GrovePort pin, byte param1, byte param2)
         {
-            Span<byte> outArray = stackalloc byte[4] { (byte)command, (byte)(pin), param1, param2 };
+            Span<byte> outArray = stackalloc byte[4]
+            {
+                (byte)command, (byte)(pin), param1, param2
+            };
             byte tries = 0;
             IOException innerEx = null;
             // When writing/reading to the I2C port, GrovePi doesn't respond on time in some cases
@@ -97,7 +100,7 @@ namespace Iot.Device.GrovePiDevice
                     // Give it another try
                     innerEx = ex;
                     tries++;
-                    Thread.Sleep(10);                    
+                    Thread.Sleep(10);
                 }
             }
 
@@ -133,6 +136,7 @@ namespace Iot.Device.GrovePiDevice
                 default:
                     return null;
             }
+
             byte[] outArray = new byte[numberBytesToRead];
             byte tries = 0;
             IOException innerEx = null;

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -13,10 +13,10 @@ namespace Iot.Device.Seesaw
         /// Reads the value of an analog pin.
         /// </summary>
         /// <param name="pin">The pin number in the devices numbering scheme.</param>
-        /// <returns>A value between 0..1023 that represents the analog value.</returns> 
+        /// <returns>A value between 0..1023 that represents the analog value.</returns>
         public ushort AnalogRead(byte pin)
         {
-            const int AdcConversionDelayMicroseconds = 500; //500 microSeconds delay between read and write to allow Adc conversion time.
+            const int AdcConversionDelayMicroseconds = 500; // 500 microSeconds delay between read and write to allow Adc conversion time.
 
             if (!HasModule(SeesawModule.Gpio))
             {

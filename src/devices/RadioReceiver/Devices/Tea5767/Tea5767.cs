@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.I2c;
+using UnitsNet;
 
 namespace Iot.Device.RadioReceiver
 {
@@ -40,7 +41,7 @@ namespace Iot.Device.RadioReceiver
         /// <summary>
         /// TEA5767 FM frequency.
         /// </summary>
-        public override double Frequency { get => GetFrequency(); set => SetFrequency(value); }
+        public override Frequency Frequency { get => GetFrequency(); set => SetFrequency(value); }
 
         /// <summary>
         /// Create a new instance of the TEA5767.
@@ -48,7 +49,7 @@ namespace Iot.Device.RadioReceiver
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         /// <param name="frequencyRange">FM frequency range.</param>
         /// <param name="frequency">FM frequency.</param>
-        public Tea5767(I2cDevice i2cDevice, FrequencyRange frequencyRange, double frequency)
+        public Tea5767(I2cDevice i2cDevice, FrequencyRange frequencyRange, Frequency frequency)
         {
             _i2cDevice = i2cDevice;
 
@@ -119,27 +120,30 @@ namespace Iot.Device.RadioReceiver
         /// Set TEA5767 FM frequency.
         /// </summary>
         /// <param name="frequency">FM frequency.</param>
-        private void SetFrequency(double frequency)
+        private void SetFrequency(Frequency frequency)
         {
+            double frequencyMhz = frequency.Megahertz;
             switch (FrequencyRange)
             {
                 case FrequencyRange.Japan:
-                    if (frequency < 76 || frequency > 90)
+                    if (frequencyMhz < 76 || frequencyMhz > 90)
                     {
                         throw new ArgumentOutOfRangeException(nameof(frequency), $"{nameof(frequency)} needs to be in the range of 76 to 90.");
                     }
+
                     break;
                 case FrequencyRange.Other:
-                    if (frequency < 87 || frequency > 108)
+                    if (frequencyMhz < 87 || frequencyMhz > 108)
                     {
                         throw new ArgumentOutOfRangeException(nameof(frequency), $"{nameof(frequency)} needs to be in the range of 87 to 108.");
                     }
+
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(FrequencyRange), FrequencyRange, null);
             }
 
-            int f = (int)((frequency * 1000000 + 225000) / 8192);
+            int f = (int)((frequencyMhz * 1000000 + 225000) / 8192);
 
             byte high = (byte)((f & 0b_0011_1111_0000_0000) >> 8);
             byte low = (byte)(f & 0b_1111_1111);
@@ -155,13 +159,13 @@ namespace Iot.Device.RadioReceiver
         /// Get TEA5767 FM frequency.
         /// </summary>
         /// <returns>FM frequency.</returns>
-        private double GetFrequency()
+        private Frequency GetFrequency()
         {
             byte[] readBuffer = ReadRegisters();
 
             int f = ((readBuffer[0] & 0b_0011_1111) << 8) | readBuffer[1];
 
-            return Math.Round((f * 8192 - 225000) / 1000000.0, 1);
+            return Frequency.FromMegahertz(Math.Round((f * 8192 - 225000) / 1000000.0, 1));
         }
 
         /// <summary>
@@ -230,7 +234,8 @@ namespace Iot.Device.RadioReceiver
             do
             {
                 readBuffer = ReadRegisters();
-            } while (readBuffer[0] >> 7 != 1);
+            }
+            while (readBuffer[0] >> 7 != 1);
 
             // disable search mode
             _registers[0] &= 0b_1011_1111;

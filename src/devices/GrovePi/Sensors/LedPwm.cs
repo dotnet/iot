@@ -16,13 +16,14 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         /// <param name="grovePi">The GrovePi class</param>
         /// <param name="port">The grove Port, need to be in the list of SupportedPorts</param>
-        public LedPwm(GrovePi grovePi, GrovePort port) : base(grovePi, port)
-        { }
+        public LedPwm(GrovePi grovePi, GrovePort port)
+            : base(grovePi, port)
+        {
+        }
 
         /// <summary>
         /// Returns the duty cycle as percentage from 0 % to 100 %
         /// </summary>
-        /// <returns>Returns the duty cycle as percentage from 0 % to 100 %</returns>
         public override string ToString() => $"{ValueAsPercent} %";
 
         /// <summary>

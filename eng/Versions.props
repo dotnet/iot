@@ -2,12 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
-    <MicrosoftDotNetGenAPIPackageVersion>5.0.0-beta.19552.1</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>5.0.0-beta.20467.6</MicrosoftDotNetGenAPIPackageVersion>
     <!-- dotnet/corefx dependencies -->
     <SystemDrawingCommonPackageVersion>4.6.0</SystemDrawingCommonPackageVersion>
     <SystemIOPortsPackageVersion>4.6.0</SystemIOPortsPackageVersion>
     <MicrosoftWin32RegistryPackageVersion>4.6.0</MicrosoftWin32RegistryPackageVersion>
     <SystemRuntimeWindowsRuntimePackageVersion>4.6.0</SystemRuntimeWindowsRuntimePackageVersion>
+    <UnitsNetPackageVersion>4.58.0</UnitsNetPackageVersion>
   </PropertyGroup>
   <!-- Restore sources -->
   <PropertyGroup>

@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.OneWire.Samples
 {
-    class Program
+    internal class Program
     {
-        static async Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
             // Make sure you can access the bus device before requesting a device scan (or run using sudo)
             // $ sudo chmod a+rw /sys/bus/w1/devices/w1_bus_master1/w1_master_*
@@ -18,7 +18,10 @@ namespace Iot.Device.OneWire.Samples
             {
                 // Quick and simple way to find a thermometer and print the temperature
                 foreach (var dev in OneWireThermometerDevice.EnumerateDevices())
-                    Console.WriteLine($"Temperature reported by '{dev.DeviceId}': " + (await dev.ReadTemperatureAsync()).Celsius.ToString("F2") + "\u00B0C");
+                {
+                    Console.WriteLine($"Temperature reported by '{dev.DeviceId}': " +
+                                      (await dev.ReadTemperatureAsync()).DegreesCelsius.ToString("F2") + "\u00B0C");
+                }
             }
             else
             {
@@ -35,7 +38,9 @@ namespace Iot.Device.OneWire.Samples
                         if (OneWireThermometerDevice.IsCompatible(busId, devId))
                         {
                             var devTemp = new OneWireThermometerDevice(busId, devId);
-                            Console.WriteLine("Temperature reported by device: " + (await devTemp.ReadTemperatureAsync()).Celsius.ToString("F2") + "\u00B0C");
+                            Console.WriteLine("Temperature reported by device: " +
+                                              (await devTemp.ReadTemperatureAsync()).DegreesCelsius.ToString("F2") +
+                                              "\u00B0C");
                         }
                     }
                 }

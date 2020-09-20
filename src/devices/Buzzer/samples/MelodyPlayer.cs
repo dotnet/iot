@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -12,7 +12,7 @@ namespace Iot.Device.Buzzer.Samples
     /// <summary>
     /// Buzzer wrapper which allows to play melody element sequences with desired tempo.
     /// </summary>
-    class MelodyPlayer : IDisposable
+    internal class MelodyPlayer : IDisposable
     {
         private readonly Buzzer _buzzer;
         private int _wholeNoteDurationInMilliseconds;
@@ -48,6 +48,7 @@ namespace Iot.Device.Buzzer.Samples
             {
                 return sequence;
             }
+
             return sequence
                 .Select(element => TransposeElement(element, tonesToTransponse))
                 .ToList();
@@ -66,7 +67,7 @@ namespace Iot.Device.Buzzer.Samples
             // As far as octave and note numbered starting from 1 we decrease it's values by 1 for farher calculation.
             var absoluteNoteNumber = ((int)noteElement.Octave - 1) * 12 + ((int)noteElement.Note - 1);
 
-            // Then we transpose absolute number. In case gotten value exceeds maximum value of 96 (12 notes * 8 octave) 
+            // Then we transpose absolute number. In case gotten value exceeds maximum value of 96 (12 notes * 8 octave)
             // we calculate remainder of dividing by 96. In case gotten value is below 0 we add 96.
             absoluteNoteNumber = (absoluteNoteNumber + tonesToTransponse) % 96;
             absoluteNoteNumber = absoluteNoteNumber >= 0 ? absoluteNoteNumber : absoluteNoteNumber + 96;
@@ -104,7 +105,7 @@ namespace Iot.Device.Buzzer.Samples
             }
         }
 
-        private static readonly Dictionary<Note, double> notesOfEightOctaveToFrequenciesMap 
+        private static readonly Dictionary<Note, double> notesOfEightOctaveToFrequenciesMap
             = new Dictionary<Note, double>
                 {
                     { Note.C,  4186.01 },

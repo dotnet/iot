@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.GrovePiDevice.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -14,8 +14,8 @@ namespace Iot.Device.GrovePiDevice.Sensors
     /// </summary>
     public class DhtSensor
     {
+        private readonly double[] _lastTemHum = new double[2] { double.NaN, double.NaN };
         private GrovePi _grovePi;
-        private readonly double[] _lastTemHum = new double[2];
 
         /// <summary>
         /// grove sensor port
@@ -31,7 +31,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public DhtSensor(GrovePi grovePi, GrovePort port, DhtType dhtType)
         {
             if (!SupportedPorts.Contains(port))
+            {
                 throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
+            }
+
             _grovePi = grovePi;
             DhtType = dhtType;
             _port = port;
@@ -63,9 +66,17 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         public void Read()
         {
-            _grovePi.WriteCommand(GrovePiCommand.DhtTemp, _port, (byte)DhtType, 0);
+            // Fix for the firmware 1.4.0, you can request a new measurement only if you got data
+            // from the previous one
+            if (!(double.IsNaN(_lastTemHum[0]) && double.IsNaN(_lastTemHum[1])))
+            {
+                _grovePi.WriteCommand(GrovePiCommand.DhtTemp, _port, (byte)DhtType, 0);
+            }
+
             // Wait a little bit to read the result
-            Thread.Sleep(50);
+            // Delay from source code, line 90 in the Grove Pi firmware repository
+            // This is needed for firmware 1.4.0 and also working for previous versions
+            Thread.Sleep(300);
             var retArray = _grovePi.ReadCommand(GrovePiCommand.DhtTemp, _port);
             _lastTemHum[0] = BitConverter.ToSingle(retArray.AsSpan(1, 4));
             _lastTemHum[1] = BitConverter.ToSingle(retArray.AsSpan(5, 4));

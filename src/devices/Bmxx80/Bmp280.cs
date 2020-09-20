@@ -2,14 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Device.I2c;
+using Iot.Device.Bmxx80.Register;
 
 namespace Iot.Device.Bmxx80
 {
     /// <summary>
     /// Represents a BME280 temperature and barometric pressure sensor.
     /// </summary>
-    public sealed class Bmp280 : Bmx280Base
+    public class Bmp280 : Bmx280Base
     {
         /// <summary>
         /// The expected chip ID of the BMP280.

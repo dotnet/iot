@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Magnetometer;
-using Iot.Units;
 using System;
 using System.Buffers.Binary;
 using System.Device;
@@ -13,6 +11,8 @@ using System.Net.Http.Headers;
 using System.Numerics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using Iot.Device.Magnetometer;
+using UnitsNet;
 
 namespace Iot.Device.Imu
 {
@@ -54,7 +54,10 @@ namespace Iot.Device.Imu
         public Vector3 CalibrateMagnetometer(int calibrationCounts = 1000)
         {
             if (_wakeOnMotion)
+            {
                 return Vector3.Zero;
+            }
+
             // Run the calibration
             var calib = _ak8963.CalibrateMagnetometer(calibrationCounts);
             // Invert X and Y, don't change Z, this is a multiplication factor only
@@ -91,7 +94,7 @@ namespace Iot.Device.Imu
         /// <param name="waitForData">true to wait for new data</param>
         /// <returns>The data from the magnetometer</returns>
         public Vector3 ReadMagnetometerWithoutCorrection(bool waitForData = true)
-        {            
+        {
             var readMag = _ak8963.ReadMagnetometerWithoutCorrection(waitForData, GetTimeout());
             _firstContinuousRead = false;
             return _wakeOnMotion ? Vector3.Zero : new Vector3(readMag.Y, readMag.X, -readMag.Z);
@@ -138,12 +141,13 @@ namespace Iot.Device.Imu
                     // When switching to this mode, the first read can be longer than 10 ms. Tests shows up to 100 ms
                     timeout = _firstContinuousRead ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromMilliseconds(12);
                     break;
-                // Those cases are not measurement and should be 0 then                
+                // Those cases are not measurement and should be 0 then
                 case MeasurementMode.FuseRomAccess:
                 case MeasurementMode.PowerDown:
                 default:
                     break;
             }
+
             return timeout;
         }
 
@@ -152,12 +156,17 @@ namespace Iot.Device.Imu
         /// </summary>
         public MeasurementMode MagnetometerMeasurementMode
         {
-            get { return _ak8963.MeasurementMode; }
+            get
+            {
+                return _ak8963.MeasurementMode;
+            }
             set
             {
                 _ak8963.MeasurementMode = value;
                 if (value == MeasurementMode.ContinuousMeasurement100Hz)
+                {
                     _firstContinuousRead = true;
+                }
             }
         }
 
@@ -182,13 +191,17 @@ namespace Iot.Device.Imu
         /// </summary>
         /// <param name="i2cDevice">The I2C device</param>
         /// <param name="autoDispose">Will automatically dispose the I2C device if true</param>
-        public Mpu9250(I2cDevice i2cDevice, bool autoDispose = true) : base()
+        public Mpu9250(I2cDevice i2cDevice, bool autoDispose = true)
+            : base()
         {
             _i2cDevice = i2cDevice;
             Reset();
             PowerOn();
             if (!CheckVersion())
+            {
                 throw new IOException($"This device does not contain the correct signature 0x71 for a MPU9250");
+            }
+
             GyroscopeBandwidth = GyroscopeBandwidth.Bandwidth0250Hz;
             GyroscopeRange = GyroscopeRange.Range0250Dps;
             AccelerometerBandwidth = AccelerometerBandwidth.Bandwidth1130Hz;
@@ -217,9 +230,12 @@ namespace Iot.Device.Imu
                     Thread.Sleep(100);
                     // Try one more time
                     if (!_ak8963.IsVersionCorrect())
+                    {
                         throw new IOException($"This device does not contain the correct signature 0x48 for a AK8963 embedded into the MPU9250");
+                    }
                 }
             }
+
             _ak8963.MeasurementMode = MeasurementMode.SingleMeasurement;
         }
 

@@ -6,9 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <PackageReference Include="System.Memory" Version="4.5.3" />
     <Compile Include="*.cs" />
     <None Include="README.md" />
@@ -17,7 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ak8963\Ak8963.csproj" />
-    <ProjectReference Include="..\Units\Units.csproj" />
   </ItemGroup>
 
   <ItemGroup>

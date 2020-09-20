@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -34,8 +34,12 @@ namespace Iot.Device.LEDMatrix
         private byte[] _colorsBuffer; // Buffer to store all color data used for drawing on the matrix.
         private byte[] _colorsBackBuffer; // Background buffer to store all color data used for drawing on the matrix.
         private ulong[] _rowSetMasks; // masks used to quickly set the row number to Gpio pins.
-        private ulong [] _colorsMake; // masks used to quickly set the R, G, B values to Gpio pins.
-        private long _duration = (long) (Stopwatch.Frequency * 1800 / 1E9); // time interval in 100 nanoseconds used in the pulse width modulation (PWM)
+        private ulong[] _colorsMake; // masks used to quickly set the R, G, B values to Gpio pins.
+
+        private long
+            _duration = (long)(Stopwatch.Frequency * 1800 /
+                               1E9); // time interval in 100 nanoseconds used in the pulse width modulation (PWM)
+
         private long _frameTime; // store the time spent to render one frame.
         private bool _startMeasureFrameTime; // enable to measure the time frame
         private int _chainRows; // how many matrices in one column of the chaining.
@@ -51,8 +55,8 @@ namespace Iot.Device.LEDMatrix
         /// <param name="chainColumns">Number of the matrices columns in the chain</param>
         public RGBLedMatrix(PinMapping mapping, int width, int height, int chainRows = 1, int chainColumns = 1)
         {
-            _chainRows      = chainRows;
-            _chainColumns   = chainColumns;
+            _chainRows = chainRows;
+            _chainColumns = chainColumns;
 
             _mapping = mapping;
 
@@ -77,7 +81,7 @@ namespace Iot.Device.LEDMatrix
 
             if (_deviceRows > 32)
             {
-                _duration = (long) ((double) Stopwatch.Frequency * 400 / 1E9);
+                _duration = (long)((double)Stopwatch.Frequency * 400 / 1E9);
                 OpenAndWriteToPin(_mapping.E, PinValue.Low);
             }
 
@@ -85,7 +89,7 @@ namespace Iot.Device.LEDMatrix
 
             if (_fullChainWidth > 32)
             {
-                _duration = (long) ((double) Stopwatch.Frequency * 400 / 1E9);
+                _duration = (long)((double)Stopwatch.Frequency * 400 / 1E9);
             }
 
             // OE set High means disable output (confusing)
@@ -100,23 +104,56 @@ namespace Iot.Device.LEDMatrix
             OpenAndWriteToPin(_mapping.G2, PinValue.Low);
             OpenAndWriteToPin(_mapping.B2, PinValue.Low);
 
-            _rowSetMasks   = new ulong [_deviceRows >> 1];
+            _rowSetMasks = new ulong[_deviceRows >> 1];
 
             for (int i = 1; i < _deviceRows >> 1; i++)
             {
-                if ((i & 1)    != 0) _rowSetMasks[i] |= _gpio.AMask;
-                if ((i & 2)    != 0) _rowSetMasks[i] |= _gpio.BMask;
-                if ((i & 4)    != 0) _rowSetMasks[i] |= _gpio.CMask;
-                if ((i & 8)    != 0) _rowSetMasks[i] |= _gpio.DMask;
-                if ((i & 0x10) != 0) _rowSetMasks[i] |= _gpio.EMask;
+                if ((i & 1) != 0)
+                {
+                    _rowSetMasks[i] |= _gpio.AMask;
+                }
+
+                if ((i & 2) != 0)
+                {
+                    _rowSetMasks[i] |= _gpio.BMask;
+                }
+
+                if ((i & 4) != 0)
+                {
+                    _rowSetMasks[i] |= _gpio.CMask;
+                }
+
+                if ((i & 8) != 0)
+                {
+                    _rowSetMasks[i] |= _gpio.DMask;
+                }
+
+                if ((i & 0x10) != 0)
+                {
+                    _rowSetMasks[i] |= _gpio.EMask;
+                }
             }
 
             _colorsMake = new ulong[16]; // 8 for RGB1 and 8 for RGB2
             for (int i = 1; i < 8; i++)
             {
-                if ((i & 1) != 0) { _colorsMake[i] |= _gpio.R1Mask; _colorsMake[i + 8] |= _gpio.R2Mask; }
-                if ((i & 2) != 0) { _colorsMake[i] |= _gpio.G1Mask; _colorsMake[i + 8] |= _gpio.G2Mask; }
-                if ((i & 4) != 0) { _colorsMake[i] |= _gpio.B1Mask; _colorsMake[i + 8] |= _gpio.B2Mask; }
+                if ((i & 1) != 0)
+                {
+                    _colorsMake[i] |= _gpio.R1Mask;
+                    _colorsMake[i + 8] |= _gpio.R2Mask;
+                }
+
+                if ((i & 2) != 0)
+                {
+                    _colorsMake[i] |= _gpio.G1Mask;
+                    _colorsMake[i + 8] |= _gpio.G2Mask;
+                }
+
+                if ((i & 4) != 0)
+                {
+                    _colorsMake[i] |= _gpio.B1Mask;
+                    _colorsMake[i + 8] |= _gpio.B2Mask;
+                }
             }
 
             _colorsBuffer = new byte[8 * _fullChainWidth * (_deviceRows >> 1)];
@@ -151,10 +188,10 @@ namespace Iot.Device.LEDMatrix
         /// <value></value>
         public long PWMDuration
         {
-            get => (long) (((double) _duration / Stopwatch.Frequency) * 1E9);
+            get => (long)(((double)_duration / Stopwatch.Frequency) * 1E9);
             set
             {
-                _duration = (long) ((double) Stopwatch.Frequency * value / 1E9); // value nanoseconds;
+                _duration = (long)((double)Stopwatch.Frequency * value / 1E9); // value nanoseconds;
                 _startMeasureFrameTime = true;
             }
         }
@@ -176,9 +213,10 @@ namespace Iot.Device.LEDMatrix
         /// <param name="green">green color value</param>
         /// <param name="blue">blue color value</param>
         /// <param name="backBuffer">true if to draw on back buffer, false to draw on the forground buffer</param>
-        public void FillRectangle(int x, int y, int width, int height, byte red, byte green, byte blue, bool backBuffer = false)
+        public void FillRectangle(int x, int y, int width, int height, byte red, byte green, byte blue,
+            bool backBuffer = false)
         {
-            byte [] buffer = backBuffer ? _colorsBackBuffer : _colorsBuffer;
+            byte[] buffer = backBuffer ? _colorsBackBuffer : _colorsBuffer;
 
             for (int j = 0; j < height; j++)
             {
@@ -216,7 +254,6 @@ namespace Iot.Device.LEDMatrix
             SetPixel(column, row, red, green, blue, _colorsBuffer);
         }
 
-
         /// <summary>
         /// Set color of specific pixel on the background buffer display
         /// </summary>
@@ -231,7 +268,7 @@ namespace Iot.Device.LEDMatrix
             SetPixel(column, row, red, green, blue, _colorsBackBuffer);
         }
 
-        private void SetPixel(int column, int row, byte red, byte green, byte blue, byte [] colorsBuffer)
+        private void SetPixel(int column, int row, byte red, byte green, byte blue, byte[] colorsBuffer)
         {
             if ((column | row) < 0 || column >= Width || row >= Height)
             {
@@ -255,26 +292,38 @@ namespace Iot.Device.LEDMatrix
             }
 
             int pos = 8 * column + 8 * (row % (_deviceRows >> 1)) * _fullChainWidth;
-            byte mask = (byte) (row >= (_deviceRows >> 1) ? 0x08 : 0x01);
+            byte mask = (byte)(row >= (_deviceRows >> 1) ? 0x08 : 0x01);
 
             for (int i = 0; i < 8; i++)
             {
                 int bit = 1 << i;
 
                 if ((red & bit) != 0)
+                {
                     colorsBuffer[pos + i] |= mask;
+                }
                 else
-                    colorsBuffer[pos + i] &= (byte) (~mask);
+                {
+                    colorsBuffer[pos + i] &= (byte)(~mask);
+                }
 
                 if ((green & bit) != 0)
-                    colorsBuffer[pos + i] |= (byte) (mask << 1);
+                {
+                    colorsBuffer[pos + i] |= (byte)(mask << 1);
+                }
                 else
-                    colorsBuffer[pos + i] &= (byte) ~(mask << 1);
+                {
+                    colorsBuffer[pos + i] &= (byte)~(mask << 1);
+                }
 
                 if ((blue & bit) != 0)
-                    colorsBuffer[pos + i] |= (byte) (mask << 2);
+                {
+                    colorsBuffer[pos + i] |= (byte)(mask << 2);
+                }
                 else
-                    colorsBuffer[pos + i] &= (byte) ~(mask << 2);
+                {
+                    colorsBuffer[pos + i] &= (byte)~(mask << 2);
+                }
             }
         }
 
@@ -292,7 +341,9 @@ namespace Iot.Device.LEDMatrix
         {
             _swapRequested = true;
 
-            while (_swapRequested );
+            while (_swapRequested)
+            {
+            }
         }
 
         /// <summary>
@@ -350,26 +401,29 @@ namespace Iot.Device.LEDMatrix
                 return;
             }
 
-            byte [] buffer = backBuffer ? _colorsBackBuffer : _colorsBuffer;
+            byte[] buffer = backBuffer ? _colorsBackBuffer : _colorsBuffer;
 
             Rectangle fullImageRectangle = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
             Rectangle partialBitmap = new Rectangle(x, y, bitmap.Width, bitmap.Height);
             partialBitmap.Intersect(new Rectangle(0, 0, Width, Height));
 
-            BitmapData bitmapData = bitmap.LockBits(fullImageRectangle, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            BitmapData bitmapData =
+                bitmap.LockBits(fullImageRectangle, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
             try
             {
                 int pos = 3 * ((y < 0 ? Math.Abs(y) * bitmap.Width : 0) + (x < 0 ? Math.Abs(x) : 0));
                 int stride = (bitmapData.Stride - 3 * bitmap.Width) + 3 * (bitmap.Width - partialBitmap.Width);
 
-                Span<byte> span = new Span<byte>((void*) bitmapData.Scan0, fullImageRectangle.Width * fullImageRectangle.Height * 3);
+                Span<byte> span = new Span<byte>((void*)bitmapData.Scan0,
+                    fullImageRectangle.Width * fullImageRectangle.Height * 3);
 
                 for (int j = 0; j < partialBitmap.Height; j++)
                 {
                     for (int i = 0; i < partialBitmap.Width; i++)
                     {
-                        SetPixel(partialBitmap.X + i, partialBitmap.Y + j, span[pos + 2], span[pos + 1], span[pos], buffer);
+                        SetPixel(partialBitmap.X + i, partialBitmap.Y + j, span[pos + 2], span[pos + 1], span[pos],
+                            buffer);
                         pos += 3;
                     }
 
@@ -396,14 +450,15 @@ namespace Iot.Device.LEDMatrix
         /// <param name="repGreen">replacement color for the green color</param>
         /// <param name="repBlue">replacement color for the blue color</param>
         /// <param name="backBuffer">true if want use back buffer, false otherwise</param>
-        public unsafe void DrawBitmap(int x, int y, Bitmap bitmap, byte red, byte green, byte blue, byte repRed, byte repGreen, byte repBlue, bool backBuffer = false)
+        public unsafe void DrawBitmap(int x, int y, Bitmap bitmap, byte red, byte green, byte blue, byte repRed,
+            byte repGreen, byte repBlue, bool backBuffer = false)
         {
             if (y >= Height || x >= Width || x + bitmap.Width <= 0 || y + bitmap.Height <= 0)
             {
                 return;
             }
 
-            byte [] buffer = backBuffer ? _colorsBackBuffer : _colorsBuffer;
+            byte[] buffer = backBuffer ? _colorsBackBuffer : _colorsBuffer;
 
             int bitmapX = x < 0 ? -x : 0;
             int bitmapY = y < 0 ? -y : 0;
@@ -412,14 +467,15 @@ namespace Iot.Device.LEDMatrix
             int coorX = Math.Max(0, x);
             int coorY = Math.Max(0, y);
 
-            BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
             try
             {
                 int pos = 3 * (bitmapY * bitmap.Width + bitmapX);
                 int stride = (bitmapData.Stride - 3 * bitmap.Width) + 3 * (bitmap.Width - bitmapWidth);
 
-                Span<byte> span = new Span<byte>((void*) bitmapData.Scan0, bitmapData.Stride * bitmap.Height);
+                Span<byte> span = new Span<byte>((void*)bitmapData.Scan0, bitmapData.Stride * bitmap.Height);
 
                 for (int j = 0; j < bitmapHeight; j++)
                 {
@@ -433,6 +489,7 @@ namespace Iot.Device.LEDMatrix
                         {
                             SetPixel(coorX + i, coorY + j, span[pos + 2], span[pos + 1], span[pos], buffer);
                         }
+
                         pos += 3;
                     }
 
@@ -459,7 +516,8 @@ namespace Iot.Device.LEDMatrix
         /// <param name="bkG">Green channel of the text background</param>
         /// <param name="bkB">Blue channel of the text background</param>
         /// <param name="backBuffer">Set to true if drawing on the backing buffer. Defaults to false.</param>
-        public void DrawText(int x, int y, ReadOnlySpan<char> text, BdfFont font, byte textR, byte textG, byte textB, byte bkR, byte bkG, byte bkB, bool backBuffer = false)
+        public void DrawText(int x, int y, ReadOnlySpan<char> text, BdfFont font, byte textR, byte textG, byte textB,
+            byte bkR, byte bkG, byte bkB, bool backBuffer = false)
         {
             int charWidth = font.Width;
             int totalTextWith = charWidth * text.Length;
@@ -488,7 +546,6 @@ namespace Iot.Device.LEDMatrix
             }
         }
 
-
         /// <summary>
         /// Write a text at specific position to the display using the input font and the colors
         /// </summary>
@@ -504,7 +561,8 @@ namespace Iot.Device.LEDMatrix
         /// <param name="bkB">text background blue color</param>
         /// <param name="backBuffer">true if want use back buffer, false otherwise</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void DrawText(int x, int y, string text, BdfFont font, byte textR, byte textG, byte textB, byte bkR, byte bkG, byte bkB, bool backBuffer = false)
+        public void DrawText(int x, int y, string text, BdfFont font, byte textR, byte textG, byte textB, byte bkR,
+            byte bkG, byte bkB, bool backBuffer = false)
         {
             DrawText(x, y, text.AsSpan(), font, textR, textG, textB, bkR, bkG, bkB, backBuffer);
         }
@@ -519,25 +577,28 @@ namespace Iot.Device.LEDMatrix
         /// <param name="green">green color of circle arc</param>
         /// <param name="blue">blue color of circle arc</param>
         /// <param name="backBuffer">true if want use back buffer, false otherwise</param>
-        public void DrawCircle(int xCenter, int yCenter, int radius, byte red, byte green, byte blue, bool backBuffer = false)
+        public void DrawCircle(int xCenter, int yCenter, int radius, byte red, byte green, byte blue,
+            bool backBuffer = false)
         {
-            byte [] buffer = backBuffer ? _colorsBackBuffer : _colorsBuffer;
+            byte[] buffer = backBuffer ? _colorsBackBuffer : _colorsBuffer;
 
             for (double angle = 0.0; angle < 6.2832; angle += 1.0 / radius)
             {
-                SetPixel((int) Math.Round(xCenter + radius * Math.Cos(angle)), (int) Math.Round(yCenter + radius * Math.Sin(angle)), red, green, blue, buffer);
+                SetPixel((int)Math.Round(xCenter + radius * Math.Cos(angle)),
+                    (int)Math.Round(yCenter + radius * Math.Sin(angle)), red, green, blue, buffer);
             }
         }
 
-        private void DrawChar(int x, int y, char c, BdfFont font, byte textR, byte textG, byte textB, byte bkR, byte bkG, byte bkB, byte [] buffer)
+        private void DrawChar(int x, int y, char c, BdfFont font, byte textR, byte textG, byte textB, byte bkR,
+            byte bkG, byte bkB, byte[] buffer)
         {
             int hightToDraw = Math.Min(Height - y, font.Height);
             int firstColumnToDraw = x < 0 ? Math.Abs(x) : 0;
-            int lastColumnToDraw  = x + font.Width > Width ? Width - x : font.Width;
+            int lastColumnToDraw = x + font.Width > Width ? Width - x : font.Width;
 
             font.GetCharData(c, out ReadOnlySpan<ushort> charData);
 
-            int b = 8 * (sizeof(ushort) - (int) Math.Ceiling(((double)font.Width) / 8)) + firstColumnToDraw;
+            int b = 8 * (sizeof(ushort) - (int)Math.Ceiling(((double)font.Width) / 8)) + firstColumnToDraw;
 
             for (int j = firstColumnToDraw; j < lastColumnToDraw; j++)
             {
@@ -546,9 +607,13 @@ namespace Iot.Device.LEDMatrix
                     int value = charData[i] << (b + j - firstColumnToDraw);
 
                     if ((value & 0x8000) != 0)
+                    {
                         SetPixel(x + j, y + i, textR, textG, textB, buffer);
+                    }
                     else
+                    {
                         SetPixel(x + j, y + i, bkR, bkG, bkB, buffer);
+                    }
                 }
             }
         }
@@ -557,7 +622,9 @@ namespace Iot.Device.LEDMatrix
         private void Sleep(long duration)
         {
             long startTicks = Stopwatch.GetTimestamp();
-            while (Stopwatch.GetTimestamp() - startTicks < duration) { }
+            while (Stopwatch.GetTimestamp() - startTicks < duration)
+            {
+            }
         }
 
         private void Render()
@@ -583,7 +650,7 @@ namespace Iot.Device.LEDMatrix
                     if (showFrameTime)
                     {
                         long totalTime = Stopwatch.GetTimestamp() - startTime;
-                        _frameTime = (long)(((double) totalTime / Stopwatch.Frequency) * 1E6);
+                        _frameTime = (long)(((double)totalTime / Stopwatch.Frequency) * 1E6);
                         showFrameTime = false;
                         _startMeasureFrameTime = false;
                     }

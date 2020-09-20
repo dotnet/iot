@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -11,9 +11,9 @@ using Iot.Device.Imu;
 
 namespace DemoMpu9250
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello MPU9250!");
 
@@ -26,10 +26,10 @@ namespace DemoMpu9250
                 Console.WriteLine("If you want to run a deep dive calibration data export, run this sample with an argument for the number of calibration cycles you want:");
                 Console.WriteLine("To run a calibration with 1000 sample and exporting all data: ./Mpu9250.sample 1000");
                 MainTest();
-            }            
+            }
         }
 
-        static void MagnetometerCalibrationDeepDive(int calibrationCount)
+        public static void MagnetometerCalibrationDeepDive(int calibrationCount)
         {
             var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
             Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
@@ -55,6 +55,7 @@ namespace DemoMpu9250
                         Console.WriteLine("Error reading");
                     }
                 }
+
                 Console.WriteLine("Performing calibration");
                 // then we calibrate
                 var magnetoBias = mpu9250.CalibrateMagnetometer(calibrationCount);
@@ -85,16 +86,19 @@ namespace DemoMpu9250
                     }
                 }
             }
+
             Console.WriteLine("Calibration deep dive over, file name is mag.csv");
         }
 
-        static void MainTest()
-        {           
+        public static void MainTest()
+        {
             var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
             Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
             Console.WriteLine($"Check version magnetometer: {mpu9250.GetMagnetometerVersion()}");
-            Console.WriteLine("Magnetometer calibration is taking couple of seconds, please be patient! Please make sure you are not close to any magnetic field like magnet or phone.");
-            Console.WriteLine("Please move your sensor as much as possible in all direction in space to get as many points in space as possible");
+            Console.WriteLine(
+                "Magnetometer calibration is taking couple of seconds, please be patient! Please make sure you are not close to any magnetic field like magnet or phone.");
+            Console.WriteLine(
+                "Please move your sensor as much as possible in all direction in space to get as many points in space as possible");
             var mag = mpu9250.CalibrateMagnetometer();
             Console.WriteLine($"Hardware bias multiplicative:");
             Console.WriteLine($"Mag X = {mag.X}");
@@ -139,7 +143,7 @@ namespace DemoMpu9250
                 Console.WriteLine($"Acc X = {acc.X,15}");
                 Console.WriteLine($"Acc Y = {acc.Y,15}");
                 Console.WriteLine($"Acc Z = {acc.Z,15}");
-                Console.WriteLine($"Temp = {mpu9250.GetTemperature().Celsius.ToString("0.00")} °C");
+                Console.WriteLine($"Temp = {mpu9250.GetTemperature().DegreesCelsius.ToString("0.00")} °C");
                 var magne = mpu9250.ReadMagnetometer();
                 Console.WriteLine($"Mag X = {magne.X,15}");
                 Console.WriteLine($"Mag Y = {magne.Y,15}");
@@ -150,7 +154,7 @@ namespace DemoMpu9250
             readKey = Console.ReadKey();
             // SetWakeOnMotion
             mpu9250.SetWakeOnMotion(300, AccelerometerLowPowerFrequency.Frequency0Dot24Hz);
-            // You'll need to attach the INT pin to a GPIO and read the level. Once going up, you have 
+            // You'll need to attach the INT pin to a GPIO and read the level. Once going up, you have
             // some data and the sensor is awake
             // In order to simulate this without a GPIO pin, you will see that the refresh rate is very low
             // Setup here at 0.24Hz which means, about every 4 seconds

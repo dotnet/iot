@@ -23,6 +23,7 @@ namespace Iot.Device.Pcx857x
         protected I2cDevice Device { get; }
         private readonly GpioController _masterGpioController;
         private readonly int _interrupt;
+        private bool _shouldDispose;
 
         // Pin mode bits- 0 for input, 1 for output to match PinMode
         private ushort _pinModes;
@@ -39,10 +40,12 @@ namespace Iot.Device.Pcx857x
         /// The GPIO controller for the <paramref name="interrupt"/>.
         /// If not specified, the default controller will be used.
         /// </param>
-        public Pcx857x(I2cDevice device, int interrupt = -1, GpioController gpioController = null)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Pcx857x(I2cDevice device, int interrupt = -1, GpioController gpioController = null, bool shouldDispose = true)
         {
             Device = device ?? throw new ArgumentNullException(nameof(device));
             _interrupt = interrupt;
+            _shouldDispose = gpioController == null ? true : shouldDispose;
 
             if (_interrupt != -1)
             {
@@ -51,7 +54,7 @@ namespace Iot.Device.Pcx857x
             }
 
             // These controllers do not have commands, setting the pins to high designates
-            // them as able to recieve input. As we don't want to set high on pins intended
+            // them as able to receive input. As we don't want to set high on pins intended
             // for output we'll set all of the pins to low for our initial state.
             if (PinCount == 8)
             {
@@ -109,6 +112,11 @@ namespace Iot.Device.Pcx857x
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
+            if (_shouldDispose)
+            {
+                _masterGpioController?.Dispose();
+            }
+
             Device.Dispose();
             base.Dispose(disposing);
         }
@@ -122,7 +130,10 @@ namespace Iot.Device.Pcx857x
         /// <inheritdoc/>
         protected override PinValue Read(int pinNumber)
         {
-            Span<PinValuePair> values = stackalloc PinValuePair[]{ new PinValuePair(pinNumber, default) };
+            Span<PinValuePair> values = stackalloc PinValuePair[]
+            {
+                new PinValuePair(pinNumber, default)
+            };
             Read(values);
             return values[0].PinValue;
         }
@@ -135,7 +146,9 @@ namespace Iot.Device.Pcx857x
         {
             (uint pins, _) = new PinVector32(pinValues);
             if (pins >> PinCount > 0)
+            {
                 ThrowInvalidPin(nameof(pinValues));
+            }
 
             if ((pins & _pinModes) != 0)
             {
@@ -163,7 +176,9 @@ namespace Iot.Device.Pcx857x
         private void ValidatePinNumber(int pinNumber)
         {
             if (pinNumber < 0 || pinNumber >= PinCount)
+            {
                 ThrowInvalidPin(nameof(pinNumber));
+            }
         }
 
         /// <inheritdoc/>
@@ -208,16 +223,23 @@ namespace Iot.Device.Pcx857x
         /// <inheritdoc/>
         protected override void Write(int pinNumber, PinValue value)
         {
-            Span<PinValuePair> values = stackalloc PinValuePair[] { new PinValuePair(pinNumber, value) };
+            Span<PinValuePair> values = stackalloc PinValuePair[]
+            {
+                new PinValuePair(pinNumber, value)
+            };
             Write(values);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Writes a value to a set of pins.
+        /// </summary>
         public void Write(ReadOnlySpan<PinValuePair> pinValues)
         {
             (uint pins, uint values) = new PinVector32(pinValues);
             if (pins >> PinCount > 0)
+            {
                 ThrowInvalidPin(nameof(pinValues));
+            }
 
             if ((pins & ~_pinModes) != 0)
             {
@@ -245,6 +267,7 @@ namespace Iot.Device.Pcx857x
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
 
         // For now eventing APIs are not supported.
+
         /// <inheritdoc/>
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => throw new NotImplementedException();
 

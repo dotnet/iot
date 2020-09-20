@@ -9,21 +9,21 @@ using System.Threading;
 
 namespace Iot.Device.SocketCan.Samples
 {
-    class Program
+    internal class Program
     {
-        static readonly CanId Id = new CanId()
+        private static readonly CanId Id = new CanId()
         {
             Standard = 0x1A // arbitrary id
         };
 
-        static Dictionary<string, Action> s_samples = new Dictionary<string, Action>
+        private static Dictionary<string, Action> s_samples = new Dictionary<string, Action>
         {
             { "send", SendExample },
             { "receive", ReceiveAllExample },
             { "receive-on-specific-address", ReceiveOnAddressExample },
         };
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             if (args.Length == 0 || !s_samples.ContainsKey(args[0]))
             {
@@ -66,7 +66,7 @@ namespace Iot.Device.SocketCan.Samples
                     foreach (byte[] buffer in buffers)
                     {
                         can.WriteFrame(buffer, Id);
-                        string dataAsHex = string.Join("", buffer.Select((x) => x.ToString("X2")));
+                        string dataAsHex = string.Join(string.Empty, buffer.Select((x) => x.ToString("X2")));
                         Console.WriteLine($"Sending: {dataAsHex}");
                         Thread.Sleep(1000);
                     }
@@ -88,7 +88,7 @@ namespace Iot.Device.SocketCan.Samples
                     {
                         Span<byte> data = new Span<byte>(buffer, 0, frameLength);
                         string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
-                        string dataAsHex = string.Join("", data.ToArray().Select((x) => x.ToString("X2")));
+                        string dataAsHex = string.Join(string.Empty, data.ToArray().Select((x) => x.ToString("X2")));
                         Console.WriteLine($"Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
                     }
                     else
@@ -96,7 +96,7 @@ namespace Iot.Device.SocketCan.Samples
                         Console.WriteLine($"Invalid frame received!");
                         Span<byte> data = new Span<byte>(buffer, 0, frameLength);
                         string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
-                        string dataAsHex = string.Join("", data.ToArray().Select((x) => x.ToString("X2")));
+                        string dataAsHex = string.Join(string.Empty, data.ToArray().Select((x) => x.ToString("X2")));
                         Console.WriteLine($"Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
                     }
                 }
@@ -111,14 +111,14 @@ namespace Iot.Device.SocketCan.Samples
             {
                 byte[] buffer = new byte[8];
                 can.Filter(Id);
-                
+
                 while (true)
                 {
                     if (can.TryReadFrame(buffer, out int frameLength, out CanId id))
                     {
                         Span<byte> data = new Span<byte>(buffer, 0, frameLength);
                         string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
-                        string dataAsHex = string.Join("", data.ToArray().Select((x) => x.ToString("X2")));
+                        string dataAsHex = string.Join(string.Empty, data.ToArray().Select((x) => x.ToString("X2")));
                         Console.WriteLine($"Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
                     }
                     else

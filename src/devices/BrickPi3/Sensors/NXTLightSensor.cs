@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.BrickPi3.Extensions;
-using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
+using Iot.Device.BrickPi3.Extensions;
+using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
@@ -25,14 +25,13 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Use the light sensor to detect the light intensity
         /// </summary>
         Ambient = SensorType.NXTLightOn
-    };
+    }
 
     /// <summary>
     /// Create a NXT Light sensor
     /// </summary>
     public class NXTLightSensor : INotifyPropertyChanged, ISensor
     {
-
         private LightMode _lightMode;
         private Brick _brick = null;
         private Timer _timer = null;
@@ -43,22 +42,28 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Initialize a NXT Light Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor port</param>
-        public NXTLightSensor(Brick brick, SensorPort port) : this(brick, port, LightMode.Relection, 1000) { }
+        public NXTLightSensor(Brick brick, SensorPort port)
+            : this(brick, port, LightMode.Relection, 1000)
+        {
+        }
 
         /// <summary>
         /// Initialize a NXT Light Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">Light mode</param>
-        public NXTLightSensor(Brick brick, SensorPort port, LightMode mode) : this(brick, port, mode, 1000) { }
+        public NXTLightSensor(Brick brick, SensorPort port, LightMode mode)
+            : this(brick, port, mode, 1000)
+        {
+        }
 
         /// <summary>
         /// Initialize a NXT Light Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">Light mode</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>
@@ -67,7 +72,7 @@ namespace Iot.Device.BrickPi3.Sensors
             _brick = brick;
             Port = port;
             _lightMode = mode;
-            CutOff = 512;            
+            CutOff = 512;
             brick.SetSensorType((byte)Port, (SensorType)mode);
             _periodRefresh = timeout;
             _timer = new Timer(UpdateSensor, this, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(timeout));
@@ -98,7 +103,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int PeriodRefresh
         {
-            get { return _periodRefresh; }
+            get
+            {
+                return _periodRefresh;
+            }
 
             set
             {
@@ -112,7 +120,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int Value
         {
-            get { return ReadRaw(); }
+            get
+            {
+                return ReadRaw();
+            }
 
             internal set
             {
@@ -129,7 +140,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public string ValueAsString
         {
-            get { return ReadAsString(); }
+            get
+            {
+                return ReadAsString();
+            }
 
             internal set
             {
@@ -198,7 +212,7 @@ namespace Iot.Device.BrickPi3.Sensors
         }
 
         /// <summary>
-        /// Number of modes
+        /// Number of modes supported
         /// </summary>
         /// <returns>Number of modes</returns>
         public int NumberOfModes()

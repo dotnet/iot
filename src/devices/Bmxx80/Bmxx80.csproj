@@ -30,10 +30,8 @@
     <Compile Include="Register\Bme280Register.cs" />
     <Compile Include="Sampling.cs" />
     <Compile Include="StandbyTime.cs" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="..\Units\Units.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Common\Iot\Device\Common\CommonHelpers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

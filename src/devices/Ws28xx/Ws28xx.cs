@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Graphics;
 using System.Device.Spi;
+using Iot.Device.Graphics;
 
 namespace Iot.Device.Ws28xx
 {

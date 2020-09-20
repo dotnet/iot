@@ -32,8 +32,10 @@ namespace Iot.Device.Magnetometer
         /// Default constructor for an independent AK8963
         /// </summary>
         /// <param name="i2CDevice">The I2C device</param>
-        public Ak8963(I2cDevice i2CDevice) : this(i2CDevice, new Ak8963I2c())
-        { }
+        public Ak8963(I2cDevice i2CDevice)
+            : this(i2CDevice, new Ak8963I2c())
+        {
+        }
 
         /// <summary>
         /// Constructor to use if AK8963 is behind another element and need a special I2C protocol like
@@ -54,7 +56,9 @@ namespace Iot.Device.Magnetometer
             byte mode = (byte)((byte)_measurementMode | ((byte)_outputBitMode << 4));
             WriteRegister(Register.CNTL, mode);
             if (!IsVersionCorrect())
+            {
                 throw new IOException($"This device does not contain the correct signature 0x48 for a AK8963");
+            }
         }
 
         /// <summary>
@@ -106,7 +110,7 @@ namespace Iot.Device.Magnetometer
             // Stop the magnetometer
             MeasurementMode = MeasurementMode.PowerDown;
             // Enter the magnetometer Fuse mode to read the calibration data
-            // Page 13 of documentation 
+            // Page 13 of documentation
             MeasurementMode = MeasurementMode.FuseRomAccess;
             // Read the data
             // See http://www.invensense.com/wp-content/uploads/2017/11/RM-MPU-9250A-00-v1.6.pdf
@@ -148,6 +152,7 @@ namespace Iot.Device.Magnetometer
                 }
 
             }
+
             // Store the bias
             var magBias = (maxbias + minbias) / 2;
             magBias *= calib;
@@ -165,7 +170,7 @@ namespace Iot.Device.Magnetometer
         /// <summary>
         /// Check if the version is the correct one (0x48). This is fixed for this device
         /// Page 28 from the documentation :
-        /// Device ID of AKM. It is described in one byte and fixed value.  48H: fixed 
+        /// Device ID of AKM. It is described in one byte and fixed value.  48H: fixed
         /// </summary>
         /// <returns>Returns true if the version match</returns>
         public bool IsVersionCorrect()
@@ -200,7 +205,9 @@ namespace Iot.Device.Magnetometer
                 while (!HasDataToRead)
                 {
                     if (DateTime.Now > dt)
+                    {
                         throw new TimeoutException($"{nameof(ReadMagnetometer)} timeout reading value");
+                    }
                 }
             }
 
@@ -228,6 +235,7 @@ namespace Iot.Device.Magnetometer
                 // result of 4912.0f / 8192.0f
                 magneto *= 0.599609375f;
             }
+
             return magneto;
 
         }
@@ -259,15 +267,15 @@ namespace Iot.Device.Magnetometer
 
         /// <summary>
         /// <![CDATA[
-        /// Get or set the device self test mode. 
+        /// Get or set the device self test mode.
         /// If set to true, this creates a magnetic field
         /// Once you read it, you will have the results of the self test
-        /// 14-bit output(BIT=“0”)  
-        ///          | HX[15:0]        | HY[15:0]        | HZ[15:0] 
-        /// Criteria | -50 =< HX =< 50 | -50 =< HY =< 50 | -800 =< HZ =< -200 
-        /// 16-bit output(BIT=“1”)  
-        ///          | HX[15:0]          | HY[15:0]          | HZ[15:0] 
-        /// Criteria | -200 =< HX =< 200 | -200 =< HY =< 200 | -3200 =< HZ =< -800 
+        /// 14-bit output(BIT=“0”)
+        ///          | HX[15:0]        | HY[15:0]        | HZ[15:0]
+        /// Criteria | -50 =< HX =< 50 | -50 =< HY =< 50 | -800 =< HZ =< -200
+        /// 16-bit output(BIT=“1”)
+        ///          | HX[15:0]          | HY[15:0]          | HZ[15:0]
+        /// Criteria | -200 =< HX =< 200 | -200 =< HY =< 200 | -3200 =< HZ =< -800
         /// ]]>
         /// </summary>
         public bool MageneticFieldGeneratorEnabled

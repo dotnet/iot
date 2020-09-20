@@ -66,7 +66,9 @@ namespace Iot.Device.Pcx857x.Tests
             // Don't need these
             public override void WriteByte(byte data) => DeviceMock.WriteByte(data);
             public override byte ReadByte() => DeviceMock.ReadByte();
-            public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer) => throw new NotImplementedException();
+
+            public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer) =>
+                throw new NotImplementedException();
         }
 
         /// <summary>
@@ -88,8 +90,11 @@ namespace Iot.Device.Pcx857x.Tests
             public Span<byte> Registers => _registers;
 
             // Can't coalesce here https://github.com/dotnet/roslyn/issues/29927
-            public ReadOnlySpan<byte> LastReadBuffer => _lastReadBuffer == null ? ReadOnlySpan<byte>.Empty : _lastReadBuffer;
-            public ReadOnlySpan<byte> LastWriteBuffer => _lastWriteBuffer == null ? ReadOnlySpan<byte>.Empty : _lastWriteBuffer;
+            public ReadOnlySpan<byte> LastReadBuffer =>
+                _lastReadBuffer == null ? ReadOnlySpan<byte>.Empty : _lastReadBuffer;
+
+            public ReadOnlySpan<byte> LastWriteBuffer =>
+                _lastWriteBuffer == null ? ReadOnlySpan<byte>.Empty : _lastWriteBuffer;
 
             public void Read(Span<byte> buffer)
             {
@@ -120,11 +125,13 @@ namespace Iot.Device.Pcx857x.Tests
 
             public void WriteByte(byte value)
             {
-                Span<byte> buffer = stackalloc byte[] { value };
+                Span<byte> buffer = stackalloc byte[]
+                {
+                    value
+                };
                 Write(buffer);
             }
         }
-
 
         public class GpioControllerMock : GpioDriver
         {
@@ -148,7 +155,9 @@ namespace Iot.Device.Pcx857x.Tests
             protected override PinValue Read(int pinNumber)
             {
                 if (_pinValues.TryGetValue(pinNumber, out PinValue value))
+                {
                     return value;
+                }
 
                 return PinValue.Low;
             }
@@ -184,17 +193,25 @@ namespace Iot.Device.Pcx857x.Tests
             {
             }
 
-            protected override PinMode GetPinMode(int pinNumber) => _pinModes.TryGetValue(pinNumber, out PinMode value) ? value : throw new InvalidOperationException($"Failed to get mode for pin {pinNumber} since it is not opened.");
+            protected override PinMode GetPinMode(int pinNumber) => _pinModes.TryGetValue(pinNumber, out PinMode value)
+                ? value
+                : throw new InvalidOperationException(
+                    $"Failed to get mode for pin {pinNumber} since it is not opened.");
 
             protected override bool IsPinModeSupported(int pinNumber, PinMode mode) => true;
 
-            protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new NotImplementedException();
+            protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) =>
+                throw new NotImplementedException();
 
-            protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => throw new NotImplementedException();
+            protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes,
+                CancellationToken cancellationToken) => throw new NotImplementedException();
 
-            protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => throw new NotImplementedException();
+            protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes,
+                PinChangeEventHandler callback) => throw new NotImplementedException();
 
-            protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) => throw new NotImplementedException();
+            protected override void
+                RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) =>
+                throw new NotImplementedException();
         }
     }
 }

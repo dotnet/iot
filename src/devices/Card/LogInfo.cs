@@ -16,10 +16,12 @@ namespace Iot.Device.Card
         /// No log level
         /// </summary>
         None = 0,
+
         /// <summary>
         /// Only information
         /// </summary>
         Info = 1,
+
         /// <summary>
         /// Deep log for debug purpose
         /// </summary>
@@ -36,6 +38,7 @@ namespace Iot.Device.Card
         /// Log to console
         /// </summary>
         Console = 0b0000_00001,
+
         /// <summary>
         /// Log to debug
         /// </summary>
@@ -68,11 +71,15 @@ namespace Iot.Device.Card
             if (LogLevel >= logLevel)
             {
                 if ((LogTo & LogTo.Console) == LogTo.Console)
+                {
                     Console.WriteLine(toLog);
+                }
+
                 if ((LogTo & LogTo.Debug) == LogTo.Debug)
+                {
                     Debug.WriteLine(toLog);
+                }
             }
         }
     }
 }
-

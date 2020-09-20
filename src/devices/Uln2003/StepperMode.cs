@@ -9,8 +9,10 @@
     {
         /// <summary>Half step mode</summary>
         HalfStep,
+
         /// <summary>Full step mode (single phase)</summary>
         FullStepSinglePhase,
+
         /// <summary>Full step mode (dual phase)</summary>
         FullStepDualPhase
     }

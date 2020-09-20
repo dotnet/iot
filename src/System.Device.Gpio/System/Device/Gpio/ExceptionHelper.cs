@@ -31,7 +31,7 @@ namespace System.Device.Gpio
 
         private static string GetResourceString(ExceptionResource resource, int errorCode, int pin)
         {
-            string message = "";
+            string message = string.Empty;
             switch (resource)
             {
                 case ExceptionResource.NoChipIteratorFound:

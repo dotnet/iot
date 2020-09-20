@@ -14,17 +14,19 @@ namespace Iot.Device.Nrf24l01
     /// </summary>
     public class Nrf24l01 : IDisposable
     {
-        private GpioController _gpio = null;
-        private SpiDevice _sensor = null;
-
         private readonly int _ce;
         private readonly int _irq;
 
         private readonly byte[] _empty = Array.Empty<byte>();
 
+        private GpioController _gpio = null;
+        private SpiDevice _sensor = null;
+        private bool _shouldDispose;
+
         #region prop
 
         private byte _packetSize;
+
         /// <summary>
         /// nRF24L01 Receive Packet Size
         /// </summary>
@@ -97,6 +99,7 @@ namespace Iot.Device.Nrf24l01
         #endregion
 
         #region SpiSettings
+
         /// <summary>
         /// NRF24L01 SPI Clock Frequency
         /// </summary>
@@ -119,15 +122,18 @@ namespace Iot.Device.Nrf24l01
         /// <param name="outputPower">Output Power</param>
         /// <param name="dataRate">Send Data Rate</param>
         /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
+        /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Nrf24l01(SpiDevice sensor, int ce, int irq, byte packetSize, byte channel = 2,
-            OutputPower outputPower = OutputPower.N00dBm, DataRate dataRate = DataRate.Rate2Mbps, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+            OutputPower outputPower = OutputPower.N00dBm, DataRate dataRate = DataRate.Rate2Mbps, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController gpioController = null, bool shouldDispose = true)
         {
             _sensor = sensor;
             _ce = ce;
             _irq = irq;
             PacketSize = packetSize;
+            _shouldDispose = gpioController == null ? true : shouldDispose;
 
-            Initialize(pinNumberingScheme, outputPower, dataRate, channel);
+            Initialize(pinNumberingScheme, outputPower, dataRate, channel, gpioController);
             InitializePipe();
         }
 
@@ -185,8 +191,11 @@ namespace Iot.Device.Nrf24l01
             _sensor?.Dispose();
             _sensor = null;
 
-            _gpio?.Dispose();
-            _gpio = null;
+            if (_shouldDispose)
+            {
+                _gpio?.Dispose();
+                _gpio = null;
+            }
         }
 
         /// <summary>
@@ -211,10 +220,10 @@ namespace Iot.Device.Nrf24l01
         /// <summary>
         /// Initialize
         /// </summary>
-        private void Initialize(PinNumberingScheme pinNumberingScheme, OutputPower outputPower, DataRate dataRate, byte channel)
+        private void Initialize(PinNumberingScheme pinNumberingScheme, OutputPower outputPower, DataRate dataRate, byte channel, GpioController gpioController)
         {
             // open pins
-            _gpio = new GpioController(pinNumberingScheme);
+            _gpio = gpioController ?? new GpioController(pinNumberingScheme);
             _gpio.OpenPin(_ce, PinMode.Output);
             _gpio.OpenPin(_irq, PinMode.Input);
             _gpio.RegisterCallbackForPinValueChangedEvent(_irq, PinEventTypes.Falling, Irq_ValueChanged);
@@ -264,7 +273,10 @@ namespace Iot.Device.Nrf24l01
 
             _gpio.Write(_ce, PinValue.Low);
 
-            Span<byte> writeData = stackalloc byte[1] { payload };
+            Span<byte> writeData = stackalloc byte[1]
+            {
+                payload
+            };
 
             Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P0, writeData);
             Write(Command.NRF_W_REGISTER, Register.NRF_RX_PW_P1, writeData);
@@ -294,7 +306,11 @@ namespace Iot.Device.Nrf24l01
                 throw new ArgumentOutOfRangeException(nameof(pipe), $"{nameof(pipe)} needs to be in the range of 0 to 5.");
             }
 
-            Span<byte> writeData = stackalloc byte[] { (byte)((byte)Command.NRF_W_REGISTER + (byte)Register.NRF_RX_PW_P0 + pipe), payload };
+            Span<byte> writeData = stackalloc byte[]
+            {
+                (byte)((byte)Command.NRF_W_REGISTER + (byte)Register.NRF_RX_PW_P0 + pipe),
+                payload
+            };
 
             _gpio.Write(_ce, PinValue.Low);
 
@@ -762,7 +778,11 @@ namespace Iot.Device.Nrf24l01
 
         internal void Write(Command command, Register register, byte writeByte)
         {
-            Span<byte> writeBuf = stackalloc byte[2] { (byte)((byte)command + (byte)register), writeByte };
+            Span<byte> writeBuf = stackalloc byte[2]
+            {
+                (byte)((byte)command + (byte)register),
+                writeByte
+            };
             Span<byte> readBuf = stackalloc byte[2];
 
             _sensor.TransferFullDuplex(writeBuf, readBuf);

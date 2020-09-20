@@ -23,6 +23,7 @@ namespace System.Device.Gpio.Tests
             {
                 throw new ArgumentOutOfRangeException(nameof(maxAttempts));
             }
+
             if (test == null)
             {
                 throw new ArgumentNullException(nameof(test));

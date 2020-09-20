@@ -1,16 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RuntimeIdentifiers>win;linux</RuntimeIdentifiers>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>preview</LangVersion>
-    <!-- Only produce reference assembly in one of our inner builds -->
-    <ProduceReferenceAssembly Condition="'$(TargetsLinux)' == 'true'">true</ProduceReferenceAssembly>
-    <TargetRefPath>$(OutputPath)$(TargetFramework)\ref\$(MSBuildProjectName).dll</TargetRefPath>
     <IsPackable>true</IsPackable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <GeneratePlatformNotSupportedAssembly Condition="'$(RuntimeIdentifier)' == ''">true</GeneratePlatformNotSupportedAssembly>
-    <Configurations>Windows-Debug;Linux-Debug;Linux-Release;Windows-Release;Debug;Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="winmd\**" />
@@ -25,16 +19,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsLinux)' == 'true'">
-    <!--Excluding Windows implementations-->
-    <Compile Remove="**\*.Windows.cs" />
-    <Compile Remove="Interop\Windows\**\*.cs" />
-    <CreateDirectory Include="$(OutputPath)..\ref\" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
-    <!--Excluding Linux implementations-->
-    <Compile Remove="**\*.Linux.cs" />
-    <Compile Remove="Interop\Unix\**\*.cs" />
+  
+  <ItemGroup>
     <Reference Include="Windows.Devices.DevicesLowLevelContract">
       <HintPath>winmd\Windows.Devices.DevicesLowLevelContract.winmd</HintPath>
       <IsWinMDFile>true</IsWinMDFile>

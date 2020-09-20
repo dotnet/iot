@@ -16,7 +16,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// reception at all - timeout).
         /// For active mode, value 0xFF means to try eternally, 0x00 means only once(no
         /// retry, only one try). The default value of this parameter is 0xFF (infinitely).
-        /// For passive mode, the value is always overruled with 0x02 (two retries). 
+        /// For passive mode, the value is always overruled with 0x02 (two retries).
         /// </summary>
         public byte MaxRetryAnswerToReset { get; set; } = 0x02;
 
@@ -29,7 +29,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// protocol.
         /// Value 0xFF means to try eternally, 0x00 means only once(no retry, only one
         /// try).The default value of this parameter is 0x01 (the PSL_REQ/PPS request is
-        /// sent twice in case of need). 
+        /// sent twice in case of need).
         /// </summary>
         public byte MaxRetryPSL { get; set; } = 0x01;
 
@@ -39,7 +39,7 @@ namespace Iot.Device.Pn532.RfConfiguration
         /// (§7.3.5, p: 115).
         /// Value 0xFF means to try eternally, 0x00 means only once(no retry, only one
         /// try).
-        /// The default value of this parameter is 0xFF (infinitely). 
+        /// The default value of this parameter is 0xFF (infinitely).
         /// </summary>
         public byte MaxRetryPassiveActivation { get; set; }
 

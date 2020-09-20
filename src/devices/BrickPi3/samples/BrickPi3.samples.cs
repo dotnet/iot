@@ -1,30 +1,39 @@
-﻿using Iot.Device.BrickPi3;
-using Iot.Device.BrickPi3.Models;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Iot.Device.BrickPi3;
+using Iot.Device.BrickPi3.Models;
 
 namespace BrickPiHardwareTest
 {
-
-    partial class Program
+    /// <summary>
+    /// Test program for BrickPi3
+    /// </summary>
+    public partial class Program
     {
+        private const string MotorTest = "-motor";
+        private const string VehiculeTest = "-vehicle";
+        private const string MultiSensorTest = "-multi";
+        private const string NoBasicTest = "-nobrick";
+        private const string ColorTest = "-color";
+        private const string TouchTest = "-touch";
+        private const string NXTLightTest = "-nxtlight";
+        private const string NXTUSTest = "-nxtus";
+        private const string NXTColorTest = "-nxtcolor";
+        private const string IRSensorTest = "-irsensor";
 
-        const string MotorTest = "-motor";
-        const string VehiculeTest = "-vehicle";
-        const string MultiSensorTest = "-multi";
-        const string NoBasicTest = "-nobrick";
-        const string ColorTest = "-color";
-        const string TouchTest = "-touch";
-        const string NXTLightTest = "-nxtlight";
-        const string NXTUSTest = "-nxtus";
-        const string NXTColorTest = "-nxtcolor";
-        const string IRSensorTest = "-irsensor";
+        private static Brick _brick = new Brick();
 
-        static private Brick _brick = new Brick();
-
-        static void Main(string[] args)
+        /// <summary>
+        /// Main entry point
+        /// </summary>
+        /// <param name="args">Module to test</param>
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello BrickPi3!");
 
@@ -58,57 +67,63 @@ namespace BrickPiHardwareTest
 
             try
             {
-                // uncomment any of the test to run it                
+                // uncomment any of the test to run it
                 if (!(args.Contains(NoBasicTest)))
+                {
                     TestBrickDetails();
-                //TestSensors();
+                }
+
+                // TestSensors();
                 if (args.Contains(MotorTest))
                 {
-                    //
                     // Tests directly using the brick low level driver
-                    //
                     TestRunMotors();
                     TestMotorEncoder();
                     TestMotorDPS();
                     TestMotorPosition();
-                    // 
                     // Test using the high level classes
                     //
-                    //TestMotorTacho();
-                    //Test3Motors();
+                    // TestMotorTacho();
+                    // Test3Motors();
                     TestMotorEvents();
                 }
+
                 if (args.Contains(VehiculeTest))
                 {
                     TestVehicule();
                 }
-                //
-                // Test using high level calsses for sensosrs
-                //
+
+                // Test using high level classes for sensors
                 if (args.Contains(MultiSensorTest))
                 {
                     TestMultipleSensorsTouchCSSoud();
                 }
+
                 if (args.Contains(ColorTest))
                 {
                     TestEV3Color();
                 }
+
                 if (args.Contains(ColorTest))
                 {
                     TestTouch();
                 }
+
                 if (args.Contains(IRSensorTest))
                 {
                     TestIRSensor();
                 }
+
                 if (args.Contains(NXTUSTest))
                 {
                     TestNXTUS();
                 }
+
                 if (args.Contains(NXTLightTest))
                 {
                     TestNXTLight();
                 }
+
                 if (args.Contains(NXTColorTest))
                 {
                     TestNXTCS();
@@ -120,11 +135,9 @@ namespace BrickPiHardwareTest
             }
         }
 
-        static private void TestMotorPosition()
+        private static void TestMotorPosition()
         {
-            //
             // Test motor position
-            //
             _brick.OffsetMotorEncoder((byte)MotorPort.PortD, _brick.GetMotorEncoder((byte)MotorPort.PortD));
             _brick.OffsetMotorEncoder((byte)MotorPort.PortA, _brick.GetMotorEncoder((byte)MotorPort.PortA));
             _brick.SetMotorPositionKD((byte)MotorPort.PortA);
@@ -135,7 +148,7 @@ namespace BrickPiHardwareTest
             _brick.SetMotorLimits((byte)MotorPort.PortA, 50, 200);
             _brick.SetSensorType((byte)SensorPort.Port1, SensorType.EV3Touch);
             Console.WriteLine("Read Motor A and D positions. Press EV3 Touch sensor on port 1 to stop.");
-            //run until we press the button on port2
+            // run until we press the button on port2
             while (_brick.GetSensor((byte)SensorPort.Port1)[0] == 0)
             {
                 var target = _brick.GetMotorEncoder((byte)MotorPort.PortD);
@@ -146,11 +159,9 @@ namespace BrickPiHardwareTest
             }
         }
 
-        static private void TestMotorDPS()
+        private static void TestMotorDPS()
         {
-            //
-            // Test Mortor Degree Per Second (DPS)
-            //
+            // Test Motor Degree Per Second (DPS)
             _brick.OffsetMotorEncoder((byte)MotorPort.PortD, _brick.GetMotorEncoder((byte)MotorPort.PortD));
             _brick.OffsetMotorEncoder((byte)MotorPort.PortA, _brick.GetMotorEncoder((byte)MotorPort.PortA));
             // Float motor D
@@ -158,7 +169,7 @@ namespace BrickPiHardwareTest
             _brick.SetSensorType((byte)SensorPort.Port1, SensorType.EV3Touch);
             Console.WriteLine("Control Motor A speed with Motor D encoder. Turn Motor D to control speed of Motor A");
             Console.WriteLine("Press EV3 Touch sensor on port 1 to stop the test");
-            //run until we press the button on port 1
+            // run until we press the button on port 1
             while (_brick.GetSensor((byte)SensorPort.Port1)[0] == 0)
             {
                 var target = _brick.GetMotorEncoder((byte)MotorPort.PortD);
@@ -169,11 +180,10 @@ namespace BrickPiHardwareTest
             }
         }
 
-        static private void TestMotorEncoder()
+        private static void TestMotorEncoder()
         {
-            //
             // Test Motor encoders
-            //         
+            //
             // Reset first the position
             Console.WriteLine("Read encoder of Motor D 100 times. Reset position to 0 to start");
             _brick.OffsetMotorEncoder((byte)MotorPort.PortD, _brick.GetMotorEncoder((byte)MotorPort.PortD));
@@ -185,28 +195,28 @@ namespace BrickPiHardwareTest
             }
         }
 
-        static private void TestBrickDetails()
+        private static void TestBrickDetails()
         {
-            //
             // Get the details abourt the brick
-            //
             var brickinfo = _brick.BrickPi3Info;
             Console.WriteLine($"Manufacturer: {brickinfo.Manufacturer}");
             Console.WriteLine($"Board: {brickinfo.Board}");
             Console.WriteLine($"Hardware version: {brickinfo.HardwareVersion}");
             var hdv = brickinfo.GetHardwareVersion();
             for (int i = 0; i < hdv.Length; i++)
+            {
                 Console.WriteLine($"Hardware version {i}: {hdv[i]}");
+            }
 
             Console.WriteLine($"Software version: {brickinfo.SoftwareVersion}");
             var swv = brickinfo.GetSoftwareVersion();
             for (int i = 0; i < swv.Length; i++)
+            {
                 Console.WriteLine($"Software version {i}: {swv[i]}");
+            }
 
             Console.WriteLine($"Id: {brickinfo.Id}");
-            //
             // Testing Led
-            //
             Console.WriteLine("Testing Led, PWM on Led");
             for (int i = 0; i < 10; i++)
             {
@@ -221,9 +231,7 @@ namespace BrickPiHardwareTest
             }
 
             _brick.SetLed(255);
-            //
             // Get the voltage details
-            //
             var voltage = _brick.BrickPi3Voltage;
             Console.WriteLine($"3.3V: {voltage.Voltage3V3}");
             Console.WriteLine($"5V: {voltage.Voltage5V}");
@@ -231,11 +239,9 @@ namespace BrickPiHardwareTest
             Console.WriteLine($"Battery voltage: {voltage.VoltageBattery}");
         }
 
-        static private void TestSensors()
+        private static void TestSensors()
         {
-            //
             // Setting a sencor and reading values
-            //
             Console.WriteLine($"{SensorType.EV3UltrasonicCentimeter.ToString()}");
             _brick.SetSensorType((byte)SensorPort.Port3, SensorType.EV3UltrasonicCentimeter);
             for (int i = 0; i < 100; i++)
@@ -245,12 +251,15 @@ namespace BrickPiHardwareTest
                 {
                     var sensordata = _brick.GetSensor((byte)SensorPort.Port3);
                     for (int j = 0; j < sensordata.Length; j++)
+                    {
                         Console.WriteLine($"Sensor value {j}: {sensordata[j]}");
+                    }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Exception: {ex.Message}");
                 }
+
                 Task.Delay(200).Wait();
             }
 
@@ -263,12 +272,15 @@ namespace BrickPiHardwareTest
                 {
                     var sensordata = _brick.GetSensor((byte)SensorPort.Port4);
                     for (int j = 0; j < sensordata.Length; j++)
+                    {
                         Console.WriteLine($"Sensor value {j}: {sensordata[j]}");
+                    }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Exception: {ex.Message}");
                 }
+
                 Task.Delay(200).Wait();
             }
 
@@ -281,12 +293,15 @@ namespace BrickPiHardwareTest
                 {
                     var sensordata = _brick.GetSensor((byte)SensorPort.Port1);
                     for (int j = 0; j < sensordata.Length; j++)
+                    {
                         Console.WriteLine($"Sensor value {j}: {sensordata[j]}");
+                    }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Exception: {ex.Message}");
                 }
+
                 Task.Delay(200).Wait();
             }
 
@@ -299,22 +314,23 @@ namespace BrickPiHardwareTest
                 {
                     var sensordata = _brick.GetSensor((byte)SensorPort.Port2);
                     for (int j = 0; j < sensordata.Length; j++)
+                    {
                         Console.WriteLine($"Sensor value {j}: {sensordata[j]}");
+                    }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Exception: {ex.Message}");
                 }
+
                 Task.Delay(200).Wait();
 
             }
         }
 
-        static private void TestRunMotors()
+        private static void TestRunMotors()
         {
-            //
             // Testing motors
-            //
             // Acceleration to full speed, float and decreasing speed to stop
             Console.WriteLine("Speed test on Motor D, increasing and decreasing speed from 0 to maximum");
             Console.WriteLine("Acceleration on Motor D");

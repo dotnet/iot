@@ -7,9 +7,16 @@ using Iot.Device.BoardLed;
 
 namespace BoardLedSample
 {
-    class Program
+    /// <summary>
+    /// Test program main class
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Entry point for example program
+        /// </summary>
+        /// <param name="args">Command line arguments</param>
+        public static void Main(string[] args)
         {
             // Open the green led on Raspberry Pi.
             using BoardLed led = new BoardLed("led0");

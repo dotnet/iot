@@ -13,6 +13,7 @@ namespace System.Device.Gpio
         /// The logical representation of the GPIOs. Refer to the microcontroller's datasheet to find this information.
         /// </summary>
         Logical,
+
         /// <summary>
         /// The physical pin numbering that is usually accessible by the board headers.
         /// </summary>

@@ -14,16 +14,18 @@ namespace Iot.Device.Mcp23xxx
     /// </summary>
     public abstract partial class Mcp23xxx : GpioDriver
     {
-        private GpioController _masterGpioController;
         private readonly int _reset;
         private readonly int _interruptA;
         private readonly int _interruptB;
         private BankStyle _bankStyle;
+        private GpioController _masterGpioController;
+        private bool _shouldDispose;
 
         /// <summary>
         /// Bus adapter (I2C/SPI) used to communicate with the device
         /// </summary>
         protected BusAdapter _bus;
+
         private bool _increments = true;
 
         private ushort _gpioCache;
@@ -46,10 +48,13 @@ namespace Iot.Device.Mcp23xxx
         /// detect what style the chip is in and most apps will fail if the chip is not set to defaults. This setting
         /// has no impact on 8-bit expanders.
         /// </param>
-        protected Mcp23xxx(BusAdapter bus, int reset = -1, int interruptA = -1, int interruptB = -1, GpioController masterController = null, BankStyle bankStyle = BankStyle.Sequential)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        protected Mcp23xxx(BusAdapter bus, int reset = -1, int interruptA = -1, int interruptB = -1,
+            GpioController masterController = null, BankStyle bankStyle = BankStyle.Sequential, bool shouldDispose = true)
         {
             _bus = bus;
             _bankStyle = bankStyle;
+            _shouldDispose = masterController == null ? true : shouldDispose;
 
             _reset = reset;
             _interruptA = interruptA;
@@ -111,11 +116,12 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="register">The register to read from.</param>
         /// <param name="buffer">The buffer to read bytes into.</param>
         /// <param name="port">The I/O port used with the register.</param>
-        /// <returns>The data read from the registers.</returns>
         protected void InternalRead(Register register, Span<byte> buffer, Port port)
         {
             if (_disabled)
+            {
                 ThrowDisabled();
+            }
 
             _bus.Read(GetMappedAddress(register, port, _bankStyle), buffer);
         }
@@ -129,7 +135,9 @@ namespace Iot.Device.Mcp23xxx
         protected void InternalWrite(Register register, Span<byte> data, Port port)
         {
             if (_disabled)
+            {
                 ThrowDisabled();
+            }
 
             _bus.Write(GetMappedAddress(register, port, _bankStyle), data);
         }
@@ -199,6 +207,7 @@ namespace Iot.Device.Mcp23xxx
                 InternalRead(register, buffer.Slice(0, 1), Port.PortA);
                 InternalRead(register, buffer.Slice(1), Port.PortB);
             }
+
             return (ushort)(buffer[0] | buffer[1] << 8);
         }
 
@@ -229,8 +238,12 @@ namespace Iot.Device.Mcp23xxx
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            _masterGpioController?.Dispose();
-            _masterGpioController = null;
+            if (_shouldDispose)
+            {
+                _masterGpioController?.Dispose();
+                _masterGpioController = null;
+            }
+
             _bus?.Dispose();
             _bus = null;
             base.Dispose(disposing);
@@ -242,7 +255,9 @@ namespace Iot.Device.Mcp23xxx
         public void Disable()
         {
             if (_reset == -1)
+            {
                 throw new InvalidOperationException("No reset pin configured.");
+            }
 
             _masterGpioController.Write(_reset, PinValue.Low);
 
@@ -258,7 +273,9 @@ namespace Iot.Device.Mcp23xxx
         public void Enable()
         {
             if (_reset == -1)
+            {
                 throw new InvalidOperationException("No reset pin configured.");
+            }
 
             _masterGpioController.Write(_reset, PinValue.High);
 
@@ -287,7 +304,9 @@ namespace Iot.Device.Mcp23xxx
             }
 
             if (pinNumber == -1)
+            {
                 throw new ArgumentException("No interrupt pin configured.", nameof(port));
+            }
 
             return _masterGpioController.Read(pinNumber);
         }
@@ -308,7 +327,9 @@ namespace Iot.Device.Mcp23xxx
         protected override void SetPinMode(int pinNumber, PinMode mode)
         {
             if (mode != PinMode.Input && mode != PinMode.Output)
+            {
                 throw new ArgumentException("The Mcp controller supports Input and Output modes only.");
+            }
 
             ValidatePin(pinNumber);
 
@@ -340,17 +361,24 @@ namespace Iot.Device.Mcp23xxx
         protected override PinValue Read(int pinNumber)
         {
             ValidatePin(pinNumber);
-            Span<PinValuePair> pinValuePairs = stackalloc PinValuePair[] { new PinValuePair(pinNumber, default) };
+            Span<PinValuePair> pinValuePairs = stackalloc PinValuePair[]
+            {
+                new PinValuePair(pinNumber, default)
+            };
             Read(pinValuePairs);
             return pinValuePairs[0].PinValue;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Reads the value of a set of pins
+        /// </summary>
         protected void Read(Span<PinValuePair> pinValuePairs)
         {
             (uint pins, _) = new PinVector32(pinValuePairs);
             if ((pins >> PinCount) > 0)
+            {
                 ThrowBadPin(nameof(pinValuePairs));
+            }
 
             ushort result;
             if (pins < 0xFF + 1)
@@ -372,7 +400,7 @@ namespace Iot.Device.Mcp23xxx
             for (int i = 0; i < pinValuePairs.Length; i++)
             {
                 int pin = pinValuePairs[i].PinNumber;
-                pinValuePairs[i]= new PinValuePair(pin, result & (1 << pin));
+                pinValuePairs[i] = new PinValuePair(pin, result & (1 << pin));
             }
         }
 
@@ -384,24 +412,35 @@ namespace Iot.Device.Mcp23xxx
         protected override void Write(int pinNumber, PinValue value)
         {
             ValidatePin(pinNumber);
-            Span<PinValuePair> pinValuePairs = stackalloc PinValuePair[] { new PinValuePair(pinNumber, value) };
+            Span<PinValuePair> pinValuePairs = stackalloc PinValuePair[]
+            {
+                new PinValuePair(pinNumber, value)
+            };
             Write(pinValuePairs);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Writes values to a set of pins
+        /// </summary>
         protected void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
         {
             (uint mask, uint newBits) = new PinVector32(pinValuePairs);
             if ((mask >> PinCount) > 0)
+            {
                 ThrowBadPin(nameof(pinValuePairs));
+            }
 
             if (!_cacheValid)
+            {
                 UpdateCache();
+            }
 
             ushort cachedValue = _gpioCache;
             ushort newValue = SetBits(cachedValue, (ushort)newBits, (ushort)mask);
             if (cachedValue == newValue)
+            {
                 return;
+            }
 
             if (mask < 0xFF + 1)
             {
@@ -432,7 +471,9 @@ namespace Iot.Device.Mcp23xxx
         private void ValidatePin(int pinNumber)
         {
             if (pinNumber >= PinCount || pinNumber < 0)
+            {
                 ThrowBadPin(nameof(pinNumber));
+            }
         }
 
         private void ThrowBadPin(string argument)
@@ -447,18 +488,26 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="port">The bank of I/O ports used with the register.</param>
         /// <param name="bankStyle">The bank style that determines how the register addresses are grouped.</param>
         /// <returns>The byte address of the register for the given port bank and bank style.</returns>
-        private byte GetMappedAddress(Register register, Port port = Port.PortA, BankStyle bankStyle = BankStyle.Sequential)
+        private byte GetMappedAddress(Register register, Port port = Port.PortA,
+            BankStyle bankStyle = BankStyle.Sequential)
         {
             if (port != Port.PortA && port != Port.PortB)
+            {
                 throw new ArgumentOutOfRangeException(nameof(port));
+            }
+
             if (bankStyle != BankStyle.Separated && bankStyle != BankStyle.Sequential)
+            {
                 throw new ArgumentOutOfRangeException(nameof(bankStyle));
+            }
 
             byte address = (byte)register;
 
             // There is no mapping for 8 bit expanders
             if (PinCount == 8)
+            {
                 return address;
+            }
 
             if (bankStyle == BankStyle.Sequential)
             {
@@ -496,28 +545,34 @@ namespace Iot.Device.Mcp23xxx
             if (pinNumber < 8)
             {
                 return IsBitSet(InternalReadByte(Register.IODIR, Port.PortA), pinNumber)
-                       ? PinMode.Input : PinMode.Output;
+                    ? PinMode.Input
+                    : PinMode.Output;
             }
             else
             {
                 return IsBitSet(InternalReadByte(Register.IODIR, Port.PortB), pinNumber - 8)
-                       ? PinMode.Input : PinMode.Output;
+                    ? PinMode.Input
+                    : PinMode.Output;
             }
         }
 
         /// <inheritdoc/>
-        protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => throw new NotImplementedException();
+        protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes,
+            PinChangeEventHandler callback) => throw new NotImplementedException();
 
         /// <inheritdoc/>
-        protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) => throw new NotImplementedException();
+        protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) =>
+            throw new NotImplementedException();
 
         /// <inheritdoc/>
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
 
         /// <inheritdoc/>
-        protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => throw new NotImplementedException();
+        protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes,
+            CancellationToken cancellationToken) => throw new NotImplementedException();
 
         /// <inheritdoc/>
-        protected override bool IsPinModeSupported(int pinNumber, PinMode mode) => (mode == PinMode.Input || mode == PinMode.Output);
+        protected override bool IsPinModeSupported(int pinNumber, PinMode mode) =>
+            (mode == PinMode.Input || mode == PinMode.Output);
     }
 }

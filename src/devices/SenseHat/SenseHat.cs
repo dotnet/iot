@@ -5,7 +5,7 @@
 using System;
 using System.Drawing;
 using System.Numerics;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.SenseHat
 {
@@ -95,7 +95,6 @@ namespace Iot.Device.SenseHat
         /// </summary>
         public Vector3 Acceleration => _gyro.Acceleration;
 
-
         /// <summary>
         /// Gets angular rate from the gyroscope
         /// </summary>
@@ -118,7 +117,7 @@ namespace Iot.Device.SenseHat
         /// <summary>
         /// Gets humidity from temperature and humidity sensor
         /// </summary>
-        public float Humidity => _temp.Humidity;
+        public Ratio Humidity => _temp.Humidity;
 
         // PRESSURE AND TEMPERATURE
 

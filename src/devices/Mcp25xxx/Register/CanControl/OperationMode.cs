@@ -13,18 +13,22 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.CanControl
         /// Device is in the Normal Operation mode.
         /// </summary>
         NormalOperation = 0,
+
         /// <summary>
         /// Device is in Sleep mode.
         /// </summary>
         Sleep = 1,
+
         /// <summary>
         /// Device is in Loopback mode.
         /// </summary>
         Loopback = 2,
+
         /// <summary>
         /// Device is in Listen-Only mode.
         /// </summary>
         ListenOnly = 3,
+
         /// <summary>
         /// Device is in Configuration mode.
         /// </summary>

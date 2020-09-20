@@ -1,3 +1,6 @@
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/iot)
+[![Discord](https://img.shields.io/discord/755370044946513932?label=Discord)](https://discord.gg/kqWhBbj)
+
 # .NET Core IoT Libraries
 
 .NET Core can be used to build applications for [IoT](https://en.wikipedia.org/wiki/Internet_of_things) devices and scenarios. IoT applications typically interact with sensors, displays and input devices that require the use of [GPIO pins](https://en.wikipedia.org/wiki/General-purpose_input/output), serial ports or similar hardware.
@@ -8,22 +11,26 @@ The repository also contains [Iot.Device.Bindings](https://www.nuget.org/package
 
 **NOTE**: This repository is still in experimental stage and all APIs are subject to changes.
 
+# .NET Core Versions
+
+Whilst most of the device binding projects target .NET Core 2.1 for backward compatibility, the sample projects target the latest stable .NET Core. This applies to the sample projects with each device as well as the example projects on the `/samples` directory.
+
 # How to Install
 
 You can install the latest daily pre-release build of the .NET Core System.Device.Gpio and Iot.Device.Bindings NuGet packages from the blob feed.
   
 ## NuGet.exe
 ~~~~
-nuget install System.Device.Gpio -PreRelease -Source https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json
-nuget install Iot.Device.Bindings -PreRelease -Source https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json
+nuget install System.Device.Gpio -PreRelease -Source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json
+nuget install Iot.Device.Bindings -PreRelease -Source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json
 ~~~~
 ### Official Build Status
-![BuildStatus](https://dev.azure.com/dnceng/internal/_apis/build/status/dotnet/iot/dotnet.iot-official?branchName=master)
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/dotnet/iot/dotnet.iot.github?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=268&branchName=master)
 
 ## .NET CLI
 ~~~~
-dotnet add package System.Device.Gpio --source https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json
-dotnet add package Iot.Device.Bindings --source https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json
+dotnet add package System.Device.Gpio --source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json
+dotnet add package Iot.Device.Bindings --source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json
 ~~~~
 
 # Contributing
@@ -42,6 +49,7 @@ Please contribute. We are primarily interested in the following:
 
 After installing, please see the following areas to learn more:
 
+* [.NET IoT 101 (Jan 2020)](https://channel9.msdn.com/Series/IoT-101) - An introduction series on how to create .NET IoT applications with a Raspberry Pi.
 * [Documentation](Documentation/README.md) - Resources related to electronics, devices, vendors, software and other IoT topics.
 * [Samples](samples/README.md) - Step-by-step instructions on building your first app.
 * [Roadmap](Documentation/roadmap.md) - Areas planned or currently being worked on.

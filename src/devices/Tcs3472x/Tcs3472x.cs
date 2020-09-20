@@ -19,6 +19,7 @@ namespace Iot.Device.Tcs3472x
         /// Default I2C address for TCS3472x familly
         /// </summary>
         public const byte DefaultI2cAddress = 0x29;
+
         private I2cDevice _i2cDevice;
         private byte _integrationTimeByte;
         private double _integrationTime;
@@ -34,7 +35,10 @@ namespace Iot.Device.Tcs3472x
         /// </summary>
         public double IntegrationTime
         {
-            get { return _integrationTime; }
+            get
+            {
+                return _integrationTime;
+            }
             set
             {
                 _integrationTime = value;
@@ -47,7 +51,10 @@ namespace Iot.Device.Tcs3472x
         /// </summary>
         public Gain Gain
         {
-            get { return _gain; }
+            get
+            {
+                return _gain;
+            }
             set
             {
                 _gain = value;
@@ -67,10 +74,11 @@ namespace Iot.Device.Tcs3472x
         /// <param name="integrationTime">The time to wait for sensor to read the data, minimum is 0.024 seconds, maximum in the constructor is 0.7 seconds</param>
         /// <param name="gain">The gain when integrating the color measurement</param>
         /// <param name="autoDisposable">true to dispose the I2C Device class at dispose</param>
-        public Tcs3472x(I2cDevice i2cDevice, double integrationTime = 0.0024, Gain gain = Gain.Gain16X, bool autoDisposable = true)
+        public Tcs3472x(I2cDevice i2cDevice, double integrationTime = 0.0024, Gain gain = Gain.Gain16X,
+            bool autoDisposable = true)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
-            // Maximum is 700 ms for the initialization. Value can be changed for a long one but not during this initialization phase            
+            // Maximum is 700 ms for the initialization. Value can be changed for a long one but not during this initialization phase
             _autoDisposable = autoDisposable;
             _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | Registers.ID));
             ChipId = (TCS3472Type)_i2cDevice.ReadByte();
@@ -96,7 +104,7 @@ namespace Iot.Device.Tcs3472x
 
         /// <summary>
         /// Get true if RGBC is clear channel interrupt
-        /// </summary>        
+        /// </summary>
         public bool IsClearInterrupt
         {
             get
@@ -119,6 +127,7 @@ namespace Iot.Device.Tcs3472x
                 {
                     SetConfigLongTime(false);
                 }
+
                 _isLongTime = false;
                 var timeByte = Math.Clamp((int)(0x100 - (timeSeconds / 0.0024)), 0, 255);
                 WriteRegister(Registers.ATIME, (byte)timeByte);
@@ -130,6 +139,7 @@ namespace Iot.Device.Tcs3472x
                 {
                     SetConfigLongTime(true);
                 }
+
                 _isLongTime = true;
                 var timeByte = (int)(0x100 - (timeSeconds / 0.029));
                 timeByte = Math.Clamp(timeByte, 0, 255);
@@ -145,7 +155,6 @@ namespace Iot.Device.Tcs3472x
 
         private void PowerOn()
         {
-
             WriteRegister(Registers.ENABLE, (byte)Registers.ENABLE_PON);
             Thread.Sleep(10);
             WriteRegister(Registers.ENABLE, (byte)(Registers.ENABLE_PON | Registers.ENABLE_AEN));
@@ -170,7 +179,7 @@ namespace Iot.Device.Tcs3472x
         /// <summary>
         /// Set/clear a specific interrupt persistence
         /// This is used to have more than 1 cycle before generating an
-        /// interruption. 
+        /// interruption.
         /// </summary>
         /// <param name="interupt">The percistence cycles</param>
         /// <param name="state">True to set the interrupt, false to clear</param>
@@ -178,7 +187,9 @@ namespace Iot.Device.Tcs3472x
         {
             WriteRegister(Registers.PERS, (byte)interupt);
             var enable = I2cRead8(Registers.ENABLE);
-            enable = state ? enable |= (byte)Registers.ENABLE_AIEN : enable = (byte)(enable & ~(byte)Registers.ENABLE_AIEN);
+            enable = state
+                ? enable |= (byte)Registers.ENABLE_AIEN
+                : enable = (byte)(enable & ~(byte)Registers.ENABLE_AIEN);
             WriteRegister(Registers.ENABLE, enable);
         }
 
@@ -192,11 +203,17 @@ namespace Iot.Device.Tcs3472x
             // To have a new reading, you need to wait for integration time to happen
             // If you don't wait, then you'll read the previous value
             if (delay)
+            {
                 Thread.Sleep((int)(IntegrationTime * 1000));
+            }
+
             var divide = ((256 - _integrationTimeByte) * 1024);
             // If we are in long wait, we'll need to divide even more
             if (_isLongTime)
+            {
                 divide *= 12;
+            }
+
             int r = (int)(I2cRead16(Registers.RDATAL) * 255 / divide);
             r = Math.Clamp(r, 0, 255);
             int g = (int)(I2cRead16(Registers.GDATAL) * 255 / divide);
@@ -216,7 +233,10 @@ namespace Iot.Device.Tcs3472x
         private ushort I2cRead16(Registers reg)
         {
             _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | reg));
-            Span<byte> outArray = stackalloc byte[2] { 0, 0 };
+            Span<byte> outArray = stackalloc byte[2]
+            {
+                0, 0
+            };
             _i2cDevice.Read(outArray);
             return BinaryPrimitives.ReadUInt16BigEndian(outArray);
         }

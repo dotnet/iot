@@ -2,12 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Iot.Device.Card;
-using Iot.Device.Pn532.AsTarget;
-using Iot.Device.Pn532.ListPassive;
-using Iot.Device.Pn532.RfConfiguration;
-using Iot.Device.Rfid;
-using IoT.Device.Pn532;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
@@ -17,6 +11,12 @@ using System.Device.Spi;
 using System.IO;
 using System.IO.Ports;
 using System.Threading;
+using Iot.Device.Card;
+using Iot.Device.Pn532.AsTarget;
+using Iot.Device.Pn532.ListPassive;
+using Iot.Device.Pn532.RfConfiguration;
+using Iot.Device.Rfid;
+using IoT.Device.Pn532;
 
 namespace Iot.Device.Pn532
 {
@@ -25,6 +25,7 @@ namespace Iot.Device.Pn532
     /// </summary>
     public class Pn532 : CardTransceiver, IDisposable
     {
+        private const int I2cMaxBuffer = 1024;
         // Communication way
         private const byte ToHostCheckSumD5 = 0xD5;
         private const byte FromHostCheckSumD4 = 0xD4;
@@ -37,14 +38,19 @@ namespace Iot.Device.Pn532
         private const byte WriteData = 0b0000_0001;
         private const byte ReadStatus = 0b0000_0010;
         private const byte ReadData = 0b0000_0011;
-        // Acknowledge
-        private byte[] AckBuffer = { 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00 };
-        // Specific buffer to wake up the sensor in serial HSU mode
-        private byte[] SerialWakeUp = new byte[] { 0x55, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-        private byte[] I2cWakeUp = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-        private int I2cMAxBuffer = 1024;
-        private ParametersFlags _parametersFlags;
 
+        // Acknowledge
+        private byte[] _ackBuffer = { 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00 };
+
+        // Specific buffer to wake up the sensor in serial HSU mode
+        private byte[] _serialWakeUp = new byte[]
+        {
+            0x55, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+
+        private byte[] _i2CWakeUp = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        private ParametersFlags _parametersFlags;
         private SpiDevice _spiDevice = null;
         private I2cDevice _i2cDevice = null;
         private GpioController _controller = null;
@@ -63,13 +69,21 @@ namespace Iot.Device.Pn532
 
         /// <summary>
         /// The Log level
-        /// </summary>        
-        public LogLevel LogLevel { get { return LogInfo.LogLevel; } set { LogInfo.LogLevel = value; } }
+        /// </summary>
+        public LogLevel LogLevel
+        {
+            get { return LogInfo.LogLevel; }
+            set { LogInfo.LogLevel = value; }
+        }
 
         /// <summary>
         /// The location to log the info
         /// </summary>
-        public LogTo LogTo { get { return LogInfo.LogTo; } set { LogInfo.LogTo = value; } }
+        public LogTo LogTo
+        {
+            get { return LogInfo.LogTo; }
+            set { LogInfo.LogTo = value; }
+        }
 
         /// <summary>
         /// Firmware version information
@@ -77,6 +91,7 @@ namespace Iot.Device.Pn532
         public FirmwareVersion FirmwareVersion { get; internal set; }
 
         #region Spi and I2c Settings
+
         /// <summary>
         /// PN532 SPI Clock Frequency
         /// </summary>
@@ -92,7 +107,7 @@ namespace Iot.Device.Pn532
         /// </summary>
         public const byte I2cDefaultAddress = 0x24;
 
-        #endregion        
+        #endregion
 
         /// <summary>
         /// Create a PN532 using Serial Port
@@ -114,7 +129,8 @@ namespace Iot.Device.Pn532
             _serialPort.WriteTimeout = 89;
             _serialPort.Open();
             // Setting up internals as default version
-            _parametersFlags = ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS | ParametersFlags.ISO14443_4_PICC;
+            _parametersFlags = ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS |
+                               ParametersFlags.ISO14443_4_PICC;
             _securityAccessModuleMode = SecurityAccessModuleMode.Normal;
             _virtualCardTimeout = 0x17;
 
@@ -124,7 +140,9 @@ namespace Iot.Device.Pn532
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
             // Check the version
             if (!IsPn532())
+            {
                 throw new Exception("Can't find a PN532");
+            }
 
             // Apply default parameters
             ret = SetParameters(ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS);
@@ -145,13 +163,15 @@ namespace Iot.Device.Pn532
             _controller.Write(_pin, PinValue.High);
             Thread.Sleep(2);
             WakeUp();
-            // The first time we apply SAM after waking up the device, it always 
+            // The first time we apply SAM after waking up the device, it always
             // returns false, some timeout appear. So we will need to apply a second time
             bool ret = SetSecurityAccessModule();
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
             // Check the version
             if (!IsPn532())
+            {
                 throw new Exception("Can't find a PN532");
+            }
 
             // Apply default parameters
             ret = SetParameters(ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS);
@@ -170,11 +190,13 @@ namespace Iot.Device.Pn532
             LogLevel = logLevel;
             _i2cDevice = i2CDevice;
             WakeUp();
-            bool ret = SetSecurityAccessModule();            
+            bool ret = SetSecurityAccessModule();
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
             // Check the version
             if (!IsPn532())
+            {
                 throw new Exception("Can't find a PN532");
+            }
 
             // Apply default parameters
             ret = SetParameters(ParametersFlags.AutomaticATR_RES | ParametersFlags.AutomaticRATS);
@@ -192,7 +214,10 @@ namespace Iot.Device.Pn532
         public bool RunSelfTest(DiagnoseMode diagnoseMode)
         {
             int ret = 0;
-            Span<byte> singleParam = stackalloc byte[1] { (byte)diagnoseMode };
+            Span<byte> singleParam = stackalloc byte[1]
+            {
+                (byte)diagnoseMode
+            };
             switch (diagnoseMode)
             {
                 case DiagnoseMode.CommunicationLineTest:
@@ -203,13 +228,29 @@ namespace Iot.Device.Pn532
                     // − Parameter Length : m (0 <= m <= 262),
                     // − Parameter : Data,
                     // − Result Length : Same value of m + 1.
-                    // OutParam consists of NumTst concatenate with InParam. 
-                    Span<byte> toTest = stackalloc byte[9] { (byte)DiagnoseMode.CommunicationLineTest, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88 };
+                    // OutParam consists of NumTst concatenate with InParam.
+                    Span<byte> toTest = stackalloc byte[9]
+                    {
+                        (byte)DiagnoseMode.CommunicationLineTest,
+                        0x11,
+                        0x22,
+                        0x33,
+                        0x44,
+                        0x55,
+                        0x66,
+                        0x77,
+                        0x88
+                    };
                     ret = WriteCommand(CommandSet.Diagnose, toTest);
-                    if (ret < 0) return false;
+                    if (ret < 0)
+                    {
+                        return false;
+                    }
+
                     Span<byte> resultTest = stackalloc byte[9];
                     ret = ReadResponse(CommandSet.Diagnose, resultTest);
-                    LogInfo.Log($"{diagnoseMode} received: {BitConverter.ToString(resultTest.ToArray())}, ret: {ret}", LogLevel.Debug);
+                    LogInfo.Log($"{diagnoseMode} received: {BitConverter.ToString(resultTest.ToArray())}, ret: {ret}",
+                        LogLevel.Debug);
                     return resultTest.SequenceEqual(toTest) && (ret >= 0);
                 case DiagnoseMode.ROMTest:
                     // NumTst = 0x01: ROM Test
@@ -219,12 +260,17 @@ namespace Iot.Device.Pn532
                     // − Result : 0x00 is OK,
                     // 0xFF is Not Good
                     ret = WriteCommand(CommandSet.Diagnose, singleParam);
-                    if (ret < 0) return false;
+                    if (ret < 0)
+                    {
+                        return false;
+                    }
+
                     // Wait for the test to run
                     Thread.Sleep(1500);
                     Span<byte> romTest = stackalloc byte[1];
                     ret = ReadResponse(CommandSet.Diagnose, romTest);
-                    LogInfo.Log($"{diagnoseMode} received: {BitConverter.ToString(romTest.ToArray())}, ret: {ret}", LogLevel.Debug);
+                    LogInfo.Log($"{diagnoseMode} received: {BitConverter.ToString(romTest.ToArray())}, ret: {ret}",
+                        LogLevel.Debug);
                     // Wait for the test to run
                     // TODO: find the right timing, this is empirical
                     Thread.Sleep(100);
@@ -237,15 +283,20 @@ namespace Iot.Device.Pn532
                     // − Parameter Length : 0,
                     // − Result Length : 1,
                     // − Result : 0x00 is OK,
-                    // 0xFF is Not Good. 
+                    // 0xFF is Not Good.
                     ret = WriteCommand(CommandSet.Diagnose, singleParam);
-                    if (ret < 0) return false;
+                    if (ret < 0)
+                    {
+                        return false;
+                    }
+
                     // Wait for the test to run
                     // TODO: find the right timing, this is empirical
                     Thread.Sleep(1500);
                     Span<byte> ramTest = stackalloc byte[1];
                     ret = ReadResponse(CommandSet.Diagnose, ramTest);
-                    LogInfo.Log($"{diagnoseMode} received: {BitConverter.ToString(ramTest.ToArray())}, ret: {ret}", LogLevel.Debug);
+                    LogInfo.Log($"{diagnoseMode} received: {BitConverter.ToString(ramTest.ToArray())}, ret: {ret}",
+                        LogLevel.Debug);
                     Thread.Sleep(100);
                     return (ramTest[0] == 0) && (ret >= 0);
                 case DiagnoseMode.PollingTestToTarget:
@@ -264,7 +315,7 @@ namespace Iot.Device.Pn532
                     // − Parameter : 0x01 is 212 kbps,
                     // 0x02 is 424 kbps.
                     // − Result Length : 1,
-                    // − Result : Number of fails (Maximum 128). 
+                    // − Result : Number of fails (Maximum 128).
                     throw new NotImplementedException($"Test {diagnoseMode} not implemented");
                 case DiagnoseMode.EchoBackTest:
                     // NumTst = 0x05 : Echo Back Test
@@ -283,7 +334,7 @@ namespace Iot.Device.Pn532
                     // defining the baud rate and the modulation type in
                     // reception,
                     // − Result Length : no result, the test runs infinitely, so no output frame is
-                    // sent to the host controller. 
+                    // sent to the host controller.
                     // For example:
                     // − The PN532 is configured to receive frame with passive 106 kbps modulation
                     // type. The frames are sent back immediately.
@@ -296,7 +347,7 @@ namespace Iot.Device.Pn532
                     // − The PN532 is configured to receive frame with passive 424 kbps modulation
                     // type. The frames are sent back immediately.
                     // The MSB bit (CRC enable) of CIU_TxMode and CIU_RxMode must be set to 1.
-                    // D4 00 05 00 A2 A2 
+                    // D4 00 05 00 A2 A2
                     throw new NotImplementedException($"Test {diagnoseMode} not implemented");
                 case DiagnoseMode.AttentionRequestTest:
                     // NumTst = 0x06 : Attention Request Test or ISO/IEC14443-4 card presence detection
@@ -312,7 +363,7 @@ namespace Iot.Device.Pn532
                     // − Parameter Length : 0,
                     // − Result Length : 1,
                     // − Result : 0x00 is OK,
-                    // different from 0x00 is Not OK, Status byte. 
+                    // different from 0x00 is Not OK, Status byte.
                     throw new NotImplementedException($"Test {diagnoseMode} not implemented");
                 case DiagnoseMode.SelfAntenaTest:
                     // NumTst = 0x07 : Self Antenna Test
@@ -325,11 +376,12 @@ namespace Iot.Device.Pn532
                     // andet_bot andet_up andet_ithl[1:0] andet_ithh[1:0] andet_en
                     // − Result Length : 1,
                     // − Result : 0x00 is OK (antenna is detected),
-                    // different from 0x00 is not OK (no antenna is detected). 
+                    // different from 0x00 is not OK (no antenna is detected).
                     throw new NotImplementedException($"Test {diagnoseMode} not implemented");
                 default:
                     break;
             }
+
             return false;
         }
 
@@ -338,7 +390,10 @@ namespace Iot.Device.Pn532
         /// </summary>
         public uint VirtualCardTimeout
         {
-            get { return _virtualCardTimeout * 50; }
+            get
+            {
+                return _virtualCardTimeout * 50;
+            }
 
             set
             {
@@ -346,9 +401,11 @@ namespace Iot.Device.Pn532
                 // In Virtual Card mode, this field is mandatory; whereas in the other mode, it is optional.
                 // This parameter indicates the timeout value with a LSB of 50ms.
                 // There is no timeout control if the value is null (Timeout = 0).
-                // The maximum value for the timeout is 12.75 sec (Timeout = 0xFF). 
+                // The maximum value for the timeout is 12.75 sec (Timeout = 0xFF).
                 if (value / 50 > 0xFF)
+                {
                     throw new ArgumentException($"{nameof(VirtualCardTimeout)} can't be more than 12750 milliseconds.");
+                }
 
                 _virtualCardTimeout = value / 50;
                 bool ret = SetSecurityAccessModule();
@@ -361,7 +418,11 @@ namespace Iot.Device.Pn532
         /// </summary>
         public SecurityAccessModuleMode SecurityAccessModuleMode
         {
-            get { return _securityAccessModuleMode; }
+            get
+            {
+                return _securityAccessModuleMode;
+            }
+
             set
             {
                 bool ret = SetSecurityAccessModule();
@@ -371,11 +432,18 @@ namespace Iot.Device.Pn532
 
         private bool SetSecurityAccessModule()
         {
-            // Pass the SAM, the virtual card timeout and remove IRQ 
-            Span<byte> toSend = stackalloc byte[3] { (byte)_securityAccessModuleMode, (byte)(_virtualCardTimeout), 0x00 };
+            // Pass the SAM, the virtual card timeout and remove IRQ
+            Span<byte> toSend = stackalloc byte[3]
+            {
+                (byte)_securityAccessModuleMode, (byte)(_virtualCardTimeout), 0x00
+            };
             var ret = WriteCommand(CommandSet.SAMConfiguration, toSend);
             LogInfo.Log($"{nameof(SetSecurityAccessModule)} Write: {ret}", LogLevel.Debug);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             // We don't expect any result, just that the command went well
             ret = ReadResponse(CommandSet.SAMConfiguration, Span<byte>.Empty);
             LogInfo.Log($"{nameof(SetSecurityAccessModule)} read: {ret}", LogLevel.Debug);
@@ -386,7 +454,11 @@ namespace Iot.Device.Pn532
         {
             var ret = WriteCommand(CommandSet.GetFirmwareVersion);
             LogInfo.Log($"GetFirmwareVersion write command returned: {ret}", LogLevel.Info);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             Span<byte> firmware = stackalloc byte[4];
             ret = ReadResponse(CommandSet.GetFirmwareVersion, firmware);
             var ver = firmware.ToArray();
@@ -399,7 +471,9 @@ namespace Iot.Device.Pn532
                     VersionSupported = (VersionSupported)(firmware[3] & 0b0000_0111)
                 };
             }
-            LogInfo.Log($"GetFirmwareVersion read command returned: {ret} - Bytes {BitConverter.ToString(ver)}", LogLevel.Info);
+
+            LogInfo.Log($"GetFirmwareVersion read command returned: {ret} - Bytes {BitConverter.ToString(ver)}",
+                LogLevel.Info);
             return ret >= 0;
         }
 
@@ -408,19 +482,32 @@ namespace Iot.Device.Pn532
         /// </summary>
         public ParametersFlags ParametersFlags
         {
-            get { return _parametersFlags; }
+            get
+            {
+                return _parametersFlags;
+            }
 
             set
             {
                 if (SetParameters(value))
+                {
                     _parametersFlags = value;
+                }
             }
         }
+
         private bool SetParameters(ParametersFlags parametersFlags)
         {
-            Span<byte> toSend = stackalloc byte[1] { (byte)parametersFlags };
+            Span<byte> toSend = stackalloc byte[1]
+            {
+                (byte)parametersFlags
+            };
             var ret = WriteCommand(CommandSet.SetParameters, toSend);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             ret = ReadResponse(CommandSet.SetParameters, Span<byte>.Empty);
             LogInfo.Log($"{nameof(SetParameters)}: {ret}", LogLevel.Debug);
             return ret >= 0;
@@ -452,21 +539,32 @@ namespace Iot.Device.Pn532
         /// <param name="targetBaudRate">The baud rate to use to find cards</param>
         /// <param name="initiatorData">Specific initialization data</param>
         /// <returns>A raw byte array with the data of the targets if any has been identified</returns>
-        public byte[] ListPassiveTarget(MaxTarget maxTarget, TargetBaudRate targetBaudRate, ReadOnlySpan<byte> initiatorData)
+        public byte[] ListPassiveTarget(MaxTarget maxTarget, TargetBaudRate targetBaudRate,
+            ReadOnlySpan<byte> initiatorData)
         {
             Span<byte> toSend = stackalloc byte[2 + initiatorData.Length];
             toSend[0] = (byte)maxTarget;
             toSend[1] = (byte)targetBaudRate;
             if (initiatorData.Length > 0)
+            {
                 initiatorData.CopyTo(toSend.Slice(2));
+            }
+
             var ret = WriteCommand(CommandSet.InListPassiveTarget, toSend);
-            if (ret < 0) return null;
+            if (ret < 0)
+            {
+                return null;
+            }
+
             // TODO: check what is the real maximum size
             Span<byte> listData = stackalloc byte[1024];
             ret = ReadResponse(CommandSet.InListPassiveTarget, listData);
             LogInfo.Log($"{nameof(ListPassiveTarget)}: {ret}, number tags: {listData[0]}", LogLevel.Debug);
             if ((ret >= 0) && (listData[0] > 0))
+            {
                 return listData.Slice(0, ret).ToArray();
+            }
+
             return null;
         }
 
@@ -486,13 +584,19 @@ namespace Iot.Device.Pn532
                 data.Sak = toDecode[3];
                 data.NfcId = new byte[toDecode[4]];
                 for (int i = 0; i < data.NfcId.Length; i++)
+                {
                     data.NfcId[i] = toDecode[5 + i];
+                }
+
                 if ((5 + data.NfcId.Length) > toDecode.Length)
                 {
                     data.Ats = new byte[toDecode[5 + data.NfcId.Length]];
                     for (int i = 0; i < data.Ats.Length; i++)
+                    {
                         data.Ats[i] = toDecode[6 + data.NfcId.Length + i];
+                    }
                 }
+
                 return data;
             }
             catch (ArgumentOutOfRangeException)
@@ -534,7 +638,10 @@ namespace Iot.Device.Pn532
                 Data212_424kbps data = new Data212_424kbps();
                 data.TargetNumber = toDecode[0];
                 if ((toDecode[1] != 18) || (toDecode[1] != 20))
+                {
                     return null;
+                }
+
                 data.ResponseCode = toDecode[2];
                 data.NfcId = new byte[8];
                 toDecode.Slice(3, 8).CopyTo(data.NfcId);
@@ -545,6 +652,7 @@ namespace Iot.Device.Pn532
                     data.SystemCode = new byte[2];
                     toDecode.Slice(19, 2).CopyTo(data.SystemCode);
                 }
+
                 return data;
             }
             catch (ArgumentOutOfRangeException)
@@ -566,9 +674,7 @@ namespace Iot.Device.Pn532
                 Data106kbpsInnovisionJewel data = new Data106kbpsInnovisionJewel();
                 data.TargetNumber = toDecode[0];
                 data.Atqa = new byte[2] { toDecode[1], toDecode[2] };
-                data.JewelId = new byte[4] { toDecode[3], toDecode[4],
-                    toDecode[5], toDecode[6]
-                };
+                data.JewelId = new byte[4] { toDecode[3], toDecode[4], toDecode[5], toDecode[6] };
                 return data;
             }
             catch (ArgumentOutOfRangeException)
@@ -584,9 +690,16 @@ namespace Iot.Device.Pn532
         /// <returns>True if success</returns>
         public bool DeselectTarget(byte targetNumber)
         {
-            Span<byte> toSend = stackalloc byte[1] { targetNumber };
+            Span<byte> toSend = stackalloc byte[1]
+            {
+                targetNumber
+            };
             var ret = WriteCommand(CommandSet.InDeselect, toSend);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             ret = ReadResponse(CommandSet.InDeselect, toSend);
             return (toSend[0] == (byte)ErrorCode.None) && (ret >= 0);
         }
@@ -598,9 +711,16 @@ namespace Iot.Device.Pn532
         /// <returns>True if success</returns>
         public bool SelectTarget(byte targetNumber)
         {
-            Span<byte> toSend = stackalloc byte[1] { targetNumber };
+            Span<byte> toSend = stackalloc byte[1]
+            {
+                targetNumber
+            };
             var ret = WriteCommand(CommandSet.InSelect, toSend);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             ret = ReadResponse(CommandSet.InSelect, toSend);
             return (toSend[0] == (byte)ErrorCode.None) && (ret >= 0);
         }
@@ -612,9 +732,16 @@ namespace Iot.Device.Pn532
         /// <returns>True if success</returns>
         public bool ReleaseTarget(byte targetNumber)
         {
-            Span<byte> toSend = stackalloc byte[1] { targetNumber };
+            Span<byte> toSend = stackalloc byte[1]
+            {
+                targetNumber
+            };
             var ret = WriteCommand(CommandSet.InRelease, toSend);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             ret = ReadResponse(CommandSet.InRelease, toSend);
             return (toSend[0] == (byte)ErrorCode.None) && (ret >= 0);
         }
@@ -629,12 +756,19 @@ namespace Iot.Device.Pn532
         public int WriteReadDirect(Span<byte> dataToSend, Span<byte> dataFromCard)
         {
             var ret = WriteCommand(CommandSet.InCommunicateThru, dataToSend);
-            if (ret < 0) return -1;
+            if (ret < 0)
+            {
+                return -1;
+            }
+
             Span<byte> toReceive = stackalloc byte[1 + dataFromCard.Length];
             ret = ReadResponse(CommandSet.InCommunicateThru, toReceive);
             toReceive.Slice(1).CopyTo(dataFromCard);
             if ((toReceive[0] == (byte)ErrorCode.None) & (ret >= 0))
+            {
                 return ret;
+            }
+
             return -1;
         }
 
@@ -650,14 +784,24 @@ namespace Iot.Device.Pn532
             Span<byte> toSend = stackalloc byte[1 + dataToSend.Length];
             toSend[0] = targetNumber;
             if (dataToSend.Length > 0)
+            {
                 dataToSend.CopyTo(toSend.Slice(1));
+            }
+
             var ret = WriteCommand(CommandSet.InDataExchange, toSend);
-            if (ret < 0) return -1;
+            if (ret < 0)
+            {
+                return -1;
+            }
+
             Span<byte> toReceive = stackalloc byte[1 + dataFromCard.Length];
             ret = ReadResponse(CommandSet.InDataExchange, toReceive);
             toReceive.Slice(1).CopyTo(dataFromCard);
             if ((toReceive[0] == (byte)ErrorCode.None) & (ret >= 0))
+            {
                 return ret;
+            }
+
             return -1;
         }
 
@@ -670,18 +814,38 @@ namespace Iot.Device.Pn532
         /// <returns>A raw byte array containing the number of cards, the card type and the raw data. Null if nothing has been polled</returns>
         public byte[] AutoPoll(byte numberPolling, ushort periodMilliSecond, PollingType[] pollingType)
         {
-            if (pollingType == null) return null;
-            if (pollingType.Length > 15) return null;
+            if (pollingType == null)
+            {
+                return null;
+            }
+
+            if (pollingType.Length > 15)
+            {
+                return null;
+            }
+
             Span<byte> toSend = stackalloc byte[2 + pollingType.Length];
             toSend[0] = numberPolling;
             if ((periodMilliSecond / 150) > 0xFF)
+            {
                 toSend[1] = 0xFF;
+            }
             else
+            {
                 toSend[1] = (byte)(periodMilliSecond / 150);
+            }
+
             for (int i = 0; i < pollingType.Length; i++)
+            {
                 toSend[2 + i] = (byte)pollingType[i];
+            }
+
             var ret = WriteCommand(CommandSet.InAutoPoll, toSend);
-            if (ret < 0) return null;
+            if (ret < 0)
+            {
+                return null;
+            }
+
             Span<byte> receivedData = stackalloc byte[1024];
             ret = ReadResponse(CommandSet.InAutoPoll, receivedData);
             LogInfo.Log($"{nameof(AutoPoll)}, success: {ret}", LogLevel.Debug);
@@ -689,6 +853,7 @@ namespace Iot.Device.Pn532
             {
                 return receivedData.Slice(0, ret).ToArray();
             }
+
             return null;
         }
 
@@ -697,12 +862,8 @@ namespace Iot.Device.Pn532
         /// <summary>
         /// Set the PN532 as a target, so as a card
         /// </summary>
-        /// <param name="mode"></param>
-        /// <param name="mifare"></param>
-        /// <param name="feliCa"></param>
-        /// <param name="picc"></param>
-        /// <returns></returns>
-        public (TargetModeInitialized modeInialized, byte[] initiator) InitAsTarget(TargetModeInitialization mode, TargetMifareParameters mifare, TargetFeliCaParameters feliCa, TargetPiccParameters picc)
+        public (TargetModeInitialized modeInialized, byte[] initiator) InitAsTarget(TargetModeInitialization mode,
+            TargetMifareParameters mifare, TargetFeliCaParameters feliCa, TargetPiccParameters picc)
         {
             // First make sure we have the right mode in the parameters for the PICC only case
             if (mode == TargetModeInitialization.PiccOnly)
@@ -726,7 +887,10 @@ namespace Iot.Device.Pn532
             toSend.AddRange(feliCa.Serialize());
             toSend.AddRange(picc.Serialize());
             var ret = WriteCommand(CommandSet.TgInitAsTarget, toSend.ToArray());
-            if (ret < 0) return (null, null);
+            if (ret < 0)
+            {
+                return (null, null);
+            }
 
             Span<byte> receivedData = stackalloc byte[1024];
             ret = ReadResponse(CommandSet.TgInitAsTarget, receivedData);
@@ -740,6 +904,7 @@ namespace Iot.Device.Pn532
                 modeInitialized.TargetBaudRate = (TargetBaudRateInialized)(receivedData[0] & 0b0111_0000);
                 return (modeInitialized, receivedData.Slice(1, ret - 1).ToArray());
             }
+
             return (null, null);
         }
 
@@ -751,14 +916,20 @@ namespace Iot.Device.Pn532
         public int ReadDataAsTarget(Span<byte> receivedData)
         {
             var ret = WriteCommand(CommandSet.TgGetData);
-            if (ret < 0) return -1;
-            
+            if (ret < 0)
+            {
+                return -1;
+            }
+
             ret = ReadResponse(CommandSet.TgGetData, receivedData);
             LogInfo.Log($"{nameof(InitAsTarget)}, success: {ret}", LogLevel.Debug);
             if (ret > 0)
             {
-                LogInfo.Log($"{nameof(WriteDataAsTarget)} - error: {(ErrorCode)receivedData[0]}, received array: {BitConverter.ToString(receivedData.Slice(1, ret - 1).ToArray())}", LogLevel.Debug);
+                LogInfo.Log(
+                    $"{nameof(WriteDataAsTarget)} - error: {(ErrorCode)receivedData[0]}, received array: {BitConverter.ToString(receivedData.Slice(1, ret - 1).ToArray())}",
+                    LogLevel.Debug);
             }
+
             return ret;
         }
 
@@ -770,7 +941,10 @@ namespace Iot.Device.Pn532
         public bool WriteDataAsTarget(ReadOnlySpan<byte> dataToSend)
         {
             var ret = WriteCommand(CommandSet.TgSetData, dataToSend);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
 
             Span<byte> receivedData = stackalloc byte[1];
             ret = ReadResponse(CommandSet.TgSetData, receivedData);
@@ -780,6 +954,7 @@ namespace Iot.Device.Pn532
                 LogInfo.Log($"{nameof(WriteDataAsTarget)} - error: {(ErrorCode)receivedData[0]}", LogLevel.Debug);
                 return receivedData[0] == (byte)ErrorCode.None;
             }
+
             return false;
         }
 
@@ -858,13 +1033,14 @@ namespace Iot.Device.Pn532
         }
 
         /// <summary>
-        /// 
+        /// Configure analog mode
         /// </summary>
-        /// <param name="analog212_424_848Kbps"></param>
+        /// <param name="analog212_424_848Kbps">Settings</param>
         /// <returns>True is success</returns>
         public bool SetAnalog212_424_848kbps(Analog212_424_848kbpsMode analog212_424_848Kbps)
         {
-            return SetRfConfiguration(RfConfigurationMode.AnalogSettingsB212_424_848ISO_IEC14443_4, analog212_424_848Kbps.Serialize());
+            return SetRfConfiguration(RfConfigurationMode.AnalogSettingsB212_424_848ISO_IEC14443_4,
+                analog212_424_848Kbps.Serialize());
         }
 
         private bool SetRfConfiguration(RfConfigurationMode rfConfigurationMode, byte[] configurationData)
@@ -873,7 +1049,11 @@ namespace Iot.Device.Pn532
             toSend[0] = (byte)rfConfigurationMode;
             configurationData.AsSpan().CopyTo(toSend.Slice(1));
             var ret = WriteCommand(CommandSet.RFConfiguration, toSend);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             ret = ReadResponse(CommandSet.RFConfiguration, Span<byte>.Empty);
             LogInfo.Log($"{nameof(SetParameters)}: {ret}", LogLevel.Debug);
             return ret >= 0;
@@ -897,6 +1077,7 @@ namespace Iot.Device.Pn532
                 toSend[i * 2] = 0xFF;
                 toSend[i * 2 + 1] = (byte)registers[i];
             }
+
             return ReadRegisterCore(toSend, registerValues);
         }
 
@@ -928,13 +1109,18 @@ namespace Iot.Device.Pn532
                 toSend[i * 2] = (byte)(registers[i] >> 8);
                 toSend[i * 2 + 1] = (byte)registers[i];
             }
+
             return ReadRegisterCore(toSend, registerValues);
         }
 
         private bool ReadRegisterCore(Span<byte> toSend, Span<byte> registerValues)
         {
             var ret = WriteCommand(CommandSet.ReadRegister, toSend);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             ret = ReadResponse(CommandSet.ReadRegister, registerValues);
             LogInfo.Log($"{nameof(ReadRegister)}: {ret}", LogLevel.Debug);
             return ret >= 0;
@@ -955,6 +1141,7 @@ namespace Iot.Device.Pn532
                 toSend[i * 3 + 1] = (byte)registers[i];
                 toSend[i * 3 + 2] = registerValue[i];
             }
+
             return WriteRegisterCore(toSend, registerValue);
         }
 
@@ -984,18 +1171,23 @@ namespace Iot.Device.Pn532
                 toSend[i * 2 + 1] = (byte)registers[i];
                 toSend[i * 3 + 2] = registerValue[i];
             }
+
             return WriteRegisterCore(toSend, registerValue);
         }
 
         private bool WriteRegisterCore(Span<byte> toSend, Span<byte> registerValue)
         {
             var ret = WriteCommand(CommandSet.ReadRegister, toSend);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             // In theory, nothing is returned but practically you can get some returns
             // For example if you write on a register that is creating an output
             // So this buffer is here only to avoid having an exception when writing to
             // A register that will create an output
-            // The maximum amount of data return if 260 but writing specific register can 
+            // The maximum amount of data return if 260 but writing specific register can
             // Generate a larger amount
             Span<byte> returnVal = stackalloc byte[1024];
             ret = ReadResponse(CommandSet.ReadRegister, returnVal);
@@ -1021,7 +1213,11 @@ namespace Iot.Device.Pn532
             p3 = 0;
             l0L1 = 0;
             var ret = WriteCommand(CommandSet.ReadGPIO);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             Span<byte> retGPIO = stackalloc byte[3];
             ret = ReadResponse(CommandSet.ReadGPIO, retGPIO);
             p7 = (Port7)retGPIO[0];
@@ -1038,9 +1234,16 @@ namespace Iot.Device.Pn532
         /// <returns>True if success</returns>
         public bool WriteGpio(Port7 p7, Port3 p3)
         {
-            Span<byte> toWrite = stackalloc byte[2] { (byte)p7, (byte)p3 };
+            Span<byte> toWrite = stackalloc byte[2]
+            {
+                (byte)p7, (byte)p3
+            };
             var ret = WriteCommand(CommandSet.WriteGPIO, toWrite);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             ret = ReadResponse(CommandSet.WriteGPIO, Span<byte>.Empty);
             return ret >= 0;
         }
@@ -1056,9 +1259,16 @@ namespace Iot.Device.Pn532
         /// <returns>True if success</returns>
         public bool PowerDown(WakeUpEnable wakeUpEnable)
         {
-            Span<byte> toSend = stackalloc byte[1] { (byte)wakeUpEnable };
+            Span<byte> toSend = stackalloc byte[1]
+            {
+                (byte)wakeUpEnable
+            };
             var ret = WriteCommand(CommandSet.PowerDown, toSend);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             Span<byte> status = stackalloc byte[1];
             ret = ReadResponse(CommandSet.PowerDown, status);
             LogInfo.Log($"{nameof(PowerDown)}: {ret}, Status {status[0]}", LogLevel.Debug);
@@ -1077,10 +1287,11 @@ namespace Iot.Device.Pn532
                 // Wakeup the device send the magic 0x55 with a long preamble and SAM Command
                 LogInfo.Log("Waking up device", LogLevel.Debug);
                 // Create a SAM message and add the wake up message before
-                byte[] samMessage = CreateWriteMessage(CommandSet.SAMConfiguration, new byte[3] { (byte)_securityAccessModuleMode, (byte)(_virtualCardTimeout), 0x00 });
-                byte[] wakeUp = new byte[SerialWakeUp.Length + samMessage.Length];
-                SerialWakeUp.CopyTo(wakeUp, 0);
-                samMessage.CopyTo(wakeUp, SerialWakeUp.Length);
+                byte[] samMessage = CreateWriteMessage(CommandSet.SAMConfiguration,
+                    new byte[3] { (byte)_securityAccessModuleMode, (byte)(_virtualCardTimeout), 0x00 });
+                byte[] wakeUp = new byte[_serialWakeUp.Length + samMessage.Length];
+                _serialWakeUp.CopyTo(wakeUp, 0);
+                samMessage.CopyTo(wakeUp, _serialWakeUp.Length);
                 _serialPort.Write(wakeUp, 0, wakeUp.Length);
                 LogInfo.Log($"Send: {BitConverter.ToString(wakeUp)}", LogLevel.Debug);
                 // Wait to make sure it's awake and processed the order
@@ -1095,20 +1306,22 @@ namespace Iot.Device.Pn532
                 _controller.Write(_pin, PinValue.Low);
                 Thread.Sleep(4);
                 _controller.Write(_pin, PinValue.High);
-                byte[] samMessage = CreateWriteMessage(CommandSet.SAMConfiguration, new byte[3] { (byte)_securityAccessModuleMode, (byte)(_virtualCardTimeout), 0x00 });
-                byte[] wakeUp = new byte[I2cWakeUp.Length + samMessage.Length];
-                I2cWakeUp.CopyTo(wakeUp, 0);
-                samMessage.CopyTo(wakeUp, I2cWakeUp.Length);
+                byte[] samMessage = CreateWriteMessage(CommandSet.SAMConfiguration,
+                    new byte[3] { (byte)_securityAccessModuleMode, (byte)(_virtualCardTimeout), 0x00 });
+                byte[] wakeUp = new byte[_i2CWakeUp.Length + samMessage.Length];
+                _i2CWakeUp.CopyTo(wakeUp, 0);
+                samMessage.CopyTo(wakeUp, _i2CWakeUp.Length);
                 _spiDevice.Write(wakeUp);
 
             }
             else if (_i2cDevice != null)
             {
-                LogInfo.Log("Waking up PN522 on I2C mode", LogLevel.Debug);      
-                byte[] samMessage = CreateWriteMessage(CommandSet.SAMConfiguration, new byte[3] { (byte)_securityAccessModuleMode, (byte)(_virtualCardTimeout), 0x00 });
-                byte[] wakeUp = new byte[I2cWakeUp.Length + samMessage.Length];
-                I2cWakeUp.CopyTo(wakeUp, 0);
-                samMessage.CopyTo(wakeUp, I2cWakeUp.Length);
+                LogInfo.Log("Waking up PN522 on I2C mode", LogLevel.Debug);
+                byte[] samMessage = CreateWriteMessage(CommandSet.SAMConfiguration,
+                    new byte[3] { (byte)_securityAccessModuleMode, (byte)(_virtualCardTimeout), 0x00 });
+                byte[] wakeUp = new byte[_i2CWakeUp.Length + samMessage.Length];
+                _i2CWakeUp.CopyTo(wakeUp, 0);
+                samMessage.CopyTo(wakeUp, _i2CWakeUp.Length);
                 int i = 3;
                 while (i > 0)
                 {
@@ -1153,13 +1366,23 @@ namespace Iot.Device.Pn532
         public bool SetSerialBaudRate(BaudRate baudRate)
         {
             if (_serialPort == null)
+            {
                 return false;
-            Span<byte> toSend = stackalloc byte[1] { (byte)baudRate };
+            }
+
+            Span<byte> toSend = stackalloc byte[1]
+            {
+                (byte)baudRate
+            };
             var ret = WriteCommand(CommandSet.SetSerialBaudRate, toSend);
-            if (ret < 0) return false;
+            if (ret < 0)
+            {
+                return false;
+            }
+
             ret = ReadResponse(CommandSet.SetSerialBaudRate, Span<byte>.Empty);
             // Need to send an acknowledge
-            _serialPort.Write(AckBuffer, 0, AckBuffer.Length);
+            _serialPort.Write(_ackBuffer, 0, _ackBuffer.Length);
             _serialPort.Close();
             // See page 39 of the documentation for the baud rates
             // It is approximately Math.Round(10252800.0 / BaudRate)
@@ -1204,6 +1427,7 @@ namespace Iot.Device.Pn532
                 default:
                     break;
             }
+
             _serialPort.WriteTimeout = _serialPort.ReadTimeout;
             _serialPort.Open();
             return ret >= 0;
@@ -1215,7 +1439,9 @@ namespace Iot.Device.Pn532
             {
                 LogInfo.Log($"Serial Available bytes and dumped: {_serialPort.BytesToRead}", LogLevel.Debug);
                 while (_serialPort.BytesToRead > 0)
+                {
                     _serialPort.ReadByte();
+                }
             }
         }
 
@@ -1226,13 +1452,24 @@ namespace Iot.Device.Pn532
 
         private int WriteCommand(CommandSet commandSet, ReadOnlySpan<byte> writeData)
         {
-            LogInfo.Log($"{nameof(WriteCommand)}: {nameof(CommandSet)} {commandSet} Bytes to send: {BitConverter.ToString(writeData.ToArray())}", LogLevel.Debug);
+            LogInfo.Log(
+                $"{nameof(WriteCommand)}: {nameof(CommandSet)} {commandSet} Bytes to send: {BitConverter.ToString(writeData.ToArray())}",
+                LogLevel.Debug);
             if (_spiDevice != null)
+            {
                 return WriteCommandSPI(commandSet, writeData);
+            }
+
             if (_i2cDevice != null)
+            {
                 return WriteCommandI2C(commandSet, writeData);
+            }
+
             if (_serialPort != null)
+            {
                 return WriteCommandSerial(commandSet, writeData);
+            }
+
             return -1;
         }
 
@@ -1253,7 +1490,7 @@ namespace Iot.Device.Pn532
         /// Lower byte of [TFI + PD0 + PD1 + … + PDn + DCS] = 0x00,
         /// POSTAMBLE 1 byte2.
         /// The amount of data that can be exchanged using this frame structure is limited to 255
-        /// bytes (including TFI). 
+        /// bytes (including TFI).
         /// 00 00 FF LEN LCS TFI PD0 PD1 ……... PDn DCS 00
         /// -- ----- --- --- --- ----------------- --- --
         /// |    |    |   |   |            |         |  |_ Postamble
@@ -1281,9 +1518,13 @@ namespace Iot.Device.Pn532
                 correctionPreamble = 0;
                 correctionIndex = 1;
             }
+
             Span<byte> buff = stackalloc byte[7 + writeData.Length + correctionPreamble + correctionLArgeSizeBuffer];
             if (correctionPreamble != 0)
+            {
                 buff[0] = Preamble;
+            }
+
             buff[1 - correctionIndex] = StartCode1;
             buff[2 - correctionIndex] = StartCode2;
             // Normal frame size
@@ -1297,12 +1538,13 @@ namespace Iot.Device.Pn532
             }
             else
             {
-                //Large frame size
+                // Large frame size
                 buff[3 - correctionIndex] = 0xFF;
                 buff[4 - correctionIndex] = 0xFF;
                 buff[5 - correctionIndex] = (byte)(writeData.Length >> 8);
                 buff[6 - correctionIndex] = (byte)(writeData.Length);
             }
+
             // We are writing from Host
             buff[5 - correctionIndex + correctionLArgeSizeBuffer] = FromHostCheckSumD4;
             // The command and the data
@@ -1311,13 +1553,20 @@ namespace Iot.Device.Pn532
             {
                 writeData.CopyTo(buff.Slice(7 - correctionIndex + correctionLArgeSizeBuffer));
             }
+
             // Checksum
             byte checkSum = (byte)(FromHostCheckSumD4 + commandSet);
             for (int i = 0; i < writeData.Length; i++)
+            {
                 checkSum += writeData[i];
+            }
+
             buff[7 + writeData.Length - correctionIndex + correctionLArgeSizeBuffer] = (byte)(~checkSum + 1);
             if (correctionPreamble != 0)
+            {
                 buff[8 + writeData.Length + correctionLArgeSizeBuffer] = Postamble;
+            }
+
             LogInfo.Log($"Message to send: {BitConverter.ToString(buff.ToArray())}", LogLevel.Debug);
             return buff.ToArray();
         }
@@ -1335,10 +1584,16 @@ namespace Iot.Device.Pn532
                 Thread.Sleep(1);
                 timeout--;
                 if (timeout == 0)
+                {
                     return -1;
+                }
             }
+
             if (CheckAckFrame())
+            {
                 return writeData.Length;
+            }
+
             return -1;
         }
 
@@ -1362,10 +1617,16 @@ namespace Iot.Device.Pn532
                 Thread.Sleep(1);
                 timeout--;
                 if (timeout == 0)
+                {
                     return -1;
+                }
             }
+
             if (CheckAckFrame())
+            {
                 return writeData.Length;
+            }
+
             return -1;
         }
 
@@ -1386,12 +1647,18 @@ namespace Iot.Device.Pn532
             while (!IsReady())
             {
                 Thread.Sleep(1);
-                timeout--;                
+                timeout--;
                 if (timeout == 0)
+                {
                     return -1;
+                }
             }
+
             if (CheckAckFrame())
+            {
                 return writeData.Length;
+            }
+
             return -1;
         }
 
@@ -1404,9 +1671,13 @@ namespace Iot.Device.Pn532
                 return ret;
             }
             else if (_i2cDevice != null)
+            {
                 return ReadResponseI2C(commandSet, readData);
+            }
             else if (_serialPort != null)
+            {
                 return ReadResponseSerial(commandSet, readData);
+            }
 
             return -1;
         }
@@ -1419,18 +1690,32 @@ namespace Iot.Device.Pn532
                 Thread.Sleep(1);
                 timeout--;
                 if (timeout == 0)
+                {
                     return -1;
+                }
             }
+
             // PREAMBULE
             if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
+            {
                 if (!(_serialPort.ReadByte() == Preamble))
+                {
                     return -1;
+                }
+            }
+
             // STARTCODE1
             if (!(_serialPort.ReadByte() == StartCode1))
+            {
                 return -1;
+            }
+
             // STARTCODE2
             if (!(_serialPort.ReadByte() == StartCode2))
+            {
                 return -1;
+            }
+
             // Checksum length the sum of both should be 0
             int length = _serialPort.ReadByte();
             int length2 = _serialPort.ReadByte();
@@ -1445,17 +1730,28 @@ namespace Iot.Device.Pn532
                     length += _serialPort.ReadByte();
                     length2 = _serialPort.ReadByte();
                     if ((byte)(length + length2) != 0)
+                    {
                         return -1;
+                    }
                 }
                 else
+                {
                     return -1;
+                }
             }
+
             // Is it a device to cloud message?
             if (_serialPort.ReadByte() != ToHostCheckSumD5)
+            {
                 return -1;
-            // The response command should be +1 vs the one sent            
+            }
+
+            // The response command should be +1 vs the one sent
             if (_serialPort.ReadByte() != ((byte)commandSet + 1))
+            {
                 return -1;
+            }
+
             // Finally, we can read the data
             if (length - 2 > 0)
             {
@@ -1463,16 +1759,28 @@ namespace Iot.Device.Pn532
                 _serialPort.Read(buff, 0, buff.Length);
                 buff.AsSpan().CopyTo(readData);
             }
+
             // Almost finished, we need to calculate the checksum
             var checkSum = ToHostCheckSumD5 + (byte)commandSet + 1;
             for (int i = 0; i < length - 2; i++)
+            {
                 checkSum += readData[i];
+            }
+
             var checkSumReal = _serialPort.ReadByte();
             if ((byte)(checkSum + checkSumReal) != 0)
+            {
                 return -1;
+            }
+
             if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
+            {
                 if (!(_serialPort.ReadByte() == Postamble))
+                {
                     return -1;
+                }
+            }
+
             return length - 2;
         }
 
@@ -1484,21 +1792,35 @@ namespace Iot.Device.Pn532
                 Thread.Sleep(1);
                 timeout--;
                 if (timeout == 0)
+                {
                     return -1;
+                }
             }
+
             _controller.Write(_pin, PinValue.Low);
             Thread.Sleep(1);
             _spiDevice.WriteByte(ReverseByte(ReadData));
             // PREAMBULE
             if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
+            {
                 if (!(ReverseByte(_spiDevice.ReadByte()) == Preamble))
+                {
                     return -1;
+                }
+            }
+
             // STARTCODE1
             if (!(ReverseByte(_spiDevice.ReadByte()) == StartCode1))
+            {
                 return -1;
+            }
+
             // STARTCODE2
             if (!(ReverseByte(_spiDevice.ReadByte()) == StartCode2))
+            {
                 return -1;
+            }
+
             // Checksum length the sum of both should be 0
             int length = ReverseByte(_spiDevice.ReadByte());
             int length2 = ReverseByte(_spiDevice.ReadByte());
@@ -1513,17 +1835,28 @@ namespace Iot.Device.Pn532
                     length += ReverseByte(_spiDevice.ReadByte());
                     length2 = ReverseByte(_spiDevice.ReadByte());
                     if ((byte)(length + length2) != 0)
+                    {
                         return -1;
+                    }
                 }
                 else
+                {
                     return -1;
+                }
             }
+
             // Is it a device to cloud message?
             if (ReverseByte(_spiDevice.ReadByte()) != ToHostCheckSumD5)
+            {
                 return -1;
-            // The response command should be +1 vs the one sent            
+            }
+
+            // The response command should be +1 vs the one sent
             if (ReverseByte(_spiDevice.ReadByte()) != ((byte)commandSet + 1))
+            {
                 return -1;
+            }
+
             // Finally, we can read the data
             if (length - 2 > 0)
             {
@@ -1533,16 +1866,28 @@ namespace Iot.Device.Pn532
                 buff.AsSpan().CopyTo(readData);
 
             }
+
             // Almost finished, we need to calculate the checksum
             var checkSum = ToHostCheckSumD5 + (byte)commandSet + 1;
             for (int i = 0; i < length - 2; i++)
+            {
                 checkSum += readData[i];
+            }
+
             var checkSumReal = ReverseByte(_spiDevice.ReadByte());
             if ((byte)(checkSum + checkSumReal) != 0)
+            {
                 return -1;
+            }
+
             if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
+            {
                 if (!(ReverseByte(_spiDevice.ReadByte()) == Postamble))
+                {
                     return -1;
+                }
+            }
+
             return length - 2;
         }
 
@@ -1554,26 +1899,43 @@ namespace Iot.Device.Pn532
                 Thread.Sleep(1);
                 timeout--;
                 if (timeout == 0)
+                {
                     return -1;
+                }
             }
+
             // For I2C, we need to read at least 2 bytes other wise it things we're still trying
             // to check the status
-            byte[] preamb = new byte[I2cMAxBuffer];
+            byte[] preamb = new byte[I2cMaxBuffer];
             _i2cDevice.Read(preamb);
             int idxPreamb = 0;
             // Dropping the first byte, it is 0x01 and read previously in the pooling
             if (preamb[idxPreamb] == 0x01)
+            {
                 idxPreamb++;
+            }
+
             // PREAMBULE
             if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
+            {
                 if (!(preamb[idxPreamb++] == Preamble))
+                {
                     return -1;
+                }
+            }
+
             // STARTCODE1
             if (!(preamb[idxPreamb++] == StartCode1))
+            {
                 return -1;
+            }
+
             // STARTCODE2
             if (!(preamb[idxPreamb++] == StartCode2))
+            {
                 return -1;
+            }
+
             // Checksum length the sum of both should be 0
             int length = preamb[idxPreamb++];
             int length2 = preamb[idxPreamb++];
@@ -1588,43 +1950,65 @@ namespace Iot.Device.Pn532
                     length += preamb[idxPreamb++];
                     length2 = preamb[idxPreamb++];
                     if ((byte)(length + length2) != 0)
+                    {
                         return -1;
+                    }
                 }
                 else
+                {
                     return -1;
+                }
             }
+
             // Is it a device to cloud message?
             if (preamb[idxPreamb++] != ToHostCheckSumD5)
+            {
                 return -1;
-            // The response command should be +1 vs the one sent            
+            }
+
+            // The response command should be +1 vs the one sent
             if (preamb[idxPreamb++] != ((byte)commandSet + 1))
+            {
                 return -1;
+            }
+
             // Finally, we can read the data
             if (length - 2 > 0)
             {
-                //var buff = new byte[length - 2];
-                //_i2cDevice.Read(buff);
-                //buff.AsSpan().CopyTo(readData);
                 preamb.AsSpan().Slice(idxPreamb, length - 2).CopyTo(readData);
                 idxPreamb += length - 2;
             }
+
             // Almost finished, we need to calculate the checksum
             var checkSum = ToHostCheckSumD5 + (byte)commandSet + 1;
             for (int i = 0; i < length - 2; i++)
+            {
                 checkSum += readData[i];
+            }
+
             var checkSumReal = preamb[idxPreamb++];
             if ((byte)(checkSum + checkSumReal) != 0)
+            {
                 return -1;
+            }
+
             if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
+            {
                 if (!(preamb[idxPreamb++] == Postamble))
+                {
                     return -1;
+                }
+            }
+
             return length - 2;
         }
 
-
         private bool CheckAckFrame()
         {
-            Span<byte> ackReceived = stackalloc byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            Span<byte> ackReceived = stackalloc byte[6]
+            {
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            };
             if (_spiDevice != null)
             {
                 _controller.Write(_pin, PinValue.Low);
@@ -1652,8 +2036,9 @@ namespace Iot.Device.Pn532
                     LogInfo.Log($"Exception: {ex.Message}", LogLevel.Info);
                 }
             }
+
             LogInfo.Log($"ACK: {BitConverter.ToString(ackReceived.ToArray())}", LogLevel.Debug);
-            return ackReceived.SequenceEqual(AckBuffer);
+            return ackReceived.SequenceEqual(_ackBuffer);
         }
 
         private bool IsReady()
@@ -1686,41 +2071,24 @@ namespace Iot.Device.Pn532
             return ((ret & 0x01) == 0x01);
         }
 
-
-        private static byte[] BitReverseTable =
+        private static readonly byte[] BitReverseTable =
         {
-            0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0,
-            0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0,
-            0x08, 0x88, 0x48, 0xc8, 0x28, 0xa8, 0x68, 0xe8,
-            0x18, 0x98, 0x58, 0xd8, 0x38, 0xb8, 0x78, 0xf8,
-            0x04, 0x84, 0x44, 0xc4, 0x24, 0xa4, 0x64, 0xe4,
-            0x14, 0x94, 0x54, 0xd4, 0x34, 0xb4, 0x74, 0xf4,
-            0x0c, 0x8c, 0x4c, 0xcc, 0x2c, 0xac, 0x6c, 0xec,
-            0x1c, 0x9c, 0x5c, 0xdc, 0x3c, 0xbc, 0x7c, 0xfc,
-            0x02, 0x82, 0x42, 0xc2, 0x22, 0xa2, 0x62, 0xe2,
-            0x12, 0x92, 0x52, 0xd2, 0x32, 0xb2, 0x72, 0xf2,
-            0x0a, 0x8a, 0x4a, 0xca, 0x2a, 0xaa, 0x6a, 0xea,
-            0x1a, 0x9a, 0x5a, 0xda, 0x3a, 0xba, 0x7a, 0xfa,
-            0x06, 0x86, 0x46, 0xc6, 0x26, 0xa6, 0x66, 0xe6,
-            0x16, 0x96, 0x56, 0xd6, 0x36, 0xb6, 0x76, 0xf6,
-            0x0e, 0x8e, 0x4e, 0xce, 0x2e, 0xae, 0x6e, 0xee,
-            0x1e, 0x9e, 0x5e, 0xde, 0x3e, 0xbe, 0x7e, 0xfe,
-            0x01, 0x81, 0x41, 0xc1, 0x21, 0xa1, 0x61, 0xe1,
-            0x11, 0x91, 0x51, 0xd1, 0x31, 0xb1, 0x71, 0xf1,
-            0x09, 0x89, 0x49, 0xc9, 0x29, 0xa9, 0x69, 0xe9,
-            0x19, 0x99, 0x59, 0xd9, 0x39, 0xb9, 0x79, 0xf9,
-            0x05, 0x85, 0x45, 0xc5, 0x25, 0xa5, 0x65, 0xe5,
-            0x15, 0x95, 0x55, 0xd5, 0x35, 0xb5, 0x75, 0xf5,
-            0x0d, 0x8d, 0x4d, 0xcd, 0x2d, 0xad, 0x6d, 0xed,
-            0x1d, 0x9d, 0x5d, 0xdd, 0x3d, 0xbd, 0x7d, 0xfd,
-            0x03, 0x83, 0x43, 0xc3, 0x23, 0xa3, 0x63, 0xe3,
-            0x13, 0x93, 0x53, 0xd3, 0x33, 0xb3, 0x73, 0xf3,
-            0x0b, 0x8b, 0x4b, 0xcb, 0x2b, 0xab, 0x6b, 0xeb,
-            0x1b, 0x9b, 0x5b, 0xdb, 0x3b, 0xbb, 0x7b, 0xfb,
-            0x07, 0x87, 0x47, 0xc7, 0x27, 0xa7, 0x67, 0xe7,
-            0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7,
-            0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef,
-            0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff
+            0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0, 0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0, 0x08,
+            0x88, 0x48, 0xc8, 0x28, 0xa8, 0x68, 0xe8, 0x18, 0x98, 0x58, 0xd8, 0x38, 0xb8, 0x78, 0xf8, 0x04, 0x84,
+            0x44, 0xc4, 0x24, 0xa4, 0x64, 0xe4, 0x14, 0x94, 0x54, 0xd4, 0x34, 0xb4, 0x74, 0xf4, 0x0c, 0x8c, 0x4c,
+            0xcc, 0x2c, 0xac, 0x6c, 0xec, 0x1c, 0x9c, 0x5c, 0xdc, 0x3c, 0xbc, 0x7c, 0xfc, 0x02, 0x82, 0x42, 0xc2,
+            0x22, 0xa2, 0x62, 0xe2, 0x12, 0x92, 0x52, 0xd2, 0x32, 0xb2, 0x72, 0xf2, 0x0a, 0x8a, 0x4a, 0xca, 0x2a,
+            0xaa, 0x6a, 0xea, 0x1a, 0x9a, 0x5a, 0xda, 0x3a, 0xba, 0x7a, 0xfa, 0x06, 0x86, 0x46, 0xc6, 0x26, 0xa6,
+            0x66, 0xe6, 0x16, 0x96, 0x56, 0xd6, 0x36, 0xb6, 0x76, 0xf6, 0x0e, 0x8e, 0x4e, 0xce, 0x2e, 0xae, 0x6e,
+            0xee, 0x1e, 0x9e, 0x5e, 0xde, 0x3e, 0xbe, 0x7e, 0xfe, 0x01, 0x81, 0x41, 0xc1, 0x21, 0xa1, 0x61, 0xe1,
+            0x11, 0x91, 0x51, 0xd1, 0x31, 0xb1, 0x71, 0xf1, 0x09, 0x89, 0x49, 0xc9, 0x29, 0xa9, 0x69, 0xe9, 0x19,
+            0x99, 0x59, 0xd9, 0x39, 0xb9, 0x79, 0xf9, 0x05, 0x85, 0x45, 0xc5, 0x25, 0xa5, 0x65, 0xe5, 0x15, 0x95,
+            0x55, 0xd5, 0x35, 0xb5, 0x75, 0xf5, 0x0d, 0x8d, 0x4d, 0xcd, 0x2d, 0xad, 0x6d, 0xed, 0x1d, 0x9d, 0x5d,
+            0xdd, 0x3d, 0xbd, 0x7d, 0xfd, 0x03, 0x83, 0x43, 0xc3, 0x23, 0xa3, 0x63, 0xe3, 0x13, 0x93, 0x53, 0xd3,
+            0x33, 0xb3, 0x73, 0xf3, 0x0b, 0x8b, 0x4b, 0xcb, 0x2b, 0xab, 0x6b, 0xeb, 0x1b, 0x9b, 0x5b, 0xdb, 0x3b,
+            0xbb, 0x7b, 0xfb, 0x07, 0x87, 0x47, 0xc7, 0x27, 0xa7, 0x67, 0xe7, 0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7,
+            0x77, 0xf7, 0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef, 0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f,
+            0xff
         };
 
         private static byte ReverseByte(byte toReverse)
@@ -1731,7 +2099,9 @@ namespace Iot.Device.Pn532
         private static void ReverseByte(Span<byte> span)
         {
             for (int i = 0; i < span.Length; i++)
+            {
                 span[i] = ReverseByte(span[i]);
+            }
         }
 
         #endregion
@@ -1748,8 +2118,11 @@ namespace Iot.Device.Pn532
             if (_serialPort != null)
             {
                 if (_serialPort.IsOpen)
+                {
                     _serialPort.Close();
+                }
             }
+
             _serialPort?.Dispose();
             _serialPort = null;
         }

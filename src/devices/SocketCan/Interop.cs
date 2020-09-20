@@ -2,6 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// Disable these StyleCop rules for this file, as we are using native names here.
+#pragma warning disable SA1300 // Element should begin with upper-case letter
+#pragma warning disable SA1307 // Field should begin with upper-case letter
+#pragma warning disable SX1309 // Field should begin with an underscore
+
 using System;
 using System.IO;
 using System.Net.Sockets;
@@ -25,7 +30,6 @@ namespace Iot.Device.SocketCan
 
         public const int SOL_CAN_BASE = 100;
         public const int SOL_CAN_RAW = SOL_CAN_BASE + (int)CanProtocol.CAN_RAW;
-
 
         [DllImport("libc", EntryPoint = "socket", CallingConvention = CallingConvention.Cdecl)]
         private static extern int CreateNativeSocket(int domain, int type, CanProtocol protocol);
@@ -91,7 +95,9 @@ namespace Iot.Device.SocketCan
             int socket = CreateNativeSocket(PF_CAN, SOCK_RAW, CanProtocol.CAN_RAW);
 
             if (socket == -1)
+            {
                 throw new IOException("CAN socket could not be created");
+            }
 
             BindToInterface(socket, networkInterface);
 
@@ -209,7 +215,7 @@ namespace Iot.Device.SocketCan
         internal enum CanSocketOption : int
         {
             // set 0 .. n can_filter(s)
-            CAN_RAW_FILTER = 1,       
+            CAN_RAW_FILTER = 1,
             // set filter for error frames
             CAN_RAW_ERR_FILTER,
             // local loopback (default:on)

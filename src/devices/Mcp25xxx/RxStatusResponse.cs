@@ -16,7 +16,7 @@ namespace Iot.Device.Mcp25xxx
         /// RXxIF (CANINTF) bits are mapped to bits 7 and 6.</param>
         /// <param name="messageTypeReceived">
         /// The extended ID bit is mapped to bit 4. The RTR bit is mapped to bit 3.</param>
-        /// <param name="filterMatch"></param>
+        /// <param name="filterMatch">Filter match type</param>
         public RxStatusResponse(
             FilterMatchType filterMatch,
             MessageReceivedType messageTypeReceived,
@@ -62,14 +62,17 @@ namespace Iot.Device.Mcp25xxx
             /// No RX Message.
             /// </summary>
             NoRxMessage = 0,
+
             /// <summary>
             /// Message in RXB0.
             /// </summary>
             MessageInRxB0 = 1,
+
             /// <summary>
             /// Message in RXB1.
             /// </summary>
             MessageInRxB1 = 2,
+
             /// <summary>
             /// Messages in Both Buffers.
             /// </summary>
@@ -85,14 +88,17 @@ namespace Iot.Device.Mcp25xxx
             /// Standard Data Frame.
             /// </summary>
             StandardDataFrame = 0,
+
             /// <summary>
             /// Standard Remote Frame.
             /// </summary>
             StandardRemoteFrame = 1,
+
             /// <summary>
             /// Extended Data Frame.
             /// </summary>
             ExtendedDataFrame = 2,
+
             /// <summary>
             /// Extended Remote Frame.
             /// </summary>
@@ -106,18 +112,25 @@ namespace Iot.Device.Mcp25xxx
         {
             /// <summary>RxF0</summary>
             RxF0 = 0,
+
             /// <summary>RxF1</summary>
             RxF1 = 1,
+
             /// <summary>RxF2</summary>
             RxF2 = 2,
+
             /// <summary>RxF3</summary>
             RxF3 = 3,
+
             /// <summary>RxF4</summary>
             RxF4 = 4,
+
             /// <summary>RxF5</summary>
             RxF5 = 5,
+
             /// <summary>RxF0RolloverToRxB1</summary>
             RxF0RolloverToRxB1 = 6,
+
             /// <summary>RxF1RolloverToRxB1</summary>
             RxF1RolloverToRxB1 = 7,
         }

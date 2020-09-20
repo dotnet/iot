@@ -3,10 +3,33 @@
   <Import Project="../eng/Compilers.props" />
   <Import Project="../eng/Versions.props" />
   <PropertyGroup>
-    <NoWarn>$(NoWarn);CS8321</NoWarn>
+    <!--
+         CS8321: The local function is not declared
+         CS1591: Missing XML comment for publicly visible type or member
+    -->
+    <NoWarn>$(NoWarn);CS8321;CS1591</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>
     <MainLibraryPath>$(MSBuildThisFileDirectory)../src/System.Device.Gpio/</MainLibraryPath>
     <IotBindingsLibraryPath>$(MSBuildThisFileDirectory)../src/Iot.Device.Bindings/</IotBindingsLibraryPath>
   </PropertyGroup>
+
+  <!--
+    This file adds two ProjectReferences to all sample projects (even if they don't depend on these projects).
+    This enables building the samples, as part of the repo build, with the latest version of these projects.
+    If changes to these projects break the samples, then the build will break.
+    
+    If you want to use the PackageReferences instead, set the PreferPackageReference property to true, either
+    in the project or on the commandline, like:
+
+    dotnet build /p:PreferPackageReference=true
+
+    The samples can be copied outside the repo, and will use the PackageReferences as long as this file isn't included.
+  -->
+
+  <ItemGroup Condition="'$(PreferPackageReference)' != 'true'">
+    <ProjectReference Include="$(IotBindingsLibraryPath)Iot.Device.Bindings.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+  </ItemGroup>
+
 </Project>

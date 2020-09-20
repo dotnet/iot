@@ -13,14 +13,17 @@ namespace Iot.Device.Imu
         /// Range 250Dps
         /// </summary>
         Range0250Dps = 0,
+
         /// <summary>
         /// Range 500Dps
         /// </summary>
         Range0500Dps = 1,
+
         /// <summary>
         /// Range 1000Dps
         /// </summary>
         Range1000Dps = 2,
+
         /// <summary>
         /// Range 2000Dps
         /// </summary>
