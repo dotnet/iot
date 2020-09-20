@@ -23,74 +23,50 @@ Development environment specifics:
 
 ******************************************************************************/
         private const int DefaultAddress = 0x6F; // default I2C address of the button
-        private const int DeviceId = 0x5D;          // device ID of the Qwiic Button
-
-        // private TwoWire* _i2cPort;      //Generic connection to user's chosen I2C port
-        private byte _deviceAddress; // I2C address of the button/switch
-        private I2cBusAccess _i2cBus;
+        private I2cBusAccess _i2CBus;
 
         /*-------------------------------- Device Status ------------------------*/
 
         /// <summary>
-        /// TODO
+        /// Initializes a new instance of the <see cref="QwiicButton"/> class.
         /// </summary>
-        public QwiicButton(int busId, byte deviceAddress = DefaultAddress)
+        /// <param name="i2CBusId">I2C bus ID the button is connected to.</param>
+        /// <param name="i2CAddress">I2C bus address of the button (default=0x6F).</param>
+        public QwiicButton(int i2CBusId, byte i2CAddress = DefaultAddress)
         {
-            var settings = new I2cConnectionSettings(busId, deviceAddress);
+            I2CBusId = i2CBusId;
+            I2CAddress = i2CAddress;
+            var settings = new I2cConnectionSettings(i2CBusId, i2CAddress);
             var device = I2cDevice.Create(settings);
-            _i2cBus = new I2cBusAccess(device);
+            _i2CBus = new I2cBusAccess(device);
         }
 
         /// <summary>
-        /// TODO
+        /// I2C bus ID the button is connected to.
+        /// </summary>
+        public int I2CBusId { get; set; }
+
+        /// <summary>
+        /// I2C bus address of the button.
+        /// </summary>
+        public byte I2CAddress { get; set; }
+
+        /// <summary>
+        /// Returns the 8-bit device ID of the button.
         /// </summary>
         public byte GetDeviceId()
         {
-            return _i2cBus.ReadSingleRegister(Register.ID);
+            return _i2CBus.ReadSingleRegister(Register.ID);
         }
 
         /// <summary>
-        /// TODO
-        /// </summary>
-        public bool CheckDeviceId()
-        {
-            // return ((DeviceID() == DEV_ID_SW) || (DeviceID() == DEV_ID_BTN)); //Return true if the device ID matches either the button or the switch
-            return GetDeviceId() == DeviceId;
-        }
-
-        /// <summary>
-        /// TODO
-        /// </summary>
-        public byte GetDeviceType()
-        {
-            if (GetDeviceId() == DeviceId)
-            {
-                return 1;
-            }
-
-            return 0;
-
-            // if (IsConnected())
-            // {
-            // only try to get the device ID if the device will acknowledge
-            // if (GetDeviceId() == DeviceId)
-            //    {
-            //        return 1;
-            //    }
-
-            // if (id == DEV_ID_SW)
-            //    //     return 2;
-            // // }
-            // return 0;
-        }
-
-        /// <summary>
-        /// TODO
+        /// Returns the firmware version of the attached device as a 16-bit integer.
+        /// The leftmost (high) byte is the major revision number, and the rightmost (low) byte is the minor revision number.
         /// </summary>
         public ushort GetFirmwareVersion()
         {
-            ushort version = (ushort)(_i2cBus.ReadSingleRegister(Register.FIRMWARE_MAJOR) << 8);
-            version |= _i2cBus.ReadSingleRegister(Register.FIRMWARE_MINOR);
+            ushort version = (ushort)(_i2CBus.ReadSingleRegister(Register.FIRMWARE_MAJOR) << 8);
+            version |= _i2CBus.ReadSingleRegister(Register.FIRMWARE_MINOR);
             return version;
         }
 
@@ -105,21 +81,16 @@ Development environment specifics:
                 return false;
             }
 
-            var success = _i2cBus.WriteSingleRegister(Register.I2C_ADDRESS, address);
+            var success = _i2CBus.WriteSingleRegister(Register.I2C_ADDRESS, address);
             if (success)
             {
-                _deviceAddress = address;
+                I2CAddress = address;
                 return true;
             }
 
             Console.WriteLine("Could not set I2C address");
             return false;
         }
-
-        /// <summary>
-        /// TODO
-        /// </summary>
-        public byte I2cAddress() => _deviceAddress;
 
         /*------------------------------ Button Status ---------------------- */
 
@@ -128,8 +99,7 @@ Development environment specifics:
         /// </summary>
         public bool IsPressed()
         {
-            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS));
-            // Console.WriteLine($"StatusRegisterValue: {Convert.ToString(status.StatusRegisterValue, toBase: 2)}");
+            var status = new StatusRegisterBitField(_i2CBus.ReadSingleRegister(Register.BUTTON_STATUS));
             return status.IsPressed;
         }
 
@@ -138,16 +108,16 @@ Development environment specifics:
         /// </summary>
         public bool HasBeenClicked()
         {
-            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS));
+            var status = new StatusRegisterBitField(_i2CBus.ReadSingleRegister(Register.BUTTON_STATUS));
             return status.HasBeenClicked;
         }
 
         /// <summary>
-        /// TODO
+        /// Returns whether a new button status event has occurred.
         /// </summary>
-        public bool Available()
+        public bool EventAvailable()
         {
-            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS));
+            var status = new StatusRegisterBitField(_i2CBus.ReadSingleRegister(Register.BUTTON_STATUS));
             return status.EventAvailable;
         }
 
@@ -156,29 +126,30 @@ Development environment specifics:
         /// </summary>
         public byte ClearEventBits()
         {
-            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS))
+            var status = new StatusRegisterBitField(_i2CBus.ReadSingleRegister(Register.BUTTON_STATUS))
             {
                 EventAvailable = false,
                 HasBeenClicked = false,
                 IsPressed = false
             };
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.BUTTON_STATUS, status.StatusRegisterValue);
+            return _i2CBus.WriteSingleRegisterWithReadback(Register.BUTTON_STATUS, status.StatusRegisterValue);
         }
 
         /// <summary>
-        /// TODO
+        /// Returns the time in milliseconds that the button waits for the mechanical contacts to settle.
         /// </summary>
         public ushort GetDebounceTime()
         {
-            return _i2cBus.ReadDoubleRegister(Register.BUTTON_DEBOUNCE_TIME);
+            return _i2CBus.ReadDoubleRegister(Register.BUTTON_DEBOUNCE_TIME);
         }
 
         /// <summary>
-        /// TODO
+        /// Sets the time in milliseconds that the button waits for the mechanical contacts to settle and checks if the register was set properly.
+        /// Returns 0 on success, 1 on register I2C write fail, and 2 if the value didn't get written into the register properly.
         /// </summary>
         public byte SetDebounceTime(ushort time)
         {
-            return (byte)_i2cBus.WriteDoubleRegisterWithReadback(Register.BUTTON_DEBOUNCE_TIME, time);
+            return (byte)_i2CBus.WriteDoubleRegisterWithReadback(Register.BUTTON_DEBOUNCE_TIME, time);
         }
 
         /*------------------- Interrupt Status/Configuration ---------------- */
@@ -189,11 +160,11 @@ Development environment specifics:
         public byte EnablePressedInterrupt()
         {
             var interrupt =
-                new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.INTERRUPT_CONFIG))
+                new InterruptConfigBitField(_i2CBus.ReadSingleRegister(Register.INTERRUPT_CONFIG))
                 {
                     PressedEnable = true
                 };
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
+            return _i2CBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
         }
 
         /// <summary>
@@ -202,11 +173,11 @@ Development environment specifics:
         public byte DisablePressedInterrupt()
         {
             var interrupt =
-                new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.INTERRUPT_CONFIG))
+                new InterruptConfigBitField(_i2CBus.ReadSingleRegister(Register.INTERRUPT_CONFIG))
                 {
                     PressedEnable = false
                 };
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
+            return _i2CBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
         }
 
         /// <summary>
@@ -215,12 +186,12 @@ Development environment specifics:
         public byte EnableClickedInterrupt()
         {
             var interrupt =
-                new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.INTERRUPT_CONFIG))
+                new InterruptConfigBitField(_i2CBus.ReadSingleRegister(Register.INTERRUPT_CONFIG))
                 {
                     ClickedEnable = true
                 };
 
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
+            return _i2CBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
         }
 
         /// <summary>
@@ -229,12 +200,12 @@ Development environment specifics:
         public byte DisableClickedInterrupt()
         {
             var interrupt =
-                new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.INTERRUPT_CONFIG))
+                new InterruptConfigBitField(_i2CBus.ReadSingleRegister(Register.INTERRUPT_CONFIG))
                 {
                     ClickedEnable = false
                 };
 
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
+            return _i2CBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
         }
 
         /// <summary>
@@ -247,13 +218,13 @@ Development environment specifics:
                 PressedEnable = true,
                 ClickedEnable = true
             };
-            var interruptValue = _i2cBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
+            var interruptValue = _i2CBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
 
             var status = new StatusRegisterBitField
             {
                 EventAvailable = false
             };
-            _i2cBus.WriteSingleRegisterWithReadback(Register.BUTTON_STATUS, status.StatusRegisterValue);
+            _i2CBus.WriteSingleRegisterWithReadback(Register.BUTTON_STATUS, status.StatusRegisterValue);
 
             return interruptValue;
         }
@@ -265,7 +236,7 @@ Development environment specifics:
         /// </summary>
         public bool IsPressedQueueFull()
         {
-            var pressedQueue = new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.PRESSED_QUEUE_STATUS));
+            var pressedQueue = new QueueStatusBitField(_i2CBus.ReadSingleRegister(Register.PRESSED_QUEUE_STATUS));
             return pressedQueue.IsFull;
         }
 
@@ -274,7 +245,7 @@ Development environment specifics:
         /// </summary>
         public bool IsPressedQueueEmpty()
         {
-            var pressedQueue = new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.PRESSED_QUEUE_STATUS));
+            var pressedQueue = new QueueStatusBitField(_i2CBus.ReadSingleRegister(Register.PRESSED_QUEUE_STATUS));
             return pressedQueue.IsEmpty;
         }
 
@@ -284,7 +255,7 @@ Development environment specifics:
         /// </summary>
         public uint TimeSinceLastPress()
         {
-            return _i2cBus.ReadQuadRegister(Register.PRESSED_QUEUE_FRONT);
+            return _i2CBus.ReadQuadRegister(Register.PRESSED_QUEUE_FRONT);
         }
 
         /// <summary>
@@ -293,7 +264,7 @@ Development environment specifics:
         /// </summary>
         public uint TimeSinceFirstPress()
         {
-            return _i2cBus.ReadQuadRegister(Register.PRESSED_QUEUE_BACK);
+            return _i2CBus.ReadQuadRegister(Register.PRESSED_QUEUE_BACK);
         }
 
         /// <summary>
@@ -304,13 +275,13 @@ Development environment specifics:
             var timeSinceFirstPress = TimeSinceFirstPress(); // Take the oldest value on the queue
 
             var pressedQueue =
-                new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.PRESSED_QUEUE_STATUS))
+                new QueueStatusBitField(_i2CBus.ReadSingleRegister(Register.PRESSED_QUEUE_STATUS))
                 {
                     PopRequest = true
                 };
 
             // Remove the oldest value from the queue
-            _i2cBus.WriteSingleRegister(Register.PRESSED_QUEUE_STATUS, pressedQueue.QueueStatusValue);
+            _i2CBus.WriteSingleRegister(Register.PRESSED_QUEUE_STATUS, pressedQueue.QueueStatusValue);
 
             return timeSinceFirstPress; // Return the value we popped
         }
@@ -320,7 +291,7 @@ Development environment specifics:
         /// </summary>
         public bool IsClickedQueueFull()
         {
-            var clickedQueue = new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.CLICKED_QUEUE_STATUS));
+            var clickedQueue = new QueueStatusBitField(_i2CBus.ReadSingleRegister(Register.CLICKED_QUEUE_STATUS));
             return clickedQueue.IsFull;
         }
 
@@ -329,7 +300,7 @@ Development environment specifics:
         /// </summary>
         public bool IsClickedQueueEmpty()
         {
-            var clickedQueue = new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.CLICKED_QUEUE_STATUS));
+            var clickedQueue = new QueueStatusBitField(_i2CBus.ReadSingleRegister(Register.CLICKED_QUEUE_STATUS));
             return clickedQueue.IsEmpty;
         }
 
@@ -339,7 +310,7 @@ Development environment specifics:
         /// </summary>
         public uint TimeSinceLastClick()
         {
-            return _i2cBus.ReadQuadRegister(Register.CLICKED_QUEUE_FRONT);
+            return _i2CBus.ReadQuadRegister(Register.CLICKED_QUEUE_FRONT);
         }
 
         /// <summary>
@@ -348,7 +319,7 @@ Development environment specifics:
         /// </summary>
         public uint TimeSinceFirstClick()
         {
-            return _i2cBus.ReadQuadRegister(Register.CLICKED_QUEUE_BACK);
+            return _i2CBus.ReadQuadRegister(Register.CLICKED_QUEUE_BACK);
         }
 
         /// <summary>
@@ -359,11 +330,11 @@ Development environment specifics:
             var timeSinceFirstClick = TimeSinceFirstClick();
 
             var clickedQueue =
-                new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.CLICKED_QUEUE_STATUS))
+                new QueueStatusBitField(_i2CBus.ReadSingleRegister(Register.CLICKED_QUEUE_STATUS))
                 {
                     PopRequest = true
                 };
-            _i2cBus.WriteSingleRegister(Register.CLICKED_QUEUE_STATUS, clickedQueue.QueueStatusValue);
+            _i2CBus.WriteSingleRegister(Register.CLICKED_QUEUE_STATUS, clickedQueue.QueueStatusValue);
 
             return timeSinceFirstClick;
         }
@@ -394,10 +365,10 @@ Development environment specifics:
         /// </summary>
         public bool LedConfig(byte brightness, ushort cycleTime, ushort offTime, byte granularity = 1)
         {
-            bool success = _i2cBus.WriteSingleRegister(Register.LED_BRIGHTNESS, brightness);
-            success &= _i2cBus.WriteSingleRegister(Register.LED_PULSE_GRANULARITY, granularity);
-            success &= _i2cBus.WriteDoubleRegister(Register.LED_PULSE_CYCLE_TIME, cycleTime);
-            success &= _i2cBus.WriteDoubleRegister(Register.LED_PULSE_OFF_TIME, offTime);
+            bool success = _i2CBus.WriteSingleRegister(Register.LED_BRIGHTNESS, brightness);
+            success &= _i2CBus.WriteSingleRegister(Register.LED_PULSE_GRANULARITY, granularity);
+            success &= _i2CBus.WriteDoubleRegister(Register.LED_PULSE_CYCLE_TIME, cycleTime);
+            success &= _i2CBus.WriteDoubleRegister(Register.LED_PULSE_OFF_TIME, offTime);
             return success;
         }
 
@@ -406,8 +377,8 @@ Development environment specifics:
         /// <inheritdoc />
         public void Dispose()
         {
-            _i2cBus?.Dispose();
-            _i2cBus = null;
+            _i2CBus?.Dispose();
+            _i2CBus = null;
         }
     }
 }
