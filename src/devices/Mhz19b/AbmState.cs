@@ -5,18 +5,19 @@
 namespace Iot.Device.Mhz19b
 {
     /// <summary>
-    /// Defines if automatic baseline correction is on or off
+    /// Defines if automatic baseline correction (ABM) is on or off
+    /// For details refer to datasheet, rev. 1.0, pg. 8
     /// </summary>
     public enum AbmState
     {
         /// <summary>
-        /// ABM off
+        /// ABM off (value acc. to datasheet)
         /// </summary>
         Off = 0x00,
 
         /// <summary>
-        /// ABM on
+        /// ABM on (value acc. to datasheet)
         /// </summary>
-        On = 0x0a
+        On = 0xA0
     }
 }
