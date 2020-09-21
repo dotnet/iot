@@ -18,13 +18,13 @@ namespace Iot.Device.Multiplexing
 
         /// <param name="serialData">Serial data in pin</param>
         /// <param name="clock">Shift register clock pin</param>
-        /// <param name="latch">Register clock pin (latch)</param>
+        /// <param name="latchEnable">Register clock pin (latch)</param>
         /// <param name="outputEnable">Output enable pin</param>
-        public ShiftRegisterPinMapping(int serialData, int clock, int latch, int outputEnable = -1)
+        public ShiftRegisterPinMapping(int serialData, int clock, int latchEnable, int outputEnable = -1)
         {
             SerialDataInput = serialData;
             Clock = clock;
-            LatchEnable = latch;
+            LatchEnable = latchEnable;
             OutputEnable = outputEnable;
         }
 
