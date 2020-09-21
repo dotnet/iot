@@ -1,4 +1,5 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/iot)
+[![Discord](https://img.shields.io/discord/755370044946513932?label=Discord)](https://discord.gg/kqWhBbj)
 
 # .NET Core IoT Libraries
 

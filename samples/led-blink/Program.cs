@@ -12,30 +12,25 @@ namespace led_blink
     {
         static void Main(string[] args)
         {
-            var pin = 17;
-            var lightTimeInMilliseconds = 1000;
-            var dimTimeInMilliseconds = 200;
+            var pin = 18;
+            var lightTime = 1000;
+            var dimTime = 200;
             
             Console.WriteLine($"Let's blink an LED!");
-            using (GpioController controller = new GpioController())
+            using GpioController controller = new GpioController();
+            controller.OpenPin(pin, PinMode.Output);
+            Console.WriteLine($"GPIO pin enabled for use: {pin}");
+
+            // turn LED on and off
+            while (true)
             {
-                controller.OpenPin(pin, PinMode.Output);
-                Console.WriteLine($"GPIO pin enabled for use: {pin}");
+                Console.WriteLine($"Light for {lightTime}ms");
+                controller.Write(pin, PinValue.High);
+                Thread.Sleep(lightTime);
 
-                Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs eventArgs) =>
-                {
-                    controller.Dispose();
-                };
-
-                while (true)
-                {
-                    Console.WriteLine($"Light for {lightTimeInMilliseconds}ms");
-                    controller.Write(pin, PinValue.High);
-                    Thread.Sleep(lightTimeInMilliseconds);
-                    Console.WriteLine($"Dim for {dimTimeInMilliseconds}ms");
-                    controller.Write(pin, PinValue.Low);
-                    Thread.Sleep(dimTimeInMilliseconds);
-                }
+                Console.WriteLine($"Dim for {dimTime}ms");
+                controller.Write(pin, PinValue.Low);
+                Thread.Sleep(dimTime);
             }
         }
     }
