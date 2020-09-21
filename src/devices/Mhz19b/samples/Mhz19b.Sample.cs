@@ -3,11 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Threading;
+using UnitsNet;
 
 namespace Iot.Device.Mhz19b.Samples
 {
     /// <summary>
-    /// Samples for Mhz19b
+    /// Sample for MH-Z19B sensor
     /// </summary>
     public class Program
     {
@@ -19,15 +21,17 @@ namespace Iot.Device.Mhz19b.Samples
             Mhz19b sensor = new Mhz19b("/dev/serial0");
             while (true)
             {
-                var reading = sensor.GetCo2Reading();
-                if (reading.Item2)
+                (Ratio concentration, bool validity) reading = sensor.GetCo2Reading();
+                if (reading.validity)
                 {
-                    Console.WriteLine($"{reading.Item1}");
+                    Console.WriteLine($"{reading.concentration}");
                 }
                 else
                 {
                     Console.WriteLine("Concentration counldn't be read");
                 }
+
+                Thread.Sleep(1000);
             }
         }
     }

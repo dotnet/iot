@@ -11,17 +11,10 @@ using UnitsNet;
 namespace Iot.Device.Mhz19b
 {
     /// <summary>
-    /// Add documentation here
+    /// MH-Z19B CO2 concentration sensor binding
     /// </summary>
-    public sealed partial class Mhz19b : IDisposable
+    public sealed class Mhz19b : IDisposable
     {
-        private enum CommonMessageBytes
-        {
-            Start = 0xff,
-            SensorNumber = 0x01,
-            Empty = 0x00
-        }
-
         private enum Command : byte
         {
             ReadCo2Concentration = 0x86,
@@ -36,8 +29,10 @@ namespace Iot.Device.Mhz19b
             Start = 0x00,
             SensorNum = 0x01,
             Command = 0x02,
-            DataHigh = 0x03,
-            DataLow = 0x04,
+            DataHighRequest = 0x03,
+            DataLowRequest = 0x04,
+            DataHighResponse = 0x02,
+            DataLowResponse = 0x03,
             Checksum = 0x08
         }
 
@@ -71,11 +66,8 @@ namespace Iot.Device.Mhz19b
         /// If the validity is false the ratio is set to 0.
         /// </summary>
         /// <returns>CO2 concentration in ppm and validity</returns>
-        public (Ratio, bool) GetCo2Reading()
+        public (Ratio concentration, bool validity) GetCo2Reading()
         {
-            Ratio concentration = Ratio.FromPartsPerMillion(0);
-            bool validity = false;
-
             try
             {
                 var request = CreateRequest(Command.ReadCo2Concentration);
@@ -84,19 +76,38 @@ namespace Iot.Device.Mhz19b
                 _serialPort.Open();
                 _serialPort.Write(request, 0, request.Length);
 
+                // wait until the response has been completely received
+                int timeout = 100;
+                while (timeout > 0 && _serialPort.BytesToRead < MessageSize)
+                {
+                    Thread.Sleep(1);
+                    timeout--;
+                }
+
+                if (timeout == 0)
+                {
+                    return (Ratio.FromPartsPerMillion(0), false);
+                }
+
+                // read and process response
                 byte[] response = new byte[MessageSize];
                 if ((_serialPort.Read(response, 0, response.Length) == response.Length) && (response[(int)MessageFormat.Checksum] == Checksum(response)))
                 {
-                    concentration = Ratio.FromPartsPerMillion((int)response[(int)MessageFormat.DataHigh] * 256 + (int)response[(int)MessageFormat.DataLow]);
-                    validity = true;
+                    return (Ratio.FromPartsPerMillion((int)response[(int)MessageFormat.DataHighResponse] * 256 + (int)response[(int)MessageFormat.DataLowResponse]), true);
                 }
+                else
+                {
+                    return (Ratio.FromPartsPerMillion(0), false);
+                }
+            }
+            catch
+            { // no need for details here
+                return (Ratio.FromPartsPerMillion(0), false);
             }
             finally
             {
                 _serialPort.Close();
             }
-
-            return (concentration, validity);
         }
 
         /// <summary>
@@ -116,8 +127,8 @@ namespace Iot.Device.Mhz19b
         {
             var request = CreateRequest(Command.CalibrateSpanPoint);
             // set span in request, c. f. datasheet rev. 1.0, pg. 8 for details
-            request[(int)MessageFormat.DataHigh] = (byte)(span / 256);
-            request[(int)MessageFormat.DataLow] = (byte)(span % 256);
+            request[(int)MessageFormat.DataHighRequest] = (byte)(span / 256);
+            request[(int)MessageFormat.DataLowRequest] = (byte)(span % 256);
 
             return SendRequest(request);
         }
@@ -132,7 +143,7 @@ namespace Iot.Device.Mhz19b
         {
             var request = CreateRequest(Command.AutoCalibrationSwitch);
             // set on/off state in request, c. f. datasheet rev. 1.0, pg. 8 for details
-            request[(int)MessageFormat.DataHigh] = (byte)state;
+            request[(int)MessageFormat.DataHighRequest] = (byte)state;
 
             return SendRequest(request);
         }
@@ -147,37 +158,38 @@ namespace Iot.Device.Mhz19b
         {
             var request = CreateRequest(Command.DetectionRangeSetting);
             // set detection range in request, c. f. datasheet rev. 1.0, pg. 8 for details
-            request[(int)MessageFormat.DataHigh] = (byte)((int)detectionRange / 256);
-            request[(int)MessageFormat.DataLow] = (byte)((int)detectionRange % 256);
+            request[(int)MessageFormat.DataHighRequest] = (byte)((int)detectionRange / 256);
+            request[(int)MessageFormat.DataLowRequest] = (byte)((int)detectionRange % 256);
 
             return SendRequest(request);
         }
 
         private bool SendRequest(byte[] request)
         {
-            bool validity = false;
-
             request[(int)MessageFormat.Checksum] = Checksum(request);
 
             try
             {
                 _serialPort.Open();
                 _serialPort.Write(request, 0, request.Length);
-                validity = true;
+                return true;
+            }
+            catch
+            { // no need fo details here
+                return false;
             }
             finally
             {
                 _serialPort.Close();
             }
-
-            return validity;
         }
 
         private byte[] CreateRequest(Command command) => new byte[]
             {
-                (byte)CommonMessageBytes.Start, (byte)CommonMessageBytes.SensorNumber, (byte)command,
-                (byte)CommonMessageBytes.Empty, (byte)CommonMessageBytes.Empty, (byte)CommonMessageBytes.Empty,
-                (byte)CommonMessageBytes.Empty, (byte)CommonMessageBytes.Empty, (byte)CommonMessageBytes.Empty
+                0xff, // start byte,
+                0x01, // sensor number, always 0x1
+                (byte)command,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00 // empty bytes
             };
 
         /// <summary>
