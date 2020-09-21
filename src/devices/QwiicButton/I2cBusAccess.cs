@@ -45,7 +45,7 @@ namespace Iot.Device.QwiicButton
 
         internal ushort ReadDoubleRegister(Register register)
         {
-            var readBuffer = new Span<byte>();
+            Span<byte> readBuffer = new byte[2];
             _device.WriteRead(ToReadOnlySpan(register), readBuffer);
             if (readBuffer.IsEmpty)
             {
@@ -79,7 +79,7 @@ namespace Iot.Device.QwiicButton
 
         internal uint ReadQuadRegister(Register register)
         {
-            var readBuffer = new Span<byte>();
+            Span<byte> readBuffer = new byte[4];
             _device.WriteRead(ToReadOnlySpan(register), readBuffer);
             if (readBuffer.IsEmpty)
             {
@@ -122,6 +122,15 @@ namespace Iot.Device.QwiicButton
 
         internal bool WriteDoubleRegister(Register register, ushort data)
         {
+            // EVI alternative:
+            // byte lower = (byte)(data & 0xff);
+            // byte upper = (byte)(data >> 8);
+            // _device.Write(new ReadOnlySpan<byte>(new[]
+            // {
+            //    (byte)register,
+            //    lower,
+            //    upper
+            // }));
             _device.WriteByte((byte)register);
             byte lower = (byte)(data & 0xff);
             byte upper = (byte)(data >> 8);
