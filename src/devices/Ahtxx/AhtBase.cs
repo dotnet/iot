@@ -22,7 +22,8 @@ namespace Iot.Device.Ahtxx
         /// </summary>
         public const int DeviceAddress = 0x38;
 
-        private enum StatusBit : byte // datasheet version 1.1, table 10
+        // datasheet version 1.1, table 10
+        private enum StatusBit : byte
         {
             Calibrated = 0x08,
             Busy = 0x80
@@ -35,7 +36,6 @@ namespace Iot.Device.Ahtxx
             Measure = 0xac
         }
 
-        private bool _disposed = false;
         private I2cDevice _i2cDevice = null;
         private double _temperature;
         private double _humidity;
@@ -48,7 +48,8 @@ namespace Iot.Device.Ahtxx
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
-            SoftReset(); // even if not clearly stated in datasheet, start with a software reset to assure clear start conditions
+            // even if not clearly stated in datasheet, start with a software reset to assure clear start conditions
+            SoftReset();
 
             // check whether the device indicates the need for a calibration cycle
             // and perform calibration if indicated ==> c.f. datasheet, version 1.1, ch. 5.4
@@ -87,8 +88,9 @@ namespace Iot.Device.Ahtxx
         {
             Span<byte> buffer = stackalloc byte[3]
             {
+                // command parameters c.f. datasheet, version 1.1, ch. 5.4
                 (byte)Command.Measure,
-                0x33, // command parameters c.f. datasheet, version 1.1, ch. 5.4
+                0x33,
                 0x00
             };
             _i2cDevice.Write(buffer);
@@ -121,7 +123,8 @@ namespace Iot.Device.Ahtxx
         private void SoftReset()
         {
             _i2cDevice.WriteByte((byte)Command.SoftRest);
-            Thread.Sleep(20); // reset requires 20ms at most, c.f. datasheet version 1.1, ch. 5.5
+            // reset requires 20ms at most, c.f. datasheet version 1.1, ch. 5.5
+            Thread.Sleep(20);
         }
 
         /// <summary>
@@ -136,13 +139,15 @@ namespace Iot.Device.Ahtxx
                 0x00
             };
             _i2cDevice.Write(buffer);
-            Thread.Sleep(10); // wait 10ms c.f. datasheet, version 1.1, ch. 5.4
+            // wait 10ms c.f. datasheet, version 1.1, ch. 5.4
+            Thread.Sleep(10);
         }
 
         private byte GetStatusByte()
         {
             _i2cDevice.WriteByte(0x71);
-            Thread.Sleep(10); // whithout this delay the reading the status fails often.
+            // whithout this delay the reading the status fails often.
+            Thread.Sleep(10);
             byte status = _i2cDevice.ReadByte();
             return status;
         }
@@ -163,21 +168,13 @@ namespace Iot.Device.Ahtxx
         /// <inheritdoc cref="IDisposable" />
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed)
+            if (_i2cDevice == null)
             {
                 return;
             }
 
-            if (disposing)
-            {
-                if (_i2cDevice != null)
-                {
-                    _i2cDevice?.Dispose();
-                    _i2cDevice = null;
-                }
-            }
-
-            _disposed = true;
+            _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
     }
 }
