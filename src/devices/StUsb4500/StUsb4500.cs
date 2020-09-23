@@ -197,10 +197,6 @@ namespace Iot.Device.StUsb4500
                 {
                     (byte)StUsb4500Register.RX_HEADER_LOW
                 };
-            ////Span<byte> rxByteCntBuffer = stackalloc byte[]
-            ////    {
-            ////        (byte)StUsb4500Register.RX_BYTE_CNT
-            ////    };
             Span<byte> rxDataBuffer = stackalloc byte[]
                 {
                     (byte)StUsb4500Register.RX_DATA_OBJ1_0
@@ -236,13 +232,9 @@ namespace Iot.Device.StUsb4500
                 return null;
             }
 
-            // The following check is disabled as it can not really prevent the error mentioned below, as the buffer-change can happen after the check and before the read.
+            // The original code does a check for the object count at this stage which is not used here as it can not really prevent the error mentioned below,
+            // as the buffer-change can happen after the check and before the read.
             // It actually increases the probability of the error as it increases the time between message detection and reading the buffer.
-            ////_i2cDevice.WriteRead(rxByteCntBuffer, statusBuffer);
-            ////if (statusBuffer[0] != objectCount * 4)
-            ////{
-            ////    throw new InvalidOperationException($"{nameof(StUsb4500Register.RX_BYTE_CNT)} = {statusBuffer[0]}");
-            ////}
 
             // Warning: Short Timing
             // There is ~3 ms time-frame to read the source capabilities, before the next Message ("Accept") arrives and overwrites the first bytes of RX_DATA_OBJ register
