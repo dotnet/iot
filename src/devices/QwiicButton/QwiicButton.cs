@@ -110,7 +110,7 @@ Development environment specifics:
         /*------------------------------ Button Status ---------------------- */
 
         /// <summary>
-        /// TODO
+        /// Returns whether the button is pressed.
         /// </summary>
         public bool IsPressed()
         {
@@ -119,7 +119,7 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// TODO
+        /// Returns whether the button is clicked.
         /// </summary>
         public bool HasBeenClicked()
         {
@@ -137,7 +137,7 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// TODO
+        /// Sets <see cref="IsPressed"/>, <see cref="HasBeenClicked"/> and <see cref="EventAvailable"/> to false.
         /// </summary>
         public byte ClearEventBits()
         {
