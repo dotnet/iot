@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.I2c;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Iot.Device.StUsb4500.Enumerations;
@@ -135,7 +136,8 @@ namespace Iot.Device.StUsb4500
                 throw new ArgumentOutOfRangeException(nameof(objects));
             }
 
-            Span<byte> buffer = stackalloc byte[1 + (objects.Length * 4)]; // first byte is the address + 4 byte for each PDO
+            // first byte is the address + 4 byte for each PDO
+            Span<byte> buffer = stackalloc byte[1 + (objects.Length * 4)];
             buffer[0] = (byte)StUsb4500Register.DPM_SNK_PDO1_0;
             for (int i = 0; i < objects.Length; ++i)
             {
@@ -165,15 +167,18 @@ namespace Iot.Device.StUsb4500
             {
                 return GetSourcePdo();
             }
-            catch (ArgumentException exception) when (exception.Message.Contains("readBuffer")) // sometimes we get a "readBuffer cannot be empty." exception
+            catch (ArgumentException exception) when (exception.Message.Contains("readBuffer"))
             {
-                if (retryCount <= 0) // avoid endless tries in case of other problems
+                // sometimes we get a "readBuffer cannot be empty." exception
+                if (retryCount <= 0)
                 {
+                    // avoid endless tries in case of other problems
                     throw;
                 }
 
-                Console.WriteLine(exception.Message);
-                return ReadSourcePdo(retryCount - 1); // try again, second try almost always works
+                Trace.WriteLine(exception.Message);
+                // try again, second try almost always works
+                return ReadSourcePdo(retryCount - 1);
             }
         }
 
@@ -204,8 +209,10 @@ namespace Iot.Device.StUsb4500
             Span<byte> statusBuffer = stackalloc byte[1];
             Span<byte> headerBuffer = stackalloc byte[2];
 
-            var cts = new CancellationTokenSource(500); // to avoid endless-loop
-            PerformUsbPdSoftwareReset(); // Source PDOs are only readable during negotiation, which happens after a reset
+            // to avoid endless-loop
+            var cts = new CancellationTokenSource(500);
+            // Source PDOs are only readable during negotiation, which happens after a reset
+            PerformUsbPdSoftwareReset();
 
             do
             {
@@ -226,7 +233,7 @@ namespace Iot.Device.StUsb4500
 
             if (cts.IsCancellationRequested)
             {
-                return new PowerDeliveryObject[0];
+                return null;
             }
 
             // The following check is disabled as it can not really prevent the error mentioned below, as the buffer-change can happen after the check and before the read.
@@ -292,49 +299,54 @@ namespace Iot.Device.StUsb4500
         /// <summary>Enters the NVM read mode.</summary>
         private void EnterNvmReadMode()
         {
+            // set password
             Span<byte> buffer = stackalloc byte[]
                 {
-                    (byte)StUsb4500Register.FTP_CUST_PASSWORD_REG, StUsb4500Constants.FTP_CUST_PASSWORD
+                    (byte)StUsb4500Register.FTP_CUST_PASSWORD_REG,
+                    StUsb4500Constants.FTP_CUST_PASSWORD
                 };
-            _i2cDevice.Write(buffer); // set password
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_0, 0x00
-                };
-            _i2cDevice.Write(buffer); // NVM internal controller reset
+            // NVM internal controller reset
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_0;
+            buffer[1] = 0x00;
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_0, StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N
-                };
-            _i2cDevice.Write(buffer); // Set PWR and RST_N bits
+            // Set PWR and RST_N bits
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_0;
+            buffer[1] = StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N;
+            _i2cDevice.Write(buffer);
         }
 
         /// <summary>Reads a NVM sector.</summary>
-        /// <param name="sectorNumber">The sector number.</param>
+        /// <param name="sectorNumber">The sector number. This must be a value between 0 - 4.</param>
         /// <param name="sectorDataBuffer">The sector data buffer.</param>
         private void ReadNvmSector(byte sectorNumber, Span<byte> sectorDataBuffer)
         {
+            if (sectorNumber > 4)
+            {
+                throw new ArgumentOutOfRangeException(nameof(sectorNumber));
+            }
+
+            // Set PWR and RST_N bits
             Span<byte> buffer = stackalloc byte[]
                 {
-                    (byte)StUsb4500Register.FTP_CTRL_0, StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N
-                };
-            _i2cDevice.Write(buffer); // Set PWR and RST_N bits
-
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_1, StUsb4500Constants.READ & StUsb4500Constants.FTP_CUST_OPCODE_MASK
-                };
-            _i2cDevice.Write(buffer); // Set Read Sectors Opcode
-
-            buffer = stackalloc byte[]
-                {
                     (byte)StUsb4500Register.FTP_CTRL_0,
-                    (byte)((sectorNumber & StUsb4500Constants.FTP_CUST_SECT) | StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N | StUsb4500Constants.FTP_CUST_REQ)
+                    StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N
                 };
-            _i2cDevice.Write(buffer); // Load Read Sectors Opcode
+            _i2cDevice.Write(buffer);
 
+            // Set Read Sectors Opcode
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_1;
+            buffer[1] = StUsb4500Constants.READ & StUsb4500Constants.FTP_CUST_OPCODE_MASK;
+            _i2cDevice.Write(buffer);
+
+            // Load Read Sectors Opcode
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_0;
+            buffer[1] = (byte)((sectorNumber & StUsb4500Constants.FTP_CUST_SECT) | StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N | StUsb4500Constants.FTP_CUST_REQ);
+            _i2cDevice.Write(buffer);
+
+            // The FTP_CUST_REQ is cleared by NVM controller when the operation is finished.
             buffer = stackalloc byte[]
                 {
                     (byte)StUsb4500Register.FTP_CTRL_0
@@ -344,19 +356,19 @@ namespace Iot.Device.StUsb4500
             {
                 _i2cDevice.WriteRead(buffer, readBuffer);
             }
-            while ((readBuffer[0] & StUsb4500Constants.FTP_CUST_REQ) > 0); // The FTP_CUST_REQ is cleared by NVM controller when the operation is finished.
+            while ((readBuffer[0] & StUsb4500Constants.FTP_CUST_REQ) > 0);
 
+            // Sectors Data are available in RW-BUFFER
+            buffer[0] = (byte)StUsb4500Register.RW_BUFFER;
+            _i2cDevice.WriteRead(buffer, sectorDataBuffer);
+
+            // NVM internal controller reset
             buffer = stackalloc byte[]
                 {
-                    (byte)StUsb4500Register.RW_BUFFER
+                    (byte)StUsb4500Register.FTP_CTRL_0,
+                    0x00
                 };
-            _i2cDevice.WriteRead(buffer, sectorDataBuffer); // Sectors Data are available in RW-BUFFER
-
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_0, 0x00
-                };
-            _i2cDevice.Write(buffer); // NVM internal controller reset
+            _i2cDevice.Write(buffer);
         }
 
         /// <summary>Writes the NVM.</summary>
@@ -383,43 +395,39 @@ namespace Iot.Device.StUsb4500
         /// <summary>Enters the NVM write mode.</summary>
         private void EnterNvmWriteMode(byte erasedSectors)
         {
+            // set password
             Span<byte> buffer = stackalloc byte[]
                 {
-                    (byte)StUsb4500Register.FTP_CUST_PASSWORD_REG, StUsb4500Constants.FTP_CUST_PASSWORD
+                    (byte)StUsb4500Register.FTP_CUST_PASSWORD_REG,
+                    StUsb4500Constants.FTP_CUST_PASSWORD
                 };
-            _i2cDevice.Write(buffer); // set password
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.RW_BUFFER, 0x00
-                };
-            _i2cDevice.Write(buffer); // this register must be NULL for Partial Erase feature
+            // this register must be NULL for Partial Erase feature
+            buffer[0] = (byte)StUsb4500Register.RW_BUFFER;
+            buffer[1] = 0x00;
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_0, 0x00
-                };
-            _i2cDevice.Write(buffer); // NVM internal controller reset
+            // NVM internal controller reset
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_0;
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_0, StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N
-                };
-            _i2cDevice.Write(buffer); // Set PWR and RST_N bits
+            // Set PWR and RST_N bits
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_0;
+            buffer[1] = StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N;
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_1, // Load 0xF1 to erase all sectors of FTP and Write SER Opcode
-                    (byte)(((byte)(erasedSectors << 3) & StUsb4500Constants.FTP_CUST_SER_MASK) | (StUsb4500Constants.WRITE_SER & StUsb4500Constants.FTP_CUST_OPCODE_MASK))
-                };
-            _i2cDevice.Write(buffer); // Set Write SER Opcode
+            // Set Write SER Opcode - Load 0xF1 to erase all sectors of FTP and Write SER Opcode
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_1;
+            buffer[1] = (byte)(((byte)(erasedSectors << 3) & StUsb4500Constants.FTP_CUST_SER_MASK) | (StUsb4500Constants.WRITE_SER & StUsb4500Constants.FTP_CUST_OPCODE_MASK));
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_0, StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N | StUsb4500Constants.FTP_CUST_REQ
-                };
-            _i2cDevice.Write(buffer); // Load Write SER Opcode
+            // Load Write SER Opcode
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_0;
+            buffer[1] = StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N | StUsb4500Constants.FTP_CUST_REQ;
+            _i2cDevice.Write(buffer);
 
+            // Wait for execution
             buffer = stackalloc byte[]
                 {
                     (byte)StUsb4500Register.FTP_CTRL_0
@@ -429,42 +437,22 @@ namespace Iot.Device.StUsb4500
             {
                 _i2cDevice.WriteRead(buffer, readBuffer);
             }
-            while ((readBuffer[0] & StUsb4500Constants.FTP_CUST_REQ) > 0); // Wait for execution
+            while ((readBuffer[0] & StUsb4500Constants.FTP_CUST_REQ) > 0);
 
+            // Set Soft Prog Opcode
             buffer = stackalloc byte[]
                 {
-                    (byte)StUsb4500Register.FTP_CTRL_1, StUsb4500Constants.SOFT_PROG_SECTOR & StUsb4500Constants.FTP_CUST_OPCODE_MASK
+                    (byte)StUsb4500Register.FTP_CTRL_1,
+                    StUsb4500Constants.SOFT_PROG_SECTOR & StUsb4500Constants.FTP_CUST_OPCODE_MASK
                 };
-            _i2cDevice.Write(buffer); // Set Soft Prog Opcode
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_0, StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N | StUsb4500Constants.FTP_CUST_REQ
-                };
-            _i2cDevice.Write(buffer); // Load Soft Prog Opcode
+            // Load Soft Prog Opcode
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_0;
+            buffer[1] = StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N | StUsb4500Constants.FTP_CUST_REQ;
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_0
-                };
-            do
-            {
-                _i2cDevice.WriteRead(buffer, readBuffer);
-            }
-            while ((readBuffer[0] & StUsb4500Constants.FTP_CUST_REQ) > 0); // Wait for execution
-
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_1, StUsb4500Constants.ERASE_SECTOR & StUsb4500Constants.FTP_CUST_OPCODE_MASK
-                };
-            _i2cDevice.Write(buffer); // Set Erase Sectors Opcode
-
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_0, StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N | StUsb4500Constants.FTP_CUST_REQ
-                };
-            _i2cDevice.Write(buffer); // Load Erase Sectors Opcode
-
+            // Wait for execution
             buffer = stackalloc byte[]
                 {
                     (byte)StUsb4500Register.FTP_CTRL_0
@@ -473,7 +461,31 @@ namespace Iot.Device.StUsb4500
             {
                 _i2cDevice.WriteRead(buffer, readBuffer);
             }
-            while ((readBuffer[0] & StUsb4500Constants.FTP_CUST_REQ) > 0); // Wait for execution
+            while ((readBuffer[0] & StUsb4500Constants.FTP_CUST_REQ) > 0);
+
+            // Set Erase Sectors Opcode
+            buffer = stackalloc byte[]
+                {
+                    (byte)StUsb4500Register.FTP_CTRL_1,
+                    StUsb4500Constants.ERASE_SECTOR & StUsb4500Constants.FTP_CUST_OPCODE_MASK
+                };
+            _i2cDevice.Write(buffer);
+
+            // Load Erase Sectors Opcode
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_0;
+            buffer[1] = StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N | StUsb4500Constants.FTP_CUST_REQ;
+            _i2cDevice.Write(buffer);
+
+            // Wait for execution
+            buffer = stackalloc byte[]
+                {
+                    (byte)StUsb4500Register.FTP_CTRL_0
+                };
+            do
+            {
+                _i2cDevice.WriteRead(buffer, readBuffer);
+            }
+            while ((readBuffer[0] & StUsb4500Constants.FTP_CUST_REQ) > 0);
         }
 
         /// <summary>Writes a NVM sector.</summary>
@@ -481,30 +493,33 @@ namespace Iot.Device.StUsb4500
         /// <param name="data">The data.</param>
         private void WriteNvmSector(byte sectorNumber, Span<byte> data)
         {
+            // Write the 64-bit data to be written in the sector
             Span<byte> buffer = stackalloc byte[]
                 {
-                    (byte)StUsb4500Register.RW_BUFFER, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]
+                    (byte)StUsb4500Register.RW_BUFFER,
+                    data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]
                 };
-            _i2cDevice.Write(buffer); // Write the 64-bit data to be written in the sector
+            _i2cDevice.Write(buffer);
 
+            // Set PWR and RST_N bits
             buffer = stackalloc byte[]
                 {
-                    (byte)StUsb4500Register.FTP_CTRL_0, StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N
+                    (byte)StUsb4500Register.FTP_CTRL_0,
+                    StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N
                 };
-            _i2cDevice.Write(buffer); // Set PWR and RST_N bits
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_1, StUsb4500Constants.WRITE_PL & StUsb4500Constants.FTP_CUST_OPCODE_MASK
-                };
-            _i2cDevice.Write(buffer); // NVM Program Load Register to write with the 64-bit data to be written in sector
+            // NVM Program Load Register to write with the 64-bit data to be written in sector
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_1;
+            buffer[1] = StUsb4500Constants.WRITE_PL & StUsb4500Constants.FTP_CUST_OPCODE_MASK;
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_0, StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N | StUsb4500Constants.FTP_CUST_REQ
-                };
-            _i2cDevice.Write(buffer); // Load Write to PL Sectors Opcode
+            // Load Write to PL Sectors Opcode
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_0;
+            buffer[1] = StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N | StUsb4500Constants.FTP_CUST_REQ;
+            _i2cDevice.Write(buffer);
 
+            // Wait for execution
             buffer = stackalloc byte[]
                 {
                     (byte)StUsb4500Register.FTP_CTRL_0
@@ -514,21 +529,22 @@ namespace Iot.Device.StUsb4500
             {
                 _i2cDevice.WriteRead(buffer, readBuffer);
             }
-            while ((readBuffer[0] & StUsb4500Constants.FTP_CUST_REQ) > 0); // Wait for execution
+            while ((readBuffer[0] & StUsb4500Constants.FTP_CUST_REQ) > 0);
 
+            // NVM Program Load Register to write with the 64-bit data to be written in sector
             buffer = stackalloc byte[]
                 {
-                    (byte)StUsb4500Register.FTP_CTRL_1, StUsb4500Constants.PROG_SECTOR & StUsb4500Constants.FTP_CUST_OPCODE_MASK
+                    (byte)StUsb4500Register.FTP_CTRL_1,
+                    StUsb4500Constants.PROG_SECTOR & StUsb4500Constants.FTP_CUST_OPCODE_MASK
                 };
-            _i2cDevice.Write(buffer); // NVM Program Load Register to write with the 64-bit data to be written in sector
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CTRL_0,
-                    (byte)((sectorNumber & StUsb4500Constants.FTP_CUST_SECT) | StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N | StUsb4500Constants.FTP_CUST_REQ)
-                };
-            _i2cDevice.Write(buffer); // Load Prog Sectors Opcode
+            // Load Prog Sectors Opcode
+            buffer[0] = (byte)StUsb4500Register.FTP_CTRL_0;
+            buffer[1] = (byte)((sectorNumber & StUsb4500Constants.FTP_CUST_SECT) | StUsb4500Constants.FTP_CUST_PWR | StUsb4500Constants.FTP_CUST_RST_N | StUsb4500Constants.FTP_CUST_REQ);
+            _i2cDevice.Write(buffer);
 
+            // Wait for execution
             buffer = stackalloc byte[]
                 {
                     (byte)StUsb4500Register.FTP_CTRL_0
@@ -537,23 +553,24 @@ namespace Iot.Device.StUsb4500
             {
                 _i2cDevice.WriteRead(buffer, readBuffer);
             }
-            while ((readBuffer[0] & StUsb4500Constants.FTP_CUST_REQ) > 0); // Wait for execution
+            while ((readBuffer[0] & StUsb4500Constants.FTP_CUST_REQ) > 0);
         }
 
         /// <summary>Exits the test mode.</summary>
         private void ExitNvmMode()
         {
+            // clear register
             Span<byte> buffer = stackalloc byte[]
                 {
-                    (byte)StUsb4500Register.FTP_CTRL_0, StUsb4500Constants.FTP_CUST_RST_N, 0x00
+                    (byte)StUsb4500Register.FTP_CTRL_0,
+                    StUsb4500Constants.FTP_CUST_RST_N, 0x00
                 };
-            _i2cDevice.Write(buffer); // clear register
+            _i2cDevice.Write(buffer);
 
-            buffer = stackalloc byte[]
-                {
-                    (byte)StUsb4500Register.FTP_CUST_PASSWORD_REG, 0x00
-                };
-            _i2cDevice.Write(buffer); // clear password
+            // clear password
+            buffer[0] = (byte)StUsb4500Register.FTP_CUST_PASSWORD_REG;
+            buffer[1] = 0x00;
+            _i2cDevice.Write(buffer);
         }
     }
 }

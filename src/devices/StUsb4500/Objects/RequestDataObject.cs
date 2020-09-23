@@ -21,7 +21,11 @@ namespace Iot.Device.StUsb4500.Objects
         public ElectricCurrent MaximalCurrent
         {
             get => ElectricCurrent.FromAmperes((ushort)(Value & MaximalCurrentMask) / 100.0);
-            set => Value = (Value & MaximalCurrentMask) | (uint)(Convert.ToUInt16(value * 100) & MaximalCurrentMask);
+            set
+            {
+                CheckArgumentInRange(value.Value, 10.23);
+                Value = (Value & MaximalCurrentMask) | (uint)(Convert.ToUInt16(value * 100) & MaximalCurrentMask);
+            }
         }
 
         /// <summary>Gets or sets the operational current.</summary>
@@ -29,30 +33,58 @@ namespace Iot.Device.StUsb4500.Objects
         public ElectricCurrent OperatingCurrent
         {
             get => ElectricCurrent.FromAmperes(((ushort)(Value & OperatingCurrentMask) >> 10) / 100.0);
-            set => Value = (Value & OperatingCurrentMask) | (ushort)(Convert.ToUInt16(value * 100) << 10 & OperatingCurrentMask);
+            set
+            {
+                CheckArgumentInRange(value.Value, 10.23);
+                Value = (Value & OperatingCurrentMask) | (ushort)(Convert.ToUInt16(value * 100) << 10 & OperatingCurrentMask);
+            }
         }
 
         /// <summary>Gets or sets a value indicating whether unchunked extended messages are supported.</summary>
-        public bool UnchunkedExtendedMessagesSupported { get => GetBit(23); set => UpdateBit(23, value); }
+        public bool UnchunkedExtendedMessagesSupported
+        {
+            get => GetBit(23);
+            set => UpdateBit(23, value);
+        }
 
         /// <summary>Gets or sets a value indicating whether the USB is not suspended.</summary>
-        public bool NoUsbSuspend { get => GetBit(24); set => UpdateBit(24, value); }
+        public bool NoUsbSuspend
+        {
+            get => GetBit(24);
+            set => UpdateBit(24, value);
+        }
 
         /// <summary>Gets or sets a value indicating whether the port is capable of USB communications.</summary>
-        public bool UsbCommunicationsCapable { get => GetBit(25); set => UpdateBit(25, value); }
+        public bool UsbCommunicationsCapable
+        {
+            get => GetBit(25);
+            set => UpdateBit(25, value);
+        }
 
         /// <summary>Gets or sets a value indicating whether there is a capability mismatch.</summary>
-        public bool CapabilityMismatch { get => GetBit(26); set => UpdateBit(26, value); }
+        public bool CapabilityMismatch
+        {
+            get => GetBit(26);
+            set => UpdateBit(26, value);
+        }
 
         /// <summary>Gets or sets a value indicating whether the give back flag is set.</summary>
-        public bool GiveBackFlag { get => GetBit(27); set => UpdateBit(27, value); }
+        public bool GiveBackFlag
+        {
+            get => GetBit(27);
+            set => UpdateBit(27, value);
+        }
 
         /// <summary>Gets or sets the object position.</summary>
         /// <remarks>This is stored as a 3-bit value (range 0 - 7). 000b is Reserved and shall not be used.</remarks>
         public byte ObjectPosition
         {
             get => (byte)(Value >> 28 & ObjectPositionMask);
-            set => Value = (Value & ObjectPositionMask) | (uint)((value & ObjectPositionMask) << 28);
+            set
+            {
+                CheckArgumentInRange(value, 7);
+                Value = (Value & ObjectPositionMask) | (uint)((value & ObjectPositionMask) << 28);
+            }
         }
 
         /// <summary>Initializes a new instance of the <see cref="RequestDataObject"/> class.</summary>

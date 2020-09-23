@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Runtime.CompilerServices;
+
 namespace Iot.Device.StUsb4500.Objects
 {
     /// <summary>
@@ -29,6 +32,45 @@ namespace Iot.Device.StUsb4500.Objects
             else
             {
                 Value &= ~(uint)(0b1 << bit);
+            }
+        }
+
+        /// <summary>Checks it an argument is in range.</summary>
+        /// <param name="value">The value.</param>
+        /// <param name="maxValue">The maximum value.</param>
+        /// <param name="minValue">The minimum value.</param>
+        /// <param name="propertyName">Name of the property.</param>
+        protected void CheckArgumentInRange(int value, int maxValue, int minValue = 0, [CallerMemberName] string propertyName = null)
+        {
+            if (value < minValue || value > maxValue)
+            {
+                throw new ArgumentOutOfRangeException(propertyName);
+            }
+        }
+
+        /// <summary>Checks it an argument is in range.</summary>
+        /// <param name="value">The value.</param>
+        /// <param name="maxValue">The maximum value.</param>
+        /// <param name="minValue">The minimum value.</param>
+        /// <param name="propertyName">Name of the property.</param>
+        protected void CheckArgumentInRange(double value, double maxValue, double minValue = 0, [CallerMemberName] string propertyName = null)
+        {
+            if (value < minValue || value > maxValue)
+            {
+                throw new ArgumentOutOfRangeException(propertyName);
+            }
+        }
+
+        /// <summary>Checks it an argument is in range.</summary>
+        /// <param name="value">The value.</param>
+        /// <param name="maxValue">The maximum value.</param>
+        /// <param name="minValue">The minimum value.</param>
+        /// <param name="propertyName">Name of the property.</param>
+        protected void CheckArgumentInRange(decimal value, decimal maxValue, decimal minValue = 0, [CallerMemberName] string propertyName = null)
+        {
+            if (value < minValue || value > maxValue)
+            {
+                throw new ArgumentOutOfRangeException(propertyName);
             }
         }
     }
