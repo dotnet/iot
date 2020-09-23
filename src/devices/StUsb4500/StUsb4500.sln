@@ -9,6 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{6A4D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StUsb4500.Samples", "samples\StUsb4500.Samples.csproj", "{3CFA13D6-1D29-4C87-B0C1-01A6901A50EF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C60C0460-E31A-477A-9EAA-841FD1BB125A}"
+	ProjectSection(SolutionItems) = preProject
+		category.txt = category.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
