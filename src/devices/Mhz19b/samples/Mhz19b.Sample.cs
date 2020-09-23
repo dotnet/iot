@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.IO;
 using System.Threading;
 using UnitsNet;
 
@@ -40,12 +41,12 @@ namespace Iot.Device.Mhz19b.Samples
             // Continously read current concentration
             while (true)
             {
-                (VolumeConcentration concentration, bool validity) reading = sensor.GetCo2Reading();
-                if (reading.validity)
+                try
                 {
-                    Console.WriteLine($"{reading.concentration}");
+                    VolumeConcentration reading = sensor.GetCo2Reading();
+                    Console.WriteLine($"{reading}");
                 }
-                else
+                catch (IOException)
                 {
                     Console.WriteLine("Concentration couldn't be read");
                 }
