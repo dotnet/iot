@@ -38,7 +38,6 @@ namespace Iot.Device.Mhz19b
 
         private const int MessageSize = 9;
 
-        private bool _disposed = false;
         private SerialPort _serialPort = null;
 
         /// <summary>
@@ -47,9 +46,9 @@ namespace Iot.Device.Mhz19b
         /// <param name="uartDevice">Path to the UART device / serial port, e.g. /dev/serial0</param>
         public Mhz19b(string uartDevice)
         {
-            if (uartDevice == null)
+            if (string.IsNullOrEmpty(uartDevice))
             {
-                throw new ArgumentNullException(nameof(uartDevice));
+                throw new ArgumentException(nameof(uartDevice));
             }
 
             // create serial port using the setting acc. to datasheet, pg. 7, sec. general settings
@@ -66,7 +65,7 @@ namespace Iot.Device.Mhz19b
         /// If the validity is false the ratio is set to 0.
         /// </summary>
         /// <returns>CO2 concentration in ppm and validity</returns>
-        public (Ratio concentration, bool validity) GetCo2Reading()
+        public (VolumeConcentration concentration, bool validity) GetCo2Reading()
         {
             try
             {
@@ -86,23 +85,23 @@ namespace Iot.Device.Mhz19b
 
                 if (timeout == 0)
                 {
-                    return (Ratio.FromPartsPerMillion(0), false);
+                    return (VolumeConcentration.Zero, false);
                 }
 
                 // read and process response
                 byte[] response = new byte[MessageSize];
                 if ((_serialPort.Read(response, 0, response.Length) == response.Length) && (response[(int)MessageFormat.Checksum] == Checksum(response)))
                 {
-                    return (Ratio.FromPartsPerMillion((int)response[(int)MessageFormat.DataHighResponse] * 256 + (int)response[(int)MessageFormat.DataLowResponse]), true);
+                    return (VolumeConcentration.FromPartsPerMillion((int)response[(int)MessageFormat.DataHighResponse] * 256 + (int)response[(int)MessageFormat.DataLowResponse]), true);
                 }
                 else
                 {
-                    return (Ratio.FromPartsPerMillion(0), false);
+                    return (VolumeConcentration.Zero, false);
                 }
             }
             catch
             { // no need for details here
-                return (Ratio.FromPartsPerMillion(0), false);
+                return (VolumeConcentration.Zero, false);
             }
             finally
             {
@@ -115,20 +114,26 @@ namespace Iot.Device.Mhz19b
         /// The sensor doesn't respond anything, so this is fire and forget.
         /// </summary>
         /// <returns>true, if the command could be send</returns>
-        public bool ZeroPointCalibration() => SendRequest(CreateRequest(Command.CalibrateZeroPoint));
+        public bool PerformZeroPointCalibration() => SendRequest(CreateRequest(Command.CalibrateZeroPoint));
 
         /// <summary>
         /// Initiate a span point calibration.
         /// The sensor doesn't respond anything, so this is fire and forget.
         /// </summary>
-        /// <param name="span">span value, e.g. 2000[ppm]</param>
+        /// <param name="span">span value, between 1000[ppm] and 5000[ppm]. The typical value is 2000[ppm].</param>
         /// <returns>true, if the command could be send</returns>///
-        public bool SpanPointCalibration(int span)
+        /// <exception cref="System.Exception">Thrown when span value is out of range</exception>
+        public bool PerformSpanPointCalibration(VolumeConcentration span)
         {
+            if ((span.PartsPerMillion < 1000) || (span.PartsPerMillion > 5000))
+            {
+                throw new ArgumentException("Span value out of range (1000-5000[ppm])", nameof(span));
+            }
+
             var request = CreateRequest(Command.CalibrateSpanPoint);
             // set span in request, c. f. datasheet rev. 1.0, pg. 8 for details
-            request[(int)MessageFormat.DataHighRequest] = (byte)(span / 256);
-            request[(int)MessageFormat.DataLowRequest] = (byte)(span % 256);
+            request[(int)MessageFormat.DataHighRequest] = (byte)(span.PartsPerMillion / 256);
+            request[(int)MessageFormat.DataLowRequest] = (byte)(span.PartsPerMillion % 256);
 
             return SendRequest(request);
         }
@@ -139,7 +144,7 @@ namespace Iot.Device.Mhz19b
         /// </summary>
         /// <param name="state">State of automatic correction</param>
         /// <returns>true, if the command could be send</returns>
-        public bool AutomaticBaselineCorrection(AbmState state)
+        public bool SetAutomaticBaselineCorrection(AbmState state)
         {
             var request = CreateRequest(Command.AutoCalibrationSwitch);
             // set on/off state in request, c. f. datasheet rev. 1.0, pg. 8 for details
@@ -154,7 +159,7 @@ namespace Iot.Device.Mhz19b
         /// </summary>
         /// <param name="detectionRange">Detection range of the sensor</param>
         /// <returns>true, if the command could be send</returns>
-        public bool SensorDetectionRange(DetectionRange detectionRange)
+        public bool SetSensorDetectionRange(DetectionRange detectionRange)
         {
             var request = CreateRequest(Command.DetectionRangeSetting);
             // set detection range in request, c. f. datasheet rev. 1.0, pg. 8 for details
@@ -171,11 +176,13 @@ namespace Iot.Device.Mhz19b
             try
             {
                 _serialPort.Open();
-                _serialPort.Write(request, 0, request.Length);
-                return true;
+                // _serialPort.Write(request, 0, request.Length);
+                return false;
+                // return true;
             }
             catch
-            { // no need fo details here
+            {
+                // no need fo details here
                 return false;
             }
             finally
@@ -214,17 +221,13 @@ namespace Iot.Device.Mhz19b
         /// <inheritdoc cref="IDisposable" />
         public void Dispose()
         {
-            if (_disposed)
+            if (_serialPort == null)
             {
                 return;
             }
 
-            if (_serialPort != null)
-            {
-                _serialPort.Dispose();
-                _serialPort = null;
-                _disposed = true;
-            }
+            _serialPort.Dispose();
+            _serialPort = null;
         }
     }
 }

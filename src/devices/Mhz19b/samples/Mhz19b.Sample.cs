@@ -19,16 +19,35 @@ namespace Iot.Device.Mhz19b.Samples
         public static void Main(string[] args)
         {
             Mhz19b sensor = new Mhz19b("/dev/serial0");
+
+            // Switch ABM on (default).
+            // sensor.SetAutomaticBaselineCorrection(AbmState.On);
+
+            // Set sensor detection range to 2000ppm (default).
+            // sensor.SetSensorDetectionRange(DetectionRange.Range2000);
+
+            // Perform calibration
+            // Step #1: perform zero point calibration
+            // Step #2: perform span point calibration at 2000ppm
+            // CAUTION: enable the following lines only if you know exactly what you do.
+            //          Consider also that zero point and span point calibration are performed
+            //          at different concentrations. The sensor requires up to 20 min to be
+            //          saturated at the target level.
+            // sensor.PerformZeroPointCalibration();
+            // ---- Now change to target concentration for span point.
+            // sensor.PerformSpanPointCalibration(VolumeConcentration.FromPartsPerMillion(200));
+
+            // Continously read current concentration
             while (true)
             {
-                (Ratio concentration, bool validity) reading = sensor.GetCo2Reading();
+                (VolumeConcentration concentration, bool validity) reading = sensor.GetCo2Reading();
                 if (reading.validity)
                 {
                     Console.WriteLine($"{reading.concentration}");
                 }
                 else
                 {
-                    Console.WriteLine("Concentration counldn't be read");
+                    Console.WriteLine("Concentration couldn't be read");
                 }
 
                 Thread.Sleep(1000);
