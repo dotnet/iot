@@ -63,7 +63,6 @@
 * [Solomon Systech Ssd1351 - CMOS OLED](Ssd1351/README.md)
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
 * [Still image recording library](Media/README.md)
-* [STUSB4500 - Autonomous USB-C PD controller for Power Sinks / UFP](StUsb4500/README.md)
 * [TCS3472x Sensors](Tcs3472x/README.md)
 * [TM1637 - Segment Display](Tm1637/README.md)
 * [VL53L0X - distance sensor](Vl53L0X/README.md)

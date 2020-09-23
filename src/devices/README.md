@@ -205,10 +205,6 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
 
-### USB PD Power Sinks
-
-* [STUSB4500 - Autonomous USB-C PD controller for Power Sinks / UFP](StUsb4500/README.md)
-
 ### Protocols providers/libraries
 
 * [1-wire](OneWire/README.md)
