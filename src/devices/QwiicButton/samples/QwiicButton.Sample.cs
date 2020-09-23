@@ -21,31 +21,33 @@ namespace Iot.Device.QwiicButton.Samples
             var deviceBusId = GetDeviceBusId();
             var deviceAddress = GetDeviceAddress();
             var sampleNumber = GetSampleNumber();
-            var button = new QwiicButton(deviceBusId, deviceAddress);
 
-            switch (sampleNumber)
+            using (var button = new QwiicButton(deviceBusId, deviceAddress))
             {
-                case 1:
-                    PrintButtonConfiguration.Run(button);
-                    break;
-                case 2:
-                    PrintButtonStatus.Run(button);
-                    break;
-                case 3:
-                    new PrintButtonStatusInterruptBased().Run(button);
-                    break;
-                case 4:
-                    LightWhenPressed.Run(button);
-                    break;
-                case 5:
-                    OnOffButtonWithLight.Run(button);
-                    break;
-                case 6:
-                    QueueUsage.Run(button);
-                    break;
-                default:
-                    Console.WriteLine("No sample chosen - exiting...");
-                    break;
+                switch (sampleNumber)
+                {
+                    case 1:
+                        PrintButtonConfiguration.Run(button);
+                        break;
+                    case 2:
+                        PrintButtonStatus.Run(button);
+                        break;
+                    case 3:
+                        new PrintButtonStatusInterruptBased().Run(button);
+                        break;
+                    case 4:
+                        LightWhenPressed.Run(button);
+                        break;
+                    case 5:
+                        OnOffButtonWithLight.Run(button);
+                        break;
+                    case 6:
+                        QueueUsage.Run(button);
+                        break;
+                    default:
+                        Console.WriteLine("No sample chosen - exiting...");
+                        break;
+                }
             }
         }
 
