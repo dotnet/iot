@@ -1,6 +1,8 @@
 ﻿# STUSB4500 - Autonomous USB-C PD controller for Power Sinks / UFP
 
-## Summary
+The STUSB4500 is an autonomous USB-C PD controller for Power Sinks which enables you to configure the required/available power for your device from a USB-C PD Power Source. The STUSB4500 is configurable via I2C interface.
+
+### Short introduction to the STUSB4500
 By default a USB Type-C port on your hardware can get only 5V from a USB-PD Power Source (Host / DFP)
 This product enables to automatically negociate with the Source a higher Voltage (>5V) up to 100W (20V@5A).
 For instance, if the Power brick can provide 4 power profiles (5V, 9V, 15V and 20V), then the STUSB4500 will request the highest voltage available (20V).
