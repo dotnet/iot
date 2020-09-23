@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.IO;
 using System.IO.Ports;
 using System.Text;
 using System.Threading;
@@ -44,6 +45,7 @@ namespace Iot.Device.Mhz19b
         /// Initializes a new instance of the <see cref="Mhz19b"/> class.
         /// </summary>
         /// <param name="uartDevice">Path to the UART device / serial port, e.g. /dev/serial0</param>
+        /// <exception cref="System.ArgumentException">uartDevice is null or empty</exception>
         public Mhz19b(string uartDevice)
         {
             if (string.IsNullOrEmpty(uartDevice))
@@ -65,7 +67,8 @@ namespace Iot.Device.Mhz19b
         /// If the validity is false the ratio is set to 0.
         /// </summary>
         /// <returns>CO2 concentration in ppm and validity</returns>
-        public (VolumeConcentration concentration, bool validity) GetCo2Reading()
+        /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
+        public VolumeConcentration GetCo2Reading()
         {
             try
             {
@@ -85,23 +88,23 @@ namespace Iot.Device.Mhz19b
 
                 if (timeout == 0)
                 {
-                    return (VolumeConcentration.Zero, false);
+                    throw new IOException("Timeout");
                 }
 
                 // read and process response
                 byte[] response = new byte[MessageSize];
                 if ((_serialPort.Read(response, 0, response.Length) == response.Length) && (response[(int)MessageFormat.Checksum] == Checksum(response)))
                 {
-                    return (VolumeConcentration.FromPartsPerMillion((int)response[(int)MessageFormat.DataHighResponse] * 256 + (int)response[(int)MessageFormat.DataLowResponse]), true);
+                    return VolumeConcentration.FromPartsPerMillion((int)response[(int)MessageFormat.DataHighResponse] * 256 + (int)response[(int)MessageFormat.DataLowResponse]);
                 }
                 else
                 {
-                    return (VolumeConcentration.Zero, false);
+                    throw new IOException("Invalid response message received from sensor");
                 }
             }
-            catch
-            { // no need for details here
-                return (VolumeConcentration.Zero, false);
+            catch (Exception e)
+            {
+                throw new IOException("Sensor communication failed", e);
             }
             finally
             {
@@ -113,17 +116,17 @@ namespace Iot.Device.Mhz19b
         /// Initiates a zero point calibration.
         /// The sensor doesn't respond anything, so this is fire and forget.
         /// </summary>
-        /// <returns>true, if the command could be send</returns>
-        public bool PerformZeroPointCalibration() => SendRequest(CreateRequest(Command.CalibrateZeroPoint));
+        /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
+        public void PerformZeroPointCalibration() => SendRequest(CreateRequest(Command.CalibrateZeroPoint));
 
         /// <summary>
         /// Initiate a span point calibration.
         /// The sensor doesn't respond anything, so this is fire and forget.
         /// </summary>
         /// <param name="span">span value, between 1000[ppm] and 5000[ppm]. The typical value is 2000[ppm].</param>
-        /// <returns>true, if the command could be send</returns>///
-        /// <exception cref="System.Exception">Thrown when span value is out of range</exception>
-        public bool PerformSpanPointCalibration(VolumeConcentration span)
+        /// <exception cref="System.ArgumentException">Thrown when span value is out of range</exception>
+        /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
+        public void PerformSpanPointCalibration(VolumeConcentration span)
         {
             if ((span.PartsPerMillion < 1000) || (span.PartsPerMillion > 5000))
             {
@@ -135,7 +138,7 @@ namespace Iot.Device.Mhz19b
             request[(int)MessageFormat.DataHighRequest] = (byte)(span.PartsPerMillion / 256);
             request[(int)MessageFormat.DataLowRequest] = (byte)(span.PartsPerMillion % 256);
 
-            return SendRequest(request);
+            SendRequest(request);
         }
 
         /// <summary>
@@ -143,14 +146,14 @@ namespace Iot.Device.Mhz19b
         /// The sensor doesn't respond anything, so this is fire and forget.
         /// </summary>
         /// <param name="state">State of automatic correction</param>
-        /// <returns>true, if the command could be send</returns>
-        public bool SetAutomaticBaselineCorrection(AbmState state)
+        /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
+        public void SetAutomaticBaselineCorrection(AbmState state)
         {
             var request = CreateRequest(Command.AutoCalibrationSwitch);
             // set on/off state in request, c. f. datasheet rev. 1.0, pg. 8 for details
             request[(int)MessageFormat.DataHighRequest] = (byte)state;
 
-            return SendRequest(request);
+            SendRequest(request);
         }
 
         /// <summary>
@@ -158,32 +161,29 @@ namespace Iot.Device.Mhz19b
         /// The sensor doesn't respond anything, so this is fire and forget
         /// </summary>
         /// <param name="detectionRange">Detection range of the sensor</param>
-        /// <returns>true, if the command could be send</returns>
-        public bool SetSensorDetectionRange(DetectionRange detectionRange)
+        /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
+        public void SetSensorDetectionRange(DetectionRange detectionRange)
         {
             var request = CreateRequest(Command.DetectionRangeSetting);
             // set detection range in request, c. f. datasheet rev. 1.0, pg. 8 for details
             request[(int)MessageFormat.DataHighRequest] = (byte)((int)detectionRange / 256);
             request[(int)MessageFormat.DataLowRequest] = (byte)((int)detectionRange % 256);
 
-            return SendRequest(request);
+            SendRequest(request);
         }
 
-        private bool SendRequest(byte[] request)
+        private void SendRequest(byte[] request)
         {
             request[(int)MessageFormat.Checksum] = Checksum(request);
 
             try
             {
                 _serialPort.Open();
-                // _serialPort.Write(request, 0, request.Length);
-                return false;
-                // return true;
+                _serialPort.Write(request, 0, request.Length);
             }
-            catch
+            catch (Exception e)
             {
-                // no need fo details here
-                return false;
+                throw new IOException("Sensor communication failed", e);
             }
             finally
             {
