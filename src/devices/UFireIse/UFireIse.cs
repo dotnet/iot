@@ -304,7 +304,7 @@ namespace Iot.Device.UFire
         /// <returns>The version of the firmware</returns>
         public Version GetFirmwareVersion()
         {
-            return new Version(0,ReadByte(Register.ISE_FW_VERSION_REGISTER));
+            return new Version(0, ReadByte(Register.ISE_FW_VERSION_REGISTER));
         }
 
         private void SendCommand(byte data)
