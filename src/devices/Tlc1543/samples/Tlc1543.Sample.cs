@@ -4,10 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Device.Gpio;
-using System.Device.I2c;
-using System.Device.Spi;
-using System.Threading;
 
 namespace Iot.Device.Tlc1543.Samples
 {
@@ -16,28 +12,37 @@ namespace Iot.Device.Tlc1543.Samples
     /// </summary>
     public class Program
     {
-        private static List<Tlc1543.Channel> _channelList = new List<Tlc1543.Channel>
-        {
-            Tlc1543.Channel.A0,
-            Tlc1543.Channel.A1,
-            Tlc1543.Channel.A2,
-            Tlc1543.Channel.A3,
-            Tlc1543.Channel.A4
-        };
-        private static Tlc1543 _adc;
-
         /// <summary>
         /// Main entry point
         /// </summary>
         public static void Main()
         {
-            _adc = new Tlc1543(24, 5, 23, 25);
-            _adc.ChargeChannel = Tlc1543.Channel.SelfTest0;
-            List<int> values = _adc.ReadChannels(_channelList);
-            foreach (var value in values)
+            Tlc1543 adc = new Tlc1543(24, 5, 23, 25);
+            List<Channel> channelList = new List<Channel>
             {
-                Console.WriteLine(value);
+                Channel.A0,
+                Channel.A1,
+                Channel.A2,
+                Channel.A3,
+                Channel.A4
+            };
+            adc.ChargeChannel = Channel.SelfTest512;
+
+            int lineAverage = 0;
+            int onLine = 0;
+            List<int> values = adc.ReadChannels(channelList);
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                if (values[i] < 300)
+                {
+                    lineAverage += (i - 2);
+                    onLine++;
+                }
             }
+
+            double linePosition = ((double)lineAverage / (double)onLine);
+            Console.WriteLine($"Line position: {linePosition}");
         }
     }
 }
