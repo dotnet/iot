@@ -42,10 +42,7 @@ namespace Iot.Device.UFire
         /// </summary>
         public bool TemperatureCompensation
         {
-            get
-            {
-                return _temperatureCompensation;
-            }
+            get => _temperatureCompensation;
 
             set
             {
@@ -65,6 +62,11 @@ namespace Iot.Device.UFire
         /// <param name="i2cDevice">The I2C device to be used</param>
         public UFireIse(I2cDevice i2cDevice)
         {
+            if (i2cDevice == null)
+            {
+                throw new ArgumentNullException("i2cDevice can not be null");
+            }
+
             _device = i2cDevice;
         }
 
@@ -72,7 +74,7 @@ namespace Iot.Device.UFire
         /// Read a value from the ISE Probe Interface, typical measure are in the millivolt range.
         /// </summary>
         /// <returns>value from ISE Probe Interface, typical measure are in the millivolt range. On error it return -1 as value</returns>
-        public ElectricPotential Read()
+        public ElectricPotential ReadElectricPotential()
         {
             SendCommand((byte)Command.ISE_MEASURE_MV);
 
@@ -109,7 +111,7 @@ namespace Iot.Device.UFire
         }
 
         /// <summary>
-        /// Calibrates the probe using a single solution. Put the probe in a solution where the pH (Power of Hydrogen) is know.
+        /// Calibrates the probe using a single solution. Put the probe in a solution where the pH (Power of Hydrogen) is known.
         /// </summary>
         /// <param name="solution">The known pH value in mV. Range: -1024 mV to 1024 mV</param>
         public void CalibrateFromSingleValue(ElectricPotential solution)
@@ -121,8 +123,10 @@ namespace Iot.Device.UFire
 
                 DelayHelper.DelayMilliseconds(IseMvMeasureTime, allowThreadYield: true);
             }
-
-            throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
+            else
+            {
+                throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
+            }
         }
 
         /// <summary>
@@ -138,8 +142,10 @@ namespace Iot.Device.UFire
 
                 DelayHelper.DelayMilliseconds(IseMvMeasureTime, allowThreadYield: true);
             }
-
-            throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
+            else
+            {
+                throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
+            }
         }
 
         /// <summary>
@@ -155,17 +161,19 @@ namespace Iot.Device.UFire
 
                 DelayHelper.DelayMilliseconds(IseMvMeasureTime, allowThreadYield: true);
             }
-
-            throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
+            else
+            {
+                throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
+            }
         }
 
         /// <summary>
-        /// Returns the firmware version of the device.
+        /// Returns the firmware version of the device. The manufacturer do not provide any information about the format of the version number, see https://www.ufire.co/docs/uFire_ISE/api.html#getversion
         /// </summary>
         /// <returns>Firmware version</returns>
         public Version GetVersion()
         {
-            return new Version((int)ReadFloat((byte)Register.ISE_VERSION_REGISTER), 0);
+            return new Version(ReadFloat((byte)Register.ISE_VERSION_REGISTER).ToString());
         }
 
         /// <summary>
@@ -210,7 +218,7 @@ namespace Iot.Device.UFire
         }
 
         /// <summary>
-        ///  Resets all the stored calibration information
+        ///  Resets all the stored calibration information.It is possible to run without calibration.
         /// </summary>
         public void ResetCalibration()
         {
@@ -240,8 +248,10 @@ namespace Iot.Device.UFire
                 WriteRegister(Register.ISE_CALIBRATE_READLOW_REGISTER, Convert.ToSingle(readLow));
                 WriteRegister(Register.ISE_CALIBRATE_READHIGH_REGISTER, Convert.ToSingle(readHigh));
             }
-
-            throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV for refLow, refHigh, readLow and readLow");
+            else
+            {
+                throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV for refLow, refHigh, readLow and readLow");
+            }
         }
 
         /// <summary>
@@ -268,7 +278,7 @@ namespace Iot.Device.UFire
         /// </summary>
         /// <param name="address">Address to read</param>
         /// <returns>Low level data from EEPROM</returns>
-        public float ReadEeprom(Register address)
+        internal float ReadEeprom(Register address)
         {
             WriteRegister(Register.ISE_SOLUTION_REGISTER, (byte)address);
             SendCommand((byte)Command.ISE_MEMORY_READ);
@@ -281,7 +291,7 @@ namespace Iot.Device.UFire
         /// </summary>
         /// <param name="address">Address</param>
         /// <param name="data">Data to write to the address</param>
-        public void WriteEeprom(Register address, float data)
+        internal void WriteEeprom(Register address, float data)
         {
             WriteRegister(Register.ISE_SOLUTION_REGISTER, (byte)address);
             WriteRegister(Register.ISE_BUFFER_REGISTER, data);
@@ -289,13 +299,12 @@ namespace Iot.Device.UFire
         }
 
         /// <summary>
-        /// Get Firmware version
+        /// Get Firmware version.The manufacturer do not provide any information about the format of the version number, see https://www.ufire.co/docs/uFire_ISE/api.html#getversion
         /// </summary>
         /// <returns>The version of the firmware</returns>
         public Version GetFirmwareVersion()
         {
-            return new Version(0, (int)ReadByte(Register.ISE_FW_VERSION_REGISTER));
-
+            return new Version(ReadByte(Register.ISE_FW_VERSION_REGISTER).ToString());
         }
 
         private void SendCommand(byte data)

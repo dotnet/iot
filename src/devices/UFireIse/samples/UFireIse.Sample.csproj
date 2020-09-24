@@ -6,7 +6,7 @@
     <AssemblyName>Iot.Device.UFire.Sample</AssemblyName>
     <RootNamespace>Iot.Device.UFire.Sample</RootNamespace>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>

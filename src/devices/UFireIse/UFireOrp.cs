@@ -16,7 +16,7 @@ namespace Iot.Device.UFire
         /// Oxidation-reduction potential (ORP) measuremens
         /// It makes it possible to the Oxidation-Reduction Potential (ORP) measurement without doing a measuremen (the retunres the old measurement)
         /// </summary>
-        public ElectricPotential OxidationReducationPotential = new ElectricPotential();
+        public ElectricPotential OxidationReductionPotential = new ElectricPotential();
 
         /// <summary>
         /// Reduction potential (Eh) measuremens (see https://www.eosremediation.com/converting-field-orp-measurements-into-eh/)
@@ -45,13 +45,13 @@ namespace Iot.Device.UFire
         /// <returns>True if it could measure ORP (Oxidation-Reduction Potential) else false</returns>
         public bool TryMeasureOxidationReductionPotential(out ElectricPotential orp)
         {
-            ElectricPotential mV = Read();
-            OxidationReducationPotential = mV;
+            ElectricPotential mV = ReadElectricPotential();
+            OxidationReductionPotential = mV;
             ReductionPotential = new ElectricPotential(mV.Millivolts + GetProbePotential(), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
 
             if (double.IsNaN(mV.Value) || double.IsInfinity(mV.Value))
             {
-                OxidationReducationPotential = new ElectricPotential();
+                OxidationReductionPotential = new ElectricPotential();
                 ReductionPotential = new ElectricPotential();
             }
 

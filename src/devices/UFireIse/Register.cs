@@ -7,7 +7,7 @@ namespace Iot.Device.UFire
     /// <summary>
     /// Register with all adress values for μFire ISE (Ion Specific Electrode) Probe Interface controller
     /// </summary>
-    public enum Register : byte
+    internal enum Register : byte
     {
         /// <summary>
         /// hardware version

@@ -68,7 +68,7 @@ namespace Iot.Device.UFire.Sample
         {
             using (UFireIse uFireIse = new UFireIse(device))
             {
-                Console.WriteLine("mV:" + uFireIse.Read().Millivolts);
+                Console.WriteLine("mV:" + uFireIse.ReadElectricPotential().Millivolts);
             }
         }
 
@@ -91,12 +91,11 @@ namespace Iot.Device.UFire.Sample
         {
             using (UFirePh uFire_pH = new UFirePh(device))
             {
-                Console.WriteLine("mV:" + uFire_pH.Read().Millivolts);
+                Console.WriteLine("mV:" + uFire_pH.ReadElectricPotential().Millivolts);
 
                 if (uFire_pH.TryMeasurepH(out float pH))
                 {
                     Console.WriteLine("pH:" + pH);
-                    Console.WriteLine("pOH:" + uFire_pH.Poh);
                 }
                 else
                 {

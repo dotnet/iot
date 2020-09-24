@@ -22,11 +22,6 @@ namespace Iot.Device.UFire
         public float Ph = 0;
 
         /// <summary>
-        /// pOH units measurement, for the relationship between pH and pOH see https://www.chem.purdue.edu/gchelp/howtosolveit/Equilibrium/Calculating_pHandpOH.htm#pOH
-        /// </summary>
-        public float Poh => Ph >= 0 ? Math.Abs(14 - Ph) : float.NaN;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="UFirePh "/> class.
         /// </summary>
         /// <param name="i2cDevice">The I2C device to be used</param>
@@ -44,7 +39,7 @@ namespace Iot.Device.UFire
         public bool TryMeasurepH(out float pH, Temperature? temp = null)
         {
             // It return -1 on error
-            ElectricPotential mV = Read();
+            ElectricPotential mV = ReadElectricPotential();
             if (mV.Value == -1)
             {
                 Ph = pH = float.NaN;
