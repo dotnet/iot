@@ -20,7 +20,7 @@ namespace TestTest
             var pwm = PwmChannel.Create(0, 0, 400, 0.5);
             pwm.Start();
             Console.ReadKey();
-        }        
+        }
     }
 }
 ```
@@ -153,7 +153,7 @@ sudo ./yourapplication
 
 ### Adding your user to the right permission group
 
-If you're running, or just upgrated to a version published after Auguste 2020, this should be already done. 
+If you're running, or just upgraded to a version published after Auguste 2020, this should be already done. 
 You will have to create a [specific group in udev](https://raspberrypi.stackexchange.com/questions/66890/accessing-pwm-module-without-root-permissions).
 
 ```bash
