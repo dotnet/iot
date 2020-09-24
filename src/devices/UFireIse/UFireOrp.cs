@@ -16,13 +16,18 @@ namespace Iot.Device.UFire
         /// Oxidation-reduction potential (ORP) measuremens
         /// It makes it possible to the Oxidation-Reduction Potential (ORP) measurement without doing a measuremen (the retunres the old measurement)
         /// </summary>
-        public ElectricPotential OxidationReductionPotential = new ElectricPotential();
+        public ElectricPotential LastOxidationReducationPotential { get; private set; } = new ElectricPotential();
 
         /// <summary>
-        /// Reduction potential (Eh) measuremens (see https://www.eosremediation.com/converting-field-orp-measurements-into-eh/)
+        /// Reduction potential (Eh) measuremens
         /// It makes it possible to the Reduction potential (Eh) measurement without doing a measuremen (the retunres the old measurement)
         /// </summary>
-        public ElectricPotential ReductionPotential = new ElectricPotential();
+        public ElectricPotential LastReductionPotential { get; private set; } = new ElectricPotential();
+
+        /// <summary>
+        /// The probe potential
+        /// </summary>
+        public ElectricPotential ProbePotential => ElectricPotential.FromMillivolts(ReadEeprom(Register.POTENTIAL_REGISTER));
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UFireOrp"/> class.
@@ -34,11 +39,6 @@ namespace Iot.Device.UFire
         }
 
         /// <summary>
-        /// The probe potential
-        /// </summary>
-        public ElectricPotential ProbePotential => ElectricPotential.FromMillivolts(ReadEeprom(Register.POTENTIAL_REGISTER));
-
-        /// <summary>
         /// Tries to measure ORP (Oxidation-Reduction Potential).
         /// </summary>
         /// <param name="orp">ORP (Oxidation-Reduction Potential) measurement</param>
@@ -46,13 +46,13 @@ namespace Iot.Device.UFire
         public bool TryMeasureOxidationReductionPotential(out ElectricPotential orp)
         {
             ElectricPotential mV = ReadElectricPotential();
-            OxidationReductionPotential = mV;
-            ReductionPotential = new ElectricPotential(mV.Millivolts + GetProbePotential(), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
+            LastOxidationReducationPotential = mV;
+            LastReductionPotential = new ElectricPotential(mV.Millivolts + GetProbePotential(), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
 
             if (double.IsNaN(mV.Value) || double.IsInfinity(mV.Value))
             {
-                OxidationReductionPotential = new ElectricPotential();
-                ReductionPotential = new ElectricPotential();
+                LastOxidationReducationPotential = new ElectricPotential();
+                LastReductionPotential = new ElectricPotential();
             }
 
             orp = mV;

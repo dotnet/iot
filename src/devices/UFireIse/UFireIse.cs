@@ -222,11 +222,11 @@ namespace Iot.Device.UFire
         /// </summary>
         public void ResetCalibration()
         {
-            WriteRegister(Register.ISE_CALIBRATE_SINGLE_REGISTER, null);
-            WriteRegister(Register.ISE_CALIBRATE_REFHIGH_REGISTER, null);
-            WriteRegister(Register.ISE_CALIBRATE_REFLOW_REGISTER, null);
-            WriteRegister(Register.ISE_CALIBRATE_READHIGH_REGISTER, null);
-            WriteRegister(Register.ISE_CALIBRATE_READLOW_REGISTER, null);
+            WriteRegister(Register.ISE_CALIBRATE_SINGLE_REGISTER);
+            WriteRegister(Register.ISE_CALIBRATE_REFHIGH_REGISTER);
+            WriteRegister(Register.ISE_CALIBRATE_REFLOW_REGISTER);
+            WriteRegister(Register.ISE_CALIBRATE_READHIGH_REGISTER);
+            WriteRegister(Register.ISE_CALIBRATE_READLOW_REGISTER);
         }
 
         /// <summary>
@@ -324,10 +324,10 @@ namespace Iot.Device.UFire
 
             _device.Read(data);
 
-            return Convert.ToSingle(RoundTotalDigits(BitConverter.ToSingle(data.ToArray(), 0), 7));
+            return Convert.ToSingle(BitConverter.ToSingle(data.ToArray(), 0));
         }
 
-        private void WriteRegister(Register register, float? data)
+        private void WriteRegister(Register register, float data = 0)
         {
             // μFire ISE (Ion Specific Electrode) is 0 as default
             Span<byte> bytes = stackalloc byte[4]
@@ -338,10 +338,7 @@ namespace Iot.Device.UFire
                 0
              };
 
-            if (data != null)
-            {
-                bytes = BitConverter.GetBytes(RoundTotalDigits(data.Value));
-            }
+            bytes = BitConverter.GetBytes(data);
 
             ChangeRegister(register);
             _device.Write(bytes);
@@ -389,29 +386,6 @@ namespace Iot.Device.UFire
             }
 
             return v;
-        }
-
-        private int Magnitude(float x)
-        {
-            return float.IsNaN(x) || x == 0 ? 0 : (int)Math.Floor(Math.Log10(Math.Abs(x))) + 1;
-        }
-
-        /// <summary>
-        /// Round x to a number of digits. This makes sure that μFire ISE (Ion Specific Electrode) returns the correct value
-        /// </summary>
-        /// <param name="x">Number to round</param>
-        /// <param name="digits">Number of digits. Default is 7. If > 15 then it use 15 as number of digits</param>
-        /// <returns></returns>
-        private float RoundTotalDigits(float x, int? digits = 7)
-        {
-            int numberOfDigits = digits.Value - Magnitude(x);
-            if (numberOfDigits > 15)
-            {
-                numberOfDigits = 15;
-
-            }
-
-            return (float)Math.Round(x, numberOfDigits);
         }
 
         /// <inheritdoc/>
