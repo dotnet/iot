@@ -171,9 +171,9 @@ namespace Iot.Device.UFire
         /// Returns the firmware version of the device. The manufacturer do not provide any information about the format of the version number, see https://www.ufire.co/docs/uFire_ISE/api.html#getversion
         /// </summary>
         /// <returns>Firmware version</returns>
-        public Version GetVersion()
+        public byte GetVersion()
         {
-            return new Version(ReadByte(Register.ISE_VERSION_REGISTER), 0);
+            return ReadByte(Register.ISE_VERSION_REGISTER);
         }
 
         /// <summary>
@@ -302,9 +302,9 @@ namespace Iot.Device.UFire
         /// Get Firmware version.The manufacturer do not provide any information about the format of the version number, see https://www.ufire.co/docs/uFire_ISE/api.html#getversion
         /// </summary>
         /// <returns>The version of the firmware</returns>
-        public Version GetFirmwareVersion()
+        public byte GetFirmwareVersion()
         {
-            return new Version(0, ReadByte(Register.ISE_FW_VERSION_REGISTER));
+            return ReadByte(Register.ISE_FW_VERSION_REGISTER);
         }
 
         private void SendCommand(byte data)
