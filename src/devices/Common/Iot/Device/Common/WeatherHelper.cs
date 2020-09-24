@@ -180,7 +180,7 @@ namespace Iot.Device.Common
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
         /// <param name="seaLevelPressure">The sea-level pressure</param>
         /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
-        /// <returns>The altitude in meters</returns>
+        /// <returns>The altitude</returns>
         public static Length CalculateAltitude(Pressure pressure, Pressure seaLevelPressure, Temperature airTemperature)
         {
             double meters = ((Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, 1 / 5.255) - 1) * airTemperature.Kelvins) / 0.0065;
@@ -192,7 +192,7 @@ namespace Iot.Device.Common
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
         /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
-        /// <returns>The altitude in meters</returns>
+        /// <returns>The altitude</returns>
         public static Length CalculateAltitude(Pressure pressure, Temperature airTemperature)
         {
             return CalculateAltitude(pressure, MeanSeaLevel, airTemperature);
@@ -203,7 +203,7 @@ namespace Iot.Device.Common
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
         /// <param name="seaLevelPressure">The sea-level pressure</param>
-        /// <returns>The altitude in meters</returns>
+        /// <returns>The altitude</returns>
         public static Length CalculateAltitude(Pressure pressure, Pressure seaLevelPressure)
         {
             return CalculateAltitude(pressure, seaLevelPressure, Temperature.FromDegreesCelsius(15));
@@ -213,7 +213,7 @@ namespace Iot.Device.Common
         /// Calculates the altitude in meters from the given pressure. Assumes mean sea-level pressure and temperature of 15C.
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
-        /// <returns>The altitude in meters</returns>
+        /// <returns>The altitude</returns>
         public static Length CalculateAltitude(Pressure pressure)
         {
             return CalculateAltitude(pressure, MeanSeaLevel, Temperature.FromDegreesCelsius(15));
@@ -223,7 +223,7 @@ namespace Iot.Device.Common
         /// Calculates the approximate sea-level pressure from given absolute pressure, altitude and air temperature.
         /// </summary>
         /// <param name="pressure">The air pressure at the point of measurement</param>
-        /// <param name="altitude">The altitude in meters at the point of the measurement</param>
+        /// <param name="altitude">The altitude at the point of the measurement</param>
         /// <param name="airTemperature">The air temperature</param>
         /// <returns>The estimated absolute sea-level pressure</returns>
         /// <remarks><see cref="CalculatePressure"/> solved for sea level pressure</remarks>
