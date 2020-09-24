@@ -173,7 +173,7 @@ namespace Iot.Device.UFire
         /// <returns>Firmware version</returns>
         public Version GetVersion()
         {
-            return new Version(ReadFloat((byte)Register.ISE_VERSION_REGISTER).ToString());
+            return new Version(ReadByte(Register.ISE_VERSION_REGISTER), 0);
         }
 
         /// <summary>
@@ -304,7 +304,7 @@ namespace Iot.Device.UFire
         /// <returns>The version of the firmware</returns>
         public Version GetFirmwareVersion()
         {
-            return new Version(ReadByte(Register.ISE_FW_VERSION_REGISTER).ToString());
+            return new Version(0,ReadByte(Register.ISE_FW_VERSION_REGISTER));
         }
 
         private void SendCommand(byte data)
