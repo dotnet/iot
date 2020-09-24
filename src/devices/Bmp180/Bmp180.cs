@@ -91,9 +91,9 @@ namespace Iot.Device.Bmp180
         ///  Sea-level pressure
         /// </param>
         /// <returns>
-        ///  Height in meters from the sensor
+        ///  Height above sea level
         /// </returns>
-        public double ReadAltitude(Pressure seaLevelPressure)
+        public Length ReadAltitude(Pressure seaLevelPressure)
         {
             return WeatherHelper.CalculateAltitude(ReadPressure(), seaLevelPressure, ReadTemperature());
         }
@@ -102,15 +102,15 @@ namespace Iot.Device.Bmp180
         ///  Calculates the altitude in meters from the mean sea-level pressure.
         /// </summary>
         /// <returns>
-        ///  Height in meters from the sensor
+        ///  Height in meters above sea level
         /// </returns>
-        public double ReadAltitude()
+        public Length ReadAltitude()
         {
             return ReadAltitude(WeatherHelper.MeanSeaLevel);
         }
 
         /// <summary>
-        ///  Calculates the pressure at sea level when given a known altitude in meter
+        ///  Calculates the pressure at sea level when given a known altitude
         /// </summary>
         /// <param name="altitude" >
         ///  Altitude in meters
@@ -118,9 +118,20 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Pressure
         /// </returns>
-        public Pressure ReadSeaLevelPressure(double altitude = 0.0)
+        public Pressure ReadSeaLevelPressure(Length altitude)
         {
             return WeatherHelper.CalculateSeaLevelPressure(ReadPressure(), altitude, ReadTemperature());
+        }
+
+        /// <summary>
+        ///  Calculates the pressure at sea level, when the current altitude is 0.
+        /// </summary>
+        /// <returns>
+        ///  Pressure
+        /// </returns>
+        public Pressure ReadSeaLevelPressure()
+        {
+            return ReadSeaLevelPressure(Length.Zero);
         }
 
         /// <summary>
