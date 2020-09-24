@@ -1,4 +1,4 @@
-# SN74HC595 -- 8-Bit Shift Register Test app
+# SN74HC595 -- 8-Bit shift register driver app
 
 This [test application](Program.cs) tests the [SN74HC595 binding](../README.md).
 

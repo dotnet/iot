@@ -192,6 +192,13 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Segment display driver (HT16K33)](Display/README.md)
 * [Ws28xx LED drivers](Ws28xx/README.md)
 
+### Shift registers
+
+* [ShiftRegister -- generic shift register](ShiftRegister/README.md)
+* [SN74HC595 -- 8 bit shift register](Sn75hc595/README.md)
+* [Mbi5027 -- 16-bit shift register](Mbi5027/README.md)
+
+
 ### RFID/NFC modules
 
 * [PN532 - RFID and NFC reader](Pn532/README.md)
