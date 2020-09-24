@@ -178,9 +178,9 @@ namespace Iot.Device.Common.Tests
         [InlineData(20, 40.2, 20, 40.2)]
         [InlineData(30, 40.2, 20, 70.569)]
         [InlineData(27.8, 38.1, 20.0, 59.317)] // in data from BMP280 (in case), thermometer 1 meter away shows 20.0°, 57%
-        public void CorrectRelativeHumidityFromDifferentSensor(double inTemp, double inHumidity, double outTemp, double outHumidityExpected)
+        public void GetRelativeHumidityFromActualAirTemperature(double inTemp, double inHumidity, double outTemp, double outHumidityExpected)
         {
-            var result = WeatherHelper.CorrectRelativeHumidityFromDifferentSensor(
+            var result = WeatherHelper.GetRelativeHumidityFromActualAirTemperature(
                 Temperature.FromDegreesCelsius(inTemp),
                 Ratio.FromPercent(inHumidity), Temperature.FromDegreesCelsius(outTemp));
 
