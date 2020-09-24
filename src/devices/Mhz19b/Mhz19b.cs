@@ -40,9 +40,19 @@ namespace Iot.Device.Mhz19b
         private const int MessageSize = 9;
 
         private SerialPort _serialPort = null;
+        private Stream _serialPortStream = null;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Mhz19b"/> class.
+        /// Initializes a new instance of the <see cref="Mhz19b"/> class using an existing (serial port) stream.
+        /// </summary>
+        /// <param name="stream">Existing stream</param>
+        public Mhz19b(Stream stream)
+        {
+            _serialPortStream = stream ?? throw new ArgumentNullException(nameof(stream));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Mhz19b"/> class and creates a new serial port stream.
         /// </summary>
         /// <param name="uartDevice">Path to the UART device / serial port, e.g. /dev/serial0</param>
         /// <exception cref="System.ArgumentException">uartDevice is null or empty</exception>
@@ -58,6 +68,8 @@ namespace Iot.Device.Mhz19b
             _serialPort.Encoding = Encoding.ASCII;
             _serialPort.ReadTimeout = 1000;
             _serialPort.WriteTimeout = 1000;
+            _serialPort.Open();
+            _serialPortStream = _serialPort.BaseStream;
         }
 
         /// <summary>
@@ -72,16 +84,18 @@ namespace Iot.Device.Mhz19b
         {
             try
             {
+                // send read command request
                 var request = CreateRequest(Command.ReadCo2Concentration);
                 request[(int)MessageFormat.Checksum] = Checksum(request);
+                _serialPortStream.Write(request, 0, request.Length);
 
-                _serialPort.Open();
-                _serialPort.Write(request, 0, request.Length);
-
-                // wait until the response has been completely received
+                // read complete response (9 bytes expected)
+                byte[] response = new byte[MessageSize];
                 int timeout = 100;
-                while (timeout > 0 && _serialPort.BytesToRead < MessageSize)
+                int bytesRead = 0;
+                while (timeout > 0 && bytesRead < MessageSize)
                 {
+                    bytesRead += _serialPortStream.Read(response, bytesRead, response.Length - bytesRead);
                     Thread.Sleep(1);
                     timeout--;
                 }
@@ -91,9 +105,8 @@ namespace Iot.Device.Mhz19b
                     throw new IOException("Timeout");
                 }
 
-                // read and process response
-                byte[] response = new byte[MessageSize];
-                if ((_serialPort.Read(response, 0, response.Length) == response.Length) && (response[(int)MessageFormat.Checksum] == Checksum(response)))
+                // check response and return calculated concentration if valid
+                if (response[(int)MessageFormat.Checksum] == Checksum(response))
                 {
                     return VolumeConcentration.FromPartsPerMillion((int)response[(int)MessageFormat.DataHighResponse] * 256 + (int)response[(int)MessageFormat.DataLowResponse]);
                 }
@@ -105,10 +118,6 @@ namespace Iot.Device.Mhz19b
             catch (Exception e)
             {
                 throw new IOException("Sensor communication failed", e);
-            }
-            finally
-            {
-                _serialPort.Close();
             }
         }
 
@@ -178,16 +187,11 @@ namespace Iot.Device.Mhz19b
 
             try
             {
-                _serialPort.Open();
-                _serialPort.Write(request, 0, request.Length);
+                _serialPortStream.Write(request, 0, request.Length);
             }
             catch (Exception e)
             {
                 throw new IOException("Sensor communication failed", e);
-            }
-            finally
-            {
-                _serialPort.Close();
             }
         }
 
@@ -221,13 +225,27 @@ namespace Iot.Device.Mhz19b
         /// <inheritdoc cref="IDisposable" />
         public void Dispose()
         {
-            if (_serialPort == null)
+            if (_serialPort == null && _serialPortStream == null)
             {
                 return;
             }
 
-            _serialPort.Dispose();
-            _serialPort = null;
+            if (_serialPortStream != null)
+            {
+                _serialPortStream.Dispose();
+                _serialPortStream = null;
+            }
+
+            if (_serialPort != null)
+            {
+                if (_serialPort.IsOpen)
+                {
+                    _serialPort.Close();
+                }
+
+                _serialPort.Dispose();
+                _serialPort = null;
+            }
         }
     }
 }

@@ -4,6 +4,8 @@
 
 using System;
 using System.IO;
+using System.IO.Ports;
+using System.Text;
 using System.Threading;
 using UnitsNet;
 
@@ -19,7 +21,16 @@ namespace Iot.Device.Mhz19b.Samples
         /// </summary>
         public static void Main(string[] args)
         {
-            Mhz19b sensor = new Mhz19b("/dev/serial0");
+            // create serial port using the setting acc. to datasheet, pg. 7, sec. general settings
+            var serialPort = new SerialPort("/dev/serial0", 9600, Parity.None, 8, StopBits.One);
+            serialPort.Encoding = Encoding.ASCII;
+            serialPort.ReadTimeout = 1000;
+            serialPort.WriteTimeout = 1000;
+            serialPort.Open();
+            Mhz19b sensor = new Mhz19b(serialPort.BaseStream);
+
+            // Alternatively you can let the binding create the serial port stream:
+            // Mhz19b sensor = new Mhz19b("/dev/serial0");
 
             // Switch ABM on (default).
             // sensor.SetAutomaticBaselineCorrection(AbmState.On);
@@ -36,7 +47,7 @@ namespace Iot.Device.Mhz19b.Samples
             //          saturated at the target level.
             // sensor.PerformZeroPointCalibration();
             // ---- Now change to target concentration for span point.
-            // sensor.PerformSpanPointCalibration(VolumeConcentration.FromPartsPerMillion(200));
+            // sensor.PerformSpanPointCalibration(VolumeConcentration.FromPartsPerMillion(2000));
 
             // Continously read current concentration
             while (true)
@@ -46,9 +57,11 @@ namespace Iot.Device.Mhz19b.Samples
                     VolumeConcentration reading = sensor.GetCo2Reading();
                     Console.WriteLine($"{reading}");
                 }
-                catch (IOException)
+                catch (IOException e)
                 {
                     Console.WriteLine("Concentration couldn't be read");
+                    Console.WriteLine(e.Message);
+                    Console.WriteLine(e.InnerException.Message);
                 }
 
                 Thread.Sleep(1000);
