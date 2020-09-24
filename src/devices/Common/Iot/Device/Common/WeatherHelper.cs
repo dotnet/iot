@@ -157,7 +157,7 @@ namespace Iot.Device.Common
         /// <param name="airTemperatureFromBetterPlacedSensor">Temperature measured by better placed sensor</param>
         /// <returns>A corrected humidity. The value will be lower than the input value if the better placed sensor is cooler than
         /// the "bad" sensor.</returns>
-        public static Ratio CorrectRelativeHumidityFromDifferentSensor(Temperature airTemperatureFromHumiditySensor,
+        public static Ratio GetRelativeHumidityFromActualAirTemperature(Temperature airTemperatureFromHumiditySensor,
             Ratio relativeHumidityMeasured, Temperature airTemperatureFromBetterPlacedSensor)
         {
             Density absoluteHumidity =
