@@ -51,11 +51,11 @@ namespace Iot.Device.UFire
             {
                 _temperatureCompensation = value;
 
-                byte retval = ReadByte((byte)Register.ISE_CONFIG_REGISTER);
+                byte retval = ReadByte(Register.ISE_CONFIG_REGISTER);
 
                 retval = (byte)Bit_set((int)retval, IseTemperatureCompensationConfigBit, _temperatureCompensation);
 
-                WriteByte((byte)Register.ISE_CONFIG_REGISTER, retval);
+                WriteByte(Register.ISE_CONFIG_REGISTER, retval);
             }
         }
 
@@ -69,88 +69,94 @@ namespace Iot.Device.UFire
         }
 
         /// <summary>
-        /// Measure a value from the ISE Probe Interface, typical measure are in the millivolt range.
+        /// Read a value from the ISE Probe Interface, typical measure are in the millivolt range.
         /// </summary>
         /// <returns>value from ISE Probe Interface, typical measure are in the millivolt range. On error it return -1 as value</returns>
-        public ElectricPotential Measure()
+        public ElectricPotential Read()
         {
             SendCommand((byte)Command.ISE_MEASURE_MV);
 
             DelayHelper.DelayMilliseconds(IseMvMeasureTime, allowThreadYield: true);
 
-            _measurement = ReadRegister((byte)Register.ISE_MV_REGISTER);
+            _measurement = ReadFloat(Register.ISE_MV_REGISTER);
             _measurement = Convert.ToSingle(Math.Round(_measurement, 2));
 
             return new ElectricPotential(_measurement, UnitsNet.Units.ElectricPotentialUnit.Millivolt);
         }
 
         /// <summary>
-        /// Measure temperature
+        /// Read temperature
         /// </summary>
         /// <returns>Temperature. Temperature range: -2 to 35 C. Temperature Precision: 0.05 C</returns>
-        public Temperature MeasureTemperature()
+        public Temperature ReadTemperature()
         {
             SendCommand((byte)Command.ISE_MEASURE_TEMP);
 
             DelayHelper.DelayMilliseconds(IseTemperatureMeasureTime, allowThreadYield: true);
-            _temperature = new Temperature(ReadRegister((byte)Register.ISE_TEMP_REGISTER), UnitsNet.Units.TemperatureUnit.DegreeCelsius);
+            _temperature = new Temperature(ReadFloat(Register.ISE_TEMP_REGISTER), UnitsNet.Units.TemperatureUnit.DegreeCelsius);
 
             return _temperature;
         }
 
         /// <summary>
-        /// Set temperature compensation
+        /// It sets the a temperature used as compensation. The compensation temperature is to correlate the mV input to the correct pH value, see https://assets.tequipment.net/assets/1/26/Yokogawa_Temperature_Compensation.pdf
         /// </summary>
-        /// <param name="temp">Compensation temperature</param>
+        /// <param name="temp">The temperature used for compensation</param>
         public void SetTemperatureCompensation(Temperature temp)
         {
-            WriteRegister((byte)Register.ISE_TEMP_REGISTER, Convert.ToSingle(temp.DegreesCelsius));
+            WriteRegister(Register.ISE_TEMP_REGISTER, Convert.ToSingle(temp.DegreesCelsius));
             _temperature = temp;
         }
 
         /// <summary>
-        /// Calibrates the probe using a single point using a mV value.
+        /// Calibrates the probe using a single solution. Put the probe in a solution where the pH (Power of Hydrogen) is know.
         /// </summary>
-        /// <param name="solution">Value. Range: -1024 mV to 1024 mV</param>
-        public void CalibrateSingle(ElectricPotential solution)
+        /// <param name="solution">The known pH value in mV. Range: -1024 mV to 1024 mV</param>
+        public void CalibrateFromSingleValue(ElectricPotential solution)
         {
             if (solution.Millivolts >= -1024 && solution.Millivolts <= 1024)
             {
-                WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
+                WriteRegister(Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
                 SendCommand((byte)Command.ISE_CALIBRATE_SINGLE);
 
                 DelayHelper.DelayMilliseconds(IseMvMeasureTime, allowThreadYield: true);
             }
+
+            throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
         }
 
         /// <summary>
-        /// Calibrates the dual-point values for the low reading, in mV, and saves them in the devices's EEPROM.
+        /// The lower value when calibrating from two solutions. Put the probe in a solution with the lowest pH (Power of Hydrogen) value.
         /// </summary>
-        /// <param name="solution">Value. Range: -1024 mV to 1024 mV</param>
-        public void CalibrateProbeLow(ElectricPotential solution)
+        /// <param name="solution">The known pH value in mV. Range: -1024 mV to 1024 mV</param>
+        public void CalibrateFromTwoValuesLowValue(ElectricPotential solution)
         {
             if (solution.Millivolts >= -1024 && solution.Millivolts <= 1024)
             {
-                WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
+                WriteRegister(Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
                 SendCommand((byte)Command.ISE_CALIBRATE_LOW);
 
                 DelayHelper.DelayMilliseconds(IseMvMeasureTime, allowThreadYield: true);
             }
+
+            throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
         }
 
         /// <summary>
-        /// Calibrates the dual-point values for the high reading, in mV, and saves them in the devices's EEPROM.
+        ///  The highest value when calibrating from two solutions. Put the probe in a solution with the highest pH (Power of Hydrogen) value.
         /// </summary>
-        /// <param name="solution">Value. Range: -1024 mV to 1024 mV</param>
-        public void CalibrateProbeHigh(ElectricPotential solution)
+        /// <param name="solution">The known pH value in mV. Range: -1024 mV to 1024 mV</param>
+        public void CalibrateFromTwoValuesHighValue(ElectricPotential solution)
         {
             if (solution.Millivolts >= -1024 && solution.Millivolts <= 1024)
             {
-                WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
+                WriteRegister(Register.ISE_SOLUTION_REGISTER, Convert.ToSingle(solution.Millivolts));
                 SendCommand((byte)Command.ISE_CALIBRATE_HIGH);
 
                 DelayHelper.DelayMilliseconds(IseMvMeasureTime, allowThreadYield: true);
             }
+
+            throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
         }
 
         /// <summary>
@@ -159,60 +165,60 @@ namespace Iot.Device.UFire
         /// <returns>Firmware version</returns>
         public Version GetVersion()
         {
-            return new Version(ReadRegister((byte)Register.ISE_VERSION_REGISTER).ToString());
+            return new Version((int)ReadFloat((byte)Register.ISE_VERSION_REGISTER), 0);
         }
 
         /// <summary>
-        /// Dual point uses two measures for low and high points. It needs the measured value (reading value) and the known value (reference value). Calling calibrateProbeLow saves both the reading and reference value.
-        /// When there are high and low calibration points, the device will automatically use them to adjust readings.To disable dual-point adjustment, call reset to remove all calibration data.
+        /// Dual point uses two measures for low and high points. It needs the measured value (reading value) and the known value (reference value). Calling SetDualPointCalibration saves both the reading and reference value.
+        /// When there are high and low calibration points, the device will automatically use them to adjust readings.To disable dual-point adjustment, call ResetCalibration to remove all calibration data.
         /// </summary>
         /// <returns>The known value (reference value) for calibrate the high value</returns>
         public ElectricPotential GetCalibrateHighReference()
         {
-            return new ElectricPotential(ReadRegister((byte)Register.ISE_CALIBRATE_REFHIGH_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
+            return new ElectricPotential(ReadFloat(Register.ISE_CALIBRATE_REFHIGH_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
         }
 
         /// <summary>
-        /// Dual point uses two measures for low and high points. It needs the measured value (reading value) and the known value (reference value). Calling calibrateProbeLow saves both the reading and reference value.
-        /// When there are high and low calibration points, the device will automatically use them to adjust readings.To disable dual-point adjustment, call reset to remove all calibration data.
+        /// Dual point uses two measures for low and high points. It needs the measured value (reading value) and the known value (reference value). Calling SetDualPointCalibration saves both the reading and reference value.
+        /// When there are high and low calibration points, the device will automatically use them to adjust readings.To disable dual-point adjustment, call ResetCalibration to remove all calibration data.
         /// </summary>
         /// <returns>The known value (reference value) for calibrate the low value</returns>
         public ElectricPotential GetCalibrateLowReference()
         {
-            return new ElectricPotential(ReadRegister((byte)Register.ISE_CALIBRATE_REFLOW_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
+            return new ElectricPotential(ReadFloat(Register.ISE_CALIBRATE_REFLOW_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
         }
 
         /// <summary>
-        /// Dual point uses two measures for low and high points. It needs the measured value (reading value) and the known value (reference value). Calling calibrateProbeLow saves both the reading and reference value.
-        /// When there are high and low calibration points, the device will automatically use them to adjust readings.To disable dual-point adjustment, call reset to remove all calibration data.
+        /// Dual point uses two measures for low and high points. It needs the measured value (reading value) and the known value (reference value). Calling SetDualPointCalibration saves both the reading and reference value.
+        /// When there are high and low calibration points, the device will automatically use them to adjust readings.To disable dual-point adjustment, call ResetCalibration to remove all calibration data.
         /// </summary>
         /// <returns>The measured value (reading value) for calibrate the high value</returns>
         public ElectricPotential GetCalibrateHighReading()
         {
-            return new ElectricPotential(ReadRegister((byte)Register.ISE_CALIBRATE_READHIGH_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
+            return new ElectricPotential(ReadFloat(Register.ISE_CALIBRATE_READHIGH_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
 
         }
 
         /// <summary>
-        /// Dual point uses two measures for low and high points. It needs the measured value (reading value) and the known value (reference value). Calling calibrateProbeLow saves both the reading and reference value.
-        /// When there are high and low calibration points, the device will automatically use them to adjust readings.To disable dual-point adjustment, call reset to remove all calibration data.
+        /// Dual point uses two measures for low and high points. It needs the measured value (reading value) and the known value (reference value). Calling SetDualPointCalibration saves both the reading and reference value.
+        /// When there are high and low calibration points, the device will automatically use them to adjust readings.To disable dual-point adjustment, call ResetCalibration to remove all calibration data.
         /// </summary>
         /// <returns>The measured value (reading value) for calibrate the low value</returns>
         public ElectricPotential GetCalibrateLowReading()
         {
-            return new ElectricPotential(ReadRegister((byte)Register.ISE_CALIBRATE_READLOW_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
+            return new ElectricPotential(ReadFloat(Register.ISE_CALIBRATE_READLOW_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
         }
 
         /// <summary>
         ///  Resets all the stored calibration information
         /// </summary>
-        public void Reset()
+        public void ResetCalibration()
         {
-            WriteRegister((byte)Register.ISE_CALIBRATE_SINGLE_REGISTER, null);
-            WriteRegister((byte)Register.ISE_CALIBRATE_REFHIGH_REGISTER, null);
-            WriteRegister((byte)Register.ISE_CALIBRATE_REFLOW_REGISTER, null);
-            WriteRegister((byte)Register.ISE_CALIBRATE_READHIGH_REGISTER, null);
-            WriteRegister((byte)Register.ISE_CALIBRATE_READLOW_REGISTER, null);
+            WriteRegister(Register.ISE_CALIBRATE_SINGLE_REGISTER, null);
+            WriteRegister(Register.ISE_CALIBRATE_REFHIGH_REGISTER, null);
+            WriteRegister(Register.ISE_CALIBRATE_REFLOW_REGISTER, null);
+            WriteRegister(Register.ISE_CALIBRATE_READHIGH_REGISTER, null);
+            WriteRegister(Register.ISE_CALIBRATE_READLOW_REGISTER, null);
         }
 
         /// <summary>
@@ -229,28 +235,32 @@ namespace Iot.Device.UFire
                 readLow.Millivolts >= -1024 && readLow.Millivolts <= 1024 &&
                 readHigh.Millivolts >= -1024 && readHigh.Millivolts <= 1024)
             {
-                WriteRegister((byte)Register.ISE_CALIBRATE_REFLOW_REGISTER, Convert.ToSingle(refLow.Millivolts));
-                WriteRegister((byte)Register.ISE_CALIBRATE_REFHIGH_REGISTER, Convert.ToSingle(refHigh));
-                WriteRegister((byte)Register.ISE_CALIBRATE_READLOW_REGISTER, Convert.ToSingle(readLow));
-                WriteRegister((byte)Register.ISE_CALIBRATE_READHIGH_REGISTER, Convert.ToSingle(readHigh));
+                WriteRegister(Register.ISE_CALIBRATE_REFLOW_REGISTER, Convert.ToSingle(refLow.Millivolts));
+                WriteRegister(Register.ISE_CALIBRATE_REFHIGH_REGISTER, Convert.ToSingle(refHigh));
+                WriteRegister(Register.ISE_CALIBRATE_READLOW_REGISTER, Convert.ToSingle(readLow));
+                WriteRegister(Register.ISE_CALIBRATE_READHIGH_REGISTER, Convert.ToSingle(readHigh));
             }
+
+            throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV for refLow, refHigh, readLow and readLow");
         }
 
         /// <summary>
         /// Changes the default I2C address
         /// </summary>
-        /// <param name="i2cAddress">The new I2C address</param>
-        public void SetI2CAddress(byte i2cAddress)
+        /// <param name="i2cAddress">The new I2C address. Range: 1 to 127 </param>
+        public void SetI2cAddressAndDispose(byte i2cAddress)
         {
             if (i2cAddress >= 1 && i2cAddress <= 127)
             {
-                WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, Convert.ToByte(i2cAddress));
+                WriteRegister(Register.ISE_SOLUTION_REGISTER, Convert.ToByte(i2cAddress));
                 SendCommand((byte)Command.ISE_I2C);
             }
             else
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException("The value range is 1 to 127");
             }
+
+            Dispose();
         }
 
         /// <summary>
@@ -258,12 +268,12 @@ namespace Iot.Device.UFire
         /// </summary>
         /// <param name="address">Address to read</param>
         /// <returns>Low level data from EEPROM</returns>
-        public float ReadEeprom(byte address)
+        public float ReadEeprom(Register address)
         {
-            WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, address);
+            WriteRegister(Register.ISE_SOLUTION_REGISTER, (byte)address);
             SendCommand((byte)Command.ISE_MEMORY_READ);
 
-            return ReadRegister((byte)Register.ISE_BUFFER_REGISTER);
+            return ReadFloat(Register.ISE_BUFFER_REGISTER);
         }
 
         /// <summary>
@@ -271,10 +281,10 @@ namespace Iot.Device.UFire
         /// </summary>
         /// <param name="address">Address</param>
         /// <param name="data">Data to write to the address</param>
-        public void WriteEeprom(byte address, float data)
+        public void WriteEeprom(Register address, float data)
         {
-            WriteRegister((byte)Register.ISE_SOLUTION_REGISTER, address);
-            WriteRegister((byte)Register.ISE_BUFFER_REGISTER, data);
+            WriteRegister(Register.ISE_SOLUTION_REGISTER, (byte)address);
+            WriteRegister(Register.ISE_BUFFER_REGISTER, data);
             SendCommand((byte)Command.ISE_MEMORY_WRITE);
         }
 
@@ -284,7 +294,7 @@ namespace Iot.Device.UFire
         /// <returns>The version of the firmware</returns>
         public Version GetFirmwareVersion()
         {
-            return new Version(ReadByte((byte)Register.ISE_FW_VERSION_REGISTER).ToString());
+            return new Version(0, (int)ReadByte(Register.ISE_FW_VERSION_REGISTER));
 
         }
 
@@ -297,7 +307,7 @@ namespace Iot.Device.UFire
             DelayHelper.DelayMilliseconds(IseCommunicationDelay, allowThreadYield: true);
         }
 
-        private float ReadRegister(byte register)
+        private float ReadFloat(Register register)
         {
             ChangeRegister(register);
 
@@ -308,8 +318,9 @@ namespace Iot.Device.UFire
             return Convert.ToSingle(RoundTotalDigits(BitConverter.ToSingle(data.ToArray(), 0), 7));
         }
 
-        private void WriteRegister(byte register, float? data)
+        private void WriteRegister(Register register, float? data)
         {
+            // μFire ISE (Ion Specific Electrode) is 0 as default
             Span<byte> bytes = stackalloc byte[4]
              {
                 0,
@@ -328,13 +339,17 @@ namespace Iot.Device.UFire
             DelayHelper.DelayMilliseconds(IseCommunicationDelay, allowThreadYield: true);
         }
 
-        private void ChangeRegister(byte register)
+        /// <summary>
+        /// Change the register in μFire ISE (Ion Specific Electrode). This makes sure that the next time it writes, it writes to the correct location
+        /// </summary>
+        /// <param name="register">The register to change μFire ISE (Ion Specific Electrode) to write to next times it writes</param>
+        private void ChangeRegister(Register register)
         {
-            _device.WriteByte(register);
+            _device.WriteByte((byte)register);
             DelayHelper.DelayMilliseconds(IseCommunicationDelay, allowThreadYield: true);
         }
 
-        private byte ReadByte(byte register)
+        private byte ReadByte(Register register)
         {
             ChangeRegister(register);
             DelayHelper.DelayMilliseconds(IseCommunicationDelay, allowThreadYield: true);
@@ -342,7 +357,7 @@ namespace Iot.Device.UFire
             return _device.ReadByte();
         }
 
-        private void WriteByte(byte register, byte value)
+        private void WriteByte(Register register, byte value)
         {
             ChangeRegister(register);
 
@@ -355,10 +370,13 @@ namespace Iot.Device.UFire
         private int Bit_set(int v, int index, bool x)
         {
             int mask = 1 << index;
-            v &= ~mask;
             if (x)
             {
                 v |= mask;
+            }
+            else
+            {
+                v &= ~mask;
             }
 
             return v;
@@ -369,6 +387,12 @@ namespace Iot.Device.UFire
             return float.IsNaN(x) || x == 0 ? 0 : (int)Math.Floor(Math.Log10(Math.Abs(x))) + 1;
         }
 
+        /// <summary>
+        /// Round x to a number of digits. This makes sure that μFire ISE (Ion Specific Electrode) returns the correct value
+        /// </summary>
+        /// <param name="x">Number to round</param>
+        /// <param name="digits">Number of digits. Default is 7. If > 15 then it use 15 as number of digits</param>
+        /// <returns></returns>
         private float RoundTotalDigits(float x, int? digits = 7)
         {
             int numberOfDigits = digits.Value - Magnitude(x);

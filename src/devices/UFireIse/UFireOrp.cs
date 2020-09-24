@@ -12,15 +12,15 @@ namespace Iot.Device.UFire
     /// </summary>
     public class UFireOrp : UFireIse
     {
-        private const byte POTENTIAL_REGISTER_ADDRESS = 0x64;
-
         /// <summary>
         /// Oxidation-reduction potential (ORP) measuremens
+        /// It makes it possible to the Oxidation-Reduction Potential (ORP) measurement without doing a measuremen (the retunres the old measurement)
         /// </summary>
         public ElectricPotential OxidationReducationPotential = new ElectricPotential();
 
         /// <summary>
         /// Reduction potential (Eh) measuremens (see https://www.eosremediation.com/converting-field-orp-measurements-into-eh/)
+        /// It makes it possible to the Reduction potential (Eh) measurement without doing a measuremen (the retunres the old measurement)
         /// </summary>
         public ElectricPotential ReductionPotential = new ElectricPotential();
 
@@ -36,16 +36,16 @@ namespace Iot.Device.UFire
         /// <summary>
         /// The probe potential
         /// </summary>
-        public ElectricPotential ProbePotential => ElectricPotential.FromMillivolts(ReadEeprom(POTENTIAL_REGISTER_ADDRESS));
+        public ElectricPotential ProbePotential => ElectricPotential.FromMillivolts(ReadEeprom(Register.POTENTIAL_REGISTER));
 
         /// <summary>
         /// Tries to measure ORP (Oxidation-Reduction Potential).
         /// </summary>
         /// <param name="orp">ORP (Oxidation-Reduction Potential) measurement</param>
         /// <returns>True if it could measure ORP (Oxidation-Reduction Potential) else false</returns>
-        public bool TryMeasureOxidationReducationPotential(out ElectricPotential orp)
+        public bool TryMeasureOxidationReductionPotential(out ElectricPotential orp)
         {
-            ElectricPotential mV = Measure();
+            ElectricPotential mV = Read();
             OxidationReducationPotential = mV;
             ReductionPotential = new ElectricPotential(mV.Millivolts + GetProbePotential(), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
 
@@ -61,7 +61,7 @@ namespace Iot.Device.UFire
 
         private float GetProbePotential()
         {
-            return ReadEeprom(POTENTIAL_REGISTER_ADDRESS);
+            return ReadEeprom(Register.POTENTIAL_REGISTER);
         }
     }
 }

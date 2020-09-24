@@ -19,8 +19,8 @@ namespace Iot.Device.UFire.Sample
         {
             Console.WriteLine("Command:");
             Console.WriteLine("    B           Basic");
-            Console.WriteLine("    O           Orp");
-            Console.WriteLine("    P           PH");
+            Console.WriteLine("    O           Read Orp (Oxidation-reduction potential) value");
+            Console.WriteLine("    P           Read pH (Power of Hydrogen) value");
             Console.WriteLine();
         }
 
@@ -30,34 +30,36 @@ namespace Iot.Device.UFire.Sample
         /// <param name="args">Command line arguments see <see cref="PrintHelp"/></param>
         public static void Main(string[] args)
         {
-            I2cConnectionSettings settings = new I2cConnectionSettings(BusId, UFireIse.I2cAddress);
-            I2cDevice device = I2cDevice.Create(settings);
-
-            Console.WriteLine(
-                    $"UFire_ISE is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
-
-            Console.WriteLine();
             PrintHelp();
 
-            while (true)
+            I2cConnectionSettings settings = new I2cConnectionSettings(BusId, UFireIse.I2cAddress);
+            using (I2cDevice device = I2cDevice.Create(settings))
             {
-                var command = Console.ReadLine().ToLower().Split(' ');
-                if (string.IsNullOrEmpty(command[0]))
-                {
-                    return;
-                }
+                Console.WriteLine(
+                        $"UFire_ISE is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
 
-                switch (command[0][0])
+                Console.WriteLine();
+
+                while (true)
                 {
-                    case 'b':
-                        Basic(device);
+                    var command = Console.ReadLine().ToLower().Split(' ');
+                    if (string.IsNullOrEmpty(command[0]))
+                    {
                         return;
-                    case '0':
-                        Orp(device);
-                        return;
-                    case 'p':
-                        Ph(device);
-                        return;
+                    }
+
+                    switch (command[0][0])
+                    {
+                        case 'b':
+                            Basic(device);
+                            return;
+                        case '0':
+                            Orp(device);
+                            return;
+                        case 'p':
+                            Ph(device);
+                            return;
+                    }
                 }
             }
         }
@@ -66,7 +68,7 @@ namespace Iot.Device.UFire.Sample
         {
             using (UFireIse uFireIse = new UFireIse(device))
             {
-                Console.WriteLine("mV:" + uFireIse.Measure().Millivolts);
+                Console.WriteLine("mV:" + uFireIse.Read().Millivolts);
             }
         }
 
@@ -89,7 +91,7 @@ namespace Iot.Device.UFire.Sample
         {
             using (UFirePh uFire_pH = new UFirePh(device))
             {
-                Console.WriteLine("mV:" + uFire_pH.Measure().Millivolts);
+                Console.WriteLine("mV:" + uFire_pH.Read().Millivolts);
 
                 if (uFire_pH.TryMeasurepH(out float pH))
                 {
@@ -103,5 +105,4 @@ namespace Iot.Device.UFire.Sample
             }
         }
     }
-
 }

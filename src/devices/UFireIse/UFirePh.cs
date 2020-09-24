@@ -44,11 +44,10 @@ namespace Iot.Device.UFire
         public bool TryMeasurepH(out float pH, Temperature? temp = null)
         {
             // It return -1 on error
-            ElectricPotential mV = Measure();
+            ElectricPotential mV = Read();
             if (mV.Value == -1)
             {
-                pH = float.NaN;
-                Ph = pH;
+                Ph = pH = float.NaN;
 
                 return false;
             }
@@ -101,7 +100,7 @@ namespace Iot.Device.UFire
         /// <param name="solutionpH">pH value</param>
         public void CalibrateSingle(float solutionpH)
         {
-            CalibrateSingle(PHtomV(solutionpH));
+            CalibrateSingle(PhToMillivolts(solutionpH));
         }
 
         /// <summary>
@@ -110,7 +109,7 @@ namespace Iot.Device.UFire
         /// <param name="solutionpH">The pH of the calibration solution</param>
         public void CalibrateProbeHigh(float solutionpH)
         {
-            CalibrateProbeHigh(PHtomV(solutionpH));
+            CalibrateProbeHigh(PhToMillivolts(solutionpH));
         }
 
         /// <summary>
@@ -137,7 +136,7 @@ namespace Iot.Device.UFire
         /// <param name="solutionpH"> the pH of the calibration solution</param>
         public void CalibrateProbeLow(float solutionpH)
         {
-            CalibrateProbeLow(PHtomV(solutionpH));
+            CalibrateProbeLow(PhToMillivolts(solutionpH));
         }
 
         /// <summary>
@@ -158,7 +157,7 @@ namespace Iot.Device.UFire
             return MVtopH(GetCalibrateLowReading());
         }
 
-        private float PHtomV(float pH)
+        private float PhToMillivolts(float pH)
         {
             return (7 - pH) * ProbeMvToPh;
         }
@@ -167,6 +166,5 @@ namespace Iot.Device.UFire
         {
             return Convert.ToSingle(Math.Abs(7.0 - (mV / ProbeMvToPh)));
         }
-
     }
 }
