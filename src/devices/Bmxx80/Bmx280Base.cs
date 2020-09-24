@@ -175,13 +175,13 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadAltitude(Pressure seaLevelPressure, out double altitude)
+        public bool TryReadAltitude(Pressure seaLevelPressure, out Length altitude)
         {
             // Read the pressure first.
             var success = TryReadPressure(out var pressure);
             if (!success)
             {
-                altitude = double.NaN;
+                altitude = default;
                 return false;
             }
 
@@ -189,7 +189,7 @@ namespace Iot.Device.Bmxx80
             success = TryReadTemperature(out var temperature);
             if (!success)
             {
-                altitude = double.NaN;
+                altitude = default;
                 return false;
             }
 
@@ -206,7 +206,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadAltitude(out double altitude)
+        public bool TryReadAltitude(out Length altitude)
         {
             return TryReadAltitude(WeatherHelper.MeanSeaLevel, out altitude);
         }
