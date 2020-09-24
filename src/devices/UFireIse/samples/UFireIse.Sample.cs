@@ -76,7 +76,7 @@ namespace Iot.Device.UFire.Sample
         {
             using (UFireOrp uFireOrp = new UFireOrp(device))
             {
-                if (uFireOrp.TryMeasureOxidationReducationPotential(out ElectricPotential orp))
+                if (uFireOrp.TryMeasureOxidationReductionPotential(out ElectricPotential orp))
                 {
                     Console.WriteLine("Eh:" + orp.Millivolts);
                 }
