@@ -4,9 +4,7 @@
 Binding for the MH-Z19B NDIR infrared gas module. The gas module measures the CO2 gas concentration in the ambient air.
 
 ## Binding Notes
-The binding supports the connection through its UART interface. The binding gets configured with the UART to be used (e.g. ```/dev/serial0```). The UART is held open only while reading the current concentration from the sensor to enable UART multiplexing.
-
-The sensor is supplied with 5V. The UART level is at 3.3V and no level shifter is required.
+The MH-Z19B gas module provides a serial communication interface (UART) which can be directly wired to a Raspberry PI board. The module is supplied with 5V. The UART level is at 3.3V and no level shifter is required.
 
 |Function|	Raspi pin|	MH-Z19 pin|
 |--------|-----------|------------|
@@ -15,7 +13,14 @@ The sensor is supplied with 5V. The UART level is at 3.3V and no level shifter i
 |UART	 |8 (TXD0)	 |2 (RXD)     |
 |UART	 |10 (RXD0)	 |3 (TXD)     |
 Table: MH-Z19B to RPi 3 connection
- 
+
+<br/>
+The binding supports the connection through an UART interface (e.g. ```/dev/serial0```) or (serial port) stream.
+When using the UART interface the binding instantiates the port with the required UART settings and opens it.
+The use of an existing stream adds flexibility to the actual interface that used with the binding.
+In either case the binding supports all commands of the module.
+<br/><br/>
+
 **Make sure that you read the datasheet carefully before altering the default calibration behaviour. 
 Automatic baseline correction is enabled by default.**
 
