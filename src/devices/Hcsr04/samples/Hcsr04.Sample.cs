@@ -3,9 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device.Gpio;
-using System.Device.I2c;
-using System.Device.Spi;
 using System.Threading;
 using Iot.Device.Hcsr04;
 
@@ -19,11 +16,16 @@ namespace Iot.Device.Hcsr04.Samples
 
             using (var sonar = new Hcsr04(4, 17))
             {
-                while (true)
+                try
                 {
-                    Console.WriteLine($"Distance: {sonar.Distance} cm");
-                    Thread.Sleep(1000);
+                    Console.WriteLine($"Distance: {sonar.Distance.Centimeters} cm");
                 }
+                catch
+                {
+                    Console.WriteLine("Error reading sensor");
+                }
+
+                Thread.Sleep(1000);
             }
         }
     }
