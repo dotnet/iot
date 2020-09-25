@@ -16,16 +16,19 @@ namespace Iot.Device.Hcsr04.Samples
 
             using (var sonar = new Hcsr04(4, 17))
             {
-                try
+                while (true)
                 {
-                    Console.WriteLine($"Distance: {sonar.Distance.Centimeters} cm");
-                }
-                catch
-                {
-                    Console.WriteLine("Error reading sensor");
-                }
+                    try
+                    {
+                        Console.WriteLine($"Distance: {sonar.Distance.Centimeters} cm");
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Error reading sensor");
+                    }
 
-                Thread.Sleep(1000);
+                    Thread.Sleep(1000);
+                }
             }
         }
     }
