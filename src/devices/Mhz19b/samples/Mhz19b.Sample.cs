@@ -27,7 +27,7 @@ namespace Iot.Device.Mhz19b.Samples
             serialPort.ReadTimeout = 1000;
             serialPort.WriteTimeout = 1000;
             serialPort.Open();
-            Mhz19b sensor = new Mhz19b(serialPort.BaseStream);
+            Mhz19b sensor = new Mhz19b(serialPort.BaseStream, true);
 
             // Alternatively you can let the binding create the serial port stream:
             // Mhz19b sensor = new Mhz19b("/dev/serial0");

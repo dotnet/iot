@@ -38,7 +38,7 @@ namespace Iot.Device.Mhz19b
         }
 
         private const int MessageSize = 9;
-
+        private bool _shouldDispose = false;
         private SerialPort _serialPort = null;
         private Stream _serialPortStream = null;
 
@@ -46,9 +46,11 @@ namespace Iot.Device.Mhz19b
         /// Initializes a new instance of the <see cref="Mhz19b"/> class using an existing (serial port) stream.
         /// </summary>
         /// <param name="stream">Existing stream</param>
-        public Mhz19b(Stream stream)
+        /// <param name="shouldDispose">If true, the stream gets disposed when disposing the binding</param>
+        public Mhz19b(Stream stream, bool shouldDispose)
         {
             _serialPortStream = stream ?? throw new ArgumentNullException(nameof(stream));
+            _shouldDispose = shouldDispose;
         }
 
         /// <summary>
@@ -70,6 +72,7 @@ namespace Iot.Device.Mhz19b
             _serialPort.WriteTimeout = 1000;
             _serialPort.Open();
             _serialPortStream = _serialPort.BaseStream;
+            _shouldDispose = true;
         }
 
         /// <summary>
@@ -230,7 +233,7 @@ namespace Iot.Device.Mhz19b
                 return;
             }
 
-            if (_serialPortStream != null)
+            if (_shouldDispose && _serialPortStream != null)
             {
                 _serialPortStream.Dispose();
                 _serialPortStream = null;
