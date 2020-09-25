@@ -81,7 +81,7 @@ namespace Iot.Device.Shtc3
         /// <summary>
         /// Try read Temperature and Humidity
         /// </summary>
-        /// <param name="temperature">Temperature return by sensor</param>
+        /// <param name="temperature">Temperature returned by sensor</param>
         /// <param name="relativeHumidity">Humidity return by sensor</param>
         /// <param name="lowPower">"true" measure in low power mode, "false"(default) measure in normal power mode</param>
         /// <param name="clockStretching">"true" allow clock stretching, "false"(default) without clock stretching</param>
