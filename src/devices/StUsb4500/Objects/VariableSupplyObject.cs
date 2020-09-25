@@ -23,8 +23,8 @@ namespace Iot.Device.StUsb4500.Objects
             get => ElectricCurrent.FromAmperes((ushort)(Value & OperationalCurrentMask) / 100.0);
             set
             {
-                CheckArgumentInRange(value.Value, 10.23);
-                Value = (Value & ~OperationalCurrentMask) | (Convert.ToUInt32(value * 100) & OperationalCurrentMask);
+                CheckArgumentInRange(value.Amperes, 10.23);
+                Value = (Value & ~OperationalCurrentMask) | (Convert.ToUInt32(value.Amperes * 100) & OperationalCurrentMask);
             }
         }
 
@@ -35,8 +35,8 @@ namespace Iot.Device.StUsb4500.Objects
             get => ElectricPotentialDc.FromVoltsDc((ushort)((Value & MinVoltageMask) >> 10) / 20.0);
             set
             {
-                CheckArgumentInRange(value.Value, 51.15);
-                Value = (Value & ~MinVoltageMask) | (Convert.ToUInt32(value * 20) << 10 & MinVoltageMask);
+                CheckArgumentInRange(value.VoltsDc, 51.15);
+                Value = (Value & ~MinVoltageMask) | (Convert.ToUInt32(value.VoltsDc * 20) << 10 & MinVoltageMask);
             }
         }
 
@@ -47,8 +47,8 @@ namespace Iot.Device.StUsb4500.Objects
             get => ElectricPotentialDc.FromVoltsDc((ushort)((Value & MaxVoltageMask) >> 20) / 20.0);
             set
             {
-                CheckArgumentInRange(value.Value, 51.15);
-                Value = (Value & ~MaxVoltageMask) | (Convert.ToUInt32(value * 20) << 20 & MaxVoltageMask);
+                CheckArgumentInRange(value.VoltsDc, 51.15);
+                Value = (Value & ~MaxVoltageMask) | (Convert.ToUInt32(value.VoltsDc * 20) << 20 & MaxVoltageMask);
             }
         }
 

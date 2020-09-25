@@ -60,18 +60,5 @@ namespace Iot.Device.StUsb4500.Objects
                 throw new ArgumentOutOfRangeException(propertyName);
             }
         }
-
-        /// <summary>Checks it an argument is in range.</summary>
-        /// <param name="value">The value.</param>
-        /// <param name="maxValue">The maximum value.</param>
-        /// <param name="minValue">The minimum value.</param>
-        /// <param name="propertyName">Name of the property.</param>
-        protected void CheckArgumentInRange(decimal value, decimal maxValue, decimal minValue = 0, [CallerMemberName] string propertyName = null)
-        {
-            if (value < minValue || value > maxValue)
-            {
-                throw new ArgumentOutOfRangeException(propertyName);
-            }
-        }
     }
 }

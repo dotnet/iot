@@ -23,8 +23,8 @@ namespace Iot.Device.StUsb4500.Objects
             get => ElectricCurrent.FromAmperes((ushort)(Value & MaximalCurrentMask) / 100.0);
             set
             {
-                CheckArgumentInRange(value.Value, 10.23);
-                Value = (Value & MaximalCurrentMask) | (uint)(Convert.ToUInt16(value * 100) & MaximalCurrentMask);
+                CheckArgumentInRange(value.Amperes, 10.23);
+                Value = (Value & MaximalCurrentMask) | (uint)(Convert.ToUInt16(value.Amperes * 100) & MaximalCurrentMask);
             }
         }
 
@@ -35,8 +35,8 @@ namespace Iot.Device.StUsb4500.Objects
             get => ElectricCurrent.FromAmperes(((ushort)(Value & OperatingCurrentMask) >> 10) / 100.0);
             set
             {
-                CheckArgumentInRange(value.Value, 10.23);
-                Value = (Value & OperatingCurrentMask) | (ushort)(Convert.ToUInt16(value * 100) << 10 & OperatingCurrentMask);
+                CheckArgumentInRange(value.Amperes, 10.23);
+                Value = (Value & OperatingCurrentMask) | (ushort)(Convert.ToUInt16(value.Amperes * 100) << 10 & OperatingCurrentMask);
             }
         }
 
