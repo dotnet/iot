@@ -338,11 +338,16 @@ namespace Iot.Device.UFire
                 0
              };
 
-            bytes = BitConverter.GetBytes(data);
-
-            ChangeRegister(register);
-            _device.Write(bytes);
-            DelayHelper.DelayMilliseconds(IseCommunicationDelay, allowThreadYield: true);
+            if (BitConverter.TryWriteBytes(bytes, data))
+            {
+                ChangeRegister(register);
+                _device.Write(bytes);
+                DelayHelper.DelayMilliseconds(IseCommunicationDelay, allowThreadYield: true);
+            }
+            else
+            {
+                throw new Exception("Not possible to write bytes");
+            }
         }
 
         /// <summary>
