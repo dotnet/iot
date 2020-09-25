@@ -85,7 +85,7 @@ namespace Iot.Device.Shtc3
         /// <param name="relativeHumidity">Humidity return by sensor</param>
         /// <param name="lowPower">"true" measured in low power mode, "false"(default) measured in normal power mode</param>
         /// <param name="clockStretching">"true" allow clock stretching, "false" (default) without clock stretching</param>
-        /// <returns></returns>
+        /// <returns>True if operation was successful</returns>
         public bool TryGetTemperatureAndHumidity(out Temperature temperature, out Ratio relativeHumidity, bool lowPower = false, bool clockStretching = false)
         {
             Register cmd = GetMeasurementCmd(lowPower, clockStretching);
