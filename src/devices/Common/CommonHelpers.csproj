@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace></RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="*.cs" />
+	<Compile Include="Iot/Device/Common/*.cs" />
+	<Compile Include="Iot/Device/Graphics/*.cs" />
+	<Compile Include="System/Device/*.cs" />
+	<Compile Include="System/Device/Gpio/*.cs" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+  </ItemGroup>
+
+</Project>
