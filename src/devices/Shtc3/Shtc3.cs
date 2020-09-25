@@ -207,7 +207,7 @@ namespace Iot.Device.Shtc3
                 return null;
             }
 
-            var id = BinaryPrimitives.ReadInt16BigEndian(readBuff.Slice(0, 2));
+            int id = BinaryPrimitives.ReadInt16BigEndian(readBuff.Slice(0, 2));
 
             // check the result match to the SHTC3 product code
             if (!ValidShtc3Id(id))
