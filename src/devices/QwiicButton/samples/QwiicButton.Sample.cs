@@ -18,6 +18,11 @@ namespace Iot.Device.QwiicButton.Samples
         {
             DisplayWelcomeMessage();
 
+            if (ShouldScanForI2cDevices())
+            {
+                FindI2cDevices.Run();
+            }
+
             var deviceBusId = GetDeviceBusId();
             var deviceAddress = GetDeviceAddress();
             var sampleNumber = GetSampleNumber();
@@ -43,6 +48,9 @@ namespace Iot.Device.QwiicButton.Samples
                         break;
                     case 6:
                         QueueUsage.Run(button);
+                        break;
+                    case 7:
+                        ChangeI2cAddress.Run(button);
                         break;
                     default:
                         Console.WriteLine("No sample chosen - exiting...");
@@ -85,6 +93,12 @@ namespace Iot.Device.QwiicButton.Samples
             Console.WriteLine("------------------------------------");
         }
 
+        private static bool ShouldScanForI2cDevices()
+        {
+            Console.WriteLine("Do you want to scan for I2C devices before setting I2C bus ID and device address? [Y/N]");
+            return Console.ReadLine()?.ToUpperInvariant() == "Y";
+        }
+
         private static int GetSampleNumber()
         {
             Console.WriteLine("Choose a sample by typing the corresponding number:");
@@ -95,6 +109,7 @@ namespace Iot.Device.QwiicButton.Samples
             Console.WriteLine("4. Light when button pressed");
             Console.WriteLine("5. ON/OFF button with light when ON");
             Console.WriteLine("6. Clicked queue and pressed queue usage");
+            Console.WriteLine("7. Change I2C address");
 
             string sampleNumber = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(sampleNumber))
