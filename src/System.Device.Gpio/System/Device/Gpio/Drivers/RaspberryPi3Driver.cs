@@ -30,14 +30,29 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         public RaspberryPi3Driver()
         {
-            if (pinNumber < 0 || pinNumber >= PinCount)
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                _internalDriver = new RaspberryPi3LinuxDriver();
-                RaspberryPi3LinuxDriver linuxDriver = _internalDriver as RaspberryPi3LinuxDriver;
+                BoardIdentification identification = BoardIdentification.LoadBoard();
+                RaspberryPi3LinuxDriver linuxDriver = null;
+                switch (identification.GetBoardModel())
+                {
+                    case BoardIdentification.Model.RaspberryPi3B:
+                    case BoardIdentification.Model.RaspberryPi3BPlus:
+                    case BoardIdentification.Model.RaspberryPi4:
+                        linuxDriver = new RaspberryPi3LinuxDriver();
+                        break;
+                    case BoardIdentification.Model.RaspberryPiComputeModule3:
+                        linuxDriver = new RaspberryPiCm3Driver();
+                        break;
+                    default:
+                        throw new PlatformNotSupportedException("Not a supported Raspberry Pi type");
+                }
+
                 _setSetRegister = (value) => linuxDriver.SetRegister = value;
                 _setClearRegister = (value) => linuxDriver.ClearRegister = value;
                 _getSetRegister = () => linuxDriver.SetRegister;
                 _getClearRegister = () => linuxDriver.ClearRegister;
+                _internalDriver = linuxDriver;
             }
             else
             {
@@ -46,7 +61,7 @@ namespace System.Device.Gpio.Drivers
                 _setClearRegister = (value) => throw new PlatformNotSupportedException();
                 _getSetRegister = () => throw new PlatformNotSupportedException();
                 _getClearRegister = () => throw new PlatformNotSupportedException();
-        }
+            }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -60,7 +75,7 @@ namespace System.Device.Gpio.Drivers
         }
 
         /// <inheritdoc/>
-        protected internal override int PinCount => 28;
+        protected internal override int PinCount => _internalDriver.PinCount;
 
         /// <inheritdoc/>
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => _internalDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
@@ -71,38 +86,7 @@ namespace System.Device.Gpio.Drivers
         /// <inheritdoc/>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
-            return pinNumber switch
-            {
-                3 => 2,
-                5 => 3,
-                7 => 4,
-                8 => 14,
-                10 => 15,
-                11 => 17,
-                12 => 18,
-                13 => 27,
-                15 => 22,
-                16 => 23,
-                18 => 24,
-                19 => 10,
-                21 => 9,
-                22 => 25,
-                23 => 11,
-                24 => 8,
-                26 => 7,
-                27 => 0,
-                28 => 1,
-                29 => 5,
-                31 => 6,
-                32 => 12,
-                33 => 13,
-                35 => 19,
-                36 => 16,
-                37 => 26,
-                38 => 20,
-                40 => 21,
-                _ => throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber))
-            };
+            return _internalDriver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
         }
 
         /// <inheritdoc/>
@@ -141,7 +125,7 @@ namespace System.Device.Gpio.Drivers
             get => _getSetRegister();
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => _setSetRegister(value);
-    }
+        }
 
         /// <summary>
         /// Allows directly setting the "Set pin low" register. Used for special applications only

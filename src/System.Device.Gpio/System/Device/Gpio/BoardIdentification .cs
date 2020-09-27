@@ -4,7 +4,10 @@ using System.IO;
 
 namespace System.Device.Gpio
 {
-    public class BoardIdentification
+    /// <summary>
+    /// Identification of Raspberry Pi board models
+    /// </summary>
+    internal class BoardIdentification
     {
         /// <summary>
         /// The Raspberry Pi model.
@@ -49,7 +52,7 @@ namespace System.Device.Gpio
             /// <summary>
             /// Pi 2 Model B.
             /// </summary>
-            RaspberryPiB2,
+            RaspberryPi2B,
 
             /// <summary>
             /// Pi Zero.
@@ -64,12 +67,12 @@ namespace System.Device.Gpio
             /// <summary>
             /// Pi 3 Model B.
             /// </summary>
-            RaspberryPiB3,
+            RaspberryPi3B,
 
             /// <summary>
             /// Pi 3 Model B+.
             /// </summary>
-            RaspberryPiB3Plus,
+            RaspberryPi3BPlus,
 
             /// <summary>
             /// Compute module 3.
@@ -81,6 +84,38 @@ namespace System.Device.Gpio
             /// </summary>
             RaspberryPi4,
         }
+
+        /// <summary>
+        /// The board processor.
+        /// </summary>
+        public enum Processor
+        {
+            /// <summary>
+            /// Processor is unknown.
+            /// </summary>
+            Unknown,
+
+            /// <summary>
+            /// Processor is a BCM2708.
+            /// </summary>
+            Bcm2708,
+
+            /// <summary>
+            /// Processor is a BCM2709.
+            /// </summary>
+            Bcm2709,
+
+            /// <summary>
+            /// Processor is a BCM2710.
+            /// </summary>
+            Bcm2710,
+
+            /// <summary>
+            /// Processor is a11.
+            /// </summary>
+            Bcm2711,
+        }
+
         #region Fields
 
         private readonly Dictionary<string, string> _settings;
@@ -132,7 +167,7 @@ namespace System.Device.Gpio
 
                 case 0x1040:
                 case 0x1041:
-                    return Model.RaspberryPiB2;
+                    return Model.RaspberryPi2B;
 
                 case 0x0092:
                 case 0x0093:
@@ -142,10 +177,10 @@ namespace System.Device.Gpio
                     return Model.RaspberryPiZeroW;
 
                 case 0x2082:
-                    return Model.RaspberryPiB3;
+                    return Model.RaspberryPi3B;
 
                 case 0x20D3:
-                    return Model.RaspberryPiB3Plus;
+                    return Model.RaspberryPi3BPlus;
 
                 case 0x20A0:
                     return Model.RaspberryPiComputeModule3;
@@ -240,10 +275,10 @@ namespace System.Device.Gpio
                 case Model.RaspberryPiZero:
                 case Model.RaspberryPiZeroW:
                     return Processor.Bcm2708;
-                case Model.RaspberryPiB2:
+                case Model.RaspberryPi2B:
                 // TBC: B3(+) should be a BCM2710 processor ...
-                case Model.RaspberryPiB3:
-                case Model.RaspberryPiB3Plus:
+                case Model.RaspberryPi3B:
+                case Model.RaspberryPi3BPlus:
                 case Model.RaspberryPiComputeModule3:
                     return Processor.Bcm2709;
                 case Model.RaspberryPi4:
@@ -263,9 +298,9 @@ namespace System.Device.Gpio
         {
             try
             {
-                const string FilePath = "/proc/cpuinfo";
+                const string filePath = "/proc/cpuinfo";
 
-                var cpuInfo = File.ReadAllLines(FilePath);
+                var cpuInfo = File.ReadAllLines(filePath);
                 var settings = new Dictionary<string, string>();
                 var suffix = string.Empty;
 
