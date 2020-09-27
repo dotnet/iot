@@ -61,7 +61,7 @@ Then reboot:
 sudo reboot
 ```
 
-This will enable SP0 where those are the pins which will be seleted, only Software Chip Select is activated with the default pins:
+This will enable SPI0 where those are the pins which will be selected, only Software Chip Select is activated with the default pins:
 
 | SPI Function | Header Pin | GPIO # | Pin Name |
 | --- | --- | --- | --- |
