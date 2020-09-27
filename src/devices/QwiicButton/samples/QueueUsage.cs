@@ -8,13 +8,16 @@ using System.Threading;
 namespace Iot.Device.QwiicButton.Samples
 {
     /// <summary>
-    /// Shows how to use the FIFO Queue on the Qwiic Button.
+    /// Shows how to use the clicked and pressed FIFO queues on the Qwiic Button.
     /// </summary>
     internal class QueueUsage
     {
         public static void Run(QwiicButton button)
         {
-            Console.WriteLine("FIFO queue sample started - press ESC to stop");
+            Console.WriteLine("FIFO queues sample started");
+            Console.WriteLine("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+            Console.WriteLine("BEWARE: If your button has firmware version 258 (1.2) or earlier, you cannot pop values from the queues due to a bug.");
+            Console.WriteLine("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
             do
             {
@@ -48,14 +51,16 @@ namespace Iot.Device.QwiicButton.Samples
                 {
                     // If the character is p or P, then pop a value off of the pressed queue
                     button.PopPressedQueue();
-                    Console.WriteLine("Popped value from pressed queue!");
+                    Console.WriteLine();
+                    Console.WriteLine("Popped value from pressed queue! Press Enter to continue, ESC to exit.");
                 }
 
                 if (consoleKeyInfo.KeyChar.ToString().ToLowerInvariant() == "c")
                 {
                     // If the character is c or C, then pop a value off of the pressed Queue
                     button.PopClickedQueue();
-                    Console.WriteLine("Popped value from clicked queue!");
+                    Console.WriteLine();
+                    Console.WriteLine("Popped value from clicked queue! Press Enter to continue, ESC to exit.");
                 }
 
                 Thread.Sleep(20); // Let's not hammer too hard on the I2C bus
