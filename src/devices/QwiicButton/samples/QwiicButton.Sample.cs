@@ -61,7 +61,7 @@ namespace Iot.Device.QwiicButton.Samples
 
         private static int GetDeviceBusId()
         {
-            Console.WriteLine("Enter Qwiic Button I2C bus ID: [Press Enter for default = 1]");
+            Console.WriteLine("Enter I2C bus ID that the Qwiic Button is attached to: [Press Enter for default = 1]");
             string deviceBusId = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(deviceBusId))
             {
@@ -75,7 +75,7 @@ namespace Iot.Device.QwiicButton.Samples
 
         private static byte GetDeviceAddress()
         {
-            Console.WriteLine("Enter Qwiic Button I2C address: [Press Enter for default = 111]");
+            Console.WriteLine("Enter Qwiic Button I2C address as decimal number: [Press Enter for default = 111]");
             string deviceAddress = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(deviceAddress))
             {

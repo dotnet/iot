@@ -13,8 +13,14 @@ namespace Iot.Device.QwiicButton.Samples
     {
         public static void Run()
         {
-            Console.WriteLine("Enter I2C bus ID: [Press Enter for default = 1]");
-            if (!Int32.TryParse(Console.ReadLine(), out int i2cBusId))
+            Console.WriteLine("Enter I2C bus ID to scan: [Press Enter for default = 1]");
+            var busIdAsString = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(busIdAsString))
+            {
+                busIdAsString = "1";
+            }
+
+            if (!Int32.TryParse(busIdAsString, out int i2cBusId))
             {
                 Console.WriteLine("You must enter an integer - exiting...");
                 return;
@@ -27,8 +33,10 @@ namespace Iot.Device.QwiicButton.Samples
             {
                 try
                 {
-                    using (new QwiicButton(i2cBusId, (byte)address))
+                    using (var button = new QwiicButton(i2cBusId, (byte)address))
                     {
+                        // Try to read device ID - fails if no device on address
+                        button.GetDeviceId();
                     }
 
                     devicesFoundCount++;
@@ -40,10 +48,14 @@ namespace Iot.Device.QwiicButton.Samples
                 }
             }
 
+            Console.WriteLine("Scan finished");
+
             if (devicesFoundCount == 0)
             {
                 Console.WriteLine("Could not detect any attached I2C devices!");
             }
+
+            Console.WriteLine();
         }
     }
 }
