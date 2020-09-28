@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using Iot.Device.Usb.Helper;
 using UnitsNet;
-using UnitsNet.Units;
 
 namespace Iot.Device.Usb.Objects
 {
@@ -24,7 +24,7 @@ namespace Iot.Device.Usb.Objects
             get => Power.FromWatts((ushort)(Value & OperatingPowerMask) / 4.0);
             set
             {
-                CheckArgumentInRange(value.Watts, 255.75);
+                value.Watts.CheckArgumentInRange(255.75);
                 Value = (Value & ~OperatingPowerMask) | (Convert.ToUInt32(value.Watts * 4) & OperatingPowerMask);
             }
         }
@@ -36,7 +36,7 @@ namespace Iot.Device.Usb.Objects
             get => ElectricPotentialDc.FromVoltsDc((ushort)((Value & MinVoltageMask) >> 10) / 20.0);
             set
             {
-                CheckArgumentInRange(value.VoltsDc, 51.15);
+                value.VoltsDc.CheckArgumentInRange(51.15);
                 Value = (Value & ~MinVoltageMask) | (Convert.ToUInt32(value.VoltsDc * 20) << 10 & MinVoltageMask);
             }
         }
@@ -48,7 +48,7 @@ namespace Iot.Device.Usb.Objects
             get => ElectricPotentialDc.FromVoltsDc((ushort)((Value & MaxVoltageMask) >> 20) / 20.0);
             set
             {
-                CheckArgumentInRange(value.VoltsDc, 51.15);
+                value.VoltsDc.CheckArgumentInRange(51.15);
                 Value = (Value & ~MaxVoltageMask) | (Convert.ToUInt32(value.VoltsDc * 20) << 20 & MaxVoltageMask);
             }
         }

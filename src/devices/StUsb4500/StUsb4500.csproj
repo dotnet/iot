@@ -12,9 +12,9 @@
     <Compile Include="Enumerations\StUsb4500Register.cs" />
     <Compile Include="Enumerations\UsbPdControlMessageType.cs" />
     <Compile Include="Enumerations\UsbPdDataMessageType.cs" />
+    <Compile Include="Helper\UsbPdObjectHelper.cs" />
     <Compile Include="Objects\BatteryObject.cs" />
     <Compile Include="Objects\FixedSupplyObject.cs" />
-    <Compile Include="Objects\ObjectBase.cs" />
     <Compile Include="Objects\PowerDeliveryObject.cs" />
     <Compile Include="Objects\RequestDataObject.cs" />
     <Compile Include="Objects\UsbPdMessageHeader.cs" />

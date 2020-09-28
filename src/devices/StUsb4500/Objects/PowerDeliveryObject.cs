@@ -10,8 +10,11 @@ namespace Iot.Device.Usb.Objects
     /// <summary>
     /// Base class for all the different power delivery objects (=PDO).
     /// </summary>
-    public abstract class PowerDeliveryObject : ObjectBase
+    public abstract class PowerDeliveryObject
     {
+        /// <summary>Gets or sets the value which encodes all properties of this PDO.</summary>
+        public uint Value { get; protected set; }
+
         /// <summary>Gets the power of this PDO.</summary>
         public abstract Power Power { get; }
 

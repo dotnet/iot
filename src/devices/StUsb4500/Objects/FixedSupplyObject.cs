@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using Iot.Device.Usb.Helper;
 using UnitsNet;
 
 namespace Iot.Device.Usb.Objects
@@ -22,7 +23,7 @@ namespace Iot.Device.Usb.Objects
             get => ElectricCurrent.FromAmperes((ushort)(Value & OperationalCurrentMask) / 100.0);
             set
             {
-                CheckArgumentInRange(value.Amperes, 10.23);
+                value.Amperes.CheckArgumentInRange(10.23);
                 Value = (Value & ~OperationalCurrentMask) | (Convert.ToUInt32(value.Amperes * 100) & OperationalCurrentMask);
             }
         }
@@ -34,7 +35,7 @@ namespace Iot.Device.Usb.Objects
             get => ElectricPotentialDc.FromVoltsDc((ushort)((Value & VoltageMask) >> 10) / 20.0);
             set
             {
-                CheckArgumentInRange(value.VoltsDc, 51.15);
+                value.VoltsDc.CheckArgumentInRange(51.15);
                 Value = (Value & ~VoltageMask) | (Convert.ToUInt32(value.VoltsDc * 20) << 10 & VoltageMask);
             }
         }
@@ -42,36 +43,36 @@ namespace Iot.Device.Usb.Objects
         /// <summary>Gets or sets a value indicating whether the PDO supports dual role data.</summary>
         public bool DualRoleData
         {
-            get => GetBit(25);
-            set => UpdateBit(25, value);
+            get => Value.GetBit(25);
+            set => Value = Value.UpdateBit(25, value);
         }
 
         /// <summary>Gets or sets a value indicating whether this PDO is USB communications capable.</summary>
         public bool UsbCommunicationsCapable
         {
-            get => GetBit(26);
-            set => UpdateBit(26, value);
+            get => Value.GetBit(26);
+            set => Value = Value.UpdateBit(26, value);
         }
 
         /// <summary>Gets or sets a value indicating whether this PDO has unconstrained power.</summary>
         public bool UnconstrainedPower
         {
-            get => GetBit(27);
-            set => UpdateBit(27, value);
+            get => Value.GetBit(27);
+            set => Value = Value.UpdateBit(27, value);
         }
 
         /// <summary>Gets or sets a value indicating whether this PDO has a higher capability.</summary>
         public bool HigherCapability
         {
-            get => GetBit(28);
-            set => UpdateBit(28, value);
+            get => Value.GetBit(28);
+            set => Value = Value.UpdateBit(28, value);
         }
 
         /// <summary>Gets or sets a value indicating whether the PDO supports dual role power.</summary>
         public bool DualRolePower
         {
-            get => GetBit(29);
-            set => UpdateBit(29, value);
+            get => Value.GetBit(29);
+            set => Value = Value.UpdateBit(29, value);
         }
 
         /// <summary>Gets the power of this PDO.</summary>

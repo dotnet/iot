@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using Iot.Device.Usb.Helper;
 using UnitsNet;
 
 namespace Iot.Device.Usb.Objects
@@ -10,11 +11,14 @@ namespace Iot.Device.Usb.Objects
     /// <summary>
     /// Representation of a request data object (=RDO).
     /// </summary>
-    public class RequestDataObject : ObjectBase
+    public class RequestDataObject
     {
         private const ushort MaximalCurrentMask = 0b0011_1111_1111;
         private const uint OperatingCurrentMask = 0b1111_1111_1100_0000_0000;
         private const byte ObjectPositionMask = 0b0111;
+
+        /// <summary>Gets the value which encodes all properties of this object.</summary>
+        public uint Value { get; private set; }
 
         /// <summary>Gets or sets the maximal current.</summary>
         /// <remarks>This is stored with the factor 100 as a 10-bit value (range 0 - 1023) => 0...10.23A.</remarks>
@@ -23,7 +27,7 @@ namespace Iot.Device.Usb.Objects
             get => ElectricCurrent.FromAmperes((ushort)(Value & MaximalCurrentMask) / 100.0);
             set
             {
-                CheckArgumentInRange(value.Amperes, 10.23);
+                value.Amperes.CheckArgumentInRange(10.23);
                 Value = (Value & MaximalCurrentMask) | (uint)(Convert.ToUInt16(value.Amperes * 100) & MaximalCurrentMask);
             }
         }
@@ -35,7 +39,7 @@ namespace Iot.Device.Usb.Objects
             get => ElectricCurrent.FromAmperes(((ushort)(Value & OperatingCurrentMask) >> 10) / 100.0);
             set
             {
-                CheckArgumentInRange(value.Amperes, 10.23);
+                value.Amperes.CheckArgumentInRange(10.23);
                 Value = (Value & OperatingCurrentMask) | (ushort)(Convert.ToUInt16(value.Amperes * 100) << 10 & OperatingCurrentMask);
             }
         }
@@ -43,36 +47,36 @@ namespace Iot.Device.Usb.Objects
         /// <summary>Gets or sets a value indicating whether unchunked extended messages are supported.</summary>
         public bool UnchunkedExtendedMessagesSupported
         {
-            get => GetBit(23);
-            set => UpdateBit(23, value);
+            get => Value.GetBit(23);
+            set => Value = Value.UpdateBit(23, value);
         }
 
         /// <summary>Gets or sets a value indicating whether the USB is not suspended.</summary>
         public bool NoUsbSuspend
         {
-            get => GetBit(24);
-            set => UpdateBit(24, value);
+            get => Value.GetBit(24);
+            set => Value = Value.UpdateBit(24, value);
         }
 
         /// <summary>Gets or sets a value indicating whether the port is capable of USB communications.</summary>
         public bool UsbCommunicationsCapable
         {
-            get => GetBit(25);
-            set => UpdateBit(25, value);
+            get => Value.GetBit(25);
+            set => Value = Value.UpdateBit(25, value);
         }
 
         /// <summary>Gets or sets a value indicating whether there is a capability mismatch.</summary>
         public bool CapabilityMismatch
         {
-            get => GetBit(26);
-            set => UpdateBit(26, value);
+            get => Value.GetBit(26);
+            set => Value = Value.UpdateBit(26, value);
         }
 
         /// <summary>Gets or sets a value indicating whether the give back flag is set.</summary>
         public bool GiveBackFlag
         {
-            get => GetBit(27);
-            set => UpdateBit(27, value);
+            get => Value.GetBit(27);
+            set => Value = Value.UpdateBit(27, value);
         }
 
         /// <summary>Gets or sets the object position.</summary>
@@ -82,7 +86,7 @@ namespace Iot.Device.Usb.Objects
             get => (byte)(Value >> 28 & ObjectPositionMask);
             set
             {
-                CheckArgumentInRange(value, 7);
+                value.CheckArgumentInRange(7);
                 Value = (Value & ObjectPositionMask) | (uint)((value & ObjectPositionMask) << 28);
             }
         }

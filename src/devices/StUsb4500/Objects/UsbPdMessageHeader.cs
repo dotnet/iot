@@ -4,18 +4,22 @@
 
 using System;
 using Iot.Device.Usb.Enumerations;
+using Iot.Device.Usb.Helper;
 
 namespace Iot.Device.Usb.Objects
 {
     /// <summary>
     /// Represents the header of a USB PD message.
     /// </summary>
-    internal class UsbPdMessageHeader : ObjectBase
+    internal class UsbPdMessageHeader
     {
         private const uint MessageTypeMask = 0b0001_1111;
         private const uint SpecificationRevisionMask = 0b1100_0000;
         private const uint MessageIdMask = 0b1110_0000_0000;
         private const uint NumberOfDataObjectsMask = 0b0111_0000_0000_0000;
+
+        /// <summary>Gets the value which encodes all properties of this message header.</summary>
+        public uint Value { get; private set; }
 
         /// <summary>Gets or sets the type of the message, if this is a control message (NumberOfDataObjects = 0).</summary>
         /// <remarks>This is stored as a 5-bit value (range 0 - 31).</remarks>
@@ -25,7 +29,7 @@ namespace Iot.Device.Usb.Objects
             set
             {
                 byte type = (byte)value;
-                CheckArgumentInRange(type, 31);
+                type.CheckArgumentInRange(31);
                 Value = (Value & ~MessageTypeMask) | (type & MessageTypeMask);
             }
         }
@@ -38,7 +42,7 @@ namespace Iot.Device.Usb.Objects
             set
             {
                 byte type = (byte)value;
-                CheckArgumentInRange(type, 31);
+                type.CheckArgumentInRange(31);
                 Value = (Value & ~MessageTypeMask) | (type & MessageTypeMask);
             }
         }
@@ -46,8 +50,8 @@ namespace Iot.Device.Usb.Objects
         /// <summary>Gets or sets a value indicating whether the port is in a data role.</summary>
         public bool PortDataRole
         {
-            get => GetBit(5);
-            set => UpdateBit(5, value);
+            get => Value.GetBit(5);
+            set => Value = Value.UpdateBit(5, value);
         }
 
         /// <summary>Gets or sets the specification revision.</summary>
@@ -57,7 +61,7 @@ namespace Iot.Device.Usb.Objects
             get => new Version((int)(Value & SpecificationRevisionMask) >> 6, 0);
             set
             {
-                CheckArgumentInRange(value.Major, 3);
+                value.Major.CheckArgumentInRange(3);
                 Value = (Value & ~SpecificationRevisionMask) | (uint)(value.Major << 6 & SpecificationRevisionMask);
             }
         }
@@ -65,8 +69,8 @@ namespace Iot.Device.Usb.Objects
         /// <summary>Gets or sets a value indicating whether the port is in power role / cable plugged.</summary>
         public bool PortPowerRoleCablePlug
         {
-            get => GetBit(8);
-            set => UpdateBit(8, value);
+            get => Value.GetBit(8);
+            set => Value = Value.UpdateBit(8, value);
         }
 
         /// <summary>Gets or sets the Message Id.</summary>
@@ -76,7 +80,7 @@ namespace Iot.Device.Usb.Objects
             get => (byte)((Value & MessageIdMask) >> 9);
             set
             {
-                CheckArgumentInRange(value, 7);
+                value.CheckArgumentInRange(7);
                 Value = (Value & ~MessageIdMask) | (uint)(value << 9 & MessageIdMask);
             }
         }
@@ -88,7 +92,7 @@ namespace Iot.Device.Usb.Objects
             get => (byte)((Value & NumberOfDataObjectsMask) >> 12);
             set
             {
-                CheckArgumentInRange(value, 7);
+                value.CheckArgumentInRange(7);
                 Value = (Value & ~NumberOfDataObjectsMask) | (uint)(value << 12 & NumberOfDataObjectsMask);
             }
         }
