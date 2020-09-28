@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.StUsb4500
+namespace Iot.Device.Usb
 {
     internal static class StUsb4500Constants
     {

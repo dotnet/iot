@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.StUsb4500.Enumerations
+namespace Iot.Device.Usb.Enumerations
 {
     /// <summary>
     /// Register of STUSB4500.

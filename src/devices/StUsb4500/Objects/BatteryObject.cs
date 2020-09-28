@@ -6,7 +6,7 @@ using System;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace Iot.Device.StUsb4500.Objects
+namespace Iot.Device.Usb.Objects
 {
     /// <summary>
     /// PDO of a battery sources.

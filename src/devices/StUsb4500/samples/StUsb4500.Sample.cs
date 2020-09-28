@@ -9,11 +9,11 @@ using System.Device.I2c;
 using System.Device.Spi;
 using System.Linq;
 using System.Threading;
-using Iot.Device.StUsb4500.Enumerations;
-using Iot.Device.StUsb4500.Objects;
+using Iot.Device.Usb.Enumerations;
+using Iot.Device.Usb.Objects;
 using UnitsNet;
 
-namespace Iot.Device.StUsb4500.Samples
+namespace Iot.Device.Usb.Samples
 {
     /// <summary>Samples for StUsb4500.</summary>
     public class Program
@@ -24,7 +24,7 @@ namespace Iot.Device.StUsb4500.Samples
             var settings = new I2cConnectionSettings(2, StUsb4500.DefaultI2cAddress);
             var stUsb = new StUsb4500(I2cDevice.Create(settings));
             Console.WriteLine($"{nameof(stUsb.DeviceId)}: 0x{stUsb.DeviceId:x}");
-            CableConnection connection = stUsb.CableConnection;
+            UsbCCableConnection connection = stUsb.CableConnection;
             Console.WriteLine($"{nameof(stUsb.CableConnection)}: {connection}{Environment.NewLine}");
 
             PrintLocalPdo(stUsb);
@@ -36,7 +36,7 @@ namespace Iot.Device.StUsb4500.Samples
                 UpdateNvmData(stUsb);
             }
 
-            if (connection == CableConnection.Disconnected)
+            if (connection == UsbCCableConnection.Disconnected)
             {
                 return;
             }

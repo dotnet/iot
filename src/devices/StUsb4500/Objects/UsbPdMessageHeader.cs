@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using Iot.Device.StUsb4500.Enumerations;
+using Iot.Device.Usb.Enumerations;
 
-namespace Iot.Device.StUsb4500.Objects
+namespace Iot.Device.Usb.Objects
 {
     /// <summary>
     /// Represents the header of a USB PD message.

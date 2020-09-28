@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.StUsb4500.Enumerations
+namespace Iot.Device.Usb.Enumerations
 {
     /// <summary>
     /// Cable connection status of the USB-C port.
     /// </summary>
-    public enum CableConnection
+    public enum UsbCCableConnection
     {
         /// <summary>No cable is connected.</summary>
         Disconnected = 0,

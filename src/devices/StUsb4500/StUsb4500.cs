@@ -7,12 +7,11 @@ using System.Device.I2c;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using Iot.Device.StUsb4500.Enumerations;
-using Iot.Device.StUsb4500.Objects;
+using Iot.Device.Usb.Enumerations;
+using Iot.Device.Usb.Objects;
 using UnitsNet;
-using UnitsNet.Units;
 
-namespace Iot.Device.StUsb4500
+namespace Iot.Device.Usb
 {
     /// <summary>USB PD sink controller STUSB4500.</summary>
     /// <remarks>This is based on code from the official STUSB4500 repo (https://github.com/usb-c/STUSB4500/).</remarks>
@@ -27,7 +26,7 @@ namespace Iot.Device.StUsb4500
         public byte DeviceId => ReadDeviceId();
 
         /// <summary>Gets the cable connection state.</summary>
-        public CableConnection CableConnection => ReadCableConnection();
+        public UsbCCableConnection CableConnection => ReadCableConnection();
 
         /// <summary>Gets the power delivery objects from the sink.</summary>
         public PowerDeliveryObject[] SinkPowerDeliveryObjects { get => ReadSinkPdo(); set => WriteSinkPdo(value); }
@@ -92,18 +91,18 @@ namespace Iot.Device.StUsb4500
 
         /// <summary>Reads the cable connection.</summary>
         /// <returns>Cable status</returns>
-        private CableConnection ReadCableConnection()
+        private UsbCCableConnection ReadCableConnection()
         {
             _i2cDevice.WriteByte((byte)StUsb4500Register.PORT_STATUS_1);
             byte status = _i2cDevice.ReadByte();
             if ((status & StUsb4500Constants.STUSBMASK_ATTACHED_STATUS) != StUsb4500Constants.VALUE_ATTACHED)
             {
-                return CableConnection.Disconnected;
+                return UsbCCableConnection.Disconnected;
             }
 
             _i2cDevice.WriteByte((byte)StUsb4500Register.TYPEC_STATUS);
             status = _i2cDevice.ReadByte();
-            return (status & StUsb4500Constants.MASK_REVERSE) == StUsb4500Constants.VALUE_NOT_ATTACHED ? CableConnection.CC1 : CableConnection.CC2;
+            return (status & StUsb4500Constants.MASK_REVERSE) == StUsb4500Constants.VALUE_NOT_ATTACHED ? UsbCCableConnection.CC1 : UsbCCableConnection.CC2;
         }
 
         /// <summary>Reads the sink's PDOs.</summary>

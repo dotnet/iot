@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
-    <Compile Include="Enumerations\CableConnection.cs" />
+    <Compile Include="Enumerations\UsbCCableConnection.cs" />
     <Compile Include="Enumerations\StUsb4500Register.cs" />
     <Compile Include="Enumerations\UsbPdControlMessageType.cs" />
     <Compile Include="Enumerations\UsbPdDataMessageType.cs" />

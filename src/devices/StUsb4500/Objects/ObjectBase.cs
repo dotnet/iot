@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Iot.Device.StUsb4500.Objects
+namespace Iot.Device.Usb.Objects
 {
     /// <summary>
     /// Base class for shared object logic.
