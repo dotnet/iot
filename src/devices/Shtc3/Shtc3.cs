@@ -23,7 +23,7 @@ namespace Iot.Device.Shtc3
         /// <summary>
         /// Default I2C address
         /// </summary>
-        public const int I2cAddress = 0x70;
+        public const int DefaultI2cAddress = 0x70;
 
         private I2cDevice _i2cDevice;
         private int? _id = null;
@@ -34,6 +34,11 @@ namespace Iot.Device.Shtc3
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Shtc3(I2cDevice i2cDevice)
         {
+            if (i2cDevice == null)
+            {
+                throw new ArgumentNullException(nameof(i2cDevice));
+            }
+
             _i2cDevice = i2cDevice;
 
             Wakeup();
@@ -53,29 +58,6 @@ namespace Iot.Device.Shtc3
             {
                 return _status;
             }
-            set
-            {
-                if (value == _status)
-                {
-                    return;
-                }
-
-                switch (value)
-                {
-                    case Status.Idle:
-                        // Change to idle awake sensor
-                        Wakeup();
-                        break;
-                    case Status.Sleep:
-                        // Change to sleep making sensor in sleeping mode
-                        Sleep();
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                _status = value;
-            }
         }
 
         /// <summary>
@@ -88,6 +70,11 @@ namespace Iot.Device.Shtc3
         /// <returns>True if operation was successful</returns>
         public bool TryGetTemperatureAndHumidity(out Temperature temperature, out Ratio relativeHumidity, bool lowPower = false, bool clockStretching = false)
         {
+            if (Status == Status.Sleep)
+            {
+                Wakeup();
+            }
+
             Register cmd = GetMeasurementCmd(lowPower, clockStretching);
 
             if (!TryReadSensorData(cmd, out var st, out var srh))
@@ -132,34 +119,40 @@ namespace Iot.Device.Shtc3
 
         private static Register GetMeasurementCmd(bool lowPower, bool clockStretching)
         {
-            Register mea = Register.SHTC3_MEAS_T_RH_POLLING_NPM;
             if (lowPower)
             {
                 if (clockStretching)
                 {
-                    mea = Register.SHTC3_MEAS_T_RH_CLOCKSTR_LPM;
+                    return Register.SHTC3_MEAS_T_RH_CLOCKSTR_LPM;
                 }
                 else
                 {
-                    mea = Register.SHTC3_MEAS_T_RH_POLLING_LPM;
+                    return Register.SHTC3_MEAS_T_RH_POLLING_LPM;
                 }
             }
             else
             {
                 if (clockStretching)
                 {
-                    mea = Register.SHTC3_MEAS_T_RH_CLOCKSTR_NPM;
+                    return Register.SHTC3_MEAS_T_RH_CLOCKSTR_NPM;
+                }
+                else
+                {
+                    return Register.SHTC3_MEAS_T_RH_POLLING_NPM;
                 }
             }
-
-            return mea;
         }
 
         /// <summary>
         /// SHTC3 Sleep
         /// </summary>
-        private void Sleep()
+        public void Sleep()
         {
+            if (Status == Status.Sleep)
+            {
+                return;
+            }
+
             Write(Register.SHTC3_SLEEP);
         }
 
@@ -176,6 +169,11 @@ namespace Iot.Device.Shtc3
         /// </summary>
         public void Reset()
         {
+            if (Status == Status.Sleep)
+            {
+                Wakeup();
+            }
+
             Write(Register.SHTC3_RESET);
         }
 
@@ -195,6 +193,11 @@ namespace Iot.Device.Shtc3
         /// </summary>
         private int? ReadId()
         {
+            if (Status == Status.Sleep)
+            {
+                Wakeup();
+            }
+
             Write(Register.SHTC3_ID);
 
             Span<byte> readBuff = stackalloc byte[3];

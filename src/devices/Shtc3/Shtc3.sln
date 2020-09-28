@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shtc3.Samples", "samples\Sh
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Device.Gpio", "..\..\System.Device.Gpio\System.Device.Gpio.csproj", "{A81F4110-9D79-426B-BFD5-77C1CFADD15A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\Iot\Device\Common\CommonHelpers.csproj", "{DBAA1AE9-49B0-4148-A7FB-6F9583061FEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{9089BDBB-35CE-4CD6-BD79-484177C5B153}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,10 +31,10 @@ Global
 		{A81F4110-9D79-426B-BFD5-77C1CFADD15A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A81F4110-9D79-426B-BFD5-77C1CFADD15A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A81F4110-9D79-426B-BFD5-77C1CFADD15A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DBAA1AE9-49B0-4148-A7FB-6F9583061FEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DBAA1AE9-49B0-4148-A7FB-6F9583061FEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DBAA1AE9-49B0-4148-A7FB-6F9583061FEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DBAA1AE9-49B0-4148-A7FB-6F9583061FEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9089BDBB-35CE-4CD6-BD79-484177C5B153}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9089BDBB-35CE-4CD6-BD79-484177C5B153}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9089BDBB-35CE-4CD6-BD79-484177C5B153}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9089BDBB-35CE-4CD6-BD79-484177C5B153}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

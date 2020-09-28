@@ -13,7 +13,7 @@
 
 ## Code
 ```C#
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Shtc3.I2cAddress);
+I2cConnectionSettings settings = new I2cConnectionSettings(1, Shtc3.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 
 using (Shtc3 sensor = new Shtc3(device))
@@ -22,8 +22,6 @@ using (Shtc3 sensor = new Shtc3(device))
 
     while (true)
     {
-        sensor.Status = Status.Idle;
-
             if (sensor.TryGetTemperatureAndHumidity(out var temperature, out var relativeHumidity))
             {
                 Console.WriteLine($"Temperature: {temperature.DegreesCelsius:0.#}\u00B0C");
@@ -34,7 +32,7 @@ using (Shtc3 sensor = new Shtc3(device))
                 Console.WriteLine();
             }
 
-        sensor.Status = Status.Sleep;
+        sensor.Sleep();
 
         Thread.Sleep(1000);
     }

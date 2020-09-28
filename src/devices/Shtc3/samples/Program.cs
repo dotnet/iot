@@ -14,7 +14,7 @@ namespace Iot.Device.Shtc3.Samples
     {
         private static void Main(string[] args)
         {
-            I2cConnectionSettings settings = new I2cConnectionSettings(1, Iot.Device.Shtc3.Shtc3.I2cAddress);
+            I2cConnectionSettings settings = new I2cConnectionSettings(1, Iot.Device.Shtc3.Shtc3.DefaultI2cAddress);
             I2cDevice device = I2cDevice.Create(settings);
 
             using (Shtc3 sensor = new Shtc3(device))
@@ -22,9 +22,6 @@ namespace Iot.Device.Shtc3.Samples
                 Console.WriteLine($"Sensor Id: {sensor.Id}");
                 while (true)
                 {
-                    // Set sensor ready to use because while apply sleep mode bellow
-                    sensor.Status = Status.Idle;
-
                     // Try sensor measurement in normal power mode
                     if (sensor.TryGetTemperatureAndHumidity(out var temperature, out var relativeHumidity))
                     {
@@ -40,7 +37,7 @@ namespace Iot.Device.Shtc3.Samples
                     }
 
                     // Set sensor in sleep mode
-                    sensor.Status = Status.Sleep;
+                    sensor.Sleep();
 
                     Console.WriteLine();
                     Thread.Sleep(1000);
@@ -58,5 +55,4 @@ namespace Iot.Device.Shtc3.Samples
         }
 
     }
-
 }
