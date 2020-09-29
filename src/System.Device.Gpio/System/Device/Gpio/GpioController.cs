@@ -387,9 +387,8 @@ namespace System.Device.Gpio
             }
             catch (PlatformNotSupportedException)
             {
+                return UnixDriver.Create();
             }
-
-            return UnixDriver.Create();
         }
 
         /// <summary>
