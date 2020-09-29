@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amg88xx", "Amg88xx.csproj",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{03107CFF-FE00-467D-9B38-C00F7E12A7FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amg88xx_Not_Required.Tests", "tests\Amg88xx_Not_Required.Tests.csproj", "{2B0F5D91-F38B-427D-84DB-5656D9661E1C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amg88xx.Tests", "tests\Amg88xx.Tests.csproj", "{2B0F5D91-F38B-427D-84DB-5656D9661E1C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{6A4DE7B1-03F3-4EE0-BF73-A0BAEF88BA2B}"
 EndProject

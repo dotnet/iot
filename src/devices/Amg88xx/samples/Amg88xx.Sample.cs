@@ -5,6 +5,7 @@
 using System;
 using System.Device.I2c;
 using System.Threading;
+using UnitsNet;
 
 namespace Iot.Device.Amg88xx.Samples
 {
@@ -18,7 +19,30 @@ namespace Iot.Device.Amg88xx.Samples
         /// </summary>
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello Amg88xx Sample!");
+            const int I2cBus = 1;
+            I2cConnectionSettings i2cSettings = new I2cConnectionSettings(I2cBus, Amg88xx.AlternativeDeviceAddress);
+            I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
+            Amg88xx amg88xx = new Amg88xx(i2cDevice);
+
+            while (true)
+            {
+                Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {amg88xx.GetSensorTemperature()}");
+
+                var image = new Temperature[Amg88xx.Columns, Amg88xx.Rows];
+                // var image = new int[Amg88xx.Columns, Amg88xx.Rows];
+                image = amg88xx.GetImage();
+                for (int r = 0; r < Amg88xx.Rows; r++)
+                {
+                    Console.WriteLine();
+                    for (int c = 0; c < Amg88xx.Columns; c++)
+                    {
+                        Console.Write($"{((int)image[c, r].DegreesCelsius).ToString().PadRight(10)}");
+                    }
+                }
+
+                Console.WriteLine();
+                Thread.Sleep(1000);
+            }
         }
     }
 }
