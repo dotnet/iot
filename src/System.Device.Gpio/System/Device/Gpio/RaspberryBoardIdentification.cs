@@ -7,7 +7,7 @@ namespace System.Device.Gpio
     /// <summary>
     /// Identification of Raspberry Pi board models
     /// </summary>
-    internal class BoardIdentification
+    internal class RaspberryBoardIdentification
     {
         /// <summary>
         /// The Raspberry Pi model.
@@ -120,7 +120,7 @@ namespace System.Device.Gpio
 
         private readonly Dictionary<string, string> _settings;
 
-        private BoardIdentification(Dictionary<string, string> settings)
+        private RaspberryBoardIdentification(Dictionary<string, string> settings)
         {
             _settings = settings;
         }
@@ -239,7 +239,7 @@ namespace System.Device.Gpio
                     return serial;
                 }
 
-                return null;
+                return string.Empty;
             }
         }
 
@@ -292,9 +292,9 @@ namespace System.Device.Gpio
         /// Detect the board CPU information from /proc/cpuinfo
         /// </summary>
         /// <returns>
-        /// The <see cref="BoardIdentification"/>.
+        /// The <see cref="RaspberryBoardIdentification"/>.
         /// </returns>
-        internal static BoardIdentification LoadBoard()
+        internal static RaspberryBoardIdentification LoadBoard()
         {
             try
             {
@@ -325,11 +325,11 @@ namespace System.Device.Gpio
                     }
                 }
 
-                return new BoardIdentification(settings);
+                return new RaspberryBoardIdentification(settings);
             }
             catch
             {
-                return new BoardIdentification(new Dictionary<string, string>());
+                return new RaspberryBoardIdentification(new Dictionary<string, string>());
             }
         }
         #endregion

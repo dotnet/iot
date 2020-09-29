@@ -32,16 +32,16 @@ namespace System.Device.Gpio.Drivers
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                BoardIdentification identification = BoardIdentification.LoadBoard();
+                RaspberryBoardIdentification identification = RaspberryBoardIdentification.LoadBoard();
                 RaspberryPi3LinuxDriver linuxDriver = null;
                 switch (identification.GetBoardModel())
                 {
-                    case BoardIdentification.Model.RaspberryPi3B:
-                    case BoardIdentification.Model.RaspberryPi3BPlus:
-                    case BoardIdentification.Model.RaspberryPi4:
+                    case RaspberryBoardIdentification.Model.RaspberryPi3B:
+                    case RaspberryBoardIdentification.Model.RaspberryPi3BPlus:
+                    case RaspberryBoardIdentification.Model.RaspberryPi4:
                         linuxDriver = new RaspberryPi3LinuxDriver();
                         break;
-                    case BoardIdentification.Model.RaspberryPiComputeModule3:
+                    case RaspberryBoardIdentification.Model.RaspberryPiComputeModule3:
                         linuxDriver = new RaspberryPiCm3Driver();
                         break;
                     default:
