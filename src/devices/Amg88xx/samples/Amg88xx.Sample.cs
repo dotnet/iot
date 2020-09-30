@@ -24,20 +24,29 @@ namespace Iot.Device.Amg88xx.Samples
             I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
             Amg88xx amg88xx = new Amg88xx(i2cDevice);
 
+            amg88xx.ClearStatus();
+
+            string avgMode = amg88xx.GetMovingAverageMode() ? "on" : "off";
+            Console.WriteLine($"Average mode: {avgMode}");
+
             while (true)
             {
-                Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {amg88xx.GetSensorTemperature()}");
+                Console.WriteLine($"Thermistor: {amg88xx.GetSensorTemperature()}");
+
+                Status status = amg88xx.GetStatus();
+                Console.WriteLine($"Status: {status}");
 
                 var image = new Temperature[Amg88xx.Columns, Amg88xx.Rows];
                 // var image = new int[Amg88xx.Columns, Amg88xx.Rows];
-                image = amg88xx.GetImage();
+                image = amg88xx.GetThermalImage();
                 for (int r = 0; r < Amg88xx.Rows; r++)
                 {
-                    Console.WriteLine();
                     for (int c = 0; c < Amg88xx.Columns; c++)
                     {
                         Console.Write($"{((int)image[c, r].DegreesCelsius).ToString().PadRight(10)}");
                     }
+
+                    Console.WriteLine();
                 }
 
                 Console.WriteLine();

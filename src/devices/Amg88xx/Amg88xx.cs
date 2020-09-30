@@ -33,12 +33,10 @@ namespace Iot.Device.Amg88xx
         /// </summary>
         public const int Rows = 0x8;
 
-        // Definition of data link packet constants, c.f. "grid-eye_communication-protocol-v1.0.pdf"
-        private const string PacketHead = "***";
-        private const string PacketTail = "\r\n";
-        private const int BytesPerPixel = 2;
-        private const int BytesForThermistor = 2;
-        private const int SensorDataPacketSize = Columns * Rows * BytesPerPixel + BytesForThermistor;
+        /// <summary>
+        /// Number of bytes per pixel
+        /// </summary>
+        public const int BytesPerPixel = 2;
 
         private I2cDevice _i2cDevice;
 
@@ -51,9 +49,9 @@ namespace Iot.Device.Amg88xx
         }
 
         /// <summary>
-        /// Gets the temperature reading from the sensor internal thermistor.
+        /// Gets the temperature reading from the sensor's internal thermistor.
         /// </summary>
-        /// <returns>Chip temperature reading</returns>
+        /// <returns>Temperature reading</returns>
         public Temperature GetSensorTemperature()
         {
             _i2cDevice.WriteByte((byte)Register.TTHL);
@@ -65,10 +63,10 @@ namespace Iot.Device.Amg88xx
         }
 
         /// <summary>
-        /// Gets the current thermal image from the sensor.
+        /// Gets the current thermal image from the sensor as temperature per pixel.
         /// </summary>
-        /// <returns>...</returns>
-        public Temperature[,] GetImage()
+        /// <returns>Thermal image</returns>
+        public Temperature[,] GetThermalImage()
         {
             var rawImage = GetRawImage();
             var temperatureImage = new Temperature[Columns, Rows];
@@ -77,7 +75,7 @@ namespace Iot.Device.Amg88xx
             {
                 for (int c = 0; c < Columns; c++)
                 {
-                    temperatureImage[c, r] = Amg88xxUtils.ConvertThermophileReading((byte)(rawImage[c, r] & 0xff), (byte)(rawImage[c, r] >> 8));
+                    temperatureImage[c, r] = Amg88xxUtils.ConvertPixelReading((byte)(rawImage[c, r] & 0xff), (byte)(rawImage[c, r] >> 8));
                 }
             }
 
@@ -85,9 +83,9 @@ namespace Iot.Device.Amg88xx
         }
 
         /// <summary>
-        /// Gets the current thermal image from the sensor.
+        /// Gets the current thermal image from the sensor as 12-bit two's complement per pixel.
         /// </summary>
-        /// <returns>...</returns>
+        /// <returns>Thermal image</returns>
         public int[,] GetRawImage()
         {
             var image = new int[Columns, Rows];
@@ -108,6 +106,57 @@ namespace Iot.Device.Amg88xx
             }
 
             return image;
+        }
+
+        /// <summary>
+        /// Gets the sensor status.
+        /// </summary>
+        /// <returns>Status flags</returns>
+        public Status GetStatus()
+        {
+            _i2cDevice.WriteByte((byte)Register.STAT);
+            byte status = _i2cDevice.ReadByte();
+            return new Status(status);
+        }
+
+        /// <summary>
+        /// Clears the status register.
+        /// </summary>
+        public void ClearStatus()
+        {
+            ClearStatus(new Status { TemperatureOverflow = true, Interrupt = true });
+        }
+
+        /// <summary>
+        /// Clears the given flags of the status register.
+        /// </summary>
+        /// <param name="flagsToReset">Flags to be reset</param>
+        public void ClearStatus(Status flagsToReset)
+        {
+            _i2cDevice.WriteByte((byte)Register.SCLR);
+            _i2cDevice.WriteByte(flagsToReset.ToByte());
+        }
+
+        /// <summary>
+        /// Get the state of the moving average mode.
+        /// </summary>
+        /// <returns>True, if moving average is active</returns>
+        public bool GetMovingAverageMode()
+        {
+            _i2cDevice.WriteByte((byte)Register.AVE);
+            // if bit 5 of AVE register is set average mode is on
+            return (_i2cDevice.ReadByte() & 0b0001_0000) != 0;
+        }
+
+        /// <summary>
+        /// Sets the moving average mode.
+        /// </summary>
+        /// <param name="mode">True, to switch moving average on</param>
+        public void SetMovingAverageMode(bool mode)
+        {
+            _i2cDevice.WriteByte((byte)Register.AVE);
+            // bit 5: if set, average mode is on
+            _i2cDevice.WriteByte((byte)(mode ? 0b0001_0000 : 0));
         }
 
         /// <inheritdoc />

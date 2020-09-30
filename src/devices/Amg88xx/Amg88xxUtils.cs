@@ -28,12 +28,12 @@ namespace Iot.Device.Amg88xx
         }
 
         /// <summary>
-        /// Converts raw thermophile (pixel of grid array) reading into a temperature.
+        /// Converts raw pixel reading (from grid array) into a temperature.
         /// </summary>
         /// <param name="tl">Reading low byte</param>
         /// <param name="th">Reading high byte</param>
         /// <returns>Temperature reading</returns>
-        public static Temperature ConvertThermophileReading(byte tl, byte th)
+        public static Temperature ConvertPixelReading(byte tl, byte th)
         {
             int reading = (th & 0x7) << 8 | tl;
             reading = th >> 3 == 0 ? reading : -(~(reading - 1) & 0x7ff);

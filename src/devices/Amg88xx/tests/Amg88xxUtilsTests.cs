@@ -29,7 +29,7 @@ namespace Iot.Device.Amg88xx.Tests
         [InlineData(0xf24, -55)]
         public void ConvertThermophileReadingTest(int value, double expected)
         {
-            Assert.Equal(expected, Amg88xxUtils.ConvertThermophileReading((byte)(value & 0xff), (byte)((value & 0xff00) >> 8)).DegreesCelsius);
+            Assert.Equal(expected, Amg88xxUtils.ConvertPixelReading((byte)(value & 0xff), (byte)((value & 0xff00) >> 8)).DegreesCelsius);
         }
     }
 }
