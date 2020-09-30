@@ -96,7 +96,6 @@ namespace System.Device.Gpio
         private RaspberryBoardInfo(Dictionary<string, string> settings)
         {
             _settings = settings;
-            BoardModel = GetBoardModel();
             Firmware = 0;
             ProcessorName = string.Empty;
 
@@ -117,6 +116,8 @@ namespace System.Device.Gpio
             {
                 SerialNumber = serial;
             }
+
+            BoardModel = GetBoardModel();
         }
 
         #endregion

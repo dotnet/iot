@@ -32,11 +32,11 @@ namespace System.Device.Gpio.Drivers
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                RaspberryPi3LinuxDriver linuxDriver = CreateInternalRaspberryPi3LinuxDriver();
+                RaspberryPi3LinuxDriver linuxDriver = CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo);
 
                 if (linuxDriver == null)
                 {
-                    throw new PlatformNotSupportedException("Not a supported Raspberry Pi type");
+                    throw new PlatformNotSupportedException($"Not a supported Raspberry Pi type: " + boardInfo.BoardModel);
                 }
 
                 _setSetRegister = (value) => linuxDriver.SetRegister = value;
@@ -71,10 +71,11 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        internal static RaspberryPi3LinuxDriver CreateInternalRaspberryPi3LinuxDriver()
+        internal static RaspberryPi3LinuxDriver CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo)
         {
             RaspberryBoardInfo identification = RaspberryBoardInfo.LoadBoardInfo();
             RaspberryPi3LinuxDriver linuxDriver;
+            boardInfo = identification;
             switch (identification.BoardModel)
             {
                 case RaspberryBoardInfo.Model.RaspberryPi3B:
