@@ -7,7 +7,7 @@ namespace System.Device.Gpio
     /// <summary>
     /// Identification of Raspberry Pi board models
     /// </summary>
-    internal class RaspberryBoardIdentification
+    internal class RaspberryBoardInfo
     {
         /// <summary>
         /// The Raspberry Pi model.
@@ -85,56 +85,51 @@ namespace System.Device.Gpio
             RaspberryPi4,
         }
 
-        /// <summary>
-        /// The board processor.
-        /// </summary>
-        public enum Processor
-        {
-            /// <summary>
-            /// Processor is unknown.
-            /// </summary>
-            Unknown,
-
-            /// <summary>
-            /// Processor is a BCM2708.
-            /// </summary>
-            Bcm2708,
-
-            /// <summary>
-            /// Processor is a BCM2709.
-            /// </summary>
-            Bcm2709,
-
-            /// <summary>
-            /// Processor is a BCM2710.
-            /// </summary>
-            Bcm2710,
-
-            /// <summary>
-            /// Processor is a11.
-            /// </summary>
-            Bcm2711,
-        }
-
         #region Fields
 
         private readonly Dictionary<string, string> _settings;
 
-        private RaspberryBoardIdentification(Dictionary<string, string> settings)
+        private RaspberryBoardInfo(Dictionary<string, string> settings)
         {
             _settings = settings;
+            BoardModel = GetBoardModel();
+            Firmware = 0;
+            ProcessorName = string.Empty;
+
+            if (_settings.TryGetValue("Hardware", out string hardware))
+            {
+                ProcessorName = hardware;
+            }
+
+            if (_settings.TryGetValue("Revision", out string revision)
+                && !string.IsNullOrEmpty(revision)
+                && int.TryParse(revision, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int firmware))
+            {
+                Firmware = firmware;
+            }
+
+            if (_settings.TryGetValue("Serial", out string serial)
+                && !string.IsNullOrEmpty(serial))
+            {
+                SerialNumber = serial;
+            }
         }
 
         #endregion
 
         #region Properties
 
+        public Model BoardModel
+        {
+            get;
+        }
+
         /// <summary>
         /// Get board model from firmware revision
         /// See http://www.raspberrypi-spy.co.uk/2012/09/checking-your-raspberry-pi-board-version/ for information.
         /// </summary>
         /// <returns></returns>
-        internal Model GetBoardModel()
+        private Model GetBoardModel()
         {
             var firmware = Firmware;
             switch (firmware & 0xFFFF)
@@ -201,11 +196,7 @@ namespace System.Device.Gpio
         /// </value>
         public string ProcessorName
         {
-            get
-            {
-                _settings.TryGetValue("Hardware", out string hardware);
-                return hardware;
-            }
+            get;
         }
 
         /// <summary>
@@ -213,17 +204,7 @@ namespace System.Device.Gpio
         /// </summary>
         public int Firmware
         {
-            get
-            {
-                if (_settings.TryGetValue("Revision", out string revision)
-                    && !string.IsNullOrEmpty(revision)
-                    && int.TryParse(revision, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int firmware))
-                {
-                    return firmware;
-                }
-
-                return 0;
-            }
+            get;
         }
 
         /// <summary>
@@ -231,16 +212,7 @@ namespace System.Device.Gpio
         /// </summary>
         public string SerialNumber
         {
-            get
-            {
-                if (_settings.TryGetValue("Serial", out string serial)
-                    && !string.IsNullOrEmpty(serial))
-                {
-                    return serial;
-                }
-
-                return string.Empty;
-            }
+            get;
         }
 
         /// <summary>
@@ -262,39 +234,13 @@ namespace System.Device.Gpio
 
         #region Private Helpers
 
-        private Processor LoadProcessor(Model model)
-        {
-            switch (model)
-            {
-                case Model.RaspberryPiA:
-                case Model.RaspberryPiAPlus:
-                case Model.RaspberryPiBRev1:
-                case Model.RaspberryPiBRev2:
-                case Model.RaspberryPiBPlus:
-                case Model.RaspberryPiComputeModule:
-                case Model.RaspberryPiZero:
-                case Model.RaspberryPiZeroW:
-                    return Processor.Bcm2708;
-                case Model.RaspberryPi2B:
-                // TBC: B3(+) should be a BCM2710 processor ...
-                case Model.RaspberryPi3B:
-                case Model.RaspberryPi3BPlus:
-                case Model.RaspberryPiComputeModule3:
-                    return Processor.Bcm2709;
-                case Model.RaspberryPi4:
-                    return Processor.Bcm2711;
-                default:
-                    return Processor.Unknown;
-            }
-        }
-
         /// <summary>
         /// Detect the board CPU information from /proc/cpuinfo
         /// </summary>
         /// <returns>
-        /// The <see cref="RaspberryBoardIdentification"/>.
+        /// The <see cref="RaspberryBoardInfo"/>.
         /// </returns>
-        internal static RaspberryBoardIdentification LoadBoard()
+        internal static RaspberryBoardInfo LoadBoardInfo()
         {
             try
             {
@@ -325,11 +271,11 @@ namespace System.Device.Gpio
                     }
                 }
 
-                return new RaspberryBoardIdentification(settings);
+                return new RaspberryBoardInfo(settings);
             }
             catch
             {
-                return new RaspberryBoardIdentification(new Dictionary<string, string>());
+                return new RaspberryBoardInfo(new Dictionary<string, string>());
             }
         }
         #endregion
