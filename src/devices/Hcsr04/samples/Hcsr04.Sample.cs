@@ -5,6 +5,7 @@
 using System;
 using System.Threading;
 using Iot.Device.Hcsr04;
+using UnitsNet;
 
 namespace Iot.Device.Hcsr04.Samples
 {
@@ -18,11 +19,12 @@ namespace Iot.Device.Hcsr04.Samples
             {
                 while (true)
                 {
-                    try
+                    var res = sonar.TryGetDistance(out Length distance);
+                    if (res)
                     {
-                        Console.WriteLine($"Distance: {sonar.Distance.Centimeters} cm");
+                        Console.WriteLine($"Distance: {distance.Centimeters} cm");
                     }
-                    catch
+                    else
                     {
                         Console.WriteLine("Error reading sensor");
                     }

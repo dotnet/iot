@@ -25,7 +25,7 @@ namespace Iot.Device.Hcsr04
         private long _lastMeasurment = 0;
 
         /// <summary>
-        /// Gets the current distance in cm.
+        /// Gets the current distance, usual range from 2 cm to 400 cm.
         /// </summary>
         public Length Distance => GetDistance();
 
@@ -66,7 +66,7 @@ namespace Iot.Device.Hcsr04
         }
 
         /// <summary>
-        /// Gets the current distance in cm.
+        /// Gets the current distance, usual range from 2 cm to 400 cm.
         /// </summary>
         private Length GetDistance()
         {
@@ -77,16 +77,21 @@ namespace Iot.Device.Hcsr04
             // which is causing invalid readings.
             for (int i = 0; i < 10; i++)
             {
-                if (TryGetDistance(out double result))
+                if (TryGetDistance(out Length result))
                 {
-                    return Length.FromCentimeters(result);
+                    return result;
                 }
             }
 
             throw new InvalidOperationException("Could not get reading from the sensor");
         }
 
-        private bool TryGetDistance(out double result)
+        /// <summary>
+        /// Try to gets the current distance, , usual range from 2 cm to 400 cm
+        /// </summary>
+        /// <param name="result">Length</param>
+        /// <returns>True if success</returns>
+        public bool TryGetDistance(out Length result)
         {
             // Time when we give up on looping and declare that reading failed
             // 100ms was chosen because max measurement time for this sensor is around 24ms for 400cm
@@ -134,9 +139,9 @@ namespace Iot.Device.Hcsr04
             _timer.Stop();
 
             // distance = (time / 2) × velocity of sound (34300 cm/s)
-            result = (_timer.Elapsed.TotalMilliseconds / 2.0) * 34.3;
+            result = Length.FromCentimeters((_timer.Elapsed.TotalMilliseconds / 2.0) * 34.3);
 
-            if (result > 400)
+            if (result.Value > 400)
             {
                 // result is more than sensor supports
                 // something went wrong
