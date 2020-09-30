@@ -381,14 +381,14 @@ namespace System.Device.Gpio
         /// <returns>A driver that works with the board the program is executing on.</returns>
         private static GpioDriver GetBestDriverForBoardOnLinux()
         {
-            try
+            RaspberryPi3LinuxDriver internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver();
+
+            if (internalDriver != null)
             {
-                return new RaspberryPi3Driver();
+                return new RaspberryPi3Driver(internalDriver);
             }
-            catch (PlatformNotSupportedException)
-            {
-                return UnixDriver.Create();
-            }
+
+            return UnixDriver.Create();
         }
 
         /// <summary>

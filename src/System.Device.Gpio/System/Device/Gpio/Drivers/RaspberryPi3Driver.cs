@@ -32,20 +32,11 @@ namespace System.Device.Gpio.Drivers
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                RaspberryBoardIdentification identification = RaspberryBoardIdentification.LoadBoard();
-                RaspberryPi3LinuxDriver linuxDriver = null;
-                switch (identification.GetBoardModel())
+                RaspberryPi3LinuxDriver linuxDriver = CreateInternalRaspberryPi3LinuxDriver();
+
+                if (linuxDriver == null)
                 {
-                    case RaspberryBoardIdentification.Model.RaspberryPi3B:
-                    case RaspberryBoardIdentification.Model.RaspberryPi3BPlus:
-                    case RaspberryBoardIdentification.Model.RaspberryPi4:
-                        linuxDriver = new RaspberryPi3LinuxDriver();
-                        break;
-                    case RaspberryBoardIdentification.Model.RaspberryPiComputeModule3:
-                        linuxDriver = new RaspberryPiCm3Driver();
-                        break;
-                    default:
-                        throw new PlatformNotSupportedException("Not a supported Raspberry Pi type");
+                    throw new PlatformNotSupportedException("Not a supported Raspberry Pi type");
                 }
 
                 _setSetRegister = (value) => linuxDriver.SetRegister = value;
@@ -62,6 +53,44 @@ namespace System.Device.Gpio.Drivers
                 _getSetRegister = () => throw new PlatformNotSupportedException();
                 _getClearRegister = () => throw new PlatformNotSupportedException();
             }
+        }
+
+        internal RaspberryPi3Driver(RaspberryPi3LinuxDriver linuxDriver)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                _setSetRegister = (value) => linuxDriver.SetRegister = value;
+                _setClearRegister = (value) => linuxDriver.ClearRegister = value;
+                _getSetRegister = () => linuxDriver.SetRegister;
+                _getClearRegister = () => linuxDriver.ClearRegister;
+                _internalDriver = linuxDriver;
+            }
+            else
+            {
+                throw new NotSupportedException("This ctor is for internal use only");
+            }
+        }
+
+        internal static RaspberryPi3LinuxDriver CreateInternalRaspberryPi3LinuxDriver()
+        {
+            RaspberryBoardIdentification identification = RaspberryBoardIdentification.LoadBoard();
+            RaspberryPi3LinuxDriver linuxDriver;
+            switch (identification.GetBoardModel())
+            {
+                case RaspberryBoardIdentification.Model.RaspberryPi3B:
+                case RaspberryBoardIdentification.Model.RaspberryPi3BPlus:
+                case RaspberryBoardIdentification.Model.RaspberryPi4:
+                    linuxDriver = new RaspberryPi3LinuxDriver();
+                    break;
+                case RaspberryBoardIdentification.Model.RaspberryPiComputeModule3:
+                    linuxDriver = new RaspberryPiCm3Driver();
+                    break;
+                default:
+                    linuxDriver = null;
+                    break;
+            }
+
+            return linuxDriver;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
