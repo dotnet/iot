@@ -5,7 +5,7 @@
 namespace Iot.Device.QwiicButton
 {
     /// <summary>
-    /// TODO
+    /// Register map for the Qwiic Button.
     /// </summary>
     internal enum Register : byte
     {

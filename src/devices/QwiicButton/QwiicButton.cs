@@ -8,26 +8,12 @@ using System.Device.I2c;
 namespace Iot.Device.QwiicButton
 {
     /// <summary>
-    /// TODO
+    /// SparkFun Qwiic Button is an I2C based button with a built-in LED.
+    /// Supported hardware version: 1.0.0
     /// </summary>
     public class QwiicButton : IDisposable
     {
-        /******************************************************************************
-SparkFun Qwiic Button/Switch Library Source File
-Fischer Moseley @ SparkFun Electronics
-Original Creation Date: July 24, 2019
-
-Development environment specifics:
-    Qwiic Button Version: 1.0.0
-    Qwiic Switch Version: 1.0.0
-
-    Qwiic Button is an I2C based button that records any button presses to a queue.
-    Qwiic Button maintains a queue of events. To remove events from the queue write
-    the appropriate register (timeSinceLastButtonClicked or timeSinceLastButtonPressed)
-    to zero. The register will then be filled with the next available event time.
-
-******************************************************************************/
-        private const int DefaultAddress = 0x6F; // default I2C address of the button
+        private const int DefaultAddress = 0x6F; // Default I2C address of the button
         private I2cBusAccess _i2cBus;
 
         /*-------------------------------- Device Status ------------------------*/
@@ -86,7 +72,7 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// TODO
+        /// Configures the button to attach to the I2C bus using the specified address.
         /// </summary>
         public bool SetI2cAddress(byte address)
         {
@@ -167,10 +153,12 @@ Development environment specifics:
             return (byte)_i2cBus.WriteDoubleRegisterWithReadback(Register.BUTTON_DEBOUNCE_TIME, time);
         }
 
-        /*------------------- Interrupt Status/Configuration ---------------- */
+        #region Interrupt Status/Configuration
 
         /// <summary>
-        /// TODO
+        /// When called, the interrupt will be configured to trigger when the button is pressed.
+        /// If <see cref="EnableClickedInterrupt"/> has also been called,
+        /// then the interrupt will trigger on either a push or a click.
         /// </summary>
         public byte EnablePressedInterrupt()
         {
@@ -183,7 +171,9 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// TODO
+        /// When called, the interrupt will no longer be configured to trigger when the button is pressed.
+        /// If <see cref="EnableClickedInterrupt"/> has also been called,
+        /// then the interrupt will still trigger on the button click.
         /// </summary>
         public byte DisablePressedInterrupt()
         {
@@ -196,7 +186,9 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// TODO
+        /// When called, the interrupt will be configured to trigger when the button is clicked.
+        /// If <see cref="EnablePressedInterrupt"/> has also been called,
+        /// then the interrupt will trigger on either a push or a click.
         /// </summary>
         public byte EnableClickedInterrupt()
         {
@@ -210,7 +202,9 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// TODO
+        /// When called, the interrupt will no longer be configured to trigger when the button is clicked.
+        /// If <see cref="EnablePressedInterrupt"/> has also been called,
+        /// then the interrupt will still trigger on the button press.
         /// </summary>
         public byte DisableClickedInterrupt()
         {
@@ -224,7 +218,7 @@ Development environment specifics:
         }
 
         /// <summary>
-        /// TODO
+        /// Resets the interrupt configuration back to defaults.
         /// </summary>
         public byte ResetInterruptConfig()
         {
@@ -243,6 +237,8 @@ Development environment specifics:
 
             return interruptValue;
         }
+
+        #endregion
 
         #region Queue Manipulation
 
