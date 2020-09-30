@@ -44,12 +44,15 @@ namespace Iot.Device.QwiicButton.Samples
                         LightWhenPressed.Run(button);
                         break;
                     case 5:
-                        OnOffButtonWithLight.Run(button);
+                        PulseWhenPressed.Run(button);
                         break;
                     case 6:
-                        QueueUsage.Run(button);
+                        OnOffButtonWithLight.Run(button);
                         break;
                     case 7:
+                        QueueUsage.Run(button);
+                        break;
+                    case 8:
                         ChangeI2cAddress.Run(button);
                         break;
                     default:
@@ -107,9 +110,10 @@ namespace Iot.Device.QwiicButton.Samples
             Console.WriteLine("2. Print button status");
             Console.WriteLine("3. Print button status - interrupt based");
             Console.WriteLine("4. Light when button pressed");
-            Console.WriteLine("5. ON/OFF button with light when ON");
-            Console.WriteLine("6. Clicked queue and pressed queue usage");
-            Console.WriteLine("7. Change I2C address");
+            Console.WriteLine("5. Pulse when button pressed");
+            Console.WriteLine("6. ON/OFF button with light when ON");
+            Console.WriteLine("7. Clicked queue and pressed queue usage");
+            Console.WriteLine("8. Change I2C address");
 
             string sampleNumber = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(sampleNumber))
