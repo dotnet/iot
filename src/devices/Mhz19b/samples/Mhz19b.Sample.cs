@@ -22,10 +22,12 @@ namespace Iot.Device.Mhz19b.Samples
         public static void Main(string[] args)
         {
             // create serial port using the setting acc. to datasheet, pg. 7, sec. general settings
-            var serialPort = new SerialPort("/dev/serial0", 9600, Parity.None, 8, StopBits.One);
-            serialPort.Encoding = Encoding.ASCII;
-            serialPort.ReadTimeout = 1000;
-            serialPort.WriteTimeout = 1000;
+            var serialPort = new SerialPort("/dev/serial0", 9600, Parity.None, 8, StopBits.One)
+            {
+                Encoding = Encoding.ASCII,
+                ReadTimeout = 1000,
+                WriteTimeout = 1000
+            };
             serialPort.Open();
             Mhz19b sensor = new Mhz19b(serialPort.BaseStream, true);
 
@@ -55,7 +57,7 @@ namespace Iot.Device.Mhz19b.Samples
                 try
                 {
                     VolumeConcentration reading = sensor.GetCo2Reading();
-                    Console.WriteLine($"{reading}");
+                    Console.WriteLine($"{reading.PartsPerMillion:F0} ppm");
                 }
                 catch (IOException e)
                 {
