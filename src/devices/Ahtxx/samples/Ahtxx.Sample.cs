@@ -3,9 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device.Gpio;
 using System.Device.I2c;
-using System.Device.Spi;
 using System.Threading;
 
 namespace Iot.Device.Ahtxx.Samples
@@ -27,7 +25,7 @@ namespace Iot.Device.Ahtxx.Samples
 
             while (true)
             {
-                Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {aht20Sensor.GetTemperature()}, {aht20Sensor.GetHumidity()}");
+                Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {aht20Sensor.GetTemperature().DegreesCelsius:F1}°C, {aht20Sensor.GetHumidity().Percent:F0}%");
                 Thread.Sleep(1000);
             }
         }

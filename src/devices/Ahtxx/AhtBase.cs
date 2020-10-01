@@ -78,7 +78,7 @@ namespace Iot.Device.Ahtxx
         public Ratio GetHumidity()
         {
             Measure();
-            return new Ratio(_humidity, UnitsNet.Units.RatioUnit.Percent);
+            return Ratio.FromPercent(_humidity);
         }
 
         /// <summary>
