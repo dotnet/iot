@@ -66,3 +66,4 @@ to clarify expected behavior in our community. For more information, see the [.N
 # License
 
 .NET Core (including the iot repo) is licensed under the [MIT license](LICENSE).
+                                                               #thank you
