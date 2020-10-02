@@ -32,12 +32,18 @@ namespace System.Device.Gpio.Drivers
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                _internalDriver = new RaspberryPi3LinuxDriver();
-                RaspberryPi3LinuxDriver linuxDriver = _internalDriver as RaspberryPi3LinuxDriver;
+                RaspberryPi3LinuxDriver linuxDriver = CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo);
+
+                if (linuxDriver == null)
+                {
+                    throw new PlatformNotSupportedException($"Not a supported Raspberry Pi type: " + boardInfo.BoardModel);
+                }
+
                 _setSetRegister = (value) => linuxDriver.SetRegister = value;
                 _setClearRegister = (value) => linuxDriver.ClearRegister = value;
                 _getSetRegister = () => linuxDriver.SetRegister;
                 _getClearRegister = () => linuxDriver.ClearRegister;
+                _internalDriver = linuxDriver;
             }
             else
             {
@@ -47,6 +53,45 @@ namespace System.Device.Gpio.Drivers
                 _getSetRegister = () => throw new PlatformNotSupportedException();
                 _getClearRegister = () => throw new PlatformNotSupportedException();
             }
+        }
+
+        internal RaspberryPi3Driver(RaspberryPi3LinuxDriver linuxDriver)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                _setSetRegister = (value) => linuxDriver.SetRegister = value;
+                _setClearRegister = (value) => linuxDriver.ClearRegister = value;
+                _getSetRegister = () => linuxDriver.SetRegister;
+                _getClearRegister = () => linuxDriver.ClearRegister;
+                _internalDriver = linuxDriver;
+            }
+            else
+            {
+                throw new NotSupportedException("This ctor is for internal use only");
+            }
+        }
+
+        internal static RaspberryPi3LinuxDriver CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo)
+        {
+            RaspberryBoardInfo identification = RaspberryBoardInfo.LoadBoardInfo();
+            RaspberryPi3LinuxDriver linuxDriver;
+            boardInfo = identification;
+            switch (identification.BoardModel)
+            {
+                case RaspberryBoardInfo.Model.RaspberryPi3B:
+                case RaspberryBoardInfo.Model.RaspberryPi3BPlus:
+                case RaspberryBoardInfo.Model.RaspberryPi4:
+                    linuxDriver = new RaspberryPi3LinuxDriver();
+                    break;
+                case RaspberryBoardInfo.Model.RaspberryPiComputeModule3:
+                    linuxDriver = new RaspberryPiCm3Driver();
+                    break;
+                default:
+                    linuxDriver = null;
+                    break;
+            }
+
+            return linuxDriver;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -60,7 +105,7 @@ namespace System.Device.Gpio.Drivers
         }
 
         /// <inheritdoc/>
-        protected internal override int PinCount => 28;
+        protected internal override int PinCount => _internalDriver.PinCount;
 
         /// <inheritdoc/>
         protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => _internalDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
@@ -71,38 +116,7 @@ namespace System.Device.Gpio.Drivers
         /// <inheritdoc/>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
-            return pinNumber switch
-            {
-                3 => 2,
-                5 => 3,
-                7 => 4,
-                8 => 14,
-                10 => 15,
-                11 => 17,
-                12 => 18,
-                13 => 27,
-                15 => 22,
-                16 => 23,
-                18 => 24,
-                19 => 10,
-                21 => 9,
-                22 => 25,
-                23 => 11,
-                24 => 8,
-                26 => 7,
-                27 => 0,
-                28 => 1,
-                29 => 5,
-                31 => 6,
-                32 => 12,
-                33 => 13,
-                35 => 19,
-                36 => 16,
-                37 => 26,
-                38 => 20,
-                40 => 21,
-                _ => throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber))
-            };
+            return _internalDriver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
         }
 
         /// <inheritdoc/>
