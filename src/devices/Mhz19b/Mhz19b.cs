@@ -66,10 +66,12 @@ namespace Iot.Device.Mhz19b
             }
 
             // create serial port using the setting acc. to datasheet, pg. 7, sec. general settings
-            _serialPort = new SerialPort(uartDevice, 9600, Parity.None, 8, StopBits.One);
-            _serialPort.Encoding = Encoding.ASCII;
-            _serialPort.ReadTimeout = 1000;
-            _serialPort.WriteTimeout = 1000;
+            _serialPort = new SerialPort(uartDevice, 9600, Parity.None, 8, StopBits.One)
+            {
+                Encoding = Encoding.ASCII,
+                ReadTimeout = 1000,
+                WriteTimeout = 1000
+            };
             _serialPort.Open();
             _serialPortStream = _serialPort.BaseStream;
             _shouldDispose = true;
