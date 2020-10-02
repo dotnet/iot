@@ -22,7 +22,7 @@ namespace Iot.Device.Amg88xx
         RST = 0x01,
 
         /// <summary>
-        /// rame rate register
+        /// Frame rate register
         /// </summary>
         FPSC = 0x02,
 
@@ -805,5 +805,102 @@ namespace Iot.Device.Amg88xx
         /// Pixel 64 value register (high byte)
         /// </summary>
         T64H = 0xff
+    }
+
+    /// <summary>
+    /// Defines the status bits of the status register (addr: 0x04)
+    /// </summary>
+    [Flags]
+    public enum StatusFlag : byte
+    {
+        /// <summary>
+        /// Temperature output overflow occured for one or more pixel
+        /// </summary>
+        OVF_IRS = 0b0000_0100,
+
+        /// <summary>
+        /// Thermistor output overflow occured
+        /// </summary>
+        OVF_THS = 0b0000_1000,
+
+        /// <summary>
+        /// Interrupt occured
+        /// </summary>
+        INTF = 0b0000_0010
+    }
+
+    /// <summary>
+    /// Defines the frame rates
+    /// </summary>
+    public enum FrameRate
+    {
+        /// <summary>
+        /// 1 frame per second
+        /// </summary>
+        FPS1 = 1,
+
+        /// <summary>
+        /// 10 frames per second
+        /// </summary>
+        FPS10 = 10
+    }
+
+    /// <summary>
+    /// Defines the operating modes
+    /// </summary>
+    public enum OperatingMode : byte
+    {
+        /// <summary>
+        /// normal mode
+        /// </summary>
+        Normal = 0b0000_0000,
+
+        /// <summary>
+        /// sleep mode
+        /// </summary>
+        Sleep = 0b0001_0000,
+
+        /// <summary>
+        /// stand-by mode, 10s intermittence
+        /// </summary>
+        StandBy10 = 0b0010_0001,
+
+        /// <summary>
+        /// stand-by mode, 60s intermittence
+        /// </summary>
+        StandBy60 = 0b0010_0000,
+    }
+
+    /// <summary>
+    /// Defines the interrupt modes
+    /// </summary>
+    public enum InterruptMode : byte
+    {
+        /// <summary>
+        /// The specification does not give any details on this mode.
+        /// </summary>
+        DifferenceMode,
+
+        /// <summary>
+        /// An interrupt occures if any pixel exceed the upper or lower limit as given in the
+        /// interrupt level register
+        /// </summary>
+        AbsoluteMode
+    }
+
+    /// <summary>
+    /// Defines the interrupt pin modes
+    /// </summary>
+    public enum InterruptPin : byte
+    {
+        /// <summary>
+        /// INT pin is pulled low if an interrupt occures
+        /// </summary>
+        PinEnabled,
+
+        /// <summary>
+        /// INT pin does not change if an interrupt occures
+        /// </summary>
+        PinDisabled
     }
 }

@@ -24,21 +24,28 @@ namespace Iot.Device.Amg88xx.Samples
             I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
             Amg88xx amg88xx = new Amg88xx(i2cDevice);
 
-            amg88xx.ClearStatus();
+            // Factory defaults
+            amg88xx.InitialReset();
+            amg88xx.SetOperatingMode(OperatingMode.Normal);
+
+            Console.WriteLine($"Operating mode: {amg88xx.GetOperatingMode()}");
 
             // Switch moving average mode on.
-            // If moving average mode is active the sensor outputs for each pixel the average of 10 samples.
-            // The frame rate gets reduced to 1 fps. Averaging is disabled by default after power on.
-            // amg88xx.SetMovingAverageMode(true);
+            amg88xx.SetMovingAverageMode(true);
             string avgMode = amg88xx.GetMovingAverageMode() ? "on" : "off";
             Console.WriteLine($"Average mode: {avgMode}");
+
+            // Set frame rate to 1 fps
+            amg88xx.SetFrameRate(FrameRate.FPS1);
+            Console.WriteLine($"Frame rate: {(int)amg88xx.GetFrameRate()} fps");
 
             while (true)
             {
                 Console.WriteLine($"Thermistor: {amg88xx.GetSensorTemperature()}");
 
-                Status status = amg88xx.GetStatus();
-                Console.WriteLine($"Status: {status}");
+                Console.WriteLine($"Temperature overrun: {amg88xx.HasTemperatureOverflow()}");
+                Console.WriteLine($"Thermistor overrun: {amg88xx.HasThermistorOverflow()}");
+                Console.WriteLine($"Interrupt occurred: {amg88xx.HasInterrupt()}");
 
                 var image = new Temperature[Amg88xx.Columns, Amg88xx.Rows];
                 // var image = new int[Amg88xx.Columns, Amg88xx.Rows];
@@ -55,6 +62,8 @@ namespace Iot.Device.Amg88xx.Samples
 
                 Console.WriteLine();
                 Thread.Sleep(1000);
+
+                amg88xx.ClearAllStatus();
             }
         }
     }
