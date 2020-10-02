@@ -168,11 +168,6 @@ namespace Iot.Device.Ahtxx
         /// <inheritdoc cref="IDisposable" />
         protected virtual void Dispose(bool disposing)
         {
-            if (_i2cDevice == null)
-            {
-                return;
-            }
-
             _i2cDevice?.Dispose();
             _i2cDevice = null;
         }
