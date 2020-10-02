@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using UnitsNet;
 using Xunit;
 
 namespace Iot.Device.Amg88xx.Tests
@@ -30,6 +31,21 @@ namespace Iot.Device.Amg88xx.Tests
         public void ConvertThermophileReadingTest(int value, double expected)
         {
             Assert.Equal(expected, Amg88xxUtils.ConvertPixelReading((byte)(value & 0xff), (byte)((value & 0xff00) >> 8)).DegreesCelsius);
+        }
+
+        [Theory]
+        [InlineData(125, 0xf4, 0x01)]
+        [InlineData(25, 0x64, 0x00)]
+        [InlineData(0.25, 0x01, 0x00)]
+        [InlineData(0, 0x00, 0x00)]
+        [InlineData(-0.25, 0xff, 0x0f)]
+        [InlineData(-25, 0x9c, 0x0f)]
+        [InlineData(-55, 0x24, 0x0f)]
+        public void ConvertTemperature(double temperature, byte expectedTl, byte expectedTh)
+        {
+            (byte tl, byte th) = Amg88xxUtils.ConvertTemperature(Temperature.FromDegreesCelsius(temperature));
+            Assert.Equal(expectedTl, tl);
+            Assert.Equal(expectedTh, th);
         }
     }
 }

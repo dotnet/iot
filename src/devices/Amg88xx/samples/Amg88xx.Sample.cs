@@ -26,6 +26,10 @@ namespace Iot.Device.Amg88xx.Samples
 
             amg88xx.ClearStatus();
 
+            // Switch moving average mode on.
+            // If moving average mode is active the sensor outputs for each pixel the average of 10 samples.
+            // The frame rate gets reduced to 1 fps. Averaging is disabled by default after power on.
+            // amg88xx.SetMovingAverageMode(true);
             string avgMode = amg88xx.GetMovingAverageMode() ? "on" : "off";
             Console.WriteLine($"Average mode: {avgMode}");
 

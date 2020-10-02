@@ -28,7 +28,7 @@ namespace Iot.Device.Amg88xx
         }
 
         /// <summary>
-        /// Converts raw pixel reading (from grid array) into a temperature.
+        /// Converts raw pixel reading (from grid array) to a temperature.
         /// </summary>
         /// <param name="tl">Reading low byte</param>
         /// <param name="th">Reading high byte</param>
@@ -40,6 +40,24 @@ namespace Iot.Device.Amg88xx
             // The temperature of each pixel is encoded as a 12 bit value in two's complement form.
             // The LSB is equivalent to 0.25℃
             return Temperature.FromDegreesCelsius(reading * 0.25);
+        }
+
+        /// <summary>
+        /// Converts a temperature to a pixel value (low- and high-byte).
+        /// </summary>
+        /// <param name="temperature">Temperature</param>
+        /// <returns>Low and high byte of two's complement representation of temperature</returns>
+        public static (byte, byte) ConvertTemperature(Temperature temperature)
+        {
+            // The temperature of each pixel is encoded as a 12 bit value in two's complement form.
+            // The LSB is equivalent to 0.25℃
+            var t = (int)(temperature.DegreesCelsius / 0.25);
+            if (temperature.DegreesCelsius < 0)
+            {
+                t = ~(0x1000 - t) + 1;
+            }
+
+            return ((byte)(t & 0xff), (byte)((t >> 8) & 0x0f));
         }
     }
 }
