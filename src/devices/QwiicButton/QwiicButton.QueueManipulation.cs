@@ -11,7 +11,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsPressedQueueFull()
         {
-            var pressedQueue = new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.PRESSED_QUEUE_STATUS));
+            var pressedQueue = new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.PressedQueueStatus));
             return pressedQueue.IsFull;
         }
 
@@ -20,7 +20,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsPressedQueueEmpty()
         {
-            var pressedQueue = new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.PRESSED_QUEUE_STATUS));
+            var pressedQueue = new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.PressedQueueStatus));
             return pressedQueue.IsEmpty;
         }
 
@@ -30,7 +30,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public uint TimeSinceLastPress()
         {
-            return _i2cBus.ReadQuadRegister(Register.PRESSED_QUEUE_FRONT);
+            return _i2cBus.ReadQuadRegister(Register.PressedQueueFront);
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public uint TimeSinceFirstPress()
         {
-            return _i2cBus.ReadQuadRegister(Register.PRESSED_QUEUE_BACK);
+            return _i2cBus.ReadQuadRegister(Register.PressedQueueBack);
         }
 
         /// <summary>
@@ -50,13 +50,13 @@ namespace Iot.Device.QwiicButton
             var timeSinceFirstPress = TimeSinceFirstPress(); // Take the oldest value on the queue
 
             var pressedQueue =
-                new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.PRESSED_QUEUE_STATUS))
+                new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.PressedQueueStatus))
                 {
                     PopRequest = true
                 };
 
             // Remove the oldest value from the queue
-            _i2cBus.WriteSingleRegister(Register.PRESSED_QUEUE_STATUS, pressedQueue.QueueStatusValue);
+            _i2cBus.WriteSingleRegister(Register.PressedQueueStatus, pressedQueue.QueueStatusValue);
 
             return timeSinceFirstPress; // Return the value we popped
         }
@@ -66,7 +66,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsClickedQueueFull()
         {
-            var clickedQueue = new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.CLICKED_QUEUE_STATUS));
+            var clickedQueue = new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.ClickedQueueStatus));
             return clickedQueue.IsFull;
         }
 
@@ -75,7 +75,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsClickedQueueEmpty()
         {
-            var clickedQueue = new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.CLICKED_QUEUE_STATUS));
+            var clickedQueue = new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.ClickedQueueStatus));
             return clickedQueue.IsEmpty;
         }
 
@@ -85,7 +85,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public uint TimeSinceLastClick()
         {
-            return _i2cBus.ReadQuadRegister(Register.CLICKED_QUEUE_FRONT);
+            return _i2cBus.ReadQuadRegister(Register.ClickedQueueFront);
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public uint TimeSinceFirstClick()
         {
-            return _i2cBus.ReadQuadRegister(Register.CLICKED_QUEUE_BACK);
+            return _i2cBus.ReadQuadRegister(Register.ClickedQueueBack);
         }
 
         /// <summary>
@@ -105,11 +105,11 @@ namespace Iot.Device.QwiicButton
             var timeSinceFirstClick = TimeSinceFirstClick();
 
             var clickedQueue =
-                new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.CLICKED_QUEUE_STATUS))
+                new QueueStatusBitField(_i2cBus.ReadSingleRegister(Register.ClickedQueueStatus))
                 {
                     PopRequest = true
                 };
-            _i2cBus.WriteSingleRegister(Register.CLICKED_QUEUE_STATUS, clickedQueue.QueueStatusValue);
+            _i2cBus.WriteSingleRegister(Register.ClickedQueueStatus, clickedQueue.QueueStatusValue);
 
             return timeSinceFirstClick;
         }

@@ -11,7 +11,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsPressed()
         {
-            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS));
+            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.ButtonStatus));
             return status.IsPressed;
         }
 
@@ -20,7 +20,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool HasBeenClicked()
         {
-            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS));
+            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.ButtonStatus));
             return status.HasBeenClicked;
         }
 
@@ -29,7 +29,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool EventAvailable()
         {
-            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS));
+            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.ButtonStatus));
             return status.EventAvailable;
         }
 
@@ -38,13 +38,13 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public byte ClearEventBits()
         {
-            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.BUTTON_STATUS))
+            var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.ButtonStatus))
             {
                 EventAvailable = false,
                 HasBeenClicked = false,
                 IsPressed = false
             };
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.BUTTON_STATUS, status.StatusRegisterValue);
+            return _i2cBus.WriteSingleRegisterWithReadback(Register.ButtonStatus, status.StatusRegisterValue);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public ushort GetDebounceTime()
         {
-            return _i2cBus.ReadDoubleRegister(Register.BUTTON_DEBOUNCE_TIME);
+            return _i2cBus.ReadDoubleRegister(Register.ButtonDebounceTime);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public byte SetDebounceTime(ushort time)
         {
-            return (byte)_i2cBus.WriteDoubleRegisterWithReadback(Register.BUTTON_DEBOUNCE_TIME, time);
+            return (byte)_i2cBus.WriteDoubleRegisterWithReadback(Register.ButtonDebounceTime, time);
         }
     }
 }

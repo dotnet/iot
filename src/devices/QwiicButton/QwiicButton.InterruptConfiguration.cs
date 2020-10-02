@@ -14,11 +14,11 @@ namespace Iot.Device.QwiicButton
         public byte EnablePressedInterrupt()
         {
             var interrupt =
-                new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.INTERRUPT_CONFIG))
+                new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.InterruptConfig))
                 {
                     PressedEnable = true
                 };
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
+            return _i2cBus.WriteSingleRegisterWithReadback(Register.InterruptConfig, interrupt.InterruptConfigValue);
         }
 
         /// <summary>
@@ -29,11 +29,11 @@ namespace Iot.Device.QwiicButton
         public byte DisablePressedInterrupt()
         {
             var interrupt =
-                new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.INTERRUPT_CONFIG))
+                new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.InterruptConfig))
                 {
                     PressedEnable = false
                 };
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
+            return _i2cBus.WriteSingleRegisterWithReadback(Register.InterruptConfig, interrupt.InterruptConfigValue);
         }
 
         /// <summary>
@@ -44,12 +44,12 @@ namespace Iot.Device.QwiicButton
         public byte EnableClickedInterrupt()
         {
             var interrupt =
-                new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.INTERRUPT_CONFIG))
+                new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.InterruptConfig))
                 {
                     ClickedEnable = true
                 };
 
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
+            return _i2cBus.WriteSingleRegisterWithReadback(Register.InterruptConfig, interrupt.InterruptConfigValue);
         }
 
         /// <summary>
@@ -60,12 +60,12 @@ namespace Iot.Device.QwiicButton
         public byte DisableClickedInterrupt()
         {
             var interrupt =
-                new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.INTERRUPT_CONFIG))
+                new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.InterruptConfig))
                 {
                     ClickedEnable = false
                 };
 
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
+            return _i2cBus.WriteSingleRegisterWithReadback(Register.InterruptConfig, interrupt.InterruptConfigValue);
         }
 
         /// <summary>
@@ -78,13 +78,13 @@ namespace Iot.Device.QwiicButton
                 PressedEnable = true,
                 ClickedEnable = true
             };
-            var interruptValue = _i2cBus.WriteSingleRegisterWithReadback(Register.INTERRUPT_CONFIG, interrupt.InterruptConfigValue);
+            var interruptValue = _i2cBus.WriteSingleRegisterWithReadback(Register.InterruptConfig, interrupt.InterruptConfigValue);
 
             var status = new StatusRegisterBitField
             {
                 EventAvailable = false
             };
-            _i2cBus.WriteSingleRegisterWithReadback(Register.BUTTON_STATUS, status.StatusRegisterValue);
+            _i2cBus.WriteSingleRegisterWithReadback(Register.ButtonStatus, status.StatusRegisterValue);
 
             return interruptValue;
         }
