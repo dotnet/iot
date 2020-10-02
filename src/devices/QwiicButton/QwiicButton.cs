@@ -45,7 +45,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public byte GetDeviceId()
         {
-            return _i2cBus.ReadSingleRegister(Register.ID);
+            return _i2cBus.ReadSingleRegister(Register.Id);
         }
 
         /// <summary>
@@ -55,8 +55,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public ushort GetFirmwareVersionAsInteger()
         {
-            ushort version = (ushort)(_i2cBus.ReadSingleRegister(Register.FIRMWARE_MAJOR) << 8);
-            version |= _i2cBus.ReadSingleRegister(Register.FIRMWARE_MINOR);
+            ushort version = (ushort)(_i2cBus.ReadSingleRegister(Register.FirmwareMajor) << 8);
+            version |= _i2cBus.ReadSingleRegister(Register.FirmwareMinor);
             return version;
         }
 
@@ -65,8 +65,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public string GetFirmwareVersionAsString()
         {
-            var major = _i2cBus.ReadSingleRegister(Register.FIRMWARE_MAJOR);
-            var minor = _i2cBus.ReadSingleRegister(Register.FIRMWARE_MINOR);
+            var major = _i2cBus.ReadSingleRegister(Register.FirmwareMajor);
+            var minor = _i2cBus.ReadSingleRegister(Register.FirmwareMinor);
             return major + "." + minor;
         }
 
@@ -81,7 +81,7 @@ namespace Iot.Device.QwiicButton
                 return false;
             }
 
-            var success = _i2cBus.WriteSingleRegister(Register.I2C_ADDRESS, address);
+            var success = _i2cBus.WriteSingleRegister(Register.I2cAddress, address);
             if (success)
             {
                 I2cAddress = address;
