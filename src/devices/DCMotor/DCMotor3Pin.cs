@@ -45,6 +45,16 @@ namespace Iot.Device.DCMotor
             Controller.Write(_pin1, PinValue.Low);
         }
 
+        public override void Start()
+        {
+            _pwm.Start();
+        }
+
+        public override void Stop()
+        {
+            _pwm.Stop();
+        }
+
         /// <summary>
         /// Gets or sets the speed of the motor.
         /// Speed is a value from -1 to 1.

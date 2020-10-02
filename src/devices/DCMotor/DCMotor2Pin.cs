@@ -9,13 +9,13 @@ using System.Device.Pwm.Drivers;
 
 namespace Iot.Device.DCMotor
 {
-    internal class DCMotor2PinNoEnable : DCMotor
+    internal class DCMotor2Pin : DCMotor
     {
         private PwmChannel _pwm;
         private int _pin1;
         private double _speed;
 
-        public DCMotor2PinNoEnable(
+        public DCMotor2Pin(
             PwmChannel pwmChannel,
             int pin1,
             GpioController controller,
@@ -49,7 +49,7 @@ namespace Iot.Device.DCMotor
 
         /// <summary>
         /// Gets or sets the speed of the motor.
-        /// Speed is a value from 0 to 1 or -1 to 1 if direction pin has been provided.
+        /// Speed is a value from -1 to 1
         /// 1 means maximum speed, signed value changes the direction.
         /// </summary>
         public override double Speed
@@ -71,7 +71,7 @@ namespace Iot.Device.DCMotor
                 {
                     if (_pin1 != -1)
                     {
-                        Controller.Write(_pin1, PinValue.Low);
+                        Controller.Write(_pin1, PinValue.High);
                     }
 
                     _pwm.DutyCycle = val;
@@ -80,10 +80,10 @@ namespace Iot.Device.DCMotor
                 {
                     if (_pin1 != -1)
                     {
-                        Controller.Write(_pin1, PinValue.High);
+                        Controller.Write(_pin1, PinValue.Low);
                     }
 
-                    _pwm.DutyCycle = 1.0 + val;
+                    _pwm.DutyCycle = Math.Abs(val);
                 }
 
                 _speed = val;
