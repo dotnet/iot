@@ -1,6 +1,6 @@
-# Samples
+# Qwiic Button Samples
 
-The following functionality is demonstrated with code samples:
+The following Qwiic Button functionality is demonstrated with code samples:
 
 -   Read button configuration such as firmware version
 -   Read button status, i.e. whether it is pressed, using polling
