@@ -17,6 +17,7 @@ namespace Iot.Device.QwiicButton.Samples
             Console.WriteLine("FIFO queues sample started");
             Console.WriteLine("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
             Console.WriteLine("BEWARE: If your button has firmware version 258 (1.2) or earlier, you cannot pop values from the queues due to a bug.");
+            Console.WriteLine("Read more here: https://github.com/sparkfun/Qwiic_Button/issues/1");
             Console.WriteLine("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
             do
