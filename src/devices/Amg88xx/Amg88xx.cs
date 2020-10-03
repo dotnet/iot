@@ -374,7 +374,7 @@ namespace Iot.Device.Amg88xx
         /// Gets the interrupt flags of all pixels.
         /// </summary>
         /// <returns>Interrupt flags</returns>
-        public bool[] GetInterruptFlagTable()
+        public bool[,] GetInterruptFlagTable()
         {
             var addresses = new byte[]
             {
@@ -382,23 +382,24 @@ namespace Iot.Device.Amg88xx
                 (byte)Register.INT4, (byte)Register.INT5, (byte)Register.INT6, (byte)Register.INT7,
             };
 
+            // read all registers from the sensor
             var flagRegisters = new Queue<byte>();
             foreach (byte address in addresses)
             {
                 flagRegisters.Enqueue(GetRegister(address));
             }
 
-            var flags = new Queue<bool>();
-            while (flagRegisters.Count > 0)
+            var flags = new bool[Columns, Rows];
+            for (int row = 0; row < Rows; row++)
             {
                 var flagRegister = flagRegisters.Dequeue();
-                for (int b = 0; b < 8; b++)
+                for (int col = 0; col < Columns; col++)
                 {
-                    flags.Enqueue((flagRegister & (1 << b)) > 0);
+                    flags[col, row] = (flagRegister & (1 << col)) > 0;
                 }
             }
 
-            return flags.ToArray();
+            return flags;
         }
         #endregion
 

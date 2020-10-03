@@ -36,8 +36,16 @@ namespace Iot.Device.Amg88xx.Samples
             Console.WriteLine($"Average mode: {avgMode}");
 
             // Set frame rate to 1 fps
-            amg88xx.SetFrameRate(FrameRate.FPS1);
+            // amg88xx.SetFrameRate(FrameRate.FPS1);
             Console.WriteLine($"Frame rate: {(int)amg88xx.GetFrameRate()} fps");
+
+            // set interrupt mode and levels
+            amg88xx.SetInterruptMode(InterruptMode.AbsoluteMode);
+            amg88xx.SetInterruptLowerLevel(Temperature.FromDegreesCelsius(16));
+            amg88xx.SetInterruptUpperLevel(Temperature.FromDegreesCelsius(32));
+            Console.WriteLine($"Interrupt mode: {amg88xx.GetInterruptMode()}");
+            Console.WriteLine($"Lower interrupt temperature level: {amg88xx.GetInterruptLowerLevel().DegreesCelsius:F1}°C");
+            Console.WriteLine($"Upper interrupt temperature level: {amg88xx.GetInterruptUpperLevel().DegreesCelsius:F1}°C");
 
             while (true)
             {
@@ -47,23 +55,21 @@ namespace Iot.Device.Amg88xx.Samples
                 Console.WriteLine($"Thermistor overrun: {amg88xx.HasThermistorOverflow()}");
                 Console.WriteLine($"Interrupt occurred: {amg88xx.HasInterrupt()}");
 
-                var image = new Temperature[Amg88xx.Columns, Amg88xx.Rows];
-                // var image = new int[Amg88xx.Columns, Amg88xx.Rows];
-                image = amg88xx.GetThermalImage();
+                var image = amg88xx.GetThermalImage();
+                var intFlags = amg88xx.GetInterruptFlagTable();
+
                 for (int r = 0; r < Amg88xx.Rows; r++)
                 {
                     for (int c = 0; c < Amg88xx.Columns; c++)
                     {
-                        Console.Write($"{((int)image[c, r].DegreesCelsius).ToString().PadRight(10)}");
+                        Console.Write($"{(intFlags[c, r] ? '*' : ' ')} {(int)image[c, r].DegreesCelsius,-4}");
                     }
 
-                    Console.WriteLine();
+                    Console.WriteLine("\n------------------------------------------------");
                 }
 
                 Console.WriteLine();
                 Thread.Sleep(1000);
-
-                amg88xx.ClearAllStatus();
             }
         }
     }

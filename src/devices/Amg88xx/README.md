@@ -28,6 +28,28 @@ The thermistor has a measurement range of -20...80°C at a resolution of 0.0625�
 The binding implements the AMG88 provides a lean interface to retrieve the pixel array and to control the sensor. Any further processing, e.g. pattern recognition, is beyond the scope of the binding.
 <br/>
 
+### Operating Mode / Power Control
+The sensor supports four operating modes for controlling power consumption:
+* Normal
+* Sleep Mode
+* Stand-by with 60 seconds intermittence
+* Stand-by with 10 seconds intermittence
+
+*Note*: refer to the datasheet für further details
+
+*Note*: in sleep mode reading operations are not supported, writing operations are not supported except switching back to ```normal``` mode.
+<br/>
+
+### Reset
+The sensor software can be reset in two ways.
+* **Initial Reset:** Resets all flags and registers to default values
+* **Flag Reset:** Resets all flags (status register, interrupt flag, interrupt table)
+```
+public void InitialReset()
+public void FlagReset()
+```
+<br/>
+
 ### Sensor Status
 The sensor status indicates if any pixel or the chip internal thermistor overran the upper or lower limit. It also flags on the occurence of an interrupt. The status can be read out and reset per flag:
 ```
@@ -65,28 +87,6 @@ public void SetFrameRate(FrameRate)
 ```
 <br/>
 
-### Operating Mode / Power Control
-The sensor supports four operating modes for controlling power consumption:
-* Normal
-* Sleep Mode
-* Stand-by with 60 seconds intermittence
-* Stand-by with 10 seconds intermittence
-
-*Note*: refer to the datasheet für further details
-
-*Note*: in sleep mode reading operations are not supported, writing operations are not supported except switching back to ```normal``` mode.
-<br/>
-
-### Reset
-The sensor software can be reset in two ways.
-* **Initial Reset:** Resets all flags and registers to default values
-* **Flag Reset:** Resets all flags (status register, interrupt flag, interrupt table)
-```
-public void InitialReset()
-public void FlagReset()
-```
-<br/>
-
 ### Interrupt control, levels and pixel flags
 The sensor can raise an interrupt if any pixel passes a given value. The event is signaled by the interrupt flag of the status register. Additionally the INT pin of the sensor can be pulled low.
 
@@ -107,9 +107,8 @@ public Temperature GetInterruptHysteresisLevel()
 public Temperature SetInterruptHysteresisLevel()
 ```
 After the sensor raised an interrupt the triggering pixels can be readout from the interrupt table register.
-The table can be reset by performing a ```FlagReset()```.
 ```
-public bool[] GetInterruptFlagTable()
+public bool[,] GetInterruptFlagTable()
 ```
 <br/>
 

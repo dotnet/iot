@@ -525,15 +525,15 @@ namespace Iot.Device.Amg88xx.Tests
         }
 
         [Theory]
-        [InlineData(01, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0001 })]
-        [InlineData(10, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0010, 0b0000_0000 })]
-        [InlineData(19, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0100, 0b0000_0000, 0b0000_0000 })]
-        [InlineData(28, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_1000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
-        [InlineData(37, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0001_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
-        [InlineData(46, new byte[] { 0b0000_0000, 0b0000_0000, 0b0010_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
-        [InlineData(55, new byte[] { 0b0000_0000, 0b0100_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
-        [InlineData(64, new byte[] { 0b1000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
-        public void GetInterruptFlagTableTest(int expectedPixel, byte[] testData)
+        [InlineData(1, 1, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0001 })]
+        [InlineData(2, 2, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0010, 0b0000_0000 })]
+        [InlineData(3, 3, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0100, 0b0000_0000, 0b0000_0000 })]
+        [InlineData(4, 4, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_1000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
+        [InlineData(5, 5, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0001_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
+        [InlineData(6, 6, new byte[] { 0b0000_0000, 0b0000_0000, 0b0010_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
+        [InlineData(7, 7, new byte[] { 0b0000_0000, 0b0100_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
+        [InlineData(8, 8, new byte[] { 0b1000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
+        public void GetInterruptFlagTableTest(int expectedColumn, int expectedRow, byte[] testData)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
@@ -559,9 +559,13 @@ namespace Iot.Device.Amg88xx.Tests
                 Assert.Equal(address, i2cDevice.DataWritten.Dequeue());
             }
 
-            for (int pixel = 0; pixel < 64; pixel++)
+            for (int col = 0; col < Amg88xx.Columns; col++)
             {
-                Assert.Equal(pixel + 1 == expectedPixel, flags[pixel]);
+                for (int row = 0; row < Amg88xx.Rows; row++)
+                {
+                    Assert.Equal(col == expectedColumn - 1 && row == expectedRow - 1, flags[col, row]);
+
+                }
             }
         }
 
