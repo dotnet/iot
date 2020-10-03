@@ -4,9 +4,7 @@
 
 The [SparkFun](https://www.sparkfun.com) Qwiic Button is an [I2C](https://en.wikipedia.org/wiki/I%C2%B2C) based button with a built-in LED.
 
-In addition to handling blinking and debouncing, the Qwiic Button has configurable interrupts that can be configured to activate upon a button press or click.
-
-The Qwiic Button also contains a FIFO queue where it keeps an internal record of when the button was pressed.
+In addition to handling blinking and debouncing, the Qwiic Button has configurable interrupts that can be configured to activate upon a button press or click. The Qwiic Button also contains a FIFO queue where it keeps an internal record of when the button was pressed.
 
 ![Qwiic Button](./samples/15932-SparkFun_Qwiic_Button_-_Red-01.png)
 
