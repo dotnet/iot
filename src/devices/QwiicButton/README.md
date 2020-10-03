@@ -62,7 +62,7 @@ using (var button = new QwiicButton(i2cBusId: 1, i2cAddress: 111))
 
 ### Detect Button Is Pressed Using an Interrupt
 
-Interrupts are handled by a `GpioController` instance that listens for events on a GPIO pin.
+Interrupts are handled by a `GpioController` instance that detects changes on a GPIO pin.
 Below is an example that uses the Raspberry Pi's GPIO pin 23:
 
 ```c#
