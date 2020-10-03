@@ -39,6 +39,16 @@ namespace Iot.Device.Amg88xx
         /// </summary>
         public const int BytesPerPixel = 2;
 
+        /// <summary>
+        /// Temperature resolution of a pixel (in degrees celsius)
+        /// </summary>
+        public const double PixelTemperatureResolution = 0.25;
+
+        /// <summary>
+        /// Temperature resolution of thermistor (in degrees Celsius)
+        /// </summary>
+        public const double ThermistorTemperatureResolution = 0.0625;
+
         private I2cDevice _i2cDevice;
 
         /// <summary>
@@ -302,6 +312,27 @@ namespace Iot.Device.Amg88xx
             }
 
             SetRegister((byte)Register.INTC, value);
+        }
+
+        /// <summary>
+        /// Enables the interrupt pin of the AMG88xx sensor.
+        /// The pin is pulled down if an interrupt is active.
+        /// </summary>
+        public void EnableInterruptPin()
+        {
+            byte registerContent = GetRegister((byte)Register.INTC);
+            registerContent |= 0x01;
+            SetRegister((byte)Register.INTC, registerContent);
+        }
+
+        /// <summary>
+        /// Enables the interrupt pin of the AMG88xx sensor.
+        /// The pin is pulled down if an interrupt is active.
+        /// </summary>
+        public void DisableInterruptPin()
+        {
+            byte registerContent = GetRegister((byte)Register.INTC);
+            SetRegister((byte)Register.INTC, (byte)(registerContent & 0b1111_1110));
         }
 
         /// <summary>

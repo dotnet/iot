@@ -80,17 +80,14 @@ namespace Iot.Device.Amg88xx.Tests
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
-            // using a simple linear sequence of numbers as reference image:
-            //   0 to 126°C (0x1f8/504d)
             Temperature[,] referenceImage = new Temperature[Amg88xx.Columns, Amg88xx.Rows];
+            Random rnd = new Random();
             for (int y = 0; y < Amg88xx.Rows; y++)
             {
                 for (int x = 0; x < Amg88xx.Columns; x++)
                 {
-                    int rawValue = (y * Amg88xx.Columns + x) * 8;
-                    byte tl = (byte)(rawValue & 0xff);
-                    byte th = (byte)(rawValue >> 8);
-                    referenceImage[x, y] = Amg88xxUtils.ConvertToTemperature(tl, th);
+                    referenceImage[x, y] = Temperature.FromDegreesCelsius(rnd.Next(-80, 321) * Amg88xx.PixelTemperatureResolution);
+                    (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(referenceImage[x, y]);
                     i2cDevice.DataToRead.Enqueue(tl);
                     i2cDevice.DataToRead.Enqueue(th);
                 }

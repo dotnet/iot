@@ -112,6 +112,11 @@ public bool[,] GetInterruptFlagTable()
 ```
 <br/>
 
+**Note**
+* be aware that the interrupt flag in the status register is reset automatically if no pixel temperature exceeds the lower or upper threshold. It is <u>not</u> required to reset the flag manually.
+* any flag in the interrupt flag table is automatically reset if the corresponding pixel is no long exceed the lower or upper threshold.
+
+TRIFFT DAS NUR AUF DEN ABSOLUTE MODUS ZU
 
 ## References
 **Product Homepage**: https://industry.panasonic.eu/components/sensors/grid-eye
