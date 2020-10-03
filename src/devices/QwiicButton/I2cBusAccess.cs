@@ -8,6 +8,10 @@ using System.Runtime.InteropServices;
 
 namespace Iot.Device.QwiicButton
 {
+    /// <summary>
+    /// Encapsulates low-level access to read from and write to the provided
+    /// Qwiic Button device.
+    /// </summary>
     internal class I2cBusAccess : IDisposable
     {
         private I2cDevice _device;

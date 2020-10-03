@@ -30,6 +30,8 @@ The following [Fritzing](https://fritzing.org) diagram shows how to connect a Ra
 
 This binding is a port of SparkFun's [Qwiic Button Arduino Library](https://github.com/sparkfun/SparkFun_Qwiic_Button_Arduino_Library) (MIT licensed).
 
+The supported hardware version is 1.0.0.
+
 The functionality of the button is demonstrated in the samples. Below are code samples of some common usage scenarios.
 
 ### Detect Button Is Pressed Using Polling
