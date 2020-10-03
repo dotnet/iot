@@ -6,11 +6,19 @@ using System;
 using Iot.Device.Amg88xx;
 using UnitsNet;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Iot.Device.Amg88xx.Tests
 {
     public class Amg88xxTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public Amg88xxTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Fact]
         public void GetSensorTemperatureTest()
         {
@@ -515,6 +523,48 @@ namespace Iot.Device.Amg88xx.Tests
             Assert.Equal((byte)Register.INTSH, i2cDevice.DataWritten.Dequeue());
             Assert.Equal(refTh, i2cDevice.DataWritten.Dequeue());
         }
+
+        [Theory]
+        [InlineData(01, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0001 })]
+        [InlineData(10, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0010, 0b0000_0000 })]
+        [InlineData(19, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0100, 0b0000_0000, 0b0000_0000 })]
+        [InlineData(28, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_1000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
+        [InlineData(37, new byte[] { 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0001_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
+        [InlineData(46, new byte[] { 0b0000_0000, 0b0000_0000, 0b0010_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
+        [InlineData(55, new byte[] { 0b0000_0000, 0b0100_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
+        [InlineData(64, new byte[] { 0b1000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000 })]
+        public void GetInterruptFlagTableTest(int expectedPixel, byte[] testData)
+        {
+            I2cTestDevice i2cDevice = new I2cTestDevice();
+            Amg88xx sensor = new Amg88xx(i2cDevice);
+
+            // prepare register content (INT0 - INT7)
+            for (int i = 7; i >= 0; i--)
+            {
+                i2cDevice.DataToRead.Enqueue(testData[i]);
+            }
+
+            var flags = sensor.GetInterruptFlagTable();
+
+            Assert.Equal(8, i2cDevice.DataWritten.Count);
+
+            var expectedAddresses = new byte[]
+            {
+                (byte)Register.INT0, (byte)Register.INT1, (byte)Register.INT2, (byte)Register.INT3,
+                (byte)Register.INT4, (byte)Register.INT5, (byte)Register.INT6, (byte)Register.INT7,
+            };
+
+            foreach (byte address in expectedAddresses)
+            {
+                Assert.Equal(address, i2cDevice.DataWritten.Dequeue());
+            }
+
+            for (int pixel = 0; pixel < 64; pixel++)
+            {
+                Assert.Equal(pixel + 1 == expectedPixel, flags[pixel]);
+            }
+        }
+
         #endregion
     }
 }

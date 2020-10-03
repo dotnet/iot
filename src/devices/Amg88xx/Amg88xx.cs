@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Device.I2c;
 using UnitsNet;
 
@@ -270,7 +271,7 @@ namespace Iot.Device.Amg88xx
 
         #endregion
 
-        #region Interrupt control and levels
+        #region Interrupt control, levels and pixel flags
 
         /// <summary>
         /// Gets the interrupt mode
@@ -367,6 +368,37 @@ namespace Iot.Device.Amg88xx
             (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(temperature);
             SetRegister((byte)Register.INTSL, tl);
             SetRegister((byte)Register.INTSH, th);
+        }
+
+        /// <summary>
+        /// Gets the interrupt flags of all pixels.
+        /// </summary>
+        /// <returns>Interrupt flags</returns>
+        public bool[] GetInterruptFlagTable()
+        {
+            var addresses = new byte[]
+            {
+                (byte)Register.INT0, (byte)Register.INT1, (byte)Register.INT2, (byte)Register.INT3,
+                (byte)Register.INT4, (byte)Register.INT5, (byte)Register.INT6, (byte)Register.INT7,
+            };
+
+            var flagRegisters = new Queue<byte>();
+            foreach (byte address in addresses)
+            {
+                flagRegisters.Enqueue(GetRegister(address));
+            }
+
+            var flags = new Queue<bool>();
+            while (flagRegisters.Count > 0)
+            {
+                var flagRegister = flagRegisters.Dequeue();
+                for (int b = 0; b < 8; b++)
+                {
+                    flags.Enqueue((flagRegister & (1 << b)) > 0);
+                }
+            }
+
+            return flags.ToArray();
         }
         #endregion
 

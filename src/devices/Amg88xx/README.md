@@ -87,7 +87,7 @@ public void FlagReset()
 ```
 <br/>
 
-### Interrupt Control and Levels
+### Interrupt control, levels and pixel flags
 The sensor can raise an interrupt if any pixel passes a given value. The event is signaled by the interrupt flag of the status register. Additionally the INT pin of the sensor can be pulled low.
 
 ```
@@ -106,7 +106,13 @@ public Temperature SetInterruptUpperLevel()
 public Temperature GetInterruptHysteresisLevel()
 public Temperature SetInterruptHysteresisLevel()
 ```
+After the sensor raised an interrupt the triggering pixels can be readout from the interrupt table register.
+The table can be reset by performing a ```FlagReset()```.
+```
+public bool[] GetInterruptFlagTable()
+```
 <br/>
+
 
 ## References
 **Product Homepage**: https://industry.panasonic.eu/components/sensors/grid-eye
