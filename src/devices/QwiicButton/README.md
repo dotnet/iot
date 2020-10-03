@@ -2,7 +2,7 @@
 
 ## Summary
 
-The [SparkFun](https://www.sparkfun.com) Qwiic Button is an [I2C](https://en.wikipedia.org/wiki/I%C2%B2C) based button with a built-in LED.
+The [SparkFun](https://www.sparkfun.com) Qwiic Button is an [I²C](https://en.wikipedia.org/wiki/I%C2%B2C) based button with a built-in LED.
 
 In addition to handling blinking and debouncing, the Qwiic Button has configurable interrupts that can be configured to activate upon a button press or click. The Qwiic Button also contains a FIFO queue where it keeps an internal record of when the button was pressed.
 
@@ -12,13 +12,13 @@ At a glance:
 
 -   12mm LED button rated for 50mA
 -   Configurable LED blinking
--   Configurable I2C address
+-   Configurable I²C address
 -   Configurable interrupts
 -   FIFO queue
 
 ## Device Family
 
-Compatible with devices capable of acting as I2C master, such as the [Raspberry Pi](https://www.raspberrypi.org).
+Compatible with devices capable of acting as I²C master, such as the [Raspberry Pi](https://www.raspberrypi.org).
 
 ## Fritzing Diagram
 
