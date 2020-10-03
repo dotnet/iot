@@ -18,6 +18,10 @@ At a glance:
 -   Configurable interrupts
 -   FIFO queue
 
+## Source of Inspiration
+
+This binding is a port of SparkFun's [Qwiic Button C++ Arduino Library](https://github.com/sparkfun/SparkFun_Qwiic_Button_Arduino_Library) (MIT licensed).
+
 ## Device Family
 
 Compatible with devices capable of acting as I2C master, such as the [Raspberry Pi](https://www.raspberrypi.org).
