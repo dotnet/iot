@@ -1,4 +1,4 @@
-﻿# QwiicButton
+﻿# SparkFun Qwiic Button
 
 ## Summary
 
@@ -29,6 +29,10 @@ The following [Fritzing](https://fritzing.org) diagram shows how to connect a Ra
 ![Fritzing Diagram](./samples/QwiicButton-RPi4-Fritzing.png)
 
 ## Binding Notes
+
+The functionality of the button is demonstrated in the samples.
+
+Below are code samples of some common usage scenarios:
 
 ### Detect Button Is Pressed Using Polling
 
