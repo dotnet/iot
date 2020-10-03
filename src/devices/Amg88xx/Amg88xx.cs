@@ -75,7 +75,7 @@ namespace Iot.Device.Amg88xx
             {
                 for (int c = 0; c < Columns; c++)
                 {
-                    temperatureImage[c, r] = Amg88xxUtils.ConvertPixelReading((byte)(rawImage[c, r] & 0xff), (byte)(rawImage[c, r] >> 8));
+                    temperatureImage[c, r] = Amg88xxUtils.ConvertToTemperature((byte)(rawImage[c, r] & 0xff), (byte)(rawImage[c, r] >> 8));
                 }
             }
 
@@ -270,7 +270,7 @@ namespace Iot.Device.Amg88xx
 
         #endregion
 
-        #region Interrupt control
+        #region Interrupt control and levels
 
         /// <summary>
         /// Gets the interrupt mode
@@ -279,7 +279,7 @@ namespace Iot.Device.Amg88xx
         public InterruptMode GetInterruptMode()
         {
             // bit 1 represents the interrupt mode (not set: difference mode, set: absolute mode)
-            return GetRegister(((byte)Register.INTC) & 0b0000_0010) == 0 ? InterruptMode.DifferenceMode : InterruptMode.AbsoluteMode;
+            return (GetRegister((byte)Register.INTC) & 0b0000_0010) == 0 ? InterruptMode.DifferenceMode : InterruptMode.AbsoluteMode;
         }
 
         /// <summary>
@@ -303,6 +303,71 @@ namespace Iot.Device.Amg88xx
             SetRegister((byte)Register.INTC, value);
         }
 
+        /// <summary>
+        /// Gets the lower level interrupt temperature
+        /// </summary>
+        /// <returns>Temperature level</returns>
+        public Temperature GetInterruptLowerLevel()
+        {
+            byte tl = GetRegister((byte)Register.INTLL);
+            byte th = GetRegister((byte)Register.INTLH);
+            return Amg88xxUtils.ConvertToTemperature(tl, th);
+        }
+
+        /// <summary>
+        /// Sets the lower level interrupt temperature
+        /// </summary>
+        /// <param name="temperature">Temperature</param>
+        public void SetInterruptLowerLevel(Temperature temperature)
+        {
+            (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(temperature);
+            SetRegister((byte)Register.INTLL, tl);
+            SetRegister((byte)Register.INTLH, th);
+        }
+
+        /// <summary>
+        /// Gets the upper level interrupt temperature
+        /// </summary>
+        /// <returns>Temperature level</returns>
+        public Temperature GetInterruptUpperLevel()
+        {
+            byte tl = GetRegister((byte)Register.INTHL);
+            byte th = GetRegister((byte)Register.INTHH);
+            return Amg88xxUtils.ConvertToTemperature(tl, th);
+        }
+
+        /// <summary>
+        /// Sets the upper level interrupt temperature
+        /// </summary>
+        /// <param name="temperature">Temperature</param>
+        public void SetInterruptUpperLevel(Temperature temperature)
+        {
+            (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(temperature);
+            SetRegister((byte)Register.INTHL, tl);
+            SetRegister((byte)Register.INTHH, th);
+        }
+
+        /// <summary>
+        /// Gets the hysteresis level interrupt temperature
+        /// </summary>
+        /// <returns>Temperature level</returns>
+        public Temperature GetInterruptHysteresisLevel()
+        {
+            byte tl = GetRegister((byte)Register.INTSL);
+            byte th = GetRegister((byte)Register.INTSH);
+            return Amg88xxUtils.ConvertToTemperature(tl, th);
+        }
+
+        /// <summary>
+        /// Sets the hysteresis level interrupt temperature
+        /// </summary>
+        /// <param name="temperature">Temperature</param>
+        public void SetInterruptHysteresisLevel(Temperature temperature)
+        {
+            (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(temperature);
+            SetRegister((byte)Register.INTSL, tl);
+            SetRegister((byte)Register.INTSH, th);
+        }
         #endregion
 
         /// <inheritdoc />

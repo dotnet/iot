@@ -82,7 +82,7 @@ namespace Iot.Device.Amg88xx.Tests
                     int rawValue = (y * Amg88xx.Columns + x) * 8;
                     byte tl = (byte)(rawValue & 0xff);
                     byte th = (byte)(rawValue >> 8);
-                    referenceImage[x, y] = Amg88xxUtils.ConvertPixelReading(tl, th);
+                    referenceImage[x, y] = Amg88xxUtils.ConvertToTemperature(tl, th);
                     i2cDevice.DataToRead.Enqueue(tl);
                     i2cDevice.DataToRead.Enqueue(th);
                 }
@@ -403,6 +403,117 @@ namespace Iot.Device.Amg88xx.Tests
             Assert.Equal((byte)Register.INTC, i2cDevice.DataWritten.Dequeue());
             // bit 1 represents the interrupt mode (not set: difference mode, set: absolute mode)
             Assert.Equal(modeBitIsSet, (i2cDevice.DataWritten.Dequeue() & 0b0000_0010) != 0);
+        }
+
+        [Fact]
+        public void GetInterruptLowerLevelTest()
+        {
+            I2cTestDevice i2cDevice = new I2cTestDevice();
+            Amg88xx sensor = new Amg88xx(i2cDevice);
+
+            // prepare register content 0x01(INTLH)0x23(INTLL)
+            i2cDevice.DataToRead.Enqueue(0x23);
+            i2cDevice.DataToRead.Enqueue(0x01);
+
+            var temperature = sensor.GetInterruptLowerLevel();
+
+            Assert.Equal(2, i2cDevice.DataWritten.Count);
+            Assert.Equal((byte)Register.INTLL, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal((byte)Register.INTLH, i2cDevice.DataWritten.Dequeue());
+
+            Assert.Equal(Amg88xxUtils.ConvertToTemperature(0x23, 0x01).DegreesCelsius, temperature.DegreesCelsius);
+        }
+
+        [Fact]
+        public void SetInterruptLowerLevelTest()
+        {
+            I2cTestDevice i2cDevice = new I2cTestDevice();
+            Amg88xx sensor = new Amg88xx(i2cDevice);
+
+            Temperature refTemp = Temperature.FromDegreesCelsius(125);
+            sensor.SetInterruptLowerLevel(refTemp);
+
+            Assert.Equal(4, i2cDevice.DataWritten.Count);
+
+            (byte refTl, byte refTh) = Amg88xxUtils.ConvertFromTemperature(refTemp);
+            Assert.Equal((byte)Register.INTLL, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal(refTl, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal((byte)Register.INTLH, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal(refTh, i2cDevice.DataWritten.Dequeue());
+        }
+
+        [Fact]
+        public void GetInterruptUpperLevelTest()
+        {
+            I2cTestDevice i2cDevice = new I2cTestDevice();
+            Amg88xx sensor = new Amg88xx(i2cDevice);
+
+            // prepare register content 0x01(INTHH)0x23(INTHL)
+            i2cDevice.DataToRead.Enqueue(0x23);
+            i2cDevice.DataToRead.Enqueue(0x01);
+
+            var temperature = sensor.GetInterruptUpperLevel();
+
+            Assert.Equal(2, i2cDevice.DataWritten.Count);
+            Assert.Equal((byte)Register.INTHL, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal((byte)Register.INTHH, i2cDevice.DataWritten.Dequeue());
+
+            Assert.Equal(Amg88xxUtils.ConvertToTemperature(0x23, 0x01).DegreesCelsius, temperature.DegreesCelsius);
+        }
+
+        [Fact]
+        public void SetInterruptUpperLevelTest()
+        {
+            I2cTestDevice i2cDevice = new I2cTestDevice();
+            Amg88xx sensor = new Amg88xx(i2cDevice);
+
+            Temperature refTemp = Temperature.FromDegreesCelsius(125);
+            sensor.SetInterruptUpperLevel(refTemp);
+
+            Assert.Equal(4, i2cDevice.DataWritten.Count);
+
+            (byte refTl, byte refTh) = Amg88xxUtils.ConvertFromTemperature(refTemp);
+            Assert.Equal((byte)Register.INTHL, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal(refTl, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal((byte)Register.INTHH, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal(refTh, i2cDevice.DataWritten.Dequeue());
+        }
+
+        [Fact]
+        public void GetInterruptHysteresisLevelTest()
+        {
+            I2cTestDevice i2cDevice = new I2cTestDevice();
+            Amg88xx sensor = new Amg88xx(i2cDevice);
+
+            // prepare register content 0x01(INTSH)0x23(INTSL)
+            i2cDevice.DataToRead.Enqueue(0x23);
+            i2cDevice.DataToRead.Enqueue(0x01);
+
+            var temperature = sensor.GetInterruptHysteresisLevel();
+
+            Assert.Equal(2, i2cDevice.DataWritten.Count);
+            Assert.Equal((byte)Register.INTSL, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal((byte)Register.INTSH, i2cDevice.DataWritten.Dequeue());
+
+            Assert.Equal(Amg88xxUtils.ConvertToTemperature(0x23, 0x01).DegreesCelsius, temperature.DegreesCelsius);
+        }
+
+        [Fact]
+        public void SetInterruptHysteresisLevelTest()
+        {
+            I2cTestDevice i2cDevice = new I2cTestDevice();
+            Amg88xx sensor = new Amg88xx(i2cDevice);
+
+            Temperature refTemp = Temperature.FromDegreesCelsius(125);
+            sensor.SetInterruptHysteresisLevel(refTemp);
+
+            Assert.Equal(4, i2cDevice.DataWritten.Count);
+
+            (byte refTl, byte refTh) = Amg88xxUtils.ConvertFromTemperature(refTemp);
+            Assert.Equal((byte)Register.INTSL, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal(refTl, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal((byte)Register.INTSH, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal(refTh, i2cDevice.DataWritten.Dequeue());
         }
         #endregion
     }
