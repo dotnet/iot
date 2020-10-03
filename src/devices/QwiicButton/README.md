@@ -65,7 +65,7 @@ Below is an example that uses the Raspberry Pi's GPIO pin 23:
 ```c#
 private QwiicButton _button;
 
-public void Run(QwiicButton button)
+public void Run()
 {
     using (_button = new QwiicButton(i2cBusId: 1, i2cAddress: 111))
     {
