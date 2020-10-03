@@ -18,10 +18,6 @@ At a glance:
 -   Configurable interrupts
 -   FIFO queue
 
-## Source of Inspiration
-
-This binding is a port of SparkFun's [Qwiic Button C++ Arduino Library](https://github.com/sparkfun/SparkFun_Qwiic_Button_Arduino_Library) (MIT licensed).
-
 ## Device Family
 
 Compatible with devices capable of acting as I2C master, such as the [Raspberry Pi](https://www.raspberrypi.org).
@@ -34,9 +30,9 @@ The following [Fritzing](https://fritzing.org) diagram shows how to connect a Ra
 
 ## Binding Notes
 
-The functionality of the button is demonstrated in the samples.
+This binding is a port of SparkFun's [Qwiic Button Arduino Library](https://github.com/sparkfun/SparkFun_Qwiic_Button_Arduino_Library) (MIT licensed).
 
-Below are code samples of some common usage scenarios:
+The functionality of the button is demonstrated in the samples. Below are code samples of some common usage scenarios.
 
 ### Detect Button Is Pressed Using Polling
 
@@ -67,7 +63,6 @@ using (var button = new QwiicButton(i2cBusId: 1, i2cAddress: 111))
 ### Detect Button Is Pressed Using an Interrupt
 
 Interrupts are handled by a `GpioController` instance that listens for events on a GPIO pin.
-
 Below is an example that uses the Raspberry Pi's GPIO pin 23:
 
 ```c#
@@ -78,7 +73,7 @@ public void Run()
     using (_button = new QwiicButton(i2cBusId: 1, i2cAddress: 111))
     {
         Initialize();
-        Console.ReadKey();
+        Console.ReadKey(); // Block the thread and wait for OnValueChanged to be invoked
     }
 }
 
