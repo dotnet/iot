@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device.Gpio;
 using System.Device.I2c;
 using System.Threading;
 using UnitsNet;
@@ -22,6 +23,23 @@ namespace Iot.Device.Amg88xx.Samples
             const int I2cBus = 1;
             I2cConnectionSettings i2cSettings = new I2cConnectionSettings(I2cBus, Amg88xx.AlternativeDeviceAddress);
             I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
+
+            GpioController ioController = new GpioController();
+            ioController.OpenPin(6, PinMode.Output);
+            ioController.OpenPin(5, PinMode.Input);
+
+            ioController.Write(6, PinValue.Low);
+
+            ioController.RegisterCallbackForPinValueChangedEvent(5, PinEventTypes.Falling, (s, e) =>
+            {
+                ioController.Write(6, PinValue.High);
+            });
+
+            ioController.RegisterCallbackForPinValueChangedEvent(5, PinEventTypes.Rising, (s, e) =>
+            {
+                ioController.Write(6, PinValue.Low);
+            });
+
             Amg88xx amg88xx = new Amg88xx(i2cDevice);
 
             // Factory defaults

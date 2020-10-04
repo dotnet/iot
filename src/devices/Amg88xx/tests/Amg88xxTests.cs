@@ -410,6 +410,44 @@ namespace Iot.Device.Amg88xx.Tests
             Assert.Equal(modeBitIsSet, (i2cDevice.DataWritten.Dequeue() & 0b0000_0010) != 0);
         }
 
+        [Theory]
+        [InlineData(0b0000_0000, 0b0000_0001)]
+        [InlineData(0b0000_0010, 0b0000_0011)]
+        public void EnableInterruptPinTest(byte registerContentBefore, byte registerContentWritten)
+        {
+            I2cTestDevice i2cDevice = new I2cTestDevice();
+            Amg88xx sensor = new Amg88xx(i2cDevice);
+
+            i2cDevice.DataToRead.Enqueue(registerContentBefore);
+
+            sensor.EnableInterruptPin();
+
+            Assert.Equal(3, i2cDevice.DataWritten.Count);
+            // register address is expected two times: once for reading the current register value and once for writing the new one
+            Assert.Equal((byte)Register.INTC, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal((byte)Register.INTC, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal(registerContentWritten, i2cDevice.DataWritten.Dequeue());
+        }
+
+        [Theory]
+        [InlineData(0b0000_0001, 0b0000_0000)]
+        [InlineData(0b0000_0011, 0b0000_0010)]
+        public void DisableInterruptPinTest(byte registerContentBefore, byte registerContentWritten)
+        {
+            I2cTestDevice i2cDevice = new I2cTestDevice();
+            Amg88xx sensor = new Amg88xx(i2cDevice);
+
+            i2cDevice.DataToRead.Enqueue(registerContentBefore);
+
+            sensor.DisableInterruptPin();
+
+            Assert.Equal(3, i2cDevice.DataWritten.Count);
+            // register address is expected two times: once for reading the current register value and once for writing the new one
+            Assert.Equal((byte)Register.INTC, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal((byte)Register.INTC, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal(registerContentWritten, i2cDevice.DataWritten.Dequeue());
+        }
+
         [Fact]
         public void GetInterruptLowerLevelTest()
         {
