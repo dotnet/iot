@@ -7,3 +7,8 @@ There are AMG88xx breakout boards available from a variety of the known vendors.
 
 ## Wiring
 For demonstration purpose the INT-pin of the sensor ist connected to GPIO PIN05 of the RPi. Additionally an LED is connected to GPIO PIN06 of the RPi.
+
+![Wiring of a sensor breakout and LED for the sample](./amg8833sample.png)
+
+## Funtional description of the sample
+
