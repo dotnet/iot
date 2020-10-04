@@ -178,7 +178,7 @@ namespace Iot.Device.Amg88xx
         /// <summary>
         /// Clears the status register.
         /// </summary>
-        public void ClearAllStatus()
+        public void ClearAllFlags()
         {
             _i2cDevice.WriteByte((byte)Register.SCLR);
             _i2cDevice.WriteByte((byte)(StatusFlag.INTF | StatusFlag.OVF_IRS | StatusFlag.OVF_THS));
