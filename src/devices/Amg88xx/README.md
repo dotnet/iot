@@ -1,10 +1,13 @@
 ﻿# AMG88xx Infrared Array Sensor Family
 
 ## Summary
-The AMG88xx family of infrared array sensors supports temperature detection on a two dimensional area with 8×8 (64) thermophile sensor pixels. The sensor is an IT camera with a viewing field angle of 60°, a 7.5° view angle per pixel and a detection distance up to 5 to 7m. The resolution is 0.25°C per pixel.
-The manufacturer (Panasonic) names the following applications:  Home appliances (Microwaves and air-conditioners), Building automation (People counting, Air conditioning control), Home automation (People detection), Factory automation (Fault prevention). The sensor delivers a heat image through its digital interface (I2C) at a rate of 1 or 10 frames per second.
+The AMG88xx family of infrared array sensors has 64 thermophile pixels arranged in an 8×8 matrix. The sensor works as a thermal infrared camera. It can detect objects (e.g. human bodies) from a distance of up 5-7m. A pixel can measure object temperatures in a range of 0 to 80°C / -20 to 100°C with a resolution of 0.25°C and an accuracy of ±2.5°C / ±4.5°C. The sensor has a view field angle of 60° and a 7.5° view angle per pixel.
+
+The manufacturer (Panasonic) names the following applications: home appliances (microwaves and air-conditioners), building automation (people counting, air conditioning control), home automation (people detection), factory automation (fault prevention). The sensor delivers a heat image through its digital interface (I2C) at a rate of 1 or 10 frames per second.
+Additionally an interrupt pin can raise an event when any individual pixel goes above or below a configured threshold.
 <br/><br/>
-![Illustration of thermophile array and heat map](./amg88xx.png)
+![Illustration of thermophile pixel array and heat map](./amg88xx.png)
+*Illustration of thermophile pixel array and heat map*
 <br/><br/>
 
 
@@ -12,46 +15,50 @@ The manufacturer (Panasonic) names the following applications:  Home appliances 
 **AMG88**: https://industrial.panasonic.com/cdbs/www-data/pdf/ADI8000/ADI8000COL13.pdf
 
 The family consists of 4 members:
-|Type   |Resolution|Gain |Vcc|Obj. Temp. Range|Resolution|
-|-------|----------|-----|---|----------------|----------|
-|AMG8833| 8x8      | High|3V3|0-80°C          |0.25°C    |
-|AMG8834| 8x8      | Low |3V3|-20-100°C       |0.25°C    |
-|AMG8853| 8x8      | High|5V0|0-80°C          |0.25°C    |
-|AMG8854| 8x8      | Low |5V0|-20-100°C       |0.25°C    |
+|Type   |Resolution|Gain |Vcc|Obj. Temp. Range|Resolution|Accuracy|
+|-------|----------|-----|---|----------------|----------|--------|
+|AMG8833| 8x8      | High|3V3|0-80°C          |0.25°C    |±2.5°C  |
+|AMG8834| 8x8      | Low |3V3|-20-100°C       |0.25°C    |±4.5°C  |
+|AMG8853| 8x8      | High|5V0|0-80°C          |0.25°C    |±2.5°C  |
+|AMG8854| 8x8      | Low |5V0|-20-100°C       |0.25°C    |±4.5°C  |
 
 <br/>
-The sensor is also equiped with an on-chip thermistor which can be read out, too.
+The sensor is equipped with an on-chip thermistor which can be read out.
 The thermistor has a measurement range of -20...80°C at a resolution of 0.0625°C.
 <br/><br/>
 
 ## Binding Notes
-The binding implements the AMG88 provides a lean interface to retrieve the pixel array and to control the sensor. Any further processing, e.g. pattern recognition, is beyond the scope of the binding.
-<br/>
+The Amg88xx binding provides a lean interface to retrieve the pixel array and to control the sensor. All sensor functions are covered. Any further processing, e.g. pattern recognition, is beyond the scope of the binding.
+<br/><br/>
 
 ### Operating Mode / Power Control
-The sensor supports four operating modes for controlling power consumption:
+The sensor supports four operating modes to control power consumption:
 * Normal
 * Sleep Mode
 * Stand-by with 60 seconds intermittence
 * Stand-by with 10 seconds intermittence
 
-*Note*: refer to the datasheet für further details
+```
+public OperatingMode GetOperatingMode()
+public void SetOperatingMode(OperatingMode operatingMode)
+```
 
-*Note*: in sleep mode reading operations are not supported, writing operations are not supported except switching back to ```normal``` mode.
-<br/>
+*Note*: refer to the reference specification for further details on mode transitions and sensor behavior.
+<br/><br/>
 
 ### Reset
-The sensor software can be reset in two ways.
+The sensor software can be reset in two extends.
 * **Initial Reset:** Resets all flags and registers to default values
 * **Flag Reset:** Resets all flags (status register, interrupt flag, interrupt table)
 ```
 public void InitialReset()
 public void FlagReset()
 ```
-<br/>
+*Note*: resetting the interrupt related flags is only required if you want to clear flags while the readings are still within the hysteresis span. See interrupts section for further details on interrupt behavior.
+<br/><br/>
 
 ### Sensor Status
-The sensor status indicates if any pixel or the chip internal thermistor overran the upper or lower limit. It also flags on the occurence of an interrupt. The status can be read out and reset per flag:
+The sensor status indicates if any pixel or the chip internal thermistor overran the upper or lower operating range limit. It also flags on the occurrence of an interrupt. The status can be read out and reset per flag:
 ```
 public bool HasTemperatureOverflow()
 public void ClearTemperatureOverflow()
@@ -62,30 +69,41 @@ public void ClearThermistorOverflow()
 public bool HasInterrupt()
 public void ClearInterrupt()
 
-public void ClearAllStatus()
+public void ClearAllFlags()
 ```
-<br/>
-
-### Moving average
-The sensor can be switched into a moving average mode. In this mode the sensor builds the twice moving average for each pixel. The moving average mode can be applied for both frame rates, 1 fps and 10 fps. If the sensor frame rate is set to 10 fps (default) it takes the average of the readings n and n+1 and yields their average as output. If the sensor operates at 1 fps it takes the readings of 10 frames (as the sensor runs internally always at 10 fps) and builds their average. This is done twice, resulting in a final average which is used for the pixel output.
-The noise per pixel will decrease to 1/sqrt2 by using the moving average mode.
-
-```
-public bool GetMovingAverageMode()
-public void SetMovingAverageMode(bool mode)
-```
-***Important***: the reference specification states that the current mode can be read, but this seems that is not working at the time being. The bit is always read as 0.
-
-<br/>
+*Note*: resetting the interrupt flag is only required if you want to clear flags while the readings are still within the hysteresis span. See interrupts section for further details on interrupt behavior.
+<br/><br/>
 
 ### Frame Rate
-The sensor supports a frame rates of 1 FPS and 10 FPS. The default value is 10 frames per second.
-
+The sensor supports frame rates of 1fps and 10fps.<br/>
+**Default:** 10fps
 ```
 public FrameRate GetFrameRate()
 public void SetFrameRate(FrameRate)
 ```
 <br/>
+
+### Moving average
+The sensor supports a moving average mode. In this mode it builds the twice moving average for each pixel.
+* If the frame rate is set to 10fps the sensor takes the average of the readings *n* and *n+1* and yields their average as output.
+* If the frame rate is set to 1fps the sensor takes the readings of 10 frames (as the sensor runs internally always at 10fps) and builds the average.
+The average of two averages of 10 readings is the resulting output.
+
+The noise per pixel will decrease to 1/sqrt2 when using the moving average mode.<br/>
+**Default:** off
+```
+public bool GetMovingAverageMode()
+public void SetMovingAverageMode(bool mode)
+```
+***Important***: the reference specification states that the current mode can be read, but it seems that is not working at the time being. The bit is always read as 0.
+<br/><br/>
+
+### Thermal image / Pixel array
+The temperature readings of the pixel array can be read as a thermal image with 64 pixels arranged in an 8x8 matrix.
+The pixel array can be readout at any time and speed. However, the sensor updates the corresponding registers depending on the configured frame rate.
+<br/><br/>
+**Note:** there is no statement in the reference specification w.r.t. the synchronization between an update of the pixel registers and the readout operation. So, you may readout pixel data from two subsequent frames in one readout operation. However, for normal application this shouldn't be relevant.
+
 
 ### Interrupt control, levels and pixel flags
 The sensor can raise an interrupt if any pixel passes a given value. The event is signaled by the interrupt flag of the status register. Additionally the INT pin of the sensor can be pulled low.

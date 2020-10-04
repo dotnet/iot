@@ -208,12 +208,12 @@ namespace Iot.Device.Amg88xx.Tests
         }
 
         [Fact]
-        public void ClearAllStatusTest()
+        public void ClearAllFlagsTest()
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
-            sensor.ClearAllStatus();
+            sensor.ClearAllFlags();
 
             Assert.Equal(2, i2cDevice.DataWritten.Count);
             Assert.Equal((byte)Register.SCLR, i2cDevice.DataWritten.Dequeue());
