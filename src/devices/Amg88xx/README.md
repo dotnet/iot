@@ -31,6 +31,24 @@ The thermistor has a measurement range of -20...80Â°C at a resolution of 0.0625Â
 The Amg88xx binding provides a lean interface to retrieve the pixel array and to control the sensor. All sensor functions are covered. Any further processing, e.g. pattern recognition, is beyond the scope of the binding.
 <br/><br/>
 
+### Thermal image / Pixel array
+The temperature readings of the pixel array can be read as a thermal image with 64 pixels arranged in an 8x8 matrix.
+The pixel array can be readout at any time and speed. However, the sensor updates the corresponding registers depending on the configured frame rate.
+<br/>The sensor has an integrated thermistor which can be readout, too.
+environmental temperature.
+<br/><br/>
+The binding supports getting a thermal image as a two dimensional array in a floating point or two's complement representation of each pixels temperature.
+```
+public Temperature[,] GetThermalImage()
+public int[,] GetRawImage()
+```
+**Note:** there is no statement in the reference specification regarding the synchronization between an update of the pixel registers and the readout operation. So, you may readout pixel data from two subsequent frames in one readout operation. However, for normal application this shouldn't be relevant.
+<br/><br/>
+```
+public Temperature GetSensorTemperature()
+```
+**Note**: the thermistor temperature is <u>not</u> equivalent to the
+<br/><br/>
 ### Operating Mode / Power Control
 The sensor supports four operating modes to control power consumption:
 * Normal
@@ -75,8 +93,8 @@ public void ClearAllFlags()
 <br/><br/>
 
 ### Frame Rate
+**Default:** 10fps<br/>
 The sensor supports frame rates of 1fps and 10fps.<br/>
-**Default:** 10fps
 ```
 public FrameRate GetFrameRate()
 public void SetFrameRate(FrameRate)
@@ -84,13 +102,19 @@ public void SetFrameRate(FrameRate)
 <br/>
 
 ### Moving average
+**Default:** off<br/>
 The sensor supports a moving average mode. In this mode it builds the twice moving average for each pixel.
 * If the frame rate is set to 10fps the sensor takes the average of the readings *n* and *n+1* and yields their average as output.
 * If the frame rate is set to 1fps the sensor takes the readings of 10 frames (as the sensor runs internally always at 10fps) and builds the average.
 The average of two averages of 10 readings is the resulting output.
 
+<br/>
+
+![Moving average principle](./movingavg.png)
+<br/>*Moving Average*
+<br/>
+
 The noise per pixel will decrease to 1/sqrt2 when using the moving average mode.<br/>
-**Default:** off
 ```
 public bool GetMovingAverageMode()
 public void SetMovingAverageMode(bool mode)
@@ -98,11 +122,7 @@ public void SetMovingAverageMode(bool mode)
 ***Important***: the reference specification states that the current mode can be read, but it seems that is not working at the time being. The bit is always read as 0.
 <br/><br/>
 
-### Thermal image / Pixel array
-The temperature readings of the pixel array can be read as a thermal image with 64 pixels arranged in an 8x8 matrix.
-The pixel array can be readout at any time and speed. However, the sensor updates the corresponding registers depending on the configured frame rate.
-<br/><br/>
-**Note:** there is no statement in the reference specification w.r.t. the synchronization between an update of the pixel registers and the readout operation. So, you may readout pixel data from two subsequent frames in one readout operation. However, for normal application this shouldn't be relevant.
+
 
 
 ### Interrupt control, levels and pixel flags
@@ -112,7 +132,7 @@ The sensor can raise an interrupt if any pixel passes a given value. The event i
 public void GetInterruptModeTest(InterruptMode expectedMode, byte registerValue)
 public void SetInterruptModeTest(InterruptMode mode, bool modeBitIsSet)
 ```
-The interrupt levels can be configured using the Interrupt Level register. Both lower limit, upper limit, and the hysteresis level can be set and read. Initially the register is filled with zeroes. The levels apply to all pixels.
+The interrupt levels can be configured. The lower and upper limit as well as the hysteresis level can be set and read. Initially the register is filled with zeros. The levels apply to all pixels equally.
 
 ```
 public Temperature GetInterruptLowerLevel()
@@ -133,8 +153,8 @@ public bool[,] GetInterruptFlagTable()
 **Note**
 * be aware that the interrupt flag in the status register is reset automatically if no pixel temperature exceeds the lower or upper threshold. It is <u>not</u> required to reset the flag manually.
 * any flag in the interrupt flag table is automatically reset if the corresponding pixel is no long exceed the lower or upper threshold.
-
-TRIFFT DAS NUR AUF DEN ABSOLUTE MODUS ZU
+* if a hysteresis level is applied and the reading of a pixel is not passing the threshold anymore, while at the same time the reading is still within the hysteresis span, the interrupt flag can be cleared by using the ```FlagReset``` method.
+<br/><br/>
 
 ## References
 **Product Homepage**: https://industry.panasonic.eu/components/sensors/grid-eye

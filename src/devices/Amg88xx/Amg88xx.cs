@@ -10,27 +10,29 @@ using UnitsNet;
 namespace Iot.Device.Amg88xx
 {
     /// <summary>
-    /// Add documentation here
+    /// Binding for the AMG88xx family of infrared array sensors
     /// </summary>
     public class Amg88xx : IDisposable
     {
         /// <summary>
-        /// Standard device address (AD_SELECT pin is low, c.f. reference specification, pg. 11)
+        /// Standard device address
+        /// (AD_SELECT pin is low, c.f. reference specification, pg. 11)
         /// </summary>
         public const int DeviceAddress = 0x68;
 
         /// <summary>
-        /// Alternative device address (AD_SELECT pin is high, c.f. reference specification, pg. 11)
+        /// Alternative device address
+        /// (AD_SELECT pin is high, c.f. reference specification, pg. 11)
         /// </summary>
         public const int AlternativeDeviceAddress = 0x69;
 
         /// <summary>
-        /// Number of columns of the sensor array
+        /// Number of sensor pixel array columns
         /// </summary>
         public const int Columns = 0x8;
 
         /// <summary>
-        /// Number of rows of the sensor array
+        /// Number of sensor pixel array rows
         /// </summary>
         public const int Rows = 0x8;
 
@@ -38,16 +40,6 @@ namespace Iot.Device.Amg88xx
         /// Number of bytes per pixel
         /// </summary>
         public const int BytesPerPixel = 2;
-
-        /// <summary>
-        /// Temperature resolution of a pixel (in degrees celsius)
-        /// </summary>
-        public const double PixelTemperatureResolution = 0.25;
-
-        /// <summary>
-        /// Temperature resolution of thermistor (in degrees Celsius)
-        /// </summary>
-        public const double ThermistorTemperatureResolution = 0.0625;
 
         private I2cDevice _i2cDevice;
 
@@ -59,51 +51,49 @@ namespace Iot.Device.Amg88xx
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
         }
 
-        /// <summary>
-        /// Gets the temperature reading from the sensor's internal thermistor.
-        /// </summary>
-        /// <returns>Temperature reading</returns>
-        public Temperature GetSensorTemperature()
-        {
-            _i2cDevice.WriteByte((byte)Register.TTHL);
-            byte tthl = _i2cDevice.ReadByte();
-            _i2cDevice.WriteByte((byte)Register.TTHH);
-            byte tthh = _i2cDevice.ReadByte();
-
-            return Amg88xxUtils.ConvertThermistorReading(tthl, tthh);
-        }
+        #region Infrared sensor
 
         /// <summary>
-        /// Gets the current thermal image from the sensor as temperature per pixel.
+        /// Gets the current thermal image.
         /// </summary>
-        /// <returns>Thermal image</returns>
+        /// <returns>Array of pixel temperatures [column, row]</returns>
         public Temperature[,] GetThermalImage()
         {
-            var rawImage = GetRawImage();
-            var temperatureImage = new Temperature[Columns, Rows];
+            // the readout process gets triggered by writing to pixel 0 of the sensor w/o any additional data
+            _i2cDevice.WriteByte((byte)Register.T01L);
 
+            Span<byte> buffer = stackalloc byte[Rows * Columns * BytesPerPixel];
+            _i2cDevice.Read(buffer);
+
+            var image = new Temperature[Columns, Rows];
+
+            int idx = 0;
             for (int r = 0; r < Rows; r++)
             {
                 for (int c = 0; c < Columns; c++)
                 {
-                    temperatureImage[c, r] = Amg88xxUtils.ConvertToTemperature((byte)(rawImage[c, r] & 0xff), (byte)(rawImage[c, r] >> 8));
+                    byte tl = buffer[idx++];
+                    byte th = buffer[idx++];
+                    image[c, r] = Amg88xxUtils.ConvertToTemperature(tl, th);
                 }
             }
 
-            return temperatureImage;
+            return image;
         }
 
         /// <summary>
-        /// Gets the current thermal image from the sensor as 12-bit two's complement per pixel.
+        /// Gets the current raw thermal image from the sensor.
         /// </summary>
-        /// <returns>Thermal image</returns>
-        public int[,] GetRawImage()
+        /// <returns>Thermal image in two's complement representation</returns>
+        public int[,] GetThermalRawImage()
         {
-            var image = new int[Columns, Rows];
-
+            // the readout process gets triggered by writing to pixel 0 of the sensor w/o any additional data
             _i2cDevice.WriteByte((byte)Register.T01L);
+
             Span<byte> buffer = stackalloc byte[Rows * Columns * BytesPerPixel];
             _i2cDevice.Read(buffer);
+
+            var image = new int[Columns, Rows];
 
             int idx = 0;
             for (int r = 0; r < Rows; r++)
@@ -119,69 +109,82 @@ namespace Iot.Device.Amg88xx
             return image;
         }
 
+        /// <summary>
+        /// Gets the temperature reading from the internal thermistor.
+        /// </summary>
+        /// <returns>Temperature reading</returns>
+        public Temperature GetSensorTemperature()
+        {
+            byte tthl = GetRegister(Register.TTHL);
+            byte tthh = GetRegister(Register.TTHH);
+            return Amg88xxUtils.ConvertThermistorReading(tthl, tthh);
+        }
+
+        #endregion
+
         #region Status
 
         /// <summary>
-        /// Gets the temperature overflow flag from the status register.
+        /// Gets the temperature overflow flag from the status register
         /// </summary>
         /// <returns>Temperature overflow flag</returns>
         public bool HasTemperatureOverflow()
         {
-            _i2cDevice.WriteByte((byte)Register.STAT);
-            return (_i2cDevice.ReadByte() & (byte)StatusFlag.OVF_IRS) != 0;
+            return GetBit(Register.STAT, (byte)StatusFlagBit.OVF_IRS);
         }
 
         /// <summary>
-        /// Clears the temperature overflag of the status register.
+        /// Clears the temperature overflow flag in the status register
         /// </summary>
         public void ClearTemperatureOverflow()
         {
-            SetRegister((byte)Register.SCLR, (byte)StatusFlag.OVF_IRS);
+            // only the bit to be cleared is set, the other bits need to be 0
+            SetRegister(Register.SCLR, 1 << (byte)StatusClearBit.OVFCLR);
         }
 
         /// <summary>
-        /// Gets the thermistor overflow flag from the status register.
+        /// Gets the thermistor overflow flag from the status register
         /// </summary>
         /// <returns>Thermistor overflow flag</returns>
         public bool HasThermistorOverflow()
         {
-            _i2cDevice.WriteByte((byte)Register.STAT);
-            return (_i2cDevice.ReadByte() & (byte)StatusFlag.OVF_THS) != 0;
+            return GetBit(Register.STAT, (byte)StatusFlagBit.OVF_THS);
         }
 
         /// <summary>
-        /// Clears the thermistor overflag of the status register.
+        /// Clears the thermistor overflow flag in the status register
         /// </summary>
         public void ClearThermistorOverflow()
         {
-            SetRegister((byte)Register.SCLR, (byte)StatusFlag.OVF_THS);
+            // only the bit to be cleared is set, the other bits need to be 0
+            SetRegister(Register.SCLR, 1 << (byte)StatusClearBit.OVFTHCLR);
         }
 
         /// <summary>
-        /// Gets the interrupt flag from the status register.
+        /// Gets the interrupt flag from the status register
         /// </summary>
         /// <returns>Interrupt flag</returns>
         public bool HasInterrupt()
         {
-            _i2cDevice.WriteByte((byte)Register.STAT);
-            return (_i2cDevice.ReadByte() & (byte)StatusFlag.INTF) != 0;
+            return GetBit(Register.STAT, (byte)StatusFlagBit.INTF);
         }
 
         /// <summary>
-        /// Clears the interrupt flag of the status register.
+        /// Clears the interrupt flag in the status register
         /// </summary>
         public void ClearInterrupt()
         {
-            SetRegister((byte)Register.SCLR, (byte)StatusFlag.INTF);
+            // only the bit to be cleared is set, the other bits need to be 0
+            SetRegister(Register.SCLR, 1 << (byte)StatusClearBit.INTCLR);
         }
 
         /// <summary>
-        /// Clears the status register.
+        /// Clears all flags in the status register
         /// </summary>
         public void ClearAllFlags()
         {
-            _i2cDevice.WriteByte((byte)Register.SCLR);
-            _i2cDevice.WriteByte((byte)(StatusFlag.INTF | StatusFlag.OVF_IRS | StatusFlag.OVF_THS));
+            // only the bit to be cleared is set, the other bits need to be 0
+            SetRegister(Register.SCLR, (1 << (byte)StatusClearBit.OVFCLR) | (1 << (byte)StatusClearBit.OVFTHCLR) | (1 << (byte)StatusClearBit.INTCLR));
         }
 
         #endregion
@@ -189,24 +192,21 @@ namespace Iot.Device.Amg88xx
         #region Moving average
 
         /// <summary>
-        /// Get the state of the moving average mode.
+        /// Get the state of the moving average mode
         /// </summary>
-        /// <returns>True, if moving average is active</returns>
-        public bool GetMovingAverageMode()
+        /// <returns>True, if moving average mode is on</returns>
+        public bool GetMovingAverageModeState()
         {
-            _i2cDevice.WriteByte((byte)Register.AVE);
-            // if bit 5 of AVE register is set average mode is on
-            return (_i2cDevice.ReadByte() & 0b0001_0000) != 0;
+            return GetBit(Register.AVE, (byte)MovingAverageModeBit.MAMOD);
         }
 
         /// <summary>
-        /// Sets the moving average mode.
+        /// Sets the moving average mode state.
         /// </summary>
-        /// <param name="mode">True, to switch moving average on</param>
-        public void SetMovingAverageMode(bool mode)
+        /// <param name="state">True, to switch moving average on</param>
+        public void SetMovingAverageModeState(bool state)
         {
-            // bit 5: if set, average mode is on
-            SetRegister((byte)Register.AVE, (byte)(mode ? 0b0001_0000 : 0));
+            SetBit(Register.AVE, (byte)MovingAverageModeBit.MAMOD, state);
         }
 
         #endregion
@@ -216,35 +216,37 @@ namespace Iot.Device.Amg88xx
         /// <summary>
         /// Get the current frame rate.
         /// </summary>
-        /// <returns>Frame rate (1 or 10 fps) </returns>
-        public FrameRate GetFrameRate()
+        /// <returns>Frame rate (either 1 or 10fps) </returns>
+        public int GetFrameRate()
         {
-            _i2cDevice.WriteByte((byte)Register.FPSC);
-            // if bit 0 of FPSC register is set the frame rate is 1 otherwise 10 fps.
-            return (_i2cDevice.ReadByte() & 0b0000_0001) != 0 ? FrameRate.FPS1 : FrameRate.FPS10;
+            return GetBit(Register.FPSC, (byte)FrameRateBit.FPS) ? 1 : 10;
         }
 
         /// <summary>
-        /// Sets the frame rate (1 or 10 fps).
+        /// Sets the frame rate (either 1 or 10fps).
         /// </summary>
         /// <param name="frameRate">Frame rate</param>
-        public void SetFrameRate(FrameRate frameRate)
+        /// <exception cref="ArgumentException">Thrown when attempting to set a frame rate other than 1 or 10</exception>
+        public void SetFrameRate(int frameRate)
         {
-            // if bit 0 of FPSC register is set the frame rate is 1 otherwise 10 fps.
-            SetRegister((byte)Register.FPSC, (byte)(frameRate == FrameRate.FPS1 ? 0b0000_0001 : 0));
+            if (frameRate != 1 && frameRate != 10)
+            {
+                throw new ArgumentException("Frame rate must either be 1 or 10.", nameof(frameRate));
+            }
+
+            SetBit(Register.FPSC, (byte)FrameRateBit.FPS, frameRate == 1);
         }
         #endregion
 
         #region Operating Mode / Power Control
 
         /// <summary>
-        /// Get the current operating mode.
+        /// Gets the current operating mode
         /// </summary>
         /// <returns>Operating mode</returns>
         public OperatingMode GetOperatingMode()
         {
-            _i2cDevice.WriteByte((byte)Register.PCLT);
-            return (OperatingMode)_i2cDevice.ReadByte();
+            return (OperatingMode)GetRegister(Register.PCLT);
         }
 
         /// <summary>
@@ -253,7 +255,7 @@ namespace Iot.Device.Amg88xx
         /// <param name="operatingMode">Operating mode</param>
         public void SetOperatingMode(OperatingMode operatingMode)
         {
-            SetRegister((byte)Register.PCLT, (byte)operatingMode);
+            SetRegister(Register.PCLT, (byte)operatingMode);
         }
         #endregion
 
@@ -266,17 +268,17 @@ namespace Iot.Device.Amg88xx
         public void InitialReset()
         {
             // an initial reset (factory defaults) is initiated by writing 0x3f into the reset register (RST)
-            SetRegister((byte)Register.RST, 0x3f);
+            SetRegister(Register.RST, (byte)ResetType.Initial);
         }
 
         /// <summary>
-        /// Performs a reset of all flags.
+        /// Performs a reset of all flags
         /// </summary>
         public void FlagReset()
         {
             // a reset of all flags (status register, interrupt flag and interrupt table) is initiated by writing 0x30
             // into the reset register (RST)
-            SetRegister((byte)Register.RST, 0x30);
+            SetRegister(Register.RST, (byte)ResetType.Flag);
         }
 
         #endregion
@@ -289,8 +291,7 @@ namespace Iot.Device.Amg88xx
         /// <returns>Interrupt mode</returns>
         public InterruptMode GetInterruptMode()
         {
-            // bit 1 represents the interrupt mode (not set: difference mode, set: absolute mode)
-            return (GetRegister((byte)Register.INTC) & 0b0000_0010) == 0 ? InterruptMode.DifferenceMode : InterruptMode.AbsoluteMode;
+            return GetBit(Register.INTC, (byte)InterruptModeBit.INTMODE) ? InterruptMode.AbsoluteMode : InterruptMode.DifferenceMode;
         }
 
         /// <summary>
@@ -299,19 +300,7 @@ namespace Iot.Device.Amg88xx
         /// <param name="mode">Interrupt mode</param>
         public void SetInterruptMode(InterruptMode mode)
         {
-            byte value = GetRegister((byte)Register.INTC);
-            // bit 1 represents the interrupt mode (not set: difference mode, set: absolute mode)
-            switch (mode)
-            {
-                case InterruptMode.AbsoluteMode:
-                    value |= 0b0000_0010;
-                    break;
-                case InterruptMode.DifferenceMode:
-                    value &= 0b1111_1101;
-                    break;
-            }
-
-            SetRegister((byte)Register.INTC, value);
+            SetBit(Register.INTC, (byte)InterruptModeBit.INTMODE, mode == InterruptMode.AbsoluteMode);
         }
 
         /// <summary>
@@ -320,9 +309,7 @@ namespace Iot.Device.Amg88xx
         /// </summary>
         public void EnableInterruptPin()
         {
-            byte registerContent = GetRegister((byte)Register.INTC);
-            registerContent |= 0x01;
-            SetRegister((byte)Register.INTC, registerContent);
+            SetBit(Register.INTC, (byte)InterruptModeBit.INTEN, true);
         }
 
         /// <summary>
@@ -331,8 +318,7 @@ namespace Iot.Device.Amg88xx
         /// </summary>
         public void DisableInterruptPin()
         {
-            byte registerContent = GetRegister((byte)Register.INTC);
-            SetRegister((byte)Register.INTC, (byte)(registerContent & 0b1111_1110));
+            SetBit(Register.INTC, (byte)InterruptModeBit.INTEN, true);
         }
 
         /// <summary>
@@ -341,8 +327,8 @@ namespace Iot.Device.Amg88xx
         /// <returns>Temperature level</returns>
         public Temperature GetInterruptLowerLevel()
         {
-            byte tl = GetRegister((byte)Register.INTLL);
-            byte th = GetRegister((byte)Register.INTLH);
+            byte tl = GetRegister(Register.INTLL);
+            byte th = GetRegister(Register.INTLH);
             return Amg88xxUtils.ConvertToTemperature(tl, th);
         }
 
@@ -353,8 +339,8 @@ namespace Iot.Device.Amg88xx
         public void SetInterruptLowerLevel(Temperature temperature)
         {
             (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(temperature);
-            SetRegister((byte)Register.INTLL, tl);
-            SetRegister((byte)Register.INTLH, th);
+            SetRegister(Register.INTLL, tl);
+            SetRegister(Register.INTLH, th);
         }
 
         /// <summary>
@@ -363,8 +349,8 @@ namespace Iot.Device.Amg88xx
         /// <returns>Temperature level</returns>
         public Temperature GetInterruptUpperLevel()
         {
-            byte tl = GetRegister((byte)Register.INTHL);
-            byte th = GetRegister((byte)Register.INTHH);
+            byte tl = GetRegister(Register.INTHL);
+            byte th = GetRegister(Register.INTHH);
             return Amg88xxUtils.ConvertToTemperature(tl, th);
         }
 
@@ -375,8 +361,8 @@ namespace Iot.Device.Amg88xx
         public void SetInterruptUpperLevel(Temperature temperature)
         {
             (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(temperature);
-            SetRegister((byte)Register.INTHL, tl);
-            SetRegister((byte)Register.INTHH, th);
+            SetRegister(Register.INTHL, tl);
+            SetRegister(Register.INTHH, th);
         }
 
         /// <summary>
@@ -385,8 +371,8 @@ namespace Iot.Device.Amg88xx
         /// <returns>Temperature level</returns>
         public Temperature GetInterruptHysteresisLevel()
         {
-            byte tl = GetRegister((byte)Register.INTSL);
-            byte th = GetRegister((byte)Register.INTSH);
+            byte tl = GetRegister(Register.INTSL);
+            byte th = GetRegister(Register.INTSH);
             return Amg88xxUtils.ConvertToTemperature(tl, th);
         }
 
@@ -397,8 +383,8 @@ namespace Iot.Device.Amg88xx
         public void SetInterruptHysteresisLevel(Temperature temperature)
         {
             (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(temperature);
-            SetRegister((byte)Register.INTSL, tl);
-            SetRegister((byte)Register.INTSH, th);
+            SetRegister(Register.INTSL, tl);
+            SetRegister(Register.INTSH, th);
         }
 
         /// <summary>
@@ -407,17 +393,17 @@ namespace Iot.Device.Amg88xx
         /// <returns>Interrupt flags</returns>
         public bool[,] GetInterruptFlagTable()
         {
-            var addresses = new byte[]
+            var registers = new Register[]
             {
-                (byte)Register.INT0, (byte)Register.INT1, (byte)Register.INT2, (byte)Register.INT3,
-                (byte)Register.INT4, (byte)Register.INT5, (byte)Register.INT6, (byte)Register.INT7,
+                Register.INT0, Register.INT1, Register.INT2, Register.INT3,
+                Register.INT4, Register.INT5, Register.INT6, Register.INT7,
             };
 
             // read all registers from the sensor
             var flagRegisters = new Queue<byte>();
-            foreach (byte address in addresses)
+            foreach (Register register in registers)
             {
-                flagRegisters.Enqueue(GetRegister(address));
+                flagRegisters.Enqueue(GetRegister(register));
             }
 
             var flags = new bool[Columns, Rows];
@@ -434,6 +420,35 @@ namespace Iot.Device.Amg88xx
         }
         #endregion
 
+        private byte GetRegister(Register register)
+        {
+            _i2cDevice.WriteByte((byte)register);
+            return _i2cDevice.ReadByte();
+        }
+
+        private bool GetBit(Register register, byte bit)
+        {
+            return (GetRegister(register) & (1 << bit)) > 0;
+        }
+
+        private void SetRegister(Register register, byte value)
+        {
+            Span<byte> buffer = stackalloc byte[2]
+            {
+                (byte)register,
+                value
+            };
+
+            _i2cDevice.Write(buffer);
+        }
+
+        private void SetBit(Register register, byte bit, bool state)
+        {
+            var b = GetRegister(register);
+            b = (byte)(state ? (b | (1 << bit)) : (b & (~(1 << bit))));
+            SetRegister(register, b);
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {
@@ -442,23 +457,6 @@ namespace Iot.Device.Amg88xx
                 _i2cDevice?.Dispose();
                 _i2cDevice = null;
             }
-        }
-
-        private byte GetRegister(byte address)
-        {
-            _i2cDevice.WriteByte(address);
-            return _i2cDevice.ReadByte();
-        }
-
-        private void SetRegister(byte address, byte value)
-        {
-            Span<byte> buffer = stackalloc byte[2]
-            {
-                address,
-                value
-            };
-
-            _i2cDevice.Write(buffer);
         }
     }
 }

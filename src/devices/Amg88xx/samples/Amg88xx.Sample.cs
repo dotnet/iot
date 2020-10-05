@@ -49,8 +49,8 @@ namespace Iot.Device.Amg88xx.Samples
             Console.WriteLine($"Operating mode: {amg88xx.GetOperatingMode()}");
 
             // Switch moving average mode on.
-            amg88xx.SetMovingAverageMode(true);
-            string avgMode = amg88xx.GetMovingAverageMode() ? "on" : "off";
+            amg88xx.SetMovingAverageModeState(true);
+            string avgMode = amg88xx.GetMovingAverageModeState() ? "on" : "off";
             Console.WriteLine($"Average mode: {avgMode}");
 
             // Set frame rate to 1 fps

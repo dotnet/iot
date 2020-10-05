@@ -810,74 +810,116 @@ namespace Iot.Device.Amg88xx
     /// <summary>
     /// Defines the status bits of the status register (addr: 0x04)
     /// </summary>
-    [Flags]
-    public enum StatusFlag : byte
+    public enum StatusFlagBit : byte
     {
+        /// <summary>
+        /// Interrupt occured
+        /// </summary>
+        INTF = 1,
+
         /// <summary>
         /// Temperature output overflow occured for one or more pixel
         /// </summary>
-        OVF_IRS = 0b0000_0100,
+        OVF_IRS = 2,
 
         /// <summary>
         /// Thermistor output overflow occured
         /// </summary>
-        OVF_THS = 0b0000_1000,
+        OVF_THS = 3
+    }
 
+    /// <summary>
+    /// Defines the status bits of the status clear register (addr: 0x05)
+    /// </summary>
+    public enum StatusClearBit : byte
+    {
         /// <summary>
         /// Interrupt occured
         /// </summary>
-        INTF = 0b0000_0010
+        INTCLR = 1,
+
+        /// <summary>
+        /// Temperature output overflow occured for one or more pixel
+        /// </summary>
+        OVFCLR = 2,
+
+        /// <summary>
+        /// Thermistor output overflow occured
+        /// </summary>
+        OVFTHCLR = 3
     }
 
     /// <summary>
-    /// Defines the frame rates
+    /// Defines the bit(s) of the moving average mode register (addr: 0x07)
     /// </summary>
-    public enum FrameRate
+    public enum MovingAverageModeBit : byte
     {
         /// <summary>
-        /// 1 frame per second
+        /// Twice moving average mode bit
         /// </summary>
-        FPS1 = 1,
-
-        /// <summary>
-        /// 10 frames per second
-        /// </summary>
-        FPS10 = 10
+        MAMOD = 5
     }
 
     /// <summary>
-    /// Defines the operating modes
+    /// Defines the bit of the frame rate register (addr: 0x02)
+    /// </summary>
+    public enum FrameRateBit : byte
+    {
+        /// <summary>
+        /// Frame rate mode bit (not set: 10fps, set: 1fps)
+        /// </summary>
+        FPS = 1
+    }
+
+    /// <summary>
+    /// Defines the operating modes of the power control register (addr: 0x00)
     /// </summary>
     public enum OperatingMode : byte
     {
         /// <summary>
         /// normal mode
         /// </summary>
-        Normal = 0b0000_0000,
+        Normal = 0x00,
 
         /// <summary>
         /// sleep mode
         /// </summary>
-        Sleep = 0b0001_0000,
+        Sleep = 0x10,
 
         /// <summary>
         /// stand-by mode, 10s intermittence
         /// </summary>
-        StandBy10 = 0b0010_0001,
+        StandBy10 = 0x21,
 
         /// <summary>
         /// stand-by mode, 60s intermittence
         /// </summary>
-        StandBy60 = 0b0010_0000,
+        StandBy60 = 0x20,
     }
 
     /// <summary>
-    /// Defines the interrupt modes
+    /// Defines the reset types of the reset register (addr: 0x01)
+    /// </summary>
+    public enum ResetType : byte
+    {
+        /// <summary>
+        /// flag reset (clear all flags and interrupt flag registers)
+        /// </summary>
+        Flag = 0x30,
+
+        /// <summary>
+        /// initial reset (set all registers to defaults)
+        /// </summary>
+        Initial = 0x3f
+    }
+
+    /// <summary>
+    /// Defines the interrupt modes of the interrupt control register (addr: 0x03)
     /// </summary>
     public enum InterruptMode : byte
     {
         /// <summary>
-        /// The specification does not give any details on this mode.
+        /// The specification does not give any details on this mode
         /// </summary>
         DifferenceMode,
 
@@ -889,18 +931,18 @@ namespace Iot.Device.Amg88xx
     }
 
     /// <summary>
-    /// Defines the interrupt pin modes
+    /// Defines the interrupt controls bits of the interrupt control register (addr: 0x03)
     /// </summary>
-    public enum InterruptPin : byte
+    public enum InterruptModeBit : byte
     {
         /// <summary>
-        /// INT pin is pulled low if an interrupt occures
+        /// Interrupt output bit (INT pin, 0: inactive, 1: active)
         /// </summary>
-        PinEnabled,
+        INTEN = 0,
 
         /// <summary>
-        /// INT pin does not change if an interrupt occures
+        /// Interrupt mode bit (0: difference mode, 1: absolute mode)
         /// </summary>
-        PinDisabled
+        INTMODE = 1
     }
 }
