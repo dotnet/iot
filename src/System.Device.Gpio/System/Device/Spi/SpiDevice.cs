@@ -57,7 +57,7 @@ namespace System.Device.Spi
         /// Creates a communications channel to a device on a SPI bus running on the current hardware
         /// </summary>
         /// <param name="settings">The connection settings of a device on a SPI bus.</param>
-        /// <returns>A communications channel to a device on a SPI bus running on Windows 10 IoT.</returns>
+        /// <returns>A communications channel to a device on a SPI bus.</returns>
         public static SpiDevice Create(SpiConnectionSettings settings)
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
