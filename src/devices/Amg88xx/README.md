@@ -6,7 +6,7 @@ The AMG88xx family of infrared array sensors has 64 thermophile pixels arranged 
 The manufacturer (Panasonic) names the following applications: home appliances (microwaves and air-conditioners), building automation (people counting, air conditioning control), home automation (people detection), factory automation (fault prevention). The sensor delivers a heat image through its digital interface (I2C) at a rate of 1 or 10 frames per second.
 Additionally an interrupt pin can raise an event when any individual pixel goes above or below a configured threshold.
 <br/><br/>
-![Illustration of thermophile pixel array and heat map](./amg88xx.png)
+![Illustration of thermophile pixel array and heat map](./AMG88xx.png)
 *Illustration of thermophile pixel array and heat map*
 <br/><br/>
 
