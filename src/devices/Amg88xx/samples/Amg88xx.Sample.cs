@@ -11,7 +11,8 @@ using UnitsNet;
 namespace Iot.Device.Amg88xx.Samples
 {
     /// <summary>
-    /// Samples for Amg88xx
+    /// Samples for using the Amg88xx binding incl. interrupt handling.
+    /// Refer to the README.md for the required hardware setup to run this sample.
     /// </summary>
     public class Program
     {
