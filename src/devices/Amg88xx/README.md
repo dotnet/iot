@@ -7,6 +7,7 @@ The manufacturer (Panasonic) names the following applications: home appliances (
 Additionally an interrupt pin can raise an event when any individual pixel goes above or below a configured threshold.
 <br/><br/>
 ![Illustration of thermophile pixel array and heat map](./AMG88xx.png)
+<br/>
 *Illustration of thermophile pixel array and heat map*
 <br/><br/>
 
@@ -151,6 +152,8 @@ public bool[,] GetInterruptFlagTable()
 <br/>
 
 ![Interrupt levels and hysteresis](./AMG8833Int.svg)
+<br/>
+Interrupt levels and hysteresis
 
 **Note**
 * be aware that the interrupt flag in the status register is reset automatically if no pixel temperature exceeds the lower or upper threshold. It is <u>not</u> required to reset the flag manually.
