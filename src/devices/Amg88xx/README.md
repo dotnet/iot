@@ -112,7 +112,7 @@ The average of two averages of 10 readings is the resulting output.
 
 <br/>
 
-![Moving average principle](./movingavg.png)
+![Moving average principle](./AMG88xxAvgMode.svg)
 <br/>*Moving Average*
 <br/>
 
@@ -150,7 +150,7 @@ public bool[,] GetInterruptFlagTable()
 ```
 <br/>
 
-![Interrupt levels and hysteresis](./AMG8833Int.svg =400)
+![Interrupt levels and hysteresis](./AMG8833Int.svg)
 
 **Note**
 * be aware that the interrupt flag in the status register is reset automatically if no pixel temperature exceeds the lower or upper threshold. It is <u>not</u> required to reset the flag manually.
