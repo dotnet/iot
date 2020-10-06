@@ -89,6 +89,7 @@ namespace Iot.Device.Amg88xx.Samples
             Console.WriteLine($"Interrupt mode: {amg88xx.GetInterruptMode()}");
             Console.WriteLine($"Lower interrupt temperature level: {amg88xx.GetInterruptLowerLevel().DegreesCelsius:F1}°C");
             Console.WriteLine($"Upper interrupt temperature level: {amg88xx.GetInterruptUpperLevel().DegreesCelsius:F1}°C");
+            Console.WriteLine($"Hysteresis level: {amg88xx.GetInterruptHysteresisLevel().DegreesCelsius:F1}°C");
 
             while (true)
             {
