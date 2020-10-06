@@ -7,7 +7,7 @@ using System;
 namespace Iot.Device.Amg88xx
 {
     /// <summary>
-    /// Defines the address of the AMG88xx registers
+    /// Defines the addresses of the AMG88xx registers
     /// </summary>
     public enum Register : byte
     {
@@ -824,6 +824,9 @@ namespace Iot.Device.Amg88xx
 
         /// <summary>
         /// Thermistor output overflow occured
+        /// Note: the bit is only menthioned in early versions of the reference specification.
+        /// It is not clear whether this is a specification error or a change in a newer
+        /// revision of the sensor.
         /// </summary>
         OVF_THS = 3
     }

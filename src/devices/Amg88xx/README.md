@@ -90,6 +90,8 @@ public void ClearInterrupt()
 public void ClearAllFlags()
 ```
 *Note*: resetting the interrupt flag is only required if you want to clear flags while the readings are still within the hysteresis span. See interrupts section for further details on interrupt behavior.
+*Note*: the thermistor overflow flag is only menthioned in early versions of the reference specification.
+It is not clear whether this is a specification error or a change in a newer revision of the sensor.
 <br/><br/>
 
 ### Frame Rate
@@ -116,10 +118,10 @@ The average of two averages of 10 readings is the resulting output.
 
 The noise per pixel will decrease to 1/sqrt2 when using the moving average mode.<br/>
 ```
-public bool GetMovingAverageMode()
-public void SetMovingAverageMode(bool mode)
+public bool GetMovingAverageModeState()
+public void SetMovingAverageModeState(bool state)
 ```
-***Important***: the reference specification states that the current mode can be read, but it seems that is not working at the time being. The bit is always read as 0.
+***Important***: the reference specification states that the current mode can be read, but it doesn't seem to work at the time being. The bit is always read as 0.
 <br/><br/>
 
 

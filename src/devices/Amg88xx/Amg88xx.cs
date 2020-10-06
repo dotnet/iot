@@ -143,7 +143,10 @@ namespace Iot.Device.Amg88xx
         }
 
         /// <summary>
-        /// Gets the thermistor overflow flag from the status register
+        /// Gets the thermistor overflow flag from the status register.
+        /// Note: the bit is only menthioned in early versions of the reference specification.
+        /// It is not clear whether this is a specification error or a change in a newer
+        /// revision of the sensor.
         /// </summary>
         /// <returns>Thermistor overflow flag</returns>
         public bool HasThermistorOverflow()
@@ -318,7 +321,7 @@ namespace Iot.Device.Amg88xx
         /// </summary>
         public void DisableInterruptPin()
         {
-            SetBit(Register.INTC, (byte)InterruptModeBit.INTEN, true);
+            SetBit(Register.INTC, (byte)InterruptModeBit.INTEN, false);
         }
 
         /// <summary>
