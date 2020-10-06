@@ -125,8 +125,6 @@ public void SetMovingAverageModeState(bool state)
 <br/><br/>
 
 
-
-
 ### Interrupt control, levels and pixel flags
 The sensor can raise an interrupt if any pixel passes a given value. The event is signaled by the interrupt flag of the status register. Additionally the INT pin of the sensor can be pulled low.
 
@@ -151,6 +149,8 @@ After the sensor raised an interrupt the triggering pixels can be readout from t
 public bool[,] GetInterruptFlagTable()
 ```
 <br/>
+
+![Interrupt levels and hysteresis](./AMG8833Int.svg =400)
 
 **Note**
 * be aware that the interrupt flag in the status register is reset automatically if no pixel temperature exceeds the lower or upper threshold. It is <u>not</u> required to reset the flag manually.
