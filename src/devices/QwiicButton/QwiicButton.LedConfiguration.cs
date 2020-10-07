@@ -32,10 +32,10 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public void LedConfig(byte brightness, ushort cycleTime, ushort offTime, byte granularity = 1)
         {
-            _i2cBus.WriteSingleRegister(Register.LedBrightness, brightness);
-            _i2cBus.WriteSingleRegister(Register.LedPulseGranularity, granularity);
-            _i2cBus.WriteDoubleRegister(Register.LedPulseCycleTime, cycleTime);
-            _i2cBus.WriteDoubleRegister(Register.LedPulseOffTime, offTime);
+            _registerAccess.WriteSingleRegister(Register.LedBrightness, brightness);
+            _registerAccess.WriteSingleRegister(Register.LedPulseGranularity, granularity);
+            _registerAccess.WriteDoubleRegister(Register.LedPulseCycleTime, cycleTime);
+            _registerAccess.WriteDoubleRegister(Register.LedPulseOffTime, offTime);
         }
     }
 }
