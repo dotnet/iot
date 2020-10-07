@@ -9,22 +9,38 @@ using System.Runtime.InteropServices;
 namespace Iot.Device.QwiicButton
 {
     /// <summary>
-    /// Implements low-level access to read from and write to the provided I2C device.
+    /// Implements low-level access to read and write to the provided I2C device.
     /// Takes as generic parameter an <see cref="Enum"/> where each value represents a register
-    /// and is explicitly assigned an integer address, thereby forming a register map.
-    /// TODO: Give register enum example
+    /// with its corresponding address, thereby forming a register map. Example:
+    /// <example>
+    /// <code>
+    /// enum MyRegisterMap : byte
+    /// {
+    ///     Id = 0x00,
+    ///     FirmwareVersion = 0x01,
+    ///     Status = 0x03
+    /// }
+    /// </code>
+    /// </example>
     /// </summary>
-    internal sealed class I2cRegisterAccess<T> : IDisposable
-        where T : Enum
+    public sealed class I2cRegisterAccess<TRegisterMap> : IDisposable
+        where TRegisterMap : Enum
     {
         private I2cDevice _device;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="I2cRegisterAccess{TRegisterMap}"/> class.
+        /// </summary>
+        /// <param name="device">I2C device that should be accessed.</param>
         public I2cRegisterAccess(I2cDevice device)
         {
             _device = device;
         }
 
-        internal byte ReadSingleRegister(T register)
+        /// <summary>
+        /// Reads a byte from the provided register address.
+        /// </summary>
+        public byte ReadSingleRegister(TRegisterMap register)
         {
             Span<byte> readBuffer = new byte[1];
             _device.WriteRead(ToReadOnlySpan(register), readBuffer);
@@ -36,7 +52,10 @@ namespace Iot.Device.QwiicButton
             return MemoryMarshal.Read<byte>(readBuffer);
         }
 
-        internal ushort ReadDoubleRegister(T register)
+        /// <summary>
+        /// Reads 2 bytes from the provided register address.
+        /// </summary>
+        public ushort ReadDoubleRegister(TRegisterMap register)
         {
             Span<byte> readBuffer = new byte[2];
             _device.WriteRead(ToReadOnlySpan(register), readBuffer);
@@ -48,7 +67,10 @@ namespace Iot.Device.QwiicButton
             return MemoryMarshal.Read<ushort>(readBuffer);
         }
 
-        internal uint ReadQuadRegister(T register)
+        /// <summary>
+        /// Reads 4 bytes from the provided register address.
+        /// </summary>
+        public uint ReadQuadRegister(TRegisterMap register)
         {
             Span<byte> readBuffer = new byte[4];
             _device.WriteRead(ToReadOnlySpan(register), readBuffer);
@@ -60,12 +82,18 @@ namespace Iot.Device.QwiicButton
             return MemoryMarshal.Read<uint>(readBuffer);
         }
 
-        internal void WriteSingleRegister(T register, byte data)
+        /// <summary>
+        /// Writes a byte to the provided register address.
+        /// </summary>
+        public void WriteSingleRegister(TRegisterMap register, byte data)
         {
             _device.Write(new[] { (byte)(object)register, data });
         }
 
-        internal void WriteDoubleRegister(T register, ushort data)
+        /// <summary>
+        /// Writes 2 bytes to the provided register address.
+        /// </summary>
+        public void WriteDoubleRegister(TRegisterMap register, ushort data)
         {
             byte lower = (byte)(data & 0xff);
             byte upper = (byte)(data >> 8);
@@ -77,7 +105,7 @@ namespace Iot.Device.QwiicButton
             }));
         }
 
-        private static ReadOnlySpan<byte> ToReadOnlySpan(T registerValue)
+        private static ReadOnlySpan<byte> ToReadOnlySpan(TRegisterMap registerValue)
         {
             return new ReadOnlySpan<byte>(new[] { (byte)(object)registerValue });
         }
