@@ -3,10 +3,11 @@
 //// See the LICENSE file in the project root for more information.
 
 using System;
+using Iot.Device.Common;
 
 namespace Iot.Device.QwiicButton
 {
-    internal class QueueStatusBitField
+    internal struct QueueStatusBitField
     {
         [Flags]
         private enum QueueStatusBits
@@ -14,10 +15,6 @@ namespace Iot.Device.QwiicButton
             PopRequest = 1,
             IsEmpty = 2,
             IsFull = 4,
-        }
-
-        public QueueStatusBitField()
-        {
         }
 
         public QueueStatusBitField(byte queueStatusValue)

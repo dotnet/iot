@@ -3,10 +3,11 @@
 //// See the LICENSE file in the project root for more information.
 
 using System;
+using Iot.Device.Common;
 
 namespace Iot.Device.QwiicButton
 {
-    internal class StatusRegisterBitField
+    internal struct StatusRegisterBitField
     {
         [Flags]
         private enum StatusRegisterBits
@@ -14,10 +15,6 @@ namespace Iot.Device.QwiicButton
             EventAvailable = 1,
             HasBeenClicked = 2,
             IsPressed = 4,
-        }
-
-        public StatusRegisterBitField()
-        {
         }
 
         public StatusRegisterBitField(byte statusRegisterValue)

@@ -3,20 +3,17 @@
 //// See the LICENSE file in the project root for more information.
 
 using System;
+using Iot.Device.Common;
 
 namespace Iot.Device.QwiicButton
 {
-    internal class InterruptConfigBitField
+    internal struct InterruptConfigBitField
     {
         [Flags]
         private enum InterruptConfigBits
         {
             ClickedEnable = 1,
             PressedEnable = 2
-        }
-
-        public InterruptConfigBitField()
-        {
         }
 
         public InterruptConfigBitField(byte interruptConfigValue)
