@@ -10,17 +10,17 @@ namespace Iot.Device.QwiicButton
         /// Turns the onboard LED on with the specified brightness.
         /// <param name="brightness">LED brightness value between 0 (off) and 255 (max). Defaults to max.</param>
         /// </summary>
-        public bool LedOn(byte brightness = 255)
+        public void LedOn(byte brightness = 255)
         {
-            return LedConfig(brightness, 0, 0);
+            LedConfig(brightness, 0, 0);
         }
 
         /// <summary>
         /// Turns the onboard LED off.
         /// </summary>
-        public bool LedOff()
+        public void LedOff()
         {
-            return LedConfig(0, 0, 0);
+            LedConfig(0, 0, 0);
         }
 
         /// <summary>
@@ -30,13 +30,12 @@ namespace Iot.Device.QwiicButton
         /// <param name="offTime">Off time between pulses (in ms). Default is 500 ms.</param>
         /// <param name="granularity">Amount of steps it takes to get to the set brightness level (1 is fine for most applications).</param>
         /// </summary>
-        public bool LedConfig(byte brightness, ushort cycleTime, ushort offTime, byte granularity = 1)
+        public void LedConfig(byte brightness, ushort cycleTime, ushort offTime, byte granularity = 1)
         {
-            bool success = _i2cBus.WriteSingleRegister(Register.LedBrightness, brightness);
-            success &= _i2cBus.WriteSingleRegister(Register.LedPulseGranularity, granularity);
-            success &= _i2cBus.WriteDoubleRegister(Register.LedPulseCycleTime, cycleTime);
-            success &= _i2cBus.WriteDoubleRegister(Register.LedPulseOffTime, offTime);
-            return success;
+            _i2cBus.WriteSingleRegister(Register.LedBrightness, brightness);
+            _i2cBus.WriteSingleRegister(Register.LedPulseGranularity, granularity);
+            _i2cBus.WriteDoubleRegister(Register.LedPulseCycleTime, cycleTime);
+            _i2cBus.WriteDoubleRegister(Register.LedPulseOffTime, offTime);
         }
     }
 }

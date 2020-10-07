@@ -36,7 +36,7 @@ namespace Iot.Device.QwiicButton
         /// <summary>
         /// Sets <see cref="IsPressed"/>, <see cref="HasBeenClicked"/> and <see cref="EventAvailable"/> to false.
         /// </summary>
-        public byte ClearEventBits()
+        public void ClearEventBits()
         {
             var status = new StatusRegisterBitField(_i2cBus.ReadSingleRegister(Register.ButtonStatus))
             {
@@ -44,7 +44,7 @@ namespace Iot.Device.QwiicButton
                 HasBeenClicked = false,
                 IsPressed = false
             };
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.ButtonStatus, status.StatusRegisterValue);
+            _i2cBus.WriteSingleRegister(Register.ButtonStatus, status.StatusRegisterValue);
         }
 
         /// <summary>
@@ -57,11 +57,10 @@ namespace Iot.Device.QwiicButton
 
         /// <summary>
         /// Sets the time in milliseconds that the button waits for the mechanical contacts to settle and checks if the register was set properly.
-        /// Returns 0 on success, 1 on register I2C write fail, and 2 if the value didn't get written into the register properly.
         /// </summary>
-        public byte SetDebounceTime(ushort time)
+        public void SetDebounceTime(ushort time)
         {
-            return (byte)_i2cBus.WriteDoubleRegisterWithReadback(Register.ButtonDebounceTime, time);
+            _i2cBus.WriteDoubleRegister(Register.ButtonDebounceTime, time);
         }
     }
 }

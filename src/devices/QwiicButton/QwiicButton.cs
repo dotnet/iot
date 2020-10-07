@@ -73,23 +73,15 @@ namespace Iot.Device.QwiicButton
         /// <summary>
         /// Configures the button to attach to the I2C bus using the specified address.
         /// </summary>
-        public bool SetI2cAddress(byte address)
+        public void SetI2cAddress(byte address)
         {
             if (address < 0x08 || address > 0x77)
             {
-                Console.WriteLine("I2C input address is out of range");
-                return false;
+                throw new ArgumentOutOfRangeException(nameof(address), "I2C input address must be between 0x08 and 0x77");
             }
 
-            var success = _i2cBus.WriteSingleRegister(Register.I2cAddress, address);
-            if (success)
-            {
-                I2cAddress = address;
-                return true;
-            }
-
-            Console.WriteLine("Could not set I2C address");
-            return false;
+            _i2cBus.WriteSingleRegister(Register.I2cAddress, address);
+            I2cAddress = address;
         }
 
         /// <inheritdoc />

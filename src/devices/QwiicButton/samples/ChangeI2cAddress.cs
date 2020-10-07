@@ -22,11 +22,7 @@ namespace Iot.Device.QwiicButton.Samples
                 return;
             }
 
-            if (!button.SetI2cAddress((byte)address.Value))
-            {
-                return;
-            }
-
+            button.SetI2cAddress((byte)address.Value);
             Console.WriteLine($"Successfully changed the I2C address of the button to {address}!");
         }
 

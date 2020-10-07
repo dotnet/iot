@@ -11,14 +11,14 @@ namespace Iot.Device.QwiicButton
         /// If <see cref="EnableClickedInterrupt"/> has also been called,
         /// then the interrupt will trigger on either a push or a click.
         /// </summary>
-        public byte EnablePressedInterrupt()
+        public void EnablePressedInterrupt()
         {
             var interrupt =
                 new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.InterruptConfig))
                 {
                     PressedEnable = true
                 };
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.InterruptConfig, interrupt.InterruptConfigValue);
+            _i2cBus.WriteSingleRegister(Register.InterruptConfig, interrupt.InterruptConfigValue);
         }
 
         /// <summary>
@@ -26,14 +26,14 @@ namespace Iot.Device.QwiicButton
         /// If <see cref="EnableClickedInterrupt"/> has also been called,
         /// then the interrupt will still trigger on the button click.
         /// </summary>
-        public byte DisablePressedInterrupt()
+        public void DisablePressedInterrupt()
         {
             var interrupt =
                 new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.InterruptConfig))
                 {
                     PressedEnable = false
                 };
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.InterruptConfig, interrupt.InterruptConfigValue);
+            _i2cBus.WriteSingleRegister(Register.InterruptConfig, interrupt.InterruptConfigValue);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Iot.Device.QwiicButton
         /// If <see cref="EnablePressedInterrupt"/> has also been called,
         /// then the interrupt will trigger on either a push or a click.
         /// </summary>
-        public byte EnableClickedInterrupt()
+        public void EnableClickedInterrupt()
         {
             var interrupt =
                 new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.InterruptConfig))
@@ -49,7 +49,7 @@ namespace Iot.Device.QwiicButton
                     ClickedEnable = true
                 };
 
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.InterruptConfig, interrupt.InterruptConfigValue);
+            _i2cBus.WriteSingleRegister(Register.InterruptConfig, interrupt.InterruptConfigValue);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Iot.Device.QwiicButton
         /// If <see cref="EnablePressedInterrupt"/> has also been called,
         /// then the interrupt will still trigger on the button press.
         /// </summary>
-        public byte DisableClickedInterrupt()
+        public void DisableClickedInterrupt()
         {
             var interrupt =
                 new InterruptConfigBitField(_i2cBus.ReadSingleRegister(Register.InterruptConfig))
@@ -65,28 +65,26 @@ namespace Iot.Device.QwiicButton
                     ClickedEnable = false
                 };
 
-            return _i2cBus.WriteSingleRegisterWithReadback(Register.InterruptConfig, interrupt.InterruptConfigValue);
+            _i2cBus.WriteSingleRegister(Register.InterruptConfig, interrupt.InterruptConfigValue);
         }
 
         /// <summary>
         /// Resets the interrupt configuration back to defaults.
         /// </summary>
-        public byte ResetInterruptConfig()
+        public void ResetInterruptConfig()
         {
             var interrupt = new InterruptConfigBitField
             {
                 PressedEnable = true,
                 ClickedEnable = true
             };
-            var interruptValue = _i2cBus.WriteSingleRegisterWithReadback(Register.InterruptConfig, interrupt.InterruptConfigValue);
+            _i2cBus.WriteSingleRegister(Register.InterruptConfig, interrupt.InterruptConfigValue);
 
             var status = new StatusRegisterBitField
             {
                 EventAvailable = false
             };
-            _i2cBus.WriteSingleRegisterWithReadback(Register.ButtonStatus, status.StatusRegisterValue);
-
-            return interruptValue;
+            _i2cBus.WriteSingleRegister(Register.ButtonStatus, status.StatusRegisterValue);
         }
     }
 }

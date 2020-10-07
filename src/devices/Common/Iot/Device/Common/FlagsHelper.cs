@@ -2,20 +2,27 @@
 //// The .NET Foundation licenses this file to you under the MIT license.
 //// See the LICENSE file in the project root for more information.
 
-namespace Iot.Device.QwiicButton
-{
-    internal static class FlagsHelper
-    {
-        public static bool IsSet<T>(T flags, T flag)
-            where T : struct
-        {
-            // Cast to object necessary due to C#'s restriction against a where T : Enum constraint
-            int flagsValue = (int)(object)flags;
-            int flagValue = (int)(object)flag;
+using System;
 
-            return (flagsValue & flagValue) != 0;
+namespace Iot.Device.Common
+{
+    /// <summary>
+    /// TODO
+    /// </summary>
+    public static class FlagsHelper
+    {
+        /// <summary>
+        /// Sets the provided flag TODO
+        /// </summary>
+        public static bool IsSet<T>(T flags, T flag)
+            where T : Enum
+        {
+            return flags.HasFlag(flag);
         }
 
+        /// <summary>
+        /// TODO
+        /// </summary>
         public static T SetValue<T>(T flags, T flag, bool enabled)
             where T : struct
         {
@@ -31,6 +38,9 @@ namespace Iot.Device.QwiicButton
             return flags;
         }
 
+        /// <summary>
+        /// TODO
+        /// </summary>
         private static void Set<T>(ref T flags, T flag)
             where T : struct
         {
@@ -40,6 +50,9 @@ namespace Iot.Device.QwiicButton
             flags = (T)(object)(flagsValue | flagValue);
         }
 
+        /// <summary>
+        /// TODO
+        /// </summary>
         private static void Unset<T>(ref T flags, T flag)
             where T : struct
         {

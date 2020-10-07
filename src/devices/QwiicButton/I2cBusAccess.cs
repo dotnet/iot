@@ -12,7 +12,7 @@ namespace Iot.Device.QwiicButton
     /// Encapsulates low-level access to read from and write to the provided
     /// Qwiic Button device.
     /// </summary>
-    internal class I2cBusAccess : IDisposable
+    internal sealed class I2cBusAccess : IDisposable
     {
         private I2cDevice _device;
 
@@ -57,13 +57,12 @@ namespace Iot.Device.QwiicButton
             return MemoryMarshal.Read<uint>(readBuffer);
         }
 
-        internal bool WriteSingleRegister(Register register, byte data)
+        internal void WriteSingleRegister(Register register, byte data)
         {
             _device.Write(new[] { (byte)register, data });
-            return true;
         }
 
-        internal bool WriteDoubleRegister(Register register, ushort data)
+        internal void WriteDoubleRegister(Register register, ushort data)
         {
             byte lower = (byte)(data & 0xff);
             byte upper = (byte)(data >> 8);
@@ -73,38 +72,6 @@ namespace Iot.Device.QwiicButton
                lower,
                upper
             }));
-
-            return true;
-        }
-
-        internal byte WriteSingleRegisterWithReadback(Register register, byte data)
-        {
-            if (WriteSingleRegister(register, data))
-            {
-                return 1;
-            }
-
-            if (ReadSingleRegister(register) != data)
-            {
-                return 2;
-            }
-
-            return 0;
-        }
-
-        internal ushort WriteDoubleRegisterWithReadback(Register register, ushort data)
-        {
-            if (WriteDoubleRegister(register, data))
-            {
-                return 1;
-            }
-
-            if (ReadDoubleRegister(register) != data)
-            {
-                return 2;
-            }
-
-            return 0;
         }
 
         private static ReadOnlySpan<byte> ToReadOnlySpan(Register registerValue)
