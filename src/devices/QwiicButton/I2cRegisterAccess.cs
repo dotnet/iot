@@ -11,7 +11,8 @@ namespace Iot.Device.QwiicButton
     /// <summary>
     /// Implements low-level access to read from and write to the provided I2C device.
     /// Takes as generic parameter an <see cref="Enum"/> where each value represents a register
-    /// and is assigned an integer address, thereby forming a register map.
+    /// and is explicitly assigned an integer address, thereby forming a register map.
+    /// TODO: Give register enum example
     /// </summary>
     internal sealed class I2cRegisterAccess<T> : IDisposable
         where T : Enum

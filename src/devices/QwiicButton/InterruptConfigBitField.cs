@@ -16,12 +16,14 @@ namespace Iot.Device.QwiicButton
             PressedEnable = 2
         }
 
+        private InterruptConfigBits _interruptConfigValue;
+
         public InterruptConfigBitField(byte interruptConfigValue)
         {
-            InterruptConfigValue = interruptConfigValue;
+            _interruptConfigValue = (InterruptConfigBits)interruptConfigValue;
         }
 
-        public byte InterruptConfigValue { get; set; }
+        public byte InterruptConfigValue => (byte)_interruptConfigValue;
 
         /// <summary>
         /// Set to true to enable an interrupt when the button is clicked.
@@ -29,8 +31,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool ClickedEnable
         {
-            get { return FlagsHelper.IsSet((InterruptConfigBits)InterruptConfigValue, InterruptConfigBits.ClickedEnable); }
-            set { InterruptConfigValue = (byte)FlagsHelper.SetValue((InterruptConfigBits)InterruptConfigValue, InterruptConfigBits.ClickedEnable, value); }
+            get { return FlagsHelper.IsSet(_interruptConfigValue, InterruptConfigBits.ClickedEnable); }
+            set { FlagsHelper.SetValue(ref _interruptConfigValue, InterruptConfigBits.ClickedEnable, value); }
         }
 
         /// <summary>
@@ -39,8 +41,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool PressedEnable
         {
-            get { return FlagsHelper.IsSet((InterruptConfigBits)InterruptConfigValue, InterruptConfigBits.PressedEnable); }
-            set { InterruptConfigValue = (byte)FlagsHelper.SetValue((InterruptConfigBits)InterruptConfigValue, InterruptConfigBits.PressedEnable, value); }
+            get { return FlagsHelper.IsSet(_interruptConfigValue, InterruptConfigBits.PressedEnable); }
+            set { FlagsHelper.SetValue(ref _interruptConfigValue, InterruptConfigBits.PressedEnable, value); }
         }
     }
 }

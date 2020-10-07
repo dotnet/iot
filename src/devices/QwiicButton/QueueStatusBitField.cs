@@ -17,12 +17,14 @@ namespace Iot.Device.QwiicButton
             IsFull = 4,
         }
 
+        private QueueStatusBits _queueStatusValue;
+
         public QueueStatusBitField(byte queueStatusValue)
         {
-            QueueStatusValue = queueStatusValue;
+            _queueStatusValue = (QueueStatusBits)queueStatusValue;
         }
 
-        public byte QueueStatusValue { get; set; }
+        public byte QueueStatusValue => (byte)_queueStatusValue;
 
         /// <summary>
         /// Set to true to pop from the queue.
@@ -30,8 +32,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool PopRequest
         {
-            get { return FlagsHelper.IsSet((QueueStatusBits)QueueStatusValue, QueueStatusBits.PopRequest); }
-            set { QueueStatusValue = (byte)FlagsHelper.SetValue((QueueStatusBits)QueueStatusValue, QueueStatusBits.PopRequest, value); }
+            get { return FlagsHelper.IsSet(_queueStatusValue, QueueStatusBits.PopRequest); }
+            set { FlagsHelper.SetValue(ref _queueStatusValue, QueueStatusBits.PopRequest, value); }
         }
 
         /// <summary>
@@ -39,7 +41,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsEmpty
         {
-            get { return FlagsHelper.IsSet((QueueStatusBits)QueueStatusValue, QueueStatusBits.IsEmpty); }
+            get { return FlagsHelper.IsSet(_queueStatusValue, QueueStatusBits.IsEmpty); }
         }
 
         /// <summary>
@@ -47,7 +49,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsFull
         {
-            get { return FlagsHelper.IsSet((QueueStatusBits)QueueStatusValue, QueueStatusBits.IsFull); }
+            get { return FlagsHelper.IsSet(_queueStatusValue, QueueStatusBits.IsFull); }
         }
     }
 }
