@@ -9,19 +9,21 @@ using System.Runtime.InteropServices;
 namespace Iot.Device.QwiicButton
 {
     /// <summary>
-    /// Encapsulates low-level access to read from and write to the provided
-    /// Qwiic Button device.
+    /// Implements low-level access to read from and write to the provided I2C device.
+    /// Takes as generic parameter an <see cref="Enum"/> where each value represents a register
+    /// and is assigned an integer address, thereby forming a register map.
     /// </summary>
-    internal sealed class I2cBusAccess : IDisposable
+    internal sealed class I2cRegisterAccess<T> : IDisposable
+        where T : Enum
     {
         private I2cDevice _device;
 
-        public I2cBusAccess(I2cDevice device)
+        public I2cRegisterAccess(I2cDevice device)
         {
             _device = device;
         }
 
-        internal byte ReadSingleRegister(Register register)
+        internal byte ReadSingleRegister(T register)
         {
             Span<byte> readBuffer = new byte[1];
             _device.WriteRead(ToReadOnlySpan(register), readBuffer);
@@ -33,7 +35,7 @@ namespace Iot.Device.QwiicButton
             return MemoryMarshal.Read<byte>(readBuffer);
         }
 
-        internal ushort ReadDoubleRegister(Register register)
+        internal ushort ReadDoubleRegister(T register)
         {
             Span<byte> readBuffer = new byte[2];
             _device.WriteRead(ToReadOnlySpan(register), readBuffer);
@@ -45,7 +47,7 @@ namespace Iot.Device.QwiicButton
             return MemoryMarshal.Read<ushort>(readBuffer);
         }
 
-        internal uint ReadQuadRegister(Register register)
+        internal uint ReadQuadRegister(T register)
         {
             Span<byte> readBuffer = new byte[4];
             _device.WriteRead(ToReadOnlySpan(register), readBuffer);
@@ -57,26 +59,26 @@ namespace Iot.Device.QwiicButton
             return MemoryMarshal.Read<uint>(readBuffer);
         }
 
-        internal void WriteSingleRegister(Register register, byte data)
+        internal void WriteSingleRegister(T register, byte data)
         {
-            _device.Write(new[] { (byte)register, data });
+            _device.Write(new[] { (byte)(object)register, data });
         }
 
-        internal void WriteDoubleRegister(Register register, ushort data)
+        internal void WriteDoubleRegister(T register, ushort data)
         {
             byte lower = (byte)(data & 0xff);
             byte upper = (byte)(data >> 8);
             _device.Write(new ReadOnlySpan<byte>(new[]
             {
-               (byte)register,
+               (byte)(object)register,
                lower,
                upper
             }));
         }
 
-        private static ReadOnlySpan<byte> ToReadOnlySpan(Register registerValue)
+        private static ReadOnlySpan<byte> ToReadOnlySpan(T registerValue)
         {
-            return new ReadOnlySpan<byte>(new[] { (byte)registerValue });
+            return new ReadOnlySpan<byte>(new[] { (byte)(object)registerValue });
         }
 
         /// <inheritdoc />

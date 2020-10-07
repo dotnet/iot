@@ -14,7 +14,7 @@ namespace Iot.Device.QwiicButton
     public partial class QwiicButton : IDisposable
     {
         private const int DefaultAddress = 0x6F; // Default I2C address of the button
-        private I2cBusAccess _i2cBus;
+        private I2cRegisterAccess<Register> _registerAccess;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QwiicButton"/> class.
@@ -27,7 +27,7 @@ namespace Iot.Device.QwiicButton
             I2cAddress = i2cAddress;
             var settings = new I2cConnectionSettings(i2cBusId, i2cAddress);
             var device = I2cDevice.Create(settings);
-            _i2cBus = new I2cBusAccess(device);
+            _registerAccess = new I2cRegisterAccess<Register>(device);
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public byte GetDeviceId()
         {
-            return _i2cBus.ReadSingleRegister(Register.Id);
+            return _registerAccess.ReadSingleRegister(Register.Id);
         }
 
         /// <summary>
@@ -55,8 +55,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public ushort GetFirmwareVersionAsInteger()
         {
-            ushort version = (ushort)(_i2cBus.ReadSingleRegister(Register.FirmwareMajor) << 8);
-            version |= _i2cBus.ReadSingleRegister(Register.FirmwareMinor);
+            ushort version = (ushort)(_registerAccess.ReadSingleRegister(Register.FirmwareMajor) << 8);
+            version |= _registerAccess.ReadSingleRegister(Register.FirmwareMinor);
             return version;
         }
 
@@ -65,8 +65,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public string GetFirmwareVersionAsString()
         {
-            var major = _i2cBus.ReadSingleRegister(Register.FirmwareMajor);
-            var minor = _i2cBus.ReadSingleRegister(Register.FirmwareMinor);
+            var major = _registerAccess.ReadSingleRegister(Register.FirmwareMajor);
+            var minor = _registerAccess.ReadSingleRegister(Register.FirmwareMinor);
             return major + "." + minor;
         }
 
@@ -80,15 +80,15 @@ namespace Iot.Device.QwiicButton
                 throw new ArgumentOutOfRangeException(nameof(address), "I2C input address must be between 0x08 and 0x77");
             }
 
-            _i2cBus.WriteSingleRegister(Register.I2cAddress, address);
+            _registerAccess.WriteSingleRegister(Register.I2cAddress, address);
             I2cAddress = address;
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
-            _i2cBus?.Dispose();
-            _i2cBus = null;
+            _registerAccess?.Dispose();
+            _registerAccess = null;
         }
     }
 }
