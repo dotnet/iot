@@ -7,7 +7,7 @@ namespace Iot.Device.Shtc3
     /// <summary>
     /// Shtc3 Status
     /// </summary>
-    public enum Status
+    internal enum Status
     {
         /// <summary>
         /// Sensor ready to use
