@@ -6,7 +6,7 @@ using System;
 using System.Device.I2c;
 using System.Runtime.InteropServices;
 
-namespace Iot.Device.QwiicButton
+namespace Iot.Device.Common
 {
     /// <summary>
     /// Implements low-level access to read and write to the provided I2C device.
