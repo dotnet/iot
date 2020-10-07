@@ -4,6 +4,7 @@
 
 using System;
 using System.Device.I2c;
+using Iot.Device.Common;
 
 namespace Iot.Device.QwiicButton
 {
