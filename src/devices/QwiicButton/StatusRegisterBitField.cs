@@ -17,12 +17,14 @@ namespace Iot.Device.QwiicButton
             IsPressed = 4,
         }
 
+        private StatusRegisterBits _statusRegisterValue;
+
         public StatusRegisterBitField(byte statusRegisterValue)
         {
-            StatusRegisterValue = statusRegisterValue;
+            _statusRegisterValue = (StatusRegisterBits)statusRegisterValue;
         }
 
-        public byte StatusRegisterValue { get; set; }
+        public byte StatusRegisterValue => (byte)_statusRegisterValue;
 
         /// <summary>
         /// Gets set to true when a new event occurs.
@@ -30,8 +32,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool EventAvailable
         {
-            get { return FlagsHelper.IsSet((StatusRegisterBits)StatusRegisterValue, StatusRegisterBits.EventAvailable); }
-            set { StatusRegisterValue = (byte)FlagsHelper.SetValue((StatusRegisterBits)StatusRegisterValue, StatusRegisterBits.EventAvailable, value); }
+            get { return FlagsHelper.IsSet(_statusRegisterValue, StatusRegisterBits.EventAvailable); }
+            set { FlagsHelper.SetValue(ref _statusRegisterValue, StatusRegisterBits.EventAvailable, value); }
         }
 
         /// <summary>
@@ -39,8 +41,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsPressed
         {
-            get { return FlagsHelper.IsSet((StatusRegisterBits)StatusRegisterValue, StatusRegisterBits.IsPressed); }
-            set { StatusRegisterValue = (byte)FlagsHelper.SetValue((StatusRegisterBits)StatusRegisterValue, StatusRegisterBits.IsPressed, value); }
+            get { return FlagsHelper.IsSet(_statusRegisterValue, StatusRegisterBits.IsPressed); }
+            set { FlagsHelper.SetValue(ref _statusRegisterValue, StatusRegisterBits.IsPressed, value); }
         }
 
         /// <summary>
@@ -49,8 +51,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool HasBeenClicked
         {
-            get { return FlagsHelper.IsSet((StatusRegisterBits)StatusRegisterValue, StatusRegisterBits.HasBeenClicked); }
-            set { StatusRegisterValue = (byte)FlagsHelper.SetValue((StatusRegisterBits)StatusRegisterValue, StatusRegisterBits.HasBeenClicked, value); }
+            get { return FlagsHelper.IsSet(_statusRegisterValue, StatusRegisterBits.HasBeenClicked); }
+            set { FlagsHelper.SetValue(ref _statusRegisterValue, StatusRegisterBits.HasBeenClicked, value); }
         }
     }
 }

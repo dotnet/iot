@@ -23,7 +23,7 @@ namespace Iot.Device.Common
         /// <summary>
         /// TODO
         /// </summary>
-        public static T SetValue<T>(T flags, T flag, bool enabled)
+        public static void SetValue<T>(ref T flags, T flag, bool enabled)
             where T : struct
         {
             if (enabled)
@@ -34,8 +34,6 @@ namespace Iot.Device.Common
             {
                 Unset(ref flags, flag);
             }
-
-            return flags;
         }
 
         /// <summary>
