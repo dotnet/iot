@@ -14,11 +14,11 @@ namespace Iot.Device.Common
     /// with its corresponding address, thereby forming a register map. Example:
     /// <example>
     /// <code>
-    /// enum MyRegisterMap : byte
+    /// enum RegisterMap : byte
     /// {
-    ///     Id = 0x00,
-    ///     FirmwareVersion = 0x01,
-    ///     Status = 0x03
+    ///     Register1 = 0x00,
+    ///     Register2 = 0x01,
+    ///     Register3 = 0x03
     /// }
     /// </code>
     /// </example>
@@ -31,14 +31,14 @@ namespace Iot.Device.Common
         /// <summary>
         /// Initializes a new instance of the <see cref="I2cRegisterAccess{TRegisterMap}"/> class.
         /// </summary>
-        /// <param name="device">I2C device that should be accessed.</param>
+        /// <param name="device">I2C device to access.</param>
         public I2cRegisterAccess(I2cDevice device)
         {
             _device = device;
         }
 
         /// <summary>
-        /// Reads a byte from the provided register address.
+        /// Reads an 8-bit integer from the provided register address.
         /// </summary>
         public byte ReadSingleRegister(TRegisterMap register)
         {
@@ -53,7 +53,7 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
-        /// Reads 2 bytes from the provided register address.
+        /// Reads a 16-bit integer from the provided register address.
         /// </summary>
         public ushort ReadDoubleRegister(TRegisterMap register)
         {
@@ -68,7 +68,7 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
-        /// Reads 4 bytes from the provided register address.
+        /// Reads a 32-bit integer from the provided register address.
         /// </summary>
         public uint ReadQuadRegister(TRegisterMap register)
         {
@@ -83,7 +83,7 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
-        /// Writes a byte to the provided register address.
+        /// Writes an 8-bit integer to the provided register address.
         /// </summary>
         public void WriteSingleRegister(TRegisterMap register, byte data)
         {
@@ -91,7 +91,7 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
-        /// Writes 2 bytes to the provided register address.
+        /// Writes a 16-bit integer to the provided register address.
         /// </summary>
         public void WriteDoubleRegister(TRegisterMap register, ushort data)
         {
