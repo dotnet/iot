@@ -7,13 +7,18 @@ using System;
 namespace Iot.Device.Common
 {
     /// <summary>
-    /// TODO
+    /// Contains functionality to operate on a bit field <see cref="Enum"/>,
+    /// which is an <see cref="Enum"/> decorated with the <see cref="FlagsAttribute"/>
+    /// and which represents a set of flags.
     /// </summary>
     public static class FlagsHelper
     {
         /// <summary>
-        /// Sets the provided flag TODO
+        /// Determines whether one or more bit fields are set in the provided <paramref name="flags"/> bit field.
         /// </summary>
+        /// <typeparam name="T"><see cref="Enum"/> decorated with the <see cref="FlagsAttribute"/>.</typeparam>
+        /// <param name="flags">Bit field to use as basis for the lookup.</param>
+        /// <param name="flag">One or more bit fields to lookup.</param>
         public static bool IsSet<T>(T flags, T flag)
             where T : Enum
         {
@@ -21,8 +26,12 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
-        /// TODO
+        /// Sets or unsets one or more bit fields in the provided <paramref name="flags"/> bit field.
         /// </summary>
+        /// <typeparam name="T"><see cref="Enum"/> decorated with the <see cref="FlagsAttribute"/>.</typeparam>
+        /// <param name="flags">Bit field to apply the <paramref name="flag"/> to.</param>
+        /// <param name="flag">One or more bit fields to set or unset.</param>
+        /// <param name="enabled"><see langword="true"/> if <paramref name="flag"/> should be set; <see langword="false"/> if it should be unset.</param>
         public static void SetValue<T>(ref T flags, T flag, bool enabled)
             where T : struct
         {
@@ -36,9 +45,6 @@ namespace Iot.Device.Common
             }
         }
 
-        /// <summary>
-        /// TODO
-        /// </summary>
         private static void Set<T>(ref T flags, T flag)
             where T : struct
         {
@@ -48,9 +54,6 @@ namespace Iot.Device.Common
             flags = (T)(object)(flagsValue | flagValue);
         }
 
-        /// <summary>
-        /// TODO
-        /// </summary>
         private static void Unset<T>(ref T flags, T flag)
             where T : struct
         {
