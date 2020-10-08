@@ -5,7 +5,7 @@
 using System;
 using Iot.Device.Common;
 
-namespace Iot.Device.QwiicButton
+namespace Iot.Device.QwiicButton.RegisterMapping
 {
     internal struct StatusRegisterBitField
     {

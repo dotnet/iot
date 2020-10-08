@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
+    <Compile Include="RegisterMapping\*.cs" />
     <None Include="README.md" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="../Common/CommonHelpers.csproj" />
