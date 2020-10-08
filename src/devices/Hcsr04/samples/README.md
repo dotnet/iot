@@ -18,8 +18,7 @@ The fritz diagram above depicts how you should wire your RPi in order to run the
 ```C#
 using (var sonar = new Hcsr04(4, 17))
 {
-    var res = sonar.TryGetDistance(out Length distance);
-    if (res)
+    if (sonar.TryGetDistance(out Length distance))
     {
         Console.WriteLine($"Distance: {distance.Centimeters} cm");
     }
