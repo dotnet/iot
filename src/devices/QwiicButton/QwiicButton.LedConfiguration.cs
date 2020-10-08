@@ -4,7 +4,7 @@
 
 namespace Iot.Device.QwiicButton
 {
-    public partial class QwiicButton
+    public sealed partial class QwiicButton
     {
         /// <summary>
         /// Turns the onboard LED on with the specified brightness.

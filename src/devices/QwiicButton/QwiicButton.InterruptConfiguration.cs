@@ -4,7 +4,7 @@
 
 namespace Iot.Device.QwiicButton
 {
-    public partial class QwiicButton
+    public sealed partial class QwiicButton
     {
         /// <summary>
         /// When called, the interrupt will be configured to trigger when the button is pressed.

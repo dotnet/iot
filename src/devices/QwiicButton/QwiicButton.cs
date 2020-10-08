@@ -12,7 +12,7 @@ namespace Iot.Device.QwiicButton
     /// SparkFun Qwiic Button is an I2C based button with a built-in LED.
     /// Supported hardware version: 1.0.0
     /// </summary>
-    public partial class QwiicButton : IDisposable
+    public sealed partial class QwiicButton : IDisposable
     {
         private const int DefaultAddress = 0x6F; // Default I2C address of the button
         private I2cRegisterAccess<Register> _registerAccess;
