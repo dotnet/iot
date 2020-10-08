@@ -6,7 +6,7 @@ This page will explain how to setup any SPI. Please refer to the [Raspberry Pi d
 
 ## Basic Hardware SPI usage
 
-The most simplest code you can build to use SPI is the following:
+The most simple code you can build to use SPI is the following:
 
 ```csharp
 using System;
