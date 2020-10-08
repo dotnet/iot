@@ -4,7 +4,7 @@
 
 namespace Iot.Device.QwiicButton
 {
-    public partial class QwiicButton
+    public sealed partial class QwiicButton
     {
         /// <summary>
         /// Returns whether the queue of button press timestamps is full.
