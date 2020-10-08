@@ -14,29 +14,15 @@ namespace Iot.Device.Ahtxx
     /// Note: has been tested with AHT20 only, but should work with AHT10 and AHT15 as well.
     /// Up to now all functions are contained in the base class, though there might be differences between the sensors types.
     /// </summary>
-    public class AhtBase : IDisposable
+    public abstract class AhtBase : IDisposable
     {
         /// <summary>
         /// Address of AHTxx device (0x38). This address is fix and cannot be changed.
         /// This implies that only one device can be attached to a single I2C bus at a time.
         /// </summary>
-        public const int DeviceAddress = 0x38;
+        public const int DefaultI2cAddress = 0x38;
 
-        // datasheet version 1.1, table 10
-        private enum StatusBit : byte
-        {
-            Calibrated = 0x08,
-            Busy = 0x80
-        }
-
-        private enum Command : byte
-        {
-            Calibrate = 0xbe,
-            SoftRest = 0xba,
-            Measure = 0xac
-        }
-
-        private I2cDevice _i2cDevice = null;
+        private I2cDevice _i2cDevice;
         private double _temperature;
         private double _humidity;
 
@@ -93,6 +79,7 @@ namespace Iot.Device.Ahtxx
                 0x33,
                 0x00
             };
+
             _i2cDevice.Write(buffer);
 
             // According to the datasheet the measurement takes 80 ms and completion is indicated by the status bit.
@@ -122,7 +109,7 @@ namespace Iot.Device.Ahtxx
         /// </summary>
         private void SoftReset()
         {
-            _i2cDevice.WriteByte((byte)Command.SoftRest);
+            _i2cDevice.WriteByte((byte)Command.SoftReset);
             // reset requires 20ms at most, c.f. datasheet version 1.1, ch. 5.5
             Thread.Sleep(20);
         }
@@ -138,6 +125,7 @@ namespace Iot.Device.Ahtxx
                 0x08, // command parameters c.f. datasheet, version 1.1, ch. 5.4
                 0x00
             };
+
             _i2cDevice.Write(buffer);
             // wait 10ms c.f. datasheet, version 1.1, ch. 5.4
             Thread.Sleep(10);
@@ -170,6 +158,20 @@ namespace Iot.Device.Ahtxx
         {
             _i2cDevice?.Dispose();
             _i2cDevice = null;
+        }
+
+        // datasheet version 1.1, table 10
+        private enum StatusBit : byte
+        {
+            Calibrated = 0x08,
+            Busy = 0x80
+        }
+
+        private enum Command : byte
+        {
+            Calibrate = 0xbe,
+            SoftReset = 0xba,
+            Measure = 0xac
         }
     }
 }
