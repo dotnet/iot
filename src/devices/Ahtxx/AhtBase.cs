@@ -57,10 +57,10 @@ namespace Iot.Device.Ahtxx
         }
 
         /// <summary>
-        /// Gets the current humidity reading from the sensor.
+        /// Gets the current relative humidity reading from the sensor.
         /// Reading the humidity takes between 10 ms and 80 ms.
         /// </summary>
-        /// <returns>Temperature reading</returns>
+        /// <returns>Relative humidity reading</returns>
         public Ratio GetHumidity()
         {
             Measure();
