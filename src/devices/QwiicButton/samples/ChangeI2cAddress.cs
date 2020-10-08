@@ -29,13 +29,14 @@ namespace Iot.Device.QwiicButton.Samples
         public static uint? EnterNewAddress()
         {
             Console.WriteLine("Enter a new I2C address for the Qwiic Button to use.");
-            Console.WriteLine("Don't use the 0x prefix. For instance, if you wanted to");
-            Console.WriteLine("change the address to 0x5B, you would enter 5B and press enter.");
+            Console.WriteLine("Use hexadecimal notation, but don't use the 0x prefix.");
+            Console.WriteLine("For instance, if you wanted to change the address to 0x5B,");
+            Console.WriteLine("you would enter 5B and press enter.");
 
             try
             {
                 var address = Convert.ToUInt32(Console.ReadLine(), 16);
-                Console.WriteLine($"Using I2C address 0x{BitConverter.ToString(new[] { (byte)address })} (decimal: {address})");
+                Console.WriteLine($"Using I2C address 0x{address:X} (decimal: {address})");
                 return address;
             }
             catch

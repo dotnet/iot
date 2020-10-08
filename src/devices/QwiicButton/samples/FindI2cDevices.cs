@@ -40,7 +40,7 @@ namespace Iot.Device.QwiicButton.Samples
                     }
 
                     devicesFoundCount++;
-                    Console.WriteLine($"Found I2C device on address 0x{BitConverter.ToString(new[] { (byte)address })} ({address})");
+                    Console.WriteLine($"Found I2C device on address 0x{address:X} (decimal: {address})");
                 }
                 catch
                 {
