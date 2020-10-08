@@ -16,28 +16,7 @@ namespace Iot.Device.Mhz19b
     /// </summary>
     public sealed class Mhz19b : IDisposable
     {
-        private enum Command : byte
-        {
-            ReadCo2Concentration = 0x86,
-            CalibrateZeroPoint = 0x87,
-            CalibrateSpanPoint = 0x88,
-            AutoCalibrationSwitch = 0x79,
-            DetectionRangeSetting = 0x99
-        }
-
-        private enum MessageFormat
-        {
-            Start = 0x00,
-            SensorNum = 0x01,
-            Command = 0x02,
-            DataHighRequest = 0x03,
-            DataLowRequest = 0x04,
-            DataHighResponse = 0x02,
-            DataLowResponse = 0x03,
-            Checksum = 0x08
-        }
-
-        private const int MessageSize = 9;
+        private const int MessageBytes = 9;
         private bool _shouldDispose = false;
         private SerialPort _serialPort = null;
         private Stream _serialPortStream = null;
@@ -72,6 +51,7 @@ namespace Iot.Device.Mhz19b
                 ReadTimeout = 1000,
                 WriteTimeout = 1000
             };
+
             _serialPort.Open();
             _serialPortStream = _serialPort.BaseStream;
             _shouldDispose = true;
@@ -79,63 +59,52 @@ namespace Iot.Device.Mhz19b
 
         /// <summary>
         /// Gets the current CO2 concentration from the sensor.
-        /// The validity is true if the current concentration was successfully read.
-        /// If the serial communication timed out or the checksum was invalid the validity is false.
-        /// If the validity is false the ratio is set to 0.
         /// </summary>
-        /// <returns>CO2 concentration in ppm and validity</returns>
-        /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
+        /// <returns>CO2 volume concentration</returns>
+        /// <exception cref="IOException">Communication with sensor failed</exception>
+        /// <exception cref="TimeoutException">A timeout occurred while communicating with the sensor</exception>
         public VolumeConcentration GetCo2Reading()
         {
-            try
+            // send read command request
+            var request = CreateRequest(Command.ReadCo2Concentration);
+            request[(int)MessageFormat.Checksum] = Checksum(request);
+            _serialPortStream.Write(request, 0, request.Length);
+
+            // read complete response (9 bytes expected)
+            byte[] response = new byte[MessageBytes];
+
+            long endTicks = DateTime.Now.AddMilliseconds(250).Ticks;
+            int bytesRead = 0;
+            while (DateTime.Now.Ticks < endTicks && bytesRead < MessageBytes)
             {
-                // send read command request
-                var request = CreateRequest(Command.ReadCo2Concentration);
-                request[(int)MessageFormat.Checksum] = Checksum(request);
-                _serialPortStream.Write(request, 0, request.Length);
-
-                // read complete response (9 bytes expected)
-                byte[] response = new byte[MessageSize];
-                int timeout = 100;
-                int bytesRead = 0;
-                while (timeout > 0 && bytesRead < MessageSize)
-                {
-                    bytesRead += _serialPortStream.Read(response, bytesRead, response.Length - bytesRead);
-                    Thread.Sleep(1);
-                    timeout--;
-                }
-
-                if (timeout == 0)
-                {
-                    throw new IOException("Timeout");
-                }
-
-                // check response and return calculated concentration if valid
-                if (response[(int)MessageFormat.Checksum] == Checksum(response))
-                {
-                    return VolumeConcentration.FromPartsPerMillion((int)response[(int)MessageFormat.DataHighResponse] * 256 + (int)response[(int)MessageFormat.DataLowResponse]);
-                }
-                else
-                {
-                    throw new IOException("Invalid response message received from sensor");
-                }
+                bytesRead += _serialPortStream.Read(response, bytesRead, response.Length - bytesRead);
+                Thread.Sleep(1);
             }
-            catch (Exception e)
+
+            if (bytesRead < MessageBytes)
             {
-                throw new IOException("Sensor communication failed", e);
+                throw new TimeoutException($"Communication with sensor failed.");
+            }
+
+            // check response and return calculated concentration if valid
+            if (response[(int)MessageFormat.Checksum] == Checksum(response))
+            {
+                return VolumeConcentration.FromPartsPerMillion((int)response[(int)MessageFormat.DataHighResponse] * 256 + (int)response[(int)MessageFormat.DataLowResponse]);
+            }
+            else
+            {
+                throw new IOException("Invalid response message received from sensor");
             }
         }
 
         /// <summary>
         /// Initiates a zero point calibration.
-        /// The sensor doesn't respond anything, so this is fire and forget.
         /// </summary>
         /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
         public void PerformZeroPointCalibration() => SendRequest(CreateRequest(Command.CalibrateZeroPoint));
 
         /// <summary>
         /// Initiate a span point calibration.
-        /// The sensor doesn't respond anything, so this is fire and forget.
         /// </summary>
         /// <param name="span">span value, between 1000[ppm] and 5000[ppm]. The typical value is 2000[ppm].</param>
         /// <exception cref="System.ArgumentException">Thrown when span value is out of range</exception>
@@ -157,7 +126,6 @@ namespace Iot.Device.Mhz19b
 
         /// <summary>
         /// Switches the autmatic baseline correction on and off.
-        /// The sensor doesn't respond anything, so this is fire and forget.
         /// </summary>
         /// <param name="state">State of automatic correction</param>
         /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
@@ -172,7 +140,6 @@ namespace Iot.Device.Mhz19b
 
         /// <summary>
         /// Set the sensor detection range.
-        /// The sensor doesn't respond anything, so this is fire and forget
         /// </summary>
         /// <param name="detectionRange">Detection range of the sensor</param>
         /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
@@ -251,6 +218,27 @@ namespace Iot.Device.Mhz19b
                 _serialPort.Dispose();
                 _serialPort = null;
             }
+        }
+
+        private enum Command : byte
+        {
+            ReadCo2Concentration = 0x86,
+            CalibrateZeroPoint = 0x87,
+            CalibrateSpanPoint = 0x88,
+            AutoCalibrationSwitch = 0x79,
+            DetectionRangeSetting = 0x99
+        }
+
+        private enum MessageFormat
+        {
+            Start = 0x00,
+            SensorNum = 0x01,
+            Command = 0x02,
+            DataHighRequest = 0x03,
+            DataLowRequest = 0x04,
+            DataHighResponse = 0x02,
+            DataLowResponse = 0x03,
+            Checksum = 0x08
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Iot.Device.Ahtxx.Samples
         public static void Main(string[] args)
         {
             const int I2cBus = 1;
-            I2cConnectionSettings i2cSettings = new I2cConnectionSettings(I2cBus, Aht20.DeviceAddress);
+            I2cConnectionSettings i2cSettings = new I2cConnectionSettings(I2cBus, Aht20.DefaultI2cAddress);
             I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
             Aht20 aht20Sensor = new Aht20(i2cDevice);
 
