@@ -5,6 +5,7 @@
 using System;
 using System.Device.I2c;
 using Iot.Device.Common;
+using Iot.Device.QwiicButton.RegisterMapping;
 
 namespace Iot.Device.QwiicButton
 {
