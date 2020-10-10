@@ -21,9 +21,9 @@ namespace Iot.Device.Tlc1543
         private readonly int _address;
         private readonly int _inputOutputClock;
         private readonly int _endOfConversion;
+        private readonly bool _shouldDispose;
         private readonly TimeSpan _conversionTime = new TimeSpan(210);
         private GpioController _controller;
-        private bool _shouldDispose;
         private Channel _chargeChannel = Channel.SelfTest512;
         private List<int> _values = new List<int>(16);
 
@@ -64,7 +64,7 @@ namespace Iot.Device.Tlc1543
         /// <param name="controller">The GPIO controller for defined external pins. If not specified, the default controller will be used.</param>
         /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Tlc1543(int address, int chipSelect, int dataOut, int inputOutputClock, int endOfConversion, GpioController controller = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
+        public Tlc1543(int address, int chipSelect, int dataOut, int inputOutputClock, int endOfConversion = -1, GpioController controller = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
         {
             _shouldDispose = controller == null || shouldDispose;
             _controller = controller ?? new GpioController(pinNumberingScheme);
