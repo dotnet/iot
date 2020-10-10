@@ -21,7 +21,6 @@ namespace Iot.Device.Tlc1543
         private readonly int _address;
         private readonly int _inputOutputClock;
         private readonly int _endOfConversion;
-        private readonly int _channels = 11;
         private readonly TimeSpan _conversionTime = new TimeSpan(210);
         private GpioController _controller;
         private bool _shouldDispose;
