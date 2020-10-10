@@ -52,10 +52,6 @@ List<int> values = adc.ReadChannels(_channelList);
 
 Uses only one more cycle than number of channels being polled (last cycle sends dummy ChargeChannel address and reads data)
 
-#### List<int> ReadAll()
-
-Reads all 11 channels (excluded are SelfTest channels) and returned in order in list. As fast as ReadChannels but not as flexible.
-
 #### *int ReadChannel(int)
 
 1 cycle long mode. To get usable data you need to use this method atleast 2 times. Remember that output that you get from this from last cycle. Use it at your own risk.

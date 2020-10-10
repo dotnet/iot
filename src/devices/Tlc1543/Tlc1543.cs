@@ -20,12 +20,13 @@ namespace Iot.Device.Tlc1543
         private readonly int _dataOut;
         private readonly int _address;
         private readonly int _inputOutputClock;
-        private readonly int? _endOfConversion;
+        private readonly int _endOfConversion;
         private readonly int _channels = 11;
         private readonly TimeSpan _conversionTime = new TimeSpan(210);
-        private GpioController _digital;
+        private GpioController _controller;
         private bool _shouldDispose;
         private Channel _chargeChannel = Channel.SelfTest512;
+        private List<int> _values = new List<int>(16);
 
         /// <summary>
         /// Channel used between readings to charge up capacitors in ADC
@@ -56,49 +57,32 @@ namespace Iot.Device.Tlc1543
         /// <summary>
         /// Constructor for Tlc1543
         /// </summary>
-        /// <param name="address">Address</param>
-        /// <param name="chipSelect">Chip Select</param>
-        /// <param name="dataOut">Data Out</param>
-        /// <param name="inputOutputClock">I/O Clock</param>
-        /// <param name="controller"> s</param>
-        /// <param name="pinNumberingScheme"> s</param>
-        /// <param name="shouldDispose"> s</param>
-        public Tlc1543(int address, int chipSelect, int dataOut, int inputOutputClock, GpioController controller = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
+        /// <param name="address">Address pin</param>
+        /// <param name="chipSelect">Chip Select pin</param>
+        /// <param name="dataOut">Data Out pin</param>
+        /// <param name="inputOutputClock">I/O Clock pin</param>
+        /// <param name="endOfConversion">End of Conversion pin</param>
+        /// <param name="controller">The GPIO controller for defined external pins. If not specified, the default controller will be used.</param>
+        /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Tlc1543(int address, int chipSelect, int dataOut, int inputOutputClock, int endOfConversion, GpioController controller = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
         {
             _shouldDispose = controller == null || shouldDispose;
-            _digital = controller ?? new GpioController(pinNumberingScheme);
-            _address = address;
-            _chipSelect = chipSelect;
-            _dataOut = dataOut;
-            _inputOutputClock = inputOutputClock;
-
-            _digital.OpenPin(_address, PinMode.Output);
-            _digital.OpenPin(_chipSelect, PinMode.Output);
-            _digital.OpenPin(_dataOut, PinMode.InputPullUp);
-            _digital.OpenPin(_inputOutputClock, PinMode.Output);
-        }
-
-        /// <summary>
-        /// Constructor for Tlc1543
-        /// </summary>
-        /// <param name="address">Address</param>
-        /// <param name="chipSelect">Chip Select</param>
-        /// <param name="dataOut">Data Out</param>
-        /// <param name="endOfConversion">End of Conversion</param>
-        /// <param name="inputOutputClock">I/O Clock</param>
-        public Tlc1543(int address, int chipSelect, int dataOut, int inputOutputClock, int endOfConversion)
-        {
+            _controller = controller ?? new GpioController(pinNumberingScheme);
             _address = address;
             _chipSelect = chipSelect;
             _dataOut = dataOut;
             _endOfConversion = endOfConversion;
             _inputOutputClock = inputOutputClock;
 
-            _digital.OpenPin(_address, PinMode.Output);
-            _digital.OpenPin(_chipSelect, PinMode.Output);
-            _digital.OpenPin(_dataOut, PinMode.InputPullUp);
-            _digital.OpenPin((int)_endOfConversion, PinMode.InputPullUp);
-            _digital.OpenPin(_inputOutputClock, PinMode.Output);
+            _controller.OpenPin(_address, PinMode.Output);
+            _controller.OpenPin(_chipSelect, PinMode.Output);
+            _controller.OpenPin(_dataOut, PinMode.InputPullUp);
+            _controller.OpenPin(_inputOutputClock, PinMode.Output);
+            if (_endOfConversion != -1)
+            {
+                _controller.OpenPin(_endOfConversion, PinMode.InputPullUp);
+            }
         }
 
         #endregion
@@ -122,34 +106,35 @@ namespace Iot.Device.Tlc1543
             }
 
             int value = 0;
-            _digital.Write(_chipSelect, 0);
+            _controller.Write(_chipSelect, 0);
             for (int i = 0; i < 10; i++)
             {
                 if (i < 4)
                 {
                     // send 4-bit Address
-                    if ((channelNumber >> (3 - i) & 0x01) != 0)
+                    if (((channelNumber >> (3 - i)) & 0x01) == 1)
                     {
-                        _digital.Write(_address, 1);
+                        _controller.Write(_address, 1);
                     }
                     else
                     {
-                        _digital.Write(_address, 0);
+                        _controller.Write(_address, 0);
                     }
                 }
 
                 // read 10-bit data
                 value <<= 1;
-                if (_digital.Read(_dataOut) == PinValue.High)
+                if (_controller.Read(_dataOut) == PinValue.High)
                 {
                     value |= 0x01;
                 }
 
-                _digital.Write(_inputOutputClock, 1);
-                _digital.Write(_inputOutputClock, 0);
+                _controller.Write(_inputOutputClock, 1);
+                DelayHelper.DelayMicroseconds(0, false);
+                _controller.Write(_inputOutputClock, 0);
             }
 
-            _digital.Write(_chipSelect, 1);
+            _controller.Write(_chipSelect, 1);
             // Max conversion time (21us) as seen in table on page 10 in TLC1543 documentation
             DelayHelper.Delay(_conversionTime, false);
             return value;
@@ -180,32 +165,15 @@ namespace Iot.Device.Tlc1543
         /// <returns>List of 10 bit values corresponding to relative voltage level on specified device channels</returns>
         public List<int> ReadChannels(List<Channel> channelList)
         {
-            List<int> values = new List<int>(channelList.Count);
+            _values.Clear();
             ReadChannel((int)channelList[0]);
             for (int i = 1; i < channelList.Count; i++)
             {
-                values.Add(ReadChannel((int)channelList[i]));
+                _values.Add(ReadChannel((int)channelList[i]));
             }
 
-            values.Add(ReadChannel((int)ChargeChannel));
-            return values;
-        }
-
-        /// <summary>
-        /// Reads all sensor values into an List
-        /// </summary>
-        /// <returns>List of 10 bit values corresponding to relative voltage level on all channels</returns>
-        public List<int> ReadAll()
-        {
-            List<int> values = new List<int>(_channels);
-            ReadChannel(0);
-            for (int i = 1; i < values.Count; i++)
-            {
-                values.Add(ReadChannel(i));
-            }
-
-            values.Add(ReadChannel((int)ChargeChannel));
-            return values;
+            _values.Add(ReadChannel((int)ChargeChannel));
+            return _values;
         }
 
         #endregion
@@ -219,17 +187,17 @@ namespace Iot.Device.Tlc1543
         {
             if (_shouldDispose)
             {
-                _digital?.Dispose();
+                _controller?.Dispose();
             }
             else
             {
-                _digital?.ClosePin(_address);
-                _digital?.ClosePin(_chipSelect);
-                _digital?.ClosePin(_dataOut);
-                _digital?.ClosePin(_inputOutputClock);
-                if (_endOfConversion.HasValue)
+                _controller?.ClosePin(_address);
+                _controller?.ClosePin(_chipSelect);
+                _controller?.ClosePin(_dataOut);
+                _controller?.ClosePin(_inputOutputClock);
+                if (_endOfConversion != -1)
                 {
-                    _digital?.ClosePin((int)_endOfConversion);
+                    _controller?.ClosePin(_endOfConversion);
                 }
             }
         }

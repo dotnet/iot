@@ -80,6 +80,6 @@ namespace Iot.Device.Tlc1543
         /// <summary>
         /// Self Test channel that sets charge capacitors to Vref+
         /// </summary>
-        SelfTest1024 = 13,
+        SelfTest1023 = 13,
     }
 }
