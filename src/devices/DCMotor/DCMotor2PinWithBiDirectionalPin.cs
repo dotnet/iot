@@ -9,7 +9,9 @@ using System.Device.Pwm.Drivers;
 
 namespace Iot.Device.DCMotor
 {
-    // class that supports H-bridge controller with only one direction input and PWM input
+    /// <summary>
+    /// class for H-bridge controller with only one direction input and PWM input
+    /// </summary>
     internal class DCMotor2PinWithBiDirectionalPin : DCMotor
     {
         private PwmChannel _pwm;
