@@ -75,8 +75,8 @@ namespace Iot.Device.ExplorerHat
 
             _motorArray = new List<DCMotor.DCMotor>()
             {
-                DCMotor.DCMotor.Create3pinDriver(MOTOR1_SPDPIN, MOTOR1_DIRPIN, _controller),
-                DCMotor.DCMotor.Create3pinDriver(MOTOR2_SPDPIN, MOTOR2_DIRPIN, _controller)
+                DCMotor.DCMotor.Create(MOTOR1_SPDPIN, MOTOR1_DIRPIN, false, _controller),
+                DCMotor.DCMotor.Create(MOTOR2_SPDPIN, MOTOR2_DIRPIN, false,  _controller)
             };
         }
 

@@ -12,7 +12,7 @@ namespace Iot.Device.DCMotor
     internal class DCMotor2Pin : DCMotor
     {
         private PwmChannel _pwm;
-        private int _pin1;
+        private int _DIRpin;
         private double _speed;
 
         public DCMotor2Pin(
@@ -24,27 +24,17 @@ namespace Iot.Device.DCMotor
         {
             _pwm = pwmChannel;
 
-            _pin1 = pin1;
+            _DIRpin = pin1;
 
             _speed = 0;
 
             _pwm.Start();
 
-            if (_pin1 != -1)
+            if (_DIRpin != -1)
             {
-                Controller.OpenPin(_pin1, PinMode.Output);
-                Controller.Write(_pin1, PinValue.Low);
+                Controller.OpenPin(_DIRpin, PinMode.Output);
+                Controller.Write(_DIRpin, PinValue.Low);
             }
-        }
-
-        public override void Start()
-        {
-            _pwm.Start();
-        }
-
-        public override void Stop()
-        {
-            _pwm.Stop();
         }
 
         /// <summary>
@@ -60,7 +50,7 @@ namespace Iot.Device.DCMotor
             }
             set
             {
-                double val = Math.Clamp(value, _pin1 != -1 ? -1.0 : 0.0, 1.0);
+                double val = Math.Clamp(value, _DIRpin != -1 ? -1.0 : 0.0, 1.0);
 
                 if (_speed == val)
                 {
@@ -69,21 +59,21 @@ namespace Iot.Device.DCMotor
 
                 if (val >= 0.0)
                 {
-                    if (_pin1 != -1)
+                    if (_DIRpin != -1)
                     {
-                        Controller.Write(_pin1, PinValue.High);
+                        Controller.Write(_DIRpin, PinValue.High);
                     }
 
                     _pwm.DutyCycle = val;
                 }
                 else
                 {
-                    if (_pin1 != -1)
+                    if (_DIRpin != -1)
                     {
-                        Controller.Write(_pin1, PinValue.Low);
+                        Controller.Write(_DIRpin, PinValue.Low);
                     }
 
-                    _pwm.DutyCycle = Math.Abs(val);
+                    _pwm.DutyCycle = -val;
                 }
 
                 _speed = val;

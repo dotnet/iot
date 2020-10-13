@@ -37,16 +37,6 @@ namespace Iot.Device.DCMotor
             }
         }
 
-        public override void Start()
-        {
-            _pwm.Start();
-        }
-
-        public override void Stop()
-        {
-            _pwm.Stop();
-        }
-
         /// <summary>
         /// Gets or sets the speed of the motor.
         /// Speed is a value from 0 to 1 or -1 to 1 if direction pin has been provided.
