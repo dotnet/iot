@@ -9,32 +9,35 @@ using System.Device.Pwm.Drivers;
 
 namespace Iot.Device.DCMotor
 {
-    internal class DCMotor2Pin : DCMotor
+    // class that supports H-bridge controller with only one direction input and PWM input
+    internal class DCMotor2PinWithBiDirectionalPin : DCMotor
     {
         private PwmChannel _pwm;
-        private int _DIRpin;
+        private int _dirPin;
         private double _speed;
 
-        public DCMotor2Pin(
+        public DCMotor2PinWithBiDirectionalPin(
             PwmChannel pwmChannel,
-            int pin1,
+            int dirpin,
             GpioController controller,
             bool shouldDispose)
-            : base(controller ?? ((pin1 == -1) ? null : new GpioController()), controller == null ? true : shouldDispose)
+            : base(controller ?? ((dirpin == -1) ? null : new GpioController()), controller == null ? true : shouldDispose)
         {
             _pwm = pwmChannel;
 
-            _DIRpin = pin1;
+            _dirPin = dirpin;
 
             _speed = 0;
 
             _pwm.Start();
 
-            if (_DIRpin != -1)
+            if (_dirPin == -1)
             {
-                Controller.OpenPin(_DIRpin, PinMode.Output);
-                Controller.Write(_DIRpin, PinValue.Low);
+                throw new ArgumentOutOfRangeException(nameof(_dirPin));
             }
+
+            Controller.OpenPin(_dirPin, PinMode.Output);
+            Controller.Write(_dirPin, PinValue.Low);
         }
 
         /// <summary>
@@ -50,7 +53,7 @@ namespace Iot.Device.DCMotor
             }
             set
             {
-                double val = Math.Clamp(value, _DIRpin != -1 ? -1.0 : 0.0, 1.0);
+                double val = Math.Clamp(value, _dirPin != -1 ? -1.0 : 0.0, 1.0);
 
                 if (_speed == val)
                 {
@@ -59,18 +62,18 @@ namespace Iot.Device.DCMotor
 
                 if (val >= 0.0)
                 {
-                    if (_DIRpin != -1)
+                    if (_dirPin != -1)
                     {
-                        Controller.Write(_DIRpin, PinValue.High);
+                        Controller.Write(_dirPin, PinValue.High);
                     }
 
                     _pwm.DutyCycle = val;
                 }
                 else
                 {
-                    if (_DIRpin != -1)
+                    if (_dirPin != -1)
                     {
-                        Controller.Write(_DIRpin, PinValue.Low);
+                        Controller.Write(_dirPin, PinValue.Low);
                     }
 
                     _pwm.DutyCycle = -val;
