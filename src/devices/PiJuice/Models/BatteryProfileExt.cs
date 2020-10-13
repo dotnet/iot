@@ -4,7 +4,7 @@
 
 using UnitsNet;
 
-namespace PiJuiceDevice.Models
+namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
     /// TODO: Fill In

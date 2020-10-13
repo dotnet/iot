@@ -5,13 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Iot.Device.PiJuiceDevice;
 using Iot.Device.PiJuiceDevice.Models;
-using PiJuiceDevice.Models;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace PiJuiceDevice
+namespace Iot.Device.PiJuiceDevice
 {
     /// <summary>
     /// PiJuiceStatus class to support status of the PiJuice

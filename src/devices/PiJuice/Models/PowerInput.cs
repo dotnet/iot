@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace PiJuiceDevice.Models
+using UnitsNet;
+
+namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
     /// TODO: Fill In
@@ -27,7 +29,12 @@ namespace PiJuiceDevice.Models
         /// <summary>
         /// TODO: Fill In
         /// </summary>
-        public string USBMicroCurrentLimit { get; set; }
+        public ElectricCurrent USBMicroCurrentLimit { get; set; }
+
+        /// <summary>
+        /// TODO: Fill In
+        /// </summary>
+        public ElectricPotential USBMicroDPM { get; set; }
 
         /// <summary>
         /// TODO: Fill In

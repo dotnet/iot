@@ -40,7 +40,6 @@ namespace Iot.Device.PiJuiceDevice.Models
         PowerInputsConfig = 0x5E,
 
         /*
-        ButtonConfig = 0x6E,
         IOConfig = 0x72,
         I2CAddress = 0x7C,
         , */
@@ -139,6 +138,11 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// LED configuration
         /// </summary>
         LEDConfig = 0x6A,
+
+        /// <summary>
+        /// Button configuration
+        /// </summary>
+        ButtonConfig = 0x6E,
 
         /// <summary>
         /// TODO: Fill In

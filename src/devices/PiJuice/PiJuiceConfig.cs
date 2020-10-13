@@ -5,13 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Iot.Device.PiJuiceDevice;
 using Iot.Device.PiJuiceDevice.Models;
-using PiJuiceDevice.Models;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace PiJuiceDevice
+namespace Iot.Device.PiJuiceDevice
 {
     /// <summary>
     /// PiJuiceConfig class to support status of the PiJuice
@@ -19,6 +17,10 @@ namespace PiJuiceDevice
     public class PiJuiceConfig
     {
         private readonly PiJuice _piJuice;
+
+        private readonly List<ElectricCurrent> _usbMicroCurrentLimits = new List<ElectricCurrent> { new ElectricCurrent(1.5, ElectricCurrentUnit.Ampere), new ElectricCurrent(2.5, ElectricCurrentUnit.Ampere) };
+        private readonly List<ElectricPotential> _usbMicroDPMs = new List<ElectricPotential>();
+        /* private List<string> _usbMicroDPMs = new List<string> { "4.20V", "4.28V", "4.36V", "4.44V", "4.52V", "4.60V", "4.68V", "4.76V" };*/
 
         private List<string> _batteryProfiles = new List<string>();
 
@@ -29,6 +31,11 @@ namespace PiJuiceDevice
         public PiJuiceConfig(PiJuice piJuice)
         {
             _piJuice = piJuice;
+
+            for (int i = 0; i < 8; i++)
+            {
+                _usbMicroDPMs.Add(new ElectricPotential(4.2 + 0.8 * i, ElectricPotentialUnit.Volt));
+            }
         }
 
         /// <summary>
@@ -68,33 +75,18 @@ namespace PiJuiceDevice
             data[3] = (byte)Math.Round((batteryProfile.TerminationCurrent.Milliamperes - 50) / 50, 0, MidpointRounding.AwayFromZero);
             data[4] = (byte)Math.Round((batteryProfile.RegulationVoltage.Millivolts - 3500) / 20, 0, MidpointRounding.AwayFromZero);
             data[5] = (byte)Math.Round(batteryProfile.CutOffVoltage.Millivolts / 20, 0, MidpointRounding.AwayFromZero);
-        }
+            data[6] = (byte)batteryProfile.TemperatureCold.DegreesCelsius;
+            data[7] = (byte)batteryProfile.TemperatureCool.DegreesCelsius;
+            data[8] = (byte)batteryProfile.TemperatureWarm.DegreesCelsius;
+            data[9] = (byte)batteryProfile.TemperatureHot.DegreesCelsius;
+            data[10] = (byte)(batteryProfile.NTCB & 0xFF);
+            data[11] = (byte)((batteryProfile.NTCB >> 8) & 0xFF);
+            int ntcResistance = (int)batteryProfile.NTCResistance.Ohms / 10;
+            data[12] = (byte)(ntcResistance & 0xFF);
+            data[13] = (byte)((ntcResistance >> 8) & 0xFF);
 
-        /*
-         * def SetCustomBatteryProfile(self, profile):
-        d = [0x00] * 14
-        try:
-            c = profile['capacity']
-            d[0] = c & 0xFF
-            d[1] = (c >> 8) & 0xFF
-            d[2] = int(round((profile['chargeCurrent'] - 550) // 75))
-            d[3] = int(round((profile['terminationCurrent'] - 50) // 50))
-            d[4] = int(round((profile['regulationVoltage'] - 3500) // 20))
-            d[5] = int(round(profile['cutoffVoltage'] // 20))
-            d[6] = ctypes.c_ubyte(profile['tempCold']).value
-            d[7] = ctypes.c_ubyte(profile['tempCool']).value
-            d[8] = ctypes.c_ubyte(profile['tempWarm']).value
-            d[9] = ctypes.c_ubyte(profile['tempHot']).value
-            B = profile['ntcB']
-            d[10] = B & 0xFF
-            d[11] = (B >> 8) & 0xFF
-            R = profile['ntcResistance'] // 10
-            d[12] = R & 0xFF
-            d[13] = (R >> 8) & 0xFF
-        except:
-            return {'error': 'BAD_ARGUMENT'}
-        return self.interface.WriteDataVerify(self.BATTERY_PROFILE_CMD, d, 0.2)
-         */
+            _piJuice.WriteCommandVerify(PiJuiceCommand.BatteryProfile, data);
+        }
 
         /// <summary>
         /// TODO: Fill In
@@ -122,6 +114,30 @@ namespace PiJuiceDevice
             batteryProfileExt.R90 = new ElectricResistance(((response[12] << 8) | response[11]) / 100.0, ElectricResistanceUnit.Milliohm);
 
             return batteryProfileExt;
+        }
+
+        /// <summary>
+        /// TODO: Fill In
+        /// </summary>
+        public void SetCustomBatteryExtProfile(BatteryProfileExt batteryProfile)
+        {
+            var data = new byte[18];
+
+            data[0] = (byte)batteryProfile.BatteryChemistry;
+            data[1] = (byte)((int)batteryProfile.OCV10.Millivolts & 0xFF);
+            data[2] = (byte)(((int)batteryProfile.OCV10.Millivolts >> 8) & 0xFF);
+            data[3] = (byte)((int)batteryProfile.OCV50.Millivolts & 0xFF);
+            data[4] = (byte)(((int)batteryProfile.OCV50.Millivolts >> 8) & 0xFF);
+            data[5] = (byte)((int)batteryProfile.OCV90.Millivolts & 0xFF);
+            data[6] = (byte)(((int)batteryProfile.OCV90.Millivolts >> 8) & 0xFF);
+            data[7] = (byte)((int)batteryProfile.R10.Milliohms & 0xFF);
+            data[8] = (byte)(((int)batteryProfile.R10.Milliohms >> 8) & 0xFF);
+            data[9] = (byte)((int)batteryProfile.R50.Milliohms & 0xFF);
+            data[10] = (byte)(((int)batteryProfile.R50.Milliohms >> 8) & 0xFF);
+            data[11] = (byte)((int)batteryProfile.R90.Milliohms & 0xFF);
+            data[12] = (byte)(((int)batteryProfile.R90.Milliohms >> 8) & 0xFF);
+
+            _piJuice.WriteCommandVerify(PiJuiceCommand.BatteryProfileExt, data);
         }
 
         /// <summary>
@@ -236,12 +252,110 @@ namespace PiJuiceDevice
             powerInput.Precedence = (PowerInputType)(response[0] & 0x01);
             powerInput.GPIOIn = (response[0] & 0x02) == 0x02;
             powerInput.NoBatteryTurnOn = (response[0] & 0x04) == 0x04;
-            // powerInput.USBMicroCurrentLimit = IntMask(response[0] >> 3, 0x01) == 1 ? _usbMicroCurrentLimits[1] : _usbMicroCurrentLimits[0];
-            // var usbMicroDPM = ()
+            powerInput.USBMicroCurrentLimit = _usbMicroCurrentLimits[(response[0] >> 3) & 0x01];
+            powerInput.USBMicroDPM = _usbMicroDPMs[(response[0] >> 4) & 0x07];
             powerInput.NonVolatile = (response[0] & 0x80) == 0x80;
 
             return powerInput;
         }
+
+        /// <summary>
+        /// TODO: Fill In
+        /// </summary>
+        public void SetPowerInputs(PowerInput powerInput)
+        {
+            byte nonVolatile = powerInput.NonVolatile ? (byte)0x80 : (byte)0x00;
+            byte precedence = powerInput.Precedence == PowerInputType.GPIO5V ? (byte)0x01 : (byte)0x00;
+            byte gpioIn = powerInput.GPIOIn ? (byte)0x02 : (byte)0x00;
+            byte noBatteryTurnOn = powerInput.NoBatteryTurnOn ? (byte)0x04 : (byte)0x00;
+            int index = _usbMicroCurrentLimits.IndexOf(powerInput.USBMicroCurrentLimit);
+            if (index == -1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(powerInput.USBMicroCurrentLimit));
+            }
+
+            byte usbMicroLimit = (byte)(index << 3);
+
+            index = _usbMicroDPMs.IndexOf(powerInput.USBMicroDPM);
+            if (index == -1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(powerInput.USBMicroDPM));
+            }
+
+            byte usbMicroDPM = (byte)((index & 0x07) << 3);
+
+            var data = new byte[2];
+            data[0] = (byte)(nonVolatile | precedence | gpioIn | noBatteryTurnOn | usbMicroLimit | usbMicroDPM);
+
+            _piJuice.WriteCommandVerify(PiJuiceCommand.PowerInputsConfig, data);
+        }
+
+        /// <summary>
+        /// TODO: Fill In
+        /// </summary>
+        public void GetButtonConfiguration(Button button)
+        {
+            var response = _piJuice.ReadCommand(PiJuiceCommand.ButtonConfig + (int)button, 12);
+
+            /*for (var i = 0; i < _buttonEvents.Length; i++)
+            {
+            }*/
+        }
+
+        /* public async Task<List<ButtonConfigurationResult>> GetButtonConfigurationAsync()
+        {
+            List<ButtonConfigurationResult> buttonConfigResult = new List<ButtonConfigurationResult>(_buttonEvents.Length);
+
+            try
+            {
+                var result = await JuiceInterface.ReadDataAsync((byte)PiJuiceConfigCommand.ButtonConfig, 12);
+
+                if (result.Success)
+                {
+                    var data = result.Response;
+
+                    for (var i = 0; i < _buttonEvents.Length; i++)
+                    {
+                        buttonConfigResult.Add(new ButtonConfigurationResult());
+
+                        var buttonData = data[i * 2];
+
+                        if (buttonData == 0)
+                        {
+                            buttonConfigResult[i].Function = "NO_FUNC";
+                            //config[self.buttonEvents[i]]['function'] = 'NO_FUNC'
+                        }
+                        else if (IntMask(buttonData, 0xF0) == 0)
+                        {
+                            buttonConfigResult[i].Function = _hardFunctions[IntMask(buttonData, 0x0F) - 1];
+                            //config[self.buttonEvents[i]]['function'] = pijuice_hard_functions[(d[i * 2] & 0x0F) - 1]
+                        }
+                        else if (IntMask(buttonData, 0xF0) == 0x10)
+                        {
+                            buttonConfigResult[i].Function = _systemFunctions[IntMask(buttonData, 0x0F) - 1];
+                            //    config[self.buttonEvents[i]]['function'] = pijuice_sys_functions[(d[i * 2] & 0x0F) - 1]
+                        }
+                        else if (IntMask(buttonData, 0xF0) == 0x20)
+                        {
+                            //    config[self.buttonEvents[i]]['function'] = pijuice_user_functions[d[i * 2] & 0x0F]
+                        }
+                        else
+                        {
+                            buttonConfigResult[i].Function = "UNKNOWN";
+                            //config[self.buttonEvents[i]]['function'] = 'UNKNOWN'
+                        }
+
+                        buttonConfigResult[i].Parameter = data[i * 2 + 1] * 100;
+                    }
+                }
+
+                return buttonConfigResult;
+            }
+            catch (Exception)
+            {
+                return buttonConfigResult;
+            }
+        }*/
 
         /// <summary>
         /// TODO: Fill In
@@ -314,42 +428,6 @@ namespace PiJuiceDevice
         public void SetRunPinConfig(RunPin runPin)
         {
             _piJuice.WriteCommandVerify(PiJuiceCommand.RunPinConfig, new byte[] { (byte)runPin, 0 });
-        }
-
-        /// <summary>
-        /// TODO: Fill In
-        /// </summary>
-        public bool GetIdEepromWriteProtect()
-        {
-            var response = _piJuice.ReadCommand(PiJuiceCommand.IdEepromWriteProtect, 1);
-
-            return response[0] == 1;
-        }
-
-        /// <summary>
-        /// TODO: Fill In
-        /// </summary>
-        public void SetIdEepromWriteProtect(bool writeProtect)
-        {
-            _piJuice.WriteCommandVerify(PiJuiceCommand.IdEepromWriteProtect, new byte[] { (byte)(writeProtect ? 1 : 0), 0 });
-        }
-
-        /// <summary>
-        /// TODO: Fill In
-        /// </summary>
-        public IdEepromAddress GetIdEepromAddress()
-        {
-            var response = _piJuice.ReadCommand(PiJuiceCommand.IdEepromAddress, 1);
-
-            return (IdEepromAddress)response[0];
-        }
-
-        /// <summary>
-        /// TODO: Fill In
-        /// </summary>
-        public void SetIdEepromAddress(IdEepromAddress epromAddress)
-        {
-            _piJuice.WriteCommandVerify(PiJuiceCommand.IdEepromAddress, new byte[] { (byte)epromAddress, 0 });
         }
 
         /// <summary>

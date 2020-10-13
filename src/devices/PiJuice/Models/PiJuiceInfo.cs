@@ -4,7 +4,7 @@
 
 using System;
 
-namespace PiJuiceDevice.Models
+namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
     /// PiJuice info

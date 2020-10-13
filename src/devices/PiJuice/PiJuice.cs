@@ -7,7 +7,6 @@ using System.Device;
 using System.Device.I2c;
 using System.IO;
 using Iot.Device.PiJuiceDevice.Models;
-using PiJuiceDevice.Models;
 
 namespace Iot.Device.PiJuiceDevice
 {
@@ -74,6 +73,42 @@ namespace Iot.Device.PiJuiceDevice
         public void SetDefaultConfiguration()
         {
             WriteCommand(PiJuiceCommand.ResetToDefault, new byte[] { 0xAA, 0x55, 0x0A, 0xA3, 0 });
+        }
+
+        /// <summary>
+        /// TODO: Fill In
+        /// </summary>
+        public bool GetIdEepromWriteProtect()
+        {
+            var response = ReadCommand(PiJuiceCommand.IdEepromWriteProtect, 1);
+
+            return response[0] == 1;
+        }
+
+        /// <summary>
+        /// TODO: Fill In
+        /// </summary>
+        public void SetIdEepromWriteProtect(bool writeProtect)
+        {
+            WriteCommandVerify(PiJuiceCommand.IdEepromWriteProtect, new byte[] { (byte)(writeProtect ? 1 : 0), 0 });
+        }
+
+        /// <summary>
+        /// TODO: Fill In
+        /// </summary>
+        public IdEepromAddress GetIdEepromAddress()
+        {
+            var response = ReadCommand(PiJuiceCommand.IdEepromAddress, 1);
+
+            return (IdEepromAddress)response[0];
+        }
+
+        /// <summary>
+        /// TODO: Fill In
+        /// </summary>
+        public void SetIdEepromAddress(IdEepromAddress epromAddress)
+        {
+            WriteCommandVerify(PiJuiceCommand.IdEepromAddress, new byte[] { (byte)epromAddress, 0 });
         }
 
         /// <summary>

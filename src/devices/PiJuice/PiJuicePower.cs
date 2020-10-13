@@ -3,11 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using Iot.Device.PiJuiceDevice;
 using Iot.Device.PiJuiceDevice.Models;
-using PiJuiceDevice.Models;
 
-namespace PiJuiceDevice
+namespace Iot.Device.PiJuiceDevice
 {
     /// <summary>
     /// PiJuicePower class to support status of the PiJuice
@@ -64,7 +62,7 @@ namespace PiJuiceDevice
         {
             if (!wakeUpOnCharge.Disabled && (wakeUpOnCharge.WakeUpPercentage < 0 || wakeUpOnCharge.WakeUpPercentage > 100))
             {
-                throw new ArgumentOutOfRangeException("FF");
+                throw new ArgumentOutOfRangeException(nameof(wakeUpOnCharge.WakeUpPercentage));
             }
 
             _piJuice.WriteCommandVerify(PiJuiceCommand.WakeUpOnCharge, new byte[] { (byte)(wakeUpOnCharge.Disabled ? 0x7F : wakeUpOnCharge.WakeUpPercentage), 0 });
@@ -87,7 +85,7 @@ namespace PiJuiceDevice
         {
             if (time.TotalMinutes < 1 || time.TotalMinutes > 65535)
             {
-                throw new ArgumentOutOfRangeException("ff");
+                throw new ArgumentOutOfRangeException(nameof(time.Minutes));
             }
 
             var minutes = time.Minutes & 0xFFFF;
