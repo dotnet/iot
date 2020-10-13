@@ -26,7 +26,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Gets the delay before the PiJuice removes power to the GPIO pins
         /// </summary>
-        public int GetPowerOff()
+        public byte GetPowerOff()
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.PowerOff, 1);
 
@@ -83,12 +83,12 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         public void SetWatchdogTimer(TimeSpan time)
         {
-            if (time.TotalMinutes < 1 || time.TotalMinutes > 65535)
+            if (time.TotalMinutes < 0 || time.TotalMinutes > 65535)
             {
-                throw new ArgumentOutOfRangeException(nameof(time.Minutes));
+                throw new ArgumentOutOfRangeException(nameof(time.TotalMinutes));
             }
 
-            var minutes = time.Minutes & 0xFFFF;
+            var minutes = (int)time.TotalMinutes & 0xFFFF;
 
             _piJuice.WriteCommand(PiJuiceCommand.WatchdogActiviation, new byte[] { (byte)(minutes & 0xFF), (byte)((minutes >> 8) & 0xFF), 0 });
         }
