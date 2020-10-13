@@ -178,7 +178,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <returns></returns>
         public byte[] ReadCommand(PiJuiceCommand command, byte length)
         {
-            byte[] outArray = new byte[length];
+            byte[] outArray = new byte[length + 1];
             byte tries = 0;
             IOException innerEx = null;
             // When writing/reading the I2C port, PiJuice doesn't respond on time in some cases
