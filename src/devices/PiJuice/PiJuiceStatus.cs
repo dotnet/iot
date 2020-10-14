@@ -89,9 +89,9 @@ namespace Iot.Device.PiJuiceDevice
         {
             var array = button switch
             {
-                Button.SW1 => new byte[] { 0xF0, 0xFF, 0 },
-                Button.SW2 => new byte[] { 0x0F, 0xFF, 0 },
-                Button.SW3 => new byte[] { 0xFF, 0xF0, 0 },
+                Button.SW1 => new byte[] { 0xF0, 0xFF },
+                Button.SW2 => new byte[] { 0x0F, 0xFF },
+                Button.SW3 => new byte[] { 0xFF, 0xF0 },
                 _ => throw new NotImplementedException()
             };
 

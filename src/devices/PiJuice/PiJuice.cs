@@ -6,6 +6,7 @@ using System;
 using System.Device;
 using System.Device.I2c;
 using System.IO;
+using System.Linq;
 using Iot.Device.PiJuiceDevice.Models;
 
 namespace Iot.Device.PiJuiceDevice
@@ -116,7 +117,7 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         /// <param name="command">The PiJuice command</param>
         /// <param name="data">The data to write</param>
-        public void WriteCommand(PiJuiceCommand command, byte[] data)
+        internal void WriteCommand(PiJuiceCommand command, byte[] data)
         {
             byte tries = 0;
             IOException innerEx = null;
@@ -153,7 +154,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <param name="command">The PiJuice command</param>
         /// <param name="data">The data to write</param>
         /// <param name="delay">The delay before reading the data</param>
-        public void WriteCommandVerify(PiJuiceCommand command, byte[] data, int delay = 0)
+        internal void WriteCommandVerify(PiJuiceCommand command, byte[] data, int delay = 0)
         {
             WriteCommand(command, data);
 
@@ -164,7 +165,7 @@ namespace Iot.Device.PiJuiceDevice
 
             var response = ReadCommand(command, (byte)data.Length);
 
-            if (!ByteArrayCompare(data, response))
+            if (!data.SequenceEqual(response))
             {
                 throw new IOException($"{nameof(WriteCommandVerify)}: Failed to write command {command}");
             }
@@ -176,7 +177,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <param name="command">The PiJuice command</param>
         /// <param name="length">The pin to read</param>
         /// <returns></returns>
-        public byte[] ReadCommand(PiJuiceCommand command, byte length)
+        internal byte[] ReadCommand(PiJuiceCommand command, byte length)
         {
             byte[] outArray = new byte[length + 1];
             byte tries = 0;
@@ -202,7 +203,7 @@ namespace Iot.Device.PiJuiceDevice
                         }
                     }
 
-                    return outArray;
+                    return outArray.Skip(0).Take(length).ToArray();
                 }
                 catch (IOException ex)
                 {
@@ -214,15 +215,6 @@ namespace Iot.Device.PiJuiceDevice
             }
 
             throw new IOException($"{nameof(ReadCommand)}: Failed to read command {command}", innerEx);
-        }
-
-        /// <summary>Compare the byte arrays</summary>
-        /// <param name="array1">Byte array 1</param>
-        /// <param name="array2">Byte array 2</param>
-        /// <returns></returns>
-        private static bool ByteArrayCompare(ReadOnlySpan<byte> array1, ReadOnlySpan<byte> array2)
-        {
-            return array1.SequenceEqual(array2);
         }
 
         /// <summary>Gets the check sum.</summary>

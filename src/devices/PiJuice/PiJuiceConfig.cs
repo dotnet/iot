@@ -67,7 +67,7 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         public void SetCustomBatteryProfile(BatteryProfile batteryProfile)
         {
-            var data = new byte[15];
+            var data = new byte[14];
 
             data[0] = (byte)((int)(batteryProfile.Capacity.MilliampereHours) & 0xFF);
             data[1] = (byte)(((int)(batteryProfile.Capacity.MilliampereHours) >> 8) & 0xFF);
@@ -121,7 +121,7 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         public void SetCustomBatteryExtProfile(BatteryProfileExt batteryProfile)
         {
-            var data = new byte[18];
+            var data = new byte[17];
 
             data[0] = (byte)batteryProfile.BatteryChemistry;
             data[1] = (byte)((int)batteryProfile.OCV10.Millivolts & 0xFF);
@@ -136,6 +136,10 @@ namespace Iot.Device.PiJuiceDevice
             data[10] = (byte)(((int)batteryProfile.R50.Milliohms >> 8) & 0xFF);
             data[11] = (byte)((int)batteryProfile.R90.Milliohms & 0xFF);
             data[12] = (byte)(((int)batteryProfile.R90.Milliohms >> 8) & 0xFF);
+            data[13] = 0xFF;
+            data[14] = 0xFF;
+            data[15] = 0xFF;
+            data[16] = 0xFF;
 
             _piJuice.WriteCommandVerify(PiJuiceCommand.BatteryProfileExt, data);
         }
@@ -189,7 +193,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryTempSenseConfig, 1);
 
-            _piJuice.WriteCommandVerify(PiJuiceCommand.BatteryTempSenseConfig, new byte[] { (byte)((response[0] & (~0x07)) | (int)batteryTempSense), 0 });
+            _piJuice.WriteCommandVerify(PiJuiceCommand.BatteryTempSenseConfig, new byte[] { (byte)((response[0] & (~0x07)) | (int)batteryTempSense) });
         }
 
         /// <summary>
@@ -214,7 +218,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryTempSenseConfig, 1);
 
-            _piJuice.WriteCommandVerify(PiJuiceCommand.BatteryTempSenseConfig, new byte[] { (byte)((response[0] & (~0x30)) | ((int)estimationType) << 4), 0 });
+            _piJuice.WriteCommandVerify(PiJuiceCommand.BatteryTempSenseConfig, new byte[] { (byte)((response[0] & (~0x30)) | ((int)estimationType) << 4) });
         }
 
         /// <summary>
@@ -284,7 +288,7 @@ namespace Iot.Device.PiJuiceDevice
 
             byte usbMicroDPM = (byte)((index & 0x07) << 3);
 
-            var data = new byte[2];
+            var data = new byte[1];
             data[0] = (byte)(nonVolatile | precedence | gpioIn | noBatteryTurnOn | usbMicroLimit | usbMicroDPM);
 
             _piJuice.WriteCommandVerify(PiJuiceCommand.PowerInputsConfig, data);
@@ -381,7 +385,7 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         public void SetLedConfiguration(LED led, LEDConfig ledConfig)
         {
-            _piJuice.WriteCommandVerify(PiJuiceCommand.LEDConfig + (int)led, new byte[] { (byte)ledConfig.LedFunction, ledConfig.RGB.R, ledConfig.RGB.G, ledConfig.RGB.B, 0 }, 200);
+            _piJuice.WriteCommandVerify(PiJuiceCommand.LEDConfig + (int)led, new byte[] { (byte)ledConfig.LedFunction, ledConfig.RGB.R, ledConfig.RGB.G, ledConfig.RGB.B }, 200);
         }
 
         /// <summary>
@@ -404,7 +408,7 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         public void SetPowerRegulatorMode(PowerRegulatorMode powerMode)
         {
-            _piJuice.WriteCommandVerify(PiJuiceCommand.PowerRegulatorConfig, new byte[] { (byte)powerMode, 0 });
+            _piJuice.WriteCommandVerify(PiJuiceCommand.PowerRegulatorConfig, new byte[] { (byte)powerMode });
         }
 
         /// <summary>
@@ -427,7 +431,7 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         public void SetRunPinConfig(RunPin runPin)
         {
-            _piJuice.WriteCommandVerify(PiJuiceCommand.RunPinConfig, new byte[] { (byte)runPin, 0 });
+            _piJuice.WriteCommandVerify(PiJuiceCommand.RunPinConfig, new byte[] { (byte)runPin });
         }
 
         /// <summary>

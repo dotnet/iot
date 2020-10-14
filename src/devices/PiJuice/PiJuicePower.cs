@@ -38,7 +38,7 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         public void SetPowerOff(byte delaySeconds)
         {
-            _piJuice.WriteCommand(PiJuiceCommand.PowerOff, new byte[] { delaySeconds, 0 });
+            _piJuice.WriteCommand(PiJuiceCommand.PowerOff, new byte[] { delaySeconds });
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Iot.Device.PiJuiceDevice
                 throw new ArgumentOutOfRangeException(nameof(wakeUpOnCharge.WakeUpPercentage));
             }
 
-            _piJuice.WriteCommandVerify(PiJuiceCommand.WakeUpOnCharge, new byte[] { (byte)(wakeUpOnCharge.Disabled ? 0x7F : wakeUpOnCharge.WakeUpPercentage), 0 });
+            _piJuice.WriteCommandVerify(PiJuiceCommand.WakeUpOnCharge, new byte[] { (byte)(wakeUpOnCharge.Disabled ? 0x7F : wakeUpOnCharge.WakeUpPercentage) });
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Iot.Device.PiJuiceDevice
 
             var minutes = (int)time.TotalMinutes & 0xFFFF;
 
-            _piJuice.WriteCommand(PiJuiceCommand.WatchdogActiviation, new byte[] { (byte)(minutes & 0xFF), (byte)((minutes >> 8) & 0xFF), 0 });
+            _piJuice.WriteCommand(PiJuiceCommand.WatchdogActiviation, new byte[] { (byte)(minutes & 0xFF), (byte)((minutes >> 8) & 0xFF) });
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         public void SetSystemPowerSwitch(SystemPowerSwitch powerSwitch)
         {
-            _piJuice.WriteCommand(PiJuiceCommand.SystemPowerSwitch, new byte[] { (byte)(((int)powerSwitch) / 100), 0 });
+            _piJuice.WriteCommand(PiJuiceCommand.SystemPowerSwitch, new byte[] { (byte)(((int)powerSwitch) / 100) });
         }
     }
 }
