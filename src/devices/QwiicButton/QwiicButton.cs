@@ -4,7 +4,6 @@
 
 using System;
 using System.Device.I2c;
-using Iot.Device.Common;
 using Iot.Device.QwiicButton.RegisterMapping;
 
 namespace Iot.Device.QwiicButton
@@ -29,7 +28,7 @@ namespace Iot.Device.QwiicButton
             I2cAddress = i2cAddress;
             var settings = new I2cConnectionSettings(i2cBusId, i2cAddress);
             var device = I2cDevice.Create(settings);
-            _registerAccess = new I2cRegisterAccess<Register>(device);
+            _registerAccess = new I2cRegisterAccess<Register>(device, useLittleEndian: true);
         }
 
         /// <summary>
@@ -47,7 +46,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public byte GetDeviceId()
         {
-            return _registerAccess.ReadSingleRegister(Register.Id);
+            return _registerAccess.ReadRegister<byte>(Register.Id);
         }
 
         /// <summary>
@@ -57,8 +56,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public ushort GetFirmwareVersionAsInteger()
         {
-            ushort version = (ushort)(_registerAccess.ReadSingleRegister(Register.FirmwareMajor) << 8);
-            version |= _registerAccess.ReadSingleRegister(Register.FirmwareMinor);
+            ushort version = (ushort)(_registerAccess.ReadRegister<byte>(Register.FirmwareMajor) << 8);
+            version |= _registerAccess.ReadRegister<byte>(Register.FirmwareMinor);
             return version;
         }
 
@@ -67,8 +66,8 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public string GetFirmwareVersionAsString()
         {
-            var major = _registerAccess.ReadSingleRegister(Register.FirmwareMajor);
-            var minor = _registerAccess.ReadSingleRegister(Register.FirmwareMinor);
+            var major = _registerAccess.ReadRegister<byte>(Register.FirmwareMajor);
+            var minor = _registerAccess.ReadRegister<byte>(Register.FirmwareMinor);
             return major + "." + minor;
         }
 
@@ -82,7 +81,7 @@ namespace Iot.Device.QwiicButton
                 throw new ArgumentOutOfRangeException(nameof(address), "I2C input address must be between 0x08 and 0x77");
             }
 
-            _registerAccess.WriteSingleRegister(Register.I2cAddress, address);
+            _registerAccess.WriteRegister(Register.I2cAddress, address);
             I2cAddress = address;
         }
 
