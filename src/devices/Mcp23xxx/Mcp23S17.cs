@@ -11,7 +11,7 @@ namespace Iot.Device.Mcp23xxx
     /// <summary>
     /// Driver for the Microchip MCP23S17 16-Bit I/O Expander with Serial Interface.
     /// </summary>
-    public class Mcp23s17 : Mcp23x1x
+    public partial class Mcp23s17 : Mcp23x1x
     {
         /// <summary>
         /// Initializes a new instance of the Mcp23s17 device.
@@ -35,7 +35,7 @@ namespace Iot.Device.Mcp23xxx
                 throw new ArgumentOutOfRangeException(nameof(deviceAddress), "The Mcp23s17 address must be between 32 (0x20) and 39 (0x27).");
             }
 
-            return new SpiAdapter(spiDevice, deviceAddress);
+            return new Mcp23S17SpiAdapter(spiDevice, deviceAddress);
         }
     }
 }

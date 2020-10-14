@@ -13,6 +13,7 @@
     <Compile Include="BusAdapter.cs" />
     <Compile Include="Mcp23018.cs" />
     <Compile Include="Mcp23017.cs" />
+    <Compile Include="Mcp23S17SpiAdapter.cs" />
     <Compile Include="Mcp23S18.cs" />
     <Compile Include="Mcp23S17.cs" />
     <Compile Include="Mcp23S09.cs" />
