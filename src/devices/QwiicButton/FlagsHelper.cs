@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Iot.Device.Common
+namespace Iot.Device.QwiicButton
 {
     /// <summary>
     /// Contains functionality to operate on a bit field <see cref="Enum"/>,

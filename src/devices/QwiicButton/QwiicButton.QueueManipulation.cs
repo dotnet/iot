@@ -13,7 +13,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsPressedQueueFull()
         {
-            var pressedQueue = new QueueStatusBitField(_registerAccess.ReadSingleRegister(Register.PressedQueueStatus));
+            var pressedQueue = new QueueStatusBitField(_registerAccess.ReadRegister<byte>(Register.PressedQueueStatus));
             return pressedQueue.IsFull;
         }
 
@@ -22,7 +22,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsPressedQueueEmpty()
         {
-            var pressedQueue = new QueueStatusBitField(_registerAccess.ReadSingleRegister(Register.PressedQueueStatus));
+            var pressedQueue = new QueueStatusBitField(_registerAccess.ReadRegister<byte>(Register.PressedQueueStatus));
             return pressedQueue.IsEmpty;
         }
 
@@ -32,7 +32,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public uint TimeSinceLastPress()
         {
-            return _registerAccess.ReadQuadRegister(Register.PressedQueueFront);
+            return _registerAccess.ReadRegister<uint>(Register.PressedQueueFront);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public uint TimeSinceFirstPress()
         {
-            return _registerAccess.ReadQuadRegister(Register.PressedQueueBack);
+            return _registerAccess.ReadRegister<uint>(Register.PressedQueueBack);
         }
 
         /// <summary>
@@ -52,13 +52,13 @@ namespace Iot.Device.QwiicButton
             var timeSinceFirstPress = TimeSinceFirstPress(); // Take the oldest value on the queue
 
             var pressedQueue =
-                new QueueStatusBitField(_registerAccess.ReadSingleRegister(Register.PressedQueueStatus))
+                new QueueStatusBitField(_registerAccess.ReadRegister<byte>(Register.PressedQueueStatus))
                 {
                     PopRequest = true
                 };
 
             // Remove the oldest value from the queue
-            _registerAccess.WriteSingleRegister(Register.PressedQueueStatus, pressedQueue.QueueStatusValue);
+            _registerAccess.WriteRegister(Register.PressedQueueStatus, pressedQueue.QueueStatusValue);
 
             return timeSinceFirstPress; // Return the value we popped
         }
@@ -68,7 +68,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsClickedQueueFull()
         {
-            var clickedQueue = new QueueStatusBitField(_registerAccess.ReadSingleRegister(Register.ClickedQueueStatus));
+            var clickedQueue = new QueueStatusBitField(_registerAccess.ReadRegister<byte>(Register.ClickedQueueStatus));
             return clickedQueue.IsFull;
         }
 
@@ -77,7 +77,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public bool IsClickedQueueEmpty()
         {
-            var clickedQueue = new QueueStatusBitField(_registerAccess.ReadSingleRegister(Register.ClickedQueueStatus));
+            var clickedQueue = new QueueStatusBitField(_registerAccess.ReadRegister<byte>(Register.ClickedQueueStatus));
             return clickedQueue.IsEmpty;
         }
 
@@ -87,7 +87,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public uint TimeSinceLastClick()
         {
-            return _registerAccess.ReadQuadRegister(Register.ClickedQueueFront);
+            return _registerAccess.ReadRegister<uint>(Register.ClickedQueueFront);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Iot.Device.QwiicButton
         /// </summary>
         public uint TimeSinceFirstClick()
         {
-            return _registerAccess.ReadQuadRegister(Register.ClickedQueueBack);
+            return _registerAccess.ReadRegister<uint>(Register.ClickedQueueBack);
         }
 
         /// <summary>
@@ -107,11 +107,11 @@ namespace Iot.Device.QwiicButton
             var timeSinceFirstClick = TimeSinceFirstClick();
 
             var clickedQueue =
-                new QueueStatusBitField(_registerAccess.ReadSingleRegister(Register.ClickedQueueStatus))
+                new QueueStatusBitField(_registerAccess.ReadRegister<byte>(Register.ClickedQueueStatus))
                 {
                     PopRequest = true
                 };
-            _registerAccess.WriteSingleRegister(Register.ClickedQueueStatus, clickedQueue.QueueStatusValue);
+            _registerAccess.WriteRegister(Register.ClickedQueueStatus, clickedQueue.QueueStatusValue);
 
             return timeSinceFirstClick;
         }
