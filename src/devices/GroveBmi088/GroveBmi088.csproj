@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="AccelerometerMeasurementRange.cs" />
+    <Compile Include="AccelerometerOutputDataRate.cs" />
+    <Compile Include="AccelerometerPowerMode.cs" />
+    <Compile Include="AccelerometerRegister.cs" />
+    <Compile Include="GroveBmi088.cs" />
+    <Compile Include="GyroscopeOutputDataRate.cs" />
+    <Compile Include="GyroscopePowerMode.cs" />
+    <Compile Include="GyroscopeRegister.cs" />
+    <Compile Include="GyroscopeScaleRange.cs" />
+  </ItemGroup>
+</Project>
