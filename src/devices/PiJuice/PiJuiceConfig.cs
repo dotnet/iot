@@ -20,7 +20,6 @@ namespace Iot.Device.PiJuiceDevice
 
         private readonly List<ElectricCurrent> _usbMicroCurrentLimits = new List<ElectricCurrent> { new ElectricCurrent(1.5, ElectricCurrentUnit.Ampere), new ElectricCurrent(2.5, ElectricCurrentUnit.Ampere) };
         private readonly List<ElectricPotential> _usbMicroDPMs = new List<ElectricPotential>();
-        /* private List<string> _usbMicroDPMs = new List<string> { "4.20V", "4.28V", "4.36V", "4.44V", "4.52V", "4.60V", "4.68V", "4.76V" };*/
 
         private List<string> _batteryProfiles = new List<string>();
 
@@ -91,9 +90,9 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// TODO: Fill In
         /// </summary>
-        public BatteryProfileExt GetBatteryProfileExt()
+        public BatteryExtProfile GetBatteryExtProfile()
         {
-            var batteryProfileExt = new BatteryProfileExt();
+            var batteryProfileExt = new BatteryExtProfile();
 
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryProfileExt, 17);
 
@@ -119,7 +118,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// TODO: Fill In
         /// </summary>
-        public void SetCustomBatteryExtProfile(BatteryProfileExt batteryProfile)
+        public void SetCustomBatteryExtProfile(BatteryExtProfile batteryProfile)
         {
             var data = new byte[17];
 
@@ -154,8 +153,8 @@ namespace Iot.Device.PiJuiceDevice
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryProfileId, 1);
 
             batteryProfileStatus.BatteryOrigin = (response[0] & 0x0F) == 0x0F ? BatteryOrigin.Custom : BatteryOrigin.Predefined;
-            batteryProfileStatus.BatteryProfileSource = (BatteryProfileSource)(response[0] >> 4 & 0x03);
-            batteryProfileStatus.BatteryProfileValid = (response[0] >> 6 & 0x01) == 0;
+            batteryProfileStatus.BatteryProfileSource = (BatteryProfileSource)((response[0] >> 4) & 0x03);
+            batteryProfileStatus.BatteryProfileValid = ((response[0] >> 6) & 0x01) == 0;
 
             SelectBatteryProfiles();
             int profileIndex = response[0] & 0x0F;
@@ -241,7 +240,19 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         public void SetChargingConfig(ChargingConfig config)
         {
-            _piJuice.WriteCommandVerify(PiJuiceCommand.ChargingConfig, config.ToArray());
+            var data = new byte[1];
+
+            if (config.Enabled)
+            {
+                data[0] |= 0x01;
+            }
+
+            if (config.NonVolatile)
+            {
+                data[0] |= 0x80;
+            }
+
+            _piJuice.WriteCommandVerify(PiJuiceCommand.ChargingConfig, data);
         }
 
         /// <summary>
@@ -295,74 +306,7 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// TODO: Fill In
-        /// </summary>
-        public void GetButtonConfiguration(Button button)
-        {
-            var response = _piJuice.ReadCommand(PiJuiceCommand.ButtonConfig + (int)button, 12);
-
-            /*for (var i = 0; i < _buttonEvents.Length; i++)
-            {
-            }*/
-        }
-
-        /* public async Task<List<ButtonConfigurationResult>> GetButtonConfigurationAsync()
-        {
-            List<ButtonConfigurationResult> buttonConfigResult = new List<ButtonConfigurationResult>(_buttonEvents.Length);
-
-            try
-            {
-                var result = await JuiceInterface.ReadDataAsync((byte)PiJuiceConfigCommand.ButtonConfig, 12);
-
-                if (result.Success)
-                {
-                    var data = result.Response;
-
-                    for (var i = 0; i < _buttonEvents.Length; i++)
-                    {
-                        buttonConfigResult.Add(new ButtonConfigurationResult());
-
-                        var buttonData = data[i * 2];
-
-                        if (buttonData == 0)
-                        {
-                            buttonConfigResult[i].Function = "NO_FUNC";
-                            //config[self.buttonEvents[i]]['function'] = 'NO_FUNC'
-                        }
-                        else if (IntMask(buttonData, 0xF0) == 0)
-                        {
-                            buttonConfigResult[i].Function = _hardFunctions[IntMask(buttonData, 0x0F) - 1];
-                            //config[self.buttonEvents[i]]['function'] = pijuice_hard_functions[(d[i * 2] & 0x0F) - 1]
-                        }
-                        else if (IntMask(buttonData, 0xF0) == 0x10)
-                        {
-                            buttonConfigResult[i].Function = _systemFunctions[IntMask(buttonData, 0x0F) - 1];
-                            //    config[self.buttonEvents[i]]['function'] = pijuice_sys_functions[(d[i * 2] & 0x0F) - 1]
-                        }
-                        else if (IntMask(buttonData, 0xF0) == 0x20)
-                        {
-                            //    config[self.buttonEvents[i]]['function'] = pijuice_user_functions[d[i * 2] & 0x0F]
-                        }
-                        else
-                        {
-                            buttonConfigResult[i].Function = "UNKNOWN";
-                            //config[self.buttonEvents[i]]['function'] = 'UNKNOWN'
-                        }
-
-                        buttonConfigResult[i].Parameter = data[i * 2 + 1] * 100;
-                    }
-                }
-
-                return buttonConfigResult;
-            }
-            catch (Exception)
-            {
-                return buttonConfigResult;
-            }
-        }*/
-
-        /// <summary>
-        /// TODO: Fill In
+        /// Get the configuration for the specific LED
         /// </summary>
         public LEDConfig GetLedConfiguration(LED led)
         {
@@ -381,7 +325,7 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Set the configuration for the specific LED
         /// </summary>
         public void SetLedConfiguration(LED led, LEDConfig ledConfig)
         {
@@ -389,22 +333,17 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Get power regulator mode
         /// </summary>
         public PowerRegulatorMode GetPowerRegulatorMode()
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.PowerRegulatorConfig, 1);
 
-            if (response[0] < 0 || response[0] > 2)
-            {
-                throw new ArgumentOutOfRangeException("ff");
-            }
-
             return (PowerRegulatorMode)response[0];
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Set power regulator mode
         /// </summary>
         public void SetPowerRegulatorMode(PowerRegulatorMode powerMode)
         {
@@ -412,7 +351,7 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Get run pin configuration
         /// </summary>
         public RunPin GetRunPinConfig()
         {
@@ -420,14 +359,14 @@ namespace Iot.Device.PiJuiceDevice
 
             if (response[0] < 0 || response[0] > 1)
             {
-                throw new ArgumentOutOfRangeException("ff");
+                throw new ArgumentOutOfRangeException("Run pin out of range.");
             }
 
             return (RunPin)response[0];
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Set run pin configuration
         /// </summary>
         public void SetRunPinConfig(RunPin runPin)
         {
@@ -440,7 +379,6 @@ namespace Iot.Device.PiJuiceDevice
         private void SelectBatteryProfiles()
         {
             var firmware = _piJuice.GetFirmwareVerion();
-
             var version = (firmware.Major << 4) + firmware.Minor;
 
             if (version >= 0x14)

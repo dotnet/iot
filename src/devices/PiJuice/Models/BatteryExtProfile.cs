@@ -9,7 +9,7 @@ namespace Iot.Device.PiJuiceDevice.Models
     /// <summary>
     /// TODO: Fill In
     /// </summary>
-    public class BatteryProfileExt
+    public class BatteryExtProfile
     {
         /// <summary>
         /// Battery chemistry

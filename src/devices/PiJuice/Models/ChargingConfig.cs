@@ -18,23 +18,5 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// TODO: Fill In
         /// </summary>
         public bool NonVolatile { get; set; }
-
-        /// <summary>Converts to array.</summary>
-        /// <returns></returns>
-        public byte[] ToArray()
-        {
-            byte v = 0;
-            if (Enabled)
-            {
-                v |= 0x01;
-            }
-
-            if (NonVolatile)
-            {
-                v |= 0x80;
-            }
-
-            return new byte[] { v };
-        }
     }
 }

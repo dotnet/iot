@@ -12,7 +12,12 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// TODO: Fill In
         /// </summary>
-        Press = 0,
+        NoEvent = 0,
+
+        /// <summary>
+        /// TODO: Fill In
+        /// </summary>
+        Press,
 
         /// <summary>
         /// TODO: Fill In

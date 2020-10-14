@@ -60,10 +60,10 @@ namespace Iot.Device.PiJuiceDevice
         /// <returns>PiJuice firmware version</returns>
         public Version GetFirmwareVerion()
         {
-            byte[] inArray = ReadCommand(PiJuiceCommand.FirmwareVersion, 2);
+            var response = ReadCommand(PiJuiceCommand.FirmwareVersion, 2);
 
-            var major_version = inArray[0] >> 4;
-            var minor_version = (inArray[0] << 4 & 0xf0) >> 4;
+            var major_version = response[0] >> 4;
+            var minor_version = (response[0] << 4 & 0xf0) >> 4;
 
             return new Version(major_version, minor_version);
         }
@@ -73,11 +73,11 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         public void SetDefaultConfiguration()
         {
-            WriteCommand(PiJuiceCommand.ResetToDefault, new byte[] { 0xAA, 0x55, 0x0A, 0xA3, 0 });
+            WriteCommand(PiJuiceCommand.ResetToDefault, new byte[] { 0xAA, 0x55, 0x0A, 0xA3 });
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Get the write protect of the eeprom
         /// </summary>
         public bool GetIdEepromWriteProtect()
         {
@@ -87,15 +87,15 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Set the write protect on the eeprom
         /// </summary>
         public void SetIdEepromWriteProtect(bool writeProtect)
         {
-            WriteCommandVerify(PiJuiceCommand.IdEepromWriteProtect, new byte[] { (byte)(writeProtect ? 1 : 0), 0 });
+            WriteCommandVerify(PiJuiceCommand.IdEepromWriteProtect, new byte[] { (byte)(writeProtect ? 1 : 0) });
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Get the actual physical I2C address of the eeprom
         /// </summary>
         public IdEepromAddress GetIdEepromAddress()
         {
@@ -105,11 +105,11 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Set the actual physical I2C address of the eeprom
         /// </summary>
         public void SetIdEepromAddress(IdEepromAddress epromAddress)
         {
-            WriteCommandVerify(PiJuiceCommand.IdEepromAddress, new byte[] { (byte)epromAddress, 0 });
+            WriteCommandVerify(PiJuiceCommand.IdEepromAddress, new byte[] { (byte)epromAddress });
         }
 
         /// <summary>
