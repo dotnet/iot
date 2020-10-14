@@ -15,9 +15,9 @@
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
     <PackageReference Include="System.Memory" Version="4.5.3" />
     <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" /> <!-- This is Windows specific -->
-    <!--<PackageReference Include="Microsoft.DotNet.GenAPI" Version="$(MicrosoftDotNetGenApiPackageVersion)">
+    <PackageReference Include="Microsoft.DotNet.GenAPI" Version="$(MicrosoftDotNetGenApiPackageVersion)">
       <PrivateAssets>all</PrivateAssets>
-    </PackageReference>-->
+    </PackageReference>
   </ItemGroup>
   
   <ItemGroup>
