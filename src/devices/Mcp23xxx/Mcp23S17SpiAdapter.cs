@@ -48,7 +48,6 @@ namespace Iot.Device.Mcp23xxx
                 // Should this also contain the op code and register?
                 // Why are we transferring full duplex if we only really
                 // need to read?
-                Console.WriteLine($"read: {readBuffer.Length}, write: {writeBuffer.Length}");
                 _device.TransferFullDuplex(writeBuffer, readBuffer);
 
                 // First 2 bytes are from sending OpCode and Register Address.
