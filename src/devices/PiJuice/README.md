@@ -28,6 +28,15 @@ This version does not include the following functionality
 
 - RTC
 - RTC Alarms
+- Button Configuration
+- IO
+  - Configuration
+  - Digital Input
+  - Digital Output
+  - Analog Input
+  - PWM
+- Reset Fault Flags
+- I2C Address
 
 ## How to use the driver
 
