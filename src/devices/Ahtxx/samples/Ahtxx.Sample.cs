@@ -9,7 +9,7 @@ using System.Threading;
 namespace Iot.Device.Ahtxx.Samples
 {
     /// <summary>
-    /// Samples for Ahtxx
+    /// Samples for Aht10 and Aht20 bindings
     /// </summary>
     internal class Program
     {
@@ -21,11 +21,15 @@ namespace Iot.Device.Ahtxx.Samples
             const int I2cBus = 1;
             I2cConnectionSettings i2cSettings = new I2cConnectionSettings(I2cBus, Aht20.DefaultI2cAddress);
             I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
-            Aht20 aht20Sensor = new Aht20(i2cDevice);
+
+            // For AHT10 or AHT15 use:
+            // Aht10 sensor = new Aht10(i2cDevice);
+            // For AHT20 use:
+            Aht20 sensor = new Aht20(i2cDevice);
 
             while (true)
             {
-                Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {aht20Sensor.GetTemperature().DegreesCelsius:F1}°C, {aht20Sensor.GetHumidity().Percent:F0}%");
+                Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {sensor.GetTemperature().DegreesCelsius:F1}°C, {sensor.GetHumidity().Percent:F0}%");
                 Thread.Sleep(1000);
             }
         }
