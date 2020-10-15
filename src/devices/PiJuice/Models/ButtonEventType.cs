@@ -47,6 +47,6 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Unknown button event
         /// </summary>
-        Unknown = 999
+        Unknown = 1000
     }
 }
