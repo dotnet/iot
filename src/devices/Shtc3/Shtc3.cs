@@ -52,7 +52,7 @@ namespace Iot.Device.Shtc3
         /// <summary>
         /// Set Shtc3 state
         /// </summary>
-        public Status Status
+        internal Status Status
         {
             get
             {
