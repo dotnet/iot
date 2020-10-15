@@ -23,6 +23,7 @@ namespace Iot.Device.QwiicButton
     /// }
     /// </code>
     /// </example>
+    /// <remarks>
     /// Notice: If the I2C device uses register addresses larger than a <see cref="byte"/>,
     /// it often means that you have to read the data at several individual 8-bit addresses and
     /// assemble this data in the correct order to extract the corresponding 16/32/64-bit word.
@@ -31,6 +32,7 @@ namespace Iot.Device.QwiicButton
     /// actual 16-bit word referenced by the hexadecimal 0x1234.
     /// Read through the data sheets/manuals for your specific I2C device for more information
     /// on its register addressing.
+    /// </remarks>
     /// </summary>
     public sealed class I2cRegisterAccess<TRegisterMap> : IDisposable
         where TRegisterMap : Enum
