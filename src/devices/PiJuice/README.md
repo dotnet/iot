@@ -32,8 +32,6 @@ This version does not include the following functionality
 - RTC
 - RTC Alarms
 
-![sensors](grovepisensors.png)
-
 ## How to use the driver
 
 The main [PiJuice samples](./samples) contains a series of test showing how to use some of the classes.
@@ -41,10 +39,10 @@ The main [PiJuice samples](./samples) contains a series of test showing how to u
 Create a ```PiJuice``` class.
 
 ```csharp
-I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, GrovePi.GrovePiSefaultI2cAddress);
-grovePi = new GrovePi(I2cDevice.Create(i2CConnectionSettings));
-// Do something with the sensors
-// At the end, the IEC Device will be disposed
+I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, PiJuice.DefaultI2cAddress);
+piJuice = new PiJuice(I2cDevice.Create(i2CConnectionSettings));
+// Do something with the PiJuice
+// At the end, the I2C Device will be disposed
 ```
 
 ### Accessing PiJuice information
