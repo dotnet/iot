@@ -10,29 +10,29 @@ using UnitsNet;
 namespace Iot.Device.Ahtxx
 {
     /// <summary>
-    /// AHT temperature and humidity sensor family.
-    /// Note: has been tested with AHT20 only, but should work with AHT10 and AHT15 as well.
-    /// Up to now all functions are contained in the base class, though there might be differences between the sensors types.
+    ///  Base class for common functions of the AHT10/15 and AHT20 sensors.
     /// </summary>
     public abstract class AhtBase : IDisposable
     {
         /// <summary>
-        /// Address of AHTxx device (0x38). This address is fix and cannot be changed.
+        /// Address of AHT10/15/20 device (0x38). This address is fix and cannot be changed.
         /// This implies that only one device can be attached to a single I2C bus at a time.
         /// </summary>
         public const int DefaultI2cAddress = 0x38;
 
+        private readonly byte _initCommand;
         private I2cDevice _i2cDevice;
         private double _temperature;
         private double _humidity;
 
         /// <summary>
-        /// Initializes a new instance of the device connected through I2C interface.
+        /// Initializes a new instance of the binding for a sensor connected through I2C interface.
         /// </summary>
         /// <paramref name="i2cDevice">Reference to the initialized I2C interface device</paramref>
-        public AhtBase(I2cDevice i2cDevice)
+        public AhtBase(I2cDevice i2cDevice, byte initCommand)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+            _initCommand = initCommand;
 
             // even if not clearly stated in datasheet, start with a software reset to assure clear start conditions
             SoftReset();
@@ -41,7 +41,7 @@ namespace Iot.Device.Ahtxx
             // and perform calibration if indicated ==> c.f. datasheet, version 1.1, ch. 5.4
             if (!IsCalibrated())
             {
-                Calibrate();
+                Initialize();
             }
         }
 
@@ -75,7 +75,7 @@ namespace Iot.Device.Ahtxx
             Span<byte> buffer = stackalloc byte[3]
             {
                 // command parameters c.f. datasheet, version 1.1, ch. 5.4
-                (byte)Command.Measure,
+                (byte)CommonCommand.Measure,
                 0x33,
                 0x00
             };
@@ -109,19 +109,19 @@ namespace Iot.Device.Ahtxx
         /// </summary>
         private void SoftReset()
         {
-            _i2cDevice.WriteByte((byte)Command.SoftReset);
+            _i2cDevice.WriteByte((byte)CommonCommand.SoftReset);
             // reset requires 20ms at most, c.f. datasheet version 1.1, ch. 5.5
             Thread.Sleep(20);
         }
 
         /// <summary>
-        /// Perform calibration command sequence
+        /// Perform initialization (calibration) command sequence
         /// </summary>
-        private void Calibrate()
+        private void Initialize()
         {
             Span<byte> buffer = stackalloc byte[3]
             {
-                (byte)Command.Calibrate,
+                _initCommand,
                 0x08, // command parameters c.f. datasheet, version 1.1, ch. 5.4
                 0x00
             };
@@ -131,7 +131,7 @@ namespace Iot.Device.Ahtxx
             Thread.Sleep(10);
         }
 
-        private byte GetStatusByte()
+        private byte GetStatus()
         {
             _i2cDevice.WriteByte(0x71);
             // whithout this delay the reading the status fails often.
@@ -142,12 +142,12 @@ namespace Iot.Device.Ahtxx
 
         private bool IsBusy()
         {
-            return (GetStatusByte() & (byte)StatusBit.Busy) == (byte)StatusBit.Busy;
+            return (GetStatus() & (byte)StatusBit.Busy) == (byte)StatusBit.Busy;
         }
 
         private bool IsCalibrated()
         {
-            return (GetStatusByte() & (byte)StatusBit.Calibrated) == (byte)StatusBit.Calibrated;
+            return (GetStatus() & (byte)StatusBit.Calibrated) == (byte)StatusBit.Calibrated;
         }
 
         /// <inheritdoc cref="IDisposable" />
@@ -163,15 +163,14 @@ namespace Iot.Device.Ahtxx
         // datasheet version 1.1, table 10
         private enum StatusBit : byte
         {
-            Calibrated = 0x08,
-            Busy = 0x80
+            Calibrated = 0b_0000_1000,
+            Busy = 0b1000_0000
         }
 
-        private enum Command : byte
+        private enum CommonCommand : byte
         {
-            Calibrate = 0xbe,
-            SoftReset = 0xba,
-            Measure = 0xac
+            SoftReset = 0b1011_1010,
+            Measure = 0b1010_1100
         }
     }
 }
