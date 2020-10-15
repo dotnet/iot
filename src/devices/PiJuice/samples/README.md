@@ -1,6 +1,6 @@
 # PiJuice sample
 
-You can refer to the main documentation to understand how to use PiJuice. This example uses multiple sensors. All of them can be found in the basic Grove Start Kit.
+You can refer to the PiJuice [documentation](https://github.com/PiSupply/PiJuice/blob/master/Software/README.md) to understand how to use PiJuice.
 
 Once you have PiJuice on a Raspberry Pi, it looks like this:
 
