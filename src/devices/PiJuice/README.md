@@ -10,7 +10,6 @@ PiJuice is a fully uninterruptable / uninterupted power supply that will always 
 - [PiJuice requirements](./README.md#make-sure-you-have-a-PiJuice)
 - [Know limitations](./README.md#known-limitations)
 - [Accessing PiJuice information](./README.md#accessing-PiJuice-information)
-- [Using high level classes](./README.md#how-to-use-the-high-level-classes)
 - [Tests](./README.md#tests)
 
 ## Device family
@@ -53,23 +52,6 @@ piJuice = new PiJuice(I2cDevice.Create(i2CConnectionSettings));
 Console.WriteLine($"Manufacturer :{piJuice.PiJuiceInfo.Manufacturer}");
 Console.WriteLine($"Board: {piJuice.PiJuiceInfo.Board}");
 Console.WriteLine($"Firmware version: {piJuice.PiJuiceInfo.FirmwareVersion}");
-```
-
-## How to use the high level classes
-
-There are high level classes to handle directly sensors like analogic sensors, buzzers, leds, buttons. All the sensors are using only 1 pin out of the 2 available. There is nothing presenting you to use the 2 pins if you have a sensor using 2 pins. Just make sue you won't use the adjacent Grove plug in this case.
-
-Using the sensor classes is straight forward. Just reference a class and initialized it. Access properties which are common to all sensors, ```Value``` and ```ToString()```.
-
-Example creating an Ultrasonic sensor on Grove1 port:
-
-```csharp
-UltrasonicSensor ultrasonic = new UltrasonicSensor(grovePi, GrovePort.DigitalPin6);
-while (!Console.KeyAvailable)
-{
-    Console.WriteLine($"Ultrasonic: {ultrasonic}");
-    Thread.Sleep(2000);
-}
 ```
 
 ## Tests
