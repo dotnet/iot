@@ -4,14 +4,12 @@
 
 You will need a PiJuice from [Pi Supply](https://uk.pi-supply.com/products/pijuice-standard/) and a Raspberry Pi.
 
-GrovePi+ have the ability to use Grove sensors, analogic, digital. GrovePi+ provide as well extensions for I2C sensors. In order to take advantage of GrovePi, you'll need Grove compatible sensors. There are lots existing like on [Seeed Studio](http://wiki.seeedstudio.com/Grove/).
+PiJuice is a fully uninterruptable / uninterupted power supply that will always keep your Raspberry Pi powered! It has a real time clock (RTC) for time tracking and scheduled tasks when the Pi is offline (as well as remote on/off of your Pi). It also has an integrated microcontroller (MCU) chip which will manage soft shut down functionality, a true low power deep sleep state and intelligent start up.
 
 - [Device family](./README.md#device-family)
 - [PiJuice requirements](./README.md#make-sure-you-have-a-PiJuice)
 - [Know limitations](./README.md#known-limitations)
-- [Using the driver](./README.md#how-to-use-the-driver)
-  - [Accessing PiJuice information](./README.md#accessing-PiJuice-information)
-  - [Accessing the sensors](./README.md#accessing-the-sensors)
+- [Accessing PiJuice information](./README.md#accessing-PiJuice-information)
 - [Using high level classes](./README.md#how-to-use-the-high-level-classes)
 - [Tests](./README.md#tests)
 
@@ -56,38 +54,6 @@ Console.WriteLine($"Manufacturer :{piJuice.PiJuiceInfo.Manufacturer}");
 Console.WriteLine($"Board: {piJuice.PiJuiceInfo.Board}");
 Console.WriteLine($"Firmware version: {piJuice.PiJuiceInfo.FirmwareVersion}");
 ```
-
-### Accessing the sensors
-
-If you are familiar with Ardunio programming, using GrovePi will look very familiar. The main functions you can use to access the Grove sensors are:
-
-```csharp
-public PinLevel DigitalRead(GrovePort pin);
-public void DigitalWrite(GrovePort pin, PinLevel pinLevel);
-public void PinMode(GrovePort pin, PinMode mode);
-public int AnalogRead(GrovePort pin);
-public void AnalogWrite(GrovePort pin, byte value);
-```
-
-Their usage is very similar to Arduino usage. For example, if you want to read an analogic pin, you will have to:
-
-```csharp
-// Set the pin as Input, should be done only once but you
-// can change it as well over time
-grovePi.PinMode(GrovePort.Grove1, PinMode.Input);
-// Then read results, you can do it as much as you want
-var result = grovePi.AnalogRead(GrovePort.Grove1);
-```
-
-As in Arduino, you will have to setup the type of port you want, Input or Output. Then read or write on it depending on its setup. Note that PWM is supported as well for PWM ports. Jut do an AnalogWrite on any PWM port to use the hardware PWM.
-
-All pins are documented here:
-
-![pins](GrovePort.png)
-
-As you can see in this schema, pins are used most of the cases on 2 Grove plugs. Most Grove sensors just use one pin, the yellow cable, the outside pin. But if your sensor like the Led Bar is using 2 pins, you will have to avoid using the Grove plug where the other pin is used.
-
-Note that Analogic pins can be used for both analogic and digital sensors. In case you want to use them for digital operation, please use DigitalPin14, 15 and 16. They are respectively AnalogPin0, 1 and 2. You will note as well that not all pins are capable of PWM, so for actuators which needs to use PWM, please use only the PWM capable ports.
 
 ## How to use the high level classes
 
