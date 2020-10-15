@@ -60,27 +60,21 @@ A series of hardware tests for sensors are available in [GrovePi.samples](./samp
 
 ```csharp
 Console.WriteLine("Hello PiJuice!");
-PinLevel relay = PinLevel.Low;
 I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, PiJuice.DefaultI2cAddress);
 piJuice = new piJuice(I2cDevice.Create(i2CConnectionSettings));
 Console.WriteLine($"Manufacturer :{piJuice.PiJuiceInfo.Manufacturer}");
 Console.WriteLine($"Board: {piJuice.PiJuiceInfo.Board}");
 Console.WriteLine($"Firmware version: {piJuice.PiJuiceInfo.FirmwareVersion}");
-UltrasonicSensor ultrasonic = new UltrasonicSensor(grovePi, GrovePort.DigitalPin6);
-DhtSensor dhtSensor = new DhtSensor(grovePi, GrovePort.DigitalPin7, DhtType.Dht11);
-int poten = 0;
+PiJuiceStatus piJuiceStatus = new PiJuiceStatus(piJuice);
+PiJuiceConfig piJuiceConfig = new PiJuiceConfig(piJuice);
 while (!Console.KeyAvailable)
 {
-    poten = grovePi.AnalogRead(GrovePort.AnalogPin0);
-    Console.WriteLine($"Potentiometer: {poten}");
-    relay = (relay == PinLevel.Low) ? PinLevel.High : PinLevel.Low;
-    grovePi.DigitalWrite(GrovePort.DigitalPin2, relay);
-    Console.WriteLine($"Relay: {relay}");
-    grovePi.AnalogWrite(GrovePort.DigitalPin3, (byte)(poten * 100 / 1023));
-    Console.WriteLine($"Button: {grovePi.DigitalRead(GrovePort.DigitalPin4)}");
-    Console.WriteLine($"Ultrasonic: {ultrasonic}");
-    dhtSensor.ReadSensor();
-    Console.WriteLine($"{dhtSensor.DhtType}: {dhtSensor}");
+    var status = piJuiceStatus.GetStatus();
+    Console.WriteLine($"Battery state: {status.Battery.ToString()}");
+    Console.WriteLine($"Battery charge level: {piJuiceStatus.GetChargeLevel()%}");
+    Console.WriteLine($"Battery temperature: {piJuiceStatus.GetBatteryTemperature().ToString()}");
+    var chargeConfig = piJuiceConfig.GetChargingConfig();
+    Console.WriteLine($"Battery charging enabled: {chargeConfig.Enabled}");    
     Thread.Sleep(2000);
     Console.CursorTop -= 5;
 }
