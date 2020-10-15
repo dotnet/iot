@@ -27,9 +27,9 @@ namespace Iot.Device.QwiicButton
     /// Notice: If the I2C device uses register addresses larger than a <see cref="byte"/>,
     /// it often means that you have to read the data at several individual 8-bit addresses and
     /// assemble this data in the correct order to extract the corresponding 16/32/64-bit word.
-    /// For instance, register address 0x1234 often means that you need to read/write from registers
-    /// 0x12 and 0x34. Both registers will hold 8-bits of information, which together form the
-    /// actual 16-bit word referenced by the hexadecimal 0x1234.
+    /// For instance, for some devices a register address such as 0x1234 means that you need to
+    /// read/write from registers 0x12 and 0x34. Both registers will hold 8-bits of information,
+    /// which together form the actual 16-bit word referenced by the hexadecimal 0x1234.
     /// Read through the data sheets/manuals for your specific I2C device for more information
     /// on its register addressing.
     /// </remarks>
