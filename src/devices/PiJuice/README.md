@@ -17,7 +17,7 @@ GrovePi+ have the ability to use Grove sensors, analogic, digital. GrovePi+ prov
 
 ## Device family
 
-The device supported is the PiJuice [PiJuice](https://uk.pi-supply.com/products/pijuice-standard/).
+The device supported is the PiSupply [PiJuice](https://uk.pi-supply.com/products/pijuice-standard/).
 
 ![PiJuice](grovepi.jpg)
 
