@@ -10,7 +10,7 @@ PiJuice is a fully uninterruptable / uninterupted power supply that will always 
 - [PiJuice requirements](./README.md#make-sure-you-have-a-PiJuice)
 - [Know limitations](./README.md#known-limitations)
 - [Accessing PiJuice information](./README.md#accessing-PiJuice-information)
-- [Tests](./README.md#tests)
+- [Usage](./README.md#Usage)
 
 ## Device family
 
@@ -54,7 +54,7 @@ Console.WriteLine($"Board: {piJuice.PiJuiceInfo.Board}");
 Console.WriteLine($"Firmware version: {piJuice.PiJuiceInfo.FirmwareVersion}");
 ```
 
-## Tests
+## Usage
 
 A series of hardware tests for sensors are available in [GrovePi.samples](./samples). Those hardware tests offers a variety of sensors.
 
