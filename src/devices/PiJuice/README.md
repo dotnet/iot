@@ -59,17 +59,13 @@ Console.WriteLine($"Firmware version: {piJuice.PiJuiceInfo.FirmwareVersion}");
 A series of hardware tests for sensors are available in [GrovePi.samples](./samples). Those hardware tests offers a variety of sensors.
 
 ```csharp
-Console.WriteLine("Hello GrovePi!");
+Console.WriteLine("Hello PiJuice!");
 PinLevel relay = PinLevel.Low;
-I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, GrovePi.GrovePiSefaultI2cAddress);
-grovePi = new GrovePi(I2cDevice.Create(i2CConnectionSettings));
-Console.WriteLine($"Manufacturer :{grovePi.GrovePiInfo.Manufacturer}");
-Console.WriteLine($"Board: {grovePi.GrovePiInfo.Board}");
-Console.WriteLine($"Firmware version: {grovePi.GrovePiInfo.SoftwareVersion}");
-grovePi.PinMode(GrovePort.AnalogPin0, PinMode.Input);
-grovePi.PinMode(GrovePort.DigitalPin2, PinMode.Output);
-grovePi.PinMode(GrovePort.DigitalPin3, PinMode.Output);
-grovePi.PinMode(GrovePort.DigitalPin4, PinMode.Input);
+I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, PiJuice.DefaultI2cAddress);
+piJuice = new piJuice(I2cDevice.Create(i2CConnectionSettings));
+Console.WriteLine($"Manufacturer :{piJuice.PiJuiceInfo.Manufacturer}");
+Console.WriteLine($"Board: {piJuice.PiJuiceInfo.Board}");
+Console.WriteLine($"Firmware version: {piJuice.PiJuiceInfo.FirmwareVersion}");
 UltrasonicSensor ultrasonic = new UltrasonicSensor(grovePi, GrovePort.DigitalPin6);
 DhtSensor dhtSensor = new DhtSensor(grovePi, GrovePort.DigitalPin7, DhtType.Dht11);
 int poten = 0;
