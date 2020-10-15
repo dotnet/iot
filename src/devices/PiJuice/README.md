@@ -56,8 +56,6 @@ Console.WriteLine($"Firmware version: {piJuice.PiJuiceInfo.FirmwareVersion}");
 
 ## Usage
 
-A series of hardware tests for sensors are available in [GrovePi.samples](./samples). Those hardware tests offers a variety of sensors.
-
 ```csharp
 Console.WriteLine("Hello PiJuice!");
 I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, PiJuice.DefaultI2cAddress);
@@ -81,3 +79,5 @@ while (!Console.KeyAvailable)
 
 Console.CursorTop += 5;
 ```
+
+More examples on how to use the PiJuice device binding are available in [PiJuice.samples](./samples)
