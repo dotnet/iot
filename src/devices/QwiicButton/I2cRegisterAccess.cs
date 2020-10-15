@@ -44,6 +44,7 @@ namespace Iot.Device.QwiicButton
 
             switch (default(T))
             {
+                case sbyte sbyteType:
                 case byte byteType:
                     return MemoryMarshal.Read<T>(readBuffer);
                 case short shortType:
@@ -71,7 +72,7 @@ namespace Iot.Device.QwiicButton
                         ? (T)(object)BinaryPrimitives.ReadUInt64LittleEndian(readBuffer)
                         : (T)(object)BinaryPrimitives.ReadUInt64BigEndian(readBuffer);
                 default:
-                    throw new InvalidOperationException($"Type '{default(T).GetType()}' is not a supported integral numeric type.");
+                    throw new InvalidOperationException($"Type {default(T).GetType()} is not a supported integral numeric type.");
             }
         }
 
@@ -165,7 +166,7 @@ namespace Iot.Device.QwiicButton
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Type '{data.GetType()}' is not a supported integral numeric type.");
+                    throw new InvalidOperationException($"Type {data.GetType()} is not a supported integral numeric type.");
             }
 
             _device.Write(outArray);
