@@ -8,7 +8,7 @@ PiJuice is a fully uninterruptable / uninterupted power supply that will always 
 
 - [Device family](./README.md#device-family)
 - [PiJuice requirements](./README.md#make-sure-you-have-a-PiJuice)
-- [Know limitations](./README.md#known-limitations)
+- [Known limitations](./README.md#known-limitations)
 - [Accessing PiJuice information](./README.md#accessing-PiJuice-information)
 - [Usage](./README.md#Usage)
 
