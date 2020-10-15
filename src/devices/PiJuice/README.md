@@ -10,7 +10,7 @@ GrovePi+ have the ability to use Grove sensors, analogic, digital. GrovePi+ prov
 - [PiJuice requirements](./README.md#make-sure-you-have-a-PiJuice)
 - [Know limitations](./README.md#known-limitations)
 - [Using the driver](./README.md#how-to-use-the-driver)
-  - [Accessing GrovePi information](./README.md#accessing-GrovePi-information)
+  - [Accessing PiJuice information](./README.md#accessing-PiJuice-information)
   - [Accessing the sensors](./README.md#accessing-the-sensors)
 - [Using high level classes](./README.md#how-to-use-the-high-level-classes)
 - [Tests](./README.md#tests)
@@ -50,11 +50,11 @@ piJuice = new PiJuice(I2cDevice.Create(i2CConnectionSettings));
 The PiJuiceInfo class offers information like the firmware version, manufacturer. You can easily access them like in the following code:
 
 ```csharp
-I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, GrovePi.GrovePiSefaultI2cAddress);
-grovePi = new GrovePi(I2cDevice.Create(i2CConnectionSettings));
-Console.WriteLine($"Manufacturer :{grovePi.GrovePiInfo.Manufacturer}");
-Console.WriteLine($"Board: {grovePi.GrovePiInfo.Board}");
-Console.WriteLine($"Firmware version: {grovePi.GrovePiInfo.SoftwareVersion}");
+I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, PiJuice.DefaultI2cAddress);
+piJuice = new PiJuice(I2cDevice.Create(i2CConnectionSettings));
+Console.WriteLine($"Manufacturer :{piJuice.PiJuiceInfo.Manufacturer}");
+Console.WriteLine($"Board: {piJuice.PiJuiceInfo.Board}");
+Console.WriteLine($"Firmware version: {piJuice.PiJuiceInfo.FirmwareVersion}");
 ```
 
 ### Accessing the sensors

@@ -41,7 +41,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _shouldDispose = shouldDispose;
-            PiJuiceInfo = new PiJuiceInfo() { SoftwareVersion = GetFirmwareVerion() };
+            PiJuiceInfo = new PiJuiceInfo() { FirmwareVersion = GetFirmwareVerion() };
         }
 
         /// <inheritdoc/>

@@ -24,6 +24,6 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Firmware version
         /// </summary>
-        public Version SoftwareVersion { get; set; }
+        public Version FirmwareVersion { get; set; }
     }
 }
