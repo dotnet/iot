@@ -19,7 +19,7 @@ GrovePi+ have the ability to use Grove sensors, analogic, digital. GrovePi+ prov
 
 The device supported is the PiSupply [PiJuice](https://uk.pi-supply.com/products/pijuice-standard/).
 
-![PiJuice](grovepi.jpg)
+![PiJuice](pijuice.jpg)
 
 ## Make sure you have a PiJuice
 
