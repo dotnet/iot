@@ -136,7 +136,7 @@ namespace Iot.Device.PiJuiceDevice
                     var buffer = new byte[data.Length + 2];
                     Array.Copy(data, 0, buffer, 1, data.Length);
                     buffer[0] = (byte)command;
-                    buffer[^1] = GetCheckSum(data, all: true);
+                    buffer[buffer.Length - 1] = GetCheckSum(data, all: true);
                     _i2cDevice.Write(buffer);
                     return;
                 }
