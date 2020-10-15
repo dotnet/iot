@@ -5,17 +5,17 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Battery origin
     /// </summary>
     public enum BatteryOrigin
     {
         /// <summary>
-        /// TODO: Fill In
+        /// Predefined battery origin
         /// </summary>
         Predefined = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Custom battery origin
         /// </summary>
         Custom
     }

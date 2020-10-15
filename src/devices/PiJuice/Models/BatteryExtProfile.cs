@@ -7,7 +7,7 @@ using UnitsNet;
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Battery extended profile
     /// </summary>
     public class BatteryExtProfile
     {

@@ -5,22 +5,26 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// LED function type
     /// </summary>
     public enum LEDFunction
     {
         /// <summary>
-        /// TODO: Fill In
+        /// LED is not configured
         /// </summary>
         NotUsed = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// LED is configured to signal current charge level of battery
+        /// For level less than or equal too 15% red with configurable brightness
+        /// For level greater than 15% and level less than or equal to 50% mix of red and green with configurable brightness
+        /// For level greater than 50% green with configurable brightness.
+        /// When battery is charging blinking blue with configurable brightness is added to current charge level color. For full buttery state blue component is steady on
         /// </summary>
         ChargeStatus,
 
         /// <summary>
-        /// TODO: Fill In
+        /// LED is configured as user LED
         /// </summary>
         UserLED
     }

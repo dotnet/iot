@@ -5,27 +5,27 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Battery profile status
     /// </summary>
     public class BatteryProfileStatus
     {
         /// <summary>
-        /// TODO: Fill In
+        /// Current battery profile
         /// </summary>
         public string BatteryProfile { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// The source for the battery profile
         /// </summary>
         public BatteryProfileSource BatteryProfileSource { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Whether the current battery profile is valid
         /// </summary>
         public bool BatteryProfileValid { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// The type of battery profile
         /// </summary>
         public BatteryOrigin BatteryOrigin { get; set; }
     }

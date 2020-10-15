@@ -26,6 +26,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Gets the delay before the PiJuice removes power to the GPIO pins
         /// </summary>
+        /// <returns>The delay in seconds</returns>
         public byte GetPowerOff()
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.PowerOff, 1);
@@ -36,14 +37,21 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Sets the delay before the PiJuice removes power to the GPIO pins
         /// </summary>
+        /// <param name="delaySeconds">The delay in seconds between 0 and 255</param>
         public void SetPowerOff(byte delaySeconds)
         {
+            if (delaySeconds < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(delaySeconds));
+            }
+
             _piJuice.WriteCommand(PiJuiceCommand.PowerOff, new byte[] { delaySeconds });
         }
 
         /// <summary>
         /// Get the current state of the Wakeup on charge
         /// </summary>
+        /// <returns>Current state of the wake up on charge function</returns>
         public WakeUpOnCharge GetWakeUpOnCharge()
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.WakeUpOnCharge, 1);
@@ -58,6 +66,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Wakeup the Raspberry Pi when the battery charge level reaches the specified percentage
         /// </summary>
+        /// <param name="wakeUpOnCharge">Wake up on charge function details</param>
         public void SetWakeUpOnCharge(WakeUpOnCharge wakeUpOnCharge)
         {
             if (!wakeUpOnCharge.Disabled && (wakeUpOnCharge.WakeUpPercentage < 0 || wakeUpOnCharge.WakeUpPercentage > 100))
@@ -69,8 +78,9 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// Gets the current watchdog status
+        /// Gets the current watchdog timer time after which it will power cycle if it does not receive a heartbeat signal
         /// </summary>
+        /// <returns>Time in minutes after which PiJuice will power cycle if it does not receive a heartbeat signal</returns>
         public TimeSpan GetWatchdogTimer()
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.WatchdogActiviation, 2);
@@ -81,6 +91,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Configure watchdog timer time after which it will power cycle if it does not receive a heartbeat signal
         /// </summary>
+        /// <param name="time">Time in minutes after which PiJuice will power cycle if it does not receive a heartbeat signal. Time is between 0 and 65535, 0 disables watchdog timer</param>
         public void SetWatchdogTimer(TimeSpan time)
         {
             if (time.TotalMinutes < 0 || time.TotalMinutes > 65535)
@@ -96,6 +107,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Gets the current state of system switch
         /// </summary>
+        /// <returns>Current state of system switch</returns>
         public SystemPowerSwitch GetSystemPowerSwitch()
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.SystemPowerSwitch, 1);
@@ -106,6 +118,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Sets the state of the system switch
         /// </summary>
+        /// <param name="powerSwitch">Desired current limit in milliampere</param>
         public void SetSystemPowerSwitch(SystemPowerSwitch powerSwitch)
         {
             _piJuice.WriteCommand(PiJuiceCommand.SystemPowerSwitch, new byte[] { (byte)(((int)powerSwitch) / 100) });

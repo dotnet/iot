@@ -5,27 +5,27 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Battery charging temperature fault
     /// </summary>
     public enum BatteryChargingTempFault
     {
         /// <summary>
-        /// TODO: Fill In
+        /// Normal
         /// </summary>
         Normal = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Charging is suspended
         /// </summary>
         Suspend,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Cool
         /// </summary>
         Cool,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Warm
         /// </summary>
         Warm
     }

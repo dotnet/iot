@@ -5,32 +5,32 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// PiJuice Status
     /// </summary>
     public class Status
     {
         /// <summary>
-        /// TODO: Fill In
+        /// True if there faults or fault events waiting to be read, otherwise False
         /// </summary>
         public bool IsFault { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// True if there are button events, otherwise False
         /// </summary>
         public bool IsButton { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Current battery status
         /// </summary>
         public BatteryState Battery { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Current USB Micro power input status
         /// </summary>
         public PowerInState PowerInput { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Current 5V GPIO power input status
         /// </summary>
         public PowerInState PowerInput5vIo { get; set; }
     }

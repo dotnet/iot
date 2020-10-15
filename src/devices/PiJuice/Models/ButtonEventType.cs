@@ -5,47 +5,47 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Button event types
     /// </summary>
     public enum ButtonEventType
     {
         /// <summary>
-        /// TODO: Fill In
+        /// No button event assigned
         /// </summary>
         NoEvent = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Triggered immediately after button is pressed
         /// </summary>
         Press,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Triggered immediately after button is released
         /// </summary>
         Release,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Triggered if button is released in time less than configurable timeout after button press
         /// </summary>
         SinglePress,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Triggered if button is double pressed in time less than configurable timeout
         /// </summary>
         DoublePress,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Triggered if button is hold pressed hold for configurable time period 1
         /// </summary>
         LongPress1,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Triggered if button is hold pressed hold for configurable time period 2
         /// </summary>
         LongPress2,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Unknown button event
         /// </summary>
         Unknown = 999
     }

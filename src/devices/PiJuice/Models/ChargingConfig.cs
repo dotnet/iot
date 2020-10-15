@@ -5,17 +5,17 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Charging configuration
     /// </summary>
     public class ChargingConfig
     {
         /// <summary>
-        /// TODO: Fill In
+        /// Whether charging is enabled
         /// </summary>
         public bool Enabled { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Whether the charging configuration is stored in the non-volatile EEPROM
         /// </summary>
         public bool NonVolatile { get; set; }
     }

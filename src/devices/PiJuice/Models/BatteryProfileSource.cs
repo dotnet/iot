@@ -5,22 +5,22 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Battery profile source
     /// </summary>
     public enum BatteryProfileSource
     {
         /// <summary>
-        /// TODO: Fill In
+        /// Host
         /// </summary>
         Host = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// PiJuice DIP Switch
         /// </summary>
         DIPSwitch,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Resistor
         /// </summary>
         Resistor
     }

@@ -5,22 +5,22 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// VSYS on J3 to provide power to external devices
     /// </summary>
     public enum SystemPowerSwitch
     {
         /// <summary>
-        /// TODO: Fill In
+        /// VSYS pin is off
         /// </summary>
         Off = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// VSYS pin provides up to 500 milliampere of power
         /// </summary>
         Power500mA = 500,
 
         /// <summary>
-        /// TODO: Fill In
+        /// VSYS pin provides up to 2100 milliampere of power
         /// </summary>
         Power2100mA = 2100
     }

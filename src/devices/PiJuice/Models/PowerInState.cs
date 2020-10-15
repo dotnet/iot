@@ -5,27 +5,27 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Power input state
     /// </summary>
     public enum PowerInState
     {
         /// <summary>
-        /// TODO: Fill In
+        /// No power supply connected
         /// </summary>
         NotPresent = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Find an alternative power supply with a higher rating
         /// </summary>
         Bad,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Power supply cannot charge the PiJuice and provide power to the Raspberry Pi
         /// </summary>
         Weak,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Power is good
         /// </summary>
         Present,
     }

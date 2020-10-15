@@ -5,17 +5,17 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Run pin configuration
     /// </summary>
     public enum RunPin
     {
         /// <summary>
-        /// TODO: Fill In
+        /// Run Pin not installed
         /// </summary>
         NotInstalled = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Run pin installed
         /// </summary>
         Installed
     }

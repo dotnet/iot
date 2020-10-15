@@ -5,17 +5,17 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// LED designator
     /// </summary>
     public enum LED
     {
         /// <summary>
-        /// TODO: Fill In
+        /// LED 1
         /// </summary>
         D1 = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// LED 2
         /// </summary>
         D2
     }

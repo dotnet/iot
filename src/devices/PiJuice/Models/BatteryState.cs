@@ -5,27 +5,27 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Battery state
     /// </summary>
     public enum BatteryState
     {
         /// <summary>
-        /// TODO: Fill In
+        /// Battery is present but not charging
         /// </summary>
         Normal = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Battery is charging from PiJuice USB power connector
         /// </summary>
         ChargingFromIn,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Battery is charging from GPIO pin (Will occur if powered through Raspberry Pi power connector)
         /// </summary>
         ChargingFrom5VIO,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Battery is not detected or not installed
         /// </summary>
         NotPresent
     }

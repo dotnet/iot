@@ -7,37 +7,37 @@ using UnitsNet;
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// PiJuice power input
     /// </summary>
     public class PowerInput
     {
         /// <summary>
-        /// TODO: Fill In
+        /// Selects what power input will have precedence for charging and supplying VSYS output when both are present, PiJuice USB Micro Input, GPIO 5V Input. 5V_GPIO selected by default
         /// </summary>
         public PowerInputType Precedence { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Enables/disables powering PiJuice from 5V GPIO Input. Enabled by default
         /// </summary>
         public bool GPIOIn { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// If enabled PiJuice will automatically power on 5V rail and trigger wake up as soon as power appears at USB Micro Input and there is no battery. Disabled by default
         /// </summary>
         public bool NoBatteryTurnOn { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Maximum current that PiJuice can take from USB Micro connected power source. 2.5A selected by default
         /// </summary>
         public ElectricCurrent USBMicroCurrentLimit { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Minimum voltage at USB Micro power input for Dynamic Power Management Loop. 4.2V set by default
         /// </summary>
         public ElectricPotential USBMicroDPM { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Whether the power input configuration is stored in the non-volatile EEPROM
         /// </summary>
         public bool NonVolatile { get; set; }
     }

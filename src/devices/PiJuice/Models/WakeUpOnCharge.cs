@@ -5,17 +5,17 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Wake up on charge configuration
     /// </summary>
     public class WakeUpOnCharge
     {
         /// <summary>
-        /// TODO: Fill In
+        /// Is the wake up on charge disabled
         /// </summary>
         public bool Disabled { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Battery charge level percentage between [0 - 100] used to wake up the Raspberry Pi
         /// </summary>
         public short WakeUpPercentage { get; set; }
     }

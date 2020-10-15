@@ -5,37 +5,37 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// PiJuice Fault Status
     /// </summary>
     public class FaultStatus
     {
         /// <summary>
-        /// TODO: Fill In
+        /// If there was power off triggered by button press
         /// </summary>
         public bool ButtonPowerOff { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// If there was forced power off caused by loss of energy (battery voltage approached cut-off threshold)
         /// </summary>
         public bool ForcedPowerOff { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// If there was forced system switch turn off caused by loss of energy
         /// </summary>
         public bool ForcedSystemPowerOff { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// If watchdog reset happened
         /// </summary>
         public bool WatchdogReset { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Determines if the battery profile is invalid
         /// </summary>
         public bool BatteryProfileInvalid { get; set; }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Battery charging temperature fault
         /// </summary>
         public BatteryChargingTempFault BatteryChargingTempFault { get; set; }
     }

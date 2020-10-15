@@ -5,22 +5,22 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// User configurable buttons
     /// </summary>
     public enum Button
     {
         /// <summary>
-        /// TODO: Fill In
+        /// Button 1, Power button by default
         /// </summary>
         SW1 = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Button 2, User button by default
         /// </summary>
         SW2,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Button 3, user button by default
         /// </summary>
         SW3
     }

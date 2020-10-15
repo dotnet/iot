@@ -77,8 +77,9 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// Get the write protect of the eeprom
+        /// Get the write protect of the EEPROM
         /// </summary>
+        /// <returns>Whether the EEPROM is write protected</returns>
         public bool GetIdEepromWriteProtect()
         {
             var response = ReadCommand(PiJuiceCommand.IdEepromWriteProtect, 1);
@@ -87,16 +88,18 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// Set the write protect on the eeprom
+        /// Set the write protection on the EEPROM
         /// </summary>
+        /// <param name="writeProtect">Whether the EEPROM is write protected</param>
         public void SetIdEepromWriteProtect(bool writeProtect)
         {
             WriteCommandVerify(PiJuiceCommand.IdEepromWriteProtect, new byte[] { (byte)(writeProtect ? 1 : 0) });
         }
 
         /// <summary>
-        /// Get the actual physical I2C address of the eeprom
+        /// Get the physical I2C address of the EEPROM
         /// </summary>
+        /// <returns>The I2C Address of the EEPROM</returns>
         public IdEepromAddress GetIdEepromAddress()
         {
             var response = ReadCommand(PiJuiceCommand.IdEepromAddress, 1);
@@ -105,8 +108,9 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// Set the actual physical I2C address of the eeprom
+        /// Set the physical I2C address of the EEPROM
         /// </summary>
+        /// <param name="epromAddress">The I2C Address of the EEPROM</param>
         public void SetIdEepromAddress(IdEepromAddress epromAddress)
         {
             WriteCommandVerify(PiJuiceCommand.IdEepromAddress, new byte[] { (byte)epromAddress });
@@ -175,8 +179,8 @@ namespace Iot.Device.PiJuiceDevice
         /// Read data from PiJuice
         /// </summary>
         /// <param name="command">The PiJuice command</param>
-        /// <param name="length">The pin to read</param>
-        /// <returns></returns>
+        /// <param name="length">The length of the data to be read</param>
+        /// <returns>Returns an array of the bytes read</returns>
         internal byte[] ReadCommand(PiJuiceCommand command, byte length)
         {
             byte[] outArray = new byte[length + 1];
@@ -219,8 +223,8 @@ namespace Iot.Device.PiJuiceDevice
 
         /// <summary>Gets the check sum.</summary>
         /// <param name="data">The data.</param>
-        /// <param name="all">if set to <c>true</c> [all].</param>
-        /// <returns></returns>
+        /// <param name="all">Whether the last byte in the data is included in the checksum</param>
+        /// <returns>Checksum</returns>
         private byte GetCheckSum(byte[] data, bool all = false)
         {
             byte fcs = 0xff;

@@ -15,9 +15,9 @@ namespace Iot.Device.PiJuiceDevice.Models
         ChargingConfig = 0x51,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Battery Profile Status
         /// </summary>
-        BatteryProfileId = 0x52,
+        BatteryProfileStatus = 0x52,
 
         /// <summary>
         /// Battery Profile
@@ -25,24 +25,19 @@ namespace Iot.Device.PiJuiceDevice.Models
         BatteryProfile = 0x53,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Battery extended profile
         /// </summary>
-        BatteryProfileExt = 0x54,
+        BatteryExtProfile = 0x54,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Battery temperature sensor configuration
         /// </summary>
         BatteryTempSenseConfig = 0x5D,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Power inputs configuration
         /// </summary>
         PowerInputsConfig = 0x5E,
-
-        /*
-        IOConfig = 0x72,
-        I2CAddress = 0x7C,
-        , */
 
         /// <summary>
         /// Get the firmware version number
@@ -60,7 +55,7 @@ namespace Iot.Device.PiJuiceDevice.Models
         ChargeLevel = 0x41,
 
         /// <summary>
-        /// TODO: Fill In
+        /// PiJuice fault events
         /// </summary>
         FaultEvent = 0x44,
 
@@ -95,7 +90,7 @@ namespace Iot.Device.PiJuiceDevice.Models
         IOCurrent = 0x4F,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Run pin configuration
         /// </summary>
         RunPinConfig = 0x5F,
 
@@ -145,12 +140,12 @@ namespace Iot.Device.PiJuiceDevice.Models
         ButtonConfig = 0x6E,
 
         /// <summary>
-        /// TODO: Fill In
+        /// EEPROM write protection
         /// </summary>
         IdEepromWriteProtect = 0x7E,
 
         /// <summary>
-        /// TODO: Fill In
+        /// EEPROM I2C address
         /// </summary>
         IdEepromAddress = 0x7F,
 
@@ -158,7 +153,5 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// Reset PiJuice to default
         /// </summary>
         ResetToDefault = 0xF0
-
-        // IO_PIN_ACCESS_CMD = 0x75
     }
 }

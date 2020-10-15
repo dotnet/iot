@@ -5,17 +5,17 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Battery relative state-of-health
     /// </summary>
     public enum RSOCEstimationType
     {
         /// <summary>
-        /// TODO: Fill In
+        /// Let the PiJuice software determine RSOC estimation
         /// </summary>
         AutoDetect = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// MCU used for RSOC estimation
         /// </summary>
         DirectByMCU
     }

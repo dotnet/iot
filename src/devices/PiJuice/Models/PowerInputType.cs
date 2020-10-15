@@ -5,17 +5,17 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Power input type for charging and supplying VSYS output
     /// </summary>
     public enum PowerInputType
     {
         /// <summary>
-        /// TODO: Fill In
+        /// USB micro input
         /// </summary>
         USBMicro,
 
         /// <summary>
-        /// TODO: Fill In
+        /// GPIO 5V
         /// </summary>
         GPIO5V
     }

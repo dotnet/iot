@@ -40,6 +40,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Get battery profile
         /// </summary>
+        /// <returns>Battery profile</returns>
         public BatteryProfile GetBatteryProfile()
         {
             var batteryProfile = new BatteryProfile();
@@ -64,6 +65,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Set a custom battery profile
         /// </summary>
+        /// <param name="batteryProfile">Custom battery profile</param>
         public void SetCustomBatteryProfile(BatteryProfile batteryProfile)
         {
             var data = new byte[14];
@@ -88,13 +90,14 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Get Battery extended profile
         /// </summary>
+        /// <returns>Battery extended profile</returns>
         public BatteryExtProfile GetBatteryExtProfile()
         {
             var batteryProfileExt = new BatteryExtProfile();
 
-            var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryProfileExt, 17);
+            var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryExtProfile, 17);
 
             if (response[0] < 2)
             {
@@ -116,8 +119,9 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Set custom battery extended profile
         /// </summary>
+        /// <param name="batteryProfile">Custom battery extended profile</param>
         public void SetCustomBatteryExtProfile(BatteryExtProfile batteryProfile)
         {
             var data = new byte[17];
@@ -140,17 +144,18 @@ namespace Iot.Device.PiJuiceDevice
             data[15] = 0xFF;
             data[16] = 0xFF;
 
-            _piJuice.WriteCommandVerify(PiJuiceCommand.BatteryProfileExt, data);
+            _piJuice.WriteCommandVerify(PiJuiceCommand.BatteryExtProfile, data);
         }
 
         /// <summary>
         /// Get battery profile status
         /// </summary>
+        /// <returns>Battery profile status</returns>
         public BatteryProfileStatus GetBatteryProfileStatus()
         {
             var batteryProfileStatus = new BatteryProfileStatus();
 
-            var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryProfileId, 1);
+            var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryProfileStatus, 1);
 
             batteryProfileStatus.BatteryOrigin = (response[0] & 0x0F) == 0x0F ? BatteryOrigin.Custom : BatteryOrigin.Predefined;
             batteryProfileStatus.BatteryProfileSource = (BatteryProfileSource)((response[0] >> 4) & 0x03);
@@ -173,6 +178,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Get how the battery temperature is taken
         /// </summary>
+        /// <returns>Battery temperature sensor configuration</returns>
         public BatteryTempSense GetBatteryTempSenseConfig()
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryTempSenseConfig, 1);
@@ -188,6 +194,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Set how the battery temperature is taken
         /// </summary>
+        /// <param name="batteryTempSense">Determine how the battery temperature is taken</param>
         public void SetBatteryTempSenseConfig(BatteryTempSense batteryTempSense)
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryTempSenseConfig, 1);
@@ -196,23 +203,20 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Get battery relative state-of-health estimation type
         /// </summary>
+        /// <returns>Battery relative state-of-health estimation type</returns>
         public RSOCEstimationType GetRSOCEstimation()
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryTempSenseConfig, 1);
-
-            if ((response[0] & 0x30) >> 4 > 2)
-            {
-                throw new ArgumentOutOfRangeException("ff");
-            }
 
             return (RSOCEstimationType)((response[0] & 0x30) >> 4);
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Set battery relative state-of-health estimation type
         /// </summary>
+        /// <param name="estimationType">Battery relative state-of-health estimation type</param>
         public void SetRSOCEstimation(RSOCEstimationType estimationType)
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryTempSenseConfig, 1);
@@ -223,6 +227,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Get current battery charging state
         /// </summary>
+        /// <returns>Battery charging configuration</returns>
         public ChargingConfig GetChargingConfig()
         {
             var chargingConfig = new ChargingConfig();
@@ -238,6 +243,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Set current battery charging state
         /// </summary>
+        /// <param name="config">Battery charging configuration</param>
         public void SetChargingConfig(ChargingConfig config)
         {
             var data = new byte[1];
@@ -256,8 +262,9 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Get power inputs
         /// </summary>
+        /// <returns>Power inputs</returns>
         public PowerInput GetPowerInputs()
         {
             var powerInput = new PowerInput();
@@ -275,8 +282,9 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Set power inputs
         /// </summary>
+        /// <param name="powerInput">Power inputs</param>
         public void SetPowerInputs(PowerInput powerInput)
         {
             byte nonVolatile = powerInput.NonVolatile ? (byte)0x80 : (byte)0x00;
@@ -308,6 +316,8 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Get the configuration for the specific LED
         /// </summary>
+        /// <param name="led">LED to get configuration for</param>
+        /// <returns>LED Configuration</returns>
         public LEDConfig GetLedConfiguration(LED led)
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.LEDConfig + (int)led, 4);
@@ -319,6 +329,7 @@ namespace Iot.Device.PiJuiceDevice
 
             return new LEDConfig
             {
+                LED = led,
                 LedFunction = (LEDFunction)response[0],
                 RGB = Color.FromArgb(0, response[1], response[2], response[3])
             };
@@ -327,14 +338,16 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Set the configuration for the specific LED
         /// </summary>
-        public void SetLedConfiguration(LED led, LEDConfig ledConfig)
+        /// <param name="ledConfig">LED configuration</param>
+        public void SetLedConfiguration(LEDConfig ledConfig)
         {
-            _piJuice.WriteCommandVerify(PiJuiceCommand.LEDConfig + (int)led, new byte[] { (byte)ledConfig.LedFunction, ledConfig.RGB.R, ledConfig.RGB.G, ledConfig.RGB.B }, 200);
+            _piJuice.WriteCommandVerify(PiJuiceCommand.LEDConfig + (int)ledConfig.LED, new byte[] { (byte)ledConfig.LedFunction, ledConfig.RGB.R, ledConfig.RGB.G, ledConfig.RGB.B }, 200);
         }
 
         /// <summary>
         /// Get power regulator mode
         /// </summary>
+        /// <returns>Power regulator mode</returns>
         public PowerRegulatorMode GetPowerRegulatorMode()
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.PowerRegulatorConfig, 1);
@@ -345,6 +358,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Set power regulator mode
         /// </summary>
+        /// <param name="powerMode">Power regulator mode</param>
         public void SetPowerRegulatorMode(PowerRegulatorMode powerMode)
         {
             _piJuice.WriteCommandVerify(PiJuiceCommand.PowerRegulatorConfig, new byte[] { (byte)powerMode });
@@ -353,6 +367,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Get run pin configuration
         /// </summary>
+        /// <returns>Run pin configuration</returns>
         public RunPin GetRunPinConfig()
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.RunPinConfig, 1);
@@ -368,13 +383,14 @@ namespace Iot.Device.PiJuiceDevice
         /// <summary>
         /// Set run pin configuration
         /// </summary>
+        /// <param name="runPin">Run pin configuration</param>
         public void SetRunPinConfig(RunPin runPin)
         {
             _piJuice.WriteCommandVerify(PiJuiceCommand.RunPinConfig, new byte[] { (byte)runPin });
         }
 
         /// <summary>
-        /// TODO: Fill In
+        /// Selects which preset battery profiles to use based on the PiJuice firmware version
         /// </summary>
         private void SelectBatteryProfiles()
         {

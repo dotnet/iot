@@ -5,27 +5,27 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// TODO: Fill In
+    /// Determine how the battery temperature is taken
     /// </summary>
     public enum BatteryTempSense
     {
         /// <summary>
-        /// TODO: Fill In
+        /// No temperature sensor will be used
         /// </summary>
         NotUsed = 0,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Use batteries built-in NTC as per battery NTC terminal
         /// </summary>
         NTC,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Use temperature sensor on MCU
         /// </summary>
         OnBoard,
 
         /// <summary>
-        /// TODO: Fill In
+        /// Let the PiJuice software determine which method to use
         /// </summary>
         AutoDetect
     }
