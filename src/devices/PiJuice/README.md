@@ -70,7 +70,7 @@ More examples on how to use the PiJuice device binding are available in [PiJuice
 ```csharp
 Console.WriteLine("Hello PiJuice!");
 I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, PiJuice.DefaultI2cAddress);
-piJuice = new piJuice(I2cDevice.Create(i2CConnectionSettings));
+PiJuice piJuice = new PiJuice(I2cDevice.Create(i2CConnectionSettings));
 Console.WriteLine($"Manufacturer :{piJuice.PiJuiceInfo.Manufacturer}");
 Console.WriteLine($"Board: {piJuice.PiJuiceInfo.Board}");
 Console.WriteLine($"Firmware version: {piJuice.PiJuiceInfo.FirmwareVersion}");
@@ -78,11 +78,11 @@ PiJuiceStatus piJuiceStatus = new PiJuiceStatus(piJuice);
 PiJuiceConfig piJuiceConfig = new PiJuiceConfig(piJuice);
 while (!Console.KeyAvailable)
 {
-    var status = piJuiceStatus.GetStatus();
-    Console.WriteLine($"Battery state: {status.Battery.ToString()}");
-    Console.WriteLine($"Battery charge level: {piJuiceStatus.GetChargeLevel()%}");
-    Console.WriteLine($"Battery temperature: {piJuiceStatus.GetBatteryTemperature().ToString()}");
-    var chargeConfig = piJuiceConfig.GetChargingConfig();
+    Status status = piJuiceStatus.GetStatus();
+    Console.WriteLine($"Battery state: {status.Battery}");
+    Console.WriteLine($"Battery charge level: {piJuiceStatus.GetChargeLevel()}%");
+    Console.WriteLine($"Battery temperature: {piJuiceStatus.GetBatteryTemperature()}");
+    ChargingConfig chargeConfig = piJuiceConfig.GetChargingConfig();
     Console.WriteLine($"Battery charging enabled: {chargeConfig.Enabled}");    
     Thread.Sleep(2000);
     Console.CursorTop -= 5;
