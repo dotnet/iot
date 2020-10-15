@@ -32,6 +32,20 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="QwiicButton"/> class.
+        /// </summary>
+        /// <param name="i2cDevice">Qwiic Button communications channel.</param>
+        public QwiicButton(I2cDevice i2cDevice)
+        {
+            if (i2cDevice == null)
+            {
+                throw new ArgumentNullException(nameof(i2cDevice));
+            }
+
+            _registerAccess = new I2cRegisterAccess<Register>(i2cDevice, useLittleEndian: true);
+        }
+
+        /// <summary>
         /// I2C bus ID the button is connected to.
         /// </summary>
         public int I2cBusId { get; set; }
