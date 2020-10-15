@@ -34,10 +34,6 @@ This version does not include the following functionality
 
 ![sensors](grovepisensors.png)
 
-High level classes has been built for those sensors. Generic Digital Input, Digital Output, Analogic Input, PWM Output has been built as well. You can build your own classes looking at the sensors provided in the [Sensors folder](./Sensors).
-
-More sensors are supported and being tested like the Grove Led Bar. Note that this sensor as the Ultrasonic sensor have native support and accessing their data is different than for the other sensors.
-
 ## How to use the driver
 
 The main [PiJuice samples](./samples) contains a series of test showing how to use some of the classes.
