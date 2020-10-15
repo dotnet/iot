@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace Iot.Device.GroveBmi088Device.Samples
+namespace Iot.Device.Bmi088Device.Samples
 {
     /// <summary>
     /// Test program main class
@@ -14,7 +14,7 @@ namespace Iot.Device.GroveBmi088Device.Samples
         /// <param name="args">Command line arguments</param>
         public static void Main(string[] args)
         {
-            using (var ag = new GroveBmi088())
+            using (var ag = new Bmi088())
             {
                 Console.WriteLine("Press any key to exit");
                 Console.WriteLine();

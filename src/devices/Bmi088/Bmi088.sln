@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30524.135
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroveBmi088.Samples", "samples\GroveBmi088.Samples.csproj", "{3000335C-7665-42E8-9F5B-36DBF98B8906}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bmi088.Samples", "samples\Bmi088.Samples.csproj", "{3000335C-7665-42E8-9F5B-36DBF98B8906}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GroveBmi088", "GroveBmi088.csproj", "{E26B55E7-7A6E-427F-90FB-260E544FFD34}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bmi088", "Bmi088.csproj", "{E26B55E7-7A6E-427F-90FB-260E544FFD34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

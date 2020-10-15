@@ -1,4 +1,4 @@
-﻿namespace Iot.Device.GroveBmi088Device
+﻿namespace Iot.Device.Bmi088Device
 {
     /// <summary>
     /// Power modes for the gyroscope
@@ -6,12 +6,12 @@
     public enum GyroscopePowerMode : byte
     {
         /// <summary>See datasheet</summary>
-        GYRO_NORMAL = 0x00,
+        Normal = 0x00,
 
         /// <summary>See datasheet</summary>
-        GYRO_SUSPEND = 0x80,
+        Suspend = 0x80,
 
         /// <summary>See datasheet</summary>
-        GYRO_DEEP_SUSPEND = 0x20
+        DeepSuspend = 0x20
     }
 }

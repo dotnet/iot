@@ -1,32 +1,32 @@
-﻿namespace Iot.Device.GroveBmi088Device
+﻿namespace Iot.Device.Bmi088Device
 {
     /// <summary>
-    /// Data rate for the accelerometer
+    /// Data rates for the gyroscope
     /// </summary>
-    public enum AccelerometerOutputDataRate : byte
+    public enum GyroscopeOutputDataRate : byte
     {
         /// <summary>See datasheet</summary>
-        ODR_12 = 0x05,
+        Odr2000_Bw532 = 0x00,
 
         /// <summary>See datasheet</summary>
-        ODR_25 = 0x06,
+        Odr2000_Bw230 = 0x01,
 
         /// <summary>See datasheet</summary>
-        ODR_50 = 0x07,
+        Odr1000_Bw116 = 0x02,
 
         /// <summary>See datasheet</summary>
-        ODR_100 = 0x08,
+        Odr400_Bw47 = 0x03,
 
         /// <summary>See datasheet</summary>
-        ODR_200 = 0x09,
+        Odr200_Bw23 = 0x04,
 
         /// <summary>See datasheet</summary>
-        ODR_400 = 0x0A,
+        Odr100_Bw12 = 0x05,
 
         /// <summary>See datasheet</summary>
-        ODR_800 = 0x0B,
+        Odr200_Bw64 = 0x06,
 
         /// <summary>See datasheet</summary>
-        ODR_1600 = 0x0C
+        Odr100_Bw32 = 0x07
     }
 }
