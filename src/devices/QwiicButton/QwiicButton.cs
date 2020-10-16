@@ -63,8 +63,10 @@ namespace Iot.Device.QwiicButton
 
         /// <summary>
         /// Configures the button to attach to the I2C bus using the specified address.
+        /// Since this operation does not update the configuration of the underlying <see cref="I2cDevice"/>,
+        /// the <see cref="QwiicButton"/> instance is subsequently misconfigured and thus actively disposed.
         /// </summary>
-        public void SetI2cAddress(byte address)
+        public void ChangeI2cAddressAndDispose(byte address)
         {
             if (address < 0x08 || address > 0x77)
             {
@@ -72,6 +74,7 @@ namespace Iot.Device.QwiicButton
             }
 
             _registerAccess.WriteRegister(Register.I2cAddress, address);
+            Dispose();
         }
 
         /// <inheritdoc />

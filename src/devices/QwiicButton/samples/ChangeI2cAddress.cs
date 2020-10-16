@@ -22,8 +22,10 @@ namespace Iot.Device.QwiicButton.Samples
                 return;
             }
 
-            button.SetI2cAddress((byte)address.Value);
+            button.ChangeI2cAddressAndDispose((byte)address.Value);
             Console.WriteLine($"Successfully changed the I2C address of the button to {address}!");
+            Console.WriteLine("Notice that the current instance of the QwiicButton class was now actively disposed");
+            Console.WriteLine("since the underlying I2cDevice instance was not reconfigured to use the new address.");
         }
 
         public static uint? EnterNewAddress()
