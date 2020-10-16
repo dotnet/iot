@@ -16,8 +16,8 @@ namespace Iot.Device.QwiicButton.Samples
             Console.WriteLine("Qwiic Button Configuration");
             Console.WriteLine("--------------------------");
             Console.WriteLine($"Device ID: {button.GetDeviceId()}");
-            Console.WriteLine($"Firmware version: {button.GetFirmwareVersionAsInteger()} ({button.GetFirmwareVersionAsString()})");
-            Console.WriteLine($"Debounce time: {button.GetDebounceTime()}ms");
+            Console.WriteLine($"Firmware version: {button.GetFirmwareVersion()}");
+            Console.WriteLine($"Debounce time: {button.GetDebounceTime().TotalMilliseconds}ms");
         }
     }
 }

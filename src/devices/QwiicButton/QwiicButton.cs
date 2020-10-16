@@ -52,25 +52,13 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
-        /// Returns the firmware version of the button as a 16-bit integer.
-        /// The leftmost (high) byte is the major revision number, and the rightmost (low) byte is
-        /// the minor revision number.
+        /// Returns the firmware version of the button.
         /// </summary>
-        public ushort GetFirmwareVersionAsInteger()
-        {
-            ushort version = (ushort)(_registerAccess.ReadRegister<byte>(Register.FirmwareMajor) << 8);
-            version |= _registerAccess.ReadRegister<byte>(Register.FirmwareMinor);
-            return version;
-        }
-
-        /// <summary>
-        /// Returns the firmware version of the button as a [major revision].[minor revision] string.
-        /// </summary>
-        public string GetFirmwareVersionAsString()
+        public Version GetFirmwareVersion()
         {
             var major = _registerAccess.ReadRegister<byte>(Register.FirmwareMajor);
             var minor = _registerAccess.ReadRegister<byte>(Register.FirmwareMinor);
-            return major + "." + minor;
+            return new Version(major, minor);
         }
 
         /// <summary>
