@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using Iot.Device.QwiicButton.RegisterMapping;
 
 namespace Iot.Device.QwiicButton
@@ -27,40 +28,44 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
-        /// Returns how many milliseconds it has been since the last button press.
-        /// Since this returns a 32-bit unsigned int, it will roll over about every 50 days.
+        /// Returns interval of time since the last button press.
+        /// Since this returns a <see cref="TimeSpan"/> based on a 32-bit unsigned int,
+        /// it will roll over about every 50 days.
         /// </summary>
-        public uint TimeSinceLastPress()
+        public TimeSpan GetTimeSinceLastPress()
         {
-            return _registerAccess.ReadRegister<uint>(Register.PressedQueueFront);
+            var timeSinceLastPressInMs = _registerAccess.ReadRegister<uint>(Register.PressedQueueFront);
+            return TimeSpan.FromMilliseconds(timeSinceLastPressInMs);
         }
 
         /// <summary>
-        /// Returns how many milliseconds it has been since the first button press.
-        /// Since this returns a 32-bit unsigned int, it will roll over about every 50 days.
+        /// Returns interval of time since the first button press.
+        /// Since this returns a <see cref="TimeSpan"/> based on a 32-bit unsigned int,
+        /// it will roll over about every 50 days.
         /// </summary>
-        public uint TimeSinceFirstPress()
+        public TimeSpan GetTimeSinceFirstPress()
         {
-            return _registerAccess.ReadRegister<uint>(Register.PressedQueueBack);
+            var timeSinceFirstPressInMs = _registerAccess.ReadRegister<uint>(Register.PressedQueueBack);
+            return TimeSpan.FromMilliseconds(timeSinceFirstPressInMs);
         }
 
         /// <summary>
-        /// Returns the oldest value in the queue (milliseconds since first button press), and then removes it.
+        /// Returns the oldest value in the queue of button press timestamps,
+        /// i.e. the interval of time since the first button press,
+        /// and then removes it.
         /// </summary>
-        public uint PopPressedQueue()
+        public TimeSpan PopPressedQueue()
         {
-            var timeSinceFirstPress = TimeSinceFirstPress(); // Take the oldest value on the queue
+            var timeSinceFirstPress = GetTimeSinceFirstPress();
 
             var pressedQueue =
                 new QueueStatusBitField(_registerAccess.ReadRegister<byte>(Register.PressedQueueStatus))
                 {
                     PopRequest = true
                 };
-
-            // Remove the oldest value from the queue
             _registerAccess.WriteRegister(Register.PressedQueueStatus, pressedQueue.QueueStatusValue);
 
-            return timeSinceFirstPress; // Return the value we popped
+            return timeSinceFirstPress;
         }
 
         /// <summary>
@@ -82,29 +87,35 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
-        /// Returns how many milliseconds it has been since the last button click.
-        /// Since this returns a 32-bit unsigned int, it will roll over about every 50 days.
+        /// Returns interval of time since the last button click.
+        /// Since this returns a <see cref="TimeSpan"/> based on a 32-bit unsigned int,
+        /// it will roll over about every 50 days.
         /// </summary>
-        public uint TimeSinceLastClick()
+        public TimeSpan GetTimeSinceLastClick()
         {
-            return _registerAccess.ReadRegister<uint>(Register.ClickedQueueFront);
+            var timeSinceLastClickInMs = _registerAccess.ReadRegister<uint>(Register.ClickedQueueFront);
+            return TimeSpan.FromMilliseconds(timeSinceLastClickInMs);
         }
 
         /// <summary>
-        /// Returns how many milliseconds it has been since the first button click.
-        /// Since this returns a 32-bit unsigned int, it will roll over about every 50 days.
+        /// Returns interval of time since the first button click.
+        /// Since this returns a <see cref="TimeSpan"/> based on a 32-bit unsigned int,
+        /// it will roll over about every 50 days.
         /// </summary>
-        public uint TimeSinceFirstClick()
+        public TimeSpan GetTimeSinceFirstClick()
         {
-            return _registerAccess.ReadRegister<uint>(Register.ClickedQueueBack);
+            var timeSinceFirstClickInMs = _registerAccess.ReadRegister<uint>(Register.ClickedQueueBack);
+            return TimeSpan.FromMilliseconds(timeSinceFirstClickInMs);
         }
 
         /// <summary>
-        /// Returns the oldest value in the queue (milliseconds since first button click), and then removes it.
+        /// Returns the oldest value in the queue of button click timestamps,
+        /// i.e. the interval of time since the first button click,
+        /// and then removes it.
         /// </summary>
-        public uint PopClickedQueue()
+        public TimeSpan PopClickedQueue()
         {
-            var timeSinceFirstClick = TimeSinceFirstClick();
+            var timeSinceFirstClick = GetTimeSinceFirstClick();
 
             var clickedQueue =
                 new QueueStatusBitField(_registerAccess.ReadRegister<byte>(Register.ClickedQueueStatus))
