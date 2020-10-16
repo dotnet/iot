@@ -25,8 +25,8 @@ namespace Iot.Device.QwiicButton.Samples
                 if (!button.IsPressedQueueEmpty())
                 {
                     // If the queue of pressed events is not empty then print the time since the last and first button press
-                    Console.WriteLine($"{button.TimeSinceLastPress() / 1000.0}s since the button was last pressed");
-                    Console.WriteLine($"{button.TimeSinceFirstPress() / 1000.0}s since the button was first pressed");
+                    Console.WriteLine($"{button.GetTimeSinceLastPress().TotalSeconds}s since the button was last pressed");
+                    Console.WriteLine($"{button.GetTimeSinceFirstPress().TotalSeconds}s since the button was first pressed");
                 }
                 else
                 {
@@ -36,8 +36,8 @@ namespace Iot.Device.QwiicButton.Samples
                 if (!button.IsClickedQueueEmpty())
                 {
                     // If the queue of clicked events is not empty then print the time since the last and first button click
-                    Console.WriteLine($"{button.TimeSinceLastClick() / 1000.0}s since the button was last clicked");
-                    Console.WriteLine($"{button.TimeSinceFirstClick() / 1000.0}s since the button was first clicked");
+                    Console.WriteLine($"{button.GetTimeSinceLastClick().TotalSeconds}s since the button was last clicked");
+                    Console.WriteLine($"{button.GetTimeSinceFirstClick().TotalSeconds}s since the button was first clicked");
                 }
                 else
                 {
