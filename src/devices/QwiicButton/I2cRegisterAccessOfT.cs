@@ -24,7 +24,8 @@ namespace Iot.Device.QwiicButton
     /// </code>
     /// </example>
     /// <remarks>
-    /// Notice: If the I2C device uses register addresses larger than a <see cref="byte"/>,
+    /// Notice: This class only supports 8-bit register addresses.
+    /// If the I2C device uses register addresses larger than 8-bit,
     /// it often means that you have to read the data at several individual 8-bit addresses and
     /// assemble this data in the correct order to extract the corresponding 16/32/64-bit word.
     /// For instance, for some devices a register address such as 0x1234 means that you need to
@@ -69,65 +70,6 @@ namespace Iot.Device.QwiicButton
             return _registerAccess.ReadRegister<T>((byte)(object)register, _useLittleEndian);
         }
 
-        // TODO: Remove when tested
-        /*
-        /// <summary>
-        /// Writes a numeric value to the provided register address.
-        /// </summary>
-        /// <typeparam name="T">Integral numeric type.</typeparam>
-        public void WriteRegister<T>(TRegisterMap register, T data)
-            where T : struct
-        {
-            var bytesToWrite = new List<byte> { (byte)(object)register };
-
-            int typeSizeInBytes = Marshal.SizeOf(default(T));
-            for (int index = 0; index < typeSizeInBytes; index++)
-            {
-                byte valueToWrite = 0;
-                var shiftBitsCount = index * 8;
-
-                // Shift operations are only allowed on integral numeric types and not on generic types,
-                // thus the need for this switch statement
-                switch (data)
-                {
-                    case sbyte typedData:
-                        valueToWrite = (byte)typedData;
-                        break;
-                    case byte typedData:
-                        valueToWrite = typedData;
-                        break;
-                    case short typedData:
-                        valueToWrite = index == 0 ? (byte)(typedData & 0xFF) : (byte)(typedData >> shiftBitsCount);
-                        break;
-                    case ushort typedData:
-                        valueToWrite = index == 0 ? (byte)(typedData & 0xFF) : (byte)(typedData >> shiftBitsCount);
-                        break;
-                    case int typedData:
-                        valueToWrite = index == 0 ? (byte)(typedData & 0xFF) : (byte)(typedData >> shiftBitsCount);
-                        break;
-                    case uint typedData:
-                        valueToWrite = index == 0 ? (byte)(typedData & 0xFF) : (byte)(typedData >> shiftBitsCount);
-                        break;
-                    case long typedData:
-                        valueToWrite = index == 0 ? (byte)(typedData & 0xFF) : (byte)(typedData >> shiftBitsCount);
-                        break;
-                    case ulong typedData:
-                        valueToWrite = index == 0 ? (byte)(typedData & 0xFF) : (byte)(typedData >> shiftBitsCount);
-                        break;
-                    case char typedData:
-                        valueToWrite = index == 0 ? (byte)(typedData & 0xFF) : (byte)(typedData >> shiftBitsCount);
-                        break;
-                    default:
-                        throw new InvalidOperationException($"Type '{data.GetType()}' is not an integral numeric type.");
-                }
-
-                bytesToWrite.Add(valueToWrite);
-            }
-
-            // _device.Write();
-        }
-        */
-
         /// <summary>
         /// Writes a numeric value to the provided register address.
         /// Uses the endianness defined when constructing the instance.
@@ -146,97 +88,6 @@ namespace Iot.Device.QwiicButton
 
             _registerAccess.WriteRegister((byte)(object)register, data, _useLittleEndian);
         }
-
-        // TODO: Remove when tested
-        /*
-        private Span<byte> Write<T>(T data, bool useLittleEndian)
-            where T : struct
-        {
-            int typeSizeInBytes = Marshal.SizeOf(default(T));
-            Span<byte> outArray = stackalloc byte[typeSizeInBytes];
-
-            switch (data)
-            {
-                case sbyte typedData:
-                    outArray[0] = (byte)typedData;
-                    break;
-                case byte typedData:
-                    outArray[0] = typedData;
-                    break;
-                case short typedData:
-                    if (useLittleEndian)
-                    {
-                        BinaryPrimitives.WriteInt16LittleEndian(outArray, typedData);
-                    }
-                    else
-                    {
-                        BinaryPrimitives.WriteInt16BigEndian(outArray, typedData);
-                    }
-
-                    break;
-                case ushort typedData:
-                    if (useLittleEndian)
-                    {
-                        BinaryPrimitives.WriteUInt16LittleEndian(outArray, typedData);
-                    }
-                    else
-                    {
-                        BinaryPrimitives.WriteUInt16BigEndian(outArray, typedData);
-                    }
-
-                    break;
-                case int typedData:
-                    if (useLittleEndian)
-                    {
-                        BinaryPrimitives.WriteInt32LittleEndian(outArray, typedData);
-                    }
-                    else
-                    {
-                        BinaryPrimitives.WriteInt32BigEndian(outArray, typedData);
-                    }
-
-                    break;
-                case uint typedData:
-                    if (useLittleEndian)
-                    {
-                        BinaryPrimitives.WriteUInt32LittleEndian(outArray, typedData);
-                    }
-                    else
-                    {
-                        BinaryPrimitives.WriteUInt32BigEndian(outArray, typedData);
-                    }
-
-                    break;
-                case long typedData:
-                    if (useLittleEndian)
-                    {
-                        BinaryPrimitives.WriteInt64LittleEndian(outArray, typedData);
-                    }
-                    else
-                    {
-                        BinaryPrimitives.WriteInt64BigEndian(outArray, typedData);
-                    }
-
-                    break;
-                case ulong typedData:
-                    if (useLittleEndian)
-                    {
-                        BinaryPrimitives.WriteUInt64LittleEndian(outArray, typedData);
-                    }
-                    else
-                    {
-                        BinaryPrimitives.WriteUInt64BigEndian(outArray, typedData);
-                    }
-
-                    break;
-
-                default:
-                    throw new InvalidOperationException($"Type '{data.GetType()}' is not a supported integral numeric type.");
-            }
-
-            return outArray;
-        }
-        */
 
         /// <inheritdoc />
         public void Dispose()
