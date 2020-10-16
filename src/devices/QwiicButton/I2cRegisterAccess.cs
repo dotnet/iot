@@ -11,6 +11,17 @@ namespace Iot.Device.QwiicButton
 {
     /// <summary>
     /// Implements low-level access to read and write to the provided I2C device.
+    /// <remarks>
+    /// Notice: This class only supports 8-bit register addresses.
+    /// If the I2C device uses register addresses larger than 8-bit,
+    /// it often means that you have to read the data at several individual 8-bit addresses and
+    /// assemble this data in the correct order to extract the corresponding 16/32/64-bit word.
+    /// For instance, for some devices a register address such as 0x1234 means that you need to
+    /// read/write from registers 0x12 and 0x34. Both registers will hold 8-bits of information,
+    /// which together form the actual 16-bit word referenced by the hexadecimal 0x1234.
+    /// Read through the data sheets/manuals for your specific I2C device for more information
+    /// on its register addressing.
+    /// </remarks>
     /// </summary>
     public sealed class I2cRegisterAccess : IDisposable
     {
