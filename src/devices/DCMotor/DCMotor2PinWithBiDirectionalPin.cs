@@ -23,12 +23,10 @@ namespace Iot.Device.DCMotor
             int dirpin,
             GpioController controller,
             bool shouldDispose)
-            : base(controller ?? ((dirpin == -1) ? null : new GpioController()), controller == null ? true : shouldDispose)
+            : base(controller ?? ((dirpin == -1) ? null : new GpioController()), controller == null || shouldDispose)
         {
             _pwm = pwmChannel;
-
             _dirPin = dirpin;
-
             _speed = 0;
 
             _pwm.Start();
