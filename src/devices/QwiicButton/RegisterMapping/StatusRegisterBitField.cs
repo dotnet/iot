@@ -11,7 +11,7 @@ namespace Iot.Device.QwiicButton.RegisterMapping
         [Flags]
         private enum StatusRegisterBits
         {
-            EventAvailable = 1,
+            IsEventAvailable = 1,
             HasBeenClicked = 2,
             IsPressed = 4,
         }
@@ -29,14 +29,14 @@ namespace Iot.Device.QwiicButton.RegisterMapping
         /// Gets set to true when a new event occurs.
         /// Must be manually set to false to clear the flag.
         /// </summary>
-        public bool EventAvailable
+        public bool IsEventAvailable
         {
-            get { return FlagsHelper.IsSet(_statusRegisterValue, StatusRegisterBits.EventAvailable); }
-            set { FlagsHelper.SetValue(ref _statusRegisterValue, StatusRegisterBits.EventAvailable, value); }
+            get { return FlagsHelper.IsSet(_statusRegisterValue, StatusRegisterBits.IsEventAvailable); }
+            set { FlagsHelper.SetValue(ref _statusRegisterValue, StatusRegisterBits.IsEventAvailable, value); }
         }
 
         /// <summary>
-        /// Gets set to true if button is pushed.
+        /// Gets set to true if button is pressed, i.e. pushed in.
         /// </summary>
         public bool IsPressed
         {
@@ -45,7 +45,7 @@ namespace Iot.Device.QwiicButton.RegisterMapping
         }
 
         /// <summary>
-        /// Gets set to true when the button gets clicked.
+        /// Gets set to true when the button gets clicked, i.e. pressed and released.
         /// Must be manually set to false to clear the flag.
         /// </summary>
         public bool HasBeenClicked
