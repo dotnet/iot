@@ -52,6 +52,7 @@ namespace Iot.Device.QwiicButton
 
         /// <summary>
         /// Returns interval of time that the button waits for the mechanical contacts to settle.
+        /// Default is 10 milliseconds.
         /// </summary>
         public TimeSpan GetDebounceTime()
         {
@@ -61,6 +62,7 @@ namespace Iot.Device.QwiicButton
 
         /// <summary>
         /// Sets the time in milliseconds that the button waits for the mechanical contacts to settle.
+        /// Default is 10 milliseconds.
         /// </summary>
         public void SetDebounceTime(ushort time)
         {
