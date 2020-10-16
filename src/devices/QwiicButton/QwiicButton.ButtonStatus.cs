@@ -20,6 +20,7 @@ namespace Iot.Device.QwiicButton
 
         /// <summary>
         /// Returns whether the button is clicked, i.e. pressed and released.
+        /// After the button is clicked, must be manually reset to false by calling <see cref="ClearEventBits"/>.
         /// </summary>
         public bool HasBeenClicked()
         {
@@ -29,6 +30,7 @@ namespace Iot.Device.QwiicButton
 
         /// <summary>
         /// Returns whether a new button status event has occurred.
+        /// After an event has occurred, must be manually reset to false by calling <see cref="ClearEventBits"/>.
         /// </summary>
         public bool IsEventAvailable()
         {
