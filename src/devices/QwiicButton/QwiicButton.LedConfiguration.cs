@@ -28,8 +28,8 @@ namespace Iot.Device.QwiicButton
         /// <summary>
         /// Configures the onboard LED with the given max brightness, granularity, cycle time, and off time.
         /// <param name="brightness">LED brightness value between 0 (off) and 255 (max). Default is 255.</param>
-        /// <param name="cycleTime">Total pulse cycle time (in ms). Does not include off time.</param>
-        /// <param name="offTime">Off time between pulses (in ms). Default is 500 ms.</param>
+        /// <param name="cycleTime">Total pulse cycle time in ms. Does not include off time. Pulse disabled if 0.</param>
+        /// <param name="offTime">Off time between pulses in ms. Default is 500 ms.</param>
         /// <param name="granularity">Amount of steps it takes to get to the set brightness level (1 is fine for most applications).</param>
         /// </summary>
         public void LedConfig(byte brightness, ushort cycleTime, ushort offTime, byte granularity = 1)
