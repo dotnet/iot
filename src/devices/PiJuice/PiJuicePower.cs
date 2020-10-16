@@ -58,8 +58,8 @@ namespace Iot.Device.PiJuiceDevice
 
             return new WakeUpOnCharge
             {
-                Disabled = response[0] == 0xFF,
-                WakeUpPercentage = (short)(response[0] == 0xFF ? 0 : response[0])
+                Disabled = response[0] == 0x7F,
+                WakeUpPercentage = (short)(response[0] == 0x7F ? 0 : response[0])
             };
         }
 
