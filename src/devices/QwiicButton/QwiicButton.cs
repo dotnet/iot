@@ -24,8 +24,6 @@ namespace Iot.Device.QwiicButton
         /// <param name="i2cAddress">I2C bus address of the button (default=0x6F).</param>
         public QwiicButton(int i2cBusId, byte i2cAddress = DefaultAddress)
         {
-            I2cBusId = i2cBusId;
-            I2cAddress = i2cAddress;
             var settings = new I2cConnectionSettings(i2cBusId, i2cAddress);
             var device = I2cDevice.Create(settings);
             _registerAccess = new I2cRegisterAccess<Register>(device, useLittleEndian: true);
@@ -44,16 +42,6 @@ namespace Iot.Device.QwiicButton
 
             _registerAccess = new I2cRegisterAccess<Register>(i2cDevice, useLittleEndian: true);
         }
-
-        /// <summary>
-        /// I2C bus ID the button is connected to.
-        /// </summary>
-        public int I2cBusId { get; set; }
-
-        /// <summary>
-        /// I2C bus address of the button.
-        /// </summary>
-        public byte I2cAddress { get; set; }
 
         /// <summary>
         /// Returns the 8-bit device ID of the button.
@@ -96,7 +84,6 @@ namespace Iot.Device.QwiicButton
             }
 
             _registerAccess.WriteRegister(Register.I2cAddress, address);
-            I2cAddress = address;
         }
 
         /// <inheritdoc />

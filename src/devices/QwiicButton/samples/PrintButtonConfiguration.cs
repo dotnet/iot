@@ -15,8 +15,6 @@ namespace Iot.Device.QwiicButton.Samples
         {
             Console.WriteLine("Qwiic Button Configuration");
             Console.WriteLine("--------------------------");
-            Console.WriteLine($"I2C bus ID: {button.I2cBusId}");
-            Console.WriteLine($"I2C bus address: 0x{button.I2cAddress:X} (decimal: {button.I2cAddress})");
             Console.WriteLine($"Device ID: {button.GetDeviceId()}");
             Console.WriteLine($"Firmware version: {button.GetFirmwareVersionAsInteger()} ({button.GetFirmwareVersionAsString()})");
             Console.WriteLine($"Debounce time: {button.GetDebounceTime()}ms");
