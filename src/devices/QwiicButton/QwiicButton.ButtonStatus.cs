@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using Iot.Device.QwiicButton.RegisterMapping;
 
 namespace Iot.Device.QwiicButton
@@ -50,15 +51,16 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
-        /// Returns the time in milliseconds that the button waits for the mechanical contacts to settle.
+        /// Returns interval of time that the button waits for the mechanical contacts to settle.
         /// </summary>
-        public ushort GetDebounceTime()
+        public TimeSpan GetDebounceTime()
         {
-            return _registerAccess.ReadRegister<ushort>(Register.ButtonDebounceTime);
+            var debounceTimeInMs = _registerAccess.ReadRegister<ushort>(Register.ButtonDebounceTime);
+            return TimeSpan.FromMilliseconds(debounceTimeInMs);
         }
 
         /// <summary>
-        /// Sets the time in milliseconds that the button waits for the mechanical contacts to settle and checks if the register was set properly.
+        /// Sets the time in milliseconds that the button waits for the mechanical contacts to settle.
         /// </summary>
         public void SetDebounceTime(ushort time)
         {
