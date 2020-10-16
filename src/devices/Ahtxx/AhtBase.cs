@@ -29,6 +29,7 @@ namespace Iot.Device.Ahtxx
         /// Initializes a new instance of the binding for a sensor connected through I2C interface.
         /// </summary>
         /// <paramref name="i2cDevice">Reference to the initialized I2C interface device</paramref>
+        /// <paramref name="initCommand">Type specific command for device initialization</paramref>
         public AhtBase(I2cDevice i2cDevice, byte initCommand)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
@@ -161,6 +162,7 @@ namespace Iot.Device.Ahtxx
         }
 
         // datasheet version 1.1, table 10
+        [Flags]
         private enum StatusBit : byte
         {
             Calibrated = 0b_0000_1000,
