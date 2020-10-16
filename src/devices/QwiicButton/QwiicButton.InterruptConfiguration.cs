@@ -84,7 +84,7 @@ namespace Iot.Device.QwiicButton
 
             var status = new StatusRegisterBitField
             {
-                EventAvailable = false
+                IsEventAvailable = false
             };
             _registerAccess.WriteRegister(Register.ButtonStatus, status.StatusRegisterValue);
         }
