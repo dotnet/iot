@@ -26,7 +26,6 @@ namespace Iot.Device.Ahtxx.Samples
             // Aht10 sensor = new Aht10(i2cDevice);
             // For AHT20 use:
             Aht20 sensor = new Aht20(i2cDevice);
-
             while (true)
             {
                 Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {sensor.GetTemperature().DegreesCelsius:F1}°C, {sensor.GetHumidity().Percent:F0}%");
