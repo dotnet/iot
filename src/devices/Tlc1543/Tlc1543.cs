@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -38,7 +38,7 @@ namespace Iot.Device.Tlc1543
             get => _chargeChannel;
             set
             {
-                if ((int)value >= 0 & (int)value < 14)
+                if (IsValidChannel((int)value))
                 {
                     _chargeChannel = value;
                 }
@@ -89,7 +89,22 @@ namespace Iot.Device.Tlc1543
         #region Methods
 
         /// <summary>
-        /// Reads sensor value in Fast Mode 1 (10 clock transfer using !chipSelect)
+        /// Check if channelNumber is valid
+        /// </summary>
+        /// <param name="channelNumber">Channel Address</param>
+        /// <returns></returns>
+        protected static bool IsValidChannel(int channelNumber)
+        {
+            if (channelNumber < 0 || channelNumber > 13)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Reads sensor value
         /// <remarks>
         /// <br>1 cycle used - gets data on second call of this method</br>
         /// <br>First cycle: Ask for value on the channel</br>
@@ -99,7 +114,7 @@ namespace Iot.Device.Tlc1543
         /// <returns>10 bit value corresponding to relative voltage level on channel</returns>
         public int ReadChannel(int channelNumber)
         {
-            if (channelNumber < 0 & channelNumber > 14)
+            if (!IsValidChannel(channelNumber))
             {
                 throw new ArgumentOutOfRangeException("channelNumber", "Out of range. \nMust be non-negative and less than 14. \nRefer to table 2 and 3 in TLC1543 documentation for more information");
             }
