@@ -26,12 +26,12 @@ namespace Iot.Device.QwiicButton.Samples
                 while (!Console.KeyAvailable)
                 {
                     // Check if button is pressed and tell us if it is!
-                    if (button.IsPressed())
+                    if (button.IsPressedDown())
                     {
                         Console.WriteLine("The button is pressed!");
                         button.LedOn(Brightness);
 
-                        while (button.IsPressed())
+                        while (button.IsPressedDown())
                         {
                             Thread.Sleep(10); // Wait for user to stop pressing
                         }
