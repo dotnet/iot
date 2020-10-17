@@ -8,7 +8,8 @@ using Windows.Foundation;
 
 internal static partial class Interop
 {
-    public static TResult WaitForCompletion<TResult>(this IAsyncOperation<TResult> operation)
+    public static TResult? WaitForCompletion<TResult>(this IAsyncOperation<TResult> operation)
+        where TResult : class
     {
         using (var waitEvent = new ManualResetEvent(false))
         {

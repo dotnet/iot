@@ -32,7 +32,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                RaspberryPi3LinuxDriver linuxDriver = CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo);
+                RaspberryPi3LinuxDriver? linuxDriver = CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo);
 
                 if (linuxDriver == null)
                 {
@@ -71,10 +71,10 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        internal static RaspberryPi3LinuxDriver CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo)
+        internal static RaspberryPi3LinuxDriver? CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo)
         {
             RaspberryBoardInfo identification = RaspberryBoardInfo.LoadBoardInfo();
-            RaspberryPi3LinuxDriver linuxDriver;
+            RaspberryPi3LinuxDriver? linuxDriver;
             boardInfo = identification;
             switch (identification.BoardModel)
             {
@@ -172,7 +172,7 @@ namespace System.Device.Gpio.Drivers
         protected override void Dispose(bool disposing)
         {
             _internalDriver?.Dispose();
-            _internalDriver = null;
+            _internalDriver = null!;
             base.Dispose(disposing);
         }
     }

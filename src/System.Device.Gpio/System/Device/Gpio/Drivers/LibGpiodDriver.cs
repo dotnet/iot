@@ -354,7 +354,7 @@ namespace System.Device.Gpio.Drivers
             }
 
             _chip?.Dispose();
-            _chip = null;
+            _chip = null!;
 
             base.Dispose(disposing);
         }

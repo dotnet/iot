@@ -20,11 +20,11 @@ namespace LedMatrixWeather
 {
     internal partial class Program
     {
-        private static Action<RGBLedMatrix> s_scenario = WeatherDemo;
-        private static Stopwatch s_showLocalIp = null;
-        private static string[] s_ips;
+        private static Action<RGBLedMatrix>? s_scenario = WeatherDemo;
+        private static Stopwatch? s_showLocalIp = null;
+        private static string[]? s_ips;
         private static bool s_networkAvailable = false;
-        private static Weather s_client;
+        private static Weather? s_client;
         private static OpenWeatherResponse s_weatherResponse;
         private static readonly TimeZoneInfo s_timeZonePst = TimeZoneInfo.FindSystemTimeZoneById("America/Los_Angeles");
 
@@ -55,12 +55,9 @@ namespace LedMatrixWeather
             {
                 matrix.StartRendering();
 
-                while (true)
+                while (true && s_scenario != null)
                 {
                     Action<RGBLedMatrix> scenario = s_scenario;
-
-                    if (scenario == null)
-                        break;
 
                     Stopwatch sw = Stopwatch.StartNew();
                     scenario(matrix);
@@ -127,7 +124,7 @@ namespace LedMatrixWeather
         {
             try
             {
-                s_weatherResponse = s_client.GetWeatherFromOpenWeather();
+                s_weatherResponse = s_client!.GetWeatherFromOpenWeather();
                 s_networkAvailable = true;
             }
             catch (Exception e)
@@ -212,7 +209,7 @@ namespace LedMatrixWeather
                 return (byte)Math.Clamp(x * 255, 0, 255);
             }
 
-            string text = null;
+            string text = string.Empty;
             int fullTextWidth = 0;
 
             Stopwatch sw = Stopwatch.StartNew();

@@ -96,8 +96,6 @@ namespace System.Device.Gpio
         private RaspberryBoardInfo(Dictionary<string, string> settings)
         {
             _settings = settings;
-            Firmware = 0;
-            ProcessorName = string.Empty;
 
             if (_settings.TryGetValue("Hardware", out string hardware))
             {
@@ -111,8 +109,7 @@ namespace System.Device.Gpio
                 Firmware = firmware;
             }
 
-            if (_settings.TryGetValue("Serial", out string serial)
-                && !string.IsNullOrEmpty(serial))
+            if (_settings.TryGetValue("Serial", out string serial))
             {
                 SerialNumber = serial;
             }
@@ -199,7 +196,7 @@ namespace System.Device.Gpio
         /// <value>
         /// The name of the processor.
         /// </value>
-        public string ProcessorName
+        public string? ProcessorName
         {
             get;
         }
@@ -215,7 +212,7 @@ namespace System.Device.Gpio
         /// <summary>
         /// Gets the serial number.
         /// </summary>
-        public string SerialNumber
+        public string? SerialNumber
         {
             get;
         }
@@ -230,8 +227,7 @@ namespace System.Device.Gpio
         {
             get
             {
-                var firmware = Firmware;
-                return (firmware & 0xFFFF0000) != 0;
+                return (Firmware & 0xFFFF0000) != 0;
             }
         }
 
