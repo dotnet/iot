@@ -31,6 +31,7 @@ namespace Iot.Device.QwiicButton
         /// Returns interval of time since the last button press.
         /// Since this returns a <see cref="TimeSpan"/> based on a 32-bit unsigned int,
         /// it will roll over about every 50 days.
+        /// If called when queue is empty then returns interval of time since the button was powered on.
         /// </summary>
         public TimeSpan GetTimeSinceLastPress()
         {
@@ -42,6 +43,7 @@ namespace Iot.Device.QwiicButton
         /// Returns interval of time since the first button press.
         /// Since this returns a <see cref="TimeSpan"/> based on a 32-bit unsigned int,
         /// it will roll over about every 50 days.
+        /// If called when queue is empty then returns interval of time since the button was powered on.
         /// </summary>
         public TimeSpan GetTimeSinceFirstPress()
         {
@@ -51,8 +53,8 @@ namespace Iot.Device.QwiicButton
 
         /// <summary>
         /// Returns the oldest value in the queue of button press timestamps,
-        /// i.e. the interval of time since the first button press,
-        /// and then removes it.
+        /// i.e. the interval of time since the first button press, and then removes it.
+        /// If called when queue is empty then returns interval of time since the button was powered on.
         /// </summary>
         public TimeSpan PopPressedQueue()
         {
@@ -90,6 +92,7 @@ namespace Iot.Device.QwiicButton
         /// Returns interval of time since the last button click.
         /// Since this returns a <see cref="TimeSpan"/> based on a 32-bit unsigned int,
         /// it will roll over about every 50 days.
+        /// If called when queue is empty then returns interval of time since the button was powered on.
         /// </summary>
         public TimeSpan GetTimeSinceLastClick()
         {
@@ -101,6 +104,7 @@ namespace Iot.Device.QwiicButton
         /// Returns interval of time since the first button click.
         /// Since this returns a <see cref="TimeSpan"/> based on a 32-bit unsigned int,
         /// it will roll over about every 50 days.
+        /// If called when queue is empty then returns interval of time since the button was powered on.
         /// </summary>
         public TimeSpan GetTimeSinceFirstClick()
         {
@@ -110,8 +114,8 @@ namespace Iot.Device.QwiicButton
 
         /// <summary>
         /// Returns the oldest value in the queue of button click timestamps,
-        /// i.e. the interval of time since the first button click,
-        /// and then removes it.
+        /// i.e. the interval of time since the first button click, and then removes it.
+        /// If called when queue is empty then returns interval of time since the button was powered on.
         /// </summary>
         public TimeSpan PopClickedQueue()
         {

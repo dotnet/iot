@@ -9,11 +9,12 @@ namespace Iot.Device.QwiicButton
     public sealed partial class QwiicButton
     {
         /// <summary>
-        /// When called, the interrupt will be configured to trigger when the button is pressed.
+        /// When called, the interrupt will be configured to trigger when the button is pressed down.
         /// If <see cref="EnableClickedInterrupt"/> has also been called,
-        /// then the interrupt will trigger on either a push or a click.
+        /// then the interrupt will trigger on either a press down or a click (press down + release).
+        /// Interrupt is enabled by default.
         /// </summary>
-        public void EnablePressedInterrupt()
+        public void EnablePressedDownInterrupt()
         {
             var interrupt =
                 new InterruptConfigBitField(_registerAccess.ReadRegister<byte>(Register.InterruptConfig))
@@ -24,11 +25,12 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
-        /// When called, the interrupt will no longer be configured to trigger when the button is pressed.
+        /// When called, the interrupt will no longer be configured to trigger when the button is pressed down.
         /// If <see cref="EnableClickedInterrupt"/> has also been called,
-        /// then the interrupt will still trigger on the button click.
+        /// then the interrupt will still trigger on button click (press down + release).
+        /// Interrupt is enabled by default.
         /// </summary>
-        public void DisablePressedInterrupt()
+        public void DisablePressedDownInterrupt()
         {
             var interrupt =
                 new InterruptConfigBitField(_registerAccess.ReadRegister<byte>(Register.InterruptConfig))
@@ -39,9 +41,10 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
-        /// When called, the interrupt will be configured to trigger when the button is clicked.
-        /// If <see cref="EnablePressedInterrupt"/> has also been called,
-        /// then the interrupt will trigger on either a push or a click.
+        /// When called, the interrupt will be configured to trigger when the button is clicked (pressed down + released).
+        /// If <see cref="EnablePressedDownInterrupt"/> has also been called,
+        /// then the interrupt will trigger on either a press down or a click.
+        /// Interrupt is enabled by default.
         /// </summary>
         public void EnableClickedInterrupt()
         {
@@ -55,9 +58,10 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
-        /// When called, the interrupt will no longer be configured to trigger when the button is clicked.
-        /// If <see cref="EnablePressedInterrupt"/> has also been called,
-        /// then the interrupt will still trigger on the button press.
+        /// When called, the interrupt will no longer be configured to trigger when the button is clicked (pressed down + released).
+        /// If <see cref="EnablePressedDownInterrupt"/> has also been called,
+        /// then the interrupt will still trigger on button pressed down.
+        /// Interrupt is enabled by default.
         /// </summary>
         public void DisableClickedInterrupt()
         {
@@ -71,7 +75,8 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
-        /// Resets the interrupt configuration back to defaults.
+        /// Resets the interrupt configuration back to defaults,
+        /// i.e. the interrupt will trigger on either a button press down or click (press down + release).
         /// </summary>
         public void ResetInterruptConfig()
         {

@@ -103,8 +103,8 @@ namespace Iot.Device.QwiicButton.Samples
                 PinEventTypes.Falling,
                 OnValueChanged);
 
-            _button.EnablePressedInterrupt(); // Configure the interrupt pin to go low when we press the button
-            _button.EnableClickedInterrupt(); // Configure the interrupt pin to go low when we click the button
+            _button.EnablePressedDownInterrupt(); // Configure the interrupt pin to go low when we press the button down
+            _button.EnableClickedInterrupt(); // Configure the interrupt pin to go low when we click the button (press down + release)
             _button.ClearEventBits(); // Once event bits are cleared, interrupt pin goes high
         }
 
