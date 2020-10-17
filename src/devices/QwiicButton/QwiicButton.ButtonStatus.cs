@@ -63,7 +63,7 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
-        /// Sets the time in milliseconds that the button waits for the mechanical contacts to settle.
+        /// Sets the time in milliseconds (0 to 65,535) that the button waits for the mechanical contacts to settle.
         /// Default is 10 milliseconds.
         /// </summary>
         public void SetDebounceTime(ushort time)
