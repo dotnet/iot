@@ -10,16 +10,16 @@ namespace Iot.Device.QwiicButton
     public sealed partial class QwiicButton
     {
         /// <summary>
-        /// Returns whether the button is pressed, i.e. pushed in.
+        /// Returns whether the button is pressed down.
         /// </summary>
-        public bool IsPressed()
+        public bool IsPressedDown()
         {
             var status = new StatusRegisterBitField(_registerAccess.ReadRegister<byte>(Register.ButtonStatus));
-            return status.IsPressed;
+            return status.IsPressedDown;
         }
 
         /// <summary>
-        /// Returns whether the button is clicked, i.e. pressed and released.
+        /// Returns whether the button is clicked, i.e. pressed down then released.
         /// After the button is clicked, must be manually reset to false by calling <see cref="ClearEventBits"/>.
         /// </summary>
         public bool HasBeenClicked()
@@ -39,7 +39,7 @@ namespace Iot.Device.QwiicButton
         }
 
         /// <summary>
-        /// Sets <see cref="IsPressed"/>, <see cref="HasBeenClicked"/> and <see cref="IsEventAvailable"/> to false.
+        /// Sets <see cref="IsPressedDown"/>, <see cref="HasBeenClicked"/> and <see cref="IsEventAvailable"/> to false.
         /// </summary>
         public void ClearEventBits()
         {
@@ -47,7 +47,7 @@ namespace Iot.Device.QwiicButton
             {
                 IsEventAvailable = false,
                 HasBeenClicked = false,
-                IsPressed = false
+                IsPressedDown = false
             };
             _registerAccess.WriteRegister(Register.ButtonStatus, status.StatusRegisterValue);
         }

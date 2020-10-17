@@ -117,7 +117,7 @@ namespace Iot.Device.QwiicButton.Samples
 
             Console.WriteLine("Pin value changed - interrupt received!");
 
-            if (_button.IsPressed())
+            if (_button.IsPressedDown())
             {
                 Console.WriteLine("The button is pressed!");
             }
