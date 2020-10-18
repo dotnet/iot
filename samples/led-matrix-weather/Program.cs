@@ -55,14 +55,14 @@ namespace LedMatrixWeather
             {
                 matrix.StartRendering();
 
-                while (true && s_scenario != null)
+                while (s_scenario is object)
                 {
                     Action<RGBLedMatrix> scenario = s_scenario;
 
                     Stopwatch sw = Stopwatch.StartNew();
                     scenario(matrix);
 
-                    if (s_scenario != null && sw.ElapsedMilliseconds < 100)
+                    if (s_scenario is object && sw.ElapsedMilliseconds < 100)
                     {
                         Debug.WriteLine("Scenario execution finished in less than 100ms. This is likely due to bug.");
                     }
@@ -73,7 +73,7 @@ namespace LedMatrixWeather
             {
                 if (!Console.IsOutputRedirected)
                 {
-                    while (s_scenario != null)
+                    while (s_scenario is object)
                     {
                         switch (Console.ReadKey(intercept: true).Key)
                         {
