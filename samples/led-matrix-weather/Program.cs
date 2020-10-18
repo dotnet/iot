@@ -62,7 +62,7 @@ namespace LedMatrixWeather
                     Stopwatch sw = Stopwatch.StartNew();
                     scenario(matrix);
 
-                    if (s_scenario is object && sw.ElapsedMilliseconds < 100)
+                    if (sw.ElapsedMilliseconds < 100)
                     {
                         Debug.WriteLine("Scenario execution finished in less than 100ms. This is likely due to bug.");
                     }
