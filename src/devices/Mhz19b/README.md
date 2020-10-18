@@ -21,8 +21,28 @@ The use of an existing stream adds flexibility to the actual interface that used
 In either case the binding supports all commands of the module.
 <br/><br/>
 
-**Make sure that you read the datasheet carefully before altering the default calibration behaviour. 
+**Make sure that you read the datasheet carefully before altering the default calibration behaviour.
 Automatic baseline correction is enabled by default.**
 
-## References 
+## Basic Usage
+The binding can be instantiated using an existing serial UART stream or with the name (e.g. ```/dev/serial0``` ) of the serial interface to be used.
+If using an existing stream ```shouldDispose``` indicates whether the stream shall be disposed when the binding gets disposed.
+If providing the name of the serial interface the connection gets closed and disposed when the binding is disposed.
+
+```
+public Mhz19b(Stream stream, bool shouldDispose)
+public Mhz19b(string uartDevice)
+```
+
+The CO2 concentration reading can be retrieved with
+
+```
+public VolumeConcentration GetCo2Reading()
+```
+
+The sample application demonstrates the use of the binding API for sensor calibration.
+
+**Note:** Refer to the datasheet for more details on sensor calibration **before** using the calibration API of the binding. You may decalibrate the sensor otherwise!
+
+## References
 [MH-Z19b Datasheet](https://www.winsen-sensor.com/d/files/infrared-gas-sensor/mh-z19b-co2-ver1_0.pdf)
