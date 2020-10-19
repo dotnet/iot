@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
-    <TargetFrameworks Condition="$(NETCoreSdkRuntimeIdentifier.StartsWith('win'))">$(TargetFrameworks);net5.0-windows10.0.17763.0</TargetFrameworks>
+    <TargetFramework>net5.0</TargetFramework>
+    <!--<TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="$(NETCoreSdkRuntimeIdentifier.StartsWith('win'))">$(TargetFrameworks);net5.0-windows10.0.17763.0</TargetFrameworks>-->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>preview</LangVersion>
     <IsPackable>true</IsPackable>
@@ -11,7 +12,7 @@
     <Compile Remove="winmd\**" />
     <EmbeddedResource Remove="winmd\**" />
     <None Remove="winmd\**" />
-    <None Include="build\net5.0\System.Device.Gpio.targets" Pack="true" PackagePath="\build\net5.0" />
+    <None Include="buildTransitive\net5.0\System.Device.Gpio.targets" Pack="true" PackagePath="\buildTransitive\net5.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="$(MicrosoftWin32RegistryPackageVersion)" /> <!-- This is Windows specific -->
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
     <PackageReference Include="System.Memory" Version="4.5.3" />
@@ -44,6 +45,7 @@
     <Compile Remove="System\Device\I2c\I2cDevice.nonWindows.cs" />
     <Compile Remove="System\Device\Pwm\PwmChannel.nonWindows.cs" />
     <Compile Remove="System\Device\Spi\SpiDevice.nonWindows.cs" />
+    <Compile Remove="System\Device\CommonHelpers.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">

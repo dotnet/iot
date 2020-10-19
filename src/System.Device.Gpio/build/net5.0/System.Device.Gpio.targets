@@ -1,7 +1,0 @@
-<Project>
-  <Target Name="EnsureProjectIsTargetingWindowsPlatformIfRequired"
-          BeforeTargets="Build"
-          Condition="'$(TargetFramework)' == 'net5.0' And $(RuntimeIdentifier.StartsWith('win'))">
-    <Error Text="In order to use System.Device.Gpio package when running on Windows and targeting net5.0, it is required to add 'net5.0-windows10.0.17763.0' to your project's target frameworks." />
-  </Target>
-</Project>

@@ -19,7 +19,7 @@ namespace System.Device.Gpio.Drivers
             // If we land in this method it means the console application is running on Windows and targetting net5.0 (without specifying Windows platform)
             // In order to call WinRT code in net5.0 it is required for the application to target the specific platform
             // so we throw the bellow exception with a detailed message in order to instruct the consumer on how to move forward.
-            throw new PlatformNotSupportedException("In order to use Windows10Driver on Windows with .NET 5.0 it is required for your application to target net5.0-windows10.0.17763.0. Please add that to your target frameworks in your project file.");
+            throw new PlatformNotSupportedException(CommonHelpers.GetFormattedWindowsPlatformTargetingErrorMessage(nameof(Windows10Driver)));
         }
 
         /// <inheritdoc />
