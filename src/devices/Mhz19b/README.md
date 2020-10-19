@@ -14,12 +14,10 @@ The MH-Z19B gas module provides a serial communication interface (UART) which ca
 |UART	 |10 (RXD0)	 |3 (TXD)     |
 Table: MH-Z19B to RPi 3 connection
 
-<br/>
 The binding supports the connection through an UART interface (e.g. ```/dev/serial0```) or (serial port) stream.
 When using the UART interface the binding instantiates the port with the required UART settings and opens it.
 The use of an existing stream adds flexibility to the actual interface that used with the binding.
 In either case the binding supports all commands of the module.
-<br/><br/>
 
 **Make sure that you read the datasheet carefully before altering the default calibration behaviour.
 Automatic baseline correction is enabled by default.**
