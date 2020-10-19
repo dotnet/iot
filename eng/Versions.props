@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
-    <MicrosoftDotNetGenAPIPackageVersion>6.0.0-beta.20514.1</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>6.0.0-beta.20515.7</MicrosoftDotNetGenAPIPackageVersion>
     <!-- dotnet/corefx dependencies -->
     <SystemDrawingCommonPackageVersion>4.6.0</SystemDrawingCommonPackageVersion>
     <SystemIOPortsPackageVersion>4.6.0</SystemIOPortsPackageVersion>
