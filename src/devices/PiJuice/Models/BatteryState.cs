@@ -22,7 +22,7 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Battery is charging from GPIO pin (Will occur if powered through Raspberry Pi power connector)
         /// </summary>
-        ChargingFrom5VIO,
+        ChargingFrom5VoltInput,
 
         /// <summary>
         /// Battery is not detected or not installed

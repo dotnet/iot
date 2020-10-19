@@ -7,16 +7,16 @@ namespace Iot.Device.PiJuiceDevice.Models
     /// <summary>
     /// Battery relative state-of-health
     /// </summary>
-    public enum RSOCEstimationType
+    public enum RelativeStateOfChangeEstimationType
     {
         /// <summary>
-        /// Let the PiJuice software determine RSOC estimation
+        /// Let the PiJuice software determine the relative state of change estimation
         /// </summary>
         AutoDetect = 0,
 
         /// <summary>
-        /// MCU used for RSOC estimation
+        /// MCU used for relative state of change estimation
         /// </summary>
-        DirectByMCU
+        DirectByMcu
     }
 }

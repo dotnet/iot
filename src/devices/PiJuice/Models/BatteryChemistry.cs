@@ -12,12 +12,12 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// LIPO
         /// </summary>
-        LIPO = 0,
+        Lipo = 0,
 
         /// <summary>
         /// LiFePO4
         /// </summary>
-        LIFEPO4,
+        LiFePO4,
 
         /// <summary>
         /// Unknown

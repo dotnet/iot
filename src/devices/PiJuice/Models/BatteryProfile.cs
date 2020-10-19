@@ -59,11 +59,11 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Thermistor B constant of NTC temperature sensor if it is integrated with battery
         /// </summary>
-        public int NTCB { get; set; }
+        public int NegativeTemperatureCoefficientB { get; set; }
 
         /// <summary>
         /// Nominal thermistor resistance at 25°C of NTC temperature sensor if it is integrated with battery as ohm
         /// </summary>
-        public ElectricResistance NTCResistance { get; set; }
+        public ElectricResistance NegativeTemperatureCoefficientResistance { get; set; }
     }
 }

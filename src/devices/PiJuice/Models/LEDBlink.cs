@@ -7,14 +7,14 @@ using System.Drawing;
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// LED blink pattern
+    /// Led blink pattern
     /// </summary>
     public class LedBlink
     {
         /// <summary>
-        /// LED designator
+        /// Led designator
         /// </summary>
-        public LED Led { get; set; }
+        public Led Led { get; set; }
 
         /// <summary>
         /// Blink indefinite
@@ -29,21 +29,21 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Color for first period of blink
         /// </summary>
-        public Color RGB1 { get; set; }
+        public Color ColorFirstPeriod { get; set; }
 
         /// <summary>
         /// Duration of first blink period in milliseconds between [10 – 2550]
         /// </summary>
-        public int Period1 { get; set; }
+        public int FirstPeriod { get; set; }
 
         /// <summary>
         /// Color for second period of blink
         /// </summary>
-        public Color RGB2 { get; set; }
+        public Color ColorSecondPeriod { get; set; }
 
         /// <summary>
         /// Duration of second blink period in milliseconds between [10 – 2550]
         /// </summary>
-        public int Period2 { get; set; }
+        public int SecondPeriod { get; set; }
     }
 }

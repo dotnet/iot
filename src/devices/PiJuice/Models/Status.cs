@@ -32,6 +32,6 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Current 5V GPIO power input status
         /// </summary>
-        public PowerInState PowerInput5vIo { get; set; }
+        public PowerInState PowerInput5VoltInput { get; set; }
     }
 }

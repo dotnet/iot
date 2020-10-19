@@ -17,7 +17,7 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// PiJuice DIP Switch
         /// </summary>
-        DIPSwitch,
+        DualInlinePackageSwitch,
 
         /// <summary>
         /// Resistor

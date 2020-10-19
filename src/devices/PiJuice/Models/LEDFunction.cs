@@ -5,17 +5,17 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// LED function type
+    /// Led function type
     /// </summary>
-    public enum LEDFunction
+    public enum LedFunction
     {
         /// <summary>
-        /// LED is not configured
+        /// Led is not configured
         /// </summary>
         NotUsed = 0,
 
         /// <summary>
-        /// LED is configured to signal current charge level of battery
+        /// Led is configured to signal current charge level of battery
         /// For level less than or equal too 15% red with configurable brightness
         /// For level greater than 15% and level less than or equal to 50% mix of red and green with configurable brightness
         /// For level greater than 50% green with configurable brightness.
@@ -24,8 +24,8 @@ namespace Iot.Device.PiJuiceDevice.Models
         ChargeStatus,
 
         /// <summary>
-        /// LED is configured as user LED
+        /// Led is configured as user Led
         /// </summary>
-        UserLED
+        UserDefined
     }
 }

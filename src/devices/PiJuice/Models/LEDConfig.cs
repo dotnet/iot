@@ -7,28 +7,28 @@ using System.Drawing;
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// LED configuration
+    /// Led configuration
     /// </summary>
-    public class LEDConfig
+    public class LedConfig
     {
         /// <summary>
-        /// LED designator
+        /// Led designator
         /// </summary>
-        public LED LED { get; set; }
+        public Led Led { get; set; }
 
         /// <summary>
-        /// LED function type
+        /// Led function type
         /// </summary>
-        public LEDFunction LedFunction { get; set; }
+        public LedFunction LedFunction { get; set; }
 
         /// <summary>
-        /// Color for LED
+        /// Color for Led
         /// If LedFunction is ChargeStatus
         /// Red - parameter defines color component level of red below 15%
         /// Green - parameter defines color component charge level over 50%
         /// Blue - parameter defines color component for charging(blink) and fully charged states(constant)
-        /// Red LED and Green LED will show the charge status between 15% - 50%
+        /// Red Led and Green Led will show the charge status between 15% - 50%
         /// </summary>
-        public Color RGB { get; set; }
+        public Color Color { get; set; }
     }
 }

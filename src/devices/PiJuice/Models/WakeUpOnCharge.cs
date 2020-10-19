@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using UnitsNet;
+
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
@@ -17,6 +19,6 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Battery charge level percentage between [0 - 100] used to wake up the Raspberry Pi
         /// </summary>
-        public short WakeUpPercentage { get; set; }
+        public Ratio WakeUpPercentage { get; set; }
     }
 }

@@ -17,7 +17,7 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Charging is suspended
         /// </summary>
-        Suspend,
+        Suspended,
 
         /// <summary>
         /// Cool

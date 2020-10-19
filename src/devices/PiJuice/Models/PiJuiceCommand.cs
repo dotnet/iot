@@ -7,7 +7,7 @@ namespace Iot.Device.PiJuiceDevice.Models
     /// <summary>
     /// PiJuice commands to read, write, setup pins and access special sensors
     /// </summary>
-    public enum PiJuiceCommand
+    internal enum PiJuiceCommand
     {
         /// <summary>
         /// Charging configuration
@@ -27,12 +27,12 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Battery extended profile
         /// </summary>
-        BatteryExtProfile = 0x54,
+        BatteryExtendedProfile = 0x54,
 
         /// <summary>
         /// Battery temperature sensor configuration
         /// </summary>
-        BatteryTempSenseConfig = 0x5D,
+        BatteryTemperatureSensorConfig = 0x5D,
 
         /// <summary>
         /// Power inputs configuration
@@ -120,19 +120,19 @@ namespace Iot.Device.PiJuiceDevice.Models
         SystemPowerSwitch = 0x64,
 
         /// <summary>
-        /// LED States
+        /// Led States
         /// </summary>
-        LEDState = 0x66,
+        LedState = 0x66,
 
         /// <summary>
-        /// LED blink pattern
+        /// Led blink pattern
         /// </summary>
-        LEDBlink = 0x68,
+        LedBlink = 0x68,
 
         /// <summary>
-        /// LED configuration
+        /// Led configuration
         /// </summary>
-        LEDConfig = 0x6A,
+        LedConfig = 0x6A,
 
         /// <summary>
         /// Button configuration

@@ -9,7 +9,7 @@ namespace Iot.Device.PiJuiceDevice.Models
     /// <summary>
     /// Battery extended profile
     /// </summary>
-    public class BatteryExtProfile
+    public class BatteryExtendedProfile
     {
         /// <summary>
         /// Battery chemistry
@@ -19,31 +19,31 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Open Circuit Voltage at 10% charge as millivolts
         /// </summary>
-        public ElectricPotential OCV10 { get; set; }
+        public ElectricPotential OpenCircuitVoltage10Percent { get; set; }
 
         /// <summary>
         /// Open Circuit Voltage at 50% charge as millivolts
         /// </summary>
-        public ElectricPotential OCV50 { get; set; }
+        public ElectricPotential OpenCircuitVoltage50Percent { get; set; }
 
         /// <summary>
         /// Open Circuit Voltage at 90% charge as millivolts
         /// </summary>
-        public ElectricPotential OCV90 { get; set; }
+        public ElectricPotential OpenCircuitVoltage90Percent { get; set; }
 
         /// <summary>
         /// Internal battery resistance at 10% charge as milliohm
         /// </summary>
-        public ElectricResistance R10 { get; set; }
+        public ElectricResistance InternalResistance10Percent { get; set; }
 
         /// <summary>
         /// Internal battery resistance at 50% charge as milliohm
         /// </summary>
-        public ElectricResistance R50 { get; set; }
+        public ElectricResistance InternalResistance50Percent { get; set; }
 
         /// <summary>
         /// Internal battery resistance at 90% charge as milliohm
         /// </summary>
-        public ElectricResistance R90 { get; set; }
+        public ElectricResistance InternalResistance90Percent { get; set; }
     }
 }

@@ -12,16 +12,16 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Button 1, Power button by default
         /// </summary>
-        SW1 = 0,
+        Switch1 = 0,
 
         /// <summary>
         /// Button 2, User button by default
         /// </summary>
-        SW2,
+        Switch2,
 
         /// <summary>
         /// Button 3, user button by default
         /// </summary>
-        SW3
+        Switch3
     }
 }

@@ -17,32 +17,32 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Triggered immediately after button is pressed
         /// </summary>
-        Press,
+        Click,
 
         /// <summary>
         /// Triggered immediately after button is released
         /// </summary>
-        Release,
+        Up,
 
         /// <summary>
         /// Triggered if button is released in time less than configurable timeout after button press
         /// </summary>
-        SinglePress,
+        ClickCustomPeriod,
 
         /// <summary>
         /// Triggered if button is double pressed in time less than configurable timeout
         /// </summary>
-        DoublePress,
+        DoubleClickCustomPeriod,
 
         /// <summary>
         /// Triggered if button is hold pressed hold for configurable time period 1
         /// </summary>
-        LongPress1,
+        LongClickCustomFirstPeriod,
 
         /// <summary>
         /// Triggered if button is hold pressed hold for configurable time period 2
         /// </summary>
-        LongPress2,
+        LongClickCustomSecondPeriod,
 
         /// <summary>
         /// Unknown button event

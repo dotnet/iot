@@ -17,7 +17,7 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Use batteries built-in NTC as per battery NTC terminal
         /// </summary>
-        NTC,
+        NegativeTemperatureCoefficientB,
 
         /// <summary>
         /// Use temperature sensor on MCU

@@ -12,11 +12,11 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// USB micro input
         /// </summary>
-        USBMicro,
+        UsbMicro,
 
         /// <summary>
         /// GPIO 5V
         /// </summary>
-        GPIO5V
+        Gpio5Volt
     }
 }

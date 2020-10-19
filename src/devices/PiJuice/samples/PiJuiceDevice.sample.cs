@@ -3,6 +3,8 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.PiJuiceDevice;
 using Iot.Device.PiJuiceDevice.Models;
+using UnitsNet;
+using UnitsNet.Units;
 
 namespace PiJuiceDevice.Sample
 {
@@ -30,14 +32,14 @@ namespace PiJuiceDevice.Sample
                 Console.WriteLine($"Battery charging enabled: {chargeConfig.Enabled}");
 
                 // Wake up on charge functionality
-                WakeUpOnCharge wakeUp = piJuicePower.GetWakeUpOnCharge();
+                WakeUpOnCharge wakeUp = piJuicePower.WakeUpOnCharge;
                 Console.WriteLine($"Is wake up on charge disabled: {wakeUp.Disabled}, Wake up at charging percentage: {wakeUp.WakeUpPercentage}%");
                 Console.WriteLine("Set wake up on charge percentage to 60%");
-                piJuicePower.SetWakeUpOnCharge(new WakeUpOnCharge { Disabled = false, WakeUpPercentage = 60 });
+                piJuicePower.WakeUpOnCharge = new WakeUpOnCharge { Disabled = false, WakeUpPercentage = new Ratio(60, RatioUnit.Percent) };
                 Thread.Sleep(5);
-                wakeUp = piJuicePower.GetWakeUpOnCharge();
-                Console.WriteLine($"Is wake up on charge disabled: {wakeUp.Disabled}, Wake up at charging percentage: {wakeUp.WakeUpPercentage}%");
-                piJuicePower.SetWakeUpOnCharge(new WakeUpOnCharge { Disabled = true, WakeUpPercentage = 0 });
+                wakeUp = piJuicePower.WakeUpOnCharge;
+                Console.WriteLine($"Is wake up on charge disabled: {wakeUp.Disabled}, Wake up at charging percentage: {wakeUp.WakeUpPercentage.Value}%");
+                piJuicePower.WakeUpOnCharge = new WakeUpOnCharge { Disabled = true, WakeUpPercentage = new Ratio(0, RatioUnit.Percent) };
 
                 Thread.Sleep(2000);
             }

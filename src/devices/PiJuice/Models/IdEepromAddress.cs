@@ -10,13 +10,13 @@ namespace Iot.Device.PiJuiceDevice.Models
     public enum IdEepromAddress
     {
         /// <summary>
-        /// EEPROM I2C Address 0x50
-        /// </summary>
-        Fifty = 0x50,
-
-        /// <summary>
         /// Default EEPROM I2C Address 0x52
         /// </summary>
-        FiftyTwo = 0x52
+        First = 0x52,
+
+        /// <summary>
+        /// EEPROM I2C Address 0x50
+        /// </summary>
+        Second = 0x50
     }
 }

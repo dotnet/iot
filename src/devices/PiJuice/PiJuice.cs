@@ -63,13 +63,13 @@ namespace Iot.Device.PiJuiceDevice
             var response = ReadCommand(PiJuiceCommand.FirmwareVersion, 2);
 
             var major_version = response[0] >> 4;
-            var minor_version = (response[0] << 4 & 0xf0) >> 4;
+            var minor_version = response[0] & 0x0F;
 
             return new Version(major_version, minor_version);
         }
 
         /// <summary>
-        /// Restore PiJuice to its default settings
+        /// Restore PiJuice to its default settings (https://github.com/PiSupply/PiJuice/blob/02c129c3aa884934c368936c9363df90690148a8/Software/Source/pijuice.py#L1531)
         /// </summary>
         public void SetDefaultConfiguration()
         {
@@ -77,43 +77,39 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// Get the write protect of the EEPROM
+        /// the write protectection of the EEPROM
         /// </summary>
-        /// <returns>Whether the EEPROM is write protected</returns>
-        public bool GetIdEepromWriteProtect()
+        /// <value>Whether the EEPROM is write protected</value>
+        public bool GetIdEepromWriteProtect
         {
-            var response = ReadCommand(PiJuiceCommand.IdEepromWriteProtect, 1);
+            get
+            {
+                var response = ReadCommand(PiJuiceCommand.IdEepromWriteProtect, 1);
 
-            return response[0] == 1;
+                return response[0] == 1;
+            }
+            set
+            {
+                WriteCommandVerify(PiJuiceCommand.IdEepromWriteProtect, new byte[] { (byte)(value ? 1 : 0) });
+            }
         }
 
         /// <summary>
-        /// Set the write protection on the EEPROM
+        /// The physical I2C address of the EEPROM
         /// </summary>
-        /// <param name="writeProtect">Whether the EEPROM is write protected</param>
-        public void SetIdEepromWriteProtect(bool writeProtect)
+        /// <value>The I2C Address of the EEPROM</value>
+        public IdEepromAddress GetIdEepromAddress
         {
-            WriteCommandVerify(PiJuiceCommand.IdEepromWriteProtect, new byte[] { (byte)(writeProtect ? 1 : 0) });
-        }
+            get
+            {
+                var response = ReadCommand(PiJuiceCommand.IdEepromAddress, 1);
 
-        /// <summary>
-        /// Get the physical I2C address of the EEPROM
-        /// </summary>
-        /// <returns>The I2C Address of the EEPROM</returns>
-        public IdEepromAddress GetIdEepromAddress()
-        {
-            var response = ReadCommand(PiJuiceCommand.IdEepromAddress, 1);
-
-            return (IdEepromAddress)response[0];
-        }
-
-        /// <summary>
-        /// Set the physical I2C address of the EEPROM
-        /// </summary>
-        /// <param name="epromAddress">The I2C Address of the EEPROM</param>
-        public void SetIdEepromAddress(IdEepromAddress epromAddress)
-        {
-            WriteCommandVerify(PiJuiceCommand.IdEepromAddress, new byte[] { (byte)epromAddress });
+                return (IdEepromAddress)response[0];
+            }
+            set
+            {
+                WriteCommandVerify(PiJuiceCommand.IdEepromAddress, new byte[] { (byte)value });
+            }
         }
 
         /// <summary>
@@ -133,8 +129,12 @@ namespace Iot.Device.PiJuiceDevice
                 try
                 {
                     // create request
-                    var buffer = new byte[data.Length + 2];
-                    Array.Copy(data, 0, buffer, 1, data.Length);
+                    Span<byte> buffer = stackalloc byte[data.Length + 2];
+                    for (int i = 0; i < data.Length; i++)
+                    {
+                        buffer[i + 1] = data[i];
+                    }
+
                     buffer[0] = (byte)command;
                     buffer[buffer.Length - 1] = GetCheckSum(data, all: true);
                     _i2cDevice.Write(buffer);

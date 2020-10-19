@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers.Binary;
 using Iot.Device.PiJuiceDevice.Models;
+using UnitsNet;
 
 namespace Iot.Device.PiJuiceDevice
 {
@@ -24,104 +26,96 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// Gets the delay before the PiJuice removes power to the GPIO pins
+        /// The delay before the PiJuice removes power to the GPIO pins
         /// </summary>
-        /// <returns>The delay in seconds</returns>
-        public byte GetPowerOff()
+        /// <value>The delay in seconds</value>
+        public TimeSpan PowerOff
         {
-            var response = _piJuice.ReadCommand(PiJuiceCommand.PowerOff, 1);
-
-            return response[0];
-        }
-
-        /// <summary>
-        /// Sets the delay before the PiJuice removes power to the GPIO pins
-        /// </summary>
-        /// <param name="delaySeconds">The delay in seconds between 0 and 255</param>
-        public void SetPowerOff(byte delaySeconds)
-        {
-            if (delaySeconds < 0)
+            get
             {
-                throw new ArgumentOutOfRangeException(nameof(delaySeconds));
-            }
+                var response = _piJuice.ReadCommand(PiJuiceCommand.PowerOff, 1);
 
-            _piJuice.WriteCommand(PiJuiceCommand.PowerOff, new byte[] { delaySeconds });
+                return new TimeSpan(0, 0, response[0]);
+            }
+            set
+            {
+                if (value.TotalSeconds < 0 || value.TotalSeconds > 255)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value.TotalSeconds));
+                }
+
+                _piJuice.WriteCommand(PiJuiceCommand.PowerOff, new byte[] { (byte)value.TotalSeconds });
+            }
         }
 
         /// <summary>
-        /// Get the current state of the Wakeup on charge
+        /// The current state of the Wakeup on charge
         /// </summary>
         /// <returns>Current state of the wake up on charge function</returns>
-        public WakeUpOnCharge GetWakeUpOnCharge()
+        public WakeUpOnCharge WakeUpOnCharge
         {
-            var response = _piJuice.ReadCommand(PiJuiceCommand.WakeUpOnCharge, 1);
-
-            return new WakeUpOnCharge
+            get
             {
-                Disabled = response[0] == 0x7F,
-                WakeUpPercentage = (short)(response[0] == 0x7F ? 0 : response[0])
-            };
-        }
+                var response = _piJuice.ReadCommand(PiJuiceCommand.WakeUpOnCharge, 1);
 
-        /// <summary>
-        /// Wakeup the Raspberry Pi when the battery charge level reaches the specified percentage
-        /// </summary>
-        /// <param name="wakeUpOnCharge">Wake up on charge function details</param>
-        public void SetWakeUpOnCharge(WakeUpOnCharge wakeUpOnCharge)
-        {
-            if (!wakeUpOnCharge.Disabled && (wakeUpOnCharge.WakeUpPercentage < 0 || wakeUpOnCharge.WakeUpPercentage > 100))
-            {
-                throw new ArgumentOutOfRangeException(nameof(wakeUpOnCharge.WakeUpPercentage));
+                return new WakeUpOnCharge
+                {
+                    Disabled = response[0] == 0x7F,
+                    WakeUpPercentage = new Ratio((response[0] == 0x7F ? 0 : response[0]), UnitsNet.Units.RatioUnit.Percent)
+                };
             }
-
-            _piJuice.WriteCommandVerify(PiJuiceCommand.WakeUpOnCharge, new byte[] { (byte)(wakeUpOnCharge.Disabled ? 0x7F : wakeUpOnCharge.WakeUpPercentage) });
-        }
-
-        /// <summary>
-        /// Gets the current watchdog timer time after which it will power cycle if it does not receive a heartbeat signal
-        /// </summary>
-        /// <returns>Time in minutes after which PiJuice will power cycle if it does not receive a heartbeat signal</returns>
-        public TimeSpan GetWatchdogTimer()
-        {
-            var response = _piJuice.ReadCommand(PiJuiceCommand.WatchdogActiviation, 2);
-
-            return new TimeSpan(0, (response[1] << 8) | response[0], 0);
-        }
-
-        /// <summary>
-        /// Configure watchdog timer time after which it will power cycle if it does not receive a heartbeat signal
-        /// </summary>
-        /// <param name="time">Time in minutes after which PiJuice will power cycle if it does not receive a heartbeat signal. Time is between 0 and 65535, 0 disables watchdog timer</param>
-        public void SetWatchdogTimer(TimeSpan time)
-        {
-            if (time.TotalMinutes < 0 || time.TotalMinutes > 65535)
+            set
             {
-                throw new ArgumentOutOfRangeException(nameof(time.TotalMinutes));
+                if (!value.Disabled && (value.WakeUpPercentage.Percent < 0 || value.WakeUpPercentage.Percent > 100))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value.WakeUpPercentage));
+                }
+
+                _piJuice.WriteCommandVerify(PiJuiceCommand.WakeUpOnCharge, new byte[] { (byte)(value.Disabled ? 0x7F : (short)value.WakeUpPercentage.Percent) });
             }
-
-            var minutes = (int)time.TotalMinutes & 0xFFFF;
-
-            _piJuice.WriteCommand(PiJuiceCommand.WatchdogActiviation, new byte[] { (byte)(minutes & 0xFF), (byte)((minutes >> 8) & 0xFF) });
         }
 
         /// <summary>
-        /// Gets the current state of system switch
+        /// The current watchdog timer time after which it will power cycle if it does not receive a heartbeat signal
+        /// </summary>
+        /// <value>Time in minutes after which PiJuice will power cycle if it does not receive a heartbeat signal </value>
+        public TimeSpan WatchdogTimer
+        {
+            get
+            {
+                var response = _piJuice.ReadCommand(PiJuiceCommand.WatchdogActiviation, 2);
+
+                return new TimeSpan(0, BinaryPrimitives.ReadInt16LittleEndian(new Span<byte>(response)), 0);
+            }
+            set
+            {
+                if (value.TotalMinutes < 0 || value.TotalMinutes > 65535)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value.TotalMinutes));
+                }
+
+                var minutes = (int)value.TotalMinutes & 0xFFFF;
+
+                _piJuice.WriteCommand(PiJuiceCommand.WatchdogActiviation, new byte[] { (byte)(minutes & 0xFF), (byte)((minutes >> 8) & 0xFF) });
+            }
+        }
+
+        /// <summary>
+        /// The current state of system switch
         /// </summary>
         /// <returns>Current state of system switch</returns>
-        public SystemPowerSwitch GetSystemPowerSwitch()
+        public SystemPowerSwitch SystemPowerSwitch
         {
-            var response = _piJuice.ReadCommand(PiJuiceCommand.SystemPowerSwitch, 1);
+            get
+            {
+                var response = _piJuice.ReadCommand(PiJuiceCommand.SystemPowerSwitch, 1);
 
-            return (SystemPowerSwitch)(response[0] * 100);
-        }
-
-        /// <summary>
-        /// Sets the state of the system switch
-        /// </summary>
-        /// <param name="powerSwitch">Desired current limit in milliampere</param>
-        public void SetSystemPowerSwitch(SystemPowerSwitch powerSwitch)
-        {
-            _piJuice.WriteCommand(PiJuiceCommand.SystemPowerSwitch, new byte[] { (byte)(((int)powerSwitch) / 100) });
+                return (SystemPowerSwitch)(response[0] * 100);
+            }
+            set
+            {
+                _piJuice.WriteCommand(PiJuiceCommand.SystemPowerSwitch, new byte[] { (byte)(((int)value) / 100) });
+            }
         }
     }
 }

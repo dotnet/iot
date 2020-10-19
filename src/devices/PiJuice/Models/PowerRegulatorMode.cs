@@ -17,11 +17,11 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// This mode regulates 5V Rail voltage to 4.79V. In this mode output voltage has lowest output ripple
         /// </summary>
-        LDO,
+        LowDropout,
 
         /// <summary>
         /// This mode 5V Rail voltage is regulated to 5V with 2.5% tolerance, typically 5.07V at mid-loaded conditions. This is the most efficient operation mode
         /// </summary>
-        DCDC
+        DirectCurrentDirectCurrent
     }
 }
