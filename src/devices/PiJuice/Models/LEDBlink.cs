@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Drawing;
 
 namespace Iot.Device.PiJuiceDevice.Models
@@ -34,7 +35,7 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Duration of first blink period in milliseconds between [10 – 2550]
         /// </summary>
-        public int FirstPeriod { get; set; }
+        public TimeSpan FirstPeriod { get; set; }
 
         /// <summary>
         /// Color for second period of blink
@@ -44,6 +45,6 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Duration of second blink period in milliseconds between [10 – 2550]
         /// </summary>
-        public int SecondPeriod { get; set; }
+        public TimeSpan SecondPeriod { get; set; }
     }
 }

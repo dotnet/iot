@@ -85,7 +85,7 @@ namespace Iot.Device.PiJuiceDevice
             {
                 var response = _piJuice.ReadCommand(PiJuiceCommand.WatchdogActiviation, 2);
 
-                return new TimeSpan(0, BinaryPrimitives.ReadInt16LittleEndian(new Span<byte>(response)), 0);
+                return new TimeSpan(0, BinaryPrimitives.ReadInt16LittleEndian(response), 0);
             }
             set
             {

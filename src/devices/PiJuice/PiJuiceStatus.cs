@@ -121,7 +121,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryTemperature, 2);
 
-            return new Temperature(BinaryPrimitives.ReadInt16LittleEndian(new Span<byte>(response)), TemperatureUnit.DegreeCelsius);
+            return new Temperature(BinaryPrimitives.ReadInt16LittleEndian(response), TemperatureUnit.DegreeCelsius);
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryVoltage, 2);
 
-            return new ElectricPotential(BinaryPrimitives.ReadInt16LittleEndian(new Span<byte>(response)), ElectricPotentialUnit.Millivolt);
+            return new ElectricPotential(BinaryPrimitives.ReadInt16LittleEndian(response), ElectricPotentialUnit.Millivolt);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryCurrent, 2);
 
-            int i = BinaryPrimitives.ReadInt16LittleEndian(new Span<byte>(response));
+            int i = BinaryPrimitives.ReadInt16LittleEndian(response);
             if ((i & (1 << 15)) == (1 << 15))
             {
                 i -= (1 << 16);
@@ -160,7 +160,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.IOVoltage, 2);
 
-            return new ElectricPotential(BinaryPrimitives.ReadInt16LittleEndian(new Span<byte>(response)), ElectricPotentialUnit.Millivolt);
+            return new ElectricPotential(BinaryPrimitives.ReadInt16LittleEndian(response), ElectricPotentialUnit.Millivolt);
         }
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.IOCurrent, 2);
 
-            int i = BinaryPrimitives.ReadInt16LittleEndian(new Span<byte>(response));
+            int i = BinaryPrimitives.ReadInt16LittleEndian(response);
             if ((i & (1 << 15)) == (1 << 15))
             {
                 i -= (1 << 16);
@@ -217,9 +217,9 @@ namespace Iot.Device.PiJuiceDevice
                 BlinkIndefinite = response[0] == 255,
                 Count = response[0],
                 ColorFirstPeriod = Color.FromArgb(0, response[1], response[2], response[3]),
-                FirstPeriod = response[4] * 10,
+                FirstPeriod = new TimeSpan(0, 0, 0, 0, response[4] * 10),
                 ColorSecondPeriod = Color.FromArgb(0, response[5], response[6], response[7]),
-                SecondPeriod = response[8] * 10
+                SecondPeriod = new TimeSpan(0, 0, 0, 0, response[8] * 10)
             };
         }
 
@@ -234,12 +234,12 @@ namespace Iot.Device.PiJuiceDevice
                 throw new ArgumentOutOfRangeException(nameof(ledBlink.Count));
             }
 
-            if (ledBlink.FirstPeriod < 10 || ledBlink.FirstPeriod > 2550)
+            if (ledBlink.FirstPeriod.TotalMilliseconds < 10 || ledBlink.FirstPeriod.TotalMilliseconds > 2550)
             {
                 throw new ArgumentOutOfRangeException(nameof(ledBlink.FirstPeriod));
             }
 
-            if (ledBlink.SecondPeriod < 10 || ledBlink.SecondPeriod > 2550)
+            if (ledBlink.SecondPeriod.TotalMilliseconds < 10 || ledBlink.SecondPeriod.TotalMilliseconds > 2550)
             {
                 throw new ArgumentOutOfRangeException(nameof(ledBlink.SecondPeriod));
             }
@@ -250,11 +250,11 @@ namespace Iot.Device.PiJuiceDevice
             data[1] = ledBlink.ColorFirstPeriod.R;
             data[2] = ledBlink.ColorFirstPeriod.G;
             data[3] = ledBlink.ColorFirstPeriod.B;
-            data[4] = (byte)((ledBlink.FirstPeriod / 10) & 0xFF);
+            data[4] = (byte)((int)(ledBlink.FirstPeriod.TotalMilliseconds / 10) & 0xFF);
             data[5] = ledBlink.ColorSecondPeriod.R;
             data[6] = ledBlink.ColorSecondPeriod.G;
             data[7] = ledBlink.ColorSecondPeriod.B;
-            data[8] = (byte)((ledBlink.SecondPeriod / 10) & 0xFF);
+            data[8] = (byte)((int)(ledBlink.SecondPeriod.TotalMilliseconds / 10) & 0xFF);
 
             _piJuice.WriteCommand(PiJuiceCommand.LedBlink + (byte)ledBlink.Led, data);
         }

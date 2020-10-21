@@ -48,7 +48,7 @@ namespace Iot.Device.PiJuiceDevice
 
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryProfile, 14);
 
-            batteryProfile.Capacity = new ElectricCharge(BinaryPrimitives.ReadInt16LittleEndian(new Span<byte>(response)), ElectricChargeUnit.MilliampereHour);
+            batteryProfile.Capacity = new ElectricCharge(BinaryPrimitives.ReadInt16LittleEndian(response), ElectricChargeUnit.MilliampereHour);
             batteryProfile.ChargeCurrent = new ElectricCurrent(response[2] * 75 + 550, ElectricCurrentUnit.Milliampere);
             batteryProfile.TerminationCurrent = new ElectricCurrent(response[3] * 50 + 50, ElectricCurrentUnit.Milliampere);
             batteryProfile.RegulationVoltage = new ElectricPotential(response[4] * 20 + 3500, ElectricPotentialUnit.Millivolt);
@@ -186,7 +186,7 @@ namespace Iot.Device.PiJuiceDevice
 
             if ((response[0] & 0x07) < 0 || (response[0] & 0x07) > 3)
             {
-                throw new ArgumentOutOfRangeException("ff");
+                throw new ArgumentOutOfRangeException("Battery temperature sensor configuration out of range");
             }
 
             return (BatteryTempSense)(response[0] & 0x07);
@@ -325,7 +325,7 @@ namespace Iot.Device.PiJuiceDevice
 
             if (response[0] < 0 || response[0] > 2)
             {
-                throw new ArgumentOutOfRangeException("ff");
+                throw new ArgumentOutOfRangeException("Led function type out of range");
             }
 
             return new LedConfig

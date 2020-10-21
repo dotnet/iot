@@ -69,7 +69,7 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// Restore PiJuice to its default settings (https://github.com/PiSupply/PiJuice/blob/02c129c3aa884934c368936c9363df90690148a8/Software/Source/pijuice.py#L1531)
+        /// (https://github.com/PiSupply/PiJuice/blob/02c129c3aa884934c368936c9363df90690148a8/Software/Source/pijuice.py#L1531)
         /// </summary>
         public void SetDefaultConfiguration()
         {
@@ -77,10 +77,10 @@ namespace Iot.Device.PiJuiceDevice
         }
 
         /// <summary>
-        /// the write protectection of the EEPROM
+        /// The write protection of the EEPROM
         /// </summary>
         /// <value>Whether the EEPROM is write protected</value>
-        public bool GetIdEepromWriteProtect
+        public bool IdEepromWriteProtect
         {
             get
             {
@@ -98,7 +98,7 @@ namespace Iot.Device.PiJuiceDevice
         /// The physical I2C address of the EEPROM
         /// </summary>
         /// <value>The I2C Address of the EEPROM</value>
-        public IdEepromAddress GetIdEepromAddress
+        public IdEepromAddress IdEepromAddress
         {
             get
             {
