@@ -132,7 +132,7 @@ namespace System.Device.Gpio.Drivers
         {
             ValidatePinNumber(pinNumber);
 
-            bool isOpen = _pinModes?[pinNumber] is object && (_pinModes[pinNumber]?.InUseByInterruptDriver ?? false);
+            bool isOpen = _pinModes is object && (_pinModes[pinNumber]?.InUseByInterruptDriver ?? false);
             if (isOpen)
             {
                 _interruptDriver!.ClosePin(pinNumber);

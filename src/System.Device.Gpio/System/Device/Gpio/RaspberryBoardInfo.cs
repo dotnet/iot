@@ -97,10 +97,7 @@ namespace System.Device.Gpio
         {
             _settings = settings;
 
-            if (_settings.TryGetValue("Hardware", out string hardware))
-            {
-                ProcessorName = hardware;
-            }
+            ProcessorName = _settings.TryGetValue("Hardware", out string hardware) ? hardware : string.Empty;
 
             if (_settings.TryGetValue("Revision", out string revision)
                 && !string.IsNullOrEmpty(revision)
@@ -196,7 +193,7 @@ namespace System.Device.Gpio
         /// <value>
         /// The name of the processor.
         /// </value>
-        public string? ProcessorName
+        public string ProcessorName
         {
             get;
         }
