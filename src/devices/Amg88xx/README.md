@@ -90,7 +90,6 @@ public void ClearAllFlags()
 *Note*: the thermistor overflow flag is only menthioned in early versions of the reference specification.
 It is not clear whether this is a specification error or a change in a newer revision of the sensor.
 
-
 ### Frame Rate
 **Default:** 10fps
 

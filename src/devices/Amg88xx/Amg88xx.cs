@@ -18,13 +18,13 @@ namespace Iot.Device.Amg88xx
         /// Standard device address
         /// (AD_SELECT pin is low, c.f. reference specification, pg. 11)
         /// </summary>
-        public const int DefaultDeviceAddress = 0x68;
+        public const int DeafultI2cAddress = 0x68;
 
         /// <summary>
         /// Alternative device address
         /// (AD_SELECT pin is high, c.f. reference specification, pg. 11)
         /// </summary>
-        public const int AlternativeDeviceAddress = 0x69;
+        public const int AlternativeI2cAddress = 0x69;
 
         /// <summary>
         /// Number of sensor pixel array columns

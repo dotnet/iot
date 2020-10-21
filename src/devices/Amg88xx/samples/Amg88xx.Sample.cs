@@ -25,7 +25,7 @@ namespace Iot.Device.Amg88xx.Samples
             // Note: if you're using a breakout board check which address is configured by the logic level
             // of the sensor's AD_SELECT pin.
             const int I2cBus = 1;
-            I2cConnectionSettings i2cSettings = new I2cConnectionSettings(I2cBus, Amg88xx.AlternativeDeviceAddress);
+            I2cConnectionSettings i2cSettings = new I2cConnectionSettings(I2cBus, Amg88xx.AlternativeI2cAddress);
             I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
 
             // Setup GPIO controller for receiving interrupts from the sensor's INT pin (pin 5)

@@ -1,9 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <!--
-  // NOTE: THIS TEST PROJECT IS NOT REQUIRED AND CAN BE DELETED IF NOT USED.
-  -->
-  
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <IsPackable>false</IsPackable>
@@ -12,7 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../Amg88xx.csproj" />
-
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
