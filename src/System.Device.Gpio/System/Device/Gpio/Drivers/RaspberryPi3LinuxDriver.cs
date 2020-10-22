@@ -10,6 +10,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+#pragma warning disable SA1011
+
 namespace System.Device.Gpio.Drivers
 {
     /// <summary>
@@ -120,7 +122,7 @@ namespace System.Device.Gpio.Drivers
                 throw new Exception($"Pin {pinNumber} is not open.");
             }
 
-            _pinModes[pinNumber] !.InUseByInterruptDriver = true;
+            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
             _interruptDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
         }
 
@@ -203,7 +205,7 @@ namespace System.Device.Gpio.Drivers
             ValidatePinNumber(pinNumber);
 
             _interruptDriver!.OpenPin(pinNumber);
-            _pinModes[pinNumber] !.InUseByInterruptDriver = true;
+            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
 
             _interruptDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
         }
@@ -241,7 +243,7 @@ namespace System.Device.Gpio.Drivers
 
             if (_pinModes[pinNumber] is object)
             {
-                _pinModes[pinNumber] !.CurrentPinMode = mode;
+                _pinModes[pinNumber]!.CurrentPinMode = mode;
             }
             else
             {
@@ -384,7 +386,7 @@ namespace System.Device.Gpio.Drivers
             ValidatePinNumber(pinNumber);
 
             _interruptDriver!.OpenPin(pinNumber);
-            _pinModes[pinNumber] !.InUseByInterruptDriver = true;
+            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
 
             return _interruptDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
         }
@@ -401,7 +403,7 @@ namespace System.Device.Gpio.Drivers
             ValidatePinNumber(pinNumber);
 
             _interruptDriver!.OpenPin(pinNumber);
-            _pinModes[pinNumber] !.InUseByInterruptDriver = true;
+            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
 
             return _interruptDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
         }
