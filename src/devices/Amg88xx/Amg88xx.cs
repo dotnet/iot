@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Device.I2c;
 using UnitsNet;
@@ -89,7 +90,7 @@ namespace Iot.Device.Amg88xx
         /// <summary>
         /// Gets the current raw thermal image from the sensor.
         /// </summary>
-        /// <returns>Thermal image in two's complement representation</returns>
+        /// <returns>Thermal image in 12-bit two's complement representation</returns>
         public int[,] GetThermalRawImage()
         {
             // the readout process gets triggered by writing to pixel 0 of the sensor w/o any additional data
@@ -105,9 +106,8 @@ namespace Iot.Device.Amg88xx
             {
                 for (int c = 0; c < Columns; c++)
                 {
-                    byte tl = buffer[idx++];
-                    byte th = buffer[idx++];
-                    image[c, r] = th << 8 | tl;
+                    image[c, r] = BinaryPrimitives.ReadInt16LittleEndian(buffer.Slice(idx, 2));
+                    idx += 2;
                 }
             }
 
@@ -135,16 +135,19 @@ namespace Iot.Device.Amg88xx
         #region Status
 
         /// <summary>
-        /// Gets the temperature overflow flag from the status register
+        /// Gets whether any pixel measured a temperature higher than the normal operation range.
+        /// The event of an overflow does not prevent from continuing reading the sensor.
+        /// The overflow indication will last even if all pixels are returned to readings within normal range.
+        /// The indicator is reset using <see cfref="ClearTemperatureOverflow"/>.
         /// </summary>
-        /// <returns>Temperature overflow flag</returns>
+        /// <returns>True, if an overflow occured</returns>
         public bool HasTemperatureOverflow()
         {
             return GetBit(Register.STAT, (byte)StatusFlagBit.OVF_IRS);
         }
 
         /// <summary>
-        /// Clears the temperature overflow flag in the status register
+        /// Clears the temperature overflow indication.
         /// </summary>
         public void ClearTemperatureOverflow()
         {
@@ -154,18 +157,21 @@ namespace Iot.Device.Amg88xx
 
         /// <summary>
         /// Gets the thermistor overflow flag from the status register.
+        /// The overflow indication will last even if the thermistor temperature returned to normal range.
+        /// The event of an overflow does not prevent from continuing reading the sensor.
+        /// The indicator is reset using <see cfref="ClearThermistorOverflow"/>.
         /// Note: the bit is only menthioned in early versions of the reference specification.
         /// It is not clear whether this is a specification error or a change in a newer
         /// revision of the sensor.
         /// </summary>
-        /// <returns>Thermistor overflow flag</returns>
+        /// <returns>True, if an overflow occured</returns>
         public bool HasThermistorOverflow()
         {
             return GetBit(Register.STAT, (byte)StatusFlagBit.OVF_THS);
         }
 
         /// <summary>
-        /// Clears the thermistor overflow flag in the status register
+        /// Clears the temperature overflow indication.
         /// </summary>
         public void ClearThermistorOverflow()
         {
@@ -230,9 +236,9 @@ namespace Iot.Device.Amg88xx
         /// Get the current frame rate.
         /// </summary>
         /// <returns>Frame rate (either 1 or 10fps) </returns>
-        public int GetFrameRate()
+        public FrameRate GetFrameRate()
         {
-            return GetBit(Register.FPSC, (byte)FrameRateBit.FPS) ? 1 : 10;
+            return GetBit(Register.FPSC, (byte)FrameRateBit.FPS) ? FrameRate.Rate1FramePerSecond : FrameRate.Rate10FramesPerSecond;
         }
 
         /// <summary>
@@ -240,14 +246,14 @@ namespace Iot.Device.Amg88xx
         /// </summary>
         /// <param name="frameRate">Frame rate</param>
         /// <exception cref="ArgumentException">Thrown when attempting to set a frame rate other than 1 or 10</exception>
-        public void SetFrameRate(int frameRate)
+        public void SetFrameRate(FrameRate frameRate)
         {
-            if (frameRate != 1 && frameRate != 10)
+            if (frameRate != FrameRate.Rate1FramePerSecond && frameRate != FrameRate.Rate10FramesPerSecond)
             {
                 throw new ArgumentException("Frame rate must either be 1 or 10.", nameof(frameRate));
             }
 
-            SetBit(Register.FPSC, (byte)FrameRateBit.FPS, frameRate == 1);
+            SetBit(Register.FPSC, (byte)FrameRateBit.FPS, frameRate == FrameRate.Rate1FramePerSecond);
         }
         #endregion
 

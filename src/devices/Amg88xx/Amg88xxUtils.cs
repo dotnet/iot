@@ -9,7 +9,7 @@ namespace Iot.Device.Amg88xx
     /// <summary>
     /// This class contains utilities for working with AMG88xx devices.
     /// </summary>
-    public static class Amg88xxUtils
+    internal static class Amg88xxUtils
     {
         /// <summary>
         /// Temperature resolution of a pixel (in degrees celsius)

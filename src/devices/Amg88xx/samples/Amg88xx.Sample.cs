@@ -95,6 +95,8 @@ namespace Iot.Device.Amg88xx.Samples
             {
                 Console.WriteLine($"Thermistor: {amg88xx.GetSensorTemperature()}");
                 Console.WriteLine($"Interrupt occurred: {amg88xx.HasInterrupt()}");
+                Console.WriteLine($"Temperature overflow: {amg88xx.HasTemperatureOverflow()}");
+                Console.WriteLine($"Thermistor overflow: {amg88xx.HasThermistorOverflow()}");
 
                 // Optionally check whether the thermistor temperature or any pixel temperature
                 // exceeds maximum levels.

@@ -5,18 +5,18 @@
 namespace Iot.Device.Amg88xx
 {
     /// <summary>
-    /// Defines the reset types of the reset register (addr: 0x01)
+    /// Defines the frame rate per second
     /// </summary>
-    internal enum ResetType : byte
+    public enum FrameRate
     {
         /// <summary>
-        /// flag reset (clear all flags and interrupt flag registers)
+        /// 10 frames per second
         /// </summary>
-        Flag = 0x30,
+        Rate10FramesPerSecond = 10,
 
         /// <summary>
-        /// initial reset (set all registers to defaults)
+        /// 1 frame per second
         /// </summary>
-        Initial = 0x3f
+        Rate1FramePerSecond = 1,
     }
 }

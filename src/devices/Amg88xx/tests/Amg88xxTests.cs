@@ -268,9 +268,9 @@ namespace Iot.Device.Amg88xx.Tests
 
         #region Frame Rate
         [Theory]
-        [InlineData(0x00, 10)]
-        [InlineData(1 << (byte)FrameRateBit.FPS, 1)]
-        public void GetFrameRateTest(byte registerContent, int expectedFrameRate)
+        [InlineData(0x00, FrameRate.Rate10FramesPerSecond)]
+        [InlineData(1 << (byte)FrameRateBit.FPS, FrameRate.Rate1FramePerSecond)]
+        public void GetFrameRateTest(byte registerContent, FrameRate expectedFrameRate)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
@@ -285,11 +285,11 @@ namespace Iot.Device.Amg88xx.Tests
         }
 
         [Theory]
-        [InlineData(1, 0x00, 1 << (byte)FrameRateBit.FPS)]
-        [InlineData(10, 0x00, 0x00)]
-        [InlineData(1, 0xff, 0xff)]
-        [InlineData(10, 0xff, 0xff & ~(1 << (byte)FrameRateBit.FPS))]
-        public void SetFrameRateTest(int targetFrameRate, byte initialRegisterContent, byte expectedRegisterContent)
+        [InlineData(FrameRate.Rate1FramePerSecond, 0x00, 1 << (byte)FrameRateBit.FPS)]
+        [InlineData(FrameRate.Rate10FramesPerSecond, 0x00, 0x00)]
+        [InlineData(FrameRate.Rate1FramePerSecond, 0xff, 0xff)]
+        [InlineData(FrameRate.Rate10FramesPerSecond, 0xff, 0xff & ~(1 << (byte)FrameRateBit.FPS))]
+        public void SetFrameRateTest(FrameRate targetFrameRate, byte initialRegisterContent, byte expectedRegisterContent)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
@@ -310,8 +310,8 @@ namespace Iot.Device.Amg88xx.Tests
         [Theory]
         [InlineData((byte)OperatingMode.Normal, OperatingMode.Normal)]
         [InlineData((byte)OperatingMode.Sleep, OperatingMode.Sleep)]
-        [InlineData((byte)OperatingMode.StandBy10, OperatingMode.StandBy10)]
-        [InlineData((byte)OperatingMode.StandBy60, OperatingMode.StandBy60)]
+        [InlineData((byte)OperatingMode.StandBy10Seconds, OperatingMode.StandBy10Seconds)]
+        [InlineData((byte)OperatingMode.StandBy60Seconds, OperatingMode.StandBy60Seconds)]
         public void GetOperatingModeTest(byte registerContent, OperatingMode expectedOperatingMode)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
@@ -329,8 +329,8 @@ namespace Iot.Device.Amg88xx.Tests
         [Theory]
         [InlineData(OperatingMode.Normal, (byte)OperatingMode.Normal)]
         [InlineData(OperatingMode.Sleep, (byte)OperatingMode.Sleep)]
-        [InlineData(OperatingMode.StandBy10, (byte)OperatingMode.StandBy10)]
-        [InlineData(OperatingMode.StandBy60, (byte)OperatingMode.StandBy60)]
+        [InlineData(OperatingMode.StandBy10Seconds, (byte)OperatingMode.StandBy10Seconds)]
+        [InlineData(OperatingMode.StandBy60Seconds, (byte)OperatingMode.StandBy60Seconds)]
         public void SetOperatingModeTest(OperatingMode targetOperatingMode, byte expectedMode)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();

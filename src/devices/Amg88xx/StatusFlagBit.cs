@@ -9,8 +9,7 @@ namespace Iot.Device.Amg88xx
     /// <summary>
     /// Defines the status bits of the status register (addr: 0x04)
     /// </summary>
-    [Flags]
-    public enum StatusFlagBit : byte
+    internal enum StatusFlagBit : byte
     {
         /// <summary>
         /// Interrupt occured

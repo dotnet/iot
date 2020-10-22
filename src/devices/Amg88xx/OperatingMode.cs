@@ -5,7 +5,8 @@
 namespace Iot.Device.Amg88xx
 {
     /// <summary>
-    /// Defines the operating modes of the power control register (addr: 0x00)
+    /// Defines the operating modes.
+    /// The modes correspond to the setting in the power control register (addr: 0x00)
     /// </summary>
     public enum OperatingMode : byte
     {
@@ -22,11 +23,11 @@ namespace Iot.Device.Amg88xx
         /// <summary>
         /// stand-by mode, 10s intermittence
         /// </summary>
-        StandBy10 = 0x21,
+        StandBy10Seconds = 0x21,
 
         /// <summary>
         /// stand-by mode, 60s intermittence
         /// </summary>
-        StandBy60 = 0x20,
+        StandBy60Seconds = 0x20,
     }
 }

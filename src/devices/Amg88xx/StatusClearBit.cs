@@ -9,8 +9,7 @@ namespace Iot.Device.Amg88xx
     /// <summary>
     /// Defines the status bits of the status clear register (addr: 0x05)
     /// </summary>
-    [Flags]
-    public enum StatusClearBit : byte
+    internal enum StatusClearBit : byte
     {
         /// <summary>
         /// Interrupt occured

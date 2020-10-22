@@ -7,7 +7,7 @@ namespace Iot.Device.Amg88xx
     /// <summary>
     /// Defines the addresses of the AMG88xx registers
     /// </summary>
-    public enum Register : byte
+    internal enum Register : byte
     {
         /// <summary>
         /// Power control register
