@@ -58,42 +58,41 @@ namespace Iot.Device.Amg88xx.Samples
             // factory defaults
             amg88xx.InitialReset();
 
-            amg88xx.SetOperatingMode(OperatingMode.Normal);
-            Console.WriteLine($"Operating mode: {amg88xx.GetOperatingMode()}");
+            amg88xx.OperatingMode = OperatingMode.Normal;
+            Console.WriteLine($"Operating mode: {amg88xx.OperatingMode}");
 
             // Switch moving average mode on.
-            // amg88xx.SetMovingAverageModeState(true);
+            // amg88xx.UseMovingAverageMode = true;
             // Note: reading the average mode state doesn't seems to work with current revisions
             //       of the sensor, even though the reference specification defines the register
             //      as R/W type.
-            // string avgMode = amg88xx.GetMovingAverageModeState() ? "on" : "off";
-            // Console.WriteLine($"Average mode: {avgMode}");
+            Console.WriteLine($"Average mode: {amg88xx.UseMovingAverageMode}");
 
             // Set frame rate to 1 fps
-            // amg88xx.SetFrameRate(FrameRate.FPS1);
-            Console.WriteLine($"Frame rate: {(int)amg88xx.GetFrameRate()} fps");
+            // amg88xx.FrameRate = FrameRate.Rate1FramePerSecond;
+            Console.WriteLine($"Frame rate: {amg88xx.FrameRate}");
 
             // set interrupt mode and levels
-            amg88xx.SetInterruptMode(InterruptMode.AbsoluteMode);
+            amg88xx.InterruptMode = InterruptMode.Absolute;
             // enable the interrupt output pin (INT)
-            amg88xx.EnableInterruptPin();
+            amg88xx.InterruptPinEnabled = true;
             // set the hysteresis span to 4°C
-            amg88xx.SetInterruptHysteresisLevel(Temperature.FromDegreesCelsius(4));
+            amg88xx.InterruptHysteresis = Temperature.FromDegreesCelsius(4);
             // Set the lower level to 10°C. The interrupt is raised when the temperature of any pixel goes below 10°C.
             // Due to the hysteresis level the interrupt is not cleared before all pixels are above 14°C.
-            amg88xx.SetInterruptLowerLevel(Temperature.FromDegreesCelsius(10));
+            amg88xx.InterruptLowerLevel = Temperature.FromDegreesCelsius(10);
             // Set the upper level to 28°C. The interrupt is raised when the temperature of any pixel goes over 28°C.
             // Due to the hysteresis level the interrupt is not cleared before all pixels are below 24°C.
-            amg88xx.SetInterruptUpperLevel(Temperature.FromDegreesCelsius(28));
+            amg88xx.InterruptUpperLevel = Temperature.FromDegreesCelsius(28);
 
-            Console.WriteLine($"Interrupt mode: {amg88xx.GetInterruptMode()}");
-            Console.WriteLine($"Lower interrupt temperature level: {amg88xx.GetInterruptLowerLevel().DegreesCelsius:F1}°C");
-            Console.WriteLine($"Upper interrupt temperature level: {amg88xx.GetInterruptUpperLevel().DegreesCelsius:F1}°C");
-            Console.WriteLine($"Hysteresis level: {amg88xx.GetInterruptHysteresisLevel().DegreesCelsius:F1}°C");
+            Console.WriteLine($"Interrupt mode: {amg88xx.InterruptMode}");
+            Console.WriteLine($"Lower interrupt temperature level: {amg88xx.InterruptLowerLevel.DegreesCelsius:F1}°C");
+            Console.WriteLine($"Upper interrupt temperature level: {amg88xx.InterruptUpperLevel.DegreesCelsius:F1}°C");
+            Console.WriteLine($"Hysteresis level: {amg88xx.InterruptHysteresis.DegreesCelsius:F1}°C");
 
             while (true)
             {
-                Console.WriteLine($"Thermistor: {amg88xx.GetSensorTemperature()}");
+                Console.WriteLine($"Thermistor: {amg88xx.SensorTemperature}");
                 Console.WriteLine($"Interrupt occurred: {amg88xx.HasInterrupt()}");
                 Console.WriteLine($"Temperature overflow: {amg88xx.HasTemperatureOverflow()}");
                 Console.WriteLine($"Thermistor overflow: {amg88xx.HasThermistorOverflow()}");
