@@ -42,8 +42,9 @@ public int[,] GetRawImage()
 ```
 **Note:** there is no statement in the reference specification regarding the synchronization between an update of the pixel registers and the readout operation. So, you may read out pixel data from two subsequent frames in one readout operation. However, for normal application this shouldn't be relevant.
 
+Property:
 ```
-public Temperature GetSensorTemperature()
+public Temperature SensorTemperature
 ```
 **Note**: the thermistor temperature is <u>not</u> equivalent to the
 
@@ -54,20 +55,20 @@ The sensor supports four operating modes to control power consumption:
 * Stand-by with 60 seconds intermittence
 * Stand-by with 10 seconds intermittence
 
+Property:
 ```
-public OperatingMode GetOperatingMode()
-public void SetOperatingMode(OperatingMode operatingMode)
+public OperatingMode OperatingMode
 ```
 
 *Note*: refer to the reference specification for further details on mode transitions and sensor behavior.
 
 ### Reset
-The sensor software can be reset in two extends.
+The sensor supports two types of resets.
 * **Initial Reset:** Resets all flags and registers to default values
-* **Flag Reset:** Resets all flags (status register, interrupt flag, interrupt table)
+* **Resetting all flags:** Resets all flags (status register, interrupt flag, interrupt table)
 ```
 public void InitialReset()
-public void FlagReset()
+public void ResetAllFlags()
 ```
 *Note*: resetting the interrupt related flags is only required if you want to clear flags while the readings are still within the hysteresis span. See interrupts section for further details on interrupt behavior.
 
@@ -85,7 +86,8 @@ public void ClearInterrupt()
 
 public void ClearAllFlags()
 ```
-*Note*: resetting the interrupt flag is only required if you want to clear flags while the readings are still within the hysteresis span. See interrupts section for further details on interrupt behavior.
+*Note*: resetting the interrupt flag is only required if you want to clear flags while the readings are still within the hysteresis span (but already within the lower-upper range). This method does not clear the interrupt flags of the individual pixels.
+See interrupts section for further details on interrupt behavior.
 
 *Note*: the thermistor overflow flag is only menthioned in early versions of the reference specification.
 It is not clear whether this is a specification error or a change in a newer revision of the sensor.
@@ -93,10 +95,11 @@ It is not clear whether this is a specification error or a change in a newer rev
 ### Frame Rate
 **Default:** 10fps
 
-The sensor supports frame rates of 1fps and 10fps.
+The sensor supports frame rates of 1fps and 10fps. The frame rate defines the update interval of the pixels. This is independent from the readout interval through the I2C interface.
+
+Property:
 ```
-public FrameRate GetFrameRate()
-public void SetFrameRate(FrameRate)
+public FrameRate FrameRate
 ```
 
 ### Moving average
@@ -111,31 +114,29 @@ The average of two averages of 10 readings is the resulting output.
 
 *Moving Average*
 
-The noise per pixel will decrease to 1/sqrt2 when using the moving average mode.<br/>
+The noise per pixel will decrease to 1/sqrt2 when using the moving average mode.
+
+Property:
 ```
-public bool GetMovingAverageModeState()
-public void SetMovingAverageModeState(bool state)
+public bool UseMovingAverageMode
 ```
-***Important***: the reference specification states that the current mode can be read, but it doesn't seem to work at the time being. The bit is always read as 0.
+***Important***: the reference specification states that the current mode can be read, but it doesn't seem to work at the time being. In this case the property is always read as ```false```.
 
 ### Interrupt control, levels and pixel flags
 The sensor can raise an interrupt if any pixel passes a given value. The event is signaled by the interrupt flag of the status register. Additionally the INT pin of the sensor can be pulled low.
 
+Properties:
 ```
-public void GetInterruptModeTest(InterruptMode expectedMode, byte registerValue)
-public void SetInterruptModeTest(InterruptMode mode, bool modeBitIsSet)
+public InterruptMode PixelTemperatureInterruptMode
+public bool InterruptPinEnabled
 ```
 The interrupt levels can be configured. The lower and upper limit as well as the hysteresis level can be set and read. Initially the register is filled with zeros. The levels apply to all pixels equally.
 
+Properties:
 ```
-public Temperature GetInterruptLowerLevel()
-public Temperature SetInterruptLowerLevel()
-
-public Temperature GetInterruptUpperLevel()
-public Temperature SetInterruptUpperLevel()
-
-public Temperature GetInterruptHysteresisLevel()
-public Temperature SetInterruptHysteresisLevel()
+public Temperature InterruptLowerLevel
+public Temperature InterruptUpperLevel
+public Temperature InterruptHysteresis
 ```
 After the sensor raised an interrupt the triggering pixels can be readout from the interrupt table register.
 ```
@@ -149,7 +150,7 @@ Interrupt levels and hysteresis
 **Note**
 * be aware that the interrupt flag in the status register is reset automatically if no pixel temperature exceeds the lower or upper threshold. It is <u>not</u> required to reset the flag manually.
 * any flag in the interrupt flag table is automatically reset if the corresponding pixel is no long exceed the lower or upper threshold.
-* if a hysteresis level is applied and the reading of a pixel is not passing the threshold anymore, while at the same time the reading is still within the hysteresis span, the interrupt flag can be cleared by using the ```FlagReset``` method.
+* if a hysteresis is applied and the reading of a pixel is not passing the threshold anymore, while at the same time the reading is still within the hysteresis span, the interrupt flag can be cleared by using the ```ResetAllFlags``` method.
 
 ## References
 **Product Homepage**: https://industry.panasonic.eu/components/sensors/grid-eye

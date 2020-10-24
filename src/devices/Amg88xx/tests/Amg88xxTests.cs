@@ -22,7 +22,7 @@ namespace Iot.Device.Amg88xx.Tests
         [InlineData(0x00, 0x00, 0.0)]
         [InlineData(0x08, 0x04, -0.25)]
         [InlineData(0x0b, 0xbb, -59.6875)]
-        public void GetSensorTemperatureTest(byte th, byte tl, double expectedTemperature)
+        public void SensorTemperatureGetTest(byte th, byte tl, double expectedTemperature)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
@@ -31,7 +31,7 @@ namespace Iot.Device.Amg88xx.Tests
             i2cDevice.DataToRead.Enqueue(tl);
             i2cDevice.DataToRead.Enqueue(th);
 
-            Assert.Equal(expectedTemperature, sensor.GetSensorTemperature().DegreesCelsius);
+            Assert.Equal(expectedTemperature, sensor.SensorTemperature.DegreesCelsius);
             Assert.Equal(2, i2cDevice.DataWritten.Count);
             Assert.Equal((byte)Register.TTHL, i2cDevice.DataWritten.Dequeue());
             Assert.Equal((byte)Register.TTHH, i2cDevice.DataWritten.Dequeue());
@@ -228,18 +228,18 @@ namespace Iot.Device.Amg88xx.Tests
         [Theory]
         [InlineData(0, false)]
         [InlineData(1 << (byte)MovingAverageModeBit.MAMOD, true)]
-        public void GetMovingAverageModeStateTest(byte registerContent, bool expectedState)
+        public void UseMovingAverageModeGetTest(byte registerContent, bool expectedState)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
             i2cDevice.DataToRead.Enqueue(registerContent);
 
-            bool state = sensor.GetMovingAverageModeState();
+            bool actualState = sensor.UseMovingAverageMode;
 
             Assert.Single(i2cDevice.DataWritten);
             Assert.Equal((byte)Register.AVE, i2cDevice.DataWritten.Dequeue());
-            Assert.Equal(expectedState, state);
+            Assert.Equal(expectedState, actualState);
         }
 
         [Theory]
@@ -247,7 +247,7 @@ namespace Iot.Device.Amg88xx.Tests
         [InlineData(true, 0x00, 1 << (byte)MovingAverageModeBit.MAMOD)]
         [InlineData(true, 0xff & ~(1 << (byte)MovingAverageModeBit.MAMOD), 0xff)]
         [InlineData(false, 0xff, 0xff & ~(1 << (byte)MovingAverageModeBit.MAMOD))]
-        public void SetMovingAverageModeStateTest(bool targetState, byte initialRegisterContent, byte expectedRegisterContent)
+        public void UseMovingAverageModeSetTest(bool targetState, byte initialRegisterContent, byte expectedRegisterContent)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
@@ -255,7 +255,7 @@ namespace Iot.Device.Amg88xx.Tests
             // bit 5: if set, moving average is on
             i2cDevice.DataToRead.Enqueue(initialRegisterContent);
 
-            sensor.SetMovingAverageModeState(targetState);
+            sensor.UseMovingAverageMode = targetState;
 
             Assert.Equal(3, i2cDevice.DataWritten.Count);
             // register address is expected two times: once for reading the current register value and once for writing the new one
@@ -270,18 +270,18 @@ namespace Iot.Device.Amg88xx.Tests
         [Theory]
         [InlineData(0x00, FrameRate.Rate10FramesPerSecond)]
         [InlineData(1 << (byte)FrameRateBit.FPS, FrameRate.Rate1FramePerSecond)]
-        public void GetFrameRateTest(byte registerContent, FrameRate expectedFrameRate)
+        public void FrameRateGetTest(byte registerContent, FrameRate expectedFrameRate)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
             i2cDevice.DataToRead.Enqueue(registerContent);
 
-            var frameRate = sensor.GetFrameRate();
+            var actualFrameRate = sensor.FrameRate;
 
             Assert.Single(i2cDevice.DataWritten);
             Assert.Equal((byte)Register.FPSC, i2cDevice.DataWritten.Dequeue());
-            Assert.Equal(expectedFrameRate, frameRate);
+            Assert.Equal(expectedFrameRate, actualFrameRate);
         }
 
         [Theory]
@@ -289,14 +289,14 @@ namespace Iot.Device.Amg88xx.Tests
         [InlineData(FrameRate.Rate10FramesPerSecond, 0x00, 0x00)]
         [InlineData(FrameRate.Rate1FramePerSecond, 0xff, 0xff)]
         [InlineData(FrameRate.Rate10FramesPerSecond, 0xff, 0xff & ~(1 << (byte)FrameRateBit.FPS))]
-        public void SetFrameRateTest(FrameRate targetFrameRate, byte initialRegisterContent, byte expectedRegisterContent)
+        public void FrameRateSetTest(FrameRate targetFrameRate, byte initialRegisterContent, byte expectedRegisterContent)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
             i2cDevice.DataToRead.Enqueue(initialRegisterContent);
 
-            sensor.SetFrameRate(targetFrameRate);
+            sensor.FrameRate = targetFrameRate;
 
             Assert.Equal(3, i2cDevice.DataWritten.Count);
             // register address is expected two times: once for reading the current register value and once for writing the new one
@@ -312,18 +312,18 @@ namespace Iot.Device.Amg88xx.Tests
         [InlineData((byte)OperatingMode.Sleep, OperatingMode.Sleep)]
         [InlineData((byte)OperatingMode.StandBy10Seconds, OperatingMode.StandBy10Seconds)]
         [InlineData((byte)OperatingMode.StandBy60Seconds, OperatingMode.StandBy60Seconds)]
-        public void GetOperatingModeTest(byte registerContent, OperatingMode expectedOperatingMode)
+        public void OperatingModeGetTest(byte registerContent, OperatingMode expectedOperatingMode)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
             i2cDevice.DataToRead.Enqueue(registerContent);
 
-            var operatingMode = sensor.GetOperatingMode();
+            var actualOperatingMode = sensor.OperatingMode;
 
             Assert.Single(i2cDevice.DataWritten);
             Assert.Equal((byte)Register.PCLT, i2cDevice.DataWritten.Dequeue());
-            Assert.Equal(expectedOperatingMode, operatingMode);
+            Assert.Equal(expectedOperatingMode, actualOperatingMode);
         }
 
         [Theory]
@@ -331,12 +331,12 @@ namespace Iot.Device.Amg88xx.Tests
         [InlineData(OperatingMode.Sleep, (byte)OperatingMode.Sleep)]
         [InlineData(OperatingMode.StandBy10Seconds, (byte)OperatingMode.StandBy10Seconds)]
         [InlineData(OperatingMode.StandBy60Seconds, (byte)OperatingMode.StandBy60Seconds)]
-        public void SetOperatingModeTest(OperatingMode targetOperatingMode, byte expectedMode)
+        public void OperatingModeSetTest(OperatingMode targetOperatingMode, byte expectedMode)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
-            sensor.SetOperatingMode(targetOperatingMode);
+            sensor.OperatingMode = targetOperatingMode;
 
             Assert.Equal(2, i2cDevice.DataWritten.Count);
             Assert.Equal((byte)Register.PCLT, i2cDevice.DataWritten.Dequeue());
@@ -365,7 +365,7 @@ namespace Iot.Device.Amg88xx.Tests
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
-            sensor.FlagReset();
+            sensor.ResetAllFlags();
 
             Assert.Equal(2, i2cDevice.DataWritten.Count);
             Assert.Equal((byte)Register.RST, i2cDevice.DataWritten.Dequeue());
@@ -377,36 +377,36 @@ namespace Iot.Device.Amg88xx.Tests
         #region Interrupt Control
 
         [Theory]
-        [InlineData(InterruptMode.AbsoluteMode, 1 << (byte)InterruptModeBit.INTMODE)]
-        [InlineData(InterruptMode.DifferenceMode, 0x00)]
-        public void GetInterruptModeTest(InterruptMode expectedMode, byte registerValue)
+        [InlineData(InterruptMode.Absolute, 1 << (byte)InterruptModeBit.INTMODE)]
+        [InlineData(InterruptMode.Difference, 0x00)]
+        public void InterruptModeGetTest(InterruptMode expectedMode, byte registerValue)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
             i2cDevice.DataToRead.Enqueue(registerValue);
 
-            InterruptMode mode = sensor.GetInterruptMode();
+            InterruptMode actualMode = sensor.InterruptMode;
 
             Assert.Single(i2cDevice.DataWritten);
             // register address is expected two times: once for reading the current register value and once for writing the new one
             Assert.Equal((byte)Register.INTC, i2cDevice.DataWritten.Dequeue());
-            Assert.Equal(expectedMode, mode);
+            Assert.Equal(expectedMode, actualMode);
         }
 
         [Theory]
-        [InlineData(0x00, InterruptMode.AbsoluteMode, 1 << (byte)InterruptModeBit.INTMODE)]
-        [InlineData(0x00, InterruptMode.DifferenceMode, 0x00)]
-        [InlineData(0xff, InterruptMode.AbsoluteMode, 0xff)]
-        [InlineData(0xff, InterruptMode.DifferenceMode, 0xff & ~(1 << (byte)InterruptModeBit.INTMODE))]
-        public void SetInterruptModeTest(byte initialRegisterContent, InterruptMode mode, byte expectedRegisterContent)
+        [InlineData(0x00, InterruptMode.Absolute, 1 << (byte)InterruptModeBit.INTMODE)]
+        [InlineData(0x00, InterruptMode.Difference, 0x00)]
+        [InlineData(0xff, InterruptMode.Absolute, 0xff)]
+        [InlineData(0xff, InterruptMode.Difference, 0xff & ~(1 << (byte)InterruptModeBit.INTMODE))]
+        public void InterruptModeSetTest(byte initialRegisterContent, InterruptMode targetMode, byte expectedRegisterContent)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
             i2cDevice.DataToRead.Enqueue(initialRegisterContent);
 
-            sensor.SetInterruptMode(mode);
+            sensor.InterruptMode = targetMode;
 
             Assert.Equal(3, i2cDevice.DataWritten.Count);
             // register address is expected two times: once for reading the current register value and once for writing the new one
@@ -416,35 +416,36 @@ namespace Iot.Device.Amg88xx.Tests
         }
 
         [Theory]
-        [InlineData(0x00, 1 << (byte)InterruptModeBit.INTEN)]
-        [InlineData(0xff, 0xff)]
-        public void EnableInterruptPinTest(byte initialRegisterContent, byte expectedRegisterContent)
+        [InlineData(true, 1 << (byte)InterruptModeBit.INTEN)]
+        [InlineData(false, 0x00)]
+        public void InterruptPinEnabledGetTest(bool expectedState, byte registerValue)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
-            i2cDevice.DataToRead.Enqueue(initialRegisterContent);
+            i2cDevice.DataToRead.Enqueue(registerValue);
 
-            sensor.EnableInterruptPin();
+            bool actualState = sensor.InterruptPinEnabled;
 
-            Assert.Equal(3, i2cDevice.DataWritten.Count);
+            Assert.Single(i2cDevice.DataWritten);
             // register address is expected two times: once for reading the current register value and once for writing the new one
             Assert.Equal((byte)Register.INTC, i2cDevice.DataWritten.Dequeue());
-            Assert.Equal((byte)Register.INTC, i2cDevice.DataWritten.Dequeue());
-            Assert.Equal(expectedRegisterContent, i2cDevice.DataWritten.Dequeue());
+            Assert.Equal(expectedState, actualState);
         }
 
         [Theory]
-        [InlineData(0x00, 0x00)]
-        [InlineData(0xff, 0xff & ~(1 << (byte)InterruptModeBit.INTEN))]
-        public void DisableInterruptPinTest(byte initialRegisterContent, byte expectedRegisterContent)
+        [InlineData(0x00, true, 1 << (byte)InterruptModeBit.INTEN)]
+        [InlineData(0xff, true, 0xff)]
+        [InlineData(0x00, false, 0x00)]
+        [InlineData(0xff, false, 0xff & ~(1 << (byte)InterruptModeBit.INTEN))]
+        public void InterruptPinEnabledSetTest(byte initialRegisterContent, bool targetState, byte expectedRegisterContent)
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
             i2cDevice.DataToRead.Enqueue(initialRegisterContent);
 
-            sensor.DisableInterruptPin();
+            sensor.InterruptPinEnabled = targetState;
 
             Assert.Equal(3, i2cDevice.DataWritten.Count);
             // register address is expected two times: once for reading the current register value and once for writing the new one
@@ -454,7 +455,7 @@ namespace Iot.Device.Amg88xx.Tests
         }
 
         [Fact]
-        public void GetInterruptLowerLevelTest()
+        public void InterruptLowerLevelGetTest()
         {
             // expected temeperature: 72.75°C
             // two's complement representation:
@@ -467,24 +468,24 @@ namespace Iot.Device.Amg88xx.Tests
             i2cDevice.DataToRead.Enqueue(expectedTl);
             i2cDevice.DataToRead.Enqueue(expectedTh);
 
-            var temperature = sensor.GetInterruptLowerLevel();
+            Temperature actualTemperature = sensor.InterruptLowerLevel;
 
             Assert.Equal(2, i2cDevice.DataWritten.Count);
             Assert.Equal((byte)Register.INTLL, i2cDevice.DataWritten.Dequeue());
             Assert.Equal((byte)Register.INTLH, i2cDevice.DataWritten.Dequeue());
 
-            Assert.Equal(Amg88xxUtils.ConvertToTemperature(expectedTl, expectedTh).DegreesCelsius, temperature.DegreesCelsius);
+            Assert.Equal(Amg88xxUtils.ConvertToTemperature(expectedTl, expectedTh).DegreesCelsius, actualTemperature.DegreesCelsius);
         }
 
         [Fact]
-        public void SetInterruptLowerLevelTest()
+        public void InterruptLowerLevelSetTest()
         {
             var expectedTemperature = Temperature.FromDegreesCelsius(125);
 
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
-            sensor.SetInterruptLowerLevel(expectedTemperature);
+            sensor.InterruptLowerLevel = expectedTemperature;
 
             Assert.Equal(4, i2cDevice.DataWritten.Count);
 
@@ -496,7 +497,7 @@ namespace Iot.Device.Amg88xx.Tests
         }
 
         [Fact]
-        public void GetInterruptUpperLevelTest()
+        public void InterruptUpperLevelGetTest()
         {
             // expected temeperature: 72.75°C
             // two's complement representation:
@@ -509,24 +510,24 @@ namespace Iot.Device.Amg88xx.Tests
             i2cDevice.DataToRead.Enqueue(expectedTl);
             i2cDevice.DataToRead.Enqueue(expectedTh);
 
-            var temperature = sensor.GetInterruptUpperLevel();
+            Temperature actualTemperature = sensor.InterruptUpperLevel;
 
             Assert.Equal(2, i2cDevice.DataWritten.Count);
             Assert.Equal((byte)Register.INTHL, i2cDevice.DataWritten.Dequeue());
             Assert.Equal((byte)Register.INTHH, i2cDevice.DataWritten.Dequeue());
 
-            Assert.Equal(Amg88xxUtils.ConvertToTemperature(expectedTl, expectedTh).DegreesCelsius, temperature.DegreesCelsius);
+            Assert.Equal(Amg88xxUtils.ConvertToTemperature(expectedTl, expectedTh).DegreesCelsius, actualTemperature.DegreesCelsius);
         }
 
         [Fact]
-        public void SetInterruptUpperLevelTest()
+        public void InterruptUpperLevelSetTest()
         {
             var expectedTemperature = Temperature.FromDegreesCelsius(125);
 
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
-            sensor.SetInterruptUpperLevel(expectedTemperature);
+            sensor.InterruptUpperLevel = expectedTemperature;
 
             Assert.Equal(4, i2cDevice.DataWritten.Count);
 
@@ -538,7 +539,7 @@ namespace Iot.Device.Amg88xx.Tests
         }
 
         [Fact]
-        public void GetInterruptHysteresisLevelTest()
+        public void InterruptHysteresisLevelGetTest()
         {
             // expected temeperature: 72.75°C
             // two's complement representation:
@@ -551,24 +552,24 @@ namespace Iot.Device.Amg88xx.Tests
             i2cDevice.DataToRead.Enqueue(expectedTl);
             i2cDevice.DataToRead.Enqueue(expectedTh);
 
-            var temperature = sensor.GetInterruptHysteresisLevel();
+            Temperature actualTemperature = sensor.InterruptHysteresis;
 
             Assert.Equal(2, i2cDevice.DataWritten.Count);
             Assert.Equal((byte)Register.INTSL, i2cDevice.DataWritten.Dequeue());
             Assert.Equal((byte)Register.INTSH, i2cDevice.DataWritten.Dequeue());
 
-            Assert.Equal(Amg88xxUtils.ConvertToTemperature(expectedTl, expectedTh).DegreesCelsius, temperature.DegreesCelsius);
+            Assert.Equal(Amg88xxUtils.ConvertToTemperature(expectedTl, expectedTh).DegreesCelsius, actualTemperature.DegreesCelsius);
         }
 
         [Fact]
-        public void SetInterruptHysteresisLevelTest()
+        public void InterruptHysteresisLevelSetTest()
         {
             Temperature expectedTemperature = Temperature.FromDegreesCelsius(125);
 
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
-            sensor.SetInterruptHysteresisLevel(expectedTemperature);
+            sensor.InterruptHysteresis = expectedTemperature;
 
             Assert.Equal(4, i2cDevice.DataWritten.Count);
 

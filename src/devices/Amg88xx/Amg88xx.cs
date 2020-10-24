@@ -117,17 +117,20 @@ namespace Iot.Device.Amg88xx
         /// <summary>
         /// Gets the temperature reading from the internal thermistor.
         /// </summary>
-        /// <returns>Temperature reading</returns>
-        public Temperature GetSensorTemperature()
+        /// <value>Temperature reading</value>
+        public Temperature SensorTemperature
         {
-            byte tthl = GetRegister(Register.TTHL);
-            byte tthh = GetRegister(Register.TTHH);
+            get
+            {
+                byte tthl = GetRegister(Register.TTHL);
+                byte tthh = GetRegister(Register.TTHH);
 
-            int reading = (tthh & 0x7) << 8 | tthl;
-            reading = tthh >> 3 == 0 ? reading : -reading;
+                int reading = (tthh & 0x7) << 8 | tthl;
+                reading = tthh >> 3 == 0 ? reading : -reading;
 
-            // The LSB is equivalent to 0.0625℃.
-            return Temperature.FromDegreesCelsius(reading * ThermistorTemperatureResolution);
+                // The LSB is equivalent to 0.0625℃.
+                return Temperature.FromDegreesCelsius(reading * ThermistorTemperatureResolution);
+            }
         }
 
         #endregion
@@ -198,7 +201,8 @@ namespace Iot.Device.Amg88xx
         }
 
         /// <summary>
-        /// Clears all flags in the status register
+        /// Clears all flags in the status register.
+        /// Note: it does not clear the interrupt flags of the individual pixels.
         /// </summary>
         public void ClearAllFlags()
         {
@@ -211,21 +215,16 @@ namespace Iot.Device.Amg88xx
         #region Moving average
 
         /// <summary>
-        /// Get the state of the moving average mode
+        /// Get or sets the state of the moving average mode
+        /// Important: the reference specification states that the current mode can be read,
+        /// but it doesn't seem to work at the time being.
+        /// In this case the property is always read as ```false```.
         /// </summary>
-        /// <returns>True, if moving average mode is on</returns>
-        public bool GetMovingAverageModeState()
+        /// <value>True if the moving average should be calculated; otherwise, false. The default is false.</value>
+        public bool UseMovingAverageMode
         {
-            return GetBit(Register.AVE, (byte)MovingAverageModeBit.MAMOD);
-        }
-
-        /// <summary>
-        /// Sets the moving average mode state.
-        /// </summary>
-        /// <param name="state">True, to switch moving average on</param>
-        public void SetMovingAverageModeState(bool state)
-        {
-            SetBit(Register.AVE, (byte)MovingAverageModeBit.MAMOD, state);
+            get => GetBit(Register.AVE, (byte)MovingAverageModeBit.MAMOD);
+            set => SetBit(Register.AVE, (byte)MovingAverageModeBit.MAMOD, value);
         }
 
         #endregion
@@ -233,49 +232,40 @@ namespace Iot.Device.Amg88xx
         #region Frame Rate
 
         /// <summary>
-        /// Get the current frame rate.
+        /// Get or sets the frame rate of the sensor internal thermal image update.
         /// </summary>
-        /// <returns>Frame rate (either 1 or 10fps) </returns>
-        public FrameRate GetFrameRate()
+        /// <exception cref="ArgumentException">Thrown when attempting to set a frame rate other than 1 or 10 frames per second</exception>
+        /// <value>The frame rate for the pixel update interval (either 1 or 10fps). The default is 10fps.</value>
+        public FrameRate FrameRate
         {
-            return GetBit(Register.FPSC, (byte)FrameRateBit.FPS) ? FrameRate.Rate1FramePerSecond : FrameRate.Rate10FramesPerSecond;
-        }
-
-        /// <summary>
-        /// Sets the frame rate (either 1 or 10fps).
-        /// </summary>
-        /// <param name="frameRate">Frame rate</param>
-        /// <exception cref="ArgumentException">Thrown when attempting to set a frame rate other than 1 or 10</exception>
-        public void SetFrameRate(FrameRate frameRate)
-        {
-            if (frameRate != FrameRate.Rate1FramePerSecond && frameRate != FrameRate.Rate10FramesPerSecond)
+            get => GetBit(Register.FPSC, (byte)FrameRateBit.FPS) ? FrameRate.Rate1FramePerSecond : FrameRate.Rate10FramesPerSecond;
+            set
             {
-                throw new ArgumentException("Frame rate must either be 1 or 10.", nameof(frameRate));
-            }
+                if (value != FrameRate.Rate1FramePerSecond && value != FrameRate.Rate10FramesPerSecond)
+                {
+                    throw new ArgumentException("Frame rate must either be 1 or 10.");
+                }
 
-            SetBit(Register.FPSC, (byte)FrameRateBit.FPS, frameRate == FrameRate.Rate1FramePerSecond);
+                SetBit(Register.FPSC, (byte)FrameRateBit.FPS, value == FrameRate.Rate1FramePerSecond);
+            }
         }
+
         #endregion
 
         #region Operating Mode / Power Control
 
         /// <summary>
-        /// Gets the current operating mode
+        /// Gets or sets the current operating mode
+        /// Refer to the sensor reference specification for a description of the mode
+        /// depending sensor bevaviour and the valid mode transistions.
         /// </summary>
-        /// <returns>Operating mode</returns>
-        public OperatingMode GetOperatingMode()
+        /// <value>The operating mode of the sensor. The default is Normal.</value>
+        public OperatingMode OperatingMode
         {
-            return (OperatingMode)GetRegister(Register.PCLT);
+            get => (OperatingMode)GetRegister(Register.PCLT);
+            set => SetRegister(Register.PCLT, (byte)value);
         }
 
-        /// <summary>
-        /// Sets the operating mode
-        /// </summary>
-        /// <param name="operatingMode">Operating mode</param>
-        public void SetOperatingMode(OperatingMode operatingMode)
-        {
-            SetRegister(Register.PCLT, (byte)operatingMode);
-        }
         #endregion
 
         #region Reset
@@ -291,9 +281,14 @@ namespace Iot.Device.Amg88xx
         }
 
         /// <summary>
-        /// Performs a reset of all flags
+        /// Performs a reset of all flags (status register, interrupt flag and interrupt table).
+        /// This method is useful, if using the interrupt mechanism for pixel temperatures.
+        /// If an upper and lower level has been set along with a hysteresis this reset can clear the interrupt state of all pixels
+        /// which are within the range between upper and lower level, but still above/below the hystersis level.
+        /// If this applies to ALL pixels the interrupt flag gets cleared as well.
+        /// Refer to the binding documentation for more details on interrupt level, hysteresis and flagging.
         /// </summary>
-        public void FlagReset()
+        public void ResetAllFlags()
         {
             // a reset of all flags (status register, interrupt flag and interrupt table) is initiated by writing 0x30
             // into the reset register (RST)
@@ -305,105 +300,87 @@ namespace Iot.Device.Amg88xx
         #region Interrupt control, levels and pixel flags
 
         /// <summary>
-        /// Gets the interrupt mode
+        /// Gets or sets the pixel temperature interrupt mode.
         /// </summary>
-        /// <returns>Interrupt mode</returns>
-        public InterruptMode GetInterruptMode()
+        /// <value>The interrupt mode, which is either aboslute or differential. The default is ```Difference```.</value>
+        public InterruptMode InterruptMode
         {
-            return GetBit(Register.INTC, (byte)InterruptModeBit.INTMODE) ? InterruptMode.AbsoluteMode : InterruptMode.DifferenceMode;
+            get => GetBit(Register.INTC, (byte)InterruptModeBit.INTMODE) ? InterruptMode.Absolute : InterruptMode.Difference;
+            set => SetBit(Register.INTC, (byte)InterruptModeBit.INTMODE, value == InterruptMode.Absolute);
         }
 
         /// <summary>
-        /// Sets the interrupt mode
+        /// Get or sets whether the interrupt output  pin of the sensor is enabled.
+        /// If enabled, the pin is pulled down if an interrupt is active.
         /// </summary>
-        /// <param name="mode">Interrupt mode</param>
-        public void SetInterruptMode(InterruptMode mode)
+        /// <value>True, if the INT pin sould be enabled; otherwise false. The default is false."</value>
+        public bool InterruptPinEnabled
         {
-            SetBit(Register.INTC, (byte)InterruptModeBit.INTMODE, mode == InterruptMode.AbsoluteMode);
+            get => GetBit(Register.INTC, (byte)InterruptModeBit.INTEN);
+            set => SetBit(Register.INTC, (byte)InterruptModeBit.INTEN, value);
         }
 
         /// <summary>
-        /// Enables the interrupt pin of the AMG88xx sensor.
-        /// The pin is pulled down if an interrupt is active.
+        /// Gets or sets the pixel temperature lower interrupt level.
         /// </summary>
-        public void EnableInterruptPin()
+        /// <value>Temperature level to trigger an interrupt if the any pixel falls below. The default is 0.</value>
+        public Temperature InterruptLowerLevel
         {
-            SetBit(Register.INTC, (byte)InterruptModeBit.INTEN, true);
+            get
+            {
+                byte tl = GetRegister(Register.INTLL);
+                byte th = GetRegister(Register.INTLH);
+                return Amg88xxUtils.ConvertToTemperature(tl, th);
+            }
+
+            set
+            {
+                (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(value);
+                SetRegister(Register.INTLL, tl);
+                SetRegister(Register.INTLH, th);
+            }
         }
 
         /// <summary>
-        /// Enables the interrupt pin of the AMG88xx sensor.
-        /// The pin is pulled down if an interrupt is active.
+        /// Gets or sets the pixel temperature upper interrupt level.
         /// </summary>
-        public void DisableInterruptPin()
+        /// <value>Temperature level to trigger an interrupt if the any pixel exceeds. The default is 0.</value>
+        public Temperature InterruptUpperLevel
         {
-            SetBit(Register.INTC, (byte)InterruptModeBit.INTEN, false);
+            get
+            {
+                byte tl = GetRegister(Register.INTHL);
+                byte th = GetRegister(Register.INTHH);
+                return Amg88xxUtils.ConvertToTemperature(tl, th);
+            }
+
+            set
+            {
+                (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(value);
+                SetRegister(Register.INTHL, tl);
+                SetRegister(Register.INTHH, th);
+            }
         }
 
         /// <summary>
-        /// Gets the lower level interrupt temperature
+        /// Gets or sets the pixel temperature interrupt hysteresis.
         /// </summary>
-        /// <returns>Temperature level</returns>
-        public Temperature GetInterruptLowerLevel()
+        /// <value>Temperature hysteresis for lower and upper interrupt triggering. The default is 0.</value>
+        public Temperature InterruptHysteresis
         {
-            byte tl = GetRegister(Register.INTLL);
-            byte th = GetRegister(Register.INTLH);
-            return Amg88xxUtils.ConvertToTemperature(tl, th);
-        }
+            get
+            {
+                byte tl = GetRegister(Register.INTSL);
+                byte th = GetRegister(Register.INTSH);
+                return Amg88xxUtils.ConvertToTemperature(tl, th);
+            }
 
-        /// <summary>
-        /// Sets the lower level interrupt temperature
-        /// </summary>
-        /// <param name="temperature">Temperature</param>
-        public void SetInterruptLowerLevel(Temperature temperature)
-        {
-            (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(temperature);
-            SetRegister(Register.INTLL, tl);
-            SetRegister(Register.INTLH, th);
-        }
-
-        /// <summary>
-        /// Gets the upper level interrupt temperature
-        /// </summary>
-        /// <returns>Temperature level</returns>
-        public Temperature GetInterruptUpperLevel()
-        {
-            byte tl = GetRegister(Register.INTHL);
-            byte th = GetRegister(Register.INTHH);
-            return Amg88xxUtils.ConvertToTemperature(tl, th);
-        }
-
-        /// <summary>
-        /// Sets the upper level interrupt temperature
-        /// </summary>
-        /// <param name="temperature">Temperature</param>
-        public void SetInterruptUpperLevel(Temperature temperature)
-        {
-            (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(temperature);
-            SetRegister(Register.INTHL, tl);
-            SetRegister(Register.INTHH, th);
-        }
-
-        /// <summary>
-        /// Gets the hysteresis level interrupt temperature
-        /// </summary>
-        /// <returns>Temperature level</returns>
-        public Temperature GetInterruptHysteresisLevel()
-        {
-            byte tl = GetRegister(Register.INTSL);
-            byte th = GetRegister(Register.INTSH);
-            return Amg88xxUtils.ConvertToTemperature(tl, th);
-        }
-
-        /// <summary>
-        /// Sets the hysteresis level interrupt temperature
-        /// </summary>
-        /// <param name="temperature">Temperature</param>
-        public void SetInterruptHysteresisLevel(Temperature temperature)
-        {
-            (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(temperature);
-            SetRegister(Register.INTSL, tl);
-            SetRegister(Register.INTSH, th);
+            set
+            {
+                (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(value);
+                SetRegister(Register.INTSL, tl);
+                SetRegister(Register.INTSH, th);
+            }
         }
 
         /// <summary>

@@ -12,12 +12,12 @@ namespace Iot.Device.Amg88xx
         /// <summary>
         /// The specification does not give any details on this mode
         /// </summary>
-        DifferenceMode,
+        Difference,
 
         /// <summary>
         /// An interrupt occures if any pixel exceed the upper or lower limit as given in the
         /// interrupt level register
         /// </summary>
-        AbsoluteMode
+        Absolute
     }
 }
