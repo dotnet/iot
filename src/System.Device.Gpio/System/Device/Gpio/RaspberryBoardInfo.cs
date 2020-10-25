@@ -97,16 +97,16 @@ namespace System.Device.Gpio
         {
             _settings = settings;
 
-            ProcessorName = _settings.TryGetValue("Hardware", out string hardware) ? hardware : string.Empty;
+            ProcessorName = _settings.TryGetValue("Hardware", out string? hardware) && hardware is object ? hardware : string.Empty;
 
-            if (_settings.TryGetValue("Revision", out string revision)
+            if (_settings.TryGetValue("Revision", out string? revision)
                 && !string.IsNullOrEmpty(revision)
                 && int.TryParse(revision, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int firmware))
             {
                 Firmware = firmware;
             }
 
-            if (_settings.TryGetValue("Serial", out string serial))
+            if (_settings.TryGetValue("Serial", out string? serial))
             {
                 SerialNumber = serial;
             }

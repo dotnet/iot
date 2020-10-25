@@ -403,7 +403,12 @@ namespace System.Device.Gpio
         /// </remarks>
         private static GpioDriver GetBestDriverForBoardOnWindows()
         {
-            string baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
+            string? baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
+
+            if (baseBoardProduct is null)
+            {
+                throw new Exception("Single board computer type cannot be detected.");
+            }
 
             if (baseBoardProduct == RaspberryPi3Product || baseBoardProduct.StartsWith($"{RaspberryPi3Product} ") ||
                 baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))
