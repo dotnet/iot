@@ -62,7 +62,7 @@ namespace Iot.Device.PiJuiceDevice
             faultStatus.ForcedSystemPowerOff = (response[0] & 0x04) == 0x04;
             faultStatus.WatchdogReset = (response[0] & 0x08) == 0x08;
             faultStatus.BatteryProfileInvalid = (response[0] & 0x20) == 0x20;
-            faultStatus.BatteryChargingTempFault = (BatteryChargingTempFault)(response[0] >> 6 & 0x03);
+            faultStatus.BatteryChargingTemperatureFault = (BatteryChargingTemperatureFault)(response[0] >> 6 & 0x03);
 
             return faultStatus;
         }

@@ -37,6 +37,6 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Battery charging temperature fault
         /// </summary>
-        public BatteryChargingTempFault BatteryChargingTempFault { get; set; }
+        public BatteryChargingTemperatureFault BatteryChargingTemperatureFault { get; set; }
     }
 }

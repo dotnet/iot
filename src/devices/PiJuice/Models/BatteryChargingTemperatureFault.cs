@@ -5,28 +5,28 @@
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
-    /// Determine how the battery temperature is taken
+    /// Battery charging temperature fault
     /// </summary>
-    public enum BatteryTempSense
+    public enum BatteryChargingTemperatureFault
     {
         /// <summary>
-        /// No temperature sensor will be used
+        /// Normal
         /// </summary>
-        NotUsed = 0,
+        Normal = 0,
 
         /// <summary>
-        /// Use batteries built-in NTC as per battery NTC terminal
+        /// Charging is suspended
         /// </summary>
-        NegativeTemperatureCoefficient,
+        Suspended,
 
         /// <summary>
-        /// Use temperature sensor on MCU
+        /// Cool
         /// </summary>
-        OnBoard,
+        Cool,
 
         /// <summary>
-        /// Let the PiJuice software determine which method to use
+        /// Warm
         /// </summary>
-        AutoDetect
+        Warm
     }
 }

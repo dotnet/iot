@@ -180,7 +180,7 @@ namespace Iot.Device.PiJuiceDevice
         /// Get how the battery temperature is taken
         /// </summary>
         /// <returns>Battery temperature sensor configuration</returns>
-        public BatteryTempSense GetBatteryTempSenseConfig()
+        public BatteryTemperatureSense GetBatteryTemperatureSenseConfig()
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryTemperatureSensorConfig, 1);
 
@@ -189,18 +189,18 @@ namespace Iot.Device.PiJuiceDevice
                 throw new ArgumentOutOfRangeException("Battery temperature sensor configuration out of range");
             }
 
-            return (BatteryTempSense)(response[0] & 0x07);
+            return (BatteryTemperatureSense)(response[0] & 0x07);
         }
 
         /// <summary>
         /// Set how the battery temperature is taken
         /// </summary>
-        /// <param name="batteryTempSense">Determine how the battery temperature is taken</param>
-        public void SetBatteryTempSenseConfig(BatteryTempSense batteryTempSense)
+        /// <param name="batteryTemperatureSense">Determine how the battery temperature is taken</param>
+        public void SetBatteryTemperatureSenseConfig(BatteryTemperatureSense batteryTemperatureSense)
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryTemperatureSensorConfig, 1);
 
-            _piJuice.WriteCommandVerify(PiJuiceCommand.BatteryTemperatureSensorConfig, new byte[] { (byte)((response[0] & (~0x07)) | (int)batteryTempSense) });
+            _piJuice.WriteCommandVerify(PiJuiceCommand.BatteryTemperatureSensorConfig, new byte[] { (byte)((response[0] & (~0x07)) | (int)batteryTemperatureSense) });
         }
 
         /// <summary>

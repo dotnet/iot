@@ -117,10 +117,18 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         /// <param name="command">The PiJuice command</param>
         /// <param name="data">The data to write</param>
-        internal void WriteCommand(PiJuiceCommand command, byte[] data)
+        internal void WriteCommand(PiJuiceCommand command, ReadOnlySpan<byte> data)
         {
             byte tries = 0;
-            IOException innerEx = null;
+            Span<byte> buffer = stackalloc byte[data.Length + 2];
+            for (int i = 0; i < data.Length; i++)
+            {
+                buffer[i + 1] = data[i];
+            }
+
+            buffer[0] = (byte)command;
+            buffer[buffer.Length - 1] = GetCheckSum(data, all: true);
+
             // When writing/reading to the I2C port, PiJuice doesn't respond on time in some cases
             // So we wait a little bit before retrying
             // In most cases, the I2C read/write can go thru without waiting
@@ -128,28 +136,21 @@ namespace Iot.Device.PiJuiceDevice
             {
                 try
                 {
-                    // create request
-                    Span<byte> buffer = stackalloc byte[data.Length + 2];
-                    for (int i = 0; i < data.Length; i++)
-                    {
-                        buffer[i + 1] = data[i];
-                    }
-
-                    buffer[0] = (byte)command;
-                    buffer[buffer.Length - 1] = GetCheckSum(data, all: true);
                     _i2cDevice.Write(buffer);
                     return;
                 }
                 catch (IOException ex)
                 {
-                    // Give it another try
-                    innerEx = ex;
                     tries++;
+
+                    if (tries >= MaxRetries)
+                    {
+                        throw new IOException($"{nameof(WriteCommand)}: Failed to write command {command}", ex);
+                    }
+
                     DelayHelper.DelayMilliseconds(ReadRetryDelay, false);
                 }
             }
-
-            throw new IOException($"{nameof(WriteCommand)}: Failed to write command {command}", innerEx);
         }
 
         /// <summary>
@@ -158,7 +159,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <param name="command">The PiJuice command</param>
         /// <param name="data">The data to write</param>
         /// <param name="delay">The delay before reading the data</param>
-        internal void WriteCommandVerify(PiJuiceCommand command, byte[] data, int delay = 0)
+        internal void WriteCommandVerify(PiJuiceCommand command, ReadOnlySpan<byte> data, int delay = 0)
         {
             WriteCommand(command, data);
 
@@ -183,9 +184,10 @@ namespace Iot.Device.PiJuiceDevice
         /// <returns>Returns an array of the bytes read</returns>
         internal byte[] ReadCommand(PiJuiceCommand command, byte length)
         {
-            byte[] outArray = new byte[length + 1];
             byte tries = 0;
-            IOException innerEx = null;
+            Span<byte> outArray = stackalloc byte[length + 1];
+            outArray.Clear();
+
             // When writing/reading the I2C port, PiJuice doesn't respond on time in some cases
             // So we wait a little bit before retrying
             // In most cases, the I2C read/write can go thru without waiting
@@ -204,28 +206,40 @@ namespace Iot.Device.PiJuiceDevice
                         if (checksum != outArray[length])
                         {
                             tries++;
+
+                            if (tries >= MaxRetries)
+                            {
+                                throw new InvalidDataException($"{nameof(ReadCommand)}: Invalid checksum read command {command}, checksum {checksum}");
+                            }
+
+                            DelayHelper.DelayMilliseconds(ReadRetryDelay, false);
+                            continue;
                         }
                     }
 
-                    return outArray.Skip(0).Take(length).ToArray();
+                    break;
                 }
                 catch (IOException ex)
                 {
-                    // Give it another try
-                    innerEx = ex;
                     tries++;
+
+                    if (tries >= MaxRetries - 1)
+                    {
+                        throw new IOException($"{nameof(ReadCommand)}: Failed to read command {command}", ex);
+                    }
+
                     DelayHelper.DelayMilliseconds(ReadRetryDelay, false);
                 }
             }
 
-            throw new IOException($"{nameof(ReadCommand)}: Failed to read command {command}", innerEx);
+            return outArray.Slice(0, length).ToArray();
         }
 
         /// <summary>Gets the check sum.</summary>
         /// <param name="data">The data.</param>
         /// <param name="all">Whether the last byte in the data is included in the checksum</param>
         /// <returns>Checksum</returns>
-        private byte GetCheckSum(byte[] data, bool all = false)
+        private byte GetCheckSum(ReadOnlySpan<byte> data, bool all = false)
         {
             byte fcs = 0xff;
 
