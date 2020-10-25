@@ -4,10 +4,20 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace>Iot.Device.MettlerToledo</RootNamespace>
+    <AssemblyName>Iot.Device.MettlerToledo</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="*.cs" />
+    <Compile Include="Exceptions\BalanceOutOfRangeException.cs" />
+    <Compile Include="Exceptions\CommandNotExecutableException.cs" />
+    <Compile Include="Exceptions\LogicalErrorException.cs" />
+    <Compile Include="Exceptions\MettlerToledoException.cs" />
+    <Compile Include="Exceptions\SyntaxErrorException.cs" />
+    <Compile Include="Exceptions\TransmissionException.cs" />
+    <Compile Include="Exceptions\UnknownResultException.cs" />
+    <Compile Include="Readings\MettlerToledoWeightReading.cs" />
     <None Include="README.md" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MettlerToledo", "MettlerTol
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{03107CFF-FE00-467D-9B38-C00F7E12A7FE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MettlerToledo_Not_Required.Tests", "tests\MettlerToledo_Not_Required.Tests.csproj", "{2B0F5D91-F38B-427D-84DB-5656D9661E1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MettlerToledo.Tests", "tests\MettlerToledo.Tests.csproj", "{2B0F5D91-F38B-427D-84DB-5656D9661E1C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{6A4DE7B1-03F3-4EE0-BF73-A0BAEF88BA2B}"
 EndProject
