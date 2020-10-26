@@ -76,7 +76,7 @@ namespace System.Device.Gpio.Drivers
 
         private void Pin_ValueChanged(WinGpio.GpioPin sender, WinGpio.GpioPinValueChangedEventArgs args)
         {
-            if (!_driver.TryGetTarget(out Windows10Driver driver))
+            if (!_driver.TryGetTarget(out Windows10Driver? driver))
             {
                 return;
             }

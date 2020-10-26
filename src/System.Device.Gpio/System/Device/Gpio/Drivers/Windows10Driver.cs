@@ -67,10 +67,13 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void ClosePin(int pinNumber)
         {
-            if (_openPins.TryGetValue(pinNumber, out Windows10DriverPin pin))
+            if (_openPins.TryGetValue(pinNumber, out Windows10DriverPin? pin))
             {
-                pin.ClosePin();
-                _openPins.Remove(pinNumber);
+                if (pin is object)
+                {
+                    pin.ClosePin();
+                    _openPins.Remove(pinNumber);
+                }
             }
         }
 
