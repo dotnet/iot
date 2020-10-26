@@ -4,10 +4,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.IO.Ports;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
+
 using Iot.Device.MettlerToledo.Exceptions;
 using Iot.Device.MettlerToledo.Messages;
 using Iot.Device.MettlerToledo.Readings;
@@ -15,6 +18,13 @@ using UnitsNet;
 
 namespace Iot.Device.MettlerToledo
 {
+    /// <summary>
+    /// <see cref="MettlerToledoDevice.WeightUpdated"/>
+    /// </summary>
+    /// <param name="sender">Object where the event occurred.</param>
+    /// <param name="e">Event data.</param>
+    public delegate void WeightUpdatedHandler(object sender, MettlerToledoWeightReading e);
+
     /// <summary>
     /// Provides an interface for interacting with MT-SACS devices, like scales.
     /// </summary>
@@ -30,6 +40,11 @@ namespace Iot.Device.MettlerToledo
 
         private SerialPort _serialPort;
         private bool _shouldDisposeSerialPort = true;
+
+        /// <summary>
+        /// Called when the scale reports a new weight, outside of the response to a command. Typically this is due to a call to <see cref="SubscribeToWeightAtIntervals()"/> or <see cref="SubscribeToWeightChangeEvents()"/>
+        /// </summary>
+        public event WeightUpdatedHandler WeightUpdated;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MettlerToledoDevice"/> class.
@@ -197,57 +212,112 @@ namespace Iot.Device.MettlerToledo
         }
 
         /// <summary>
-        /// Have the scale send an event every time the weight is changed.
+        /// Have the scale send an event every time the weight is changed. <see cref="WeightUpdated"/> will be called every time this occurs.
         /// </summary>
         public void SubscribeToWeightChangeEvents()
         {
-            // Uses the SR command (page 26)
+            _serialPort.WriteLine(Commands.SEND_WEIGHT_ON_VAL_CHANGE);
+        }
+
+        private void SubscribeToWeightChangeEvents(Mass minChange)
+        {
+            // TODO: see page 26 of manual (https://www.mt.com/mt_ext_files/Editorial/Generic/7/MT-SICS_for_Excellence_Balances_BA_Editorial-Generic_1116311007471_files/Excellence-SICS-BA-e-11780711B.pdf)
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Have the scale send its current weight at intervals, regardless of stability.
+        /// Have the scale send its current weight at intervals, regardless of stability. <see cref="WeightUpdated"/> will be called every time this occurs.
         /// </summary>
         public void SubscribeToWeightAtIntervals()
         {
-            // Uses the SIR command (page 19)
-            throw new NotImplementedException();
+            _serialPort.WriteLine(Commands.SEND_IMMEDIATE_WEIGHT_VALUE_AND_REPEAT);
         }
 
         /// <summary>
         /// Sends a command over the serial port.
         /// </summary>
         /// <param name="command">Command to send</param>
+        /// <param name="responseCode">Response code we want to receive.</param>
         /// <returns>Result of the command.</returns>
         /// <exception cref="InvalidOperationException" />
         /// <exception cref="TimeoutException">Occurs if the serial port times out while sending or receiving.</exception>
         /// <exception cref="SyntaxErrorException" />
         /// <exception cref="TransmissionErrorException" />
         /// <exception cref="LogicalErrorException" />
-        private string[] SendCommandWithResponse(string command)
+        private string[] SendCommandWithResponse(string command, string responseCode)
         {
             _serialPort.WriteLine(command);
-            var result = _serialPort.ReadLine();
-            var split = result.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var result = ReadResponse(command, responseCode);
+            return result;
+        }
 
-            switch (split[0])
+        private string[] SendCommandWithResponse(string command)
+        {
+            return SendCommandWithResponse(command, command.Split(' ')[0]);
+        }
+
+        private string[] ReadResponse(string command, string responseCode, TimeSpan? timeout = null)
+        {
+            var start = DateTime.Now;
+            while (timeout == null || DateTime.Now - start < timeout)
             {
-                case Errors.SYNTAX_ERROR:
-                    throw new SyntaxErrorException(command);
-                case Errors.TRANSMISSION_ERROR:
-                    throw new TransmissionErrorException(command);
-                case Errors.LOGICAL_ERROR:
-                    throw new LogicalErrorException(command);
+                // TODO: this timeout isn't accurate when timeout < _serialPort.ReadTimeout, because time may have elapsed already
+                var line = timeout == null ? _serialPort.ReadLine() : ReadSerialPortWithTimeout(start - DateTime.Now + timeout.Value);
+                var split = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                switch (split[0])
+                {
+                    case Errors.SYNTAX_ERROR:
+                        throw new SyntaxErrorException(command);
+                    case Errors.TRANSMISSION_ERROR:
+                        throw new TransmissionErrorException(command);
+                    case Errors.LOGICAL_ERROR:
+                        throw new LogicalErrorException(command);
+                }
+
+                if (split[0] == responseCode)
+                {
+                    return split;
+                }
+                else
+                {
+                    // if we're listening for weight change events, we will receive "S" responses periodically
+                    if (split[0] == Responses.WEIGHT_UPDATE)
+                    {
+                        WeightUpdated?.Invoke(this, ParseWeightReading(split));
+                    }
+                    else
+                    {
+                        throw new InvalidDataReceivedException(command, line);
+                    }
+                }
             }
 
-            return split;
+            throw new TimeoutException();
+        }
+
+        private string ReadSerialPortWithTimeout(TimeSpan timeout)
+        {
+            if (timeout.TotalMilliseconds > _serialPort.ReadTimeout)
+            {
+                timeout = TimeSpan.FromMilliseconds(_serialPort.ReadTimeout);
+            }
+
+            var task = Task.Run(() => _serialPort.ReadLine());
+            if (task.Wait(timeout))
+            {
+                return task.Result;
+            }
+
+            throw new TimeoutException();
         }
 
         private MettlerToledoWeightReading GetWeightReading(bool forceImmediate = false)
         {
             var command = forceImmediate ? Commands.SEND_IMMEDIATE_WEIGHT_VALUE : Commands.SEND_STABLE_WEIGHT_VALUE;
-            var response = SendCommandWithResponse(command);
-            bool stable = false;
+            var response = SendCommandWithResponse(command, Responses.WEIGHT_UPDATE);
+
+            // Check if we have an error
             switch (response[1])
             {
                 case Responses.COMMAND_NOT_EXECUTABLE:
@@ -256,16 +326,26 @@ namespace Iot.Device.MettlerToledo
                     throw new BalanceOutOfRangeException(true, false, command);
                 case Responses.Range.LOWER_RANGE_EXCEEDED:
                     throw new BalanceOutOfRangeException(false, true, command);
-                case Responses.Success.STABLE_SUCCESS:
-                    stable = true;
-                    break;
-                case Responses.Success.DYNAMIC_SUCCESS:
-                    stable = false;
-                    break;
             }
 
+            return ParseWeightReading(response);
+        }
+
+        private MettlerToledoWeightReading ParseWeightReading(string[] response)
+        {
             var value = double.Parse(response[2]);
             var unit = _unitMapping.First(x => x.mtAbbreviation == response[3]).unitsNetUnit;
+
+            bool stable = false;
+            if (response[1] == Responses.Success.STABLE_SUCCESS)
+            {
+                stable = true;
+            }
+            else if (response[1] != Responses.Success.DYNAMIC_SUCCESS)
+            {
+                throw new ArgumentException("Did not contain a valid stable value.", nameof(response));
+            }
+
             return new MettlerToledoWeightReading(stable, new Mass(value, unit));
         }
 

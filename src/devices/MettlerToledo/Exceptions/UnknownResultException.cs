@@ -12,10 +12,10 @@ namespace Iot.Device.MettlerToledo.Exceptions
         /// <summary>
         /// Initializes a new instance of the <see cref="UnknownResultException"/> class.
         /// </summary>
-        /// <param name="command">Command that caused this exception</param>
+        /// <param name="command">Command that caused this exception.</param>
         public UnknownResultException(string command)
             : base(command)
-        {
-        }
+            {
+            }
     }
 }

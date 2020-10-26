@@ -83,6 +83,7 @@ namespace Iot.Device.MettlerToledo.Messages
         internal const string COMMAND_EXECUTED = "A";
         internal const string PARAMETERS_MISSING = "L";
         internal const string COMMAND_NOT_EXECUTABLE = "I";
+        internal const string WEIGHT_UPDATE = "S";
 
         internal static class Range
         {

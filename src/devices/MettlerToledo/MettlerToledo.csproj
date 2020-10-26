@@ -12,6 +12,7 @@
     <Compile Include="*.cs" />
     <Compile Include="Exceptions\BalanceOutOfRangeException.cs" />
     <Compile Include="Exceptions\CommandNotExecutableException.cs" />
+    <Compile Include="Exceptions\InvalidDataReceivedException.cs" />
     <Compile Include="Exceptions\LogicalErrorException.cs" />
     <Compile Include="Exceptions\MettlerToledoException.cs" />
     <Compile Include="Exceptions\SyntaxErrorException.cs" />
