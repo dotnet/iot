@@ -151,7 +151,7 @@ namespace Iot.Device.MettlerToledo
                 throw new ArgumentException("Text to display cannot contain quotation marks.", nameof(text));
             }
 
-            var command = $"D \"{text}\"";
+            var command = $"{Commands.WRITE_TO_BALANCE_DISPLAY} \"{text}\"";
             var response = SendCommandWithResponse(command);
             switch (response[1])
             {
@@ -162,7 +162,7 @@ namespace Iot.Device.MettlerToledo
                 case Responses.PARAMETERS_MISSING:
                     throw new CommandNotExecutableException(command); // todo: maybe show a different error?
                 default:
-                    throw new UnknownResultException("Unknown result received");
+                    throw new UnknownResultException(command);
             }
         }
 
