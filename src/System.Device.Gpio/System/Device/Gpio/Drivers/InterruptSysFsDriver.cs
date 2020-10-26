@@ -23,11 +23,6 @@ namespace System.Device.Gpio.Drivers
                 throw new PlatformNotSupportedException($"{GetType().Name} is only supported on Linux/Unix.");
             }
 
-            if (gpioDriver is null)
-            {
-                throw new ArgumentException($"{nameof(gpioDriver)} must not be null.");
-            }
-
             _gpioDriver = gpioDriver;
             StatusUpdateSleepTime = TimeSpan.Zero; // This driver does not need this "magic sleep" as we're directly accessing the hardware registers
         }
