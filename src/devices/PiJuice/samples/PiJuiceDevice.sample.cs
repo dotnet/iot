@@ -10,6 +10,9 @@ namespace PiJuiceDevice.Sample
 {
     internal class Program
     {
+        /// <summary>
+        /// Main entry point
+        /// </summary>
         public static void Main(string[] args)
         {
             Console.WriteLine("Hello PiJuice!");

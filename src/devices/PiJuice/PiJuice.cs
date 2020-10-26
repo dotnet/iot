@@ -121,10 +121,8 @@ namespace Iot.Device.PiJuiceDevice
         {
             byte tries = 0;
             Span<byte> buffer = stackalloc byte[data.Length + 2];
-            for (int i = 0; i < data.Length; i++)
-            {
-                buffer[i + 1] = data[i];
-            }
+
+            data.CopyTo(buffer.Slice(1));
 
             buffer[0] = (byte)command;
             buffer[buffer.Length - 1] = GetCheckSum(data, all: true);

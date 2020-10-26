@@ -77,9 +77,9 @@ namespace Iot.Device.PiJuiceDevice
 
             var buttonEvents = new List<ButtonEventType>(3)
             {
-                GetButtonEventType(response[0] & 0x0F),
-                GetButtonEventType((response[0] >> 4) & 0x0F),
-                GetButtonEventType(response[1] & 0x0F)
+                Enum.IsDefined(typeof(ButtonEventType), response[0] & 0x0F) ? (ButtonEventType)(response[0] & 0x0F) : ButtonEventType.Unknown,
+                Enum.IsDefined(typeof(ButtonEventType), (response[0] >> 4) & 0x0F) ? (ButtonEventType)((response[0] >> 4) & 0x0F) : ButtonEventType.Unknown,
+                Enum.IsDefined(typeof(ButtonEventType), response[1] & 0x0F) ? (ButtonEventType)(response[1] & 0x0F) : ButtonEventType.Unknown,
             };
 
             return buttonEvents;
@@ -257,20 +257,6 @@ namespace Iot.Device.PiJuiceDevice
             data[8] = (byte)((int)(ledBlink.SecondPeriod.TotalMilliseconds / 10) & 0xFF);
 
             _piJuice.WriteCommand(PiJuiceCommand.LedBlink + (byte)ledBlink.Led, data);
-        }
-
-        /// <summary>
-        /// Get button event type
-        /// </summary>
-        /// <param name="buttonEventTypeIndex">Button event type index</param>
-        private ButtonEventType GetButtonEventType(int buttonEventTypeIndex)
-        {
-            if (buttonEventTypeIndex < 0 || buttonEventTypeIndex > 6)
-            {
-                return ButtonEventType.Unknown;
-            }
-
-            return (ButtonEventType)buttonEventTypeIndex;
         }
     }
 }
