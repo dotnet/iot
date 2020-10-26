@@ -3,11 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Text;
+using System.Collections.Generic;
 using System.IO.Ports;
-using UnitsNet;
-using Iot.Device.MettlerToledo.Readings;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Iot.Device.MettlerToledo.Exceptions;
+using Iot.Device.MettlerToledo.Messages;
+using Iot.Device.MettlerToledo.Readings;
+using UnitsNet;
 
 namespace Iot.Device.MettlerToledo
 {
@@ -16,6 +20,14 @@ namespace Iot.Device.MettlerToledo
     /// </summary>
     public class MettlerToledoDevice : IDisposable
     {
+        // TODO: we need to test on a real scale to determine what the response for other weights are when they are set to Unit 1
+        private static readonly (string mtAbbreviation, MettlerToledoWeightUnit mtUnit, UnitsNet.Units.MassUnit unitsNetUnit)[] _unitMapping =
+        {
+            ("g", MettlerToledoWeightUnit.Grams, UnitsNet.Units.MassUnit.Gram),
+            ("kg", MettlerToledoWeightUnit.Kilograms, UnitsNet.Units.MassUnit.Kilogram),
+            ("mg", MettlerToledoWeightUnit.Milligrams, UnitsNet.Units.MassUnit.Milligram)
+        };
+
         private SerialPort _serialPort;
         private bool _shouldDisposeSerialPort = true;
 
@@ -61,6 +73,8 @@ namespace Iot.Device.MettlerToledo
         public void Open()
         {
             _serialPort.Open();
+            _serialPort.DiscardInBuffer();
+            _serialPort.DiscardOutBuffer();
         }
 
         /// <summary>
@@ -83,24 +97,24 @@ namespace Iot.Device.MettlerToledo
         /// <returns>Boolean indicating whether re-zero was performed under stable conditions</returns>
         public bool Zero(bool immediately = false)
         {
-            var command = immediately ? "ZI" : "Z";
+            var command = immediately ? Commands.ZERO_BALANCE_IMMEDIATELY : Commands.ZERO_BALANCE;
             var response = SendCommandWithResponse(command);
             switch (response[1])
             {
-                case "I":
+                case Responses.COMMAND_NOT_EXECUTABLE:
                     throw new CommandNotExecutableException(command);
-                case "+":
+                case Responses.Range.UPPER_RANGE_EXCEEDED:
                     throw new BalanceOutOfRangeException(true, false, command);
-                case "-":
+                case Responses.Range.LOWER_RANGE_EXCEEDED:
                     throw new BalanceOutOfRangeException(false, true, command);
-                case "A": // non-force stable success
+                case Responses.COMMAND_EXECUTED: // non-force stable success
                     return true;
-                case "S": // force stable success
+                case Responses.Success.STABLE_SUCCESS: // force stable success
                     return true;
-                case "D": // force non-stable success
+                case Responses.Success.DYNAMIC_SUCCESS: // force non-stable success
                     return false;
                 default:
-                    throw new UnknownResultException("Unknown result received");
+                    throw new UnknownResultException(command);
             }
         }
 
@@ -116,10 +130,11 @@ namespace Iot.Device.MettlerToledo
         /// <exception cref="UnknownResultException"></exception>
         public void Reset()
         {
-            var response = SendCommandWithResponse("@");
-            if (response[0] != "I4")
+            var response = SendCommandWithResponse(Commands.RESET_BALANCE);
+            // Scale will always print the serial number when powered on.
+            if (response[0] != Commands.GET_SERIAL_NUMBER)
             {
-                throw new UnknownResultException("Unknown result received");
+                throw new UnknownResultException(Commands.RESET_BALANCE);
             }
         }
 
@@ -140,11 +155,11 @@ namespace Iot.Device.MettlerToledo
             var response = SendCommandWithResponse(command);
             switch (response[1])
             {
-                case "A": // success
+                case Responses.COMMAND_EXECUTED:
                     break;
-                case "I":
+                case Responses.COMMAND_NOT_EXECUTABLE:
                     throw new CommandNotExecutableException(command);
-                case "L":
+                case Responses.PARAMETERS_MISSING:
                     throw new CommandNotExecutableException(command); // todo: maybe show a different error?
                 default:
                     throw new UnknownResultException("Unknown result received");
@@ -168,24 +183,34 @@ namespace Iot.Device.MettlerToledo
         /// <exception cref="CommandNotExecutableException" />
         public void ShowWeightOnDisplay()
         {
-            var command = "DW";
+            var command = Commands.DISPLAY_WEIGHT;
             var response = SendCommandWithResponse(command);
             switch (response[1])
             {
-                case "A": // success
+                case Responses.COMMAND_EXECUTED:
                     break;
-                case "I":
+                case Responses.COMMAND_NOT_EXECUTABLE:
                     throw new CommandNotExecutableException(command);
                 default:
-                    throw new UnknownResultException("Unknown result received");
+                    throw new UnknownResultException(command);
             }
         }
 
         /// <summary>
         /// Have the scale send an event every time the weight is changed.
         /// </summary>
-        public void SubscribeToWeightEvents()
+        public void SubscribeToWeightChangeEvents()
         {
+            // Uses the SR command (page 26)
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Have the scale send its current weight at intervals, regardless of stability.
+        /// </summary>
+        public void SubscribeToWeightAtIntervals()
+        {
+            // Uses the SIR command (page 19)
             throw new NotImplementedException();
         }
 
@@ -207,11 +232,11 @@ namespace Iot.Device.MettlerToledo
 
             switch (split[0])
             {
-                case "ES":
+                case Errors.SYNTAX_ERROR:
                     throw new SyntaxErrorException(command);
-                case "ET":
+                case Errors.TRANSMISSION_ERROR:
                     throw new TransmissionErrorException(command);
-                case "EL":
+                case Errors.LOGICAL_ERROR:
                     throw new LogicalErrorException(command);
             }
 
@@ -220,28 +245,28 @@ namespace Iot.Device.MettlerToledo
 
         private MettlerToledoWeightReading GetWeightReading(bool forceImmediate = false)
         {
-            var command = forceImmediate ? "SI" : "S"; // SI sends the current net weight value, irrespective of balance stability. S will wait for the scale to balance.
+            var command = forceImmediate ? Commands.SEND_IMMEDIATE_WEIGHT_VALUE : Commands.SEND_STABLE_WEIGHT_VALUE;
             var response = SendCommandWithResponse(command);
             bool stable = false;
             switch (response[1])
             {
-                case "I":
+                case Responses.COMMAND_NOT_EXECUTABLE:
                     throw new CommandNotExecutableException(command);
-                case "+":
+                case Responses.Range.UPPER_RANGE_EXCEEDED:
                     throw new BalanceOutOfRangeException(true, false, command);
-                case "-":
+                case Responses.Range.LOWER_RANGE_EXCEEDED:
                     throw new BalanceOutOfRangeException(false, true, command);
-                case "S":
+                case Responses.Success.STABLE_SUCCESS:
                     stable = true;
                     break;
-                case "D":
+                case Responses.Success.DYNAMIC_SUCCESS:
                     stable = false;
                     break;
             }
 
             var value = double.Parse(response[2]);
-            return new MettlerToledoWeightReading(stable, new Mass(value, UnitsNet.Units.MassUnit.Gram));
-            // TODO: Weight unit is specified by response[3]
+            var unit = _unitMapping.First(x => x.mtAbbreviation == response[3]).unitsNetUnit;
+            return new MettlerToledoWeightReading(stable, new Mass(value, unit));
         }
 
         /// <inheritdoc />

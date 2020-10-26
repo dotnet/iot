@@ -16,3 +16,7 @@ Provide any specifics related to binding API.  This could include how to configu
 
 ## References 
 Provide any references to other tutorials, blogs and hardware related to the component that could help others get started.
+
+## Some Quick Notes
+
+- "unit 1" refers to the default unit of the device. All S commands are given in unit 1.
