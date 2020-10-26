@@ -69,11 +69,8 @@ namespace System.Device.Gpio.Drivers
         {
             if (_openPins.TryGetValue(pinNumber, out Windows10DriverPin? pin))
             {
-                if (pin is object)
-                {
-                    pin.ClosePin();
-                    _openPins.Remove(pinNumber);
-                }
+                pin.ClosePin();
+                _openPins.Remove(pinNumber);
             }
         }
 
