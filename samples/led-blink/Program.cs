@@ -6,32 +6,23 @@ using System;
 using System.Device.Gpio;
 using System.Threading;
 
-namespace led_blink
+var pin = 18;
+var lightTime = 1000;
+var dimTime = 200;
+
+Console.WriteLine($"Let's blink an LED!");
+using GpioController controller = new();
+controller.OpenPin(pin, PinMode.Output);
+Console.WriteLine($"GPIO pin enabled for use: {pin}");
+
+// turn LED on and off
+while (true)
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            var pin = 18;
-            var lightTime = 1000;
-            var dimTime = 200;
-            
-            Console.WriteLine($"Let's blink an LED!");
-            using GpioController controller = new GpioController();
-            controller.OpenPin(pin, PinMode.Output);
-            Console.WriteLine($"GPIO pin enabled for use: {pin}");
+    Console.WriteLine($"Light for {lightTime}ms");
+    controller.Write(pin, PinValue.High);
+    Thread.Sleep(lightTime);
 
-            // turn LED on and off
-            while (true)
-            {
-                Console.WriteLine($"Light for {lightTime}ms");
-                controller.Write(pin, PinValue.High);
-                Thread.Sleep(lightTime);
-
-                Console.WriteLine($"Dim for {dimTime}ms");
-                controller.Write(pin, PinValue.Low);
-                Thread.Sleep(dimTime);
-            }
-        }
-    }
+    Console.WriteLine($"Dim for {dimTime}ms");
+    controller.Write(pin, PinValue.Low);
+    Thread.Sleep(dimTime);
 }
