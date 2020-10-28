@@ -8,6 +8,7 @@
     <Copyright>$(CopyrightNetFoundation)</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <MainLibraryPath>$(MSBuildThisFileDirectory)src/System.Device.Gpio/</MainLibraryPath>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
