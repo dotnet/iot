@@ -19,6 +19,10 @@ while (!Console.KeyAvailable)
             {
                 Console.WriteLine($"Temperature from {entry.Item1.ToString()}: {entry.Item2.DegreesCelsius} °C");
             }
+            else
+            {
+                Console.WriteLine("Unable to read Temperature.");
+            }
         }
     }
     else

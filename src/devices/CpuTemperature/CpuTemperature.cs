@@ -15,13 +15,27 @@ namespace Iot.Device.CpuTemperature
     /// <summary>
     /// CPU temperature.
     /// On Windows, the value returned is driver dependent and may not represent actual CPU temperature, but more one
-    /// of the case sensors. Use <see cref="OpenHardwareMonitor"/> for better environmental representation in Windows.
+    /// of the case sensors. Use OpenHardwareMonitor for better environmental representation in Windows.
     /// </summary>
     public class CpuTemperature
     {
         private bool _isAvailable;
         private bool _checkedIfAvailable;
         private bool _windows;
+        private List<ManagementObjectSearcher> _managementObjectSearchers;
+
+        /// <summary>
+        /// Creates an instance of the CpuTemperature class
+        /// </summary>
+        public CpuTemperature()
+        {
+            _isAvailable = false;
+            _checkedIfAvailable = false;
+            _windows = false;
+            _managementObjectSearchers = new List<ManagementObjectSearcher>();
+
+            CheckAvailable();
+        }
 
         /// <summary>
         /// Gets CPU temperature
@@ -42,12 +56,10 @@ namespace Iot.Device.CpuTemperature
             }
         }
 
-        private List<ManagementObjectSearcher> _managementObjectSearchers = new List<ManagementObjectSearcher>();
-
         /// <summary>
         /// Is CPU temperature available
         /// </summary>
-        public bool IsAvailable => CheckAvailable();
+        public bool IsAvailable => _isAvailable;
 
         private bool CheckAvailable()
         {
