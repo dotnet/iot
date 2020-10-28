@@ -10,6 +10,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+#pragma warning disable SA1011
+
 namespace System.Device.Gpio.Drivers
 {
     /// <summary>
@@ -29,7 +31,7 @@ namespace System.Device.Gpio.Drivers
         private const string DeviceTreeRanges = "/proc/device-tree/soc/ranges";
         private const string ModelFilePath = "/proc/device-tree/model";
 
-        private readonly PinState[] _pinModes;
+        private readonly PinState?[] _pinModes;
         private RegisterView* _registerViewPointer = null;
         private static readonly object s_initializationLock = new object();
 
@@ -114,7 +116,7 @@ namespace System.Device.Gpio.Drivers
             ValidatePinNumber(pinNumber);
 
             _interruptDriver!.OpenPin(pinNumber);
-            _pinModes[pinNumber].InUseByInterruptDriver = true;
+            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
             _interruptDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
         }
 
@@ -134,7 +136,7 @@ namespace System.Device.Gpio.Drivers
             // Set pin low and mode to input upon closing a pin
             Write(pinNumber, PinValue.Low);
             SetPinMode(pinNumber, PinMode.Input);
-            _pinModes[pinNumber] = null!;
+            _pinModes[pinNumber] = null;
         }
 
         /// <summary>
@@ -196,7 +198,7 @@ namespace System.Device.Gpio.Drivers
             ValidatePinNumber(pinNumber);
 
             _interruptDriver!.OpenPin(pinNumber);
-            _pinModes[pinNumber].InUseByInterruptDriver = true;
+            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
 
             _interruptDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
         }
@@ -234,7 +236,7 @@ namespace System.Device.Gpio.Drivers
 
             if (_pinModes[pinNumber] is object)
             {
-                _pinModes[pinNumber].CurrentPinMode = mode;
+                _pinModes[pinNumber]!.CurrentPinMode = mode;
             }
             else
             {
@@ -377,7 +379,7 @@ namespace System.Device.Gpio.Drivers
             ValidatePinNumber(pinNumber);
 
             _interruptDriver!.OpenPin(pinNumber);
-            _pinModes[pinNumber].InUseByInterruptDriver = true;
+            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
 
             return _interruptDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
         }
@@ -394,7 +396,7 @@ namespace System.Device.Gpio.Drivers
             ValidatePinNumber(pinNumber);
 
             _interruptDriver!.OpenPin(pinNumber);
-            _pinModes[pinNumber].InUseByInterruptDriver = true;
+            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
 
             return _interruptDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
         }
