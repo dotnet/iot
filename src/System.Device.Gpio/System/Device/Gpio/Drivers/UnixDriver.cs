@@ -32,7 +32,7 @@ namespace System.Device.Gpio.Drivers
                 throw new PlatformNotSupportedException(nameof(UnixDriver) + " is only supported on Linux/Unix");
             }
 
-            UnixDriver driver = null;
+            UnixDriver? driver = null;
             try
             {
                 driver = new LibGpiodDriver();

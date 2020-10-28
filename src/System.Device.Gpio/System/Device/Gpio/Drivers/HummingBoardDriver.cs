@@ -102,7 +102,7 @@ namespace System.Device.Gpio.Drivers
         protected override void Dispose(bool disposing)
         {
             _internalDriver?.Dispose();
-            _internalDriver = null;
+            _internalDriver = null!;
             base.Dispose(disposing);
         }
     }

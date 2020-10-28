@@ -13,8 +13,8 @@ namespace System.Device.Gpio.Drivers
             ActiveEdges = PinEventTypes.None;
         }
 
-        public event PinChangeEventHandler ValueRising;
-        public event PinChangeEventHandler ValueFalling;
+        public event PinChangeEventHandler? ValueRising;
+        public event PinChangeEventHandler? ValueFalling;
 
         public int FileDescriptor;
 

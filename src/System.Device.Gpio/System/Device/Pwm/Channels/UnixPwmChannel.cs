@@ -235,9 +235,9 @@ namespace System.Device.Pwm.Channels
         protected override void Dispose(bool disposing)
         {
             _dutyCycleWriter?.Dispose();
-            _dutyCycleWriter = null;
+            _dutyCycleWriter = null!;
             _frequencyWriter?.Dispose();
-            _frequencyWriter = null;
+            _frequencyWriter = null!;
             Close();
             base.Dispose(disposing);
         }

@@ -62,7 +62,7 @@ namespace System.Device.Gpio
         public bool Equals(PinValue other) => other._value == _value;
 
         /// <inheritdoc cref="ValueType.Equals(object)"/>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is PinValue)
             {

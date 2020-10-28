@@ -381,9 +381,9 @@ namespace System.Device.Gpio
         /// <returns>A driver that works with the board the program is executing on.</returns>
         private static GpioDriver GetBestDriverForBoardOnLinux()
         {
-            RaspberryPi3LinuxDriver internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
+            RaspberryPi3LinuxDriver? internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
 
-            if (internalDriver != null)
+            if (internalDriver is object)
             {
                 return new RaspberryPi3Driver(internalDriver);
             }
@@ -403,7 +403,12 @@ namespace System.Device.Gpio
         /// </remarks>
         private static GpioDriver GetBestDriverForBoardOnWindows()
         {
-            string baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
+            string? baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
+
+            if (baseBoardProduct is null)
+            {
+                throw new Exception("Single board computer type cannot be detected.");
+            }
 
             if (baseBoardProduct == RaspberryPi3Product || baseBoardProduct.StartsWith($"{RaspberryPi3Product} ") ||
                 baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))

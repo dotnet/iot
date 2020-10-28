@@ -28,7 +28,7 @@ namespace System.Device.Gpio.Drivers
         private static readonly int s_pinOffset = ReadOffset();
         private TimeSpan _statusUpdateSleepTime = TimeSpan.FromMilliseconds(1);
         private int _pollFileDescriptor = -1;
-        private Thread _eventDetectionThread;
+        private Thread? _eventDetectionThread;
         private int _pinsToDetectEventsCount;
 
         private static int ReadOffset()

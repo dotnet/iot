@@ -10,6 +10,7 @@
     <NoWarn>$(NoWarn);CS8321;CS1591</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
     <MainLibraryPath>$(MSBuildThisFileDirectory)../src/System.Device.Gpio/</MainLibraryPath>
     <IotBindingsLibraryPath>$(MSBuildThisFileDirectory)../src/Iot.Device.Bindings/</IotBindingsLibraryPath>
   </PropertyGroup>

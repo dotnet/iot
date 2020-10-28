@@ -45,7 +45,7 @@ namespace System.Device.Gpio.Drivers
             if (disposing)
             {
                 // not our instance
-                _gpioDriver = null;
+                _gpioDriver = null!;
             }
 
             base.Dispose(disposing);
