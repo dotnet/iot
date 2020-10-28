@@ -16,8 +16,8 @@ namespace System.Device.Gpio.Drivers
         private readonly int _pinNumber;
         private WeakReference<Windows10Driver> _driver;
         private WinGpio.GpioPin _pin;
-        private PinChangeEventHandler _risingCallbacks;
-        private PinChangeEventHandler _fallingCallbacks;
+        private PinChangeEventHandler? _risingCallbacks;
+        private PinChangeEventHandler? _fallingCallbacks;
 
         public Windows10DriverPin(Windows10Driver driver, WinGpio.GpioPin pin)
         {
@@ -40,10 +40,10 @@ namespace System.Device.Gpio.Drivers
             {
                 _pin.ValueChanged -= Pin_ValueChanged;
                 _pin.Dispose();
-                _pin = null;
+                _pin = null!;
             }
 
-            _driver = null;
+            _driver = null!;
             _fallingCallbacks = null;
             _risingCallbacks = null;
             GC.SuppressFinalize(this);
@@ -76,7 +76,7 @@ namespace System.Device.Gpio.Drivers
 
         private void Pin_ValueChanged(WinGpio.GpioPin sender, WinGpio.GpioPinValueChangedEventArgs args)
         {
-            if (!_driver.TryGetTarget(out Windows10Driver driver))
+            if (!_driver.TryGetTarget(out Windows10Driver? driver))
             {
                 return;
             }

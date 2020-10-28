@@ -25,7 +25,7 @@ namespace led_more_blinking_lights
             // volume support
             var initialSleep = 100;
             var sleep = initialSleep;
-            Volume volume = null;
+            Volume? volume = null;
             // this line should only be enabled if a trimpot is connected
             volume = Volume.EnableVolume();
 
@@ -87,7 +87,7 @@ namespace led_more_blinking_lights
                     }
 
                     // behavior for buttonOne
-                    if (volume != null)
+                    if (volume is object)
                     {
                         var update = true;
                         var value = 0;
