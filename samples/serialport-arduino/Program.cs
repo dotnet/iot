@@ -40,8 +40,8 @@ Console.WriteLine("    start/stop spinning");
 
 while (!finished)
 {
-    string line = Console.ReadLine();
-    if (line == "!q")
+    string? line = Console.ReadLine();
+    if (line is object && line == "!q")
         break;
 
     try

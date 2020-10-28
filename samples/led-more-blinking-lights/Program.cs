@@ -19,7 +19,7 @@ var volumeSleep = 50;
 // volume support
 var initialSleep = 100;
 var sleep = initialSleep;
-Volume volume = null;
+Volume? volume = null;
 // this line should only be enabled if a trimpot is connected
 volume = Volume.EnableVolume();
 
