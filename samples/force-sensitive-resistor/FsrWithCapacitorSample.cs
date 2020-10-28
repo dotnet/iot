@@ -8,12 +8,11 @@ namespace force_sensitive_resistor
 {
     class FsrWithCapacitorSample
     {
-        private GpioController _controller;
+        private readonly GpioController _controller = new();
         private int _pinNumber = 18; // set the reading pin number
 
         public FsrWithCapacitorSample()
         {
-            _controller = new GpioController();
             _controller.OpenPin(_pinNumber);
         }
 
