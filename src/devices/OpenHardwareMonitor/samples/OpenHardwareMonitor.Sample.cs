@@ -17,7 +17,7 @@ namespace Iot.Device.OpenHardwareMonitor.Samples
             Console.WriteLine("Press any key to quit");
 
             OpenHardwareMonitor hw = new OpenHardwareMonitor();
-            if (!hw.IsAvailable)
+            if (hw.GetSensorList().Count == 0)
             {
                 Console.WriteLine("OpenHardwareMonitor is not running");
                 return;

@@ -10,7 +10,6 @@ using System.Text;
 using System.Threading;
 using UnitsNet;
 
-#pragma warning disable CS1591
 namespace Iot.Device.OpenHardwareMonitor
 {
     /// <summary>
@@ -22,10 +21,14 @@ namespace Iot.Device.OpenHardwareMonitor
     {
         private static readonly TimeSpan MonitorInterval = TimeSpan.FromMilliseconds(100);
 
-        private bool _isAvalable;
-
         private delegate IQuantity UnitCreator(float value);
 
+        /// <summary>
+        /// Event that gets invoked when a value is updated
+        /// </summary>
+        /// <param name="sensor">Sensor that has an updated value</param>
+        /// <param name="value">New value for the sensor</param>
+        /// <param name="timeSinceUpdate">Time since the last update of this sensor</param>
         public delegate void OnNewValue(Sensor sensor, IQuantity value, TimeSpan timeSinceUpdate);
 
         private static Dictionary<SensorType, (Type Type, UnitCreator Creator)> _typeMap;
@@ -55,9 +58,13 @@ namespace Iot.Device.OpenHardwareMonitor
             _typeMap.Add(SensorType.Current, (typeof(ElectricCurrent), x => ElectricCurrent.FromAmperes(x)));
         }
 
+        /// <summary>
+        /// Constructs a new instance of this class.
+        /// The class can be constructed even if no sensors are available or OpenHardwareMonitor is not running (yet).
+        /// </summary>
+        /// <exception cref="PlatformNotSupportedException">The operating system is not Windows.</exception>
         public OpenHardwareMonitor()
         {
-            _isAvalable = false;
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 throw new PlatformNotSupportedException("This class is only supported on Windows operating systems");
@@ -80,7 +87,6 @@ namespace Iot.Device.OpenHardwareMonitor
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", "SELECT * FROM Sensor");
                 if (searcher.Get().Count > 0)
                 {
-                    _isAvalable = true;
                     foreach (var hardware in GetHardwareComponents())
                     {
                         if (hardware.Type.Equals("CPU", StringComparison.OrdinalIgnoreCase))
@@ -103,8 +109,9 @@ namespace Iot.Device.OpenHardwareMonitor
             }
         }
 
-        public bool IsAvailable => _isAvalable;
-
+        /// <summary>
+        /// Number of logical processors in the system
+        /// </summary>
         public int LogicalProcessors
         {
             get
@@ -145,6 +152,9 @@ namespace Iot.Device.OpenHardwareMonitor
             return ret;
         }
 
+        /// <summary>
+        /// Returns a list of hardware components, such as "CPU", "GPU" or "Mainboard"
+        /// </summary>
         public IList<Hardware> GetHardwareComponents()
         {
             IList<Hardware> ret = new List<Hardware>();
@@ -164,6 +174,11 @@ namespace Iot.Device.OpenHardwareMonitor
             return ret;
         }
 
+        /// <summary>
+        /// Get the list of sensors for a specific piece of hardware
+        /// </summary>
+        /// <param name="forHardware">The module that should be queried</param>
+        /// <returns>A list of sensors</returns>
         public IEnumerable<Sensor> GetSensorList(Hardware forHardware)
         {
             if (forHardware == null)
@@ -201,7 +216,7 @@ namespace Iot.Device.OpenHardwareMonitor
         }
 
         /// <summary>
-        /// Gets the average CPU temperature (averaged over all CPU sensors / cores)
+        /// Gets the average GPU temperature (averaged over all GPU sensors / cores)
         /// </summary>
         /// <param name="temperature">The average GPU temperature</param>
         public bool TryGetAverageGpuTemperature(out Temperature temperature)
@@ -225,6 +240,9 @@ namespace Iot.Device.OpenHardwareMonitor
             return false;
         }
 
+        /// <summary>
+        /// Gets the overall CPU Load
+        /// </summary>
         public Ratio GetCpuLoad()
         {
             foreach (var s in GetSensorList(_cpu).OrderBy(x => x.Identifier))
@@ -238,6 +256,15 @@ namespace Iot.Device.OpenHardwareMonitor
             return default(Ratio);
         }
 
+        /// <summary>
+        /// Tries to calculate the average of a set of sensors.
+        /// </summary>
+        /// <typeparam name="T">Type of value to query (i.e. Load, Power)</typeparam>
+        /// <param name="hardware">The hardware type (i.e. CPU)</param>
+        /// <param name="average">Gets the returned quantity</param>
+        /// <returns>True if at least one matching quantity was found</returns>
+        /// <exception cref="NotSupportedException">There were multiple sensors found, but they return different units (i.e. CPU temperature is
+        /// reported as Celsius for some cores and Fahrenheit for others)</exception>
         public bool TryGetAverage<T>(Hardware hardware, out T average)
             where T : IQuantity
         {
@@ -318,6 +345,10 @@ namespace Iot.Device.OpenHardwareMonitor
             }
         }
 
+        /// <summary>
+        /// Stops monitoring of the given job.
+        /// </summary>
+        /// <param name="job">Monitoring job</param>
         public void StopMonitoring(MonitoringJob job)
         {
             lock (_lock)
@@ -326,6 +357,9 @@ namespace Iot.Device.OpenHardwareMonitor
             }
         }
 
+        /// <summary>
+        /// Stops all monitoring.
+        /// </summary>
         public void StopAllMonitoring()
         {
             lock (_lock)
@@ -390,7 +424,7 @@ namespace Iot.Device.OpenHardwareMonitor
         /// <summary>
         /// Adds some special derived sensors.
         /// - For each power sensor, this adds another sensor that integrates power over time and so generated the energy used in W/h or
-        /// more conveniently, Kilowatthours (this is the unit the electric bill bases on)
+        /// more conveniently, Kilowatthours (this is the unit the electricity bill bases on)
         /// - Gives the heat flux for the primary CPU, using the given CPU die size (or a default value)
         /// </summary>
         /// <param name="cpuDieSize">Die size of your CPU, optional. Find your CPU on https://en.wikichip.org/ to find out. Note: This
@@ -425,7 +459,7 @@ namespace Iot.Device.OpenHardwareMonitor
                     // Energy usage (integration of power over time)
                     var managementInstance = new EnergyManagementInstance();
                     Sensor newSensor = new Sensor(managementInstance, sensor.Name + " Energy", sensor.Identifier + "/energy", sensor.Identifier, SensorType.Energy);
-                    newSensor.Tag = StartMonitoring(sensor, TimeSpan.FromMilliseconds(500), (s, value, timeSinceUpdate) =>
+                    newSensor.Job = StartMonitoring(sensor, TimeSpan.FromMilliseconds(500), (s, value, timeSinceUpdate) =>
                     {
                         double previousEnergy = managementInstance.Value;
                         // Value is in watts, so increment is in watts-hours, which is an unit we can later convert from
@@ -441,7 +475,7 @@ namespace Iot.Device.OpenHardwareMonitor
                 {
                     var managementInstance = new EnergyManagementInstance();
                     var newSensor = new Sensor(managementInstance, sensor.Name + " HeatFlux", sensor.Identifier + "/heatflux", sensor.Identifier, SensorType.HeatFlux);
-                    newSensor.Tag = StartMonitoring(sensor, TimeSpan.FromMilliseconds(500), (s, value, timeSinceUpdate) =>
+                    newSensor.Job = StartMonitoring(sensor, TimeSpan.FromMilliseconds(500), (s, value, timeSinceUpdate) =>
                     {
                         Power p = Power.FromWatts(value.Value); // Current power usage in Watts
                         HeatFlux hf = p / cpuDieSize;
@@ -458,7 +492,7 @@ namespace Iot.Device.OpenHardwareMonitor
             {
                 var managementInstance = new EnergyManagementInstance();
                 var newSensor = new Sensor(managementInstance, vcore.Name + " Current", vcore.Identifier + "/current", vcore.Identifier, SensorType.Current);
-                newSensor.Tag = StartMonitoring(vcore, TimeSpan.FromMilliseconds(500), (s, value, timeSinceUpdate) =>
+                newSensor.Job = StartMonitoring(vcore, TimeSpan.FromMilliseconds(500), (s, value, timeSinceUpdate) =>
                 {
                     if (cpuPower.TryGetValue(out Power power))
                     {
@@ -472,16 +506,20 @@ namespace Iot.Device.OpenHardwareMonitor
             }
         }
 
+        /// <summary>
+        /// Remove the derived sensors from the active list.
+        /// </summary>
         public void DisableDerivedSensors()
         {
             foreach (var s in _derivedSensors)
             {
-                StopMonitoring((MonitoringJob)s.Tag);
+                StopMonitoring(s.Job);
             }
 
             _derivedSensors.Clear();
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             StopAllMonitoring();
@@ -489,10 +527,16 @@ namespace Iot.Device.OpenHardwareMonitor
             _cpu = null;
         }
 
+        /// <summary>
+        /// Represents a single sensor
+        /// </summary>
         public sealed class Sensor : IDisposable
         {
             private readonly ManagementObject _instance;
 
+            /// <summary>
+            /// Creates a sensor instance
+            /// </summary>
             public Sensor(ManagementObject instance, string name, string identifier, string parent, SensorType typeEnum)
             {
                 _instance = instance;
@@ -502,20 +546,40 @@ namespace Iot.Device.OpenHardwareMonitor
                 SensorType = typeEnum;
             }
 
+            /// <summary>
+            /// Name of the sensor
+            /// </summary>
             public string Name { get; }
+
+            /// <summary>
+            /// Sensor identifier (device path)
+            /// </summary>
             public string Identifier { get; }
+
+            /// <summary>
+            /// Sensor parent
+            /// </summary>
             public string Parent { get; }
+
+            /// <summary>
+            /// Kind of sensor
+            /// </summary>
             public SensorType SensorType { get; }
 
             /// <summary>
-            /// An user-defined marker that is attached to this sensor instance
+            /// Job associated with updating this value
             /// </summary>
-            public object Tag
+            internal MonitoringJob Job
             {
                 get;
                 set;
             }
 
+            /// <summary>
+            /// Attempt to query a value for the sensor
+            /// </summary>
+            /// <param name="value">Returned value</param>
+            /// <returns>True if a value was available</returns>
             public bool TryGetValue(out IQuantity value)
             {
                 if (!_typeMap.TryGetValue(SensorType, out var elem))
@@ -531,6 +595,12 @@ namespace Iot.Device.OpenHardwareMonitor
                 return true;
             }
 
+            /// <summary>
+            /// Attempt to get a value of the provided type
+            /// </summary>
+            /// <typeparam name="T">The type of the quantity to return</typeparam>
+            /// <param name="value">The returned value</param>
+            /// <returns>True if a value of type T could be retrieved</returns>
             public bool TryGetValue<T>(out T value)
                 where T : IQuantity
             {
@@ -553,19 +623,27 @@ namespace Iot.Device.OpenHardwareMonitor
                 return true;
             }
 
+            /// <inheritdoc />
             public override string ToString()
             {
                 return Name;
             }
 
+            /// <inheritdoc/>
             public void Dispose()
             {
                 _instance.Dispose();
             }
         }
 
+        /// <summary>
+        /// Represents a piece of hardware
+        /// </summary>
         public sealed class Hardware
         {
+            /// <summary>
+            /// Create an instance of this class
+            /// </summary>
             public Hardware(string name, string identifier, string parent, string type)
             {
                 Name = name;
@@ -574,17 +652,38 @@ namespace Iot.Device.OpenHardwareMonitor
                 Type = type;
             }
 
+            /// <summary>
+            /// Name of the object
+            /// </summary>
             public string Name { get; }
+
+            /// <summary>
+            /// Device path
+            /// </summary>
             public string Identifier { get; }
+
+            /// <summary>
+            /// Parent in device path
+            /// </summary>
             public string Parent { get; }
+
+            /// <summary>
+            /// Type of resource
+            /// </summary>
             public string Type { get; }
 
+            /// <summary>
+            /// Name of this instance
+            /// </summary>
             public override string ToString()
             {
                 return Name;
             }
         }
 
+        /// <summary>
+        /// A job that monitors a particular sensor
+        /// </summary>
         public sealed class MonitoringJob
         {
             internal MonitoringJob(Sensor sensor, TimeSpan timeSpan, OnNewValue onNewValue)
@@ -595,7 +694,14 @@ namespace Iot.Device.OpenHardwareMonitor
                 LastUpdated = DateTimeOffset.UtcNow;
             }
 
+            /// <summary>
+            /// Sensor this job operates on
+            /// </summary>
             public Sensor Sensor { get; }
+
+            /// <summary>
+            /// Update interval
+            /// </summary>
             public TimeSpan Interval { get; }
             internal OnNewValue OnNewValue { get; }
 

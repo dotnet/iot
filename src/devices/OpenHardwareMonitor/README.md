@@ -1,13 +1,20 @@
-# Cpu Temperature
+# OpenHardwareMonitor
 
-Device bindings for the CPU Temperature Sensor on Linux and Windows
+Client binding for OpenHardwareMonitor.
 
 ## Summary
 
-Returns the current temperature of the CPU Temperature Sensor. Useful telemetry in its own right, but also useful for calibrating the Raspberry Pi Sense HAT.
+Returns a set of sensor measurements for the current hardware. The values include CPU temperature(s), Fan Speed(s), GPU Temperature(s) and Hard Disk states. The set of values is hardware dependent.
 
 ## Binding Notes
 
-On Windows, the temperature returned by this binding may not be the actual CPU temperature, but one of the mainboard sensors instead. Therefore, depending on the mainboard, no data may be available. In either case, elevated permissions ("Admin rights") are required.
+This binding works on Windows only. It requires that OpenHardwareMonitor (https://openhardwaremonitor.org/) is running in the background. While that tool requires elevated permissions to work, 
+the binding (and the application using it) does not. 
+
+The binding supports some additional, "virtual" sensor measuments that are derived from other values. The following extra values are provided:
+
+- For each sensor returning power, another is generated which calculates energy consumed (by integrating the values over time).
+- From the CPU Package power sensor, the CPU heat flux is calculated (estimating the size of the die).
+- If both a power and a voltage sensor are available for CPU Package, the current is calculated.
 
 ## References
