@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -11,25 +11,13 @@ using System.Threading;
 using UnitsNet;
 
 #pragma warning disable CS1591
-namespace Iot.Device.CpuTemperature
+namespace Iot.Device.OpenHardwareMonitor
 {
-    public enum SensorType
-    {
-        Unknown,
-        Voltage,
-        Clock,
-        Temperature,
-        Load,
-        Fan,
-        Flow,
-        Control,
-        Level,
-        Power,
-        Energy,
-        HeatFlux,
-        Current,
-    }
-
+    /// <summary>
+    /// This class connects to a running instance of OpenHardwareMonitor and reads out all available values.
+    /// This works only if OpenHardwareMonitor (https://openhardwaremonitor.org/) is currently running.
+    /// While the tool needs to be run with elevated permissions, the application using this binding does not.
+    /// </summary>
     public sealed class OpenHardwareMonitor : IDisposable
     {
         private static readonly TimeSpan MonitorInterval = TimeSpan.FromMilliseconds(100);
@@ -89,8 +77,6 @@ namespace Iot.Device.CpuTemperature
         {
             try
             {
-                // This works only if OpenHardwareMonitor (https://openhardwaremonitor.org/) is currently running, but
-                // has the advantage of being supported on a wide number of platforms and works without elevation.
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", "SELECT * FROM Sensor");
                 if (searcher.Get().Count > 0)
                 {

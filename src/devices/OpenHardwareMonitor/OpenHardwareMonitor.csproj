@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <Compile Include="OpenHardwareMonitor.cs" />
+    <Compile Include="SensorType.cs" />
     <None Include="README.md" />
   </ItemGroup>
 
