@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-#pragma warning disable SA1011
+#pragma warning disable SA1011 // Closing square brackets should be spaced correctly https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2927
 
 namespace System.Device.Gpio.Drivers
 {
