@@ -192,7 +192,7 @@ namespace Iot.Device.BrickPi3.Movement
         /// To notify a property has changed. The minimum time can be set up
         /// with timeout property
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private int _periodRefresh;
 
