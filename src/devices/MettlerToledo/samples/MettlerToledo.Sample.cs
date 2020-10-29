@@ -31,6 +31,15 @@ namespace Iot.Device.MettlerToledo.Samples
 
             // Print reading to console
             Console.WriteLine($"Received a weight of {reading.Weight.Grams} grams.");
+
+            scale.WeightUpdated += (s, e) =>
+            {
+                Console.WriteLine($"Scale reported a new weight of {reading.Weight.Grams} grams.");
+            };
+            scale.SubscribeToWeightChangeEvents();
+
+            // Keep open to allow weight change events
+            Console.ReadLine();
         }
     }
 }

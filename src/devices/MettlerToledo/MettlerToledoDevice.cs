@@ -26,7 +26,7 @@ namespace Iot.Device.MettlerToledo
     public delegate void WeightUpdatedHandler(object sender, MettlerToledoWeightReading e);
 
     /// <summary>
-    /// Provides an interface for interacting with MT-SACS devices, like scales.
+    /// Provides an interface for interacting with MT-SICS devices, like scales.
     /// </summary>
     public class MettlerToledoDevice : IDisposable
     {
@@ -82,7 +82,7 @@ namespace Iot.Device.MettlerToledo
         public MettlerToledoWeightReading GetImmediateWeight() => GetWeightReading(true);
 
         /// <summary>
-        /// Opens a connection to the MT-SACS scale.
+        /// Opens a connection to the MT-SICS scale.
         /// </summary>
         /// <exception cref="UnauthorizedAccessException"></exception>
         public void Open()
@@ -93,7 +93,7 @@ namespace Iot.Device.MettlerToledo
         }
 
         /// <summary>
-        /// Closes the connection to the MT-SACS scale.
+        /// Closes the connection to the MT-SICS scale.
         /// </summary>
         public void Close()
         {
