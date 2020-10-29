@@ -3,10 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device.Gpio;
-using System.Device.I2c;
-using System.Device.Spi;
-using System.Threading;
+
+using Iot.Device.MettlerToledo.Readings;
 
 namespace Iot.Device.MettlerToledo.Samples
 {
@@ -20,7 +18,19 @@ namespace Iot.Device.MettlerToledo.Samples
         /// </summary>
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello MettlerToledo Sample!");
+            Console.WriteLine("Welcome to the MettlerToledo Sample!");
+
+            // Create a scale object
+            var scale = new MettlerToledoDevice("/dev/ttyUSB1");
+
+            // Reset the scale
+            scale.Reset();
+
+            // Now fetch a reading, when the scale is stable. This means the scale is confident in the weight.
+            MettlerToledoWeightReading reading = scale.GetStableWeight();
+
+            // Print reading to console
+            Console.WriteLine($"Received a weight of {reading.Weight.Grams} grams.");
         }
     }
 }

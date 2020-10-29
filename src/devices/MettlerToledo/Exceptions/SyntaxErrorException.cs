@@ -4,7 +4,6 @@ using System.Text;
 
 namespace Iot.Device.MettlerToledo.Exceptions
 {
-
     /// <summary>
     /// Occurs when a scale returns a Syntax Error.
     /// </summary>
