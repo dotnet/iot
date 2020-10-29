@@ -353,6 +353,10 @@ namespace Iot.Device.MettlerToledo
         public void Dispose()
         {
             Close();
+            if (_shouldDisposeSerialPort)
+            {
+                _serialPort.Dispose();
+            }
         }
     }
 }
