@@ -20,12 +20,12 @@ namespace Iot.Device.Max7219
         Right,
 
         /// <summary>
-        /// each device is turned 90 degree to the left
+        /// each device is turned by 180 degree
         /// </summary>
         Half,
 
         /// <summary>
-        /// each device is turned by 180 degree
+        /// each device is turned 90 degree to the left
         /// </summary>
         Left,
     }

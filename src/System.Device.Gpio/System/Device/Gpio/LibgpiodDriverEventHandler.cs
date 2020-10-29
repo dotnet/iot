@@ -11,9 +11,9 @@ namespace System.Device.Gpio.Drivers
 {
     internal sealed class LibGpiodDriverEventHandler : IDisposable
     {
-        public event PinChangeEventHandler ValueRising;
+        public event PinChangeEventHandler? ValueRising;
 
-        public event PinChangeEventHandler ValueFalling;
+        public event PinChangeEventHandler? ValueFalling;
 
         private int _pinNumber;
 
