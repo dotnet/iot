@@ -281,11 +281,11 @@ namespace Iot.Device.Ssd1351
             if (_disposeGpioController)
             {
                 _gpioDevice?.Dispose();
-                _gpioDevice = null;
+                _gpioDevice = null!;
             }
 
             _spiDevice?.Dispose();
-            _spiDevice = null;
+            _spiDevice = null!;
         }
     }
 }

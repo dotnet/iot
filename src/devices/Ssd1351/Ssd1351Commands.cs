@@ -421,8 +421,8 @@ namespace Iot.Device.Ssd1351
         /// This command sets the gray levels GS0 -> GS63.
         /// </summary>
         /// <param name="grayLevels">A byte array containing 64 gray levels representing GS0 -> GS63.
-        /// If this paramneter is null or an empty array then the gray leves are set to default.</param>
-        public void SetGrayLevels(byte[] grayLevels = null)
+        /// If this parameter is null or an empty array then the gray leves are set to default.</param>
+        public void SetGrayLevels(byte[]? grayLevels = null)
         {
             if (grayLevels == null || grayLevels.Length == 0)
             {

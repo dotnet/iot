@@ -7,8 +7,7 @@ using System.Device.Gpio;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-
+// using System.Runtime.InteropServices.WindowsRuntime;
 namespace Iot.Device.Tm1637
 {
     /// <summary>
@@ -49,7 +48,7 @@ namespace Iot.Device.Tm1637
         /// <param name="gpioController">A Gpio Controller if you want to use a specific one</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Tm1637(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical,
-            GpioController gpioController = null, bool shouldDispose = true)
+            GpioController? gpioController = null, bool shouldDispose = true)
         {
             _pinClk = pinClk;
             _pinDio = pinDio;
@@ -173,7 +172,7 @@ namespace Iot.Device.Tm1637
             var ack = _controller.Read(_pinDio);
             if (ack == PinValue.Low)
             {
-                // We get acknoledge from the device
+                // We get acknowledge from the device
                 _controller.SetPinMode(_pinDio, PinMode.Output);
                 _controller.Write(_pinDio, PinValue.Low);
             }
@@ -349,7 +348,7 @@ namespace Iot.Device.Tm1637
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null;
+                _controller = null!;
             }
         }
     }

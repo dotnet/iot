@@ -249,7 +249,7 @@ namespace Iot.Device.Spi
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null;
+                _controller = null!;
             }
 
             base.Dispose(disposing);
@@ -265,7 +265,7 @@ namespace Iot.Device.Spi
             internal Action _enter;
             internal Action _exit;
 
-            public ScopeData(Action enter = null, Action exit = null)
+            public ScopeData(Action? enter = null, Action? exit = null)
             {
                 _enter = enter ?? new Action(() => { });
                 _exit = exit ?? new Action(() => { });

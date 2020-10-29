@@ -1113,16 +1113,18 @@ namespace Iot.Device.Pn5180
         /// <param name="card">The type B card once detected</param>
         /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
         /// <returns>True if a 14443 Type B card has been detected</returns>
-        public bool ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver, out Data106kbpsTypeB card, int timeoutPollingMilliseconds)
+        public bool ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver, out Data106kbpsTypeB? card, int timeoutPollingMilliseconds)
         {
             card = null;
-
             var ret = LoadRadioFrequencyConfiguration(transmitter, receiver);
             // Switch on the radio frequence field and check it
             ret &= SetRadioFrequency(true);
 
             // Find out which slot we have, we starts at 1, 0 are for Mifare cards and Type A
             byte targetNumber = 0;
+            // rNak is defined outside the loop due to:
+            // error CA2014: Potential stack overflow. Move the stackalloc out of the loop.
+            Span<byte> rNak = stackalloc byte[2];
 
             foreach (var potentialActive in _activeSelected)
             {
@@ -1131,7 +1133,6 @@ namespace Iot.Device.Pn5180
 
                 // Check if the card is alive
                 // Send a RNAK and wait for the RACK
-                Span<byte> rNak = stackalloc byte[2];
                 rNak[0] = 0b1111_1010;
                 rNak[1] = potentialActive.Card.TargetNumber;
                 ret = SendDataToCard(rNak);
