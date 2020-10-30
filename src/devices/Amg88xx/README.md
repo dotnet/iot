@@ -35,11 +35,21 @@ The sensor has an integrated thermistor which can be readout to get the chip tem
 
 **Note:** The chip temperature does *not* equal to the environmental temeperature.
 
-The binding supports getting a thermal image as a two dimensional array in a floating point or two's complement representation of each pixels temperature.
+The current image can be read from the sensor into the binding by:
 ```
-public Temperature[,] GetThermalImage()
-public int[,] GetRawImage()
+public void ReadImage()
 ```
+
+The temperature of a pixel specified by its coordinates can be read using an indexer:
+```
+public Temperature this[int x, int y]
+```
+
+The raw reading (12-bit two's complement format) of a pixel specified by its number can be read using an indexer:
+```
+public Int16 this[int n]
+```
+
 **Note:** there is no statement in the reference specification regarding the synchronization between an update of the pixel registers and the readout operation. So, you may read out pixel data from two subsequent frames in one readout operation. However, for normal application this shouldn't be relevant.
 
 Property:
@@ -64,10 +74,10 @@ public OperatingMode OperatingMode
 
 ### Reset
 The sensor supports two types of resets.
-* **Initial Reset:** Resets all flags and registers to default values
+* **Reset:** Resets all flags and registers to default values
 * **Resetting all flags:** Resets all flags (status register, interrupt flag, interrupt table)
 ```
-public void InitialReset()
+public void Reset()
 public void ResetAllFlags()
 ```
 *Note*: resetting the interrupt related flags is only required if you want to clear flags while the readings are still within the hysteresis span. See interrupts section for further details on interrupt behavior.

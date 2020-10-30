@@ -30,12 +30,17 @@ namespace Iot.Device.Amg88xx
         /// <summary>
         /// Number of sensor pixel array columns
         /// </summary>
-        public const int Columns = 0x8;
+        public const int Width = 0x8;
 
         /// <summary>
         /// Number of sensor pixel array rows
         /// </summary>
-        public const int Rows = 0x8;
+        public const int Height = 0x8;
+
+        /// <summary>
+        /// Total number of pixels.
+        /// </summary>
+        public const int PixelCount = Width * Height;
 
         /// <summary>
         /// Number of bytes per pixel
@@ -46,6 +51,11 @@ namespace Iot.Device.Amg88xx
         /// Temperature resolution of thermistor (in degrees Celsius)
         /// </summary>
         private const double ThermistorTemperatureResolution = 0.0625;
+
+        /// <summary>
+        /// Internal storage for the most recently image read from the sensor
+        /// </summary>
+        private readonly byte[] _imageData = new byte[PixelCount * BytesPerPixel];
 
         private I2cDevice _i2cDevice;
 
@@ -60,58 +70,60 @@ namespace Iot.Device.Amg88xx
         #region Infrared sensor
 
         /// <summary>
-        /// Gets the current thermal image.
+        /// Gets temperature of the specified pixel from the current thermal image.
         /// </summary>
-        /// <returns>Array of pixel temperatures [column, row]</returns>
-        public Temperature[,] GetThermalImage()
+        /// <param name="x">The x-coordinate of the pixel to retrieve.</param>
+        /// <param name="y">The y-coordinate of the pixel to retrieve.</param>
+        /// <exception cref="ArgumentException">x is less than 0, or greater than or equal to Width.</exception>
+        /// <exception cref="ArgumentException">y is less than 0, or greater than or equal to Height.</exception>
+        /// <returns>Temperature of the specified pixel.</returns>
+        public Temperature this[int x, int y]
         {
-            // the readout process gets triggered by writing to pixel 0 of the sensor w/o any additional data
-            _i2cDevice.WriteByte((byte)Register.T01L);
-
-            Span<byte> buffer = stackalloc byte[Rows * Columns * BytesPerPixel];
-            _i2cDevice.Read(buffer);
-
-            var image = new Temperature[Columns, Rows];
-
-            int idx = 0;
-            for (int r = 0; r < Rows; r++)
+            get
             {
-                for (int c = 0; c < Columns; c++)
+                if (x < 0 || x >= Width)
                 {
-                    byte tl = buffer[idx++];
-                    byte th = buffer[idx++];
-                    image[c, r] = Amg88xxUtils.ConvertToTemperature(tl, th);
+                    throw new ArgumentOutOfRangeException(nameof(x));
                 }
-            }
 
-            return image;
+                if (y < 0 || y >= Height)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(y));
+                }
+
+                Span<byte> buffer = _imageData;
+                return Amg88xxUtils.ConvertToTemperature(buffer.Slice(BytesPerPixel * (Width * y + x), BytesPerPixel));
+            }
         }
 
         /// <summary>
-        /// Gets the current raw thermal image from the sensor.
+        /// Gets raw reading (12-bit two's complement format) of the specified pixel from the current thermal image.
         /// </summary>
-        /// <returns>Thermal image in 12-bit two's complement representation</returns>
-        public int[,] GetThermalRawImage()
+        /// <param name="n">The number of the pixel to retrieve.</param>
+        /// <exception cref="ArgumentException">n is less than 0, or greater than or equal to PixelCount.</exception>
+        /// <returns>Reading of the specified pixel.</returns>
+        public Int16 this[int n]
+        {
+            get
+            {
+                if (n < 0 || n >= PixelCount)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(n));
+                }
+
+                Span<byte> buffer = _imageData;
+                return BinaryPrimitives.ReadInt16LittleEndian(buffer.Slice(n * BytesPerPixel, BytesPerPixel));
+            }
+        }
+
+        /// <summary>
+        /// Reads the current image from the sensor
+        /// </summary>
+        public void ReadImage()
         {
             // the readout process gets triggered by writing to pixel 0 of the sensor w/o any additional data
             _i2cDevice.WriteByte((byte)Register.T01L);
-
-            Span<byte> buffer = stackalloc byte[Rows * Columns * BytesPerPixel];
-            _i2cDevice.Read(buffer);
-
-            var image = new int[Columns, Rows];
-
-            int idx = 0;
-            for (int r = 0; r < Rows; r++)
-            {
-                for (int c = 0; c < Columns; c++)
-                {
-                    image[c, r] = BinaryPrimitives.ReadInt16LittleEndian(buffer.Slice(idx, 2));
-                    idx += 2;
-                }
-            }
-
-            return image;
+            _i2cDevice.Read(_imageData);
         }
 
         /// <summary>
@@ -271,12 +283,12 @@ namespace Iot.Device.Amg88xx
         #region Reset
 
         /// <summary>
-        /// Performs an initial reset of the sensor. The flags and all configuration registers
+        /// Performs an reset of the sensor. The flags and all configuration registers
         /// are reset to default values.
         /// </summary>
-        public void InitialReset()
+        public void Reset()
         {
-            // an initial reset (factory defaults) is initiated by writing 0x3f into the reset register (RST)
+            // a reset (factory defaults) is initiated by writing 0x3f into the reset register (RST)
             SetRegister(Register.RST, (byte)ResetType.Initial);
         }
 
@@ -402,11 +414,11 @@ namespace Iot.Device.Amg88xx
                 flagRegisters.Enqueue(GetRegister(register));
             }
 
-            var flags = new bool[Columns, Rows];
-            for (int row = 0; row < Rows; row++)
+            var flags = new bool[Width, Height];
+            for (int row = 0; row < Height; row++)
             {
                 var flagRegister = flagRegisters.Dequeue();
-                for (int col = 0; col < Columns; col++)
+                for (int col = 0; col < Width; col++)
                 {
                     flags[col, row] = (flagRegister & (1 << col)) > 0;
                 }

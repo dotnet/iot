@@ -56,7 +56,7 @@ namespace Iot.Device.Amg88xx.Samples
             Amg88xx amg88xx = new Amg88xx(i2cDevice);
 
             // factory defaults
-            amg88xx.InitialReset();
+            amg88xx.Reset();
 
             amg88xx.OperatingMode = OperatingMode.Normal;
             Console.WriteLine($"Operating mode: {amg88xx.OperatingMode}");
@@ -105,19 +105,28 @@ namespace Iot.Device.Amg88xx.Samples
                 // Get the current thermal image and the interrupt flags.
                 // Note: this isn't and can't be synchronized with the internal sampling
                 // of the sensor.
-                var image = amg88xx.GetThermalImage();
+                amg88xx.ReadImage();
+
                 var intFlags = amg88xx.GetInterruptFlagTable();
 
                 // Display the pixel temperature readings and an interrupt indicator in the console.
-                for (int r = 0; r < Amg88xx.Rows; r++)
+                for (int r = 0; r < Amg88xx.Height; r++)
                 {
-                    for (int c = 0; c < Amg88xx.Columns; c++)
+                    for (int c = 0; c < Amg88xx.Width; c++)
                     {
-                        Console.Write($"{(intFlags[c, r] ? '*' : ' ')}  {image[c, r].DegreesCelsius,6:F2}");
+                        Console.Write($"{(intFlags[c, r] ? '*' : ' ')}  {amg88xx[c, r].DegreesCelsius,6:F2}");
                     }
 
                     Console.WriteLine("\n------------------------------------------------------------------------");
                 }
+
+                // Example how to get all 64 pixels as raw readings in 12-bit two's complement format.
+                /*
+                for (int n = 0; n < Amg88xx.PixelCount; n += 8)
+                {
+                    Console.WriteLine($"{amg88xx[n]} {amg88xx[n + 1]} {amg88xx[n + 2]} {amg88xx[n + 3]} {amg88xx[n + 4]} {amg88xx[n + 5]} {amg88xx[n + 6]} {amg88xx[n + 7]} ");
+                }
+                */
 
                 Console.WriteLine();
 

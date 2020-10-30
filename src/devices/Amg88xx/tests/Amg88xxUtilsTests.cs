@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Buffers.Binary;
 using UnitsNet;
 using Xunit;
 
@@ -16,8 +18,13 @@ namespace Iot.Device.Amg88xx.Tests
         [InlineData(0xfff, -0.25)]
         [InlineData(0xf9c, -25)]
         [InlineData(0xf24, -55)]
-        public void ConvertToTemperatureTest(int value, double expected)
+        public void ConvertToTemperatureTest(Int16 value, double expected)
         {
+            byte[] valueBuffer = new byte[2];
+
+            BinaryPrimitives.WriteInt16LittleEndian(new Span<byte>(valueBuffer), value);
+            Assert.Equal(expected, Amg88xxUtils.ConvertToTemperature(valueBuffer).DegreesCelsius);
+
             Assert.Equal(expected, Amg88xxUtils.ConvertToTemperature((byte)(value & 0xff), (byte)((value & 0xff00) >> 8)).DegreesCelsius);
         }
 

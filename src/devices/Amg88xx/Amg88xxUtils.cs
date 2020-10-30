@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using UnitsNet;
 
 namespace Iot.Device.Amg88xx
@@ -15,6 +16,13 @@ namespace Iot.Device.Amg88xx
         /// Temperature resolution of a pixel (in degrees celsius)
         /// </summary>
         private const double PixelTemperatureResolution = 0.25;
+
+        /// <summary>
+        /// Converts a temperature from 12-bit (in 2 bytes) two's complements representation into a floating-point reading.
+        /// </summary>
+        /// <param name="twosComplement">Reading in two's complement little endian representation</param>
+        /// <returns>Temperature reading</returns>
+        public static Temperature ConvertToTemperature(Span<byte> twosComplement) => ConvertToTemperature(twosComplement[0], twosComplement[1]);
 
         /// <summary>
         /// Converts a temperature from two's complements representation into a floating-point reading.

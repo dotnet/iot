@@ -38,27 +38,25 @@ namespace Iot.Device.Amg88xx.Tests
         }
 
         [Fact]
-        public void GetThermalRawImageTest()
+        public void RawPixelIndexerTest()
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
             // using a simple linear sequence of numbers as reference image:
             //   0 to 0x1f8 (504d)
-            int[,] referenceImage = new int[Amg88xx.Columns, Amg88xx.Rows];
-            for (int y = 0; y < Amg88xx.Rows; y++)
+            Int16[] referenceImage = new Int16[Amg88xx.PixelCount];
+            for (int n = 0; n < Amg88xx.PixelCount; n++)
             {
-                for (int x = 0; x < Amg88xx.Columns; x++)
-                {
-                    int rawValue = (y * Amg88xx.Columns + x) * 8;
-                    referenceImage[x, y] = rawValue;
-                    i2cDevice.DataToRead.Enqueue((byte)(rawValue & 0xff));
-                    i2cDevice.DataToRead.Enqueue((byte)(rawValue >> 8));
-                }
+                referenceImage[n] = (short)(n * 8);
+                // enqueue lower byte (TLxx)
+                i2cDevice.DataToRead.Enqueue((byte)(referenceImage[n] & 0xff));
+                // enqueue higher byte (THxx)
+                i2cDevice.DataToRead.Enqueue((byte)(referenceImage[n] >> 8));
             }
 
             // read image from sensor
-            var rawImage = sensor.GetThermalRawImage();
+            sensor.ReadImage();
 
             // expectation: one write access to register T01L (lower byte of first pixel) to trigger readout
             Assert.Single(i2cDevice.DataWritten);
@@ -67,26 +65,24 @@ namespace Iot.Device.Amg88xx.Tests
             // expectation: all pixels have been read, so nothing is remaining
             Assert.Empty(i2cDevice.DataToRead);
 
-            for (int y = 0; y < Amg88xx.Rows; y++)
+            for (int n = 0; n < Amg88xx.PixelCount; n++)
             {
-                for (int x = 0; x < Amg88xx.Columns; x++)
-                {
-                    Assert.Equal(referenceImage[x, y], rawImage[x, y]);
-                }
+                Int16 rawPixel = sensor[n];
+                Assert.Equal(referenceImage[n], rawPixel);
             }
         }
 
         [Fact]
-        public void GetThermalImageTest()
+        public void PixelTemperatureIndexerTest()
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
-            Temperature[,] referenceImage = new Temperature[Amg88xx.Columns, Amg88xx.Rows];
+            Temperature[,] referenceImage = new Temperature[Amg88xx.Width, Amg88xx.Height];
             Random rnd = new Random();
-            for (int y = 0; y < Amg88xx.Rows; y++)
+            for (int y = 0; y < Amg88xx.Height; y++)
             {
-                for (int x = 0; x < Amg88xx.Columns; x++)
+                for (int x = 0; x < Amg88xx.Width; x++)
                 {
                     referenceImage[x, y] = Temperature.FromDegreesCelsius(rnd.Next(-80, 321) * PixelTemperatureResolution);
                     (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(referenceImage[x, y]);
@@ -96,7 +92,7 @@ namespace Iot.Device.Amg88xx.Tests
             }
 
             // read image from sensor
-            var rawImage = sensor.GetThermalImage();
+            sensor.ReadImage();
 
             // expectation: one write access to register T01L (lower byte of first pixel) to trigger readout
             Assert.Single(i2cDevice.DataWritten);
@@ -105,11 +101,11 @@ namespace Iot.Device.Amg88xx.Tests
             // expectation: all pixels have been read, so nothing is remaining
             Assert.Empty(i2cDevice.DataToRead);
 
-            for (int y = 0; y < Amg88xx.Rows; y++)
+            for (int y = 0; y < Amg88xx.Height; y++)
             {
-                for (int x = 0; x < Amg88xx.Columns; x++)
+                for (int x = 0; x < Amg88xx.Width; x++)
                 {
-                    Assert.Equal(referenceImage[x, y], rawImage[x, y]);
+                    Assert.Equal(referenceImage[x, y], sensor[x, y]);
                 }
             }
         }
@@ -347,12 +343,12 @@ namespace Iot.Device.Amg88xx.Tests
         #region Reset
 
         [Fact]
-        public void InitialResetTest()
+        public void ResetTest()
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
 
-            sensor.InitialReset();
+            sensor.Reset();
 
             Assert.Equal(2, i2cDevice.DataWritten.Count);
             Assert.Equal((byte)Register.RST, i2cDevice.DataWritten.Dequeue());
@@ -615,9 +611,9 @@ namespace Iot.Device.Amg88xx.Tests
                 Assert.Equal(address, i2cDevice.DataWritten.Dequeue());
             }
 
-            for (int col = 0; col < Amg88xx.Columns; col++)
+            for (int col = 0; col < Amg88xx.Width; col++)
             {
-                for (int row = 0; row < Amg88xx.Rows; row++)
+                for (int row = 0; row < Amg88xx.Height; row++)
                 {
                     Assert.Equal(col == expectedColumn - 1 && row == expectedRow - 1, flags[col, row]);
 
