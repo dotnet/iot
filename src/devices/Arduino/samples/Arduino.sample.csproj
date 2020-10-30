@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RootNamespace>Iot.Device.Arduino.Sample</RootNamespace>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="4.7.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Include="Arduino.sample.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--Cases used when running in VS, with the solution config either Windows-Debug or Linux-Debug (or -Release) -->
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\..\Bmxx80\Bmxx80.csproj" />
+    <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
+    <ProjectReference Include="..\..\Mcp3xxx\Mcp3xxx.csproj" />
+    <ProjectReference Include="..\Arduino.csproj" />
+  </ItemGroup>
+
+</Project>
