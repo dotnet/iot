@@ -125,7 +125,7 @@ namespace Iot.Device.PiJuiceDevice
             data.CopyTo(buffer.Slice(1));
 
             buffer[0] = (byte)command;
-            buffer[buffer.Length - 1] = GetCheckSum(data, all: true);
+            buffer[buffer.Length - 1] = GetCheckSum(data, checkLastByte: true);
 
             // When writing/reading to the I2C port, PiJuice doesn't respond on time in some cases
             // So we wait a little bit before retrying
@@ -235,13 +235,13 @@ namespace Iot.Device.PiJuiceDevice
 
         /// <summary>Gets the check sum.</summary>
         /// <param name="data">The data.</param>
-        /// <param name="all">Whether the last byte in the data is included in the checksum</param>
+        /// <param name="checkLastByte">Whether the last byte in the data is included in the checksum</param>
         /// <returns>Checksum</returns>
-        private byte GetCheckSum(ReadOnlySpan<byte> data, bool all = false)
+        private byte GetCheckSum(ReadOnlySpan<byte> data, bool checkLastByte = false)
         {
             byte fcs = 0xff;
 
-            for (int i = 0; i < data.Length - (all ? 0 : 1); i++)
+            for (int i = 0; i < data.Length - (checkLastByte ? 0 : 1); i++)
             {
                 fcs = (byte)(fcs ^ data[i]);
             }

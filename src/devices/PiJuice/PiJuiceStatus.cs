@@ -229,7 +229,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <param name="ledBlink">Led blinking pattern</param>
         public void SetLedBlink(LedBlink ledBlink)
         {
-            if (ledBlink.Count < 1 || ledBlink.Count > 255)
+            if (ledBlink.Count < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(ledBlink.Count));
             }
