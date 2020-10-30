@@ -157,7 +157,7 @@ namespace Iot.Device.Ahtxx
         protected virtual void Dispose(bool disposing)
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
 
         // datasheet version 1.1, table 10

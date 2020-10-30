@@ -66,7 +66,7 @@ namespace Iot.Device.Uln2003
         /// <param name="controller">The controller.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         /// <param name="stepsToRotate">Amount of steps needed to rotate motor once in HalfStepMode.</param>
-        public Uln2003(int pin1, int pin2, int pin3, int pin4, GpioController controller = null, bool shouldDispose = true, int stepsToRotate = 4096)
+        public Uln2003(int pin1, int pin2, int pin3, int pin4, GpioController? controller = null, bool shouldDispose = true, int stepsToRotate = 4096)
         {
             _pin1 = pin1;
             _pin2 = pin2;
@@ -193,7 +193,7 @@ namespace Iot.Device.Uln2003
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null;
+                _controller = null!;
             }
         }
     }

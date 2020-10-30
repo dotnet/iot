@@ -351,16 +351,16 @@ namespace Iot.Device.Card.CreditCardProcessing
         private bool FillTags()
         {
             // Find all Application Template = 0x61
-            var appTemplates = Tag.SearchTag(Tags, 0x61);
-            if (appTemplates?.Count > 0)
+            List<Tag> appTemplates = Tag.SearchTag(Tags, 0x61);
+            if (appTemplates.Count > 0)
             {
-                LogInfo.Log($"Number of App Templates: {appTemplates?.Count}", LogLevel.Debug);
+                LogInfo.Log($"Number of App Templates: {appTemplates.Count}", LogLevel.Debug);
                 foreach (var app in appTemplates)
                 {
                     // Find the Application Identifier 0x4F
-                    var appIdentifier = Tag.SearchTag(app.Tags, 0x4F).FirstOrDefault();
+                    Tag appIdentifier = Tag.SearchTag(app.Tags, 0x4F).First();
                     // Find the Priority Identifier 0x87
-                    var appPriotity = Tag.SearchTag(app.Tags, 0x87).FirstOrDefault();
+                    Tag? appPriotity = Tag.SearchTag(app.Tags, 0x87).FirstOrDefault();
                     // As it is not mandatory, some cards will have only 1
                     // application and this may not be present
                     if (appPriotity == null)
@@ -379,11 +379,11 @@ namespace Iot.Device.Card.CreditCardProcessing
                             .Where(m => m.Tags.Where(t => t.TagNumber == 0x84).Where(t => t.Data.SequenceEqual(appIdentifier.Data)) != null)
                             .Where(m => m.Tags.Where(t => t.TagNumber == 0xA5) != null);
                         // Only here we may find a PDOL tag 0X9F38
-                        Tag pdol = null;
+                        Tag? pdol = null;
                         foreach (var temp in templates)
                         {
                             // We are sure to have 0xA5, so select it and search for PDOL
-                            pdol = Tag.SearchTag(temp.Tags, 0xA5).FirstOrDefault().Tags.Where(m => m.TagNumber == 0x9F38).FirstOrDefault();
+                            pdol = Tag.SearchTag(temp.Tags, 0xA5).FirstOrDefault()?.Tags.Where(m => m.TagNumber == 0x9F38).FirstOrDefault();
                             if (pdol != null)
                             {
                                 break;
@@ -470,7 +470,7 @@ namespace Iot.Device.Card.CreditCardProcessing
 
                         // Ask for all the process options
                         ret = GetProcessingOptions(toSend, received);
-                        Tag appLocator = null;
+                        Tag? appLocator = null;
                         if (ret == ErrorType.ProcessCompletedNormal)
                         {
                             // Check if we have an Application File Locator 0x94 in 0x77

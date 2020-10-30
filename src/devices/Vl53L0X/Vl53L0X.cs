@@ -39,7 +39,7 @@ namespace Iot.Device.Vl53L0X
         /// <summary>
         /// Get the sensor information including internal signal and distance offsets
         /// </summary>
-        public Information Information { get; internal set; }
+        public Information Information { get; private set; }
 
         /// <summary>
         /// Used to find a clean measurement when reading in single shot
@@ -665,15 +665,12 @@ namespace Iot.Device.Vl53L0X
             Thread.Sleep(30);
             WriteRegister(0x80, 0x01);
             // Reading the data from the sensor
-            Information = new Information()
-            {
-                ModuleId = GetDeviceInfo(InfoDevice.ModuleId),
-                Revision =
-                    new Version(GetDeviceInfo(InfoDevice.PartUIDUpper), GetDeviceInfo(InfoDevice.PartUIDLower)),
-                ProductId = GetProductId(),
-                SignalRateMeasFixed1104_400_Micrometers = GetSignalRate(),
-                DistMeasFixed1104_400_Micrometers = GetDistanceFixed()
-            };
+            byte moduleId = GetDeviceInfo(InfoDevice.ModuleId);
+            Version revision = new Version(GetDeviceInfo(InfoDevice.PartUIDUpper), GetDeviceInfo(InfoDevice.PartUIDLower));
+            string productId = GetProductId();
+            uint signalRateMeasFixed1104_400_Micrometers = GetSignalRate();
+            uint distMeasFixed1104_400_Micrometers = GetDistanceFixed();
+            Information = new Information(moduleId, revision, productId, signalRateMeasFixed1104_400_Micrometers, distMeasFixed1104_400_Micrometers);
             // Closing sequence
             WriteRegister(0x81, 0x00);
             WriteRegister(0xFF, 0x06);

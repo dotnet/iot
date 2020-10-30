@@ -50,7 +50,7 @@ namespace Iot.Device.Ags01db
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
 
         /// <summary>
