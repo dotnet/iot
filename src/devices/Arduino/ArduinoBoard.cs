@@ -13,8 +13,6 @@ using System.Threading;
 using System.Linq;
 using UnitsNet;
 
-#pragma warning disable CS1591
-
 namespace Iot.Device.Arduino
 {
     /// <summary>
@@ -59,6 +57,9 @@ namespace Iot.Device.Arduino
             _serialPortStream = _serialPort.BaseStream;
         }
 
+        /// <summary>
+        /// Default pin numbering scheme of this board. Always <see cref="PinNumberingScheme.Logical"/>, because the Arduino has only one pin numbering scheme.
+        /// </summary>
         public PinNumberingScheme DefaultPinNumberingScheme
         {
             get
@@ -68,8 +69,15 @@ namespace Iot.Device.Arduino
             }
         }
 
+        /// <summary>
+        /// Attach to this event to retrieve log messages
+        /// </summary>
         public event Action<string, Exception> LogMessages;
 
+        /// <summary>
+        /// Initialize the board connection. This must be called before any other methods of this class.
+        /// </summary>
+        /// <exception cref="NotSupportedException">The Firmata firmware on the connected board is too old.</exception>
         public virtual void Initialize()
         {
             _firmata = new FirmataDevice();
@@ -78,7 +86,7 @@ namespace Iot.Device.Arduino
             _protocolVersion = _firmata.QueryFirmataVersion();
             if (_protocolVersion < _firmata.QuerySupportedFirmataVersion())
             {
-                throw new NotSupportedException($"Firmata version on board is {_protocolVersion}. Expected {_firmata.QuerySupportedFirmataVersion()}. They must be equal.");
+                throw new NotSupportedException($"Firmata version on board is {_protocolVersion}. Expected at least {_firmata.QuerySupportedFirmataVersion()}.");
             }
 
             Log($"Firmata version on board is {_protocolVersion}.");
@@ -100,6 +108,9 @@ namespace Iot.Device.Arduino
             _firmata.EnableDigitalReporting();
         }
 
+        /// <summary>
+        /// Firmware version on the device
+        /// </summary>
         public Version FirmwareVersion
         {
             get
@@ -108,6 +119,9 @@ namespace Iot.Device.Arduino
             }
         }
 
+        /// <summary>
+        /// Name of the firmware.
+        /// </summary>
         public string FirmwareName
         {
             get
@@ -142,16 +156,32 @@ namespace Iot.Device.Arduino
             LogMessages?.Invoke(message, innerException);
         }
 
+        /// <summary>
+        /// Creates a GPIO Controller instance for the board. This allows working with digital input/output pins.
+        /// </summary>
+        /// <returns>An instance of GpioController, using an Arduino-Enabled driver</returns>
         public GpioController CreateGpioController()
         {
             return CreateGpioController(DefaultPinNumberingScheme);
         }
 
+        /// <summary>
+        /// Creates a GPIO Controller instance for the board. This allows working with digital input/output pins.
+        /// </summary>
+        /// <param name="pinNumberingScheme">Pin numbering scheme to use for this controller</param>
+        /// <returns>An instance of GpioController, using an Arduino-Enabled driver</returns>
         public GpioController CreateGpioController(PinNumberingScheme pinNumberingScheme)
         {
             return new GpioController(pinNumberingScheme, new ArduinoGpioControllerDriver(this, _supportedPinConfigurations));
         }
 
+        /// <summary>
+        /// Creates an I2c device with the given connection settings.
+        /// </summary>
+        /// <param name="connectionSettings">I2c connection settings. Only Bus 0 is supported.</param>
+        /// <returns>An <see cref="I2cDevice"/> instance</returns>
+        /// <exception cref="NotSupportedException">The firmware reports that no pins are available for I2C. Check whether the I2C module is enabled in Firmata.
+        /// Or: An invalid Bus Id or device Id was specified</exception>
         public I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings)
         {
             if (!SupportedPinConfigurations.Any(x => x.PinModes.Contains(SupportedMode.I2C)))
@@ -167,7 +197,7 @@ namespace Iot.Device.Arduino
         /// This therefore returns a Software SPI device for the default Arduino SPI port on pins 11, 12 and 13.
         /// </summary>
         /// <param name="settings">Spi Connection settings</param>
-        /// <returns></returns>
+        /// <returns>An <see cref="SpiDevice"/> instance.</returns>
         public SpiDevice CreateSpiDevice(SpiConnectionSettings settings)
         {
             if (settings.BusId != 0)
@@ -183,6 +213,14 @@ namespace Iot.Device.Arduino
             return new ArduinoSpiDevice(this, settings);
         }
 
+        /// <summary>
+        /// Creates a PWM channel.
+        /// </summary>
+        /// <param name="chip">Must be 0.</param>
+        /// <param name="channel">Pin number to use</param>
+        /// <param name="frequency">This value is ignored</param>
+        /// <param name="dutyCyclePercentage">The duty cycle as a fraction.</param>
+        /// <returns></returns>
         public PwmChannel CreatePwmChannel(
             int chip,
             int channel,
@@ -192,6 +230,11 @@ namespace Iot.Device.Arduino
             return new ArduinoPwmChannel(this, chip, channel, frequency, dutyCyclePercentage);
         }
 
+        /// <summary>
+        /// Creates an anlog controller for this board.
+        /// </summary>
+        /// <param name="chip">Must be 0</param>
+        /// <returns>An <see cref="AnalogController"/> instance</returns>
         public AnalogController CreateAnalogController(int chip)
         {
             return new ArduinoAnalogController(this, SupportedPinConfigurations, PinNumberingScheme.Logical);
@@ -217,6 +260,9 @@ namespace Iot.Device.Arduino
             return Firmata.TryReadDht(pinNumber, dhtType, out temperature, out humidity);
         }
 
+        /// <summary>
+        /// Standard dispose pattern
+        /// </summary>
         protected virtual void Dispose(bool disposing)
         {
             // Do this first, to force any blocking read operations to end
@@ -243,6 +289,9 @@ namespace Iot.Device.Arduino
             _firmata = null;
         }
 
+        /// <summary>
+        /// Dispose this instance
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
