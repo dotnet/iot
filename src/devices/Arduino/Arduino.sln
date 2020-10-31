@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mcp3xxx", "..\Mcp3xxx\Mcp3x
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterLcd", "..\CharacterLcd\CharacterLcd.csproj", "{D47A6627-4041-4CEA-8903-A6C67C6993CF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\Iot\Device\Common\CommonHelpers.csproj", "{CD593083-8E94-4B60-86BF-DF3FB7873893}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{CD593083-8E94-4B60-86BF-DF3FB7873893}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CpuTemperature", "..\CpuTemperature\CpuTemperature.csproj", "{F3950513-A564-462F-887B-E00972D20FAD}"
 EndProject

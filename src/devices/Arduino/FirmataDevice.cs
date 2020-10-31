@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Device.Gpio;
-using System.Device.Gpio.I2c;
 using System.Device.Spi;
 using System.Diagnostics;
 using System.IO;
@@ -51,7 +50,6 @@ namespace Iot.Device.Arduino
 
         // Event used when waiting for answers (i.e. after requesting firmware version)
         private AutoResetEvent _dataReceived;
-        public event Action<byte, MethodState, int, IList<byte>> OnSchedulerReply;
 
         public event DigitalPinValueChanged DigitalPortValueUpdated;
 
@@ -465,39 +463,6 @@ namespace Iot.Device.Arduino
                             _dataReceived.Set();
                             break;
 
-                        case FirmataSysexCommand.SCHEDULER_DATA:
-                            {
-                                if (raw_data.Length == 4 && raw_data[1] == (byte)ExecutorCommand.Ack)
-                                {
-                                    // Just an ack for a programming command.
-                                    _lastIlExecutionError = 0;
-                                    _dataReceived.Set();
-                                    return;
-                                }
-
-                                if (raw_data.Length == 4 && raw_data[1] == (byte)ExecutorCommand.Nack)
-                                {
-                                    // This is a Nack
-                                    _lastIlExecutionError = raw_data[3];
-                                    _dataReceived.Set();
-                                    return;
-                                }
-
-                                // Data from real-time methods
-                                if (raw_data.Length < 7)
-                                {
-                                    OnError?.Invoke("Code execution returned invalid result or state", null);
-                                    break;
-                                }
-
-                                int numArgs = raw_data[3];
-                                Span<byte> bytesReceived = stackalloc byte[numArgs * 4];
-                                ReassembleByteString(raw_data, 4, numArgs * 8, bytesReceived);
-
-                                OnSchedulerReply?.Invoke(raw_data[1], (MethodState)raw_data[2], numArgs, bytesReceived.ToArray());
-                                break;
-                            }
-
                         default:
 
                             // we pass the data forward as-is for any other type of sysex command
@@ -855,17 +820,17 @@ namespace Iot.Device.Arduino
                     bool result = _dataReceived.WaitOne(DefaultReplyTimeout);
                     if (result == false)
                     {
-                        throw new I2cCommunicationException("Timeout waiting for device reply");
+                        throw new TimeoutException("Timeout waiting for device reply");
                     }
 
                     if (_lastResponse[0] != (byte)FirmataSysexCommand.I2C_REPLY)
                     {
-                        throw new I2cCommunicationException("Firmata protocol error: received incorrect query response");
+                        throw new IOException("Firmata protocol error: received incorrect query response");
                     }
 
                     if (_lastResponse[1] != (byte)slaveAddress && slaveAddress != 0)
                     {
-                        throw new I2cCommunicationException($"Firmata protocol error: The wrong device did answer. Expected {slaveAddress} but got {_lastResponse[1]}.");
+                        throw new IOException($"Firmata protocol error: The wrong device did answer. Expected {slaveAddress} but got {_lastResponse[1]}.");
                     }
 
                     // Byte 0: I2C_REPLY
@@ -876,7 +841,7 @@ namespace Iot.Device.Arduino
 
                     if (replyData.Length != bytesReceived)
                     {
-                        throw new I2cCommunicationException($"Expected {replyData.Length} bytes, got only {bytesReceived}");
+                        throw new IOException($"Expected {replyData.Length} bytes, got only {bytesReceived}");
                     }
                 }
             }
@@ -964,17 +929,17 @@ namespace Iot.Device.Arduino
                 bool result = _dataReceived.WaitOne(DefaultReplyTimeout);
                 if (result == false)
                 {
-                    throw new I2cCommunicationException("Timeout waiting for device reply");
+                    throw new TimeoutException("Timeout waiting for device reply");
                 }
 
                 if (_lastResponse[0] != (byte)FirmataSysexCommand.SPI_DATA || _lastResponse[1] != (byte)FirmataSpiCommand.SPI_REPLY)
                 {
-                    throw new I2cCommunicationException("Firmata protocol error: received incorrect query response");
+                    throw new IOException("Firmata protocol error: received incorrect query response");
                 }
 
                 if (_lastResponse[3] != (byte)requestId)
                 {
-                    throw new I2cCommunicationException($"Firmata protocol sequence error.");
+                    throw new IOException($"Firmata protocol sequence error.");
                 }
 
                 ReassembleByteString(_lastResponse, 5, _lastResponse[4] * 2, readBytes);
@@ -1110,131 +1075,6 @@ namespace Iot.Device.Arduino
             if (_lastIlExecutionError != 0)
             {
                 throw new TaskSchedulerException($"Task scheduler method returned state {_lastIlExecutionError}.");
-            }
-        }
-
-        public void SendMethodIlCode(byte methodIndex, byte[] byteCode)
-        {
-            lock (_synchronisationLock)
-            {
-                const int BYTES_PER_PACKET = 20;
-                int codeIndex = 0;
-                while (codeIndex < byteCode.Length)
-                {
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0xFF); // IL data
-                    _firmataStream.WriteByte((byte)ExecutorCommand.LoadIl);
-                    _firmataStream.WriteByte(methodIndex);
-                    _firmataStream.WriteByte((byte)byteCode.Length);
-                    _firmataStream.WriteByte((byte)codeIndex);
-                    int bytesThisPacket = Math.Min(BYTES_PER_PACKET, byteCode.Length - codeIndex);
-                    SendValuesAsTwo7bitBytes(byteCode.AsSpan(codeIndex, bytesThisPacket));
-                    codeIndex += bytesThisPacket;
-
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    _firmataStream.Flush();
-
-                    WaitAndHandleIlCommandReply();
-                }
-            }
-        }
-
-        public void ExecuteIlCode(byte codeReference, int[] parameters, Type returnType)
-        {
-            lock (_synchronisationLock)
-            {
-                _dataReceived.Reset();
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.StartTask);
-                _firmataStream.WriteByte(codeReference);
-                for (int i = 0; i < parameters.Length; i++)
-                {
-                    byte[] param = BitConverter.GetBytes(parameters[i]);
-                    SendValuesAsTwo7bitBytes(param);
-                }
-
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-                WaitAndHandleIlCommandReply();
-            }
-        }
-
-        public void SendMethodDeclaration(byte codeReference, int declarationToken, MethodFlags methodFlags, byte maxLocals, byte argCount)
-        {
-            lock (_synchronisationLock)
-            {
-                _dataReceived.Reset();
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.DeclareMethod);
-                _firmataStream.WriteByte(codeReference);
-                _firmataStream.WriteByte((byte)methodFlags);
-                _firmataStream.WriteByte(maxLocals);
-                _firmataStream.WriteByte(argCount);
-                byte[] param = BitConverter.GetBytes(declarationToken);
-                SendValuesAsTwo7bitBytes(param);
-
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-
-                WaitAndHandleIlCommandReply();
-            }
-        }
-
-        public void SendTokenMap(byte codeReference, int[] data)
-        {
-            lock (_synchronisationLock)
-            {
-                _dataReceived.Reset();
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.SetMethodTokens);
-                _firmataStream.WriteByte(codeReference);
-                for (int i = 0; i < data.Length; i++)
-                {
-                    byte[] param = BitConverter.GetBytes(data[i]);
-                    SendValuesAsTwo7bitBytes(param);
-                }
-
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-                WaitAndHandleIlCommandReply();
-            }
-        }
-
-        public void SendIlResetCommand(bool force)
-        {
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.ResetExecutor);
-                _firmataStream.WriteByte((byte)(force ? 1 : 0));
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-                Thread.Sleep(100);
-            }
-        }
-
-        public void SendKillTask(byte codeReference)
-        {
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.KillTask);
-                _firmataStream.WriteByte(codeReference);
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-                Thread.Sleep(100);
             }
         }
 
