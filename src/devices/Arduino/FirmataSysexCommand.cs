@@ -1,11 +1,9 @@
-﻿#pragma warning disable CS1591
-
-namespace Iot.Device.Arduino
+﻿namespace Iot.Device.Arduino
 {
     /// <summary>
     /// Extended firmata commands
     /// </summary>
-    public enum FirmataSysexCommand
+    internal enum FirmataSysexCommand
     {
         ENCODER_DATA = 0x61,
         SPI_DATA = 0x68,

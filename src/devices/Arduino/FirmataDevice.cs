@@ -12,9 +12,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnitsNet;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Arduino
 {
+    /// <summary>
+    /// This delegate is used to fire digital value changed events.
+    /// </summary>
     public delegate void DigitalPinValueChanged(int pin, PinValue newValue);
 
     internal delegate void AnalogPinValueUpdated(int pin, uint rawValue);

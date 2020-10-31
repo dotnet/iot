@@ -5,7 +5,6 @@ using System.Device.Gpio;
 using System.Linq;
 using System.Threading;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Arduino
 {
     internal class ArduinoGpioControllerDriver : GpioDriver

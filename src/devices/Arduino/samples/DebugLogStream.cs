@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 
 #pragma warning disable CS1591
-namespace Iot.Device.Arduino
+namespace Arduino.Samples
 {
     public class DebugLogStream : Stream
     {
