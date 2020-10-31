@@ -25,7 +25,7 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// <summary>
         /// Number of blinks between [1 - 254]
         /// </summary>
-        public short Count { get; set; }
+        public byte Count { get; set; }
 
         /// <summary>
         /// Color for first period of blink
