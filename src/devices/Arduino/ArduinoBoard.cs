@@ -8,6 +8,7 @@ using System.Device.Pwm;
 using System.Device.Spi;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Ports;
 using System.Threading;
 using System.Linq;
 using UnitsNet;
@@ -24,6 +25,7 @@ namespace Iot.Device.Arduino
     /// </summary>
     public class ArduinoBoard : IDisposable
     {
+        private SerialPort _serialPort;
         private Stream _serialPortStream;
         private FirmataDevice _firmata;
         private Version _firmwareVersion;
@@ -34,10 +36,36 @@ namespace Iot.Device.Arduino
         // Counts how many spi devices are attached, to make sure we enable/disable the bus only when no devices are attached
         private int _spiEnabled;
 
+        /// <summary>
+        /// Creates an instance of an Ardino board connection using the given stream (typically from a serial port)
+        /// </summary>
+        /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
         public ArduinoBoard(Stream serialPortStream)
         {
             _serialPortStream = serialPortStream;
             _spiEnabled = 0;
+        }
+
+        /// <summary>
+        /// Creates an instance of the Arduino board connection connected to a serial port
+        /// </summary>
+        /// <param name="portName">Port name. On Windows, this is usually "COM3" or "COM4" for an Arduino attached via USB.
+        /// On Linux, possible values include "/dev/ttyAMA0", "/dev/serial0", "/dev/ttyUSB1", etc.</param>
+        /// <param name="baudRate">Baudrate to use. It is recommended to use at least 115200 Baud.</param>
+        public ArduinoBoard(string portName, int baudRate)
+        {
+            _serialPort = new SerialPort(portName, baudRate);
+            _serialPort.Open();
+            _serialPortStream = _serialPort.BaseStream;
+        }
+
+        public PinNumberingScheme DefaultPinNumberingScheme
+        {
+            get
+            {
+                // We have only one scheme
+                return PinNumberingScheme.Logical;
+            }
         }
 
         public event Action<string, Exception> LogMessages;
@@ -113,6 +141,11 @@ namespace Iot.Device.Arduino
         private void FirmataOnError(string message, Exception innerException)
         {
             LogMessages?.Invoke(message, innerException);
+        }
+
+        public GpioController CreateGpioController()
+        {
+            return CreateGpioController(DefaultPinNumberingScheme);
         }
 
         public GpioController CreateGpioController(PinNumberingScheme pinNumberingScheme)
@@ -192,9 +225,15 @@ namespace Iot.Device.Arduino
             {
                 _serialPortStream.Close();
                 _serialPortStream.Dispose();
+                _serialPortStream = null;
             }
 
-            _serialPortStream = null;
+            if (_serialPort != null)
+            {
+                _serialPort.Dispose();
+                _serialPort = null;
+            }
+
             if (_firmata != null)
             {
                 _firmata.OnError -= FirmataOnError;
