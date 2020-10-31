@@ -105,7 +105,6 @@ namespace Arduino.Samples
             Console.WriteLine(" 9 Run SPI tests with an MCP3008 (experimental)");
             Console.WriteLine(" 0 Detect all devices on the I2C bus");
             Console.WriteLine(" H Read DHT11 Humidity sensor on GPIO 3 (experimental)");
-            Console.WriteLine(" C C#/IL Code execution on Arduino (VERY experimental)");
             Console.WriteLine(" X Exit");
             var key = Console.ReadKey();
             Console.WriteLine();
@@ -149,10 +148,6 @@ namespace Arduino.Samples
                 case 'x':
                 case 'X':
                     return false;
-                case 'c':
-                case 'C':
-                    TestIlInterpreter(board);
-                    break;
             }
 
             return true;
@@ -287,21 +282,22 @@ namespace Arduino.Samples
             var gpioController = board.CreateGpioController(PinNumberingScheme.Board);
             var analogController = board.CreateAnalogController(0);
 
-            analogController.OpenPin(analogPin);
+            var pin = analogController.OpenPin(analogPin);
             gpioController.OpenPin(gpio);
             gpioController.SetPinMode(gpio, PinMode.Output);
 
             Console.WriteLine("Blinking GPIO6, based on analog input.");
             while (!Console.KeyAvailable)
             {
-                double voltage = analogController.ReadVoltage(analogPin);
+                double voltage = pin.ReadVoltage();
                 gpioController.Write(gpio, PinValue.High);
                 Thread.Sleep((int)voltage * 100);
-                voltage = analogController.ReadVoltage(analogPin);
+                voltage = pin.ReadVoltage();
                 gpioController.Write(gpio, PinValue.Low);
                 Thread.Sleep((int)voltage * 100);
             }
 
+            pin.Dispose();
             Console.ReadKey();
             analogController.Dispose();
             gpioController.Dispose();
@@ -312,10 +308,10 @@ namespace Arduino.Samples
             const int analogPin = 15;
             var analogController = board.CreateAnalogController(0);
 
-            analogController.OpenPin(analogPin);
-            analogController.EnableAnalogValueChangedEvent(analogPin, null, 0);
+            var pin = analogController.OpenPin(analogPin);
+            pin.EnableAnalogValueChangedEvent(null, 0);
 
-            analogController.ValueChanged += (sender, args) =>
+            pin.ValueChanged += (sender, args) =>
             {
                 if (args.PinNumber == analogPin)
                 {
@@ -331,7 +327,8 @@ namespace Arduino.Samples
             }
 
             Console.ReadKey();
-            analogController.DisableAnalogValueChangedEvent(analogPin);
+            pin.DisableAnalogValueChangedEvent();
+            pin.Dispose();
             analogController.Dispose();
         }
 
@@ -490,78 +487,6 @@ namespace Arduino.Samples
             }
 
             Console.ReadKey();
-        }
-
-        public static void TestIlInterpreter(ArduinoBoard board)
-        {
-            ArduinoCsCompiler compiler = new ArduinoCsCompiler(board);
-            var method1 = compiler.LoadCode<Func<int, int, int>>(ArduinoCompilerSampleMethods.AddInts);
-            method1.InvokeAsync(2, 3);
-            int result;
-            method1.WaitForResult();
-            method1.GetMethodResults(out object[] data, out MethodState state);
-            if (state != MethodState.Stopped)
-            {
-                Console.WriteLine("Method returned result but did not end?!?");
-            }
-
-            result = (int)data[0];
-            Console.WriteLine($"2 + 3 = {result}");
-            method1.InvokeAsync(255, 5);
-            method1.WaitForResult();
-            method1.GetMethodResults(out data, out state);
-            result = (int)data[0];
-            Console.WriteLine($"255 + 5 = {result}");
-
-            var method2 = compiler.LoadCode(new Func<int, int, bool>(ArduinoCompilerSampleMethods.Equal));
-            method2.InvokeAsync(2, 3);
-            method2.WaitForResult();
-            method2.GetMethodResults(out data, out state);
-            bool trueOrFalse = (bool)data[0];
-            Console.WriteLine($"Is 2 == 3? {trueOrFalse}");
-            method2.InvokeAsync(257, 257);
-            method2.WaitForResult();
-            method2.GetMethodResults(out data, out state);
-            trueOrFalse = (bool)data[0];
-            Console.WriteLine($"Is 257 == 257? {trueOrFalse}");
-
-            compiler.LoadLowLevelInterface();
-            compiler.LoadCode(new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
-            var method3 = compiler.LoadCode(new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
-            method3.InvokeAsync(0, 10, 500);
-
-            // While the above method executes (and blinks the led), we query the analog input
-            var analogController = board.CreateAnalogController(0);
-            int analogPin = 15;
-
-            analogController.OpenPin(analogPin);
-
-            while (method3.State == MethodState.Running)
-            {
-                double value = analogController.ReadVoltage(analogPin);
-                Console.WriteLine($"Read analog value as {value:F2}");
-                Thread.Sleep(100);
-            }
-
-            analogController.ClosePin(analogPin);
-            method3.WaitForResult();
-
-            compiler.ClearAllData(true);
-
-            // Start task again and terminate it immediately
-            compiler.LoadLowLevelInterface();
-            compiler.LoadCode(new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
-            method3 = compiler.LoadCode(new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
-            method3.InvokeAsync(0, 10, 500);
-            method3.Terminate();
-            if (method3.State != MethodState.Killed)
-            {
-                Console.WriteLine("Unable to terminate task");
-            }
-
-            method3.Dispose();
-            compiler.ClearAllData(true);
-            compiler.Dispose();
         }
     }
 }

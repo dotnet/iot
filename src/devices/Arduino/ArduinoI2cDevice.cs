@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Device.Gpio.I2c;
 using System.Device.I2c;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -53,7 +53,7 @@ namespace Iot.Device.Arduino
                     ReadByte();
                     break;
                 }
-                catch (Exception x) when (x is TimeoutException || x is I2cCommunicationException)
+                catch (Exception x) when (x is TimeoutException || x is IOException)
                 {
                 }
             }

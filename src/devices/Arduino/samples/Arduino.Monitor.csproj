@@ -21,7 +21,7 @@
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\..\Bmxx80\Bmxx80.csproj" />
     <ProjectReference Include="..\..\CharacterLcd\CharacterLcd.csproj" />
-    <ProjectReference Include="..\..\Common\Iot\Device\Common\CommonHelpers.csproj" />
+    <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
     <ProjectReference Include="..\..\CpuTemperature\CpuTemperature.csproj" />
     <ProjectReference Include="..\..\Mcp3xxx\Mcp3xxx.csproj" />
     <ProjectReference Include="..\Arduino.csproj" />
