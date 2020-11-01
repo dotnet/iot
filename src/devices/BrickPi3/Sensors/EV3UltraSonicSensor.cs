@@ -5,7 +5,6 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
-using System.Diagnostics.CodeAnalysis;
 using Iot.Device.BrickPi3.Extensions;
 using Iot.Device.BrickPi3.Models;
 
@@ -20,7 +19,7 @@ namespace Iot.Device.BrickPi3.Sensors
         private UltraSonicMode _mode;
         private Timer _timer;
         private int _value;
-        private string _valueAsString;
+        private string? _valueAsString;
         private int _periodRefresh;
 
         /// <summary>
@@ -63,7 +62,6 @@ namespace Iot.Device.BrickPi3.Sensors
             _mode = usmode;
             brick.SetSensorType((byte)Port, (SensorType)usmode);
             _periodRefresh = timeout;
-            UpdateSensor(this);
             _timer = new Timer(UpdateSensor, this, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(timeout));
         }
 
@@ -129,7 +127,6 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Update the sensor and this will raised an event on the interface
         /// </summary>
-        [MemberNotNull(nameof(_valueAsString))]
         public void UpdateSensor(object? state)
         {
             Value = ReadRaw();

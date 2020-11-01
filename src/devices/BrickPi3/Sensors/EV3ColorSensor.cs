@@ -5,7 +5,6 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
-using System.Diagnostics.CodeAnalysis;
 using Iot.Device.BrickPi3.Extensions;
 using Iot.Device.BrickPi3.Models;
 
@@ -27,7 +26,7 @@ namespace Iot.Device.BrickPi3.Sensors
         private Timer _timer;
         private int _periodRefresh;
         private int _value;
-        private string _valueAsString;
+        private string? _valueAsString;
 
         /// <summary>
         /// Initialize an EV3 Color Sensor
@@ -64,7 +63,6 @@ namespace Iot.Device.BrickPi3.Sensors
             _colorMode = mode;
             brick.SetSensorType((byte)Port, GetEV3Mode(mode));
             _periodRefresh = timeout;
-            UpdateSensor(this);
             _timer = new Timer(UpdateSensor, this, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(timeout));
         }
 
@@ -175,7 +173,6 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Update the sensor and this will raised an event on the interface
         /// </summary>
-        [MemberNotNull(nameof(_valueAsString))]
         public void UpdateSensor(object? state)
         {
             Value = ReadRaw();

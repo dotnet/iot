@@ -5,7 +5,6 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
-using System.Diagnostics.CodeAnalysis;
 using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3.Sensors

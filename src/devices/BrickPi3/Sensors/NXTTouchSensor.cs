@@ -5,7 +5,6 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
-using System.Diagnostics.CodeAnalysis;
 using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3.Sensors
@@ -19,7 +18,7 @@ namespace Iot.Device.BrickPi3.Sensors
         private Timer _timer;
         private int _periodRefresh;
         private int _value;
-        private string _valueAsString;
+        private string? _valueAsString;
 
         /// <summary>
         /// Initialize a new NXT Touch sensor
@@ -109,7 +108,6 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Update the sensor and this will raised an event on the interface
         /// </summary>
-        [MemberNotNull(nameof(_valueAsString))]
         public void UpdateSensor(object? state)
         {
             var ret = ReadRaw();
