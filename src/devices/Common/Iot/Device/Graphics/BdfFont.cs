@@ -133,15 +133,14 @@ namespace Iot.Device.Graphics
         /// <param name="charData">Character data</param>
         public void GetCharData(char character, out ReadOnlySpan<ushort> charData)
         {
-            if (!GlyphMapper?.TryGetValue((int)character, out int index) ?? false)
+            if (GlyphMapper is object &&
+             (GlyphMapper.TryGetValue((int)character, out int index) ||
+             GlyphMapper.TryGetValue((int)DefaultChar, out index)))
             {
-                if (!GlyphMapper?.TryGetValue((int)DefaultChar, out index) ?? false)
-                {
-                    throw new InvalidDataException("Couldn't get the glyph data");
-                }
+                charData = GlyphUshortData.AsSpan().Slice(index, Height);
             }
 
-            charData = GlyphUshortData.AsSpan().Slice(index, Height);
+            throw new InvalidDataException("Couldn't get the glyph data");
         }
 
         /// <summary>
@@ -173,16 +172,16 @@ namespace Iot.Device.Graphics
         /// <returns>True if data could be retrieved</returns>
         public bool GetCharData(int charOrdinal, ref Span<int> data, bool useDefaultChar = true)
         {
-            if (data.Length < Height)
+            if (data.Length < Height || GlyphMapper is null)
             {
                 return false;
             }
 
-            if (!GlyphMapper?.TryGetValue(charOrdinal, out int index) ?? false)
+            if (!GlyphMapper.TryGetValue(charOrdinal, out int index))
             {
                 if (useDefaultChar)
                 {
-                    if (!GlyphMapper?.TryGetValue(DefaultChar, out index) ?? false)
+                    if (!GlyphMapper.TryGetValue(DefaultChar, out index))
                     {
                         return false;
                     }
