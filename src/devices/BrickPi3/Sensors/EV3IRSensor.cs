@@ -5,6 +5,7 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
+using System.Diagnostics.CodeAnalysis;
 using Iot.Device.BrickPi3.Extensions;
 using Iot.Device.BrickPi3.Models;
 
@@ -75,9 +76,9 @@ namespace Iot.Device.BrickPi3.Sensors
     /// </summary>
     public class EV3InfraredSensor : INotifyPropertyChanged, ISensor
     {
-        private Brick _brick = null;
+        private Brick _brick;
         private IRMode _mode;
-        private Timer _timer = null;
+        private Timer _timer;
         private int _periodRefresh;
 
         /// <summary>
@@ -116,16 +117,14 @@ namespace Iot.Device.BrickPi3.Sensors
             Channel = IRChannel.One;
             brick.SetSensorType((byte)Port, (SensorType)mode);
             _periodRefresh = timeout;
+            UpdateSensor(this);
             _timer = new Timer(UpdateSensor, this, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(timeout));
         }
 
         private void StopTimerInternal()
         {
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            _timer?.Dispose();
+            _timer = null!;
         }
 
         private void OnPropertyChanged(string name)
@@ -182,30 +181,22 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Return the raw value  as a string of the sensor
         /// </summary>
-        public string ValueAsString
-        {
-            get
-            {
-                return ReadAsString();
-            }
-
-            internal set
-            {
-                if (_valueAsString != value)
-                {
-                    _valueAsString = value;
-                    OnPropertyChanged(nameof(ValueAsString));
-                }
-            }
-        }
+        public string ValueAsString => ReadAsString();
 
         /// <summary>
         /// Update the sensor and this will raised an event on the interface
         /// </summary>
-        public void UpdateSensor(object state)
+        [MemberNotNull(nameof(_valueAsString))]
+        public void UpdateSensor(object? state)
         {
             Value = ReadRaw();
-            ValueAsString = ReadAsString();
+            string sensorState = ReadAsString();
+            string? previousValue = _valueAsString;
+            _valueAsString = sensorState;
+            if (sensorState != previousValue)
+            {
+                OnPropertyChanged(nameof(ValueAsString));
+            }
         }
 
         /// <summary>

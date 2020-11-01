@@ -24,9 +24,9 @@ namespace Iot.Device.BrickPi3.Movement
     public class Motor : INotifyPropertyChanged
     {
         // represent the Brick
-        private Brick _brick = null;
+        private Brick _brick;
         private int _tacho;
-        private Timer _timer = null;
+        private Timer _timer;
 
         /// <summary>
         /// Create a motor
@@ -216,7 +216,7 @@ namespace Iot.Device.BrickPi3.Movement
         /// <summary>
         /// Update the sensor and this will raised an event on the interface
         /// </summary>
-        public void UpdateSensor(object state)
+        public void UpdateSensor(object? state)
         {
             TachoCount = GetTachoCount();
         }
@@ -243,11 +243,8 @@ namespace Iot.Device.BrickPi3.Movement
 
         private void StopTimerInternal()
         {
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            _timer?.Dispose();
+            _timer = null!;
         }
 
     }

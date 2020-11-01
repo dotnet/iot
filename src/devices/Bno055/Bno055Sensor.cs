@@ -131,13 +131,14 @@ namespace Iot.Device.Bno055
                 throw new Exception($"{nameof(Bno055Sensor)} is not a valid sensor");
             }
 
-            byte acceleratorId = ReadByte(Registers.ACCEL_REV_ID);
-            byte magnetometerId = ReadByte(Registers.MAG_REV_ID);
-            byte gyroscopeId = ReadByte(Registers.GYRO_REV_ID);
-            Version firmwareVersion = new Version(ReadByte(Registers.SW_REV_ID_MSB), ReadByte(Registers.SW_REV_ID_LSB));
-            Version bootloaderVersion = new Version(ReadByte(Registers.BL_REV_ID), 0);
+            Info = new Info(
+                chipId,
+                ReadByte(Registers.ACCEL_REV_ID),
+                ReadByte(Registers.MAG_REV_ID),
+                ReadByte(Registers.GYRO_REV_ID),
+                new Version(ReadByte(Registers.SW_REV_ID_MSB), ReadByte(Registers.SW_REV_ID_LSB)),
+                new Version(ReadByte(Registers.BL_REV_ID), 0));
             // Get the ID
-            Info = new Info(chipId, acceleratorId, magnetometerId, gyroscopeId, firmwareVersion, bootloaderVersion);
             _operationMode = operationMode;
             InitializeRegisters();
         }

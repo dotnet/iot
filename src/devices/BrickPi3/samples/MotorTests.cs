@@ -123,9 +123,10 @@ namespace BrickPiHardwareTest
             Thread.Sleep(10000);
         }
 
-        private static void Motor_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private static void Motor_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Console.WriteLine($"Event raised, endoer changed: {e.PropertyName}; {((Motor)sender).TachoCount}");
+            string count = sender is Motor m ? m.TachoCount.ToString() : string.Empty;
+            Console.WriteLine($"Event raised, endoer changed: {e.PropertyName}; {count}");
         }
 
         private static void TestVehicule()
