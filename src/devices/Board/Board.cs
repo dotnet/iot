@@ -34,13 +34,7 @@ namespace Iot.Device.Board
 
         public event Action<string, Exception> LogMessages;
 
-        protected bool Initialized
-        {
-            get
-            {
-                return _initialized;
-            }
-        }
+        protected bool Initialized => _initialized;
 
         protected bool Disposed
         {
