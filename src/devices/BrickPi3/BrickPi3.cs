@@ -22,7 +22,7 @@ namespace Iot.Device.BrickPi3
         private byte[] _i2cInBytes = { 0, 0, 0, 0 };
 
         // Internals to initalize the SPI
-        private static SpiDevice _brickPiSPI = null;
+        private  SpiDevice _brickPiSPI;
         private BrickPiVoltage _brickPiVoltage = new BrickPiVoltage();
 
         #region Properties
@@ -77,12 +77,7 @@ namespace Iot.Device.BrickPi3
                 // see http://tightdev.net/SpiDev_Doc.pdf
                 settings.Mode = SpiMode.Mode0;
                 settings.DataBitLength = 8;
-                // as the SPI is a static, checking if it has already be initialised
-                if (_brickPiSPI == null)
-                {
-                    _brickPiSPI = SpiDevice.Create(settings);
-                }
-
+                _brickPiSPI = SpiDevice.Create(settings);
                 BrickPi3Info = new BrickPiInfo();
                 BrickPi3Info.Manufacturer = GetManufacturer();
                 BrickPi3Info.Board = GetBoard();

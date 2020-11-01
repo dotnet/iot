@@ -16,10 +16,10 @@ namespace Iot.Device.BrickPi3.Movement
     /// </summary>
     public sealed class Vehicle
     {
-        private Brick _brick = null;
-        private bool _directionOpposite = false;
+        private Brick? _brick = null;
+        private bool _directionOpposite;
         private int _correctedDir = 1;
-        private Timer _timer = null;
+        private Timer? _timer = null;
 
         /// <summary>
         /// Create a vehicule with 2 motors, one left and one right
