@@ -1028,31 +1028,22 @@ namespace Iot.Device.Arduino
                     throw new TimeoutException("Timeout waiting for device reply");
                 }
 
-                // Command, type, pin number and 4x2 bytes data
-                if (_lastResponse.Count < 11)
+                // Command, pin number and 2x2 bytes data (+ END_SYSEX byte)
+                if (_lastResponse.Count < 7)
                 {
                     return false;
                 }
 
-                if (_lastResponse[2] != pinNumber)
+                if (_lastResponse[0] != (byte)FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST && _lastResponse[1] != 0)
                 {
                     return false;
                 }
 
-                Span<byte> reply = stackalloc byte[4];
-                ReassembleByteString(_lastResponse, 3, 8, reply);
+                int t = _lastResponse[3] | _lastResponse[4] << 7;
+                int h = _lastResponse[5] | _lastResponse[6] << 7;
 
-                var arr = reply.ToArray();
-
-                short h = BitConverter.ToInt16(arr, 0);
-                float t = BitConverter.ToInt16(arr, 2) / 10.0f;
-                if (double.IsNaN(t) || double.IsNaN(h))
-                {
-                    return false;
-                }
-
-                temperature = Temperature.FromDegreesCelsius(t);
-                humidity = Ratio.FromPercent(h);
+                temperature = Temperature.FromDegreesCelsius(t / 10.0);
+                humidity = Ratio.FromPercent(h / 10.0);
             }
 
             return true;
