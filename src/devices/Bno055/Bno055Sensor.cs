@@ -125,20 +125,19 @@ namespace Iot.Device.Bno055
             SetConfigMode(true);
             // A second write
             WriteReg(Registers.PAGE_ID, 0);
-            // Get the ID
-            Info = new Info();
-            Info.ChipId = ReadByte(Registers.CHIP_ID);
-            if (Info.ChipId != DeviceId)
+            byte chipId = ReadByte(Registers.CHIP_ID);
+            if (chipId != DeviceId)
             {
                 throw new Exception($"{nameof(Bno055Sensor)} is not a valid sensor");
             }
 
-            Info.AcceleratorId = ReadByte(Registers.ACCEL_REV_ID);
-            Info.MagnetometerId = ReadByte(Registers.MAG_REV_ID);
-            Info.GyroscopeId = ReadByte(Registers.GYRO_REV_ID);
-            Info.FirmwareVersion = new Version(ReadByte(Registers.SW_REV_ID_MSB), ReadByte(Registers.SW_REV_ID_LSB));
-            Info.BootloaderVersion = new Version(ReadByte(Registers.BL_REV_ID), 0);
-
+            byte acceleratorId = ReadByte(Registers.ACCEL_REV_ID);
+            byte magnetometerId = ReadByte(Registers.MAG_REV_ID);
+            byte gyroscopeId = ReadByte(Registers.GYRO_REV_ID);
+            Version firmwareVersion = new Version(ReadByte(Registers.SW_REV_ID_MSB), ReadByte(Registers.SW_REV_ID_LSB));
+            Version bootloaderVersion = new Version(ReadByte(Registers.BL_REV_ID), 0);
+            // Get the ID
+            Info = new Info(chipId, acceleratorId, magnetometerId, gyroscopeId, firmwareVersion, bootloaderVersion);
             _operationMode = operationMode;
             InitializeRegisters();
         }
@@ -552,7 +551,7 @@ namespace Iot.Device.Bno055
             if (_autoDispoable)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                _i2cDevice = null!;
             }
         }
 

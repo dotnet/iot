@@ -11,6 +11,25 @@ namespace Iot.Device.Bno055
     public class Info
     {
         /// <summary>
+        /// Instantiates an Info object
+        /// <param name="chipId">Chip identifier</param>
+        /// <param name="acceleratorId">Accelerometer identifier</param>
+        /// <param name="magnetometerId">Magnetometer identifier</param>
+        /// <param name="gyroscopeId">Gyroscope identifier</param>
+        /// <param name="firmwareVersion">Firmware version</param>
+        /// <param name="bootloaderVersion">Bootloader version</param>
+        /// </summary>
+        public Info(byte chipId, byte acceleratorId, byte magnetometerId, byte gyroscopeId, Version firmwareVersion, Version bootloaderVersion)
+        {
+            ChipId = ChipId;
+            AcceleratorId = acceleratorId;
+            MagnetometerId = magnetometerId;
+            GyroscopeId = gyroscopeId;
+            FirmwareVersion = firmwareVersion;
+            BootloaderVersion = bootloaderVersion;
+        }
+
+        /// <summary>
         /// Chip identifier
         /// </summary>
         public byte ChipId { get; set; }
