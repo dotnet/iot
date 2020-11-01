@@ -86,6 +86,11 @@ namespace Iot.Device.Bmxx80
 
             ReadCalibrationData();
             Reset();
+
+            if (_calibrationData is null)
+            {
+                throw new Exception("Bmxx80 device is incorrectly configured.");
+            }
         }
 
         /// <summary>
@@ -319,7 +324,13 @@ namespace Iot.Device.Bmxx80
                     break;
             }
 
-            _calibrationData.ReadFromDevice(this);
+            if (_calibrationData is object)
+            {
+                 _calibrationData.ReadFromDevice(this);
+                 return;
+            }
+
+            throw new Exception("Bmxx80 device not correctly configured. Could not find calibraton data.");
         }
 
         /// <summary>
@@ -338,7 +349,7 @@ namespace Iot.Device.Bmxx80
         protected virtual void Dispose(bool disposing)
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
     }
 }
