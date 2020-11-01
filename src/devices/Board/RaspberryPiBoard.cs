@@ -34,7 +34,7 @@ namespace Iot.Device.Board
         public override void Initialize()
         {
             // Needs to be a raspi 3 driver here (either unix or windows)
-            _managedGpioController = new ManagedGpioController(this, DefaultPinNumberingScheme, CreateDriver(), null);
+            _managedGpioController = new ManagedGpioController(this, DefaultPinNumberingScheme, CreateDriver());
             PinCount = _managedGpioController.PinCount;
             base.Initialize();
         }
@@ -120,9 +120,9 @@ namespace Iot.Device.Board
             throw new NotSupportedException("Unsupported numbering scheme combination");
         }
 
-        public override GpioController CreateGpioController(int[] pinAssignment = null)
+        public override GpioController CreateGpioController()
         {
-            return new ManagedGpioController(this, DefaultPinNumberingScheme, CreateDriver(), pinAssignment);
+            return new ManagedGpioController(this, DefaultPinNumberingScheme, CreateDriver());
         }
 
         public override int[] GetDefaultPinAssignmentForI2c(I2cConnectionSettings connectionSettings)

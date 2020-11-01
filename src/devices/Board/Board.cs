@@ -221,12 +221,12 @@ namespace Iot.Device.Board
             public object Owner { get; }
         }
 
-        public virtual GpioController CreateGpioController(int[] pinAssignment = null)
+        public virtual GpioController CreateGpioController()
         {
-            return CreateGpioController(pinAssignment, DefaultPinNumberingScheme);
+            return CreateGpioController(DefaultPinNumberingScheme);
         }
 
-        public abstract GpioController CreateGpioController(int[] pinAssignment, PinNumberingScheme pinNumberingScheme);
+        public abstract GpioController CreateGpioController(PinNumberingScheme pinNumberingScheme);
 
         /// <summary>
         /// This method shall be overriden by clients, providing just the basic interface to an I2cDevice.
@@ -307,10 +307,7 @@ namespace Iot.Device.Board
         /// <param name="pinNumberingScheme">Pin numbering scheme for the pin provided (logical or physical)</param>
         /// <param name="bus">Optional bus argument, for SPI and I2C pins</param>
         /// <returns>
-        /// -2: It is unknown whether this pin can be used for the given usage
-        /// -1: Pin does not support the given usage
-        /// 0: Pin supports the given usage, no special mode is needed (i.e. digital in/out)
-        /// >0: Mode to set (hardware dependent)</returns>
+        /// A hardware-dependent instance of <see cref="AlternatePinMode"/> describing the mode the pin is in.</returns>
         public abstract AlternatePinMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage,
             PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, int bus = 0);
 

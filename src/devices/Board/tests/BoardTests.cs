@@ -47,20 +47,11 @@ namespace Iot.Device.Board.Tests
             _mockedGpioDriver.Setup(x => x.GetPinModeEx(1)).Returns(PinMode.Output);
             _mockedGpioDriver.Setup(x => x.WriteEx(1, PinValue.High));
             _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
-            var ctrl = board.CreateGpioController(null);
+            var ctrl = board.CreateGpioController();
             Assert.NotNull(ctrl);
             ctrl.OpenPin(1, PinMode.Output);
             ctrl.Write(1, PinValue.High);
             ctrl.ClosePin(1);
-        }
-
-        [Fact]
-        public void OpenPinNotAssignedThrows()
-        {
-            var board = CreateBoard();
-            var ctrl = board.CreateGpioController(new int[] { 2 });
-            Assert.Throws<InvalidOperationException>(() => ctrl.OpenPin(1));
-            Assert.Throws<InvalidOperationException>(() => ctrl.ClosePin(1));
         }
 
         [Fact]
@@ -121,7 +112,7 @@ namespace Iot.Device.Board.Tests
             _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
             _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Output)).Returns(true);
             Board b = new CustomGenericBoard(PinNumberingScheme.Logical) { MockedDriver = _mockedGpioDriver.Object };
-            var ctrl = b.CreateGpioController(new int[] { 2, 4, 8 }, PinNumberingScheme.Board);
+            var ctrl = b.CreateGpioController(PinNumberingScheme.Board);
             ctrl.OpenPin(2, PinMode.Output); // Our test board maps physical pin 2 to logical pin 1
         }
 

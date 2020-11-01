@@ -44,7 +44,7 @@ namespace BoardSample
             const int led2 = 2;
             using Board b = new GenericBoard(PinNumberingScheme.Logical);
 
-            using GpioController controller = b.CreateGpioController(null, PinNumberingScheme.Logical);
+            using GpioController controller = b.CreateGpioController(PinNumberingScheme.Logical);
 
             if (controller.PinCount > 0)
             {
@@ -144,7 +144,7 @@ namespace BoardSample
             Console.WriteLine("Blinking and dimming an LED - Press any key to quit");
             while (!Console.KeyAvailable)
             {
-                GpioController ctrl = raspi.CreateGpioController(new int[] { pinNumber });
+                GpioController ctrl = raspi.CreateGpioController();
                 ctrl.OpenPin(pinNumber);
                 ctrl.SetPinMode(pinNumber, PinMode.Output);
                 ctrl.Write(pinNumber, PinValue.Low);
@@ -178,10 +178,7 @@ namespace BoardSample
             SpiConnectionSettings spiSettings = new SpiConnectionSettings(0, -1) { ChipSelectLineActiveState = PinValue.Low };
             using SpiDevice dev = raspi.CreateSpiDevice(spiSettings);
             using Mcp3008 mcp = new Mcp3008(dev);
-            using GpioController ctrl = raspi.CreateGpioController(new[]
-            {
-                8
-            });
+            using GpioController ctrl = raspi.CreateGpioController();
 
             // Note that if we have only a single device attached to the SPI bus, we could just as well pull the CS line
             // hard to low, but this is to show the concept.

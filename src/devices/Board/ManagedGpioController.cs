@@ -12,27 +12,14 @@ namespace Iot.Device.Board
 {
     internal class ManagedGpioController : GpioController
     {
-        private readonly int[] _pinAssignment;
         private readonly Board _board;
         private readonly GpioDriver _driver;
 
-        public ManagedGpioController(Board board, PinNumberingScheme numberingScheme, GpioDriver driver, int[] pinAssignment)
+        public ManagedGpioController(Board board, PinNumberingScheme numberingScheme, GpioDriver driver)
         : base(numberingScheme, driver)
         {
             _board = board ?? throw new ArgumentNullException(nameof(board));
             _driver = driver ?? throw new ArgumentNullException(nameof(driver));
-            _pinAssignment = pinAssignment;
-
-            if (pinAssignment != null)
-            {
-                foreach (var pin in pinAssignment)
-                {
-                    if (_board.GetHardwareModeForPinUsage(pin, PinUsage.Gpio) != AlternatePinMode.Gpio)
-                    {
-                        throw new NotSupportedException($"Logical pin {pin} does not support Gpio");
-                    }
-                }
-            }
         }
 
         public static new GpioDriver GetBestDriverForBoard()
@@ -68,14 +55,6 @@ namespace Iot.Device.Board
 
         public override void OpenPin(int pinNumber)
         {
-            if (_pinAssignment != null)
-            {
-                if (!_pinAssignment.Contains(pinNumber))
-                {
-                    throw new InvalidOperationException($"Pin {pinNumber} is not reserved for this GpioController");
-                }
-            }
-
             _board.ReservePin(pinNumber, PinUsage.Gpio, this);
             base.OpenPin(pinNumber);
         }

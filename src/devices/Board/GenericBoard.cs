@@ -34,9 +34,9 @@ namespace Iot.Device.Board
             return ManagedGpioController.GetBestDriverForBoard();
         }
 
-        public override GpioController CreateGpioController(int[] pinAssignment, PinNumberingScheme numberingScheme)
+        public override GpioController CreateGpioController(PinNumberingScheme numberingScheme)
         {
-            return new ManagedGpioController(this, numberingScheme, CreateDriver(), pinAssignment);
+            return new ManagedGpioController(this, numberingScheme, CreateDriver());
         }
 
         protected override SpiDevice CreateSimpleSpiDevice(SpiConnectionSettings settings, int[] pins)
