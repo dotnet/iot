@@ -27,6 +27,6 @@
         SCHEDULER_DATA = 0x7B,
         SYSEX_NON_REALTIME = 0x7E,
         SYSEX_REALTIME = 0x7F,
-        DHT_SENSOR_DATA_REQUEST = 0x02, // User defined block
+        DHT_SENSOR_DATA_REQUEST = 0x74, // User defined block
     }
 }
