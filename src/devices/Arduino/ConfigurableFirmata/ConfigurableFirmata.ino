@@ -22,11 +22,11 @@
 // I2C support (most boards have just one channel)
 #define ENABLE_I2C
 // SPI support. This feature requires a non-standard module compiled into the firmware
-#define ENABLE_SPI
+// #define ENABLE_SPI
 
 // Native reading of DHTXX sensors. Reading a DHT11 directly using GPIO methods from a remote PC will not work, because of the very tight timing requirements of these sensors
 // This feature requires a non-standard module compiled into the firmware (see Readme.md). In addition, the "DHT Sensor library" from Adafruit is required. 
-#define ENABLE_DHT
+// #define ENABLE_DHT
 
 
 #include <ConfigurableFirmata.h>
