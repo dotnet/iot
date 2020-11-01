@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Iot.Device.BoardLed
 {
@@ -56,8 +57,17 @@ namespace Iot.Device.BoardLed
         public BoardLed(string name)
         {
             Name = name;
-
             Initialize();
+#if !NET5_0
+            if (_brightnessReader is null ||
+                _brightnessWriter is null ||
+                _maxBrightnessReader is null ||
+                _triggerReader is null ||
+                _triggerWriter is null)
+            {
+                throw new Exception($"{nameof(BoardLed)} incorrectly configured");
+            }
+#endif
         }
 
         /// <summary>
@@ -98,11 +108,11 @@ namespace Iot.Device.BoardLed
             _triggerWriter?.Dispose();
             _maxBrightnessReader?.Dispose();
 
-            _brightnessReader = null;
-            _brightnessWriter = null;
-            _triggerReader = null;
-            _triggerWriter = null;
-            _maxBrightnessReader = null;
+            _brightnessReader = null!;
+            _brightnessWriter = null!;
+            _triggerReader = null!;
+            _triggerWriter = null!;
+            _maxBrightnessReader = null!;
         }
 
         private int GetBrightness()
@@ -151,6 +161,9 @@ namespace Iot.Device.BoardLed
             _triggerWriter.Flush();
         }
 
+#if NET5_0
+        [MemberNotNull(nameof(_brightnessReader), nameof(_brightnessWriter), nameof(_triggerReader), nameof(_triggerWriter), nameof(_maxBrightnessReader))]
+#endif
         private void Initialize()
         {
             FileStream brightnessStream = File.Open($"{DefaultDevicePath}/{Name}/brightness", FileMode.Open);
