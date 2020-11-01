@@ -60,26 +60,51 @@ namespace Iot.Device.Board
 
         public override byte ReadByte()
         {
+            if (_device == null)
+            {
+                throw new ObjectDisposedException("SPI Device");
+            }
+
             return _device.ReadByte();
         }
 
         public override void Read(Span<byte> buffer)
         {
+            if (_device == null)
+            {
+                throw new ObjectDisposedException("SPI Device");
+            }
+
             _device.Read(buffer);
         }
 
         public override void WriteByte(byte value)
         {
+            if (_device == null)
+            {
+                throw new ObjectDisposedException("SPI Device");
+            }
+
             _device.WriteByte(value);
         }
 
         public override void Write(ReadOnlySpan<byte> buffer)
         {
+            if (_device == null)
+            {
+                throw new ObjectDisposedException("SPI Device");
+            }
+
             _device.Write(buffer);
         }
 
         public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
+            if (_device == null)
+            {
+                throw new ObjectDisposedException("SPI Device");
+            }
+
             _device.TransferFullDuplex(writeBuffer, readBuffer);
         }
 

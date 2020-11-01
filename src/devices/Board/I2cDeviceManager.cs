@@ -35,6 +35,11 @@ namespace Iot.Device.Board
         {
             get
             {
+                if (_i2cDeviceImplementation == null)
+                {
+                    throw new ObjectDisposedException("I2c Device");
+                }
+
                 return _i2cDeviceImplementation.ConnectionSettings;
             }
         }
@@ -49,26 +54,51 @@ namespace Iot.Device.Board
 
         public override byte ReadByte()
         {
+            if (_i2cDeviceImplementation == null)
+            {
+                throw new ObjectDisposedException("I2c Device");
+            }
+
             return _i2cDeviceImplementation.ReadByte();
         }
 
         public override void Read(Span<byte> buffer)
         {
+            if (_i2cDeviceImplementation == null)
+            {
+                throw new ObjectDisposedException("I2c Device");
+            }
+
             _i2cDeviceImplementation.Read(buffer);
         }
 
         public override void WriteByte(byte value)
         {
+            if (_i2cDeviceImplementation == null)
+            {
+                throw new ObjectDisposedException("I2c Device");
+            }
+
             _i2cDeviceImplementation.WriteByte(value);
         }
 
         public override void Write(ReadOnlySpan<byte> buffer)
         {
+            if (_i2cDeviceImplementation == null)
+            {
+                throw new ObjectDisposedException("I2c Device");
+            }
+
             _i2cDeviceImplementation.Write(buffer);
         }
 
         public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
+            if (_i2cDeviceImplementation == null)
+            {
+                throw new ObjectDisposedException("I2c Device");
+            }
+
             _i2cDeviceImplementation.WriteRead(writeBuffer, readBuffer);
         }
 
