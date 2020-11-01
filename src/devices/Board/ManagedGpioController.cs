@@ -85,44 +85,5 @@ namespace Iot.Device.Board
             base.ClosePin(pinNumber, numberingScheme);
             _board.ReleasePin(pinNumber, PinUsage.Gpio, this);
         }
-
-        /// <summary>
-        /// Returns the currently set "alternate" pin mode, for pins which are multiplexed between different functions
-        /// </summary>
-        /// <param name="pinNumber">The pin number</param>
-        /// <returns>The returned pin mode</returns>
-        internal new AlternatePinMode GetAlternatePinMode(int pinNumber)
-        {
-            int mode = base.GetAlternatePinMode(pinNumber);
-            if (mode < 0)
-            {
-                return AlternatePinMode.Gpio;
-            }
-            else
-            {
-                return (AlternatePinMode)(mode + 1);
-            }
-        }
-
-        internal void SetAlternatePinMode(int pinNumber, AlternatePinMode altMode)
-        {
-            int mode = 0;
-            if (altMode < 0)
-            {
-                throw new ArgumentException("Invalid mode requested", nameof(altMode));
-            }
-
-            if (altMode == AlternatePinMode.Gpio)
-            {
-                // When going back to Gpio, default to input
-                mode = -1;
-            }
-            else
-            {
-                mode = (int)altMode - 1;
-            }
-
-            SetAlternatePinMode(pinNumber, mode);
-        }
     }
 }

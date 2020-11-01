@@ -132,7 +132,7 @@ namespace BoardSample
         private static void RaspberryPiTest()
         {
             using var raspi = new RaspberryPiBoard(PinNumberingScheme.Logical);
-            // PwmRaspiTest(raspi);
+            PwmRaspiTest(raspi);
             SpiRaspiTestWithSoftwareCs(raspi);
             SpiRaspiTestWithHardwareCs(raspi);
         }

@@ -305,7 +305,7 @@ namespace Iot.Device.Board
             pinNumber = RemapPin(pinNumber, pinNumberingScheme);
             if (pinNumber >= PinCount)
             {
-                return AlternatePinMode.NotSupported;
+                throw new InvalidOperationException($"Invalid pin number {pinNumber}");
             }
 
             if (usage == PinUsage.Gpio)
@@ -342,7 +342,7 @@ namespace Iot.Device.Board
                         return AlternatePinMode.Alt5;
                 }
 
-                return AlternatePinMode.NotSupported;
+                throw new NotSupportedException($"No I2C support on Pin {pinNumber}.");
             }
 
             if (usage == PinUsage.Pwm)
@@ -357,7 +357,7 @@ namespace Iot.Device.Board
                     return AlternatePinMode.Alt5;
                 }
 
-                return AlternatePinMode.NotSupported;
+                throw new NotSupportedException($"No Pwm support on Pin {pinNumber}.");
             }
 
             if (usage == PinUsage.Spi)
@@ -400,7 +400,7 @@ namespace Iot.Device.Board
                         return AlternatePinMode.Alt5;
                 }
 
-                return AlternatePinMode.NotSupported;
+                throw new NotSupportedException($"No SPI support on Pin {pinNumber}.");
             }
 
             if (usage == PinUsage.Uart)
@@ -442,9 +442,11 @@ namespace Iot.Device.Board
                     case 17:
                         return (bus == 0) ? AlternatePinMode.Alt3 : AlternatePinMode.Alt5;
                 }
+
+                throw new NotSupportedException($"No Uart support on Pin {pinNumber}.");
             }
 
-            return AlternatePinMode.NotSupported;
+            throw new NotSupportedException($"There are no known pins for {usage}.");
         }
 
         public override int GetDefaultPinAssignmentForPwm(int chip, int channel)

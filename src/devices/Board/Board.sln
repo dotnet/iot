@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Board.Tests", "tests\Board.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mcp3xxx", "..\Mcp3xxx\Mcp3xxx.csproj", "{B4856CA0-4620-4EA9-ABA4-966B748331A6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4D8428C9-F577-4427-8272-748347076B0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F2A31327-2447-4F7C-9659-717ADAE282F3} = {E3BCE30D-56D7-422C-B77A-6C47739C6EC2}
+		{88675694-18F0-4479-9CEA-613DC6AFB2A9} = {4D8428C9-F577-4427-8272-748347076B0A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A05EAE44-F586-4137-AB5A-BC530A21533D}
