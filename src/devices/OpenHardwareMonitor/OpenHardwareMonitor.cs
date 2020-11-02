@@ -19,7 +19,11 @@ namespace Iot.Device.OpenHardwareMonitor
     /// </summary>
     public sealed class OpenHardwareMonitor : IDisposable
     {
+        /// <summary>
+        /// This is the monitoring thread interval. All updates will be done in a multiple of this value.
+        /// </summary>
         private static readonly TimeSpan MonitorInterval = TimeSpan.FromMilliseconds(100);
+        private static readonly TimeSpan DefaultDerivedSensorsInterval = TimeSpan.FromMilliseconds(500);
 
         private delegate IQuantity UnitCreator(float value);
 
@@ -429,9 +433,11 @@ namespace Iot.Device.OpenHardwareMonitor
         /// </summary>
         /// <param name="cpuDieSize">Die size of your CPU, optional. Find your CPU on https://en.wikichip.org/ to find out. Note: This
         /// value is usually much smaller than the size of the physical CPU.</param>
-        public void EnableDerivedSensors(Area cpuDieSize = default)
+        /// <param name="monitoringInterval">Monitoring interval for the derived sensors. Defaults to 500ms.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="monitoringInterval"/> is less than 0.</exception>
+        public void EnableDerivedSensors(Area cpuDieSize = default, TimeSpan monitoringInterval = default)
         {
-            if (cpuDieSize.Value == 0)
+            if (cpuDieSize == default)
             {
                 // Values for some recent intel chips (coffee lake)
                 if (LogicalProcessors <= 4)
@@ -452,6 +458,16 @@ namespace Iot.Device.OpenHardwareMonitor
 
             Sensor cpuPower = null;
 
+            TimeSpan interval = monitoringInterval;
+            if (interval == default)
+            {
+                interval = DefaultDerivedSensorsInterval;
+            }
+            else if (interval.TotalSeconds < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(monitoringInterval));
+            }
+
             foreach (var sensor in GetSensorList())
             {
                 if (sensor.SensorType == SensorType.Power)
@@ -459,7 +475,7 @@ namespace Iot.Device.OpenHardwareMonitor
                     // Energy usage (integration of power over time)
                     var managementInstance = new EnergyManagementInstance();
                     Sensor newSensor = new Sensor(managementInstance, sensor.Name + " Energy", sensor.Identifier + "/energy", sensor.Identifier, SensorType.Energy);
-                    newSensor.Job = StartMonitoring(sensor, TimeSpan.FromMilliseconds(500), (s, value, timeSinceUpdate) =>
+                    newSensor.Job = StartMonitoring(sensor, interval, (s, value, timeSinceUpdate) =>
                     {
                         double previousEnergy = managementInstance.Value;
                         // Value is in watts, so increment is in watts-hours, which is an unit we can later convert from
@@ -475,7 +491,7 @@ namespace Iot.Device.OpenHardwareMonitor
                 {
                     var managementInstance = new EnergyManagementInstance();
                     var newSensor = new Sensor(managementInstance, sensor.Name + " HeatFlux", sensor.Identifier + "/heatflux", sensor.Identifier, SensorType.HeatFlux);
-                    newSensor.Job = StartMonitoring(sensor, TimeSpan.FromMilliseconds(500), (s, value, timeSinceUpdate) =>
+                    newSensor.Job = StartMonitoring(sensor, interval, (s, value, timeSinceUpdate) =>
                     {
                         Power p = Power.FromWatts(value.Value); // Current power usage in Watts
                         HeatFlux hf = p / cpuDieSize;
@@ -492,7 +508,7 @@ namespace Iot.Device.OpenHardwareMonitor
             {
                 var managementInstance = new EnergyManagementInstance();
                 var newSensor = new Sensor(managementInstance, vcore.Name + " Current", vcore.Identifier + "/current", vcore.Identifier, SensorType.Current);
-                newSensor.Job = StartMonitoring(vcore, TimeSpan.FromMilliseconds(500), (s, value, timeSinceUpdate) =>
+                newSensor.Job = StartMonitoring(vcore, interval, (s, value, timeSinceUpdate) =>
                 {
                     if (cpuPower.TryGetValue(out Power power))
                     {
