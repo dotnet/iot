@@ -138,7 +138,12 @@ namespace Iot.Device.GrovePiDevice.Sensors
         {
             _grovePi.WriteCommand(GrovePiCommand.LetBarGet, _port, 0, 0);
             var ret = _grovePi.ReadCommand(GrovePiCommand.LetBarGet, _port);
-            return ret[1] + (ret[2] >> 8);
+            if (ret is object)
+            {
+                return ret[1] + (ret[2] >> 8);
+            }
+
+            throw new Exception("Cannot fine all LEDs");
         }
 
         /// <summary>
