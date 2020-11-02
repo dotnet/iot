@@ -2,12 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
-MinimumVisualStudioVersion = 15.0.26124.0
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{75A1813B-4DF3-4AFB-B2BF-A4CF47F77EDF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CharacterLcd.Samples", "samples\CharacterLcd.Samples.csproj", "{940D60A0-7CAA-4EC3-BC87-0C2C037320EE}"
-EndProject
+MinimumVisualStudioVersion = 15.0.26124.0	
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CharacterLcd", "CharacterLcd.csproj", "{6F19B719-44F8-43C4-ABEB-DB33FC129DBF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CharacterLcd.Samples", "samples\CharacterLcd.Samples.csproj", "{509D7B94-F336-4A94-8D63-1950D68A93FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +44,18 @@ Global
 		{6F19B719-44F8-43C4-ABEB-DB33FC129DBF}.Release|x64.Build.0 = Release|Any CPU
 		{6F19B719-44F8-43C4-ABEB-DB33FC129DBF}.Release|x86.ActiveCfg = Release|Any CPU
 		{6F19B719-44F8-43C4-ABEB-DB33FC129DBF}.Release|x86.Build.0 = Release|Any CPU
+		{509D7B94-F336-4A94-8D63-1950D68A93FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{509D7B94-F336-4A94-8D63-1950D68A93FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{509D7B94-F336-4A94-8D63-1950D68A93FF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{509D7B94-F336-4A94-8D63-1950D68A93FF}.Debug|x64.Build.0 = Debug|Any CPU
+		{509D7B94-F336-4A94-8D63-1950D68A93FF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{509D7B94-F336-4A94-8D63-1950D68A93FF}.Debug|x86.Build.0 = Debug|Any CPU
+		{509D7B94-F336-4A94-8D63-1950D68A93FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{509D7B94-F336-4A94-8D63-1950D68A93FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{509D7B94-F336-4A94-8D63-1950D68A93FF}.Release|x64.ActiveCfg = Release|Any CPU
+		{509D7B94-F336-4A94-8D63-1950D68A93FF}.Release|x64.Build.0 = Release|Any CPU
+		{509D7B94-F336-4A94-8D63-1950D68A93FF}.Release|x86.ActiveCfg = Release|Any CPU
+		{509D7B94-F336-4A94-8D63-1950D68A93FF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{940D60A0-7CAA-4EC3-BC87-0C2C037320EE} = {75A1813B-4DF3-4AFB-B2BF-A4CF47F77EDF}

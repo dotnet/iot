@@ -121,7 +121,7 @@ namespace Iot.Device.CharacterLcd
         /// <param name="readWritePin">The optional pin that controls the read and write switch.</param>
         /// <param name="controller">The controller to use with the LCD. If not specified, uses the platform default.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public static LcdInterface CreateGpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController controller = null, bool shouldDispose = true)
+        public static LcdInterface CreateGpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController? controller = null, bool shouldDispose = true)
         {
             return new Gpio(registerSelectPin, enablePin, dataPins, backlightPin, backlightBrightness, readWritePin, controller, shouldDispose);
         }
