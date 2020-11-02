@@ -9,6 +9,7 @@ using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 
@@ -79,6 +80,12 @@ namespace Iot.Device.Vl53L0X
             MaxTryReadSingle = 3;
             // Set longer range
             Precision = Precision.LongRange;
+#if NETCOREAPP2_1 || NETCOREAPP3_1
+            if (Information is null)
+            {
+                throw new Exception("Vl53L0X device is not correctly configured.");
+            }
+#endif
         }
 
         /// <summary>
@@ -651,6 +658,9 @@ namespace Iot.Device.Vl53L0X
         /// Create the Info class. Initialization and closing sequences
         /// are coming form the official API
         /// </summary>
+#if !NETCOREAPP2_1 && !NETCOREAPP3_1
+        [MemberNotNull(nameof(Information))]
+#endif
         private void GetInfo()
         {
             // Initialization sequance
