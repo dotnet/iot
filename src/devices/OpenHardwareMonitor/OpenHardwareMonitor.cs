@@ -22,7 +22,7 @@ namespace Iot.Device.OpenHardwareMonitor
         /// <summary>
         /// This is the monitoring thread interval. All updates will be done in a multiple of this value.
         /// </summary>
-        private static readonly TimeSpan MonitorInterval = TimeSpan.FromMilliseconds(100);
+        private static readonly TimeSpan DefaultMonitorInterval = TimeSpan.FromMilliseconds(100);
         private static readonly TimeSpan DefaultDerivedSensorsInterval = TimeSpan.FromMilliseconds(500);
 
         private delegate IQuantity UnitCreator(float value);
@@ -44,6 +44,7 @@ namespace Iot.Device.OpenHardwareMonitor
         private List<MonitoringJob> _monitoredElements;
         private List<Sensor> _derivedSensors;
         private DateTimeOffset _lastMonitorLoop;
+        private TimeSpan _monitoringInterval;
 
         static OpenHardwareMonitor()
         {
@@ -82,6 +83,28 @@ namespace Iot.Device.OpenHardwareMonitor
             _lock = new object();
             _monitoredElements = new List<MonitoringJob>();
             _lastMonitorLoop = DateTimeOffset.UtcNow;
+            MonitoringInterval = DefaultMonitorInterval;
+        }
+
+        /// <summary>
+        /// The minimum monitoring interval.
+        /// </summary>
+        public TimeSpan MonitoringInterval
+        {
+            get
+            {
+                return _monitoringInterval;
+            }
+
+            set
+            {
+                if (_monitorThread != null)
+                {
+                    throw new InvalidOperationException($"{nameof(MonitoringInterval)} can only be changed while monitoring is disabled.");
+                }
+
+                _monitoringInterval = value;
+            }
         }
 
         private void InitHardwareMonitor()
@@ -333,11 +356,17 @@ namespace Iot.Device.OpenHardwareMonitor
             }
 
             double roundedInterval = monitoringInterval.TotalSeconds;
-            // round to the nearest 100ms
-            roundedInterval = Math.Round(roundedInterval, 1, MidpointRounding.AwayFromZero);
-            if (roundedInterval < 0.1)
+            // round to the nearest multiple of the thread interval
+            double fract = roundedInterval % MonitoringInterval.TotalSeconds;
+            if (fract > 0)
             {
-                roundedInterval = 0.1;
+                // If fract is > 0, step to the next multiple (+ make sure we're really greater)
+                roundedInterval = roundedInterval - fract + MonitoringInterval.TotalSeconds + 1E-6;
+            }
+
+            if (roundedInterval < MonitoringInterval.TotalSeconds)
+            {
+                roundedInterval = MonitoringInterval.TotalSeconds;
             }
 
             monitoringInterval = TimeSpan.FromSeconds(roundedInterval);
@@ -420,7 +449,7 @@ namespace Iot.Device.OpenHardwareMonitor
 
                 if (running)
                 {
-                    Thread.Sleep(MonitorInterval);
+                    Thread.Sleep(MonitoringInterval);
                 }
             }
         }
