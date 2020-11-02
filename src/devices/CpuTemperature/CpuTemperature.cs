@@ -46,17 +46,20 @@ namespace Iot.Device.CpuTemperature
 
             if (CheckAvailable())
             {
-                using (FileStream fileStream = new FileStream("/sys/class/thermal/thermal_zone0/temp", FileMode.Open, FileAccess.Read))
-                using (StreamReader reader = new StreamReader(fileStream))
+                using FileStream fileStream = new FileStream("/sys/class/thermal/thermal_zone0/temp", FileMode.Open, FileAccess.Read);
+                if (fileStream is null)
                 {
-                    string data = reader.ReadLine();
-                    if (!string.IsNullOrEmpty(data))
+                    throw new Exception("Cannot read CPU temperature");
+                }
+
+                using StreamReader reader = new StreamReader(fileStream);
+                string? data = reader.ReadLine();
+                if (!string.IsNullOrEmpty(data))
+                {
+                    int temp;
+                    if (int.TryParse(data, out temp))
                     {
-                        int temp;
-                        if (int.TryParse(data, out temp))
-                        {
-                            temperature = temp / 1000F;
-                        }
+                        temperature = temp / 1000F;
                     }
                 }
             }
