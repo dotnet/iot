@@ -19,7 +19,7 @@ namespace Iot.Device.SenseHat
         /// Constructs SenseHatPressureAndTemperature instance
         /// </summary>
         /// <param name="i2cDevice">I2C device used to communicate with the device</param>
-        public SenseHatPressureAndTemperature(I2cDevice i2cDevice = null)
+        public SenseHatPressureAndTemperature(I2cDevice? i2cDevice = null)
             : base(i2cDevice ?? CreateDefaultI2cDevice())
         {
         }

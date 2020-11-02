@@ -23,7 +23,7 @@ namespace Iot.Device.SenseHat
         /// <param name="accelerationScale">Acceleration scale</param>
         /// <param name="angularRateScale">Angular rate scale</param>
         public SenseHatAccelerometerAndGyroscope(
-            I2cDevice i2cDevice = null,
+            I2cDevice? i2cDevice = null,
             AccelerationScale accelerationScale = AccelerationScale.Scale02G,
             AngularRateScale angularRateScale = AngularRateScale.Scale0245Dps)
             : base(i2cDevice ?? CreateDefaultI2cDevice(), accelerationScale, angularRateScale)

@@ -22,7 +22,7 @@ namespace Iot.Device.SenseHat
         /// <param name="i2cDevice">I2C device used to communicate with the device</param>
         /// <param name="magneticInduction">Magnetic induction</param>
         public SenseHatMagnetometer(
-            I2cDevice i2cDevice = null,
+            I2cDevice? i2cDevice = null,
             MagneticInductionScale magneticInduction = MagneticInductionScale.Scale04G)
             : base(i2cDevice ?? CreateDefaultI2cDevice(), magneticInduction)
         {
