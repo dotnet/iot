@@ -30,6 +30,7 @@ namespace Iot.Device.Seesaw
         /// will be disposed when the along with the SeeSaw device</param>
         public Seesaw(I2cDevice i2cDevice)
         {
+            I2cDevice = i2cDevice;
             Initialize(i2cDevice);
         }
 
@@ -65,10 +66,7 @@ namespace Iot.Device.Seesaw
         /// </summary>
         protected void Initialize(I2cDevice i2cDevice)
         {
-            I2cDevice = i2cDevice;
-
             SoftwareReset();
-
             DelayHelper.DelayMilliseconds(10, true);
 
             if (ReadByte(SeesawModule.Status, SeesawFunction.StatusHwId) != SessawHardwareId)
@@ -164,7 +162,7 @@ namespace Iot.Device.Seesaw
         public void Dispose()
         {
             I2cDevice?.Dispose();
-            I2cDevice = null;
+            I2cDevice = null!;
         }
     }
 }
