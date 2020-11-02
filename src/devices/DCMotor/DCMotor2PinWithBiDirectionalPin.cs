@@ -20,7 +20,7 @@ namespace Iot.Device.DCMotor
         public DCMotor2PinWithBiDirectionalPin(
             PwmChannel pwmChannel,
             int dirpin,
-            GpioController controller,
+            GpioController? controller,
             bool shouldDispose)
             : base(controller ?? ((dirpin == -1) ? null : new GpioController()), controller == null || shouldDispose)
         {
@@ -87,7 +87,7 @@ namespace Iot.Device.DCMotor
             if (disposing)
             {
                 _pwm?.Dispose();
-                _pwm = null;
+                _pwm = null!;
             }
 
             base.Dispose(disposing);

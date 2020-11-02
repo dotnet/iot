@@ -21,10 +21,10 @@ namespace Iot.Device.DCMotor
         /// </summary>
         /// <param name="controller"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        protected DCMotor(GpioController controller, bool shouldDispose)
+        protected DCMotor(GpioController? controller, bool shouldDispose)
         {
             _shouldDispose = shouldDispose;
-            Controller = controller;
+            Controller = controller ?? new GpioController();
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Iot.Device.DCMotor
                 if (_shouldDispose)
                 {
                     Controller?.Dispose();
-                    Controller = null;
+                    Controller = null!;
                 }
             }
         }
@@ -79,11 +79,6 @@ namespace Iot.Device.DCMotor
         /// </remarks>
         public static DCMotor Create(PwmChannel speedControlChannel)
         {
-            if (speedControlChannel == null)
-            {
-                throw new ArgumentNullException(nameof(speedControlChannel));
-            }
-
             return new DCMotor2PinNoEnable(speedControlChannel, -1, null, true);
         }
 
@@ -99,7 +94,7 @@ namespace Iot.Device.DCMotor
         /// or directly to the on of two inputs related with the motor direction (if H-bridge allows inputs to change frequently).
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(int speedControlPin, GpioController controller = null, bool shouldDispose = true)
+        public static DCMotor Create(int speedControlPin, GpioController? controller = null, bool shouldDispose = true)
         {
             if (speedControlPin == -1)
             {
@@ -132,7 +127,7 @@ namespace Iot.Device.DCMotor
         /// or to direction input if a controller with one direction input is used.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, GpioController controller = null, bool shouldDispose = true, bool singleBiDirectionPin = false)
+        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, GpioController? controller = null, bool shouldDispose = true, bool singleBiDirectionPin = false)
         {
             if (speedControlChannel == null)
             {
@@ -172,7 +167,7 @@ namespace Iot.Device.DCMotor
         /// or to direction input if a controller with one direction input is used.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(int speedControlPin, int directionPin, GpioController controller = null, bool shouldDispose = true, bool singleBiDirectionPin = false)
+        public static DCMotor Create(int speedControlPin, int directionPin, GpioController? controller = null, bool shouldDispose = true, bool singleBiDirectionPin = false)
         {
             if (speedControlPin == -1)
             {
@@ -220,7 +215,7 @@ namespace Iot.Device.DCMotor
         /// <paramref name="otherDirectionPin"/> should be connected to H-bridge input corresponding to the remaining motor input.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, int otherDirectionPin, GpioController controller = null, bool shouldDispose = true)
+        public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, int otherDirectionPin, GpioController? controller = null, bool shouldDispose = true)
         {
             if (speedControlChannel == null)
             {
@@ -261,7 +256,7 @@ namespace Iot.Device.DCMotor
         /// <paramref name="otherDirectionPin"/> should be connected to H-bridge input corresponding to the remaining motor input.
         /// Connecting motor directly to GPIO pin is not recommended and may damage your board.
         /// </remarks>
-        public static DCMotor Create(int speedControlPin, int directionPin, int otherDirectionPin, GpioController controller = null, bool shouldDispose = true)
+        public static DCMotor Create(int speedControlPin, int directionPin, int otherDirectionPin, GpioController? controller = null, bool shouldDispose = true)
         {
             if (speedControlPin == -1)
             {
