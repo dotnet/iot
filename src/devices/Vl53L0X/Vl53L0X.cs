@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 // This code has been ported from the Dexter Industries Python code
 // https://github.com/DexterInd/DI_Sensors/blob/master/Python/di_sensors/VL53L0X.py
