@@ -7,15 +7,14 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Globalization;
 using Iot.Device.Mcp23xxx;
+using Iot.Device.CharacterLcd;
+using Iot.Device.CharacterLcd.Samples;
 
 // Choose the right setup for your display:
 // UsingGpioPins()
 // UsingMcp()
 UsingHd44780OverI2C();
 
-/// <summary>
-/// This sets up a 16x2 character LCD, directly connected to a set of GPIO pins, with a hardwired or no backlight and 4 Bit commands
-/// </summary>
 void UsingGpioPins()
 {
     using Lcd1602 lcd = new Lcd1602(registerSelectPin: 22, enablePin: 17, dataPins: new int[] { 25, 24, 23, 18 });
@@ -23,10 +22,6 @@ void UsingGpioPins()
     lcd.Write("Hello World");
 }
 
-/// <summary>
-/// This method will use an mcp gpio extender to connect to the LCM display.
-/// This has been tested on the CrowPi lcd display.
-/// </summary>
 void UsingMcp()
 {
     I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x21));
@@ -43,10 +38,6 @@ void UsingMcp()
     lcd.Write(".NET Core");
 }
 
-/// <summary>
-/// This method will use I2C commands to talk to the display. The display is expected to be at address 0x27 and accept 4 bit commands.
-/// This runs a full test suite against the display.
-/// </summary>
 void UsingHd44780OverI2C()
 {
     using I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x27));

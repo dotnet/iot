@@ -18,7 +18,7 @@ namespace Iot.Device.Pcx857x
         /// <param name="interrupt">Interrupt pin</param>
         /// <param name="gpioController"><see cref="GpioController"/> related with <paramref name="interrupt"/> pin</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Pcx8574(I2cDevice device, int interrupt = -1, GpioController gpioController = null, bool shouldDispose = true)
+        public Pcx8574(I2cDevice device, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true)
             : base(device, interrupt, gpioController, shouldDispose)
         {
         }
