@@ -21,7 +21,6 @@ Console.WriteLine("Press any key to continue");
 // set the maximum range to 4.096V
 using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, InputMultiplexer.AIN0, MeasuringRange.FS4096))
 {
-    // loop
     while (Console.KeyAvailable == false)
     {
         // read raw data form the sensor
@@ -44,7 +43,6 @@ using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, I
 // We set the device mode to power-down, because we have to wait for a sample after each channel swap anyway.
 using (var adc = new Iot.Device.Ads1115.Ads1115(device, InputMultiplexer.AIN0, MeasuringRange.FS4096, DataRate.SPS250, DeviceMode.PowerDown))
 {
-    // loop
     while (Console.KeyAvailable == false)
     {
         Console.Clear();
