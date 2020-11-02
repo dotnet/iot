@@ -18,7 +18,7 @@ namespace Iot.Device.DHTxx
         /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
         /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Dht22(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController gpioController = null, bool shouldDispose = true)
+        public Dht22(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
             : base(pin, pinNumberingScheme, gpioController, shouldDispose)
         {
         }
