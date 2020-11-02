@@ -50,8 +50,9 @@ namespace Iot.Device.Mcp23xxx.Tests
         {
             public byte LastInitialWriteByte { get; private set; }
 
+#nullable disable
             public override SpiConnectionSettings ConnectionSettings => null;
-
+#nullable enable
             public override void Read(Span<byte> buffer)
             {
             }
