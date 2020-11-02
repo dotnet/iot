@@ -29,9 +29,9 @@ namespace Iot.Device.GoPiGo3.Movements
     public class Motor
     {
         // represent the Brick
-        private GoPiGo _goPiGo = null;
+        private GoPiGo _goPiGo;
         private int _tacho;
-        private Timer _timer = null;
+        private Timer _timer;
         private int _periodRefresh;
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace Iot.Device.GoPiGo3.Movements
         /// <summary>
         /// Update the sensor and this will raised an event on the interface
         /// </summary>
-        public void UpdateSensor(object state)
+        public void UpdateSensor(object? state)
         {
             TachoCount = GetTachoCount();
         }
@@ -224,11 +224,8 @@ namespace Iot.Device.GoPiGo3.Movements
 
         private void StopTimerInternal()
         {
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            _timer?.Dispose();
+            _timer = null!;
         }
     }
 }
