@@ -103,39 +103,19 @@ namespace Iot.Device.ExplorerHat
             LedArray[3].Off();
         }
 
-        #region IDisposable Support
-
         private bool _shouldDispose;
-        // This to avoid double dispose
-        private bool _disposedValue = false;
-
-        /// <summary>
-        /// Disposes the <see cref="Lights"/> instance
-        /// </summary>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    Off();
-                    if (_shouldDispose)
-                    {
-                        _controller?.Dispose();
-                        _controller = null;
-                    }
-                }
-
-                _disposedValue = true;
-            }
-        }
 
         /// <summary>
         /// Disposes the <see cref="Lights"/> instance
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
+            Off();
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null!;
+            }
         }
 
         /// <summary>
@@ -155,7 +135,5 @@ namespace Iot.Device.ExplorerHat
         {
             return ((IEnumerable<Led>)LedArray).GetEnumerator();
         }
-
-        #endregion
     }
 }

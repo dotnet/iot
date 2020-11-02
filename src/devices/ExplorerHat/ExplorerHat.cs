@@ -27,11 +27,9 @@ namespace Iot.Device.ExplorerHat
         /// <summary>
         /// Initialize <see cref="ExplorerHat"/> instance
         /// </summary>
-        public ExplorerHat(GpioController controller = null, bool shouldDispose = true)
+        public ExplorerHat(GpioController? controller = null, bool shouldDispose = true)
         {
-            _controller = controller;
             _shouldDispose = controller == null ? true : shouldDispose;
-
             _controller = controller ?? new GpioController();
 
             Motors = new Motors(_controller);
@@ -45,18 +43,15 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            if (!(_controller is null))
+            if (disposing)
             {
-                if (disposing)
-                {
-                    Lights.Dispose();
-                    Motors.Dispose();
+                Lights.Dispose();
+                Motors.Dispose();
 
-                    if (_shouldDispose)
-                    {
-                        _controller.Dispose();
-                        _controller = null;
-                    }
+                if (_shouldDispose)
+                {
+                    _controller?.Dispose();
+                    _controller = null!;
                 }
             }
         }

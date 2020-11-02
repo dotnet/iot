@@ -64,41 +64,19 @@ namespace Iot.Device.ExplorerHat
             }
         }
 
-        #region IDisposable Support
-
         private bool _shouldDispose;
-        // This to avoid double dispose
-        private bool _disposedValue = false;
-
-        /// <summary>
-        /// Disposes the <see cref="Led"/> instance
-        /// </summary>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    Off();
-                    if (_shouldDispose)
-                    {
-                        _controller?.Dispose();
-                        _controller = null;
-                    }
-                }
-
-                _disposedValue = true;
-            }
-        }
 
         /// <summary>
         /// Disposes the <see cref="Led"/> instance
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
+            Off();
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null!;
+            }
         }
-
-        #endregion
     }
 }
