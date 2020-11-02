@@ -337,3 +337,4 @@ void ReadAndDisplayDetails(Ccs811Sensor ccs811, int count = 10)
         var error = ccs811.TryReadGasData(out VolumeConcentration eCO2, out VolumeConcentration eTVOC, out ElectricCurrent curr, out int adc);
         Console.WriteLine($"Success: {error}, eCO2: {eCO2.PartsPerMillion} ppm, eTVOC: {eTVOC.PartsPerBillion} ppb, Current: {curr.Microamperes} µA, ADC: {adc} = {adc * 1.65 / 1023} V.");
     }
+}

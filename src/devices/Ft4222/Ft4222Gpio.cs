@@ -20,8 +20,8 @@ namespace Iot.Device.Ft4222
         private SafeFtHandle _ftHandle;
         private GpioPinMode[] _gpioDirections = new GpioPinMode[PinCountConst];
         private GpioTrigger[] _gpioTriggers = new GpioTrigger[PinCountConst];
-        private PinChangeEventHandler[] _pinRisingHandlers = new PinChangeEventHandler[PinCountConst];
-        private PinChangeEventHandler[] _pinFallingHandlers = new PinChangeEventHandler[PinCountConst];
+        private PinChangeEventHandler?[] _pinRisingHandlers = new PinChangeEventHandler[PinCountConst];
+        private PinChangeEventHandler?[] _pinFallingHandlers = new PinChangeEventHandler[PinCountConst];
 
         /// <inheritdoc/>
         protected override int PinCount => PinCountConst;
