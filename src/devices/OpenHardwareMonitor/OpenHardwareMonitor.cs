@@ -103,6 +103,11 @@ namespace Iot.Device.OpenHardwareMonitor
                     throw new InvalidOperationException($"{nameof(MonitoringInterval)} can only be changed while monitoring is disabled.");
                 }
 
+                if (value <= TimeSpan.Zero)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(MonitoringInterval));
+                }
+
                 _monitoringInterval = value;
             }
         }
