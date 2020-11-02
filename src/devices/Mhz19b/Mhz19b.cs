@@ -17,8 +17,8 @@ namespace Iot.Device.Mhz19b
     {
         private const int MessageBytes = 9;
         private bool _shouldDispose = false;
-        private SerialPort _serialPort = null;
-        private Stream _serialPortStream = null;
+        private SerialPort? _serialPort;
+        private Stream _serialPortStream;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mhz19b"/> class using an existing (serial port) stream.
@@ -27,7 +27,7 @@ namespace Iot.Device.Mhz19b
         /// <param name="shouldDispose">If true, the stream gets disposed when disposing the binding</param>
         public Mhz19b(Stream stream, bool shouldDispose)
         {
-            _serialPortStream = stream ?? throw new ArgumentNullException(nameof(stream));
+            _serialPortStream = stream;
             _shouldDispose = shouldDispose;
         }
 
@@ -196,27 +196,19 @@ namespace Iot.Device.Mhz19b
         /// <inheritdoc cref="IDisposable" />
         public void Dispose()
         {
-            if (_serialPort == null && _serialPortStream == null)
+            if (_shouldDispose)
             {
-                return;
+                _serialPortStream?.Dispose();
+                _serialPortStream = null!;
             }
 
-            if (_shouldDispose && _serialPortStream != null)
+            if (_serialPort?.IsOpen ?? false)
             {
-                _serialPortStream.Dispose();
-                _serialPortStream = null;
+                _serialPort.Close();
             }
 
-            if (_serialPort != null)
-            {
-                if (_serialPort.IsOpen)
-                {
-                    _serialPort.Close();
-                }
-
-                _serialPort.Dispose();
-                _serialPort = null;
-            }
+            _serialPort?.Dispose();
+            _serialPort = null;
         }
 
         private enum Command : byte
