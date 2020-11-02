@@ -9,6 +9,19 @@ namespace Iot.Device.Rfid
     public class Data106kbpsInnovisionJewel
     {
         /// <summary>
+        /// Create a 106 kbpd Innovision Jewel card.
+        /// </summary>
+        /// <param name="targetNumber">The target number, should be 1 or 2 with PN532.</param>
+        /// <param name="atqa">Known as SENS_RES in the documentation.</param>
+        /// <param name="jewelId">The Jewel card ID.</param>
+        public Data106kbpsInnovisionJewel(byte targetNumber, byte[] atqa, byte[] jewelId)
+        {
+            TargetNumber = targetNumber;
+            Atqa = atqa;
+            JewelId = jewelId;
+        }
+
+        /// <summary>
         /// The target number, should be 1 or 2 with PN532
         /// </summary>
         public byte TargetNumber { get; set; }

@@ -9,6 +9,23 @@ namespace Iot.Device.Rfid
     public class Data106kbpsTypeA
     {
         /// <summary>
+        /// Create a 106 kbpd card like a Mifare card
+        /// </summary>
+        /// <param name="targetNumber">he target number, should be 1 or 2 with PN532.</param>
+        /// <param name="atqa">Known as SENS_RES in the documentation.</param>
+        /// <param name="sak">Know as SEL_RES in the documentation.</param>
+        /// <param name="nfcId">The unique NFC ID.</param>
+        /// <param name="ats">Potential extra Answer To Select data.</param>
+        public Data106kbpsTypeA(byte targetNumber, ushort atqa, byte sak, byte[] nfcId, byte[] ats)
+        {
+            TargetNumber = targetNumber;
+            Atqa = atqa;
+            Sak = sak;
+            NfcId = nfcId;
+            Ats = ats;
+        }
+
+        /// <summary>
         /// The target number, should be 1 or 2 with PN532
         /// </summary>
         public byte TargetNumber { get; set; }
