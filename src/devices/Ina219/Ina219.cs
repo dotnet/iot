@@ -6,6 +6,7 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Device;
 using System.Device.I2c;
+using System.Diagnostics.CodeAnalysis;
 using UnitsNet;
 
 namespace Iot.Device.Adc
@@ -49,6 +50,9 @@ namespace Iot.Device.Adc
         /// Method to initialize values during device construction
         /// </summary>
         /// <param name="i2cDevice">Interface to I2C device access</param>
+#if NET5_0
+        [MemberNotNull(nameof(_i2cDevice))]
+#endif
         private void Initialize(I2cDevice i2cDevice)
         {
             _currentLsb = 1F;
@@ -64,12 +68,13 @@ namespace Iot.Device.Adc
         /// <param name="i2cDevice">The I2cDevice initialized to communicate with the INA219.</param>
         public Ina219(I2cDevice i2cDevice)
         {
-            if (i2cDevice == null)
-            {
-                throw new System.ArgumentNullException(nameof(i2cDevice));
-            }
-
             Initialize(i2cDevice);
+#if !NET5_0
+            if (_i2cDevice is null)
+            {
+                throw new Exception("I2C device is not configured");
+            }
+#endif
         }
 
         /// <summary>
@@ -81,14 +86,14 @@ namespace Iot.Device.Adc
         /// <param name="settings">The I2cConnectionSettings object initialized with the appropiate settings to communicate with the INA219.</param>
         public Ina219(I2cConnectionSettings settings)
         {
-            if (settings == null)
-            {
-                throw new System.ArgumentNullException(nameof(settings));
-            }
-
             Initialize(I2cDevice.Create(settings));
-
             _disposeI2cDevice = true;
+#if !NET5_0
+            if (_i2cDevice is null)
+            {
+                throw new Exception("I2C device is not configured");
+            }
+#endif
         }
 
         /// <summary>
@@ -244,20 +249,13 @@ namespace Iot.Device.Adc
         /// <summary>
         /// Dispose instance
         /// </summary>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposeI2cDevice & disposing)
-            {
-                _i2cDevice?.Dispose();
-            }
-        }
-
-        /// <summary>
-        /// Dispose of managed assets.
-        /// </summary>
         public void Dispose()
         {
-            Dispose(true);
+            if (_disposeI2cDevice)
+            {
+                _i2cDevice?.Dispose();
+                _i2cDevice = null!;
+            }
         }
 
         /// <summary>
