@@ -24,7 +24,7 @@ namespace Iot.Device.Multiplexing
         /// <param name="bitLength">Bit length of register, including chained registers. Default is 16 bits.</param>
         /// <param name="gpioController">The GPIO Controller used for interrupt handling.</param>
         /// <param name="shouldDispose">Option (true by default) to dispose the GPIO controller when disposing this instance.</param>
-        public Mbi5027(Mbi5027PinMapping pinMapping, int bitLength = 16, GpioController gpioController = null,  bool shouldDispose = true)
+        public Mbi5027(Mbi5027PinMapping pinMapping, int bitLength = 16, GpioController? gpioController = null,  bool shouldDispose = true)
         : base(new ShiftRegisterPinMapping(pinMapping.Sdi, pinMapping.Clk, pinMapping.LE, pinMapping.OE), bitLength, gpioController, shouldDispose)
         {
             _pinMapping = pinMapping;
@@ -76,6 +76,11 @@ namespace Iot.Device.Multiplexing
         /// </summary>
         public IEnumerable<PinValue> ReadOutputErrorStatus()
         {
+            if (GpioController is null)
+            {
+                throw new Exception($"{nameof(GpioController)} is not cofigured.");
+            }
+
             /*  Required timing waveform
 
             **Phase 1: Load test data
@@ -169,6 +174,11 @@ namespace Iot.Device.Multiplexing
 
         private void ChangeModeSignal(PinValue oe, PinValue le)
         {
+            if (GpioController is null || _pinMapping.Clk < 0 || _pinMapping.OE < 0 || _pinMapping.LE < 0 || _pinMapping.Sdo < 0)
+            {
+                throw new ArgumentNullException($"{nameof(EnableDetectionMode)}: GpioController was not provided or {nameof(_pinMapping.Clk)}, {nameof(_pinMapping.LE)}, {nameof(_pinMapping.OE)}, or {nameof(_pinMapping.Sdo)} not mapped to pin");
+            }
+
             GpioController.Write(_pinMapping.OE, oe);
             GpioController.Write(_pinMapping.LE, le);
             GpioController.Write(_pinMapping.Clk, 1);
@@ -177,7 +187,7 @@ namespace Iot.Device.Multiplexing
 
         private void SetupPins()
         {
-            if (_pinMapping.Sdo >= 0)
+            if (GpioController is object && _pinMapping.Sdo >= 0)
             {
                 GpioController.OpenPin(_pinMapping.Sdo, PinMode.Input);
             }

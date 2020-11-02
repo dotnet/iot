@@ -26,8 +26,8 @@ namespace Iot.Device.Multiplexing
         private readonly int _latch;
         private readonly int _bitLength;
         private readonly bool _shouldDispose;
-        private GpioController _controller;
-        private SpiDevice _spiDevice;
+        private GpioController? _controller;
+        private SpiDevice? _spiDevice;
 
         /// <summary>
         /// Initialize a new shift register connected through GPIO.
@@ -36,7 +36,7 @@ namespace Iot.Device.Multiplexing
         /// <param name="bitLength">Bit length of register, including chained registers.</param>
         /// <param name="gpioController">The GPIO Controller used for interrupt handling.</param>
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
-        public ShiftRegister(ShiftRegisterPinMapping pinMapping, int bitLength, GpioController gpioController = null,  bool shouldDispose = true)
+        public ShiftRegister(ShiftRegisterPinMapping pinMapping, int bitLength, GpioController? gpioController = null,  bool shouldDispose = true)
         {
             _shouldDispose = shouldDispose || (gpioController == null);
             _controller = gpioController ?? new GpioController();
@@ -63,12 +63,12 @@ namespace Iot.Device.Multiplexing
         /// <summary>
         /// GPIO controller.
         /// </summary>
-        protected GpioController GpioController => _controller;
+        protected GpioController? GpioController => _controller;
 
         /// <summary>
         /// SPI device.
         /// </summary>
-        protected SpiDevice SpiDevice => _spiDevice;
+        protected SpiDevice? SpiDevice => _spiDevice;
 
         /// <summary>
         /// Bit length across all connected registers.
@@ -236,8 +236,8 @@ namespace Iot.Device.Multiplexing
 
         private void OpenPinAndWrite(int pin, PinValue value)
         {
-            _controller.OpenPin(pin, PinMode.Output);
-            _controller.Write(pin, value);
+            _controller?.OpenPin(pin, PinMode.Output);
+            _controller?.Write(pin, value);
         }
     }
 }
