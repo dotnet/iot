@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using UnitsNet;
 
-namespace Iot.Device.OpenHardwareMonitor
+namespace Iot.Device.HardwareMonitor
 {
     /// <summary>
     /// This class connects to a running instance of OpenHardwareMonitor and reads out all available values.

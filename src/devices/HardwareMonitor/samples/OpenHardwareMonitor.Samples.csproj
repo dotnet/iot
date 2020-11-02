@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../OpenHardwareMonitor.csproj" />
+    <ProjectReference Include="../HardwareMonitor.csproj" />
   </ItemGroup>
 
 </Project>

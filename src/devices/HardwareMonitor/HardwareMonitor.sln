@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{45EC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenHardwareMonitor.Samples", "samples\OpenHardwareMonitor.Samples.csproj", "{356BCA51-E8A9-4190-A814-70A6F87E33E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenHardwareMonitor", "OpenHardwareMonitor.csproj", "{B9CCBDB6-FAE3-49BF-B654-30698EF8131D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HardwareMonitor", "HardwareMonitor.csproj", "{B9CCBDB6-FAE3-49BF-B654-30698EF8131D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

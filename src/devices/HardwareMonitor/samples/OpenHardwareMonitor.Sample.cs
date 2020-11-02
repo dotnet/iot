@@ -5,10 +5,10 @@
 using System;
 using System.Globalization;
 using System.Threading;
-using Iot.Device.OpenHardwareMonitor;
+using Iot.Device.HardwareMonitor;
 using UnitsNet;
 
-namespace Iot.Device.OpenHardwareMonitor.Samples
+namespace Iot.Device.HardwareMonitor.Samples
 {
     internal class Program
     {
