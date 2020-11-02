@@ -559,7 +559,7 @@ namespace Iot.Device.Media
             if (_errorNum < 0)
             {
                 int code = _errorNum;
-                string errorMsg = Marshal.PtrToStringAnsi(Interop.snd_strerror(_errorNum));
+                string? errorMsg = Marshal.PtrToStringAnsi(Interop.snd_strerror(_errorNum));
 
                 Dispose();
                 throw new Exception($"{message}\nError {code}. {errorMsg}.");
