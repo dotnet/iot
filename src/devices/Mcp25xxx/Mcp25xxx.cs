@@ -21,7 +21,7 @@ namespace Iot.Device.Mcp25xxx
         private readonly int _rx0bf;
         private readonly int _rx1bf;
         private readonly int _clkout;
-        internal GpioController _gpioController;
+        internal GpioController? _gpioController;
         private bool _shouldDispose;
         private SpiDevice _spiDevice;
 
@@ -51,7 +51,7 @@ namespace Iot.Device.Mcp25xxx
             int rx0bf = -1,
             int rx1bf = -1,
             int clkout = -1,
-            GpioController gpioController = null,
+            GpioController? gpioController = null,
             bool shouldDispose = true)
         {
             _spiDevice = spiDevice;
@@ -66,7 +66,7 @@ namespace Iot.Device.Mcp25xxx
             _rx1bf = rx1bf;
             _clkout = clkout;
 
-            // Only need master controller if there are external pins provided.
+            // Only need controller if there are external pins provided.
             if (_reset != -1 ||
                 _tx0rts != -1 ||
                 _tx1rts != -1 ||
@@ -78,43 +78,43 @@ namespace Iot.Device.Mcp25xxx
             {
                 _gpioController = gpioController ?? new GpioController();
 
-                if (_reset != -1)
+                if (_reset != -1 && _gpioController is object)
                 {
                     _gpioController.OpenPin(_reset, PinMode.Output);
                     ResetPin = PinValue.Low;
                 }
 
-                if (_tx0rts != -1)
+                if (_tx0rts != -1 && _gpioController is object)
                 {
                     _gpioController.OpenPin(_tx0rts, PinMode.Output);
                 }
 
-                if (_tx1rts != -1)
+                if (_tx1rts != -1 && _gpioController is object)
                 {
                     _gpioController.OpenPin(_tx1rts, PinMode.Output);
                 }
 
-                if (_tx2rts != -1)
+                if (_tx2rts != -1 && _gpioController is object)
                 {
                     _gpioController.OpenPin(_tx2rts, PinMode.Output);
                 }
 
-                if (_interrupt != -1)
+                if (_interrupt != -1 && _gpioController is object)
                 {
                     _gpioController.OpenPin(_interrupt, PinMode.Input);
                 }
 
-                if (_rx0bf != -1)
+                if (_rx0bf != -1 && _gpioController is object)
                 {
                     _gpioController.OpenPin(_rx0bf, PinMode.Input);
                 }
 
-                if (_rx1bf != -1)
+                if (_rx1bf != -1 && _gpioController is object)
                 {
                     _gpioController.OpenPin(_rx1bf, PinMode.Input);
                 }
 
-                if (_clkout != -1)
+                if (_clkout != -1 && _gpioController is object)
                 {
                     _gpioController.OpenPin(_clkout, PinMode.Input);
                 }
@@ -128,6 +128,11 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 _gpioController.Write(_tx0rts, value);
             }
         }
@@ -139,6 +144,11 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 _gpioController.Write(_tx1rts, value);
             }
         }
@@ -150,6 +160,11 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 _gpioController.Write(_tx2rts, value);
             }
         }
@@ -161,6 +176,11 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 _gpioController.Write(_reset, value);
             }
         }
@@ -172,6 +192,11 @@ namespace Iot.Device.Mcp25xxx
         {
             get
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 return _gpioController.Read(_interrupt);
             }
         }
@@ -183,6 +208,11 @@ namespace Iot.Device.Mcp25xxx
         {
             get
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 return _gpioController.Read(_rx0bf);
             }
         }
@@ -194,6 +224,11 @@ namespace Iot.Device.Mcp25xxx
         {
             get
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 return _gpioController.Read(_rx1bf);
             }
         }
@@ -414,7 +449,7 @@ namespace Iot.Device.Mcp25xxx
             }
 
             _spiDevice?.Dispose();
-            _spiDevice = null;
+            _spiDevice = null!;
         }
     }
 }

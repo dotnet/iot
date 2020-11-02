@@ -42,7 +42,7 @@ namespace Iot.Device.Mcp25xxx
             int rx0bf = -1,
             int rx1bf = -1,
             int clkout = -1,
-            GpioController gpioController = null,
+            GpioController? gpioController = null,
             bool shouldDispose = true)
             : base(
                   spiDevice,
@@ -59,9 +59,9 @@ namespace Iot.Device.Mcp25xxx
         {
             _standby = standby;
 
-            if (_standby != -1)
+            if (_standby != -1 && _gpioController is object)
             {
-                // Master controller should already be configured if other pins are used.
+                // Controller should already be configured if other pins are used.
                 _gpioController = _gpioController ?? new GpioController();
                 _gpioController.OpenPin(_standby, PinMode.Output);
             }
@@ -74,7 +74,13 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
-                _gpioController.Write(_standby, value);
+                if (_gpioController is object)
+                {
+                    _gpioController.Write(_standby, value);
+                    return;
+                }
+
+                throw new Exception("GPIO controller is not correctly configured");
             }
         }
     }

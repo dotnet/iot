@@ -9,12 +9,12 @@ namespace Iot.Device.Mcp25xxx.Tests
     public class Mcp25xxxSpiDevice : SpiDevice
     {
         public override SpiConnectionSettings ConnectionSettings => throw new NotImplementedException();
-
-        public byte[] LastReadBuffer { get; set; }
+#pragma warning disable SA1011
+        public byte[]? LastReadBuffer { get; set; }
 
         public byte LastReadByte { get; set; }
 
-        public byte[] LastWriteBuffer { get; private set; }
+        public byte[]? LastWriteBuffer { get; private set; }
 
         public byte LastWriteByte { get; private set; }
 
