@@ -9,7 +9,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage)</TargetsForTfmSpecificContentInPackage>
-    <LangVersion>8</LangVersion>
+    <LangVersion>9</LangVersion>
     <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
 
