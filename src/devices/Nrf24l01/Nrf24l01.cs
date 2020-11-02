@@ -135,6 +135,18 @@ namespace Iot.Device.Nrf24l01
 
             Initialize(pinNumberingScheme, outputPower, dataRate, channel, gpioController);
             InitializePipe();
+#if !NET5_0
+            if (_gpio is null ||
+                Pipe0 is null ||
+                Pipe1 is null ||
+                Pipe2 is null ||
+                Pipe3 is null ||
+                Pipe4 is null ||
+                Pipe5 is null)
+                {
+                    throw new Exception($"{nameof(Nrf24l01)} is incorrectly configuted");
+                }
+#endif
         }
 
         /// <summary>
@@ -224,7 +236,9 @@ namespace Iot.Device.Nrf24l01
         /// <summary>
         /// Initialize
         /// </summary>
+#if NET5_0
         [MemberNotNull(nameof(_gpio))]
+#endif
         private void Initialize(PinNumberingScheme pinNumberingScheme, OutputPower outputPower, DataRate dataRate, byte channel, GpioController? gpioController)
         {
             // open pins
@@ -254,7 +268,9 @@ namespace Iot.Device.Nrf24l01
         /// <summary>
         /// Initialize nRF24L01 Pipe
         /// </summary>
+#if NET5_0
         [MemberNotNull(nameof(Pipe0), nameof(Pipe0), nameof(Pipe1), nameof(Pipe2), nameof(Pipe3), nameof(Pipe4), nameof(Pipe5))]
+#endif
         private void InitializePipe()
         {
             Pipe0 = new Nrf24l01Pipe(this, 0);
