@@ -87,8 +87,7 @@ namespace Iot.Device.Bmxx80
 
             ReadCalibrationData();
             Reset();
-
-#if !NET5_0
+#if NETCOREAPP2_1 || NETCOREAPP3_1
             if (_calibrationData is null)
             {
                 throw new Exception("BMxx80 device is not correctly configured.");
@@ -309,7 +308,7 @@ namespace Iot.Device.Bmxx80
             BigEndian
         }
 
-#if NET5_0
+#if !NETCOREAPP2_1 && !NETCOREAPP3_1
         [MemberNotNull(nameof(_calibrationData))]
 #endif
         private void ReadCalibrationData()
