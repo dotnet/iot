@@ -171,7 +171,7 @@ namespace Iot.Device.MotorHat
             }
 
             _pca9685?.Dispose();
-            _pca9685 = null;
+            _pca9685 = null!;
         }
     }
 }

@@ -180,7 +180,7 @@ namespace Iot.Device.Pwm
         public void Dispose()
         {
             _device?.Dispose();
-            _device = null;
+            _device = null!;
         }
 
         /// <summary>
