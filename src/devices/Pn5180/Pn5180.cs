@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Diagnostics.CodeAnalysis;
 using Iot.Device.Card;
 using Iot.Device.Card.Mifare;
 using Iot.Device.Rfid;
@@ -76,7 +77,7 @@ namespace Iot.Device.Pn5180
         /// <param name="gpioController">A GPIO controller, null will use a default one</param>
         /// <param name="shouldDispose">Dispose the SPI and the GPIO controller at the end if true</param>
         /// <param name="logLevel">The log level</param>
-        public Pn5180(SpiDevice spiDevice, int pinBusy, int pinNss, GpioController gpioController = null, bool shouldDispose = true, LogLevel logLevel = LogLevel.None)
+        public Pn5180(SpiDevice spiDevice, int pinBusy, int pinNss, GpioController? gpioController = null, bool shouldDispose = true, LogLevel logLevel = LogLevel.None)
         {
             if (pinBusy < 0)
             {
@@ -101,7 +102,7 @@ namespace Iot.Device.Pn5180
 
             // Check the version
             var (product, firmware, eeprom) = GetVersions();
-            if ((product.Major == 0) || (firmware.Major == 0) || (eeprom.Major == 0))
+            if ((product?.Major == 0) || (firmware?.Major == 0) || (eeprom?.Major == 0))
             {
                 throw new IOException($"Not a valid PN5180");
             }
@@ -127,7 +128,7 @@ namespace Iot.Device.Pn5180
         /// Get the Product, Firmware and EEPROM versions of the PN8150
         /// </summary>
         /// <returns>A tuple with the Product, Firmware and EEPROM versions</returns>
-        public (Version product, Version firmware, Version eeprom) GetVersions()
+        public (Version? product, Version? firmware, Version? eeprom) GetVersions()
         {
             Span<byte> versionAnswer = stackalloc byte[6];
 
@@ -975,9 +976,13 @@ namespace Iot.Device.Pn5180
         /// <param name="card">The type A card once detected</param>
         /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
         /// <returns>True if a 14443 Type A card has been detected</returns>
-        public bool ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver, out Data106kbpsTypeA card, int timeoutPollingMilliseconds)
+        public bool ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver,
+#if NET5_0
+        [NotNullWhen(true)]
+#endif
+        out Data106kbpsTypeA? card, int timeoutPollingMilliseconds)
         {
-            card = new Data106kbpsTypeA();
+            card = null;
             // From NXP documentation AN12650.pdf, Page 8 and forward
             // From NXP documentation AN10833.pdf page 10
             // From TI documentation http://www.ti.com/lit/an/sloa136/sloa136.pdf page 7 and 6 for the flow of selecting
@@ -996,7 +1001,6 @@ namespace Iot.Device.Pn5180
             int numBytes;
 
             DateTime dtTimeout = DateTime.Now.AddMilliseconds(timeoutPollingMilliseconds);
-
             try
             {
                 // Switches off the CRC off in RX and TX direction
@@ -1027,7 +1031,7 @@ namespace Iot.Device.Pn5180
                 }
                 while (numBytes == 0);
 
-                card.Atqa = BinaryPrimitives.ReadUInt16LittleEndian(atqa);
+                ushort cardAtqa = BinaryPrimitives.ReadUInt16LittleEndian(atqa);
                 int numberOfUid = 0;
                 // We do have a card! Now send anticollision
                 // There are 3 SL maximum. For looping and adjusting the SL
@@ -1064,26 +1068,44 @@ namespace Iot.Device.Pn5180
                         return false;
                     }
 
-                    card.Sak = sak[0];
+                    byte cardSak = sak[0];
                     if (((sak[0] & 0b0000_0100) == 0) && (i == 0))
                     {
                         // If the bit 3 is 0, then it's only a 4 bytes UID
                         uidSak.Slice(2, 4).CopyTo(uid);
-                        card.NfcId = uid.Slice(0, 4).ToArray();
+                        byte[] cardNfcId = uid.Slice(0, 4).ToArray();
+                        card = new Data106kbpsTypeA(
+                            0,
+                            cardAtqa,
+                            cardSak,
+                            cardNfcId,
+                            null);
                         return true;
                     }
                     else if (((atqa[0] & 0b1100_0000) == 0b01000_0000) && (i == 1))
                     {
                         // if bit 7 is 1, then it's a 7 byte
                         uidSak.Slice(2, 4).CopyTo(uid.Slice(numberOfUid));
-                        card.NfcId = uid.Slice(0, 4 + numberOfUid).ToArray();
+                        byte[] cardNfcId = uid.Slice(0, 4 + numberOfUid).ToArray();
+                        card = new Data106kbpsTypeA(
+                            0,
+                            cardAtqa,
+                            cardSak,
+                            cardNfcId,
+                            null);
                         return true;
                     }
                     else if (i == 2)
                     {
                         // Last case, it's for sure 10 bytes
                         uidSak.Slice(2, 4).CopyTo(uid.Slice(numberOfUid));
-                        card.NfcId = uid.Slice(0, 4 + numberOfUid).ToArray();
+                        byte[] cardNfcId = uid.Slice(0, 4 + numberOfUid).ToArray();
+                        card = new Data106kbpsTypeA(
+                            0,
+                            cardAtqa,
+                            cardSak,
+                            cardNfcId,
+                            null);
                         return true;
                     }
 
@@ -1237,7 +1259,7 @@ namespace Iot.Device.Pn5180
                 }
 
                 // Add the card to the list
-                var selected = new SelectedPiccInformation() { Card = card, LastBlockMark = false };
+                var selected = new SelectedPiccInformation(card, false);
                 _activeSelected.Add(selected);
                 return true;
             }
