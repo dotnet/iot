@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
@@ -9,9 +9,12 @@
     <Compile Include="CpuTemperature.cs" />
     <None Include="README.md" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../HardwareMonitor/HardwareMonitor.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Management" Version="5.0.0-alpha.1.19618.1" />
+    <PackageReference Include="System.Management" Version="5.0.0-preview.5.20224.13" />
   </ItemGroup>
 
 </Project>
