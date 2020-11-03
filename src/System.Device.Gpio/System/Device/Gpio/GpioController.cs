@@ -73,8 +73,9 @@ namespace System.Device.Gpio
         /// Gets the logical pin number in the controller's numbering scheme.
         /// </summary>
         /// <param name="pinNumber">The pin number</param>
+        /// <param name="givenScheme">The scheme for the pin number</param>
         /// <returns>The logical pin number in the controller's numbering scheme.</returns>
-        protected virtual int GetLogicalPinNumber(int pinNumber)
+        protected virtual int GetLogicalPinNumber(int pinNumber, PinNumberingScheme givenScheme)
         {
             return (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : _driver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
         }
@@ -85,7 +86,7 @@ namespace System.Device.Gpio
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         public virtual void OpenPin(int pinNumber)
         {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber, NumberingScheme);
             if (_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException($"Pin {logicalPinNumber} is already open.");
@@ -112,10 +113,22 @@ namespace System.Device.Gpio
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         public void ClosePin(int pinNumber)
         {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            ClosePin(pinNumber, NumberingScheme);
+        }
+
+        /// <summary>
+        /// Closes an open pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number.</param>
+        /// <param name="numberingScheme">Numbering scheme for the given pin</param>
+        /// <remarks>Internal use, to make Dispose work consistently</remarks>
+        protected virtual void ClosePin(int pinNumber, PinNumberingScheme numberingScheme)
+        {
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber, numberingScheme);
+
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException($"Can not close pin {logicalPinNumber} because it is not open.");
+                throw new InvalidOperationException($"Can not close pin {pinNumber} because it is not open.");
             }
 
             _driver.ClosePin(logicalPinNumber);
@@ -129,7 +142,7 @@ namespace System.Device.Gpio
         /// <param name="mode">The mode to be set.</param>
         public virtual void SetPinMode(int pinNumber, PinMode mode)
         {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber, NumberingScheme);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException($"Can not set a mode to pin {logicalPinNumber} because it is not open.");
@@ -150,7 +163,7 @@ namespace System.Device.Gpio
         /// <returns>The mode of the pin.</returns>
         public virtual PinMode GetPinMode(int pinNumber)
         {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber, NumberingScheme);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException($"Can not get the mode of pin {logicalPinNumber} because it is not open.");
@@ -166,7 +179,7 @@ namespace System.Device.Gpio
         /// <returns>The status if the pin is open or closed.</returns>
         public virtual bool IsPinOpen(int pinNumber)
         {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber, NumberingScheme);
             return _openPins.Contains(logicalPinNumber);
         }
 
@@ -178,7 +191,7 @@ namespace System.Device.Gpio
         /// <returns>The status if the pin supports the mode.</returns>
         public virtual bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber, NumberingScheme);
             return _driver.IsPinModeSupported(logicalPinNumber, mode);
         }
 
@@ -189,7 +202,7 @@ namespace System.Device.Gpio
         /// <returns>The value of the pin.</returns>
         public virtual PinValue Read(int pinNumber)
         {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber, NumberingScheme);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not open.");
@@ -205,7 +218,7 @@ namespace System.Device.Gpio
         /// <param name="value">The value to be written to the pin.</param>
         public virtual void Write(int pinNumber, PinValue value)
         {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber, NumberingScheme);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not open.");
@@ -243,7 +256,7 @@ namespace System.Device.Gpio
         /// <returns>A structure that contains the result of the waiting operation.</returns>
         public virtual WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber, NumberingScheme);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException($"Can not wait for events from pin {logicalPinNumber} because it is not open.");
@@ -276,7 +289,7 @@ namespace System.Device.Gpio
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
         public virtual ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken token)
         {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber, NumberingScheme);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException($"Can not wait for events from pin {logicalPinNumber} because it is not open.");
@@ -293,7 +306,7 @@ namespace System.Device.Gpio
         /// <param name="callback">The callback method that will be invoked.</param>
         public virtual void RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber, NumberingScheme);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException($"Can not add callback for pin {logicalPinNumber} because it is not open.");
@@ -309,7 +322,7 @@ namespace System.Device.Gpio
         /// <param name="callback">The callback method that will be invoked.</param>
         public virtual void UnregisterCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber, NumberingScheme);
             if (!_openPins.Contains(logicalPinNumber))
             {
                 throw new InvalidOperationException($"Can not remove callback for pin {logicalPinNumber} because it is not open.");
@@ -318,11 +331,17 @@ namespace System.Device.Gpio
             _driver.RemoveCallbackForPinValueChangedEvent(logicalPinNumber, callback);
         }
 
-        private void Dispose(bool disposing)
+        /// <summary>
+        /// Disposes this instance and closes all open pins associated with this controller.
+        /// </summary>
+        /// <param name="disposing">True to dispose all instances, false to dispose only unmanaged resources</param>
+        protected virtual void Dispose(bool disposing)
         {
-            foreach (int pin in _openPins)
+            var tempList = new List<int>(_openPins); // Because ClosePin modifies this list
+            foreach (int pin in tempList)
             {
-                _driver.ClosePin(pin);
+                // We need to call this special overload, because the _openPins list always contains logical numbers.
+                ClosePin(pin, PinNumberingScheme.Logical);
             }
 
             _openPins.Clear();
