@@ -77,7 +77,7 @@ namespace System.Device.Gpio
         /// <returns>The logical pin number in the controller's numbering scheme.</returns>
         protected virtual int GetLogicalPinNumber(int pinNumber, PinNumberingScheme givenScheme)
         {
-            return (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : _driver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+            return (givenScheme == PinNumberingScheme.Logical) ? pinNumber : _driver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber, NumberingScheme);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not open.");
+                throw new InvalidOperationException($"Can not read from pin {logicalPinNumber} because it is not open.");
             }
 
             return _driver.Read(logicalPinNumber);
