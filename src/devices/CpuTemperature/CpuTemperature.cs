@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
+using Iot.Device.HardwareMonitor;
 using UnitsNet;
 
 namespace Iot.Device.CpuTemperature
@@ -17,12 +18,13 @@ namespace Iot.Device.CpuTemperature
     /// On Windows, the value returned is driver dependent and may not represent actual CPU temperature, but more one
     /// of the case sensors. Use OpenHardwareMonitor for better environmental representation in Windows.
     /// </summary>
-    public class CpuTemperature
+    public sealed class CpuTemperature : IDisposable
     {
         private bool _isAvailable;
         private bool _checkedIfAvailable;
         private bool _windows;
         private List<ManagementObjectSearcher> _managementObjectSearchers;
+        private OpenHardwareMonitor _hardwareMonitorInUse;
 
         /// <summary>
         /// Creates an instance of the CpuTemperature class
@@ -33,6 +35,7 @@ namespace Iot.Device.CpuTemperature
             _checkedIfAvailable = false;
             _windows = false;
             _managementObjectSearchers = new List<ManagementObjectSearcher>();
+            _hardwareMonitorInUse = null;
 
             CheckAvailable();
         }
@@ -73,6 +76,15 @@ namespace Iot.Device.CpuTemperature
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
+                    OpenHardwareMonitor ohw = new OpenHardwareMonitor();
+                    if (ohw.TryGetAverageCpuTemperature(out _))
+                    {
+                        _windows = true;
+                        _isAvailable = true;
+                        _hardwareMonitorInUse = ohw;
+                        return true;
+                    }
+
                     try
                     {
                         ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT * FROM MSAcpi_ThermalZoneTemperature");
@@ -127,6 +139,16 @@ namespace Iot.Device.CpuTemperature
             // Windows code below
             List<(string, Temperature)> result = new List<(string, Temperature)>();
 
+            if (_hardwareMonitorInUse != null)
+            {
+                if (_hardwareMonitorInUse.TryGetAverageCpuTemperature(out Temperature temp))
+                {
+                    result.Add(("CPU", temp));
+                }
+
+                return result;
+            }
+
             foreach (var searcher in _managementObjectSearchers)
             {
                 foreach (ManagementObject obj in searcher.Get())
@@ -162,6 +184,26 @@ namespace Iot.Device.CpuTemperature
             }
 
             return temperature;
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            if (_hardwareMonitorInUse != null)
+            {
+                _hardwareMonitorInUse.Dispose();
+                _hardwareMonitorInUse = null;
+            }
+
+            foreach (var elem in _managementObjectSearchers)
+            {
+                elem.Dispose();
+            }
+
+            _managementObjectSearchers.Clear();
+
+            // Any further calls will fail
+            _isAvailable = false;
         }
     }
 }

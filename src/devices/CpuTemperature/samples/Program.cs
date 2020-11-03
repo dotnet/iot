@@ -32,3 +32,5 @@ while (!Console.KeyAvailable)
 
     Thread.Sleep(1000);
 }
+
+cpuTemperature.Dispose();
