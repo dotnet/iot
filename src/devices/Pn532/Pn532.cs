@@ -2114,12 +2114,9 @@ namespace Iot.Device.Pn532
             _spiDevice = null!;
             _i2cDevice?.Dispose();
             _i2cDevice = null!;
-            if (_serialPort != null)
+            if (_serialPort is {IsOpen: true})
             {
-                if (_serialPort.IsOpen)
-                {
-                    _serialPort.Close();
-                }
+                _serialPort.Close();
             }
 
             _serialPort?.Dispose();

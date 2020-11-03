@@ -45,7 +45,7 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void On()
         {
-            if (!IsOn)
+            if (!IsOn && _controller is object)
             {
                 _controller.Write(Pin, PinValue.High);
                 IsOn = true;
@@ -57,7 +57,7 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void Off()
         {
-            if (IsOn)
+            if (IsOn && _controller is object)
             {
                 _controller.Write(Pin, PinValue.Low);
                 IsOn = false;

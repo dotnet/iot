@@ -86,10 +86,10 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void On()
         {
-            LedArray[0].On();
-            LedArray[1].On();
-            LedArray[2].On();
-            LedArray[3].On();
+            foreach (Led led in LedArray)
+            {
+                led.On();
+            }
         }
 
         /// <summary>
@@ -97,10 +97,10 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void Off()
         {
-            LedArray[0].Off();
-            LedArray[1].Off();
-            LedArray[2].Off();
-            LedArray[3].Off();
+            foreach (Led led in LedArray)
+            {
+                led.Off();
+            }
         }
 
         private bool _shouldDispose;

@@ -187,7 +187,7 @@ namespace Iot.Device.Multiplexing
 
         private void SetupPins()
         {
-            if (GpioController is object && _pinMapping.Sdo >= 0)
+            if (_pinMapping.Sdo >= 0 && GpioController is object)
             {
                 GpioController.OpenPin(_pinMapping.Sdo, PinMode.Input);
             }

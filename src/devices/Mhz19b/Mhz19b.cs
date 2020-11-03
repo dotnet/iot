@@ -27,7 +27,7 @@ namespace Iot.Device.Mhz19b
         /// <param name="shouldDispose">If true, the stream gets disposed when disposing the binding</param>
         public Mhz19b(Stream stream, bool shouldDispose)
         {
-            _serialPortStream = stream;
+            _serialPortStream = stream ?? throw new ArgumentNullException(nameof(stream));
             _shouldDispose = shouldDispose;
         }
 

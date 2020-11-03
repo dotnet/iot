@@ -28,7 +28,7 @@ namespace Iot.Device.Apa102
         /// <param name="length">Number of LEDs</param>
         public Apa102(SpiDevice spi, int length)
         {
-            _spi = spi;
+            _spi = spi ?? throw new ArgumentNullException(nameof(spi));
             _pixels = new Color[length];
             _buffer = new byte[(length + 2) * 4];
 

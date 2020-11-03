@@ -36,34 +36,19 @@ namespace Iot.Device.ExplorerHat
             Lights = new Lights(_controller);
         }
 
-        #region IDisposable Support
-
-        /// <summary>
-        /// Disposes the <see cref="ExplorerHat"/> instance
-        /// </summary>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Lights.Dispose();
-                Motors.Dispose();
-
-                if (_shouldDispose)
-                {
-                    _controller?.Dispose();
-                    _controller = null!;
-                }
-            }
-        }
-
         /// <summary>
         /// Disposes the <see cref="ExplorerHat"/> instance
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
-        }
+            Lights.Dispose();
+            Motors.Dispose();
 
-        #endregion
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null!;
+            }
+        }
     }
 }

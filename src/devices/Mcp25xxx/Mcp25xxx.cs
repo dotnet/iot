@@ -78,43 +78,43 @@ namespace Iot.Device.Mcp25xxx
             {
                 _gpioController = gpioController ?? new GpioController();
 
-                if (_reset != -1 && _gpioController is object)
+                if (_reset != -1)
                 {
                     _gpioController.OpenPin(_reset, PinMode.Output);
                     ResetPin = PinValue.Low;
                 }
 
-                if (_tx0rts != -1 && _gpioController is object)
+                if (_tx0rts != -1)
                 {
                     _gpioController.OpenPin(_tx0rts, PinMode.Output);
                 }
 
-                if (_tx1rts != -1 && _gpioController is object)
+                if (_tx1rts != -1)
                 {
                     _gpioController.OpenPin(_tx1rts, PinMode.Output);
                 }
 
-                if (_tx2rts != -1 && _gpioController is object)
+                if (_tx2rts != -1)
                 {
                     _gpioController.OpenPin(_tx2rts, PinMode.Output);
                 }
 
-                if (_interrupt != -1 && _gpioController is object)
+                if (_interrupt != -1)
                 {
                     _gpioController.OpenPin(_interrupt, PinMode.Input);
                 }
 
-                if (_rx0bf != -1 && _gpioController is object)
+                if (_rx0bf != -1)
                 {
                     _gpioController.OpenPin(_rx0bf, PinMode.Input);
                 }
 
-                if (_rx1bf != -1 && _gpioController is object)
+                if (_rx1bf != -1)
                 {
                     _gpioController.OpenPin(_rx1bf, PinMode.Input);
                 }
 
-                if (_clkout != -1 && _gpioController is object)
+                if (_clkout != -1)
                 {
                     _gpioController.OpenPin(_clkout, PinMode.Input);
                 }

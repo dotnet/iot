@@ -79,6 +79,11 @@ namespace Iot.Device.DCMotor
         /// </remarks>
         public static DCMotor Create(PwmChannel speedControlChannel)
         {
+            if (speedControlChannel is null)
+            {
+                throw new ArgumentNullException(nameof(speedControlChannel));
+            }
+
             return new DCMotor2PinNoEnable(speedControlChannel, -1, null, true);
         }
 

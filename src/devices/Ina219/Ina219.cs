@@ -68,13 +68,12 @@ namespace Iot.Device.Adc
         /// <param name="i2cDevice">The I2cDevice initialized to communicate with the INA219.</param>
         public Ina219(I2cDevice i2cDevice)
         {
-            Initialize(i2cDevice);
-#if NETCOREAPP2_1 || NETCOREAPP3_1
             if (_i2cDevice is null)
             {
-                throw new Exception("I2C device is not configured");
+                throw new ArgumentException($"{nameof(i2cDevice)} is not configured");
             }
-#endif
+
+            Initialize(i2cDevice);
         }
 
         /// <summary>
@@ -91,7 +90,7 @@ namespace Iot.Device.Adc
 #if NETCOREAPP2_1 || NETCOREAPP3_1
             if (_i2cDevice is null)
             {
-                throw new Exception("I2C device is not configured");
+                throw new ArgumentException($"{nameof(i2cDevice)} is not configured");
             }
 #endif
         }
