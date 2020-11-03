@@ -87,15 +87,7 @@ namespace System.Device.Gpio
         /// </summary>
         /// <param name="v">Input value</param>
         /// <returns>High, when the input is low, low when the input is high</returns>
-        public static PinValue operator !(PinValue v)
-        {
-            if (v._value == 0)
-            {
-                return High;
-            }
-
-            return Low;
-        }
+        public static PinValue operator !(PinValue v) => (v._value == 0) ? High : Low;
 
         /// <inheritdoc />
         public override int GetHashCode() => _value.GetHashCode();
