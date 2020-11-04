@@ -106,7 +106,7 @@ if (pinInterrupt >= 0)
     Console.WriteLine("(Y)es,(N)o");
     var threshChoice = Console.ReadKey();
     Console.WriteLine();
-    if ((threshChoice.KeyChar == 'Y') || (threshChoice.KeyChar == 'y'))
+    if (threshChoice.KeyChar is 'Y' or 'y')
     {
         TestThresholdAndInterrupt(ccs811);
     }
@@ -172,7 +172,7 @@ ccs811.Dispose();
 
 int CheckAndAskPinNumber(char toCehck)
 {
-    if ((toCehck == 'Y') || (toCehck == 'y'))
+    if (toCehck is 'Y' or 'y')
     {
         Console.WriteLine("Type the GPIO number with pin numbering scheme, you want to use:");
         var pinInterChoice = Console.ReadLine();
@@ -289,24 +289,22 @@ void ReadAndLog(Ccs811Sensor ccs811, int count = 10)
 {
     string toWrite = "Time;Success;eCO2 (ppm);eTVOC (ppb);Current (µA);ADC;ADC (V);Baseline";
 
-    using (var fl = new StreamWriter("log.csv"))
+    using var fl = new StreamWriter("log.csv");
+    fl.WriteLine(toWrite);
+    for (int i = 0; i < count; i++)
     {
-        fl.WriteLine(toWrite);
-        for (int i = 0; i < count; i++)
+        while (!ccs811.IsDataReady)
         {
-            while (!ccs811.IsDataReady)
-            {
-                Thread.Sleep(10);
-            }
+            Thread.Sleep(10);
+        }
 
-            var error = ccs811.TryReadGasData(out VolumeConcentration eCO2, out VolumeConcentration eTVOC, out ElectricCurrent curr, out int adc);
-            toWrite = $"{DateTime.Now};{error};{eCO2.PartsPerMillion};{eTVOC.PartsPerBillion};{curr.Microamperes};{adc};{adc * 1.65 / 1023};{ccs811.BaselineAlgorithmCalculation}";
-            fl.WriteLine(toWrite);
-            Console.WriteLine(toWrite);
-            if (i % 100 == 0)
-            {
-                fl.Flush();
-            }
+        var error = ccs811.TryReadGasData(out VolumeConcentration eCO2, out VolumeConcentration eTVOC, out ElectricCurrent curr, out int adc);
+        toWrite = $"{DateTime.Now};{error};{eCO2.PartsPerMillion};{eTVOC.PartsPerBillion};{curr.Microamperes};{adc};{adc * 1.65 / 1023};{ccs811.BaselineAlgorithmCalculation}";
+        fl.WriteLine(toWrite);
+        Console.WriteLine(toWrite);
+        if (i % 100 == 0)
+        {
+            fl.Flush();
         }
     }
 }

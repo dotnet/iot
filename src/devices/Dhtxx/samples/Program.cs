@@ -23,11 +23,8 @@ if (choice.KeyChar == '1')
     I2cConnectionSettings settings = new I2cConnectionSettings(1, Dht10.DefaultI2cAddress);
     I2cDevice device = I2cDevice.Create(settings);
 
-    using (Dht10 dht = new Dht10(device))
-    {
-        Dht(dht);
-    }
-
+    using Dht10 dht = new Dht10(device);
+    Dht(dht);
     return;
 }
 

@@ -13,8 +13,8 @@ namespace Iot.Device.CpuTemperature
     /// </summary>
     public class CpuTemperature
     {
-        private bool _isAvalable = false;
-        private bool _checkedIfAvailable = false;
+        private bool _isAvalable;
+        private bool _checkedIfAvailable;
 
         /// <summary>
         /// Gets CPU temperature
@@ -54,10 +54,9 @@ namespace Iot.Device.CpuTemperature
 
                 using StreamReader reader = new StreamReader(fileStream);
                 string? data = reader.ReadLine();
-                if (!string.IsNullOrEmpty(data))
+                if (data is { Length: > 1 })
                 {
-                    int temp;
-                    if (int.TryParse(data, out temp))
+                    if (int.TryParse(data, out int temp))
                     {
                         temperature = temp / 1000F;
                     }
