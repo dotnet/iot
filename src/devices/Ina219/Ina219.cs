@@ -90,7 +90,7 @@ namespace Iot.Device.Adc
 #if NETCOREAPP2_1 || NETCOREAPP3_1
             if (_i2cDevice is null)
             {
-                throw new ArgumentException($"{nameof(i2cDevice)} is not configured");
+                throw new ArgumentException($"{nameof(_i2cDevice)} is not configured");
             }
 #endif
         }
