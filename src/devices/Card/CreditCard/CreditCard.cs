@@ -390,7 +390,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                             }
                         }
 
-                        Span<byte> received = stackalloc byte[260];
+                        Span<byte> received = new byte[260];
                         byte sumDol = 0;
                         // Do we have a PDOL?
                         if (pdol != null)

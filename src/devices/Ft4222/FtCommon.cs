@@ -34,10 +34,10 @@ namespace Iot.Device.Ft4222
                 throw new IOException($"No device found");
             }
 
+            Span<byte> sernum = stackalloc byte[16];
+            Span<byte> desc = stackalloc byte[64];
             for (uint i = 0; i < numOfDevices; i++)
             {
-                Span<byte> sernum = stackalloc byte[16];
-                Span<byte> desc = stackalloc byte[64];
                 uint flags = 0;
                 FtDevice ftDevice;
                 uint id;

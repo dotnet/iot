@@ -34,8 +34,8 @@ PrintHelp();
 
 while (true)
 {
-    var command = Console.ReadLine().ToLower().Split(' ');
-    if (string.IsNullOrEmpty(command[0]))
+    var command = Console.ReadLine()?.ToLower()?.Split(' ');
+    if (command is null || string.IsNullOrEmpty(command[0]))
     {
         return;
     }
@@ -94,9 +94,9 @@ while (true)
     }
 }
 
-ServoMotor.ServoMotor CreateServo(Pca9685 pca9685, int channel)
+ServoMotor CreateServo(Pca9685 pca9685, int channel)
 {
-    return new ServoMotor.ServoMotor(
+    return new ServoMotor(
         pca9685.CreatePwmChannel(channel),
         AngleRange, MinPulseWidthMicroseconds, MaxPulseWidthMicroseconds);
 }
@@ -116,8 +116,8 @@ void ServoDemo(Pca9685 pca9685, int channel)
 
     while (true)
     {
-        var command = Console.ReadLine().ToLower();
-        if (string.IsNullOrEmpty(command) || command[0] == 'q')
+        string? command = Console.ReadLine()?.ToLower();
+        if (command is not { Length: > 0 } || command[0] == 'q')
         {
             return;
         }
@@ -148,7 +148,7 @@ void PrintHelp()
     Console.WriteLine();
 }
 
-void CalibrateServo(ServoMotor.ServoMotor servo)
+void CalibrateServo(ServoMotor servo)
 {
     int maximumAngle = 180;
     int minimumPulseWidthMicroseconds = 520;
@@ -189,7 +189,7 @@ void CalibrateServo(ServoMotor.ServoMotor servo)
     Console.WriteLine($"Max PW [uS]: {maximumPulseWidthMicroseconds}");
 }
 
-void CalibratePulseWidth(ServoMotor.ServoMotor servo, ref int pulseWidthMicroSeconds)
+void CalibratePulseWidth(ServoMotor servo, ref int pulseWidthMicroSeconds)
 {
     void SetPulseWidth(ref int pulseWidth)
     {
