@@ -977,7 +977,7 @@ namespace Iot.Device.Pn5180
         /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
         /// <returns>True if a 14443 Type A card has been detected</returns>
         public bool ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver,
-#if NET5_0
+#if !NETCOREAPP2_1
         [NotNullWhen(true)]
 #endif
         out Data106kbpsTypeA? card, int timeoutPollingMilliseconds)
@@ -1135,7 +1135,11 @@ namespace Iot.Device.Pn5180
         /// <param name="card">The type B card once detected</param>
         /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
         /// <returns>True if a 14443 Type B card has been detected</returns>
-        public bool ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver, out Data106kbpsTypeB? card, int timeoutPollingMilliseconds)
+        public bool ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver,
+#if !NETCOREAPP2_1
+        [NotNullWhen(true)]
+#endif
+        out Data106kbpsTypeB? card, int timeoutPollingMilliseconds)
         {
             card = null;
             var ret = LoadRadioFrequencyConfiguration(transmitter, receiver);

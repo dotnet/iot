@@ -13,7 +13,7 @@
 
   <PropertyGroup>
     <Language>C#</Language>
-    <LangVersion>Latest</LangVersion>
+    <LangVersion>9</LangVersion>
     <!-- Generate snupkg package -->
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>

@@ -38,7 +38,7 @@ namespace Iot.Device.Mhz19b
         /// <exception cref="System.ArgumentException">uartDevice is null or empty</exception>
         public Mhz19b(string uartDevice)
         {
-            if (string.IsNullOrEmpty(uartDevice))
+            if (uartDevice is not { Length: > 0 })
             {
                 throw new ArgumentException(nameof(uartDevice));
             }

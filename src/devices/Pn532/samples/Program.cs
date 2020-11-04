@@ -11,6 +11,8 @@ using Iot.Device.Card.Mifare;
 using Iot.Device.Pn532;
 using Iot.Device.Pn532.ListPassive;
 
+#pragma warning disable SA1011
+
 string device = "/dev/ttyS0";
 using var pn532 = new Pn532(device);
 if (args.Length > 0)
@@ -73,7 +75,7 @@ void DumpAllRegisters(Pn532 pn532)
 
 void ReadMiFare(Pn532 pn532)
 {
-    byte[] retData = null;
+    byte[]? retData = null;
     while ((!Console.KeyAvailable))
     {
         retData = pn532.ListPassiveTarget(MaxTarget.One, TargetBaudRate.B106kbpsTypeA);
@@ -105,6 +107,7 @@ void ReadMiFare(Pn532 pn532)
         {
             BlockNumber = 0, Command = MifareCardCommand.AuthenticationA
         };
+
         mifareCard.SetCapacity(decrypted.Atqa, decrypted.Sak);
         mifareCard.SerialNumber = decrypted.NfcId;
         mifareCard.KeyA = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -121,7 +124,7 @@ void ReadMiFare(Pn532 pn532)
                 ret = mifareCard.RunMifiCardCommand();
             }
 
-            if (ret >= 0)
+            if (ret >= 0 && mifareCard.Data is object)
             {
                 mifareCard.BlockNumber = block;
                 mifareCard.Command = MifareCardCommand.Read16Bytes;
@@ -151,7 +154,7 @@ void ReadMiFare(Pn532 pn532)
             }
             else
             {
-                Console.WriteLine($"Autentication error");
+                Console.WriteLine($"Authentication error");
             }
         }
     }
@@ -196,7 +199,7 @@ void RunTests(Pn532 pn532)
 
 void ReadCreditCard(Pn532 pn532)
 {
-    byte[] retData = null;
+    byte[]? retData = null;
     while ((!Console.KeyAvailable))
     {
         retData = pn532.AutoPoll(5, 300, new PollingType[] { PollingType.Passive106kbpsISO144443_4B });

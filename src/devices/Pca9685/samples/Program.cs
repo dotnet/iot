@@ -35,7 +35,7 @@ PrintHelp();
 while (true)
 {
     var command = Console.ReadLine()?.ToLower()?.Split(' ');
-    if (command is null || string.IsNullOrEmpty(command[0]))
+    if (command is null || command[0] is { Length: 0 })
     {
         return;
     }

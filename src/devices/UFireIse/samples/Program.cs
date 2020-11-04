@@ -6,6 +6,8 @@ using System.Device.I2c;
 using Iot.Device.UFire;
 using UnitsNet;
 
+#pragma warning disable SA1011
+
 const int BusId = 1;
 
 PrintHelp();
@@ -19,8 +21,8 @@ Console.WriteLine();
 
 while (true)
 {
-    var command = Console.ReadLine().ToLower().Split(' ');
-    if (string.IsNullOrEmpty(command[0]))
+    string[]? command = Console.ReadLine()?.ToLower()?.Split(' ');
+    if (command is null || command[0] is { Length: 0 })
     {
         return;
     }

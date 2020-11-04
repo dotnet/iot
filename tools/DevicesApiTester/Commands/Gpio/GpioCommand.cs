@@ -17,7 +17,7 @@ namespace DeviceApiTester.Commands.Gpio
 
         protected GpioController CreateGpioController()
         {
-            GpioDriver gpioDriver = DriverFactory.CreateFromEnum<GpioDriver, GpioDriverType>(Driver);
+            GpioDriver? gpioDriver = DriverFactory.CreateFromEnum<GpioDriver, GpioDriverType>(Driver);
 
             return gpioDriver != null
                 ? new GpioController(Scheme, gpioDriver)

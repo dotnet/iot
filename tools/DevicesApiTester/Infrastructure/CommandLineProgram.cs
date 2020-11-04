@@ -47,7 +47,7 @@ namespace DeviceApiTester.Infrastructure
             return Assembly.GetExecutingAssembly().GetTypes()
                 .Where(t => typeof(ICommandVerb).IsAssignableFrom(t) || typeof(ICommandVerbAsync).IsAssignableFrom(t))
                 .Where(t => t.GetCustomAttributes<VerbAttribute>().Any())
-                .OrderBy(t => t.GetCustomAttribute<VerbAttribute>().Name)
+                .OrderBy(t => t.GetCustomAttribute<VerbAttribute>()?.Name)
                 .ToArray();
         }
 
