@@ -18,7 +18,5 @@ while (true)
 {
     // read concentration
     Console.WriteLine($"VOC Gas Concentration: {sensor.Concentration}ppm");
-    Console.WriteLine();
-
     Thread.Sleep(3000);
 }

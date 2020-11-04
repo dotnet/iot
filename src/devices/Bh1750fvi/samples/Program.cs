@@ -13,6 +13,5 @@ using Bh1750fvi sensor = new Bh1750fvi(device);
 while (true)
 {
     Console.WriteLine($"Illuminance: {sensor.Illuminance}Lux");
-
     Thread.Sleep(1000);
 }

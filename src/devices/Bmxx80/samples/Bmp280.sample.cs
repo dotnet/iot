@@ -77,7 +77,6 @@ while (true)
     // the value obtained from the formula above. Since that estimates the altitude based on pressure,
     // using that altitude to correct the pressure won't work.
     var correctedPressure = WeatherHelper.CalculateBarometricPressure(preValue, tempValue, stationHeight);
-
     Console.WriteLine($"Pressure corrected for altitude {stationHeight:F0}m (with average humidity): {correctedPressure.Hectopascals:0.##} hPa");
 
     Thread.Sleep(5000);

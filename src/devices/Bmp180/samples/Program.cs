@@ -45,5 +45,4 @@ Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
 // Note that if you already have the pressure value and the temperature, you could also calculate altitude by
 // calling WeatherHelper.CalculateAltitude(preValue, Pressure.MeanSeaLevel, tempValue) which would be more performant.
 altValue = i2cBmp280.ReadAltitude(WeatherHelper.MeanSeaLevel);
-
 Console.WriteLine($"Altitude: {altValue:0.##}m");

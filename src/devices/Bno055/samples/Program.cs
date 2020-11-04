@@ -8,8 +8,8 @@ using System.Threading;
 using Iot.Device.Bno055;
 
 Console.WriteLine("Hello BNO055!");
-I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Bno055Sensor.DefaultI2cAddress));
-Bno055Sensor bno055Sensor = new Bno055Sensor(i2cDevice);
+using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Bno055Sensor.DefaultI2cAddress));
+using Bno055Sensor bno055Sensor = new Bno055Sensor(i2cDevice);
 Console.WriteLine(
     $"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
 Console.WriteLine(

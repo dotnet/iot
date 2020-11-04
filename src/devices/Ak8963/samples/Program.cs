@@ -17,8 +17,9 @@ Console.WriteLine($"Mag X = {mag.X}");
 Console.WriteLine($"Mag Y = {mag.Y}");
 Console.WriteLine($"Mag Z = {mag.Z}");
 Console.WriteLine("Press a key to continue");
-var readKey = Console.ReadKey();
+Console.ReadKey();
 Console.Clear();
+
 while (!Console.KeyAvailable)
 {
     var magne = ak8963.ReadMagnetometer(true, TimeSpan.FromMilliseconds(11));
@@ -28,4 +29,4 @@ while (!Console.KeyAvailable)
     Thread.Sleep(200);
 }
 
-readKey = Console.ReadKey();
+Console.ReadKey();

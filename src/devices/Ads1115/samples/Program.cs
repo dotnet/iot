@@ -21,7 +21,7 @@ Console.WriteLine("Press any key to continue");
 // set the maximum range to 4.096V
 using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, InputMultiplexer.AIN0, MeasuringRange.FS4096))
 {
-    while (Console.KeyAvailable == false)
+    while (!Console.KeyAvailable)
     {
         // read raw data form the sensor
         short raw = adc.ReadRaw();
@@ -43,7 +43,7 @@ using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, I
 // We set the device mode to power-down, because we have to wait for a sample after each channel swap anyway.
 using (var adc = new Iot.Device.Ads1115.Ads1115(device, InputMultiplexer.AIN0, MeasuringRange.FS4096, DataRate.SPS250, DeviceMode.PowerDown))
 {
-    while (Console.KeyAvailable == false)
+    while (!Console.KeyAvailable)
     {
         Console.Clear();
 
@@ -76,36 +76,34 @@ using (var controller = new GpioController(PinNumberingScheme.Logical))
 {
     Console.Clear();
     Console.WriteLine("This triggers an interrupt each time a new value is available on AIN0");
-    using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, controller, 23, false, InputMultiplexer.AIN0, MeasuringRange.FS2048, DataRate.SPS250))
+    using Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, controller, 23, false, InputMultiplexer.AIN0, MeasuringRange.FS2048, DataRate.SPS250);
+    Stopwatch w = Stopwatch.StartNew();
+    int totalInterruptsSeen = 0;
+    int previousNumberOfInterrupts = 0;
+    ElectricPotential lastVoltage = default;
+    adc.AlertReadyAsserted += () =>
     {
-        Stopwatch w = Stopwatch.StartNew();
-        int totalInterruptsSeen = 0;
-        int previousNumberOfInterrupts = 0;
-        ElectricPotential lastVoltage = default;
-        adc.AlertReadyAsserted += () =>
-        {
-            ElectricPotential voltage = adc.ReadVoltage();
-            lastVoltage = voltage;
-            totalInterruptsSeen++;
-        };
+        ElectricPotential voltage = adc.ReadVoltage();
+        lastVoltage = voltage;
+        totalInterruptsSeen++;
+    };
 
-        adc.EnableConversionReady();
-        // (Do something else, here we print the output (as the console operations use to much time in the interrupt callback)
-        while (Console.KeyAvailable == false)
-        {
-            int interruptsThisPeriod = totalInterruptsSeen - previousNumberOfInterrupts;
-            double intsSecond = interruptsThisPeriod / w.Elapsed.TotalSeconds;
+    adc.EnableConversionReady();
+    // (Do something else, here we print the output (as the console operations use to much time in the interrupt callback)
+    while (!Console.KeyAvailable)
+    {
+        int interruptsThisPeriod = totalInterruptsSeen - previousNumberOfInterrupts;
+        double intsSecond = interruptsThisPeriod / w.Elapsed.TotalSeconds;
 
-            Console.WriteLine($"ADS1115 Voltage: {lastVoltage}");
-            Console.WriteLine($"Interrups total: {totalInterruptsSeen}, last: {interruptsThisPeriod} Average: {intsSecond}/s (should be ~ {adc.FrequencyFromDataRate(adc.DataRate)})");
-            w.Restart();
-            previousNumberOfInterrupts = totalInterruptsSeen;
-            // wait for 2s
-            Thread.Sleep(2000);
-        }
-
-        Console.ReadKey(true);
+        Console.WriteLine($"ADS1115 Voltage: {lastVoltage}");
+        Console.WriteLine($"Interrups total: {totalInterruptsSeen}, last: {interruptsThisPeriod} Average: {intsSecond}/s (should be ~ {adc.FrequencyFromDataRate(adc.DataRate)})");
+        w.Restart();
+        previousNumberOfInterrupts = totalInterruptsSeen;
+        // wait for 2s
+        Thread.Sleep(2000);
     }
+
+    Console.ReadKey(true);
 }
 
 // Use an interrupt handler, but this time when the value on AIN1 exceeds a threshold
@@ -113,43 +111,41 @@ using (var controller = new GpioController(PinNumberingScheme.Logical))
 {
     Console.Clear();
     Console.WriteLine("This triggers an interrupt as long as the value is above 2.0V (and then stays above 1.8V)");
-    using (Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, controller, 23, false, InputMultiplexer.AIN1, MeasuringRange.FS4096, DataRate.SPS860))
+    using Iot.Device.Ads1115.Ads1115 adc = new Iot.Device.Ads1115.Ads1115(device, controller, 23, false, InputMultiplexer.AIN1, MeasuringRange.FS4096, DataRate.SPS860);
+    Stopwatch w = Stopwatch.StartNew();
+    int totalInterruptsSeen = 0;
+    int previousNumberOfInterrupts = 0;
+    ElectricPotential lastVoltage = default;
+    adc.AlertReadyAsserted += () =>
     {
-        Stopwatch w = Stopwatch.StartNew();
-        int totalInterruptsSeen = 0;
-        int previousNumberOfInterrupts = 0;
-        ElectricPotential lastVoltage = default;
-        adc.AlertReadyAsserted += () =>
+        ElectricPotential voltage = adc.ReadVoltage();
+        lastVoltage = voltage;
+        totalInterruptsSeen++;
+    };
+
+    adc.EnableComparator(adc.VoltageToRaw(ElectricPotential.FromVolts(1.8)), adc.VoltageToRaw(ElectricPotential.FromVolts(2.0)), ComparatorMode.Traditional, ComparatorQueue.AssertAfterTwo);
+    // Do something else, here we print the output (as the console operations use to much time in the interrupt callback)
+    while (!Console.KeyAvailable)
+    {
+        int interruptsThisPeriod = totalInterruptsSeen - previousNumberOfInterrupts;
+        double intsSecond = interruptsThisPeriod / w.Elapsed.TotalSeconds;
+
+        if (interruptsThisPeriod > 0)
         {
-            ElectricPotential voltage = adc.ReadVoltage();
-            lastVoltage = voltage;
-            totalInterruptsSeen++;
-        };
-
-        adc.EnableComparator(adc.VoltageToRaw(ElectricPotential.FromVolts(1.8)), adc.VoltageToRaw(ElectricPotential.FromVolts(2.0)), ComparatorMode.Traditional, ComparatorQueue.AssertAfterTwo);
-        // Do something else, here we print the output (as the console operations use to much time in the interrupt callback)
-        while (Console.KeyAvailable == false)
+            Console.WriteLine($"Interrupt voltage: {lastVoltage}");
+            Console.WriteLine($"Interrups total: {totalInterruptsSeen}, last: {interruptsThisPeriod} Average: {intsSecond}/s");
+        }
+        else
         {
-            int interruptsThisPeriod = totalInterruptsSeen - previousNumberOfInterrupts;
-            double intsSecond = interruptsThisPeriod / w.Elapsed.TotalSeconds;
-
-            if (interruptsThisPeriod > 0)
-            {
-                Console.WriteLine($"Interrupt voltage: {lastVoltage}");
-                Console.WriteLine($"Interrups total: {totalInterruptsSeen}, last: {interruptsThisPeriod} Average: {intsSecond}/s");
-            }
-            else
-            {
-                Console.WriteLine($"Current Voltage (no interrupts seen): {adc.ReadVoltage()}");
-            }
-
-            lastVoltage = default;
-            w.Restart();
-            previousNumberOfInterrupts = totalInterruptsSeen;
-            // wait for 2s
-            Thread.Sleep(2000);
+            Console.WriteLine($"Current Voltage (no interrupts seen): {adc.ReadVoltage()}");
         }
 
-        Console.ReadKey(true);
+        lastVoltage = default;
+        w.Restart();
+        previousNumberOfInterrupts = totalInterruptsSeen;
+        // wait for 2s
+        Thread.Sleep(2000);
     }
+
+    Console.ReadKey(true);
 }

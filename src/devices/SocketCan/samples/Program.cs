@@ -69,27 +69,25 @@ void ReceiveAllExample()
 {
     Console.WriteLine("Listening for any id");
 
-    using (CanRaw can = new CanRaw())
-    {
-        byte[] buffer = new byte[8];
+    using CanRaw can = new CanRaw();
+    byte[] buffer = new byte[8];
 
-        while (true)
+    while (true)
+    {
+        if (can.TryReadFrame(buffer, out int frameLength, out CanId id))
         {
-            if (can.TryReadFrame(buffer, out int frameLength, out CanId id))
-            {
-                Span<byte> data = new Span<byte>(buffer, 0, frameLength);
-                string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
-                string dataAsHex = string.Join(string.Empty, data.ToArray().Select((x) => x.ToString("X2")));
-                Console.WriteLine($"Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
-            }
-            else
-            {
-                Console.WriteLine($"Invalid frame received!");
-                Span<byte> data = new Span<byte>(buffer, 0, frameLength);
-                string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
-                string dataAsHex = string.Join(string.Empty, data.ToArray().Select((x) => x.ToString("X2")));
-                Console.WriteLine($"Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
-            }
+            Span<byte> data = new Span<byte>(buffer, 0, frameLength);
+            string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
+            string dataAsHex = string.Join(string.Empty, data.ToArray().Select((x) => x.ToString("X2")));
+            Console.WriteLine($"Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
+        }
+        else
+        {
+            Console.WriteLine($"Invalid frame received!");
+            Span<byte> data = new Span<byte>(buffer, 0, frameLength);
+            string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
+            string dataAsHex = string.Join(string.Empty, data.ToArray().Select((x) => x.ToString("X2")));
+            Console.WriteLine($"Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
         }
     }
 }
