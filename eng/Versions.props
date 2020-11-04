@@ -4,10 +4,11 @@
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
     <MicrosoftDotNetGenAPIPackageVersion>6.0.0-beta.20552.5</MicrosoftDotNetGenAPIPackageVersion>
     <!-- dotnet/corefx dependencies -->
-    <SystemDrawingCommonPackageVersion>4.6.0</SystemDrawingCommonPackageVersion>
-    <SystemIOPortsPackageVersion>4.6.0</SystemIOPortsPackageVersion>
-    <MicrosoftWin32RegistryPackageVersion>4.6.0</MicrosoftWin32RegistryPackageVersion>
+    <SystemDrawingCommonPackageVersion>5.0.0</SystemDrawingCommonPackageVersion>
+    <SystemIOPortsPackageVersion>5.0.0</SystemIOPortsPackageVersion>
+    <MicrosoftWin32RegistryPackageVersion>5.0.0</MicrosoftWin32RegistryPackageVersion>
     <SystemRuntimeWindowsRuntimePackageVersion>4.6.0</SystemRuntimeWindowsRuntimePackageVersion>
+    <SystemManagementPackageVersion>5.0.0</SystemManagementPackageVersion>
     <UnitsNetPackageVersion>4.58.0</UnitsNetPackageVersion>
   </PropertyGroup>
   <!-- Restore sources -->
