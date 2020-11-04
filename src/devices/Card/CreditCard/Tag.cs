@@ -13,6 +13,13 @@ namespace Iot.Device.Card.CreditCardProcessing
     public class Tag
     {
         /// <summary>
+        /// Create an empty tag
+        /// </summary>
+        public Tag()
+        {
+        }
+
+        /// <summary>
         /// Instantiate Tag class containing part of a card information
         /// </summary>
         /// <param name="tagNumber">The Tag number.</param>
@@ -24,7 +31,10 @@ namespace Iot.Device.Card.CreditCardProcessing
             TagNumber = tagNumber;
             Data = data;
             Parent = parent;
-            Tags = tags;
+            if (tags != null)
+            {
+                Tags = tags;
+            }
         }
 
         /// <summary>
@@ -35,7 +45,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// <summary>
         /// The data of the Tag
         /// </summary>
-        public byte[] Data { get; set; }
+        public byte[] Data { get; set; } = new byte[0];
 
         /// <summary>
         /// The Tag parent, 0 is it's a root Tag
@@ -59,7 +69,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// List of Tag that this Tag can contain if it's a constructed one
         /// or a template or a DOL
         /// </summary>
-        public List<Tag>? Tags { get; set; }
+        public List<Tag> Tags { get; set; } = new List<Tag>();
 
         /// <summary>
         /// Search for a specific tag in a list of Tag including the sub Tags
