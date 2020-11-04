@@ -163,15 +163,9 @@ void RfConfiguration()
 
 void TypeB()
 {
-    // Poll the data for 20 seconds
-    var ret = pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out Data106kbpsTypeB? card, 20000);
     Console.WriteLine();
-
-    if (!ret)
-    {
-        Console.WriteLine("Can't read properly the card");
-    }
-    else if (card is object)
+    // Poll the data for 20 seconds
+    if (pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out Data106kbpsTypeB? card, 20000))
     {
         Console.WriteLine($"Target number: {card.TargetNumber}");
         Console.WriteLine($"App data: {BitConverter.ToString(card.ApplicationData)}");
@@ -206,15 +200,9 @@ void TypeB()
 
 void TypeA()
 {
-    // Let's pull for 20 seconds and see the result
-    var retok = pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, out Data106kbpsTypeA? cardTypeA, 20000);
     Console.WriteLine();
-
-    if (!retok)
-    {
-        Console.WriteLine("Can't read properly the card");
-    }
-    else if (cardTypeA is object)
+    // Let's pull for 20 seconds and see the result
+    if (pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, out Data106kbpsTypeA? cardTypeA, 20000))
     {
         Console.WriteLine($"ATQA: {cardTypeA.Atqa}");
         Console.WriteLine($"SAK: {cardTypeA.Sak}");
@@ -285,8 +273,7 @@ void PullDifferentCards()
 {
     do
     {
-        var retok = pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, out Data106kbpsTypeA? cardTypeA, 1000);
-        if (retok && cardTypeA is object)
+        if (pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, out Data106kbpsTypeA? cardTypeA, 1000))
         {
             Console.WriteLine($"ISO 14443 Type A found:");
             Console.WriteLine($"  ATQA: {cardTypeA.Atqa}");
@@ -298,8 +285,7 @@ void PullDifferentCards()
             Console.WriteLine($"{nameof(cardTypeA)} is not configured correctly.");
         }
 
-        retok = pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out Data106kbpsTypeB? card, 1000);
-        if (retok && card is object)
+        if (pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out Data106kbpsTypeB? card, 1000))
         {
             Console.WriteLine($"ISO 14443 Type B found:");
             Console.WriteLine($"  Target number: {card.TargetNumber}");
@@ -326,8 +312,7 @@ void PullTypeBCards()
 {
     do
     {
-        var retok = pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out Data106kbpsTypeB? card, 1000);
-        if (retok && card is object)
+        if (pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out Data106kbpsTypeB? card, 1000))
         {
             Console.WriteLine($"ISO 14443 Type B found:");
             Console.WriteLine($"  Target number: {card.TargetNumber}");
