@@ -220,7 +220,12 @@ void TypeA()
         Console.WriteLine($"SAK: {cardTypeA.Sak}");
         Console.WriteLine($"UID: {BitConverter.ToString(cardTypeA.NfcId)}");
 
-        MifareCard mifareCard = new MifareCard(pn5180, cardTypeA.TargetNumber) { BlockNumber = 0, Command = MifareCardCommand.AuthenticationA };
+        MifareCard mifareCard = new MifareCard(pn5180, cardTypeA.TargetNumber)
+        {
+            BlockNumber = 0,
+            Command = MifareCardCommand.AuthenticationA
+        };
+
         mifareCard.SetCapacity(cardTypeA.Atqa, cardTypeA.Sak);
         mifareCard.SerialNumber = cardTypeA.NfcId;
         mifareCard.KeyA = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -237,7 +242,7 @@ void TypeA()
                 ret = mifareCard.RunMifiCardCommand();
             }
 
-            if (ret >= 0 && mifareCard is object)
+            if (ret >= 0 && mifareCard.Data is object)
             {
                 mifareCard.BlockNumber = block;
                 mifareCard.Command = MifareCardCommand.Read16Bytes;
@@ -278,22 +283,23 @@ void TypeA()
 
 void PullDifferentCards()
 {
-    Data106kbpsTypeA cardTypeA;
-    Data106kbpsTypeB card;
-
     do
     {
-        var retok = pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, out cardTypeA, 1000);
-        if (retok)
+        var retok = pn5180.ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, ReceiverRadioFrequencyConfiguration.Iso14443A_Nfc_PI_106_106, out Data106kbpsTypeA? cardTypeA, 1000);
+        if (retok && cardTypeA is object)
         {
             Console.WriteLine($"ISO 14443 Type A found:");
             Console.WriteLine($"  ATQA: {cardTypeA.Atqa}");
             Console.WriteLine($"  SAK: {cardTypeA.Sak}");
             Console.WriteLine($"  UID: {BitConverter.ToString(cardTypeA.NfcId)}");
         }
+        else
+        {
+            Console.WriteLine($"{nameof(cardTypeA)} is not configured correctly.");
+        }
 
-        retok = pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out card, 1000);
-        if (retok)
+        retok = pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out Data106kbpsTypeB? card, 1000);
+        if (retok && card is object)
         {
             Console.WriteLine($"ISO 14443 Type B found:");
             Console.WriteLine($"  Target number: {card.TargetNumber}");
@@ -307,6 +313,10 @@ void PullDifferentCards()
             Console.WriteLine($"  Iso 14443-4 compliance: {card.ISO14443_4Compliance}");
             Console.WriteLine($"  Max frame size: {card.MaxFrameSize}");
             Console.WriteLine($"  Nad support: {card.NadSupported}");
+        }
+        else
+        {
+            Console.WriteLine($"{nameof(card)} is not configured correctly.");
         }
     }
     while (!Console.KeyAvailable);
@@ -314,12 +324,10 @@ void PullDifferentCards()
 
 void PullTypeBCards()
 {
-    Data106kbpsTypeB card;
-
     do
     {
-        var retok = pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out card, 1000);
-        if (retok)
+        var retok = pn5180.ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration.Iso14443B_106, ReceiverRadioFrequencyConfiguration.Iso14443B_106, out Data106kbpsTypeB? card, 1000);
+        if (retok && card is object)
         {
             Console.WriteLine($"ISO 14443 Type B found:");
             Console.WriteLine($"  Target number: {card.TargetNumber}");
@@ -333,6 +341,10 @@ void PullTypeBCards()
             Console.WriteLine($"  Iso 14443-4 compliance: {card.ISO14443_4Compliance}");
             Console.WriteLine($"  Max frame size: {card.MaxFrameSize}");
             Console.WriteLine($"  Nad support: {card.NadSupported}");
+        }
+        else
+        {
+            Console.WriteLine($"{nameof(card)} is not configured correctly.");
         }
 
         // Wait a bit
