@@ -54,7 +54,7 @@ namespace Iot.Device.CpuTemperature
 
                 using StreamReader reader = new StreamReader(fileStream);
                 string? data = reader.ReadLine();
-                if (data is { Length: > 1 })
+                if (data is { Length: > 0 })
                 {
                     if (int.TryParse(data, out int temp))
                     {
