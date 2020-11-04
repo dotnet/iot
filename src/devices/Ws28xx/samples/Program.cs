@@ -18,7 +18,7 @@ var settings = new SpiConnectionSettings(0, 0)
     Mode = SpiMode.Mode0,
     DataBitLength = 8
 };
-var spi = SpiDevice.Create(settings);
+using SpiDevice spi = SpiDevice.Create(settings);
 
 #if WS2808
 Ws28xx neo = new Ws2808(spi, count);

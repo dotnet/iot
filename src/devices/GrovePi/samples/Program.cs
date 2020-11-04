@@ -12,7 +12,7 @@ using Iot.Device.GrovePiDevice.Sensors;
 Console.WriteLine("Hello GrovePi!");
 PinValue relay = PinValue.Low;
 I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, GrovePi.DefaultI2cAddress);
-GrovePi grovePi = new GrovePi(I2cDevice.Create(i2CConnectionSettings));
+using GrovePi grovePi = new GrovePi(I2cDevice.Create(i2CConnectionSettings));
 Console.WriteLine($"Manufacturer :{grovePi.GrovePiInfo.Manufacturer}");
 Console.WriteLine($"Board: {grovePi.GrovePiInfo.Board}");
 Console.WriteLine($"Firmware version: {grovePi.GrovePiInfo.SoftwareVersion}");

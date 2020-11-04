@@ -23,7 +23,7 @@ var selectedI2cAddress = 0b000000; // A5 A4 A3 A2 A1 A0
 var deviceAddress = Pca9685.I2cAddressBase + selectedI2cAddress;
 
 var settings = new I2cConnectionSettings(busId, deviceAddress);
-var device = I2cDevice.Create(settings);
+using var device = I2cDevice.Create(settings);
 
 using var pca9685 = new Pca9685(device);
 Console.WriteLine(

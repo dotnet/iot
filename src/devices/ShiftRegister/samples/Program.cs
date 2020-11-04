@@ -7,7 +7,7 @@ using System.Device.Spi;
 using System.Threading;
 using Iot.Device.Multiplexing;
 
-using var sr = new ShiftRegister(ShiftRegisterPinMapping.Complete, 8);
+using ShiftRegister sr = new ShiftRegister(ShiftRegisterPinMapping.Complete, 8);
 
 // Uncomment this code to use SPI (and comment the line above)
 // var settings = new SpiConnectionSettings(0, 0);

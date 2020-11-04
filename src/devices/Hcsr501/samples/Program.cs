@@ -4,13 +4,12 @@
 using System;
 using System.Threading;
 using System.Device.Gpio;
-
 using Iot.Device.Hcsr501;
 
 const int Hcsr501Pin = 17;
 const int LedPin = 27;
 
-GpioController ledController = new GpioController();
+using GpioController ledController = new GpioController();
 ledController.OpenPin(LedPin, PinMode.Output);
 
 using Iot.Device.Hcsr501.Hcsr501 sensor =

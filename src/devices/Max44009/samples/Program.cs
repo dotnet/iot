@@ -7,7 +7,7 @@ using System.Threading;
 using Iot.Device.Max44009;
 
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Max44009.DefaultI2cAddress);
-I2cDevice device = I2cDevice.Create(settings);
+using I2cDevice device = I2cDevice.Create(settings);
 
 // integration time is 100ms
 using Max44009 sensor = new Max44009(device, IntegrationTime.Time100);

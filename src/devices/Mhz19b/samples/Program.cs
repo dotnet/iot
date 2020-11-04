@@ -17,7 +17,7 @@ var serialPort = new SerialPort("/dev/serial0", 9600, Parity.None, 8, StopBits.O
     WriteTimeout = 1000
 };
 serialPort.Open();
-Mhz19b sensor = new Mhz19b(serialPort.BaseStream, true);
+using Mhz19b sensor = new Mhz19b(serialPort.BaseStream, true);
 
 // Alternatively you can let the binding create the serial port stream:
 // Mhz19b sensor = new Mhz19b("/dev/serial0");

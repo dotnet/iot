@@ -56,7 +56,7 @@ if (key.KeyChar == '4')
 
 void TestI2c()
 {
-    var ftI2c = new Ft4222I2c(new I2cConnectionSettings(0, Bno055Sensor.DefaultI2cAddress));
+    using var ftI2c = new Ft4222I2c(new I2cConnectionSettings(0, Bno055Sensor.DefaultI2cAddress));
 
     var bno055Sensor = new Bno055Sensor(ftI2c);
 
@@ -68,7 +68,7 @@ void TestI2c()
 
 void TestSpi()
 {
-    var ftSpi = new Ft4222Spi(new SpiConnectionSettings(0, 1) { ClockFrequency = 1_000_000, Mode = SpiMode.Mode0 });
+    using var ftSpi = new Ft4222Spi(new SpiConnectionSettings(0, 1) { ClockFrequency = 1_000_000, Mode = SpiMode.Mode0 });
 
     while (!Console.KeyAvailable)
     {
@@ -82,7 +82,7 @@ void TestSpi()
 void TestGpio()
 {
     const int Gpio2 = 2;
-    var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
+    using var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
 
     // Opening GPIO2
     gpioController.OpenPin(Gpio2);
@@ -111,7 +111,7 @@ void TestGpio()
 void TestEvents()
 {
     const int Gpio2 = 2;
-    var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
+    using var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
 
     // Opening GPIO2
     gpioController.OpenPin(Gpio2);

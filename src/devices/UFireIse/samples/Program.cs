@@ -50,40 +50,34 @@ void PrintHelp()
 
 void Basic(I2cDevice device)
 {
-    using (UFireIse uFireIse = new UFireIse(device))
-    {
-        Console.WriteLine("mV:" + uFireIse.ReadElectricPotential().Millivolts);
-    }
+    using UFireIse uFireIse = new UFireIse(device);
+    Console.WriteLine("mV:" + uFireIse.ReadElectricPotential().Millivolts);
 }
 
 void Orp(I2cDevice device)
 {
-    using (UFireOrp uFireOrp = new UFireOrp(device))
+    using UFireOrp uFireOrp = new UFireOrp(device);
+    if (uFireOrp.TryMeasureOxidationReductionPotential(out ElectricPotential orp))
     {
-        if (uFireOrp.TryMeasureOxidationReductionPotential(out ElectricPotential orp))
-        {
-            Console.WriteLine("Eh:" + orp.Millivolts);
-        }
-        else
-        {
-            Console.WriteLine("Not possible to measure pH");
-        }
+        Console.WriteLine("Eh:" + orp.Millivolts);
+    }
+    else
+    {
+        Console.WriteLine("Not possible to measure pH");
     }
 }
 
 void Ph(I2cDevice device)
 {
-    using (UFirePh uFire_pH = new UFirePh(device))
-    {
-        Console.WriteLine("mV:" + uFire_pH.ReadElectricPotential().Millivolts);
+    using UFirePh uFire_pH = new UFirePh(device);
+    Console.WriteLine("mV:" + uFire_pH.ReadElectricPotential().Millivolts);
 
-        if (uFire_pH.TryMeasurepH(out float pH))
-        {
-            Console.WriteLine("pH:" + pH);
-        }
-        else
-        {
-            Console.WriteLine("Not possible to measure pH");
-        }
+    if (uFire_pH.TryMeasurepH(out float pH))
+    {
+        Console.WriteLine("pH:" + pH);
+    }
+    else
+    {
+        Console.WriteLine("Not possible to measure pH");
     }
 }

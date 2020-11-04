@@ -24,7 +24,7 @@ else
 void MagnetometerCalibrationDeepDive(int calibrationCount)
 {
     var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
-    Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
+    using Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
     mpu9250.MagnetometerOutputBitMode = Iot.Device.Magnetometer.OutputBitMode.Output16bit;
     mpu9250.MagnetometerMeasurementMode = Iot.Device.Magnetometer.MeasurementMode.ContinuousMeasurement100Hz;
     Console.WriteLine("Please move the magnetometer during calibration");

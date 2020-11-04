@@ -9,8 +9,7 @@ using Iot.Device.Si7021;
 using UnitsNet;
 
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Si7021.DefaultI2cAddress);
-I2cDevice device = I2cDevice.Create(settings);
-
+using I2cDevice device = I2cDevice.Create(settings);
 using Si7021 sensor = new Si7021(device, Resolution.Resolution1);
 while (true)
 {
