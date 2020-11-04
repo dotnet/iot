@@ -14,15 +14,4 @@
     <SystemRuntimeInteropServicesWindowsRuntimePackageVersion>4.3.0</SystemRuntimeInteropServicesWindowsRuntimePackageVersion>
     <UnitsNetPackageVersion>4.58.0</UnitsNetPackageVersion>
   </PropertyGroup>
-  <!-- Restore sources -->
-  <PropertyGroup>
-    <RestoreSources>
-      $(RestoreSources);
-      https://dotnetfeed.blob.core.windows.net/dotnet-tools-internal/index.json;
-      https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json;
-      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://api.nuget.org/v3/index.json;
-    </RestoreSources>
-  </PropertyGroup>
 </Project>
