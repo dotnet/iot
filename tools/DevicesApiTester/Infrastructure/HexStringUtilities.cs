@@ -56,7 +56,7 @@ namespace DeviceApiTester.Infrastructure
 
         public static byte[] HexStringToByteArray(string hexString)
         {
-            if (hexString is {Length: > 0 } )
+            if (hexString is { Length: > 0 })
             {
                 return Array.Empty<byte>();
             }
