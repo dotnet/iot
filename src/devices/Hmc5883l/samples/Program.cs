@@ -6,7 +6,7 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Hmc5883l;
 
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Hmc5883l.DefaultI2cAddress);
+I2cConnectionSettings settings = new (1, Hmc5883l.DefaultI2cAddress);
 using I2cDevice device = I2cDevice.Create(settings);
 using Hmc5883l sensor = new Hmc5883l(device);
 while (true)

@@ -8,7 +8,7 @@ using System.Threading;
 using Iot.Device.Multiplexing;
 
 using Sn74hc595 sr = new Sn74hc595(Sn74hc595PinMapping.Complete);
-// var settings = new SpiConnectionSettings(0, 0);
+// SpiConnectionSettings settings = new (0, 0);
 // using var spiDevice = SpiDevice.Create(settings);
 // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
 CancellationTokenSource cancellationSource = new ();

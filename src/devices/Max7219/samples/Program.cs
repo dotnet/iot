@@ -21,7 +21,7 @@ SpiConnectionSettings connectionSettings = new (0, 0)
     Mode = Iot.Device.Max7219.Max7219.SpiMode
 };
 using SpiDevice spi = SpiDevice.Create(connectionSettings);
-using var devices = new Max7219(spi, cascadedDevices: 4);
+using Max7219 devices = new Max7219(spi, cascadedDevices: 4);
 // initialize the devices
 devices.Init();
 

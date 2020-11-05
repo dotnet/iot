@@ -6,8 +6,8 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Lm75;
 
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Lm75.DefaultI2cAddress);
-I2cDevice device = I2cDevice.Create(settings);
+I2cConnectionSettings settings = new (1, Lm75.DefaultI2cAddress);
+using I2cDevice device = I2cDevice.Create(settings);
 
 using Lm75 sensor = new Lm75(device);
 while (true)

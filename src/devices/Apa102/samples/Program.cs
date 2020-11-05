@@ -9,7 +9,7 @@ using Iot.Device.Apa102;
 
 var random = new Random();
 
-var spiDevice = SpiDevice.Create(new SpiConnectionSettings(0, 0)
+using SpiDevice spiDevice = SpiDevice.Create(new SpiConnectionSettings(0, 0)
 {
     ClockFrequency = 20_000_000,
     DataFlow = DataFlow.MsbFirst,

@@ -7,7 +7,7 @@ using System.Threading;
 using Iot.Device.Ahtxx;
 
 const int I2cBus = 1;
-I2cConnectionSettings i2cSettings = new I2cConnectionSettings(I2cBus, Aht20.DefaultI2cAddress);
+I2cConnectionSettings i2cSettings = new (I2cBus, Aht20.DefaultI2cAddress);
 I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
 
 // For AHT10 or AHT15 use:

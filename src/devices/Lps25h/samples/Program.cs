@@ -29,6 +29,6 @@ while (true)
 
 I2cDevice CreateI2cDevice()
 {
-    var settings = new I2cConnectionSettings(1, I2cAddress);
+    I2cConnectionSettings settings = new (1, I2cAddress);
     return I2cDevice.Create(settings);
 }

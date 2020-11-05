@@ -20,7 +20,7 @@ if (choice.KeyChar == '1')
 {
     Console.WriteLine("Press any key to stop the reading");
     // Init DHT10 through I2C
-    I2cConnectionSettings settings = new I2cConnectionSettings(1, Dht10.DefaultI2cAddress);
+    I2cConnectionSettings settings = new (1, Dht10.DefaultI2cAddress);
     I2cDevice device = I2cDevice.Create(settings);
 
     using Dht10 dht = new Dht10(device);

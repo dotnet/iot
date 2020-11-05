@@ -8,13 +8,13 @@ using System.Threading;
 using Iot.Device.Nrf24l01;
 
 // SPI0 CS0
-SpiConnectionSettings senderSettings = new SpiConnectionSettings(0, 0)
+SpiConnectionSettings senderSettings = new (0, 0)
 {
     ClockFrequency = Nrf24l01.SpiClockFrequency,
     Mode = Nrf24l01.SpiMode
 };
 // SPI1 CS0
-SpiConnectionSettings receiverSettings = new SpiConnectionSettings(1, 2)
+SpiConnectionSettings receiverSettings = new (1, 2)
 {
     ClockFrequency = Nrf24l01.SpiClockFrequency,
     Mode = Nrf24l01.SpiMode

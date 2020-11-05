@@ -8,7 +8,7 @@ using Iot.Device.Common;
 using Iot.Device.Sht3x;
 using UnitsNet;
 
-I2cConnectionSettings settings = new I2cConnectionSettings(1, (byte)I2cAddress.AddrLow);
+I2cConnectionSettings settings = new (1, (byte)I2cAddress.AddrLow);
 using I2cDevice device = I2cDevice.Create(settings);
 using Sht3x sensor = new Sht3x(device);
 while (true)

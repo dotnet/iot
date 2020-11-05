@@ -12,7 +12,7 @@ using Iot.Device.Ws28xx;
 const int Count = 8;
 Console.Clear();
 
-var settings = new SpiConnectionSettings(0, 0)
+SpiConnectionSettings settings = new (0, 0)
 {
     ClockFrequency = 2_400_000,
     Mode = SpiMode.Mode0,

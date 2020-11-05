@@ -10,7 +10,7 @@ using Iot.Device.Multiplexing;
 using ShiftRegister sr = new ShiftRegister(ShiftRegisterPinMapping.Complete, 8);
 
 // Uncomment this code to use SPI (and comment the line above)
-// var settings = new SpiConnectionSettings(0, 0);
+// SpiConnectionSettings settings = new (0, 0);
 // using var spiDevice = SpiDevice.Create(settings);
 // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
 CancellationTokenSource cancellationSource = new ();

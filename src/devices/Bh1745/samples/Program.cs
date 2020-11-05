@@ -10,10 +10,10 @@ using Iot.Device.Bh1745;
 const int busId = 1;
 
 // create device
-var i2cSettings = new I2cConnectionSettings(busId, Bh1745.DefaultI2cAddress);
-var i2cDevice = I2cDevice.Create(i2cSettings);
+I2cConnectionSettings i2cSettings = new (busId, Bh1745.DefaultI2cAddress);
+using I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
 
-using var i2cBh1745 = new Bh1745(i2cDevice);
+using Bh1745 i2cBh1745 = new Bh1745(i2cDevice);
 // wait for first measurement
 Task.Delay(i2cBh1745.MeasurementTime.ToMilliseconds()).Wait();
 

@@ -6,7 +6,7 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Ags01db;
 
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Ags01db.DefaultI2cAddress);
+I2cConnectionSettings settings = new (1, Ags01db.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 
 using Ags01db sensor = new Ags01db(device);
