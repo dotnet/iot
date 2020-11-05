@@ -7,7 +7,7 @@ using System.Threading;
 using Iot.Device.Tcs3472x;
 
 Console.WriteLine("Hello TCS3472x!");
-var i2cSettings = new I2cConnectionSettings(1, Tcs3472x.DefaultI2cAddress);
+I2cConnectionSettings i2cSettings = new (1, Tcs3472x.DefaultI2cAddress);
 using I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
 using Tcs3472x tcs3472X = new Tcs3472x(i2cDevice);
 while (!Console.KeyAvailable)

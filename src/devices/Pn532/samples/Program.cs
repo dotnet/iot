@@ -14,7 +14,7 @@ using Iot.Device.Pn532.ListPassive;
 #pragma warning disable SA1011
 
 string device = "/dev/ttyS0";
-using var pn532 = new Pn532(device);
+using Pn532 pn532 = new Pn532(device);
 if (args.Length > 0)
 {
     pn532.LogLevel = LogLevel.Debug;

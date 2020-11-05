@@ -59,7 +59,7 @@ namespace Iot.Device.Mcp25xxx
         {
             _standby = standby;
 
-            if (_standby != -1 && _gpioController is object)
+            if (_standby != -1)
             {
                 // Controller should already be configured if other pins are used.
                 _gpioController = _gpioController ?? new GpioController();

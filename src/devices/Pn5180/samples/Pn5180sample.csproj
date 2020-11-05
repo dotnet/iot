@@ -6,12 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\..\Card\CreditCard\CreditCardProcessing.csproj" />
     <ProjectReference Include="..\..\Card\Mifare\Mifare.csproj" />
     <ProjectReference Include="..\..\Ft4222\Ft4222.csproj" />

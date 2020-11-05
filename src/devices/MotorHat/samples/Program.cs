@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using Iot.Device.MotorHat;
+using Iot.Device.DCMotor;
 
 const double Period = 10.0;
 Stopwatch sw = Stopwatch.StartNew();
@@ -14,8 +15,8 @@ Stopwatch sw = Stopwatch.StartNew();
 // var selectedI2cAddress = 0b000000;     // A5 A4 A3 A2 A1 A0
 // var deviceAddress = MotorHat.I2cAddressBase + selectedI2cAddress;
 // var settings = new I2cConnectionSettings(busId, deviceAddress);
-using var motorHat = new MotorHat();
-var motor = motorHat.CreateDCMotor(1);
+using MotorHat motorHat = new MotorHat();
+using DCMotor motor = motorHat.CreateDCMotor(1);
 
 bool done = false;
 Console.CancelKeyPress += (o, e) =>

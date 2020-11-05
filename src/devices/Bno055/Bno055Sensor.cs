@@ -132,13 +132,12 @@ namespace Iot.Device.Bno055
             }
 
             Info = new Info(
-                chipId,
-                ReadByte(Registers.ACCEL_REV_ID),
-                ReadByte(Registers.MAG_REV_ID),
-                ReadByte(Registers.GYRO_REV_ID),
-                new Version(ReadByte(Registers.SW_REV_ID_MSB), ReadByte(Registers.SW_REV_ID_LSB)),
-                new Version(ReadByte(Registers.BL_REV_ID), 0));
-            // Get the ID
+                chipId,                                     // Chip Id
+                ReadByte(Registers.ACCEL_REV_ID),           // AcceleratorId
+                ReadByte(Registers.MAG_REV_ID),             // MagnetometerId
+                ReadByte(Registers.GYRO_REV_ID),            // GyroscopeId
+                new Version(ReadByte(Registers.SW_REV_ID_MSB), ReadByte(Registers.SW_REV_ID_LSB)),  // FirmwareVersion
+                new Version(ReadByte(Registers.BL_REV_ID), 0)); // BootloaderVersion
             _operationMode = operationMode;
             InitializeRegisters();
         }

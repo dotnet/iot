@@ -11,8 +11,7 @@ Console.WriteLine("Hello Hcsr04 Sample!");
 using var sonar = new Hcsr04(4, 17);
 while (true)
 {
-    var res = sonar.TryGetDistance(out Length distance);
-    if (res)
+    if (sonar.TryGetDistance(out Length distance))
     {
         Console.WriteLine($"Distance: {distance.Centimeters} cm");
     }

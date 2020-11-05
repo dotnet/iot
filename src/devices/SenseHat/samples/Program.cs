@@ -19,7 +19,7 @@ using UnitsNet;
 // set this to the current sea level pressure in the area for correct altitude readings
 var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
 
-using var sh = new SenseHat();
+using SenseHat sh = new SenseHat();
 int n = 0;
 int x = 3, y = 3;
 

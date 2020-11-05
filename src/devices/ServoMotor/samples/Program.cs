@@ -8,7 +8,7 @@ using Iot.Device.ServoMotor;
 Console.WriteLine("Hello Servo Motor!");
 
 using PwmChannel pwmChannel = PwmChannel.Create(0, 0, 50);
-using var servoMotor = new ServoMotor(
+using ServoMotor servoMotor = new ServoMotor(
     pwmChannel,
     160,
     700,

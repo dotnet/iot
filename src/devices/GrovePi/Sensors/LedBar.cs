@@ -143,7 +143,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
                 return ret[1] + (ret[2] >> 8);
             }
 
-            throw new Exception("Cannot fine all LEDs");
+            throw new Exception("Cannot find all LEDs");
         }
 
         /// <summary>

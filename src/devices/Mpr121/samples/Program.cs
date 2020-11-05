@@ -5,10 +5,10 @@ using System;
 using System.Device.I2c;
 using Iot.Device.Mpr121;
 
-using var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
+using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
 
 // Initialize controller with default configuration and auto-refresh the channel statuses every 100 ms.
-using var mpr121 = new Mpr121(device: i2cDevice, periodRefresh: 100);
+using Mpr121 mpr121 = new Mpr121(device: i2cDevice, periodRefresh: 100);
 
 Console.Clear();
 Console.CursorVisible = false;

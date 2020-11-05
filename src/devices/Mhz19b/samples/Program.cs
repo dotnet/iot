@@ -10,7 +10,7 @@ using Iot.Device.Mhz19b;
 using UnitsNet;
 
 // create serial port using the setting acc. to datasheet, pg. 7, sec. general settings
-var serialPort = new SerialPort("/dev/serial0", 9600, Parity.None, 8, StopBits.One)
+using SerialPort serialPort = new SerialPort("/dev/serial0", 9600, Parity.None, 8, StopBits.One)
 {
     Encoding = Encoding.ASCII,
     ReadTimeout = 1000,

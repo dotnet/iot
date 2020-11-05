@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Threading;
 using System.Device.I2c;
 using Iot.Device;
 using Iot.Device.Adc;
@@ -21,6 +23,6 @@ device.SetCalibration(33574, 12.2e-6f);
 while (true)
 {
     // write out the current values from the INA219 device.
-    System.Console.WriteLine($"Bus Voltage {device.ReadBusVoltage()} Shunt Voltage {device.ReadShuntVoltage().Millivolts}mV Current {device.ReadCurrent()} Power {device.ReadPower()}");
-    System.Threading.Thread.Sleep(1000);
+    Console.WriteLine($"Bus Voltage {device.ReadBusVoltage()} Shunt Voltage {device.ReadShuntVoltage().Millivolts}mV Current {device.ReadCurrent()} Power {device.ReadPower()}");
+    Thread.Sleep(1000);
 }

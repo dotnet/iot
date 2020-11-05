@@ -11,7 +11,7 @@ using Sn74hc595 sr = new Sn74hc595(Sn74hc595PinMapping.Complete);
 // var settings = new SpiConnectionSettings(0, 0);
 // using var spiDevice = SpiDevice.Create(settings);
 // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
-var cancellationSource = new CancellationTokenSource();
+CancellationTokenSource cancellationSource = new ();
 Console.CancelKeyPress += (s, e) =>
 {
     e.Cancel = true;

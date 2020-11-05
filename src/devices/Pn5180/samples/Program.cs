@@ -81,7 +81,7 @@ else
 
 Pn5180 HardwareSpi()
 {
-    var spi = SpiDevice.Create(new SpiConnectionSettings(0, 1) { ClockFrequency = Pn5180.MaximumSpiClockFrequency, Mode = Pn5180.DefaultSpiMode, DataFlow = DataFlow.MsbFirst });
+    SpiDevice spi = SpiDevice.Create(new SpiConnectionSettings(0, 1) { ClockFrequency = Pn5180.MaximumSpiClockFrequency, Mode = Pn5180.DefaultSpiMode, DataFlow = DataFlow.MsbFirst });
 
     // Reset the device
     using GpioController gpioController = new ();
@@ -96,7 +96,7 @@ Pn5180 HardwareSpi()
 
 Pn5180 Ft4222()
 {
-    var devices = FtCommon.GetDevices();
+    List<DeviceInformation> devices = FtCommon.GetDevices();
     Console.WriteLine($"{devices.Count} FT4222 elements found");
     foreach (var device in devices)
     {
@@ -113,9 +113,9 @@ Pn5180 Ft4222()
     Console.WriteLine($"Chip version: {chip}");
     Console.WriteLine($"Dll version: {dll}");
 
-    var ftSpi = new Ft4222Spi(new SpiConnectionSettings(0, 1) { ClockFrequency = Pn5180.MaximumSpiClockFrequency, Mode = Pn5180.DefaultSpiMode, DataFlow = DataFlow.MsbFirst });
+    Ft4222Spi ftSpi = new Ft4222Spi(new SpiConnectionSettings(0, 1) { ClockFrequency = Pn5180.MaximumSpiClockFrequency, Mode = Pn5180.DefaultSpiMode, DataFlow = DataFlow.MsbFirst });
 
-    var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
+    GpioController gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
 
     // REset the device
     gpioController.OpenPin(0, PinMode.Output);

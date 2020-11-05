@@ -18,8 +18,8 @@ CheckInputRegisterPolarityInversion(pca95x4);
 
 Pca95x4 GetPca95x4Device()
 {
-    var i2cConnectionSettings = new I2cConnectionSettings(1, s_deviceAddress);
-    var i2cDevice = I2cDevice.Create(i2cConnectionSettings);
+    I2cConnectionSettings i2cConnectionSettings = new (1, s_deviceAddress);
+    I2cDevice i2cDevice = I2cDevice.Create(i2cConnectionSettings);
     return new Pca95x4(i2cDevice);
 }
 

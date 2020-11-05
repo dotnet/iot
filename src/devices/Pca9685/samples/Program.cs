@@ -22,10 +22,10 @@ var busId = 1;
 var selectedI2cAddress = 0b000000; // A5 A4 A3 A2 A1 A0
 var deviceAddress = Pca9685.I2cAddressBase + selectedI2cAddress;
 
-var settings = new I2cConnectionSettings(busId, deviceAddress);
-using var device = I2cDevice.Create(settings);
+I2cConnectionSettings settings = new (busId, deviceAddress);
+using I2cDevice device = I2cDevice.Create(settings);
 
-using var pca9685 = new Pca9685(device);
+using Pca9685 pca9685 = new Pca9685(device);
 Console.WriteLine(
     $"PCA9685 is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
 Console.WriteLine($"PWM Frequency: {pca9685.PwmFrequency}Hz");
@@ -35,7 +35,7 @@ PrintHelp();
 while (true)
 {
     var command = Console.ReadLine()?.ToLower()?.Split(' ');
-    if (command is null || command[0] is { Length: 0 })
+    if (command?[0] is not { Length: >0 })
     {
         return;
     }
@@ -117,7 +117,7 @@ void ServoDemo(Pca9685 pca9685, int channel)
     while (true)
     {
         string? command = Console.ReadLine()?.ToLower();
-        if (command is not { Length: > 0 } || command[0] == 'q')
+        if (command?[0] is not 'q')
         {
             return;
         }

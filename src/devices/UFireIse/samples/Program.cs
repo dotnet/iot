@@ -12,7 +12,7 @@ const int BusId = 1;
 
 PrintHelp();
 
-I2cConnectionSettings settings = new I2cConnectionSettings(BusId, UFireIse.I2cAddress);
+I2cConnectionSettings settings = new (BusId, UFireIse.I2cAddress);
 using I2cDevice device = I2cDevice.Create(settings);
 Console.WriteLine(
         $"UFire_ISE is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
@@ -22,7 +22,7 @@ Console.WriteLine();
 while (true)
 {
     string[]? command = Console.ReadLine()?.ToLower()?.Split(' ');
-    if (command is null || command[0] is { Length: 0 })
+    if (command?[0] is not { Length: >0 })
     {
         return;
     }

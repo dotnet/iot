@@ -15,12 +15,12 @@ if (args.Length > 0)
 
 Console.WriteLine(message);
 
-var connectionSettings = new SpiConnectionSettings(0, 0)
+SpiConnectionSettings connectionSettings = new (0, 0)
 {
     ClockFrequency = Iot.Device.Max7219.Max7219.SpiClockFrequency,
     Mode = Iot.Device.Max7219.Max7219.SpiMode
 };
-var spi = SpiDevice.Create(connectionSettings);
+using SpiDevice spi = SpiDevice.Create(connectionSettings);
 using var devices = new Max7219(spi, cascadedDevices: 4);
 // initialize the devices
 devices.Init();

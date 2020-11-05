@@ -29,8 +29,8 @@ if (mcp23xxx is Mcp23x1x mcp23x1x)
 // Program methods
 Mcp23xxx GetMcp23xxxDevice(Mcp23xxxDevice mcp23xxxDevice)
 {
-    var i2cConnectionSettings = new I2cConnectionSettings(1, s_deviceAddress);
-    var i2cDevice = I2cDevice.Create(i2cConnectionSettings);
+    I2cConnectionSettings i2cConnectionSettings = new (1, s_deviceAddress);
+    I2cDevice i2cDevice = I2cDevice.Create(i2cConnectionSettings);
 
     // I2C.
     switch (mcp23xxxDevice)
@@ -45,12 +45,12 @@ Mcp23xxx GetMcp23xxxDevice(Mcp23xxxDevice mcp23xxxDevice)
             return new Mcp23018(i2cDevice);
     }
 
-    var spiConnectionSettings = new SpiConnectionSettings(0, 0)
+    SpiConnectionSettings spiConnectionSettings = new (0, 0)
     {
         ClockFrequency = 1000000, Mode = SpiMode.Mode0
     };
 
-    var spiDevice = SpiDevice.Create(spiConnectionSettings);
+    SpiDevice spiDevice = SpiDevice.Create(spiConnectionSettings);
 
     // SPI.
     switch (mcp23xxxDevice)
