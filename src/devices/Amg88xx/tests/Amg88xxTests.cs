@@ -615,7 +615,6 @@ namespace Iot.Device.Amg88xx.Tests
                 for (int row = 0; row < Amg88xx.Height; row++)
                 {
                     Assert.Equal(col == expectedColumn - 1 && row == expectedRow - 1, flags[col, row]);
-
                 }
             }
         }
