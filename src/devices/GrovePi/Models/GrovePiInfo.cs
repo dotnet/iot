@@ -11,6 +11,15 @@ namespace Iot.Device.GrovePiDevice.Models
     public class Info
     {
         /// <summary>
+        /// Instantiate Info object.
+        /// </summary>
+        /// <param name="softwareVersion">Firmware version.</param>
+        public Info(Version softwareVersion)
+        {
+            SoftwareVersion = softwareVersion;
+        }
+
+        /// <summary>
         /// Manufacturer information
         /// </summary>
         public string Manufacturer => "Dexter Industries";

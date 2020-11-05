@@ -62,7 +62,7 @@ namespace Iot.Device.Pwm
         protected override void Dispose(bool disposing)
         {
             _parent?.SetChannelAsDestroyed(_channel);
-            _parent = null;
+            _parent = null!;
         }
     }
 }

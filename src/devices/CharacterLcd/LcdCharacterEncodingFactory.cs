@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
+#pragma warning disable SA1011
+
 namespace Iot.Device.CharacterLcd
 {
     /// <summary>
@@ -523,7 +525,7 @@ namespace Iot.Device.CharacterLcd
         /// Creates the given letter for the given ROM type.
         /// Overwrite this only if an alternate ROM is used.
         /// </summary>
-        protected virtual byte[] CreateLetter(char character, string romName)
+        protected virtual byte[]? CreateLetter(char character, string romName)
         {
             if (romName == "A00")
             {
@@ -552,7 +554,7 @@ namespace Iot.Device.CharacterLcd
         /// <remarks>
         /// Currently requires the characters to be hardcoded here. Would be nice if we could generate the pixel maps from an existing font, such as Consolas
         /// </remarks>
-        protected virtual byte[] CreateLetterA00(char character)
+        protected virtual byte[]? CreateLetterA00(char character)
         {
             switch (character)
             {
@@ -975,7 +977,7 @@ namespace Iot.Device.CharacterLcd
         /// <remarks>
         /// Currently requires the characters to be hardcoded here. Would be nice if we could generate the pixel maps from an existing font, such as Consolas
         /// </remarks>
-        protected virtual byte[] CreateLetterA02(char character)
+        protected virtual byte[]? CreateLetterA02(char character)
         {
             // TODO: Create letters for A02 map, but that one is a lot better equipped for european languages, so nothing to do for the currently supported languages
             return null;

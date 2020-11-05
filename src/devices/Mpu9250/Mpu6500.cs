@@ -62,10 +62,11 @@ namespace Iot.Device.Imu
         }
 
         /// <summary>
-        /// Used to create the class for the MPU9250. Initialization is a bit different than for the MPU65000
+        /// Used to create the class for the MPU9250. Initialization is a bit different than for the MPU6500
         /// </summary>
-        internal Mpu6500()
+        internal Mpu6500(I2cDevice i2cDevice, bool isInternal)
         {
+            _i2cDevice = i2cDevice;
         }
 
         #region Accelerometer
@@ -950,7 +951,7 @@ namespace Iot.Device.Imu
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
 
         #endregion

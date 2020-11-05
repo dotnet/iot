@@ -36,12 +36,12 @@ namespace Iot.Device.DHTxx
         /// <summary>
         /// I2C device used to communicate with the device
         /// </summary>
-        protected I2cDevice _i2cDevice;
+        protected I2cDevice? _i2cDevice;
 
         /// <summary>
         /// <see cref="GpioController"/> related with the <see cref="_pin"/>.
         /// </summary>
-        protected GpioController _controller;
+        protected GpioController? _controller;
 
         // wait about 1 ms
         private readonly uint _loopCount = 10000;
@@ -90,7 +90,7 @@ namespace Iot.Device.DHTxx
         /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
         /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public DhtBase(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController gpioController = null, bool shouldDispose = true)
+        public DhtBase(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _protocol = CommunicationProtocol.OneWire;
             _shouldDispose = gpioController == null ? true : shouldDispose;
@@ -138,6 +138,11 @@ namespace Iot.Device.DHTxx
         /// </summary>
         internal virtual void ReadThroughOneWire()
         {
+            if (_controller is null)
+            {
+                throw new Exception("GPIO controller is not configured.");
+            }
+
             byte readVal = 0;
             uint count;
 
@@ -242,6 +247,11 @@ namespace Iot.Device.DHTxx
         /// </summary>
         internal virtual void ReadThroughI2c()
         {
+            if (_i2cDevice is null)
+            {
+                throw new Exception("I2C device is not configured");
+            }
+
             // DHT12 Humidity Register
             _i2cDevice.WriteByte(0x00);
             // humidity int, humidity decimal, temperature int, temperature decimal, checksum

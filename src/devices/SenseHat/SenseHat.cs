@@ -134,22 +134,22 @@ namespace Iot.Device.SenseHat
         public void Dispose()
         {
             _ledMatrix?.Dispose();
-            _ledMatrix = null;
+            _ledMatrix = null!;
 
             _joystick?.Dispose();
-            _joystick = null;
+            _joystick = null!;
 
             _gyro?.Dispose();
-            _gyro = null;
+            _gyro = null!;
 
             _mag?.Dispose();
-            _mag = null;
+            _mag = null!;
 
             _temp?.Dispose();
-            _temp = null;
+            _temp = null!;
 
             _press?.Dispose();
-            _press = null;
+            _press = null!;
         }
     }
 }

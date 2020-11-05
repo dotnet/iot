@@ -18,14 +18,14 @@ namespace Iot.Tools.DeviceListing
         public DeviceInfo(string readmePath, string categoriesFilePath)
         {
             ReadmePath = readmePath;
-            Title = GetTitle(readmePath);
+            Title = GetTitle(readmePath) ?? "Error";
 
             ImportCategories(categoriesFilePath);
         }
 
-        public int CompareTo(DeviceInfo other)
+        public int CompareTo(DeviceInfo? other)
         {
-            return Title.CompareTo(other.Title);
+            return Title.CompareTo(other?.Title);
         }
 
         private void ImportCategories(string categoriesFilePath)
@@ -38,7 +38,7 @@ namespace Iot.Tools.DeviceListing
 
             foreach (string line in File.ReadAllLines(categoriesFilePath))
             {
-                if (string.IsNullOrEmpty(line))
+                if (line is not { Length: > 0 })
                 {
                     continue;
                 }
@@ -50,7 +50,7 @@ namespace Iot.Tools.DeviceListing
             }
         }
 
-        private static string GetTitle(string readmePath)
+        private static string? GetTitle(string readmePath)
         {
             string[] lines = File.ReadAllLines(readmePath);
             if (lines[0].StartsWith("# "))

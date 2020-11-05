@@ -41,7 +41,7 @@ namespace Iot.Device.Ssd1351
         /// <param name="resetPin">The id of the GPIO pin used to control the /RESET line (data/command).</param>
         /// <param name="spiBufferSize">The size of the SPI buffer. If data larger than the buffer is sent then it is split up into multiple transmissions. The default value is 4096.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Ssd1351(SpiDevice spiDevice, int dataCommandPin, int resetPin, int spiBufferSize = DefaultSPIBufferSize, GpioController gpioController = null, bool shouldDispose = true)
+        public Ssd1351(SpiDevice spiDevice, int dataCommandPin, int resetPin, int spiBufferSize = DefaultSPIBufferSize, GpioController? gpioController = null, bool shouldDispose = true)
         {
             if (!InRange((uint)spiBufferSize, 0x1000, 0x10000))
             {
@@ -281,11 +281,11 @@ namespace Iot.Device.Ssd1351
             if (_disposeGpioController)
             {
                 _gpioDevice?.Dispose();
-                _gpioDevice = null;
+                _gpioDevice = null!;
             }
 
             _spiDevice?.Dispose();
-            _spiDevice = null;
+            _spiDevice = null!;
         }
     }
 }

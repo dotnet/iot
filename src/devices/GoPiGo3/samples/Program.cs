@@ -15,7 +15,15 @@ namespace GoPiGo3.Samples
     /// </summary>
     public partial class Program
     {
-        private static GoPiGo _goPiGo3;
+        private static GoPiGo _goPiGo3 = new GoPiGo(SpiDevice.Create(
+            new SpiConnectionSettings(0, 1)
+            {
+                // 500K is the SPI communication with GoPiGo
+                ClockFrequency = 500000,
+                // see http://tightdev.net/SpiDev_Doc.pdf
+                Mode = SpiMode.Mode0,
+                DataBitLength = 8
+            }));
 
         /// <summary>
         /// Test program entry point
@@ -24,16 +32,6 @@ namespace GoPiGo3.Samples
         public static void Main(string[] args)
         {
             Console.WriteLine("Hello GoPiGo3!");
-            // Default on the Raspberry is Bus ID = 0 and Chip Set Select Line = 1 for GoPiGo3
-            var settings = new SpiConnectionSettings(0, 1)
-            {
-                // 500K is the SPI communication with GoPiGo
-                ClockFrequency = 500000,
-                // see http://tightdev.net/SpiDev_Doc.pdf
-                Mode = SpiMode.Mode0,
-                DataBitLength = 8
-            };
-            _goPiGo3 = new GoPiGo(SpiDevice.Create(settings));
             Console.WriteLine("Choose a test by entering the number and press enter:");
             Console.WriteLine("  1. Basic GoPiGo3 info and embedded led test");
             Console.WriteLine("  2. Control left motor from motor right position");
@@ -111,10 +109,10 @@ namespace GoPiGo3.Samples
         private static void TestGoPiGoDetails()
         {
             var goPiGoInfo = _goPiGo3.GoPiGo3Info;
-            Console.WriteLine($"Manufacturer: {goPiGoInfo.Manufacturer}");
-            Console.WriteLine($"Board: {goPiGoInfo.Board}");
-            Console.WriteLine($"Hardware version: {goPiGoInfo.HardwareVersion}");
-            Console.WriteLine($"Id: {goPiGoInfo.Id}");
+            Console.WriteLine($"Manufacturer: {goPiGoInfo?.Manufacturer}");
+            Console.WriteLine($"Board: {goPiGoInfo?.Board}");
+            Console.WriteLine($"Hardware version: {goPiGoInfo?.HardwareVersion}");
+            Console.WriteLine($"Id: {goPiGoInfo?.Id}");
             // Eyes led
             Console.WriteLine("Testing Led, changing colors for the leds on both eyes");
             for (int red = 0; red < 255; red += 10)

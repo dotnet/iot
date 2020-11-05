@@ -255,7 +255,7 @@ namespace Iot.Device.Seesaw
 
             _openPins.Clear();
             _seesawDevice?.Dispose();
-            _seesawDevice = null;
+            _seesawDevice = null!;
             base.Dispose(disposing);
         }
     }

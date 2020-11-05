@@ -17,7 +17,7 @@ namespace Iot.Device.Adxl345
         private readonly byte _gravityRangeByte;
         private readonly int _range;
 
-        private SpiDevice _sensor = null;
+        private SpiDevice _sensor;
 
         #region SpiSetting
 
@@ -122,7 +122,7 @@ namespace Iot.Device.Adxl345
             if (_sensor != null)
             {
                 _sensor.Dispose();
-                _sensor = null;
+                _sensor = null!;
             }
         }
     }

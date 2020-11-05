@@ -336,7 +336,7 @@ namespace Iot.Device.Magnetometer
             if (_autodispose)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                _i2cDevice = null!;
             }
         }
     }

@@ -13,14 +13,12 @@ namespace Iot.Device.Lsm9Ds1.Samples
 
         public static void Run()
         {
-            using (var ag = new Lsm9Ds1AccelerometerAndGyroscope(CreateI2cDevice()))
+            using var ag = new Lsm9Ds1AccelerometerAndGyroscope(CreateI2cDevice());
+            while (true)
             {
-                while (true)
-                {
-                    Console.WriteLine($"Acceleration={ag.Acceleration}");
-                    Console.WriteLine($"AngularRate={ag.AngularRate}");
-                    Thread.Sleep(100);
-                }
+                Console.WriteLine($"Acceleration={ag.Acceleration}");
+                Console.WriteLine($"AngularRate={ag.AngularRate}");
+                Thread.Sleep(100);
             }
         }
 

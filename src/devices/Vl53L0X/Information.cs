@@ -11,6 +11,23 @@ namespace Iot.Device.Vl53L0X
     public class Information
     {
         /// <summary>
+        /// Creates an Information object.
+        /// </summary>
+        /// <param name="moduleId">Module ID/</param>
+        /// <param name="revision">The revision number.</param>
+        /// <param name="productId">The product ID.</param>
+        /// <param name="signalRateMeasFixed1104_400_Micrometers">Raw measurement of the signal rate fixed point 400 micrometers.</param>
+        /// <param name="distMeasFixed1104_400_Micrometers">Raw measurement of the distance measurement fixed point 400 micrometers.</param>
+        public Information(byte moduleId, Version revision, string productId, uint signalRateMeasFixed1104_400_Micrometers, uint distMeasFixed1104_400_Micrometers)
+        {
+            ModuleId = moduleId;
+            Revision = revision;
+            ProductId = productId;
+            SignalRateMeasFixed1104_400_Micrometers = signalRateMeasFixed1104_400_Micrometers;
+            DistMeasFixed1104_400_Micrometers = distMeasFixed1104_400_Micrometers;
+        }
+
+        /// <summary>
         /// Module ID
         /// </summary>
         public byte ModuleId { get; set; }
@@ -28,12 +45,12 @@ namespace Iot.Device.Vl53L0X
         /// <summary>
         /// Raw measurement of the signal rate fixed point 400 micrometers
         /// </summary>
-        internal uint SignalRateMeasFixed1104_400_Micrometers { get; set; }
+        private uint SignalRateMeasFixed1104_400_Micrometers { get; set; }
 
         /// <summary>
         /// Raw measurement of the distance measurement fixed point 400 micrometers
         /// </summary>
-        internal uint DistMeasFixed1104_400_Micrometers { get; set; }
+        private uint DistMeasFixed1104_400_Micrometers { get; set; }
 
         /// <summary>
         /// Get the offset in micrometers

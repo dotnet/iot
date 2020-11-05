@@ -15,7 +15,7 @@ namespace Iot.Device.LiquidLevel
         /// <param name="pinNumberingScheme">Use the logical or physical pin layout</param>
         /// <param name="gpioController">A Gpio Controller if you want to use a specific one</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Llc200d3sh(int pin, GpioController gpioController = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
+        public Llc200d3sh(int pin, GpioController? gpioController = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
             : base(pin, PinValue.Low, gpioController, pinNumberingScheme, shouldDispose)
         {
         }

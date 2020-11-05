@@ -26,8 +26,8 @@ namespace Iot.Device.Mcp25xxx.Tests
             var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.Read(address);
-            Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(3, mcp25xxxSpiDevice.LastReadBuffer.Length);
+            Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice?.LastWriteBuffer);
+            Assert.Equal(3, mcp25xxxSpiDevice?.LastReadBuffer?.Length);
         }
 
         [Theory]
@@ -43,7 +43,7 @@ namespace Iot.Device.Mcp25xxx.Tests
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.ReadRxBuffer(addressPointer, byteCount);
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(byteCount, mcp25xxxSpiDevice.LastReadBuffer.Length - 1);
+            Assert.Equal(byteCount, mcp25xxxSpiDevice.LastReadBuffer?.Length - 1);
         }
 
         [Theory]
@@ -73,7 +73,7 @@ namespace Iot.Device.Mcp25xxx.Tests
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.LoadTxBuffer(addressPointer, buffer);
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(buffer.Length, mcp25xxxSpiDevice.LastWriteBuffer.Length - 1);
+            Assert.Equal(buffer.Length, mcp25xxxSpiDevice.LastWriteBuffer?.Length - 1);
         }
 
         [Theory]
@@ -97,7 +97,7 @@ namespace Iot.Device.Mcp25xxx.Tests
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.ReadStatus();
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(1, mcp25xxxSpiDevice.LastReadBuffer.Length - 1);
+            Assert.Equal(1, mcp25xxxSpiDevice.LastReadBuffer?.Length - 1);
         }
 
         [Fact]
@@ -108,7 +108,7 @@ namespace Iot.Device.Mcp25xxx.Tests
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.RxStatus();
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(1, mcp25xxxSpiDevice.LastReadBuffer.Length - 1);
+            Assert.Equal(1, mcp25xxxSpiDevice.LastReadBuffer?.Length - 1);
         }
 
         [Theory]

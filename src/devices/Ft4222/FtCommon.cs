@@ -34,12 +34,11 @@ namespace Iot.Device.Ft4222
                 throw new IOException($"No device found");
             }
 
+            Span<byte> sernum = stackalloc byte[16];
+            Span<byte> desc = stackalloc byte[64];
             for (uint i = 0; i < numOfDevices; i++)
             {
-                Span<byte> sernum = stackalloc byte[16];
-                Span<byte> desc = stackalloc byte[64];
                 uint flags = 0;
-                var devInfo = new DeviceInformation();
                 FtDevice ftDevice;
                 uint id;
                 uint locId;
@@ -51,12 +50,13 @@ namespace Iot.Device.Ft4222
                     throw new IOException($"Can't read device information on device index {i}, error {ftStatus}");
                 }
 
-                devInfo.Type = ftDevice;
-                devInfo.Id = id;
-                devInfo.LocId = locId;
-                devInfo.Flags = (FtFlag)flags;
-                devInfo.SerialNumber = Encoding.ASCII.GetString(sernum.ToArray(), 0, FindFirstZero(sernum));
-                devInfo.Description = Encoding.ASCII.GetString(desc.ToArray(), 0, FindFirstZero(desc));
+                var devInfo = new DeviceInformation(
+                    (FtFlag)flags,
+                    ftDevice,
+                    id,
+                    locId,
+                    Encoding.ASCII.GetString(sernum.ToArray(), 0, FindFirstZero(sernum)),
+                    Encoding.ASCII.GetString(desc.ToArray(), 0, FindFirstZero(desc)));
                 devInfos.Add(devInfo);
             }
 
@@ -80,7 +80,7 @@ namespace Iot.Device.Ft4222
         /// Get the versions of the chipset and dll
         /// </summary>
         /// <returns>Both the chipset and dll versions</returns>
-        public static (Version chip, Version dll) GetVersions()
+        public static (Version? chip, Version? dll) GetVersions()
         {
             // First, let's find a device
             var devices = GetDevices();

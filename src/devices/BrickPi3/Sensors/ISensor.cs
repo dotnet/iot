@@ -23,7 +23,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// To update sensors
         /// </summary>
-        void UpdateSensor(object state);
+        void UpdateSensor(object? state);
 
         /// <summary>
         /// Reads the sensor value as a string.

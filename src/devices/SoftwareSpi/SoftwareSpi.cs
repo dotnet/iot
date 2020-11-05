@@ -32,7 +32,7 @@ namespace Iot.Device.Spi
         /// <param name="settings">Settings of the SPI connection.</param>
         /// <param name="controller">GPIO controller used for pins.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public SoftwareSpi(int clk, int miso, int mosi, int cs = -1, SpiConnectionSettings settings = null, GpioController controller = null, bool shouldDispose = true)
+        public SoftwareSpi(int clk, int miso, int mosi, int cs = -1, SpiConnectionSettings? settings = null, GpioController? controller = null, bool shouldDispose = true)
         {
             _controller = controller ?? new GpioController();
             _shouldDispose = controller == null ? true : shouldDispose;
@@ -107,7 +107,7 @@ namespace Iot.Device.Spi
                     },
                     exit: () =>
                     {
-                        controller.Write(_clk, idle);
+                        _controller.Write(_clk, idle);
                     });
             }
             else
@@ -249,7 +249,7 @@ namespace Iot.Device.Spi
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null;
+                _controller = null!;
             }
 
             base.Dispose(disposing);
@@ -265,7 +265,7 @@ namespace Iot.Device.Spi
             internal Action _enter;
             internal Action _exit;
 
-            public ScopeData(Action enter = null, Action exit = null)
+            public ScopeData(Action? enter = null, Action? exit = null)
             {
                 _enter = enter ?? new Action(() => { });
                 _exit = exit ?? new Action(() => { });

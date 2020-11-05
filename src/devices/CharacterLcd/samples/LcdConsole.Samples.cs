@@ -63,7 +63,7 @@ namespace Iot.Device.CharacterLcd.Samples
             console.ReplaceLine(0, "This is all garbage that will be replaced");
             console.ReplaceLine(0, "Running clock test");
             int left = console.Size.Width;
-            Task alertTask = null;
+            Task? alertTask = null;
             // Let the current time move trought the display on line 1
             while (!Console.KeyAvailable)
             {

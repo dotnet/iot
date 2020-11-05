@@ -72,7 +72,7 @@ namespace Iot.Device.Ssd13xx
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
 
         /// <summary>

@@ -4,30 +4,20 @@
 using System;
 using System.Device.Gpio;
 using System.Device.I2c;
+using Iot.Device.Seesaw;
 
-namespace Iot.Device.Seesaw.Samples
+const byte AdafruitSeesawBreakoutI2cAddress = 0x49;
+const byte AdafruitSeesawBreakoutI2cBus = 0x1;
+
+using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(AdafruitSeesawBreakoutI2cBus, AdafruitSeesawBreakoutI2cAddress));
+using Seesaw ssDevice = new Seesaw(i2cDevice);
+Console.WriteLine();
+Console.WriteLine($"Seesaw Version: {ssDevice.Version}");
+Console.WriteLine();
+
+foreach (Seesaw.SeesawModule module in Enum.GetValues(typeof(Seesaw.SeesawModule)))
 {
-    internal class Program
-    {
-        public static void Main()
-        {
-            const byte AdafruitSeesawBreakoutI2cAddress = 0x49;
-            const byte AdafruitSeesawBreakoutI2cBus = 0x1;
-
-            using (I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(AdafruitSeesawBreakoutI2cBus, AdafruitSeesawBreakoutI2cAddress)))
-            using (Seesaw ssDevice = new Seesaw(i2cDevice))
-            {
-                Console.WriteLine();
-                Console.WriteLine($"Seesaw Version: {ssDevice.Version}");
-                Console.WriteLine();
-
-                foreach (Seesaw.SeesawModule module in Enum.GetValues(typeof(Seesaw.SeesawModule)))
-                {
-                    Console.WriteLine($"Module: {Enum.GetName(typeof(Seesaw.SeesawModule), module)} - {(ssDevice.HasModule(module) ? "available" : "not-available")}");
-                }
-
-                Console.WriteLine();
-            }
-        }
-    }
+    Console.WriteLine($"Module: {Enum.GetName(typeof(Seesaw.SeesawModule), module)} - {(ssDevice.HasModule(module) ? "available" : "not-available")}");
 }
+
+Console.WriteLine();

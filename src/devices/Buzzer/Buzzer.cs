@@ -79,7 +79,7 @@ namespace Iot.Device.Buzzer
         public void Dispose()
         {
             _pwmChannel?.Dispose();
-            _pwmChannel = null;
+            _pwmChannel = null!;
         }
     }
 }

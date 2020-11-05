@@ -30,7 +30,7 @@ namespace Iot.Device.CharacterLcd
         private LineWrapMode _lineFeedMode;
         private TimeSpan _scrollUpDelay;
         private string _romType;
-        private Encoding _characterEncoding;
+        private Encoding? _characterEncoding;
 
         /// <summary>
         /// Creates a new instance of the <see cref="LcdConsole"/> class using the specified LCD low-level interface.
@@ -476,7 +476,7 @@ namespace Iot.Device.CharacterLcd
         /// <param name="maxNumberOfCustomCharacters">The maximum number of custom characters supported by the hardware.</param>
         /// <param name="factory">Character encoding factory that delivers the mapping of the Char type to the hardware ROM character codes. May add special characters into
         /// the character ROM. Default: Null (Use internal factory)</param>
-        public static LcdCharacterEncoding CreateEncoding(CultureInfo culture, string romType, char unknownCharacter = '?', int maxNumberOfCustomCharacters = 8, LcdCharacterEncodingFactory factory = null)
+        public static LcdCharacterEncoding CreateEncoding(CultureInfo culture, string romType, char unknownCharacter = '?', int maxNumberOfCustomCharacters = 8, LcdCharacterEncodingFactory? factory = null)
         {
             if (factory == null)
             {
@@ -495,7 +495,7 @@ namespace Iot.Device.CharacterLcd
         /// <returns>See true if the encoding was correctly loaded.</returns>
         public bool LoadEncoding(Encoding encoding)
         {
-            LcdCharacterEncoding lcdCharacterEncoding = encoding as LcdCharacterEncoding;
+            LcdCharacterEncoding? lcdCharacterEncoding = encoding as LcdCharacterEncoding;
             if (lcdCharacterEncoding != null)
             {
                 return LoadEncoding(encoding);

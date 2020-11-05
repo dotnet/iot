@@ -7,19 +7,4 @@ using System.Device.I2c;
 using System.Device.Spi;
 using System.Threading;
 
-namespace Iot.Device._DeviceBinding.Samples
-{
-    /// <summary>
-    /// Samples for _DeviceBinding
-    /// </summary>
-    public class Program
-    {
-        /// <summary>
-        /// Main entry point
-        /// </summary>
-        public static void Main(string[] args)
-        {
-            Console.WriteLine("Hello _DeviceBinding Sample!");
-        }
-    }
-}
+Console.WriteLine("Hello _DeviceBinding Sample!");

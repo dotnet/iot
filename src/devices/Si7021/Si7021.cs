@@ -206,7 +206,7 @@ namespace Iot.Device.Si7021
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
     }
 }

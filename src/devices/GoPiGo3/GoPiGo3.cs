@@ -30,7 +30,7 @@ namespace Iot.Device.GoPiGo3
         private const byte I2cCorrectData = 0;
 
         private bool _autoDispose;
-        private SpiDevice _spiDevice = null;
+        private SpiDevice _spiDevice;
 
         #region Properties
 
@@ -57,12 +57,16 @@ namespace Iot.Device.GoPiGo3
         /// <summary>
         /// The 2 Grove Sensor
         /// </summary>
-        public GroveSensor[] GroveSensor { get; internal set; }
+        public GroveSensor[] GroveSensor = new GroveSensor[2]
+            {
+                new GroveSensor(GrovePort.Grove1),
+                new GroveSensor(GrovePort.Grove2)
+            };
 
         /// <summary>
         /// The GoPiGo3 information including hardware, firmware, ID and Manufacturer
         /// </summary>
-        public GoPiGoInfo GoPiGo3Info { get; internal set; }
+        public GoPiGoInfo? GoPiGo3Info { get; internal set; }
 
         /// <summary>
         /// Get the real 5V and Battery/VCC voltages
@@ -90,16 +94,16 @@ namespace Iot.Device.GoPiGo3
 
         private void InitializeGoPiGo(bool autoDetect)
         {
-            GoPiGo3Info = new GoPiGoInfo();
             if (autoDetect == true)
             {
                 try
                 {
-                    GoPiGo3Info.Manufacturer = GetManufacturer();
-                    GoPiGo3Info.Board = GetBoard();
-                    GoPiGo3Info.SoftwareVersion = GetFirmwareVersion();
-                    GoPiGo3Info.HardwareVersion = GetHardwareVersion();
-                    GoPiGo3Info.Id = GetIdHex();
+                    GoPiGo3Info = new GoPiGoInfo(
+                        GetManufacturer(),
+                        GetBoard(),
+                        GetHardwareVersion(),
+                        GetFirmwareVersion(),
+                        GetIdHex());
                 }
                 catch (IOException ex)
                 {
@@ -107,19 +111,13 @@ namespace Iot.Device.GoPiGo3
                 }
             }
 
-            if ((GoPiGo3Info.Manufacturer != ManufacturerName) || (GoPiGo3Info.Board != BoardName))
+            if ((GoPiGo3Info?.Manufacturer != ManufacturerName) || (GoPiGo3Info?.Board != BoardName))
             {
                 throw new IOException($"GoPiGo3 with address {SpiAddress} not connected.");
             }
 
             MotorGearRatio = DefaultMotorGearRatio;
             EncoderTicksPerRotation = DefaultEncoderTicksPerRotation;
-            // Initialise the 2 Grove sensors
-            GroveSensor = new GroveSensor[2]
-            {
-                new GroveSensor(GrovePort.Grove1),
-                new GroveSensor(GrovePort.Grove2)
-            };
         }
 
         /// <summary>
@@ -769,8 +767,9 @@ namespace Iot.Device.GoPiGo3
                 throw new ArgumentException($"{nameof(GroveI2cStart)} error: Port unsupported. Must be either Grove 1 or Grove 2.");
             }
 
-            byte[] outArray = null;
-            byte[] reply = null;
+#pragma warning disable SA1011
+            byte[]? outArray = null;
+            byte[]? reply = null;
             switch (GroveSensor[port_index].SensorType)
             {
                 case GroveSensorType.InfraredRemote:

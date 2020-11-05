@@ -20,8 +20,8 @@ namespace Iot.Device.Ft4222
         private SafeFtHandle _ftHandle;
         private GpioPinMode[] _gpioDirections = new GpioPinMode[PinCountConst];
         private GpioTrigger[] _gpioTriggers = new GpioTrigger[PinCountConst];
-        private PinChangeEventHandler[] _pinRisingHandlers = new PinChangeEventHandler[PinCountConst];
-        private PinChangeEventHandler[] _pinFallingHandlers = new PinChangeEventHandler[PinCountConst];
+        private PinChangeEventHandler?[] _pinRisingHandlers = new PinChangeEventHandler[PinCountConst];
+        private PinChangeEventHandler?[] _pinFallingHandlers = new PinChangeEventHandler[PinCountConst];
 
         /// <inheritdoc/>
         protected override int PinCount => PinCountConst;
@@ -175,7 +175,7 @@ namespace Iot.Device.Ft4222
 
                 if (queueSize > 0)
                 {
-                    Span<GpioTrigger> gpioTriggers = stackalloc GpioTrigger[queueSize];
+                    Span<GpioTrigger> gpioTriggers = new GpioTrigger[queueSize];
                     ushort readTrigger;
                     ftStatus = FtFunction.FT4222_GPIO_ReadTriggerQueue(_ftHandle, (GpioPort)pinNumber, in MemoryMarshal.GetReference(gpioTriggers), queueSize, out readTrigger);
                     if (ftStatus != FtStatus.Ok)

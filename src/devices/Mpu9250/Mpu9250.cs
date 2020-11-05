@@ -191,9 +191,8 @@ namespace Iot.Device.Imu
         /// <param name="i2cDevice">The I2C device</param>
         /// <param name="autoDispose">Will automatically dispose the I2C device if true</param>
         public Mpu9250(I2cDevice i2cDevice, bool autoDispose = true)
-            : base()
+            : base(i2cDevice, true)
         {
-            _i2cDevice = i2cDevice;
             Reset();
             PowerOn();
             if (!CheckVersion())
@@ -271,7 +270,7 @@ namespace Iot.Device.Imu
             if (_autoDispose)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                _i2cDevice = null!;
             }
         }
 

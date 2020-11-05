@@ -161,7 +161,7 @@ namespace Iot.Device.Mcp9808
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
 
         internal Register16 ReadRegister16(Register8 reg)

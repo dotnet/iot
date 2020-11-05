@@ -9,6 +9,25 @@ namespace Iot.Device.Media
     public class VideoDeviceValue
     {
         /// <summary>
+        /// Instantiate VideoDeviceValue.
+        /// </summary>
+        /// <param name="name">Control's name.</param>
+        /// <param name="minimum">Minimum value.</param>
+        /// <param name="maximum">Maximum value.</param>
+        /// <param name="step">Value change step.</param>
+        /// <param name="defaultValue">Control's default value.</param>
+        /// <param name="currentValue">Control's current value.</param>
+        public VideoDeviceValue(string name, int minimum, int maximum, int step, int defaultValue, int currentValue)
+        {
+            Name = name;
+            Minimum = minimum;
+            Maximum = maximum;
+            Step = step;
+            DefaultValue = defaultValue;
+            CurrentValue = currentValue;
+        }
+
+        /// <summary>
         /// Control's name
         /// </summary>
         public string Name { get; set; }

@@ -99,7 +99,7 @@ namespace System.Device.Gpio
             ProcessorName = _settings.TryGetValue("Hardware", out string? hardware) && hardware is object ? hardware : string.Empty;
 
             if (_settings.TryGetValue("Revision", out string? revision)
-                && !string.IsNullOrEmpty(revision)
+                && revision is { Length: > 0 }
                 && int.TryParse(revision, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int firmware))
             {
                 Firmware = firmware;

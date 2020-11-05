@@ -91,7 +91,7 @@ namespace Iot.Device.Sht3x
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
 
         /// <summary>

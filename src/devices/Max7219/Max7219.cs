@@ -386,7 +386,7 @@ namespace Iot.Device.Max7219
             if (_spiDevice != null)
             {
                 _spiDevice.Dispose();
-                _spiDevice = null;
+                _spiDevice = null!;
             }
         }
     }

@@ -86,7 +86,7 @@ namespace Iot.Device.Mcp23xxx.Tests
             private readonly I2cConnectionSettings _settings;
             public Mcp23xxxChipMock DeviceMock { get; private set; }
 
-            public I2cDeviceMock(int ports, I2cConnectionSettings settings = null)
+            public I2cDeviceMock(int ports, I2cConnectionSettings? settings = null)
             {
                 DeviceMock = new Mcp23xxxChipMock(ports, isSpi: false);
                 _settings = settings ?? new I2cConnectionSettings(0, 0x20);
@@ -115,8 +115,9 @@ namespace Iot.Device.Mcp23xxx.Tests
             private readonly bool _isSpi;
             // OLATB address is 0x15
             private readonly byte[] _registers;
-            private byte[] _lastReadBuffer;
-            private byte[] _lastWriteBuffer;
+#pragma warning disable SA1011
+            private byte[]? _lastReadBuffer;
+            private byte[]? _lastWriteBuffer;
 
             public Mcp23xxxChipMock(int ports, bool isSpi)
             {
@@ -137,6 +138,11 @@ namespace Iot.Device.Mcp23xxx.Tests
                 if (_isSpi)
                 {
                     buffer = buffer.Slice(2);
+                }
+
+                if (_lastWriteBuffer is null)
+                {
+                    throw new Exception($"{nameof(Mcp23xxxChipMock)} is not correctly configured");
                 }
 
                 byte registerAddress = _lastWriteBuffer[0];
