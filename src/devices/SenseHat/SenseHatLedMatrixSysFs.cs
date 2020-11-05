@@ -27,9 +27,9 @@ namespace Iot.Device.SenseHat
         /// </summary>
         public SenseHatLedMatrixSysFs()
         {
-            string device = GetSenseHatDevice();
+            string? device = GetSenseHatDevice();
 
-            if (device == null)
+            if (device is null)
             {
                 throw new InvalidOperationException("Sense HAT not found. Ensure device is enabled in config.txt.");
             }
@@ -122,7 +122,7 @@ namespace Iot.Device.SenseHat
             _deviceFile.Write(encoded);
         }
 
-        private static string GetSenseHatDevice()
+        private static string? GetSenseHatDevice()
         {
             foreach (string dev in Directory.EnumerateFileSystemEntries("/sys/class/graphics/", "fb*"))
             {
@@ -140,7 +140,7 @@ namespace Iot.Device.SenseHat
         public override void Dispose()
         {
             _deviceFile?.Dispose();
-            _deviceFile = null;
+            _deviceFile = null!;
         }
     }
 }

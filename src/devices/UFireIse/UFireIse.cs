@@ -396,7 +396,7 @@ namespace Iot.Device.UFire
         public void Dispose()
         {
             _device?.Dispose();
-            _device = null;
+            _device = null!;
         }
     }
 }

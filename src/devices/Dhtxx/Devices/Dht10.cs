@@ -62,14 +62,19 @@ namespace Iot.Device.DHTxx
         public Dht10(I2cDevice i2cDevice)
             : base(i2cDevice)
         {
-            _i2cDevice.WriteByte(DHT10_CMD_SOFTRESET);
+            i2cDevice.WriteByte(DHT10_CMD_SOFTRESET);
             // make sure DHT10 stable (in the datasheet P7)
             DelayHelper.DelayMilliseconds(20, true);
-            _i2cDevice.WriteByte(DHT10_CMD_INIT);
+            i2cDevice.WriteByte(DHT10_CMD_INIT);
         }
 
         internal override void ReadThroughI2c()
         {
+            if (_i2cDevice is null)
+            {
+                throw new Exception("I2C decvice not configured.");
+            }
+
             // DHT10 has no calibration bits
             IsLastReadSuccessful = true;
 

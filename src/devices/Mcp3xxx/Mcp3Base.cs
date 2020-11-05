@@ -125,7 +125,7 @@ namespace Iot.Device.Adc
         public void Dispose()
         {
             _spiDevice?.Dispose();
-            _spiDevice = null;
+            _spiDevice = null!;
         }
 
         /// <summary>

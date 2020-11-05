@@ -67,7 +67,7 @@ namespace Iot.Device.Mlx90614
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
     }
 }

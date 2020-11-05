@@ -9,6 +9,7 @@ using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 
@@ -39,7 +40,7 @@ namespace Iot.Device.Vl53L0X
         /// <summary>
         /// Get the sensor information including internal signal and distance offsets
         /// </summary>
-        public Information Information { get; internal set; }
+        public Information Information { get; private set; }
 
         /// <summary>
         /// Used to find a clean measurement when reading in single shot
@@ -79,6 +80,12 @@ namespace Iot.Device.Vl53L0X
             MaxTryReadSingle = 3;
             // Set longer range
             Precision = Precision.LongRange;
+#if NETCOREAPP2_1 || NETCOREAPP3_1
+            if (Information is null)
+            {
+                throw new Exception("Vl53L0X device is not correctly configured.");
+            }
+#endif
         }
 
         /// <summary>
@@ -651,6 +658,9 @@ namespace Iot.Device.Vl53L0X
         /// Create the Info class. Initialization and closing sequences
         /// are coming form the official API
         /// </summary>
+#if !NETCOREAPP2_1 && !NETCOREAPP3_1
+        [MemberNotNull(nameof(Information))]
+#endif
         private void GetInfo()
         {
             // Initialization sequance
@@ -665,15 +675,12 @@ namespace Iot.Device.Vl53L0X
             Thread.Sleep(30);
             WriteRegister(0x80, 0x01);
             // Reading the data from the sensor
-            Information = new Information()
-            {
-                ModuleId = GetDeviceInfo(InfoDevice.ModuleId),
-                Revision =
-                    new Version(GetDeviceInfo(InfoDevice.PartUIDUpper), GetDeviceInfo(InfoDevice.PartUIDLower)),
-                ProductId = GetProductId(),
-                SignalRateMeasFixed1104_400_Micrometers = GetSignalRate(),
-                DistMeasFixed1104_400_Micrometers = GetDistanceFixed()
-            };
+            byte moduleId = GetDeviceInfo(InfoDevice.ModuleId);
+            Version revision = new Version(GetDeviceInfo(InfoDevice.PartUIDUpper), GetDeviceInfo(InfoDevice.PartUIDLower));
+            string productId = GetProductId();
+            uint signalRateMeasFixed1104_400_Micrometers = GetSignalRate();
+            uint distMeasFixed1104_400_Micrometers = GetDistanceFixed();
+            Information = new Information(moduleId, revision, productId, signalRateMeasFixed1104_400_Micrometers, distMeasFixed1104_400_Micrometers);
             // Closing sequence
             WriteRegister(0x81, 0x00);
             WriteRegister(0xFF, 0x06);
@@ -1173,7 +1180,7 @@ namespace Iot.Device.Vl53L0X
             if (_autoDisposable)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                _i2cDevice = null!;
             }
         }
 

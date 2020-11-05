@@ -38,8 +38,8 @@ namespace Iot.Device.Ccs811
         /// </summary>
         public const int I2cTypicalFrequency = 100_000;
 
-        private I2cDevice _i2cDevice = null;
-        private GpioController _controller = null;
+        private I2cDevice _i2cDevice;
+        private GpioController? _controller;
         private int _pinWake = -1;
         private int _pinInterruption = -1;
         private int _pinReset = -1;
@@ -57,7 +57,7 @@ namespace Iot.Device.Ccs811
         /// <summary>
         /// The event handler for the measurement
         /// </summary>
-        public event MeasurementReadyHandler MeasurementReady;
+        public event MeasurementReadyHandler? MeasurementReady;
 
         /// <summary>
         /// The CCS811 sensor constructor
@@ -68,7 +68,7 @@ namespace Iot.Device.Ccs811
         /// <param name="pinInterruption">An interruption pin when a measurement is ready, best use when you specify a threshold</param>
         /// <param name="pinReset">An optional hard reset pin</param>
         /// <param name="shouldDispose">Should the GPIO controller be disposed at the end</param>
-        public Ccs811Sensor(I2cDevice i2cDevice, GpioController gpioController = null, int pinWake = -1, int pinInterruption = -1, int pinReset = -1, bool shouldDispose = true)
+        public Ccs811Sensor(I2cDevice i2cDevice, GpioController? gpioController = null, int pinWake = -1, int pinInterruption = -1, int pinReset = -1, bool shouldDispose = true)
         {
             _i2cDevice = i2cDevice;
             _pinWake = pinWake;
@@ -82,13 +82,13 @@ namespace Iot.Device.Ccs811
                 _controller = gpioController ?? new GpioController();
             }
 
-            if (_pinWake >= 0)
+            if (_controller is object)
             {
                 _controller.OpenPin(_pinWake, PinMode.Output);
                 _controller.Write(_pinWake, PinValue.High);
             }
 
-            if (_pinReset >= 0)
+            if (_controller is object && _pinReset >= 0)
             {
                 _controller.OpenPin(_pinReset, PinMode.Output);
                 _controller.Write(_pinReset, PinValue.Low);
@@ -140,7 +140,7 @@ namespace Iot.Device.Ccs811
             }
 
             // Set interrupt if the interruption pin is valid
-            if (_pinInterruption >= 0)
+            if (_controller is object && _pinInterruption >= 0)
             {
                 _controller.OpenPin(_pinInterruption, PinMode.Input);
                 byte mode = 0b0000_1000;
@@ -454,7 +454,7 @@ namespace Iot.Device.Ccs811
                 Thread.Sleep(1);
             }
 
-            if (_pinInterruption >= 0)
+            if (_controller is object && _pinInterruption >= 0)
             {
                 _controller.UnregisterCallbackForPinValueChangedEvent(_pinInterruption, InterruptReady);
             }
@@ -464,7 +464,7 @@ namespace Iot.Device.Ccs811
                 _controller?.Dispose();
                 _controller = null;
             }
-            else
+            else if (_controller is object)
             {
                 if (_pinInterruption >= 0)
                 {
@@ -487,7 +487,7 @@ namespace Iot.Device.Ccs811
 
         private void WakeUpDevice()
         {
-            if (_pinWake >= 0)
+            if (_controller is object && _pinWake >= 0)
             {
                 _controller.Write(_pinWake, PinValue.Low);
                 // Doc says wait 50 micro seconds
@@ -497,7 +497,7 @@ namespace Iot.Device.Ccs811
 
         private void SleepDownDevice()
         {
-            if (_pinWake >= 0)
+            if (_controller is object && _pinWake >= 0)
             {
                 _controller.Write(_pinWake, PinValue.High);
                 // Doc says wait 20 micro seconds

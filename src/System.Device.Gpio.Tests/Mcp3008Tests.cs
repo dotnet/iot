@@ -40,7 +40,7 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void NullSpiDevice_Throws()
         {
-            Assert.Throws<ArgumentNullException>(() => new Mcp3008(null));
+            Assert.Throws<ArgumentNullException>(() => new Mcp3008(null!));
         }
     }
 }

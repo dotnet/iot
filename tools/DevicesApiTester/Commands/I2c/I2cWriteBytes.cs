@@ -15,13 +15,18 @@ namespace DeviceApiTester.Commands.I2c
         public int DeviceAddress { get; set; }
 
         [Option('h', "hex-string", HelpText = "The hexadecimal string to convert and write.  Each byte in string must be represented by two hexadecimal characters.", Required = true)]
-        public string HexString { get; set; }
+        public string? HexString { get; set; }
 
         /// <summary>Executes the command.</summary>
         /// <returns>The command's exit code.</returns>
         public int Execute()
         {
             Console.WriteLine($"BusId={BusId}, DeviceAddress={DeviceAddress} (0x{DeviceAddress:X2}), HexString={HexString}");
+
+            if (HexString is null)
+            {
+                throw new Exception($"{nameof(HexString)} is null");
+            }
 
             var connectionSettings = new I2cConnectionSettings(BusId, DeviceAddress);
 

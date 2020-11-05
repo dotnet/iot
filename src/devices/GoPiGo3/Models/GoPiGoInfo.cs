@@ -12,6 +12,23 @@ namespace Iot.Device.GoPiGo3.Models
     public class GoPiGoInfo
     {
         /// <summary>
+        /// Instantiate a GoPiGoInfo object.
+        /// </summary>
+        /// <param name="manufacturer">Manufacturer information.</param>
+        /// <param name="board">Board information.</param>
+        /// <param name="hardwareVersion">Hardware version.</param>
+        /// <param name="softwareVersion">Firmware version.</param>
+        /// <param name="id">Id of the GoPiGo3.</param>
+        public GoPiGoInfo(string manufacturer, string board, Version hardwareVersion, Version softwareVersion, string id)
+        {
+            Manufacturer = manufacturer;
+            Board = board;
+            HardwareVersion = hardwareVersion;
+            SoftwareVersion = softwareVersion;
+            Id = id;
+        }
+
+        /// <summary>
         /// Manufacturer information
         /// </summary>
         public string Manufacturer { get; set; }

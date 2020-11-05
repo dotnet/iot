@@ -5,6 +5,7 @@ using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.IO;
+using System.Diagnostics.CodeAnalysis;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.Register;
 using UnitsNet;
@@ -86,6 +87,12 @@ namespace Iot.Device.Bmxx80
 
             ReadCalibrationData();
             Reset();
+#if NETCOREAPP2_1 || NETCOREAPP3_1
+            if (_calibrationData is null)
+            {
+                throw new Exception("BMxx80 device is not correctly configured.");
+            }
+#endif
         }
 
         /// <summary>
@@ -301,6 +308,9 @@ namespace Iot.Device.Bmxx80
             BigEndian
         }
 
+#if !NETCOREAPP2_1 && !NETCOREAPP3_1
+        [MemberNotNull(nameof(_calibrationData))]
+#endif
         private void ReadCalibrationData()
         {
             switch (this)
@@ -317,6 +327,8 @@ namespace Iot.Device.Bmxx80
                     _calibrationData = new Bme680CalibrationData();
                     _controlRegister = (byte)Bme680Register.CTRL_MEAS;
                     break;
+                default:
+                    throw new Exception("Bmxx80 device not correctly configured. Could not find calibraton data.");
             }
 
             _calibrationData.ReadFromDevice(this);
@@ -338,7 +350,7 @@ namespace Iot.Device.Bmxx80
         protected virtual void Dispose(bool disposing)
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
     }
 }

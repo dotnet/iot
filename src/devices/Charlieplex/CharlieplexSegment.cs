@@ -25,7 +25,7 @@ namespace Iot.Device.Multiplexing
         /// <param name="nodeCount">The count of nodes (like LEDs) that will be addressable. If 0, then the Charlieplex maximum is used for the pins provided (n^2-n).</param>
         /// <param name="gpioController">The GPIO Controller used for interrupt handling.</param>
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
-        public CharlieplexSegment(int[] pins, int nodeCount = 0,  GpioController gpioController = null, bool shouldDispose = true)
+        public CharlieplexSegment(int[] pins, int nodeCount = 0,  GpioController? gpioController = null, bool shouldDispose = true)
         {
             if (pins.Length < 2)
             {
@@ -211,7 +211,7 @@ namespace Iot.Device.Multiplexing
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null;
+                _controller = null!;
             }
         }
     }
