@@ -1,6 +1,11 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Management;
@@ -9,6 +14,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using UnitsNet;
+
+// We have a check on all constructors to ensure that we throw when not on Windows, so disabling warning on calling windows-only apis.
+#pragma warning disable CA1416 // Validate platform compatibility
 
 namespace Iot.Device.HardwareMonitor
 {
@@ -36,10 +44,10 @@ namespace Iot.Device.HardwareMonitor
         public delegate void OnNewValue(Sensor sensor, IQuantity value, TimeSpan timeSinceUpdate);
 
         private static Dictionary<SensorType, (Type Type, UnitCreator Creator)> _typeMap;
-        private Hardware _cpu;
-        private Hardware _gpu;
+        private Hardware? _cpu;
+        private Hardware? _gpu;
 
-        private Thread _monitorThread;
+        private Thread? _monitorThread;
         private object _lock;
         private List<MonitoringJob> _monitoredElements;
         private List<Sensor> _derivedSensors;
@@ -121,11 +129,11 @@ namespace Iot.Device.HardwareMonitor
                 {
                     foreach (var hardware in GetHardwareComponents())
                     {
-                        if (hardware.Type.Equals("CPU", StringComparison.OrdinalIgnoreCase))
+                        if (hardware.Type != null && hardware.Type.Equals("CPU", StringComparison.OrdinalIgnoreCase))
                         {
                             _cpu = hardware;
                         }
-                        else if (hardware.Type.StartsWith("GPU", StringComparison.OrdinalIgnoreCase))
+                        else if (hardware.Type != null && hardware.Type.StartsWith("GPU", StringComparison.OrdinalIgnoreCase))
                         {
                             _gpu = hardware;
                         }
@@ -165,10 +173,10 @@ namespace Iot.Device.HardwareMonitor
             {
                 foreach (ManagementObject sensor in searcher.Get())
                 {
-                    string name = Convert.ToString(sensor["Name"]);
-                    string identifier = Convert.ToString(sensor["Identifier"]);
-                    string parent = Convert.ToString(sensor["Parent"]);
-                    string type = Convert.ToString(sensor["SensorType"]);
+                    string? name = Convert.ToString(sensor["Name"]);
+                    string? identifier = Convert.ToString(sensor["Identifier"]);
+                    string? parent = Convert.ToString(sensor["Parent"]);
+                    string? type = Convert.ToString(sensor["SensorType"]);
                     SensorType typeEnum;
                     if (!Enum.TryParse(type, true, out typeEnum))
                     {
@@ -195,10 +203,10 @@ namespace Iot.Device.HardwareMonitor
             {
                 foreach (ManagementObject sensor in searcher.Get())
                 {
-                    string name = Convert.ToString(sensor["Name"]);
-                    string identifier = Convert.ToString(sensor["Identifier"]);
-                    string parent = Convert.ToString(sensor["Parent"]);
-                    string type = Convert.ToString(sensor["HardwareType"]);
+                    string? name = Convert.ToString(sensor["Name"]);
+                    string? identifier = Convert.ToString(sensor["Identifier"]);
+                    string? parent = Convert.ToString(sensor["Parent"]);
+                    string? type = Convert.ToString(sensor["HardwareType"]);
                     ret.Add(new Hardware(name, identifier, parent, type));
                 }
             }
@@ -211,14 +219,14 @@ namespace Iot.Device.HardwareMonitor
         /// </summary>
         /// <param name="forHardware">The module that should be queried</param>
         /// <returns>A list of sensors</returns>
-        public IEnumerable<Sensor> GetSensorList(Hardware forHardware)
+        public IEnumerable<Sensor> GetSensorList(Hardware? forHardware)
         {
             if (forHardware == null)
             {
                 throw new ArgumentNullException(nameof(forHardware));
             }
 
-            return GetSensorList().Where(x => x.Identifier.StartsWith(forHardware.Identifier)).OrderBy(y => y.Identifier);
+            return GetSensorList().Where(x => x.Identifier != null && x.Identifier.StartsWith(forHardware.Identifier ?? string.Empty)).OrderBy(y => y.Identifier);
         }
 
         // Some well-known properties have their own method
@@ -297,21 +305,25 @@ namespace Iot.Device.HardwareMonitor
         /// <returns>True if at least one matching quantity was found</returns>
         /// <exception cref="NotSupportedException">There were multiple sensors found, but they return different units (i.e. CPU temperature is
         /// reported as Celsius for some cores and Fahrenheit for others)</exception>
-        public bool TryGetAverage<T>(Hardware hardware, out T average)
+        public bool TryGetAverage<T>(Hardware hardware,
+#if !NETCOREAPP2_1
+        [NotNullWhen(true)]
+#endif
+        out T? average)
             where T : IQuantity
         {
             double value = 0;
             int count = 0;
-            Enum unitThatWasUsed = null;
+            Enum? unitThatWasUsed = null;
             foreach (var s in GetSensorList(hardware))
             {
                 if (s.TryGetValue(out T singleValue))
                 {
                     if (unitThatWasUsed == null)
                     {
-                        unitThatWasUsed = singleValue.Unit;
+                        unitThatWasUsed = singleValue!.Unit;
                     }
-                    else if (!unitThatWasUsed.Equals(singleValue.Unit))
+                    else if (!unitThatWasUsed.Equals(singleValue!.Unit))
                     {
                         throw new NotSupportedException($"The different sensors for {hardware.Name} deliver values in different units");
                     }
@@ -389,6 +401,11 @@ namespace Iot.Device.HardwareMonitor
         /// <param name="job">Monitoring job</param>
         public void StopMonitoring(MonitoringJob job)
         {
+            if (job == null)
+            {
+                throw new ArgumentNullException(nameof(job));
+            }
+
             lock (_lock)
             {
                 _monitoredElements.Remove(job);
@@ -439,9 +456,9 @@ namespace Iot.Device.HardwareMonitor
                         TimeSpan timeSinceLastUpdate = now - elem.LastUpdated;
                         if (timeSinceLastUpdate > elem.Interval)
                         {
-                            if (elem.Sensor.TryGetValue(out IQuantity value))
+                            if (elem.Sensor.TryGetValue(out IQuantity? value))
                             {
-                                elem.OnNewValue(elem.Sensor, value, timeSinceLastUpdate);
+                                elem.OnNewValue(elem.Sensor, value!, timeSinceLastUpdate);
                             }
 
                             elem.LastUpdated = now;
@@ -490,7 +507,7 @@ namespace Iot.Device.HardwareMonitor
                 return;
             }
 
-            Sensor cpuPower = null;
+            Sensor? cpuPower = null;
 
             TimeSpan interval = monitoringInterval;
             if (interval == default)
@@ -521,7 +538,7 @@ namespace Iot.Device.HardwareMonitor
                 }
 
                 // For CPU package, calculate heat flux
-                if (sensor.SensorType == SensorType.Power && sensor.Name.IndexOf("CPU Package", StringComparison.OrdinalIgnoreCase) >= 0)
+                if (sensor.SensorType == SensorType.Power && sensor.Name != null && sensor.Name.IndexOf("CPU Package", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     var managementInstance = new EnergyManagementInstance();
                     var newSensor = new Sensor(managementInstance, sensor.Name + " HeatFlux", sensor.Identifier + "/heatflux", sensor.Identifier, SensorType.HeatFlux);
@@ -536,7 +553,7 @@ namespace Iot.Device.HardwareMonitor
                 }
             }
 
-            Sensor vcore = GetSensorList().FirstOrDefault(x => x.SensorType == SensorType.Voltage && x.Name.IndexOf("CPU VCore", StringComparison.OrdinalIgnoreCase) >= 0);
+            Sensor? vcore = GetSensorList().FirstOrDefault(x => x.SensorType == SensorType.Voltage && x.Name != null && x.Name.IndexOf("CPU VCore", StringComparison.OrdinalIgnoreCase) >= 0);
             // From VCore and CPU package power calculate amperes into CPU
             if (cpuPower != null && vcore != null)
             {
@@ -563,7 +580,12 @@ namespace Iot.Device.HardwareMonitor
         {
             foreach (var s in _derivedSensors)
             {
-                StopMonitoring(s.Job);
+                if (s.Job is object)
+                {
+                    StopMonitoring(s.Job);
+                }
+
+                s.Dispose();
             }
 
             _derivedSensors.Clear();
@@ -587,7 +609,7 @@ namespace Iot.Device.HardwareMonitor
             /// <summary>
             /// Creates a sensor instance
             /// </summary>
-            public Sensor(ManagementObject instance, string name, string identifier, string parent, SensorType typeEnum)
+            public Sensor(ManagementObject instance, string? name, string? identifier, string? parent, SensorType typeEnum)
             {
                 _instance = instance;
                 Name = name;
@@ -599,17 +621,17 @@ namespace Iot.Device.HardwareMonitor
             /// <summary>
             /// Name of the sensor
             /// </summary>
-            public string Name { get; }
+            public string? Name { get; }
 
             /// <summary>
             /// Sensor identifier (device path)
             /// </summary>
-            public string Identifier { get; }
+            public string? Identifier { get; }
 
             /// <summary>
             /// Sensor parent
             /// </summary>
-            public string Parent { get; }
+            public string? Parent { get; }
 
             /// <summary>
             /// Kind of sensor
@@ -619,7 +641,7 @@ namespace Iot.Device.HardwareMonitor
             /// <summary>
             /// Job associated with updating this value
             /// </summary>
-            internal MonitoringJob Job
+            internal MonitoringJob? Job
             {
                 get;
                 set;
@@ -630,7 +652,11 @@ namespace Iot.Device.HardwareMonitor
             /// </summary>
             /// <param name="value">Returned value</param>
             /// <returns>True if a value was available</returns>
-            public bool TryGetValue(out IQuantity value)
+            public bool TryGetValue(
+#if !NETCOREAPP2_1
+            [NotNullWhen(true)]
+#endif
+            out IQuantity? value)
             {
                 if (!_typeMap.TryGetValue(SensorType, out var elem))
                 {
@@ -651,7 +677,11 @@ namespace Iot.Device.HardwareMonitor
             /// <typeparam name="T">The type of the quantity to return</typeparam>
             /// <param name="value">The returned value</param>
             /// <returns>True if a value of type T could be retrieved</returns>
-            public bool TryGetValue<T>(out T value)
+            public bool TryGetValue<T>(
+#if !NETCOREAPP2_1
+            [NotNullWhen(true)]
+#endif
+            out T? value)
                 where T : IQuantity
             {
                 if (!_typeMap.TryGetValue(SensorType, out var elem))
@@ -674,9 +704,9 @@ namespace Iot.Device.HardwareMonitor
             }
 
             /// <inheritdoc />
-            public override string ToString()
+            public override string? ToString()
             {
-                return Name;
+                return Name ?? base.ToString();
             }
 
             /// <inheritdoc/>
@@ -694,7 +724,7 @@ namespace Iot.Device.HardwareMonitor
             /// <summary>
             /// Create an instance of this class
             /// </summary>
-            public Hardware(string name, string identifier, string parent, string type)
+            public Hardware(string? name, string? identifier, string? parent, string? type)
             {
                 Name = name;
                 Identifier = identifier;
@@ -705,29 +735,29 @@ namespace Iot.Device.HardwareMonitor
             /// <summary>
             /// Name of the object
             /// </summary>
-            public string Name { get; }
+            public string? Name { get; }
 
             /// <summary>
             /// Device path
             /// </summary>
-            public string Identifier { get; }
+            public string? Identifier { get; }
 
             /// <summary>
             /// Parent in device path
             /// </summary>
-            public string Parent { get; }
+            public string? Parent { get; }
 
             /// <summary>
             /// Type of resource
             /// </summary>
-            public string Type { get; }
+            public string? Type { get; }
 
             /// <summary>
             /// Name of this instance
             /// </summary>
-            public override string ToString()
+            public override string? ToString()
             {
-                return Name;
+                return Name ?? base.ToString();
             }
         }
 
@@ -788,3 +818,5 @@ namespace Iot.Device.HardwareMonitor
         }
     }
 }
+
+#pragma warning restore CA1416 // Validate platform compatibility

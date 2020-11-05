@@ -24,7 +24,7 @@ namespace Iot.Device.CpuTemperature
         private bool _checkedIfAvailable;
         private bool _windows;
         private List<ManagementObjectSearcher> _managementObjectSearchers;
-        private OpenHardwareMonitor _hardwareMonitorInUse;
+        private OpenHardwareMonitor? _hardwareMonitorInUse;
 
         /// <summary>
         /// Creates an instance of the CpuTemperature class
@@ -151,12 +151,15 @@ namespace Iot.Device.CpuTemperature
 
             foreach (var searcher in _managementObjectSearchers)
             {
+// This code will only be executed when on Windows.
+#pragma warning disable CA1416 // Validate platform compatibility
                 foreach (ManagementObject obj in searcher.Get())
                 {
                     Double temp = Convert.ToDouble(string.Format(CultureInfo.InvariantCulture, "{0}", obj["CurrentTemperature"]), CultureInfo.InvariantCulture);
                     temp = (temp - 2732) / 10.0;
-                    result.Add((obj["InstanceName"].ToString(), Temperature.FromDegreesCelsius(temp)));
+                    result.Add((obj["InstanceName"].ToString() ?? string.Empty, Temperature.FromDegreesCelsius(temp)));
                 }
+#pragma warning restore CA1416 // Validate platform compatibility
             }
 
             return result;
