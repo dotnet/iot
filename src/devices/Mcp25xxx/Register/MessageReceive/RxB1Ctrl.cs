@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Mcp25xxx.Register.MessageReceive
 {
@@ -51,22 +50,27 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
             /// Acceptance Filter 0 (RXF0) (only if the BUKT bit is set in RXB0CTRL).
             /// </summary>
             Filter0 = 0,
+
             /// <summary>
             /// Acceptance Filter 1 (RXF1) (only if the BUKT bit is set in RXB0CTRL).
             /// </summary>
             Filter1 = 1,
+
             /// <summary>
             /// Acceptance Filter 2 (RXF2).
             /// </summary>
             Filter2 = 2,
+
             /// <summary>
             /// Acceptance Filter 3 (RXF3).
             /// </summary>
             Filter3 = 3,
+
             /// <summary>
             /// Acceptance Filter 4 (RXF4).
             /// </summary>
             Filter4 = 4,
+
             /// <summary>
             /// Acceptance Filter 5 (RXF5).
             /// </summary>

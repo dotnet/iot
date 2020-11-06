@@ -1,6 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Pwm;
@@ -55,13 +54,13 @@ namespace Iot.Device.ServoMotor.Tests
         [InlineData(50, 180, 1_000, 2_000, 180, 0.1)]
         [InlineData(50, 90, 1_000, 1_500, 0, 0.05)]
         [InlineData(50, 90, 1_000, 1_500, 90, 0.075)]
-        public void Verify_Duty_Cycle_Percentage_When_Writing_Angle(
+        public void Verify_Duty_Cycle_When_Writing_Angle(
             int frequency,
             int maxiumAngle,
             int minimumPulseWidthMicroseconds,
             int maximumPulseWidthMicroseconds,
             int angle,
-            double expectedDutyCyclePercentage)
+            double expectedDutyCycle)
         {
             Mock<PwmChannel> mockPwmChannel = new Mock<PwmChannel>();
             mockPwmChannel.SetupAllProperties();
@@ -74,7 +73,7 @@ namespace Iot.Device.ServoMotor.Tests
 
             servo.WriteAngle(angle);
 
-            Assert.Equal(expectedDutyCyclePercentage, mockPwmChannel.Object.DutyCyclePercentage, 5);
+            Assert.Equal(expectedDutyCycle, mockPwmChannel.Object.DutyCycle, 5);
         }
 
         [Theory]
@@ -82,10 +81,10 @@ namespace Iot.Device.ServoMotor.Tests
         [InlineData(50, 2_000, 0.1)]
         [InlineData(60, 1_000, 0.06)]
         [InlineData(60, 2_000, 0.12)]
-        public void Verify_Duty_Cycle_Percentage_When_Writing_Pulse_Width(
+        public void Verify_Duty_Cycle_When_Writing_Pulse_Width(
             int frequency,
             int pulseWithInMicroseconds,
-            double expectedDutyCyclePercentage)
+            double expectedDutyCycle)
         {
             Mock<PwmChannel> mockPwmChannel = new Mock<PwmChannel>();
             mockPwmChannel.SetupAllProperties();
@@ -94,7 +93,7 @@ namespace Iot.Device.ServoMotor.Tests
 
             servo.WritePulseWidth(pulseWithInMicroseconds);
 
-            Assert.Equal(expectedDutyCyclePercentage, mockPwmChannel.Object.DutyCyclePercentage, 5);
+            Assert.Equal(expectedDutyCycle, mockPwmChannel.Object.DutyCycle, 5);
         }
 
         [Theory]

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -12,7 +11,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
     public class SetReMap : ISsd1327Command
     {
         /// <summary>
-        /// Re-map setting in Graphic Display Data RAM(GDDRAM) 
+        /// Re-map setting in Graphic Display Data RAM(GDDRAM)
         /// </summary>
         public SetReMap(
             bool columnAddressRemap = false,
@@ -26,7 +25,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
             {
                 Config |= 0b_0000_0001;
             }
-            
+
             if (nibbleRemap)
             {
                 Config |= 0b_0000_0010;

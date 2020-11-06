@@ -51,5 +51,6 @@ using (Ads1115 adc = new Ads1115(device, InputMultiplexer.AIN0, MeasuringRange.F
 }
 ```
 
-## Result
+## Results
 ![](RunningResult.jpg)
+![](InterruptResult.png)

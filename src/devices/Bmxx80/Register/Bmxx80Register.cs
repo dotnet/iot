@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Bmxx80.Register
 {
@@ -10,6 +9,6 @@ namespace Iot.Device.Bmxx80.Register
     internal enum Bmxx80Register : byte
     {
         CHIPID = 0xD0,
-        RESET = 0xE0,
+        RESET = 0xE0
     }
 }

@@ -1,18 +1,17 @@
-﻿using Iot.Device.BrickPi3.Models;
-using Iot.Device.BrickPi3.Sensors;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Iot.Device.BrickPi3.Models;
+using Iot.Device.BrickPi3.Sensors;
 
 namespace BrickPiHardwareTest
 {
-
-    partial class Program
+    public partial class Program
     {
-
-        static private void TestMultipleSensorsTouchCSSoud()
+        private static void TestMultipleSensorsTouchCSSoud()
         {
             NXTTouchSensor touch = new NXTTouchSensor(_brick, SensorPort.Port2);
             EV3TouchSensor ev3Touch = new EV3TouchSensor(_brick, SensorPort.Port1, 20);
@@ -26,12 +25,12 @@ namespace BrickPiHardwareTest
                 Console.WriteLine($"NXT Sound, Raw: {sound.ReadRaw()}, ReadASString: {sound.ReadAsString()}, NumberNodes: {sound.NumberOfModes()}, SensorName: {sound.GetSensorName()}");
                 Console.WriteLine($"NXT Color Sensor, Raw: {nxtlight.ReadRaw()}, ReadASString: {nxtlight.ReadAsString()}, NumberNodes: {nxtlight.NumberOfModes()}, SensorName: {nxtlight.GetSensorName()}");
                 rgb = nxtlight.ReadRGBColor();
-                Console.WriteLine($"Color: {nxtlight.ReadColor()}, Red: {rgb.Red}, Green: {rgb.Green}, Blue: {rgb.Blue}");                
+                Console.WriteLine($"Color: {nxtlight.ReadColor()}, Red: {rgb.Red}, Green: {rgb.Green}, Blue: {rgb.Blue}");
                 Thread.Sleep(300);
             }
         }
 
-        static private void TestEV3Color()
+        private static void TestEV3Color()
         {
             Console.WriteLine("EV3 sensor color test mode");
             EV3ColorSensor nxtlight = new EV3ColorSensor(_brick, SensorPort.Port2, ColorSensorMode.Green);
@@ -49,12 +48,13 @@ namespace BrickPiHardwareTest
                     Thread.Sleep(1000);
                     count++;
                 }
+
                 nxtlight.SelectNextMode();
                 Thread.Sleep(5000);
             }
         }
-        
-        static private void TestIRSensor()
+
+        private static void TestIRSensor()
         {
             Console.WriteLine("Run test on EV3 IR sensor on port 4. Run test for the Remote, Proximity and Seek modes.");
             EV3InfraredSensor ultra = new EV3InfraredSensor(_brick, SensorPort.Port4, IRMode.Remote);
@@ -85,10 +85,10 @@ namespace BrickPiHardwareTest
             }
         }
 
-        static private void TestNXTUS()
+        private static void TestNXTUS()
         {
             Console.WriteLine("Running NXT Ultrasonic sensor test on port 4. Uses all the modes and read 50 times.");
-            NXTUltraSonicSensor ultra = new NXTUltraSonicSensor(_brick, SensorPort.Port4);            
+            NXTUltraSonicSensor ultra = new NXTUltraSonicSensor(_brick, SensorPort.Port4);
             for (int i = 0; i < ultra.NumberOfModes(); i++)
             {
                 int count = 0;
@@ -103,7 +103,7 @@ namespace BrickPiHardwareTest
             }
         }
 
-        static private void TestTouch()
+        private static void TestTouch()
         {
             Console.WriteLine("Running 100 reads on EV3 touch sensor on port 1.");
             EV3TouchSensor touch = new EV3TouchSensor(_brick, SensorPort.Port1);
@@ -113,11 +113,11 @@ namespace BrickPiHardwareTest
             while (count < 100)
             {
                 Console.WriteLine($"NXT Touch, IsPRessed: {touch.IsPressed()}, ReadAsString: {touch.ReadAsString()}, Selected mode: {touch.SelectedMode()}");
-                Task.Delay(300).Wait(); ;
+                Task.Delay(300).Wait();
             }
         }
 
-        static private void TestNXTLight()
+        private static void TestNXTLight()
         {
             Console.WriteLine("Run NXT Light sensor test on port 4. Uses all the modes and read 100 times.");
             NXTLightSensor nxtlight = new NXTLightSensor(_brick, SensorPort.Port4);
@@ -141,12 +141,12 @@ namespace BrickPiHardwareTest
             }
         }
 
-        static void TestNXTCS()
+        private static void TestNXTCS()
         {
             Console.WriteLine("Run NXT Color sensor test on port 4. Press the EV3 touch sensor on port 1 to stop the test.");
             NXTColorSensor nxtlight = new NXTColorSensor(_brick, SensorPort.Port4);
             EV3TouchSensor touch = new EV3TouchSensor(_brick, SensorPort.Port1);
-            RGBColor rgb;            
+            RGBColor rgb;
             while (!touch.IsPressed())
             {
                 Console.WriteLine($"NXT Color Sensor, Raw: {nxtlight.ReadRaw()}, ReadASString: {nxtlight.ReadAsString()}, NumberNodes: {nxtlight.SelectedMode()}");

@@ -1,16 +1,17 @@
-﻿using Iot.Device.BrickPi3.Models;
-using Iot.Device.BrickPi3.Movement;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Diagnostics;
 using System.Threading;
+using Iot.Device.BrickPi3.Models;
+using Iot.Device.BrickPi3.Movement;
 
 namespace BrickPiHardwareTest
 {
-
-    partial class Program
+    public partial class Program
     {
-
-        static private void TestMotorTacho()
+        private static void TestMotorTacho()
         {
             Motor motor = new Motor(_brick, BrickPortMotor.PortD);
             motor.SetSpeed(10);
@@ -49,7 +50,7 @@ namespace BrickPiHardwareTest
             motor.Stop();
         }
 
-        static private void Test3Motors()
+        private static void Test3Motors()
         {
             Console.WriteLine("Motor A, C and D used for this test. Run increasing and decreasing speed, read positions");
             Motor[] motor = new Motor[3];
@@ -69,6 +70,7 @@ namespace BrickPiHardwareTest
                     Console.WriteLine($"Encoder motor {i}: {motor[i].GetTachoCount()}");
                     motor[i].SetSpeed(motor[i].GetSpeed() + 1);
                 }
+
                 Thread.Sleep(200);
             }
 
@@ -86,6 +88,7 @@ namespace BrickPiHardwareTest
                     Console.WriteLine($"Encoder motor {i}: {motor[i].GetTachoCount()}");
                     motor[i].SetSpeed(motor[i].GetSpeed() + 5);
                 }
+
                 Thread.Sleep(200);
             }
 
@@ -98,6 +101,7 @@ namespace BrickPiHardwareTest
                     Console.WriteLine($"Encoder motor {i}: {motor[i].GetTachoCount()}");
                     motor[i].SetTachoCount(pos);
                 }
+
                 Thread.Sleep(1000);
 
             }
@@ -111,7 +115,7 @@ namespace BrickPiHardwareTest
             Console.WriteLine("All motors stoped");
         }
 
-        static private void TestMotorEvents()
+        private static void TestMotorEvents()
         {
             Console.WriteLine("Using Motor D with events, change encoder to raise an event");
             Motor motor = new Motor(_brick, BrickPortMotor.PortD, 500);
@@ -119,12 +123,13 @@ namespace BrickPiHardwareTest
             Thread.Sleep(10000);
         }
 
-        static private void Motor_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private static void Motor_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Console.WriteLine($"Event raised, endoer changed: {e.PropertyName}; {((Motor)sender).TachoCount}");
+            string count = sender is Motor m ? m.TachoCount.ToString() : string.Empty;
+            Console.WriteLine($"Event raised, endoer changed: {e.PropertyName}; {count}");
         }
 
-        static private void TestVehicule()
+        private static void TestVehicule()
         {
             Console.WriteLine("Vehicule drive test using Motor A for left, Motor D for right, not inverted direction");
             Vehicle veh = new Vehicle(_brick, BrickPortMotor.PortA, BrickPortMotor.PortD);

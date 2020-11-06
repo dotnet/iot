@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -66,7 +65,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// <summary>
         /// Initializes a new instance of the RxBxSidl class.
         /// </summary>
-        /// <param name="rxBufferNumber"></param>
+        /// <param name="rxBufferNumber">Rx buffer number</param>
         /// <param name="value">The value that represents the register contents.</param>
         public RxBxSidl(byte rxBufferNumber, byte value)
         {

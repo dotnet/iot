@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -91,6 +90,7 @@ namespace Iot.Device.Mcp3428
         public void Dispose()
         {
             _i2cDevice?.Dispose();
+            _i2cDevice = null!;
         }
 
         /// <summary>
@@ -104,15 +104,15 @@ namespace Iot.Device.Mcp3428
             return ReadValue(channel);
         }
 
-        private readonly I2cDevice _i2cDevice;
         private readonly byte[] _readBuffer = new byte[3];
+        private I2cDevice _i2cDevice;
 
         private bool _isReadyBit = false;
         private byte _lastChannel = 0xFF;
         private ConversionResult _lastConversion;
         private AdcMode _mode = AdcMode.Continuous;
 
-        //Config params
+        // Config params
         private AdcGain _pgaGain = AdcGain.X1;
 
         private AdcResolution _resolution = AdcResolution.Bit12;
@@ -132,7 +132,9 @@ namespace Iot.Device.Mcp3428
         protected void OneShotRead(int channel = -1)
         {
             if (Mode != AdcMode.OneShot)
+            {
                 throw new IOException("Device is not in One-Shot mode");
+            }
 
             _isReadyBit = false;
             var conf = Helpers.SetReadyBit(LastConfigByte, false);
@@ -159,7 +161,8 @@ namespace Iot.Device.Mcp3428
         /// <param name="waitSpan">Time to wait for conversion before timing out</param>
         /// <param name="progressCallback">Action to be called to report the progress</param>
         /// <param name="cancellationToken">Token which can be used to cancel the operation</param>
-        protected void WaitForConversion(TimeSpan? waitSpan = null, Action<int> progressCallback = null, CancellationToken cancellationToken = default)
+        protected void WaitForConversion(TimeSpan? waitSpan = null, Action<int>? progressCallback = null,
+            CancellationToken cancellationToken = default)
         {
             waitSpan = waitSpan ?? TimeSpan.FromMilliseconds(WaitTime);
             var allms = 0;
@@ -169,13 +172,16 @@ namespace Iot.Device.Mcp3428
                 _i2cDevice.Read(_readBuffer);
                 ReadConfigByte(LastConfigByte);
                 if (_isReadyBit)
+                {
                     break;
+                }
 
                 Thread.Sleep(waitSpan.Value);
                 cancellationToken.ThrowIfCancellationRequested();
                 allms += (int)(waitSpan.Value.TotalMilliseconds);
                 progressCallback?.Invoke(allms);
             }
+
             cancellationToken.ThrowIfCancellationRequested();
         }
 
@@ -234,10 +240,14 @@ namespace Iot.Device.Mcp3428
         /// <returns><c>true</c> if all values are set correctly, <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentOutOfRangeException">channel</exception>
         protected bool SetConfig(int channel = 0, AdcMode mode = AdcMode.Continuous,
-            AdcResolution resolution = AdcResolution.Bit12, AdcGain pgaGain = AdcGain.X1, IList<string> errorList = null)
+            AdcResolution resolution = AdcResolution.Bit12, AdcGain pgaGain = AdcGain.X1,
+            IList<string>? errorList = null)
         {
             if (channel < 0 || channel > ChannelCount - 1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(channel));
+            }
+
             byte conf = 0;
             var ok = true;
             conf = Helpers.SetModeBit(conf, mode);
@@ -256,16 +266,19 @@ namespace Iot.Device.Mcp3428
                 errorList?.Add($"Channel update failed from {_lastChannel} to {channel}");
                 ok = false;
             }
+
             if (Resolution != resolution)
             {
                 errorList?.Add($"Resolution update failed from {Resolution} to {resolution}");
                 ok = false;
             }
+
             if (mode != Mode)
             {
                 errorList?.Add($"Mode update failed from {Mode} to {mode}");
                 ok = false;
             }
+
             if (InputGain != pgaGain)
             {
                 errorList?.Add($"PGAGain update failed from {InputGain} to {pgaGain}");
@@ -273,9 +286,11 @@ namespace Iot.Device.Mcp3428
             }
 
             if (!ok)
-            {   // Only use console on error
+            {
+                // Only use console on error
                 errorList?.Add($"Sent config byte {conf:X}, received {LastConfigByte:X}");
             }
+
             return ok;
         }
 
@@ -308,7 +323,7 @@ namespace Iot.Device.Mcp3428
         /// <summary>
         /// Event called when conversion is complete
         /// </summary>
-        public event EventHandler<ConversionResult> OnConversion;
+        public event EventHandler<ConversionResult>? OnConversion;
 
         /// <summary>
         /// Writes configuration
@@ -331,7 +346,10 @@ namespace Iot.Device.Mcp3428
         /// </remarks>
         /// <param name="thresh">Time limit in ms. Default: 20ms</param>
         /// <autogeneratedoc />
-        public static void SetAsyncThreshold(int thresh) { _asyncThreshold = thresh; }
+        public static void SetAsyncThreshold(int thresh)
+        {
+            _asyncThreshold = thresh;
+        }
 
         /// <summary>
         /// One-shot read as an asynchronous operation. Initiates read and waits for it to finish.
@@ -349,7 +367,9 @@ namespace Iot.Device.Mcp3428
         protected ValueTask OneShotReadAsync(int channel = -1, CancellationToken cancellationToken = default)
         {
             if (Mode != AdcMode.OneShot)
+            {
                 throw new IOException("Device is not in One-Shot mode");
+            }
 
             _isReadyBit = false;
             var conf = Helpers.SetReadyBit(LastConfigByte, false);
@@ -369,7 +389,8 @@ namespace Iot.Device.Mcp3428
         /// <param name="channel">Channel to read data from</param>
         /// <param name="cancellationToken">Token which can be used to cancel the operation</param>
         /// <returns>Task which can be used to wait for <see cref="ConversionResult"/></returns>
-        protected async ValueTask<ConversionResult> ReadValueAsync(int channel = -1, CancellationToken cancellationToken = default)
+        protected async ValueTask<ConversionResult> ReadValueAsync(int channel = -1,
+            CancellationToken cancellationToken = default)
         {
             if (Mode == AdcMode.OneShot)
             {
@@ -383,8 +404,10 @@ namespace Iot.Device.Mcp3428
                     WriteConfig(conf);
                 }
 
-                await WaitForConversionAsync(TimeSpan.FromMilliseconds(WaitTime / 5), cancellationToken: cancellationToken); // In continuous mode poll more often
+                await WaitForConversionAsync(TimeSpan.FromMilliseconds(WaitTime / 5),
+                    cancellationToken: cancellationToken); // In continuous mode poll more often
             }
+
             cancellationToken.ThrowIfCancellationRequested();
 
             var value = BinaryPrimitives.ReadInt16BigEndian(_readBuffer.AsSpan().Slice(0, 2));
@@ -400,7 +423,8 @@ namespace Iot.Device.Mcp3428
         /// <param name="progressCallback">Callback to be called to report progress</param>
         /// <param name="cancellationToken">Token which can be used to cancel the operation</param>
         /// <returns>Task which can be used to wait for opertation to finish</returns>
-        protected async ValueTask WaitForConversionAsync(TimeSpan? waitSpan = null, Action<int> progressCallback = null, CancellationToken cancellationToken = default)
+        protected async ValueTask WaitForConversionAsync(TimeSpan? waitSpan = null, Action<int>? progressCallback = null,
+            CancellationToken cancellationToken = default)
         {
             waitSpan = waitSpan ?? TimeSpan.FromMilliseconds(WaitTime);
             var allms = 0;
@@ -410,12 +434,15 @@ namespace Iot.Device.Mcp3428
                 _i2cDevice.Read(_readBuffer);
                 ReadConfigByte(LastConfigByte);
                 if (_isReadyBit)
+                {
                     break;
+                }
 
                 await Task.Delay(waitSpan.Value, cancellationToken);
                 allms += (int)(waitSpan.Value.TotalMilliseconds);
                 progressCallback?.Invoke(allms);
             }
+
             cancellationToken.ThrowIfCancellationRequested();
         }
 
@@ -429,7 +456,9 @@ namespace Iot.Device.Mcp3428
         public async ValueTask<double> ReadChannelAsync(int channel, CancellationToken cancellationToken = default)
         {
             if ((Resolution == AdcResolution.Bit12 && Mode == AdcMode.Continuous) || WaitTime < _asyncThreshold)
+            {
                 return ReadValue(channel);
+            }
 
             await ReadValueAsync(channel, cancellationToken);
             return LastConversion.Voltage;

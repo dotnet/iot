@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Bmxx80.Register
 {
@@ -25,20 +24,10 @@ namespace Iot.Device.Bmxx80.Register
         DIG_P8 = 0x9C,
         DIG_P9 = 0x9E,
 
-        VERSION = 0xD1,
-        SOFTRESET = 0xE0,
-
-        CAL26 = 0xE1, // R calibration stored in 0xE1-0xF0
-
         STATUS = 0xF3,
         CONFIG = 0xF5,
 
-        PRESSUREDATA_MSB = 0xF7,
-        PRESSUREDATA_LSB = 0xF8,
-        PRESSUREDATA_XLSB = 0xF9, // bits <7:4>
-
-        TEMPDATA_MSB = 0xFA,
-        TEMPDATA_LSB = 0xFB,
-        TEMPDATA_XLSB = 0xFC, // bits <7:4>
+        PRESSUREDATA = 0xF7,
+        TEMPDATA_MSB = 0xFA
     }
 }

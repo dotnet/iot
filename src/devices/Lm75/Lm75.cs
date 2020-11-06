@@ -1,10 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Lm75
 {
@@ -25,13 +24,25 @@ namespace Iot.Device.Lm75
         /// <summary>
         /// LM75 Temperature
         /// </summary>
-        public Temperature Temperature { get => Temperature.FromCelsius(GetTemperature()); }
+        public Temperature Temperature { get => Temperature.FromDegreesCelsius(GetTemperature()); }
 
         private bool _disable;
+
         /// <summary>
         /// Disable LM75
         /// </summary>
-        public bool Disabled { get { return _disable; } set { SetShutdown(value); _disable = value; } }
+        public bool Disabled
+        {
+            get
+            {
+                return _disable;
+            }
+            set
+            {
+                SetShutdown(value);
+                _disable = value;
+            }
+        }
 
         #endregion
 
@@ -89,9 +100,14 @@ namespace Iot.Device.Lm75
 
             config &= 0xFE;
             if (isShutdown)
+            {
                 config |= 0x01;
+            }
 
-            Span<byte> writeBuff = stackalloc byte[] { (byte)Register.LM_CONFIG, config };
+            Span<byte> writeBuff = stackalloc byte[]
+            {
+                (byte)Register.LM_CONFIG, config
+            };
             _i2cDevice.Write(writeBuff);
         }
 
@@ -101,7 +117,7 @@ namespace Iot.Device.Lm75
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
     }
 }

@@ -1,12 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Diagnostics;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Lps25h
 {
@@ -24,7 +23,9 @@ namespace Iot.Device.Lps25h
         public Lps25h(I2cDevice i2cDevice)
         {
             if (i2cDevice == null)
+            {
                 throw new ArgumentNullException(nameof(i2cDevice));
+            }
 
             _i2c = i2cDevice;
 
@@ -47,12 +48,12 @@ namespace Iot.Device.Lps25h
         /// <summary>
         /// Temperature
         /// </summary>
-        public Temperature Temperature => Temperature.FromCelsius(42.5f + ReadInt16(Register.Temperature) / 480f);
+        public Temperature Temperature => Temperature.FromDegreesCelsius(42.5f + ReadInt16(Register.Temperature) / 480f);
 
         /// <summary>
-        /// Pressure in hPa
+        /// Pressure
         /// </summary>
-        public float Pressure => ReadInt24(Register.Pressure) / 4096f;
+        public Pressure Pressure => Pressure.FromHectopascals(ReadInt24(Register.Pressure) / 4096.0);
 
         private void WriteByte(Register register, byte data)
         {
@@ -67,7 +68,7 @@ namespace Iot.Device.Lps25h
 
         private static int ReadInt24LittleEndian(ReadOnlySpan<byte> buff)
         {
-            Debug.Assert(buff.Length == 3);
+            Debug.Assert(buff.Length == 3, "Buffer must be 3 bytes long");
 
             byte mostSignificantByte = buff[2];
             Span<byte> b = stackalloc byte[4]
@@ -111,7 +112,7 @@ namespace Iot.Device.Lps25h
         public void Dispose()
         {
             _i2c?.Dispose();
-            _i2c = null;
+            _i2c = null!;
         }
     }
 }

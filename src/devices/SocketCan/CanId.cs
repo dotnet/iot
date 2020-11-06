@@ -1,6 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -33,14 +32,18 @@ namespace Iot.Device.SocketCan
             get
             {
                 if (ExtendedFrameFormat)
+                {
                     throw new InvalidOperationException($"{nameof(Standard)} can be obtained only when {nameof(ExtendedFrameFormat)} is not set.");
-                
+                }
+
                 return Raw & Interop.CAN_SFF_MASK;
             }
             set
             {
                 if ((value & ~Interop.CAN_SFF_MASK) != 0)
+                {
                     throw new InvalidOperationException($"{nameof(value)} must be 11 bit identifier.");
+                }
 
                 ExtendedFrameFormat = false;
                 // note: we clear all bits, not just SFF
@@ -57,14 +60,18 @@ namespace Iot.Device.SocketCan
             get
             {
                 if (!ExtendedFrameFormat)
+                {
                     throw new InvalidOperationException($"{nameof(Extended)} can be obtained only when {nameof(ExtendedFrameFormat)} is set.");
-                
+                }
+
                 return Raw & Interop.CAN_EFF_MASK;
             }
             set
             {
                 if ((value & ~Interop.CAN_EFF_MASK) != 0)
+                {
                     throw new InvalidOperationException($"{nameof(value)} must be 29 bit identifier.");
+                }
 
                 ExtendedFrameFormat = true;
                 Raw &= ~Interop.CAN_EFF_MASK;

@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Alignment.cs" />
+    <Compile Include="BlinkRate.cs" />
+    <Compile Include="Ht16k33.cs" />
+    <Compile Include="Dot.cs" />
+    <Compile Include="Font.cs" />
+    <Compile Include="Segment.cs" />
+    <Compile Include="FontHelper.cs" />
+    <Compile Include="ISevenSegmentDisplay.cs" />
+    <Compile Include="Large4Digit7SegmentDisplay.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <None Include="README.md" />
+  </ItemGroup>
+
+</Project>

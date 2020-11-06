@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -39,6 +38,8 @@ namespace Iot.Device.Rtc
         /// Releases the unmanaged resources used by the RtcBase and optionally releases the managed resources.
         /// </summary>
         /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing) { }
+        protected virtual void Dispose(bool disposing)
+        {
+        }
     }
 }

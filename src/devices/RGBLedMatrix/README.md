@@ -1,5 +1,6 @@
 # RGBLedMatrix - RGB LED Matrix
-The RGBLedMatrix is the class which handle drawing on the RGB LED Matrices. RGBLedMatrix mainly support Raspberry PI 3 (B+). It may work with other models but this not tested.
+
+The RGBLedMatrix is the class which handle drawing on the RGB LED Matrices. RGBLedMatrix mainly support Raspberry PI 3 (B+). It may work with other models but this not tested. RGB LED Matrix interface protocol is sometimes referred as `HUB75`.
 
 RGBLedMatrix is tested with 32x32, 64x64 LED panels and also tested with chaining multiple 32x32 panels.
 
@@ -58,4 +59,7 @@ There is some room for doing more enhancement and optimization. e.g. we support 
 ```
 
 ## References
-https://learn.adafruit.com/32x16-32x32-rgb-led-matrix/
+
+- https://learn.adafruit.com/32x16-32x32-rgb-led-matrix/
+- http://www.ti.com/lit/ds/symlink/tlc59283.pdf
+- https://datasheet4u.com/datasheet-parts/FM6124-datasheet.php?id=1309677 (diagram on page 3)

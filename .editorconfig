@@ -16,6 +16,9 @@ indent_size = 2
 
 # C# files
 [*.cs]
+# Character Set: UTF-8 with byte order mark (see also StyleCop rule SA1412)
+charset = utf-8-bom
+
 # New line preferences
 csharp_new_line_before_open_brace = all
 csharp_new_line_before_else = true

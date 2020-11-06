@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../Interop/**/*.cs" />
+    <Compile Include="VideoDevice/*.cs" />
+    <Compile Include="VideoDevice/Devices/*.cs" />
+    <Compile Include="SoundDevice/*.cs" />
+    <Compile Include="SoundDevice/Devices/*.cs" />
+  </ItemGroup>
+
+</Project>

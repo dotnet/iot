@@ -1,15 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
 using System.Threading;
+using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3.Movement
 {
-
     /// <summary>
     /// Polarity of the motor
     /// </summary>
@@ -18,7 +16,7 @@ namespace Iot.Device.BrickPi3.Movement
 #pragma warning disable
         Backward = -1, Forward = 1, OppositeDirection = 0
 #pragma warning restore
-    };
+    }
 
     /// <summary>
     /// This class contains a motor object and all needed functions and properties to pilot it
@@ -26,16 +24,19 @@ namespace Iot.Device.BrickPi3.Movement
     public class Motor : INotifyPropertyChanged
     {
         // represent the Brick
-        private Brick _brick = null;
+        private Brick _brick;
         private int _tacho;
-        private Timer _timer = null;
+        private Timer _timer;
 
         /// <summary>
         /// Create a motor
         /// </summary>
         /// <param name="brick">The brick controlling the motor</param>
         /// <param name="port">Motor port</param>
-        public Motor(Brick brick, BrickPortMotor port) : this(brick, port, 1000) { }
+        public Motor(Brick brick, BrickPortMotor port)
+            : this(brick, port, 1000)
+        {
+        }
 
         /// <summary>
         /// Create a motor
@@ -47,7 +48,7 @@ namespace Iot.Device.BrickPi3.Movement
         {
             _brick = brick;
             Port = port;
-            periodRefresh = timeout;
+            _periodRefresh = timeout;
             _timer = new Timer(UpdateSensor, this, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(timeout));
         }
 
@@ -111,11 +112,17 @@ namespace Iot.Device.BrickPi3.Movement
                 {
                     case Polarity.Backward:
                         if (motorstatus.Speed > 0)
+                        {
                             _brick.SetMotorPower((byte)Port, -Speed);
+                        }
+
                         break;
                     case Polarity.Forward:
                         if (motorstatus.Speed < 0)
+                        {
                             _brick.SetMotorPower((byte)Port, -Speed);
+                        }
+
                         break;
                     case Polarity.OppositeDirection:
                         _brick.SetMotorPower((byte)Port, -Speed);
@@ -124,7 +131,9 @@ namespace Iot.Device.BrickPi3.Movement
                         break;
                 }
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+            }
         }
 
         /// <summary>
@@ -157,7 +166,16 @@ namespace Iot.Device.BrickPi3.Movement
         /// speed is between -255 and +255
         /// </summary>
         public int Speed
-        { get { return GetSpeed(); } set { SetSpeed(value); } }
+        {
+            get
+            {
+                return GetSpeed();
+            }
+            set
+            {
+                SetSpeed(value);
+            }
+        }
 
         /// <summary>
         /// Motor port
@@ -174,27 +192,31 @@ namespace Iot.Device.BrickPi3.Movement
         /// To notify a property has changed. The minimum time can be set up
         /// with timeout property
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        private int periodRefresh;
+        private int _periodRefresh;
+
         /// <summary>
         /// Period to refresh the notification of property changed in milliseconds
         /// </summary>
         public int PeriodRefresh
         {
-            get { return periodRefresh; }
+            get
+            {
+                return _periodRefresh;
+            }
 
             set
             {
-                periodRefresh = value;
-                _timer.Change(TimeSpan.FromMilliseconds(periodRefresh), TimeSpan.FromMilliseconds(periodRefresh));
+                _periodRefresh = value;
+                _timer.Change(TimeSpan.FromMilliseconds(_periodRefresh), TimeSpan.FromMilliseconds(_periodRefresh));
             }
         }
 
         /// <summary>
         /// Update the sensor and this will raised an event on the interface
         /// </summary>
-        public void UpdateSensor(object state)
+        public void UpdateSensor(object? state)
         {
             TachoCount = GetTachoCount();
         }
@@ -204,7 +226,10 @@ namespace Iot.Device.BrickPi3.Movement
         /// </summary>
         public int TachoCount
         {
-            get { return GetTachoCount(); }
+            get
+            {
+                return GetTachoCount();
+            }
 
             internal set
             {
@@ -218,11 +243,8 @@ namespace Iot.Device.BrickPi3.Movement
 
         private void StopTimerInternal()
         {
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            _timer?.Dispose();
+            _timer = null!;
         }
 
     }

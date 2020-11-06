@@ -12,13 +12,13 @@ To initialize the software with frequency of 200 on pin 17 and duty cycle of 50%
 
 ```csharp
 var channel = new SoftwarePwmChannel(17, 200, 0.5);
-channel.Start();        
+channel.Start();
 ```
 
 Then you can change the duty cycle during the execution (75% used in the example below):
 
 ```csharp
-channel.DutyCyclePercentage = 0.75;
+channel.DutyCycle = 0.75;
 ```
 
 Here is a full example:
@@ -40,7 +40,7 @@ class Program
             pwmChannel.Start();
             for (double fill = 0.0; fill <= 1.0; fill += 0.01)
             {
-                pwmChannel.DutyCyclePercentage = fill;
+                pwmChannel.DutyCycle = fill;
                 Thread.Sleep(500);
             }
         }
@@ -49,6 +49,6 @@ class Program
 
 ```
 
-## Other Example 
+## Other Example
 
 You will find another example of SoftPwm in the [Servo Motor class](/src/devices/Servo/samples/README.md). This Servomotor sample uses a precision timer.

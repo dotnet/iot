@@ -1,11 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Hts221
 {
@@ -23,12 +22,14 @@ namespace Iot.Device.Hts221
         public Hts221(I2cDevice i2cDevice)
         {
             if (i2cDevice == null)
+            {
                 throw new ArgumentNullException(nameof(i2cDevice));
+            }
 
             _i2c = i2cDevice;
 
             // Highest resolution for both temperature and humidity sensor:
-            // 0.007 Celsius and 0.03 percentage of relative humidity respectively
+            // 0.007 DegreesCelsius and 0.03 percentage of relative humidity respectively
             byte resolution = 0b0011_1111;
             WriteByte(Register.ResolutionMode, resolution);
 
@@ -45,12 +46,12 @@ namespace Iot.Device.Hts221
         /// <summary>
         /// Temperature
         /// </summary>
-        public Temperature Temperature => Temperature.FromCelsius(GetActualTemperature(ReadInt16(Register.Temperature)));
+        public Temperature Temperature => Temperature.FromDegreesCelsius(GetActualTemperature(ReadInt16(Register.Temperature)));
 
         /// <summary>
         /// Humidity in %rH (percentage relative humidity)
         /// </summary>
-        public float Humidity => GetActualHumidity(ReadInt16(Register.Humidity));
+        public Ratio Humidity => GetActualHumidity(ReadInt16(Register.Humidity));
 
         private void WriteByte(Register register, byte data)
         {
@@ -91,13 +92,13 @@ namespace Iot.Device.Hts221
             return Lerp(temperatureRaw, t0raw, t1raw, t0x8C / 8.0f, t1x8C / 8.0f);
         }
 
-        private float GetActualHumidity(short humidityRaw)
+        private Ratio GetActualHumidity(short humidityRaw)
         {
             // datasheet does not specify if calibration points are not changing
             // since this is almost no-op and max output data rate is 12.5Hz let's do it every time
             (short h0raw, short h1raw) = GetHumidityCalibrationPointsRaw();
             (byte h0x2rH, byte h1x2rH) = GetHumidityCalibrationPointsRH();
-            return Lerp(humidityRaw, h0raw, h1raw, h0x2rH / 2.0f, h1x2rH / 2.0f);
+            return Ratio.FromPercent(Lerp(humidityRaw, h0raw, h1raw, h0x2rH / 2.0f, h1x2rH / 2.0f));
         }
 
         private static float Lerp(float x, float x0, float x1, float y0, float y1)
@@ -146,7 +147,7 @@ namespace Iot.Device.Hts221
         public void Dispose()
         {
             _i2c?.Dispose();
-            _i2c = null;
+            _i2c = null!;
         }
     }
 }

@@ -2,19 +2,22 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RuntimeIdentifiers>win</RuntimeIdentifiers>
+    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="$(NETCoreSdkRuntimeIdentifier.StartsWith('win'))">$(TargetFrameworks);net5.0-windows10.0.17763.0</TargetFrameworks>
     <Configurations>Debug;Release</Configurations>
     <Copyright>The .NET Foundation</Copyright>
     <Company>The .NET Foundation</Company>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- Ignore missing documentation tags (mostly already documented parameter members, anyway)-->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.3.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.10.0" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>

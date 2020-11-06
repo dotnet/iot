@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Vl53L0X
 {
@@ -53,7 +52,7 @@ namespace Iot.Device.Vl53L0X
         GPIO_HV_MUX_ACTIVE_HIGH = 0x84,
         VHV_CONFIG_PAD_SCL_SDA__EXTSUP_HV = 0x89,
         DEVICE_INFO_READING = 0x90,
-        I2C_SLAVE_DEVICE_ADDRESS = 0x8A,        
+        I2C_SLAVE_DEVICE_ADDRESS = 0x8A,
         SOFT_RESET_GO2_SOFT_RESET_N = 0xBF,
         IDENTIFICATION_MODEL_ID = 0xC0,
         IDENTIFICATION_REVISION_ID = 0xC2,

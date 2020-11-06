@@ -2,15 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <LangVersion>preview</LangVersion>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)\..\ServoMotor.csproj" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <None Include="README.md" />
   </ItemGroup>
 

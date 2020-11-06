@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -38,15 +37,19 @@ namespace Iot.Device.SocketCan
         public void WriteFrame(ReadOnlySpan<byte> data, CanId id)
         {
             if (!id.IsValid)
+            {
                 throw new ArgumentException(nameof(id), "Id is not valid. Ensure Error flag is not set and that id is in the valid range (11-bit for standard frame and 29-bit for extended frame).");
+            }
 
             if (data.Length > CanFrame.MaxLength)
+            {
                 throw new ArgumentException(nameof(data), $"Data length cannot exceed {CanFrame.MaxLength} bytes.");
+            }
 
             CanFrame frame = new CanFrame();
             frame.Id = id;
             frame.Length = (byte)data.Length;
-            Debug.Assert(frame.IsValid);
+            Debug.Assert(frame.IsValid, "Frame is not valid");
 
             unsafe
             {
@@ -74,7 +77,7 @@ namespace Iot.Device.SocketCan
             }
 
             CanFrame frame = new CanFrame();
-            
+
             Span<CanFrame> frameSpan = MemoryMarshal.CreateSpan(ref frame, 1);
             Span<byte> buff = MemoryMarshal.AsBytes(frameSpan);
             while (buff.Length > 0)
@@ -93,9 +96,9 @@ namespace Iot.Device.SocketCan
                 frameLength = 0;
                 return false;
             }
-            
+
             // This is guaranteed by minimum buffer length and the fact that frame is valid
-            Debug.Assert(frame.Length <= data.Length);
+            Debug.Assert(frame.Length <= data.Length, "Invalid frame length");
 
             unsafe
             {

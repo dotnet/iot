@@ -1,6 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Mpr121
 {
@@ -158,7 +157,7 @@ namespace Iot.Device.Mpr121
         E10RTH = 0x56,
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         E11TTH = 0x57,
 

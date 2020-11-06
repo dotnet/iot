@@ -1,6 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -14,7 +13,7 @@ namespace Iot.Device.Max7219
     /// </summary>
     public class MatrixGraphics
     {
-        readonly Max7219 _device;
+        private readonly Max7219 _device;
 
         /// <summary>
         /// Constructs MatrixGraphics instance
@@ -24,9 +23,15 @@ namespace Iot.Device.Max7219
         public MatrixGraphics(Max7219 device, IFont font)
         {
             if (device == null)
+            {
                 throw new ArgumentNullException(nameof(device));
+            }
+
             if (font == null)
+            {
                 throw new ArgumentNullException(nameof(font));
+            }
+
             _device = device;
             Font = font;
         }
@@ -47,6 +52,7 @@ namespace Iot.Device.Max7219
             {
                 _device[deviceId, col] = charBytes[col];
             }
+
             if (flush)
             {
                 _device.Flush();
@@ -59,7 +65,10 @@ namespace Iot.Device.Max7219
         public void ScrollUp(bool flush = true)
         {
             for (var i = 0; i < _device.Length; i++)
+            {
                 _device[i] = (byte)(_device[i] >> 1);
+            }
+
             if (flush)
             {
                 _device.Flush();
@@ -75,6 +84,7 @@ namespace Iot.Device.Max7219
             {
                 _device[i] = (byte)((_device[i] << 1) & 0xff);
             }
+
             if (flush)
             {
                 _device.Flush();
@@ -90,6 +100,7 @@ namespace Iot.Device.Max7219
             {
                 _device[i - 1] = _device[i];
             }
+
             _device[_device.Length - 1] = value;
             if (flush)
             {
@@ -106,6 +117,7 @@ namespace Iot.Device.Max7219
             {
                 _device[i] = _device[i - 1];
             }
+
             _device[0] = value;
             if (flush)
             {
@@ -114,8 +126,8 @@ namespace Iot.Device.Max7219
         }
 
         /// <summary>
-        /// Shows a message on the device. 
-        /// If it's longer then the total width (or <see paramref="alwaysScroll"/> == true), 
+        /// Shows a message on the device.
+        /// If it's longer then the total width (or <see paramref="alwaysScroll"/> == true),
         /// it transitions the text message across the devices from right-to-left.
         /// </summary>
         public void ShowMessage(string text, int delayInMilliseconds = 50, bool alwaysScroll = false)
@@ -136,10 +148,12 @@ namespace Iot.Device.Max7219
                         Thread.Sleep(delayInMilliseconds);
 
                     }
+
                     ScrollLeft(0, true);
                     Thread.Sleep(delayInMilliseconds);
 
                 }
+
                 for (; pos > 0; pos--)
                 {
                     ScrollLeft(0, true);
@@ -148,7 +162,7 @@ namespace Iot.Device.Max7219
             }
             else
             {
-                //calculate margin to display text centered
+                // calculate margin to display text centered
                 var margin = (_device.Length - textBytesLength) / 2;
                 _device.ClearAll(false);
                 var pos = margin;
@@ -158,8 +172,10 @@ namespace Iot.Device.Max7219
                     {
                         _device[pos++] = b;
                     }
+
                     pos++;
                 }
+
                 _device.Flush();
             }
         }

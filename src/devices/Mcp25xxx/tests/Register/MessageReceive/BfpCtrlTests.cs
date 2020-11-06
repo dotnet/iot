@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using Iot.Device.Mcp25xxx.Register;
 using Iot.Device.Mcp25xxx.Register.MessageReceive;
@@ -41,7 +40,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Register.MessageReceive
             Assert.Equal(rx0bfPinState, bfpCtrl.Rx0bfPinState);
             Assert.Equal(rx1bfPinState, bfpCtrl.Rx1bfPinState);
             Assert.Equal(expectedByte, bfpCtrl.ToByte());
-            Assert.Equal(expectedByte, new BfpCtrl(expectedByte).ToByte());            
+            Assert.Equal(expectedByte, new BfpCtrl(expectedByte).ToByte());
         }
     }
 }

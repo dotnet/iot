@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -45,9 +44,11 @@ namespace Iot.Device.Mcp23xxx.Tests
 
             // Check the output latches after enabling and setting
             // different bits.
-            device.Enable(); 
+            device.Enable();
             for (int i = 0; i < 4; i++)
+            {
                 controller.OpenPin(i, PinMode.Output);
+            }
 
             controller.Write(0, PinValue.High);
             Assert.Equal(1, device.ReadByte(Register.OLAT));
@@ -84,22 +85,22 @@ namespace Iot.Device.Mcp23xxx.Tests
 
                 // Don't want to use the same bus mock for each
                 I2cDeviceMock i2c = new I2cDeviceMock(1);
-                devices.Add(new TestDevice(new Mcp23008(i2c, reset: 1, masterController: new GpioController(PinNumberingScheme.Logical, s_driverMock)), i2c.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23008(i2c, reset: 1, controller: new GpioController(PinNumberingScheme.Logical, s_driverMock)), i2c.DeviceMock));
                 i2c = new I2cDeviceMock(1);
-                devices.Add(new TestDevice(new Mcp23009(i2c, reset: 1, masterController: new GpioController(PinNumberingScheme.Logical, s_driverMock)), i2c.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23009(i2c, reset: 1, controller: new GpioController(PinNumberingScheme.Logical, s_driverMock)), i2c.DeviceMock));
                 i2c = new I2cDeviceMock(2);
-                devices.Add(new TestDevice(new Mcp23017(i2c, reset: 1, masterController: new GpioController(PinNumberingScheme.Logical, s_driverMock)), i2c.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23017(i2c, reset: 1, controller: new GpioController(PinNumberingScheme.Logical, s_driverMock)), i2c.DeviceMock));
                 i2c = new I2cDeviceMock(2);
-                devices.Add(new TestDevice(new Mcp23018(i2c, reset: 1, masterController: new GpioController(PinNumberingScheme.Logical, s_driverMock)), i2c.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23018(i2c, reset: 1, controller: new GpioController(PinNumberingScheme.Logical, s_driverMock)), i2c.DeviceMock));
 
                 SpiDeviceMock spi = new SpiDeviceMock(1);
-                devices.Add(new TestDevice(new Mcp23s08(spi, 0x20, reset: 1, masterController: new GpioController(PinNumberingScheme.Logical, s_driverMock)), spi.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23s08(spi, 0x20, reset: 1, controller: new GpioController(PinNumberingScheme.Logical, s_driverMock)), spi.DeviceMock));
                 spi = new SpiDeviceMock(1);
-                devices.Add(new TestDevice(new Mcp23s09(spi, reset: 1, masterController: new GpioController(PinNumberingScheme.Logical, s_driverMock)), spi.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23s09(spi, reset: 1, controller: new GpioController(PinNumberingScheme.Logical, s_driverMock)), spi.DeviceMock));
                 spi = new SpiDeviceMock(2);
-                devices.Add(new TestDevice(new Mcp23s17(spi, 0x20, reset: 1, masterController: new GpioController(PinNumberingScheme.Logical, s_driverMock)), spi.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23s17(spi, 0x20, reset: 1, controller: new GpioController(PinNumberingScheme.Logical, s_driverMock)), spi.DeviceMock));
                 spi = new SpiDeviceMock(2);
-                devices.Add(new TestDevice(new Mcp23s18(spi, reset: 1, masterController: new GpioController(PinNumberingScheme.Logical, s_driverMock)), spi.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23s18(spi, reset: 1, controller: new GpioController(PinNumberingScheme.Logical, s_driverMock)), spi.DeviceMock));
                 return devices;
             }
         }

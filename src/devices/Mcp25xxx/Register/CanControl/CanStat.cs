@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using Iot.Device.Mcp25xxx.Tests.Register.CanControl;
 
@@ -41,30 +40,37 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
             /// No Interrupt.
             /// </summary>
             No = 0,
+
             /// <summary>
             /// Error interrupt.
             /// </summary>
             Error = 1,
+
             /// <summary>
             /// Wake-up interrupt.
             /// </summary>
             WakeUp = 2,
+
             /// <summary>
             /// TXB0 interrupt.
             /// </summary>
             TxB0 = 3,
+
             /// <summary>
             /// TXB1 interrupt.
             /// </summary>
             TxB1 = 4,
+
             /// <summary>
             /// TXB2 interrupt.
             /// </summary>
             TxB2 = 5,
+
             /// <summary>
             /// RXB0 interrupt.
             /// </summary>
             RxB0 = 6,
+
             /// <summary>
             /// RXB1 interrupt.
             /// </summary>

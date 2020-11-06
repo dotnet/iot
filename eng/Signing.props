@@ -1,0 +1,8 @@
+<Project>
+  <Target Name="RemoveSymbolPackagesFromSigning" BeforeTargets="Sign">
+    <ItemGroup>
+      <!-- Remove symbol nuget packages from items to sign -->
+      <ItemsToSign Remove="%(ItemsToSign.Identity)" Condition="$([System.String]::Copy('%(ItemsToSign.Identity)').EndsWith('.symbols.nupkg'))" />
+    </ItemGroup>
+  </Target>
+</Project>

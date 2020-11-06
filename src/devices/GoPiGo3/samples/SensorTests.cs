@@ -1,23 +1,22 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.GoPiGo3.Models;
-using Iot.Device.GoPiGo3.Sensors;
 using System;
 using System.Threading;
+using Iot.Device.GoPiGo3.Models;
+using Iot.Device.GoPiGo3.Sensors;
 
-namespace GoPiGo3.sample
+namespace GoPiGo3.Samples
 {
-    partial class Program
+    public partial class Program
     {
-        static private void TestUltrasound()
+        private static void TestUltrasound()
         {
             UltraSonicSensor ultraSonic = new UltraSonicSensor(_goPiGo3, GrovePort.Grove1);
             Console.WriteLine($"Test {ultraSonic.SensorName} on port {ultraSonic.Port}. Gives the distance. Press enter to stop the test.");
             AddLines();
             while (!Console.KeyAvailable)
-            {                
+            {
                 Console.CursorLeft = 0;
                 Console.Write($"Value: {ultraSonic.Value}, ValueAsString: {ultraSonic.ToString()}");
                 Thread.Sleep(100);
@@ -25,7 +24,7 @@ namespace GoPiGo3.sample
             }
         }
 
-        static private void TestBuzzer()
+        private static void TestBuzzer()
         {
             int[] notes = new int[] { 261, 293, 329, 349, 392, 440, 493, 523 };
             Buzzer buzzer = new Buzzer(_goPiGo3, GrovePort.Grove1);
@@ -37,7 +36,10 @@ namespace GoPiGo3.sample
             {
                 buzzer.Value = notes[i++];
                 if (i == notes.Length)
+                {
                     i = 0;
+                }
+
                 Thread.Sleep(1000);
             }
 
@@ -48,7 +50,10 @@ namespace GoPiGo3.sample
             {
                 buzzer.Value = notes[i++];
                 if (i == notes.Length)
+                {
                     i = 0;
+                }
+
                 Thread.Sleep(1000);
             }
 
@@ -59,14 +64,17 @@ namespace GoPiGo3.sample
             {
                 buzzer.Value = notes[i++];
                 if (i == notes.Length)
+                {
                     i = 0;
+                }
+
                 Thread.Sleep(1000);
             }
 
             buzzer.Stop();
         }
 
-        static private void TestPotentiometer()
+        private static void TestPotentiometer()
         {
             Buzzer buzzer = new Buzzer(_goPiGo3, GrovePort.Grove1);
             PotentiometerSensor potentiometerSensor = new PotentiometerSensor(_goPiGo3, GrovePort.Grove2);
@@ -74,15 +82,16 @@ namespace GoPiGo3.sample
             AddLines();
             buzzer.Value = potentiometerSensor.Value;
             buzzer.Start();
-            while(!Console.KeyAvailable)
+            while (!Console.KeyAvailable)
             {
                 buzzer.Value = potentiometerSensor.Value;
                 Thread.Sleep(100);
             }
+
             buzzer.Stop();
         }
 
-        static private void TestSound()
+        private static void TestSound()
         {
             SoundSensor soundSensor = new SoundSensor(_goPiGo3, GrovePort.Grove1);
             Console.WriteLine($"Test {soundSensor.SensorName} on port {soundSensor.Port}. Press a key to finish the test");
@@ -96,7 +105,7 @@ namespace GoPiGo3.sample
             }
         }
 
-        static private void TestRelay()
+        private static void TestRelay()
         {
             Relay relay = new Relay(_goPiGo3, GrovePort.Grove1);
             Console.WriteLine($"Test {relay.SensorName} on port {relay.Port}, will change the state of the relay from on to off, reverse the polarity, turn on and off, reverse the polarity and turn on an off again.");
@@ -125,7 +134,7 @@ namespace GoPiGo3.sample
             Thread.Sleep(2000);
         }
 
-        static private void TestButton()
+        private static void TestButton()
         {
             Button button = new Button(_goPiGo3, GrovePort.Grove2);
             Console.WriteLine($"Test {button.SensorName} on port {button.Port}. Press enter to stop the test.");
@@ -139,7 +148,7 @@ namespace GoPiGo3.sample
             }
         }
 
-        static private void TestLedPwmLightSensor()
+        private static void TestLedPwmLightSensor()
         {
             LedPwm ledPwm = new LedPwm(_goPiGo3, GrovePort.Grove2);
             LightSensor lightSensor = new LightSensor(_goPiGo3, GrovePort.Grove1);

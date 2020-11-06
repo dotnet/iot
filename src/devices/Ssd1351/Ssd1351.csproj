@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
     <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
@@ -10,10 +10,8 @@
     <Compile Include="Command\*.cs" />
     <Compile Include="*.cs" />
     <None Include="README.md" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
-    <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview4.19164.7" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
   </ItemGroup>
   
 </Project>

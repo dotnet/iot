@@ -1,18 +1,33 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Device.Gpio.Drivers;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 
 namespace System.Device.Gpio
 {
     /// <summary>
     /// Represents a general-purpose I/O (GPIO) controller.
     /// </summary>
-    public sealed partial class GpioController : IDisposable
+    public sealed class GpioController : IDisposable
     {
+        // Constants used to check the hardware on linux
+        private const string CpuInfoPath = "/proc/cpuinfo";
+        private const string RaspberryPiHardware = "BCM2835";
+
+        // Constants used to check the hardware on Windows
+        private const string BaseBoardProductRegistryValue = @"SYSTEM\HardwareConfig\Current\BaseBoardProduct";
+        private const string RaspberryPi2Product = "Raspberry Pi 2";
+        private const string RaspberryPi3Product = "Raspberry Pi 3";
+
+        private const string HummingBoardProduct = "HummingBoard-Edge";
+        private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
+
         private readonly GpioDriver _driver;
         private readonly HashSet<int> _openPins;
 
@@ -65,8 +80,9 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("The selected pin is already open.");
+                throw new InvalidOperationException($"Pin {logicalPinNumber} is already open.");
             }
+
             _driver.OpenPin(logicalPinNumber);
             _openPins.Add(logicalPinNumber);
         }
@@ -91,8 +107,9 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not close a pin that is not open.");
+                throw new InvalidOperationException($"Can not close pin {logicalPinNumber} because it is not open.");
             }
+
             _driver.ClosePin(logicalPinNumber);
             _openPins.Remove(logicalPinNumber);
         }
@@ -107,12 +124,14 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not set a mode to a pin that is not open.");
+                throw new InvalidOperationException($"Can not set a mode to pin {logicalPinNumber} because it is not open.");
             }
+
             if (!_driver.IsPinModeSupported(logicalPinNumber, mode))
             {
-                throw new InvalidOperationException("The pin does not support the selected mode.");
+                throw new InvalidOperationException($"Pin {pinNumber} does not support mode {mode}.");
             }
+
             _driver.SetPinMode(logicalPinNumber, mode);
         }
 
@@ -126,8 +145,9 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not get the mode of a pin that is not open.");
+                throw new InvalidOperationException($"Can not get the mode of pin {logicalPinNumber} because it is not open.");
             }
+
             return _driver.GetPinMode(logicalPinNumber);
         }
 
@@ -164,12 +184,9 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not read from a pin that is not open.");
+                throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not open.");
             }
-            if (_driver.GetPinMode(logicalPinNumber) == PinMode.Output)
-            {
-                throw new InvalidOperationException("Can not read from a pin that is set to Output mode.");
-            }
+
             return _driver.Read(logicalPinNumber);
         }
 
@@ -183,12 +200,14 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not write to a pin that is not open.");
+                throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not open.");
             }
+
             if (_driver.GetPinMode(logicalPinNumber) != PinMode.Output)
             {
-                throw new InvalidOperationException("Can not write to a pin that is not set to Output mode.");
+                throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not set to Output mode.");
             }
+
             _driver.Write(logicalPinNumber, value);
         }
 
@@ -219,8 +238,9 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not wait for events from a pin that is not open.");
+                throw new InvalidOperationException($"Can not wait for events from pin {logicalPinNumber} because it is not open.");
             }
+
             return _driver.WaitForEvent(logicalPinNumber, eventTypes, cancellationToken);
         }
 
@@ -251,8 +271,9 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not wait for events from a pin that is not open.");
+                throw new InvalidOperationException($"Can not wait for events from pin {logicalPinNumber} because it is not open.");
             }
+
             return _driver.WaitForEventAsync(logicalPinNumber, eventTypes, token);
         }
 
@@ -267,8 +288,9 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not add callback for a pin that is not open.");
+                throw new InvalidOperationException($"Can not add callback for pin {logicalPinNumber} because it is not open.");
             }
+
             _driver.AddCallbackForPinValueChangedEvent(logicalPinNumber, eventTypes, callback);
         }
 
@@ -282,17 +304,19 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not add callback for a pin that is not open.");
+                throw new InvalidOperationException($"Can not remove callback for pin {logicalPinNumber} because it is not open.");
             }
+
             _driver.RemoveCallbackForPinValueChangedEvent(logicalPinNumber, callback);
         }
 
         private void Dispose(bool disposing)
         {
-            foreach(int pin in _openPins)
+            foreach (int pin in _openPins)
             {
                 _driver.ClosePin(pin);
             }
+
             _openPins.Clear();
             _driver.Dispose();
         }
@@ -326,6 +350,78 @@ namespace System.Device.Gpio
                 int pin = pinValuePairs[i].PinNumber;
                 pinValuePairs[i] = new PinValuePair(pin, Read(pin));
             }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GpioController"/> class that will use the specified numbering scheme.
+        /// The controller will default to use the driver that best applies given the platform the program is executing on.
+        /// </summary>
+        /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
+        public GpioController(PinNumberingScheme numberingScheme)
+            : this(numberingScheme, GetBestDriverForBoard())
+        {
+        }
+
+        private static GpioDriver GetBestDriverForBoard()
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return GetBestDriverForBoardOnWindows();
+            }
+            else
+            {
+                return GetBestDriverForBoardOnLinux();
+            }
+        }
+
+        /// <summary>
+        /// Attempt to get the best applicable driver for the board the program is executing on.
+        /// </summary>
+        /// <returns>A driver that works with the board the program is executing on.</returns>
+        private static GpioDriver GetBestDriverForBoardOnLinux()
+        {
+            RaspberryPi3LinuxDriver? internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
+
+            if (internalDriver is object)
+            {
+                return new RaspberryPi3Driver(internalDriver);
+            }
+
+            return UnixDriver.Create();
+        }
+
+        /// <summary>
+        /// Attempt to get the best applicable driver for the board the program is executing on.
+        /// </summary>
+        /// <returns>A driver that works with the board the program is executing on.</returns>
+        /// <remarks>
+        ///     This really feels like it needs a driver-based pattern, where each driver exposes a static method:
+        ///     public static bool IsSpecificToCurrentEnvironment { get; }
+        ///     The GpioController could use reflection to find all GpioDriver-derived classes and call this
+        ///     static method to determine if the driver considers itself to be the best match for the environment.
+        /// </remarks>
+        private static GpioDriver GetBestDriverForBoardOnWindows()
+        {
+            string? baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
+
+            if (baseBoardProduct is null)
+            {
+                throw new Exception("Single board computer type cannot be detected.");
+            }
+
+            if (baseBoardProduct == RaspberryPi3Product || baseBoardProduct.StartsWith($"{RaspberryPi3Product} ") ||
+                baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))
+            {
+                return new RaspberryPi3Driver();
+            }
+
+            if (baseBoardProduct == HummingBoardProduct || baseBoardProduct.StartsWith($"{HummingBoardProduct} "))
+            {
+                return new HummingBoardDriver();
+            }
+
+            // Default for Windows IoT Core on a non-specific device
+            return new Windows10Driver();
         }
     }
 }

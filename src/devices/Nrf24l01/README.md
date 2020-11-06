@@ -47,7 +47,7 @@ private static void Receiver_ReceivedData(object sender, DataReceivedEventArgs e
     }
     Console.WriteLine();
 
-    Console.WriteLine($"Massage: {msg}");
+    Console.WriteLine($"Message: {msg}");
     Console.WriteLine();
 }
 ```

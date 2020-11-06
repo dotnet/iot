@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Mcp3428
 {
@@ -44,7 +43,7 @@ namespace Iot.Device.Mcp3428
         /// Accuracy of the voltage measurement
         /// </summary>
         /// <value>The LSB value.</value>
-        public double Accuracy => (double)1 / VoltageDivisor;
+        public double Accuracy => 1.0 / VoltageDivisor;
 
         /// <summary>
         /// Gets the voltage.

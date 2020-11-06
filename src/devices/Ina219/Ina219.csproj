@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <!--Disabling default items so samples source won't get build by the main library-->
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="*.cs" />
+    <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />
+    <None Include="README.md" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+  </ItemGroup>
+
+</Project>

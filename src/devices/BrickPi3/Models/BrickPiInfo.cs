@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 
@@ -12,6 +11,23 @@ namespace Iot.Device.BrickPi3.Models
     public class BrickPiInfo
     {
         /// <summary>
+        /// Instantiate BrickPiInfo object
+        /// <param name="manufacturer">Manufacturer information</param>
+        /// <param name="board">Board information</param>
+        /// <param name="hardwareVersion">Hardware version</param>
+        /// <param name="softwareVersion">Software version</param>
+        /// <param name="id">Id of the brick, can be 1 to 255</param>
+        /// </summary>
+        public BrickPiInfo(string manufacturer, string board, string hardwareVersion, string softwareVersion, string id)
+        {
+            Manufacturer = manufacturer;
+            Board = board;
+            HardwareVersion = hardwareVersion;
+            SoftwareVersion = softwareVersion;
+            Id = id;
+        }
+
+        /// <summary>
         /// Manufacturer information
         /// </summary>
         public string Manufacturer { get; set; }
@@ -22,7 +38,7 @@ namespace Iot.Device.BrickPi3.Models
         public string Board { get; set; }
 
         /// <summary>
-        /// HArdware version
+        /// Hardware version
         /// </summary>
         public string HardwareVersion { get; set; }
 
@@ -56,12 +72,13 @@ namespace Iot.Device.BrickPi3.Models
 
         private int[] GetVersionsFromString(string toconvert)
         {
-            if (toconvert == "")
-                return null;
             var split = toconvert.Split('.');
             List<int> ret = new List<int>();
             foreach (var elem in split)
+            {
                 ret.Add(int.Parse(elem));
+            }
+
             return ret.ToArray();
         }
     }

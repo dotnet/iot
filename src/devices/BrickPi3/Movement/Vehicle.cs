@@ -1,14 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.BrickPi3.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3.Movement
 {
@@ -17,10 +16,10 @@ namespace Iot.Device.BrickPi3.Movement
     /// </summary>
     public sealed class Vehicle
     {
-        private Brick _brick = null;
-        private bool _directionOpposite = false;
+        private Brick _brick;
+        private bool _directionOpposite;
         private int _correctedDir = 1;
-        private Timer _timer = null;
+        private Timer? _timer;
 
         /// <summary>
         /// Create a vehicule with 2 motors, one left and one right
@@ -30,7 +29,7 @@ namespace Iot.Device.BrickPi3.Movement
         /// <param name="right">Motor port for right motor</param>
         public Vehicle(Brick brick, BrickPortMotor left, BrickPortMotor right)
         {
-            this._brick = brick;
+            _brick = brick;
             PortLeft = left;
             PortRight = right;
         }
@@ -126,7 +125,7 @@ namespace Iot.Device.BrickPi3.Movement
         }
 
         /// <summary>
-        /// Return the BrickPortMotor of the left motor 
+        /// Return the BrickPortMotor of the left motor
         /// </summary>
         public BrickPortMotor PortLeft { get; }
 
@@ -140,31 +139,48 @@ namespace Iot.Device.BrickPi3.Movement
         /// </summary>
         public bool DirectionOpposite
         {
-            get { return _directionOpposite; }
+            get
+            {
+                return _directionOpposite;
+            }
 
             set
             {
                 _directionOpposite = value;
                 if (_directionOpposite)
+                {
                     _correctedDir = -1;
+                }
                 else
+                {
                     _correctedDir = 1;
+                }
             }
         }
 
         private void RunMotorSyncTime(BrickPortMotor[] ports, int[] speeds, int timeout)
         {
             if ((ports == null) || (speeds == null))
+            {
                 return;
-            if (ports.Length != speeds.Length)
-                return;
-            //create a timer for the needed time to run
-            if (_timer == null)
-                _timer = new Timer(RunUntil, ports, TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
-            else
-                _timer.Change(TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
+            }
 
-            //initialize the speed and enable motors
+            if (ports.Length != speeds.Length)
+            {
+                return;
+            }
+
+            // create a timer for the needed time to run
+            if (_timer == null)
+            {
+                _timer = new Timer(RunUntil, ports, TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
+            }
+            else
+            {
+                _timer.Change(TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
+            }
+
+            // initialize the speed and enable motors
             for (int i = 0; i < ports.Length; i++)
             {
                 StartMotor((int)ports[i], speeds[i]);
@@ -178,25 +194,27 @@ namespace Iot.Device.BrickPi3.Movement
                 {
                     status |= IsRunning(ports[i]);
                 }
+
                 nonstop = status;
             }
         }
 
-        private void RunUntil(object state)
+        private void RunUntil(object? state)
         {
             if (state == null)
+            {
                 return;
-            //stop all motors!
+            }
+
+            // stop all motors!
             BrickPortMotor[] ports = (BrickPortMotor[])state;
             for (int i = 0; i < ports.Length; i++)
             {
                 StopMotor((int)ports[i]);
             }
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+
+            _timer?.Dispose();
+            _timer = null!;
         }
 
         private void StopMotor(int port)
@@ -213,17 +231,25 @@ namespace Iot.Device.BrickPi3.Movement
         private void RunMotorSyncDegrees(BrickPortMotor[] ports, int[] speeds, int[] degrees)
         {
             if ((ports == null) || (speeds == null) || degrees == null)
+            {
                 return;
+            }
+
             if ((ports.Length != speeds.Length) && (degrees.Length != speeds.Length))
+            {
                 return;
-            //make sure we have only positive degrees
+            }
+
+            // make sure we have only positive degrees
             for (int i = 0; i < degrees.Length; i++)
             {
                 if (degrees[i] < 0)
+                {
                     degrees[i] = -degrees[i];
+                }
             }
 
-            //initialize the speed and enable motors
+            // initialize the speed and enable motors
             int[] initval = new int[ports.Length];
             for (int i = 0; i < ports.Length; i++)
             {
@@ -233,8 +259,8 @@ namespace Iot.Device.BrickPi3.Movement
                     StartMotor((int)ports[i], speeds[i]);
                 }
                 catch (Exception)
-                { }
-
+                {
+                }
             }
 
             bool nonstop = true;
@@ -259,12 +285,15 @@ namespace Iot.Device.BrickPi3.Movement
                                 StopMotor((int)ports[i]);
                             }
                         }
+
                         status |= IsRunning(ports[i]);
                     }
+
                     nonstop = status;
                 }
                 catch (Exception)
-                { }
+                {
+                }
             }
         }
 
@@ -275,20 +304,27 @@ namespace Iot.Device.BrickPi3.Movement
         public bool IsRunning()
         {
             if (IsRunning(PortLeft) || IsRunning(PortRight))
+            {
                 return true;
+            }
+
             return false;
         }
 
         private bool IsRunning(BrickPortMotor port)
         {
-            //if (brick.BrickPi.Motor[(int)port].Enable == 0)
+            // if (brick.BrickPi.Motor[(int)port].Enable == 0)
             try
             {
                 if (_brick.GetMotorStatus((byte)port).Speed == 0)
+                {
                     return false;
+                }
             }
             catch (Exception)
-            { }
+            {
+            }
+
             return true;
         }
     }

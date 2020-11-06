@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.GrovePiDevice.Models
 {
@@ -11,10 +10,13 @@ namespace Iot.Device.GrovePiDevice.Models
     {
         /// <summary>DHT11</summary>
         Dht11 = 0,
+
         /// <summary>DHT22</summary>
         Dht22 = 1,
+
         /// <summary>DHT21</summary>
         Dht21 = 2,
+
         /// <summary>AM2301</summary>
         Am2301 = 3
     }

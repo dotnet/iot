@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -19,7 +18,7 @@ namespace Iot.Device.SenseHat.Samples
             {
                 while (true)
                 {
-                    Console.WriteLine($"Acceleration={ag.Acceleration}"); 
+                    Console.WriteLine($"Acceleration={ag.Acceleration}");
                     Console.WriteLine($"AngularRate={ag.AngularRate}");
                     Thread.Sleep(100);
                 }

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -11,6 +10,25 @@ namespace Iot.Device.Bno055
     /// </summary>
     public class Info
     {
+        /// <summary>
+        /// Instantiates an Info object
+        /// <param name="chipId">Chip identifier</param>
+        /// <param name="acceleratorId">Accelerometer identifier</param>
+        /// <param name="magnetometerId">Magnetometer identifier</param>
+        /// <param name="gyroscopeId">Gyroscope identifier</param>
+        /// <param name="firmwareVersion">Firmware version</param>
+        /// <param name="bootloaderVersion">Bootloader version</param>
+        /// </summary>
+        public Info(byte chipId, byte acceleratorId, byte magnetometerId, byte gyroscopeId, Version firmwareVersion, Version bootloaderVersion)
+        {
+            ChipId = ChipId;
+            AcceleratorId = acceleratorId;
+            MagnetometerId = magnetometerId;
+            GyroscopeId = gyroscopeId;
+            FirmwareVersion = firmwareVersion;
+            BootloaderVersion = bootloaderVersion;
+        }
+
         /// <summary>
         /// Chip identifier
         /// </summary>

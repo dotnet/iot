@@ -1,6 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Buzzer.Samples
 {
@@ -13,6 +12,9 @@ namespace Iot.Device.Buzzer.Samples
         /// Create Pause element.
         /// </summary>
         /// <param name="duration">Duration of pause in melody sequence timeline.</param>
-        public PauseElement(Duration duration) : base(duration) {}
+        public PauseElement(Duration duration)
+            : base(duration)
+        {
+        }
     }
 }

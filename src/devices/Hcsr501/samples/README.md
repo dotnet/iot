@@ -23,18 +23,16 @@
 
 ## Code
 ```C#
-GpioController ledController = new GpioController(PinNumberingScheme.Logical);
-// open PIN 27 for led
+GpioController ledController = new GpioController();
 ledController.OpenPin(27, PinMode.Output);
 
-using(Hcsr501 sensor = Hcsr501(17, PinNumberingScheme.Logical))
+using (Iot.Device.Hcsr501.Hcsr501 sensor =
+    new Iot.Device.Hcsr501.Hcsr501(17))
 {
-    // loop
     while (true)
     {
-        // Adjusting the detection distance and time by rotating the potentiometer on the sensor
-        // For more information, you can see the picture above or the datasheet in src/devices/Hcsr501/README.md
-        if (sensor.IsMotionDetected == true)
+        // adjusting the detection distance and time by rotating the potentiometer on the sensor
+        if (sensor.IsMotionDetected)
         {
             // turn the led on when the sensor detected infrared heat
             ledController.Write(27, PinValue.High);
@@ -47,7 +45,6 @@ using(Hcsr501 sensor = Hcsr501(17, PinNumberingScheme.Logical))
             Console.WriteLine("Undetected! Turn the LED off.");
         }
 
-        // wait for a second
         Thread.Sleep(1000);
     }
 }

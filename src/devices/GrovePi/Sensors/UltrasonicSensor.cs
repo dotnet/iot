@@ -1,19 +1,18 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.GrovePiDevice.Models;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Threading;
+using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
     /// <summary>
     /// UltrasonicSensor class to support ultrasonic Grove sensors
     /// </summary>
-    public class UltrasonicSensor 
+    public class UltrasonicSensor
     {
         private GrovePi _grovePi;
 
@@ -30,7 +29,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public UltrasonicSensor(GrovePi grovePi, GrovePort port)
         {
             if (!SupportedPorts.Contains(port))
+            {
                 throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
+            }
+
             _grovePi = grovePi;
             _port = port;
         }
@@ -53,9 +55,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
         }
 
         /// <summary>
-        /// Returns the distance formated in centimeter
+        /// Returns the distance formatted in centimeters.
         /// </summary>
-        /// <returns>Returns the distance formated in centimeter</returns>
+        /// <returns>Returns the distance formatted in centimeters</returns>
         public override string ToString() => $"{Value} cm";
 
         /// <summary>

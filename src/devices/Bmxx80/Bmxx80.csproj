@@ -1,14 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Bme280.cs" />
     <Compile Include="Bme680.cs" />
+    <Compile Include="Bme680HeaterProfile.cs" />
+    <Compile Include="Bme680HeaterProfileConfig.cs" />
+    <Compile Include="Bme680Mask.cs" />
     <Compile Include="Bmp280.cs" />
     <Compile Include="Bmx280Base.cs" />
     <Compile Include="Bmxx80Base.cs" />
@@ -17,7 +19,8 @@
     <Compile Include="CalibrationData\Bmp280CalibrationData.cs" />
     <Compile Include="CalibrationData\Bmxx80CalibrationData.cs" />
     <Compile Include="DeviceStatus.cs" />
-    <Compile Include="FilteringMode.cs" />
+    <Compile Include="FilteringMode\Bme680FilteringMode.cs" />
+    <Compile Include="FilteringMode\Bmx280FilteringMode.cs" />
     <Compile Include="PowerMode\Bme680PowerMode.cs" />
     <Compile Include="PowerMode\Bmx280PowerMode.cs" />
     <Compile Include="Register\Bme680Register.cs" />
@@ -26,10 +29,8 @@
     <Compile Include="Register\Bme280Register.cs" />
     <Compile Include="Sampling.cs" />
     <Compile Include="StandbyTime.cs" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="..\Units\Units.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

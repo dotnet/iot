@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Spi;
@@ -43,6 +42,7 @@ namespace Iot.Device.Mcp23xxx.Tests
             {
                 mcp23S08.WriteByte(Register.GPIO, 0xA1);
             }
+
             Assert.Equal(expectedOpCode, spiMock.LastInitialWriteByte);
         }
 
@@ -50,9 +50,10 @@ namespace Iot.Device.Mcp23xxx.Tests
         {
             public byte LastInitialWriteByte { get; private set; }
 
-            public override SpiConnectionSettings ConnectionSettings => null;
-
-            public override void Read(Span<byte> buffer) {}
+            public override SpiConnectionSettings ConnectionSettings => throw new NotImplementedException("Not implemented");
+            public override void Read(Span<byte> buffer)
+            {
+            }
 
             public override byte ReadByte() => 0x42;
 

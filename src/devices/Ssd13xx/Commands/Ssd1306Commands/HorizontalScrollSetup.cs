@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
 {
@@ -11,18 +10,25 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
     {
         /// <summary>Frames2</summary>
         Frames2 = 0x07,
+
         /// <summary>Frames3</summary>
         Frames3 = 0x04,
+
         /// <summary>Frames4</summary>
         Frames4 = 0x05,
+
         /// <summary>Frames5</summary>
         Frames5 = 0x00,
+
         /// <summary>Frames25</summary>
         Frames25 = 0x06,
+
         /// <summary>Frames64</summary>
         Frames64 = 0x01,
+
         /// <summary>Frames128</summary>
         Frames128 = 0x02,
+
         /// <summary>Frames256</summary>
         Frames256 = 0x03
     }
@@ -95,6 +101,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
             /// Right horizontal scroll.
             /// </summary>
             Right = 0x26,
+
             /// <summary>
             /// Left horizontal scroll.
             /// </summary>

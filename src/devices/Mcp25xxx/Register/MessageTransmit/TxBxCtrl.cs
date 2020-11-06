@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -86,14 +85,17 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
             /// Lowest message priority.
             /// </summary>
             LowestMessage = 0,
+
             /// <summary>
             /// Low intermediate message priority.
             /// </summary>
             LowIntermediateMessage = 1,
+
             /// <summary>
             /// High intermediate message priority.
             /// </summary>
             HighIntermediateMessage = 2,
+
             /// <summary>
             /// Highest message priority.
             /// </summary>

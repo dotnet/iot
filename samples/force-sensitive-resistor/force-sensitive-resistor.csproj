@@ -2,15 +2,13 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RootNamespace>force_sensitive_resistor</RootNamespace>
+    <TargetFramework>net5.0</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(IotBindingsLibraryPath)Iot.Device.Bindings.csproj" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <PackageReference Include="System.Device.Gpio" Version="1.1.0-prerelease.20153.1" />
+    <PackageReference Include="Iot.Device.Bindings" Version="1.1.0-prerelease.20153.1" />
   </ItemGroup>
 
 </Project>

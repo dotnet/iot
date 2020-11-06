@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace System.Device.Gpio
 {
@@ -24,6 +23,7 @@ namespace System.Device.Gpio
         /// The change type that triggered the event.
         /// </summary>
         public PinEventTypes ChangeType { get; }
+
         /// <summary>
         /// The pin number that triggered the event.
         /// </summary>

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Pwm;
@@ -92,15 +91,15 @@ namespace Iot.Device.ServoMotor
         /// <param name="microseconds">The pulse width, in microseconds, to write to the servo motor.</param>
         public void WritePulseWidth(int microseconds)
         {
-            double dutyCyclePercentage = (double)microseconds / 1_000_000 * _pwmChannel.Frequency; // Convert to seconds 1st.
-            _pwmChannel.DutyCyclePercentage = dutyCyclePercentage;
+            double dutyCycle = (double)microseconds / 1_000_000 * _pwmChannel.Frequency; // Convert to seconds 1st.
+            _pwmChannel.DutyCycle = dutyCycle;
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
             _pwmChannel?.Dispose();
-            _pwmChannel = null;
+            _pwmChannel = null!;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Concurrent;
@@ -47,7 +46,7 @@ namespace Iot.Device.Mcp23xxx.Tests
         {
             public Mcp23xxx Device { get; }
             public Mcp23xxxChipMock ChipMock { get; }
-            public GpioController Controller { get; }   
+            public GpioController Controller { get; }
 
             public TestDevice(Mcp23xxx device, Mcp23xxxChipMock chipMock)
             {
@@ -87,7 +86,7 @@ namespace Iot.Device.Mcp23xxx.Tests
             private readonly I2cConnectionSettings _settings;
             public Mcp23xxxChipMock DeviceMock { get; private set; }
 
-            public I2cDeviceMock(int ports, I2cConnectionSettings settings = null)
+            public I2cDeviceMock(int ports, I2cConnectionSettings? settings = null)
             {
                 DeviceMock = new Mcp23xxxChipMock(ports, isSpi: false);
                 _settings = settings ?? new I2cConnectionSettings(0, 0x20);
@@ -116,8 +115,9 @@ namespace Iot.Device.Mcp23xxx.Tests
             private readonly bool _isSpi;
             // OLATB address is 0x15
             private readonly byte[] _registers;
-            private byte[] _lastReadBuffer;
-            private byte[] _lastWriteBuffer;
+#pragma warning disable SA1011
+            private byte[]? _lastReadBuffer;
+            private byte[]? _lastWriteBuffer;
 
             public Mcp23xxxChipMock(int ports, bool isSpi)
             {
@@ -136,7 +136,14 @@ namespace Iot.Device.Mcp23xxx.Tests
             {
                 _lastReadBuffer = buffer.ToArray();
                 if (_isSpi)
+                {
                     buffer = buffer.Slice(2);
+                }
+
+                if (_lastWriteBuffer is null)
+                {
+                    throw new Exception($"{nameof(Mcp23xxxChipMock)} is not correctly configured");
+                }
 
                 byte registerAddress = _lastWriteBuffer[0];
 
@@ -150,7 +157,10 @@ namespace Iot.Device.Mcp23xxx.Tests
             public void Write(ReadOnlySpan<byte> data)
             {
                 if (_isSpi)
+                {
                     data = data.Slice(1);
+                }
+
                 _lastWriteBuffer = data.ToArray();
 
                 byte registerAddress = data[0];
@@ -171,7 +181,6 @@ namespace Iot.Device.Mcp23xxx.Tests
                 }
             }
         }
-
 
         public class GpioDriverMock : GpioDriver
         {
@@ -199,7 +208,9 @@ namespace Iot.Device.Mcp23xxx.Tests
             protected override PinValue Read(int pinNumber)
             {
                 if (_pinValues.TryGetValue(pinNumber, out PinValue value))
+                {
                     return value;
+                }
 
                 return PinValue.Low;
             }

@@ -1,34 +1,35 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.BrickPi3.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Device.Spi;
 using System.Linq;
 using System.IO;
+using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3
 {
     /// <summary>
     /// The main Brick class allowing low level access to motors and sensors
     /// </summary>
-    public class Brick: IDisposable
+    public class Brick : IDisposable
     {
         // To store the Sensor types as well as date to be sent when it's an I2C sensor
         private SensorType[] _sensorType = { SensorType.None, SensorType.None, SensorType.None, SensorType.None };
+
         private byte[] _i2cInBytes = { 0, 0, 0, 0 };
-        //Initernals to initalize the SPI
-        private static SpiDevice _brickPiSPI = null;
+
+        // Internals to initalize the SPI
+        private SpiDevice _brickPiSPI;
         private BrickPiVoltage _brickPiVoltage = new BrickPiVoltage();
 
         #region Properties
 
         /// <summary>
         /// used to store the SPI Address
-        /// used mainly when multiple bricks in a raw or not the default SPI address 
+        /// used mainly when multiple bricks in a raw or not the default SPI address
         /// up to 254 addresses supported
         /// </summary>
         public byte SpiAddress { get; set; }
@@ -66,32 +67,21 @@ namespace Iot.Device.BrickPi3
         /// <param name="ChipSelectLine">The chip select line that the device is connected to</param>
         public Brick(byte spiAddress = 1, int busId = 0, int ChipSelectLine = 1)
         {
-            try
-            {
-                SpiAddress = spiAddress;
-                // SPI 0 is used on Raspberry with ChipSelectLine 1
-                var settings = new SpiConnectionSettings(busId, ChipSelectLine);
-                // 500K is the SPI communication with the brick
-                settings.ClockFrequency = 500000;
-                // see http://tightdev.net/SpiDev_Doc.pdf
-                settings.Mode = SpiMode.Mode0;
-                settings.DataBitLength = 8;
-                // as the SPI is a static, checking if it has already be initialised
-                if (_brickPiSPI == null)
-                {
-                    _brickPiSPI = SpiDevice.Create(settings);
-                }
-                BrickPi3Info = new BrickPiInfo();
-                BrickPi3Info.Manufacturer = GetManufacturer();
-                BrickPi3Info.Board = GetBoard();
-                BrickPi3Info.HardwareVersion = GetHardwareVersion();
-                BrickPi3Info.SoftwareVersion = GetFirmwareVersion();
-                BrickPi3Info.Id = GetId();
-            }
-            catch (Exception ex) when (ex is IOException)
-            {
-                Debug.Write($"Exception: {ex.Message}");
-            }
+            SpiAddress = spiAddress;
+            // SPI 0 is used on Raspberry with ChipSelectLine 1
+            var settings = new SpiConnectionSettings(busId, ChipSelectLine);
+            // 500K is the SPI communication with the brick
+            settings.ClockFrequency = 500000;
+            // see http://tightdev.net/SpiDev_Doc.pdf
+            settings.Mode = SpiMode.Mode0;
+            settings.DataBitLength = 8;
+            _brickPiSPI = SpiDevice.Create(settings);
+            BrickPi3Info = new BrickPiInfo(
+                GetManufacturer(),
+                GetBoard(),
+                GetHardwareVersion(),
+                GetFirmwareVersion(),
+                GetId());
         }
 
         /// <summary>
@@ -101,9 +91,12 @@ namespace Iot.Device.BrickPi3
         {
             // Reset the BrickPi.Set all the sensors' type to NONE, set the motors to float, and motors' limits and constants to default, and return control of the LED to the firmware.
             // reset all sensors
-            SetSensorType((byte)(SensorPort.Port1) + (byte)(SensorPort.Port2) + (byte)(SensorPort.Port3) + (byte)(SensorPort.Port4), SensorType.None);
+            SetSensorType(
+                (byte)(SensorPort.Port1) + (byte)(SensorPort.Port2) + (byte)(SensorPort.Port3) +
+                (byte)(SensorPort.Port4), SensorType.None);
             // turn off all motors
-            byte allmotors = (byte)(MotorPort.PortA) + (byte)(MotorPort.PortB) + (byte)(MotorPort.PortC) + (byte)(MotorPort.PortD);
+            byte allmotors = (byte)(MotorPort.PortA) + (byte)(MotorPort.PortB) + (byte)(MotorPort.PortC) +
+                             (byte)(MotorPort.PortD);
             SetMotorPower(allmotors, (byte)MotorSpeed.Float);
             // reset motor limits
             SetMotorLimits(allmotors);
@@ -205,7 +198,11 @@ namespace Iot.Device.BrickPi3
         /// <param name="Value">the value to be sent</param>
         public void SpiWrite24(SpiMessageType MessageType, int Value)
         {
-            byte[] outArray = { SpiAddress, (byte)MessageType, (byte)((Value >> 16) & 0xFF), (byte)((Value >> 8) & 0xFF), (byte)(Value & 0xFF) };
+            byte[] outArray =
+            {
+                SpiAddress, (byte)MessageType, (byte)((Value >> 16) & 0xFF), (byte)((Value >> 8) & 0xFF),
+                (byte)(Value & 0xFF)
+            };
             SpiTransferArray(outArray);
         }
 
@@ -216,7 +213,11 @@ namespace Iot.Device.BrickPi3
         /// <param name="Value">the value to be sent</param>
         public void SpiWrite32(SpiMessageType MessageType, int Value)
         {
-            byte[] outArray = { SpiAddress, (byte)MessageType, (byte)((Value >> 24) & 0xFF), (byte)((Value >> 16) & 0xFF), (byte)((Value >> 8) & 0xFF), (byte)(Value & 0xFF) };
+            byte[] outArray =
+            {
+                SpiAddress, (byte)MessageType, (byte)((Value >> 24) & 0xFF), (byte)((Value >> 16) & 0xFF),
+                (byte)((Value >> 8) & 0xFF), (byte)(Value & 0xFF)
+            };
             SpiTransferArray(outArray);
         }
 
@@ -231,8 +232,11 @@ namespace Iot.Device.BrickPi3
         public string GetManufacturer()
         {
             string retVal = string.Empty;
-            byte[] outArray = {SpiAddress, (byte)SpiMessageType.GetManufacturer,
-                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            byte[] outArray =
+            {
+                SpiAddress, (byte)SpiMessageType.GetManufacturer, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0
+            };
             byte[] reply = SpiTransferArray(outArray);
             if (reply[3] != 0xA5)
             {
@@ -252,6 +256,7 @@ namespace Iot.Device.BrickPi3
                     }
                 }
             }
+
             return retVal;
         }
 
@@ -262,8 +267,11 @@ namespace Iot.Device.BrickPi3
         public string GetBoard()
         {
             string retVal = string.Empty;
-            byte[] outArray = {SpiAddress, (byte)SpiMessageType.GetName,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            byte[] outArray =
+            {
+                SpiAddress, (byte)SpiMessageType.GetName, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0
+            };
             byte[] reply = SpiTransferArray(outArray);
 
             if (reply[3] == 0xA5)
@@ -284,6 +292,7 @@ namespace Iot.Device.BrickPi3
             {
                 throw new IOException("No SPI response");
             }
+
             return retVal;
         }
 
@@ -306,18 +315,21 @@ namespace Iot.Device.BrickPi3
         public string GetId()
         {
             string retVal = string.Empty;
-            byte[] outArray = {SpiAddress, (byte)SpiMessageType.GetId,
-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            byte[] outArray =
+            {
+                SpiAddress, (byte)SpiMessageType.GetId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            };
             byte[] reply = SpiTransferArray(outArray);
 
             if (reply[3] == 0xA5)
             {
-                retVal = string.Join("", reply.Skip(4).Take(16).Select((b) => b.ToString("X2")));
+                retVal = string.Join(string.Empty, reply.Skip(4).Take(16).Select((b) => b.ToString("X2")));
             }
             else
             {
                 throw new IOException("No SPI response");
             }
+
             return retVal;
         }
 
@@ -343,34 +355,53 @@ namespace Iot.Device.BrickPi3
             byte[] id_arr = new byte[16];
             if (id.Length != 32)
             {
-                if (id != "") throw new IOException("brickpi3.set_address error: wrong serial number id length. Must be a 32-digit hex string.");
+                if (id != string.Empty)
+                {
+                    throw new IOException(
+                        "brickpi3.set_address error: wrong serial number id length. Must be a 32-digit hex string.");
+                }
             }
+
             if (id.Length == 32)
             {
                 var isok = false;
                 for (int i = 0; i < 16; i++)
                 {
-                    isok = byte.TryParse(id.Substring(i * 2, i * 2 + 1), System.Globalization.NumberStyles.HexNumber, null as IFormatProvider, out id_arr[i]);
+                    isok = byte.TryParse(id.Substring(i * 2, i * 2 + 1), System.Globalization.NumberStyles.HexNumber,
+                        null as IFormatProvider, out id_arr[i]);
                     if (!isok)
+                    {
                         break;
+                    }
                 }
-                if (!isok) throw new IOException("brickpi3.set_address error: unknown serial number id problem. Make sure to use a valid 32-digit hex string serial number.");
+
+                if (!isok)
+                {
+                    throw new IOException(
+                        "brickpi3.set_address error: unknown serial number id problem. Make sure to use a valid 32-digit hex string serial number.");
+                }
             }
+
             byte[] outArray = new byte[19];
             outArray[0] = 0;
             outArray[1] = (byte)SpiMessageType.SetAddress;
             outArray[2] = address;
             for (int i = 0; i < 16; i++)
+            {
                 outArray[3 + i] = id_arr[i];
+            }
+
             var ret = SpiTransferArray(outArray);
             if (ret[3] == 0xA5)
+            {
                 SpiAddress = address;
+            }
         }
 
         /// <summary>
         /// Set the Led intensity from 0 (off) to 100 (fully bright), 255 used to return the led to BrickPi3 management
         /// </summary>
-        /// <param name="intensity"></param>
+        /// <param name="intensity">Led intensity</param>
         public void SetLed(byte intensity)
         {
             byte[] outArray = { SpiAddress, (byte)SpiMessageType.SetLed, intensity };
@@ -458,8 +489,8 @@ namespace Iot.Device.BrickPi3
         /// <returns>Returns the value(s) for the specified sensor.</returns>
         public byte[] GetSensor(byte port)
         {
-            string IOErrorMessage = $"{nameof(GetSensor)} error: No SPI response";
-            string SensorErrorInvalidData = $"{nameof(GetSensor)} error: Invalid sensor data";
+            string ioErrorMessage = $"{nameof(GetSensor)} error: No SPI response";
+            string sensorErrorInvalidData = $"{nameof(GetSensor)} error: Invalid sensor data";
 
             byte port_index = 0;
             SpiMessageType message_type = SpiMessageType.None;
@@ -485,7 +516,10 @@ namespace Iot.Device.BrickPi3
                 port_index = 3;
             }
             else
-                throw new IOException($"{nameof(GetSensor)} error. Must be one sensor port at a time. PORT_1, PORT_2, PORT_3, or PORT_4.");
+            {
+                throw new IOException(
+                    $"{nameof(GetSensor)} error. Must be one sensor port at a time. PORT_1, PORT_2, PORT_3, or PORT_4.");
+            }
 
             List<byte> outArray = new List<byte>();
             byte[] reply;
@@ -497,58 +531,87 @@ namespace Iot.Device.BrickPi3
                 if (reply[3] == 0xA5)
                 {
                     if ((reply[4] == (int)_sensorType[port_index]) && (reply[5] == (int)SensorState.ValidData))
-                        return new byte[] { (byte)(((reply[8] & 0x0F) << 8) | reply[9]), (byte)(((reply[8] >> 4) & 0x0F) | (reply[7] << 4)), (byte)(reply[6] & 0x01), (byte)((reply[6] >> 1) & 0x01) };
+                    {
+                        return new byte[]
+                        {
+                            (byte)(((reply[8] & 0x0F) << 8) | reply[9]),
+                            (byte)(((reply[8] >> 4) & 0x0F) | (reply[7] << 4)), (byte)(reply[6] & 0x01),
+                            (byte)((reply[6] >> 1) & 0x01)
+                        };
+                    }
                     else
-                        throw new IOException(SensorErrorInvalidData);
+                    {
+                        throw new IOException(sensorErrorInvalidData);
+                    }
                 }
                 else
-                    throw new IOException(IOErrorMessage);
+                {
+                    throw new IOException(ioErrorMessage);
+                }
             }
             else if (_sensorType[port_index] == Models.SensorType.I2C)
             {
                 outArray.AddRange(new byte[] { SpiAddress, (byte)message_type, 0, 0, 0, 0 });
                 for (int b = 0; b < _i2cInBytes[port_index]; b++)
+                {
                     outArray.Add(0);
+                }
 
                 reply = SpiTransferArray(outArray.ToArray());
                 if (reply[3] == 0xA5)
                 {
-                    if ((reply[4] == (int)_sensorType[port_index]) && (reply[5] == (int)SensorState.ValidData) && ((reply.Length - 6) == _i2cInBytes[port_index]))
+                    if ((reply[4] == (int)_sensorType[port_index]) && (reply[5] == (int)SensorState.ValidData) &&
+                        ((reply.Length - 6) == _i2cInBytes[port_index]))
                     {
                         List<byte> values = new List<byte>();
                         for (int b = 6; b < _i2cInBytes[port_index]; b++)
+                        {
                             values.Add(reply[b]);
+                        }
 
                         return values.ToArray();
                     }
                     else
-                        throw new IOException(SensorErrorInvalidData);
+                    {
+                        throw new IOException(sensorErrorInvalidData);
+                    }
                 }
                 else
-                    throw new IOException(IOErrorMessage);
+                {
+                    throw new IOException(ioErrorMessage);
+                }
             }
             else if ((_sensorType[port_index] == Models.SensorType.Touch)
-                || (_sensorType[port_index] == Models.SensorType.NXTTouch)
-                || (_sensorType[port_index] == Models.SensorType.EV3Touch)
-                || (_sensorType[port_index] == Models.SensorType.NXTUltrasonic)
-                || (_sensorType[port_index] == Models.SensorType.EV3ColorReflected)
-                || (_sensorType[port_index] == Models.SensorType.EV3ColorAmbient)
-                || (_sensorType[port_index] == Models.SensorType.EV3ColorColor)
-                || (_sensorType[port_index] == Models.SensorType.EV3UltrasonicListen)
-                || (_sensorType[port_index] == Models.SensorType.EV3InfraredProximity))
+                     || (_sensorType[port_index] == Models.SensorType.NXTTouch)
+                     || (_sensorType[port_index] == Models.SensorType.EV3Touch)
+                     || (_sensorType[port_index] == Models.SensorType.NXTUltrasonic)
+                     || (_sensorType[port_index] == Models.SensorType.EV3ColorReflected)
+                     || (_sensorType[port_index] == Models.SensorType.EV3ColorAmbient)
+                     || (_sensorType[port_index] == Models.SensorType.EV3ColorColor)
+                     || (_sensorType[port_index] == Models.SensorType.EV3UltrasonicListen)
+                     || (_sensorType[port_index] == Models.SensorType.EV3InfraredProximity))
             {
                 outArray.AddRange(new byte[] { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0 });
                 reply = SpiTransferArray(outArray.ToArray());
                 if (reply[3] == 0xA5)
-                {                    
-                    if (((reply[4] == (int)_sensorType[port_index]) || ((_sensorType[port_index] == Models.SensorType.Touch) && ((reply[4] == (int)Models.SensorType.NXTTouch)
-                        || (reply[4] == (int)Models.SensorType.EV3Touch)))) && (reply[5] == (int)SensorState.ValidData))
+                {
+                    if (((reply[4] == (int)_sensorType[port_index]) ||
+                         ((_sensorType[port_index] == Models.SensorType.Touch) &&
+                          ((reply[4] == (int)Models.SensorType.NXTTouch)
+                           || (reply[4] == (int)Models.SensorType.EV3Touch)))) &&
+                        (reply[5] == (int)SensorState.ValidData))
+                    {
                         return new byte[] { reply[6] };
+                    }
                     else
-                        throw new IOException(SensorErrorInvalidData);
+                    {
+                        throw new IOException(sensorErrorInvalidData);
+                    }
                 }
                 else
-                    throw new IOException(IOErrorMessage);
+                {
+                    throw new IOException(ioErrorMessage);
+                }
             }
             else if (_sensorType[port_index] == Models.SensorType.NXTColorFull)
             {
@@ -557,25 +620,35 @@ namespace Iot.Device.BrickPi3
                 if (reply[3] == 0xA5)
                 {
                     if ((reply[4] == (int)_sensorType[port_index]) && (reply[5] == (int)SensorState.ValidData))
-
-                        return new byte[] { reply[6], (byte)((reply[7] << 2) | ((reply[11] >> 6) & 0x03)), (byte)((reply[8] << 2) | ((reply[11] >> 4) & 0x03)),
-                            (byte)((reply[9] << 2) | ((reply[11] >> 2) & 0x03)), (byte)((reply[10] << 2) | (reply[11] & 0x03)) };
+                    {
+                        return new byte[]
+                        {
+                            reply[6], (byte)((reply[7] << 2) | ((reply[11] >> 6) & 0x03)),
+                            (byte)((reply[8] << 2) | ((reply[11] >> 4) & 0x03)),
+                            (byte)((reply[9] << 2) | ((reply[11] >> 2) & 0x03)),
+                            (byte)((reply[10] << 2) | (reply[11] & 0x03))
+                        };
+                    }
                     else
-                        throw new IOException(SensorErrorInvalidData);
+                    {
+                        throw new IOException(sensorErrorInvalidData);
+                    }
                 }
                 else
-                    throw new IOException(IOErrorMessage);
+                {
+                    throw new IOException(ioErrorMessage);
+                }
             }
             else if ((_sensorType[port_index] == SensorType.NXTLightOn)
-              || (_sensorType[port_index] == SensorType.NXTLightOff)
-              || (_sensorType[port_index] == SensorType.NXTColorRed)
-              || (_sensorType[port_index] == SensorType.NXTColorGreen)
-              || (_sensorType[port_index] == SensorType.NXTColorBlue)
-              || (_sensorType[port_index] == SensorType.NXTColorOff)
-              || (_sensorType[port_index] == SensorType.EV3GyroAbs)
-              || (_sensorType[port_index] == SensorType.EV3GyroDps)
-              || (_sensorType[port_index] == SensorType.EV3UltrasonicCentimeter)
-              || (_sensorType[port_index] == SensorType.EV3UltrasonicInches))
+                     || (_sensorType[port_index] == SensorType.NXTLightOff)
+                     || (_sensorType[port_index] == SensorType.NXTColorRed)
+                     || (_sensorType[port_index] == SensorType.NXTColorGreen)
+                     || (_sensorType[port_index] == SensorType.NXTColorBlue)
+                     || (_sensorType[port_index] == SensorType.NXTColorOff)
+                     || (_sensorType[port_index] == SensorType.EV3GyroAbs)
+                     || (_sensorType[port_index] == SensorType.EV3GyroDps)
+                     || (_sensorType[port_index] == SensorType.EV3UltrasonicCentimeter)
+                     || (_sensorType[port_index] == SensorType.EV3UltrasonicInches))
             {
                 outArray.AddRange(new byte[] { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0, 0 });
                 reply = SpiTransferArray(outArray.ToArray());
@@ -585,23 +658,32 @@ namespace Iot.Device.BrickPi3
                     {
                         var value = (int)((reply[6] << 8) | reply[7]);
                         if (((_sensorType[port_index] == SensorType.EV3GyroAbs)
-                        || (_sensorType[port_index] == SensorType.EV3GyroDps))
-                        && ((value & 0x8000) > 0))
+                             || (_sensorType[port_index] == SensorType.EV3GyroDps))
+                            && ((value & 0x8000) > 0))
+                        {
                             value = value - 0x10000;
+                        }
                         else if ((_sensorType[port_index] == SensorType.EV3UltrasonicCentimeter)
-                          || (_sensorType[port_index] == SensorType.EV3UltrasonicInches))
+                                 || (_sensorType[port_index] == SensorType.EV3UltrasonicInches))
+                        {
                             value = value / 10;
+                        }
+
                         // convert back the value to a byte array
                         return new byte[] { (byte)((value >> 8) & 0xFF), (byte)(value & 0xFF) };
                     }
                     else
-                        throw new IOException(SensorErrorInvalidData);
+                    {
+                        throw new IOException(sensorErrorInvalidData);
+                    }
                 }
                 else
-                    throw new IOException(IOErrorMessage);
+                {
+                    throw new IOException(ioErrorMessage);
+                }
             }
             else if ((_sensorType[port_index] == SensorType.EV3ColorRawReflected)
-              || (_sensorType[port_index] == SensorType.EV3GyroAbsDps))
+                     || (_sensorType[port_index] == SensorType.EV3GyroAbsDps))
             {
                 outArray.AddRange(new byte[] { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0, 0, 0, 0 });
                 reply = SpiTransferArray(outArray.ToArray());
@@ -609,21 +691,38 @@ namespace Iot.Device.BrickPi3
                 {
                     if ((reply[4] == (int)_sensorType[port_index]) && (reply[5] == (int)SensorState.ValidData))
                     {
-                        ushort[] results = new ushort[] { (ushort)((reply[6] << 8) | reply[7]), (ushort)((reply[8] << 8) | reply[9]) };
-                        if (_sensorType[port_index] == SensorType.EV3GyroAbsDps)                            
+                        ushort[] results = new ushort[]
+                        {
+                            (ushort)((reply[6] << 8) | reply[7]), (ushort)((reply[8] << 8) | reply[9])
+                        };
+                        if (_sensorType[port_index] == SensorType.EV3GyroAbsDps)
+                        {
                             for (int r = 0; r < results.Length; r++)
+                            {
                                 if (results[r] >= 0x8000)
+                                {
                                     results[r] = (ushort)(results[r] - 0x10000);
-                        
+                                }
+                            }
+                        }
+
                         // convert back the value to a byte array
                         // we know the length is 2
-                        return new byte[] { (byte)((results[1] >> 8) & 0xFF), (byte)(results[1] & 0xFF), (byte)((results[0] >> 8) & 0xFF), (byte)(results[0] & 0xFF) };
+                        return new byte[]
+                        {
+                            (byte)((results[1] >> 8) & 0xFF), (byte)(results[1] & 0xFF),
+                            (byte)((results[0] >> 8) & 0xFF), (byte)(results[0] & 0xFF)
+                        };
                     }
                     else
-                        throw new IOException(SensorErrorInvalidData);
+                    {
+                        throw new IOException(sensorErrorInvalidData);
+                    }
                 }
                 else
-                    throw new IOException(IOErrorMessage);
+                {
+                    throw new IOException(ioErrorMessage);
+                }
             }
             else if ((_sensorType[port_index] == SensorType.EV3ColorColorComponents))
             {
@@ -632,14 +731,21 @@ namespace Iot.Device.BrickPi3
                 if (reply[3] == 0xA5)
                 {
                     if ((reply[4] == (int)_sensorType[port_index]) || (reply[5] == (int)SensorState.ValidData))
-
-                        return new byte[] { reply[6], reply[7], reply[8], reply[9], reply[10], reply[11], reply[12], reply[13] };
+                    {
+                        return new byte[]
+                        {
+                            reply[6], reply[7], reply[8], reply[9], reply[10], reply[11], reply[12], reply[13]
+                        };
+                    }
                     else
-
-                        throw new IOException(SensorErrorInvalidData);
+                    {
+                        throw new IOException(sensorErrorInvalidData);
+                    }
                 }
                 else
-                    throw new IOException(IOErrorMessage);
+                {
+                    throw new IOException(ioErrorMessage);
+                }
             }
             else if (_sensorType[port_index] == SensorType.EV3InfraredSeek)
             {
@@ -650,15 +756,22 @@ namespace Iot.Device.BrickPi3
                 if (reply[3] == 0xA5)
                 {
                     if ((reply[4] == (int)_sensorType[port_index]) && (reply[5] == (int)SensorState.ValidData))
-
                     {
-                        return new byte[] { (reply[6]), (reply[7]), (reply[8]), (reply[9]), (reply[10]), (reply[11]), (reply[12]), (reply[13]) };
+                        return new byte[]
+                        {
+                            (reply[6]), (reply[7]), (reply[8]), (reply[9]), (reply[10]), (reply[11]), (reply[12]),
+                            (reply[13])
+                        };
                     }
                     else
-                        throw new IOException(SensorErrorInvalidData);
+                    {
+                        throw new IOException(sensorErrorInvalidData);
+                    }
                 }
                 else
-                    throw new IOException(IOErrorMessage);
+                {
+                    throw new IOException(ioErrorMessage);
+                }
             }
             else if (_sensorType[port_index] == Models.SensorType.EV3InfraredRemote)
             {
@@ -673,76 +786,118 @@ namespace Iot.Device.BrickPi3
                         {
                             var value = reply[6 + r];
                             if (value == 1)
+                            {
                                 results[r] = 0b10000;
+                            }
                             else if (value == 2)
+                            {
                                 results[r] = 0b01000;
+                            }
                             else if (value == 3)
+                            {
                                 results[r] = 0b00100;
+                            }
                             else if (value == 4)
+                            {
                                 results[r] = 0b00010;
+                            }
                             else if (value == 5)
+                            {
                                 results[r] = 0b10100;
+                            }
                             else if (value == 6)
+                            {
                                 results[r] = 0b10010;
+                            }
                             else if (value == 7)
+                            {
                                 results[r] = 0b01100;
+                            }
                             else if (value == 8)
+                            {
                                 results[r] = 0b01010;
+                            }
                             else if (value == 9)
+                            {
                                 results[r] = 0b00001;
+                            }
                             else if (value == 10)
+                            {
                                 results[r] = 0b11000;
+                            }
                             else if (value == 11)
+                            {
                                 results[r] = 0b00110;
+                            }
                             else
+                            {
                                 results[r] = 0b00000;
+                            }
                         }
+
                         return results;
                     }
                     else
-                        throw new IOException(SensorErrorInvalidData);
+                    {
+                        throw new IOException(sensorErrorInvalidData);
+                    }
                 }
                 else
-                    throw new IOException(IOErrorMessage);
+                {
+                    throw new IOException(ioErrorMessage);
+                }
             }
+
             throw new IOException($"{nameof(GetSensor)}  error: Sensor not configured or not supported.");
         }
 
+#pragma warning disable SA1011
         /// <summary>
         /// Set the sensor type
         /// </summary>
         /// <param name="port">The sensor port(s). Port 1, 2, 3, and/or 4</param>
         /// <param name="type">The sensor type</param>
         /// <param name="param">param is used only for some sensors and can be ignore for the others
-        /// params is used for the following sensor types:
+        /// param is used for the following sensor types:
         ///   CUSTOM-- a 16 - bit integer used to configure the hardware.
         ///   I2C-- a list of settings:
-        ///     params[0]-- Settings / flags
-        ///     params[1] -- target Speed in microseconds(0-255). Realistically the speed will vary.
+        ///     param[0]-- Settings / flags
+        ///     param[1] -- target Speed in microseconds(0-255). Realistically the speed will vary.
         ///     if SENSOR_I2C_SETTINGS_SAME flag set in I2C Settings:
-        ///        params[2] -- Delay in microseconds between transactions.
-        ///        params[3] -- Address
-        ///        params[4] -- List of bytes to write
-        ///        params[5] -- Number of bytes to read
+        ///        param[2] -- Delay in microseconds between transactions.
+        ///        param[3] -- Address
+        ///        param[4] -- List of bytes to write
+        ///        param[5] -- Number of bytes to read
         /// </param>
-        public void SetSensorType(byte port, SensorType type, int[] param = null)
+        public void SetSensorType(byte port, SensorType type, int[]? param = null)
         {
+#pragma warning restore SA1011
             for (int p = 0; p < 4; p++)
             {
                 if ((port & (1 << p)) > 0)
+                {
                     _sensorType[p] = type;
+                }
             }
 
             List<byte> outArray = new List<byte>();
-            if (type == Models.SensorType.Custom)
+            if (param is object && type == Models.SensorType.Custom)
             {
-                outArray.AddRange(new byte[] { SpiAddress, (byte)SpiMessageType.SetSensorType, port, (byte)type, (byte)((param[0] >> 8) & 0xFF), (byte)(param[0] & 0xFF) });
+                outArray.AddRange(new byte[]
+                {
+                    SpiAddress, (byte)SpiMessageType.SetSensorType, port, (byte)type,
+                    (byte)((param[0] >> 8) & 0xFF), (byte)(param[0] & 0xFF)
+                });
             }
-            else if (type == Models.SensorType.I2C)
+            else if (param is object && type == Models.SensorType.I2C)
             {
                 if (param.Length >= 2)
                 {
-                    outArray.AddRange(new byte[] { SpiAddress, (byte)SpiMessageType.SetSensorType, port, (byte)type, (byte)param[0], (byte)param[1] });  //# Settings, SpeedUS
+                    outArray.AddRange(new byte[]
+                    {
+                        SpiAddress, (byte)SpiMessageType.SetSensorType, port, (byte)type, (byte)param[0],
+                        (byte)param[1]
+                    }); // # Settings, SpeedUS
 
                     if ((param[0] == (int)SensorI2CSettings.Same) && (param.Length >= 6))
                     {
@@ -759,16 +914,21 @@ namespace Iot.Device.BrickPi3
                         for (int p = 0; p < 4; p++)
                         {
                             if ((port & (1 << p)) > 0)
+                            {
                                 _i2cInBytes[p] = (byte)(param[5] & 0xFF);
+                            }
                         }
+
                         // TODO: need to test more this part
                         outArray.Add((byte)param[4]);
-                        // outArray.Add((byte)param[4]);         
+                        // outArray.Add((byte)param[4]);
                     }
                 }
             }
             else
+            {
                 outArray.AddRange(new byte[] { SpiAddress, (byte)SpiMessageType.SetSensorType, port, (byte)type });
+            }
 
             SpiTransferArray(outArray.ToArray());
         }
@@ -798,7 +958,12 @@ namespace Iot.Device.BrickPi3
         /// <param name="positionDegree">The target position in degree</param>
         public void SetMotorPosition(byte port, int positionDegree)
         {
-            byte[] outArray = { SpiAddress, (byte)SpiMessageType.SetMotorPosition, port, (byte)((positionDegree >> 24) & 0xFF), (byte)((positionDegree >> 16) & 0xFF), (byte)((positionDegree >> 8) & 0xFF), (byte)(positionDegree & 0xFF) };
+            byte[] outArray =
+            {
+                SpiAddress, (byte)SpiMessageType.SetMotorPosition, port, (byte)((positionDegree >> 24) & 0xFF),
+                (byte)((positionDegree >> 16) & 0xFF), (byte)((positionDegree >> 8) & 0xFF),
+                (byte)(positionDegree & 0xFF)
+            };
             var ret = SpiTransferArray(outArray);
         }
 
@@ -837,7 +1002,10 @@ namespace Iot.Device.BrickPi3
         /// <param name="dps">The target speed in degrees per second</param>
         public void SetMotorDps(byte port, int dps)
         {
-            byte[] outArray = { SpiAddress, (byte)SpiMessageType.setMotorDps, port, (byte)((dps >> 8) & 0xFF), (byte)(dps & 0xFF) };
+            byte[] outArray =
+            {
+                SpiAddress, (byte)SpiMessageType.SetMotorDps, port, (byte)((dps >> 8) & 0xFF), (byte)(dps & 0xFF)
+            };
             var ret = SpiTransferArray(outArray);
         }
 
@@ -849,7 +1017,11 @@ namespace Iot.Device.BrickPi3
         /// <param name="dps">The speed limit in degrees per second, with 0 being no limit</param>
         public void SetMotorLimits(byte port, byte powerPercent = 0, int dps = 0)
         {
-            byte[] outArray = { SpiAddress, (byte)SpiMessageType.setMotorLimits, port, powerPercent, (byte)((dps >> 8) & 0xFF), (byte)(dps & 0xFF) };
+            byte[] outArray =
+            {
+                SpiAddress, (byte)SpiMessageType.SetMotorLimits, port, powerPercent, (byte)((dps >> 8) & 0xFF),
+                (byte)(dps & 0xFF)
+            };
             var ret = SpiTransferArray(outArray);
         }
 
@@ -859,35 +1031,51 @@ namespace Iot.Device.BrickPi3
         /// <param name="port">The motor port (one at a time). PortA, PortB, PortC, or PortD.</param>
         /// <returns>MotorStatus containing the status of the motor</returns>
         public MotorStatus GetMotorStatus(byte port)
-        {  
+        {
             MotorStatus motorStatus = new MotorStatus();
             SpiMessageType message_type = SpiMessageType.None;
             if (port == (byte)MotorPort.PortA)
+            {
                 message_type = SpiMessageType.GetMotorAStatus;
+            }
             else if (port == (byte)MotorPort.PortB)
+            {
                 message_type = SpiMessageType.GetMotorBStatus;
+            }
             else if (port == (byte)MotorPort.PortC)
+            {
                 message_type = SpiMessageType.GetMotorCStatus;
+            }
             else if (port == (byte)MotorPort.PortD)
+            {
                 message_type = SpiMessageType.GetMotorDStatus;
+            }
             else
             {
-                throw new IOException($"{nameof(GetMotorStatus)} error. Must be one motor port at a time. PORT_A, PORT_B, PORT_C, or PORT_D.");
+                throw new IOException(
+                    $"{nameof(GetMotorStatus)} error. Must be one motor port at a time. PORT_A, PORT_B, PORT_C, or PORT_D.");
             }
+
             byte[] outArray = { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             var reply = SpiTransferArray(outArray);
             if (reply[3] == 0xA5)
             {
                 motorStatus.Speed = reply[5];
                 if ((motorStatus.Speed & 0x80) > 0)
+                {
                     motorStatus.Speed = -motorStatus.Speed;
+                }
+
                 motorStatus.Encoder = (reply[6] << 24) | (reply[7] << 16) | (reply[8] << 8) | reply[9];
-                //negative should be managed
-                //if ((motorStatus.Encoder & 0x80000000) > 0)
+                // negative should be managed
+                // if ((motorStatus.Encoder & 0x80000000) > 0)
                 //    motorStatus.Encoder = motorStatus.Encoder - 0x100000000;
                 motorStatus.Dps = ((reply[10] << 8) | reply[11]);
                 if ((motorStatus.Dps & 0x8000) > 0)
+                {
                     motorStatus.Dps = motorStatus.Dps - 0x10000;
+                }
+
                 motorStatus.Flags = (MotorStatusFlags)reply[4];
             }
             else
@@ -905,7 +1093,12 @@ namespace Iot.Device.BrickPi3
         /// <param name="positionOffset">The encoder offset. Zero the encoder by offsetting it by the current position</param>
         public void OffsetMotorEncoder(byte port, int positionOffset)
         {
-            byte[] outArray = new byte[] { SpiAddress, (byte)SpiMessageType.OffsetMotorEncoder, port, (byte)((positionOffset >> 24) & 0xFF), (byte)((positionOffset >> 16) & 0xFF), (byte)((positionOffset >> 8) & 0xFF), (byte)(positionOffset & 0xFF) };
+            byte[] outArray = new byte[]
+            {
+                SpiAddress, (byte)SpiMessageType.OffsetMotorEncoder, port, (byte)((positionOffset >> 24) & 0xFF),
+                (byte)((positionOffset >> 16) & 0xFF), (byte)((positionOffset >> 8) & 0xFF),
+                (byte)(positionOffset & 0xFF)
+            };
             SpiTransferArray(outArray);
         }
 
@@ -918,19 +1111,33 @@ namespace Iot.Device.BrickPi3
         {
             SpiMessageType message_type;
             if (port == (byte)MotorPort.PortA)
+            {
                 message_type = SpiMessageType.GetMotorAEncoder;
+            }
             else if (port == (byte)MotorPort.PortB)
+            {
                 message_type = SpiMessageType.GetMotorBEncoder;
+            }
             else if (port == (byte)MotorPort.PortC)
+            {
                 message_type = SpiMessageType.GetMotorCEncoder;
+            }
             else if (port == (byte)MotorPort.PortD)
+            {
                 message_type = SpiMessageType.GetMotorDEncoder;
+            }
             else
-                throw new IOException($"{nameof(GetMotorEncoder)} error. Must be one motor port at a time. PORT_A, PORT_B, PORT_C, or PORT_D.");
+            {
+                throw new IOException(
+                    $"{nameof(GetMotorEncoder)} error. Must be one motor port at a time. PORT_A, PORT_B, PORT_C, or PORT_D.");
+            }
 
             var encoder = SpiRead32(message_type);
             if ((encoder & 0x80000000) > 0)
+            {
                 encoder = (int)(encoder - 0x100000000);
+            }
+
             return encoder;
         }
 

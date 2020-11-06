@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using Iot.Device.Mcp25xxx.Tests.Register.CanControl;
 
@@ -67,14 +66,17 @@ namespace Iot.Device.Mcp25xxx.Register.CanControl
             /// FCLKOUT = System Clock/1.
             /// </summary>
             ClockDivideBy1 = 0,
+
             /// <summary>
             /// FCLKOUT = System Clock/2.
             /// </summary>
             ClockDivideBy2 = 1,
+
             /// <summary>
             /// FCLKOUT = System Clock/4.
             /// </summary>
             ClockDivideBy4 = 2,
+
             /// <summary>
             /// FCLKOUT = System Clock/8.
             /// </summary>

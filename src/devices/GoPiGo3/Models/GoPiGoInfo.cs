@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -12,6 +11,23 @@ namespace Iot.Device.GoPiGo3.Models
     /// </summary>
     public class GoPiGoInfo
     {
+        /// <summary>
+        /// Instantiate a GoPiGoInfo object.
+        /// </summary>
+        /// <param name="manufacturer">Manufacturer information.</param>
+        /// <param name="board">Board information.</param>
+        /// <param name="hardwareVersion">Hardware version.</param>
+        /// <param name="softwareVersion">Firmware version.</param>
+        /// <param name="id">Id of the GoPiGo3.</param>
+        public GoPiGoInfo(string manufacturer, string board, Version hardwareVersion, Version softwareVersion, string id)
+        {
+            Manufacturer = manufacturer;
+            Board = board;
+            HardwareVersion = hardwareVersion;
+            SoftwareVersion = softwareVersion;
+            Id = id;
+        }
+
         /// <summary>
         /// Manufacturer information
         /// </summary>
@@ -35,6 +51,6 @@ namespace Iot.Device.GoPiGo3.Models
         /// <summary>
         /// Id of the GoPiGo3
         /// </summary>
-        public string Id { get; set; }        
+        public string Id { get; set; }
     }
 }

@@ -1,6 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Mpr121
 {
@@ -21,7 +20,7 @@ namespace Iot.Device.Mpr121
 
         /// <summary>
         /// Determines the number of samples consecutively greater than the Max Half Delta value (rising).
-        /// This is necessary to determine that it is not noise. 
+        /// This is necessary to determine that it is not noise.
         /// </summary>
         public byte NoiseCountLimitRising { get; set; }
 
@@ -42,7 +41,7 @@ namespace Iot.Device.Mpr121
 
         /// <summary>
         /// Determines the number of samples consecutively greater than the Max Half Delta value (falling).
-        /// This is necessary to determine that it is not noise. 
+        /// This is necessary to determine that it is not noise.
         /// </summary>
         public byte NoiseCountLimitFalling { get; set; }
 
@@ -79,6 +78,6 @@ namespace Iot.Device.Mpr121
         /// <summary>
         /// Electrode Configuration (datasheet page 15).
         /// </summary>
-        public byte ElectrodeConfiguration  { get; set; }
+        public byte ElectrodeConfiguration { get; set; }
     }
 }

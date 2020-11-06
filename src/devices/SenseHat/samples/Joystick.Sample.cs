@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -23,15 +22,29 @@ namespace Iot.Device.SenseHat.Samples
 
                     Console.Clear();
                     if (j.HoldingUp)
+                    {
                         Console.Write("U");
+                    }
+
                     if (j.HoldingDown)
+                    {
                         Console.Write("D");
+                    }
+
                     if (j.HoldingLeft)
+                    {
                         Console.Write("L");
+                    }
+
                     if (j.HoldingRight)
+                    {
                         Console.Write("R");
+                    }
+
                     if (j.HoldingButton)
+                    {
                         Console.Write("!");
+                    }
                 }
             }
         }

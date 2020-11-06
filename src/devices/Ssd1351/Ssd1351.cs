@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -12,28 +11,28 @@ namespace Iot.Device.Ssd1351
 {
     /// <summary>
     /// A single-chip CMOS OLED/PLED driver with controller for organic/polymer
-    /// light emitting diode dot-matrix graphic display system. 
+    /// light emitting diode dot-matrix graphic display system.
     /// </summary>
     public partial class Ssd1351 : IDisposable
     {
+        private const byte ScreenWidthPx = 128;
+        private const byte ScreenHeightPx = 128;
+        private const int DefaultSPIBufferSize = 0x1000;
+
         private readonly int _dcPinId;
         private readonly int _resetPinId;
         private readonly int _spiBufferSize;
-        private readonly bool _disposeGpioController = false;
+        private readonly bool _disposeGpioController;
 
         private SpiDevice _spiDevice;
         private GpioController _gpioDevice;
         private ColorDepth _colorDepth;
         private ColorSequence _colorSequence;
 
-        private const byte SCREEN_WIDTH_PX = 128;
-        private const byte SCREEN_HEIGHT_PX = 128;
-        private const int DefaultSPIBufferSize = 0x1000;
-
         /// <summary>
         /// Initializes new instance of Ssd1351 device that will communicate using SPI bus.
         /// A single-chip CMOS OLED/PLED driver with controller for organic/polymer
-        /// light emitting diode dot-matrix graphic display system. 
+        /// light emitting diode dot-matrix graphic display system.
         /// </summary>
         /// <param name="spiDevice">The SPI device used for communication. This Spi device will be displed along with the Ssd1351 device.</param>
         /// <param name="gpioController">The GPIO controller used for communication and controls the the <paramref name="resetPin"/> and the <paramref name="dataCommandPin"/>
@@ -41,25 +40,21 @@ namespace Iot.Device.Ssd1351
         /// <param name="dataCommandPin">The id of the GPIO pin used to control the DC line (data/command).</param>
         /// <param name="resetPin">The id of the GPIO pin used to control the /RESET line (data/command).</param>
         /// <param name="spiBufferSize">The size of the SPI buffer. If data larger than the buffer is sent then it is split up into multiple transmissions. The default value is 4096.</param>
-        public Ssd1351(SpiDevice spiDevice, int dataCommandPin, int resetPin, int spiBufferSize = DefaultSPIBufferSize, GpioController gpioController = null)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Ssd1351(SpiDevice spiDevice, int dataCommandPin, int resetPin, int spiBufferSize = DefaultSPIBufferSize, GpioController? gpioController = null, bool shouldDispose = true)
         {
             if (!InRange((uint)spiBufferSize, 0x1000, 0x10000))
             {
                 throw new ArgumentException($"SPI Buffer Size must be between 4096 and 65536.", nameof(spiBufferSize));
             }
 
-            _gpioDevice = gpioController;
+            _gpioDevice = gpioController ?? new GpioController();
+            _disposeGpioController = gpioController == null ? true : shouldDispose;
 
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
 
             _dcPinId = dataCommandPin;
             _resetPinId = resetPin;
-
-            if(_gpioDevice == null)
-            {
-                _gpioDevice = new GpioController();
-                _disposeGpioController = true;
-            }
 
             _gpioDevice.OpenPin(_dcPinId, PinMode.Output);
             _gpioDevice.OpenPin(_resetPinId, PinMode.Output);
@@ -75,14 +70,14 @@ namespace Iot.Device.Ssd1351
         /// <param name="color">The color to be converted.</param>
         /// <returns>
         /// This method returns the low byte and the high byte of the 16bit value representing RGB565 or BGR565 value
-        /// 
+        ///
         /// byte    11111111 00000000
         /// bit     76543210 76543210
-        /// 
+        ///
         /// For ColorSequence.RGB
         ///         RRRRRGGG GGGBBBBB
         ///         43210543 21043210
-        ///         
+        ///
         /// For ColorSequence.BGR
         ///         BBBBBGGG GGGRRRRR
         ///         43210543 21043210
@@ -115,8 +110,8 @@ namespace Iot.Device.Ssd1351
             Span<byte> colourBytes = stackalloc byte[_colorDepth == ColorDepth.ColourDepth65K ? 2 : 3]; // create a short span that holds the colour data to be sent to the display
             Span<byte> displayBytes = stackalloc byte[w * h * (_colorDepth == ColorDepth.ColourDepth65K ? 2 : 3)]; // span used to form the data to be written out to the SPI interface
 
-            // set the colourbyte array to represent the fill colour 
-            if (_colorDepth == ColorDepth.ColourDepth65K )
+            // set the colourbyte array to represent the fill colour
+            if (_colorDepth == ColorDepth.ColourDepth65K)
             {
                 (colourBytes[0], colourBytes[1]) = Color565(color);
             }
@@ -127,7 +122,6 @@ namespace Iot.Device.Ssd1351
                 colourBytes[2] = (byte)((_colorSequence == ColorSequence.BGR ? color.R : color.B) >> 2);
             }
 
-            
             // set the pixels in the array representing the raw data to be sent to the display
             // to the fill color
             for (int i = 0; i < w * h; i++)
@@ -158,7 +152,7 @@ namespace Iot.Device.Ssd1351
         /// </summary>
         public void ClearScreen()
         {
-            FillRect(Color.Black, 0, 0, SCREEN_HEIGHT_PX, SCREEN_WIDTH_PX);
+            FillRect(Color.Black, 0, 0, ScreenHeightPx, ScreenWidthPx);
         }
 
         /// <summary>
@@ -198,7 +192,10 @@ namespace Iot.Device.Ssd1351
         private void SendCommand(Ssd1351Command command, params byte[] commandParameters)
         {
             Span<byte> paramSpan = stackalloc byte[commandParameters.Length];
-            for (int i = 0; i < commandParameters.Length; paramSpan[i] = commandParameters[i], i++);
+            for (int i = 0; i < commandParameters.Length; paramSpan[i] = commandParameters[i], i++)
+            {
+            }
+
             SendCommand(command, paramSpan);
         }
 
@@ -209,7 +206,10 @@ namespace Iot.Device.Ssd1351
         /// <param name="data">Span to send as parameters for the command.</param>
         private void SendCommand(Ssd1351Command command, Span<byte> data)
         {
-            Span<byte> commandSpan = stackalloc byte[] { (byte) command };
+            Span<byte> commandSpan = stackalloc byte[]
+            {
+                (byte)command
+            };
 
             SendSPI(commandSpan, true);
 
@@ -217,7 +217,7 @@ namespace Iot.Device.Ssd1351
             {
                 SendSPI(data);
 
-                // detect certain commands that may alter the state of the device. This is done as the 
+                // detect certain commands that may alter the state of the device. This is done as the
                 // SPI device cannot read registers from the ssd1351 and so changes need to be captured
                 switch (command)
                 {
@@ -271,19 +271,21 @@ namespace Iot.Device.Ssd1351
                 _spiDevice.Write(data.Slice(index, len));
                 // add the length just sent to the index
                 index += len;
-            } while (index < data.Length); // repeat until all data sent.
+            }
+            while (index < data.Length); // repeat until all data sent.
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            if(_disposeGpioController)
+            if (_disposeGpioController)
             {
                 _gpioDevice?.Dispose();
-                _gpioDevice = null;
+                _gpioDevice = null!;
             }
+
             _spiDevice?.Dispose();
-            _spiDevice = null;
+            _spiDevice = null!;
         }
     }
 }

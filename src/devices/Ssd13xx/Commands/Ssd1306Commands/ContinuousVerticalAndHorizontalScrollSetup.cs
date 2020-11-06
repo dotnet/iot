@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -88,6 +87,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1306Commands
             /// Vertical and right horizontal scroll.
             /// </summary>
             Right = 0x29,
+
             /// <summary>
             /// Vertical and left horizontal scroll.
             /// </summary>

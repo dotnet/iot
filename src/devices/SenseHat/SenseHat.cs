@@ -1,11 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Drawing;
 using System.Numerics;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.SenseHat
 {
@@ -95,7 +94,6 @@ namespace Iot.Device.SenseHat
         /// </summary>
         public Vector3 Acceleration => _gyro.Acceleration;
 
-
         /// <summary>
         /// Gets angular rate from the gyroscope
         /// </summary>
@@ -118,14 +116,14 @@ namespace Iot.Device.SenseHat
         /// <summary>
         /// Gets humidity from temperature and humidity sensor
         /// </summary>
-        public float Humidity => _temp.Humidity;
+        public Ratio Humidity => _temp.Humidity;
 
         // PRESSURE AND TEMPERATURE
 
         /// <summary>
         /// Gets pressure from pressure and temperature sensor
         /// </summary>
-        public float Pressure => _press.Pressure;
+        public Pressure Pressure => _press.Pressure;
 
         /// <summary>
         /// Gets temperature from pressure and temperature sensor
@@ -136,22 +134,22 @@ namespace Iot.Device.SenseHat
         public void Dispose()
         {
             _ledMatrix?.Dispose();
-            _ledMatrix = null;
+            _ledMatrix = null!;
 
             _joystick?.Dispose();
-            _joystick = null;
+            _joystick = null!;
 
             _gyro?.Dispose();
-            _gyro = null;
+            _gyro = null!;
 
             _mag?.Dispose();
-            _mag = null;
+            _mag = null!;
 
             _temp?.Dispose();
-            _temp = null;
+            _temp = null!;
 
             _press?.Dispose();
-            _press = null;
+            _press = null!;
         }
     }
 }

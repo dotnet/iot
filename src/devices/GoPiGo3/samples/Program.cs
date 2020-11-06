@@ -1,33 +1,37 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.GoPiGo3.Models;
-using Iot.Device.GoPiGo3;
 using System;
 using System.Threading;
 using System.Drawing;
 using System.Device.Spi;
+using Iot.Device.GoPiGo3.Models;
+using Iot.Device.GoPiGo3;
 
-namespace GoPiGo3.sample
+namespace GoPiGo3.Samples
 {
-    partial class Program
+    /// <summary>
+    /// Test program
+    /// </summary>
+    public partial class Program
     {
-
-        private static GoPiGo _goPiGo3;
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello GoPiGo3!");
-            // Default on the Raspberry is Bus ID = 0 and Chip Set Select Line = 1 for GoPiGo3
-            var settings = new SpiConnectionSettings(0, 1)
+        private static GoPiGo _goPiGo3 = new GoPiGo(SpiDevice.Create(
+            new SpiConnectionSettings(0, 1)
             {
                 // 500K is the SPI communication with GoPiGo
                 ClockFrequency = 500000,
                 // see http://tightdev.net/SpiDev_Doc.pdf
                 Mode = SpiMode.Mode0,
                 DataBitLength = 8
-            };
-            _goPiGo3 = new GoPiGo(SpiDevice.Create(settings));
+            }));
+
+        /// <summary>
+        /// Test program entry point
+        /// </summary>
+        /// <param name="args">Unused</param>
+        public static void Main(string[] args)
+        {
+            Console.WriteLine("Hello GoPiGo3!");
             Console.WriteLine("Choose a test by entering the number and press enter:");
             Console.WriteLine("  1. Basic GoPiGo3 info and embedded led test");
             Console.WriteLine("  2. Control left motor from motor right position");
@@ -89,7 +93,7 @@ namespace GoPiGo3.sample
             }
         }
 
-        static private void TestServo()
+        private static void TestServo()
         {
             Console.WriteLine("Move both servo from position 800 µs to 1600µs. Press enter to stop the test.");
             while (!Console.KeyAvailable)
@@ -102,13 +106,13 @@ namespace GoPiGo3.sample
             }
         }
 
-        static private void TestGoPiGoDetails()
+        private static void TestGoPiGoDetails()
         {
             var goPiGoInfo = _goPiGo3.GoPiGo3Info;
-            Console.WriteLine($"Manufacturer: {goPiGoInfo.Manufacturer}");
-            Console.WriteLine($"Board: {goPiGoInfo.Board}");
-            Console.WriteLine($"Hardware version: {goPiGoInfo.HardwareVersion}");
-            Console.WriteLine($"Id: {goPiGoInfo.Id}");
+            Console.WriteLine($"Manufacturer: {goPiGoInfo?.Manufacturer}");
+            Console.WriteLine($"Board: {goPiGoInfo?.Board}");
+            Console.WriteLine($"Hardware version: {goPiGoInfo?.HardwareVersion}");
+            Console.WriteLine($"Id: {goPiGoInfo?.Id}");
             // Eyes led
             Console.WriteLine("Testing Led, changing colors for the leds on both eyes");
             for (int red = 0; red < 255; red += 10)
@@ -121,6 +125,7 @@ namespace GoPiGo3.sample
                     }
                 }
             }
+
             // Led wifi
             Console.WriteLine("Changing wifi led to red");
             _goPiGo3.SetLed((byte)GoPiGo3Led.LedWifi, Color.Red);
@@ -138,7 +143,7 @@ namespace GoPiGo3.sample
             _goPiGo3.SetLed((byte)GoPiGo3Led.LedEyeLeft + (byte)GoPiGo3Led.LedEyeRight + (byte)GoPiGo3Led.LedWifi, Color.Black);
         }
 
-        static private void TestMotorPosition()
+        private static void TestMotorPosition()
         {
             _goPiGo3.OffsetMotorEncoder(MotorPort.MotorRight, _goPiGo3.GetMotorEncoder(MotorPort.MotorRight));
             _goPiGo3.OffsetMotorEncoder(MotorPort.MotorLeft, _goPiGo3.GetMotorEncoder(MotorPort.MotorLeft));
@@ -150,7 +155,7 @@ namespace GoPiGo3.sample
             _goPiGo3.SetMotorLimits(MotorPort.MotorLeft, 50, 200);
             Console.WriteLine("Read Motor Left and Right positions. Press enter stop the test.");
             AddLines();
-            //run until we press enter
+            // run until we press enter
             while (!Console.KeyAvailable)
             {
                 var target = _goPiGo3.GetMotorEncoder(MotorPort.MotorRight);
@@ -166,7 +171,7 @@ namespace GoPiGo3.sample
             }
         }
 
-        static private void CleanALine()
+        private static void CleanALine()
         {
             Console.CursorLeft = 0;
             // Create a space string of size of the Window
@@ -174,14 +179,14 @@ namespace GoPiGo3.sample
             Console.CursorLeft = 0;
         }
 
-        static private void AddLines()
+        private static void AddLines()
         {
             Console.WriteLine();
             Console.WriteLine();
             Console.CursorTop -= 2;
         }
 
-        static private void TestMotorEncoder()
+        private static void TestMotorEncoder()
         {
             // Reset first the position
             Console.WriteLine("Read encoder of Motor Right. Reset position to 0 to start. Press enter stop the test.");

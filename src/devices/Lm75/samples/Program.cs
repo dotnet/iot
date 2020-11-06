@@ -1,31 +1,20 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
 using System.Threading;
+using Iot.Device.Lm75;
 
-namespace Iot.Device.Lm75.Samples
+I2cConnectionSettings settings = new (1, Lm75.DefaultI2cAddress);
+using I2cDevice device = I2cDevice.Create(settings);
+
+using Lm75 sensor = new Lm75(device);
+while (true)
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            I2cConnectionSettings settings = new I2cConnectionSettings(1, Lm75.DefaultI2cAddress);
-            I2cDevice device = I2cDevice.Create(settings);
+    // read temperature
+    Console.WriteLine($"Temperature: {sensor.Temperature.DegreesCelsius} ℃");
+    Console.WriteLine();
 
-            using (Lm75 sensor = new Lm75(device))
-            {
-                while (true)
-                {
-                    // read temperature
-                    Console.WriteLine($"Temperature: {sensor.Temperature.Celsius} ℃");
-                    Console.WriteLine();
-
-                    Thread.Sleep(1000);
-                }
-            }
-        }
-    }
+    Thread.Sleep(1000);
 }

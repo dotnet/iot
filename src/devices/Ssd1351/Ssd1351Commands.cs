@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Drawing;
@@ -52,10 +51,13 @@ namespace Iot.Device.Ssd1351
     {
         /// <summary>Disabled</summary>
         Disabled = 0x00,
+
         /// <summary>Input enabled</summary>
         InputEnabled = 0x01,
+
         /// <summary>Output low</summary>
         OutputLow = 0x10,
+
         /// <summary>Output high</summary>
         OutputHigh = 0x11
     }
@@ -67,10 +69,13 @@ namespace Iot.Device.Ssd1351
     {
         /// <summary>Color depth: 256</summary>
         ColourDepth256 = 0x00,
+
         /// <summary>Color depth: 65k</summary>
         ColourDepth65K = 0x01,
+
         /// <summary>Color depth: 262k</summary>
         ColourDepth262K = 0x02,
+
         /// <summary>Color depth: 262k 16-bit</summary>
         ColourDepth262K16Bit = 0x03
     }
@@ -82,6 +87,7 @@ namespace Iot.Device.Ssd1351
     {
         /// <summary>None</summary>
         None = 0x00,
+
         /// <summary>Parity split (odd and even numbers)</summary>
         OddEven = 0x01
     }
@@ -93,6 +99,7 @@ namespace Iot.Device.Ssd1351
     {
         /// <summary>Column 0</summary>
         Column0 = 0x00,
+
         /// <summary>Column 127</summary>
         Column127 = 0x01
     }
@@ -104,6 +111,7 @@ namespace Iot.Device.Ssd1351
     {
         /// <summary>BGR (blue, green, red)</summary>
         BGR = 0x00,
+
         /// <summary>RGB (red, green, blue)</summary>
         RGB = 0x01
     }
@@ -115,18 +123,25 @@ namespace Iot.Device.Ssd1351
     {
         /// <summary>0.72 of VCC level</summary>
         VccX072 = 0x00,
+
         /// <summary>0.74 of VCC level</summary>
         VccX074 = 0x01,
+
         /// <summary>0.76 of VCC level</summary>
         VccX076 = 0x02,
+
         /// <summary>0.78 of VCC level</summary>
         VccX078 = 0x03,
+
         /// <summary>0.80 of VCC level</summary>
         VccX080 = 0x04,
+
         /// <summary>0.82 of VCC level</summary>
         VccX082 = 0x05,
+
         /// <summary>0.84 of VCC level</summary>
         VccX084 = 0x06,
+
         /// <summary>0.86 of VCC level</summary>
         VccX086 = 0x07
     }
@@ -138,6 +153,7 @@ namespace Iot.Device.Ssd1351
     {
         /// <summary>External VDD source</summary>
         External = 0x00,
+
         /// <summary>Internal VDD source</summary>
         Internal = 0x01
     }
@@ -149,8 +165,10 @@ namespace Iot.Device.Ssd1351
     {
         /// <summary>No scroll</summary>
         NoScroll = 0x00,
+
         /// <summary>Scroll to segment 127</summary>
         Scroll2Seg127 = 0x01,
+
         /// <summary>Scroll to segment 0</summary>
         Scroll2Seg0 = 0x40
     }
@@ -162,8 +180,10 @@ namespace Iot.Device.Ssd1351
     {
         /// <summary>Normal speed</summary>
         Normal = 0x01,
+
         /// <summary>Slow speed</summary>
         Slow = 0x02,
+
         /// <summary>Slowest speed</summary>
         Slowest = 0x03
     }
@@ -173,7 +193,6 @@ namespace Iot.Device.Ssd1351
     /// </summary>
     public partial class Ssd1351 : IDisposable
     {
-
         /// <summary>
         /// This command is used to lock the OLED driver IC from accepting any command except itself.
         /// </summary>
@@ -183,7 +202,7 @@ namespace Iot.Device.Ssd1351
         }
 
         /// <summary>
-        /// This command allows the driver IC to resume from the “Lock” state. And the driver IC will then respond to the command and memory access. 
+        /// This command allows the driver IC to resume from the “Lock” state. And the driver IC will then respond to the command and memory access.
         /// </summary>
         public void Unlock()
         {
@@ -207,7 +226,7 @@ namespace Iot.Device.Ssd1351
         }
 
         /// <summary>
-        /// This command turns the OLED panel display on. 
+        /// This command turns the OLED panel display on.
         /// </summary>
         public void SetDisplayOn()
         {
@@ -215,7 +234,7 @@ namespace Iot.Device.Ssd1351
         }
 
         /// <summary>
-        /// This command turns the OLED panel display off. 
+        /// This command turns the OLED panel display off.
         /// </summary>
         public void SetDisplayOff()
         {
@@ -223,7 +242,7 @@ namespace Iot.Device.Ssd1351
         }
 
         /// <summary>
-        /// This command enhances display performance. 
+        /// This command enhances display performance.
         /// </summary>
         /// <param name="enhanceDisplay">When set to true turns on enhanced display mode. (defaults to not enhanced)</param>
         public void SetDisplayEnhancement(bool enhanceDisplay = false)
@@ -293,11 +312,11 @@ namespace Iot.Device.Ssd1351
 
         /// <summary>
         /// This triple byte command specifies row start address and end address of the display
-        /// data RAM.This command also sets the row address pointer to row start address.This 
+        /// data RAM.This command also sets the row address pointer to row start address.This
         /// pointer is used to define the current read/write row address in graphic display data
-        /// RAM. If vertical address increment mode is enabled by command A0h, after finishing 
+        /// RAM. If vertical address increment mode is enabled by command A0h, after finishing
         /// read/write one row data, it is incremented automatically to the next row address.
-        /// Whenever the row address pointer finishes accessing the end row address, it is 
+        /// Whenever the row address pointer finishes accessing the end row address, it is
         /// reset back to start row address.
         /// </summary>
         /// <param name="startRow">Row start address with a range of 0-127. (defaults to 0)</param>
@@ -395,17 +414,18 @@ namespace Iot.Device.Ssd1351
         /// <param name="pin1Mode">The GpioMode of Pin1. (defaults to Output/Low)</param>
         public void SetGpio(GpioMode pin0Mode = GpioMode.OutputLow, GpioMode pin1Mode = GpioMode.OutputLow)
         {
-            SendCommand(Ssd1351Command.SetGPIO, (byte)(((int) pin1Mode << 2) + pin0Mode));
+            SendCommand(Ssd1351Command.SetGPIO, (byte)(((int)pin1Mode << 2) + pin0Mode));
         }
 
+#pragma warning disable SA1011
         /// <summary>
         /// This command sets the gray levels GS0 -> GS63.
         /// </summary>
         /// <param name="grayLevels">A byte array containing 64 gray levels representing GS0 -> GS63.
-        /// If this paramneter is null or an empty array then the gray leves are set to default.</param>
-        public void SetGrayLevels(byte[] grayLevels = null)
+        /// If this parameter is null or an empty array then the gray leves are set to default.</param>
+        public void SetGrayLevels(byte[]? grayLevels = null)
         {
-            if(grayLevels == null || grayLevels.Length == 0)
+            if (grayLevels == null || grayLevels.Length == 0)
             {
                 SendCommand(Ssd1351Command.SetDefaultGrayLevels);
             }
@@ -419,8 +439,6 @@ namespace Iot.Device.Ssd1351
                 SendCommand(Ssd1351Command.SetGrayLevels, grayLevels);
             }
         }
-
-
 
         /// <summary>
         /// This command sets the display to be inverse.
@@ -456,7 +474,7 @@ namespace Iot.Device.Ssd1351
         }
 
         /// <summary>
-        /// This double byte command is to control the segment output current by a scaling factor. 
+        /// This double byte command is to control the segment output current by a scaling factor.
         /// The chip has 16 master control steps, with the factor ranges from 1 [0000b] to 16
         /// [1111b – default]. The smaller the master current value, the dimmer the OLED panel
         /// display is set.   For example, if original segment output current is 160uA at
@@ -489,10 +507,10 @@ namespace Iot.Device.Ssd1351
         }
 
         /// <summary>
-        /// This double byte command sets the length of phase 1 and 2 of segment waveform of the driver. 
+        /// This double byte command sets the length of phase 1 and 2 of segment waveform of the driver.
         /// Phase 1: Set the period from 5 to 31 in the unit of 2 DCLKs.  A larger capacitance of the
-        /// OLED pixel may require longer period to discharge the previous data charge completely. 
-        /// Phase 2 (A[7:4]): Set the period from 3 to 15 in the unit of DCLKs.  A longer period 
+        /// OLED pixel may require longer period to discharge the previous data charge completely.
+        /// Phase 2 (A[7:4]): Set the period from 3 to 15 in the unit of DCLKs.  A longer period
         /// is needed to charge up a larger capacitance of the OLED pixel to the target voltage.
         /// </summary>
         /// <param name="phase1Period">Phase 1 period with a range of 2-15. (defaults to 2 x 2 DCLKs)</param>
@@ -533,12 +551,12 @@ namespace Iot.Device.Ssd1351
                 throw new ArgumentException("Color depth 256 not supported.", nameof(colorDepth));
             }
 
-            SendCommand(Ssd1351Command.SetRemap, (byte)(((int) colorDepth << 6) + ((int) commonSplit << 5) + ((int) seg0Common << 4) + ((int) colorSequence << 2)));
+            SendCommand(Ssd1351Command.SetRemap, (byte)(((int)colorDepth << 6) + ((int)commonSplit << 5) + ((int)seg0Common << 4) + ((int)colorSequence << 2)));
         }
 
         /// <summary>
         /// This double byte command sets the high voltage level of common pins, VCOMH.
-        /// The level of VCOMH is programmed with reference to VC. 
+        /// The level of VCOMH is programmed with reference to VC.
         /// </summary>
         /// <param name="level">Vcomh deselect level. (defaults to 0.82 x Vcc)</param>
         public void SetVcomhDeselectLevel(VComHDeselectLevel level = VComHDeselectLevel.VccX082)

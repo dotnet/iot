@@ -1,24 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RuntimeIdentifiers>win-arm;linux-arm</RuntimeIdentifiers>
     <IsPackable>false</IsPackable>
-    <Configurations>Debug;Release;Windows-Debug;Linux-Debug</Configurations>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit.runner.utility" Version="2.4.1" />
+  </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties Condition="'$(RuntimeIdentifier)' != ''">RuntimeIdentifier=$(RuntimeIdentifier.SubString(0, $(RuntimeIdentifier.IndexOf('-'))))</AdditionalProperties>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetsLinux)' == 'true'">
-    <!--Excluding Windows implementations-->
-    <Compile Remove="**\*.Windows.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
-    <!--Excluding Linux implementations-->
-    <Compile Remove="**\*.Linux.cs" />
+    <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
   </ItemGroup>
 </Project>

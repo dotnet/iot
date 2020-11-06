@@ -1,12 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
+using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
@@ -15,26 +14,28 @@ namespace Iot.Device.BrickPi3.Sensors
     /// </summary>
     public class NXTSoundSensor : INotifyPropertyChanged, ISensor
     {
-
         private const int NXTCutoff = 512;
 
-        private Brick _brick = null;
-        private Timer _timer = null;
+        private Brick _brick;
+        private Timer _timer;
         private int _periodRefresh;
         private int _value;
-        private string _valueAsString;
+        private string? _valueAsString;
 
         /// <summary>
         /// Initialize a NXT Sound Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor Port</param>
-        public NXTSoundSensor(Brick brick, SensorPort port) : this(brick, port, 1000) { }
+        public NXTSoundSensor(Brick brick, SensorPort port)
+            : this(brick, port, 1000)
+        {
+        }
 
         /// <summary>
         /// Initialize a NXT Sound Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor port</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>
         public NXTSoundSensor(Brick brick, SensorPort port, int timeout)
@@ -48,11 +49,8 @@ namespace Iot.Device.BrickPi3.Sensors
 
         private void StopTimerInternal()
         {
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            _timer?.Dispose();
+            _timer = null!;
         }
 
         private void OnPropertyChanged(string name)
@@ -64,14 +62,17 @@ namespace Iot.Device.BrickPi3.Sensors
         /// To notify a property has changed. The minimum time can be set up
         /// with timeout property
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Period to refresh the notification of property changed in milliseconds
         /// </summary>
         public int PeriodRefresh
         {
-            get { return _periodRefresh; }
+            get
+            {
+                return _periodRefresh;
+            }
 
             set
             {
@@ -85,7 +86,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int Value
         {
-            get { return ReadRaw(); }
+            get
+            {
+                return ReadRaw();
+            }
 
             internal set
             {
@@ -100,27 +104,21 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Return the raw value  as a string of the sensor
         /// </summary>
-        public string ValueAsString
-        {
-            get { return ReadAsString(); }
-
-            internal set
-            {
-                if (_valueAsString != value)
-                {
-                    _valueAsString = value;
-                    OnPropertyChanged(nameof(ValueAsString));
-                }
-            }
-        }
+        public string ValueAsString => ReadAsString();
 
         /// <summary>
         /// Update the sensor and this will raised an event on the interface
         /// </summary>
-        public void UpdateSensor(object state)
+        public void UpdateSensor(object? state)
         {
             Value = ReadRaw();
-            ValueAsString = ReadAsString();
+            string sensorState = ReadAsString();
+            string? previousValue = _valueAsString;
+            _valueAsString = sensorState;
+            if (sensorState != previousValue)
+            {
+                OnPropertyChanged(nameof(ValueAsString));
+            }
         }
 
         /// <summary>
@@ -177,7 +175,7 @@ namespace Iot.Device.BrickPi3.Sensors
         }
 
         /// <summary>
-        /// Number of modes
+        /// Number of modes supported
         /// </summary>
         /// <returns>Number of modes</returns>
         public int NumberOfModes()
@@ -197,11 +195,15 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Moves to next mode
         /// </summary>
-        public void SelectNextMode() { }
+        public void SelectNextMode()
+        {
+        }
 
         /// <summary>
         /// Moves to previous mode
         /// </summary>
-        public void SelectPreviousMode() { }
+        public void SelectPreviousMode()
+        {
+        }
     }
 }

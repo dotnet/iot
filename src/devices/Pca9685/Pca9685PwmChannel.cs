@@ -1,11 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Pwm;
 
-namespace  Iot.Device.Pwm
+namespace Iot.Device.Pwm
 {
     internal class Pca9685PwmChannel : PwmChannel
     {
@@ -26,7 +25,7 @@ namespace  Iot.Device.Pwm
             set => _parent.SetDutyCycleInternal(_channel, value);
         }
 
-        public override double DutyCyclePercentage
+        public override double DutyCycle
         {
             get => _running ? ActualDutyCycle : _dutyCycle;
             set
@@ -63,7 +62,7 @@ namespace  Iot.Device.Pwm
         protected override void Dispose(bool disposing)
         {
             _parent?.SetChannelAsDestroyed(_channel);
-            _parent = null;
+            _parent = null!;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -80,8 +79,7 @@ namespace Iot.Device.SenseHat.Samples
             return Color.FromArgb(
                 Col(0.5 + 0.5 * Math.Cos(time + uv.X)),
                 Col(0.5 + 0.5 * Math.Cos(time + uv.Y + 2.0)),
-                Col(0.5 + 0.5 * Math.Cos(time + uv.X + 4.0))
-            );
+                Col(0.5 + 0.5 * Math.Cos(time + uv.X + 4.0)));
         }
 
         private static byte Col(double x)

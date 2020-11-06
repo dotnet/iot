@@ -17,12 +17,13 @@ namespace System.Device.Gpio.Tests
         /// <param name="test">The test to invoke.</param>
         /// <param name="maxAttempts">The maximum number of times to invoke <paramref name="test"/>.</param>
         /// <param name="backoffFunc">After a failure, invoked to determine how many milliseconds to wait before the next attempt. It's passed the number of iterations attempted.</param>
-        public static void Execute(Action test, int maxAttempts = 5, Func<int, int> backoffFunc = null)
+        public static void Execute(Action test, int maxAttempts = 5, Func<int, int>? backoffFunc = null)
         {
             if (maxAttempts < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(maxAttempts));
             }
+
             if (test == null)
             {
                 throw new ArgumentNullException(nameof(test));

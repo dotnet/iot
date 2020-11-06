@@ -1,11 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.GrovePiDevice.Models;
 using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
+using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -30,7 +29,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public PwmOutput(GrovePi grovePi, GrovePort port)
         {
             if (!SupportedPorts.Contains(port))
+            {
                 throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
+            }
+
             _grovePi = grovePi;
             _port = port;
             _grovePi.PinMode(_port, PinMode.Output);
@@ -41,21 +43,35 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// For GrovePi, Value is same as Duty
         /// </summary>
         public byte Value
-        { get { return Duty; } set { Duty = value; } }
+        {
+            get
+            {
+                return Duty;
+            }
+            set
+            {
+                Duty = value;
+            }
+        }
 
         /// <summary>
         /// Get/set the PWM duty to use to generate the sound from 0 to 100
         /// </summary>
         public byte Duty
         {
-            get { return _duty; }
+            get
+            {
+                return _duty;
+            }
 
             set
             {
                 var prev = _duty;
                 _duty = Math.Clamp(value, (byte)0, (byte)100);
                 if (prev != _duty)
+                {
                     Start();
+                }
             }
         }
 

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
     <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
@@ -10,9 +10,7 @@
     <Compile Include="*.cs" />
     <Compile Include="../Common/Iot/Device/Graphics/BitmapImage.cs" />
     <None Include="README.md" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>

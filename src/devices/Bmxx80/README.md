@@ -11,13 +11,13 @@ The implementation supports the following devices:
 
 - BMP280 temperature and barometric pressure sensor ([Datasheet](https://cdn-shop.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf))
 - BME280 temperature, barometric pressure and humidity sensor ([Datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME280-DS002.pdf))
-- BME680 Temperature, barometric pressure, Humidity and VOC gas sensor ([Datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME680-DS001.pdf))
+- BME680 temperature, barometric pressure, humidity and VOC gas sensor ([Datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME680-DS001.pdf))
 
 ## Usage
 
-2 examples on how to use this device binding are available in the [samples](samples) folder.
+3 examples on how to use this device binding are available in the [samples](samples) folder.
 
-The following fritzing diagram illustrates one way to wire up the BMP280 with a Raspberry Pi using I2C.
+The following fritzing diagram illustrates one way to wire up the BMP280 with a Raspberry Pi using I2C:
 
 ![Raspberry Pi Breadboard diagram](samples/rpi-bmp280_i2c.png)
 

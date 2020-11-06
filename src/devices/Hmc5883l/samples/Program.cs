@@ -1,42 +1,32 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
 using System.Threading;
+using Iot.Device.Hmc5883l;
 
-namespace Iot.Device.Hmc5883l.Samples
+I2cConnectionSettings settings = new (1, Hmc5883l.DefaultI2cAddress);
+using I2cDevice device = I2cDevice.Create(settings);
+using Hmc5883l sensor = new Hmc5883l(device);
+while (true)
 {
-    class Program
+    // read heading
+    Console.WriteLine($"Heading: {sensor.Heading.ToString("0.00")} °");
+
+    var status = sensor.DeviceStatus;
+    Console.Write("Statuses: ");
+    foreach (Status item in Enum.GetValues(typeof(Status)))
     {
-        static void Main(string[] args)
+        if (status.HasFlag(item))
         {
-            I2cConnectionSettings settings = new I2cConnectionSettings(1, Hmc5883l.DefaultI2cAddress);
-            I2cDevice device = I2cDevice.Create(settings);
-
-            using (Hmc5883l sensor = new Hmc5883l(device))
-            {
-                while (true)
-                {
-                    // read heading
-                    Console.WriteLine($"Heading: {sensor.Heading.ToString("0.00")} °");
-
-                    var status = sensor.DeviceStatus;
-                    Console.Write("Statuses: ");
-                    foreach (Status item in Enum.GetValues(typeof(Status)))
-                    {
-                        if (status.HasFlag(item))
-                            Console.Write($"{item} ");
-                    }
-
-                    Console.WriteLine();
-                    Console.WriteLine();
-
-                    // wait for a second
-                    Thread.Sleep(1000);
-                }
-            }
+            Console.Write($"{item} ");
         }
     }
+
+    Console.WriteLine();
+    Console.WriteLine();
+
+    // wait for a second
+    Thread.Sleep(1000);
 }

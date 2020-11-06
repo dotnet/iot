@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace System.Device.I2c
 {
@@ -9,7 +8,9 @@ namespace System.Device.I2c
     /// </summary>
     public sealed class I2cConnectionSettings
     {
-        private I2cConnectionSettings() { }
+        private I2cConnectionSettings()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="I2cConnectionSettings"/> class.

@@ -1,6 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using Iot.Device.Mcp25xxx.Register;
 using Xunit;
@@ -27,8 +26,8 @@ namespace Iot.Device.Mcp25xxx.Tests
             var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.Read(address);
-            Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(3, mcp25xxxSpiDevice.LastReadBuffer.Length);
+            Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice?.LastWriteBuffer);
+            Assert.Equal(3, mcp25xxxSpiDevice?.LastReadBuffer?.Length);
         }
 
         [Theory]
@@ -44,7 +43,7 @@ namespace Iot.Device.Mcp25xxx.Tests
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.ReadRxBuffer(addressPointer, byteCount);
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(byteCount, mcp25xxxSpiDevice.LastReadBuffer.Length - 1);
+            Assert.Equal(byteCount, mcp25xxxSpiDevice.LastReadBuffer?.Length - 1);
         }
 
         [Theory]
@@ -74,7 +73,7 @@ namespace Iot.Device.Mcp25xxx.Tests
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.LoadTxBuffer(addressPointer, buffer);
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(buffer.Length, mcp25xxxSpiDevice.LastWriteBuffer.Length - 1);
+            Assert.Equal(buffer.Length, mcp25xxxSpiDevice.LastWriteBuffer?.Length - 1);
         }
 
         [Theory]
@@ -93,12 +92,12 @@ namespace Iot.Device.Mcp25xxx.Tests
         [Fact]
         public void Send_ReadStatus_Instruction()
         {
-            byte[] expectedWriteBuffer = new byte[] { 0b1010_0000, 0b0000_0000};
+            byte[] expectedWriteBuffer = new byte[] { 0b1010_0000, 0b0000_0000 };
             var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.ReadStatus();
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(1, mcp25xxxSpiDevice.LastReadBuffer.Length - 1);
+            Assert.Equal(1, mcp25xxxSpiDevice.LastReadBuffer?.Length - 1);
         }
 
         [Fact]
@@ -109,7 +108,7 @@ namespace Iot.Device.Mcp25xxx.Tests
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.RxStatus();
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(1, mcp25xxxSpiDevice.LastReadBuffer.Length - 1);
+            Assert.Equal(1, mcp25xxxSpiDevice.LastReadBuffer?.Length - 1);
         }
 
         [Theory]

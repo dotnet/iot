@@ -1,18 +1,17 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.GoPiGo3.Models;
-using Iot.Device.GoPiGo3.Movements;
 using System;
 using System.Diagnostics;
 using System.Threading;
+using Iot.Device.GoPiGo3.Models;
+using Iot.Device.GoPiGo3.Movements;
 
-namespace GoPiGo3.sample
+namespace GoPiGo3.Samples
 {
-    partial class Program
+    public partial class Program
     {
-        static private void TestMotorTacho()
+        private static void TestMotorTacho()
         {
             Motor motor = new Motor(_goPiGo3, MotorPort.MotorLeft);
             Console.WriteLine($"Test on Motor class with motor on {motor.Port}.");
@@ -58,7 +57,7 @@ namespace GoPiGo3.sample
             motor.Stop();
         }
 
-        static private void Testvehicle()
+        private static void Testvehicle()
         {
             Console.WriteLine("vehicle drive test using Motor left, Motor right, not inverted direction.");
             Vehicle veh = new Vehicle(_goPiGo3);

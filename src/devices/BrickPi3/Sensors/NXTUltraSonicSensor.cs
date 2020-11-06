@@ -1,19 +1,18 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.BrickPi3.Extensions;
-using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
+using Iot.Device.BrickPi3.Extensions;
+using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
     /// <summary>
-	/// Sensor mode when using a Sonar sensor
-	/// </summary>
+    /// Sensor mode when using a Sonar sensor
+    /// </summary>
     public enum UltraSonicMode
     {
         /// <summary>
@@ -30,39 +29,44 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Sensor is in listen mode
         /// </summary>
         Listen = SensorType.EV3UltrasonicListen
-    };
+    }
 
     /// <summary>
     /// Create a NXT Utrasonic sensor
     /// </summary>
     public class NXTUltraSonicSensor : INotifyPropertyChanged, ISensor
     {
-
-        private Brick _brick = null;
-        private Timer _timer = null;
+        private Brick _brick;
+        private Timer _timer;
         private int _periodRefresh;
         private int _value;
-        private string _valueAsString;
+        private string? _valueAsString;
 
         /// <summary>
         /// Initialize a NXT Ultrasonic sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to an instance of <see cref="Brick"/></param>
         /// <param name="port">Sensor port</param>
-        public NXTUltraSonicSensor(Brick brick, SensorPort port) : this(brick, port, UltraSonicMode.Centimeter, 1000) { }
+        public NXTUltraSonicSensor(Brick brick, SensorPort port)
+            : this(brick, port, UltraSonicMode.Centimeter, 1000)
+        {
+        }
 
         /// <summary>
         /// Initialize a NXT Ultrasonic sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to an instance of <see cref="Brick"/></param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">Ultrasonic mode</param>
-        public NXTUltraSonicSensor(Brick brick, SensorPort port, UltraSonicMode mode) : this(brick, port, mode, 1000) { }
+        public NXTUltraSonicSensor(Brick brick, SensorPort port, UltraSonicMode mode)
+            : this(brick, port, mode, 1000)
+        {
+        }
 
         /// <summary>
         /// Initialize a NXT Ultrasonic sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to an instance of <see cref="Brick"/></param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">Ultrasonic mode</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>
@@ -71,7 +75,10 @@ namespace Iot.Device.BrickPi3.Sensors
             _brick = brick;
             Port = port;
             if (UltraSonicMode.Listen == mode)
+            {
                 mode = UltraSonicMode.Centimeter;
+            }
+
             Mode = mode;
             brick.SetSensorType((byte)Port, SensorType.NXTUltrasonic);
             _periodRefresh = timeout;
@@ -80,11 +87,8 @@ namespace Iot.Device.BrickPi3.Sensors
 
         private void StopTimerInternal()
         {
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            _timer?.Dispose();
+            _timer = null!;
         }
 
         private void OnPropertyChanged(string name)
@@ -96,14 +100,17 @@ namespace Iot.Device.BrickPi3.Sensors
         /// To notify a property has changed. The minimum time can be set up
         /// with timeout property
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Period to refresh the notification of property changed in milliseconds
         /// </summary>
         public int PeriodRefresh
         {
-            get { return _periodRefresh; }
+            get
+            {
+                return _periodRefresh;
+            }
 
             set
             {
@@ -122,8 +129,11 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int Value
         {
-            //return the stored value, this sensor can't be read too often
-            get { return _value; }
+            // return the stored value, this sensor can't be read too often
+            get
+            {
+                return _value;
+            }
 
             internal set
             {
@@ -138,35 +148,28 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Return the raw value  as a string of the sensor
         /// </summary>
-        public string ValueAsString
-        {
-            //return the stored value, this sensor can't be read too often
-            get { return _valueAsString; }
-
-            internal set
-            {
-                if (_valueAsString != value)
-                {
-                    _valueAsString = value;
-                    OnPropertyChanged(nameof(ValueAsString));
-                }
-            }
-        }
+        public string ValueAsString => ReadAsString();
 
         /// <summary>
         /// Update the sensor and this will raised an event on the interface
         /// </summary>
-        public void UpdateSensor(object state)
+        public void UpdateSensor(object? state)
         {
             Value = ReadRaw();
-            ValueAsString = ReadAsString();
+            string sensorState = ReadAsString();
+            string? previousValue = _valueAsString;
+            _valueAsString = sensorState;
+            if (sensorState != previousValue)
+            {
+                OnPropertyChanged(nameof(ValueAsString));
+            }
         }
 
         /// <summary>
         /// Gets or sets the sonar mode.
         /// </summary>
         /// <value>
-        /// The sonar mode 
+        /// The sonar mode
         /// </value>
         public UltraSonicMode Mode { get; set; }
 
@@ -196,7 +199,10 @@ namespace Iot.Device.BrickPi3.Sensors
         {
             int reading = _value;
             if (reading == int.MaxValue)
+            {
                 return reading;
+            }
+
             return Mode == UltraSonicMode.Inch ? (reading * 39370) / 100 : reading;
         }
 
@@ -223,7 +229,9 @@ namespace Iot.Device.BrickPi3.Sensors
         {
             Mode = Mode.Next();
             if (Mode == UltraSonicMode.Listen)
+            {
                 Mode = Mode.Next();
+            }
         }
 
         /// <summary>
@@ -233,11 +241,13 @@ namespace Iot.Device.BrickPi3.Sensors
         {
             Mode = Mode.Previous();
             if (Mode == UltraSonicMode.Listen)
+            {
                 Mode = Mode.Previous();
+            }
         }
 
         /// <summary>
-        /// Number of modes
+        /// Number of supported modes
         /// </summary>
         /// <returns>Number of modes</returns>
         public int NumberOfModes()

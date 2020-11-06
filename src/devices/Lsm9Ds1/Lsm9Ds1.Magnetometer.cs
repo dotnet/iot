@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -26,7 +25,9 @@ namespace Iot.Device.Lsm9Ds1
             MagneticInductionScale magneticInductionScale = MagneticInductionScale.Scale04G)
         {
             if (i2cDevice == null)
+            {
                 throw new ArgumentNullException(nameof(i2cDevice));
+            }
 
             _i2c = i2cDevice;
             _magneticInductionScale = magneticInductionScale;
@@ -118,7 +119,7 @@ namespace Iot.Device.Lsm9Ds1
         public void Dispose()
         {
             _i2c?.Dispose();
-            _i2c = null;
+            _i2c = null!;
         }
     }
 }

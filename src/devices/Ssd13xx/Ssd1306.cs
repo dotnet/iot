@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -10,14 +9,14 @@ namespace Iot.Device.Ssd13xx
 {
     /// <summary>
     /// A single-chip CMOS OLED/PLED driver with controller for organic/polymer
-    /// light emitting diode dot-matrix graphic display system. 
+    /// light emitting diode dot-matrix graphic display system.
     /// </summary>
     public class Ssd1306 : Ssd13xx
     {
         /// <summary>
         /// Initializes new instance of Ssd1306 device that will communicate using I2C bus.
         /// A single-chip CMOS OLED/PLED driver with controller for organic/polymer
-        /// light emitting diode dot-matrix graphic display system. 
+        /// light emitting diode dot-matrix graphic display system.
         /// </summary>
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Ssd1306(I2cDevice i2cDevice)
@@ -68,7 +67,6 @@ namespace Iot.Device.Ssd13xx
             // Be aware there is a Continuation Bit in the Control byte and can be used
             // to state (logic LOW) if there is only data bytes to follow.
             // This binding separates commands and data by using SendCommand and SendData.
-
             _i2cDevice.Write(writeBuffer);
         }
     }

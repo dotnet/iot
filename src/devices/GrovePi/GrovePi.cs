@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -17,9 +16,9 @@ namespace Iot.Device.GrovePiDevice
     /// </summary>
     public class GrovePi : IDisposable
     {
-        private I2cDevice _i2cDevice;
-        private readonly bool _autoDispose;
         private const byte MaxRetries = 4;
+        private readonly bool _shouldDispose;
+        private I2cDevice _i2cDevice;
 
         /// <summary>
         /// The default GrovePi I2C address is 0x04
@@ -41,21 +40,21 @@ namespace Iot.Device.GrovePiDevice
         /// GrovePi constructor
         /// </summary>
         /// <param name="i2cDevice">The I2C device. Device address is 0x04</param>
-        /// <param name="autoDispose">True to dispose the I2C device when disposing GrovePi</param>
-        public GrovePi(I2cDevice i2cDevice, bool autoDispose = true)
+        /// <param name="shouldDispose">True to dispose the I2C device when disposing GrovePi</param>
+        public GrovePi(I2cDevice i2cDevice, bool shouldDispose = true)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
-            _autoDispose = autoDispose;
-            GrovePiInfo = new Info() { SoftwareVersion = GetFirmwareVerion() };
+            _shouldDispose = shouldDispose;
+            GrovePiInfo = new Info(GetFirmwareVerion());
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_autoDispose)
+            if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                _i2cDevice = null!;
             }
         }
 
@@ -66,8 +65,14 @@ namespace Iot.Device.GrovePiDevice
         public Version GetFirmwareVerion()
         {
             WriteCommand(GrovePiCommand.Version, 0, 0, 0);
-            byte[] inArray = ReadCommand(GrovePiCommand.Version, 0);
-            return new Version(inArray[1], inArray[2], inArray[3]);
+#pragma warning disable SA1011
+            byte[]? inArray = ReadCommand(GrovePiCommand.Version, 0);
+            if (inArray is object)
+            {
+                return new Version(inArray[1], inArray[2], inArray[3]);
+            }
+
+            throw new Exception("Unknown firmware version");
         }
 
         /// <summary>
@@ -79,9 +84,12 @@ namespace Iot.Device.GrovePiDevice
         /// <param name="param2">Second parameter</param>
         public void WriteCommand(GrovePiCommand command, GrovePort pin, byte param1, byte param2)
         {
-            Span<byte> outArray = stackalloc byte[4] { (byte)command, (byte)(pin), param1, param2 };
+            Span<byte> outArray = stackalloc byte[4]
+            {
+                (byte)command, (byte)(pin), param1, param2
+            };
             byte tries = 0;
-            IOException innerEx = null;
+            IOException? innerEx = null;
             // When writing/reading to the I2C port, GrovePi doesn't respond on time in some cases
             // So we wait a little bit before retrying
             // In most cases, the I2C read/write can go thru without waiting
@@ -97,7 +105,7 @@ namespace Iot.Device.GrovePiDevice
                     // Give it another try
                     innerEx = ex;
                     tries++;
-                    Thread.Sleep(10);                    
+                    Thread.Sleep(10);
                 }
             }
 
@@ -110,7 +118,7 @@ namespace Iot.Device.GrovePiDevice
         /// <param name="command">The GrovePi command</param>
         /// <param name="pin">The pin to read</param>
         /// <returns></returns>
-        public byte[] ReadCommand(GrovePiCommand command, GrovePort pin)
+        public byte[]? ReadCommand(GrovePiCommand command, GrovePort pin)
         {
             int numberBytesToRead = 0;
             switch (command)
@@ -133,9 +141,10 @@ namespace Iot.Device.GrovePiDevice
                 default:
                     return null;
             }
+
             byte[] outArray = new byte[numberBytesToRead];
             byte tries = 0;
-            IOException innerEx = null;
+            IOException? innerEx = null;
             // When writing/reading the I2C port, GrovePi doesn't respond on time in some cases
             // So we wait a little bit before retrying
             // In most cases, the I2C read/write can go thru without waiting
@@ -167,7 +176,7 @@ namespace Iot.Device.GrovePiDevice
         {
             WriteCommand(GrovePiCommand.DigitalRead, pin, 0, 0);
             byte tries = 0;
-            IOException innerEx = null;
+            IOException? innerEx = null;
             // When writing/reading to the I2C port, GrovePi doesn't respond on time in some cases
             // So we wait a little bit before retrying
             // In most cases, the I2C read/write can go thru without waiting

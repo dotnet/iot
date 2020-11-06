@@ -1,6 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio.Drivers;
@@ -10,24 +9,24 @@ namespace Iot.Device.LEDMatrix
 {
     internal sealed class Gpio : RaspberryPi3Driver
     {
-        internal ulong AMask { get; set;}
-        internal ulong BMask { get; set;}
-        internal ulong CMask { get; set;}
-        internal ulong DMask { get; set;}
-        internal ulong EMask { get; set;}
-        internal ulong ABCDEMask { get; set;}
-        internal ulong OEMask { get; set;}
-        internal ulong ClockMask { get; set;}
-        internal ulong LatchMask { get; set;}
+        internal ulong AMask { get; set; }
+        internal ulong BMask { get; set; }
+        internal ulong CMask { get; set; }
+        internal ulong DMask { get; set; }
+        internal ulong EMask { get; set; }
+        internal ulong ABCDEMask { get; set; }
+        internal ulong OEMask { get; set; }
+        internal ulong ClockMask { get; set; }
+        internal ulong LatchMask { get; set; }
 
-        internal ulong R1Mask { get; set;}
-        internal ulong G1Mask { get; set;}
-        internal ulong B1Mask { get; set;}
+        internal ulong R1Mask { get; set; }
+        internal ulong G1Mask { get; set; }
+        internal ulong B1Mask { get; set; }
 
-        internal ulong R2Mask { get; set;}
-        internal ulong G2Mask { get; set;}
-        internal ulong B2Mask { get; set;}
-        internal ulong AllColorsMask { get; set;}
+        internal ulong R2Mask { get; set; }
+        internal ulong G2Mask { get; set; }
+        internal ulong B2Mask { get; set; }
+        internal ulong AllColorsMask { get; set; }
 
         internal Gpio(PinMapping mapping, int rows)
         {
@@ -64,7 +63,7 @@ namespace Iot.Device.LEDMatrix
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void WriteSet(ulong mask)   => SetRegister = mask;
+        internal void WriteSet(ulong mask) => SetRegister = mask;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void WriteClear(ulong mask) => ClearRegister = mask;

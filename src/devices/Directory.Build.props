@@ -1,12 +1,17 @@
 <Project>
   <Import Project="../../eng/Compilers.props" />
   <Import Project="../../eng/Versions.props" />
+  <Import Project="../../eng/Analyzers.props" />
   <PropertyGroup>
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>
     <MainLibraryPath>$(MSBuildThisFileDirectory)../System.Device.Gpio/</MainLibraryPath>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <LangVersion>9</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
+  </ItemGroup>
 </Project>

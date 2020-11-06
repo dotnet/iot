@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Bno055
 {
@@ -21,8 +20,10 @@ namespace Iot.Device.Bno055
     {
         /// <summary>X coordinate</summary>
         X = 0x00,
+
         /// <summary>Y coordinate</summary>
         Y = 0x01,
+
         /// <summary>Z coordinate</summary>
         Z = 0x02,
     }
@@ -34,6 +35,7 @@ namespace Iot.Device.Bno055
     {
         /// <summary>Positive axis sign</summary>
         Positive = 0x00,
+
         /// <summary>Negative axis sign</summary>
         Negative = 0x01,
     }

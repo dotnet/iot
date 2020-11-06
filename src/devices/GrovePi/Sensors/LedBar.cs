@@ -1,10 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.GrovePiDevice.Models;
 using System;
 using System.Collections.Generic;
+using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice.Sensors
 {
@@ -15,6 +14,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
     {
         /// <summary>Red to green</summary>
         RedToGreen = 0,
+
         /// <summary>Green to red</summary>
         GreenToRed = 1
     }
@@ -38,8 +38,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         /// <param name="grovePi">The GrovePi class</param>
         /// <param name="port">The grove Port, need to be in the list of SupportedPorts</param>
-        public LedBar(GrovePi grovePi, GrovePort port) : this(grovePi, port, LedBarOrientation.GreenToRed)
-        { }
+        public LedBar(GrovePi grovePi, GrovePort port)
+            : this(grovePi, port, LedBarOrientation.GreenToRed)
+        {
+        }
 
         /// <summary>
         /// LedBar constructor
@@ -50,7 +52,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public LedBar(GrovePi grovePi, GrovePort port, LedBarOrientation orientation)
         {
             if (!SupportedPorts.Contains(port))
+            {
                 throw new ArgumentException($"Grove port {port} not supported.", nameof(port));
+            }
+
             _grovePi = grovePi;
             _port = port;
             _orientation = orientation;
@@ -63,7 +68,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         public LedBarOrientation Orientation
         {
-            get { return _orientation; }
+            get
+            {
+                return _orientation;
+            }
 
             set
             {
@@ -80,12 +88,18 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// </summary>
         public byte Value
         {
-            get { return _level; }
+            get
+            {
+                return _level;
+            }
 
             set
             {
                 if (value > 10)
+                {
                     throw new ArgumentException($"Only 10 leds can be controlled");
+                }
+
                 _grovePi.WriteCommand(GrovePiCommand.LedBarLevel, _port, _level, 0);
             }
         }
@@ -98,7 +112,10 @@ namespace Iot.Device.GrovePiDevice.Sensors
         public void SetOneLed(byte led, bool status)
         {
             if (led > 10)
+            {
                 throw new ArgumentException($"{nameof(led)} can only be from 0 to 10");
+            }
+
             _grovePi.WriteCommand(GrovePiCommand.LedBarSetOneLed, _port, led, status ? (byte)1 : (byte)0);
         }
 
@@ -106,7 +123,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// Set all leds to either on or off by setting 1 as byte for on
         /// 0 for off. lowser bit is led 0
         /// </summary>
-        /// <param name="leds"></param>
+        /// <param name="leds">Pixel array, 1 bit for each LED</param>
         public void SetAllLeds(int leds)
         {
             leds = leds & 0b00000111111111;
@@ -121,7 +138,12 @@ namespace Iot.Device.GrovePiDevice.Sensors
         {
             _grovePi.WriteCommand(GrovePiCommand.LetBarGet, _port, 0, 0);
             var ret = _grovePi.ReadCommand(GrovePiCommand.LetBarGet, _port);
-            return ret[1] + (ret[2] >> 8);
+            if (ret is object)
+            {
+                return ret[1] + (ret[2] >> 8);
+            }
+
+            throw new Exception("Cannot find all LEDs");
         }
 
         /// <summary>
@@ -135,9 +157,9 @@ namespace Iot.Device.GrovePiDevice.Sensors
         }
 
         /// <summary>
-        /// Returns the Level formated 
+        /// Returns the Level formatted
         /// </summary>
-        /// <returns>Returns the Level formated</returns>
+        /// <returns>Returns the LED Level formatted</returns>
         public override string ToString() => $"Level {_level}";
 
         /// <summary>

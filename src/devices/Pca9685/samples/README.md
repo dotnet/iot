@@ -7,8 +7,8 @@ using (var pca9685 = new Pca9685(device, pwmFrequency: 50))
     PwmChannel firstChannel = pca9685.CreatePwmChannel(0); // channel 0
     PwmChannel secondChannel = pca9685.CreatePwmChannel(1); // channel 1
 
-    firstChannel.DutyCyclePercentage = 0.0; // min
-    secondChannel.DutyCyclePercentage = 1.0; // max
+    firstChannel.DutyCycle = 0.0; // min
+    secondChannel.DutyCycle = 1.0; // max
 
     // note: SetDutyCycleAllChannels cannot be used anymore
     //       because it would interfere with firstChannel and secondChannel setting

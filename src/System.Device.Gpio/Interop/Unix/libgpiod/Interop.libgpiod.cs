@@ -2,6 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information
 
+// Disable these StyleCop rules for this file, as we are using native names here.
+#pragma warning disable SA1300 // Element should begin with upper-case letter
+#pragma warning disable SA1307 // Accessible fields should begin with upper-case letter
+
 using System;
 using System.Device.Gpio;
 using System.Runtime.InteropServices;
@@ -42,7 +46,7 @@ internal partial class Interop
         /// </summary>
         /// <param name="chip">The GPIO chip handle</param>
         /// <param name="offset">The offset of the GPIO line</param>
-        /// <returns>Handle to the GPIO line or <see langword="null" /> if an error occured.</returns>
+        /// <returns>Handle to the GPIO line or <see langword="null" /> if an error occurred.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern SafeLineHandle gpiod_chip_get_line(SafeChipHandle chip, int offset);
 
@@ -54,6 +58,16 @@ internal partial class Interop
         /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern int gpiod_line_request_input(SafeLineHandle line, string consumer);
+
+        /// <summary>
+        /// Reserve a single line, set the direction to input with flags
+        /// </summary>
+        /// <param name="line">GPIO line handle</param>
+        /// <param name="consumer">Name of the consumer.</param>
+        /// <param name="flags">Additional request flags.</param>
+        /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        internal static extern int gpiod_line_request_input_flags(SafeLineHandle line, string consumer, int flags);
 
         /// <summary>
         /// Reserve a single line, set the direction to output.
@@ -119,7 +133,7 @@ internal partial class Interop
         /// </summary>
         /// <param name="line">GPIO line handle</param>
         /// <param name="gpioEvent">Reference to the gpio event that was detected</param>
-        /// <returns>1 if rising edge event occured, 2 on falling edge, -1 on error.</returns>
+        /// <returns>1 if rising edge event occurred, 2 on falling edge, -1 on error.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern int gpiod_line_event_read(SafeLineHandle line, ref GpioLineEvent gpioEvent);
 
@@ -129,6 +143,13 @@ internal partial class Interop
         /// <returns>GPIO chip pointer handle or NULL if an error occurred.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern SafeChipHandle gpiod_chip_open_by_number(int number);
+
+        /// <summary>
+        /// Get the API version of the library as a human-readable string.
+        /// </summary>
+        /// <returns>Human-readable string containing the library version.</returns>
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        internal static extern IntPtr gpiod_version_string();
     }
 }
 

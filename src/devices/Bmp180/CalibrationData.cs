@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Bmp180
 {
@@ -31,10 +30,10 @@ namespace Iot.Device.Bmp180
 
             B1 = (short)bmp180.Read16BitsFromRegisterBE((byte)Register.B1);
             B2 = (short)bmp180.Read16BitsFromRegisterBE((byte)Register.B2);
-           
+
             MB = (short)bmp180.Read16BitsFromRegisterBE((byte)Register.MB);
             MC = (short)bmp180.Read16BitsFromRegisterBE((byte)Register.MC);
-            MD = (short)bmp180.Read16BitsFromRegisterBE((byte)Register.MD);            
+            MD = (short)bmp180.Read16BitsFromRegisterBE((byte)Register.MD);
         }
     }
 }

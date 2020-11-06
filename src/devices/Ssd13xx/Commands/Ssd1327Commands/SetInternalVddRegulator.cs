@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -12,7 +11,7 @@ namespace Iot.Device.Ssd13xx.Commands.Ssd1327Commands
     public class SetInternalVddRegulator : ISsd1327Command
     {
         /// <summary>
-        /// This command is used to enable internal Vdd regulator. 
+        /// This command is used to enable internal Vdd regulator.
         /// </summary>
         /// <param name="enable">Represents if internal Vdd have to be enabled.</param>
         public SetInternalVddRegulator(bool enable)

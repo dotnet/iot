@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -31,6 +30,7 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="gpioController">
         /// The GPIO controller for defined external pins. If not specified, the default controller will be used.
         /// </param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Mcp25625(
             SpiDevice spiDevice,
             int reset = -1,
@@ -42,7 +42,8 @@ namespace Iot.Device.Mcp25xxx
             int rx0bf = -1,
             int rx1bf = -1,
             int clkout = -1,
-            GpioController gpioController = null)
+            GpioController? gpioController = null,
+            bool shouldDispose = true)
             : base(
                   spiDevice,
                   reset,
@@ -53,13 +54,14 @@ namespace Iot.Device.Mcp25xxx
                   rx0bf,
                   rx1bf,
                   clkout,
-                  gpioController)
+                  gpioController,
+                  shouldDispose)
         {
             _standby = standby;
 
             if (_standby != -1)
             {
-                // Master controller should already be configured if other pins are used.
+                // Controller should already be configured if other pins are used.
                 _gpioController = _gpioController ?? new GpioController();
                 _gpioController.OpenPin(_standby, PinMode.Output);
             }
@@ -72,7 +74,13 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
-                _gpioController.Write(_standby, value);
+                if (_gpioController is object)
+                {
+                    _gpioController.Write(_standby, value);
+                    return;
+                }
+
+                throw new Exception("GPIO controller is not correctly configured");
             }
         }
     }

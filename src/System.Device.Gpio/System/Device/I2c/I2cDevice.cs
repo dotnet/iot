@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace System.Device.I2c
 {
@@ -46,7 +45,7 @@ namespace System.Device.I2c
         public abstract void Write(ReadOnlySpan<byte> buffer);
 
         /// <summary>
-        /// Performs an atomic operation to write data to and then read data from the I2C bus on which the device is connected, 
+        /// Performs an atomic operation to write data to and then read data from the I2C bus on which the device is connected,
         /// and sends a restart condition between the write and read operations.
         /// </summary>
         /// <param name="writeBuffer">
@@ -58,12 +57,34 @@ namespace System.Device.I2c
         /// </param>
         public abstract void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer);
 
+        /// <summary>
+        /// Creates a communications channel to a device on an I2C bus running on the current platform
+        /// </summary>
+        /// <param name="settings">The connection settings of a device on an I2C bus.</param>
+        /// <returns>A communications channel to a device on an I2C bus running on Windows 10 IoT.</returns>
+        public static I2cDevice Create(I2cConnectionSettings settings)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return CreateWindows10I2cDevice(settings);
+            }
+            else
+            {
+                return new UnixI2cDevice(settings);
+            }
+        }
+
+        /// <inheritdoc cref="IDisposable.Dispose"/>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Disposes this instance
+        /// </summary>
+        /// <param name="disposing"><see langword="true"/> if explicitly disposing, <see langword="false"/> if in finalizer</param>
         protected virtual void Dispose(bool disposing)
         {
             // Nothing to do in base class.

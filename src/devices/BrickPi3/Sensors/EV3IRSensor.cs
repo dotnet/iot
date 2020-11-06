@@ -1,13 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.BrickPi3.Extensions;
-using Iot.Device.BrickPi3.Models;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
+using Iot.Device.BrickPi3.Extensions;
+using Iot.Device.BrickPi3.Models;
 
 namespace Iot.Device.BrickPi3.Sensors
 {
@@ -19,7 +18,7 @@ namespace Iot.Device.BrickPi3.Sensors
 #pragma warning disable
         One = 0, Two = 1, Three = 2, Four = 3
 #pragma warning restore
-    };
+    }
 
     /// <summary>
     /// Sensor mode when using a EV3 IR Sensor
@@ -40,16 +39,15 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Use the IR sensor to detect wich Buttons where pressed on the IR Remote
         /// </summary>
         Remote = SensorType.EV3InfraredRemote
-    };
+    }
 
     /// <summary>
     /// Class for IR beacon location.
     /// </summary>
     public class BeaconLocation
     {
-
         /// <summary>
-        /// Initializes a new instance of the IR beacon location class.        
+        /// Initializes a new instance of the IR beacon location class.
         /// </summary>
         /// <param name="location">Location.</param>
         /// <param name="distance">Distance.</param>
@@ -63,13 +61,13 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Gets the location of the beacon ranging from minus to plus increasing clockwise when pointing towards the beacon
         /// </summary>
         /// <value>The location of the beacon.</value>
-        public int Location { get; internal set; } 
+        public int Location { get; internal set; }
 
         /// <summary>
         /// Gets the distance of the beacon in CM (0-100)
         /// </summary>
         /// <value>The distance to the beacon.</value>
-        public int Distance { get; internal set; } 
+        public int Distance { get; internal set; }
     }
 
     /// <summary>
@@ -77,31 +75,36 @@ namespace Iot.Device.BrickPi3.Sensors
     /// </summary>
     public class EV3InfraredSensor : INotifyPropertyChanged, ISensor
     {
-
-        private Brick _brick = null;
+        private Brick _brick;
         private IRMode _mode;
-        private Timer _timer = null;
+        private Timer _timer;
         private int _periodRefresh;
 
         /// <summary>
         /// Initialize an EV3 IR Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor port</param>
-        public EV3InfraredSensor(Brick brick, SensorPort port) : this(brick, port, IRMode.Proximity, 1000) { }
+        public EV3InfraredSensor(Brick brick, SensorPort port)
+            : this(brick, port, IRMode.Proximity, 1000)
+        {
+        }
 
         /// <summary>
         /// Initializes an EV3 IS Sensor
         /// </summary>
-        /// <param name="brick"></param>
-        /// <param name="port"></param>
+        /// <param name="brick">Interface to main Brick component</param>
+        /// <param name="port">Sensor port</param>
         /// <param name="mode">IR mode</param>
-        public EV3InfraredSensor(Brick brick, SensorPort port, IRMode mode) : this(brick, port, mode, 1000) { }
+        public EV3InfraredSensor(Brick brick, SensorPort port, IRMode mode)
+            : this(brick, port, mode, 1000)
+        {
+        }
 
         /// <summary>
         /// Initialize an EV3 IR Sensor
         /// </summary>
-        /// <param name="brick"></param>
+        /// <param name="brick">Interface to main Brick component</param>
         /// <param name="port">Sensor port</param>
         /// <param name="mode">IR mode</param>
         /// <param name="timeout">Period in millisecond to check sensor value changes</param>
@@ -118,11 +121,8 @@ namespace Iot.Device.BrickPi3.Sensors
 
         private void StopTimerInternal()
         {
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            _timer?.Dispose();
+            _timer = null!;
         }
 
         private void OnPropertyChanged(string name)
@@ -134,14 +134,17 @@ namespace Iot.Device.BrickPi3.Sensors
         /// To notify a property has changed. The minimum time can be set up
         /// with timeout property
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Period to refresh the notification of property changed in milliseconds
         /// </summary>
         public int PeriodRefresh
         {
-            get { return _periodRefresh; }
+            get
+            {
+                return _periodRefresh;
+            }
 
             set
             {
@@ -149,21 +152,25 @@ namespace Iot.Device.BrickPi3.Sensors
                 _timer.Change(TimeSpan.FromMilliseconds(_periodRefresh), TimeSpan.FromMilliseconds(_periodRefresh));
             }
         }
-        private int value;
-        private string valueAsString;
+
+        private int _value;
+        private string? _valueAsString;
 
         /// <summary>
         /// Return the raw value of the sensor
         /// </summary>
         public int Value
         {
-            get { return ReadRaw(); }
+            get
+            {
+                return ReadRaw();
+            }
 
             internal set
             {
-                if (value != this.value)
+                if (value != _value)
                 {
-                    this.value = value;
+                    _value = value;
                     OnPropertyChanged(nameof(Value));
                 }
             }
@@ -172,36 +179,33 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Return the raw value  as a string of the sensor
         /// </summary>
-        public string ValueAsString
-        {
-            get { return ReadAsString(); }
-
-            internal set
-            {
-                if (valueAsString != value)
-                {
-                    valueAsString = value;
-                    OnPropertyChanged(nameof(ValueAsString));
-                }
-            }
-        }
+        public string ValueAsString => ReadAsString();
 
         /// <summary>
         /// Update the sensor and this will raised an event on the interface
         /// </summary>
-        public void UpdateSensor(object state)
+        public void UpdateSensor(object? state)
         {
             Value = ReadRaw();
-            ValueAsString = ReadAsString();
+            string sensorState = ReadAsString();
+            string? previousValue = _valueAsString;
+            _valueAsString = sensorState;
+            if (sensorState != previousValue)
+            {
+                OnPropertyChanged(nameof(ValueAsString));
+            }
         }
 
         /// <summary>
-        /// Gets or sets the IR mode. 
+        /// Gets or sets the IR mode.
         /// </summary>
         /// <value>The mode.</value>
         public IRMode Mode
         {
-            get { return _mode; }
+            get
+            {
+                return _mode;
+            }
 
             set
             {
@@ -219,7 +223,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <returns>The value as a string</returns>
         public string ReadAsString()
         {
-            string s = "";
+            string s = string.Empty;
             switch (_mode)
             {
                 case IRMode.Proximity:
@@ -232,12 +236,13 @@ namespace Iot.Device.BrickPi3.Sensors
                     s = "Location: " + ReadBeaconLocation() + " Distance: TBD cm";
                     break;
             }
+
             return s;
         }
 
         /// <summary>
-        /// Read the sensor value. The returned value depends on the mode. Distance in proximity mode. 
-        /// Remote command number in remote mode. Beacon location in seek mode. 
+        /// Read the sensor value. The returned value depends on the mode. Distance in proximity mode.
+        /// Remote command number in remote mode. Beacon location in seek mode.
         /// </summary>
         public int Read()
         {
@@ -254,6 +259,7 @@ namespace Iot.Device.BrickPi3.Sensors
                     value = ReadBeaconLocation();
                     break;
             }
+
             return value;
         }
 
@@ -285,6 +291,7 @@ namespace Iot.Device.BrickPi3.Sensors
                     default:
                         break;
                 }
+
                 return value;
             }
             catch (Exception ex) when (ex is IOException)
@@ -302,6 +309,7 @@ namespace Iot.Device.BrickPi3.Sensors
             {
                 Mode = IRMode.Proximity;
             }
+
             return ReadRaw();
         }
 
@@ -315,6 +323,7 @@ namespace Iot.Device.BrickPi3.Sensors
             {
                 Mode = IRMode.Remote;
             }
+
             try
             {
                 var ret = _brick.GetSensor((byte)Port);
@@ -337,17 +346,24 @@ namespace Iot.Device.BrickPi3.Sensors
             {
                 Mode = IRMode.Seek;
             }
+
             try
             {
                 var ret = _brick.GetSensor((byte)Port);
                 if (Mode != oldmode)
+                {
                     Mode = oldmode;
+                }
+
                 return (ret[(int)(Channel) * 2] + ret[(int)(Channel) * 2 + 1] >> 8);
             }
             catch (Exception ex) when (ex is IOException)
             {
                 if (Mode != oldmode)
+                {
                     Mode = oldmode;
+                }
+
                 return int.MaxValue;
             }
         }
@@ -389,7 +405,7 @@ namespace Iot.Device.BrickPi3.Sensors
         }
 
         /// <summary>
-        /// Number of modes
+        /// Number of modes supported
         /// </summary>
         /// <returns>Number of modes</returns>
         public int NumberOfModes()

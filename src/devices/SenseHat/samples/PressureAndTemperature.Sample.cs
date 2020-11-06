@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -8,6 +7,8 @@ using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Iot.Device.Common;
+using UnitsNet;
 
 namespace Iot.Device.SenseHat.Samples
 {
@@ -15,11 +16,20 @@ namespace Iot.Device.SenseHat.Samples
     {
         public static void Run()
         {
-            using (var th = new SenseHatPressureAndTemperature())
+            // set this to the current sea level pressure in the area for correct altitude readings
+            var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
+
+            using (var pt = new SenseHatPressureAndTemperature())
             {
                 while (true)
                 {
-                    Console.WriteLine($"Temperature: {th.Temperature.Celsius}°C   Humidity: {th.Pressure}hPa");
+                    var tempValue = pt.Temperature;
+                    var preValue = pt.Pressure;
+                    var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
+
+                    Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
+                    Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
+                    Console.WriteLine($"Altitude: {altValue:0.##}m");
                     Thread.Sleep(1000);
                 }
             }

@@ -1,13 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
 using System.Device.Gpio;
 using System.Diagnostics;
 using System.Drawing;
-using System.Runtime.CompilerServices; 
+using System.Runtime.CompilerServices;
 
 namespace Iot.Device.SenseHat
 {
@@ -28,9 +27,9 @@ namespace Iot.Device.SenseHat
         /// </summary>
         public SenseHatLedMatrixSysFs()
         {
-            string device = GetSenseHatDevice();
+            string? device = GetSenseHatDevice();
 
-            if (device == null)
+            if (device is null)
             {
                 throw new InvalidOperationException("Sense HAT not found. Ensure device is enabled in config.txt.");
             }
@@ -43,7 +42,9 @@ namespace Iot.Device.SenseHat
         public override void Write(ReadOnlySpan<Color> colors)
         {
             if (colors.Length != NumberOfPixels)
+            {
                 throw new ArgumentException($"`{nameof(colors)}` must have exactly {NumberOfPixels} elements.");
+            }
 
             StartWritingColors();
 
@@ -72,10 +73,14 @@ namespace Iot.Device.SenseHat
         public override void SetPixel(int x, int y, Color color)
         {
             if (x < 0 || x >= NumberOfPixelsPerRow)
+            {
                 throw new ArgumentOutOfRangeException(nameof(x));
+            }
 
             if (y < 0 || y >= NumberOfPixelsPerColumn)
+            {
                 throw new ArgumentOutOfRangeException(nameof(y));
+            }
 
             StartWritingColor(x, y);
             WriteColor(color);
@@ -117,7 +122,7 @@ namespace Iot.Device.SenseHat
             _deviceFile.Write(encoded);
         }
 
-        private static string GetSenseHatDevice()
+        private static string? GetSenseHatDevice()
         {
             foreach (string dev in Directory.EnumerateFileSystemEntries("/sys/class/graphics/", "fb*"))
             {
@@ -135,7 +140,7 @@ namespace Iot.Device.SenseHat
         public override void Dispose()
         {
             _deviceFile?.Dispose();
-            _deviceFile = null;
+            _deviceFile = null!;
         }
     }
 }

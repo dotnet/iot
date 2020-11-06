@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -16,8 +15,10 @@ namespace Iot.Device.Pcx857x.Tests
         {
             // Set all pins to output
             for (int pin = 0; pin < testDevice.Controller.PinCount; pin++)
+            {
+                Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Write(-1, PinValue.High));
+            }
 
-            Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Write(-1, PinValue.High));
             Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Write(testDevice.Controller.PinCount, PinValue.Low));
             Assert.Throws<InvalidOperationException>(() => testDevice.Controller.Write(testDevice.Controller.PinCount + 1, PinValue.High));
         }

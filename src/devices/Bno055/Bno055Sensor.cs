@@ -1,13 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Numerics;
 using System.Threading;
-using Iot.Units;
+using Temperature = UnitsNet.Temperature;
 
 namespace Iot.Device.Bno055
 {
@@ -38,7 +37,10 @@ namespace Iot.Device.Bno055
         /// </summary>
         public OperationMode OperationMode
         {
-            get { return _operationMode; }
+            get
+            {
+                return _operationMode;
+            }
             set
             {
                 _operationMode = value;
@@ -53,7 +55,10 @@ namespace Iot.Device.Bno055
         /// </summary>
         public PowerMode PowerMode
         {
-            get { return (PowerMode)ReadByte(Registers.PWR_MODE); }
+            get
+            {
+                return (PowerMode)ReadByte(Registers.PWR_MODE);
+            }
             set
             {
                 SetConfigMode(true);
@@ -67,7 +72,10 @@ namespace Iot.Device.Bno055
         /// </summary>
         public TemperatureSource TemperatureSource
         {
-            get { return (TemperatureSource)ReadByte(Registers.TEMP_SOURCE); }
+            get
+            {
+                return (TemperatureSource)ReadByte(Registers.TEMP_SOURCE);
+            }
             set
             {
                 SetConfigMode(true);
@@ -81,7 +89,10 @@ namespace Iot.Device.Bno055
         /// </summary>
         public Units Units
         {
-            get { return (Units)ReadByte(Registers.UNIT_SEL); }
+            get
+            {
+                return (Units)ReadByte(Registers.UNIT_SEL);
+            }
             set
             {
                 SetConfigMode(true);
@@ -102,7 +113,9 @@ namespace Iot.Device.Bno055
         /// <param name="i2cDevice">The I2C Device</param>
         /// <param name="operationMode">The operation mode to setup</param>
         /// <param name="autoDispoable">true to dispose the I2C device at dispose</param>
-        public Bno055Sensor(I2cDevice i2cDevice, OperationMode operationMode = OperationMode.AccelerometerMagnetometerGyroscopeRelativeOrientation, bool autoDispoable = true)
+        public Bno055Sensor(I2cDevice i2cDevice,
+            OperationMode operationMode = OperationMode.AccelerometerMagnetometerGyroscopeRelativeOrientation,
+            bool autoDispoable = true)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} can't be null");
             _autoDispoable = autoDispoable;
@@ -112,35 +125,69 @@ namespace Iot.Device.Bno055
             SetConfigMode(true);
             // A second write
             WriteReg(Registers.PAGE_ID, 0);
-            // Get the ID
-            Info = new Info();
-            Info.ChipId = ReadByte(Registers.CHIP_ID);
-            if (Info.ChipId != DeviceId)
-                throw new Exception($"{nameof(Bno055Sensor)} is not a valid sensor");
-            Info.AcceleratorId = ReadByte(Registers.ACCEL_REV_ID);
-            Info.MagnetometerId = ReadByte(Registers.MAG_REV_ID);
-            Info.GyroscopeId = ReadByte(Registers.GYRO_REV_ID);
-            Info.FirmwareVersion = new Version(ReadByte(Registers.SW_REV_ID_MSB), ReadByte(Registers.SW_REV_ID_LSB));
-            Info.BootloaderVersion = new Version(ReadByte(Registers.BL_REV_ID), 0);
-
-            // Check if a reset is needed
-            if (TemperatureSource != TemperatureSource.Gyroscope)
+            byte chipId = ReadByte(Registers.CHIP_ID);
+            if (chipId != DeviceId)
             {
-                WriteReg(Registers.SYS_TRIGGER, 0x20);
-                // Need 650 milliseconds after reset
-                Thread.Sleep(650);
-                PowerMode = PowerMode.Normal;
-                WriteReg(Registers.SYS_TRIGGER, 0x00);
-                TemperatureSource = TemperatureSource.Gyroscope;
+                throw new Exception($"{nameof(Bno055Sensor)} is not a valid sensor");
             }
-            // Select default units
-            Units = Units.AccelerationMeterPerSecond | Units.AngularRateDegreePerSecond | Units.DataOutputFormatWindows | Units.EulerAnglesDegrees | Units.TemperatureCelsius;
-            // Using the gyroscope as temeprature source
-            TemperatureSource = TemperatureSource.Gyroscope;
-            // Set the operation mode
-            OperationMode = operationMode;
-            // Get the current unit (should be all at default)
-            _units = Units;
+
+            Info = new Info(
+                chipId,                                     // Chip Id
+                ReadByte(Registers.ACCEL_REV_ID),           // AcceleratorId
+                ReadByte(Registers.MAG_REV_ID),             // MagnetometerId
+                ReadByte(Registers.GYRO_REV_ID),            // GyroscopeId
+                new Version(ReadByte(Registers.SW_REV_ID_MSB), ReadByte(Registers.SW_REV_ID_LSB)),  // FirmwareVersion
+                new Version(ReadByte(Registers.BL_REV_ID), 0)); // BootloaderVersion
+            _operationMode = operationMode;
+            InitializeRegisters();
+        }
+
+        private static readonly byte[][] s_registerDefaults =
+        {
+            new byte[]
+            {
+                (byte)Registers.UNIT_SEL, (byte)(
+                    Units.AccelerationMeterPerSecond |
+                    Units.AngularRateDegreePerSecond |
+                    Units.DataOutputFormatWindows |
+                    Units.EulerAnglesDegrees |
+                    Units.TemperatureCelsius)
+            },
+            new byte[]
+            {
+                (byte)Registers.TEMP_SOURCE, (byte)TemperatureSource.Gyroscope
+            },
+            new byte[]
+            {
+                (byte)Registers.PWR_MODE, (byte)PowerMode.Normal
+            },
+            new byte[]
+            {
+                (byte)Registers.AXIS_MAP_CONFIG, 0x24, // AXIS_MAP_CONFIG
+                0, // AXIS_MAP_SIGN
+            },
+            new byte[]
+            {
+                (byte)Registers.ACCEL_OFFSET_X_LSB, 0, 0, 0, 0, 0, 0, // ACC_OFFSET_*_*SB
+                0, 0, 0, 0, 0, 0, // MAC_OFFSET_*_*SB
+                0, 0, 0, 0, 0, 0, // GYR_OFFSET_*_*SB
+                0, 0, 0, 0, // *_RADIUS_*SB
+            }
+        };
+
+        private void InitializeRegisters()
+        {
+            // WriteReg(Registers.SYS_TRIGGER, 0x20);
+            // Using the chip's internal reset might not work:
+            // https://community.bosch-sensortec.com/t5/MEMS-sensors-forum/BNO055-power-on-reset-issues/m-p/8457/highlight/true#M948
+            SetConfigMode(true);
+
+            foreach (var registerDefault in s_registerDefaults)
+            {
+                _i2cDevice.Write(registerDefault);
+            }
+
+            SetConfigMode(false);
         }
 
         /// <summary>
@@ -159,6 +206,7 @@ namespace Iot.Device.Bno055
             {
                 WriteReg(Registers.SYS_TRIGGER, 0x00);
             }
+
             SetConfigMode(false);
         }
 
@@ -194,7 +242,7 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Returns the calibration status for the system and sensors
         /// </summary>
-        /// <returns>Returns the calibration status for the system and sensors</returns>
+        /// <returns>Calibration status</returns>
         public CalibrationStatus GetCalibrationStatus() => (CalibrationStatus)ReadByte(Registers.CALIB_STAT);
 
         /// <summary>
@@ -213,7 +261,7 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Set the accelerometer calibration data
         /// </summary>
-        /// <param name="calibrationData"></param>
+        /// <param name="calibrationData">Calibration data</param>
         public void SetAccelerometerCalibrationData(Vector4 calibrationData)
         {
             SetConfigMode(true);
@@ -245,7 +293,7 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Set the magnetometer calibration data
         /// </summary>
-        /// <param name="calibrationData"></param>
+        /// <param name="calibrationData">Calibration data</param>
         public void SetMagnetometerCalibrationData(Vector4 calibrationData)
         {
             SetConfigMode(true);
@@ -333,11 +381,16 @@ namespace Iot.Device.Bno055
                 var retVect = GetVectorData(Registers.EULER_H_LSB);
                 // If unit is MeterG, then divide by 900, otherwise divide by 16
                 if (_units.HasFlag(Units.EulerAnglesRadians))
+                {
                     return retVect / 900;
+                }
                 else
+                {
                     return retVect / 16;
+                }
             }
         }
+
         /// <summary>
         /// Get the Magnetometer
         /// </summary>
@@ -352,9 +405,13 @@ namespace Iot.Device.Bno055
             {
                 var retVect = GetVectorData(Registers.GYRO_DATA_X_LSB);
                 if ((_units & Units.AngularRateRotationPerSecond) == Units.AngularRateRotationPerSecond)
+                {
                     return retVect / 900;
+                }
                 else
+                {
                     return retVect / 16;
+                }
             }
         }
 
@@ -371,9 +428,13 @@ namespace Iot.Device.Bno055
                 var retVect = GetVectorData(Registers.ACCEL_DATA_X_LSB);
                 // If unit is MeterG, then no convertion, otherwise divide by 100
                 if ((_units & Units.AccelerationMeterG) == Units.AccelerationMeterG)
+                {
                     return retVect;
+                }
                 else
+                {
                     return retVect / 100;
+                }
             }
         }
 
@@ -390,11 +451,16 @@ namespace Iot.Device.Bno055
                 var retVect = GetVectorData(Registers.LINEAR_ACCEL_DATA_X_LSB);
                 // If unit is MeterG, then no convertion, otherwise divide by 100
                 if ((_units & Units.AccelerationMeterG) == Units.AccelerationMeterG)
+                {
                     return retVect;
+                }
                 else
+                {
                     return retVect / 100;
+                }
             }
         }
+
         /// <summary>
         /// Get the gravity
         /// Gravity Vector (100Hz)
@@ -408,15 +474,21 @@ namespace Iot.Device.Bno055
                 var retVect = GetVectorData(Registers.GRAVITY_DATA_X_LSB);
                 // If unit is MeterG, then no convertion, otherwise divide by 100
                 if ((_units & Units.AccelerationMeterG) == Units.AccelerationMeterG)
+                {
                     return retVect;
+                }
                 else
+                {
                     return retVect / 100;
+                }
             }
         }
+
         /// <summary>
         /// Get the quaternion, unit is 1 Quaternion (unit less) = 2^14 returned result
         /// </summary>
-        public Vector4 Quaternion => new Vector4(GetVectorData(Registers.QUATERNION_DATA_X_LSB), ReadInt16(Registers.QUATERNION_DATA_W_LSB));
+        public Vector4 Quaternion => new Vector4(GetVectorData(Registers.QUATERNION_DATA_X_LSB),
+            ReadInt16(Registers.QUATERNION_DATA_W_LSB));
 
         /// <summary>
         /// Get the temperature
@@ -427,9 +499,13 @@ namespace Iot.Device.Bno055
             {
                 // If unit is Farenheit, then divide by 2, otherwise no convertion
                 if ((_units & Units.TemperatureFarenheit) == Units.TemperatureFarenheit)
-                    return Temperature.FromFahrenheit(ReadByte(Registers.TEMP) / 2.0f);
+                {
+                    return Temperature.FromDegreesFahrenheit(ReadByte(Registers.TEMP) / 2.0f);
+                }
                 else
-                    return Temperature.FromCelsius(ReadByte(Registers.TEMP));
+                {
+                    return Temperature.FromDegreesCelsius(ReadByte(Registers.TEMP));
+                }
             }
         }
 
@@ -475,7 +551,7 @@ namespace Iot.Device.Bno055
             if (_autoDispoable)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                _i2cDevice = null!;
             }
         }
 

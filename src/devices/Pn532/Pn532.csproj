@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
+    <PackageReference Include="System.Memory" Version="4.5.3" />
+    <Compile Include="*.cs" />
+    <Compile Include="RfConfiguration\*.cs" />
+    <Compile Include="ListPassive\*.cs" />
+    <Compile Include="AsTarget\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Card\CardRfid.csproj" />
+  </ItemGroup>
+
+</Project>

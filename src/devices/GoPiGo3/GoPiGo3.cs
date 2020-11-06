@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Iot.Device.GoPiGo3.Models;
 using System;
 using System.Buffers.Binary;
 using System.Device.Spi;
@@ -12,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Iot.Device.GoPiGo3.Models;
 
 namespace Iot.Device.GoPiGo3
 {
@@ -25,12 +24,13 @@ namespace Iot.Device.GoPiGo3
         private const int GroveI2cLengthLimit = 32;
         private const string ManufacturerName = "Dexter Industries";
         private const string BoardName = "GoPiGo3";
-        private bool _autoDispose;
-        private SpiDevice _spiDevice = null;
         // this is used by GoPiGo3 when the data returned are correct
         private const byte SpiCorrectDataReturned = 0xA5;
         // This is used by GoPiGo3 when returning I2C data returned are correct
         private const byte I2cCorrectData = 0;
+
+        private bool _autoDispose;
+        private SpiDevice _spiDevice;
 
         #region Properties
 
@@ -57,12 +57,16 @@ namespace Iot.Device.GoPiGo3
         /// <summary>
         /// The 2 Grove Sensor
         /// </summary>
-        public GroveSensor[] GroveSensor { get; internal set; }
+        public GroveSensor[] GroveSensor = new GroveSensor[2]
+            {
+                new GroveSensor(GrovePort.Grove1),
+                new GroveSensor(GrovePort.Grove2)
+            };
 
         /// <summary>
         /// The GoPiGo3 information including hardware, firmware, ID and Manufacturer
         /// </summary>
-        public GoPiGoInfo GoPiGo3Info { get; internal set; }
+        public GoPiGoInfo? GoPiGo3Info { get; internal set; }
 
         /// <summary>
         /// Get the real 5V and Battery/VCC voltages
@@ -90,30 +94,30 @@ namespace Iot.Device.GoPiGo3
 
         private void InitializeGoPiGo(bool autoDetect)
         {
-            GoPiGo3Info = new GoPiGoInfo();
             if (autoDetect == true)
+            {
                 try
                 {
-                    GoPiGo3Info.Manufacturer = GetManufacturer();
-                    GoPiGo3Info.Board = GetBoard();
-                    GoPiGo3Info.SoftwareVersion = GetFirmwareVersion();
-                    GoPiGo3Info.HardwareVersion = GetHardwareVersion();
-                    GoPiGo3Info.Id = GetIdHex();
+                    GoPiGo3Info = new GoPiGoInfo(
+                        GetManufacturer(),
+                        GetBoard(),
+                        GetHardwareVersion(),
+                        GetFirmwareVersion(),
+                        GetIdHex());
                 }
                 catch (IOException ex)
                 {
                     throw new IOException($"No SPI response. GoPiGo3 with address {SpiAddress} not connected.", ex);
                 }
-            if ((GoPiGo3Info.Manufacturer != ManufacturerName) || (GoPiGo3Info.Board != BoardName))
+            }
+
+            if ((GoPiGo3Info?.Manufacturer != ManufacturerName) || (GoPiGo3Info?.Board != BoardName))
+            {
                 throw new IOException($"GoPiGo3 with address {SpiAddress} not connected.");
+            }
+
             MotorGearRatio = DefaultMotorGearRatio;
             EncoderTicksPerRotation = DefaultEncoderTicksPerRotation;
-            // Initialise the 2 Grove sensors
-            GroveSensor = new GroveSensor[2]
-            {
-                new GroveSensor(GrovePort.Grove1),
-                new GroveSensor(GrovePort.Grove2)
-            };
         }
 
         /// <summary>
@@ -168,6 +172,7 @@ namespace Iot.Device.GoPiGo3
             {
                 return BinaryPrimitives.ReadInt32BigEndian(new Span<byte>(reply).Slice(4));
             }
+
             throw new IOException($"{nameof(SpiRead32)} : no SPI response");
         }
 
@@ -185,6 +190,7 @@ namespace Iot.Device.GoPiGo3
             {
                 return BinaryPrimitives.ReadInt16BigEndian(new Span<byte>(reply).Slice(4));
             }
+
             throw new IOException($"{nameof(SpiRead16)} : no SPI response");
         }
 
@@ -255,13 +261,16 @@ namespace Iot.Device.GoPiGo3
         public string GetManufacturer()
         {
             string retVal = string.Empty;
-            byte[] outArray = {SpiAddress, (byte)SpiMessageType.GetManufacturer,
-                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            byte[] outArray =
+            {
+                SpiAddress, (byte)SpiMessageType.GetManufacturer, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            };
             byte[] reply = SpiTransferArray(outArray);
             if (reply[3] != SpiCorrectDataReturned)
             {
                 throw new IOException("No SPI response");
             }
+
             return Encoding.ASCII.GetString(reply.Skip(4).Where(c => c != 0).ToArray());
         }
 
@@ -272,14 +281,17 @@ namespace Iot.Device.GoPiGo3
         public string GetBoard()
         {
             string retVal = string.Empty;
-            byte[] outArray = {SpiAddress, (byte)SpiMessageType.GetName,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            byte[] outArray =
+            {
+                SpiAddress, (byte)SpiMessageType.GetName, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            };
             byte[] reply = SpiTransferArray(outArray);
 
             if (reply[3] != SpiCorrectDataReturned)
             {
                 throw new IOException("No SPI response");
             }
+
             return Encoding.ASCII.GetString(reply.Skip(4).Where(c => c != 0).ToArray());
         }
 
@@ -300,7 +312,7 @@ namespace Iot.Device.GoPiGo3
         /// <returns>Returns the serial number as 32 char HEX formatted string</returns>
         public string GetIdHex()
         {
-            return string.Join("", GetId().Select((b) => b.ToString("X2")));
+            return string.Join(string.Empty, GetId().Select((b) => b.ToString("X2")));
         }
 
         /// <summary>
@@ -310,14 +322,17 @@ namespace Iot.Device.GoPiGo3
         public byte[] GetId()
         {
             string retVal = string.Empty;
-            byte[] outArray = {SpiAddress, (byte)SpiMessageType.GetId,
-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            byte[] outArray =
+            {
+                SpiAddress, (byte)SpiMessageType.GetId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            };
             byte[] reply = SpiTransferArray(outArray);
 
             if (reply[3] != SpiCorrectDataReturned)
             {
                 throw new IOException("No SPI response");
             }
+
             return reply.Skip(4).Take(16).ToArray();
         }
 
@@ -339,7 +354,6 @@ namespace Iot.Device.GoPiGo3
         /// <param name="ledColor">The Color of the <paramref name="led"/></param>
         public void SetLed(byte led, Color ledColor)
         {
-
             byte[] outArray = { SpiAddress, (byte)SpiMessageType.SetLed, led, ledColor.R, ledColor.G, ledColor.B };
             var reply = SpiTransferArray(outArray);
         }
@@ -452,7 +466,7 @@ namespace Iot.Device.GoPiGo3
         /// <param name="dps">The speed limit in degrees per second, with 0 being no limit</param>
         public void SetMotorLimits(MotorPort port, byte powerPercent = 0, int dps = 0)
         {
-            byte[] outArray = { SpiAddress, (byte)SpiMessageType.setMotorLimits, (byte)port, powerPercent, (byte)((dps >> 8) & 0xFF), (byte)(dps & 0xFF) };
+            byte[] outArray = { SpiAddress, (byte)SpiMessageType.SetMotorLimits, (byte)port, powerPercent, (byte)((dps >> 8) & 0xFF), (byte)(dps & 0xFF) };
             var ret = SpiTransferArray(outArray);
         }
 
@@ -471,11 +485,17 @@ namespace Iot.Device.GoPiGo3
             {
                 motorStatus.Speed = reply[5];
                 if ((motorStatus.Speed & 0x80) > 0)
+                {
                     motorStatus.Speed = -motorStatus.Speed;
-                motorStatus.Encoder = (int)(BinaryPrimitives.ReadInt32BigEndian(new Span<byte>(reply).Slice(6)) / MotorTicksPerDegree); 
+                }
+
+                motorStatus.Encoder = (int)(BinaryPrimitives.ReadInt32BigEndian(new Span<byte>(reply).Slice(6)) / MotorTicksPerDegree);
                 motorStatus.Dps = ((reply[10] << 8) | reply[11]);
                 if ((motorStatus.Dps & 0x8000) > 0)
+                {
                     motorStatus.Dps = motorStatus.Dps - 0x10000;
+                }
+
                 motorStatus.Flags = (MotorStatusFlags)reply[4];
             }
             else
@@ -507,15 +527,24 @@ namespace Iot.Device.GoPiGo3
         {
             SpiMessageType message_type;
             if (port == MotorPort.MotorLeft)
+            {
                 message_type = SpiMessageType.GetMotorEncoderLeft;
+            }
             else if (port == MotorPort.MotorRight)
+            {
                 message_type = SpiMessageType.GetMotorEncoderRight;
+            }
             else
+            {
                 throw new IOException($"{nameof(GetMotorEncoder)} error. Must be one motor port at a time, PortMotorLeft or PortMotorRight");
+            }
 
             var encoder = SpiRead32(message_type);
             if ((encoder & 0x80000000) > 0)
+            {
                 encoder = (int)(encoder - 0x100000000);
+            }
+
             return (int)(encoder / MotorTicksPerDegree);
         }
 
@@ -531,9 +560,14 @@ namespace Iot.Device.GoPiGo3
         public void SetGroveType(GrovePort port, GroveSensorType type)
         {
             if ((port == GrovePort.Grove1) || (port == GrovePort.Both))
+            {
                 GroveSensor[0].SensorType = type;
+            }
+
             if ((port == GrovePort.Grove2) || (port == GrovePort.Both))
+            {
                 GroveSensor[1].SensorType = type;
+            }
 
             byte[] outArray = { SpiAddress, (byte)SpiMessageType.SetGroveType, (byte)port, (byte)type };
             SpiTransferArray(outArray);
@@ -609,17 +643,28 @@ namespace Iot.Device.GoPiGo3
                 catch (IOException ex)
                 {
                     if (stopwatch.ElapsedMilliseconds > timeout)
+                    {
                         throw new IOException($"{nameof(GroveI2cTransfer)} error: timeout while transfering the I2C data", ex);
+                    }
                 }
             }
+
             // Wait for the sensors to be read
             // In theory 115µs per byte sent
             int towait = 0;
             if (arrayToSend != null)
+            {
                 if (arrayToSend.Length != 0)
+                {
                     towait += 1 + arrayToSend.Length;
+                }
+            }
+
             if (inBytes > 0)
+            {
                 towait += 1 + inBytes;
+            }
+
             timeout += (int)(0.115 * towait);
             // but make sure we wait a minimum of 1 ms
             if (towait > 0)
@@ -667,11 +712,17 @@ namespace Iot.Device.GoPiGo3
             {
                 throw new ArgumentException($"{nameof(GroveI2cStart)} error: Port unsupported. Must be either Grove 1 or Grove 2.");
             }
+
             var address = ((addr & 0x7F) << 1);
             if (inBytes > GroveI2cLengthLimit)
+            {
                 throw new ArgumentException($"{nameof(GroveI2cStart)} error: Read length error. Up to {GroveI2cLengthLimit} bytes can be read in a single transaction.");
+            }
+
             if (arrayToSend.Length > GroveI2cLengthLimit)
+            {
                 throw new ArgumentException($"{nameof(GroveI2cStart)} error:Write length error. Up to {GroveI2cLengthLimit}  bytes can be written in a single transaction.");
+            }
 
             byte[] outArray = { SpiAddress, (byte)message_type, (byte)address, inBytes, (byte)arrayToSend.Length };
             Array.Resize(ref outArray, outArray.Length + arrayToSend.Length);
@@ -680,9 +731,14 @@ namespace Iot.Device.GoPiGo3
 
             GroveSensor[port_index].I2cDataLength = inBytes;
             if (reply[3] != SpiCorrectDataReturned)
+            {
                 throw new IOException($"{nameof(GroveI2cStart)} error: No SPI response");
+            }
+
             if (reply[4] != I2cCorrectData)
+            {
                 throw new IOException($"{nameof(GroveI2cStart)} error: Not ready to start I2C transaction");
+            }
         }
 
         /// <summary>
@@ -692,8 +748,8 @@ namespace Iot.Device.GoPiGo3
         /// <returns>Returns a byte array containing the read data</returns>
         public byte[] GetGroveValue(GrovePort port)
         {
-            string ErrorSPI = $"{nameof(GetGroveValue)} error: No SPI response";
-            string ErrorInvalidValue = $"{nameof(GetGroveValue)} error: Invalid value";
+            string errorSpi = $"{nameof(GetGroveValue)} error: No SPI response";
+            string errorInvalidValue = $"{nameof(GetGroveValue)} error: Invalid value";
             SpiMessageType message_type;
             byte port_index;
             if (port == GrovePort.Grove1)
@@ -711,62 +767,106 @@ namespace Iot.Device.GoPiGo3
                 throw new ArgumentException($"{nameof(GroveI2cStart)} error: Port unsupported. Must be either Grove 1 or Grove 2.");
             }
 
-            byte[] outArray = null;
-            byte[] reply = null;
+#pragma warning disable SA1011
+            byte[]? outArray = null;
+            byte[]? reply = null;
             switch (GroveSensor[port_index].SensorType)
             {
                 case GroveSensorType.InfraredRemote:
                     outArray = new byte[] { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0 };
                     reply = SpiTransferArray(outArray);
                     if (reply[3] == SpiCorrectDataReturned)
+                    {
                         if ((reply[4] == (byte)GroveSensor[port_index].SensorType) && (reply[5] == I2cCorrectData))
+                        {
                             return new byte[] { reply[6] };
+                        }
                         else
-                            throw new IOException(ErrorInvalidValue);
+                        {
+                            throw new IOException(errorInvalidValue);
+                        }
+                    }
                     else
-                        throw new IOException(ErrorSPI);
+                    {
+                        throw new IOException(errorSpi);
+                    }
+
                 case GroveSensorType.InfraredEV3Remote:
                     outArray = new byte[] { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0, 0, 0, 0 };
                     reply = SpiTransferArray(outArray);
                     if (reply[3] == SpiCorrectDataReturned)
+                    {
                         if ((reply[4] == (byte)GroveSensor[port_index].SensorType) && (reply[5] == I2cCorrectData))
+                        {
                             return new byte[] { reply[6], reply[7], reply[8], reply[9] };
+                        }
                         else
-                            throw new IOException(ErrorInvalidValue);
+                        {
+                            throw new IOException(errorInvalidValue);
+                        }
+                    }
                     else
-                        throw new IOException(ErrorSPI);
+                    {
+                        throw new IOException(errorSpi);
+                    }
+
                 case GroveSensorType.Ultrasonic:
                     outArray = new byte[] { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0, 0 };
                     reply = SpiTransferArray(outArray);
                     if (reply[3] == SpiCorrectDataReturned)
+                    {
                         if ((reply[4] == (byte)GroveSensor[port_index].SensorType) && (reply[5] == I2cCorrectData))
+                        {
                             return new byte[] { reply[6], reply[7] };
+                        }
                         else
-                            throw new IOException(ErrorInvalidValue);
+                        {
+                            throw new IOException(errorInvalidValue);
+                        }
+                    }
                     else
-                        throw new IOException(ErrorSPI);
+                    {
+                        throw new IOException(errorSpi);
+                    }
+
                 case GroveSensorType.I2c:
                     outArray = new byte[6 + GroveSensor[port_index].I2cDataLength];
                     outArray[0] = SpiAddress;
                     outArray[1] = (byte)message_type;
                     // next 4 bytes are 0 then fill with the number of inbytes data
                     for (int i = 0; i < 4 + GroveSensor[port_index].I2cDataLength; i++)
+                    {
                         outArray[2 + i] = 0;
+                    }
+
                     reply = SpiTransferArray(outArray);
                     if (reply[3] == SpiCorrectDataReturned)
+                    {
                         if (reply[4] == (byte)GroveSensor[port_index].SensorType)
-
+                        {
                             if (reply[5] == (byte)GroveSensorState.ValidData)
+                            {
                                 return reply.Skip(5).ToArray();
+                            }
                             else if (reply[5] == (byte)GroveSensorState.I2cError)
+                            {
                                 throw new IOException($"{nameof(GetGroveValue)} error: I2C bus error");
-
+                            }
                             else
-                                throw new IOException(ErrorInvalidValue);
+                            {
+                                throw new IOException(errorInvalidValue);
+                            }
+                        }
                         else
+                        {
                             throw new IOException($"{nameof(GetGroveValue)} error: Grove type mismatch");
+                        }
+                    }
                     else
-                        throw new IOException(ErrorSPI);
+                    {
+                        throw new IOException(errorSpi);
+                    }
+
                 case GroveSensorType.None:
                 case GroveSensorType.Custom:
                 default:
@@ -783,27 +883,43 @@ namespace Iot.Device.GoPiGo3
         {
             SpiMessageType message_type;
             if (port == GrovePort.Grove1Pin1)
+            {
                 message_type = SpiMessageType.GetGrove1Pin1State;
+            }
             else if (port == GrovePort.Grove1Pin2)
+            {
                 message_type = SpiMessageType.GetGrove1Pin2State;
+            }
             else if (port == GrovePort.Grove2Pin1)
+            {
                 message_type = SpiMessageType.GetGrove2Pin1State;
+            }
             else if (port == GrovePort.Grove2Pin2)
+            {
                 message_type = SpiMessageType.GetGrove2Pin2State;
+            }
             else
+            {
                 throw new ArgumentException($"{nameof(GetGroveState)} error: Pin(s) unsupported. Must get one at a time.");
+            }
 
             byte[] outArray = { SpiAddress, (byte)message_type, 0, 0, 0, 0 };
             var reply = SpiTransferArray(outArray);
             if (reply[3] == SpiCorrectDataReturned)
             {
                 if (reply[4] == (byte)GroveSensorState.ValidData)
+                {
                     return reply[5];
+                }
                 else
+                {
                     throw new IOException($"{nameof(GetGroveState)} error: Invalid value");
+                }
             }
             else
+            {
                 throw new IOException($"{nameof(GetGroveState)} error: Grove type mismatch");
+            }
         }
 
         /// <summary>
@@ -815,27 +931,43 @@ namespace Iot.Device.GoPiGo3
         {
             SpiMessageType message_type;
             if (port == GrovePort.Grove1Pin1)
+            {
                 message_type = SpiMessageType.GetGrove1Pin1Voltage;
+            }
             else if (port == GrovePort.Grove1Pin2)
+            {
                 message_type = SpiMessageType.GetGrove1Pin2Voltage;
+            }
             else if (port == GrovePort.Grove2Pin1)
+            {
                 message_type = SpiMessageType.GetGrove2Pin1Voltage;
+            }
             else if (port == GrovePort.Grove2Pin2)
+            {
                 message_type = SpiMessageType.GetGrove2Pin2Voltage;
+            }
             else
+            {
                 throw new ArgumentException($"{nameof(GetGroveVoltage)} error: Pin(s) unsupported. Must get one at a time.");
+            }
 
             byte[] outArray = { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0 };
             var reply = SpiTransferArray(outArray);
             if (reply[3] == SpiCorrectDataReturned)
             {
                 if (reply[4] == (byte)GroveSensorState.ValidData)
+                {
                     return ((reply[5] << 8) + reply[6]) / 1000.0;
+                }
                 else
+                {
                     throw new IOException($"{nameof(GetGroveVoltage)} error: Invalid value");
+                }
             }
             else
+            {
                 throw new IOException($"{nameof(GetGroveVoltage)} error: Grove type mismatch");
+            }
         }
 
         /// <summary>
@@ -847,27 +979,43 @@ namespace Iot.Device.GoPiGo3
         {
             SpiMessageType message_type;
             if (port == GrovePort.Grove1Pin1)
+            {
                 message_type = SpiMessageType.GetGrove1Pin1Analog;
+            }
             else if (port == GrovePort.Grove1Pin2)
+            {
                 message_type = SpiMessageType.GetGrove1Pin2Analog;
+            }
             else if (port == GrovePort.Grove2Pin1)
+            {
                 message_type = SpiMessageType.GetGrove2Pin1Analog;
+            }
             else if (port == GrovePort.Grove2Pin2)
+            {
                 message_type = SpiMessageType.GetGrove2Pin2Analog;
+            }
             else
+            {
                 throw new ArgumentException($"{nameof(GetGroveAnalog)} error: Pin(s) unsupported. Must get one at a time.");
+            }
 
             byte[] outArray = { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0 };
             var reply = SpiTransferArray(outArray);
             if (reply[3] == SpiCorrectDataReturned)
             {
                 if (reply[4] == (byte)GroveSensorState.ValidData)
+                {
                     return ((reply[5] << 8) + reply[6]);
+                }
                 else
+                {
                     throw new IOException($"{nameof(GetGroveAnalog)} error: Invalid value");
+                }
             }
             else
+            {
                 throw new IOException($"{nameof(GetGroveAnalog)} error: Grove type mismatch");
+            }
         }
 
         #endregion

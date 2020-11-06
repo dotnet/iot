@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <LangVersion>Latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,10 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="..\Units\Units.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <None Include="README.md" />
   </ItemGroup>
 
