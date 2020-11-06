@@ -36,7 +36,7 @@ namespace Iot.Device.Usb.Helper
         /// <param name="maxValue">The maximum value.</param>
         /// <param name="minValue">The minimum value.</param>
         /// <param name="propertyName">Name of the property.</param>
-        public static void CheckArgumentInRange(this byte value, byte maxValue, byte minValue = 0, [CallerMemberName] string propertyName = null)
+        public static void CheckArgumentInRange(this byte value, byte maxValue, byte minValue = 0, [CallerMemberName] string? propertyName = null)
         {
             if (value < minValue || value > maxValue)
             {
@@ -49,7 +49,7 @@ namespace Iot.Device.Usb.Helper
         /// <param name="maxValue">The maximum value.</param>
         /// <param name="minValue">The minimum value.</param>
         /// <param name="propertyName">Name of the property.</param>
-        public static void CheckArgumentInRange(this int value, int maxValue, int minValue = 0, [CallerMemberName] string propertyName = null)
+        public static void CheckArgumentInRange(this int value, int maxValue, int minValue = 0, [CallerMemberName] string? propertyName = null)
         {
             if (value < minValue || value > maxValue)
             {
@@ -62,7 +62,7 @@ namespace Iot.Device.Usb.Helper
         /// <param name="maxValue">The maximum value.</param>
         /// <param name="minValue">The minimum value.</param>
         /// <param name="propertyName">Name of the property.</param>
-        public static void CheckArgumentInRange(this double value, double maxValue, double minValue = 0, [CallerMemberName] string propertyName = null)
+        public static void CheckArgumentInRange(this double value, double maxValue, double minValue = 0, [CallerMemberName] string? propertyName = null)
         {
             if (value < minValue || value > maxValue)
             {

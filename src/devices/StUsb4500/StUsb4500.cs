@@ -78,7 +78,6 @@ namespace Iot.Device.Usb
         protected virtual void Dispose(bool disposing)
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
         }
 
         /// <summary>Reads the device Id.</summary>
@@ -228,7 +227,7 @@ namespace Iot.Device.Usb
 
             if (cts.IsCancellationRequested)
             {
-                return null;
+                return Array.Empty<PowerDeliveryObject>();
             }
 
             // The original code does a check for the object count at this stage which is not used here as it can not really prevent the error mentioned below,
