@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+// /// docs issue: https://github.com/dotnet/roslyn/issues/44571
+#pragma warning disable CS1591
 namespace Iot.Device.Bh1745
 {
     /// <summary>
