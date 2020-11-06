@@ -9,6 +9,13 @@ using System.Linq;
 
 namespace Iot.Device.Bh1745
 {
+// Tracking https://github.com/dotnet/roslyn/issues/44571
+#pragma warning disable CS1591
+    /// <summary>
+    /// Channel compensation multipliers used to compensate the 4 color channels of the Bh1745.
+    /// </summary>
+    public record ChannelCompensationMultipliers(double Red, double Green, double Blue, double Clear);
+
     /// <summary>
     /// Digital color sensor Bh1745.
     /// </summary>
@@ -443,11 +450,4 @@ namespace Iot.Device.Bh1745
                 _ => throw new ArgumentOutOfRangeException()
             };
     }
-
-// Tracking https://github.com/dotnet/roslyn/issues/44571
-#pragma warning disable CS1591
-    /// <summary>
-    /// Channel compensation multipliers used to compensate the 4 color channels of the Bh1745.
-    /// </summary>
-    public record ChannelCompensationMultipliers(double Red, double Green, double Blue, double Clear);
 }
