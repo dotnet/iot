@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device;
@@ -48,7 +47,7 @@ namespace Iot.Device.CharacterLcd
             private bool _shouldDispose;
             private PinValuePair[] _pinBuffer = new PinValuePair[8];
 
-            public Gpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController controller = null, bool shouldDispose = true)
+            public Gpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController? controller = null, bool shouldDispose = true)
             {
                 _rwPin = readWritePin;
                 _rsPin = registerSelectPin;
@@ -247,7 +246,7 @@ namespace Iot.Device.CharacterLcd
                 if (_shouldDispose)
                 {
                     _controller?.Dispose();
-                    _controller = null;
+                    _controller = null!;
                 }
 
                 base.Dispose(disposing);

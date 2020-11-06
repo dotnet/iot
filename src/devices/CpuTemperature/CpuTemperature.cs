@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -14,8 +13,8 @@ namespace Iot.Device.CpuTemperature
     /// </summary>
     public class CpuTemperature
     {
-        private bool _isAvalable = false;
-        private bool _checkedIfAvailable = false;
+        private bool _isAvalable;
+        private bool _checkedIfAvailable;
 
         /// <summary>
         /// Gets CPU temperature
@@ -47,18 +46,18 @@ namespace Iot.Device.CpuTemperature
 
             if (CheckAvailable())
             {
-                using (FileStream fileStream = new FileStream("/sys/class/thermal/thermal_zone0/temp", FileMode.Open, FileAccess.Read))
-                using (StreamReader reader = new StreamReader(fileStream))
+                using FileStream fileStream = new FileStream("/sys/class/thermal/thermal_zone0/temp", FileMode.Open, FileAccess.Read);
+                if (fileStream is null)
                 {
-                    string data = reader.ReadLine();
-                    if (!string.IsNullOrEmpty(data))
-                    {
-                        int temp;
-                        if (int.TryParse(data, out temp))
-                        {
-                            temperature = temp / 1000F;
-                        }
-                    }
+                    throw new Exception("Cannot read CPU temperature");
+                }
+
+                using StreamReader reader = new StreamReader(fileStream);
+                string? data = reader.ReadLine();
+                if (data is { Length: > 0 } &&
+                    int.TryParse(data, out int temp))
+                {
+                    temperature = temp / 1000F;
                 }
             }
 

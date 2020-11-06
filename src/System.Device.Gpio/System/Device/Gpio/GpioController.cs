@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Device.Gpio.Drivers;
@@ -381,29 +380,11 @@ namespace System.Device.Gpio
         /// <returns>A driver that works with the board the program is executing on.</returns>
         private static GpioDriver GetBestDriverForBoardOnLinux()
         {
-            string[] cpuInfoLines = File.ReadAllLines(CpuInfoPath);
-            Regex regex = new Regex(@"Hardware\s*:\s*(.*)");
-            foreach (string cpuInfoLine in cpuInfoLines)
-            {
-                Match match = regex.Match(cpuInfoLine);
-                if (match.Success)
-                {
-                    if (match.Groups.Count > 1)
-                    {
-                        if (match.Groups[1].Value == RaspberryPiHardware)
-                        {
-                            return new RaspberryPi3Driver();
-                        }
+            RaspberryPi3LinuxDriver? internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
 
-                        // Commenting out as HummingBoard driver is not implemented yet, will be added back after implementation
-                        // https://github.com/dotnet/iot/issues/76
-                        // if (match.Groups[1].Value == HummingBoardHardware)
-                        // {
-                        //     return new HummingBoardDriver();
-                        // }
-                        return UnixDriver.Create();
-                    }
-                }
+            if (internalDriver is object)
+            {
+                return new RaspberryPi3Driver(internalDriver);
             }
 
             return UnixDriver.Create();
@@ -421,7 +402,12 @@ namespace System.Device.Gpio
         /// </remarks>
         private static GpioDriver GetBestDriverForBoardOnWindows()
         {
-            string baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
+            string? baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
+
+            if (baseBoardProduct is null)
+            {
+                throw new Exception("Single board computer type cannot be detected.");
+            }
 
             if (baseBoardProduct == RaspberryPi3Product || baseBoardProduct.StartsWith($"{RaspberryPi3Product} ") ||
                 baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -113,7 +112,7 @@ namespace Iot.Device.Lps25h
         public void Dispose()
         {
             _i2c?.Dispose();
-            _i2c = null;
+            _i2c = null!;
         }
     }
 }

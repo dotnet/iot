@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -15,7 +14,7 @@ namespace Iot.Device.Pca95x4
     {
         private readonly int? _interrupt;
         private I2cDevice _i2cDevice;
-        private GpioController _masterGpioController;
+        private GpioController? _controller = null;
         private bool _shouldDispose;
 
         /// <summary>
@@ -26,13 +25,13 @@ namespace Iot.Device.Pca95x4
         /// <param name="interrupt">The input pin number that is connected to the interrupt (INT).</param>
         /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Pca95x4(I2cDevice i2cDevice, int? interrupt = null, GpioController gpioController = null, bool shouldDispose = true)
+        public Pca95x4(I2cDevice i2cDevice, int? interrupt = null, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _i2cDevice = i2cDevice;
             _interrupt = interrupt;
             _shouldDispose = gpioController == null ? true : shouldDispose;
 
-            InitializeMasterGpioController(gpioController);
+            InitializeGpioController(gpioController);
         }
 
         private static void ValidateBitNumber(int bitNumber)
@@ -61,13 +60,13 @@ namespace Iot.Device.Pca95x4
             return ((data >> bitNumber) & 1) == 1;
         }
 
-        private void InitializeMasterGpioController(GpioController gpioController)
+        private void InitializeGpioController(GpioController? gpioController)
         {
             // Only need master controller if there is external pin provided.
             if (_interrupt != null)
             {
-                _masterGpioController = gpioController ?? new GpioController();
-                _masterGpioController.OpenPin((int)_interrupt, PinMode.Input);
+                _controller = gpioController ?? new GpioController();
+                _controller.OpenPin((int)_interrupt, PinMode.Input);
             }
         }
 
@@ -101,7 +100,7 @@ namespace Iot.Device.Pca95x4
         /// <returns>The pin value of the interrupt (INT).</returns>
         public PinValue ReadInterrupt()
         {
-            if (_masterGpioController == null)
+            if (_controller == null)
             {
                 throw new Exception("Master controller has not been initialized.");
             }
@@ -111,7 +110,7 @@ namespace Iot.Device.Pca95x4
                 throw new Exception("INT pin has not been initialized.");
             }
 
-            return _masterGpioController.Read((int)_interrupt);
+            return _controller.Read((int)_interrupt);
         }
 
         /// <summary>
@@ -171,11 +170,11 @@ namespace Iot.Device.Pca95x4
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
             if (_shouldDispose)
             {
-                _masterGpioController?.Dispose();
-                _masterGpioController = null;
+                _controller?.Dispose();
+                _controller = null;
             }
         }
     }

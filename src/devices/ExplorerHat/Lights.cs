@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -87,10 +86,10 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void On()
         {
-            LedArray[0].On();
-            LedArray[1].On();
-            LedArray[2].On();
-            LedArray[3].On();
+            foreach (Led led in LedArray)
+            {
+                led.On();
+            }
         }
 
         /// <summary>
@@ -98,45 +97,25 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void Off()
         {
-            LedArray[0].Off();
-            LedArray[1].Off();
-            LedArray[2].Off();
-            LedArray[3].Off();
-        }
-
-        #region IDisposable Support
-
-        private bool _shouldDispose;
-        // This to avoid double dispose
-        private bool _disposedValue = false;
-
-        /// <summary>
-        /// Disposes the <see cref="Lights"/> instance
-        /// </summary>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
+            foreach (Led led in LedArray)
             {
-                if (disposing)
-                {
-                    Off();
-                    if (_shouldDispose)
-                    {
-                        _controller?.Dispose();
-                        _controller = null;
-                    }
-                }
-
-                _disposedValue = true;
+                led.Off();
             }
         }
+
+        private bool _shouldDispose;
 
         /// <summary>
         /// Disposes the <see cref="Lights"/> instance
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
+            Off();
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null!;
+            }
         }
 
         /// <summary>
@@ -156,7 +135,5 @@ namespace Iot.Device.ExplorerHat
         {
             return ((IEnumerable<Led>)LedArray).GetEnumerator();
         }
-
-        #endregion
     }
 }

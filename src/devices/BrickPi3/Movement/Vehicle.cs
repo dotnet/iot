@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -17,10 +16,10 @@ namespace Iot.Device.BrickPi3.Movement
     /// </summary>
     public sealed class Vehicle
     {
-        private Brick _brick = null;
-        private bool _directionOpposite = false;
+        private Brick _brick;
+        private bool _directionOpposite;
         private int _correctedDir = 1;
-        private Timer _timer = null;
+        private Timer? _timer;
 
         /// <summary>
         /// Create a vehicule with 2 motors, one left and one right
@@ -200,7 +199,7 @@ namespace Iot.Device.BrickPi3.Movement
             }
         }
 
-        private void RunUntil(object state)
+        private void RunUntil(object? state)
         {
             if (state == null)
             {
@@ -214,11 +213,8 @@ namespace Iot.Device.BrickPi3.Movement
                 StopMotor((int)ports[i]);
             }
 
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            _timer?.Dispose();
+            _timer = null!;
         }
 
         private void StopMotor(int port)

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -45,7 +44,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// <summary>
         /// The list of templates that contain this Tag
         /// </summary>
-        public List<ushort> TagTemplateParent { get; set; }
+        public List<ushort>? TagTemplateParent { get; set; }
 
         /// <summary>
         /// True if this Tag is a template
@@ -60,7 +59,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// <summary>
         /// Description of this Tag
         /// </summary>
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         /// <summary>
         /// The type of encoding used by this Tag

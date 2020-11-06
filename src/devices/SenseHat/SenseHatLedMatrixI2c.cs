@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -30,7 +29,7 @@ namespace Iot.Device.SenseHat
         /// Constructs instance of SenseHatLedMatrixI2c
         /// </summary>
         /// <param name="i2cDevice">I2C device used to communicate with the device</param>
-        public SenseHatLedMatrixI2c(I2cDevice i2cDevice = null)
+        public SenseHatLedMatrixI2c(I2cDevice? i2cDevice = null)
         {
             _i2c = i2cDevice ?? CreateDefaultI2cDevice();
             Fill(Color.Black);
@@ -162,7 +161,7 @@ namespace Iot.Device.SenseHat
         public override void Dispose()
         {
             _i2c?.Dispose();
-            _i2c = null;
+            _i2c = null!;
         }
     }
 }

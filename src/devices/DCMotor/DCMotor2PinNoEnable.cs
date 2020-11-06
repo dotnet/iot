@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -18,7 +17,7 @@ namespace Iot.Device.DCMotor
         public DCMotor2PinNoEnable(
             PwmChannel pwmChannel,
             int pin1,
-            GpioController controller,
+            GpioController? controller,
             bool shouldDispose)
             : base(controller ?? ((pin1 == -1) ? null : new GpioController()), controller == null ? true : shouldDispose)
         {
@@ -85,7 +84,7 @@ namespace Iot.Device.DCMotor
             if (disposing)
             {
                 _pwm?.Dispose();
-                _pwm = null;
+                _pwm = null!;
             }
 
             base.Dispose(disposing);

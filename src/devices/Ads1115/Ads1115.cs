@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -20,9 +19,9 @@ namespace Iot.Device.Ads1115
     {
         private readonly bool _shouldDispose;
 
-        private I2cDevice _i2cDevice = null;
+        private I2cDevice _i2cDevice;
 
-        private GpioController _gpioController;
+        private GpioController? _gpioController;
 
         private InputMultiplexer _inputMultiplexer;
 
@@ -221,7 +220,7 @@ namespace Iot.Device.Ads1115
         /// This event fires when a new value is available (in conversion ready mode) or the comparator threshold is exceeded.
         /// Requires setup through <see cref="EnableConversionReady"/> or <see cref="EnableComparator(ElectricPotential, ElectricPotential, ComparatorMode, ComparatorQueue)"/>.
         /// </summary>
-        public event Action AlertReadyAsserted;
+        public event Action? AlertReadyAsserted;
 
         /// <summary>
         /// Set ADS1115 Config Register.
@@ -659,7 +658,7 @@ namespace Iot.Device.Ads1115
             {
                 DisableAlertReadyPin();
                 _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                _i2cDevice = null!;
             }
 
             if (_shouldDispose && _gpioController != null)

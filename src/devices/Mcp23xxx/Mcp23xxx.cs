@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -18,7 +17,7 @@ namespace Iot.Device.Mcp23xxx
         private readonly int _interruptA;
         private readonly int _interruptB;
         private BankStyle _bankStyle;
-        private GpioController _masterGpioController;
+        private GpioController? _controller;
         private bool _shouldDispose;
 
         /// <summary>
@@ -39,7 +38,7 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="reset">The output pin number that is connected to the hardware reset.</param>
         /// <param name="interruptA">The input pin number that is connected to the interrupt for Port A (INTA).</param>
         /// <param name="interruptB">The input pin number that is connected to the interrupt for Port B (INTB).</param>
-        /// <param name="masterController">
+        /// <param name="controller">
         /// The controller for the reset and interrupt pins. If not specified, the default controller will be used.
         /// </param>
         /// <param name="bankStyle">
@@ -50,11 +49,11 @@ namespace Iot.Device.Mcp23xxx
         /// </param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         protected Mcp23xxx(BusAdapter bus, int reset = -1, int interruptA = -1, int interruptB = -1,
-            GpioController masterController = null, BankStyle bankStyle = BankStyle.Sequential, bool shouldDispose = true)
+            GpioController? controller = null, BankStyle bankStyle = BankStyle.Sequential, bool shouldDispose = true)
         {
             _bus = bus;
             _bankStyle = bankStyle;
-            _shouldDispose = masterController == null ? true : shouldDispose;
+            _shouldDispose = controller == null ? true : shouldDispose;
 
             _reset = reset;
             _interruptA = interruptA;
@@ -63,21 +62,21 @@ namespace Iot.Device.Mcp23xxx
             // Only need master controller if there are external pins provided.
             if (_reset != -1 || _interruptA != -1 || _interruptB != -1)
             {
-                _masterGpioController = masterController ?? new GpioController();
+                _controller = controller ?? new GpioController();
 
                 if (_interruptA != -1)
                 {
-                    _masterGpioController.OpenPin(_interruptA, PinMode.Input);
+                    _controller.OpenPin(_interruptA, PinMode.Input);
                 }
 
                 if (_interruptB != -1)
                 {
-                    _masterGpioController.OpenPin(_interruptB, PinMode.Input);
+                    _controller.OpenPin(_interruptB, PinMode.Input);
                 }
 
                 if (_reset != -1)
                 {
-                    _masterGpioController.OpenPin(_reset, PinMode.Output);
+                    _controller.OpenPin(_reset, PinMode.Output);
                     Disable();
                 }
             }
@@ -240,12 +239,12 @@ namespace Iot.Device.Mcp23xxx
         {
             if (_shouldDispose)
             {
-                _masterGpioController?.Dispose();
-                _masterGpioController = null;
+                _controller?.Dispose();
+                _controller = null;
             }
 
             _bus?.Dispose();
-            _bus = null;
+            _bus = null!;
             base.Dispose(disposing);
         }
 
@@ -254,12 +253,12 @@ namespace Iot.Device.Mcp23xxx
         /// </summary>
         public void Disable()
         {
-            if (_reset == -1)
+            if (_reset == -1 || _controller is null)
             {
                 throw new InvalidOperationException("No reset pin configured.");
             }
 
-            _masterGpioController.Write(_reset, PinValue.Low);
+            _controller.Write(_reset, PinValue.Low);
 
             // Registers will all be reset when re-enabled
             _bankStyle = BankStyle.Sequential;
@@ -272,12 +271,12 @@ namespace Iot.Device.Mcp23xxx
         /// </summary>
         public void Enable()
         {
-            if (_reset == -1)
+            if (_reset == -1 || _controller is null)
             {
                 throw new InvalidOperationException("No reset pin configured.");
             }
 
-            _masterGpioController.Write(_reset, PinValue.High);
+            _controller.Write(_reset, PinValue.High);
 
             _disabled = false;
             _cacheValid = false;
@@ -303,12 +302,12 @@ namespace Iot.Device.Mcp23xxx
                     throw new ArgumentOutOfRangeException(nameof(port));
             }
 
-            if (pinNumber == -1)
+            if (pinNumber == -1 || _controller is null)
             {
                 throw new ArgumentException("No interrupt pin configured.", nameof(port));
             }
 
-            return _masterGpioController.Read(pinNumber);
+            return _controller.Read(pinNumber);
         }
 
         /// <summary>

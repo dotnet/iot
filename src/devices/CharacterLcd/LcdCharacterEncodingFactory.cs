@@ -1,10 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+
+#pragma warning disable SA1011
 
 namespace Iot.Device.CharacterLcd
 {
@@ -13,8 +14,11 @@ namespace Iot.Device.CharacterLcd
     /// </summary>
     public class LcdCharacterEncodingFactory
     {
+        // Default maps for the HD44780 controller
         private static readonly Dictionary<char, byte> DefaultA00Map;
         private static readonly Dictionary<char, byte> DefaultA02Map;
+        // This map is used on SPLC780 controllers, it seems. They're otherwise compatible to the HD44780.
+        private static readonly Dictionary<char, byte> DefaultSplC780Map;
         private static readonly Dictionary<char, byte> DefaultCustomMap;
 
         static LcdCharacterEncodingFactory()
@@ -31,12 +35,16 @@ namespace Iot.Device.CharacterLcd
             // pixel row usually empty for the cursor. The added space at the top of the character helps by better supporting diacritical symbols.
             DefaultA02Map = new Dictionary<char, byte>();
 
+            // This map for instance can be found here: https://www.microchip.com/forums/m977852.aspx
+            DefaultSplC780Map = new Dictionary<char, byte>();
+
             // Inserts ASCII characters ' ' to 'z', which are common to most known character sets
             for (char c = ' '; c <= 'z'; c++)
             {
                 DefaultCustomMap.Add(c, (byte)c);
                 DefaultA00Map.Add(c, (byte)c);
                 DefaultA02Map.Add(c, (byte)c);
+                DefaultSplC780Map.Add(c, (byte)c);
             }
 
             DefaultA00Map.Remove('\\'); // Instead of the backspace, the Yen letter is in the map, but we can use char 164 instead
@@ -75,6 +83,7 @@ namespace Iot.Device.CharacterLcd
             DefaultA00Map.Add('÷', 253);
             DefaultA00Map.Add('×', (byte)'x');
             DefaultA00Map.Add('█', 255);
+            DefaultA00Map.Add('°', 0b1101_1111);
 
             // Now the japanese characters in the A00 rom map.
             // They use the same order than described in https://de.wikipedia.org/wiki/Japanische_Schrift#F%C3%BCnfzig-Laute-Tafel Table "Katakana", so the mapping sounds reasonable.
@@ -156,6 +165,7 @@ namespace Iot.Device.CharacterLcd
             DefaultA02Map.Add('↲', 0b0001_0111);
             DefaultA02Map.Add('≤', 0b0001_1100);
             DefaultA02Map.Add('≥', 0b0001_1101);
+            DefaultA02Map.Add('°', 0b1011_0000);
 
             // Cyrillic script, capital letters (russian, slawic languages)
             DefaultA02Map.Add('А', (byte)'A');
@@ -297,6 +307,66 @@ namespace Iot.Device.CharacterLcd
             DefaultA02Map.Add('þ', 0b1111_1110);
             DefaultA02Map.Add('ÿ', 0b1111_1111);
 
+            // Map for the SplC780
+            DefaultSplC780Map.Add('{', 123);
+            DefaultSplC780Map.Add('|', 124);
+            DefaultSplC780Map.Add('}', 125);
+            DefaultSplC780Map.Add('~', 0126);
+            DefaultSplC780Map.Add('Ç', 0128);
+            DefaultSplC780Map.Add('ü', 0129);
+            DefaultSplC780Map.Add('é', 0130);
+            DefaultSplC780Map.Add('â', 0131);
+            DefaultSplC780Map.Add('å', 0131);
+            DefaultSplC780Map.Add('ä', 0132);
+            DefaultSplC780Map.Add('à', 0133);
+            DefaultSplC780Map.Add('ả', 0134);
+            DefaultSplC780Map.Add('ç', 0135);
+            DefaultSplC780Map.Add('ê', 0136);
+            DefaultSplC780Map.Add('ë', 0137);
+            DefaultSplC780Map.Add('è', 0138);
+            DefaultSplC780Map.Add('ï', 0139);
+            DefaultSplC780Map.Add('î', 0140);
+            DefaultSplC780Map.Add('ì', 0141);
+            DefaultSplC780Map.Add('Ä', 0142);
+            DefaultSplC780Map.Add('Å', 0143);
+
+            // A bit easier like this...
+            string toAdd = "ÉæÆôöòûùÿÖÜñÑ  ¿"
+                           + "áíóú₡£¥₧ ¡ÃãÕõØø"
+                           + " ¨° ´½¼×÷≤≥«»≠√ "
+                           + "              ®©" // Not much useful in this row
+                           + "™†§¶Γ ΘΛΞΠΣ ΦΨΩα"
+                           + "βγδεζηθικλμνξπρσ"
+                           + "τυχψω"; // greek letter small phi may apparently be represented by its capital letter
+
+            byte startIndex = 144;
+            foreach (var c in toAdd)
+            {
+                if (c != ' ')
+                {
+                    DefaultSplC780Map.Add(c, startIndex);
+                }
+
+                startIndex++;
+            }
+
+            DefaultSplC780Map.Add('φ', 0xCD);
+
+            // Complete the set of capital greek letters for those that look like latin letters (note that these are not identity assignments)
+            DefaultSplC780Map.Add('Α', (byte)'A');
+            DefaultSplC780Map.Add('Β', (byte)'B');
+            DefaultSplC780Map.Add('Ε', (byte)'E');
+            DefaultSplC780Map.Add('Ζ', (byte)'Z');
+            DefaultSplC780Map.Add('Η', (byte)'H');
+            DefaultSplC780Map.Add('Ι', (byte)'I');
+            DefaultSplC780Map.Add('Κ', (byte)'K');
+            DefaultSplC780Map.Add('Μ', (byte)'M');
+            DefaultSplC780Map.Add('Ν', (byte)'N');
+            DefaultSplC780Map.Add('Ο', (byte)'O');
+            DefaultSplC780Map.Add('Ρ', (byte)'P');
+            DefaultSplC780Map.Add('Τ', (byte)'T');
+            DefaultSplC780Map.Add('Υ', (byte)'Y');
+            DefaultSplC780Map.Add('Χ', (byte)'X');
         }
 
         /// <summary>
@@ -305,7 +375,7 @@ namespace Iot.Device.CharacterLcd
         /// to add them as user-defined characters, if possible.
         /// </summary>
         /// <param name="culture">Culture for which support is required</param>
-        /// <param name="romName">ROM type of attached chip. Supported values: "A00" and "A02"</param>
+        /// <param name="romName">ROM type of attached chip. Supported values: "A00", "A02", "SplC780"</param>
         /// <param name="unknownLetter">Letter that is printed when an unknown character is encountered. This letter must be part of the
         /// default rom set</param>
         /// <param name="maxNumberOfCustomCharacters">Maximum number of custom characters supported on the hardware. Should be 8 for Hd44780-controlled displays.</param>
@@ -327,6 +397,9 @@ namespace Iot.Device.CharacterLcd
                     break;
                 case "A02":
                     newMap = new Dictionary<char, byte>(DefaultA02Map);
+                    break;
+                case "SplC780":
+                    newMap = new Dictionary<char, byte>(DefaultSplC780Map);
                     break;
                 default:
                     newMap = new Dictionary<char, byte>(DefaultCustomMap);
@@ -452,7 +525,7 @@ namespace Iot.Device.CharacterLcd
         /// Creates the given letter for the given ROM type.
         /// Overwrite this only if an alternate ROM is used.
         /// </summary>
-        protected virtual byte[] CreateLetter(char character, string romName)
+        protected virtual byte[]? CreateLetter(char character, string romName)
         {
             if (romName == "A00")
             {
@@ -462,6 +535,12 @@ namespace Iot.Device.CharacterLcd
             if (romName == "A02")
             {
                 return CreateLetterA02(character);
+            }
+
+            if (romName == "SplC780")
+            {
+                // The font looks identical, so we can use the same lookup table
+                return CreateLetterA00(character);
             }
 
             return null;
@@ -475,7 +554,7 @@ namespace Iot.Device.CharacterLcd
         /// <remarks>
         /// Currently requires the characters to be hardcoded here. Would be nice if we could generate the pixel maps from an existing font, such as Consolas
         /// </remarks>
-        protected virtual byte[] CreateLetterA00(char character)
+        protected virtual byte[]? CreateLetterA00(char character)
         {
             switch (character)
             {
@@ -898,7 +977,7 @@ namespace Iot.Device.CharacterLcd
         /// <remarks>
         /// Currently requires the characters to be hardcoded here. Would be nice if we could generate the pixel maps from an existing font, such as Consolas
         /// </remarks>
-        protected virtual byte[] CreateLetterA02(char character)
+        protected virtual byte[]? CreateLetterA02(char character)
         {
             // TODO: Create letters for A02 map, but that one is a lot better equipped for european languages, so nothing to do for the currently supported languages
             return null;

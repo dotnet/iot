@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Concurrent;
@@ -21,7 +20,7 @@ namespace Iot.Device.Pcx857x
         /// I2C device used for communication with the device
         /// </summary>
         protected I2cDevice Device { get; }
-        private readonly GpioController _masterGpioController;
+        private readonly GpioController? _controller;
         private readonly int _interrupt;
         private bool _shouldDispose;
 
@@ -41,7 +40,7 @@ namespace Iot.Device.Pcx857x
         /// If not specified, the default controller will be used.
         /// </param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Pcx857x(I2cDevice device, int interrupt = -1, GpioController gpioController = null, bool shouldDispose = true)
+        public Pcx857x(I2cDevice device, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true)
         {
             Device = device ?? throw new ArgumentNullException(nameof(device));
             _interrupt = interrupt;
@@ -49,8 +48,8 @@ namespace Iot.Device.Pcx857x
 
             if (_interrupt != -1)
             {
-                _masterGpioController = gpioController ?? new GpioController();
-                _masterGpioController.OpenPin(_interrupt, PinMode.Input);
+                _controller = gpioController ?? new GpioController();
+                _controller.OpenPin(_interrupt, PinMode.Input);
             }
 
             // These controllers do not have commands, setting the pins to high designates
@@ -114,7 +113,7 @@ namespace Iot.Device.Pcx857x
         {
             if (_shouldDispose)
             {
-                _masterGpioController?.Dispose();
+                _controller?.Dispose();
             }
 
             Device.Dispose();

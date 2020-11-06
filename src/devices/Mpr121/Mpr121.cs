@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -34,7 +33,7 @@ namespace Iot.Device.Mpr121
         /// Notifies about a the channel statuses have been changed.
         /// Refresh period can be changed by setting PeriodRefresh property.
         /// </summary>
-        public event EventHandler<ChannelStatusesChangedEventArgs> ChannelStatusesChanged;
+        public event EventHandler<ChannelStatusesChangedEventArgs>? ChannelStatusesChanged;
 
         /// <summary>
         /// Gets or sets the period in milliseconds to refresh the channels statuses.
@@ -71,7 +70,7 @@ namespace Iot.Device.Mpr121
         /// <param name="device">The i2c device.</param>
         /// <param name="periodRefresh">The period in milliseconds of refresing the channel statuses.</param>
         /// <param name="configuration">The controller configuration.</param>
-        public Mpr121(I2cDevice device, int periodRefresh = -1, Mpr121Configuration configuration = null)
+        public Mpr121(I2cDevice device, int periodRefresh = -1, Mpr121Configuration? configuration = null)
         {
             configuration = configuration ?? GetDefaultConfiguration();
 
@@ -92,17 +91,10 @@ namespace Iot.Device.Mpr121
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_device != null)
-            {
-                _device.Dispose();
-                _device = null;
-            }
-
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            _device?.Dispose();
+            _device = null!;
+            _timer?.Dispose();
+            _timer = null!;
         }
 
         /// <summary>
@@ -190,7 +182,7 @@ namespace Iot.Device.Mpr121
         /// <summary>
         /// The callback function for timer to refresh channels statuses.
         /// </summary>
-        private void RefreshChannelStatuses(object state)
+        private void RefreshChannelStatuses(object? state)
         {
             RefreshChannelStatuses();
         }

@@ -1,12 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Device;
 using System.Device.I2c;
+using System.Diagnostics.CodeAnalysis;
 using UnitsNet;
 
 namespace Iot.Device.Adc
@@ -50,6 +50,9 @@ namespace Iot.Device.Adc
         /// Method to initialize values during device construction
         /// </summary>
         /// <param name="i2cDevice">Interface to I2C device access</param>
+#if !NETCOREAPP2_1 && !NETCOREAPP3_1
+        [MemberNotNull(nameof(_i2cDevice))]
+#endif
         private void Initialize(I2cDevice i2cDevice)
         {
             _currentLsb = 1F;
@@ -65,9 +68,9 @@ namespace Iot.Device.Adc
         /// <param name="i2cDevice">The I2cDevice initialized to communicate with the INA219.</param>
         public Ina219(I2cDevice i2cDevice)
         {
-            if (i2cDevice == null)
+            if (_i2cDevice is null)
             {
-                throw new System.ArgumentNullException(nameof(i2cDevice));
+                throw new ArgumentException($"{nameof(i2cDevice)} is not configured");
             }
 
             Initialize(i2cDevice);
@@ -82,14 +85,14 @@ namespace Iot.Device.Adc
         /// <param name="settings">The I2cConnectionSettings object initialized with the appropiate settings to communicate with the INA219.</param>
         public Ina219(I2cConnectionSettings settings)
         {
-            if (settings == null)
-            {
-                throw new System.ArgumentNullException(nameof(settings));
-            }
-
             Initialize(I2cDevice.Create(settings));
-
             _disposeI2cDevice = true;
+#if NETCOREAPP2_1 || NETCOREAPP3_1
+            if (_i2cDevice is null)
+            {
+                throw new ArgumentException($"{nameof(_i2cDevice)} is not configured");
+            }
+#endif
         }
 
         /// <summary>
@@ -245,20 +248,13 @@ namespace Iot.Device.Adc
         /// <summary>
         /// Dispose instance
         /// </summary>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposeI2cDevice & disposing)
-            {
-                _i2cDevice?.Dispose();
-            }
-        }
-
-        /// <summary>
-        /// Dispose of managed assets.
-        /// </summary>
         public void Dispose()
         {
-            Dispose(true);
+            if (_disposeI2cDevice)
+            {
+                _i2cDevice?.Dispose();
+                _i2cDevice = null!;
+            }
         }
 
         /// <summary>

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Device.Spi;
 using Iot.Device.Graphics;
@@ -20,15 +19,17 @@ namespace Iot.Device.Ws28xx
         /// <summary>
         /// Backing image to be updated on the driver
         /// </summary>
-        public BitmapImage Image { get; protected set; }
+        public BitmapImage Image { get; }
 
         /// <summary>
         /// Constructs Ws28xx instance
         /// </summary>
-        /// <param name="spiDevice">SPI device used for communication with the LED driver</param>
-        public Ws28xx(SpiDevice spiDevice)
+        /// <param name="spiDevice">SPI device used for communication with the LED driver.</param>
+        /// <param name="image">The bitmap that represents the screen or led strip.</param>
+        public Ws28xx(SpiDevice spiDevice, BitmapImage image)
         {
             _spiDevice = spiDevice;
+            Image = image;
         }
 
         /// <summary>

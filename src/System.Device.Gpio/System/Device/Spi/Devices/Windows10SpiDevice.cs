@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio;
 using Windows.Devices.Enumeration;
@@ -44,13 +43,20 @@ namespace System.Device.Spi
             string busFriendlyName = $"SPI{settings.BusId}";
             string deviceSelector = WinSpi.SpiDevice.GetDeviceSelector(busFriendlyName);
 
-            DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
-            if (deviceInformationCollection.Count == 0)
+            DeviceInformationCollection? deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
+            if (deviceInformationCollection is null || deviceInformationCollection.Count == 0)
             {
                 throw new ArgumentException($"No SPI device exists for bus ID {settings.BusId}.", $"{nameof(settings)}.{nameof(settings.BusId)}");
             }
 
-            _winDevice = WinSpi.SpiDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).WaitForCompletion();
+            WinSpi.SpiDevice? winDevice = WinSpi.SpiDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).WaitForCompletion();
+
+            if (winDevice is null)
+            {
+                throw new Exception("A SPI device could not be found.");
+            }
+
+            _winDevice = winDevice;
         }
 
         /// <summary>
@@ -129,7 +135,7 @@ namespace System.Device.Spi
         protected override void Dispose(bool disposing)
         {
             _winDevice?.Dispose();
-            _winDevice = null;
+            _winDevice = null!;
 
             base.Dispose(disposing);
         }

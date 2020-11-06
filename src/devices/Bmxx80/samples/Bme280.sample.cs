@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -11,98 +10,80 @@ using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Common;
 using UnitsNet;
 
-namespace Iot.Device.Samples
+Console.WriteLine("Hello Bme280!");
+
+// bus id on the raspberry pi 3
+const int busId = 1;
+// set this to the current sea level pressure in the area for correct altitude readings
+var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
+
+var i2cSettings = new I2cConnectionSettings(busId, Bme280.DefaultI2cAddress);
+var i2cDevice = I2cDevice.Create(i2cSettings);
+using var i2CBmpe80 = new Bme280(i2cDevice);
+
+while (true)
 {
-    /// <summary>
-    /// Test program main class
-    /// </summary>
-    public class Program
-    {
-        /// <summary>
-        /// Entry point for example program
-        /// </summary>
-        /// <param name="args">Command line arguments</param>
-        public static void Main(string[] args)
-        {
-            Console.WriteLine("Hello Bme280!");
+    // set higher sampling
+    i2CBmpe80.TemperatureSampling = Sampling.LowPower;
+    i2CBmpe80.PressureSampling = Sampling.UltraHighResolution;
+    i2CBmpe80.HumiditySampling = Sampling.Standard;
 
-            // bus id on the raspberry pi 3
-            const int busId = 1;
-            // set this to the current sea level pressure in the area for correct altitude readings
-            var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
+    // set mode forced so device sleeps after read
+    i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
 
-            var i2cSettings = new I2cConnectionSettings(busId, Bme280.DefaultI2cAddress);
-            var i2cDevice = I2cDevice.Create(i2cSettings);
-            var i2CBmpe80 = new Bme280(i2cDevice);
+    // wait for measurement to be performed
+    var measurementTime = i2CBmpe80.GetMeasurementDuration();
+    Thread.Sleep(measurementTime);
 
-            using (i2CBmpe80)
-            {
-                while (true)
-                {
-                    // set higher sampling
-                    i2CBmpe80.TemperatureSampling = Sampling.LowPower;
-                    i2CBmpe80.PressureSampling = Sampling.UltraHighResolution;
-                    i2CBmpe80.HumiditySampling = Sampling.Standard;
+    // read values
+    i2CBmpe80.TryReadTemperature(out var tempValue);
+    i2CBmpe80.TryReadPressure(out var preValue);
+    i2CBmpe80.TryReadHumidity(out var humValue);
 
-                    // set mode forced so device sleeps after read
-                    i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
+    // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using
+    // var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
+    i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out var altValue);
 
-                    // wait for measurement to be performed
-                    var measurementTime = i2CBmpe80.GetMeasurementDuration();
-                    Thread.Sleep(measurementTime);
+    Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
+    Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
+    Console.WriteLine($"Altitude: {altValue:0.##}m");
+    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
 
-                    // read values
-                    i2CBmpe80.TryReadTemperature(out var tempValue);
-                    i2CBmpe80.TryReadPressure(out var preValue);
-                    i2CBmpe80.TryReadHumidity(out var humValue);
+    // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
+    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
+    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
+    Thread.Sleep(1000);
 
-                    // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using
-                    // var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
-                    i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out var altValue);
+    // change sampling and filter
+    i2CBmpe80.TemperatureSampling = Sampling.UltraHighResolution;
+    i2CBmpe80.PressureSampling = Sampling.UltraLowPower;
+    i2CBmpe80.HumiditySampling = Sampling.UltraLowPower;
+    i2CBmpe80.FilterMode = Bmx280FilteringMode.X2;
 
-                    Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
-                    Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
-                    Console.WriteLine($"Altitude: {altValue:0.##}m");
-                    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+    // set mode forced and read again
+    i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
 
-                    // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
-                    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
-                    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
-                    Thread.Sleep(1000);
+    // wait for measurement to be performed
+    measurementTime = i2CBmpe80.GetMeasurementDuration();
+    Thread.Sleep(measurementTime);
 
-                    // change sampling and filter
-                    i2CBmpe80.TemperatureSampling = Sampling.UltraHighResolution;
-                    i2CBmpe80.PressureSampling = Sampling.UltraLowPower;
-                    i2CBmpe80.HumiditySampling = Sampling.UltraLowPower;
-                    i2CBmpe80.FilterMode = Bmx280FilteringMode.X2;
+    // read values
+    i2CBmpe80.TryReadTemperature(out tempValue);
+    i2CBmpe80.TryReadPressure(out preValue);
+    i2CBmpe80.TryReadHumidity(out humValue);
 
-                    // set mode forced and read again
-                    i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
+    // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using
+    // var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
+    i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out altValue);
 
-                    // wait for measurement to be performed
-                    measurementTime = i2CBmpe80.GetMeasurementDuration();
-                    Thread.Sleep(measurementTime);
+    Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
+    Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
+    Console.WriteLine($"Altitude: {altValue:0.##}m");
+    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
 
-                    // read values
-                    i2CBmpe80.TryReadTemperature(out tempValue);
-                    i2CBmpe80.TryReadPressure(out preValue);
-                    i2CBmpe80.TryReadHumidity(out humValue);
+    // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
+    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
+    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
 
-                    // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using
-                    // var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
-                    i2CBmpe80.TryReadAltitude(defaultSeaLevelPressure, out altValue);
-
-                    Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
-                    Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
-                    Console.WriteLine($"Altitude: {altValue:0.##}m");
-                    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
-
-                    // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
-                    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
-                    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
-                    Thread.Sleep(5000);
-                }
-            }
-        }
-    }
+    Thread.Sleep(5000);
 }

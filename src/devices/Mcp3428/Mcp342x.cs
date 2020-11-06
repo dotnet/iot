@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -91,6 +90,7 @@ namespace Iot.Device.Mcp3428
         public void Dispose()
         {
             _i2cDevice?.Dispose();
+            _i2cDevice = null!;
         }
 
         /// <summary>
@@ -104,8 +104,8 @@ namespace Iot.Device.Mcp3428
             return ReadValue(channel);
         }
 
-        private readonly I2cDevice _i2cDevice;
         private readonly byte[] _readBuffer = new byte[3];
+        private I2cDevice _i2cDevice;
 
         private bool _isReadyBit = false;
         private byte _lastChannel = 0xFF;
@@ -161,7 +161,7 @@ namespace Iot.Device.Mcp3428
         /// <param name="waitSpan">Time to wait for conversion before timing out</param>
         /// <param name="progressCallback">Action to be called to report the progress</param>
         /// <param name="cancellationToken">Token which can be used to cancel the operation</param>
-        protected void WaitForConversion(TimeSpan? waitSpan = null, Action<int> progressCallback = null,
+        protected void WaitForConversion(TimeSpan? waitSpan = null, Action<int>? progressCallback = null,
             CancellationToken cancellationToken = default)
         {
             waitSpan = waitSpan ?? TimeSpan.FromMilliseconds(WaitTime);
@@ -241,7 +241,7 @@ namespace Iot.Device.Mcp3428
         /// <exception cref="ArgumentOutOfRangeException">channel</exception>
         protected bool SetConfig(int channel = 0, AdcMode mode = AdcMode.Continuous,
             AdcResolution resolution = AdcResolution.Bit12, AdcGain pgaGain = AdcGain.X1,
-            IList<string> errorList = null)
+            IList<string>? errorList = null)
         {
             if (channel < 0 || channel > ChannelCount - 1)
             {
@@ -323,7 +323,7 @@ namespace Iot.Device.Mcp3428
         /// <summary>
         /// Event called when conversion is complete
         /// </summary>
-        public event EventHandler<ConversionResult> OnConversion;
+        public event EventHandler<ConversionResult>? OnConversion;
 
         /// <summary>
         /// Writes configuration
@@ -423,7 +423,7 @@ namespace Iot.Device.Mcp3428
         /// <param name="progressCallback">Callback to be called to report progress</param>
         /// <param name="cancellationToken">Token which can be used to cancel the operation</param>
         /// <returns>Task which can be used to wait for opertation to finish</returns>
-        protected async ValueTask WaitForConversionAsync(TimeSpan? waitSpan = null, Action<int> progressCallback = null,
+        protected async ValueTask WaitForConversionAsync(TimeSpan? waitSpan = null, Action<int>? progressCallback = null,
             CancellationToken cancellationToken = default)
         {
             waitSpan = waitSpan ?? TimeSpan.FromMilliseconds(WaitTime);

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device;
@@ -8,8 +7,7 @@ using System.Device.Gpio;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-
+// using System.Runtime.InteropServices.WindowsRuntime;
 namespace Iot.Device.Tm1637
 {
     /// <summary>
@@ -18,9 +16,9 @@ namespace Iot.Device.Tm1637
     public sealed class Tm1637 : IDisposable
     {
         /// <summary>
-        /// The number of segments that the TM1637 can handle
+        /// The number of characters that the TM1637 can handle
         /// </summary>
-        public static byte MaxSegments => 6;
+        public static byte MaxCharacters => 6;
 
         // According to the doc, the clock pulse width minimum is 400 ns
         // And waiting time between clk up and down is 1 µs
@@ -33,8 +31,8 @@ namespace Iot.Device.Tm1637
 
         private byte _brightness;
 
-        // Default segment order is from 0 to 5
-        private byte[] _segmentOrder = new byte[6] { 0, 1, 2, 3, 4, 5 };
+        // Default character order is from 0 to 5
+        private byte[] _charactersOrder = new byte[6] { 0, 1, 2, 3, 4, 5 };
 
         // To store what has been displayed last. Used when change on brightness or
         // screen on/off is used
@@ -50,7 +48,7 @@ namespace Iot.Device.Tm1637
         /// <param name="gpioController">A Gpio Controller if you want to use a specific one</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Tm1637(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical,
-            GpioController gpioController = null, bool shouldDispose = true)
+            GpioController? gpioController = null, bool shouldDispose = true)
         {
             _pinClk = pinClk;
             _pinDio = pinDio;
@@ -64,27 +62,27 @@ namespace Iot.Device.Tm1637
         }
 
         /// <summary>
-        /// Order of segments, expect a 6 length byte array
+        /// Order of characters, expect a 6 length byte array
         /// 0 to 5, any order. Most of the time 4 segments do
         /// not need to be changed but the 6 ones may be in different order
         /// like 0 1 2 5 4 3. In this case, this byte array has be be in this order
         /// </summary>
-        public byte[] SegmentOrder
+        public byte[] CharacterOrder
         {
             get
             {
-                return _segmentOrder;
+                return _charactersOrder;
             }
             set
             {
-                if (value.Length != MaxSegments)
+                if (value.Length != MaxCharacters)
                 {
-                    throw new ArgumentException($"Size of {nameof(SegmentOrder)} can only be 6 length");
+                    throw new ArgumentException($"Size of {nameof(CharacterOrder)} can only be 6 length");
                 }
 
                 // Check if we have all values from 0 to 5
                 bool allExist = true;
-                for (int i = 0; i < MaxSegments; i++)
+                for (int i = 0; i < MaxCharacters; i++)
                 {
                     allExist &= Array.Exists(value, e => e == i);
                 }
@@ -92,10 +90,10 @@ namespace Iot.Device.Tm1637
                 if (!allExist)
                 {
                     throw new ArgumentException(
-                        $"{nameof(SegmentOrder)} needs to have all existing segments from 0 to 5");
+                        $"{nameof(CharacterOrder)} needs to have all existing characters from 0 to 5");
                 }
 
-                value.CopyTo(_segmentOrder, 0);
+                value.CopyTo(_charactersOrder, 0);
             }
         }
 
@@ -160,7 +158,7 @@ namespace Iot.Device.Tm1637
                 DelayHelper.DelayMicroseconds(ClockWidthMicroseconds, true);
             }
 
-            // Wait for the acknoledge
+            // Wait for the acknowledge
             _controller.Write(_pinClk, PinValue.Low);
             _controller.Write(_pinDio, PinValue.High);
             _controller.Write(_pinClk, PinValue.High);
@@ -174,7 +172,7 @@ namespace Iot.Device.Tm1637
             var ack = _controller.Read(_pinDio);
             if (ack == PinValue.Low)
             {
-                // We get acknoledge from the device
+                // We get acknowledge from the device
                 _controller.SetPinMode(_pinDio, PinMode.Output);
                 _controller.Write(_pinDio, PinValue.Low);
             }
@@ -225,22 +223,22 @@ namespace Iot.Device.Tm1637
         /// <param name="rawData">The raw data array to display, size of the array has to be 6 maximum</param>
         private void Display(ReadOnlySpan<byte> rawData)
         {
-            if (rawData.Length > MaxSegments)
+            if (rawData.Length > MaxCharacters)
             {
-                throw new ArgumentException($"Maximum number of segments for TM1637 is {MaxSegments}");
+                throw new ArgumentException($"Maximum number of segments for TM1637 is {MaxCharacters}");
             }
 
             // Prepare the buffer with the right order to transfer
-            byte[] toTransfer = new byte[MaxSegments];
+            byte[] toTransfer = new byte[MaxCharacters];
 
             for (int i = 0; i < rawData.Length; i++)
             {
-                toTransfer[_segmentOrder[i]] = rawData[i];
+                toTransfer[_charactersOrder[i]] = rawData[i];
             }
 
-            for (int j = rawData.Length; j < MaxSegments; j++)
+            for (int j = rawData.Length; j < MaxCharacters; j++)
             {
-                toTransfer[_segmentOrder[j]] = (byte)Character.Nothing;
+                toTransfer[_charactersOrder[j]] = (byte)Character.Nothing;
             }
 
             _lastDisplay = toTransfer;
@@ -253,7 +251,7 @@ namespace Iot.Device.Tm1637
             // Second command is set address to automatic
             WriteByte((byte)DataCommand.DataCommandSetting);
             // Transfer the data
-            for (int i = 0; i < MaxSegments; i++)
+            for (int i = 0; i < MaxCharacters; i++)
             {
                 WriteByte(toTransfer[i]);
             }
@@ -292,21 +290,21 @@ namespace Iot.Device.Tm1637
         ///
         /// Representation of the number 0 so lighting segments a, b, c, d, e and F is then 0x3f
         /// </remarks>
-        /// <param name="segmentPosition">The segment position from 0 to 5</param>
-        /// <param name="rawData">The segemnet characters to display</param>
-        public void Display(byte segmentPosition, Character rawData)
+        /// <param name="characterPosition">The character position from 0 to 5</param>
+        /// <param name="rawData">The segment characters to display</param>
+        public void Display(byte characterPosition, Character rawData)
         {
-            if (segmentPosition > MaxSegments)
+            if (characterPosition > MaxCharacters)
             {
-                throw new ArgumentException($"Maximum number of segments for TM1637 is {MaxSegments}");
+                throw new ArgumentException($"Maximum number of characters for TM1637 is {MaxCharacters}");
             }
 
             // Recreate the buffer in correct order
-            _lastDisplay[_segmentOrder[segmentPosition]] = (byte)rawData;
-            DisplayRaw(_segmentOrder[segmentPosition], (byte)rawData);
+            _lastDisplay[_charactersOrder[characterPosition]] = (byte)rawData;
+            DisplayRaw(_charactersOrder[characterPosition], (byte)rawData);
         }
 
-        private void DisplayRaw(byte segmentAddress, byte rawData)
+        private void DisplayRaw(byte characterAddress, byte rawData)
         {
             StartTransmission();
             // First command for fix address
@@ -314,7 +312,7 @@ namespace Iot.Device.Tm1637
             StopTransmission();
             StartTransmission();
             // Set the address to transfer
-            WriteByte((byte)(DataCommand.AddressCommandSetting + segmentAddress));
+            WriteByte((byte)(DataCommand.AddressCommandSetting + characterAddress));
             // Transfer the byte
             WriteByte(rawData);
             StopTransmission();
@@ -350,7 +348,7 @@ namespace Iot.Device.Tm1637
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null;
+                _controller = null!;
             }
         }
     }

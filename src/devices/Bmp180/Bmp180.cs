@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 // Ported from https://github.com/adafruit/Adafruit_Python_BMP/blob/master/Adafruit_BMP/BMP085.py
 // Formulas and code examples can also be found in the datasheet https://cdn-shop.adafruit.com/datasheets/BST-BMP180-DS000-09.pdf
@@ -91,9 +90,9 @@ namespace Iot.Device.Bmp180
         ///  Sea-level pressure
         /// </param>
         /// <returns>
-        ///  Height in meters from the sensor
+        ///  Height above sea level
         /// </returns>
-        public double ReadAltitude(Pressure seaLevelPressure)
+        public Length ReadAltitude(Pressure seaLevelPressure)
         {
             return WeatherHelper.CalculateAltitude(ReadPressure(), seaLevelPressure, ReadTemperature());
         }
@@ -102,15 +101,15 @@ namespace Iot.Device.Bmp180
         ///  Calculates the altitude in meters from the mean sea-level pressure.
         /// </summary>
         /// <returns>
-        ///  Height in meters from the sensor
+        ///  Height in meters above sea level
         /// </returns>
-        public double ReadAltitude()
+        public Length ReadAltitude()
         {
             return ReadAltitude(WeatherHelper.MeanSeaLevel);
         }
 
         /// <summary>
-        ///  Calculates the pressure at sea level when given a known altitude in meter
+        ///  Calculates the pressure at sea level when given a known altitude
         /// </summary>
         /// <param name="altitude" >
         ///  Altitude in meters
@@ -118,9 +117,20 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Pressure
         /// </returns>
-        public Pressure ReadSeaLevelPressure(double altitude = 0.0)
+        public Pressure ReadSeaLevelPressure(Length altitude)
         {
             return WeatherHelper.CalculateSeaLevelPressure(ReadPressure(), altitude, ReadTemperature());
+        }
+
+        /// <summary>
+        ///  Calculates the pressure at sea level, when the current altitude is 0.
+        /// </summary>
+        /// <returns>
+        ///  Pressure
+        /// </returns>
+        public Pressure ReadSeaLevelPressure()
+        {
+            return ReadSeaLevelPressure(Length.Zero);
         }
 
         /// <summary>
@@ -258,7 +268,7 @@ namespace Iot.Device.Bmp180
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
     }
 }

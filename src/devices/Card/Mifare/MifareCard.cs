@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -24,20 +23,21 @@ namespace Iot.Device.Card.Mifare
         /// </summary>
         public MifareCardCommand Command { get; set; }
 
+#pragma warning disable SA1011
         /// <summary>
         /// Key A Used for encryption/decryption
         /// </summary>
-        public byte[] KeyA { get; set; }
+        public byte[]? KeyA { get; set; }
 
         /// <summary>
         /// Key B Used for encryption/decryption
         /// </summary>
-        public byte[] KeyB { get; set; }
+        public byte[]? KeyB { get; set; }
 
         /// <summary>
         /// UUID is the Serial Number, called MAC sometimes
         /// </summary>
-        public byte[] SerialNumber { get; set; }
+        public byte[]? SerialNumber { get; set; }
 
         /// <summary>
         /// The storage capacity
@@ -52,7 +52,7 @@ namespace Iot.Device.Card.Mifare
         /// <summary>
         /// The Data which has been read or to write for the specific block
         /// </summary>
-        public byte[] Data { get; set; }
+        public byte[]? Data { get; set; }
 
         /// <summary>
         /// Constructor for Mifarecard
@@ -542,10 +542,15 @@ namespace Iot.Device.Card.Mifare
         /// <returns>The serialized bits</returns>
         private byte[] Serialize()
         {
-            byte[] ser = null;
+            byte[]? ser = null;
             switch (Command)
             {
                 case MifareCardCommand.AuthenticationA:
+                    if (KeyA is null || SerialNumber is null)
+                    {
+                        throw new Exception($"Card is not configured for {nameof(MifareCardCommand.AuthenticationA)}.");
+                    }
+
                     ser = new byte[2 + KeyA.Length + SerialNumber.Length];
                     ser[0] = (byte)Command;
                     ser[1] = BlockNumber;
@@ -561,6 +566,11 @@ namespace Iot.Device.Card.Mifare
 
                     return ser;
                 case MifareCardCommand.AuthenticationB:
+                    if (KeyB is null || SerialNumber is null)
+                    {
+                        throw new Exception($"Card is not configured for {nameof(MifareCardCommand.AuthenticationB)}.");
+                    }
+
                     ser = new byte[2 + KeyB.Length + SerialNumber.Length];
                     ser[0] = (byte)Command;
                     ser[1] = BlockNumber;
@@ -577,6 +587,11 @@ namespace Iot.Device.Card.Mifare
                     return ser;
                 case MifareCardCommand.Write16Bytes:
                 case MifareCardCommand.Write4Bytes:
+                    if (Data is null)
+                    {
+                        throw new Exception($"Card is not configured for {nameof(MifareCardCommand.Write4Bytes)}.");
+                    }
+
                     ser = new byte[2 + Data.Length];
                     ser[0] = (byte)Command;
                     ser[1] = BlockNumber;

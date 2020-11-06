@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -124,9 +123,10 @@ namespace BrickPiHardwareTest
             Thread.Sleep(10000);
         }
 
-        private static void Motor_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private static void Motor_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Console.WriteLine($"Event raised, endoer changed: {e.PropertyName}; {((Motor)sender).TachoCount}");
+            string count = sender is Motor m ? m.TachoCount.ToString() : string.Empty;
+            Console.WriteLine($"Event raised, endoer changed: {e.PropertyName}; {count}");
         }
 
         private static void TestVehicule()

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -23,7 +22,7 @@ namespace Iot.Device.Hcsr501
         /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
         /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Hcsr501(int outPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController gpioController = null, bool shouldDispose = true)
+        public Hcsr501(int outPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _outPin = outPin;
 
@@ -46,11 +45,8 @@ namespace Iot.Device.Hcsr501
         {
             if (_shouldDispose)
             {
-                if (_controller != null)
-                {
-                    _controller.Dispose();
-                    _controller = null;
-                }
+                _controller?.Dispose();
+                _controller = null!;
             }
         }
 
@@ -64,7 +60,7 @@ namespace Iot.Device.Hcsr501
         /// <summary>
         /// Triggering when HC-SR501 value changes
         /// </summary>
-        public event Hcsr501ValueChangedHandle Hcsr501ValueChanged;
+        public event Hcsr501ValueChangedHandle? Hcsr501ValueChanged;
 
         private void Sensor_ValueChanged(object sender, PinValueChangedEventArgs e)
         {

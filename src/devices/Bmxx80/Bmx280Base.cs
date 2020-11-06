@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 // Ported from https://github.com/adafruit/Adafruit_BMP280_Library/blob/master/Adafruit_BMP280.cpp
 // Formulas and code examples can also be found in the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
@@ -175,13 +174,13 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadAltitude(Pressure seaLevelPressure, out double altitude)
+        public bool TryReadAltitude(Pressure seaLevelPressure, out Length altitude)
         {
             // Read the pressure first.
             var success = TryReadPressure(out var pressure);
             if (!success)
             {
-                altitude = double.NaN;
+                altitude = default;
                 return false;
             }
 
@@ -189,7 +188,7 @@ namespace Iot.Device.Bmxx80
             success = TryReadTemperature(out var temperature);
             if (!success)
             {
-                altitude = double.NaN;
+                altitude = default;
                 return false;
             }
 
@@ -206,7 +205,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadAltitude(out double altitude)
+        public bool TryReadAltitude(out Length altitude)
         {
             return TryReadAltitude(WeatherHelper.MeanSeaLevel, out altitude);
         }

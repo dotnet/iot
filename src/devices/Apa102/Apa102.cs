@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Spi;
@@ -18,7 +17,7 @@ namespace Iot.Device.Apa102
         /// </summary>
         public Span<Color> Pixels => _pixels;
 
-        private readonly SpiDevice _spi;
+        private SpiDevice _spi;
         private Color[] _pixels;
         private byte[] _buffer;
 
@@ -30,7 +29,6 @@ namespace Iot.Device.Apa102
         public Apa102(SpiDevice spi, int length)
         {
             _spi = spi ?? throw new ArgumentNullException(nameof(spi));
-
             _pixels = new Color[length];
             _buffer = new byte[(length + 2) * 4];
 
@@ -59,9 +57,9 @@ namespace Iot.Device.Apa102
         public void Dispose()
         {
             _spi.Dispose();
-
-            _pixels = null;
-            _buffer = null;
+            _spi = null!;
+            _pixels = null!;
+            _buffer = null!;
         }
     }
 }

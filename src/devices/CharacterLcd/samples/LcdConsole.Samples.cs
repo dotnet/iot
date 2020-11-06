@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -64,7 +63,7 @@ namespace Iot.Device.CharacterLcd.Samples
             console.ReplaceLine(0, "This is all garbage that will be replaced");
             console.ReplaceLine(0, "Running clock test");
             int left = console.Size.Width;
-            Task alertTask = null;
+            Task? alertTask = null;
             // Let the current time move trought the display on line 1
             while (!Console.KeyAvailable)
             {

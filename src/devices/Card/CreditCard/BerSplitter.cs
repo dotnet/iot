@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -30,16 +29,18 @@ namespace Iot.Device.Card.CreditCardProcessing
             {
                 try
                 {
-                    var elem = new Tag();
                     var resTag = DecodeTag(toSplit.Slice(index));
-                    elem.TagNumber = resTag.Item1;
+                    var tagNumber = resTag.Item1;
                     // Need to move index depending on how many has been read
                     index += resTag.Item2;
                     var resSize = DecodeSize(toSplit.Slice(index));
-                    elem.Data = new byte[resSize.Item1];
+                    var data = new byte[resSize.Item1];
+                    var elem = new Tag(
+                        tagNumber,
+                        data);
+                    Tags.Add(elem);
                     index += resSize.Item2;
                     toSplit.Slice(index, resSize.Item1).CopyTo(elem.Data);
-                    Tags.Add(elem);
                     index += resSize.Item1;
 
                 }

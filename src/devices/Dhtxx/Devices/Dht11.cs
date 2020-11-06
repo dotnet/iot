@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio;
 using UnitsNet;
@@ -19,7 +18,7 @@ namespace Iot.Device.DHTxx
         /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
         /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Dht11(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController gpioController = null, bool shouldDispose = true)
+        public Dht11(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
             : base(pin, pinNumberingScheme, gpioController, shouldDispose)
         {
         }

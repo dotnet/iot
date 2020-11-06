@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -46,7 +45,7 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void On()
         {
-            if (!IsOn)
+            if (!IsOn && _controller is object)
             {
                 _controller.Write(Pin, PinValue.High);
                 IsOn = true;
@@ -58,48 +57,26 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void Off()
         {
-            if (IsOn)
+            if (IsOn && _controller is object)
             {
                 _controller.Write(Pin, PinValue.Low);
                 IsOn = false;
             }
         }
 
-        #region IDisposable Support
-
         private bool _shouldDispose;
-        // This to avoid double dispose
-        private bool _disposedValue = false;
-
-        /// <summary>
-        /// Disposes the <see cref="Led"/> instance
-        /// </summary>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    Off();
-                    if (_shouldDispose)
-                    {
-                        _controller?.Dispose();
-                        _controller = null;
-                    }
-                }
-
-                _disposedValue = true;
-            }
-        }
 
         /// <summary>
         /// Disposes the <see cref="Led"/> instance
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
+            Off();
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null!;
+            }
         }
-
-        #endregion
     }
 }
