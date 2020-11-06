@@ -48,7 +48,7 @@ while (true)
     Console.WriteLine($"Acceleration: {sh.Acceleration} g");
     Console.WriteLine($"Angular rate: {sh.AngularRate} DPS");
     Console.WriteLine($"Magnetic induction: {sh.MagneticInduction} gauss");
-    Console.WriteLine($"Relative humidity: {humValue.Percent:0.#}");
+    Console.WriteLine($"Relative humidity: {humValue.Percent:0.#}%");
 
     // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
     Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
