@@ -6,27 +6,15 @@ namespace Iot.Device.Bh1745
     /// <summary>
     /// Channel compensation multipliers used to compensate the 4 color channels of the Bh1745.
     /// </summary>
-    public class ChannelCompensationMultipliers
+    public record ChannelCompensationMultipliers(double Red, double Green, double Blue, double Clear);
+}
+
+#if NETCOREAPP2_1 || NETCOREAPP3_1
+#pragma warning disable SA1403
+namespace System.Runtime.CompilerServices
+{
+    public class IsExternalInit
     {
-        /// <summary>
-        /// Multiplier for the red color channel.
-        /// </summary>
-        public double Red { get; set; }
-
-        /// <summary>
-        /// Multiplier for the green color channel.
-        /// </summary>
-        public double Green { get; set; }
-
-        /// <summary>
-        /// Multiplier for the blue color channel.
-        /// </summary>
-        public double Blue { get; set; }
-
-        /// <summary>
-        /// Multiplier for the clear color channel.
-        /// </summary>
-        public double Clear { get; set; }
-
     }
 }
+#endif

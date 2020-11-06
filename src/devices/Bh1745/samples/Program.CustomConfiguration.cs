@@ -13,12 +13,15 @@ const int busId = 1;
 var i2cSettings = new I2cConnectionSettings(busId, Bh1745.DefaultI2cAddress);
 var i2cDevice = I2cDevice.Create(i2cSettings);
 
-using var i2cBh1745 = new Bh1745(i2cDevice);
+using Bh1745 i2cBh1745 = new Bh1745(i2cDevice);
 // multipliers affect the compensated values
-i2cBh1745.ChannelCompensationMultipliers.Red = 2.5;
-i2cBh1745.ChannelCompensationMultipliers.Green = 0.9;
-i2cBh1745.ChannelCompensationMultipliers.Blue = 1.9;
-i2cBh1745.ChannelCompensationMultipliers.Clear = 9.5;
+ChannelCompensationMultipliers multipliers = new (
+    2.5,    // Red
+    0.9,    // Green
+    1.9,    // Blue
+    9.5);   // Clear
+
+i2cBh1745.ChannelCompensationMultipliers = multipliers;
 
 // set custom  measurement time
 i2cBh1745.MeasurementTime = MeasurementTime.Ms1280;
