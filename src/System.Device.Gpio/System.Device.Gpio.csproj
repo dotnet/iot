@@ -39,6 +39,10 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
+    <Compile Remove="System\Runtime\CompilerServices\IsExternalInit.cs" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' != 'net5.0'">
     <!--Remove the Linux-specific code-->
     <Compile Remove="System\Device\Gpio\Drivers\Windows10Driver.notSupported.cs" />
