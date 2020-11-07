@@ -36,5 +36,4 @@ namespace Iot.Device.Bh1745
         /// <returns></returns>
         public static TimeSpan AsTimeSpan(this Bh1745 bh1745) => new TimeSpan(bh1745.MeasurementTime.ToMilliseconds());
     }
-
 }
