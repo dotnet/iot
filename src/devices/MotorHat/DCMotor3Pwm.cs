@@ -67,7 +67,7 @@ namespace Iot.Device.MotorHat
             }
         }
 
-        protected override void Dispose(bool disposing)
+        public override void Dispose()
         {
             _pwmPin.Stop();
             _in1Pin.Stop();

@@ -47,6 +47,7 @@ namespace Iot.Device.Common.Tests
         {
             Pressure saturatedVaporPressure = WeatherHelper.CalculateSaturatedVaporPressureOverIce(Temperature.FromDegreesCelsius(celsius));
             Assert.Equal(expected, saturatedVaporPressure.Pascals, 1);
+        }
 
         [Theory]
         [InlineData(1061, 30, 25)]
