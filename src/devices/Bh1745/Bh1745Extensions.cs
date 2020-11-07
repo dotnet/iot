@@ -34,6 +34,6 @@ namespace Iot.Device.Bh1745
         /// <param name="bh1745">The BH1745 device.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when a not supported MeasurementTime is used.</exception>
         /// <returns></returns>
-        public static TimeSpan AsTimeSpan(this Bh1745 bh1745) => new TimeSpan(bh1745.MeasurementTime.ToMilliseconds());
+        public static TimeSpan MeasurementTimeAsTimeSpan(this Bh1745 bh1745) => new TimeSpan(bh1745.MeasurementTime.ToMilliseconds());
     }
 }

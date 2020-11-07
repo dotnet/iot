@@ -14,7 +14,7 @@ I2cConnectionSettings i2cSettings = new (busId, Bh1745.DefaultI2cAddress);
 using I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
 using Bh1745 i2cBh1745 = new Bh1745(i2cDevice);
 // wait for first measurement
-Thread.Sleep(i2cBh1745.AsTimeSpan());
+Thread.Sleep(i2cBh1745.MeasurementTimeAsTimeSpan());
 
 while (true)
 {
@@ -22,5 +22,5 @@ while (true)
     Console.WriteLine("RGB color read: #{0:X2}{1:X2}{2:X2}", color.R, color.G, color.B);
     Console.WriteLine($"Raw illumination value: {i2cBh1745.ReadClearDataRegister()}");
 
-    Thread.Sleep(i2cBh1745.AsTimeSpan());
+    Thread.Sleep(i2cBh1745.MeasurementTimeAsTimeSpan());
 }
