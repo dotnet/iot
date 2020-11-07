@@ -13,15 +13,17 @@ namespace Iot.Device.MemoryLcd
     public class LS027B7DH01 : LSxxxB7DHxx
     {
         /// <summary>
-        /// Create a memory LCD device
+        /// Create a <see cref="LS027B7DH01"/> device
         /// </summary>
         /// <param name="spi">SPI controller</param>
         /// <param name="gpio">GPIO controller</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         /// <param name="scs">Chip select signal</param>
         /// <param name="disp">Display ON/OFF signal</param>
         /// <param name="extcomin">External COM inversion signal input</param>
-        public LS027B7DH01(SpiDevice spi, GpioController gpio = null, int scs = -1, int disp = -1, int extcomin = -1)
-            : base(spi, gpio, scs, disp, extcomin)
+        /// <param name="pinNumberingScheme">The numbering scheme used to represent pins provided by GPIO controller</param>
+        public LS027B7DH01(SpiDevice spi, GpioController gpio = null, bool shouldDispose = true, int scs = -1, int disp = -1, int extcomin = -1, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+            : base(spi, gpio, shouldDispose, scs, disp, extcomin, pinNumberingScheme)
         {
         }
 

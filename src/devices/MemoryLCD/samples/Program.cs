@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.MemoryLcd;
+using MemoryLcd.Extends;
 
 namespace MemoryLcd.Samples
 {
@@ -30,7 +31,7 @@ namespace MemoryLcd.Samples
             // EXTMODE -- LOW
             // LSxxxB7DHxx mlcd = new LS027B7DH01(spi);
             GpioController gpio = new GpioController(PinNumberingScheme.Logical);
-            LSxxxB7DHxx mlcd = new LS027B7DH01(spi, gpio, 25, 24, 23);
+            LSxxxB7DHxx mlcd = new LS027B7DH01(spi, gpio, false, 25, 24, 23);
 
             Random random = new Random();
 
@@ -97,7 +98,7 @@ namespace MemoryLcd.Samples
                 {
                     fps = fpsCpunter;
                     fpsCpunter = 0;
-                    Thread.Sleep(1000 - DateTime.Now.Millisecond);
+                    Task.Delay(1000 - DateTime.Now.Millisecond).Wait();
                 }
             });
 
@@ -123,7 +124,7 @@ namespace MemoryLcd.Samples
                 mlcd.ShowImage(image, 4);
 
                 fpsCpunter++;
-                Thread.Sleep(0);
+                Task.Delay(0).Wait();
             }
         }
     }
