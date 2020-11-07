@@ -7,7 +7,7 @@ It supports GPIO and SPI. It supports daisy chaining. The test app supports up t
 The following example demonstrates the sample with the last two output not connected. They are detected as open or short, with a `Low` reading.
 
 ```console
-pi@raspberrypineapple:~/iot/src/devices/Mbi5027/samples $ ./bin/Debug/netcoreapp3.1/linux-arm/Mbi5027-driver
+pi@raspberrypineapple:~/iot/src/devices/Mbi5027/samples $ ./bin/Debug/net5.0/linux-arm/Mbi5027-driver
 Driver for Mbi5027
 Register bit length: 16
 Checking circuit

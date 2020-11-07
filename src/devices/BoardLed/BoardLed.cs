@@ -66,7 +66,7 @@ namespace Iot.Device.BoardLed
         {
             Name = name;
             Initialize();
-#if NETCOREAPP2_1 || NETCOREAPP3_1
+#if NETCOREAPP2_1
             if (_brightnessReader is null ||
                 _brightnessWriter is null ||
                 _maxBrightnessReader is null ||
@@ -145,7 +145,7 @@ namespace Iot.Device.BoardLed
             _triggerWriter.Flush();
         }
 
-#if !NETCOREAPP2_1 && !NETCOREAPP3_1
+#if !NETCOREAPP2_1
         [MemberNotNull(nameof(_brightnessReader), nameof(_brightnessWriter), nameof(_triggerReader), nameof(_triggerWriter), nameof(_maxBrightnessReader))]
 #endif
         private void Initialize()

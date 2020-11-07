@@ -61,7 +61,7 @@ edit the app and then to publish it (note: in many cases it might be easier to p
 dotnet publish
 ```
 
-publish command will produce binaries in `bin/Debug/netcoreapp3.1/linux-arm/publish`
+publish command will produce binaries in `bin/Debug/net5.0/linux-arm/publish`
 To run your app simply call it while in that directory
 
 ```

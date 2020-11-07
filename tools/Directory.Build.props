@@ -8,5 +8,6 @@
     <IsPackable>false</IsPackable>
     <MainLibraryPath>$(MSBuildThisFileDirectory)../src/System.Device.Gpio/</MainLibraryPath>
     <Nullable>enable</Nullable>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
 </Project>
