@@ -27,7 +27,7 @@ namespace Iot.Device.Bno055
         public const byte SecondI2cAddress = 0x29;
 
         private const byte DeviceId = 0xA0;
-        private readonly bool _autoDispoable;
+        private readonly bool _shouldDispose;
         private I2cDevice _i2cDevice;
         private OperationMode _operationMode;
         private Units _units;
@@ -37,10 +37,7 @@ namespace Iot.Device.Bno055
         /// </summary>
         public OperationMode OperationMode
         {
-            get
-            {
-                return _operationMode;
-            }
+            get => _operationMode;
             set
             {
                 _operationMode = value;
@@ -55,10 +52,7 @@ namespace Iot.Device.Bno055
         /// </summary>
         public PowerMode PowerMode
         {
-            get
-            {
-                return (PowerMode)ReadByte(Registers.PWR_MODE);
-            }
+            get => (PowerMode)ReadByte(Registers.PWR_MODE);
             set
             {
                 SetConfigMode(true);
@@ -72,10 +66,7 @@ namespace Iot.Device.Bno055
         /// </summary>
         public TemperatureSource TemperatureSource
         {
-            get
-            {
-                return (TemperatureSource)ReadByte(Registers.TEMP_SOURCE);
-            }
+            get => (TemperatureSource)ReadByte(Registers.TEMP_SOURCE);
             set
             {
                 SetConfigMode(true);
@@ -89,10 +80,7 @@ namespace Iot.Device.Bno055
         /// </summary>
         public Units Units
         {
-            get
-            {
-                return (Units)ReadByte(Registers.UNIT_SEL);
-            }
+            get => (Units)ReadByte(Registers.UNIT_SEL);
             set
             {
                 SetConfigMode(true);
@@ -105,20 +93,20 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get the information about various sensor system versions and ID
         /// </summary>
-        public Info Info { get; internal set; }
+        public Info Info { get; private set; }
 
         /// <summary>
         /// Create an BNO055 sensor
         /// </summary>
         /// <param name="i2cDevice">The I2C Device</param>
         /// <param name="operationMode">The operation mode to setup</param>
-        /// <param name="autoDispoable">true to dispose the I2C device at dispose</param>
+        /// <param name="shouldDispose">true to dispose the I2C device at dispose</param>
         public Bno055Sensor(I2cDevice i2cDevice,
             OperationMode operationMode = OperationMode.AccelerometerMagnetometerGyroscopeRelativeOrientation,
-            bool autoDispoable = true)
+            bool shouldDispose = true)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} can't be null");
-            _autoDispoable = autoDispoable;
+            _shouldDispose = shouldDispose;
 
             // A first write to initate the device
             WriteReg(Registers.PAGE_ID, 0);
@@ -378,7 +366,7 @@ namespace Iot.Device.Bno055
         {
             get
             {
-                var retVect = GetVectorData(Registers.EULER_H_LSB);
+                Vector3 retVect = GetVectorData(Registers.EULER_H_LSB);
                 // If unit is MeterG, then divide by 900, otherwise divide by 16
                 if (_units.HasFlag(Units.EulerAnglesRadians))
                 {
@@ -403,7 +391,7 @@ namespace Iot.Device.Bno055
         {
             get
             {
-                var retVect = GetVectorData(Registers.GYRO_DATA_X_LSB);
+                Vector3 retVect = GetVectorData(Registers.GYRO_DATA_X_LSB);
                 if ((_units & Units.AngularRateRotationPerSecond) == Units.AngularRateRotationPerSecond)
                 {
                     return retVect / 900;
@@ -425,7 +413,7 @@ namespace Iot.Device.Bno055
         {
             get
             {
-                var retVect = GetVectorData(Registers.ACCEL_DATA_X_LSB);
+                Vector3 retVect = GetVectorData(Registers.ACCEL_DATA_X_LSB);
                 // If unit is MeterG, then no convertion, otherwise divide by 100
                 if ((_units & Units.AccelerationMeterG) == Units.AccelerationMeterG)
                 {
@@ -448,7 +436,7 @@ namespace Iot.Device.Bno055
         {
             get
             {
-                var retVect = GetVectorData(Registers.LINEAR_ACCEL_DATA_X_LSB);
+                Vector3 retVect = GetVectorData(Registers.LINEAR_ACCEL_DATA_X_LSB);
                 // If unit is MeterG, then no convertion, otherwise divide by 100
                 if ((_units & Units.AccelerationMeterG) == Units.AccelerationMeterG)
                 {
@@ -471,7 +459,7 @@ namespace Iot.Device.Bno055
         {
             get
             {
-                var retVect = GetVectorData(Registers.GRAVITY_DATA_X_LSB);
+                Vector3 retVect = GetVectorData(Registers.GRAVITY_DATA_X_LSB);
                 // If unit is MeterG, then no convertion, otherwise divide by 100
                 if ((_units & Units.AccelerationMeterG) == Units.AccelerationMeterG)
                 {
@@ -548,7 +536,7 @@ namespace Iot.Device.Bno055
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_autoDispoable)
+            if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
                 _i2cDevice = null!;

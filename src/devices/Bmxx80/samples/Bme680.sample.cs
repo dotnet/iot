@@ -14,12 +14,12 @@ Console.WriteLine("Hello BME680!");
 // The I2C bus ID on the Raspberry Pi 3.
 const int busId = 1;
 // set this to the current sea level pressure in the area for correct altitude readings
-var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
+Pressure defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
 
-var i2cSettings = new I2cConnectionSettings(busId, Bme680.DefaultI2cAddress);
-var i2cDevice = I2cDevice.Create(i2cSettings);
+I2cConnectionSettings i2cSettings = new (busId, Bme680.DefaultI2cAddress);
+I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
 
-using var bme680 = new Bme680(i2cDevice, Temperature.FromDegreesCelsius(20.0));
+using Bme680 bme680 = new Bme680(i2cDevice, Temperature.FromDegreesCelsius(20.0));
 
 while (true)
 {

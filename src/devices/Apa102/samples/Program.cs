@@ -15,7 +15,7 @@ using SpiDevice spiDevice = SpiDevice.Create(new SpiConnectionSettings(0, 0)
     DataFlow = DataFlow.MsbFirst,
     Mode = SpiMode.Mode0 // ensure data is ready at clock rising edge
 });
-var apa102 = new Apa102(spiDevice, 16);
+using Apa102 apa102 = new Apa102(spiDevice, 16);
 
 while (true)
 {
