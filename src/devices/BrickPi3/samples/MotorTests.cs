@@ -126,12 +126,12 @@ namespace BrickPiHardwareTest
         private static void Motor_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             string count = sender is Motor m ? m.TachoCount.ToString() : string.Empty;
-            Console.WriteLine($"Event raised, endoer changed: {e.PropertyName}; {count}");
+            Console.WriteLine($"Event raised, encoder changed: {e.PropertyName}; {count}");
         }
 
-        private static void TestVehicule()
+        private static void TestVehicle()
         {
-            Console.WriteLine("Vehicule drive test using Motor A for left, Motor D for right, not inverted direction");
+            Console.WriteLine("Vehicle drive test using Motor A for left, Motor D for right, not inverted direction");
             Vehicle veh = new Vehicle(_brick, BrickPortMotor.PortA, BrickPortMotor.PortD);
             veh.DirectionOpposite = true;
             Console.WriteLine("Driving backward");

@@ -63,21 +63,13 @@ namespace Iot.Device.CharacterLcd
         /// Position of the cursor, from left.
         /// Note: May be outside the bounds of the display.
         /// </summary>
-        public int CursorLeft
-        {
-            get;
-            private set;
-        }
+        public int CursorLeft { get; private set; }
 
         /// <summary>
         /// Position of the cursor, from top
         /// Note: May be outside the bounds of the display.
         /// </summary>
-        public int CursorTop
-        {
-            get;
-            private set;
-        }
+        public int CursorTop { get; private set; }
 
         /// <summary>
         /// If this is larger than zero, an a wait is introduced each time the display wraps to the next line or scrolls up. Can be used to print long texts to the display,
@@ -85,11 +77,7 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         public TimeSpan ScrollUpDelay
         {
-            get
-            {
-                return _scrollUpDelay;
-            }
-
+            get => _scrollUpDelay;
             set
             {
                 if (value < TimeSpan.Zero)
@@ -149,10 +137,7 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         public LineWrapMode LineFeedMode
         {
-            get
-            {
-                return _lineFeedMode;
-            }
+            get => _lineFeedMode;
             set
             {
                 _lineFeedMode = value;
@@ -162,10 +147,7 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// Size of the display
         /// </summary>
-        public Size Size
-        {
-            get;
-        }
+        public Size Size { get; }
 
         private void ClearStringBuffer()
         {
@@ -478,11 +460,7 @@ namespace Iot.Device.CharacterLcd
         /// the character ROM. Default: Null (Use internal factory)</param>
         public static LcdCharacterEncoding CreateEncoding(CultureInfo culture, string romType, char unknownCharacter = '?', int maxNumberOfCustomCharacters = 8, LcdCharacterEncodingFactory? factory = null)
         {
-            if (factory == null)
-            {
-                factory = new LcdCharacterEncodingFactory();
-            }
-
+            factory = factory ?? new LcdCharacterEncodingFactory();
             return factory.Create(culture, romType, unknownCharacter, maxNumberOfCustomCharacters);
         }
 
@@ -495,8 +473,7 @@ namespace Iot.Device.CharacterLcd
         /// <returns>See true if the encoding was correctly loaded.</returns>
         public bool LoadEncoding(Encoding encoding)
         {
-            LcdCharacterEncoding? lcdCharacterEncoding = encoding as LcdCharacterEncoding;
-            if (lcdCharacterEncoding != null)
+            if (encoding is LcdCharacterEncoding lcdCharacterEncoding)
             {
                 return LoadEncoding(encoding);
             }
@@ -553,7 +530,7 @@ namespace Iot.Device.CharacterLcd
         private byte[] MapChars(string line)
         {
             byte[] buffer = new byte[line.Length];
-            if (_characterEncoding == null)
+            if (_characterEncoding is null)
             {
                 for (int i = 0; i < line.Length; i++)
                 {
@@ -575,7 +552,7 @@ namespace Iot.Device.CharacterLcd
         {
             if (_shouldDispose)
             {
-                _lcd.Dispose();
+                _lcd?.Dispose();
             }
 
             GC.SuppressFinalize(this);

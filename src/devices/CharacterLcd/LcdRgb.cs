@@ -121,10 +121,10 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <inheritdoc/>
-        protected override void Dispose(bool disposing)
+        public override void Dispose()
         {
             _rgbDevice?.Dispose();
-            base.Dispose(disposing);
+            base.Dispose();
         }
     }
 }

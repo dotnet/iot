@@ -70,7 +70,7 @@ namespace Iot.Device.Ccs811
         /// <param name="shouldDispose">Should the GPIO controller be disposed at the end</param>
         public Ccs811Sensor(I2cDevice i2cDevice, GpioController? gpioController = null, int pinWake = -1, int pinInterruption = -1, int pinReset = -1, bool shouldDispose = true)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _pinWake = pinWake;
             _pinInterruption = pinInterruption;
             _pinReset = pinReset;

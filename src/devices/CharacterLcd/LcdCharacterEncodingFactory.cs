@@ -27,16 +27,295 @@ namespace Iot.Device.CharacterLcd
             DefaultCustomMap = new Dictionary<char, byte>();
             // The character map A00 contains the most used european letters, some greek math symbols plus japanese letters.
             // Compare with the HD44780 specification sheet, page 17
-            DefaultA00Map = new Dictionary<char, byte>();
+            DefaultA00Map = new Dictionary<char, byte>()
+            {
+                // Now the japanese characters in the A00 rom map.
+                // They use the same order than described in https://de.wikipedia.org/wiki/Japanische_Schrift#F%C3%BCnfzig-Laute-Tafel Table "Katakana", so the mapping sounds reasonable.
+                // Small letters
+                { 'ヽ', 0b1010_0100 },
+                { '・', 0b1010_0101 },
+                { 'ァ', 0b1010_0111 },
+                { 'ィ', 0b1010_1000 },
+                { 'ゥ', 0b1010_1001 },
+                { 'ェ', 0b1010_1010 },
+                { 'ォ', 0b1010_1011 },
+                { 'ャ', 0b1010_1100 },
+                { 'ュ', 0b1010_1101 },
+                { 'ョ', 0b1010_1110 },
+                { 'ヮ', 0b1010_1111 }, // Not sure on this one
+                // Normal letters
+                { 'ー', 0b1011_0000 },
+                { 'ア', 0b1011_0001 },
+                { 'イ', 0b1011_0010 },
+                { 'ウ', 0b1011_0011 },
+                { 'エ', 0b1011_0100 },
+                { 'オ', 0b1011_0101 },
+                { 'カ', 0b1011_0110 },
+                { 'キ', 0b1011_0111 },
+                { 'ク', 0b1011_1000 },
+                { 'ケ', 0b1011_1001 },
+                { 'コ', 0b1011_1010 },
+                { 'サ', 0b1011_1011 },
+                { 'シ', 0b1011_1100 },
+                { 'ス', 0b1011_1101 },
+                { 'セ', 0b1011_1110 },
+                { 'ソ', 0b1011_1111 },
+                { 'タ', 0b1100_0000 },
+                { 'チ', 0b1100_0001 },
+                { 'ツ', 0b1100_0010 },
+                { 'テ', 0b1100_0011 },
+                { 'ト', 0b1100_0100 },
+                { 'ナ', 0b1100_0101 },
+                { 'ニ', 0b1100_0110 },
+                { 'ヌ', 0b1100_0111 },
+                { 'ネ', 0b1100_1000 },
+                { 'ノ', 0b1100_1001 },
+                { 'ハ', 0b1100_1010 },
+                { 'ヒ', 0b1100_1011 },
+                { 'フ', 0b1100_1100 },
+                { 'ヘ', 0b1100_1101 },
+                { 'ホ', 0b1100_1110 },
+                { 'マ', 0b1100_1111 },
+                { 'ミ', 0b1101_0000 },
+                { 'ム', 0b1101_0001 },
+                { 'メ', 0b1101_0010 },
+                { 'モ', 0b1101_0011 },
+                { 'ヤ', 0b1101_0100 },
+                { 'ユ', 0b1101_0101 },
+                { 'ヨ', 0b1101_0110 },
+                { 'ラ', 0b1101_0111 },
+                { 'リ', 0b1101_1000 },
+                { 'ル', 0b1101_1001 },
+                { 'レ', 0b1101_1010 },
+                { 'ロ', 0b1101_1011 },
+                { 'ワ', 0b1101_1100 },
+                { 'ン', 0b1101_1101 }, // Characters ヰ and ヱ seem not to exist, they are not used in current japanese and can be replaced by イ and エ
+                { 'ヰ', 0b1011_0010 },
+                { 'ヱ', 0b1011_0100 },
+                { 'ヲ', 0b1010_0110 }, // This one is out of sequence
+                { '゛', 0b1101_1110 },
+                { '゜', 0b1101_1111 },
+                // break in character type
+                { '¥', 92 },
+                { '{', 123 },
+                { '|', 124 },
+                { '}', 125 },
+                { '\u2192', 126 }, // right arrow
+                { '\u2190', 127 }, // left arrow
+                // Note: Several letters may point to the same character code
+                { '–', 0b1011_0000 },
+                { 'α', 224 },
+                { 'ä', 225 },
+                { 'β', 226 },
+                { 'ε', 227 },
+                { 'μ', 228 },
+                { 'δ', 229 },
+                { 'ρ', 230 },
+                // Character 231 looks like a small q, but what should it be?
+                { '√', 232 },
+                // What is the match for chars 233, 234 and 235?
+                { '¢', 236 },
+                { 'ñ', 238 },
+                { 'ö', 239 },
+                // 240 and 241 look like p and q again. What are they?
+                { 'θ', 242 },
+                { '∞', 243 },
+                { 'Ω', 244 },
+                { 'Ω', 244 },
+                { 'ü', 245 },
+                { '∑', 246 },
+                { 'π', 247 },
+                // Some unrecognized characters here as well
+                { '÷', 253 },
+                { '×', (byte)'x' },
+                { '█', 255 },
+                { '°', 0b1101_1111 },
+            };
 
             // Character map A02 contains about all characters used in western european languages, a few greek math symbols and some symbols.
             // Compare with the HD44780 specification sheet, page 18.
             // Note especially that this character map really uses the 8 pixel height of the characters, while the A00 map leaves the lowest
             // pixel row usually empty for the cursor. The added space at the top of the character helps by better supporting diacritical symbols.
-            DefaultA02Map = new Dictionary<char, byte>();
+            DefaultA02Map = new Dictionary<char, byte>()
+            {
+                // This map contains wide arrow characters. They could be helpful for menus, but not sure where to map them.
+                { '{', 123 },
+                { '|', 124 },
+                { '}', 125 },
+                { '~', 126 },
+                { '→', 0b0001_1010 }, // right arrow
+                { '←', 0b0001_1011 }, // left arrow
+                { '↑', 0b0001_1000 },
+                { '↓', 0b0001_1001 },
+                { '↲', 0b0001_0111 },
+                { '≤', 0b0001_1100 },
+                { '≥', 0b0001_1101 },
+                { '°', 0b1011_0000 },
+                // Cyrillic script, capital letters (russian, slawic languages)
+                { 'А', (byte)'A' },
+                { 'Б', 0b1000_0000 },
+                { 'В', (byte)'B' },
+                { 'Г', 0b1001_0010 },
+                { 'Д', 0b1000_0001 },
+                { 'Е', (byte)'E' },
+                { 'Ж', 0b1000_0010 },
+                { 'З', 0b1000_0011 },
+                { 'И', 0b1000_0100 },
+                { 'Й', 0b1000_0101 },
+                { 'К', (byte)'K' },
+                { 'Л', 0b1000_0110 },
+                { 'М', (byte)'M' },
+                { 'Н', (byte)'H' },
+                { 'О', (byte)'O' },
+                { 'П', 0b1000_0111 },
+                { 'Р', (byte)'P' },
+                { 'С', (byte)'C' },
+                { 'Т', (byte)'T' },
+                { 'У', 0b1000_1000 },
+                { 'Ф', 0b1111_1000 },
+                { 'Х', (byte)'X' },
+                { 'Ц', 0b1000_1001 },
+                { 'Ч', 0b1000_1010 },
+                { 'Ш', 0b1000_1011 },
+                { 'Щ', 0b1000_1100 },
+                { 'Ъ', 0b1000_1101 },
+                { 'Ы', 0b1000_1110 },
+                { 'Ь', (byte)'b' },
+                { 'Э', 0b1000_1111 },
+                { 'Ю', 0b1010_1100 },
+                { 'Я', 0b1010_1101 },
+                { 'μ', 0b1011_0101 },
+                { '¡', 0b1010_0001 },
+                { '¿', 0b1011_1111 },
+                // Cyrillic script, special letters
+                { 'Ё', 0b1100_1011 },
+                // Not available in ROM: ЂЃЄ
+                { 'Ѕ', (byte)'S' },
+                { 'І', (byte)'I' },
+                { 'Ї', 0b1100_1111 },
+                { 'Ј', (byte)'J' },
+                // Not available in ROM: ЉЊЋЌЏ
+                { 'Ў', 0b1101_1101 },
+                { '–', 0b0010_1101 },
+                { 'α', 0b1001_0000 },
+                { 'ε', 0b1001_1110 },
+                { 'δ', 0b1001_1011 },
+                { 'σ', 0b1001_0101 },
+                // 240 and 241 look like p and q again. What are they?
+                { 'θ', 0b1001_1001 },
+                { 'Ω', 0b1001_1010 },
+                { 'Ω', 0b1001_1010 },
+                { '∑', 0b1001_0100 },
+                { 'π', 0b1001_0011 },
+                // West european diacritics (german, spanish, french, scandinavian languages)
+                { 'À', 0b1100_0000 },
+                { 'Á', 0b1100_0001 },
+                { 'Â', 0b1100_0010 },
+                { 'Ã', 0b1100_0011 },
+                { 'Å', 0b1100_0100 },
+                { 'Æ', 0b1100_0101 },
+                { 'Ç', 0b1100_0111 },
+                { 'È', 0b1100_1000 },
+                { 'É', 0b1100_1001 },
+                { 'Ê', 0b1100_1010 },
+                { 'Ë', 0b1100_1011 },
+                { 'Ì', 0b1100_1100 },
+                { 'Í', 0b1100_1101 },
+                { 'Î', 0b1100_1110 },
+                { 'Ï', 0b1100_1111 },
+                { 'Đ', 0b1101_0000 },
+                { 'Ñ', 0b1101_0001 },
+                { 'Ò', 0b1101_0010 },
+                { 'Ó', 0b1101_0011 },
+                { 'Ô', 0b1101_0100 },
+                { 'Õ', 0b1101_0101 },
+                { 'Ö', 0b1101_0110 },
+                { '×', 0b1101_0111 },
+                { 'Ø', 0b1101_1000 },
+                { 'Ù', 0b1101_1001 },
+                { 'Ú', 0b1101_1010 },
+                { 'Û', 0b1101_1011 },
+                { 'Ü', 0b1101_1100 },
+                { 'Ý', 0b1101_1101 },
+                { 'Þ', 0b1101_1110 },
+                { 'ß', 0b1101_1111 },
+                // break in characters
+                { 'à', 0b1110_0000 },
+                { 'á', 0b1110_0001 },
+                { 'â', 0b1110_0010 },
+                { 'ã', 0b1110_0011 },
+                { 'å', 0b1110_0100 },
+                { 'æ', 0b1110_0101 },
+                { 'ç', 0b1110_0111 },
+                { 'è', 0b1110_1000 },
+                { 'é', 0b1110_1001 },
+                { 'ê', 0b1110_1010 },
+                { 'ë', 0b1110_1011 },
+                { 'ì', 0b1110_1100 },
+                { 'í', 0b1110_1101 },
+                { 'î', 0b1110_1110 },
+                { 'ï', 0b1110_1111 },
+                // break in characters
+                { 'đ', 0b1111_0000 },
+                { 'ð', 0b1111_0000 },
+                { 'ñ', 0b1111_0001 },
+                { 'ò', 0b1111_0010 },
+                { 'ó', 0b1111_0011 },
+                { 'ô', 0b1111_0100 },
+                { 'ö', 0b1111_0101 },
+                { '÷', 0b1111_0111 },
+                { 'ø', 0b1111_1000 },
+                { 'ù', 0b1111_1001 },
+                { 'ú', 0b1111_1010 },
+                { 'û', 0b1111_1011 },
+                { 'ü', 0b1111_1100 },
+                { 'ý', 0b1111_1101 },
+                { 'þ', 0b1111_1110 },
+                { 'ÿ', 0b1111_1111 },
+            };
 
             // This map for instance can be found here: https://www.microchip.com/forums/m977852.aspx
-            DefaultSplC780Map = new Dictionary<char, byte>();
+            DefaultSplC780Map = new Dictionary<char, byte>()
+            {
+                // Map for the SplC780
+                { '{', 123 },
+                { '|', 124 },
+                { '}', 125 },
+                { '~', 0126 },
+                { 'Ç', 0128 },
+                { 'ü', 0129 },
+                { 'é', 0130 },
+                { 'â', 0131 },
+                { 'å', 0131 },
+                { 'ä', 0132 },
+                { 'à', 0133 },
+                { 'ả', 0134 },
+                { 'ç', 0135 },
+                { 'ê', 0136 },
+                { 'ë', 0137 },
+                { 'è', 0138 },
+                { 'ï', 0139 },
+                { 'î', 0140 },
+                { 'ì', 0141 },
+                { 'Ä', 0142 },
+                { 'Å', 0143 },
+                { 'φ', 0xCD },
+                // Complete the set of capital greek letters for those that look like latin letters (note that these are not identity assignments)
+                { 'Α', (byte)'A' },
+                { 'Β', (byte)'B' },
+                { 'Ε', (byte)'E' },
+                { 'Ζ', (byte)'Z' },
+                { 'Η', (byte)'H' },
+                { 'Ι', (byte)'I' },
+                { 'Κ', (byte)'K' },
+                { 'Μ', (byte)'M' },
+                { 'Ν', (byte)'N' },
+                { 'Ο', (byte)'O' },
+                { 'Ρ', (byte)'P' },
+                { 'Τ', (byte)'T' },
+                { 'Υ', (byte)'Y' },
+                { 'Χ', (byte)'X' },
+            };
 
             // Inserts ASCII characters ' ' to 'z', which are common to most known character sets
             for (char c = ' '; c <= 'z'; c++)
@@ -49,182 +328,6 @@ namespace Iot.Device.CharacterLcd
 
             DefaultA00Map.Remove('\\'); // Instead of the backspace, the Yen letter is in the map, but we can use char 164 instead
             DefaultA00Map.Add('\\', 164);
-            DefaultA00Map.Add('¥', 92);
-            DefaultA00Map.Add('{', 123);
-            DefaultA00Map.Add('|', 124);
-            DefaultA00Map.Add('}', 125);
-            DefaultA00Map.Add('\u2192', 126); // right arrow
-            DefaultA00Map.Add('\u2190', 127); // left arrow
-            // Note: Several letters may point to the same character code
-            DefaultA00Map.Add('–', 0b1011_0000);
-            DefaultA00Map.Add('α', 224);
-            DefaultA00Map.Add('ä', 225);
-            DefaultA00Map.Add('β', 226);
-            DefaultA00Map.Add('ε', 227);
-            DefaultA00Map.Add('μ', 228);
-            DefaultA00Map.Add('δ', 229);
-            DefaultA00Map.Add('ρ', 230);
-            // Character 231 looks like a small q, but what should it be?
-            DefaultA00Map.Add('√', 232);
-            // What is the match for chars 233, 234 and 235?
-            DefaultA00Map.Add('¢', 236);
-            DefaultA00Map.Add('ñ', 238);
-            DefaultA00Map.Add('ö', 239);
-
-            // 240 and 241 look like p and q again. What are they?
-            DefaultA00Map.Add('θ', 242);
-            DefaultA00Map.Add('∞', 243);
-            DefaultA00Map.Add('Ω', 244);
-            DefaultA00Map.Add('Ω', 244);
-            DefaultA00Map.Add('ü', 245);
-            DefaultA00Map.Add('∑', 246);
-            DefaultA00Map.Add('π', 247);
-            // Some unrecognized characters here as well
-            DefaultA00Map.Add('÷', 253);
-            DefaultA00Map.Add('×', (byte)'x');
-            DefaultA00Map.Add('█', 255);
-            DefaultA00Map.Add('°', 0b1101_1111);
-
-            // Now the japanese characters in the A00 rom map.
-            // They use the same order than described in https://de.wikipedia.org/wiki/Japanische_Schrift#F%C3%BCnfzig-Laute-Tafel Table "Katakana", so the mapping sounds reasonable.
-
-            // Small letters
-            DefaultA00Map.Add('ヽ', 0b1010_0100);
-            DefaultA00Map.Add('・', 0b1010_0101);
-            DefaultA00Map.Add('ァ', 0b1010_0111);
-            DefaultA00Map.Add('ィ', 0b1010_1000);
-            DefaultA00Map.Add('ゥ', 0b1010_1001);
-            DefaultA00Map.Add('ェ', 0b1010_1010);
-            DefaultA00Map.Add('ォ', 0b1010_1011);
-            DefaultA00Map.Add('ャ', 0b1010_1100);
-            DefaultA00Map.Add('ュ', 0b1010_1101);
-            DefaultA00Map.Add('ョ', 0b1010_1110);
-            DefaultA00Map.Add('ヮ', 0b1010_1111); // Not sure on this one
-            // Normal letters
-            DefaultA00Map.Add('ー', 0b1011_0000);
-            DefaultA00Map.Add('ア', 0b1011_0001);
-            DefaultA00Map.Add('イ', 0b1011_0010);
-            DefaultA00Map.Add('ウ', 0b1011_0011);
-            DefaultA00Map.Add('エ', 0b1011_0100);
-            DefaultA00Map.Add('オ', 0b1011_0101);
-            DefaultA00Map.Add('カ', 0b1011_0110);
-            DefaultA00Map.Add('キ', 0b1011_0111);
-            DefaultA00Map.Add('ク', 0b1011_1000);
-            DefaultA00Map.Add('ケ', 0b1011_1001);
-            DefaultA00Map.Add('コ', 0b1011_1010);
-            DefaultA00Map.Add('サ', 0b1011_1011);
-            DefaultA00Map.Add('シ', 0b1011_1100);
-            DefaultA00Map.Add('ス', 0b1011_1101);
-            DefaultA00Map.Add('セ', 0b1011_1110);
-            DefaultA00Map.Add('ソ', 0b1011_1111);
-            DefaultA00Map.Add('タ', 0b1100_0000);
-            DefaultA00Map.Add('チ', 0b1100_0001);
-            DefaultA00Map.Add('ツ', 0b1100_0010);
-            DefaultA00Map.Add('テ', 0b1100_0011);
-            DefaultA00Map.Add('ト', 0b1100_0100);
-            DefaultA00Map.Add('ナ', 0b1100_0101);
-            DefaultA00Map.Add('ニ', 0b1100_0110);
-            DefaultA00Map.Add('ヌ', 0b1100_0111);
-            DefaultA00Map.Add('ネ', 0b1100_1000);
-            DefaultA00Map.Add('ノ', 0b1100_1001);
-            DefaultA00Map.Add('ハ', 0b1100_1010);
-            DefaultA00Map.Add('ヒ', 0b1100_1011);
-            DefaultA00Map.Add('フ', 0b1100_1100);
-            DefaultA00Map.Add('ヘ', 0b1100_1101);
-            DefaultA00Map.Add('ホ', 0b1100_1110);
-            DefaultA00Map.Add('マ', 0b1100_1111);
-            DefaultA00Map.Add('ミ', 0b1101_0000);
-            DefaultA00Map.Add('ム', 0b1101_0001);
-            DefaultA00Map.Add('メ', 0b1101_0010);
-            DefaultA00Map.Add('モ', 0b1101_0011);
-            DefaultA00Map.Add('ヤ', 0b1101_0100);
-            DefaultA00Map.Add('ユ', 0b1101_0101);
-            DefaultA00Map.Add('ヨ', 0b1101_0110);
-            DefaultA00Map.Add('ラ', 0b1101_0111);
-            DefaultA00Map.Add('リ', 0b1101_1000);
-            DefaultA00Map.Add('ル', 0b1101_1001);
-            DefaultA00Map.Add('レ', 0b1101_1010);
-            DefaultA00Map.Add('ロ', 0b1101_1011);
-            DefaultA00Map.Add('ワ', 0b1101_1100);
-            DefaultA00Map.Add('ン', 0b1101_1101); // Characters ヰ and ヱ seem not to exist, they are not used in current japanese and can be replaced by イ and エ
-            DefaultA00Map.Add('ヰ', 0b1011_0010);
-            DefaultA00Map.Add('ヱ', 0b1011_0100);
-            DefaultA00Map.Add('ヲ', 0b1010_0110); // This one is out of sequence
-            DefaultA00Map.Add('゛', 0b1101_1110);
-            DefaultA00Map.Add('゜', 0b1101_1111);
-
-            // This map contains wide arrow characters. They could be helpful for menus, but not sure where to map them.
-            DefaultA02Map.Add('{', 123);
-            DefaultA02Map.Add('|', 124);
-            DefaultA02Map.Add('}', 125);
-            DefaultA02Map.Add('~', 126);
-            DefaultA02Map.Add('→', 0b0001_1010); // right arrow
-            DefaultA02Map.Add('←', 0b0001_1011); // left arrow
-            DefaultA02Map.Add('↑', 0b0001_1000);
-            DefaultA02Map.Add('↓', 0b0001_1001);
-            DefaultA02Map.Add('↲', 0b0001_0111);
-            DefaultA02Map.Add('≤', 0b0001_1100);
-            DefaultA02Map.Add('≥', 0b0001_1101);
-            DefaultA02Map.Add('°', 0b1011_0000);
-
-            // Cyrillic script, capital letters (russian, slawic languages)
-            DefaultA02Map.Add('А', (byte)'A');
-            DefaultA02Map.Add('Б', 0b1000_0000);
-            DefaultA02Map.Add('В', (byte)'B');
-            DefaultA02Map.Add('Г', 0b1001_0010);
-            DefaultA02Map.Add('Д', 0b1000_0001);
-            DefaultA02Map.Add('Е', (byte)'E');
-            DefaultA02Map.Add('Ж', 0b1000_0010);
-            DefaultA02Map.Add('З', 0b1000_0011);
-            DefaultA02Map.Add('И', 0b1000_0100);
-            DefaultA02Map.Add('Й', 0b1000_0101);
-            DefaultA02Map.Add('К', (byte)'K');
-            DefaultA02Map.Add('Л', 0b1000_0110);
-            DefaultA02Map.Add('М', (byte)'M');
-            DefaultA02Map.Add('Н', (byte)'H');
-            DefaultA02Map.Add('О', (byte)'O');
-            DefaultA02Map.Add('П', 0b1000_0111);
-            DefaultA02Map.Add('Р', (byte)'P');
-            DefaultA02Map.Add('С', (byte)'C');
-            DefaultA02Map.Add('Т', (byte)'T');
-            DefaultA02Map.Add('У', 0b1000_1000);
-            DefaultA02Map.Add('Ф', 0b1111_1000);
-            DefaultA02Map.Add('Х', (byte)'X');
-            DefaultA02Map.Add('Ц', 0b1000_1001);
-            DefaultA02Map.Add('Ч', 0b1000_1010);
-            DefaultA02Map.Add('Ш', 0b1000_1011);
-            DefaultA02Map.Add('Щ', 0b1000_1100);
-            DefaultA02Map.Add('Ъ', 0b1000_1101);
-            DefaultA02Map.Add('Ы', 0b1000_1110);
-            DefaultA02Map.Add('Ь', (byte)'b');
-            DefaultA02Map.Add('Э', 0b1000_1111);
-            DefaultA02Map.Add('Ю', 0b1010_1100);
-            DefaultA02Map.Add('Я', 0b1010_1101);
-            DefaultA02Map.Add('μ', 0b1011_0101);
-            DefaultA02Map.Add('¡', 0b1010_0001);
-            DefaultA02Map.Add('¿', 0b1011_1111);
-            // Cyrillic script, special letters
-            DefaultA02Map.Add('Ё', 0b1100_1011);
-            // Not available in ROM: ЂЃЄ
-            DefaultA02Map.Add('Ѕ', (byte)'S');
-            DefaultA02Map.Add('І', (byte)'I');
-            DefaultA02Map.Add('Ї', 0b1100_1111);
-            DefaultA02Map.Add('Ј', (byte)'J');
-            // Not available in ROM: ЉЊЋЌЏ
-            DefaultA02Map.Add('Ў', 0b1101_1101);
-
-            DefaultA02Map.Add('–', 0b0010_1101);
-            DefaultA02Map.Add('α', 0b1001_0000);
-            DefaultA02Map.Add('ε', 0b1001_1110);
-            DefaultA02Map.Add('δ', 0b1001_1011);
-            DefaultA02Map.Add('σ', 0b1001_0101);
-
-            // 240 and 241 look like p and q again. What are they?
-            DefaultA02Map.Add('θ', 0b1001_1001);
-            DefaultA02Map.Add('Ω', 0b1001_1010);
-            DefaultA02Map.Add('Ω', 0b1001_1010);
-            DefaultA02Map.Add('∑', 0b1001_0100);
-            DefaultA02Map.Add('π', 0b1001_0011);
 
             string cyrillicLettersSmall = "абвгдежзийклмнопрстуфхцчшщъыьэюяёђѓєѕіїјљњћќўџ";
             string cyrillicLettersCapital = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯЁЂЃЄЅІЇЈЉЊЋЌЎЏ";
@@ -240,95 +343,6 @@ namespace Iot.Device.CharacterLcd
                     DefaultA02Map.Add(small, dataPoint);
                 }
             }
-
-            // West european diacritics (german, spanish, french, scandinavian languages)
-            DefaultA02Map.Add('À', 0b1100_0000);
-            DefaultA02Map.Add('Á', 0b1100_0001);
-            DefaultA02Map.Add('Â', 0b1100_0010);
-            DefaultA02Map.Add('Ã', 0b1100_0011);
-            DefaultA02Map.Add('Å', 0b1100_0100);
-            DefaultA02Map.Add('Æ', 0b1100_0101);
-            DefaultA02Map.Add('Ç', 0b1100_0111);
-            DefaultA02Map.Add('È', 0b1100_1000);
-            DefaultA02Map.Add('É', 0b1100_1001);
-            DefaultA02Map.Add('Ê', 0b1100_1010);
-            DefaultA02Map.Add('Ë', 0b1100_1011);
-            DefaultA02Map.Add('Ì', 0b1100_1100);
-            DefaultA02Map.Add('Í', 0b1100_1101);
-            DefaultA02Map.Add('Î', 0b1100_1110);
-            DefaultA02Map.Add('Ï', 0b1100_1111);
-            DefaultA02Map.Add('Đ', 0b1101_0000);
-            DefaultA02Map.Add('Ñ', 0b1101_0001);
-            DefaultA02Map.Add('Ò', 0b1101_0010);
-            DefaultA02Map.Add('Ó', 0b1101_0011);
-            DefaultA02Map.Add('Ô', 0b1101_0100);
-            DefaultA02Map.Add('Õ', 0b1101_0101);
-            DefaultA02Map.Add('Ö', 0b1101_0110);
-            DefaultA02Map.Add('×', 0b1101_0111);
-            DefaultA02Map.Add('Ø', 0b1101_1000);
-            DefaultA02Map.Add('Ù', 0b1101_1001);
-            DefaultA02Map.Add('Ú', 0b1101_1010);
-            DefaultA02Map.Add('Û', 0b1101_1011);
-            DefaultA02Map.Add('Ü', 0b1101_1100);
-            DefaultA02Map.Add('Ý', 0b1101_1101);
-            DefaultA02Map.Add('Þ', 0b1101_1110);
-            DefaultA02Map.Add('ß', 0b1101_1111);
-
-            DefaultA02Map.Add('à', 0b1110_0000);
-            DefaultA02Map.Add('á', 0b1110_0001);
-            DefaultA02Map.Add('â', 0b1110_0010);
-            DefaultA02Map.Add('ã', 0b1110_0011);
-            DefaultA02Map.Add('å', 0b1110_0100);
-            DefaultA02Map.Add('æ', 0b1110_0101);
-            DefaultA02Map.Add('ç', 0b1110_0111);
-            DefaultA02Map.Add('è', 0b1110_1000);
-            DefaultA02Map.Add('é', 0b1110_1001);
-            DefaultA02Map.Add('ê', 0b1110_1010);
-            DefaultA02Map.Add('ë', 0b1110_1011);
-            DefaultA02Map.Add('ì', 0b1110_1100);
-            DefaultA02Map.Add('í', 0b1110_1101);
-            DefaultA02Map.Add('î', 0b1110_1110);
-            DefaultA02Map.Add('ï', 0b1110_1111);
-
-            DefaultA02Map.Add('đ', 0b1111_0000);
-            DefaultA02Map.Add('ð', 0b1111_0000);
-            DefaultA02Map.Add('ñ', 0b1111_0001);
-            DefaultA02Map.Add('ò', 0b1111_0010);
-            DefaultA02Map.Add('ó', 0b1111_0011);
-            DefaultA02Map.Add('ô', 0b1111_0100);
-            DefaultA02Map.Add('ö', 0b1111_0101);
-            DefaultA02Map.Add('÷', 0b1111_0111);
-            DefaultA02Map.Add('ø', 0b1111_1000);
-            DefaultA02Map.Add('ù', 0b1111_1001);
-            DefaultA02Map.Add('ú', 0b1111_1010);
-            DefaultA02Map.Add('û', 0b1111_1011);
-            DefaultA02Map.Add('ü', 0b1111_1100);
-            DefaultA02Map.Add('ý', 0b1111_1101);
-            DefaultA02Map.Add('þ', 0b1111_1110);
-            DefaultA02Map.Add('ÿ', 0b1111_1111);
-
-            // Map for the SplC780
-            DefaultSplC780Map.Add('{', 123);
-            DefaultSplC780Map.Add('|', 124);
-            DefaultSplC780Map.Add('}', 125);
-            DefaultSplC780Map.Add('~', 0126);
-            DefaultSplC780Map.Add('Ç', 0128);
-            DefaultSplC780Map.Add('ü', 0129);
-            DefaultSplC780Map.Add('é', 0130);
-            DefaultSplC780Map.Add('â', 0131);
-            DefaultSplC780Map.Add('å', 0131);
-            DefaultSplC780Map.Add('ä', 0132);
-            DefaultSplC780Map.Add('à', 0133);
-            DefaultSplC780Map.Add('ả', 0134);
-            DefaultSplC780Map.Add('ç', 0135);
-            DefaultSplC780Map.Add('ê', 0136);
-            DefaultSplC780Map.Add('ë', 0137);
-            DefaultSplC780Map.Add('è', 0138);
-            DefaultSplC780Map.Add('ï', 0139);
-            DefaultSplC780Map.Add('î', 0140);
-            DefaultSplC780Map.Add('ì', 0141);
-            DefaultSplC780Map.Add('Ä', 0142);
-            DefaultSplC780Map.Add('Å', 0143);
 
             // A bit easier like this...
             string toAdd = "ÉæÆôöòûùÿÖÜñÑ  ¿"
@@ -349,24 +363,6 @@ namespace Iot.Device.CharacterLcd
 
                 startIndex++;
             }
-
-            DefaultSplC780Map.Add('φ', 0xCD);
-
-            // Complete the set of capital greek letters for those that look like latin letters (note that these are not identity assignments)
-            DefaultSplC780Map.Add('Α', (byte)'A');
-            DefaultSplC780Map.Add('Β', (byte)'B');
-            DefaultSplC780Map.Add('Ε', (byte)'E');
-            DefaultSplC780Map.Add('Ζ', (byte)'Z');
-            DefaultSplC780Map.Add('Η', (byte)'H');
-            DefaultSplC780Map.Add('Ι', (byte)'I');
-            DefaultSplC780Map.Add('Κ', (byte)'K');
-            DefaultSplC780Map.Add('Μ', (byte)'M');
-            DefaultSplC780Map.Add('Ν', (byte)'N');
-            DefaultSplC780Map.Add('Ο', (byte)'O');
-            DefaultSplC780Map.Add('Ρ', (byte)'P');
-            DefaultSplC780Map.Add('Τ', (byte)'T');
-            DefaultSplC780Map.Add('Υ', (byte)'Y');
-            DefaultSplC780Map.Add('Χ', (byte)'X');
         }
 
         /// <summary>
@@ -388,25 +384,16 @@ namespace Iot.Device.CharacterLcd
                 throw new ArgumentNullException(nameof(culture));
             }
 
-            Dictionary<char, byte> newMap;
             // Need to copy the static map, we must not update that
-            switch (romName)
+            Dictionary<char, byte> newMap = romName switch
             {
-                case "A00":
-                    newMap = new Dictionary<char, byte>(DefaultA00Map);
-                    break;
-                case "A02":
-                    newMap = new Dictionary<char, byte>(DefaultA02Map);
-                    break;
-                case "SplC780":
-                    newMap = new Dictionary<char, byte>(DefaultSplC780Map);
-                    break;
-                default:
-                    newMap = new Dictionary<char, byte>(DefaultCustomMap);
-                    break;
-            }
+                "A00" => new (DefaultA00Map),
+                "A02" => new (DefaultA02Map),
+                "SplC780" => new (DefaultSplC780Map),
+                _ => new (DefaultCustomMap),
+            };
 
-            List<byte[]> extraCharacters = new List<byte[]>();
+            List<byte[]> extraCharacters = new ();
             bool supported = AssignLettersForCurrentCulture(newMap, culture, romName, extraCharacters, maxNumberOfCustomCharacters);
 
             if (!newMap.ContainsKey(unknownLetter))
@@ -427,7 +414,6 @@ namespace Iot.Device.CharacterLcd
             string specialLetters = SpecialLettersForCulture(culture, characterMapping); // Special letters this language group uses, in order of importance
 
             byte charPos = 0;
-            bool retValue = true;
             foreach (var c in specialLetters)
             {
                 if (!characterMapping.ContainsKey(c))
@@ -444,17 +430,17 @@ namespace Iot.Device.CharacterLcd
                         }
                         else
                         {
-                            retValue = false;
+                            return false;
                         }
                     }
                     else
                     {
-                        retValue = false;
+                        return false;
                     }
                 }
             }
 
-            return retValue;
+            return true;
         }
 
         /// <summary>
@@ -525,26 +511,14 @@ namespace Iot.Device.CharacterLcd
         /// Creates the given letter for the given ROM type.
         /// Overwrite this only if an alternate ROM is used.
         /// </summary>
-        protected virtual byte[]? CreateLetter(char character, string romName)
+        protected virtual byte[]? CreateLetter(char character, string romName) => romName switch
         {
-            if (romName == "A00")
-            {
-                return CreateLetterA00(character);
-            }
-
-            if (romName == "A02")
-            {
-                return CreateLetterA02(character);
-            }
-
-            if (romName == "SplC780")
-            {
-                // The font looks identical, so we can use the same lookup table
-                return CreateLetterA00(character);
-            }
-
-            return null;
-        }
+            "A00" => CreateLetterA00(character),
+            "A02" => CreateLetterA02(character),
+            // The font looks identical, so we can use the same lookup table
+            "SplC780" => CreateLetterA00(character),
+            _ => null,
+        };
 
         /// <summary>
         /// Creates the given letter from a pixel map for Rom Type A00 (7-pixel high letters, bottom row empty)
@@ -554,12 +528,9 @@ namespace Iot.Device.CharacterLcd
         /// <remarks>
         /// Currently requires the characters to be hardcoded here. Would be nice if we could generate the pixel maps from an existing font, such as Consolas
         /// </remarks>
-        protected virtual byte[]? CreateLetterA00(char character)
+        protected virtual byte[]? CreateLetterA00(char character) => character switch
         {
-            switch (character)
-            {
-                case '€':
-                    return CreateCustomCharacter(
+            '€' => CreateCustomCharacter(
                     0b_00111,
                     0b_01000,
                     0b_11111,
@@ -567,9 +538,8 @@ namespace Iot.Device.CharacterLcd
                     0b_11111,
                     0b_01000,
                     0b_00111,
-                    0b_00000);
-                case '£':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            '£' => CreateCustomCharacter(
                     0b_00110,
                     0b_01001,
                     0b_01000,
@@ -577,10 +547,8 @@ namespace Iot.Device.CharacterLcd
                     0b_01000,
                     0b_01000,
                     0b_11111,
-                    0b_00000);
-
-                case 'Ä':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'Ä' => CreateCustomCharacter(
                     0b_01010,
                     0b_00000,
                     0b_00100,
@@ -588,10 +556,8 @@ namespace Iot.Device.CharacterLcd
                     0b_11111,
                     0b_10001,
                     0b_10001,
-                    0b_00000);
-
-                case 'Ö':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'Ö' => CreateCustomCharacter(
                     0b_01010,
                     0b_01110,
                     0b_10001,
@@ -599,10 +565,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10001,
                     0b_10001,
                     0b_01110,
-                    0b_00000);
-
-                case 'Ü':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'Ü' => CreateCustomCharacter(
                     0b_01010,
                     0b_00000,
                     0b_10001,
@@ -610,10 +574,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10001,
                     0b_10001,
                     0b_01110,
-                    0b_00000);
-
-                case 'ß':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ß' => CreateCustomCharacter(
                     0b_00000,
                     0b_00110,
                     0b_01001,
@@ -621,10 +583,8 @@ namespace Iot.Device.CharacterLcd
                     0b_01001,
                     0b_01001,
                     0b_10110,
-                    0b_00000);
-
-                case 'Å':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'Å' => CreateCustomCharacter(
                     0b_00100,
                     0b_01010,
                     0b_00100,
@@ -632,10 +592,9 @@ namespace Iot.Device.CharacterLcd
                     0b_11111,
                     0b_10001,
                     0b_10001,
-                    0b_00000);
-
-                case 'Â': // Same as above, cannot really distinguish them in the 7-pixel font (but they would not normally be used by the same languages)
-                    return CreateCustomCharacter(
+                    0b_00000),
+            // Same as above, cannot really distinguish them in the 7-pixel font (but they would not normally be used by the same languages)
+            'Â' => CreateCustomCharacter(
                     0b_00100,
                     0b_01010,
                     0b_00100,
@@ -643,10 +602,8 @@ namespace Iot.Device.CharacterLcd
                     0b_11111,
                     0b_10001,
                     0b_10001,
-                    0b_00000);
-
-                case 'æ':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'æ' => CreateCustomCharacter(
                     0b_00000,
                     0b_00000,
                     0b_11010,
@@ -654,10 +611,8 @@ namespace Iot.Device.CharacterLcd
                     0b_01111,
                     0b_10100,
                     0b_01011,
-                    0b_00000);
-
-                case 'Æ':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'Æ' => CreateCustomCharacter(
                     0b_00111,
                     0b_00100,
                     0b_01100,
@@ -665,10 +620,8 @@ namespace Iot.Device.CharacterLcd
                     0b_11100,
                     0b_10100,
                     0b_10111,
-                    0b_00000);
-
-                case 'ø':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ø' => CreateCustomCharacter(
                     0b_00000,
                     0b_00000,
                     0b_01110,
@@ -676,10 +629,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10101,
                     0b_11001,
                     0b_01110,
-                    0b_00000);
-
-                case 'Ø':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'Ø' => CreateCustomCharacter(
                     0b_01110,
                     0b_10011,
                     0b_10011,
@@ -687,10 +638,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10101,
                     0b_11001,
                     0b_01110,
-                    0b_00000);
-
-                case 'à':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'à' => CreateCustomCharacter(
                     0b_00100,
                     0b_00010,
                     0b_01110,
@@ -698,10 +647,8 @@ namespace Iot.Device.CharacterLcd
                     0b_01111,
                     0b_10001,
                     0b_01111,
-                    0b_00000);
-
-                case 'á':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'á' => CreateCustomCharacter(
                     0b_00100,
                     0b_01000,
                     0b_01110,
@@ -709,10 +656,8 @@ namespace Iot.Device.CharacterLcd
                     0b_01111,
                     0b_10001,
                     0b_01111,
-                    0b_00000);
-
-                case 'â':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'â' => CreateCustomCharacter(
                     0b_00100,
                     0b_01010,
                     0b_01110,
@@ -720,10 +665,8 @@ namespace Iot.Device.CharacterLcd
                     0b_01111,
                     0b_10001,
                     0b_01111,
-                    0b_00000);
-
-                case 'ä':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ä' => CreateCustomCharacter(
                      0b_01010,
                      0b_00000,
                      0b_01110,
@@ -731,10 +674,8 @@ namespace Iot.Device.CharacterLcd
                      0b_01111,
                      0b_10001,
                      0b_01111,
-                     0b_00000);
-
-                case 'å':
-                    return CreateCustomCharacter(
+                     0b_00000),
+            'å' => CreateCustomCharacter(
                      0b_00100,
                      0b_01010,
                      0b_01110,
@@ -742,10 +683,8 @@ namespace Iot.Device.CharacterLcd
                      0b_01111,
                      0b_10001,
                      0b_01111,
-                     0b_00000);
-
-                case 'ç':
-                    return CreateCustomCharacter(
+                     0b_00000),
+            'ç' => CreateCustomCharacter(
                      0b_00000,
                      0b_00000,
                      0b_01110,
@@ -753,10 +692,8 @@ namespace Iot.Device.CharacterLcd
                      0b_10000,
                      0b_01111,
                      0b_00010,
-                     0b_00110);
-
-                case 'é':
-                    return CreateCustomCharacter(
+                     0b_00110),
+            'é' => CreateCustomCharacter(
                     0b_00100,
                     0b_01000,
                     0b_01110,
@@ -764,10 +701,8 @@ namespace Iot.Device.CharacterLcd
                     0b_11111,
                     0b_10000,
                     0b_01111,
-                    0b_00000);
-
-                case 'è':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'è' => CreateCustomCharacter(
                     0b_00100,
                     0b_00010,
                     0b_01110,
@@ -775,10 +710,8 @@ namespace Iot.Device.CharacterLcd
                     0b_11111,
                     0b_10000,
                     0b_01111,
-                    0b_00000);
-
-                case 'ê':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ê' => CreateCustomCharacter(
                     0b_00100,
                     0b_01010,
                     0b_01110,
@@ -786,10 +719,8 @@ namespace Iot.Device.CharacterLcd
                     0b_11111,
                     0b_10000,
                     0b_01111,
-                    0b_00000);
-
-                case 'ë':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ë' => CreateCustomCharacter(
                     0b_01010,
                     0b_00000,
                     0b_01110,
@@ -797,10 +728,8 @@ namespace Iot.Device.CharacterLcd
                     0b_11111,
                     0b_10000,
                     0b_01111,
-                    0b_00000);
-
-                case 'ï':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ï' => CreateCustomCharacter(
                     0b_01010,
                     0b_00000,
                     0b_01100,
@@ -808,10 +737,8 @@ namespace Iot.Device.CharacterLcd
                     0b_00100,
                     0b_00100,
                     0b_01110,
-                    0b_00000);
-
-                case 'ì':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ì' => CreateCustomCharacter(
                     0b_00100,
                     0b_00010,
                     0b_01100,
@@ -819,10 +746,8 @@ namespace Iot.Device.CharacterLcd
                     0b_00100,
                     0b_00100,
                     0b_01110,
-                    0b_00000);
-
-                case 'í':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'í' => CreateCustomCharacter(
                     0b_00100,
                     0b_01000,
                     0b_01100,
@@ -830,10 +755,8 @@ namespace Iot.Device.CharacterLcd
                     0b_00100,
                     0b_00100,
                     0b_01110,
-                    0b_00000);
-
-                case 'î':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'î' => CreateCustomCharacter(
                     0b_00100,
                     0b_01010,
                     0b_01100,
@@ -841,10 +764,8 @@ namespace Iot.Device.CharacterLcd
                     0b_00100,
                     0b_00100,
                     0b_01110,
-                    0b_00000);
-
-                case 'ñ':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ñ' => CreateCustomCharacter(
                     0b_01010,
                     0b_00101,
                     0b_10000,
@@ -852,10 +773,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10001,
                     0b_10001,
                     0b_10001,
-                    0b_00000);
-
-                case 'ö':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ö' => CreateCustomCharacter(
                     0b_01010,
                     0b_00000,
                     0b_01110,
@@ -863,10 +782,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10001,
                     0b_10001,
                     0b_01110,
-                    0b_00000);
-
-                case 'ô':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ô' => CreateCustomCharacter(
                     0b_00100,
                     0b_01010,
                     0b_01110,
@@ -874,10 +791,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10001,
                     0b_10001,
                     0b_01110,
-                    0b_00000);
-
-                case 'ò':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ò' => CreateCustomCharacter(
                     0b_00100,
                     0b_00010,
                     0b_01110,
@@ -885,10 +800,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10001,
                     0b_10001,
                     0b_01110,
-                    0b_00000);
-
-                case 'ó':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ó' => CreateCustomCharacter(
                     0b_00100,
                     0b_01000,
                     0b_01110,
@@ -896,10 +809,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10001,
                     0b_10001,
                     0b_01110,
-                    0b_00000);
-
-                case 'ú':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ú' => CreateCustomCharacter(
                     0b_00100,
                     0b_01000,
                     0b_10001,
@@ -907,10 +818,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10001,
                     0b_10011,
                     0b_01101,
-                    0b_00000);
-
-                case 'ù':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ù' => CreateCustomCharacter(
                     0b_00100,
                     0b_00010,
                     0b_10001,
@@ -918,10 +827,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10001,
                     0b_10011,
                     0b_01101,
-                    0b_00000);
-
-                case 'û':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'û' => CreateCustomCharacter(
                     0b_00100,
                     0b_01010,
                     0b_10001,
@@ -929,10 +836,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10001,
                     0b_10011,
                     0b_01101,
-                    0b_00000);
-
-                case 'ü':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            'ü' => CreateCustomCharacter(
                     0b_01010,
                     0b_00000,
                     0b_10001,
@@ -940,10 +845,8 @@ namespace Iot.Device.CharacterLcd
                     0b_10001,
                     0b_10011,
                     0b_01101,
-                    0b_00000);
-
-                case '¡':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            '¡' => CreateCustomCharacter(
                     0b_00100,
                     0b_00000,
                     0b_00100,
@@ -951,10 +854,8 @@ namespace Iot.Device.CharacterLcd
                     0b_00100,
                     0b_00100,
                     0b_00100,
-                    0b_00000);
-
-                case '¿':
-                    return CreateCustomCharacter(
+                    0b_00000),
+            '¿' => CreateCustomCharacter(
                     0b_00100,
                     0b_00000,
                     0b_00100,
@@ -962,12 +863,9 @@ namespace Iot.Device.CharacterLcd
                     0b_10000,
                     0b_10001,
                     0b_01110,
-                    0b_00000);
-
-            }
-
-            return null;
-        }
+                    0b_00000),
+            _ => throw new Exception("Character encoding not supported"),
+        };
 
         /// <summary>
         /// Creates the given letter from a pixel map for Rom Type A02 (7 or 8 Pixel high letters, bottom row filled)
@@ -977,11 +875,8 @@ namespace Iot.Device.CharacterLcd
         /// <remarks>
         /// Currently requires the characters to be hardcoded here. Would be nice if we could generate the pixel maps from an existing font, such as Consolas
         /// </remarks>
-        protected virtual byte[]? CreateLetterA02(char character)
-        {
-            // TODO: Create letters for A02 map, but that one is a lot better equipped for european languages, so nothing to do for the currently supported languages
-            return null;
-        }
+        // TODO: Create letters for A02 map, but that one is a lot better equipped for european languages, so nothing to do for the currently supported languages
+        protected virtual byte[]? CreateLetterA02(char character) => null;
 
         /// <summary>
         /// Combines a set of bytes into a pixel map
@@ -1000,9 +895,7 @@ namespace Iot.Device.CharacterLcd
         ///            0b_00000)
         /// </code>
         /// </example>
-        protected byte[] CreateCustomCharacter(byte byte0, byte byte1, byte byte2, byte byte3, byte byte4, byte byte5, byte byte6, byte byte7)
-        {
-            return new byte[] { byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7 };
-        }
+        protected byte[] CreateCustomCharacter(byte byte0, byte byte1, byte byte2, byte byte3, byte byte4, byte byte5, byte byte6, byte byte7) =>
+            new byte[] { byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7 };
     }
 }

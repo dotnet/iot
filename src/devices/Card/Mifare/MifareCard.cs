@@ -471,10 +471,7 @@ namespace Iot.Device.Card.Mifare
         /// Encode with default value the access sector and tailer blocks
         /// </summary>
         /// <returns></returns>
-        public (byte b6, byte b7, byte b8) EncodeDefaultSectorAndBlockTailer()
-        {
-            return (0xFF, 0x07, 0x80);
-        }
+        public (byte b6, byte b7, byte b8) EncodeDefaultSectorAndBlockTailer() => (0xFF, 0x07, 0x80);
 
         /// <summary>
         /// From the ATAQ ans SAK data find common card capacity
@@ -511,26 +508,13 @@ namespace Iot.Device.Card.Mifare
         /// </summary>
         /// <param name="blockNumber">Input block number</param>
         /// <returns>True if it is a sector block</returns>
-        public bool IsSectorBlock(byte blockNumber)
+        public bool IsSectorBlock(byte blockNumber) => Capacity switch
         {
-            switch (Capacity)
-            {
-                default:
-                case MifareCardCapacity.Mifare300:
-                case MifareCardCapacity.Mifare1K:
-                case MifareCardCapacity.Mifare2K:
-                    return blockNumber % 4 == 3;
-                case MifareCardCapacity.Mifare4K:
-                    if (blockNumber < 128)
-                    {
-                        return blockNumber % 4 == 3;
-                    }
-                    else
-                    {
-                        return blockNumber % 16 == 15;
-                    }
-            }
-        }
+            MifareCardCapacity.Mifare300 | MifareCardCapacity.Mifare1K | MifareCardCapacity.Mifare2K => blockNumber % 4 == 3,
+            MifareCardCapacity.Mifare4K when blockNumber < 128 => blockNumber % 4 == 3,
+            MifareCardCapacity.Mifare4K => blockNumber % 16 == 15,
+            _ => blockNumber % 4 == 3,
+        };
 
         /// <summary>
         /// Depending on the command, serialize the needed data

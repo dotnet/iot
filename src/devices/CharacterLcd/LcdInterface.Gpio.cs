@@ -145,10 +145,7 @@ namespace Iot.Device.CharacterLcd
 
             public override bool BacklightOn
             {
-                get
-                {
-                    return _backlight != -1 && _controller.Read(_backlight) == PinValue.High;
-                }
+                get => _backlight != -1 && _controller.Read(_backlight) == PinValue.High;
                 set
                 {
                     if (_backlight != -1)

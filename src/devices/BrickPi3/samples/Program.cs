@@ -89,7 +89,7 @@ namespace BrickPiHardwareTest
 
                 if (args.Contains(VehiculeTest))
                 {
-                    TestVehicule();
+                    TestVehicle();
                 }
 
                 // Test using high level classes for sensors
@@ -196,7 +196,7 @@ namespace BrickPiHardwareTest
 
         private static void TestBrickDetails()
         {
-            // Get the details abourt the brick
+            // Get the details about the brick
             var brickinfo = _brick.BrickPi3Info;
             Console.WriteLine($"Manufacturer: {brickinfo.Manufacturer}");
             Console.WriteLine($"Board: {brickinfo.Board}");
@@ -245,7 +245,7 @@ namespace BrickPiHardwareTest
             _brick.SetSensorType((byte)SensorPort.Port3, SensorType.EV3UltrasonicCentimeter);
             for (int i = 0; i < 100; i++)
             {
-                Console.WriteLine($"Iterration {i}");
+                Console.WriteLine($"Iteration {i}");
                 try
                 {
                     var sensordata = _brick.GetSensor((byte)SensorPort.Port3);
@@ -266,7 +266,7 @@ namespace BrickPiHardwareTest
             _brick.SetSensorType((byte)SensorPort.Port4, SensorType.EV3Touch);
             for (int i = 0; i < 100; i++)
             {
-                Console.WriteLine($"Iterration {i}");
+                Console.WriteLine($"Iteration {i}");
                 try
                 {
                     var sensordata = _brick.GetSensor((byte)SensorPort.Port4);
@@ -287,7 +287,7 @@ namespace BrickPiHardwareTest
             _brick.SetSensorType((byte)SensorPort.Port1, SensorType.NXTTouch);
             for (int i = 0; i < 100; i++)
             {
-                Console.WriteLine($"Iterration {i}");
+                Console.WriteLine($"Iteration {i}");
                 try
                 {
                     var sensordata = _brick.GetSensor((byte)SensorPort.Port1);
@@ -308,7 +308,7 @@ namespace BrickPiHardwareTest
             _brick.SetSensorType((byte)SensorPort.Port2, SensorType.EV3ColorColor);
             for (int i = 0; i < 100; i++)
             {
-                Console.WriteLine($"Iterration {i}");
+                Console.WriteLine($"Iteration {i}");
                 try
                 {
                     var sensordata = _brick.GetSensor((byte)SensorPort.Port2);

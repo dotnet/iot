@@ -36,7 +36,7 @@ namespace Iot.Device.CharacterLcd
 
             public I2c4Bit(I2cDevice device)
             {
-                _device = device;
+                _device = device ?? throw new ArgumentNullException(nameof(device));
                 _backlightOn = true;
                 InitDisplay();
             }
@@ -49,10 +49,7 @@ namespace Iot.Device.CharacterLcd
             /// </summary>
             public override bool BacklightOn
             {
-                get
-                {
-                    return _backlightOn;
-                }
+                get => _backlightOn;
                 set
                 {
                     _backlightOn = value;

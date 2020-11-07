@@ -38,17 +38,25 @@ namespace Iot.Device.BoardLed
         /// If you want to operate the LED, you need to remove the trigger, which is to set its trigger to none.
         /// Use <see cref="EnumerateTriggers()"/> to get all triggers.
         /// </remarks>
-        public string Trigger { get => GetTrigger(); set => SetTrigger(value); }
+        public string Trigger
+        {
+            get => GetTrigger();
+            set => SetTrigger(value);
+        }
 
         /// <summary>
         /// The current brightness of the LED.
         /// </summary>
-        public int Brightness { get => GetBrightness(); set => SetBrightness(value); }
+        public int Brightness
+        {
+            get => GetBrightness();
+            set => SetBrightness(value);
+        }
 
         /// <summary>
         /// The max brightness of the LED.
         /// </summary>
-        public int MaxBrightness { get => GetMaxBrightness(); }
+        public int MaxBrightness => GetMaxBrightness();
 
         /// <summary>
         /// Creates a new instance of the BoardLed.
@@ -97,44 +105,22 @@ namespace Iot.Device.BoardLed
                 .Select(x => new BoardLed(x.Name));
         }
 
-        /// <summary>
-        /// Cleanup
-        /// </summary>
-        public void Dispose()
-        {
-            _brightnessReader?.Dispose();
-            _brightnessWriter?.Dispose();
-            _triggerReader?.Dispose();
-            _triggerWriter?.Dispose();
-            _maxBrightnessReader?.Dispose();
-
-            _brightnessReader = null!;
-            _brightnessWriter = null!;
-            _triggerReader = null!;
-            _triggerWriter = null!;
-            _maxBrightnessReader = null!;
-        }
-
         private int GetBrightness()
         {
             _brightnessReader.BaseStream.Position = 0;
-
             return int.Parse(_brightnessReader.ReadToEnd());
         }
 
         private int GetMaxBrightness()
         {
             _maxBrightnessReader.BaseStream.Position = 0;
-
             return int.Parse(_maxBrightnessReader.ReadToEnd());
         }
 
         private void SetBrightness(int value)
         {
             value = Math.Clamp(value, 0, 255);
-
             _brightnessWriter.BaseStream.SetLength(0);
-
             _brightnessWriter.Write(value);
             _brightnessWriter.Flush();
         }
@@ -142,7 +128,6 @@ namespace Iot.Device.BoardLed
         private string GetTrigger()
         {
             _triggerReader.BaseStream.Position = 0;
-
             return Regex.Match(_triggerReader.ReadToEnd(), @"(?<=\[)(.*)(?=\])").Value;
         }
 
@@ -156,7 +141,6 @@ namespace Iot.Device.BoardLed
             }
 
             _triggerWriter.BaseStream.SetLength(0);
-
             _triggerWriter.Write(name);
             _triggerWriter.Flush();
         }
@@ -173,8 +157,25 @@ namespace Iot.Device.BoardLed
             FileStream triggerStream = File.Open($"{DefaultDevicePath}/{Name}/trigger", FileMode.Open);
             _triggerReader = new StreamReader(stream: triggerStream, encoding: Encoding.ASCII, detectEncodingFromByteOrderMarks: false, bufferSize: 512, leaveOpen: true);
             _triggerWriter = new StreamWriter(stream: triggerStream, encoding: Encoding.ASCII, bufferSize: 512, leaveOpen: false);
-
             _maxBrightnessReader = new StreamReader(File.Open($"{DefaultDevicePath}/{Name}/max_brightness", FileMode.Open, FileAccess.Read));
+        }
+
+        /// <summary>
+        /// Cleanup
+        /// </summary>
+        public void Dispose()
+        {
+            _brightnessReader?.Dispose();
+            _brightnessWriter?.Dispose();
+            _triggerReader?.Dispose();
+            _triggerWriter?.Dispose();
+            _maxBrightnessReader?.Dispose();
+
+            _brightnessReader = null!;
+            _brightnessWriter = null!;
+            _triggerReader = null!;
+            _triggerWriter = null!;
+            _maxBrightnessReader = null!;
         }
     }
 }
