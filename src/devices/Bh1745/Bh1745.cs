@@ -42,7 +42,7 @@ namespace Iot.Device.Bh1745
         public Bh1745(I2cDevice device)
         {
             _i2cDevice = device;
-            ChannelCompensationMultipliers = new ChannelCompensationMultipliers(
+            ChannelCompensationMultipliers = new (
                 2.2,    // Red
                 1.0,    // Green
                 1.8,    // Blue
