@@ -21,9 +21,8 @@ namespace Iot.Device.MemoryLcd
         /// <param name="scs">Chip select signal</param>
         /// <param name="disp">Display ON/OFF signal</param>
         /// <param name="extcomin">External COM inversion signal input</param>
-        /// <param name="pinNumberingScheme">The numbering scheme used to represent pins provided by GPIO controller</param>
-        public LS027B7DH01(SpiDevice spi, GpioController gpio = null, bool shouldDispose = true, int scs = -1, int disp = -1, int extcomin = -1, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
-            : base(spi, gpio, shouldDispose, scs, disp, extcomin, pinNumberingScheme)
+        public LS027B7DH01(SpiDevice spi, GpioController? gpio = null, bool shouldDispose = true, int scs = -1, int disp = -1, int extcomin = -1)
+            : base(spi, gpio, shouldDispose, scs, disp, extcomin)
         {
         }
 

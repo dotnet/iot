@@ -63,7 +63,7 @@ namespace Iot.Device.MemoryLcd
         #endregion
 
         private readonly bool _shouldDispose;
-        private GpioController _gpio;
+        private GpioController? _gpio;
 
         private SpiDevice _spi;
 
@@ -79,15 +79,14 @@ namespace Iot.Device.MemoryLcd
         /// <param name="scs">Chip select signal</param>
         /// <param name="disp">Display ON/OFF signal</param>
         /// <param name="extcomin">External COM inversion signal input</param>
-        /// <param name="pinNumberingScheme">The numbering scheme used to represent pins provided by GPIO controller</param>
-        internal LSxxxB7DHxx(SpiDevice spi, GpioController gpio = null, bool shouldDispose = true, int scs = -1, int disp = -1, int extcomin = -1, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+        internal LSxxxB7DHxx(SpiDevice spi, GpioController? gpio = null, bool shouldDispose = true, int scs = -1, int disp = -1, int extcomin = -1)
         {
             _spi = spi ?? throw new ArgumentNullException(nameof(spi));
 
             if (scs != -1 || disp != -1 || extcomin != -1)
             {
                 _shouldDispose = gpio == null || shouldDispose;
-                _gpio = gpio ?? new GpioController(pinNumberingScheme);
+                _gpio = gpio;
             }
             else
             {
@@ -226,7 +225,6 @@ namespace Iot.Device.MemoryLcd
         public void Dispose()
         {
             _spi.Dispose();
-            _spi = null;
 
             if (_gpio != null)
             {
@@ -254,9 +252,6 @@ namespace Iot.Device.MemoryLcd
 
                 _gpio = null;
             }
-
-            _lineNumberBuffer = null;
-            _frameBuffer = null;
         }
     }
 }
