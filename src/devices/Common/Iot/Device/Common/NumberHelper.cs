@@ -15,10 +15,7 @@ namespace Iot.Device.Common
         /// </summary>
         /// <param name="bcd">BCD Code</param>
         /// <returns>decimal</returns>
-        public static int Bcd2Dec(byte bcd)
-        {
-            return ((bcd >> 4) * 10) + (bcd % 16);
-        }
+        public static int Bcd2Dec(byte bcd) => ((bcd >> 4) * 10) + (bcd % 16);
 
         /// <summary>
         /// BCD To decimal

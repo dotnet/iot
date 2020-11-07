@@ -207,7 +207,7 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get the latest error
         /// </summary>
-        /// <returns>eturns the latest error</returns>
+        /// <returns>Returns the latest error</returns>
         public Error GetError() => (Error)ReadByte(Registers.SYS_ERR);
 
         /// <summary>
@@ -240,8 +240,8 @@ namespace Iot.Device.Bno055
         public Vector4 GetAccelerometerCalibrationData()
         {
             SetConfigMode(true);
-            var vect = GetVectorData(Registers.ACCEL_OFFSET_X_LSB);
-            var radius = ReadInt16(Registers.ACCEL_RADIUS_LSB);
+            Vector3 vect = GetVectorData(Registers.ACCEL_OFFSET_X_LSB);
+            short radius = ReadInt16(Registers.ACCEL_RADIUS_LSB);
             SetConfigMode(false);
             return new Vector4(vect, radius);
         }
@@ -272,8 +272,8 @@ namespace Iot.Device.Bno055
         public Vector4 GetMagnetometerCalibrationData()
         {
             SetConfigMode(true);
-            var vect = GetVectorData(Registers.MAG_OFFSET_X_LSB);
-            var radius = ReadInt16(Registers.MAG_RADIUS_LSB);
+            Vector3 vect = GetVectorData(Registers.MAG_OFFSET_X_LSB);
+            short radius = ReadInt16(Registers.MAG_RADIUS_LSB);
             SetConfigMode(false);
             return new Vector4(vect, radius);
         }
@@ -304,7 +304,7 @@ namespace Iot.Device.Bno055
         public Vector3 GetGyroscopeCalibrationData()
         {
             SetConfigMode(true);
-            var vect = GetVectorData(Registers.GYRO_OFFSET_X_LSB);
+            Vector3 vect = GetVectorData(Registers.GYRO_OFFSET_X_LSB);
             SetConfigMode(false);
             return vect;
         }
@@ -543,10 +543,7 @@ namespace Iot.Device.Bno055
             }
         }
 
-        private void WriteReg(Registers reg, byte param)
-        {
-            _i2cDevice.Write(new byte[] { (byte)reg, param });
-        }
+        private void WriteReg(Registers reg, byte param) => _i2cDevice.Write(new byte[] { (byte)reg, param });
 
         private byte ReadByte(Registers reg)
         {

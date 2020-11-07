@@ -86,16 +86,12 @@ namespace Iot.Device.DCMotor
             }
         }
 
-        protected override void Dispose(bool disposing)
+        public override void Dispose()
         {
-            if (disposing)
-            {
-                _speed = 0.0;
-                _pwm?.Dispose();
-                _pwm = null!;
-            }
-
-            base.Dispose(disposing);
+            _speed = 0.0;
+            _pwm?.Dispose();
+            _pwm = null!;
+            base.Dispose();
         }
     }
 }
