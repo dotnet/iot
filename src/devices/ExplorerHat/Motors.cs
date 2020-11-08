@@ -86,8 +86,8 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void Dispose()
         {
-            _motorArray[0].Dispose();
-            _motorArray[1].Dispose();
+            _motorArray[0]?.Dispose();
+            _motorArray[1]?.Dispose();
             if (_shouldDispose)
             {
                 _controller?.Dispose();
