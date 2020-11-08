@@ -33,10 +33,7 @@ namespace Iot.Device.Lm75
         /// </summary>
         public bool Disabled
         {
-            get
-            {
-                return _disable;
-            }
+            get => _disable;
             set
             {
                 SetShutdown(value);
@@ -52,8 +49,7 @@ namespace Iot.Device.Lm75
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Lm75(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice;
-
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
             Disabled = false;
         }
 

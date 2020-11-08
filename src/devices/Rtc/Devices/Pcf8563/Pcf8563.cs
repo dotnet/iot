@@ -25,7 +25,7 @@ namespace Iot.Device.Rtc
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Pcf8563(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
 
             // Set "Normal Mode"
             Span<byte> ctrl1Config = stackalloc byte[]

@@ -33,12 +33,7 @@ namespace Iot.Device.Shtc3
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Shtc3(I2cDevice i2cDevice)
         {
-            if (i2cDevice == null)
-            {
-                throw new ArgumentNullException(nameof(i2cDevice));
-            }
-
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
 
             Wakeup();
             _status = Status.Idle;
@@ -51,13 +46,7 @@ namespace Iot.Device.Shtc3
         /// <summary>
         /// Set Shtc3 state
         /// </summary>
-        internal Status Status
-        {
-            get
-            {
-                return _status;
-            }
-        }
+        internal Status Status => _status;
 
         /// <summary>
         /// Try read Temperature and Humidity
@@ -158,10 +147,7 @@ namespace Iot.Device.Shtc3
         /// <summary>
         /// SHTC3 Wakeup
         /// </summary>
-        private void Wakeup()
-        {
-            Write(Register.SHTC3_WAKEUP);
-        }
+        private void Wakeup() => Write(Register.SHTC3_WAKEUP);
 
         /// <summary>
         /// SHTC3 Soft Reset
@@ -179,13 +165,7 @@ namespace Iot.Device.Shtc3
         /// <summary>
         /// Sensor Id
         /// </summary>
-        public int? Id
-        {
-            get
-            {
-                return _id = _id ?? ReadId();
-            }
-        }
+        public int? Id => _id = _id ?? ReadId();
 
         /// <summary>
         /// Read Id
@@ -226,10 +206,8 @@ namespace Iot.Device.Shtc3
         /// </summary>
         /// <param name="id">Id to test</param>
         /// <returns></returns>
-        private static bool ValidShtc3Id(int id)
-        {
-            return (id & 0b_0000_1000_0011_1111) == 0b_0000_1000_0000_0111;
-        }
+        private static bool ValidShtc3Id(int id) =>
+            (id & 0b_0000_1000_0011_1111) == 0b_0000_1000_0000_0111;
 
         /// <summary>
         /// 8-bit CRC Checksum Calculation

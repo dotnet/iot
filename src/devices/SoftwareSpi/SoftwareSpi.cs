@@ -209,10 +209,7 @@ namespace Iot.Device.Spi
             return (bool)_controller.Read(_miso);
         }
 
-        private void WriteBit(bool bitToWrite)
-        {
-            _controller.Write(_mosi, bitToWrite);
-        }
+        private void WriteBit(bool bitToWrite) => _controller.Write(_mosi, bitToWrite);
 
         /// <inheritdoc />
         public override void Read(Span<byte> data)
@@ -222,10 +219,7 @@ namespace Iot.Device.Spi
         }
 
         /// <inheritdoc />
-        public override void Write(ReadOnlySpan<byte> data)
-        {
-            TransferWriteOnly(data);
-        }
+        public override void Write(ReadOnlySpan<byte> data) => TransferWriteOnly(data);
 
         /// <inheritdoc />
         public override void WriteByte(byte data)
@@ -271,15 +265,9 @@ namespace Iot.Device.Spi
                 _exit = exit ?? new Action(() => { });
             }
 
-            public void Enter()
-            {
-                _enter.Invoke();
-            }
+            public void Enter() => _enter.Invoke();
 
-            public void Exit()
-            {
-                _exit.Invoke();
-            }
+            public void Exit() => _exit.Invoke();
         }
 
         private struct Scope : IDisposable

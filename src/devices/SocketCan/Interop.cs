@@ -83,10 +83,8 @@ namespace Iot.Device.SocketCan
             }
         }
 
-        public static void CloseSocket(IntPtr fd)
-        {
+        public static void CloseSocket(IntPtr fd) =>
             CloseSocket((int)fd);
-        }
 
         public static IntPtr CreateCanRawSocket(string networkInterface)
         {
@@ -104,10 +102,8 @@ namespace Iot.Device.SocketCan
         }
 
         public static bool SetCanRawSocketOption<T>(SafeHandle handle, CanSocketOption optName, ReadOnlySpan<T> data)
-            where T : struct
-        {
-            return SetSocketOption(handle, SOL_CAN_RAW, optName, data);
-        }
+            where T : struct =>
+            SetSocketOption(handle, SOL_CAN_RAW, optName, data);
 
         private static unsafe bool SetSocketOption<T>(SafeHandle handle, int level, CanSocketOption optName, ReadOnlySpan<T> data)
             where T : struct

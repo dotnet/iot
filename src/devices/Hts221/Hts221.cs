@@ -21,12 +21,7 @@ namespace Iot.Device.Hts221
         /// </summary>
         public Hts221(I2cDevice i2cDevice)
         {
-            if (i2cDevice == null)
-            {
-                throw new ArgumentNullException(nameof(i2cDevice));
-            }
-
-            _i2c = i2cDevice;
+            _i2c = i2cDevice ?? throw new ArgumentNullException($"{nameof(i2cDevice)} cannot be null");
 
             // Highest resolution for both temperature and humidity sensor:
             // 0.007 DegreesCelsius and 0.03 percentage of relative humidity respectively

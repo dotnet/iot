@@ -7,7 +7,7 @@ using System.Device.Spi;
 using System.Threading;
 using Iot.Device.Multiplexing;
 
-using Sn74hc595 sr = new Sn74hc595(Sn74hc595PinMapping.Complete);
+using Sn74hc595 sr = new (Sn74hc595PinMapping.Complete);
 // SpiConnectionSettings settings = new (0, 0);
 // using var spiDevice = SpiDevice.Create(settings);
 // var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
@@ -20,7 +20,7 @@ Console.CancelKeyPress += (s, e) =>
 
 Console.WriteLine($"Driver for {nameof(Iot.Device.Multiplexing.Sn74hc595)}");
 Console.WriteLine($"Register bit length: {sr.BitLength}");
-var interfaceType = sr.UsesSpi ? "SPI" : "GPIO";
+string interfaceType = sr.UsesSpi ? "SPI" : "GPIO";
 Console.WriteLine($"Using {interfaceType}");
 
 if (!sr.UsesSpi)

@@ -24,8 +24,7 @@ else
     pn532.LogLevel = LogLevel.None;
 }
 
-var version = pn532.FirmwareVersion;
-if (version != null)
+if (pn532.FirmwareVersion is FirmwareVersion version)
 {
     Console.WriteLine(
         $"Is it a PN532!: {version.IsPn532}, Version: {version.Version}, Version supported: {version.VersionSupported}");
@@ -103,7 +102,7 @@ void ReadMiFare(Pn532 pn532)
             Console.WriteLine($", ATS: {BitConverter.ToString(decrypted.Ats)}");
         }
 
-        MifareCard mifareCard = new MifareCard(pn532, decrypted.TargetNumber)
+        MifareCard mifareCard = new (pn532, decrypted.TargetNumber)
         {
             BlockNumber = 0, Command = MifareCardCommand.AuthenticationA
         };

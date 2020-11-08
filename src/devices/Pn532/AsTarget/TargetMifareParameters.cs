@@ -20,10 +20,7 @@ namespace Iot.Device.Pn532.AsTarget
         /// </summary>
         public byte[] Atqa
         {
-            get
-            {
-                return _atqa;
-            }
+            get => _atqa;
             set
             {
                 if (value.Length != _atqa.Length)
@@ -42,10 +39,7 @@ namespace Iot.Device.Pn532.AsTarget
         /// </summary>
         public byte[] NfcId3
         {
-            get
-            {
-                return _nfcId3;
-            }
+            get => _nfcId3;
             set
             {
                 if (value.Length != _nfcId3.Length)

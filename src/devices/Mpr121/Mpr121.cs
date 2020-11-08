@@ -22,7 +22,7 @@ namespace Iot.Device.Mpr121
 
         private static readonly int CHANNELS_NUMBER = Enum.GetValues(typeof(Channels)).Length;
 
-        private I2cDevice _device;
+        private I2cDevice _i2cDevice;
         private Timer _timer;
 
         private Dictionary<Channels, bool> _statuses;
@@ -43,11 +43,7 @@ namespace Iot.Device.Mpr121
         /// </remark>
         public int PeriodRefresh
         {
-            get
-            {
-                return _periodRefresh;
-            }
-
+            get => _periodRefresh;
             set
             {
                 _periodRefresh = value;
@@ -67,14 +63,14 @@ namespace Iot.Device.Mpr121
         /// <summary>
         /// Initialize a MPR121 controller.
         /// </summary>
-        /// <param name="device">The i2c device.</param>
+        /// <param name="i2cDevice">The i2c device.</param>
         /// <param name="periodRefresh">The period in milliseconds of refresing the channel statuses.</param>
         /// <param name="configuration">The controller configuration.</param>
-        public Mpr121(I2cDevice device, int periodRefresh = -1, Mpr121Configuration? configuration = null)
+        public Mpr121(I2cDevice i2cDevice, int periodRefresh = -1, Mpr121Configuration? configuration = null)
         {
             configuration = configuration ?? GetDefaultConfiguration();
 
-            _device = device;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
             _timer = new Timer(RefreshChannelStatuses, this, Timeout.Infinite, Timeout.Infinite);
 
             _statuses = new Dictionary<Channels, bool>();
@@ -91,8 +87,8 @@ namespace Iot.Device.Mpr121
         /// <inheritdoc/>
         public void Dispose()
         {
-            _device?.Dispose();
-            _device = null!;
+            _i2cDevice?.Dispose();
+            _i2cDevice = null!;
             _timer?.Dispose();
             _timer = null!;
         }
@@ -182,10 +178,7 @@ namespace Iot.Device.Mpr121
         /// <summary>
         /// The callback function for timer to refresh channels statuses.
         /// </summary>
-        private void RefreshChannelStatuses(object? state)
-        {
-            RefreshChannelStatuses();
-        }
+        private void RefreshChannelStatuses(object? state) => RefreshChannelStatuses();
 
         /// <summary>
         /// Refresh the channel statuses.
@@ -197,7 +190,7 @@ namespace Iot.Device.Mpr121
             PeriodRefresh = 0;
 
             Span<byte> buffer = stackalloc byte[2];
-            _device.Read(buffer);
+            _i2cDevice.Read(buffer);
 
             short rawStatus = BinaryPrimitives.ReadInt16LittleEndian(buffer);
             bool isStatusChanged = false;
@@ -226,12 +219,9 @@ namespace Iot.Device.Mpr121
             {
                 (byte)register, value
             };
-            _device.Write(data);
+            _i2cDevice.Write(data);
         }
 
-        private void OnChannelStatusesChanged()
-        {
-            ChannelStatusesChanged?.Invoke(this, new ChannelStatusesChangedEventArgs(_statuses.ToImmutableDictionary()));
-        }
+        private void OnChannelStatusesChanged() => ChannelStatusesChanged?.Invoke(this, new ChannelStatusesChangedEventArgs(_statuses.ToImmutableDictionary()));
     }
 }

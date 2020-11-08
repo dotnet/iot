@@ -165,12 +165,9 @@ namespace Iot.Device.Pcx857x
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void ThrowInvalidPin(string argumentName)
-        {
-            // This is a helper to allow the JIT to inline calling methods.
-            // (Methods with throws cannot be inlined.)
-            throw new ArgumentOutOfRangeException(argumentName, $"Pin numbers must be in the range of 0 to {PinCount - 1}.");
-        }
+        // This is a helper to allow the JIT to inline calling methods.
+        // (Methods with throws cannot be inlined.)
+        private void ThrowInvalidPin(string argumentName) => throw new ArgumentOutOfRangeException(argumentName, $"Pin numbers must be in the range of 0 to {PinCount - 1}.");
 
         private void ValidatePinNumber(int pinNumber)
         {

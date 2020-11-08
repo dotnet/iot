@@ -28,10 +28,7 @@ namespace Iot.Device.Adc
         /// <param name="valueChannel">Channel which represents the signal (valid values: 0 to channelcount - 1).</param>
         /// <param name="referenceChannel">Channel which represents the signal ground (valid values: 0 to channelcount - 1).</param>
         /// <returns>A value corresponding to relative voltage level on specified device channels</returns>
-        public override int ReadPseudoDifferential(int valueChannel, int referenceChannel)
-        {
-            throw new NotSupportedException($"Mcp33xx device does not support {nameof(ReadPseudoDifferential)}.");
-        }
+        public override int ReadPseudoDifferential(int valueChannel, int referenceChannel) => throw new NotSupportedException($"Mcp33xx device does not support {nameof(ReadPseudoDifferential)}.");
 
         /// <summary>
         /// Reads a 13 bit signed value from the device using differential inputs
@@ -80,10 +77,7 @@ namespace Iot.Device.Adc
         /// <param name="signedValue">Signed value with a sign bit at a particular location</param>
         /// <param name="signingBit">Bit number that contains the sign bit</param>
         /// <returns>A value corresponding to the signed value sign extended into an int</returns>
-        public static int SignExtend(int signedValue, int signingBit)
-        {
-            // if the sign bit is set then extend the signing bit to create a signed integer
-            return (signedValue >> signingBit) == 0 ? signedValue : signedValue - (2 << signingBit);
-        }
+        // if the sign bit is set then extend the signing bit to create a signed integer
+        public static int SignExtend(int signedValue, int signingBit) => (signedValue >> signingBit) == 0 ? signedValue : signedValue - (2 << signingBit);
     }
 }

@@ -41,7 +41,7 @@ namespace Iot.Device.MotorHat
         /// </remarks>
         public MotorHat(I2cConnectionSettings settings, double frequency = 1600)
         {
-            var device = I2cDevice.Create(settings);
+            I2cDevice device = I2cDevice.Create(settings);
             _pca9685 = new Pca9685(device);
 
             _pca9685.PwmFrequency = frequency;

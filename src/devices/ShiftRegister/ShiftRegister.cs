@@ -56,7 +56,7 @@ namespace Iot.Device.Multiplexing
         /// <param name="bitLength">Bit length of register, including chained registers.</param>
         public ShiftRegister(SpiDevice spiDevice, int bitLength)
         {
-            _spiDevice = spiDevice;
+            _spiDevice = spiDevice ?? throw new ArgumentException($"{nameof(spiDevice)} cannot be null");
             _bitLength = bitLength;
         }
 

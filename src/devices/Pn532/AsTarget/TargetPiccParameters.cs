@@ -23,10 +23,7 @@ namespace Iot.Device.Pn532.AsTarget
         /// </summary>
         public byte[] NfcId3
         {
-            get
-            {
-                return _nfcId3;
-            }
+            get => _nfcId3;
             set
             {
                 if (value.Length != _nfcId3.Length)
@@ -44,10 +41,7 @@ namespace Iot.Device.Pn532.AsTarget
         /// </summary>
         public byte[] GeneralTarget
         {
-            get
-            {
-                return _generalTarget;
-            }
+            get => _generalTarget;
             set
             {
                 if (value.Length > 47)
@@ -65,10 +59,7 @@ namespace Iot.Device.Pn532.AsTarget
         /// </summary>
         public byte[] HistoricalTarget
         {
-            get
-            {
-                return _historicalTarget;
-            }
+            get => _historicalTarget;
             set
             {
                 if (value.Length > 48)

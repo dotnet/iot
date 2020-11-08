@@ -55,8 +55,8 @@ namespace Iot.Device.Pn5180
         /// </summary>
         public LogLevel LogLevel
         {
-            get { return LogInfo.LogLevel; }
-            set { LogInfo.LogLevel = value; }
+            get => LogInfo.LogLevel;
+            set => LogInfo.LogLevel = value;
         }
 
         /// <summary>
@@ -64,8 +64,8 @@ namespace Iot.Device.Pn5180
         /// </summary>
         public LogTo LogTo
         {
-            get { return LogInfo.LogTo; }
-            set { LogInfo.LogTo = value; }
+            get => LogInfo.LogTo;
+            set => LogInfo.LogTo = value;
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Iot.Device.Pn5180
             LogLevel = logLevel;
 
             LogInfo.Log($"Opening PN5180, pin busy: {pinBusy}, pin NSS: {pinNss}", LogLevel.Debug);
-            _spiDevice = spiDevice;
+            _spiDevice = spiDevice ?? throw new ArgumentException($"{nameof(spiDevice)} cannot be null");
             _gpioController = gpioController ?? new GpioController(PinNumberingScheme.Logical);
             _shouldDispose = shouldDispose;
             _pinBusy = pinBusy;
@@ -1345,7 +1345,6 @@ namespace Iot.Device.Pn5180
                 crc &= ((config[0] & 0x01) == 0x01);
                 return crc;
             }
-
             set
             {
                 if (value)

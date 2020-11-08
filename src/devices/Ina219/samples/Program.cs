@@ -11,7 +11,7 @@ const byte Adafruit_Ina219_I2cAddress = 0x40;
 const byte Adafruit_Ina219_I2cBus = 0x1;
 
 // create an INA219 device on I2C bus 1 addressing channel 64
-using Ina219 device = new Ina219(new I2cConnectionSettings(Adafruit_Ina219_I2cBus, Adafruit_Ina219_I2cAddress));
+using Ina219 device = new (new I2cConnectionSettings(Adafruit_Ina219_I2cBus, Adafruit_Ina219_I2cAddress));
 // reset the device
 device.Reset();
 

@@ -22,7 +22,7 @@ Console.CancelKeyPress += (s, e) =>
 
 Console.WriteLine($"Driver for {nameof(ShiftRegister)}");
 Console.WriteLine($"Register bit length: {sr.BitLength}");
-var interfaceType = sr.UsesSpi ? "SPI" : "GPIO";
+string interfaceType = sr.UsesSpi ? "SPI" : "GPIO";
 Console.WriteLine($"Using {interfaceType}");
 
 sr.OutputEnable = true;

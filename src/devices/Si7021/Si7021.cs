@@ -63,7 +63,7 @@ namespace Iot.Device.Si7021
         /// <param name="resolution">Si7021 Read Resolution</param>
         public Si7021(I2cDevice i2cDevice, Resolution resolution = Resolution.Resolution1)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
 
             SetResolution(resolution);
         }

@@ -73,8 +73,8 @@ namespace Iot.Device.Pn532
         /// </summary>
         public LogLevel LogLevel
         {
-            get { return LogInfo.LogLevel; }
-            set { LogInfo.LogLevel = value; }
+            get => LogInfo.LogLevel;
+            set => LogInfo.LogLevel = value;
         }
 
         /// <summary>
@@ -82,8 +82,8 @@ namespace Iot.Device.Pn532
         /// </summary>
         public LogTo LogTo
         {
-            get { return LogInfo.LogTo; }
-            set { LogInfo.LogTo = value; }
+            get => LogInfo.LogTo;
+            set => LogInfo.LogTo = value;
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace Iot.Device.Pn532
         public Pn532(SpiDevice spiDevice, LogLevel logLevel = LogLevel.None)
         {
             LogLevel = logLevel;
-            _spiDevice = spiDevice;
+            _spiDevice = spiDevice ?? throw new ArgumentException($"{nameof(spiDevice)} cannot be null");
             _controller = new GpioController();
             _controller.OpenPin(_pin, PinMode.Output);
             _controller.Write(_pin, PinValue.High);
@@ -184,12 +184,12 @@ namespace Iot.Device.Pn532
         /// <summary>
         /// Create a PN532 using I2C
         /// </summary>
-        /// <param name="i2CDevice">The I2C device</param>
+        /// <param name="i2cDevice">The I2C device</param>
         /// /// <param name="logLevel">The log level</param>
-        public Pn532(I2cDevice i2CDevice, LogLevel logLevel = LogLevel.None)
+        public Pn532(I2cDevice i2cDevice, LogLevel logLevel = LogLevel.None)
         {
             LogLevel = logLevel;
-            _i2cDevice = i2CDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
             WakeUp();
             bool ret = SetSecurityAccessModule();
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
@@ -391,11 +391,7 @@ namespace Iot.Device.Pn532
         /// </summary>
         public uint VirtualCardTimeout
         {
-            get
-            {
-                return _virtualCardTimeout * 50;
-            }
-
+            get => _virtualCardTimeout * 50;
             set
             {
                 // Timeout defines the time-out only in Virtual card configuration (Mode = 0x02).
@@ -419,11 +415,7 @@ namespace Iot.Device.Pn532
         /// </summary>
         public SecurityAccessModuleMode SecurityAccessModuleMode
         {
-            get
-            {
-                return _securityAccessModuleMode;
-            }
-
+            get => _securityAccessModuleMode;
             set
             {
                 bool ret = SetSecurityAccessModule();
@@ -481,11 +473,7 @@ namespace Iot.Device.Pn532
         /// </summary>
         public ParametersFlags ParametersFlags
         {
-            get
-            {
-                return _parametersFlags;
-            }
-
+            get => _parametersFlags;
             set
             {
                 if (SetParameters(value))
@@ -975,81 +963,65 @@ namespace Iot.Device.Pn532
         /// </summary>
         /// <param name="rfFieldMode">Radio Frequency Field Mode</param>
         /// <returns>True is success</returns>
-        public bool SetRfField(RfFieldMode rfFieldMode)
-        {
-            return SetRfConfiguration(RfConfigurationMode.RfField, new byte[1] { (byte)rfFieldMode });
-        }
+        public bool SetRfField(RfFieldMode rfFieldMode) =>
+            SetRfConfiguration(RfConfigurationMode.RfField, new byte[1] { (byte)rfFieldMode });
 
         /// <summary>
         /// Set the Various Timing Mode
         /// </summary>
         /// <param name="variousTimingsMode">Various Timing Mode</param>
         /// <returns>True is success</returns>
-        public bool SetVariousTimings(VariousTimingsMode variousTimingsMode)
-        {
-            return SetRfConfiguration(RfConfigurationMode.VariousTimings, variousTimingsMode.Serialize());
-        }
+        public bool SetVariousTimings(VariousTimingsMode variousTimingsMode) =>
+            SetRfConfiguration(RfConfigurationMode.VariousTimings, variousTimingsMode.Serialize());
 
         /// <summary>
         /// Set the Maximum Retry in the 2 WriteRead modes
         /// </summary>
         /// <param name="numberRetries">The number of retries</param>
         /// <returns>True is success</returns>
-        public bool SetMaxRetryWriteRead(byte numberRetries = 0x00)
-        {
-            return SetRfConfiguration(RfConfigurationMode.MaxRetryCOM, new byte[1] { numberRetries });
-        }
+        public bool SetMaxRetryWriteRead(byte numberRetries = 0x00) =>
+            SetRfConfiguration(RfConfigurationMode.MaxRetryCOM, new byte[1] { numberRetries });
 
         /// <summary>
         /// Set the MAximu Retries during the various initialization modes
         /// </summary>
         /// <param name="maxRetriesMode">Retry modes</param>
         /// <returns>True is success</returns>
-        public bool SetMaxRetriesInitialization(MaxRetriesMode maxRetriesMode)
-        {
-            return SetRfConfiguration(RfConfigurationMode.MaxRetries, maxRetriesMode.Serialize());
-        }
+        public bool SetMaxRetriesInitialization(MaxRetriesMode maxRetriesMode) =>
+            SetRfConfiguration(RfConfigurationMode.MaxRetries, maxRetriesMode.Serialize());
 
         /// <summary>
         /// Set the specific 106 kbps card Type A modes
         /// </summary>
         /// <param name="analog106Kbps">The mode settings</param>
         /// <returns>True is success</returns>
-        public bool SetAnalog106kbpsTypeA(Analog106kbpsTypeAMode analog106Kbps)
-        {
-            return SetRfConfiguration(RfConfigurationMode.AnalogSettingsB106kbpsTypeA, analog106Kbps.Serialize());
-        }
+        public bool SetAnalog106kbpsTypeA(Analog106kbpsTypeAMode analog106Kbps) =>
+            SetRfConfiguration(RfConfigurationMode.AnalogSettingsB106kbpsTypeA, analog106Kbps.Serialize());
 
         /// <summary>
         /// Set the specific 212 424 kbps card modes
         /// </summary>
         /// <param name="analog212_424">The mode settings</param>
         /// <returns>True is success</returns>
-        public bool SetAnalog212_424Kbps(Analog212_424kbpsMode analog212_424)
-        {
-            return SetRfConfiguration(RfConfigurationMode.AnalogSettingsB212_424kbps, analog212_424.Serialize());
-        }
+        public bool SetAnalog212_424Kbps(Analog212_424kbpsMode analog212_424) =>
+            SetRfConfiguration(RfConfigurationMode.AnalogSettingsB212_424kbps, analog212_424.Serialize());
 
         /// <summary>
         /// Set the specific 106 kbps card Type B modes
         /// </summary>
         /// <param name="analogSettings">The mode settings</param>
         /// <returns>True is success</returns>
-        public bool SetAnalogTypeB(AnalogSettingsTypeBMode analogSettings)
-        {
-            return SetRfConfiguration(RfConfigurationMode.AnalogSettingsTypeB, analogSettings.Serialize());
-        }
+        public bool SetAnalogTypeB(AnalogSettingsTypeBMode analogSettings) =>
+            SetRfConfiguration(RfConfigurationMode.AnalogSettingsTypeB, analogSettings.Serialize());
 
         /// <summary>
         /// Configure analog mode
         /// </summary>
         /// <param name="analog212_424_848Kbps">Settings</param>
         /// <returns>True is success</returns>
-        public bool SetAnalog212_424_848kbps(Analog212_424_848kbpsMode analog212_424_848Kbps)
-        {
-            return SetRfConfiguration(RfConfigurationMode.AnalogSettingsB212_424_848ISO_IEC14443_4,
+        public bool SetAnalog212_424_848kbps(Analog212_424_848kbpsMode analog212_424_848Kbps) =>
+            SetRfConfiguration(RfConfigurationMode.AnalogSettingsB212_424_848ISO_IEC14443_4,
                 analog212_424_848Kbps.Serialize());
-        }
 
         private bool SetRfConfiguration(RfConfigurationMode rfConfigurationMode, byte[] configurationData)
         {
@@ -1159,10 +1131,8 @@ namespace Iot.Device.Pn532
         /// <param name="register">The register to write</param>
         /// <param name="registerValue">The value of the register</param>
         /// <returns>True if success</returns>
-        public bool WriteRegister(ushort register, byte registerValue)
-        {
-            return WriteRegister(new ushort[] { register }, new byte[] { registerValue });
-        }
+        public bool WriteRegister(ushort register, byte registerValue) =>
+            WriteRegister(new ushort[] { register }, new byte[] { registerValue });
 
         /// <summary>
         /// Write an array of register

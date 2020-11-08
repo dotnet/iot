@@ -29,7 +29,7 @@ namespace Iot.Device.Ssd13xx
         public Ssd13xx(I2cDevice i2cDevice, int bufferSize = DefaultBufferSize)
         {
             _genericBuffer = new byte[bufferSize];
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace Iot.Device.Ssd13xx
         /// <param name="data">The data to send to the display controller.</param>
         public virtual void SendData(byte[] data)
         {
-            if (data == null)
+            if (data is null)
             {
                 throw new ArgumentNullException(nameof(data));
             }
@@ -81,10 +81,7 @@ namespace Iot.Device.Ssd13xx
         /// </summary>
         /// <param name="length">Requested length</param>
         /// <returns>Span of bytes pointing to the command buffer</returns>
-        protected Span<byte> SliceGenericBuffer(int length)
-        {
-            return SliceGenericBuffer(0, length);
-        }
+        protected Span<byte> SliceGenericBuffer(int length) => SliceGenericBuffer(0, length);
 
         /// <summary>
         /// Acquires span of specific length at specific position in command buffer.

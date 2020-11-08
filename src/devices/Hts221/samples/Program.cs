@@ -11,7 +11,7 @@ using UnitsNet;
 // I2C address on SenseHat board
 const int I2cAddress = 0x5F;
 
-using var th = new Hts221(CreateI2cDevice());
+using Hts221 th = new (CreateI2cDevice());
 while (true)
 {
     var tempValue = th.Temperature;

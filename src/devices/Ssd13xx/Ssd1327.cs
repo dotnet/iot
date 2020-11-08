@@ -31,20 +31,14 @@ namespace Iot.Device.Ssd13xx
         /// </summary>
         /// <param name="startAddress">Start address</param>
         /// <param name="endAddress">End address</param>
-        public void SetColumnAddress(byte startAddress = 0x08, byte endAddress = 0x37)
-        {
-            SendCommand(new Ssd1327Cmnds.SetColumnAddress(startAddress, endAddress));
-        }
+        public void SetColumnAddress(byte startAddress = 0x08, byte endAddress = 0x37) => SendCommand(new Ssd1327Cmnds.SetColumnAddress(startAddress, endAddress));
 
         /// <summary>
         /// Sets row address
         /// </summary>
         /// <param name="startAddress">Start address</param>
         /// <param name="endAddress">End address</param>
-        public void SetRowAddress(byte startAddress = 0x00, byte endAddress = 0x5f)
-        {
-            SendCommand(new Ssd1327Cmnds.SetRowAddress(startAddress, endAddress));
-        }
+        public void SetRowAddress(byte startAddress = 0x00, byte endAddress = 0x5f) => SendCommand(new Ssd1327Cmnds.SetRowAddress(startAddress, endAddress));
 
         /// <summary>
         /// Clears the display
@@ -74,19 +68,13 @@ namespace Iot.Device.Ssd13xx
         /// Sends command to the device
         /// </summary>
         /// <param name="command">Command being send</param>
-        public void SendCommand(ISsd1327Command command)
-        {
-            SendCommand((ICommand)command);
-        }
+        public void SendCommand(ISsd1327Command command) => SendCommand((ICommand)command);
 
         /// <summary>
         /// Sends command to the device
         /// </summary>
         /// <param name="command">Command being send</param>
-        public override void SendCommand(ISharedCommand command)
-        {
-            SendCommand(command);
-        }
+        public override void SendCommand(ISharedCommand command) => SendCommand(command);
 
         /// <summary>
         /// Send data to the display controller.

@@ -78,7 +78,7 @@ namespace Iot.Device.Multiplexing
         {
             if (GpioController is null)
             {
-                throw new Exception($"{nameof(GpioController)} is not cofigured.");
+                throw new Exception($"{nameof(GpioController)} is not configured.");
             }
 
             /*  Required timing waveform

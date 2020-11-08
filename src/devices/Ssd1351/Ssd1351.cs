@@ -51,7 +51,7 @@ namespace Iot.Device.Ssd1351
             _gpioDevice = gpioController ?? new GpioController();
             _disposeGpioController = gpioController == null ? true : shouldDispose;
 
-            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
+            _spiDevice = spiDevice ?? throw new ArgumentException($"{nameof(spiDevice)} cannot be null");
 
             _dcPinId = dataCommandPin;
             _resetPinId = resetPin;
@@ -65,7 +65,7 @@ namespace Iot.Device.Ssd1351
         }
 
         /// <summary>
-        /// Convert a color structure to a byte tuple represening the colour in 565 format.
+        /// Convert a color structure to a byte tuple representing the colour in 565 format.
         /// </summary>
         /// <param name="color">The color to be converted.</param>
         /// <returns>
@@ -139,7 +139,7 @@ namespace Iot.Device.Ssd1351
                 }
             }
 
-            // specifiy a location for the rows and columns on the display where the data is to be written
+            // specify a location for the rows and columns on the display where the data is to be written
             SetColumnAddress(x, (byte)(x + w - 1));
             SetRowAddress(y, (byte)(y + h - 1));
 

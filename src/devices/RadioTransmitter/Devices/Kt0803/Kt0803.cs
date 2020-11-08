@@ -78,7 +78,7 @@ namespace Iot.Device.RadioTransmitter
         public Kt0803(I2cDevice i2cDevice, double frequency, Region region,
             TransmissionPower power = TransmissionPower.Power108dBuV, PgaGain pga = PgaGain.Pga00dB)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
             Frequency = frequency;
             TransmissionPower = power;
             PgaGain = pga;

@@ -37,9 +37,9 @@ namespace Iot.Device.Hcsr04
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Hcsr04(GpioController gpioController, int triggerPin, int echoPin, bool shouldDispose = true)
         {
+            _controller = gpioController ?? throw new ArgumentException($"{nameof(gpioController)} cannot be null.");
             _echo = echoPin;
             _trigger = triggerPin;
-            _controller = gpioController;
             _shouldDispose = shouldDispose;
 
             _controller.OpenPin(_echo, PinMode.Input);

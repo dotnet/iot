@@ -66,7 +66,7 @@ namespace Iot.Device.Imu
         /// </summary>
         internal Mpu6500(I2cDevice i2cDevice, bool isInternal)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
         }
 
         #region Accelerometer
@@ -82,7 +82,6 @@ namespace Iot.Device.Imu
         public AccelerometerRange AccelerometerRange
         {
             get => _accelerometerRange;
-
             set
             {
                 WriteRegister(Register.ACCEL_CONFIG, (byte)((byte)value << 3));
@@ -102,7 +101,6 @@ namespace Iot.Device.Imu
         public AccelerometerBandwidth AccelerometerBandwidth
         {
             get => _accelerometerBandwidth;
-
             set
             {
                 WriteRegister(Register.ACCEL_CONFIG_2, (byte)value);
@@ -200,7 +198,6 @@ namespace Iot.Device.Imu
         public GyroscopeRange GyroscopeRange
         {
             get => _gyroscopeRange;
-
             set
             {
                 WriteRegister(Register.GYRO_CONFIG, (byte)((byte)value << 3));
@@ -218,7 +215,6 @@ namespace Iot.Device.Imu
         public GyroscopeBandwidth GyroscopeBandwidth
         {
             get => _gyroscopeBandwidth;
-
             set
             {
                 if (value == GyroscopeBandwidth.Bandwidth8800HzFS32)
@@ -417,19 +413,16 @@ namespace Iot.Device.Imu
         /// Return true if the version of MPU6500 is the correct one
         /// </summary>
         /// <returns>True if success</returns>
-        internal bool CheckVersion()
-        {
-            // Check if the version is thee correct one
-            return ReadByte(Register.WHO_AM_I) == 0x70;
-        }
+        // Check if the version is thee correct one
+        internal bool CheckVersion() => ReadByte(Register.WHO_AM_I) == 0x70;
 
         /// <summary>
         /// Get or set the sample diver mode
         /// </summary>
         public byte SampleRateDivider
         {
-            get { return ReadByte(Register.SMPLRT_DIV); }
-            set { WriteRegister(Register.SMPLRT_DIV, value); }
+            get => ReadByte(Register.SMPLRT_DIV);
+            set => WriteRegister(Register.SMPLRT_DIV, value);
         }
 
         /// <summary>
@@ -438,8 +431,8 @@ namespace Iot.Device.Imu
         /// </summary>
         public DisableModes DisableModes
         {
-            get { return (DisableModes)ReadByte(Register.PWR_MGMT_2); }
-            set { WriteRegister(Register.PWR_MGMT_2, (byte)value); }
+            get => (DisableModes)ReadByte(Register.PWR_MGMT_2);
+            set => WriteRegister(Register.PWR_MGMT_2, (byte)value);
         }
 
         #endregion
@@ -467,10 +460,7 @@ namespace Iot.Device.Imu
         /// </summary>
         public FifoModes FifoModes
         {
-            get
-            {
-                return (FifoModes)(ReadByte(Register.FIFO_EN));
-            }
+            get => (FifoModes)(ReadByte(Register.FIFO_EN));
             set
             {
                 if (value != FifoModes.None)
@@ -508,10 +498,7 @@ namespace Iot.Device.Imu
         /// EXT_SENS_DATA_00 to EXT_SENS_DATA_24
         /// </summary>
         /// <param name="readData">Data which will be read</param>
-        public void ReadFifo(Span<byte> readData)
-        {
-            ReadBytes(Register.FIFO_R_W, readData);
-        }
+        public void ReadFifo(Span<byte> readData) => ReadBytes(Register.FIFO_R_W, readData);
 
         #endregion
 

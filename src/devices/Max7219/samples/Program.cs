@@ -6,9 +6,9 @@ using System.Device.Spi;
 using System.Threading;
 using Iot.Device.Max7219;
 
-var message = "Hello World from MAX7219!";
+string message = "Hello World from MAX7219!";
 
-if (args.Length > 0)
+if (args is { Length: > 0 })
 {
     message = string.Join(" ", args);
 }
@@ -21,7 +21,7 @@ SpiConnectionSettings connectionSettings = new (0, 0)
     Mode = Iot.Device.Max7219.Max7219.SpiMode
 };
 using SpiDevice spi = SpiDevice.Create(connectionSettings);
-using Max7219 devices = new Max7219(spi, cascadedDevices: 4);
+using Max7219 devices = new (spi, cascadedDevices: 4);
 // initialize the devices
 devices.Init();
 
@@ -62,7 +62,7 @@ foreach (RotationType rotation in Enum.GetValues(typeof(RotationType)))
 // reinitialize device and show message using the matrix graphics
 devices.Init();
 devices.Rotation = RotationType.Right;
-var graphics = new MatrixGraphics(devices, Fonts.Default);
+MatrixGraphics graphics = new (devices, Fonts.Default);
 foreach (var font in new[]
 {
     Fonts.CP437, Fonts.LCD, Fonts.Sinclair, Fonts.Tiny, Fonts.CyrillicUkrainian
@@ -72,14 +72,11 @@ foreach (var font in new[]
     graphics.ShowMessage(message, alwaysScroll: true);
 }
 
-RotationType? ReadRotation(char c)
+RotationType? ReadRotation(char c) => c switch
 {
-    switch (c)
-    {
-        case 'l': return RotationType.Left;
-        case 'r': return RotationType.Right;
-        case 'n': return RotationType.None;
-        case 'h': return RotationType.Half;
-        default: return null;
-    }
-}
+    'l' => RotationType.Left,
+    'r' => RotationType.Right,
+    'n' => RotationType.None,
+    'h' => RotationType.Half,
+    _ => null,
+};

@@ -39,32 +39,56 @@ namespace Iot.Device.Nrf24l01
         /// <summary>
         /// nRF24L01 Send Address
         /// </summary>
-        public byte[] Address { get => ReadTxAddress(); set => SetTxAddress(value); }
+        public byte[] Address
+        {
+            get => ReadTxAddress();
+            set => SetTxAddress(value);
+        }
 
         /// <summary>
         /// nRF24L01 Working Channel
         /// </summary>
-        public byte Channel { get => ReadChannel(); set => SetChannel(value); }
+        public byte Channel
+        {
+            get => ReadChannel();
+            set => SetChannel(value);
+        }
 
         /// <summary>
         /// nRF24L01 Output Power
         /// </summary>
-        public OutputPower OutputPower { get => ReadOutputPower(); set => SetOutputPower(value); }
+        public OutputPower OutputPower
+        {
+            get => ReadOutputPower();
+            set => SetOutputPower(value);
+        }
 
         /// <summary>
         /// nRF24L01 Send Rate
         /// </summary>
-        public DataRate DataRate { get => ReadDataRate(); set => SetDataRate(value); }
+        public DataRate DataRate
+        {
+            get => ReadDataRate();
+            set => SetDataRate(value);
+        }
 
         /// <summary>
         /// nRF24L01 Power Mode
         /// </summary>
-        public PowerMode PowerMode { get => ReadPowerMode(); set => SetPowerMode(value); }
+        public PowerMode PowerMode
+        {
+            get => ReadPowerMode();
+            set => SetPowerMode(value);
+        }
 
         /// <summary>
         /// nRF24L01 Working Mode
         /// </summary>
-        public WorkingMode WorkingMode { get => ReadWorkwingMode(); set => SetWorkingMode(value); }
+        public WorkingMode WorkingMode
+        {
+            get => ReadWorkwingMode();
+            set => SetWorkingMode(value);
+        }
 
         /// <summary>
         /// nRF24L01 Pipe 0
@@ -127,7 +151,7 @@ namespace Iot.Device.Nrf24l01
         public Nrf24l01(SpiDevice sensor, int ce, int irq, byte packetSize, byte channel = 2,
             OutputPower outputPower = OutputPower.N00dBm, DataRate dataRate = DataRate.Rate2Mbps, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
         {
-            _sensor = sensor;
+            _sensor = sensor ?? throw new ArgumentException($"{nameof(sensor)} cannot be null");
             _ce = ce;
             _irq = irq;
             PacketSize = packetSize;

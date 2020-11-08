@@ -52,10 +52,8 @@ namespace Iot.Device.Tm1637
         {
             _pinClk = pinClk;
             _pinDio = pinDio;
-            _controller = gpioController != null
-                ? (GpioController)gpioController
-                : new GpioController(pinNumberingScheme);
-            _shouldDispose = gpioController == null ? true : shouldDispose;
+            _controller = gpioController ?? new GpioController(pinNumberingScheme);
+            _shouldDispose = gpioController is null || shouldDispose ? true : shouldDispose;
             _controller.OpenPin(_pinClk, PinMode.Output);
             _controller.OpenPin(_pinDio, PinMode.Output);
             _brightness = 7;
@@ -69,10 +67,7 @@ namespace Iot.Device.Tm1637
         /// </summary>
         public byte[] CharacterOrder
         {
-            get
-            {
-                return _charactersOrder;
-            }
+            get => _charactersOrder;
             set
             {
                 if (value.Length != MaxCharacters)
@@ -102,11 +97,7 @@ namespace Iot.Device.Tm1637
         /// </summary>
         public bool ScreenOn
         {
-            get
-            {
-                return _screenOn;
-            }
-
+            get => _screenOn;
             set
             {
                 _screenOn = value;
@@ -119,10 +110,7 @@ namespace Iot.Device.Tm1637
         /// </summary>
         public byte Brightness
         {
-            get
-            {
-                return _brightness;
-            }
+            get => _brightness;
             set
             {
                 if (value > 7)

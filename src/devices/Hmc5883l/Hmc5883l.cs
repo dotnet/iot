@@ -58,7 +58,7 @@ namespace Iot.Device.Hmc5883l
             SamplesAmount samplesAmount = SamplesAmount.One,
             MeasurementConfiguration measurementConfig = MeasurementConfiguration.Normal)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
             _gain = (byte)gain;
             _measuringMode = (byte)measuringMode;
             _outputRate = (byte)outputRate;

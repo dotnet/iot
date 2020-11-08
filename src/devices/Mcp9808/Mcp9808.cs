@@ -34,10 +34,7 @@ namespace Iot.Device.Mcp9808
         /// </summary>
         public bool Disabled
         {
-            get
-            {
-                return _disable;
-            }
+            get => _disable;
             set
             {
                 SetShutdown(value);
@@ -52,7 +49,7 @@ namespace Iot.Device.Mcp9808
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Mcp9808(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
 
             Disabled = false;
 
@@ -85,10 +82,7 @@ namespace Iot.Device.Mcp9808
         /// Return the internal resolution register
         /// </summary>
         /// <returns>Resolution setting</returns>
-        public byte GetResolution()
-        {
-            return Read8(Register8.MCP_RESOLUTION);
-        }
+        public byte GetResolution() => Read8(Register8.MCP_RESOLUTION);
 
         /// <summary>
         /// Wakes-up the device
@@ -104,10 +98,7 @@ namespace Iot.Device.Mcp9808
         /// <summary>
         /// Shuts down the device
         /// </summary>
-        public void Shutdown()
-        {
-            SetShutdown(true);
-        }
+        public void Shutdown() => SetShutdown(true);
 
         /// <summary>
         /// Read MCP9808 Temperature (℃)
@@ -164,10 +155,7 @@ namespace Iot.Device.Mcp9808
             _i2cDevice = null!;
         }
 
-        internal Register16 ReadRegister16(Register8 reg)
-        {
-            return (Register16)Read16(reg);
-        }
+        internal Register16 ReadRegister16(Register8 reg) => (Register16)Read16(reg);
 
         internal ushort Read16(Register8 reg)
         {
@@ -191,7 +179,6 @@ namespace Iot.Device.Mcp9808
         internal byte Read8(Register8 reg)
         {
             _i2cDevice.WriteByte((byte)reg);
-
             return _i2cDevice.ReadByte();
         }
 

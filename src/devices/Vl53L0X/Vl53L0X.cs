@@ -25,7 +25,7 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         public const byte DefaultI2cAddress = 0x29;
 
-        private readonly bool _autoDisposable;
+        private readonly bool _shouldDispose;
         private readonly int _operationTimeout;
 
         // Default address can be found in documentation
@@ -52,10 +52,7 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         public bool HighResolution
         {
-            get
-            {
-                return _highResolution;
-            }
+            get => _highResolution;
             set
             {
                 _highResolution = value;
@@ -68,11 +65,11 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         /// <param name="i2cDevice">The I2C Device</param>
         /// <param name="operationTimeoutMilliseconds">Timeout for reading data, by default 500 milliseonds</param>
-        /// <param name="autoDisposable">True to dispose the I2C Device at dispose</param>
-        public Vl53L0X(I2cDevice i2cDevice, int operationTimeoutMilliseconds = 500, bool autoDisposable = true)
+        /// <param name="shouldDispose">True to dispose the I2C Device at dispose</param>
+        public Vl53L0X(I2cDevice i2cDevice, int operationTimeoutMilliseconds = 500, bool shouldDispose = true)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} can't be null.");
-            _autoDisposable = autoDisposable;
+            _shouldDispose = shouldDispose;
             _operationTimeout = operationTimeoutMilliseconds;
             Reset();
             Init();
@@ -146,7 +143,7 @@ namespace Iot.Device.Vl53L0X
         /// Reads the measurement when the mode is set to continuious.
         /// </summary>
         /// <returns>The range in millimeters, a maximum value is returned depending on the various settings</returns>
-        private ushort ReadContinuousMeasrurementMillimeters()
+        private ushort ReadContinuousMeasurementMillimeters()
         {
             Stopwatch stopWatch = Stopwatch.StartNew();
             var expirationMilliseconds = stopWatch.ElapsedMilliseconds + _operationTimeout;
@@ -154,7 +151,7 @@ namespace Iot.Device.Vl53L0X
             {
                 if (stopWatch.ElapsedMilliseconds > expirationMilliseconds)
                 {
-                    throw new IOException($"{nameof(ReadContinuousMeasrurementMillimeters)} timeout error");
+                    throw new IOException($"{nameof(ReadContinuousMeasurementMillimeters)} timeout error");
                 }
             }
 
@@ -169,7 +166,7 @@ namespace Iot.Device.Vl53L0X
         /// Get the distance depending on the measurement mode
         /// </summary>
         public ushort Distance =>
-            MeasurementMode == MeasurementMode.Continuous ? DistanceContinous : GetDistanceOnce(true);
+            MeasurementMode == MeasurementMode.Continuous ? DistanceContinuous : GetDistanceOnce(true);
 
         /// <summary>
         /// Get/Set the measurement mode used to return the distance property
@@ -181,7 +178,7 @@ namespace Iot.Device.Vl53L0X
         /// It is recommended to used this method to gethigher quality measurements
         /// </summary>
         /// <returns>Returns the distance in millimeters, if any error, returns the maximum range so 8190</returns>
-        public ushort DistanceContinous
+        public ushort DistanceContinuous
         {
             get
             {
@@ -190,7 +187,7 @@ namespace Iot.Device.Vl53L0X
                     StartContinuousMeasurement();
                 }
 
-                return ReadContinuousMeasrurementMillimeters();
+                return ReadContinuousMeasurementMillimeters();
             }
         }
 
@@ -259,7 +256,7 @@ namespace Iot.Device.Vl53L0X
                     }
                 }
 
-                return ReadContinuousMeasrurementMillimeters();
+                return ReadContinuousMeasurementMillimeters();
             }
         }
 
@@ -413,11 +410,7 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         public Precision Precision
         {
-            get
-            {
-                return _precision;
-            }
-
+            get => _precision;
             set
             {
                 _precision = value;
@@ -1177,7 +1170,7 @@ namespace Iot.Device.Vl53L0X
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_autoDisposable)
+            if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
                 _i2cDevice = null!;

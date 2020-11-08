@@ -26,7 +26,7 @@ namespace Iot.Device.Mlx90614
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Mlx90614(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
         }
 
         /// <summary>

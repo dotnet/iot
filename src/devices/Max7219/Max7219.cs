@@ -55,12 +55,7 @@ namespace Iot.Device.Max7219
         /// </summary>
         public Max7219(SpiDevice spiDevice, int cascadedDevices = 1, RotationType rotation = RotationType.None)
         {
-            if (spiDevice == null)
-            {
-                throw new ArgumentNullException(nameof(spiDevice));
-            }
-
-            _spiDevice = spiDevice;
+            _spiDevice = spiDevice ?? throw new ArgumentNullException($"{nameof(spiDevice)} cannot be null");
             CascadedDevices = cascadedDevices;
             Rotation = rotation;
             _buffer = new byte[CascadedDevices, NumDigits];
@@ -101,10 +96,7 @@ namespace Iot.Device.Max7219
         /// <remarks>
         /// The size of the data should be 2 * cascaded devices.
         /// </remarks>
-        private void Write(Span<byte> data)
-        {
-            _spiDevice.Write(data);
-        }
+        private void Write(Span<byte> data) => _spiDevice.Write(data);
 
         /// <summary>
         /// Sets the brightness of all cascaded devices to the same intensity level.
@@ -187,10 +179,7 @@ namespace Iot.Device.Max7219
         /// <summary>
         /// Writes all the Values to the devices.
         /// </summary>
-        public void Flush()
-        {
-            WriteBuffer(_buffer);
-        }
+        public void Flush() => WriteBuffer(_buffer);
 
         /// <summary>
         /// Writes a two dimensional buffer containing all the values to the devices.
@@ -375,19 +364,13 @@ namespace Iot.Device.Max7219
         /// <summary>
         /// Clears the buffer from the given start to end and flushes
         /// </summary>
-        public void ClearAll(bool flush = true)
-        {
-            Clear(0, CascadedDevices, flush);
-        }
+        public void ClearAll(bool flush = true) => Clear(0, CascadedDevices, flush);
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_spiDevice != null)
-            {
-                _spiDevice.Dispose();
-                _spiDevice = null!;
-            }
+            _spiDevice?.Dispose();
+            _spiDevice = null!;
         }
     }
 }

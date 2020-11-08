@@ -100,12 +100,12 @@ namespace Iot.Device.Pca95x4
         /// <returns>The pin value of the interrupt (INT).</returns>
         public PinValue ReadInterrupt()
         {
-            if (_controller == null)
+            if (_controller is null)
             {
                 throw new Exception("Master controller has not been initialized.");
             }
 
-            if (_interrupt == null)
+            if (_interrupt is null)
             {
                 throw new Exception("INT pin has not been initialized.");
             }
@@ -161,10 +161,7 @@ namespace Iot.Device.Pca95x4
         /// </summary>
         /// <param name="bitNumber">The Input Register bit number to invert.</param>
         /// <param name="invert">Determines if the Input Register bit polarity is inverted.</param>
-        public void InvertInputRegisterBitPolarity(int bitNumber, bool invert)
-        {
-            WriteBit(Register.PolarityInversion, bitNumber, invert);
-        }
+        public void InvertInputRegisterBitPolarity(int bitNumber, bool invert) => WriteBit(Register.PolarityInversion, bitNumber, invert);
 
         /// <inheritdoc/>
         public void Dispose()
