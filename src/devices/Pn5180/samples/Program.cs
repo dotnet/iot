@@ -344,7 +344,7 @@ void ReadAndDisplayData(CreditCard creditCard)
     DisplayTags(creditCard.Tags, 0);
     // Display Log Entries
     var format = Tag.SearchTag(creditCard.Tags, 0x9F4F).FirstOrDefault();
-    if (format != null)
+    if (format is object)
     {
         DisplayLogEntries(creditCard.LogEntries, format.Tags);
     }

@@ -48,7 +48,7 @@ namespace Iot.Device.UFire
 
             pH = Convert.ToSingle(Math.Abs(7.0 - (mV.Millivolts / ProbeMvToPh)));
 
-            if (temp != null)
+            if (temp is object)
             {
                 double distanceFrom7 = Math.Abs(7 - Math.Round(Ph));
                 double distanceFrom25 = Math.Floor(Math.Abs(25 - Math.Round(temp.Value.DegreesCelsius)) / 10);

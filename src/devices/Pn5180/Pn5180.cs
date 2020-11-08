@@ -94,7 +94,7 @@ namespace Iot.Device.Pn5180
             LogInfo.Log($"Opening PN5180, pin busy: {pinBusy}, pin NSS: {pinNss}", LogLevel.Debug);
             _spiDevice = spiDevice ?? throw new ArgumentException($"{nameof(spiDevice)} cannot be null");
             _gpioController = gpioController ?? new GpioController(PinNumberingScheme.Logical);
-            _shouldDispose = shouldDispose;
+            _shouldDispose = shouldDispose || gpioController is null;
             _pinBusy = pinBusy;
             _pinNss = pinNss;
             _gpioController.OpenPin(_pinBusy, PinMode.Input);
@@ -477,7 +477,7 @@ namespace Iot.Device.Pn5180
                 const int MaxTries = 5;
                 // All the type B protocol 14443-4 is from the ISO14443-4.pdf from ISO website
                 var card = _activeSelected.Where(m => m.Card.TargetNumber == targetNumber).FirstOrDefault();
-                if (card == null)
+                if (card is null)
                 {
                     throw new ArgumentException($"Device with target number {targetNumber} is not part of the list of selected devices. Card may have been removed.");
                 }
@@ -1497,7 +1497,7 @@ namespace Iot.Device.Pn5180
         private void SpiWrite(ReadOnlySpan<byte> toSend)
         {
             // Both master and slave devices must operate with the same timing.The master device
-            // always places data on the MOSI line a half cycle before the clock edge SCK, in order for
+            // always places data on the SDO line a half cycle before the clock edge SCK, in order for
             // the slave device to latch the data.
             // The BUSY line is used to indicate that the system is BUSY and cannot receive any data
             // from a host.Recommendation for the BUSY line handling by the host:
@@ -1535,7 +1535,7 @@ namespace Iot.Device.Pn5180
         private void SpiRead(Span<byte> toRead)
         {
             // Both master and slave devices must operate with the same timing.The master device
-            // always places data on the MOSI line a half cycle before the clock edge SCK, in order for
+            // always places data on the SDI line a half cycle before the clock edge SCK, in order for
             // the slave device to latch the data.
             // The BUSY line is used to indicate that the system is BUSY and cannot receive any data
             // from a host.Recommendation for the BUSY line handling by the host:

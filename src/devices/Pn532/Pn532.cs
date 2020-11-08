@@ -810,12 +810,7 @@ namespace Iot.Device.Pn532
         /// <returns>A raw byte array containing the number of cards, the card type and the raw data. Null if nothing has been polled</returns>
         public byte[]? AutoPoll(byte numberPolling, ushort periodMilliSecond, PollingType[] pollingType)
         {
-            if (pollingType == null)
-            {
-                return null;
-            }
-
-            if (pollingType.Length > 15)
+            if (pollingType is not { Length: >15 })
             {
                 return null;
             }
@@ -1260,7 +1255,7 @@ namespace Iot.Device.Pn532
         /// </summary>
         public void WakeUp()
         {
-            if (_serialPort != null)
+            if (_serialPort is object)
             {
                 // Wakeup the device send the magic 0x55 with a long preamble and SAM Command
                 LogInfo.Log("Waking up device", LogLevel.Debug);
@@ -1292,7 +1287,7 @@ namespace Iot.Device.Pn532
                 _spiDevice.Write(wakeUp);
 
             }
-            else if (_i2cDevice != null)
+            else if (_i2cDevice is object)
             {
                 LogInfo.Log("Waking up PN522 on I2C mode", LogLevel.Debug);
                 byte[] samMessage = CreateWriteMessage(CommandSet.SAMConfiguration,
@@ -1343,7 +1338,7 @@ namespace Iot.Device.Pn532
         /// <returns>True if success</returns>
         public bool SetSerialBaudRate(BaudRate baudRate)
         {
-            if (_serialPort == null)
+            if (_serialPort is null)
             {
                 return false;
             }
@@ -1413,7 +1408,7 @@ namespace Iot.Device.Pn532
 
         private void DumpSerial()
         {
-            if (_serialPort != null)
+            if (_serialPort is object)
             {
                 LogInfo.Log($"Serial Available bytes and dumped: {_serialPort.BytesToRead}", LogLevel.Debug);
                 while (_serialPort.BytesToRead > 0)
@@ -1433,17 +1428,17 @@ namespace Iot.Device.Pn532
             LogInfo.Log(
                 $"{nameof(WriteCommand)}: {nameof(CommandSet)} {commandSet} Bytes to send: {BitConverter.ToString(writeData.ToArray())}",
                 LogLevel.Debug);
-            if (_spiDevice != null)
+            if (_spiDevice is object)
             {
                 return WriteCommandSPI(commandSet, writeData);
             }
 
-            if (_i2cDevice != null)
+            if (_i2cDevice is object)
             {
                 return WriteCommandI2C(commandSet, writeData);
             }
 
-            if (_serialPort != null)
+            if (_serialPort is object)
             {
                 return WriteCommandSerial(commandSet, writeData);
             }
@@ -2034,13 +2029,13 @@ namespace Iot.Device.Pn532
                 _spiDevice.Read(ackReceived);
                 _controller.Write(_pin, PinValue.High);
             }
-            else if (_i2cDevice != null)
+            else if (_i2cDevice is object)
             {
                 Span<byte> i2cackReceived = stackalloc byte[7];
                 _i2cDevice.Read(i2cackReceived);
                 i2cackReceived.Slice(1).CopyTo(ackReceived);
             }
-            else if (_serialPort != null)
+            else if (_serialPort is object)
             {
                 try
                 {
@@ -2069,7 +2064,7 @@ namespace Iot.Device.Pn532
                 ret = _spiDevice.ReadByte();
                 _controller.Write(_pin, PinValue.High);
             }
-            else if (_i2cDevice != null)
+            else if (_i2cDevice is object)
             {
                 try
                 {
@@ -2081,7 +2076,7 @@ namespace Iot.Device.Pn532
                 }
 
             }
-            else if (_serialPort != null)
+            else if (_serialPort is object)
             {
                 return _serialPort.BytesToRead > 0;
             }

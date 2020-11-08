@@ -74,11 +74,10 @@ namespace Iot.Device.Ccs811
             _pinWake = pinWake;
             _pinInterruption = pinInterruption;
             _pinReset = pinReset;
-            _shouldDispose = shouldDispose;
             // We need a GPIO controller only if we are using any of the pin
             if ((_pinInterruption >= 0) || (_pinReset >= 0) || (_pinWake >= 0))
             {
-                _shouldDispose = _shouldDispose || gpioController == null;
+                _shouldDispose = _shouldDispose || gpioController is null;
                 _controller = gpioController ?? new GpioController();
             }
 

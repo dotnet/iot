@@ -344,7 +344,7 @@ namespace Iot.Device.LEDMatrix
         /// </summary>
         public void Dispose()
         {
-            if (_controller != null)
+            if (_controller is object)
             {
                 StopRendering();
 

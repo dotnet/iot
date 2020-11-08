@@ -147,7 +147,7 @@ namespace Iot.Device.GoPiGo3.Movements
 
         private void RunMotorSyncTime(MotorPort[] ports, int[] speeds, int timeout)
         {
-            if ((ports == null) || (speeds == null))
+            if ((ports is null) || (speeds is null))
             {
                 return;
             }
@@ -158,7 +158,7 @@ namespace Iot.Device.GoPiGo3.Movements
             }
 
             // create a timer for the needed time to run
-            if (_timer == null)
+            if (_timer is null)
             {
                 _timer = new Timer(RunUntil, null, TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
             }
@@ -207,7 +207,7 @@ namespace Iot.Device.GoPiGo3.Movements
 
         private void RunMotorSyncDegrees(MotorPort[] ports, int[] speeds, int[] degrees)
         {
-            if ((ports == null) || (speeds == null) || degrees == null)
+            if ((ports is null) || (speeds is null) || degrees is null)
             {
                 return;
             }

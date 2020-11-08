@@ -258,7 +258,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                 // If it is a template or composed, then we need to split it
                 if ((TagList.Tags.Where(m => m.TagNumber == tag.TagNumber).FirstOrDefault()?.IsTemplate == true) || tag.IsConstructed)
                 {
-                    if (tag.Tags == null)
+                    if (tag.Tags is null)
                     {
                         tag.Tags = new List<Tag>();
                     }
@@ -271,7 +271,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                 // Of the object
                 if (TagList.Tags.Where(m => m.TagNumber == tag.TagNumber).FirstOrDefault()?.IsDol == true)
                 {
-                    if (tag.Tags == null)
+                    if (tag.Tags is null)
                     {
                         tag.Tags = new List<Tag>();
                     }
@@ -335,7 +335,7 @@ namespace Iot.Device.Card.CreditCardProcessing
 
             // Search for all tags with entries
             var entries = Tag.SearchTag(Tags, 0x9F4D).FirstOrDefault();
-            if (entries != null)
+            if (entries is object)
             {
                 // SFI entries is first byte and number of records is second one
                 ReadLogEntries(entries.Data[0], entries.Data[1]);
@@ -363,7 +363,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                     Tag? appPriotity = Tag.SearchTag(app.Tags, 0x87).FirstOrDefault();
                     // As it is not mandatory, some cards will have only 1
                     // application and this may not be present
-                    if (appPriotity == null)
+                    if (appPriotity is null)
                     {
                         appPriotity = new Tag() { Data = new byte[1] { 0 } };
                     }
@@ -376,15 +376,15 @@ namespace Iot.Device.Card.CreditCardProcessing
                         // We need to select the Template 0x6F where the Tag 0x84 contains the same App Id and where we have a template A5 attached.
                         var templates = Tags
                             .Where(m => m.TagNumber == 0x6F)
-                            .Where(m => m.Tags.Where(t => t.TagNumber == 0x84).Where(t => t.Data.SequenceEqual(appIdentifier.Data)) != null)
-                            .Where(m => m.Tags.Where(t => t.TagNumber == 0xA5) != null);
+                            .Where(m => m.Tags.Where(t => t.TagNumber == 0x84).Where(t => t.Data.SequenceEqual(appIdentifier.Data)) is object)
+                            .Where(m => m.Tags.Where(t => t.TagNumber == 0xA5) is object);
                         // Only here we may find a PDOL tag 0X9F38
                         Tag? pdol = null;
                         foreach (var temp in templates)
                         {
                             // We are sure to have 0xA5, so select it and search for PDOL
                             pdol = Tag.SearchTag(temp.Tags, 0xA5).FirstOrDefault()?.Tags.Where(m => m.TagNumber == 0x9F38).FirstOrDefault();
-                            if (pdol != null)
+                            if (pdol is object)
                             {
                                 break;
                             }
@@ -393,7 +393,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                         Span<byte> received = new byte[260];
                         byte sumDol = 0;
                         // Do we have a PDOL?
-                        if (pdol != null)
+                        if (pdol is object)
                         {
                             // So we need to send as may bytes as it request
                             foreach (var dol in pdol.Tags)
@@ -410,7 +410,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                         // If we have a PDOL, then we need to fill it properly
                         // Some fields are mandatory
                         int index = 2;
-                        if (pdol != null)
+                        if (pdol is object)
                         {
                             foreach (var dol in pdol.Tags)
                             {
@@ -481,7 +481,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                             }
                         }
 
-                        if ((ret == ErrorType.ProcessCompletedNormal) && (appLocator != null))
+                        if ((ret == ErrorType.ProcessCompletedNormal) && (appLocator is object))
                         {
                             // Now decode the appLocator
                             // Format is SFI - start - stop - number of records
@@ -543,7 +543,7 @@ namespace Iot.Device.Card.CreditCardProcessing
             {
                 // It's the old way, so looking for tag 0x88
                 var appSfi = Tag.SearchTag(Tags, 0x88).FirstOrDefault();
-                if (appSfi != null)
+                if (appSfi is object)
                 {
                     LogInfo.Log($"AppSFI: {appSfi.Data[0]}", LogLevel.Debug);
                     for (byte record = 1; record < 10; record++)

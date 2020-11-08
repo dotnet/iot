@@ -425,7 +425,7 @@ namespace Iot.Device.Ssd1351
         /// If this parameter is null or an empty array then the gray leves are set to default.</param>
         public void SetGrayLevels(byte[]? grayLevels = null)
         {
-            if (grayLevels == null || grayLevels.Length == 0)
+            if (grayLevels is null || grayLevels.Length == 0)
             {
                 SendCommand(Ssd1351Command.SetDefaultGrayLevels);
             }

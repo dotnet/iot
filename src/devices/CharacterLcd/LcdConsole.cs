@@ -215,7 +215,7 @@ namespace Iot.Device.CharacterLcd
         /// </remarks>
         public void Write(string text)
         {
-            if (text == null)
+            if (text is null)
             {
                 throw new ArgumentNullException(nameof(text));
             }

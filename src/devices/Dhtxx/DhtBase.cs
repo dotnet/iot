@@ -93,7 +93,7 @@ namespace Iot.Device.DHTxx
         public DhtBase(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _protocol = CommunicationProtocol.OneWire;
-            _shouldDispose = gpioController == null ? true : shouldDispose;
+            _shouldDispose = shouldDispose || gpioController is null;
             _controller = gpioController ?? new GpioController(pinNumberingScheme);
             _pin = pin;
 

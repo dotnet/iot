@@ -148,12 +148,12 @@ namespace Iot.Device.Ft4222
         {
             _pinFallingHandlers[pinNumber] -= callback;
             _pinRisingHandlers[pinNumber] -= callback;
-            if (_pinFallingHandlers == null)
+            if (_pinFallingHandlers is null)
             {
                 _gpioTriggers[pinNumber] &= ~GpioTrigger.Falling;
             }
 
-            if (_pinRisingHandlers == null)
+            if (_pinRisingHandlers is null)
             {
                 _gpioTriggers[pinNumber] &= ~GpioTrigger.Rising;
             }

@@ -644,7 +644,7 @@ namespace Iot.Device.GoPiGo3
             // Wait for the sensors to be read
             // In theory 115µs per byte sent
             int towait = 0;
-            if (arrayToSend != null)
+            if (arrayToSend is object)
             {
                 if (arrayToSend.Length != 0)
                 {

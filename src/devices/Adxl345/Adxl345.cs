@@ -108,7 +108,7 @@ namespace Iot.Device.Adxl345
         /// </summary>
         public void Dispose()
         {
-            if (_sensor != null)
+            if (_sensor is object)
             {
                 _sensor.Dispose();
                 _sensor = null!;

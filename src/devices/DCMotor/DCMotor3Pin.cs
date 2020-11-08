@@ -21,9 +21,9 @@ namespace Iot.Device.DCMotor
             int pin1,
             GpioController? controller,
             bool shouldDispose)
-            : base(controller ?? new GpioController(), controller == null ? true : shouldDispose)
+            : base(controller ?? new GpioController(), controller is null ? true : shouldDispose)
         {
-            if (pwmChannel == null)
+            if (pwmChannel is null)
             {
                 throw new ArgumentNullException(nameof(pwmChannel));
             }

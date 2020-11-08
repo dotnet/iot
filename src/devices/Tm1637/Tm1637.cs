@@ -53,7 +53,7 @@ namespace Iot.Device.Tm1637
             _pinClk = pinClk;
             _pinDio = pinDio;
             _controller = gpioController ?? new GpioController(pinNumberingScheme);
-            _shouldDispose = gpioController is null || shouldDispose ? true : shouldDispose;
+            _shouldDispose = shouldDispose || gpioController is null;
             _controller.OpenPin(_pinClk, PinMode.Output);
             _controller.OpenPin(_pinDio, PinMode.Output);
             _brightness = 7;

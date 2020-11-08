@@ -65,7 +65,7 @@ namespace Iot.Device.CharacterLcd
                     throw new ArgumentException($"The length of the array given to parameter {nameof(dataPins)} must be 4 or 8");
                 }
 
-                _shouldDispose = controller == null ? true : shouldDispose;
+                _shouldDispose = shouldDispose || controller is null;
                 _controller = controller ?? new GpioController(PinNumberingScheme.Logical);
 
                 Initialize();

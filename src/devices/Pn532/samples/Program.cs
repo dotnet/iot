@@ -78,7 +78,7 @@ void ReadMiFare(Pn532 pn532)
     while ((!Console.KeyAvailable))
     {
         retData = pn532.ListPassiveTarget(MaxTarget.One, TargetBaudRate.B106kbpsTypeA);
-        if (retData != null)
+        if (retData is object)
         {
             break;
         }
@@ -87,17 +87,17 @@ void ReadMiFare(Pn532 pn532)
         Thread.Sleep(200);
     }
 
-    if (retData == null)
+    if (retData is null)
     {
         return;
     }
 
     var decrypted = pn532.TryDecode106kbpsTypeA(retData.AsSpan().Slice(1));
-    if (decrypted != null)
+    if (decrypted is object)
     {
         Console.WriteLine(
             $"Tg: {decrypted.TargetNumber}, ATQA: {decrypted.Atqa} SAK: {decrypted.Sak}, NFCID: {BitConverter.ToString(decrypted.NfcId)}");
-        if (decrypted.Ats != null)
+        if (decrypted.Ats is object)
         {
             Console.WriteLine($", ATS: {BitConverter.ToString(decrypted.Ats)}");
         }
@@ -202,7 +202,7 @@ void ReadCreditCard(Pn532 pn532)
     while ((!Console.KeyAvailable))
     {
         retData = pn532.AutoPoll(5, 300, new PollingType[] { PollingType.Passive106kbpsISO144443_4B });
-        if (retData != null)
+        if (retData is object)
         {
             if (retData.Length >= 3)
             {
@@ -214,7 +214,7 @@ void ReadCreditCard(Pn532 pn532)
         Thread.Sleep(200);
     }
 
-    if (retData == null)
+    if (retData is null)
     {
         return;
     }
@@ -222,7 +222,7 @@ void ReadCreditCard(Pn532 pn532)
     // Check how many tags and the type
     Console.WriteLine($"Num tags: {retData[0]}, Type: {(PollingType)retData[1]}");
     var decrypted = pn532.TryDecodeData106kbpsTypeB(retData.AsSpan().Slice(3));
-    if (decrypted != null)
+    if (decrypted is object)
     {
         Console.WriteLine(
             $"{decrypted.TargetNumber}, Serial: {BitConverter.ToString(decrypted.NfcId)}, App Data: {BitConverter.ToString(decrypted.ApplicationData)}, " +

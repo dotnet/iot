@@ -22,7 +22,7 @@ namespace Iot.Device.Ssd1351
         private readonly int _dcPinId;
         private readonly int _resetPinId;
         private readonly int _spiBufferSize;
-        private readonly bool _disposeGpioController;
+        private readonly bool _shouldDispose;
 
         private SpiDevice _spiDevice;
         private GpioController _gpioDevice;
@@ -49,7 +49,7 @@ namespace Iot.Device.Ssd1351
             }
 
             _gpioDevice = gpioController ?? new GpioController();
-            _disposeGpioController = gpioController == null ? true : shouldDispose;
+            _shouldDispose = shouldDispose || gpioController is null;
 
             _spiDevice = spiDevice ?? throw new ArgumentException($"{nameof(spiDevice)} cannot be null");
 
@@ -238,7 +238,7 @@ namespace Iot.Device.Ssd1351
         {
             if (data == null)
             {
-                throw new ArgumentNullException(nameof(data));
+                throw new ArgumentNullException($"{nameof(data)} cannot be null");
             }
 
             // create a buffer to contain the data plus pseudo command to indicate data.
@@ -278,7 +278,7 @@ namespace Iot.Device.Ssd1351
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_disposeGpioController)
+            if (_shouldDispose)
             {
                 _gpioDevice?.Dispose();
                 _gpioDevice = null!;

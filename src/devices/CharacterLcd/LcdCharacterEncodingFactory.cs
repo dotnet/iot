@@ -379,7 +379,7 @@ namespace Iot.Device.CharacterLcd
         /// <exception cref="ArgumentException">The character specified as unknownLetter must be part of the mapping.</exception>
         public LcdCharacterEncoding Create(CultureInfo culture, string romName, char unknownLetter, int maxNumberOfCustomCharacters)
         {
-            if (culture == null)
+            if (culture is null)
             {
                 throw new ArgumentNullException(nameof(culture));
             }
@@ -422,7 +422,7 @@ namespace Iot.Device.CharacterLcd
                     if (charPos < maxNumberOfCustomCharacters)
                     {
                         var pixelMap = CreateLetter(c, romName);
-                        if (pixelMap != null)
+                        if (pixelMap is object)
                         {
                             extraCharacters.Add(pixelMap);
                             characterMapping.Add(c, charPos);

@@ -74,7 +74,7 @@ namespace Iot.Device.Uln2003
             _pin4 = pin4;
 
             _controller = controller ?? new GpioController();
-            _shouldDispose = controller == null ? true : shouldDispose;
+            _shouldDispose = shouldDispose || controller is null;
             _stepsToRotate = stepsToRotate;
 
             _controller.OpenPin(_pin1, PinMode.Output);

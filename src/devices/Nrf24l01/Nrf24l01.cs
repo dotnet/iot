@@ -155,7 +155,7 @@ namespace Iot.Device.Nrf24l01
             _ce = ce;
             _irq = irq;
             PacketSize = packetSize;
-            _shouldDispose = gpioController == null ? true : shouldDispose;
+            _shouldDispose = shouldDispose || gpioController is null;
 
             Initialize(pinNumberingScheme, outputPower, dataRate, channel, gpioController);
             InitializePipe();

@@ -50,7 +50,7 @@ namespace Iot.Device.Ads1115
         public Ads1115(I2cDevice i2cDevice, InputMultiplexer inputMultiplexer = InputMultiplexer.AIN0, MeasuringRange measuringRange = MeasuringRange.FS4096,
             DataRate dataRate = DataRate.SPS128, DeviceMode deviceMode = DeviceMode.Continuous)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException($"{nameof(i2cDevice)} cannot be null");
             _inputMultiplexer = inputMultiplexer;
             _measuringRange = measuringRange;
             _dataRate = dataRate;
@@ -61,7 +61,6 @@ namespace Iot.Device.Ads1115
             _comparatorPolarity = ComparatorPolarity.Low;
             _comparatorLatching = ComparatorLatching.NonLatching;
             _comparatorQueue = ComparatorQueue.Disable;
-            _shouldDispose = false;
 
             SetConfig();
             DisableAlertReadyPin();
@@ -90,7 +89,7 @@ namespace Iot.Device.Ads1115
             }
 
             _gpioInterruptPin = gpioInterruptPin;
-            _shouldDispose = shouldDispose;
+            _shouldDispose = shouldDispose || gpioController is null;
         }
 
         /// <summary>
@@ -275,7 +274,7 @@ namespace Iot.Device.Ads1115
                 (byte)Register.ADC_CONFIG_REG_HI_THRESH, 0x7F, 0xFF
             };
             _i2cDevice.Write(writeBuff);
-            if (_gpioController != null)
+            if (_gpioController is object)
             {
                 _gpioController.UnregisterCallbackForPinValueChangedEvent(_gpioInterruptPin, ConversionReadyCallback);
                 _gpioController.ClosePin(_gpioInterruptPin);
@@ -309,7 +308,7 @@ namespace Iot.Device.Ads1115
         /// for interrupt handling.</exception>
         public void EnableConversionReady()
         {
-            if (_gpioController == null)
+            if (_gpioController is null)
             {
                 throw new InvalidOperationException("Must have provided a GPIO Controller for interrupt handling.");
             }
@@ -339,7 +338,7 @@ namespace Iot.Device.Ads1115
 
         private void ConversionReadyCallback(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
         {
-            if (AlertReadyAsserted != null)
+            if (AlertReadyAsserted is object)
             {
                 AlertReadyAsserted();
             }
@@ -375,7 +374,7 @@ namespace Iot.Device.Ads1115
         public void EnableComparator(short lowerValue, short upperValue, ComparatorMode mode,
             ComparatorQueue queueLength)
         {
-            if (_gpioController == null)
+            if (_gpioController is null)
             {
                 throw new InvalidOperationException("GPIO Controller must have been provided in constructor for this operation to work");
             }
@@ -612,7 +611,7 @@ namespace Iot.Device.Ads1115
         /// </summary>
         public void Dispose()
         {
-            if (_i2cDevice != null)
+            if (_i2cDevice is object)
             {
                 DisableAlertReadyPin();
                 _i2cDevice.Dispose();

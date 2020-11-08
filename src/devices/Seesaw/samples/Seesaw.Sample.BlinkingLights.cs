@@ -83,7 +83,7 @@ while (true)
     }
 
     // behavior for buttonOne
-    if (volume != null)
+    if (volume is object)
     {
         var update = true;
         var value = 0;

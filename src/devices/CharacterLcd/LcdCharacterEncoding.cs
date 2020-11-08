@@ -92,7 +92,7 @@ namespace Iot.Device.CharacterLcd
             for (int i = 0; i < charCount; i++)
             {
                 byte b;
-                if (_characterMapping == null)
+                if (_characterMapping is null)
                 {
                     bytes[byteIndex] = (byte)chars[charIndex];
                 }
