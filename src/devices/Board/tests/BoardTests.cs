@@ -100,10 +100,14 @@ namespace Iot.Device.Board.Tests
             Board b = new CustomGenericBoard(PinNumberingScheme.Board) { MockedDriver = _mockedGpioDriver.Object };
             var ctrl = b.CreateGpioController();
             ctrl.OpenPin(2); // logical pin 1 on our test board
+            bool wasCalled = false;
             ctrl.RegisterCallbackForPinValueChangedEvent(2, PinEventTypes.Rising, (sender, args) =>
             {
-                Assert.Equal(1, args.PinNumber);
+                wasCalled = true;
+                Assert.Equal(2, args.PinNumber);
             });
+
+            Assert.True(wasCalled);
         }
 
         [Fact]
