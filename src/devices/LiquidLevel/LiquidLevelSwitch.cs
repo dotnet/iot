@@ -26,7 +26,7 @@ namespace Iot.Device.LiquidLevel
         public LiquidLevelSwitch(int dataPin, PinValue liquidPresentPinState, GpioController? gpioController = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
         {
             _controller = gpioController ?? new GpioController(pinNumberingScheme);
-            _shouldDispose = shouldDispose || gpioController == null;
+            _shouldDispose = shouldDispose || gpioController is null;
             _dataPin = dataPin;
             _liquidPresentPinState = liquidPresentPinState;
 
