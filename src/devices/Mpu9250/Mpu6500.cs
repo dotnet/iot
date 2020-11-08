@@ -585,12 +585,12 @@ namespace Iot.Device.Imu
                 ReadBytes(Register.FIFO_R_W, rawData);
 
                 // Form signed 16-bit integer for each sample in FIFO
-                accel_temp.X = BinaryPrimitives.ReadUInt16BigEndian(rawData);
-                accel_temp.Y = BinaryPrimitives.ReadUInt16BigEndian(rawData.Slice(2));
-                accel_temp.Z = BinaryPrimitives.ReadUInt16BigEndian(rawData.Slice(4));
-                gyro_temp.X = BinaryPrimitives.ReadUInt16BigEndian(rawData.Slice(6));
-                gyro_temp.Y = BinaryPrimitives.ReadUInt16BigEndian(rawData.Slice(8));
-                gyro_temp.Z = BinaryPrimitives.ReadUInt16BigEndian(rawData.Slice(10));
+                accel_temp.X = BinaryPrimitives.ReadInt16BigEndian(rawData);
+                accel_temp.Y = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(2));
+                accel_temp.Z = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(4));
+                gyro_temp.X = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(6));
+                gyro_temp.Y = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(8));
+                gyro_temp.Z = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(10));
 
                 acceBias += accel_temp;
                 gyroBias += gyro_temp;
@@ -636,11 +636,11 @@ namespace Iot.Device.Imu
             Span<byte> accData = stackalloc byte[2];
             // Read factory accelerometer trim values
             ReadBytes(Register.XA_OFFSET_H, accData);
-            accel_bias_reg.X = BinaryPrimitives.ReadUInt16BigEndian(accData);
+            accel_bias_reg.X = BinaryPrimitives.ReadInt16BigEndian(accData);
             ReadBytes(Register.YA_OFFSET_H, accData);
-            accel_bias_reg.Y = BinaryPrimitives.ReadUInt16BigEndian(accData);
+            accel_bias_reg.Y = BinaryPrimitives.ReadInt16BigEndian(accData);
             ReadBytes(Register.ZA_OFFSET_H, accData);
-            accel_bias_reg.Z = BinaryPrimitives.ReadUInt16BigEndian(accData);
+            accel_bias_reg.Z = BinaryPrimitives.ReadInt16BigEndian(accData);
 
             // Define mask for temperature compensation bit 0 of lower byte of
             // accelerometer bias registers
