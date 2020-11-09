@@ -15,21 +15,9 @@ namespace Iot.Device.HuskyLens
             _data = data.ToArray();
         }
 
-        public Command Command
-        {
-            get
-            {
-                return (Command)_data[4];
-            }
-        }
+        public Command Command => (Command)_data[4];
 
-        public ReadOnlySpan<byte> Data
-        {
-            get
-            {
-                return new ReadOnlySpan<byte>(_data, 5, _data[3]);
-            }
-        }
+        public ReadOnlySpan<byte> Data => new ReadOnlySpan<byte>(_data, 5, _data[3]);
 
         public bool Valid()
         {
@@ -42,15 +30,9 @@ namespace Iot.Device.HuskyLens
         }
 
         /// <inheritdoc/>
-        public override string ToString()
-        {
-            return $"Frame: c={Command}, d={string.Join(" ", Data.ToArray().Select(d => $"{d:X}"))}";
-        }
+        public override string ToString() => $"Frame: c={Command}, d={string.Join(" ", Data.ToArray().Select(d => $"{d:X}"))}";
 
-        private byte CalculateChecksum()
-        {
-            return (byte)(_data.Take(_data.Length - 1).Aggregate(0x00, (a, b) => a + b) & 0xFF);
-        }
+        private byte CalculateChecksum() => (byte)(_data.Take(_data.Length - 1).Aggregate(0x00, (a, b) => a + b) & 0xFF);
     }
 
     internal enum Command : byte

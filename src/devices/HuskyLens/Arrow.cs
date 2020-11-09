@@ -35,10 +35,7 @@ namespace Iot.Device.HuskyLens
         }
 
         /// <inheritdoc/>
-        public override string ToString()
-        {
-            return $"Arrow: o={Origin}, t={Target}, id={Id}";
-        }
+        public override string ToString() => $"Arrow: o={Origin}, t={Target}, id={Id}";
 
         /// <summary>
         /// Creates a new object from the wire protocol data
