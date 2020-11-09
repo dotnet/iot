@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30626.31
+# Visual Studio 15
+VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{45EC0518-E2FF-4278-ABDB-E0A2D79E71BE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CpuTemperature.Samples", "samples\CpuTemperature.Samples.csproj", "{356BCA51-E8A9-4190-A814-70A6F87E33E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenHardwareMonitor.Samples", "samples\OpenHardwareMonitor.Samples.csproj", "{356BCA51-E8A9-4190-A814-70A6F87E33E1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CpuTemperature", "CpuTemperature.csproj", "{B9CCBDB6-FAE3-49BF-B654-30698EF8131D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HardwareMonitor", "..\HardwareMonitor\HardwareMonitor.csproj", "{91BF18B9-1511-4910-8E30-FA0D2EADF18E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HardwareMonitor", "HardwareMonitor.csproj", "{B9CCBDB6-FAE3-49BF-B654-30698EF8131D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +17,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{356BCA51-E8A9-4190-A814-70A6F87E33E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -45,26 +46,8 @@ Global
 		{B9CCBDB6-FAE3-49BF-B654-30698EF8131D}.Release|x64.Build.0 = Release|Any CPU
 		{B9CCBDB6-FAE3-49BF-B654-30698EF8131D}.Release|x86.ActiveCfg = Release|Any CPU
 		{B9CCBDB6-FAE3-49BF-B654-30698EF8131D}.Release|x86.Build.0 = Release|Any CPU
-		{91BF18B9-1511-4910-8E30-FA0D2EADF18E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{91BF18B9-1511-4910-8E30-FA0D2EADF18E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{91BF18B9-1511-4910-8E30-FA0D2EADF18E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{91BF18B9-1511-4910-8E30-FA0D2EADF18E}.Debug|x64.Build.0 = Debug|Any CPU
-		{91BF18B9-1511-4910-8E30-FA0D2EADF18E}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{91BF18B9-1511-4910-8E30-FA0D2EADF18E}.Debug|x86.Build.0 = Debug|Any CPU
-		{91BF18B9-1511-4910-8E30-FA0D2EADF18E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{91BF18B9-1511-4910-8E30-FA0D2EADF18E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{91BF18B9-1511-4910-8E30-FA0D2EADF18E}.Release|x64.ActiveCfg = Release|Any CPU
-		{91BF18B9-1511-4910-8E30-FA0D2EADF18E}.Release|x64.Build.0 = Release|Any CPU
-		{91BF18B9-1511-4910-8E30-FA0D2EADF18E}.Release|x86.ActiveCfg = Release|Any CPU
-		{91BF18B9-1511-4910-8E30-FA0D2EADF18E}.Release|x86.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{356BCA51-E8A9-4190-A814-70A6F87E33E1} = {45EC0518-E2FF-4278-ABDB-E0A2D79E71BE}
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {822036DB-5CBC-45E9-B5B4-07FB884DF248}
 	EndGlobalSection
 EndGlobal

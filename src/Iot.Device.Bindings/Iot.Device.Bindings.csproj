@@ -26,6 +26,7 @@
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
+    <PackageReference Include="System.Management" Version="$(SystemManagementPackageVersion)" />
   </ItemGroup>
 
 </Project>
