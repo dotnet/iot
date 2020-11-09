@@ -105,7 +105,7 @@ namespace Iot.Device.Bno055
             OperationMode operationMode = OperationMode.AccelerometerMagnetometerGyroscopeRelativeOrientation,
             bool shouldDispose = true)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _shouldDispose = shouldDispose;
 
             // A first write to initate the device

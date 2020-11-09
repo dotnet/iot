@@ -405,7 +405,7 @@ namespace Iot.Device.Ccs811
 
             if (!IsPpmValidThreshold(highEquivalentCO2))
             {
-                throw new ArgumentException(nameof(highEquivalentCO2), $" Value can only be between 0 and {ushort.MaxValue}.");
+                throw new ArgumentException(nameof(highEquivalentCO2), $"Value can only be between 0 and {ushort.MaxValue}.");
             }
 
             if (lowEquivalentCO2 > highEquivalentCO2)

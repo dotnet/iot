@@ -113,7 +113,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         {
             if (led > 10)
             {
-                    throw new ArgumentException(nameof(led), "Only 10 leds can be controlled, 1-10.");
+                throw new ArgumentException(nameof(led), "Only 10 leds can be controlled, 1-10.");
             }
 
             _grovePi.WriteCommand(GrovePiCommand.LedBarSetOneLed, _port, led, status ? (byte)1 : (byte)0);
