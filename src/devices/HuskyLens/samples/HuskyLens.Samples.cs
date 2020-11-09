@@ -30,7 +30,7 @@ namespace Iot.Device.HuskyLens.Samples
             }
             else
             {
-                Console.WriteLine("Yeah, it sucks, but we failed");
+                Console.WriteLine("Failed to verify connection with HuskyLens device");
             }
 
             Console.WriteLine("Switching to face recognition");
