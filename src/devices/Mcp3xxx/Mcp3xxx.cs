@@ -135,8 +135,7 @@ namespace Iot.Device.Adc
             // then incorporate the lower bit which indicates if the channel is inverted or not.
             int channelVal = inputType switch
             {
-                InputType.Differential => channel * 2,
-                InputType.InvertedDifferential => channel * 2,
+                InputType.Differential | InputType.InvertedDifferential => channel * 2,
                 _ =>channel,
             };
 
