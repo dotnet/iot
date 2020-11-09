@@ -158,7 +158,7 @@ namespace Iot.Device.Pn532
         public Pn532(SpiDevice spiDevice, LogLevel logLevel = LogLevel.None)
         {
             LogLevel = logLevel;
-            _spiDevice = spiDevice ?? throw new ArgumentException(nameof(spiDevice));
+            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             _controller = new GpioController();
             _controller.OpenPin(_pin, PinMode.Output);
             _controller.Write(_pin, PinValue.High);
