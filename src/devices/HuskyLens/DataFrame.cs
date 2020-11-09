@@ -19,7 +19,7 @@ namespace Iot.Device.HuskyLens
 
         public ReadOnlySpan<byte> Data => new ReadOnlySpan<byte>(_data, 5, _data[3]);
 
-        public bool Valid()
+        public bool IsValid()
         {
             return
             _data[0] == 0x55 &&

@@ -69,7 +69,7 @@ namespace Iot.Device.HuskyLens
 
             // wait for COMMAND_RETURN_INFO
             var response = new DataFrame(_connection.Read(0x0A + 6));
-            if (!response.Valid() || response.Command != Command.COMMAND_RETURN_INFO)
+            if (!response.IsValid() || response.Command != Command.COMMAND_RETURN_INFO)
             {
                 // error
                 throw new NotImplementedException();
@@ -82,7 +82,7 @@ namespace Iot.Device.HuskyLens
             for (int i = 0; i < count; i++)
             {
                 response = new DataFrame(_connection.Read(0x0A + 6));
-                if (!response.Valid())
+                if (!response.IsValid())
                 {
                     // error
                     throw new NotImplementedException();
