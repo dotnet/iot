@@ -189,7 +189,7 @@ namespace Iot.Device.Pn532
         public Pn532(I2cDevice i2cDevice, LogLevel logLevel = LogLevel.None)
         {
             LogLevel = logLevel;
-            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             WakeUp();
             bool ret = SetSecurityAccessModule();
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
