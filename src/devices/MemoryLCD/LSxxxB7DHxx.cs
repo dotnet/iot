@@ -72,17 +72,17 @@ namespace Iot.Device.MemoryLcd
         /// <summary>
         /// Create a memory LCD device
         /// </summary>
-        /// <param name="spi">SPI controller</param>
-        /// <param name="gpio"><see cref="GpioController"/> related with operations on pins</param>
+        /// <param name="spi">SPI controller<br/><b>ChipSelectLineActiveState</b> must be <b>HIGH</b> or use <paramref name="gpio"/> and <paramref name="chipSelect"/>. See Datasheet 6-3</param>
+        /// <param name="gpio">GPIO controller</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        /// <param name="scs">Chip select signal</param>
-        /// <param name="disp">Display ON/OFF signal</param>
-        /// <param name="extcomin">External COM inversion signal input</param>
-        internal LSxxxB7DHxx(SpiDevice spi, GpioController? gpio = null, bool shouldDispose = true, int scs = -1, int disp = -1, int extcomin = -1)
+        /// <param name="chipSelect">Chip select signal<br/>-1 when using SPI chipSelect line</param>
+        /// <param name="display">Display ON/OFF signal</param>
+        /// <param name="externalCom">External COM inversion signal input</param>
+        internal LSxxxB7DHxx(SpiDevice spi, GpioController? gpio = null, bool shouldDispose = true, int chipSelect = -1, int display = -1, int externalCom = -1)
         {
             _spi = spi ?? throw new ArgumentNullException(nameof(spi));
 
-            if (scs != -1 || disp != -1 || extcomin != -1)
+            if (chipSelect != -1 || display != -1 || externalCom != -1)
             {
                 _shouldDispose = gpio == null || shouldDispose;
                 _gpio = gpio;
@@ -93,9 +93,9 @@ namespace Iot.Device.MemoryLcd
                 _gpio = null;
             }
 
-            _scs = scs;
-            _disp = disp;
-            _extcomin = extcomin;
+            _scs = chipSelect;
+            _disp = display;
+            _extcomin = externalCom;
 
             BytesPerLine = (PixelWidth + 7) / 8;
 
