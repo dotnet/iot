@@ -68,7 +68,7 @@ namespace Iot.Device.Vl53L0X
         /// <param name="shouldDispose">True to dispose the I2C Device at dispose</param>
         public Vl53L0X(I2cDevice i2cDevice, int operationTimeoutMilliseconds = 500, bool shouldDispose = true)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _shouldDispose = shouldDispose;
             _operationTimeout = operationTimeoutMilliseconds;
             Reset();
