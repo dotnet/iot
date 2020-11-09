@@ -13,11 +13,32 @@ namespace Iot.Device.HuskyLens
     public class HuskyLens
     {
         private readonly IBinaryConnection _connection;
+        private Algorithm _algorithm;
 
         /// <summary>
         /// Algorithm currently used.
         /// </summary>
-        public Algorithm Algorithm { get; private set; }
+        public Algorithm Algorithm
+        {
+            get => _algorithm;
+            set
+            {
+                if (value == Algorithm.Undefined)
+                {
+                    throw new ArgumentException("Not supported", nameof(value));
+                }
+
+                // COMMAND_REQUEST_ALGORITHM(0x2D):
+                // When HUSKYLENS receives this command, HUSKYLENS will change the algorithm by the Data. And will return COMMAND_RETURN_OK.
+                // See: https://github.com/HuskyLens/HUSKYLENSArduino/blob/master/HUSKYLENS%20Protocol.md#command_request_algorithm0x2d
+                var command = new byte[] { 0x55, 0xAA, 0x11, 0x02, 0x2D, (byte)value, 0x00, 0x00 };
+                command[7] = command.CalculateChecksum();
+                _connection.Write(command);
+                WaitForOK();
+
+                _algorithm = value;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -41,27 +62,6 @@ namespace Iot.Device.HuskyLens
             _connection.Write(new byte[] { 0x55, 0xAA, 0x11, 0x00, 0x2C, 0x3C });
             WaitForOK();
             return true;
-        }
-
-        /// <summary>
-        /// Sets the currently active algorithm
-        /// </summary>
-        /// <param name="algorithm">the algorithm</param>
-        public void SetAlgorithm(Algorithm algorithm)
-        {
-            if (algorithm == Algorithm.Undefined)
-            {
-                throw new ArgumentException("Not supported", nameof(algorithm));
-            }
-
-            Algorithm = algorithm;
-            // COMMAND_REQUEST_ALGORITHM(0x2D):
-            // When HUSKYLENS receives this command, HUSKYLENS will change the algorithm by the Data. And will return COMMAND_RETURN_OK.
-            // See: https://github.com/HuskyLens/HUSKYLENSArduino/blob/master/HUSKYLENS%20Protocol.md#command_request_algorithm0x2d
-            var command = new byte[] { 0x55, 0xAA, 0x11, 0x02, 0x2D, (byte)algorithm, 0x00, 0x00 };
-            command[7] = command.CalculateChecksum();
-            _connection.Write(command);
-            WaitForOK();
         }
 
         /// <summary>

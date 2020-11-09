@@ -34,12 +34,12 @@ namespace Iot.Device.HuskyLens.Samples
             }
 
             Console.WriteLine("Switching to face recognition");
-            device.SetAlgorithm(Algorithm.FaceRecognition);
+            device.Algorithm = Algorithm.FaceRecognition;
 
             Console.WriteLine("Press enter");
             Console.ReadLine();
             Console.WriteLine("Switching to object tracking");
-            device.SetAlgorithm(Algorithm.ObjectTracking);
+            device.Algorithm = Algorithm.ObjectTracking;
 
             Console.WriteLine("Press enter");
             Console.ReadLine();
