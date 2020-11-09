@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HuskyLens.csproj" />
-    <PackageReference Include="System.IO.Ports" Version="4.7.0" />
+    <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
   </ItemGroup>
 
 </Project>
