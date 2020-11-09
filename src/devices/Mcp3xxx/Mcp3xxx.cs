@@ -106,7 +106,7 @@ namespace Iot.Device.Adc
 
             if (valueChannel == referenceChannel)
             {
-                throw new ArgumentException($"ADC differential channels must be different. {nameof(valueChannel)} - {nameof(referenceChannel)}");
+                throw new ArgumentException(nameof(valueChannel), $"ADC differential channels must be different. {nameof(valueChannel)} - {nameof(referenceChannel)}");
             }
 
             return ReadInternal(valueChannel, InputType.SingleEnded, _adcResolutionBits) -

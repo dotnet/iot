@@ -271,7 +271,7 @@ namespace Iot.Device.Mcp25xxx
         {
             if (byteCount < 1)
             {
-                throw new ArgumentException($"Invalid number of bytes {byteCount}.", nameof(byteCount));
+                throw new ArgumentException(nameof(byteCount), "Invalid number of bytes.");
             }
 
             const int StackThreshold = 31; // Usually won't read more than this at a time.

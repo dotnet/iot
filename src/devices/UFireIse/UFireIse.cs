@@ -59,7 +59,7 @@ namespace Iot.Device.UFire
         /// </summary>
         /// <param name="i2cDevice">The I2C device to be used</param>
         public UFireIse(I2cDevice i2cDevice) =>
-            _device = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
+            _device = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
 
         /// <summary>
         /// Read a value from the ISE Probe Interface, typical measure are in the millivolt range.

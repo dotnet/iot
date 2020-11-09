@@ -28,7 +28,7 @@ namespace Iot.Device.Pn532.AsTarget
             {
                 if (value.Length != _nfcId3.Length)
                 {
-                    throw new ArgumentException($"{nameof(NfcId3)} can only be {_nfcId3.Length} byte long");
+                    throw new ArgumentException(nameof(NfcId3), $"Value must be {_nfcId3.Length} bytes.");
                 }
 
                 value.CopyTo(_nfcId3, 0);
@@ -46,7 +46,7 @@ namespace Iot.Device.Pn532.AsTarget
             {
                 if (value.Length > 47)
                 {
-                    throw new ArgumentException($"{nameof(GeneralTarget)} can only be less than 47 byte long");
+                    throw new ArgumentException(nameof(GeneralTarget), "Value must be less than 47 bytes.");
                 }
 
                 _generalTarget = new byte[value.Length];
@@ -64,7 +64,7 @@ namespace Iot.Device.Pn532.AsTarget
             {
                 if (value.Length > 48)
                 {
-                    throw new ArgumentException($"{nameof(HistoricalTarget)} can only be less than 48 byte long");
+                    throw new ArgumentException(nameof(HistoricalTarget), "Value must be less than 48 bytes.");
                 }
 
                 _historicalTarget = new byte[value.Length];

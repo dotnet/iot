@@ -22,8 +22,8 @@ namespace Iot.Device.Max7219
         /// <param name="font">Font to use for drawing text</param>
         public MatrixGraphics(Max7219 device, IFont font)
         {
-            _device = device ?? throw new ArgumentNullException($"{nameof(device)} cannot be null");
-            Font = font ?? throw new ArgumentNullException($"{nameof(font)} cannot be null");
+            _device = device ?? throw new ArgumentNullException(nameof(device));
+            Font = font ?? throw new ArgumentNullException(nameof(font));
         }
 
         /// <summary>

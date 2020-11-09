@@ -137,7 +137,7 @@ namespace Iot.Device.BoardLed
 
             if (!triggers.Contains(name))
             {
-                throw new ArgumentException($"System does not contain a trigger called {name}.");
+                throw new Exception($"System does not contain a trigger called {name}.");
             }
 
             _triggerWriter.BaseStream.SetLength(0);

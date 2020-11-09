@@ -62,7 +62,7 @@ namespace Iot.Device.CharacterLcd
                 }
                 else if (dataPins.Length != 4)
                 {
-                    throw new ArgumentException($"The length of the array given to parameter {nameof(dataPins)} must be 4 or 8");
+                    throw new ArgumentException(nameof(dataPins), "The length of the array must be 4 or 8.");
                 }
 
                 _shouldDispose = shouldDispose || controller is null;

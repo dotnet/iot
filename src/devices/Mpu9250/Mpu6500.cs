@@ -66,7 +66,7 @@ namespace Iot.Device.Imu
         /// </summary>
         internal Mpu6500(I2cDevice i2cDevice, bool isInternal)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
+            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
         }
 
         #region Accelerometer
@@ -120,24 +120,14 @@ namespace Iot.Device.Imu
         {
             get
             {
-                float val = 0;
-                switch (AccelerometerRange)
+                float val = AccelerometerRange switch
                 {
-                    case AccelerometerRange.Range02G:
-                        val = 2.0f;
-                        break;
-                    case AccelerometerRange.Range04G:
-                        val = 4.0f;
-                        break;
-                    case AccelerometerRange.Range08G:
-                        val = 8.0f;
-                        break;
-                    case AccelerometerRange.Range16G:
-                        val = 16.0f;
-                        break;
-                    default:
-                        break;
-                }
+                    AccelerometerRange.Range02G => 2.0f,
+                    AccelerometerRange.Range04G => 4.0f,
+                    AccelerometerRange.Range08G => 8.0f,
+                    AccelerometerRange.Range16G => 16.0f,
+                    _ => 0,
+                };
 
                 val = (val * Gravity) / Adc;
                 return val / (1 + SampleRateDivider);
@@ -179,8 +169,8 @@ namespace Iot.Device.Imu
         /// </summary>
         public AccelerometerLowPowerFrequency AccelerometerLowPowerFrequency
         {
-            get { return (AccelerometerLowPowerFrequency)ReadByte(Register.LP_ACCEL_ODR); }
-            set { WriteRegister(Register.LP_ACCEL_ODR, (byte)value); }
+            get => (AccelerometerLowPowerFrequency)ReadByte(Register.LP_ACCEL_ODR);
+            set => WriteRegister(Register.LP_ACCEL_ODR, (byte)value);
         }
 
         #endregion
@@ -357,7 +347,7 @@ namespace Iot.Device.Imu
             _wakeOnMotion = true;
             if (accelerometerThreshold > 1020)
             {
-                throw new ArgumentException($"{nameof(accelerometerThreshold)} has to be between 0mg and 1020mg");
+                throw new ArgumentException(nameof(accelerometerThreshold), $"Value has to be between 0mg and 1020mg");
             }
 
             // LSB = 4mg
@@ -889,7 +879,7 @@ namespace Iot.Device.Imu
         {
             if (readBytes.Length > 24)
             {
-                throw new ArgumentException($"Can't read more than 24 bytes at once");
+                throw new ArgumentException(nameof(readBytes), "Value must be 24 bytes or less.");
             }
 
             byte slvAddress = (byte)((byte)Register.I2C_SLV0_ADDR + 3 * (byte)i2cChannel);

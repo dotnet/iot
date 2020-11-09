@@ -50,7 +50,7 @@ namespace Iot.Device.Adc
 
             if (valueChannel == referenceChannel)
             {
-                throw new ArgumentException($"ADC differential channels must be different.", nameof(valueChannel) + " " + nameof(referenceChannel));
+                throw new ArgumentException(nameof(valueChannel), $"ADC differential channels must be different. {nameof(valueChannel)}: {valueChannel}; {nameof(referenceChannel)}: {referenceChannel}.");
             }
 
             // check if it is possible to use hardware differential because both input channels are in the same differential channel pairing

@@ -56,7 +56,7 @@ namespace Iot.Device.Multiplexing
         /// <param name="bitLength">Bit length of register, including chained registers.</param>
         public ShiftRegister(SpiDevice spiDevice, int bitLength)
         {
-            _spiDevice = spiDevice ?? throw new ArgumentException($"{nameof(spiDevice)} cannot be null");
+            _spiDevice = spiDevice ?? throw new ArgumentException(nameof(spiDevice));
             _bitLength = bitLength;
         }
 
@@ -95,7 +95,7 @@ namespace Iot.Device.Multiplexing
         {
             if (_bitLength % 8 > 0)
             {
-                throw new ArgumentNullException($"{nameof(ShiftClear)}: Only supported for registers with bit lengths evenly divisible by 8.");
+                throw new ArgumentNullException(nameof(ShiftClear), "Only supported for registers with bit lengths evenly divisible by 8.");
             }
 
             for (int i = 0; i < _bitLength / 8; i++)
@@ -114,7 +114,7 @@ namespace Iot.Device.Multiplexing
         {
             if (_controller is null || _pinMapping.SerialDataInput < 0)
             {
-                throw new ArgumentNullException($"{nameof(ShiftBit)}: GpioController was not provided or {nameof(_pinMapping.SerialDataInput)} not mapped to pin");
+                throw new ArgumentNullException(nameof(ShiftBit), "GpioController was not provided or {nameof(_pinMapping.SerialDataInput)} not mapped to pin");
             }
 
             // writes value to serial data pin
@@ -165,7 +165,7 @@ namespace Iot.Device.Multiplexing
         {
             if (_controller is null || _pinMapping.LatchEnable < 0)
             {
-                throw new ArgumentNullException($"{nameof(Latch)}: GpioController was not provided or {nameof(_pinMapping.LatchEnable)} not mapped to pin");
+                throw new Exception($"{nameof(Latch)}: GpioController was not provided or {nameof(_pinMapping.LatchEnable)} not mapped to pin");
             }
 
             // latches value on rising edge of register clock (LE)
@@ -185,7 +185,7 @@ namespace Iot.Device.Multiplexing
             {
                 if (_controller is null || _pinMapping.OutputEnable < 0)
                 {
-                    throw new ArgumentNullException($"{nameof(OutputEnable)}: {nameof(_pinMapping.OutputEnable)} not mapped to non-zero pin value");
+                    throw new Exception($"{nameof(OutputEnable)}: {nameof(_pinMapping.OutputEnable)} not mapped to non-zero pin value");
                 }
 
                 _controller.Write(_pinMapping.OutputEnable, value ? 0 : 1);
@@ -223,7 +223,7 @@ namespace Iot.Device.Multiplexing
             }
             else
             {
-                throw new ArgumentException($"{nameof(ShiftRegister)} -- {nameof(ShiftRegisterPinMapping)} values must be non-zero; Values: {nameof(ShiftRegisterPinMapping.SerialDataInput)}: {_serial}; {nameof(ShiftRegisterPinMapping.LatchEnable)}: {_latch}; {nameof(ShiftRegisterPinMapping.Clock)}: {_clock};.");
+                throw new Exception($"{nameof(ShiftRegister)} -- {nameof(ShiftRegisterPinMapping)} values must be non-zero; Values: {nameof(ShiftRegisterPinMapping.SerialDataInput)}: {_serial}; {nameof(ShiftRegisterPinMapping.LatchEnable)}: {_latch}; {nameof(ShiftRegisterPinMapping.Clock)}: {_clock};.");
             }
 
             // this pin assignment is optional

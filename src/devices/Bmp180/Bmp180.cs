@@ -32,7 +32,7 @@ namespace Iot.Device.Bmp180
         /// <param name="i2cDevice">I2C device used to communicate with the device</param>
         public Bmp180(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentNullException($"{nameof(i2cDevice)} cannot be null");
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _calibrationData = new CalibrationData();
             // Read the coefficients table
             _calibrationData.ReadFromDevice(this);

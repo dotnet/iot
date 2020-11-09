@@ -79,7 +79,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         {
             if ((issuerAuthenticationData.Length < 8) || (issuerAuthenticationData.Length > 16))
             {
-                throw new ArgumentException($"{nameof(issuerAuthenticationData)} needs to be more than 8 and less than 16 length");
+                throw new ArgumentException(nameof(issuerAuthenticationData), "Data needs to be more than 8 and less than 16 bytes length");
             }
 
             Span<byte> toSend = stackalloc byte[5 + issuerAuthenticationData.Length];
@@ -113,7 +113,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         {
             if (unpredictableNumber.Length < 8)
             {
-                throw new ArgumentException($"{nameof(GetChallenge)}: {nameof(unpredictableNumber)} has to be at least 8 byte long.");
+                throw new ArgumentException(nameof(unpredictableNumber), "Data has to be at least 8 bytes long.");
             }
 
             Span<byte> toSend = stackalloc byte[5];
@@ -142,7 +142,7 @@ namespace Iot.Device.Card.CreditCardProcessing
             // Pin can only be 4 to C length
             if ((pindigits.Length < 0x04) && (pindigits.Length > 0x0C))
             {
-                throw new ArgumentException($"{nameof(VerifyPin)}: {nameof(pindigits)} can only be between 4 and 12 digits");
+                throw new ArgumentException(nameof(pindigits), "Data can only be between 4 and 12 digits");
             }
 
             // Encode the pin

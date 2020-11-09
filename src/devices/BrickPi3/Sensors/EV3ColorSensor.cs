@@ -100,30 +100,15 @@ namespace Iot.Device.BrickPi3.Sensors
             }
         }
 
-        private SensorType GetEV3Mode(ColorSensorMode mode)
+        private SensorType GetEV3Mode(ColorSensorMode mode) => mode switch
         {
-            SensorType ret = SensorType.EV3ColorReflected;
-            switch (mode)
-            {
-                case ColorSensorMode.Color:
-                    ret = SensorType.EV3ColorColor;
-                    break;
-                case ColorSensorMode.Reflection:
-                    ret = SensorType.EV3ColorReflected;
-                    break;
-                case ColorSensorMode.Green:
-                    ret = SensorType.EV3ColorRawReflected;
-                    break;
-                case ColorSensorMode.Blue:
-                    ret = SensorType.EV3ColorColorComponents;
-                    break;
-                case ColorSensorMode.Ambient:
-                    ret = SensorType.EV3ColorAmbient;
-                    break;
-            }
-
-            return ret;
-        }
+            ColorSensorMode.Color => SensorType.EV3ColorColor,
+            ColorSensorMode.Reflection => SensorType.EV3ColorReflected,
+            ColorSensorMode.Green => SensorType.EV3ColorRawReflected,
+            ColorSensorMode.Blue => SensorType.EV3ColorColorComponents,
+            ColorSensorMode.Ambient => SensorType.EV3ColorAmbient,
+            _ => SensorType.EV3ColorReflected,
+        };
 
         /// <summary>
         /// Set or get the color mode

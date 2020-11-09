@@ -50,7 +50,7 @@ namespace Iot.Device.Ads1115
         public Ads1115(I2cDevice i2cDevice, InputMultiplexer inputMultiplexer = InputMultiplexer.AIN0, MeasuringRange measuringRange = MeasuringRange.FS4096,
             DataRate dataRate = DataRate.SPS128, DeviceMode deviceMode = DeviceMode.Continuous)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentNullException($"{nameof(i2cDevice)} cannot be null");
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _inputMultiplexer = inputMultiplexer;
             _measuringRange = measuringRange;
             _dataRate = dataRate;

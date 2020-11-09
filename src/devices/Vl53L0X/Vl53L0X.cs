@@ -68,7 +68,7 @@ namespace Iot.Device.Vl53L0X
         /// <param name="shouldDispose">True to dispose the I2C Device at dispose</param>
         public Vl53L0X(I2cDevice i2cDevice, int operationTimeoutMilliseconds = 500, bool shouldDispose = true)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} can't be null.");
+            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
             _shouldDispose = shouldDispose;
             _operationTimeout = operationTimeoutMilliseconds;
             Reset();
@@ -94,7 +94,7 @@ namespace Iot.Device.Vl53L0X
         {
             if (newAddress > 0x7F)
             {
-                throw new ArgumentException($"{nameof(newAddress)} can't exceed 0x7F");
+                throw new ArgumentException(nameof(newAddress), "Value can't exceed 0x7F");
             }
 
             try
@@ -1133,7 +1133,7 @@ namespace Iot.Device.Vl53L0X
         {
             if ((limitMcps < 0) || (limitMcps > 511.99))
             {
-                throw new ArgumentException($"{nameof(limitMcps)} can't be negative and more than 511.99");
+                throw new ArgumentException(nameof(limitMcps), "Value can't be negative or greater than 511.99");
             }
 
             // Q9.7 fixed point format (9 integer bits, 7 fractional bits)

@@ -86,7 +86,7 @@ namespace Iot.Device.GoPiGo3
         /// <param name="shouldDispose">True to dispose the SpiDevice when disposing the class</param>
         public GoPiGo(SpiDevice spiDevice, byte spiAddress = 8, bool autoDetect = true, bool shouldDispose = true)
         {
-            _spiDevice = spiDevice ?? throw new ArgumentException($"{nameof(spiDevice)} can't be null");
+            _spiDevice = spiDevice ?? throw new ArgumentException(nameof(spiDevice));
             SpiAddress = spiAddress;
             _shouldDispose = shouldDispose;
             InitializeGoPiGo(autoDetect);
@@ -702,18 +702,18 @@ namespace Iot.Device.GoPiGo3
             }
             else
             {
-                throw new ArgumentException($"{nameof(GroveI2cStart)} error: Port unsupported. Must be either Grove 1 or Grove 2.");
+                throw new ArgumentException(nameof(port), $"Port unsupported. Must be either {nameof(GrovePort.Grove1)} or {nameof(GrovePort.Grove2)}.");
             }
 
             var address = ((addr & 0x7F) << 1);
             if (inBytes > GroveI2cLengthLimit)
             {
-                throw new ArgumentException($"{nameof(GroveI2cStart)} error: Read length error. Up to {GroveI2cLengthLimit} bytes can be read in a single transaction.");
+                throw new ArgumentException(nameof(addr), $"Read length error. Up to {GroveI2cLengthLimit} bytes can be read in a single transaction.");
             }
 
             if (arrayToSend.Length > GroveI2cLengthLimit)
             {
-                throw new ArgumentException($"{nameof(GroveI2cStart)} error:Write length error. Up to {GroveI2cLengthLimit}  bytes can be written in a single transaction.");
+                throw new ArgumentException(nameof(arrayToSend), $"Write length error. Up to {GroveI2cLengthLimit}  bytes can be written in a single transaction.");
             }
 
             byte[] outArray = { SpiAddress, (byte)message_type, (byte)address, inBytes, (byte)arrayToSend.Length };
@@ -756,7 +756,7 @@ namespace Iot.Device.GoPiGo3
             }
             else
             {
-                throw new ArgumentException($"{nameof(GroveI2cStart)} error: Port unsupported. Must be either Grove 1 or Grove 2.");
+                throw new ArgumentException(nameof(port), $"Port unsupported. Must be either {nameof(GrovePort.Grove1)} or {nameof(GrovePort.Grove2)}.");
             }
 
 #pragma warning disable SA1011
@@ -879,7 +879,7 @@ namespace Iot.Device.GoPiGo3
                 GrovePort.Grove1Pin2 => SpiMessageType.GetGrove1Pin2State,
                 GrovePort.Grove2Pin1 => SpiMessageType.GetGrove2Pin1State,
                 GrovePort.Grove2Pin2 => SpiMessageType.GetGrove2Pin2State,
-                _ => throw new ArgumentException($"{nameof(GetGroveState)} error: Pin(s) unsupported. Must get one at a time."),
+                _ => throw new ArgumentException(nameof(port), "Pin(s) unsupported. Must get one at a time."),
             };
 
             byte[] outArray = { SpiAddress, (byte)message_type, 0, 0, 0, 0 };
@@ -914,7 +914,7 @@ namespace Iot.Device.GoPiGo3
                 GrovePort.Grove1Pin2 => SpiMessageType.GetGrove1Pin2Voltage,
                 GrovePort.Grove2Pin1 => SpiMessageType.GetGrove2Pin1Voltage,
                 GrovePort.Grove2Pin2 => SpiMessageType.GetGrove2Pin2Voltage,
-                _ => throw new ArgumentException($"{nameof(GetGroveVoltage)} error: Pin(s) unsupported. Must get one at a time."),
+                _ => throw new ArgumentException(nameof(port), "Pin(s) unsupported. Must get one at a time."),
             };
 
             byte[] outArray = { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0 };
@@ -949,7 +949,7 @@ namespace Iot.Device.GoPiGo3
                 GrovePort.Grove1Pin2 => SpiMessageType.GetGrove1Pin2Analog,
                 GrovePort.Grove2Pin1 => SpiMessageType.GetGrove2Pin1Analog,
                 GrovePort.Grove2Pin2 => SpiMessageType.GetGrove2Pin2Analog,
-                _ => throw new ArgumentException($"{nameof(GetGroveAnalog)} error: Pin(s) unsupported. Must get one at a time."),
+                _ => throw new ArgumentException(nameof(port), "Pin(s) unsupported. Must get one at a time."),
             };
 
             byte[] outArray = { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0 };

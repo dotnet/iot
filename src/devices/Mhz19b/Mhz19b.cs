@@ -27,7 +27,7 @@ namespace Iot.Device.Mhz19b
         /// <param name="shouldDispose">If true, the stream gets disposed when disposing the binding</param>
         public Mhz19b(Stream stream, bool shouldDispose)
         {
-            _serialPortStream = stream ?? throw new ArgumentNullException($"nameof(stream) cannot be null");
+            _serialPortStream = stream ?? throw new ArgumentNullException(nameof(stream));
             _shouldDispose = shouldDispose;
         }
 
@@ -40,7 +40,7 @@ namespace Iot.Device.Mhz19b
         {
             if (uartDevice is not { Length: > 0 })
             {
-                throw new ArgumentException($"nameof(uartDevice) cannot be null");
+                throw new ArgumentException(nameof(uartDevice));
             }
 
             // create serial port using the setting acc. to datasheet, pg. 7, sec. general settings

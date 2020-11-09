@@ -449,7 +449,7 @@ namespace Iot.Device.Card.Mifare
         {
             if (accessTypes.Length != 3)
             {
-                throw new ArgumentException($"{nameof(accessTypes)} can only be array of 3");
+                throw new ArgumentException(nameof(accessTypes), "Array must have 3 elements.");
             }
 
             var tupleRes = EncodeSectorTailer(accessSector);

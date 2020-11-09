@@ -55,7 +55,7 @@ namespace Iot.Device.Max7219
         /// </summary>
         public Max7219(SpiDevice spiDevice, int cascadedDevices = 1, RotationType rotation = RotationType.None)
         {
-            _spiDevice = spiDevice ?? throw new ArgumentNullException($"{nameof(spiDevice)} cannot be null");
+            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             CascadedDevices = cascadedDevices;
             Rotation = rotation;
             _buffer = new byte[CascadedDevices, NumDigits];

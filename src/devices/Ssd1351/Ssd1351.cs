@@ -45,13 +45,13 @@ namespace Iot.Device.Ssd1351
         {
             if (!InRange((uint)spiBufferSize, 0x1000, 0x10000))
             {
-                throw new ArgumentException($"SPI Buffer Size must be between 4096 and 65536.", nameof(spiBufferSize));
+                throw new ArgumentException(nameof(spiBufferSize), "Value must be between 4096 and 65536.");
             }
 
             _gpioDevice = gpioController ?? new GpioController();
             _shouldDispose = shouldDispose || gpioController is null;
 
-            _spiDevice = spiDevice ?? throw new ArgumentException($"{nameof(spiDevice)} cannot be null");
+            _spiDevice = spiDevice ?? throw new ArgumentException(nameof(spiDevice));
 
             _dcPinId = dataCommandPin;
             _resetPinId = resetPin;
@@ -238,7 +238,7 @@ namespace Iot.Device.Ssd1351
         {
             if (data == null)
             {
-                throw new ArgumentNullException($"{nameof(data)} cannot be null");
+                throw new ArgumentNullException(nameof(data));
             }
 
             // create a buffer to contain the data plus pseudo command to indicate data.

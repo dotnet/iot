@@ -109,7 +109,7 @@ namespace Iot.Device.Adc
         /// Constructs Mcp3Base instance
         /// </summary>
         /// <param name="spiDevice">Device used for SPI communication</param>
-        public Mcp3Base(SpiDevice spiDevice) => _spiDevice = spiDevice ?? throw new ArgumentNullException($"{nameof(spiDevice)} cannot be null");
+        public Mcp3Base(SpiDevice spiDevice) => _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
 
         /// <summary>
         /// Reads a value from the device

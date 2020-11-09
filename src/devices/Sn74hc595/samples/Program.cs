@@ -156,7 +156,7 @@ void ShiftBytes(Sn74hc595 sr, int value)
 {
     if (sr.BitLength > 32)
     {
-        throw new ArgumentException($"{nameof(ShiftBytes)}: bit length must be  8-32.");
+        throw new Exception($"{nameof(ShiftBytes)}: bit length must be  8-32.");
     }
 
     for (int i = (sr.BitLength / 8) - 1; i > 0; i--)

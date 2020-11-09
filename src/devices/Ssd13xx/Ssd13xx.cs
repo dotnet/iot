@@ -29,7 +29,7 @@ namespace Iot.Device.Ssd13xx
         public Ssd13xx(I2cDevice i2cDevice, int bufferSize = DefaultBufferSize)
         {
             _genericBuffer = new byte[bufferSize];
-            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
+            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
         }
 
         /// <summary>

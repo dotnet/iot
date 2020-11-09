@@ -151,7 +151,7 @@ namespace Iot.Device.Nrf24l01
         public Nrf24l01(SpiDevice sensor, int ce, int irq, byte packetSize, byte channel = 2,
             OutputPower outputPower = OutputPower.N00dBm, DataRate dataRate = DataRate.Rate2Mbps, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
         {
-            _sensor = sensor ?? throw new ArgumentException($"{nameof(sensor)} cannot be null");
+            _sensor = sensor ?? throw new ArgumentException(nameof(sensor));
             _ce = ce;
             _irq = irq;
             PacketSize = packetSize;

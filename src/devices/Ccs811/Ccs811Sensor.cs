@@ -355,7 +355,7 @@ namespace Iot.Device.Ccs811
         {
             if ((humidity.Percent < 0) || (humidity.Percent > 100))
             {
-                throw new ArgumentException($"Humidity can only be between 0 and 100.");
+                throw new ArgumentException(nameof(humidity), "Humidity can only be between 0 and 100.");
             }
 
             Span<byte> environment = stackalloc byte[4];
@@ -400,12 +400,12 @@ namespace Iot.Device.Ccs811
 
             if (!IsPpmValidThreshold(lowEquivalentCO2))
             {
-                throw new ArgumentException($"{lowEquivalentCO2} can only be between 0 and {ushort.MaxValue}");
+                throw new ArgumentException(nameof(lowEquivalentCO2), $"Value can only be between 0 and {ushort.MaxValue}.");
             }
 
             if (!IsPpmValidThreshold(highEquivalentCO2))
             {
-                throw new ArgumentException($"{highEquivalentCO2} can only be between 0 and {ushort.MaxValue}");
+                throw new ArgumentException(nameof(highEquivalentCO2), $" Value can only be between 0 and {ushort.MaxValue}.");
             }
 
             if (lowEquivalentCO2 > highEquivalentCO2)
@@ -417,7 +417,7 @@ namespace Iot.Device.Ccs811
 
             if (highEquivalentCO2 - lowEquivalentCO2 < VolumeConcentration.FromPartsPerMillion(50))
             {
-                throw new ArgumentException($"{highEquivalentCO2}-{lowEquivalentCO2} should be more than 50");
+                throw new ArgumentException(nameof(lowEquivalentCO2), $"value of {nameof(highEquivalentCO2)}-{nameof(lowEquivalentCO2)} must be more than 50.");
             }
 
             Span<byte> toSend = stackalloc byte[4];

@@ -158,7 +158,7 @@ namespace Iot.Device.Pn532
         public Pn532(SpiDevice spiDevice, LogLevel logLevel = LogLevel.None)
         {
             LogLevel = logLevel;
-            _spiDevice = spiDevice ?? throw new ArgumentException($"{nameof(spiDevice)} cannot be null");
+            _spiDevice = spiDevice ?? throw new ArgumentException(nameof(spiDevice));
             _controller = new GpioController();
             _controller.OpenPin(_pin, PinMode.Output);
             _controller.Write(_pin, PinValue.High);
@@ -189,7 +189,7 @@ namespace Iot.Device.Pn532
         public Pn532(I2cDevice i2cDevice, LogLevel logLevel = LogLevel.None)
         {
             LogLevel = logLevel;
-            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
+            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
             WakeUp();
             bool ret = SetSecurityAccessModule();
             LogInfo.Log($"Setting SAM changed: {ret}", LogLevel.Info);
@@ -401,7 +401,7 @@ namespace Iot.Device.Pn532
                 // The maximum value for the timeout is 12.75 sec (Timeout = 0xFF).
                 if (value / 50 > 0xFF)
                 {
-                    throw new ArgumentException($"{nameof(VirtualCardTimeout)} can't be more than 12750 milliseconds.");
+                    throw new ArgumentException(nameof(VirtualCardTimeout), "Value must be 12750 milliseconds or less.");
                 }
 
                 _virtualCardTimeout = value / 50;

@@ -36,7 +36,7 @@ namespace Iot.Device.CharacterLcd
 
             public I2c4Bit(I2cDevice i2cDevice)
             {
-                _i2cDevice = i2cDevice ?? throw new ArgumentNullException($"{nameof(i2cDevice)} cannot be null.");
+                _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
                 _backlightOn = true;
                 InitDisplay();
             }

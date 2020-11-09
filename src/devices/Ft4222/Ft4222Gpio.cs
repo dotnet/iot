@@ -125,7 +125,7 @@ namespace Iot.Device.Ft4222
         {
             if (eventTypes == PinEventTypes.None)
             {
-                throw new ArgumentException($"{PinEventTypes.None} is an invalid value.", nameof(eventTypes));
+                throw new ArgumentException(nameof(eventTypes), $"{nameof(PinEventTypes.None)} is an invalid value.");
             }
 
             if (eventTypes.HasFlag(PinEventTypes.Falling))

@@ -25,7 +25,7 @@ namespace Iot.Device.Lsm9Ds1
             I2cDevice i2cDevice,
             MagneticInductionScale magneticInductionScale = MagneticInductionScale.Scale04G)
         {
-            _i2c = i2cDevice ?? throw new ArgumentNullException($"{nameof(i2cDevice)} cannot be null");
+            _i2c = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _magneticInductionScale = magneticInductionScale;
 
             byte temperatureCompensation = 1; // enable temperature compensation

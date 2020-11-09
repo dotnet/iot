@@ -108,7 +108,7 @@ namespace Iot.Device.MotorHat
                     in1Pin = 5;
                     break;
                 default:
-                    throw new ArgumentException($"MotorHat Motor must be between 1 and 4 inclusive. Received: {motorNumber}");
+                    throw new ArgumentException(nameof(motorNumber), $"MotorHat Motor must be between 1 and 4 inclusive. {nameof(motorNumber)}: {motorNumber}");
             }
 
             var speedPwm = _pca9685.CreatePwmChannel(speedPin);

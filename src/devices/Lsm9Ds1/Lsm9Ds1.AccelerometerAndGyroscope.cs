@@ -27,7 +27,7 @@ namespace Iot.Device.Lsm9Ds1
             AccelerationScale accelerationScale = AccelerationScale.Scale02G,
             AngularRateScale angularRateScale = AngularRateScale.Scale0245Dps)
         {
-            _i2c = i2cDevice ?? throw new ArgumentNullException($"{nameof(i2cDevice)} cannot be null");
+            _i2c = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _accelerometerScale = accelerationScale;
             _angularRateScale = angularRateScale;
 
@@ -95,7 +95,7 @@ namespace Iot.Device.Lsm9Ds1
             AccelerationScale.Scale04G => Max / 4,
             AccelerationScale.Scale08G => Max / 8,
             AccelerationScale.Scale16G => Max / 16,
-            _ => throw new ArgumentException($"{nameof(_accelerometerScale)} is unknown value"),
+            _ => throw new ArgumentException(nameof(_accelerometerScale), "Value is unknown."),
         };
 
         // we have 16-bit signed number
@@ -104,7 +104,7 @@ namespace Iot.Device.Lsm9Ds1
             AngularRateScale.Scale0245Dps => Max / 245,
             AngularRateScale.Scale0500Dps => Max / 500,
             AngularRateScale.Scale2000Dps => Max / 2000,
-            _ => throw new ArgumentException($"{nameof(_angularRateScale)} is unknown value"),
+            _ => throw new ArgumentException(nameof(_angularRateScale), "Value is unknown."),
         };
 
         /// <inheritdoc/>
