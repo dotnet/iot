@@ -86,7 +86,7 @@ namespace Iot.Device.GoPiGo3
         /// <param name="shouldDispose">True to dispose the SpiDevice when disposing the class</param>
         public GoPiGo(SpiDevice spiDevice, byte spiAddress = 8, bool autoDetect = true, bool shouldDispose = true)
         {
-            _spiDevice = spiDevice ?? throw new ArgumentException(nameof(spiDevice));
+            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             SpiAddress = spiAddress;
             _shouldDispose = shouldDispose;
             InitializeGoPiGo(autoDetect);
