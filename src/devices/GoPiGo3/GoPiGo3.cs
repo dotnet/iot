@@ -690,12 +690,12 @@ namespace Iot.Device.GoPiGo3
         {
             SpiMessageType message_type;
             byte port_index;
-            if (port == GrovePort.Grove1)
+            if (port is GrovePort.Grove1)
             {
                 message_type = SpiMessageType.StartGrove1I2c;
                 port_index = 0;
             }
-            else if (port == GrovePort.Grove2)
+            else if (port is GrovePort.Grove2)
             {
                 message_type = SpiMessageType.StartGrove2I2c;
                 port_index = 1;
