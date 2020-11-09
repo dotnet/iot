@@ -34,7 +34,7 @@ PrintHelp();
 
 while (true)
 {
-    var command = Console.ReadLine()?.ToLower()?.Split(' ');
+    string[]? command = Console.ReadLine()?.ToLower()?.Split(' ');
     if (command?[0] is not { Length: >0 })
     {
         return;
