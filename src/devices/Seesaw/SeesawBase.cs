@@ -30,7 +30,7 @@ namespace Iot.Device.Seesaw
         /// will be disposed when the along with the SeeSaw device</param>
         public Seesaw(I2cDevice i2cDevice)
         {
-            I2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
+            I2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             Initialize(i2cDevice);
         }
 
