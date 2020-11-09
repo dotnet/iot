@@ -66,7 +66,7 @@ namespace Iot.Device.Imu
         /// </summary>
         internal Mpu6500(I2cDevice i2cDevice, bool isInternal)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
         }
 
         #region Accelerometer
