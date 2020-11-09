@@ -8,7 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
-    <PackageReference Include="System.Memory" Version="4.5.3" />
+    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
     <Compile Include="*.cs" />
     <Compile Include="RfConfiguration\*.cs" />
     <Compile Include="ListPassive\*.cs" />
