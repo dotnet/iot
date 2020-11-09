@@ -29,7 +29,7 @@ namespace Iot.Device.Ws28xx
         /// <param name="image">The bitmap that represents the screen or led strip.</param>
         public Ws28xx(SpiDevice spiDevice, BitmapImage image)
         {
-            _spiDevice = spiDevice ?? throw new ArgumentException(nameof(spiDevice));
+            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             Image = image;
         }
 
