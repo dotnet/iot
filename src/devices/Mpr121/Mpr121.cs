@@ -70,7 +70,7 @@ namespace Iot.Device.Mpr121
         {
             configuration = configuration ?? GetDefaultConfiguration();
 
-            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _timer = new Timer(RefreshChannelStatuses, this, Timeout.Infinite, Timeout.Infinite);
 
             _statuses = new Dictionary<Channels, bool>();
