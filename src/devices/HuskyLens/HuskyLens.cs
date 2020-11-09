@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -75,7 +76,7 @@ namespace Iot.Device.HuskyLens
             }
 
             // read # of blocks&arrows
-            var count = response.Data[0] + response.Data[1] * 0x100;
+            var count = BinaryPrimitives.ReadInt16LittleEndian(response.Data.Slice(0, 2));
             Console.WriteLine($"Reading {count} objects");
             var huskyObjects = new List<HuskyObject>();
             for (int i = 0; i < count; i++)

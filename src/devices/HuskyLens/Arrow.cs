@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 
 namespace Iot.Device.HuskyLens
 {
@@ -46,12 +47,11 @@ namespace Iot.Device.HuskyLens
         /// <returns>initialized object</returns>
         public static Arrow FromData(ReadOnlySpan<byte> data)
         {
-            var buffer = data.ToArray();
-            var ox = buffer[0] + buffer[1] * 0x100;
-            var oy = buffer[2] + buffer[3] * 0x100;
-            var tx = buffer[4] + buffer[5] * 0x100;
-            var ty = buffer[6] + buffer[7] * 0x100;
-            var id = buffer[8] + buffer[9] * 0x100;
+            var ox = BinaryPrimitives.ReadInt16LittleEndian(data.Slice(0, 2));
+            var oy = BinaryPrimitives.ReadInt16LittleEndian(data.Slice(2, 2));
+            var tx = BinaryPrimitives.ReadInt16LittleEndian(data.Slice(4, 2));
+            var ty = BinaryPrimitives.ReadInt16LittleEndian(data.Slice(6, 2));
+            var id = BinaryPrimitives.ReadInt16LittleEndian(data.Slice(8, 2));
             return new Arrow(new Point(ox, oy), new Point(tx, ty), id);
         }
     }
