@@ -55,7 +55,7 @@ namespace Iot.Device.Adc
         /// <param name="i2cDevice">The I2cDevice initialized to communicate with the INA219.</param>
         public Ina219(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _currentLsb = 1F;
         }
 
