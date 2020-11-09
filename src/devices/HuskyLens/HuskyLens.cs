@@ -4,12 +4,11 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Iot.Device.HuskyLens
 {
     /// <summary>
-    /// todo
+    /// HuskyLens is an easy-to-use AI machine vision sensor with 6 built-in functions: face recognition, object tracking, object recognition, line following, color detection and tag detection.
     /// </summary>
     public class HuskyLens
     {
@@ -31,11 +30,14 @@ namespace Iot.Device.HuskyLens
         }
 
         /// <summary>
-        /// Ping the thing
+        /// Test connection with HuskyLens.
         /// </summary>
         /// <returns>true for success, guess the rest</returns>
         public bool Ping()
         {
+            // COMMAND_REQUEST_KNOCK(0x2C):
+            // Used for test connection with HUSKYLENS.When HUSKYLENS received this command, HUSKYLENS will return COMMAND_RETURN_OK
+            // See: https://github.com/HuskyLens/HUSKYLENSArduino/blob/master/HUSKYLENS%20Protocol.md#command_request_knock0x2c
             _connection.Write(new byte[] { 0x55, 0xAA, 0x11, 0x00, 0x2C, 0x3C });
             WaitForOK();
             return true;
@@ -53,8 +55,11 @@ namespace Iot.Device.HuskyLens
             }
 
             Algorithm = algorithm;
+            // COMMAND_REQUEST_ALGORITHM(0x2D):
+            // When HUSKYLENS receives this command, HUSKYLENS will change the algorithm by the Data. And will return COMMAND_RETURN_OK.
+            // See: https://github.com/HuskyLens/HUSKYLENSArduino/blob/master/HUSKYLENS%20Protocol.md#command_request_algorithm0x2d
             var command = new byte[] { 0x55, 0xAA, 0x11, 0x02, 0x2D, (byte)algorithm, 0x00, 0x00 };
-            command[7] = (byte)(command.Aggregate(0x00, (a, b) => a + b) & 0xFF);
+            command[7] = command.CalculateChecksum();
             _connection.Write(command);
             WaitForOK();
         }
@@ -64,6 +69,9 @@ namespace Iot.Device.HuskyLens
         /// </summary>
         public IReadOnlyCollection<HuskyObject> GetAllObjects()
         {
+            // COMMAND_REQUEST (0x20):
+            // Request all blocks and arrows from HUSKYLENS.
+            // See: https://github.com/HuskyLens/HUSKYLENSArduino/blob/master/HUSKYLENS%20Protocol.md#command_request-0x20
             var command = new byte[] { 0x55, 0xAA, 0x11, 0x00, 0x20, 0x30 };
             _connection.Write(command);
 
@@ -107,15 +115,35 @@ namespace Iot.Device.HuskyLens
 
         private void WaitForOK()
         {
-            // COMMAND_RETURN_OK(0x2E):
-            // HUSKYLENS will return OK, if HUSKYLENS receives COMMAND_REQUEST_ALGORITHM, COMMAND_REQUEST_KNOCK.
-            var expected = new byte[] { 0x55, 0xAA, 0x11, 0x00, 0x2E, 0x3E };
             var response = _connection.Read(6);
 
-            if (!response.ToArray().Zip(expected, (a, b) => a == b).All(a => a))
+            if (!IsOk(response))
             {
                 throw new Exception();
             }
+        }
+
+        private bool IsOk(ReadOnlySpan<byte> response)
+        {
+            // COMMAND_RETURN_OK(0x2E):
+            // HUSKYLENS will return OK, if HUSKYLENS receives COMMAND_REQUEST_ALGORITHM, COMMAND_REQUEST_KNOCK.
+            // See: https://github.com/HuskyLens/HUSKYLENSArduino/blob/master/HUSKYLENS%20Protocol.md#command_return_ok0x2e
+            var expected = new byte[] { 0x55, 0xAA, 0x11, 0x00, 0x2E, 0x3E };
+
+            if (response.Length != expected.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < response.Length; i++)
+            {
+                if (response[i] != expected[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

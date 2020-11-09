@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Linq;
 
 namespace Iot.Device.HuskyLens
 {
@@ -26,13 +25,11 @@ namespace Iot.Device.HuskyLens
             _data[1] == 0xAA &&
             _data[2] == 0x11 &&
             _data[3] == _data.Length - 6 &&
-            _data[_data.Length - 1] == CalculateChecksum();
+            _data[_data.Length - 1] == new ReadOnlySpan<byte>(_data, 0, _data.Length - 1).CalculateChecksum();
         }
 
         /// <inheritdoc/>
-        public override string ToString() => $"Frame: c={Command}, d={string.Join(" ", Data.ToArray().Select(d => $"{d:X}"))}";
-
-        private byte CalculateChecksum() => (byte)(_data.Take(_data.Length - 1).Aggregate(0x00, (a, b) => a + b) & 0xFF);
+        public override string ToString() => $"Frame: c={Command}, d={BitConverter.ToString(Data.ToArray())}";
     }
 
     internal enum Command : byte

@@ -43,7 +43,7 @@ namespace Iot.Device.HuskyLens
 
         /// <inheritdoc/>
         public override string ToString() => $"Block: c={Center}, w={Width}, h={Height}, id={Id}";
-        
+
         /// <summary>
         /// Creates a new object from the wire protocol data
         /// </summary>
