@@ -1,6 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device;
@@ -23,9 +22,11 @@ namespace Iot.Device.Tlc1543
         private readonly int _endOfConversion;
         private readonly bool _shouldDispose;
         private readonly TimeSpan _conversionTime = new TimeSpan(210);
-        private GpioController _controller;
+        private GpioController? _controller;
         private Channel _chargeChannel = Channel.SelfTest512;
+        private Mode _operatingMode = Mode.Mode1;
         private List<int> _values = new List<int>(16);
+        private int _value;
 
         /// <summary>
         /// Channel used between readings to charge up capacitors in ADC
@@ -44,7 +45,29 @@ namespace Iot.Device.Tlc1543
                 }
                 else
                 {
-                    throw new ArgumentOutOfRangeException("ChargeChannel", "Out of range. \nMust be non-negative and less than 14. \nRefer to table 2 and 3 in TLC1543 documentation for more information");
+                    throw new ArgumentOutOfRangeException(nameof(ChargeChannel), "Value must be non-negative and less than 14. Refer to table 2 and 3 in TLC1543 documentation for more information");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Operating mode used to transfer data to and from ADC
+        /// <remarks>
+        /// <br>Refer to table 1 in TLC1543 documentation for more information</br>
+        /// </remarks>
+        /// </summary>
+        public Mode OperatingMode
+        {
+            get => _operatingMode;
+            set
+            {
+                if ((int)value > 0 && (int)value < 6)
+                {
+                    _operatingMode = value;
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException(nameof(OperatingMode), "Value must be positive and less than 6. Refer to table 1 in TLC1543 documentation for more information");
                 }
             }
         }
@@ -64,10 +87,11 @@ namespace Iot.Device.Tlc1543
         /// <param name="controller">The GPIO controller for defined external pins. If not specified, the default controller will be used.</param>
         /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Tlc1543(int address, int chipSelect, int dataOut, int inputOutputClock, int endOfConversion = -1, GpioController controller = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
+        public Tlc1543(int address, int chipSelect, int dataOut, int inputOutputClock, int endOfConversion = -1, GpioController? controller = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
         {
             _shouldDispose = controller == null || shouldDispose;
             _controller = controller ?? new GpioController(pinNumberingScheme);
+
             _address = address;
             _chipSelect = chipSelect;
             _dataOut = dataOut;
@@ -78,6 +102,9 @@ namespace Iot.Device.Tlc1543
             _controller.OpenPin(_chipSelect, PinMode.Output);
             _controller.OpenPin(_dataOut, PinMode.InputPullUp);
             _controller.OpenPin(_inputOutputClock, PinMode.Output);
+
+            _controller.Write(_chipSelect, PinValue.High);
+
             if (_endOfConversion != -1)
             {
                 _controller.OpenPin(_endOfConversion, PinMode.InputPullUp);
@@ -93,15 +120,7 @@ namespace Iot.Device.Tlc1543
         /// </summary>
         /// <param name="channelNumber">Channel Address</param>
         /// <returns></returns>
-        protected static bool IsValidChannel(int channelNumber)
-        {
-            if (channelNumber < 0 || channelNumber > 13)
-            {
-                return false;
-            }
-
-            return true;
-        }
+        protected static bool IsValidChannel(int channelNumber) => channelNumber >= 0 && channelNumber <= 13;
 
         /// <summary>
         /// Reads sensor value
@@ -116,42 +135,196 @@ namespace Iot.Device.Tlc1543
         {
             if (!IsValidChannel(channelNumber))
             {
-                throw new ArgumentOutOfRangeException("channelNumber", "Out of range. \nMust be non-negative and less than 14. \nRefer to table 2 and 3 in TLC1543 documentation for more information");
+                throw new ArgumentOutOfRangeException(nameof(channelNumber), "Value must be non-negative and less than 14. Refer to table 2 and 3 in TLC1543 documentation for more information");
             }
 
-            int value = 0;
-            _controller.Write(_chipSelect, 0);
-            for (int i = 0; i < 10; i++)
+            _value = 0;
+            _controller!.Write(_chipSelect, 0);
+
+            switch (_operatingMode)
             {
-                if (i < 4)
-                {
-                    // send 4-bit Address
-                    if (((channelNumber >> (3 - i)) & 0x01) == 1)
+                case Mode.Mode1:
+                    for (int i = 0; i < 10; i++)
                     {
-                        _controller.Write(_address, 1);
+                        if (i < 4)
+                        {
+                            SendAddress(channelNumber, i);
+                        }
+
+                        // read 10-bit data
+                        _value <<= 1;
+                        _value |= (int)_controller.Read(_dataOut);
+
+                        ClockImpulse();
+                    }
+
+                    _controller.Write(_chipSelect, 1);
+                    if (_endOfConversion != -1)
+                    {
+                        // Wait for ADC to report end of conversion or timeout at max conversion time
+                        _controller.WaitForEvent(_endOfConversion, PinEventTypes.Rising, _conversionTime);
                     }
                     else
                     {
-                        _controller.Write(_address, 0);
+                        // Max conversion time (21us) as seen in table on page 10 in TLC1543 documentation
+                        DelayHelper.Delay(_conversionTime, false);
                     }
-                }
 
-                // read 10-bit data
-                value <<= 1;
-                if (_controller.Read(_dataOut) == PinValue.High)
-                {
-                    value |= 0x01;
-                }
+                    break;
+                case Mode.Mode2:
+                    for (int i = 0; i < 10; i++)
+                    {
+                        if (i < 4)
+                        {
+                            SendAddress(channelNumber, i);
+                        }
 
-                _controller.Write(_inputOutputClock, 1);
-                DelayHelper.DelayMicroseconds(0, false);
-                _controller.Write(_inputOutputClock, 0);
+                        // read 10-bit data
+                        _value <<= 1;
+                        _value |= (int)_controller.Read(_dataOut);
+
+                        ClockImpulse();
+                    }
+
+                    if (_endOfConversion != -1)
+                    {
+                        // Wait for ADC to report end of conversion or timeout at max conversion time
+                        _controller.WaitForEvent(_endOfConversion, PinEventTypes.Rising, _conversionTime);
+                    }
+                    else
+                    {
+                        // Max conversion time (21us) as seen in table on page 10 in TLC1543 documentation
+                        DelayHelper.Delay(_conversionTime, false);
+                    }
+
+                    break;
+                case Mode.Mode3:
+                    for (int i = 0; i < 16; i++)
+                    {
+                        if (i < 4)
+                        {
+                            SendAddress(channelNumber, i);
+                        }
+
+                        // read 10-bit data
+                        if (i <= 10)
+                        {
+                            _value <<= 1;
+                            _value |= (int)_controller.Read(_dataOut);
+                        }
+
+                        if (i > 10 && _controller.Read(_endOfConversion) == PinValue.High)
+                        {
+                            break;
+                        }
+
+                        ClockImpulse();
+                    }
+
+                    _controller.Write(_chipSelect, 1);
+                    break;
+                case Mode.Mode4:
+                    for (int i = 0; i < 16; i++)
+                    {
+                        if (i < 4)
+                        {
+                            SendAddress(channelNumber, i);
+                        }
+
+                        // read 10-bit data
+                        if (i <= 10)
+                        {
+                            _value <<= 1;
+                            _value |= (int)_controller.Read(_dataOut);
+                        }
+
+                        if (i > 10 && _controller.Read(_endOfConversion) == PinValue.High)
+                        {
+                            break;
+                        }
+
+                        ClockImpulse();
+                    }
+
+                    _controller.WaitForEvent(_endOfConversion, PinEventTypes.Rising, _conversionTime);
+
+                    break;
+                case Mode.Mode5:
+                    for (int i = 0; i < 16; i++)
+                    {
+                        if (i < 4)
+                        {
+                            SendAddress(channelNumber, i);
+                        }
+
+                        // read 10-bit data
+                        if (i <= 10)
+                        {
+                            _value <<= 1;
+                            _value |= (int)_controller.Read(_dataOut);
+                        }
+
+                        if (i > 11 && _controller.Read(_endOfConversion) == PinValue.High)
+                        {
+                            break;
+                        }
+
+                        ClockImpulse();
+                    }
+
+                    _controller.Write(_chipSelect, 1);
+                    break;
+                case Mode.Mode6:
+                    for (int i = 0; i < 16; i++)
+                    {
+                        if (i < 4)
+                        {
+                            SendAddress(channelNumber, i);
+                        }
+
+                        // read 10-bit data
+                        if (i <= 10)
+                        {
+                            _value <<= 1;
+                            _value |= (int)_controller.Read(_dataOut);
+                        }
+
+                        ClockImpulse();
+                    }
+
+                    break;
+                default:
+                    break;
             }
 
-            _controller.Write(_chipSelect, 1);
-            // Max conversion time (21us) as seen in table on page 10 in TLC1543 documentation
-            DelayHelper.Delay(_conversionTime, false);
-            return value;
+            return _value;
+        }
+
+        /// <summary>
+        /// Sends 4-bit Address
+        /// </summary>
+        /// <param name="channelNumber">Channel number to send</param>
+        /// <param name="byteNumber">Which bit to send</param>
+        private void SendAddress(int channelNumber, int byteNumber)
+        {
+            if (((channelNumber >> (3 - byteNumber)) & 0x01) == 1)
+            {
+                _controller!.Write(_address, 1);
+            }
+            else
+            {
+                _controller!.Write(_address, 0);
+            }
+        }
+
+        /// <summary>
+        /// Sends Clock impulse
+        /// </summary>
+        private void ClockImpulse()
+        {
+            _controller!.Write(_inputOutputClock, 1);
+            DelayHelper.DelayMicroseconds(0, false);
+            _controller.Write(_inputOutputClock, 0);
         }
 
         /// <summary>
@@ -202,6 +375,7 @@ namespace Iot.Device.Tlc1543
             if (_shouldDispose)
             {
                 _controller?.Dispose();
+                _controller = null!;
             }
             else
             {
