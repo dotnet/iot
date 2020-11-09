@@ -9,37 +9,37 @@ namespace Iot.Device.HuskyLens
     public enum Algorithm : byte
     {
         /// <summary>
-        /// FaceRecognition
+        /// Face Recognition
         /// </summary>
         FaceRecognition = 0x00,
 
         /// <summary>
-        /// ObjectTracking
+        /// Object Tracking
         /// </summary>
         ObjectTracking = 0x01,
 
         /// <summary>
-        /// ObjectRecognition
+        /// Object Recognition
         /// </summary>
         ObjectRecognition = 0x02,
 
         /// <summary>
-        /// LineTracking
+        /// Line Tracking
         /// </summary>
         LineTracking = 0x03,
 
         /// <summary>
-        /// ColorRecognition
+        /// Color Recognition
         /// </summary>
         ColorRecognition = 0x04,
 
         /// <summary>
-        /// TagRecognition
+        /// Tag Recognition
         /// </summary>
         TagRecognition = 0x05,
 
         /// <summary>
-        /// ObjectClassification
+        /// Object Classification
         /// </summary>
         ObjectClassification = 0x06,
 
