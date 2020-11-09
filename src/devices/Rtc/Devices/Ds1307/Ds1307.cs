@@ -25,7 +25,7 @@ namespace Iot.Device.Rtc
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Ds1307(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
         }
 
         /// <summary>
