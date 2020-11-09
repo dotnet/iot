@@ -321,9 +321,17 @@ namespace Iot.Device.HardwareMonitor
                 {
                     if (unitThatWasUsed == null)
                     {
+#if NETCOREAPP2_1
                         unitThatWasUsed = singleValue!.Unit;
+#else
+                        unitThatWasUsed = singleValue.Unit;
+#endif
                     }
+#if NETCOREAPP2_1
                     else if (!unitThatWasUsed.Equals(singleValue!.Unit))
+#else
+                    else if (!unitThatWasUsed.Equals(singleValue.Unit))
+#endif
                     {
                         throw new NotSupportedException($"The different sensors for {hardware.Name} deliver values in different units");
                     }
@@ -458,7 +466,11 @@ namespace Iot.Device.HardwareMonitor
                         {
                             if (elem.Sensor.TryGetValue(out IQuantity? value))
                             {
+#if NETCOREAPP2_1
                                 elem.OnNewValue(elem.Sensor, value!, timeSinceLastUpdate);
+#else
+                                elem.OnNewValue(elem.Sensor, value, timeSinceLastUpdate);
+#endif
                             }
 
                             elem.LastUpdated = now;
