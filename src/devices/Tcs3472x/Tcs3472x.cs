@@ -70,7 +70,7 @@ namespace Iot.Device.Tcs3472x
         public Tcs3472x(I2cDevice i2cDevice, double integrationTime = 0.0024, Gain gain = Gain.Gain16X,
             bool shouldDispose = true)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             // Maximum is 700 ms for the initialization. Value can be changed for a long one but not during this initialization phase
             _shouldDispose = shouldDispose;
             _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | Registers.ID));
