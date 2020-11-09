@@ -42,11 +42,12 @@ namespace Iot.Device.Ssd13xx
         /// <param name="command">The command to send to the display controller.</param>
         private void SendCommand(ICommand command)
         {
-            byte[] commandBytes = command.GetBytes();
+#pragma warning disable SA1011
+            byte[]? commandBytes = command?.GetBytes();
 
             if (commandBytes is not { Length: >0 })
             {
-                throw new ArgumentNullException(nameof(commandBytes), "Argument is either null or there were no bytes to send.");
+                throw new ArgumentNullException(nameof(command), "Argument is either null or there were no bytes to send.");
             }
 
             Span<byte> writeBuffer = SliceGenericBuffer(commandBytes.Length + 1);

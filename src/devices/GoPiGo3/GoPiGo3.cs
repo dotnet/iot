@@ -470,7 +470,7 @@ namespace Iot.Device.GoPiGo3
         public MotorStatus GetMotorStatus(MotorPort port)
         {
             MotorStatus motorStatus = new MotorStatus();
-            SpiMessageType message_type = (port == MotorPort.MotorRight) ? SpiMessageType.GetMotorStatusRight : SpiMessageType.GetMotorStatusLeft;
+            SpiMessageType message_type = port == MotorPort.MotorRight ? SpiMessageType.GetMotorStatusRight : SpiMessageType.GetMotorStatusLeft;
             byte[] outArray = { SpiAddress, (byte)message_type, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             var reply = SpiTransferArray(outArray);
             if (reply[3] == SpiCorrectDataReturned)
@@ -690,12 +690,12 @@ namespace Iot.Device.GoPiGo3
         {
             SpiMessageType message_type;
             byte port_index;
-            if (port is GrovePort.Grove1)
+            if (port == GrovePort.Grove1)
             {
                 message_type = SpiMessageType.StartGrove1I2c;
                 port_index = 0;
             }
-            else if (port is GrovePort.Grove2)
+            else if (port == GrovePort.Grove2)
             {
                 message_type = SpiMessageType.StartGrove2I2c;
                 port_index = 1;

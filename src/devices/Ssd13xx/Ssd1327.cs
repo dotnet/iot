@@ -89,11 +89,12 @@ namespace Iot.Device.Ssd13xx
 
         private void SendCommand(ICommand command)
         {
-            byte[] commandBytes = command.GetBytes();
+#pragma warning disable SA1011
+            byte[]? commandBytes = command?.GetBytes();
 
             if (commandBytes is not { Length: >0 })
             {
-                throw new ArgumentNullException(nameof(commandBytes), "Argument is either null or there were no bytes to send.");
+                throw new ArgumentException(nameof(command), "Argument is either null or there were no bytes to send.");
             }
 
             foreach (var item in commandBytes)
