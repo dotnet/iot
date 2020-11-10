@@ -60,12 +60,32 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// </summary>
         /// <param name="address">The address to look up Tx Buffer Number.</param>
         /// <returns>The Tx Buffer Number based on the register address.</returns>
-        public static byte GetTxBufferNumber(Address address) => address switch
+        public static byte GetTxBufferNumber(Address address)
         {
-            Address.TxB0D0 | Address.TxB0D1 | Address.TxB0D2 | Address.TxB0D3 | Address.TxB0D4 | Address.TxB0D5 | Address.TxB0D6 | Address.TxB0D7 => 0,
-            Address.TxB1D0 | Address.TxB1D1 | Address.TxB1D2 | Address.TxB1D3 | Address.TxB1D4 | Address.TxB1D5 | Address.TxB1D6 | Address.TxB1D7 => 1,
-            _ => throw new ArgumentException(nameof(address), $"Invalid value: {address}."),
-        };
+            switch (address)
+            {
+                case Address.TxB0D0:
+                case Address.TxB0D1:
+                case Address.TxB0D2:
+                case Address.TxB0D3:
+                case Address.TxB0D4:
+                case Address.TxB0D5:
+                case Address.TxB0D6:
+                case Address.TxB0D7:
+                    return 0;
+                case Address.TxB1D0:
+                case Address.TxB1D1:
+                case Address.TxB1D2:
+                case Address.TxB1D3:
+                case Address.TxB1D4:
+                case Address.TxB1D5:
+                case Address.TxB1D6:
+                case Address.TxB1D7:
+                    return 1;
+                default:
+                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
+            }
+        }
 
         /// <summary>
         /// Gets the address of the register.
