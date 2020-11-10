@@ -508,13 +508,26 @@ namespace Iot.Device.Card.Mifare
         /// </summary>
         /// <param name="blockNumber">Input block number</param>
         /// <returns>True if it is a sector block</returns>
-        public bool IsSectorBlock(byte blockNumber) => Capacity switch
+        public bool IsSectorBlock(byte blockNumber)
         {
-            MifareCardCapacity.Mifare300 | MifareCardCapacity.Mifare1K | MifareCardCapacity.Mifare2K => blockNumber % 4 == 3,
-            MifareCardCapacity.Mifare4K when blockNumber < 128 => blockNumber % 4 == 3,
-            MifareCardCapacity.Mifare4K => blockNumber % 16 == 15,
-            _ => blockNumber % 4 == 3,
-        };
+            switch (Capacity)
+            {
+                default:
+                case MifareCardCapacity.Mifare300:
+                case MifareCardCapacity.Mifare1K:
+                case MifareCardCapacity.Mifare2K:
+                    return blockNumber % 4 == 3;
+                case MifareCardCapacity.Mifare4K:
+                    if (blockNumber < 128)
+                    {
+                        return blockNumber % 4 == 3;
+                    }
+                    else
+                    {
+                        return blockNumber % 16 == 15;
+                    }
+            }
+        }
 
         /// <summary>
         /// Depending on the command, serialize the needed data

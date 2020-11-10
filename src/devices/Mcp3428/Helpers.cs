@@ -45,22 +45,47 @@ namespace Iot.Device.Mcp3428
         {
             byte addr = 0b1101000; // Base value from doc
 
-            int idx = (byte)adr0 << 4 + (byte)adr1;
+            var idx = (byte)adr0 << 4 + (byte)adr1;
 
-            byte addr2 = idx switch
+            switch (idx)
             {
-                0 | 0x22 => 0,
-                0x02 => 1,
-                0x01 => 2,
-                0x10 => 4,
-                0x12 => 5,
-                0x11 => 6,
-                0x20 => 3,
-                0x21 => 7,
-                _ => throw new ArgumentException("Invalid combination"),
-            };
+                case 0:
+                case 0x22:
+                    break;
 
-            return addr += addr2;
+                case 0x02:
+                    addr += 1;
+                    break;
+
+                case 0x01:
+                    addr += 2;
+                    break;
+
+                case 0x10:
+                    addr += 4;
+                    break;
+
+                case 0x12:
+                    addr += 5;
+                    break;
+
+                case 0x11:
+                    addr += 6;
+                    break;
+
+                case 0x20:
+                    addr += 3;
+                    break;
+
+                case 0x21:
+                    addr += 7;
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid combination");
+            }
+
+            return addr;
         }
 
         public static byte SetChannelBits(byte configByte, int channel)
