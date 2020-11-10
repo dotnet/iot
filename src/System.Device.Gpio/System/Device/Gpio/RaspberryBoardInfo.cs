@@ -178,6 +178,7 @@ namespace System.Device.Gpio
                 case 0x20A0:
                     return Model.RaspberryPiComputeModule3;
 
+                case 0x3112:
                 case 0x3111:
                     return Model.RaspberryPi4;
 
