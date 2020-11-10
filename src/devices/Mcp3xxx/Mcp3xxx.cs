@@ -129,15 +129,27 @@ namespace Iot.Device.Adc
         /// <returns>A value corresponding to relative voltage level on specified device channel</returns>
         protected int ReadInternal(int channel, InputType inputType, int adcResolutionBits)
         {
+            int channelVal;
+            int requestVal;
+
             CheckChannelRange(channel, inputType == InputType.SingleEnded ? ChannelCount : ChannelCount / 2);
 
             // create a value that represents the channel value. For differental inputs
             // then incorporate the lower bit which indicates if the channel is inverted or not.
-            int channelVal = inputType switch
+            switch (inputType)
             {
-                InputType.Differential | InputType.InvertedDifferential => channel * 2,
-                _ =>channel,
-            };
+                case InputType.Differential:
+                    channelVal = channel * 2;
+                    break;
+
+                case InputType.InvertedDifferential:
+                    channelVal = channel * 2;
+                    break;
+
+                default:
+                    channelVal = channel;
+                    break;
+            }
 
             // create a value to represent the request to the ADC
             switch (ChannelCount)
