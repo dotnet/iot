@@ -140,13 +140,24 @@ namespace Iot.Device.Adc
             };
 
             // create a value to represent the request to the ADC
-            int requestVal = ChannelCount switch
+            switch (ChannelCount)
             {
-                4 | 8 => (inputType == InputType.SingleEnded ? 0b1_1000 : 0b1_0000) | channelVal,
-                2 => (inputType == InputType.SingleEnded ? 0b1101 : 0b1001) | channelVal << 1,
-                1 => 0,
-                _ => throw new ArgumentOutOfRangeException("Unsupported Channel Count"),
-            };
+                case 4:
+                case 8:
+                    requestVal = (inputType == InputType.SingleEnded ? 0b1_1000 : 0b1_0000) | channelVal;
+                    break;
+
+                case 2:
+                    requestVal = (inputType == InputType.SingleEnded ? 0b1101 : 0b1001) | channelVal << 1;
+                    break;
+
+                case 1:
+                    requestVal = 0;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException("Unsupported Channel Count");
+            }
 
             // read the data from the device...
             // the delayBits is set to account for the extra sampling delay on the 3004, 3008, 3204, 3208, 3302 and 3304
