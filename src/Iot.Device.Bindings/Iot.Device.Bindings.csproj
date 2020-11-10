@@ -13,11 +13,12 @@
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage)</TargetsForTfmSpecificContentInPackage>
     <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
-
+  
   <ItemGroup>
     <_ExcludeFromCompile Include="$(DeviceRoot)**/samples/**/*.cs" />
     <_ExcludeFromCompile Include="$(DeviceRoot)**/tests/**/*.cs" />
     <_ExcludeFromCompile Include="$(DeviceRoot)**/obj/**/*.cs" />
+    <_ExcludeFromCompile Include="$(DeviceRoot)/Common/System/Runtime/CompilerServices/IsExternalInit.cs" Condition="'$(TargetFramework)' != 'netcoreapp2.1'" />
     <Compile Include="$(DeviceRoot)**/*.cs" Exclude="@(_ExcludeFromCompile)" />
   </ItemGroup>
 
