@@ -12,7 +12,7 @@ var hardwareSpiSettings = new SpiConnectionSettings(0, 0)
     ClockFrequency = 1000000
 };
 
-using SpiDevice spi = new SoftwareSpi(clk: 6, miso: 23, mosi: 5, cs: 24);
+using SpiDevice spi = new SoftwareSpi(clk: 6, sdi: 23, sdo: 5, cs: 24);
 // For hardware implementation replace it with following
 // using (SpiDevice spi = SpiDevice.Create(hardwareSpiSettings))
 using Mcp3008 mcp = new Mcp3008(spi);

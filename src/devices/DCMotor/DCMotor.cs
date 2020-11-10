@@ -23,7 +23,7 @@ namespace Iot.Device.DCMotor
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         protected DCMotor(GpioController? controller, bool shouldDispose)
         {
-            _shouldDispose = shouldDispose;
+            _shouldDispose = shouldDispose || controller is null;
             Controller = controller ?? new GpioController();
         }
 
@@ -36,34 +36,17 @@ namespace Iot.Device.DCMotor
         /// <summary>
         /// <see cref="GpioController"/> related with operations on pins
         /// </summary>
-        protected GpioController Controller
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Disposes the <see cref="DCMotor"/> class
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+        protected GpioController Controller { get; set; }
 
         /// <summary>
         /// Releases the resources used by the <see cref="DCMotor"/> instance.
         /// </summary>
-        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing)
+        public virtual void Dispose()
         {
-            if (disposing)
+            if (_shouldDispose)
             {
-                if (_shouldDispose)
-                {
-                    Controller?.Dispose();
-                    Controller = null!;
-                }
+                Controller?.Dispose();
+                Controller = null!;
             }
         }
 
@@ -134,7 +117,7 @@ namespace Iot.Device.DCMotor
         /// </remarks>
         public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, GpioController? controller = null, bool shouldDispose = true, bool singleBiDirectionPin = false)
         {
-            if (speedControlChannel == null)
+            if (speedControlChannel is null)
             {
                 throw new ArgumentNullException(nameof(speedControlChannel));
             }
@@ -222,7 +205,7 @@ namespace Iot.Device.DCMotor
         /// </remarks>
         public static DCMotor Create(PwmChannel speedControlChannel, int directionPin, int otherDirectionPin, GpioController? controller = null, bool shouldDispose = true)
         {
-            if (speedControlChannel == null)
+            if (speedControlChannel is null)
             {
                 throw new ArgumentNullException(nameof(speedControlChannel));
             }

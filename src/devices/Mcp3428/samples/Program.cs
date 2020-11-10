@@ -4,13 +4,13 @@
 using System;
 using System.Device.I2c;
 using System.Diagnostics;
-using System.Threading.Tasks;
+using System.Threading;
 using Iot.Device.Mcp3428;
 
 Console.WriteLine("Hello Mcp3428 Sample!");
 I2cConnectionSettings options = new (1, Mcp3428.I2CAddressFromPins(PinState.Low, PinState.Low));
 using I2cDevice i2cDevice = I2cDevice.Create(options);
-using Mcp3428 adc = new Mcp3428(i2cDevice, AdcMode.OneShot, resolution: AdcResolution.Bit16, pgaGain: AdcGain.X1);
+using Mcp3428 adc = new (i2cDevice, AdcMode.OneShot, resolution: AdcResolution.Bit16, pgaGain: AdcGain.X1);
 var watch = new Stopwatch();
 watch.Start();
 while (true)
@@ -27,9 +27,9 @@ while (true)
 
         Console.WriteLine();
         Console.WriteLine($"ADC Channel[{adc.LastChannel + 1}] read in {watch.ElapsedMilliseconds - last} ms, value: {value} V");
-        await Task.Delay(500);
+        Thread.Sleep(500);
     }
 
     Console.WriteLine($"mode {adc.Mode}, gain {adc.InputGain}, res {adc.Resolution}");
-    await Task.Delay(1000);
+    Thread.Sleep(1000);
 }

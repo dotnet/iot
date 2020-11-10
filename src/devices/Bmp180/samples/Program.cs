@@ -23,12 +23,12 @@ i2cBmp280.SetSampling(Sampling.Standard);
 // read values
 Temperature tempValue = i2cBmp280.ReadTemperature();
 Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
-var preValue = i2cBmp280.ReadPressure();
+Pressure preValue = i2cBmp280.ReadPressure();
 Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
 
 // Note that if you already have the pressure value and the temperature, you could also calculate altitude by
 // calling WeatherHelper.CalculateAltitude(preValue, Pressure.MeanSeaLevel, tempValue) which would be more performant.
-var altValue = i2cBmp280.ReadAltitude(WeatherHelper.MeanSeaLevel);
+Length altValue = i2cBmp280.ReadAltitude(WeatherHelper.MeanSeaLevel);
 
 Console.WriteLine($"Altitude: {altValue:0.##}m");
 Thread.Sleep(1000);

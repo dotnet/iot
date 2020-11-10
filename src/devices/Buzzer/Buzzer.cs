@@ -38,10 +38,7 @@ namespace Iot.Device.Buzzer
         /// Create Buzzer class instance with output on specified pin with specified channel using passed PWM controller.
         /// </summary>
         /// <param name="pwmChannel">The PWM controller to use during work.</param>
-        public Buzzer(PwmChannel pwmChannel)
-        {
-            _pwmChannel = pwmChannel;
-        }
+        public Buzzer(PwmChannel pwmChannel) => _pwmChannel = pwmChannel;
 
         /// <summary>
         /// Set new or overwrite previously set frequency and start playing the sound.
@@ -56,10 +53,7 @@ namespace Iot.Device.Buzzer
         /// <summary>
         /// Stop playing tone.
         /// </summary>
-        public void StopPlaying()
-        {
-            _pwmChannel.Stop();
-        }
+        public void StopPlaying() => _pwmChannel.Stop();
 
         /// <summary>
         /// Play tone of specific frequency for specified duration.

@@ -20,7 +20,7 @@ namespace Iot.Device.Magnetometer
         private OutputBitMode _outputBitMode;
         private bool _selfTest = false;
         private Ak8963I2cBase _ak8963Interface;
-        private bool _autodispose = true;
+        private bool _shouldDispose = true;
 
         /// <summary>
         /// Default I2C address for the AK8963
@@ -40,18 +40,18 @@ namespace Iot.Device.Magnetometer
         /// Constructor to use if AK8963 is behind another element and need a special I2C protocol like
         /// when used with the MPU9250
         /// </summary>
-        /// <param name="i2CDevice">The I2C device</param>
+        /// <param name="i2cDevice">The I2C device</param>
         /// <param name="ak8963Interface">The specific interface to communicate with the AK8963</param>
-        /// <param name="autoDispose">True to dispose the I2C device when class is disposed</param>
-        public Ak8963(I2cDevice i2CDevice, Ak8963I2cBase ak8963Interface, bool autoDispose = true)
+        /// <param name="shouldDispose">True to dispose the I2C device when class is disposed</param>
+        public Ak8963(I2cDevice i2cDevice, Ak8963I2cBase ak8963Interface, bool shouldDispose = true)
         {
-            _i2cDevice = i2CDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _ak8963Interface = ak8963Interface;
             // Initialize the default modes
             _measurementMode = MeasurementMode.PowerDown;
             _outputBitMode = OutputBitMode.Output14bit;
             _selfTest = false;
-            _autodispose = autoDispose;
+            _shouldDispose = shouldDispose;
             byte mode = (byte)((byte)_measurementMode | ((byte)_outputBitMode << 4));
             WriteRegister(Register.CNTL, mode);
             if (!IsVersionCorrect())
@@ -77,10 +77,7 @@ namespace Iot.Device.Magnetometer
         /// Get the device information
         /// </summary>
         /// <returns>The device information</returns>
-        public byte GetDeviceInfo()
-        {
-            return ReadByte(Register.INFO);
-        }
+        public byte GetDeviceInfo() => ReadByte(Register.INFO);
 
         /// <summary>
         /// Get the magnetometer bias
@@ -280,7 +277,6 @@ namespace Iot.Device.Magnetometer
         public bool MageneticFieldGeneratorEnabled
         {
             get => _selfTest;
-
             set
             {
                 byte mode = value ? (byte)0b01000_0000 : (byte)0b0000_0000;
@@ -295,7 +291,6 @@ namespace Iot.Device.Magnetometer
         public MeasurementMode MeasurementMode
         {
             get => _measurementMode;
-
             set
             {
                 byte mode = (byte)((byte)value | ((byte)_outputBitMode << 4));
@@ -313,7 +308,6 @@ namespace Iot.Device.Magnetometer
         public OutputBitMode OutputBitMode
         {
             get => _outputBitMode;
-
             set
             {
                 byte mode = (byte)(((byte)value << 4) | (byte)_measurementMode);
@@ -333,7 +327,7 @@ namespace Iot.Device.Magnetometer
         /// </summary>
         public void Dispose()
         {
-            if (_autodispose)
+            if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
                 _i2cDevice = null!;

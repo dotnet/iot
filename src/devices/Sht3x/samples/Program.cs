@@ -10,11 +10,11 @@ using UnitsNet;
 
 I2cConnectionSettings settings = new (1, (byte)I2cAddress.AddrLow);
 using I2cDevice device = I2cDevice.Create(settings);
-using Sht3x sensor = new Sht3x(device);
+using Sht3x sensor = new (device);
 while (true)
 {
-    var tempValue = sensor.Temperature;
-    var humValue = sensor.Humidity;
+    Temperature tempValue = sensor.Temperature;
+    Ratio humValue = sensor.Humidity;
 
     Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
     Console.WriteLine($"Relative humidity: {humValue:0.#}%");

@@ -13,7 +13,7 @@ int s_deviceAddress = 0x20;
 Console.WriteLine("Hello Mcp23xxx!");
 
 using Mcp23xxx mcp23xxx = GetMcp23xxxDevice(Mcp23xxxDevice.Mcp23017);
-using GpioController controllerUsingMcp = new GpioController(PinNumberingScheme.Logical, mcp23xxx);
+using GpioController controllerUsingMcp = new (PinNumberingScheme.Logical, mcp23xxx);
 // Samples are currently written specifically for the 16 bit variant
 if (mcp23xxx is Mcp23x1x mcp23x1x)
 {

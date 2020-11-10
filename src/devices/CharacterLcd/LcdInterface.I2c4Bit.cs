@@ -31,12 +31,12 @@ namespace Iot.Device.CharacterLcd
             private const byte LCD_ENTRYLEFT = 0x02;
             private const byte LCD_4BITMODE = 0x00;
 
-            private readonly I2cDevice _device;
+            private readonly I2cDevice _i2cDevice;
             private bool _backlightOn;
 
-            public I2c4Bit(I2cDevice device)
+            public I2c4Bit(I2cDevice i2cDevice)
             {
-                _device = device;
+                _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
                 _backlightOn = true;
                 InitDisplay();
             }
@@ -49,10 +49,7 @@ namespace Iot.Device.CharacterLcd
             /// </summary>
             public override bool BacklightOn
             {
-                get
-                {
-                    return _backlightOn;
-                }
+                get => _backlightOn;
                 set
                 {
                     _backlightOn = value;
@@ -105,8 +102,8 @@ namespace Iot.Device.CharacterLcd
 
             private void Write4Bits(byte command)
             {
-                _device.WriteByte((byte)(command | ENABLE | BacklightFlag));
-                _device.WriteByte((byte)((command & ~ENABLE) | BacklightFlag));
+                _i2cDevice.WriteByte((byte)(command | ENABLE | BacklightFlag));
+                _i2cDevice.WriteByte((byte)((command & ~ENABLE) | BacklightFlag));
             }
 
             public override void SendCommands(ReadOnlySpan<byte> commands)

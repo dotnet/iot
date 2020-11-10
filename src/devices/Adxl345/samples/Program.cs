@@ -9,14 +9,13 @@ using Iot.Device.Adxl345;
 
 SpiConnectionSettings settings = new (0, 0)
 {
-    ClockFrequency = Iot.Device.Adxl345.Adxl345.SpiClockFrequency,
-    Mode = Iot.Device.Adxl345.Adxl345.SpiMode
+    ClockFrequency = Adxl345.SpiClockFrequency,
+    Mode = Adxl345.SpiMode
 };
 
 using SpiDevice device = SpiDevice.Create(settings);
-
 // set gravity measurement range ±4G
-using Iot.Device.Adxl345.Adxl345 sensor = new Iot.Device.Adxl345.Adxl345(device, GravityRange.Range04);
+using Adxl345 sensor = new Adxl345(device, GravityRange.Range04);
 while (true)
 {
     // read data

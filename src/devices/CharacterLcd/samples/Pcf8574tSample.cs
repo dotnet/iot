@@ -16,8 +16,8 @@ namespace Iot.Device.CharacterLcd.Samples
     {
         private const string Twenty = "123456789\u0008123456789\u0009";
         private const string Thirty = Twenty + "123456789\u000a";
-        private const string Fourty = Thirty + "123456789\u000b";
-        private const string Eighty = Fourty + "123456789\u000c123456789\u000d123456789\u000e123456789\u000f";
+        private const string Forty = Thirty + "123456789\u000b";
+        private const string Eighty = Forty + "123456789\u000c123456789\u000d123456789\u000e123456789\u000f";
 
         public static void SampleEntryPoint()
         {
@@ -49,11 +49,11 @@ namespace Iot.Device.CharacterLcd.Samples
 
                 // Long string
                 TestPrompt("Twenty", lcd, l => l.Write(Twenty));
-                TestPrompt("Fourty", lcd, l => l.Write(Fourty));
+                TestPrompt("Forty", lcd, l => l.Write(Forty));
                 TestPrompt("Eighty", lcd, l => l.Write(Eighty));
 
                 TestPrompt("Twenty-", lcd, l => WriteFromEnd(l, Twenty));
-                TestPrompt("Fourty-", lcd, l => WriteFromEnd(l, Fourty));
+                TestPrompt("Forty-", lcd, l => WriteFromEnd(l, Forty));
                 TestPrompt("Eighty-", lcd, l => WriteFromEnd(l, Eighty));
 
                 TestPrompt("Wrap", lcd, l => l.Write(new string('*', 80) + ">>>>>"));

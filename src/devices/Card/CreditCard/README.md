@@ -27,20 +27,20 @@ static void ReadCreditCard(Pn532 pn532)
     while ((!Console.KeyAvailable))
     {
         retData = pn532.AutoPoll(5, 300, new PollingType[] { PollingType.Passive106kbpsISO144443_4B });
-        if (retData != null)
+        if (retData is object)
             if (retData.Length >= 3)
                 break;
         // Give time to PN532 to process
         Thread.Sleep(200);
     }
 
-    if (retData == null)
+    if (retData is null)
         return;
 
     // Check how many cards and the type
     Console.WriteLine($"Num tags: {retData[0]}, Type: {(PollingType)retData[1]}");
     var decrypted = pn532.TryDecodeData106kbpsTypeB(retData.AsSpan().Slice(3));
-    if (decrypted != null)
+    if (decrypted is object)
     {
         Console.WriteLine($"{decrypted.TargetNumber}, Serial: {BitConverter.ToString(decrypted.NfcId)}, App Data: {BitConverter.ToString(decrypted.ApplicationData)}, " +
             $"{decrypted.ApplicationType}, Bit Rates: {decrypted.BitRates}, CID {decrypted.CidSupported}, Command: {decrypted.Command}, FWT: {decrypted.FrameWaitingTime}, " +
@@ -53,7 +53,7 @@ static void ReadCreditCard(Pn532 pn532)
         DisplayTags(creditCard.Tags, 0);
 		// Display Log Entries
         var format = Tag.SearchTag(creditCard.Tags, 0x9F4F).FirstOrDefault();
-        if (format != null)
+        if (format is object)
             DisplayLogEntries(creditCard.LogEntries, format.Tags);
     }
 }

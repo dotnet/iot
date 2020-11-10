@@ -205,10 +205,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadAltitude(out Length altitude)
-        {
-            return TryReadAltitude(WeatherHelper.MeanSeaLevel, out altitude);
-        }
+        public bool TryReadAltitude(out Length altitude) => TryReadAltitude(WeatherHelper.MeanSeaLevel, out altitude);
 
         /// <summary>
         /// Get the current status of the device.
@@ -253,10 +250,7 @@ namespace Iot.Device.Bmxx80
         /// Gets the required time in ms to perform a measurement with the current sampling modes.
         /// </summary>
         /// <returns>The time it takes for the chip to read data in milliseconds rounded up.</returns>
-        public virtual int GetMeasurementDuration()
-        {
-            return s_osToMeasCycles[(int)PressureSampling] + s_osToMeasCycles[(int)TemperatureSampling];
-        }
+        public virtual int GetMeasurementDuration() => s_osToMeasCycles[(int)PressureSampling] + s_osToMeasCycles[(int)TemperatureSampling];
 
         /// <summary>
         /// Sets the default configuration for the sensor.

@@ -22,7 +22,7 @@ namespace Iot.Device.Mcp23xxx
         /// </param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         protected Mcp23x0x(BusAdapter device, int reset, int interrupt, GpioController? controller = null, bool shouldDispose = true)
-            : base(device, reset, interrupt, controller: controller, shouldDispose: shouldDispose)
+            : base(device, reset, interrupt, gpioController: controller, shouldDispose: shouldDispose)
         {
         }
 

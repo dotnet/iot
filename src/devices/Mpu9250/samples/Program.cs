@@ -7,6 +7,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using Iot.Device.Imu;
+using Iot.Device.Magnetometer;
 
 Console.WriteLine("Hello MPU9250!");
 
@@ -24,11 +25,11 @@ else
 void MagnetometerCalibrationDeepDive(int calibrationCount)
 {
     I2cConnectionSettings mpui2CConnectionSettingmpus = new (1, Mpu9250.DefaultI2cAddress);
-    using Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
-    mpu9250.MagnetometerOutputBitMode = Iot.Device.Magnetometer.OutputBitMode.Output16bit;
-    mpu9250.MagnetometerMeasurementMode = Iot.Device.Magnetometer.MeasurementMode.ContinuousMeasurement100Hz;
+    using Mpu9250 mpu9250 = new (I2cDevice.Create(mpui2CConnectionSettingmpus));
+    mpu9250.MagnetometerOutputBitMode = OutputBitMode.Output16bit;
+    mpu9250.MagnetometerMeasurementMode = MeasurementMode.ContinuousMeasurement100Hz;
     Console.WriteLine("Please move the magnetometer during calibration");
-    using var ioWriter = new StreamWriter("mag.csv");
+    using StreamWriter ioWriter = new ("mag.csv");
     // First we read the data without calibration at all
     Console.WriteLine("Reading magnetometer data without calibration");
     ioWriter.WriteLine($"X;Y;Z");

@@ -44,7 +44,7 @@ namespace Iot.Device.Ssd1351
 
             if (bm.PixelFormat != PixelFormat.Format32bppArgb)
             {
-                throw new ArgumentException($"Pixel format {bm.PixelFormat.ToString()} not supported.", nameof(bm.PixelFormat));
+                throw new ArgumentException(nameof(bm), $"Pixel format {bm.PixelFormat.ToString()} not supported.");
             }
 
             // get the pixel data and send it to the display
@@ -70,7 +70,7 @@ namespace Iot.Device.Ssd1351
 
             if (bm.PixelFormat != PixelFormat.Format32bppArgb)
             {
-                throw new ArgumentException($"Pixel format {bm.PixelFormat.ToString()} not supported.", nameof(bm.PixelFormat));
+                throw new ArgumentException(nameof(bm), $"Pixel format {bm.PixelFormat.ToString()} not supported.");
             }
 
             // allocate the working arrays.

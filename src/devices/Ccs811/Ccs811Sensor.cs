@@ -70,15 +70,14 @@ namespace Iot.Device.Ccs811
         /// <param name="shouldDispose">Should the GPIO controller be disposed at the end</param>
         public Ccs811Sensor(I2cDevice i2cDevice, GpioController? gpioController = null, int pinWake = -1, int pinInterruption = -1, int pinReset = -1, bool shouldDispose = true)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _pinWake = pinWake;
             _pinInterruption = pinInterruption;
             _pinReset = pinReset;
-            _shouldDispose = shouldDispose;
             // We need a GPIO controller only if we are using any of the pin
             if ((_pinInterruption >= 0) || (_pinReset >= 0) || (_pinWake >= 0))
             {
-                _shouldDispose = _shouldDispose || gpioController == null;
+                _shouldDispose = _shouldDispose || gpioController is null;
                 _controller = gpioController ?? new GpioController();
             }
 
@@ -356,7 +355,7 @@ namespace Iot.Device.Ccs811
         {
             if ((humidity.Percent < 0) || (humidity.Percent > 100))
             {
-                throw new ArgumentException($"Humidity can only be between 0 and 100.");
+                throw new ArgumentException(nameof(humidity), "Humidity can only be between 0 and 100.");
             }
 
             Span<byte> environment = stackalloc byte[4];
@@ -401,12 +400,12 @@ namespace Iot.Device.Ccs811
 
             if (!IsPpmValidThreshold(lowEquivalentCO2))
             {
-                throw new ArgumentException($"{lowEquivalentCO2} can only be between 0 and {ushort.MaxValue}");
+                throw new ArgumentException(nameof(lowEquivalentCO2), $"Value can only be between 0 and {ushort.MaxValue}.");
             }
 
             if (!IsPpmValidThreshold(highEquivalentCO2))
             {
-                throw new ArgumentException($"{highEquivalentCO2} can only be between 0 and {ushort.MaxValue}");
+                throw new ArgumentException(nameof(highEquivalentCO2), $"Value can only be between 0 and {ushort.MaxValue}.");
             }
 
             if (lowEquivalentCO2 > highEquivalentCO2)
@@ -418,7 +417,7 @@ namespace Iot.Device.Ccs811
 
             if (highEquivalentCO2 - lowEquivalentCO2 < VolumeConcentration.FromPartsPerMillion(50))
             {
-                throw new ArgumentException($"{highEquivalentCO2}-{lowEquivalentCO2} should be more than 50");
+                throw new ArgumentException(nameof(lowEquivalentCO2), $"value of {nameof(highEquivalentCO2)}-{nameof(lowEquivalentCO2)} must be more than 50.");
             }
 
             Span<byte> toSend = stackalloc byte[4];

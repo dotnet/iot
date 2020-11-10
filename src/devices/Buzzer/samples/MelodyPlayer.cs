@@ -20,43 +20,39 @@ namespace Iot.Device.Buzzer.Samples
         /// Create MelodyPlayer.
         /// </summary>
         /// <param name="buzzer">Buzzer instance to be played on.</param>
-        public MelodyPlayer(Buzzer buzzer)
-        {
-            _buzzer = buzzer;
-        }
+        public MelodyPlayer(Buzzer buzzer) => _buzzer = buzzer;
 
         /// <summary>
         /// Play melody elements sequecne.
         /// </summary>
         /// <param name="sequence">Sequence of pauses and notes elements to be played.</param>
         /// <param name="tempo">Tempo of melody playing.</param>
-        /// <param name="tonesToTransponse">Tones to transpose</param>
-        public void Play(IList<MelodyElement> sequence, int tempo, int tonesToTransponse = 0)
+        /// <param name="tonesToTranspose">Tones to transpose</param>
+        public void Play(IList<MelodyElement> sequence, int tempo, int tonesToTranspose = 0)
         {
             _wholeNoteDurationInMilliseconds = GetWholeNoteDurationInMilliseconds(tempo);
-            sequence = TransposeSequence(sequence, tonesToTransponse);
+            sequence = TransposeSequence(sequence, tonesToTranspose);
             foreach (var element in sequence)
             {
                 PlayElement(element);
             }
         }
 
-        private static IList<MelodyElement> TransposeSequence(IList<MelodyElement> sequence, int tonesToTransponse)
+        private static IList<MelodyElement> TransposeSequence(IList<MelodyElement> sequence, int tonesToTranspose)
         {
-            if (tonesToTransponse == 0)
+            if (tonesToTranspose == 0)
             {
                 return sequence;
             }
 
             return sequence
-                .Select(element => TransposeElement(element, tonesToTransponse))
+                .Select(element => TransposeElement(element, tonesToTranspose))
                 .ToList();
         }
 
         private static MelodyElement TransposeElement(MelodyElement element, int tonesToTransponse)
         {
-            var noteElement = element as NoteElement;
-            if (noteElement == null)
+            if (element is not NoteElement noteElement)
             {
                 return element;
             }
@@ -80,17 +76,11 @@ namespace Iot.Device.Buzzer.Samples
             return noteElement;
         }
 
-        public void Dispose()
-        {
-            _buzzer.Dispose();
-        }
-
         private void PlayElement(MelodyElement element)
         {
             var durationInMilliseconds = _wholeNoteDurationInMilliseconds / (int)element.Duration;
 
-            var noteElement = element as NoteElement;
-            if (noteElement == null)
+            if (element is not NoteElement noteElement)
             {
                 // In case it's a pause element we have only just wait desired time.
                 Thread.Sleep(durationInMilliseconds);
@@ -121,13 +111,10 @@ namespace Iot.Device.Buzzer.Samples
                     { Note.B,  7902.13 }
                 };
 
-        private static int GetWholeNoteDurationInMilliseconds(int tempo)
-        {
-            // In music tempo defines amount of quarter notes per minute.
-            // Dividing minute (60 * 1000) by tempo we get duration of quarter note.
-            // Whole note duration equals to four quarters.
-            return 4 * 60 * 1000 / tempo;
-        }
+        // In music tempo defines amount of quarter notes per minute.
+        // Dividing minute (60 * 1000) by tempo we get duration of quarter note.
+        // Whole note duration equals to four quarters.
+        private static int GetWholeNoteDurationInMilliseconds(int tempo) => 4 * 60 * 1000 / tempo;
 
         private static double GetFrequency(Note note, Octave octave)
         {
@@ -142,13 +129,14 @@ namespace Iot.Device.Buzzer.Samples
 
         private static double GetNoteFrequencyOfEightOctave(Note note)
         {
-            double result;
-            if (notesOfEightOctaveToFrequenciesMap.TryGetValue(note, out result))
+            if (notesOfEightOctaveToFrequenciesMap.TryGetValue(note, out double result))
             {
                 return result;
             }
 
             return 0;
         }
+
+        public void Dispose() => _buzzer?.Dispose();
     }
 }

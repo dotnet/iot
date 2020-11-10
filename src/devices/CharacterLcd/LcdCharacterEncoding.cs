@@ -62,31 +62,18 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// The list of pixel maps for extra characters that are required for this culture.
         /// </summary>
-        public virtual List<byte[]> ExtraCharacters
-        {
-            get
-            {
-                return _extraCharacters;
-            }
-        }
+        public virtual List<byte[]> ExtraCharacters => _extraCharacters;
 
         /// <summary>
         /// This is internally set to false if we already know that we won't be able to display all required characters
         /// </summary>
-        protected internal bool AllCharactersSupported
-        {
-            get;
-            set;
-        }
+        protected internal bool AllCharactersSupported { get; set; }
 
         /// <summary>
         /// Specified Name of the hardcoded character memory set for which this Encoding is intended. An encoding shall only be loaded to
         /// a matching display.
         /// </summary>
-        public string ReadOnlyMemoryName
-        {
-            get;
-        }
+        public string ReadOnlyMemoryName { get; }
 
         /// <inheritDoc/>
         public override int GetByteCount(char[] chars, int index, int count)
@@ -105,7 +92,7 @@ namespace Iot.Device.CharacterLcd
             for (int i = 0; i < charCount; i++)
             {
                 byte b;
-                if (_characterMapping == null)
+                if (_characterMapping is null)
                 {
                     bytes[byteIndex] = (byte)chars[charIndex];
                 }
@@ -126,30 +113,18 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <inheritDoc/>
-        public override int GetCharCount(byte[] bytes, int index, int count)
-        {
-            return Math.Min(bytes.Length, count);
-        }
+        public override int GetCharCount(byte[] bytes, int index, int count) => Math.Min(bytes.Length, count);
 
         /// <summary>
         /// Reverse mapping is not supported for this encoding.
         /// </summary>
-        public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
-        {
-            throw new NotSupportedException("Reverse conversion not supported");
-        }
+        public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex) => throw new NotSupportedException("Reverse conversion not supported");
 
         /// <inheritDoc/>
-        public override int GetMaxByteCount(int charCount)
-        {
-            // This encoder always does a 1:1 mapping
-            return charCount;
-        }
+        // This encoder always does a 1:1 mapping
+        public override int GetMaxByteCount(int charCount) => charCount;
 
         /// <inheritDoc/>
-        public override int GetMaxCharCount(int byteCount)
-        {
-            return byteCount;
-        }
+        public override int GetMaxCharCount(int byteCount) => byteCount;
     }
 }

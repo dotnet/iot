@@ -52,10 +52,8 @@ namespace Iot.Device.Tm1637
         {
             _pinClk = pinClk;
             _pinDio = pinDio;
-            _controller = gpioController != null
-                ? (GpioController)gpioController
-                : new GpioController(pinNumberingScheme);
-            _shouldDispose = gpioController == null ? true : shouldDispose;
+            _controller = gpioController ?? new GpioController(pinNumberingScheme);
+            _shouldDispose = shouldDispose || gpioController is null;
             _controller.OpenPin(_pinClk, PinMode.Output);
             _controller.OpenPin(_pinDio, PinMode.Output);
             _brightness = 7;
@@ -69,15 +67,12 @@ namespace Iot.Device.Tm1637
         /// </summary>
         public byte[] CharacterOrder
         {
-            get
-            {
-                return _charactersOrder;
-            }
+            get => _charactersOrder;
             set
             {
                 if (value.Length != MaxCharacters)
                 {
-                    throw new ArgumentException($"Size of {nameof(CharacterOrder)} can only be 6 length");
+                    throw new ArgumentException(nameof(CharacterOrder), $"Value must be 6 bytes.");
                 }
 
                 // Check if we have all values from 0 to 5
@@ -102,11 +97,7 @@ namespace Iot.Device.Tm1637
         /// </summary>
         public bool ScreenOn
         {
-            get
-            {
-                return _screenOn;
-            }
-
+            get => _screenOn;
             set
             {
                 _screenOn = value;
@@ -119,15 +110,12 @@ namespace Iot.Device.Tm1637
         /// </summary>
         public byte Brightness
         {
-            get
-            {
-                return _brightness;
-            }
+            get => _brightness;
             set
             {
                 if (value > 7)
                 {
-                    throw new ArgumentException($"{nameof(Brightness)} can't be more than 7");
+                    throw new ArgumentException(nameof(Brightness), "Value must be less than 8.");
                 }
 
                 _brightness = value;
@@ -225,7 +213,7 @@ namespace Iot.Device.Tm1637
         {
             if (rawData.Length > MaxCharacters)
             {
-                throw new ArgumentException($"Maximum number of segments for TM1637 is {MaxCharacters}");
+                throw new ArgumentException(nameof(rawData), $"Maximum number of segments for TM1637 is {MaxCharacters}");
             }
 
             // Prepare the buffer with the right order to transfer
@@ -296,7 +284,7 @@ namespace Iot.Device.Tm1637
         {
             if (characterPosition > MaxCharacters)
             {
-                throw new ArgumentException($"Maximum number of characters for TM1637 is {MaxCharacters}");
+                throw new ArgumentException(nameof(characterPosition), $"Maximum number of characters for TM1637 is {MaxCharacters}");
             }
 
             // Recreate the buffer in correct order

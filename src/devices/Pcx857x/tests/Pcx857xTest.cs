@@ -91,10 +91,10 @@ namespace Iot.Device.Pcx857x.Tests
 
             // Can't coalesce here https://github.com/dotnet/roslyn/issues/29927
             public ReadOnlySpan<byte> LastReadBuffer =>
-                _lastReadBuffer == null ? ReadOnlySpan<byte>.Empty : _lastReadBuffer;
+                _lastReadBuffer is null ? ReadOnlySpan<byte>.Empty : _lastReadBuffer;
 
             public ReadOnlySpan<byte> LastWriteBuffer =>
-                _lastWriteBuffer == null ? ReadOnlySpan<byte>.Empty : _lastWriteBuffer;
+                _lastWriteBuffer is null ? ReadOnlySpan<byte>.Empty : _lastWriteBuffer;
 
             public void Read(Span<byte> buffer)
             {

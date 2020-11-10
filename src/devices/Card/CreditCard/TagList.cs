@@ -14,7 +14,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         /// List of Tags description, source, conversion for display as well as if they are templates or contain Data Object Link
         /// This list is coming from the EMV documentation, see EMV book 3, Annexe A
         /// </summary>
-        public static List<TagDetails> Tags = new List<TagDetails>()
+        public static List<TagDetails> Tags = new ()
         {
             new TagDetails() { TagNumber = 0x06, Source = Source.Icc, Decoder = ConversionType.ByteArray, Description = "Object Identifier (OID)", IsTemplate = false, IsDol = false },
             new TagDetails() { TagNumber = 0x41, Source = Source.Icc, Decoder = ConversionType.ByteArray, Description = "Country code and national data", IsTemplate = false, IsDol = false },

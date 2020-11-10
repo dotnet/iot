@@ -54,7 +54,7 @@ namespace Iot.Device.GoPiGo3.Movements
         {
             if (port == MotorPort.Both)
             {
-                throw new ArgumentException($"Motor class can only have 1 motor");
+                throw new ArgumentException(nameof(port), "Motor class can only have 1 motor");
             }
 
             _goPiGo = brick;

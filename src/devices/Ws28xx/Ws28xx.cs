@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Device.Spi;
 using Iot.Device.Graphics;
 
@@ -28,7 +29,7 @@ namespace Iot.Device.Ws28xx
         /// <param name="image">The bitmap that represents the screen or led strip.</param>
         public Ws28xx(SpiDevice spiDevice, BitmapImage image)
         {
-            _spiDevice = spiDevice;
+            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             Image = image;
         }
 

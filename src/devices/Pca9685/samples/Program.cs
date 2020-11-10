@@ -25,16 +25,18 @@ var deviceAddress = Pca9685.I2cAddressBase + selectedI2cAddress;
 I2cConnectionSettings settings = new (busId, deviceAddress);
 using I2cDevice device = I2cDevice.Create(settings);
 
-using Pca9685 pca9685 = new Pca9685(device);
+using Pca9685 pca9685 = new (device);
 Console.WriteLine(
     $"PCA9685 is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
 Console.WriteLine($"PWM Frequency: {pca9685.PwmFrequency}Hz");
 Console.WriteLine();
 PrintHelp();
 
+#pragma warning disable SA1011
+
 while (true)
 {
-    var command = Console.ReadLine()?.ToLower()?.Split(' ');
+    string[]? command = Console.ReadLine()?.ToLower()?.Split(' ');
     if (command?[0] is not { Length: >0 })
     {
         return;
@@ -94,12 +96,10 @@ while (true)
     }
 }
 
-ServoMotor CreateServo(Pca9685 pca9685, int channel)
-{
-    return new ServoMotor(
+ServoMotor CreateServo(Pca9685 pca9685, int channel) =>
+     new ServoMotor(
         pca9685.CreatePwmChannel(channel),
         AngleRange, MinPulseWidthMicroseconds, MaxPulseWidthMicroseconds);
-}
 
 void PrintServoDemoHelp()
 {
@@ -111,7 +111,7 @@ void PrintServoDemoHelp()
 
 void ServoDemo(Pca9685 pca9685, int channel)
 {
-    using var servo = CreateServo(pca9685, channel);
+    using ServoMotor servo = CreateServo(pca9685, channel);
     PrintServoDemoHelp();
 
     while (true)

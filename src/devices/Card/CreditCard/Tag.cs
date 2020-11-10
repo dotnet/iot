@@ -31,7 +31,7 @@ namespace Iot.Device.Card.CreditCardProcessing
             TagNumber = tagNumber;
             Data = data;
             Parent = parent;
-            if (tags != null)
+            if (tags is object)
             {
                 Tags = tags;
             }

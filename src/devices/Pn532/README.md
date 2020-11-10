@@ -27,13 +27,13 @@ byte[] retData = null;
 while ((!Console.KeyAvailable))
 {
     retData = pn532.ListPassiveTarget(MaxTarget.One, TargetBaudRate.B106kbpsTypeA);
-    if (retData != null)
+    if (retData is object)
         break;
     // Give time to PN532 to process
     Thread.Sleep(200);
 }
 
-if (retData == null)
+if (retData is null)
     return;
 
 // You need to remove the first element at it's the number of tags read
@@ -48,7 +48,7 @@ byte[] retData = null;
 while ((!Console.KeyAvailable))
 {
     retData = pn532.AutoPoll(5, 300, new PollingType[] { PollingType.Passive106kbpsISO144443_4B });
-    if (retData != null)
+    if (retData is object)
     {
         if (retData.Length >= 3)
             break;
@@ -58,7 +58,7 @@ while ((!Console.KeyAvailable))
     Thread.Sleep(200);
 }
 
-if (retData == null)
+if (retData is null)
     return;
 
 // Check how many tags and the type
@@ -78,10 +78,10 @@ PN532 implement a ReadWrite function that allows to use a high level Mifare card
 Once detected and selected like in the previous example, this fully dump the content of a classical Mifare 1K card:
 
 ```csharp
-if (decrypted != null)
+if (decrypted is object)
 {
     Console.WriteLine($"Tg: {decrypted.TargetNumber}, ATQA: {decrypted.Atqa} SAK: {decrypted.Sak}, NFCID: {BitConverter.ToString(decrypted.NfcId)}");
-    if (decrypted.Ats != null)
+    if (decrypted.Ats is object)
     Console.WriteLine($", ATS: {BitConverter.ToString(decrypted.Ats)}");
     
     MifareCard mifareCard = new MifareCard(pn532, decrypted.TargetNumber) { BlockNumber = 0, Command = MifareCardCommand.AuthenticationA };
@@ -148,13 +148,13 @@ static void AsTarget(Pn532 pn532)
             new TargetMifareParameters() { Atqa = new byte[] { 0x08, 0x00 }, Sak = 0x60 },
             new TargetFeliCaParameters() { NfcId2 = new byte[] { 0x01, 0xFE, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7 }, Pad = new byte[] { 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7 } },
             new TargetPiccParameters() { NfcId3 = new byte[] { 0xAA, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11 }, GeneralTarget = new byte[0], HistoricalTarget = new byte[0] });
-        if (modeInitialized != null)
+        if (modeInitialized is object)
             break;
 
         // Give time to PN532 to process
         Thread.Sleep(200);
     }
-    if (modeInitialized == null)
+    if (modeInitialized is null)
         return;
 
     Console.WriteLine($"PN532 as a target: ISDep: {modeInitialized.IsDep}, IsPicc {modeInitialized.IsISO14443_4Picc}, {modeInitialized.TargetBaudRate}, {modeInitialized.TargetFramingType}");

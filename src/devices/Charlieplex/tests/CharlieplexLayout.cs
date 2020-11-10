@@ -1,6 +1,6 @@
 ﻿using System;
-using Xunit;
 using Iot.Device.Multiplexing;
+using Xunit;
 
 namespace Charlietests
 {
@@ -11,7 +11,7 @@ namespace Charlietests
         {
             var pins = new int[] { 1, 2 };
 
-            var nodes = CharlieplexSegment.GetNodes(pins);
+            CharlieplexSegmentNode[] nodes = CharlieplexSegment.GetNodes(pins);
             Assert.True(nodes.Length == 2);
             Assert.True(nodes[0].Anode == 1 && nodes[0].Cathode == 2);
             Assert.True(nodes[1].Anode == 2 && nodes[1].Cathode == 1);
@@ -22,7 +22,7 @@ namespace Charlietests
         {
             var pins = new int[] { 1, 2, 3 };
 
-            var nodes = CharlieplexSegment.GetNodes(pins);
+            CharlieplexSegmentNode[] nodes = CharlieplexSegment.GetNodes(pins);
             Assert.True(nodes.Length == 6);
             Assert.True(nodes[0].Anode == 1 && nodes[0].Cathode == 2);
             Assert.True(nodes[1].Anode == 2 && nodes[1].Cathode == 1);
@@ -36,7 +36,7 @@ namespace Charlietests
         public void FourPinLayout()
         {
             var pins = new int[] { 1, 2, 3, 4 };
-            var nodes = CharlieplexSegment.GetNodes(pins);
+            CharlieplexSegmentNode[] nodes = CharlieplexSegment.GetNodes(pins);
             Assert.True(true);
             Assert.True(nodes.Length == 12);
             Assert.True(nodes[0].Anode == 1 && nodes[0].Cathode == 2);
@@ -57,7 +57,7 @@ namespace Charlietests
         public void FivePinLayout()
         {
             var pins = new int[] { 1, 2, 3, 4, 5 };
-            var nodes = CharlieplexSegment.GetNodes(pins);
+            CharlieplexSegmentNode[] nodes = CharlieplexSegment.GetNodes(pins);
             Assert.True(true);
             Assert.True(nodes.Length == 20);
             Assert.True(nodes[0].Anode == 1 && nodes[0].Cathode == 2);

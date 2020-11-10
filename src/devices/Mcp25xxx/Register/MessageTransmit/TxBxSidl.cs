@@ -31,17 +31,17 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             if (txBufferNumber > 2)
             {
-                throw new ArgumentException($"Invalid TX Buffer Number value {txBufferNumber}.", nameof(txBufferNumber));
+                throw new ArgumentException(nameof(txBufferNumber), $"Invalid TX Buffer Number value {txBufferNumber}.");
             }
 
             if (extendedIdentifier > 3)
             {
-                throw new ArgumentException($"Invalid EID value {extendedIdentifier}.", nameof(extendedIdentifier));
+                throw new ArgumentException(nameof(extendedIdentifier), $"Invalid EID value {extendedIdentifier}.");
             }
 
             if (standardIdentifier > 7)
             {
-                throw new ArgumentException($"Invalid SID value {standardIdentifier}.", nameof(standardIdentifier));
+                throw new ArgumentException(nameof(standardIdentifier), $"Invalid SID value {standardIdentifier}.");
             }
 
             TxBufferNumber = txBufferNumber;
@@ -59,7 +59,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             if (txBufferNumber > 2)
             {
-                throw new ArgumentException($"Invalid TX Buffer Number value {txBufferNumber}.", nameof(txBufferNumber));
+                throw new ArgumentException(nameof(txBufferNumber), $"Invalid TX Buffer Number value {txBufferNumber}.");
             }
 
             TxBufferNumber = txBufferNumber;
@@ -92,40 +92,26 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// </summary>
         public byte StandardIdentifier { get; }
 
-        private Address GetAddress()
+        private Address GetAddress() => TxBufferNumber switch
         {
-            switch (TxBufferNumber)
-            {
-                case 0:
-                    return Address.TxB0Sidl;
-                case 1:
-                    return Address.TxB1Sidl;
-                case 2:
-                    return Address.TxB2Sidl;
-                default:
-                    throw new ArgumentException($"Invalid Tx Buffer Number value {TxBufferNumber}.", nameof(TxBufferNumber));
-            }
-        }
+            0 => Address.TxB0Sidl,
+            1 => Address.TxB1Sidl,
+            2 => Address.TxB2Sidl,
+            _ => throw new Exception($"Invalid value for {nameof(TxBufferNumber)}: {TxBufferNumber}."),
+        };
 
         /// <summary>
         /// Gets the Tx Buffer Number based on the register address.
         /// </summary>
         /// <param name="address">The address to look up Tx Buffer Number.</param>
         /// <returns>The Tx Buffer Number based on the register address.</returns>
-        public static byte GetTxBufferNumber(Address address)
+        public static byte GetTxBufferNumber(Address address) => address switch
         {
-            switch (address)
-            {
-                case Address.TxB0Sidl:
-                    return 0;
-                case Address.TxB1Sidl:
-                    return 1;
-                case Address.TxB2Sidl:
-                    return 2;
-                default:
-                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
-            }
-        }
+            Address.TxB0Sidl => 0,
+            Address.TxB1Sidl => 1,
+            Address.TxB2Sidl => 2,
+            _ => throw new ArgumentException(nameof(address), $"Invalid value: {address}."),
+        };
 
         /// <summary>
         /// Gets the address of the register.

@@ -27,7 +27,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             if (txBufferNumber > 2)
             {
-                throw new ArgumentException($"Invalid TX Buffer Number value {txBufferNumber}.", nameof(txBufferNumber));
+                throw new ArgumentException(nameof(txBufferNumber), $"Invalid TX Buffer Number value {txBufferNumber}.");
             }
 
             TxBufferNumber = txBufferNumber;
@@ -44,7 +44,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             if (txBufferNumber > 2)
             {
-                throw new ArgumentException($"Invalid TX Buffer Number value {txBufferNumber}.", nameof(txBufferNumber));
+                throw new ArgumentException(nameof(txBufferNumber), $"Invalid TX Buffer Number value {txBufferNumber}.");
             }
 
             TxBufferNumber = txBufferNumber;
@@ -71,40 +71,26 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// </summary>
         public bool RemoteTransmissionRequest { get; }
 
-        private Address GetAddress()
+        private Address GetAddress() => TxBufferNumber switch
         {
-            switch (TxBufferNumber)
-            {
-                case 0:
-                    return Address.TxB0Dlc;
-                case 1:
-                    return Address.TxB1Dlc;
-                case 2:
-                    return Address.TxB2Dlc;
-                default:
-                    throw new ArgumentException($"Invalid Tx Buffer Number value {TxBufferNumber}.", nameof(TxBufferNumber));
-            }
-        }
+            0 => Address.TxB0Dlc,
+            1 => Address.TxB1Dlc,
+            2 => Address.TxB2Dlc,
+            _ => throw new Exception($"Invalid value for {nameof(TxBufferNumber)}: {TxBufferNumber}."),
+        };
 
         /// <summary>
         /// Gets the Tx Buffer Number based on the register address.
         /// </summary>
         /// <param name="address">The address to look up Tx Buffer Number.</param>
         /// <returns>The Tx Buffer Number based on the register address.</returns>
-        public static byte GetTxBufferNumber(Address address)
+        public static byte GetTxBufferNumber(Address address) => address switch
         {
-            switch (address)
-            {
-                case Address.TxB0Dlc:
-                    return 0;
-                case Address.TxB1Dlc:
-                    return 1;
-                case Address.TxB2Dlc:
-                    return 2;
-                default:
-                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
-            }
-        }
+            Address.TxB0Dlc => 0,
+            Address.TxB1Dlc => 1,
+            Address.TxB2Dlc => 2,
+            _ => throw new ArgumentException(nameof(address), $"Invalid value: {address}."),
+        };
 
         /// <summary>
         /// Gets the address of the register.

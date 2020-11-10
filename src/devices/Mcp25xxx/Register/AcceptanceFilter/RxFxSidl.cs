@@ -31,17 +31,17 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             if (rxFilterNumber > 5)
             {
-                throw new ArgumentException($"Invalid RX Filter Number value {rxFilterNumber}.", nameof(rxFilterNumber));
+                throw new ArgumentException(nameof(rxFilterNumber), $"Invalid RX Filter Number value {rxFilterNumber}.");
             }
 
             if (extendedIdentifierFilter > 3)
             {
-                throw new ArgumentException($"Invalid EID value {extendedIdentifierFilter}.", nameof(extendedIdentifierFilter));
+                throw new ArgumentException(nameof(extendedIdentifierFilter), $"Invalid EID value {extendedIdentifierFilter}.");
             }
 
             if (standardIdentifierFilter > 7)
             {
-                throw new ArgumentException($"Invalid SID value {standardIdentifierFilter}.", nameof(standardIdentifierFilter));
+                throw new ArgumentException(nameof(standardIdentifierFilter), $"Invalid SID value {standardIdentifierFilter}.");
             }
 
             RxFilterNumber = rxFilterNumber;
@@ -59,7 +59,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             if (rxFilterNumber > 5)
             {
-                throw new ArgumentException($"Invalid RX Filter Number value {rxFilterNumber}.", nameof(rxFilterNumber));
+                throw new ArgumentException(nameof(rxFilterNumber), $"Invalid RX Filter Number value {rxFilterNumber}.");
             }
 
             RxFilterNumber = rxFilterNumber;
@@ -92,52 +92,32 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         /// </summary>
         public byte StandardIdentifierFilter { get; }
 
-        private Address GetAddress()
+        private Address GetAddress() => RxFilterNumber switch
         {
-            switch (RxFilterNumber)
-            {
-                case 0:
-                    return Address.RxF0Sidl;
-                case 1:
-                    return Address.RxF1Sidl;
-                case 2:
-                    return Address.RxF2Sidl;
-                case 3:
-                    return Address.RxF3Sidl;
-                case 4:
-                    return Address.RxF4Sidl;
-                case 5:
-                    return Address.RxF5Sidl;
-                default:
-                    throw new ArgumentException($"Invalid Rx Filter Number value {RxFilterNumber}.", nameof(RxFilterNumber));
-            }
-        }
+            0 => Address.RxF0Sidl,
+            1 => Address.RxF1Sidl,
+            2 => Address.RxF2Sidl,
+            3 => Address.RxF3Sidl,
+            4 => Address.RxF4Sidl,
+            5 => Address.RxF5Sidl,
+            _ => throw new Exception($"Invalid value for {nameof(RxFilterNumber)}: {RxFilterNumber}."),
+        };
 
         /// <summary>
         /// Gets the Rx Filter Number based on the register address.
         /// </summary>
         /// <param name="address">The address to look up Rx Filter Number.</param>
         /// <returns>The Rx Filter Number based on the register address.</returns>
-        public static byte GetRxFilterNumber(Address address)
+        public static byte GetRxFilterNumber(Address address) => address switch
         {
-            switch (address)
-            {
-                case Address.RxF0Sidl:
-                    return 0;
-                case Address.RxF1Sidl:
-                    return 1;
-                case Address.RxF2Sidl:
-                    return 2;
-                case Address.RxF3Sidl:
-                    return 3;
-                case Address.RxF4Sidl:
-                    return 4;
-                case Address.RxF5Sidl:
-                    return 5;
-                default:
-                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
-            }
-        }
+            Address.RxF0Sidl => 0,
+            Address.RxF1Sidl => 1,
+            Address.RxF2Sidl => 2,
+            Address.RxF3Sidl => 3,
+            Address.RxF4Sidl => 4,
+            Address.RxF5Sidl => 5,
+            _ => throw new ArgumentException(nameof(address), $"Invalid value: {address}."),
+        };
 
         /// <summary>
         /// Gets the address of the register.

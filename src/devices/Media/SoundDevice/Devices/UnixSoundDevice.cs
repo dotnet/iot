@@ -61,7 +61,11 @@ namespace Iot.Device.Media
         /// <summary>
         /// The recording volume of the sound device.
         /// </summary>
-        public override long RecordingVolume { get => GetRecordingVolume(); set => SetRecordingVolume(value); }
+        public override long RecordingVolume
+        {
+            get => GetRecordingVolume();
+            set => SetRecordingVolume(value);
+        }
 
         private bool _recordingMute;
 

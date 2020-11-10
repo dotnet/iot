@@ -14,6 +14,7 @@ namespace Iot.Device.Lsm9Ds1
     public class Lsm9Ds1AccelerometerAndGyroscope : IDisposable
     {
         private const byte ReadMask = 0x80;
+        private const int Max = (1 << 15);
         private I2cDevice _i2c;
         private AccelerationScale _accelerometerScale;
         private AngularRateScale _angularRateScale;
@@ -26,12 +27,7 @@ namespace Iot.Device.Lsm9Ds1
             AccelerationScale accelerationScale = AccelerationScale.Scale02G,
             AngularRateScale angularRateScale = AngularRateScale.Scale0245Dps)
         {
-            if (i2cDevice == null)
-            {
-                throw new ArgumentNullException(nameof(i2cDevice));
-            }
-
-            _i2c = i2cDevice;
+            _i2c = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _accelerometerScale = accelerationScale;
             _angularRateScale = angularRateScale;
 
@@ -90,44 +86,26 @@ namespace Iot.Device.Lsm9Ds1
             _i2c.Read(buffer);
         }
 
-        private float GetAccelerationDivisor()
+        // intentionally return float
+        // we have 16-bit signed number
+        // we can use int since our divisors are powers of 2
+        private float GetAccelerationDivisor() => _accelerometerScale switch
         {
-            // intentionally return float
+            AccelerationScale.Scale02G => Max / 2,
+            AccelerationScale.Scale04G => Max / 4,
+            AccelerationScale.Scale08G => Max / 8,
+            AccelerationScale.Scale16G => Max / 16,
+            _ => throw new ArgumentException(nameof(_accelerometerScale), "Value is unknown."),
+        };
 
-            // we have 16-bit signed number
-            // we can use int since our divisors are powers of 2
-            const int max = (1 << 15);
-            switch (_accelerometerScale)
-            {
-                case AccelerationScale.Scale02G:
-                    return max / 2;
-                case AccelerationScale.Scale04G:
-                    return max / 4;
-                case AccelerationScale.Scale08G:
-                    return max / 8;
-                case AccelerationScale.Scale16G:
-                    return max / 16;
-                default:
-                    throw new ArgumentException(nameof(_accelerometerScale));
-            }
-        }
-
-        private float GetAngularRateDivisor()
+        // we have 16-bit signed number
+        private float GetAngularRateDivisor() => _angularRateScale switch
         {
-            // we have 16-bit signed number
-            const float max = (float)(1 << 15);
-            switch (_angularRateScale)
-            {
-                case AngularRateScale.Scale0245Dps:
-                    return max / 245;
-                case AngularRateScale.Scale0500Dps:
-                    return max / 500;
-                case AngularRateScale.Scale2000Dps:
-                    return max / 2000;
-                default:
-                    throw new ArgumentException(nameof(_angularRateScale));
-            }
-        }
+            AngularRateScale.Scale0245Dps => Max / 245,
+            AngularRateScale.Scale0500Dps => Max / 500,
+            AngularRateScale.Scale2000Dps => Max / 2000,
+            _ => throw new ArgumentException(nameof(_angularRateScale), "Value is unknown."),
+        };
 
         /// <inheritdoc/>
         public void Dispose()

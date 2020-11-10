@@ -41,7 +41,7 @@ namespace Iot.Device.MotorHat
         /// </remarks>
         public MotorHat(I2cConnectionSettings settings, double frequency = 1600)
         {
-            var device = I2cDevice.Create(settings);
+            I2cDevice device = I2cDevice.Create(settings);
             _pca9685 = new Pca9685(device);
 
             _pca9685.PwmFrequency = frequency;
@@ -108,7 +108,7 @@ namespace Iot.Device.MotorHat
                     in1Pin = 5;
                     break;
                 default:
-                    throw new ArgumentException($"MotorHat Motor must be between 1 and 4 inclusive. Received: {motorNumber}");
+                    throw new ArgumentException(nameof(motorNumber), $"MotorHat Motor must be between 1 and 4 inclusive. {nameof(motorNumber)}: {motorNumber}");
             }
 
             var speedPwm = _pca9685.CreatePwmChannel(speedPin);

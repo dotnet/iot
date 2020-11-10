@@ -19,7 +19,7 @@ namespace Iot.Device.DCMotor
             int pin1,
             GpioController? controller,
             bool shouldDispose)
-            : base(controller ?? ((pin1 == -1) ? null : new GpioController()), controller == null ? true : shouldDispose)
+            : base(controller ?? ((pin1 == -1) ? null : new GpioController()), controller is null ? true : shouldDispose)
         {
             _pwm = pwmChannel;
 
@@ -43,10 +43,7 @@ namespace Iot.Device.DCMotor
         /// </summary>
         public override double Speed
         {
-            get
-            {
-                return _speed;
-            }
+            get => _speed;
             set
             {
                 double val = Math.Clamp(value, _pin1 != -1 ? -1.0 : 0.0, 1.0);
@@ -79,15 +76,11 @@ namespace Iot.Device.DCMotor
             }
         }
 
-        protected override void Dispose(bool disposing)
+        public override void Dispose()
         {
-            if (disposing)
-            {
-                _pwm?.Dispose();
-                _pwm = null!;
-            }
-
-            base.Dispose(disposing);
+            _pwm?.Dispose();
+            _pwm = null!;
+            base.Dispose();
         }
     }
 }

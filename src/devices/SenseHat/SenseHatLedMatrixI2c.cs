@@ -40,7 +40,7 @@ namespace Iot.Device.SenseHat
         {
             if (colors.Length != NumberOfPixels)
             {
-                throw new ArgumentException($"`{nameof(colors)}` must have exactly {NumberOfPixels} elements.");
+                throw new ArgumentException(nameof(colors), $"Value must be {NumberOfPixels} elements. Length: {nameof(colors)}.");
             }
 
             Span<byte> buffer = stackalloc byte[FrameBufferLength + 1];
@@ -146,14 +146,11 @@ namespace Iot.Device.SenseHat
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int PositionToAddress(int x, int y)
-        {
-            return y * 24 + x;
-        }
+        private static int PositionToAddress(int x, int y) => y * 24 + x;
 
         private static I2cDevice CreateDefaultI2cDevice()
         {
-            var settings = new I2cConnectionSettings(1, I2cAddress);
+            I2cConnectionSettings settings = new (1, I2cAddress);
             return I2cDevice.Create(settings);
         }
 

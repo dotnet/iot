@@ -24,7 +24,7 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         {
             if (baudRatePrescaler > 0b0011_1111)
             {
-                throw new ArgumentException($"Invalid BRP value {baudRatePrescaler}.", nameof(baudRatePrescaler));
+                throw new ArgumentException(nameof(baudRatePrescaler), $"Invalid BRP value {baudRatePrescaler}.");
             }
 
             BaudRatePrescaler = baudRatePrescaler;

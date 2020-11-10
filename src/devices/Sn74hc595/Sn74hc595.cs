@@ -38,7 +38,7 @@ namespace Iot.Device.Multiplexing
         {
             if (GpioController is null || _pinMapping.SrClr == 0)
             {
-                throw new ArgumentNullException($"{nameof(ClearStorage)}: GpioController was not provided or {nameof(_pinMapping.SrClr)} not mapped to pin");
+                throw new Exception($"{nameof(ClearStorage)}: GpioController was not provided or {nameof(_pinMapping.SrClr)} not mapped to pin");
             }
 
             GpioController.Write(_pinMapping.SrClr, 0);

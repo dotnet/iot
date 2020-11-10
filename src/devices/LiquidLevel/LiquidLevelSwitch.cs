@@ -26,22 +26,19 @@ namespace Iot.Device.LiquidLevel
         public LiquidLevelSwitch(int dataPin, PinValue liquidPresentPinState, GpioController? gpioController = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
         {
             _controller = gpioController ?? new GpioController(pinNumberingScheme);
+            _shouldDispose = shouldDispose || gpioController is null;
             _dataPin = dataPin;
             _liquidPresentPinState = liquidPresentPinState;
 
             _controller.OpenPin(_dataPin, PinMode.Input);
 
-            _shouldDispose = shouldDispose || gpioController == null;
         }
 
         /// <summary>
         /// Determines whether liquid is present.
         /// </summary>
         /// <returns><code>true</code> if liquid is present, otherwise <code>false</code>.</returns>
-        public bool IsLiquidPresent()
-        {
-            return _controller.Read(_dataPin) == _liquidPresentPinState;
-        }
+        public bool IsLiquidPresent() => _controller.Read(_dataPin) == _liquidPresentPinState;
 
         /// <summary>
         /// Dispose Buzzer.

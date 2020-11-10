@@ -45,25 +45,18 @@ namespace Iot.Device.CharacterLcd
             // scheme (Sitronix ST7036, Aiptek AIP31068L, probably others).
             private readonly I2cDevice _device;
 
-            public I2c(I2cDevice device)
-            {
-                _device = device;
-
-                // While the LCD controller can be set to 4 bit mode there really isn't a way to
-                // mess with that from the I2c pins as far as I know. Other drivers try to set the
-                // controller up for 8 bit mode, but it appears they are doing so only because they've
-                // copied existing HD44780 drivers.
-            }
+            // While the LCD controller can be set to 4 bit mode there really isn't a way to
+            // mess with that from the I2c pins as far as I know. Other drivers try to set the
+            // controller up for 8 bit mode, but it appears they are doing so only because they've
+            // copied existing HD44780 drivers.
+            public I2c(I2cDevice device) => _device = device;
 
             public override bool EightBitMode => true;
 
             public override bool BacklightOn
             {
-                get
-                {
-                    // Setting the backlight on or off is not supported with 8 bit commands, according to the docs.
-                    return true;
-                }
+                // Setting the backlight on or off is not supported with 8 bit commands, according to the docs.
+                get => true;
                 set
                 {
                     // Ignore setting the backlight. Exceptions are not expected by user code here, as it is normal to

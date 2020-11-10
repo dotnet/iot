@@ -11,18 +11,18 @@ byte[] retData = null;
 while (!Console.KeyAvailable)
 {
     retData = pn532.ListPassiveTarget(MaxTarget.One, TargetBaudRate.B106kbpsTypeA);
-    if (retData != null)
+    if (retData is object)
         break;
     // Give time to PN532 to process
     Thread.Sleep(200);
 }
-if (retData == null)
+if (retData is null)
     return;
 var decrypted = pn532.Decode106kbpsTypeA(retData.AsSpan().Slice(1));
-if (decrypted != null)
+if (decrypted is object)
 {
     Console.WriteLine($"Tg: {decrypted.TargetNumber}, ATQA: {decrypted.Atqa} SAK: {decrypted.Sak}, NFCID: {BitConverter.ToString(decrypted.NfcId)}");
-    if (decrypted.Ats != null)
+    if (decrypted.Ats is object)
         Console.WriteLine($", ATS: {BitConverter.ToString(decrypted.Ats)}");
     MifareCard mifareCard = new MifareCard(pn532, decrypted.TargetNumber) { BlockNumber = 0, Command = MifareCardCommand.AuthenticationA };
     mifareCard.SetCapacity(decrypted.Atqa, decrypted.Sak);
