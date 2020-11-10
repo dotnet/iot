@@ -7,8 +7,7 @@ using System.Threading;
 using Iot.Device.Bh1750fvi;
 
 I2cConnectionSettings settings = new (busId: 1, (int)I2cAddress.AddPinLow);
-I2cDevice device = I2cDevice.Create(settings);
-
+using I2cDevice device = I2cDevice.Create(settings);
 using Bh1750fvi sensor = new Bh1750fvi(device);
 while (true)
 {

@@ -16,22 +16,20 @@ namespace Iot.Device.SenseHat.Samples
     {
         public static void Run()
         {
-            using (var th = new SenseHatTemperatureAndHumidity())
+            using SenseHatTemperatureAndHumidity th = new ();
+            while (true)
             {
-                while (true)
-                {
-                    var tempValue = th.Temperature;
-                    var humValue = th.Humidity;
+                var tempValue = th.Temperature;
+                var humValue = th.Humidity;
 
-                    Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
-                    Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+                Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
+                Console.WriteLine($"Relative humidity: {humValue:0.#}%");
 
-                    // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
-                    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
-                    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
+                // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
+                Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
+                Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
 
-                    Thread.Sleep(1000);
-                }
+                Thread.Sleep(1000);
             }
         }
     }

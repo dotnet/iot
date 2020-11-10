@@ -7,7 +7,7 @@ using Iot.Device.Rtc;
 I2cConnectionSettings settings = new (1, Ds3231.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 
-using Ds3231 rtc = new Ds3231(device);
+using Ds3231 rtc = new (device);
 // set time
 rtc.DateTime = DateTime.Now;
 

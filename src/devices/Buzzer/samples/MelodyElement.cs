@@ -13,9 +13,6 @@ namespace Iot.Device.Buzzer.Samples
         /// </summary>
         public Duration Duration { get; set; }
 
-        public MelodyElement(Duration duration)
-        {
-            Duration = duration;
-        }
+        public MelodyElement(Duration duration) => Duration = duration;
     }
 }

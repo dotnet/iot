@@ -371,7 +371,7 @@ private int _pinToUse;
 
 public MyBinding(int pinToUse, GpioController controller = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
 {
-  _shouldDispose = gpioController == null || shouldDispose;
+  _shouldDispose = gpioController is null || shouldDispose;
   _controller = gpioController ?? new GpioController(pinNumberingScheme);  
   _pinToUse = pinToUse;
   _controller.OpenPin(_pinToUse);

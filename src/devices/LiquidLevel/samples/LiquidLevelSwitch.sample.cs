@@ -6,7 +6,7 @@ using System.Device.Gpio;
 using System.Threading;
 using Iot.Device.LiquidLevel;
 
-using LiquidLevelSwitch sensor = new LiquidLevelSwitch(23, PinValue.Low);
+using LiquidLevelSwitch sensor = new (23, PinValue.Low);
 while (true)
 {
     // read liquid level switch

@@ -30,10 +30,10 @@ namespace Iot.Device.ExplorerHat
         /// <param name="pin">Underlying rpi GPIO pin number</param>
         /// <param name="controller"><see cref="GpioController"/> used by <see cref="Led"/> to manage GPIO resources</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        internal Led(int pin, GpioController controller, bool shouldDispose = true)
+        internal Led(int pin, GpioController? controller = null, bool shouldDispose = true)
         {
-            _controller = controller;
-            _shouldDispose = shouldDispose;
+            _controller = controller ?? new ();
+            _shouldDispose = shouldDispose || controller is null;
             Pin = pin;
             IsOn = false;
 

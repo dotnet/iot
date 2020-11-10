@@ -24,8 +24,8 @@ void UsingGpioPins()
 
 void UsingMcp()
 {
-    using I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x21));
-    using Mcp23008 driver = new Mcp23008(i2CDevice);
+    using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x21));
+    using Mcp23008 driver = new (i2cDevice);
     int[] dataPins = { 3, 4, 5, 6 };
     int registerSelectPin = 1;
     int enablePin = 2;
@@ -40,8 +40,8 @@ void UsingMcp()
 
 void UsingHd44780OverI2C()
 {
-    using I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x27));
-    using LcdInterface lcdInterface = LcdInterface.CreateI2c(i2CDevice, false);
+    using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x27));
+    using LcdInterface lcdInterface = LcdInterface.CreateI2c(i2cDevice, false);
     using Hd44780 hd44780 = new Lcd2004(lcdInterface);
     hd44780.UnderlineCursorVisible = false;
     hd44780.BacklightOn = true;

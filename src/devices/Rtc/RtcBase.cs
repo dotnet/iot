@@ -13,7 +13,11 @@ namespace Iot.Device.Rtc
         /// <summary>
         /// The Device's <see cref="System.DateTime"/>
         /// </summary>
-        public virtual DateTime DateTime { get => ReadTime(); set => SetTime(value); }
+        public virtual DateTime DateTime
+        {
+            get => ReadTime();
+            set => SetTime(value);
+        }
 
         /// <summary>
         /// Set the device time

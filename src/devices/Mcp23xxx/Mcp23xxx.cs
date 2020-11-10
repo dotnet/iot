@@ -38,7 +38,7 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="reset">The output pin number that is connected to the hardware reset.</param>
         /// <param name="interruptA">The input pin number that is connected to the interrupt for Port A (INTA).</param>
         /// <param name="interruptB">The input pin number that is connected to the interrupt for Port B (INTB).</param>
-        /// <param name="controller">
+        /// <param name="gpioController">
         /// The controller for the reset and interrupt pins. If not specified, the default controller will be used.
         /// </param>
         /// <param name="bankStyle">
@@ -49,11 +49,10 @@ namespace Iot.Device.Mcp23xxx
         /// </param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         protected Mcp23xxx(BusAdapter bus, int reset = -1, int interruptA = -1, int interruptB = -1,
-            GpioController? controller = null, BankStyle bankStyle = BankStyle.Sequential, bool shouldDispose = true)
+            GpioController? gpioController = null, BankStyle bankStyle = BankStyle.Sequential, bool shouldDispose = true)
         {
             _bus = bus;
             _bankStyle = bankStyle;
-            _shouldDispose = controller == null ? true : shouldDispose;
 
             _reset = reset;
             _interruptA = interruptA;
@@ -62,7 +61,8 @@ namespace Iot.Device.Mcp23xxx
             // Only need master controller if there are external pins provided.
             if (_reset != -1 || _interruptA != -1 || _interruptB != -1)
             {
-                _controller = controller ?? new GpioController();
+                _shouldDispose = shouldDispose || gpioController is null;
+                _controller = gpioController ?? new GpioController();
 
                 if (_interruptA != -1)
                 {

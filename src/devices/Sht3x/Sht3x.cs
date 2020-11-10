@@ -35,7 +35,7 @@ namespace Iot.Device.Sht3x
         {
             get
             {
-                ReadTempAndHumi();
+                ReadTempAndHumidity();
                 return Temperature.FromDegreesCelsius(_temperature);
             }
         }
@@ -49,7 +49,7 @@ namespace Iot.Device.Sht3x
         {
             get
             {
-                ReadTempAndHumi();
+                ReadTempAndHumidity();
                 return Ratio.FromPercent(_humidity);
             }
         }
@@ -97,10 +97,8 @@ namespace Iot.Device.Sht3x
         /// <summary>
         /// SHT3x Soft Reset
         /// </summary>
-        public void Reset()
-        {
+        public void Reset() =>
             Write(Register.SHT_RESET);
-        }
 
         /// <summary>
         /// Set SHT3x Heater
@@ -121,7 +119,7 @@ namespace Iot.Device.Sht3x
         /// <summary>
         /// Read Temperature and Humidity
         /// </summary>
-        private void ReadTempAndHumi()
+        private void ReadTempAndHumidity()
         {
             Span<byte> writeBuff = stackalloc byte[]
             {

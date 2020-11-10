@@ -113,7 +113,7 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// Creates a GPIO based interface for the LCD.
         /// </summary>
-        /// <param name="registerSelectPin">The pin that controls the regsiter select.</param>
+        /// <param name="registerSelectPin">The pin that controls the register select.</param>
         /// <param name="enablePin">The pin that controls the enable switch.</param>
         /// <param name="dataPins">Collection of pins holding the data that will be printed on the screen.</param>
         /// <param name="backlightPin">The optional pin that controls the backlight of the display.</param>

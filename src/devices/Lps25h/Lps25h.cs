@@ -22,12 +22,7 @@ namespace Iot.Device.Lps25h
         /// </summary>
         public Lps25h(I2cDevice i2cDevice)
         {
-            if (i2cDevice == null)
-            {
-                throw new ArgumentNullException(nameof(i2cDevice));
-            }
-
-            _i2c = i2cDevice;
+            _i2c = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
             // Highest resolution for both pressure and temperature sensor
             byte resolution = Read(Register.ResolutionMode);
