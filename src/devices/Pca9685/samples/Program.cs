@@ -32,6 +32,8 @@ Console.WriteLine($"PWM Frequency: {pca9685.PwmFrequency}Hz");
 Console.WriteLine();
 PrintHelp();
 
+#pragma warning disable SA1011
+
 while (true)
 {
     string[]? command = Console.ReadLine()?.ToLower()?.Split(' ');
