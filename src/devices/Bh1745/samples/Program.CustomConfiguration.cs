@@ -16,11 +16,8 @@ var i2cDevice = I2cDevice.Create(i2cSettings);
 using Bh1745 i2cBh1745 = new Bh1745(i2cDevice)
 {
     // multipliers affect the compensated values
-    ChannelCompensationMultipliers = new (
-        2.5,    // Red
-        0.9,    // Green
-        1.9,    // Blue
-        9.5),   // Clear
+    // ChannelCompensationMultipliers:  Red, Green, Blue, Clear
+    ChannelCompensationMultipliers = new (2.5, 0.9, 1.9, 9.5),
 
     // set custom  measurement time
     MeasurementTime = MeasurementTime.Ms1280,

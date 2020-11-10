@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)/../Common/System/Runtime/CompilerServices/IsExternalInit.cs"/>
     <None Include="README.md" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
