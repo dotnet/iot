@@ -119,18 +119,26 @@ namespace Iot.Device.GrovePiDevice
         /// <returns></returns>
         public byte[]? ReadCommand(GrovePiCommand command, GrovePort pin)
         {
-            int numberBytesToRead = command switch
+            int numberBytesToRead = 0;
+            switch (command)
             {
-                GrovePiCommand.DigitalRead => 1,
-                GrovePiCommand.AnalogRead | GrovePiCommand.UltrasonicRead | GrovePiCommand.LetBarGet => 3,
-                GrovePiCommand.Version => 4,
-                GrovePiCommand.DhtTemp => 9,
-                _ => 0,
-            };
-
-            if (numberBytesToRead == 0)
-            {
-                return null;
+                case GrovePiCommand.DigitalRead:
+                    numberBytesToRead = 1;
+                    break;
+                case GrovePiCommand.AnalogRead:
+                case GrovePiCommand.UltrasonicRead:
+                case GrovePiCommand.LetBarGet:
+                    numberBytesToRead = 3;
+                    break;
+                case GrovePiCommand.Version:
+                    numberBytesToRead = 4;
+                    break;
+                case GrovePiCommand.DhtTemp:
+                    numberBytesToRead = 9;
+                    break;
+                // No other commands are for read
+                default:
+                    return null;
             }
 
             byte[] outArray = new byte[numberBytesToRead];
