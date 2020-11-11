@@ -9,9 +9,7 @@
 using System;
 using System.IO;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
 using System.Text;
 
 namespace Iot.Device.SocketCan
@@ -30,6 +28,8 @@ namespace Iot.Device.SocketCan
         public const int SOL_CAN_BASE = 100;
         public const int SOL_CAN_RAW = SOL_CAN_BASE + (int)CanProtocol.CAN_RAW;
 
+        public const int O_NONBLOCK = 2048;
+
         [DllImport("libc", EntryPoint = "socket", CallingConvention = CallingConvention.Cdecl)]
         private static extern int CreateNativeSocket(int domain, int type, CanProtocol protocol);
 
@@ -42,14 +42,20 @@ namespace Iot.Device.SocketCan
         [DllImport("libc", EntryPoint = "close", CallingConvention = CallingConvention.Cdecl)]
         private static extern int CloseSocket(int fd);
 
-        [DllImport("libc", EntryPoint = "write", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libc", EntryPoint = "write", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
         private static unsafe extern int SocketWrite(int fd, byte* buffer, int size);
 
-        [DllImport("libc", EntryPoint = "read", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libc", EntryPoint = "read", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
         private static unsafe extern int SocketRead(int fd, byte* buffer, int size);
 
         [DllImport("libc", EntryPoint = "setsockopt", CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern int SetSocketOpt(int fd, int level, int optName, byte* optVal, int optlen);
+
+        [DllImport("libc", EntryPoint = "fcntl", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int SocketControl(int fd, uint command);
+
+        [DllImport("libc", EntryPoint = "fcntl", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int SocketControl(int fd, uint command, int arg);
 
         public static unsafe void Write(SafeHandle handle, ReadOnlySpan<byte> buffer)
         {
@@ -61,7 +67,7 @@ namespace Iot.Device.SocketCan
                     int bytesWritten = Interop.SocketWrite((int)handle.DangerousGetHandle(), b, buffer.Length);
                     if (bytesWritten < 0)
                     {
-                        throw new IOException("`write` operation failed");
+                        throw new SocketException();
                     }
 
                     totalBytesWritten += bytesWritten;
@@ -76,7 +82,7 @@ namespace Iot.Device.SocketCan
                 int bytesRead = Interop.SocketRead((int)handle.DangerousGetHandle(), b, buffer.Length);
                 if (bytesRead < 0)
                 {
-                    throw new IOException("`read` operation failed");
+                    throw new SocketException();
                 }
 
                 return bytesRead;
@@ -104,6 +110,23 @@ namespace Iot.Device.SocketCan
         public static bool SetCanRawSocketOption<T>(SafeHandle handle, CanSocketOption optName, ReadOnlySpan<T> data)
             where T : struct =>
             SetSocketOption(handle, SOL_CAN_RAW, optName, data);
+
+        public static bool GetCanRawSocketNonBlockingFlag(SafeHandle handle)
+        {
+            var fd = (int)handle.DangerousGetHandle();
+
+            var flags = GetSocketFlags(fd);
+            return (flags & O_NONBLOCK) != 0;
+        }
+
+        public static void SetCanRawSocketNonBlockingFlag(SafeHandle handle, bool value)
+        {
+            var fd = (int)handle.DangerousGetHandle();
+
+            var flags = GetSocketFlags(fd);
+            flags = value ? (flags | O_NONBLOCK) : (flags & ~O_NONBLOCK);
+            SetSocketFlags(fd, flags);
+        }
 
         private static unsafe bool SetSocketOption<T>(SafeHandle handle, int level, CanSocketOption optName, ReadOnlySpan<T> data)
             where T : struct
@@ -153,6 +176,29 @@ namespace Iot.Device.SocketCan
             }
 
             return ifr.ifr_ifindex;
+        }
+
+        private static int GetSocketFlags(int fd)
+        {
+            const uint F_GETFL = 3;
+
+            var ret = SocketControl(fd, F_GETFL);
+            if (ret < 0)
+            {
+                throw new IOException("`fcntl` operation failed");
+            }
+
+            return ret;
+        }
+
+        private static void SetSocketFlags(int fd, int flags)
+        {
+            const uint F_SETFL = 4;
+
+            if (SocketControl(fd, F_SETFL, flags) < 0)
+            {
+                throw new IOException("`fcntl` operation failed");
+            }
         }
 
         internal unsafe struct ifreq

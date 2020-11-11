@@ -59,7 +59,14 @@ namespace Iot.Device.SocketCan
 
             ReadOnlySpan<CanFrame> frameSpan = MemoryMarshal.CreateReadOnlySpan(ref frame, 1);
             ReadOnlySpan<byte> buff = MemoryMarshal.AsBytes(frameSpan);
-            Interop.Write(_handle, buff);
+            try
+            {
+                Interop.Write(_handle, buff);
+            }
+            catch (SocketException ex)
+            {
+                throw new IOException("Socket write operation failed.", ex);
+            }
         }
 
         /// <summary>
@@ -80,10 +87,24 @@ namespace Iot.Device.SocketCan
 
             Span<CanFrame> frameSpan = MemoryMarshal.CreateSpan(ref frame, 1);
             Span<byte> buff = MemoryMarshal.AsBytes(frameSpan);
-            while (buff.Length > 0)
+            try
             {
-                int read = Interop.Read(_handle, buff);
-                buff = buff.Slice(read);
+                while (buff.Length > 0)
+                {
+                    int read = Interop.Read(_handle, buff);
+                    buff = buff.Slice(read);
+                }
+            }
+            catch (SocketException ex)
+            {
+                if ((ex.SocketErrorCode == SocketError.WouldBlock) && !IsBlocking)
+                {
+                    id = frame.Id;
+                    frameLength = 0;
+                    return false;
+                }
+
+                throw new IOException("Socket read operation failed.", ex);
             }
 
             id = frame.Id;
@@ -144,6 +165,15 @@ namespace Iot.Device.SocketCan
         public void Dispose()
         {
             _handle.Dispose();
+        }
+
+        /// <summary>
+        /// Enables or disables blocking operation
+        /// </summary>
+        public bool IsBlocking
+        {
+            get => !Interop.GetCanRawSocketNonBlockingFlag(_handle);
+            set => Interop.SetCanRawSocketNonBlockingFlag(_handle, !value);
         }
     }
 }
