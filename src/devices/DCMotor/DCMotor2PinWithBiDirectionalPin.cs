@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -21,9 +20,9 @@ namespace Iot.Device.DCMotor
         public DCMotor2PinWithBiDirectionalPin(
             PwmChannel pwmChannel,
             int dirpin,
-            GpioController controller,
+            GpioController? controller,
             bool shouldDispose)
-            : base(controller ?? ((dirpin == -1) ? null : new GpioController()), controller == null || shouldDispose)
+            : base(controller ?? ((dirpin == -1) ? null : new GpioController()), controller is null || shouldDispose)
         {
             _pwm = pwmChannel;
             _dirPin = dirpin;
@@ -83,15 +82,11 @@ namespace Iot.Device.DCMotor
             }
         }
 
-        protected override void Dispose(bool disposing)
+        public override void Dispose()
         {
-            if (disposing)
-            {
-                _pwm?.Dispose();
-                _pwm = null;
-            }
-
-            base.Dispose(disposing);
+            _pwm?.Dispose();
+            _pwm = null!;
+            base.Dispose();
         }
     }
 }

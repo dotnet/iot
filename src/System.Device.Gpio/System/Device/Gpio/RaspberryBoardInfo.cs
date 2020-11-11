@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Globalization;
@@ -100,7 +99,7 @@ namespace System.Device.Gpio
             ProcessorName = _settings.TryGetValue("Hardware", out string? hardware) && hardware is object ? hardware : string.Empty;
 
             if (_settings.TryGetValue("Revision", out string? revision)
-                && !string.IsNullOrEmpty(revision)
+                && revision is { Length: > 0 }
                 && int.TryParse(revision, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int firmware))
             {
                 Firmware = firmware;
@@ -179,6 +178,7 @@ namespace System.Device.Gpio
                 case 0x20A0:
                     return Model.RaspberryPiComputeModule3;
 
+                case 0x3112:
                 case 0x3111:
                     return Model.RaspberryPi4;
 

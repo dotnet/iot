@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -92,15 +91,13 @@ namespace Iot.Device.Media
             };
             V4l2Struct(VideoSettings.VIDIOC_G_CTRL, ref ctrl);
 
-            return new VideoDeviceValue
-            {
-                Name = type.ToString(),
-                Minimum = query.minimum,
-                Maximum = query.maximum,
-                Step = query.step,
-                DefaultValue = query.default_value,
-                CurrentValue = ctrl.value
-            };
+            return new VideoDeviceValue(
+                type.ToString(),
+                query.minimum,
+                query.maximum,
+                query.step,
+                query.default_value,
+                ctrl.value);
         }
 
         /// <summary>

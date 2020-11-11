@@ -1,11 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.Threading;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Iot.Device.Nrf24l01
 {
@@ -19,8 +19,8 @@ namespace Iot.Device.Nrf24l01
 
         private readonly byte[] _empty = Array.Empty<byte>();
 
-        private GpioController _gpio = null;
-        private SpiDevice _sensor = null;
+        private GpioController _gpio;
+        private SpiDevice _sensor;
         private bool _shouldDispose;
 
         #region prop
@@ -39,32 +39,56 @@ namespace Iot.Device.Nrf24l01
         /// <summary>
         /// nRF24L01 Send Address
         /// </summary>
-        public byte[] Address { get => ReadTxAddress(); set => SetTxAddress(value); }
+        public byte[] Address
+        {
+            get => ReadTxAddress();
+            set => SetTxAddress(value);
+        }
 
         /// <summary>
         /// nRF24L01 Working Channel
         /// </summary>
-        public byte Channel { get => ReadChannel(); set => SetChannel(value); }
+        public byte Channel
+        {
+            get => ReadChannel();
+            set => SetChannel(value);
+        }
 
         /// <summary>
         /// nRF24L01 Output Power
         /// </summary>
-        public OutputPower OutputPower { get => ReadOutputPower(); set => SetOutputPower(value); }
+        public OutputPower OutputPower
+        {
+            get => ReadOutputPower();
+            set => SetOutputPower(value);
+        }
 
         /// <summary>
         /// nRF24L01 Send Rate
         /// </summary>
-        public DataRate DataRate { get => ReadDataRate(); set => SetDataRate(value); }
+        public DataRate DataRate
+        {
+            get => ReadDataRate();
+            set => SetDataRate(value);
+        }
 
         /// <summary>
         /// nRF24L01 Power Mode
         /// </summary>
-        public PowerMode PowerMode { get => ReadPowerMode(); set => SetPowerMode(value); }
+        public PowerMode PowerMode
+        {
+            get => ReadPowerMode();
+            set => SetPowerMode(value);
+        }
 
         /// <summary>
         /// nRF24L01 Working Mode
         /// </summary>
-        public WorkingMode WorkingMode { get => ReadWorkwingMode(); set => SetWorkingMode(value); }
+        public WorkingMode WorkingMode
+        {
+            get => ReadWorkwingMode();
+            set => SetWorkingMode(value);
+        }
 
         /// <summary>
         /// nRF24L01 Pipe 0
@@ -125,16 +149,28 @@ namespace Iot.Device.Nrf24l01
         /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Nrf24l01(SpiDevice sensor, int ce, int irq, byte packetSize, byte channel = 2,
-            OutputPower outputPower = OutputPower.N00dBm, DataRate dataRate = DataRate.Rate2Mbps, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController gpioController = null, bool shouldDispose = true)
+            OutputPower outputPower = OutputPower.N00dBm, DataRate dataRate = DataRate.Rate2Mbps, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
         {
-            _sensor = sensor;
+            _sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
             _ce = ce;
             _irq = irq;
             PacketSize = packetSize;
-            _shouldDispose = gpioController == null ? true : shouldDispose;
+            _shouldDispose = shouldDispose || gpioController is null;
 
             Initialize(pinNumberingScheme, outputPower, dataRate, channel, gpioController);
             InitializePipe();
+#if NETCOREAPP2_1 || NETCOREAPP3_1
+            if (_gpio is null ||
+                Pipe0 is null ||
+                Pipe1 is null ||
+                Pipe2 is null ||
+                Pipe3 is null ||
+                Pipe4 is null ||
+                Pipe5 is null)
+                {
+                    throw new Exception($"{nameof(Nrf24l01)} is incorrectly configuted");
+                }
+#endif
         }
 
         /// <summary>
@@ -189,12 +225,12 @@ namespace Iot.Device.Nrf24l01
         public void Dispose()
         {
             _sensor?.Dispose();
-            _sensor = null;
+            _sensor = null!;
 
             if (_shouldDispose)
             {
                 _gpio?.Dispose();
-                _gpio = null;
+                _gpio = null!;
             }
         }
 
@@ -208,11 +244,15 @@ namespace Iot.Device.Nrf24l01
         /// <summary>
         /// Triggering when data was received
         /// </summary>
-        public event DataReceivedHandle DataReceived;
+        public event DataReceivedHandle? DataReceived;
 
         private void Irq_ValueChanged(object sender, PinValueChangedEventArgs args)
         {
-            DataReceived(sender, new DataReceivedEventArgs(Receive(_packetSize).ToArray()));
+            if (DataReceived is object)
+            {
+                DataReceived(sender, new DataReceivedEventArgs(Receive(_packetSize).ToArray()));
+            }
+
         }
 
         #region private and internal
@@ -220,7 +260,10 @@ namespace Iot.Device.Nrf24l01
         /// <summary>
         /// Initialize
         /// </summary>
-        private void Initialize(PinNumberingScheme pinNumberingScheme, OutputPower outputPower, DataRate dataRate, byte channel, GpioController gpioController)
+#if !NETCOREAPP2_1 && !NETCOREAPP3_1
+        [MemberNotNull(nameof(_gpio))]
+#endif
+        private void Initialize(PinNumberingScheme pinNumberingScheme, OutputPower outputPower, DataRate dataRate, byte channel, GpioController? gpioController)
         {
             // open pins
             _gpio = gpioController ?? new GpioController(pinNumberingScheme);
@@ -249,6 +292,9 @@ namespace Iot.Device.Nrf24l01
         /// <summary>
         /// Initialize nRF24L01 Pipe
         /// </summary>
+#if !NETCOREAPP2_1 && !NETCOREAPP3_1
+        [MemberNotNull(nameof(Pipe0), nameof(Pipe0), nameof(Pipe1), nameof(Pipe2), nameof(Pipe3), nameof(Pipe4), nameof(Pipe5))]
+#endif
         private void InitializePipe()
         {
             Pipe0 = new Nrf24l01Pipe(this, 0);

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -20,11 +19,11 @@ namespace Iot.Device.DCMotor
             PwmChannel pwmChannel,
             int pin0,
             int pin1,
-            GpioController controller,
+            GpioController? controller,
             bool shouldDispose)
-            : base(controller ?? new GpioController(), controller == null ? true : shouldDispose)
+            : base(controller ?? new GpioController(), controller is null ? true : shouldDispose)
         {
-            if (pwmChannel == null)
+            if (pwmChannel is null)
             {
                 throw new ArgumentNullException(nameof(pwmChannel));
             }
@@ -87,16 +86,12 @@ namespace Iot.Device.DCMotor
             }
         }
 
-        protected override void Dispose(bool disposing)
+        public override void Dispose()
         {
-            if (disposing)
-            {
-                _speed = 0.0;
-                _pwm?.Dispose();
-                _pwm = null;
-            }
-
-            base.Dispose(disposing);
+            _speed = 0.0;
+            _pwm?.Dispose();
+            _pwm = null!;
+            base.Dispose();
         }
     }
 }

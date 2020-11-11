@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Concurrent;
@@ -52,7 +51,7 @@ namespace Iot.Device.Pcx857x.Tests
             private I2cConnectionSettings _settings;
             public Pcx857xChipMock DeviceMock { get; private set; }
 
-            public I2cDeviceMock(int ports, I2cConnectionSettings settings = null)
+            public I2cDeviceMock(int ports, I2cConnectionSettings? settings = null)
             {
                 DeviceMock = new Pcx857xChipMock(ports);
                 _settings = settings ?? new I2cConnectionSettings(0, 0x20);
@@ -77,9 +76,10 @@ namespace Iot.Device.Pcx857x.Tests
         public class Pcx857xChipMock
         {
             private int _ports;
+#pragma warning disable SA1011
             private byte[] _registers;
-            private byte[] _lastReadBuffer;
-            private byte[] _lastWriteBuffer;
+            private byte[]? _lastReadBuffer;
+            private byte[]? _lastWriteBuffer;
 
             public Pcx857xChipMock(int ports)
             {
@@ -91,10 +91,10 @@ namespace Iot.Device.Pcx857x.Tests
 
             // Can't coalesce here https://github.com/dotnet/roslyn/issues/29927
             public ReadOnlySpan<byte> LastReadBuffer =>
-                _lastReadBuffer == null ? ReadOnlySpan<byte>.Empty : _lastReadBuffer;
+                _lastReadBuffer is null ? ReadOnlySpan<byte>.Empty : _lastReadBuffer;
 
             public ReadOnlySpan<byte> LastWriteBuffer =>
-                _lastWriteBuffer == null ? ReadOnlySpan<byte>.Empty : _lastWriteBuffer;
+                _lastWriteBuffer is null ? ReadOnlySpan<byte>.Empty : _lastWriteBuffer;
 
             public void Read(Span<byte> buffer)
             {

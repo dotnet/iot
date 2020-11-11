@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -49,7 +48,7 @@ namespace Iot.Device.UFire
 
             pH = Convert.ToSingle(Math.Abs(7.0 - (mV.Millivolts / ProbeMvToPh)));
 
-            if (temp != null)
+            if (temp is object)
             {
                 double distanceFrom7 = Math.Abs(7 - Math.Round(Ph));
                 double distanceFrom25 = Math.Floor(Math.Abs(25 - Math.Round(temp.Value.DegreesCelsius)) / 10);
@@ -93,73 +92,55 @@ namespace Iot.Device.UFire
         /// Calibrates the probe using a single point using a pH value.
         /// </summary>
         /// <param name="solutionpH">pH value</param>
-        public void CalibrateSingle(float solutionpH)
-        {
+        public void CalibrateSingle(float solutionpH) =>
             CalibrateSingle(PhToMillivolts(solutionpH));
-        }
 
         /// <summary>
         /// Calibrates the dual-point values for the high reading and saves them in the devices's EEPROM.
         /// </summary>
         /// <param name="solutionpH">The pH of the calibration solution</param>
-        public void CalibrateProbeHigh(float solutionpH)
-        {
+        public void CalibrateProbeHigh(float solutionpH) =>
             CalibrateProbeHigh(PhToMillivolts(solutionpH));
-        }
 
         /// <summary>
         /// Returns the dual-point calibration high-reference value.
         /// </summary>
         /// <returns></returns>
-        public new float GetCalibrateHighReference()
-        {
-            return MVtopH(GetCalibrateHighReference());
-        }
+        public new float GetCalibrateHighReference() =>
+            MVtopH(GetCalibrateHighReference());
 
         /// <summary>
         /// Returns the dual-point calibration high-reading value.
         /// </summary>
         /// <returns></returns>
-        public new float GetCalibrateHighReading()
-        {
-            return MVtopH(GetCalibrateHighReading());
-        }
+        public new float GetCalibrateHighReading() =>
+            MVtopH(GetCalibrateHighReading());
 
         /// <summary>
         /// Calibrates the dual-point values for the low reading and saves them in the devices's EEPROM.
         /// </summary>
         /// <param name="solutionpH"> the pH of the calibration solution</param>
-        public void CalibrateProbeLow(float solutionpH)
-        {
+        public void CalibrateProbeLow(float solutionpH) =>
             CalibrateProbeLow(PhToMillivolts(solutionpH));
-        }
 
         /// <summary>
         /// Returns the dual-point calibration low-reference value.
         /// </summary>
         /// <returns></returns>
-        public new float GetCalibrateLowReference()
-        {
-            return MVtopH(GetCalibrateLowReference());
-        }
+        public new float GetCalibrateLowReference() =>
+            MVtopH(GetCalibrateLowReference());
 
         /// <summary>
         /// Returns the dual-point calibration low-reading value.
         /// </summary>
         /// <returns></returns>
-        public new float GetCalibrateLowReading()
-        {
-            return MVtopH(GetCalibrateLowReading());
-        }
+        public new float GetCalibrateLowReading() =>
+            MVtopH(GetCalibrateLowReading());
 
-        private float PhToMillivolts(float pH)
-        {
-            return (7 - pH) * ProbeMvToPh;
-        }
+        private float PhToMillivolts(float pH) =>
+            (7 - pH) * ProbeMvToPh;
 
-        private float MVtopH(float mV)
-        {
-            return Convert.ToSingle(Math.Abs(7.0 - (mV / ProbeMvToPh)));
-        }
+        private float MVtopH(float mV) =>
+            Convert.ToSingle(Math.Abs(7.0 - (mV / ProbeMvToPh)));
     }
 }

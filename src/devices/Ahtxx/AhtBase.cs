@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -135,30 +134,20 @@ namespace Iot.Device.Ahtxx
         private byte GetStatus()
         {
             _i2cDevice.WriteByte(0x71);
-            // whithout this delay the reading the status fails often.
+            // without this delay the reading the status fails often.
             Thread.Sleep(10);
-            byte status = _i2cDevice.ReadByte();
-            return status;
+            return _i2cDevice.ReadByte();
         }
 
-        private bool IsBusy()
-        {
-            return (GetStatus() & (byte)StatusBit.Busy) == (byte)StatusBit.Busy;
-        }
+        private bool IsBusy() => (GetStatus() & (byte)StatusBit.Busy) == (byte)StatusBit.Busy;
 
-        private bool IsCalibrated()
-        {
-            return (GetStatus() & (byte)StatusBit.Calibrated) == (byte)StatusBit.Calibrated;
-        }
+        private bool IsCalibrated() => (GetStatus() & (byte)StatusBit.Calibrated) == (byte)StatusBit.Calibrated;
 
         /// <inheritdoc cref="IDisposable" />
-        public void Dispose() => Dispose(true);
-
-        /// <inheritdoc cref="IDisposable" />
-        protected virtual void Dispose(bool disposing)
+        public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
 
         // datasheet version 1.1, table 10

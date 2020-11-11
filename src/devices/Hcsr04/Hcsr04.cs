@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -36,12 +35,12 @@ namespace Iot.Device.Hcsr04
         /// <param name="triggerPin">Trigger pulse input.</param>
         /// <param name="echoPin">Trigger pulse output.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Hcsr04(GpioController gpioController, int triggerPin, int echoPin, bool shouldDispose = true)
+        public Hcsr04(GpioController? gpioController, int triggerPin, int echoPin, bool shouldDispose = true)
         {
+            _shouldDispose = shouldDispose || gpioController is null;
+            _controller = gpioController ?? new ();
             _echo = echoPin;
             _trigger = triggerPin;
-            _controller = gpioController;
-            _shouldDispose = shouldDispose;
 
             _controller.OpenPin(_echo, PinMode.Input);
             _controller.OpenPin(_trigger, PinMode.Output);
@@ -158,7 +157,7 @@ namespace Iot.Device.Hcsr04
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null;
+                _controller = null!;
             }
         }
     }

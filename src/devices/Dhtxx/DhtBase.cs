@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device;
@@ -37,12 +36,12 @@ namespace Iot.Device.DHTxx
         /// <summary>
         /// I2C device used to communicate with the device
         /// </summary>
-        protected I2cDevice _i2cDevice;
+        protected I2cDevice? _i2cDevice;
 
         /// <summary>
         /// <see cref="GpioController"/> related with the <see cref="_pin"/>.
         /// </summary>
-        protected GpioController _controller;
+        protected GpioController? _controller;
 
         // wait about 1 ms
         private readonly uint _loopCount = 10000;
@@ -91,10 +90,10 @@ namespace Iot.Device.DHTxx
         /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
         /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public DhtBase(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController gpioController = null, bool shouldDispose = true)
+        public DhtBase(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _protocol = CommunicationProtocol.OneWire;
-            _shouldDispose = gpioController == null ? true : shouldDispose;
+            _shouldDispose = shouldDispose || gpioController is null;
             _controller = gpioController ?? new GpioController(pinNumberingScheme);
             _pin = pin;
 
@@ -139,6 +138,11 @@ namespace Iot.Device.DHTxx
         /// </summary>
         internal virtual void ReadThroughOneWire()
         {
+            if (_controller is null)
+            {
+                throw new Exception("GPIO controller is not configured.");
+            }
+
             byte readVal = 0;
             uint count;
 
@@ -243,6 +247,11 @@ namespace Iot.Device.DHTxx
         /// </summary>
         internal virtual void ReadThroughI2c()
         {
+            if (_i2cDevice is null)
+            {
+                throw new Exception("I2C device is not configured");
+            }
+
             // DHT12 Humidity Register
             _i2cDevice.WriteByte(0x00);
             // humidity int, humidity decimal, temperature int, temperature decimal, checksum
@@ -282,15 +291,9 @@ namespace Iot.Device.DHTxx
                 _controller?.Dispose();
                 _controller = null;
             }
-            else
+            else if (_controller?.IsPinOpen(_pin) ?? false)
             {
-                if (_controller != null)
-                {
-                    if (_controller.IsPinOpen(_pin))
-                    {
-                        _controller.ClosePin(_pin);
-                    }
-                }
+                _controller.ClosePin(_pin);
             }
 
             _i2cDevice?.Dispose();

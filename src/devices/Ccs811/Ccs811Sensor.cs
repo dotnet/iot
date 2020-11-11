@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -39,8 +38,8 @@ namespace Iot.Device.Ccs811
         /// </summary>
         public const int I2cTypicalFrequency = 100_000;
 
-        private I2cDevice _i2cDevice = null;
-        private GpioController _controller = null;
+        private I2cDevice _i2cDevice;
+        private GpioController? _controller;
         private int _pinWake = -1;
         private int _pinInterruption = -1;
         private int _pinReset = -1;
@@ -58,7 +57,7 @@ namespace Iot.Device.Ccs811
         /// <summary>
         /// The event handler for the measurement
         /// </summary>
-        public event MeasurementReadyHandler MeasurementReady;
+        public event MeasurementReadyHandler? MeasurementReady;
 
         /// <summary>
         /// The CCS811 sensor constructor
@@ -69,27 +68,26 @@ namespace Iot.Device.Ccs811
         /// <param name="pinInterruption">An interruption pin when a measurement is ready, best use when you specify a threshold</param>
         /// <param name="pinReset">An optional hard reset pin</param>
         /// <param name="shouldDispose">Should the GPIO controller be disposed at the end</param>
-        public Ccs811Sensor(I2cDevice i2cDevice, GpioController gpioController = null, int pinWake = -1, int pinInterruption = -1, int pinReset = -1, bool shouldDispose = true)
+        public Ccs811Sensor(I2cDevice i2cDevice, GpioController? gpioController = null, int pinWake = -1, int pinInterruption = -1, int pinReset = -1, bool shouldDispose = true)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _pinWake = pinWake;
             _pinInterruption = pinInterruption;
             _pinReset = pinReset;
-            _shouldDispose = shouldDispose;
             // We need a GPIO controller only if we are using any of the pin
             if ((_pinInterruption >= 0) || (_pinReset >= 0) || (_pinWake >= 0))
             {
-                _shouldDispose = _shouldDispose || gpioController == null;
+                _shouldDispose = _shouldDispose || gpioController is null;
                 _controller = gpioController ?? new GpioController();
             }
 
-            if (_pinWake >= 0)
+            if (_controller is object)
             {
                 _controller.OpenPin(_pinWake, PinMode.Output);
                 _controller.Write(_pinWake, PinValue.High);
             }
 
-            if (_pinReset >= 0)
+            if (_controller is object && _pinReset >= 0)
             {
                 _controller.OpenPin(_pinReset, PinMode.Output);
                 _controller.Write(_pinReset, PinValue.Low);
@@ -141,7 +139,7 @@ namespace Iot.Device.Ccs811
             }
 
             // Set interrupt if the interruption pin is valid
-            if (_pinInterruption >= 0)
+            if (_controller is object && _pinInterruption >= 0)
             {
                 _controller.OpenPin(_pinInterruption, PinMode.Input);
                 byte mode = 0b0000_1000;
@@ -357,7 +355,7 @@ namespace Iot.Device.Ccs811
         {
             if ((humidity.Percent < 0) || (humidity.Percent > 100))
             {
-                throw new ArgumentException($"Humidity can only be between 0 and 100.");
+                throw new ArgumentException(nameof(humidity), "Humidity can only be between 0 and 100.");
             }
 
             Span<byte> environment = stackalloc byte[4];
@@ -402,12 +400,12 @@ namespace Iot.Device.Ccs811
 
             if (!IsPpmValidThreshold(lowEquivalentCO2))
             {
-                throw new ArgumentException($"{lowEquivalentCO2} can only be between 0 and {ushort.MaxValue}");
+                throw new ArgumentException(nameof(lowEquivalentCO2), $"Value can only be between 0 and {ushort.MaxValue}.");
             }
 
             if (!IsPpmValidThreshold(highEquivalentCO2))
             {
-                throw new ArgumentException($"{highEquivalentCO2} can only be between 0 and {ushort.MaxValue}");
+                throw new ArgumentException(nameof(highEquivalentCO2), $"Value can only be between 0 and {ushort.MaxValue}.");
             }
 
             if (lowEquivalentCO2 > highEquivalentCO2)
@@ -419,7 +417,7 @@ namespace Iot.Device.Ccs811
 
             if (highEquivalentCO2 - lowEquivalentCO2 < VolumeConcentration.FromPartsPerMillion(50))
             {
-                throw new ArgumentException($"{highEquivalentCO2}-{lowEquivalentCO2} should be more than 50");
+                throw new ArgumentException(nameof(lowEquivalentCO2), $"value of {nameof(highEquivalentCO2)}-{nameof(lowEquivalentCO2)} must be more than 50.");
             }
 
             Span<byte> toSend = stackalloc byte[4];
@@ -455,7 +453,7 @@ namespace Iot.Device.Ccs811
                 Thread.Sleep(1);
             }
 
-            if (_pinInterruption >= 0)
+            if (_controller is object && _pinInterruption >= 0)
             {
                 _controller.UnregisterCallbackForPinValueChangedEvent(_pinInterruption, InterruptReady);
             }
@@ -465,7 +463,7 @@ namespace Iot.Device.Ccs811
                 _controller?.Dispose();
                 _controller = null;
             }
-            else
+            else if (_controller is object)
             {
                 if (_pinInterruption >= 0)
                 {
@@ -488,7 +486,7 @@ namespace Iot.Device.Ccs811
 
         private void WakeUpDevice()
         {
-            if (_pinWake >= 0)
+            if (_controller is object && _pinWake >= 0)
             {
                 _controller.Write(_pinWake, PinValue.Low);
                 // Doc says wait 50 micro seconds
@@ -498,7 +496,7 @@ namespace Iot.Device.Ccs811
 
         private void SleepDownDevice()
         {
-            if (_pinWake >= 0)
+            if (_controller is object && _pinWake >= 0)
             {
                 _controller.Write(_pinWake, PinValue.High);
                 // Doc says wait 20 micro seconds

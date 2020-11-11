@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -11,6 +10,19 @@ namespace Iot.Device.Pn532
     /// </summary>
     public class FirmwareVersion
     {
+        /// <summary>
+        /// Creates PN532 firmware version object
+        /// </summary>
+        /// <param name="identificationCode">The identification code for PN532 should be 0x32.</param>
+        /// <param name="version">The version, latest know one is 1.6.</param>
+        /// <param name="versionSupported">All card version supported.</param>
+        public FirmwareVersion(byte identificationCode, Version version, VersionSupported versionSupported)
+        {
+            IdentificationCode = identificationCode;
+            Version = version;
+            VersionSupported = versionSupported;
+        }
+
         /// <summary>
         /// The identification code for PN532 should be 0x32
         /// </summary>

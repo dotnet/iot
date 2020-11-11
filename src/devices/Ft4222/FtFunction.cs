@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -432,7 +431,7 @@ namespace Iot.Device.Ft4222
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="clkStrength">The intensity of the clock pin</param>
-        /// <param name="ioStrength">The intensity of the MOSI and MISO pins</param>
+        /// <param name="ioStrength">The intensity of the SDO and SDI pins</param>
         /// <param name="ssoStrength">The intensity of the chip select pin</param>
         /// <returns>The status</returns>
         [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]

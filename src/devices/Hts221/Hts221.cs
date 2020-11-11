@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -22,12 +21,7 @@ namespace Iot.Device.Hts221
         /// </summary>
         public Hts221(I2cDevice i2cDevice)
         {
-            if (i2cDevice == null)
-            {
-                throw new ArgumentNullException(nameof(i2cDevice));
-            }
-
-            _i2c = i2cDevice;
+            _i2c = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
             // Highest resolution for both temperature and humidity sensor:
             // 0.007 DegreesCelsius and 0.03 percentage of relative humidity respectively
@@ -148,7 +142,7 @@ namespace Iot.Device.Hts221
         public void Dispose()
         {
             _i2c?.Dispose();
-            _i2c = null;
+            _i2c = null!;
         }
     }
 }

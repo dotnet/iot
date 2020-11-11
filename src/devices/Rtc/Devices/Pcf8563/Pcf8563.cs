@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -26,7 +25,7 @@ namespace Iot.Device.Rtc
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Pcf8563(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
             // Set "Normal Mode"
             Span<byte> ctrl1Config = stackalloc byte[]
@@ -91,7 +90,7 @@ namespace Iot.Device.Rtc
         protected override void Dispose(bool disposing)
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
 
             base.Dispose(disposing);
         }

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -11,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Diagnostics.CodeAnalysis;
 using Iot.Device.Card;
 using Iot.Device.Card.Mifare;
 using Iot.Device.Rfid;
@@ -55,8 +55,8 @@ namespace Iot.Device.Pn5180
         /// </summary>
         public LogLevel LogLevel
         {
-            get { return LogInfo.LogLevel; }
-            set { LogInfo.LogLevel = value; }
+            get => LogInfo.LogLevel;
+            set => LogInfo.LogLevel = value;
         }
 
         /// <summary>
@@ -64,8 +64,8 @@ namespace Iot.Device.Pn5180
         /// </summary>
         public LogTo LogTo
         {
-            get { return LogInfo.LogTo; }
-            set { LogInfo.LogTo = value; }
+            get => LogInfo.LogTo;
+            set => LogInfo.LogTo = value;
         }
 
         /// <summary>
@@ -77,24 +77,24 @@ namespace Iot.Device.Pn5180
         /// <param name="gpioController">A GPIO controller, null will use a default one</param>
         /// <param name="shouldDispose">Dispose the SPI and the GPIO controller at the end if true</param>
         /// <param name="logLevel">The log level</param>
-        public Pn5180(SpiDevice spiDevice, int pinBusy, int pinNss, GpioController gpioController = null, bool shouldDispose = true, LogLevel logLevel = LogLevel.None)
+        public Pn5180(SpiDevice spiDevice, int pinBusy, int pinNss, GpioController? gpioController = null, bool shouldDispose = true, LogLevel logLevel = LogLevel.None)
         {
             if (pinBusy < 0)
             {
-                throw new ArgumentException($"{pinBusy} can't be negative, it has to be an actual real pin number");
+                throw new ArgumentException(nameof(pinBusy), "Value must be a legal pin number. cannot be negative.");
             }
 
             if (pinNss < 0)
             {
-                throw new ArgumentException($"{pinNss} can't be negative, it has to be an actual real pin number");
+                throw new ArgumentException(nameof(pinBusy), "Value must be a legal pin number. cannot be negative.");
             }
 
             LogLevel = logLevel;
 
             LogInfo.Log($"Opening PN5180, pin busy: {pinBusy}, pin NSS: {pinNss}", LogLevel.Debug);
-            _spiDevice = spiDevice;
+            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             _gpioController = gpioController ?? new GpioController(PinNumberingScheme.Logical);
-            _shouldDispose = shouldDispose;
+            _shouldDispose = shouldDispose || gpioController is null;
             _pinBusy = pinBusy;
             _pinNss = pinNss;
             _gpioController.OpenPin(_pinBusy, PinMode.Input);
@@ -102,7 +102,7 @@ namespace Iot.Device.Pn5180
 
             // Check the version
             var (product, firmware, eeprom) = GetVersions();
-            if ((product.Major == 0) || (firmware.Major == 0) || (eeprom.Major == 0))
+            if ((product?.Major == 0) || (firmware?.Major == 0) || (eeprom?.Major == 0))
             {
                 throw new IOException($"Not a valid PN5180");
             }
@@ -128,7 +128,7 @@ namespace Iot.Device.Pn5180
         /// Get the Product, Firmware and EEPROM versions of the PN8150
         /// </summary>
         /// <returns>A tuple with the Product, Firmware and EEPROM versions</returns>
-        public (Version product, Version firmware, Version eeprom) GetVersions()
+        public (Version? product, Version? firmware, Version? eeprom) GetVersions()
         {
             Span<byte> versionAnswer = stackalloc byte[6];
 
@@ -153,7 +153,7 @@ namespace Iot.Device.Pn5180
         {
             if (outputIdentifier.Length != 16)
             {
-                throw new ArgumentException($"Identifier must be 16 bytes long");
+                throw new ArgumentException(nameof(outputIdentifier), "Value must be 16 bytes long");
             }
 
             return ReadEeprom(EepromAddress.DieIdentifier, outputIdentifier);
@@ -168,7 +168,7 @@ namespace Iot.Device.Pn5180
         {
             if (eeprom.Length != 255)
             {
-                throw new ArgumentException($"Size of EEPROM is 255 bytes, {nameof(eeprom)} must be 255 bytes");
+                throw new ArgumentException(nameof(eeprom), "Size of EEPROM is 255 bytes. Value must match.");
             }
 
             return ReadEeprom(EepromAddress.DieIdentifier, eeprom);
@@ -183,7 +183,7 @@ namespace Iot.Device.Pn5180
         {
             if (eeprom.Length != 255)
             {
-                throw new ArgumentException($"Size of EEPROM is 255 bytes, {nameof(eeprom)} must be 255 bytes");
+                throw new ArgumentException(nameof(eeprom), "Size of EEPROM is 255 bytes. Value must match.");
             }
 
             return WriteEeprom(EepromAddress.DieIdentifier, eeprom);
@@ -199,7 +199,7 @@ namespace Iot.Device.Pn5180
         {
             if ((byte)address + eeprom.Length > 255)
             {
-                throw new ArgumentException($"Size of EEPROM is 255 bytes, {nameof(address)} + {nameof(eeprom)} must be less than 255");
+                throw new ArgumentException(nameof(eeprom), "Size of EEPROM is 255 bytes. Value must 255 bytes or less.");
             }
 
             Span<byte> dumpEeprom = stackalloc byte[3];
@@ -238,7 +238,7 @@ namespace Iot.Device.Pn5180
         {
             if ((byte)address + eeprom.Length > 255)
             {
-                throw new ArgumentException($"Size of EEPROM is 255 bytes, {nameof(address)} + {nameof(eeprom)} must be less than 255");
+                throw new ArgumentException(nameof(eeprom), "Size of EEPROM is 255 bytes. Value must 255 bytes or less.");
             }
 
             Span<byte> dumpEeprom = stackalloc byte[2 + eeprom.Length];
@@ -292,12 +292,12 @@ namespace Iot.Device.Pn5180
         {
             if (toSend.Length > 260)
             {
-                throw new ArgumentException($"Data to send can't be larger than 260 bytes");
+                throw new ArgumentException(nameof(toSend), "Data to send can't be larger than 260 bytes");
             }
 
             if ((numberValidBitsLastByte < 1) || (numberValidBitsLastByte > 8))
             {
-                throw new ArgumentException($"Number of valid bits in last byte can only be between 1 and 8");
+                throw new ArgumentException(nameof(numberValidBitsLastByte), "Number of valid bits in last byte can only be between 1 and 8");
             }
 
             Span<byte> sendData = stackalloc byte[2 + toSend.Length];
@@ -334,7 +334,7 @@ namespace Iot.Device.Pn5180
         {
             if (toRead.Length > 508)
             {
-                throw new ArgumentException($"Data to read can't be larger than 508 bytes");
+                throw new ArgumentException(nameof(toRead), "Data to read can't be larger than 508 bytes");
             }
 
             Span<byte> sendData = stackalloc byte[2];
@@ -477,9 +477,9 @@ namespace Iot.Device.Pn5180
                 const int MaxTries = 5;
                 // All the type B protocol 14443-4 is from the ISO14443-4.pdf from ISO website
                 var card = _activeSelected.Where(m => m.Card.TargetNumber == targetNumber).FirstOrDefault();
-                if (card == null)
+                if (card is null)
                 {
-                    throw new ArgumentException($"Device with target number {targetNumber} is not part of the list of selected devices. Card may have been removed.");
+                    throw new ArgumentException(nameof(targetNumber), $"Device with target number {targetNumber} is not part of the list of selected devices. Card may have been removed.");
                 }
 
                 Span<byte> toSend = stackalloc byte[dataToSend.Length + 2];
@@ -660,7 +660,7 @@ namespace Iot.Device.Pn5180
         {
             if (!((blockNumber == 1) || (blockNumber == 0)))
             {
-                throw new ArgumentException($"{nameof(SendRBlock)}, block number can be only 0 or 1");
+                throw new ArgumentException(nameof(blockNumber), "Value can be only 0 or 1.");
             }
 
             Span<byte> rBlock = new byte[2] { (byte)(0b1010_1010 | (byte)ack | blockNumber), targetNumber };
@@ -692,17 +692,17 @@ namespace Iot.Device.Pn5180
             LogInfo.Log($"{nameof(MifareAuthenticate)}: ", LogLevel.Debug);
             if (key.Length != 6)
             {
-                throw new ArgumentException($"Key must be 6 bytes");
+                throw new ArgumentException(nameof(key), "Value must be 6 bytes.");
             }
 
             if (cardUid.Length != 4)
             {
-                throw new ArgumentException($"UID must be 4 bytes");
+                throw new ArgumentException(nameof(cardUid), "Value must be 4 bytes.");
             }
 
             if (!((mifareCommand == MifareCardCommand.AuthenticationA) || (mifareCommand == MifareCardCommand.AuthenticationB)))
             {
-                throw new ArgumentException($"{nameof(MifareCardCommand.AuthenticationA)} and {nameof(MifareCardCommand.AuthenticationB)} are the only supported commands");
+                throw new ArgumentException(nameof(mifareCommand), $"{nameof(MifareCardCommand.AuthenticationA)} and {nameof(MifareCardCommand.AuthenticationB)} are the only supported commands");
             }
 
             Span<byte> toAuthenticate = stackalloc byte[13];
@@ -819,7 +819,7 @@ namespace Iot.Device.Pn5180
             // Page 41 documentation PN5180A0XX-C3.pdf
             if ((configuration.Length > 195) || (configuration.Length % 5 != 0) || (configuration.Length == 0))
             {
-                throw new ArgumentException($"Configuration buffer size must be a positive multiple of 5 and no larger than 195 bytes");
+                throw new ArgumentException(nameof(configuration), "Value must be a positive multiple of 5 and no larger than 195 bytes.");
             }
 
             Span<byte> rfConfig = stackalloc byte[2];
@@ -859,7 +859,7 @@ namespace Iot.Device.Pn5180
             // Page 41 documentation PN5180A0XX-C3.pdf
             if ((configuration.Length > 252) || (configuration.Length % 6 != 0) || (configuration.Length == 0))
             {
-                throw new ArgumentException($"Configuration buffer size must be a positive multiple of 6 and no larger than 252 bytes");
+                throw new ArgumentException(nameof(configuration), "Value must be a positive multiple of 6 and no larger than 252 bytes.");
             }
 
             Span<byte> rfConfig = stackalloc byte[1 + configuration.Length];
@@ -976,9 +976,13 @@ namespace Iot.Device.Pn5180
         /// <param name="card">The type A card once detected</param>
         /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
         /// <returns>True if a 14443 Type A card has been detected</returns>
-        public bool ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver, out Data106kbpsTypeA card, int timeoutPollingMilliseconds)
+        public bool ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver,
+#if !NETCOREAPP2_1
+        [NotNullWhen(true)]
+#endif
+        out Data106kbpsTypeA? card, int timeoutPollingMilliseconds)
         {
-            card = new Data106kbpsTypeA();
+            card = null;
             // From NXP documentation AN12650.pdf, Page 8 and forward
             // From NXP documentation AN10833.pdf page 10
             // From TI documentation http://www.ti.com/lit/an/sloa136/sloa136.pdf page 7 and 6 for the flow of selecting
@@ -997,7 +1001,6 @@ namespace Iot.Device.Pn5180
             int numBytes;
 
             DateTime dtTimeout = DateTime.Now.AddMilliseconds(timeoutPollingMilliseconds);
-
             try
             {
                 // Switches off the CRC off in RX and TX direction
@@ -1028,7 +1031,7 @@ namespace Iot.Device.Pn5180
                 }
                 while (numBytes == 0);
 
-                card.Atqa = BinaryPrimitives.ReadUInt16LittleEndian(atqa);
+                ushort cardAtqa = BinaryPrimitives.ReadUInt16LittleEndian(atqa);
                 int numberOfUid = 0;
                 // We do have a card! Now send anticollision
                 // There are 3 SL maximum. For looping and adjusting the SL
@@ -1065,26 +1068,44 @@ namespace Iot.Device.Pn5180
                         return false;
                     }
 
-                    card.Sak = sak[0];
+                    byte cardSak = sak[0];
                     if (((sak[0] & 0b0000_0100) == 0) && (i == 0))
                     {
                         // If the bit 3 is 0, then it's only a 4 bytes UID
                         uidSak.Slice(2, 4).CopyTo(uid);
-                        card.NfcId = uid.Slice(0, 4).ToArray();
+                        byte[] cardNfcId = uid.Slice(0, 4).ToArray();
+                        card = new Data106kbpsTypeA(
+                            0,
+                            cardAtqa,
+                            cardSak,
+                            cardNfcId,
+                            null);
                         return true;
                     }
                     else if (((atqa[0] & 0b1100_0000) == 0b01000_0000) && (i == 1))
                     {
                         // if bit 7 is 1, then it's a 7 byte
                         uidSak.Slice(2, 4).CopyTo(uid.Slice(numberOfUid));
-                        card.NfcId = uid.Slice(0, 4 + numberOfUid).ToArray();
+                        byte[] cardNfcId = uid.Slice(0, 4 + numberOfUid).ToArray();
+                        card = new Data106kbpsTypeA(
+                            0,
+                            cardAtqa,
+                            cardSak,
+                            cardNfcId,
+                            null);
                         return true;
                     }
                     else if (i == 2)
                     {
                         // Last case, it's for sure 10 bytes
                         uidSak.Slice(2, 4).CopyTo(uid.Slice(numberOfUid));
-                        card.NfcId = uid.Slice(0, 4 + numberOfUid).ToArray();
+                        byte[] cardNfcId = uid.Slice(0, 4 + numberOfUid).ToArray();
+                        card = new Data106kbpsTypeA(
+                            0,
+                            cardAtqa,
+                            cardSak,
+                            cardNfcId,
+                            null);
                         return true;
                     }
 
@@ -1114,16 +1135,22 @@ namespace Iot.Device.Pn5180
         /// <param name="card">The type B card once detected</param>
         /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
         /// <returns>True if a 14443 Type B card has been detected</returns>
-        public bool ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver, out Data106kbpsTypeB card, int timeoutPollingMilliseconds)
+        public bool ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver,
+#if !NETCOREAPP2_1
+        [NotNullWhen(true)]
+#endif
+        out Data106kbpsTypeB? card, int timeoutPollingMilliseconds)
         {
             card = null;
-
             var ret = LoadRadioFrequencyConfiguration(transmitter, receiver);
             // Switch on the radio frequence field and check it
             ret &= SetRadioFrequency(true);
 
             // Find out which slot we have, we starts at 1, 0 are for Mifare cards and Type A
             byte targetNumber = 0;
+            // rNak is defined outside the loop due to:
+            // error CA2014: Potential stack overflow. Move the stackalloc out of the loop.
+            Span<byte> rNak = stackalloc byte[2];
 
             foreach (var potentialActive in _activeSelected)
             {
@@ -1132,7 +1159,6 @@ namespace Iot.Device.Pn5180
 
                 // Check if the card is alive
                 // Send a RNAK and wait for the RACK
-                Span<byte> rNak = stackalloc byte[2];
                 rNak[0] = 0b1111_1010;
                 rNak[1] = potentialActive.Card.TargetNumber;
                 ret = SendDataToCard(rNak);
@@ -1237,7 +1263,7 @@ namespace Iot.Device.Pn5180
                 }
 
                 // Add the card to the list
-                var selected = new SelectedPiccInformation() { Card = card, LastBlockMark = false };
+                var selected = new SelectedPiccInformation(card, false);
                 _activeSelected.Add(selected);
                 return true;
             }
@@ -1319,7 +1345,6 @@ namespace Iot.Device.Pn5180
                 crc &= ((config[0] & 0x01) == 0x01);
                 return crc;
             }
-
             set
             {
                 if (value)
@@ -1344,7 +1369,7 @@ namespace Iot.Device.Pn5180
         {
             if (crc.Length != 2)
             {
-                throw new ArgumentException($"CRC B can only be 2 bytes long");
+                throw new ArgumentException(nameof(crc), $"Value must be 2 bytes.");
             }
 
             var crcRet = CalculateCrc(buffer, 0xFFFF);
@@ -1362,7 +1387,7 @@ namespace Iot.Device.Pn5180
         {
             if (crc.Length != 2)
             {
-                throw new ArgumentException($"CRC A can only be 2 bytes long");
+                throw new ArgumentException(nameof(crc), "Value must be 2 bytes.");
             }
 
             var crcRet = CalculateCrc(buffer, 0x6363);
@@ -1389,7 +1414,7 @@ namespace Iot.Device.Pn5180
             LogInfo.Log($"{nameof(GetRxStatus)}", LogLevel.Debug);
             if (rxStatus.Length != 4)
             {
-                throw new ArgumentException($"{nameof(rxStatus)} needs to be 4 bytes");
+                throw new ArgumentException(nameof(rxStatus), "Value must be 4 bytes.");
             }
 
             try
@@ -1414,7 +1439,7 @@ namespace Iot.Device.Pn5180
             LogInfo.Log($"{nameof(GetIrqStatus)}", LogLevel.Debug);
             if (irqStatus.Length != 4)
             {
-                throw new ArgumentException($"{nameof(irqStatus)} needs to be 4 bytes");
+                throw new ArgumentException(nameof(irqStatus), "Value must be 4 bytes.");
             }
 
             try
@@ -1442,7 +1467,7 @@ namespace Iot.Device.Pn5180
         {
             if (data.Length != 4)
             {
-                throw new ArgumentException($"Register data must be 4 bytes");
+                throw new ArgumentException(nameof(data), "Value must be 4 bytes.");
             }
 
             Span<byte> toSend = stackalloc byte[2 + data.Length];
@@ -1472,7 +1497,7 @@ namespace Iot.Device.Pn5180
         private void SpiWrite(ReadOnlySpan<byte> toSend)
         {
             // Both master and slave devices must operate with the same timing.The master device
-            // always places data on the MOSI line a half cycle before the clock edge SCK, in order for
+            // always places data on the SDO line a half cycle before the clock edge SCK, in order for
             // the slave device to latch the data.
             // The BUSY line is used to indicate that the system is BUSY and cannot receive any data
             // from a host.Recommendation for the BUSY line handling by the host:
@@ -1510,7 +1535,7 @@ namespace Iot.Device.Pn5180
         private void SpiRead(Span<byte> toRead)
         {
             // Both master and slave devices must operate with the same timing.The master device
-            // always places data on the MOSI line a half cycle before the clock edge SCK, in order for
+            // always places data on the SDI line a half cycle before the clock edge SCK, in order for
             // the slave device to latch the data.
             // The BUSY line is used to indicate that the system is BUSY and cannot receive any data
             // from a host.Recommendation for the BUSY line handling by the host:

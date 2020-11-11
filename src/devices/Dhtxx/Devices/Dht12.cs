@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio;
 using System.Device.I2c;
@@ -25,7 +24,7 @@ namespace Iot.Device.DHTxx
         /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
         /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Dht12(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController gpioController = null, bool shouldDispose = true)
+        public Dht12(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
             : base(pin, pinNumberingScheme, gpioController, shouldDispose)
         {
         }
@@ -39,10 +38,7 @@ namespace Iot.Device.DHTxx
         {
         }
 
-        internal override Ratio GetHumidity(byte[] readBuff)
-        {
-            return Ratio.FromPercent(readBuff[0] + readBuff[1] * 0.1);
-        }
+        internal override Ratio GetHumidity(byte[] readBuff) => Ratio.FromPercent(readBuff[0] + readBuff[1] * 0.1);
 
         internal override Temperature GetTemperature(byte[] readBuff)
         {

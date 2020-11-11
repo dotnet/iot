@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -18,8 +17,8 @@ namespace Iot.Device.Mhz19b
     {
         private const int MessageBytes = 9;
         private bool _shouldDispose = false;
-        private SerialPort _serialPort = null;
-        private Stream _serialPortStream = null;
+        private SerialPort? _serialPort;
+        private Stream _serialPortStream;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mhz19b"/> class using an existing (serial port) stream.
@@ -39,7 +38,7 @@ namespace Iot.Device.Mhz19b
         /// <exception cref="System.ArgumentException">uartDevice is null or empty</exception>
         public Mhz19b(string uartDevice)
         {
-            if (string.IsNullOrEmpty(uartDevice))
+            if (uartDevice is not { Length: > 0 })
             {
                 throw new ArgumentException(nameof(uartDevice));
             }
@@ -66,7 +65,7 @@ namespace Iot.Device.Mhz19b
         public VolumeConcentration GetCo2Reading()
         {
             // send read command request
-            var request = CreateRequest(Command.ReadCo2Concentration);
+            byte[] request = CreateRequest(Command.ReadCo2Concentration);
             request[(int)MessageFormat.Checksum] = Checksum(request);
             _serialPortStream.Write(request, 0, request.Length);
 
@@ -116,7 +115,7 @@ namespace Iot.Device.Mhz19b
                 throw new ArgumentException("Span value out of range (1000-5000[ppm])", nameof(span));
             }
 
-            var request = CreateRequest(Command.CalibrateSpanPoint);
+            byte[] request = CreateRequest(Command.CalibrateSpanPoint);
             // set span in request, c. f. datasheet rev. 1.0, pg. 8 for details
             request[(int)MessageFormat.DataHighRequest] = (byte)(span.PartsPerMillion / 256);
             request[(int)MessageFormat.DataLowRequest] = (byte)(span.PartsPerMillion % 256);
@@ -131,7 +130,7 @@ namespace Iot.Device.Mhz19b
         /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
         public void SetAutomaticBaselineCorrection(AbmState state)
         {
-            var request = CreateRequest(Command.AutoCalibrationSwitch);
+            byte[] request = CreateRequest(Command.AutoCalibrationSwitch);
             // set on/off state in request, c. f. datasheet rev. 1.0, pg. 8 for details
             request[(int)MessageFormat.DataHighRequest] = (byte)state;
 
@@ -145,7 +144,7 @@ namespace Iot.Device.Mhz19b
         /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
         public void SetSensorDetectionRange(DetectionRange detectionRange)
         {
-            var request = CreateRequest(Command.DetectionRangeSetting);
+            byte[] request = CreateRequest(Command.DetectionRangeSetting);
             // set detection range in request, c. f. datasheet rev. 1.0, pg. 8 for details
             request[(int)MessageFormat.DataHighRequest] = (byte)((int)detectionRange / 256);
             request[(int)MessageFormat.DataLowRequest] = (byte)((int)detectionRange % 256);
@@ -197,27 +196,19 @@ namespace Iot.Device.Mhz19b
         /// <inheritdoc cref="IDisposable" />
         public void Dispose()
         {
-            if (_serialPort == null && _serialPortStream == null)
+            if (_shouldDispose)
             {
-                return;
+                _serialPortStream?.Dispose();
+                _serialPortStream = null!;
             }
 
-            if (_shouldDispose && _serialPortStream != null)
+            if (_serialPort?.IsOpen ?? false)
             {
-                _serialPortStream.Dispose();
-                _serialPortStream = null;
+                _serialPort.Close();
             }
 
-            if (_serialPort != null)
-            {
-                if (_serialPort.IsOpen)
-                {
-                    _serialPort.Close();
-                }
-
-                _serialPort.Dispose();
-                _serialPort = null;
-            }
+            _serialPort?.Dispose();
+            _serialPort = null;
         }
 
         private enum Command : byte

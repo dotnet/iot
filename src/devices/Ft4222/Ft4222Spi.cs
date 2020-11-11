@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Spi;
@@ -87,149 +86,41 @@ namespace Iot.Device.Ft4222
             }
         }
 
-        private (FtClockRate clk, SpiClock spiClk) CalculateBestClockRate()
+        // Maximum is the System Clock / 1 = 80 MHz
+        // Minimum is the System Clock / 512 = 24 / 256 = 93.75 KHz
+        // Always take the below frequency to avoid over clocking
+        private (FtClockRate clk, SpiClock spiClk) CalculateBestClockRate() => _settings.ClockFrequency switch
         {
-            // Maximum is the System Clock / 1 = 80 MHz
-            // Minimum is the System Clock / 512 = 24 / 256 = 93.75 KHz
-            // Always take the below frequency to avoid over clocking
-            if (_settings.ClockFrequency < 187500)
-            {
-                return (FtClockRate.Clock24MHz, SpiClock.DivideBy256);
-            }
-
-            if (_settings.ClockFrequency < 234375)
-            {
-                return (FtClockRate.Clock48MHz, SpiClock.DivideBy256);
-            }
-
-            if (_settings.ClockFrequency < 312500)
-            {
-                return (FtClockRate.Clock60MHz, SpiClock.DivideBy256);
-            }
-
-            if (_settings.ClockFrequency < 375000)
-            {
-                return (FtClockRate.Clock80MHz, SpiClock.DivideBy256);
-            }
-
-            if (_settings.ClockFrequency < 468750)
-            {
-                return (FtClockRate.Clock48MHz, SpiClock.DivideBy128);
-            }
-
-            if (_settings.ClockFrequency < 625000)
-            {
-                return (FtClockRate.Clock60MHz, SpiClock.DivideBy128);
-            }
-
-            if (_settings.ClockFrequency < 750000)
-            {
-                return (FtClockRate.Clock80MHz, SpiClock.DivideBy128);
-            }
-
-            if (_settings.ClockFrequency < 937500)
-            {
-                return (FtClockRate.Clock48MHz, SpiClock.DivideBy64);
-            }
-
-            if (_settings.ClockFrequency < 1250000)
-            {
-                return (FtClockRate.Clock60MHz, SpiClock.DivideBy64);
-            }
-
-            if (_settings.ClockFrequency < 1500000)
-            {
-                return (FtClockRate.Clock80MHz, SpiClock.DivideBy64);
-            }
-
-            if (_settings.ClockFrequency < 1875000)
-            {
-                return (FtClockRate.Clock48MHz, SpiClock.DivideBy32);
-            }
-
-            if (_settings.ClockFrequency < 2500000)
-            {
-                return (FtClockRate.Clock60MHz, SpiClock.DivideBy32);
-            }
-
-            if (_settings.ClockFrequency < 3000000)
-            {
-                return (FtClockRate.Clock80MHz, SpiClock.DivideBy32);
-            }
-
-            if (_settings.ClockFrequency < 3750000)
-            {
-                return (FtClockRate.Clock48MHz, SpiClock.DivideBy16);
-            }
-
-            if (_settings.ClockFrequency < 5000000)
-            {
-                return (FtClockRate.Clock60MHz, SpiClock.DivideBy16);
-            }
-
-            if (_settings.ClockFrequency < 6000000)
-            {
-                return (FtClockRate.Clock80MHz, SpiClock.DivideBy16);
-            }
-
-            if (_settings.ClockFrequency < 7500000)
-            {
-                return (FtClockRate.Clock48MHz, SpiClock.DivideBy8);
-            }
-
-            if (_settings.ClockFrequency < 10000000)
-            {
-                return (FtClockRate.Clock60MHz, SpiClock.DivideBy8);
-            }
-
-            if (_settings.ClockFrequency < 12000000)
-            {
-                return (FtClockRate.Clock80MHz, SpiClock.DivideBy8);
-            }
-
-            if (_settings.ClockFrequency < 15000000)
-            {
-                return (FtClockRate.Clock48MHz, SpiClock.DivideBy4);
-            }
-
-            if (_settings.ClockFrequency < 20000000)
-            {
-                return (FtClockRate.Clock60MHz, SpiClock.DivideBy4);
-            }
-
-            if (_settings.ClockFrequency < 24000000)
-            {
-                return (FtClockRate.Clock80MHz, SpiClock.DivideBy4);
-            }
-
-            if (_settings.ClockFrequency < 30000000)
-            {
-                return (FtClockRate.Clock48MHz, SpiClock.DivideBy2);
-            }
-
-            if (_settings.ClockFrequency < 40000000)
-            {
-                return (FtClockRate.Clock60MHz, SpiClock.DivideBy2);
-            }
-
-            if (_settings.ClockFrequency < 48000000)
-            {
-                return (FtClockRate.Clock80MHz, SpiClock.DivideBy2);
-            }
-
-            if (_settings.ClockFrequency < 60000000)
-            {
-                return (FtClockRate.Clock48MHz, SpiClock.DivideBy1);
-            }
-
-            if (_settings.ClockFrequency < 80000000)
-            {
-                return (FtClockRate.Clock60MHz, SpiClock.DivideBy1);
-            }
-
+            < 187500 => (FtClockRate.Clock24MHz, SpiClock.DivideBy256),
+            < 234375 => (FtClockRate.Clock48MHz, SpiClock.DivideBy256),
+            < 312500 => (FtClockRate.Clock60MHz, SpiClock.DivideBy256),
+            < 375000 => (FtClockRate.Clock80MHz, SpiClock.DivideBy256),
+            < 468750 => (FtClockRate.Clock48MHz, SpiClock.DivideBy128),
+            < 625000 => (FtClockRate.Clock60MHz, SpiClock.DivideBy128),
+            < 750000 => (FtClockRate.Clock80MHz, SpiClock.DivideBy128),
+            < 937500 => (FtClockRate.Clock48MHz, SpiClock.DivideBy64),
+            < 1250000 => (FtClockRate.Clock60MHz, SpiClock.DivideBy64),
+            < 1500000 => (FtClockRate.Clock80MHz, SpiClock.DivideBy64),
+            < 1875000 => (FtClockRate.Clock48MHz, SpiClock.DivideBy32),
+            < 2500000 => (FtClockRate.Clock60MHz, SpiClock.DivideBy32),
+            < 3000000 => (FtClockRate.Clock80MHz, SpiClock.DivideBy32),
+            < 3750000 => (FtClockRate.Clock48MHz, SpiClock.DivideBy16),
+            < 5000000 => (FtClockRate.Clock60MHz, SpiClock.DivideBy16),
+            < 6000000 => (FtClockRate.Clock80MHz, SpiClock.DivideBy16),
+            < 7500000 => (FtClockRate.Clock48MHz, SpiClock.DivideBy8),
+            < 10000000 => (FtClockRate.Clock60MHz, SpiClock.DivideBy8),
+            < 12000000 => (FtClockRate.Clock80MHz, SpiClock.DivideBy8),
+            < 15000000 => (FtClockRate.Clock48MHz, SpiClock.DivideBy4),
+            < 20000000 => (FtClockRate.Clock60MHz, SpiClock.DivideBy4),
+            < 24000000 => (FtClockRate.Clock80MHz, SpiClock.DivideBy4),
+            < 30000000 => (FtClockRate.Clock48MHz, SpiClock.DivideBy2),
+            < 40000000 => (FtClockRate.Clock60MHz, SpiClock.DivideBy2),
+            < 48000000 => (FtClockRate.Clock80MHz, SpiClock.DivideBy2),
+            < 60000000 => (FtClockRate.Clock48MHz, SpiClock.DivideBy1),
+            < 80000000 => (FtClockRate.Clock60MHz, SpiClock.DivideBy1),
             // Anything else will be 80 MHz
-            return (FtClockRate.Clock80MHz, SpiClock.DivideBy1);
-        }
+            _ => (FtClockRate.Clock80MHz, SpiClock.DivideBy1),
+        };
 
         /// <inheritdoc/>
         public override void Read(Span<byte> buffer)

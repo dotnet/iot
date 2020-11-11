@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -24,7 +23,7 @@ namespace Iot.Device.SenseHat
         /// Constructs SenseHatJoystick instance
         /// </summary>
         /// <param name="i2cDevice">I2C device used to communicate with the device</param>
-        public SenseHatJoystick(I2cDevice i2cDevice = null)
+        public SenseHatJoystick(I2cDevice? i2cDevice = null)
         {
             _i2c = i2cDevice ?? CreateDefaultI2cDevice();
             Read();
@@ -70,7 +69,7 @@ namespace Iot.Device.SenseHat
 
         private static I2cDevice CreateDefaultI2cDevice()
         {
-            var settings = new I2cConnectionSettings(1, I2cAddress);
+            I2cConnectionSettings settings = new (1, I2cAddress);
             return I2cDevice.Create(settings);
         }
 
@@ -78,7 +77,7 @@ namespace Iot.Device.SenseHat
         public void Dispose()
         {
             _i2c?.Dispose();
-            _i2c = null;
+            _i2c = null!;
         }
 
         private JoystickState ReadState()

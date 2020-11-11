@@ -15,7 +15,7 @@ namespace Iot.Device.Multiplexing
         private readonly int[] _pins;
         private readonly CharlieplexSegmentNode[] _nodes;
         private readonly int _nodeCount;
-        private GpioController _controller;
+        private GpioController _gpioController;
         private CharlieplexSegmentNode _lastNode;
 
         /// <summary>
@@ -25,17 +25,17 @@ namespace Iot.Device.Multiplexing
         /// <param name="nodeCount">The count of nodes (like LEDs) that will be addressable. If 0, then the Charlieplex maximum is used for the pins provided (n^2-n).</param>
         /// <param name="gpioController">The GPIO Controller used for interrupt handling.</param>
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
-        public CharlieplexSegment(int[] pins, int nodeCount = 0,  GpioController gpioController = null, bool shouldDispose = true)
+        public CharlieplexSegment(int[] pins, int nodeCount = 0,  GpioController? gpioController = null, bool shouldDispose = true)
         {
             if (pins.Length < 2)
             {
-                throw new ArgumentException($"{nameof(CharlieplexSegment)}: 2 or more pins must be provided.");
+                throw new ArgumentException(nameof(CharlieplexSegment), "2 or more pins must be provided.");
             }
 
             int charlieCount = (int)Math.Pow(pins.Length, 2) - pins.Length;
             if (nodeCount > charlieCount)
             {
-                throw new ArgumentException($"{nameof(CharlieplexSegment)}: maximum count is {charlieCount} based on {pins.Length} pins. {nodeCount} was specified as the count.");
+                throw new ArgumentException(nameof(CharlieplexSegment), $"Maximum count is {charlieCount} based on {pins.Length} pins. {nodeCount} was specified as the count.");
             }
 
             if (nodeCount == 0)
@@ -43,20 +43,18 @@ namespace Iot.Device.Multiplexing
                 nodeCount = charlieCount;
             }
 
-            if (gpioController is null)
-            {
-                gpioController = new GpioController();
-            }
+            _shouldDispose = shouldDispose || gpioController is null;
+            _gpioController = gpioController ?? new ();
 
             // first two pins will be needed as Output.
-            gpioController.OpenPin(pins[0], PinMode.Output);
-            gpioController.OpenPin(pins[1], PinMode.Output);
+            _gpioController.OpenPin(pins[0], PinMode.Output);
+            _gpioController.OpenPin(pins[1], PinMode.Output);
 
             // remaining pins should be input type
             // prevents participating in the circuit until needed
             for (int i = 2; i < pins.Length; i++)
             {
-                gpioController.OpenPin(pins[i], PinMode.Input);
+                _gpioController.OpenPin(pins[i], PinMode.Input);
             }
 
             _lastNode = new CharlieplexSegmentNode()
@@ -64,8 +62,6 @@ namespace Iot.Device.Multiplexing
                 Anode = pins[1],
                 Cathode = pins[0]
             };
-            _controller = gpioController;
-            _shouldDispose = shouldDispose;
             _pins = pins;
             _nodeCount = nodeCount;
             _nodes = GetNodes(pins, nodeCount);
@@ -120,29 +116,29 @@ namespace Iot.Device.Multiplexing
                     // skip updating pinmode when possible
                     if (_lastNode.Anode != node.Anode && _lastNode.Anode != node.Cathode)
                     {
-                        _controller.SetPinMode(_lastNode.Anode, PinMode.Input);
+                        _gpioController.SetPinMode(_lastNode.Anode, PinMode.Input);
                     }
 
                     if (_lastNode.Cathode != node.Anode && _lastNode.Cathode != node.Cathode)
                     {
-                        _controller.SetPinMode(_lastNode.Cathode, PinMode.Input);
+                        _gpioController.SetPinMode(_lastNode.Cathode, PinMode.Input);
                     }
 
                     if (node.Cathode != _lastNode.Anode && node.Cathode != _lastNode.Cathode)
                     {
-                        _controller.SetPinMode(node.Cathode, PinMode.Output);
+                        _gpioController.SetPinMode(node.Cathode, PinMode.Output);
                     }
 
                     if (node.Anode != _lastNode.Anode && node.Anode != _lastNode.Cathode)
                     {
-                        _controller.SetPinMode(node.Anode, PinMode.Output);
+                        _gpioController.SetPinMode(node.Anode, PinMode.Output);
                     }
 
-                    _controller.Write(node.Anode, node.Value);
+                    _gpioController.Write(node.Anode, node.Value);
                     // It is necessary to sleep for the LED to be seen with full brightness
                     // It may be possible to sleep less than 1ms -- this API has ms granularity
                     Thread.Sleep(1);
-                    _controller.Write(node.Anode, 0);
+                    _gpioController.Write(node.Anode, 0);
                     _lastNode.Anode = node.Anode;
                     _lastNode.Cathode = node.Cathode;
                 }
@@ -210,8 +206,8 @@ namespace Iot.Device.Multiplexing
             // this condition only applies to GPIO devices
             if (_shouldDispose)
             {
-                _controller?.Dispose();
-                _controller = null;
+                _gpioController?.Dispose();
+                _gpioController = null!;
             }
         }
     }

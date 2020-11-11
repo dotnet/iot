@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace System.Device.Gpio
 {
@@ -81,6 +80,13 @@ namespace System.Device.Gpio
         /// Inequality operator
         /// </summary>
         public static bool operator !=(PinValue a, PinValue b) => !a.Equals(b);
+
+        /// <summary>
+        /// Returns the inverse of the value
+        /// </summary>
+        /// <param name="v">Input value</param>
+        /// <returns>High, when the input is low, low when the input is high</returns>
+        public static PinValue operator !(PinValue v) => (v._value == 0) ? High : Low;
 
         /// <inheritdoc />
         public override int GetHashCode() => _value.GetHashCode();
