@@ -47,14 +47,14 @@ namespace Iot.Device.Gpio.Drivers
         private readonly int _mapMask = Environment.SystemPageSize - 1;
         private static readonly object s_initializationLock = new object();
         private static readonly object s_sysFsInitializationLock = new object();
-        private GpioController? _interruptController = new GpioController();
+        private GpioController? _internalController;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SunxiDriver"/> class.
         /// </summary>
         protected SunxiDriver()
         {
-            _interruptController = new GpioController(InternalGpioControllerPinNumberingScheme);
+            _internalController = new GpioController(InternalGpioControllerPinNumberingScheme);
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Iot.Device.Gpio.Drivers
         {
             CpuxPortBaseAddress = cpuxPortBaseAddress;
             CpusPortBaseAddress = cpusPortBaseAddress;
-            _interruptController = new GpioController(InternalGpioControllerPinNumberingScheme);
+            _internalController = new GpioController(InternalGpioControllerPinNumberingScheme);
         }
 
         /// <summary>
@@ -101,7 +101,8 @@ namespace Iot.Device.Gpio.Drivers
             {
                 if (_pinModes[pinNumber].InUseByInterruptDriver)
                 {
-                    _interruptController.ClosePin(pinNumber);
+                    InternalGpioControllerCheck();
+                    _internalController!.ClosePin(pinNumber);
                 }
 
                 if (_pinModes[pinNumber].CurrentPinMode == PinMode.Output)
@@ -265,7 +266,8 @@ namespace Iot.Device.Gpio.Drivers
         {
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            _interruptController.RegisterCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
+            InternalGpioControllerCheck();
+            _internalController!.RegisterCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
         }
 
         /// <summary>
@@ -277,7 +279,8 @@ namespace Iot.Device.Gpio.Drivers
         {
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            _interruptController.UnregisterCallbackForPinValueChangedEvent(pinNumber, callback);
+            InternalGpioControllerCheck();
+            _internalController!.UnregisterCallbackForPinValueChangedEvent(pinNumber, callback);
         }
 
         /// <summary>
@@ -291,7 +294,8 @@ namespace Iot.Device.Gpio.Drivers
         {
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            return _interruptController.WaitForEvent(pinNumber, eventTypes, cancellationToken);
+            InternalGpioControllerCheck();
+            return _internalController!.WaitForEvent(pinNumber, eventTypes, cancellationToken);
         }
 
         /// <summary>
@@ -305,7 +309,8 @@ namespace Iot.Device.Gpio.Drivers
         {
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            return _interruptController.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
+            InternalGpioControllerCheck();
+            return _internalController!.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
         }
 
         /// <summary>
@@ -358,10 +363,10 @@ namespace Iot.Device.Gpio.Drivers
                 _gpioPointer1 = IntPtr.Zero;
             }
 
-            if (_interruptController != null)
+            if (_internalController != null)
             {
-                _interruptController.Dispose();
-                _interruptController = null;
+                _internalController.Dispose();
+                _internalController = null;
             }
         }
 
@@ -420,6 +425,14 @@ namespace Iot.Device.Gpio.Drivers
             int alphabetPosition = MapPortController(portController);
 
             return alphabetPosition * 32 + port;
+        }
+
+        private void InternalGpioControllerCheck()
+        {
+            if (_internalController is null)
+            {
+                throw new InvalidOperationException("This instance has already been Disposed.");
+            }
         }
 
         private (int PortController, int Port) UnmapPinNumber(int pinNumber)
