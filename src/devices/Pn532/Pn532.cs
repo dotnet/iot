@@ -810,7 +810,7 @@ namespace Iot.Device.Pn532
         /// <returns>A raw byte array containing the number of cards, the card type and the raw data. Null if nothing has been polled</returns>
         public byte[]? AutoPoll(byte numberPolling, ushort periodMilliSecond, PollingType[] pollingType)
         {
-            if (pollingType is not { Length: >15 })
+            if (pollingType is null or { Length: >15 })
             {
                 return null;
             }
