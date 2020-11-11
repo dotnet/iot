@@ -4,19 +4,20 @@
 
 using System;
 using System.Device.Gpio;
-using System.Device.I2c;
-using System.Device.Spi;
 
-namespace RelayBoard
+namespace Iot.Device.RelayBoard
 {
     /// <summary>
-    /// A relay.
+    /// A generic GPIO relay device.
     /// </summary>
     public class Relay : IDisposable
     {
-        private GpioController _controller;
+        private readonly GpioController _controller;
 
         #region Properties
+
+        private bool _shouldDispose;
+
         /// <summary>
         /// The pin this relay uses.
         /// </summary>
@@ -44,19 +45,23 @@ namespace RelayBoard
                 _controller.Write(Pin, val);
             }
         }
+
         #endregion
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Relay"/> class.
         /// </summary>
         /// <param name="pin">The pin this relay is on.</param>
-        /// <param name="controller">The GPIO controller to use.</param>
+        /// <param name="gpioController">The GPIO controller to use.</param>
         /// <param name="relayType">The type of relay this is.</param>
-        public Relay(int pin, GpioController controller, RelayType relayType = RelayType.NormallyClosed)
+        /// <param name="pinNumberingScheme">Numbering scheme to use for <paramref name="gpioController"/>, if one is not passed.</param>
+        /// <param name="shouldDispose">Whether this class should dispose the <paramref name="gpioController"/>.</param>
+        public Relay(int pin, GpioController? gpioController = null, RelayType relayType = RelayType.NormallyClosed, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
         {
+            _shouldDispose = gpioController == null || shouldDispose;
             Pin = pin;
             Type = relayType;
-            _controller = controller;
+            _controller = gpioController ?? new GpioController(pinNumberingScheme);
             _controller.OpenPin(pin);
         }
 
@@ -64,6 +69,11 @@ namespace RelayBoard
         public void Dispose()
         {
             _controller?.ClosePin(Pin);
+
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+            }
         }
     }
 }

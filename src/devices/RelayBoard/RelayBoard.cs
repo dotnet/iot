@@ -6,12 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Device.Gpio;
-using System.Device.I2c;
-using System.Device.Spi;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-
-using RelayBoard;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Iot.Device.RelayBoard
 {
@@ -25,22 +20,21 @@ namespace Iot.Device.RelayBoard
     /// board.CreateRelay(pin: 1);
     /// </code>
     /// </example>
-    public class RelayBoard : IDisposable, IEnumerable<Relay>
+    public class RelayBoard : IDisposable, IEnumerable<Relay>, IReadOnlyCollection<Relay>, IReadOnlyDictionary<int, Relay>
     {
-        private List<Relay> _relays = new List<Relay>();
-
-        private bool _shouldDispose;
-        private GpioController _controller;
+        private readonly GpioController _controller;
+        private readonly Dictionary<int, Relay> _relays = new ();
+        private readonly bool _shouldDispose;
 
         /// <summary>
-        /// Get's the type of relay board.
+        /// Gets the type of relay board.
         /// </summary>
-        public RelayType Type { get; }
+        public RelayType Type { get; init; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RelayBoard"/> class.
         /// </summary>
-        public RelayBoard(RelayType relayType = RelayType.NormallyClosed, GpioController gpioController = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
+        public RelayBoard(RelayType relayType = RelayType.NormallyClosed, GpioController? gpioController = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
         {
             _shouldDispose = gpioController == null || shouldDispose;
             _controller = gpioController ?? new GpioController(pinNumberingScheme);
@@ -53,7 +47,12 @@ namespace Iot.Device.RelayBoard
         /// <param name="pin">Pin to use.</param>
         public void CreateRelay(int pin)
         {
-            _relays.Add(new Relay(pin, _controller, Type));
+            if (_relays.ContainsKey(pin))
+            {
+                throw new ArgumentException("Pin already in use.", nameof(pin));
+            }
+
+            _relays.Add(pin, new Relay(pin, _controller, Type, shouldDispose: false));
         }
 
         /// <summary>
@@ -69,18 +68,18 @@ namespace Iot.Device.RelayBoard
         }
 
         /// <summary>
-        /// Remove a relay from this board.
+        /// Remove a relay from this board, and safely disposes it.
         /// </summary>
         /// <param name="pin">Pin the relay is on.</param>
         public void RemoveRelay(int pin)
         {
-            var relay = _relays.FindIndex(x => x.Pin == pin);
-            if (relay == -1)
+            if (!_relays.ContainsKey(pin))
             {
-                throw new ArgumentOutOfRangeException($"No relay exists on pin {pin}", nameof(pin));
+                throw new ArgumentException($"No relay exists on pin {pin}.", nameof(pin));
             }
 
-            _relays.RemoveAt(relay);
+            _relays[pin].Dispose();
+            _relays.Remove(pin);
         }
 
         /// <summary>
@@ -88,18 +87,32 @@ namespace Iot.Device.RelayBoard
         /// </summary>
         /// <param name="relay">The relay to remove.</param>
         public void RemoveRelay(Relay relay)
-        {
-            _relays.Remove(relay);
-        }
+            => RemoveRelay(relay.Pin);
 
         /// <summary>
         /// Get a relay based on the specified pin.
         /// </summary>
         /// <param name="pin">The pin of the relay.</param>
         /// <returns>The relay, or null if a relay does not exist on that pin.</returns>
-        public Relay GetRelay(int pin)
+        public Relay? GetRelay(int pin)
         {
-            return _relays.FirstOrDefault(x => x.Pin == pin);
+            var result = _relays.TryGetValue(pin, out Relay? value);
+            return result ? value : null;
+        }
+
+        /// <summary>
+        /// Update a relays state.
+        /// </summary>
+        /// <param name="pin">Pin relay is on.</param>
+        /// <param name="state">State of pin to set.</param>
+        public void Set(int pin, bool state)
+        {
+            if (!_relays.ContainsKey(pin))
+            {
+                throw new ArgumentOutOfRangeException($"No relay exists on pin {pin}.", nameof(pin));
+            }
+
+            _relays[pin].On = state;
         }
 
         /// <inheritdoc />
@@ -112,27 +125,47 @@ namespace Iot.Device.RelayBoard
 
             if (_relays != null)
             {
-                foreach (var item in _relays)
+                foreach (var item in _relays.Values)
                 {
                     item?.Dispose();
                 }
 
-                _relays = null;
+                _relays.Clear();
             }
         }
 
-        #region IEnumerable
+        #region IEnumerable, IReadOnlyDictionary
+
+        /// <inheritdoc/>
+        public IEnumerable<int> Keys => _relays.Keys;
+
+        /// <inheritdoc/>
+        public IEnumerable<Relay> Values => _relays.Values;
+
+        /// <inheritdoc/>
+        public int Count => _relays.Count;
+
+        /// <inheritdoc/>
+        public Relay this[int key] => _relays[key];
 
         /// <inheritdoc/>
         public IEnumerator<Relay> GetEnumerator()
-        {
-            return _relays.GetEnumerator();
-        }
+            => _relays.Values.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _relays.GetEnumerator();
-        }
+            => _relays.Values.GetEnumerator();
+
+        /// <inheritdoc/>
+        public bool ContainsKey(int key)
+            => _relays.ContainsKey(key);
+
+        /// <inheritdoc/>
+        public bool TryGetValue(int key, [MaybeNullWhen(false)] out Relay value)
+            => _relays.TryGetValue(key, out value);
+
+        IEnumerator<KeyValuePair<int, Relay>> IEnumerable<KeyValuePair<int, Relay>>.GetEnumerator()
+            => _relays.GetEnumerator();
+
         #endregion
     }
 }

@@ -16,7 +16,7 @@ An example of how you would use a ``RelayBoard``:
 
 ```csharp
 // Create a relay board, using default values
-var board = new RelayBoard();
+using var board = new RelayBoard();
 
 // Add a relay to the board
 board.CreateRelay(pin: 1);
