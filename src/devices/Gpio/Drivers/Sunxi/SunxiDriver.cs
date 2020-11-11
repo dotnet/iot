@@ -47,7 +47,7 @@ namespace Iot.Device.Gpio.Drivers
         private readonly int _mapMask = Environment.SystemPageSize - 1;
         private static readonly object s_initializationLock = new object();
         private static readonly object s_sysFsInitializationLock = new object();
-        private GpioController _interruptController = new GpioController();
+        private GpioController? _interruptController = new GpioController();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SunxiDriver"/> class.
