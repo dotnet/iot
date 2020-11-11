@@ -47,13 +47,14 @@ namespace Iot.Device.Gpio.Drivers
         private readonly int _mapMask = Environment.SystemPageSize - 1;
         private static readonly object s_initializationLock = new object();
         private static readonly object s_sysFsInitializationLock = new object();
-        private GpioController _interruptController;
+        private GpioController _interruptController = new GpioController();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SunxiDriver"/> class.
         /// </summary>
         protected SunxiDriver()
         {
+            _interruptController = new GpioController(InternalGpioControllerPinNumberingScheme);
         }
 
         /// <summary>
@@ -65,6 +66,7 @@ namespace Iot.Device.Gpio.Drivers
         {
             CpuxPortBaseAddress = cpuxPortBaseAddress;
             CpusPortBaseAddress = cpusPortBaseAddress;
+            _interruptController = new GpioController(InternalGpioControllerPinNumberingScheme);
         }
 
         /// <summary>
@@ -356,10 +358,10 @@ namespace Iot.Device.Gpio.Drivers
                 _gpioPointer1 = IntPtr.Zero;
             }
 
-            if (_interruptController != default)
+            if (_interruptController != null)
             {
                 _interruptController.Dispose();
-                _interruptController = default;
+                _interruptController = null;
             }
         }
 
@@ -404,8 +406,6 @@ namespace Iot.Device.Gpio.Drivers
 
                 _gpioPointer0 = mapPointer0;
                 _gpioPointer1 = mapPointer0;
-
-                _interruptController = new GpioController(InternalGpioControllerPinNumberingScheme);
             }
         }
 
