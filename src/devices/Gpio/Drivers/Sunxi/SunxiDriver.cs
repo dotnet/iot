@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
-using System.Device.Gpio.Drivers;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -23,6 +22,11 @@ namespace Iot.Device.Gpio.Drivers
     /// </remarks>
     public unsafe class SunxiDriver : GpioDriver
     {
+        /// <summary>
+        /// Internal GPIO controller <see cref="PinNumberingScheme"/>.
+        /// </summary>
+        public PinNumberingScheme InternalGpioControllerPinNumberingScheme { get; set; } = PinNumberingScheme.Board;
+
         private const string GpioMemoryFilePath = "/dev/mem";
         private readonly IDictionary<int, PinState> _pinModes = new Dictionary<int, PinState>();
 
@@ -43,7 +47,7 @@ namespace Iot.Device.Gpio.Drivers
         private readonly int _mapMask = Environment.SystemPageSize - 1;
         private static readonly object s_initializationLock = new object();
         private static readonly object s_sysFsInitializationLock = new object();
-        private UnixDriver _interruptDriver;
+        private GpioController _interruptController;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SunxiDriver"/> class.
@@ -95,7 +99,7 @@ namespace Iot.Device.Gpio.Drivers
             {
                 if (_pinModes[pinNumber].InUseByInterruptDriver)
                 {
-                    _interruptDriver.ClosePin(pinNumber);
+                    _interruptController.ClosePin(pinNumber);
                 }
 
                 if (_pinModes[pinNumber].CurrentPinMode == PinMode.Output)
@@ -257,10 +261,9 @@ namespace Iot.Device.Gpio.Drivers
         /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
-            _interruptDriver.OpenPin(pinNumber);
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            _interruptDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
+            _interruptController.RegisterCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
         }
 
         /// <summary>
@@ -270,10 +273,9 @@ namespace Iot.Device.Gpio.Drivers
         /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
-            _interruptDriver.OpenPin(pinNumber);
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            _interruptDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
+            _interruptController.UnregisterCallbackForPinValueChangedEvent(pinNumber, callback);
         }
 
         /// <summary>
@@ -285,10 +287,9 @@ namespace Iot.Device.Gpio.Drivers
         /// <returns>A structure that contains the result of the waiting operation.</returns>
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
-            _interruptDriver.OpenPin(pinNumber);
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            return _interruptDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
+            return _interruptController.WaitForEvent(pinNumber, eventTypes, cancellationToken);
         }
 
         /// <summary>
@@ -300,10 +301,9 @@ namespace Iot.Device.Gpio.Drivers
         /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
         protected override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
-            _interruptDriver.OpenPin(pinNumber);
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            return _interruptDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
+            return _interruptController.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
         }
 
         /// <summary>
@@ -356,22 +356,10 @@ namespace Iot.Device.Gpio.Drivers
                 _gpioPointer1 = IntPtr.Zero;
             }
 
-            if (_interruptDriver != default)
+            if (_interruptController != default)
             {
-                _interruptDriver.Dispose();
-                _interruptDriver = default;
-            }
-        }
-
-        private void InitializeInterruptDriver()
-        {
-            try
-            {
-                _interruptDriver = new LibGpiodDriver(0);
-            }
-            catch (PlatformNotSupportedException)
-            {
-                _interruptDriver = new InterruptSysFsDriver(this);
+                _interruptController.Dispose();
+                _interruptController = default;
             }
         }
 
@@ -417,7 +405,7 @@ namespace Iot.Device.Gpio.Drivers
                 _gpioPointer0 = mapPointer0;
                 _gpioPointer1 = mapPointer0;
 
-                InitializeInterruptDriver();
+                _interruptController = new GpioController(InternalGpioControllerPinNumberingScheme);
             }
         }
 
