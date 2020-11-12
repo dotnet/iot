@@ -166,5 +166,14 @@ namespace Iot.Device.SocketCan
         {
             _socket.Dispose();
         }
+
+        /// <summary>
+        /// Enables or disables blocking operation
+        /// </summary>
+        public bool Blocking
+        {
+            get => _socket.Blocking;
+            set => _socket.Blocking = value;
+        }
     }
 }
