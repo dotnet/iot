@@ -51,18 +51,6 @@ updates:
       day: "wednesday"
     open-pull-requests-limit: 5
   - package-ecosystem: "nuget"
-    directory: "/.dotnet/sdk/5.0.100-rc.1.20452.10" #Microsoft.NETCoreSdk.BundledVersions.props
-    schedule:
-      interval: "weekly"
-      day: "wednesday"
-    open-pull-requests-limit: 5
-  - package-ecosystem: "nuget"
-    directory: "/.dotnet/sdk/5.0.100-rc.2.20479.15" #Microsoft.NETCoreSdk.BundledVersions.props
-    schedule:
-      interval: "weekly"
-      day: "wednesday"
-    open-pull-requests-limit: 5
-  - package-ecosystem: "nuget"
     directory: "/src/devices/Bmxx80/tests" #Bmxx80.Tests.csproj
     schedule:
       interval: "weekly"
