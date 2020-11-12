@@ -13,7 +13,7 @@ int s_deviceAddress = 0x20;
 Console.WriteLine("Hello Mcp23xxx!");
 
 using Mcp23xxx mcp23xxx = GetMcp23xxxDevice(Mcp23xxxDevice.Mcp23017);
-using GpioController controllerUsingMcp = new (PinNumberingScheme.Logical, mcp23xxx);
+using GpioController controllerUsingMcp = new(PinNumberingScheme.Logical, mcp23xxx);
 // Samples are currently written specifically for the 16 bit variant
 if (mcp23xxx is Mcp23x1x mcp23x1x)
 {
@@ -29,7 +29,7 @@ if (mcp23xxx is Mcp23x1x mcp23x1x)
 // Program methods
 Mcp23xxx GetMcp23xxxDevice(Mcp23xxxDevice mcp23xxxDevice)
 {
-    I2cConnectionSettings i2cConnectionSettings = new (1, s_deviceAddress);
+    I2cConnectionSettings i2cConnectionSettings = new(1, s_deviceAddress);
     I2cDevice i2cDevice = I2cDevice.Create(i2cConnectionSettings);
 
     // I2C.
@@ -45,7 +45,7 @@ Mcp23xxx GetMcp23xxxDevice(Mcp23xxxDevice mcp23xxxDevice)
             return new Mcp23018(i2cDevice);
     }
 
-    SpiConnectionSettings spiConnectionSettings = new (0, 0)
+    SpiConnectionSettings spiConnectionSettings = new(0, 0)
     {
         ClockFrequency = 1000000, Mode = SpiMode.Mode0
     };

@@ -8,9 +8,9 @@ using Iot.Device.Common;
 using Iot.Device.Si7021;
 using UnitsNet;
 
-I2cConnectionSettings settings = new (1, Si7021.DefaultI2cAddress);
+I2cConnectionSettings settings = new(1, Si7021.DefaultI2cAddress);
 using I2cDevice device = I2cDevice.Create(settings);
-using Si7021 sensor = new (device, Resolution.Resolution1);
+using Si7021 sensor = new(device, Resolution.Resolution1);
 while (true)
 {
     var tempValue = sensor.Temperature;

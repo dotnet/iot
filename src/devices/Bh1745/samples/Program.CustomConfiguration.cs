@@ -17,7 +17,7 @@ using Bh1745 i2cBh1745 = new Bh1745(i2cDevice)
 {
     // multipliers affect the compensated values
     // ChannelCompensationMultipliers:  Red, Green, Blue, Clear
-    ChannelCompensationMultipliers = new (2.5, 0.9, 1.9, 9.5),
+    ChannelCompensationMultipliers = new(2.5, 0.9, 1.9, 9.5),
 
     // set custom  measurement time
     MeasurementTime = MeasurementTime.Ms1280,

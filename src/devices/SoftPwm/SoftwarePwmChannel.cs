@@ -98,7 +98,7 @@ namespace System.Device.Pwm.Drivers
             _frequency = frequency;
             _dutyCycle = dutyCycle;
             _shouldDispose = shouldDispose || controller is null;
-            _controller = controller ?? new ();
+            _controller = controller ?? new();
 
             UpdatePulseWidthParameters();
 

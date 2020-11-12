@@ -32,7 +32,7 @@ namespace Iot.Device.SenseHat
 
         private static I2cDevice CreateDefaultI2cDevice()
         {
-            I2cConnectionSettings settings = new (1, I2cAddress);
+            I2cConnectionSettings settings = new(1, I2cAddress);
             return I2cDevice.Create(settings);
         }
     }

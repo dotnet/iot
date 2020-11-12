@@ -17,8 +17,6 @@ using Iot.Device.Pn532.RfConfiguration;
 using Iot.Device.Rfid;
 using IoT.Device.Pn532;
 
-#pragma warning disable SA1011
-
 namespace Iot.Device.Pn532
 {
     /// <summary>
@@ -853,7 +851,7 @@ namespace Iot.Device.Pn532
         /// <summary>
         /// Set the PN532 as a target, so as a card
         /// </summary>
-        public (TargetModeInitialized? modeInialized, byte[]? initiator) InitAsTarget(TargetModeInitialization mode,
+        public (TargetModeInitialized? ModeInialized, byte[]? Initiator) InitAsTarget(TargetModeInitialization mode,
             TargetMifareParameters mifare, TargetFeliCaParameters feliCa, TargetPiccParameters picc)
         {
             // First make sure we have the right mode in the parameters for the PICC only case

@@ -22,7 +22,7 @@ namespace Iot.Device.Ssd13xx.Samples
         {
             Int16 width = 128;
             Int16 pages = 4;
-            List<byte> buffer = new ();
+            List<byte> buffer = new();
 
             for (int page = 0; page < pages; page++)
             {

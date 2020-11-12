@@ -22,17 +22,15 @@ var busId = 1;
 var selectedI2cAddress = 0b000000; // A5 A4 A3 A2 A1 A0
 var deviceAddress = Pca9685.I2cAddressBase + selectedI2cAddress;
 
-I2cConnectionSettings settings = new (busId, deviceAddress);
+I2cConnectionSettings settings = new(busId, deviceAddress);
 using I2cDevice device = I2cDevice.Create(settings);
 
-using Pca9685 pca9685 = new (device);
+using Pca9685 pca9685 = new(device);
 Console.WriteLine(
     $"PCA9685 is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
 Console.WriteLine($"PWM Frequency: {pca9685.PwmFrequency}Hz");
 Console.WriteLine();
 PrintHelp();
-
-#pragma warning disable SA1011
 
 while (true)
 {

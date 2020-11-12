@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using Iot.Device.Media;
 
-SoundConnectionSettings settings = new ();
+SoundConnectionSettings settings = new();
 using SoundDevice device = SoundDevice.Create(settings);
 
 string path = Directory.GetCurrentDirectory();

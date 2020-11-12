@@ -11,8 +11,6 @@ using Iot.Device.Card.Mifare;
 using Iot.Device.Pn532;
 using Iot.Device.Pn532.ListPassive;
 
-#pragma warning disable SA1011
-
 string device = "/dev/ttyS0";
 using Pn532 pn532 = new Pn532(device);
 if (args.Length > 0)
@@ -102,7 +100,7 @@ void ReadMiFare(Pn532 pn532)
             Console.WriteLine($", ATS: {BitConverter.ToString(decrypted.Ats)}");
         }
 
-        MifareCard mifareCard = new (pn532, decrypted.TargetNumber)
+        MifareCard mifareCard = new(pn532, decrypted.TargetNumber)
         {
             BlockNumber = 0, Command = MifareCardCommand.AuthenticationA
         };

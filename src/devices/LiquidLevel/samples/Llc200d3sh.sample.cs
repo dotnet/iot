@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using Iot.Device.LiquidLevel;
 
-using Llc200d3sh sensor = new (23);
+using Llc200d3sh sensor = new(23);
 while (true)
 {
     // read liquid level switch

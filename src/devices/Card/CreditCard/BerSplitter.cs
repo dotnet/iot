@@ -30,18 +30,18 @@ namespace Iot.Device.Card.CreditCardProcessing
                 try
                 {
                     var resTag = DecodeTag(toSplit.Slice(index));
-                    var tagNumber = resTag.Item1;
+                    var tagNumber = resTag.TagNumber;
                     // Need to move index depending on how many has been read
-                    index += resTag.Item2;
+                    index += resTag.NumberElements;
                     var resSize = DecodeSize(toSplit.Slice(index));
-                    var data = new byte[resSize.Item1];
+                    var data = new byte[resSize.Size];
                     var elem = new Tag(
                         tagNumber,
                         data);
                     Tags.Add(elem);
-                    index += resSize.Item2;
-                    toSplit.Slice(index, resSize.Item1).CopyTo(elem.Data);
-                    index += resSize.Item1;
+                    index += resSize.NumBytes;
+                    toSplit.Slice(index, resSize.Size).CopyTo(elem.Data);
+                    index += resSize.Size;
 
                 }
                 catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is OverflowException)
@@ -52,7 +52,7 @@ namespace Iot.Device.Card.CreditCardProcessing
             }
         }
 
-        private (uint tagNumber, byte numberElements) DecodeTag(ReadOnlySpan<byte> toSplit)
+        private (uint TagNumber, byte NumberElements) DecodeTag(ReadOnlySpan<byte> toSplit)
         {
             uint tagValue = toSplit[0];
             byte index = 1;
@@ -70,7 +70,7 @@ namespace Iot.Device.Card.CreditCardProcessing
             return (tagValue, index);
         }
 
-        private (int size, byte numBytes) DecodeSize(ReadOnlySpan<byte> toSplit)
+        private (int Size, byte NumBytes) DecodeSize(ReadOnlySpan<byte> toSplit)
         {
             // Case infinite
             if (toSplit[0] == 0b1000_0000)

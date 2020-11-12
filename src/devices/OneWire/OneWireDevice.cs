@@ -27,7 +27,7 @@ namespace Iot.Device.OneWire
         /// </summary>
         /// <param name="family">Family id used to filter devices.</param>
         /// <returns>A list of devices found.</returns>
-        public static IEnumerable<(string busId, string devId)> EnumerateDeviceIds(DeviceFamily family = DeviceFamily.Any)
+        public static IEnumerable<(string BusId, string DevId)> EnumerateDeviceIds(DeviceFamily family = DeviceFamily.Any)
         {
             foreach (var busId in OneWireBus.EnumerateBusIdsInternal())
             {

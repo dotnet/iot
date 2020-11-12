@@ -22,16 +22,16 @@ else
     // More advanced way, with rescanning the bus and iterating devices per 1-wire bus
     foreach (string busId in OneWireBus.EnumerateBusIds())
     {
-        OneWireBus bus = new (busId);
+        OneWireBus bus = new(busId);
         Console.WriteLine($"Found bus '{bus.BusId}', scanning for devices ...");
         await bus.ScanForDeviceChangesAsync();
         foreach (string devId in bus.EnumerateDeviceIds())
         {
-            OneWireDevice dev = new (busId, devId);
+            OneWireDevice dev = new(busId, devId);
             Console.WriteLine($"Found family '{dev.Family}' device '{dev.DeviceId}' on '{bus.BusId}'");
             if (OneWireThermometerDevice.IsCompatible(busId, devId))
             {
-                OneWireThermometerDevice devTemp = new (busId, devId);
+                OneWireThermometerDevice devTemp = new(busId, devId);
                 Console.WriteLine("Temperature reported by device: " +
                                     (await devTemp.ReadTemperatureAsync()).DegreesCelsius.ToString("F2") +
                                     "\u00B0C");

@@ -128,7 +128,7 @@ namespace Iot.Device.Pn5180
         /// Get the Product, Firmware and EEPROM versions of the PN8150
         /// </summary>
         /// <returns>A tuple with the Product, Firmware and EEPROM versions</returns>
-        public (Version? product, Version? firmware, Version? eeprom) GetVersions()
+        public (Version? Product, Version? Firmware, Version? Eeprom) GetVersions()
         {
             Span<byte> versionAnswer = stackalloc byte[6];
 
@@ -432,7 +432,7 @@ namespace Iot.Device.Pn5180
         /// If the full byte is valid then the value of the valid bit is 0
         /// </summary>
         /// <returns>A tuple whit the number of bytes to read and the number of valid bits in the last byte. If all bits are valid, then the value of valid bits is 0</returns>
-        public (int bytes, int validBits) GetNumberOfBytesReceivedAndValidBits()
+        public (int Bytes, int ValidBits) GetNumberOfBytesReceivedAndValidBits()
         {
             try
             {

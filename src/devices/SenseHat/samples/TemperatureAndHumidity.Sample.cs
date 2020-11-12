@@ -16,7 +16,7 @@ namespace Iot.Device.SenseHat.Samples
     {
         public static void Run()
         {
-            using SenseHatTemperatureAndHumidity th = new ();
+            using SenseHatTemperatureAndHumidity th = new();
             while (true)
             {
                 var tempValue = th.Temperature;

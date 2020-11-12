@@ -59,8 +59,8 @@ namespace Iot.Device.GoPiGo3
         /// </summary>
         public GroveSensor[] GroveSensor = new GroveSensor[2]
             {
-                new (GrovePort.Grove1),
-                new (GrovePort.Grove2)
+                new(GrovePort.Grove1),
+                new(GrovePort.Grove2)
             };
 
         /// <summary>
@@ -759,7 +759,6 @@ namespace Iot.Device.GoPiGo3
                 throw new ArgumentException(nameof(port), $"Port unsupported. Must be either {nameof(GrovePort.Grove1)} or {nameof(GrovePort.Grove2)}.");
             }
 
-#pragma warning disable SA1011
             byte[]? outArray = null;
             byte[]? reply = null;
             switch (GroveSensor[port_index].SensorType)

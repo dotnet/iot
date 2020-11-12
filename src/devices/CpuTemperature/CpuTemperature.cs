@@ -127,7 +127,7 @@ namespace Iot.Device.CpuTemperature
         /// Returns all known temperature sensor values.
         /// </summary>
         /// <returns>A list of name/value pairs for temperature sensors</returns>
-        public List<(string, Temperature)> ReadTemperatures()
+        public List<(string Sensor, Temperature Temperature)> ReadTemperatures()
         {
             if (!_windows)
             {

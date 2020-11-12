@@ -31,7 +31,7 @@ namespace Iot.Device.Adc
 
         // These values are the datasheet defined delays in micro seconds between requesting a Current or Power value from the INA219 and the ADC sampling having completed
         // along with any conversions.
-        private static readonly Dictionary<Ina219AdcResolutionOrSamples, int> s_readDelays = new ()
+        private static readonly Dictionary<Ina219AdcResolutionOrSamples, int> s_readDelays = new()
         {
             { Ina219AdcResolutionOrSamples.Adc9Bit, 84 },
             { Ina219AdcResolutionOrSamples.Adc10Bit, 148 },

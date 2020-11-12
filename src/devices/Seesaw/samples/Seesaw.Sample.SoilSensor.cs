@@ -10,7 +10,7 @@ const byte AdafruitSeesawSoilSensorI2cAddress = 0x36;
 const byte AdafruitSeesawSoilSensorI2cBus = 0x1;
 
 using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(AdafruitSeesawSoilSensorI2cBus, AdafruitSeesawSoilSensorI2cAddress));
-using Seesaw ssDevice = new (i2cDevice);
+using Seesaw ssDevice = new(i2cDevice);
 while (true)
 {
     Console.WriteLine($"Temperature: {ssDevice.GetTemperature()}'C");

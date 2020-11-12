@@ -7,9 +7,9 @@ using System.Threading;
 using Iot.Device.Tcs3472x;
 
 Console.WriteLine("Hello TCS3472x!");
-I2cConnectionSettings i2cSettings = new (1, Tcs3472x.DefaultI2cAddress);
+I2cConnectionSettings i2cSettings = new(1, Tcs3472x.DefaultI2cAddress);
 using I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
-using Tcs3472x tcs3472X = new (i2cDevice);
+using Tcs3472x tcs3472X = new(i2cDevice);
 while (!Console.KeyAvailable)
 {
     Console.WriteLine($"ID: {tcs3472X.ChipId} Gain: {tcs3472X.Gain} Time to wait: {tcs3472X.IsClearInterrupt}");

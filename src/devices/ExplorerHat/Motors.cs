@@ -69,7 +69,7 @@ namespace Iot.Device.ExplorerHat
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         internal Motors(GpioController? controller = null, bool shouldDispose = true)
         {
-            _controller = controller ?? new ();
+            _controller = controller ?? new();
             _shouldDispose = shouldDispose || controller is null;
 
             _motorArray = new List<DCMotor.DCMotor>()

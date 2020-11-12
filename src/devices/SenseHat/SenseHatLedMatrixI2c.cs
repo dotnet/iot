@@ -134,7 +134,7 @@ namespace Iot.Device.SenseHat
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static (byte r, byte g, byte b) DestructColor(Color color)
+        private static (byte R, byte G, byte B) DestructColor(Color color)
         {
             // 5-bit (shift by 3) look much closer to native driver (SysFs implementation)
             // but this driver is directly reflecting the registers so we will leave the
@@ -150,7 +150,7 @@ namespace Iot.Device.SenseHat
 
         private static I2cDevice CreateDefaultI2cDevice()
         {
-            I2cConnectionSettings settings = new (1, I2cAddress);
+            I2cConnectionSettings settings = new(1, I2cAddress);
             return I2cDevice.Create(settings);
         }
 

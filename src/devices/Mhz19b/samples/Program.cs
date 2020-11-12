@@ -10,14 +10,14 @@ using Iot.Device.Mhz19b;
 using UnitsNet;
 
 // create serial port using the setting acc. to datasheet, pg. 7, sec. general settings
-using SerialPort serialPort = new ("/dev/serial0", 9600, Parity.None, 8, StopBits.One)
+using SerialPort serialPort = new("/dev/serial0", 9600, Parity.None, 8, StopBits.One)
 {
     Encoding = Encoding.ASCII,
     ReadTimeout = 1000,
     WriteTimeout = 1000
 };
 serialPort.Open();
-using Mhz19b sensor = new (serialPort.BaseStream, true);
+using Mhz19b sensor = new(serialPort.BaseStream, true);
 
 // Alternatively you can let the binding create the serial port stream:
 // Mhz19b sensor = new Mhz19b("/dev/serial0");

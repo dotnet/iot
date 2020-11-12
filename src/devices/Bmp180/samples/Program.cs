@@ -13,10 +13,10 @@ Console.WriteLine("Hello Bmp180!");
 // bus id on the raspberry pi 3
 const int busId = 1;
 
-I2cConnectionSettings i2cSettings = new (busId, Bmp180.DefaultI2cAddress);
+I2cConnectionSettings i2cSettings = new(busId, Bmp180.DefaultI2cAddress);
 using I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
 
-using Bmp180 i2cBmp280 = new Bmp180(i2cDevice);
+using Bmp180 i2cBmp280 = new(i2cDevice);
 // set samplings
 i2cBmp280.SetSampling(Sampling.Standard);
 

@@ -57,9 +57,9 @@ if (key.KeyChar == '4')
 
 void TestI2c()
 {
-    using Ft4222I2c ftI2c = new (new I2cConnectionSettings(0, Bno055Sensor.DefaultI2cAddress));
+    using Ft4222I2c ftI2c = new(new I2cConnectionSettings(0, Bno055Sensor.DefaultI2cAddress));
 
-    Bno055Sensor bno055Sensor = new (ftI2c);
+    Bno055Sensor bno055Sensor = new(ftI2c);
 
     Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
     Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");
@@ -69,7 +69,7 @@ void TestI2c()
 
 void TestSpi()
 {
-    using Ft4222Spi ftSpi = new (new SpiConnectionSettings(0, 1) { ClockFrequency = 1_000_000, Mode = SpiMode.Mode0 });
+    using Ft4222Spi ftSpi = new(new SpiConnectionSettings(0, 1) { ClockFrequency = 1_000_000, Mode = SpiMode.Mode0 });
 
     while (!Console.KeyAvailable)
     {
@@ -83,7 +83,7 @@ void TestSpi()
 void TestGpio()
 {
     const int Gpio2 = 2;
-    using GpioController gpioController = new (PinNumberingScheme.Board, new Ft4222Gpio());
+    using GpioController gpioController = new(PinNumberingScheme.Board, new Ft4222Gpio());
 
     // Opening GPIO2
     gpioController.OpenPin(Gpio2);
@@ -112,7 +112,7 @@ void TestGpio()
 void TestEvents()
 {
     const int Gpio2 = 2;
-    using GpioController gpioController = new (PinNumberingScheme.Board, new Ft4222Gpio());
+    using GpioController gpioController = new(PinNumberingScheme.Board, new Ft4222Gpio());
 
     // Opening GPIO2
     gpioController.OpenPin(Gpio2);

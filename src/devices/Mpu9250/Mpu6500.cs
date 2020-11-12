@@ -500,7 +500,7 @@ namespace Iot.Device.Imu
         /// The result bias will be stored in the AcceloremeterBias and GyroscopeBias
         /// </summary>
         /// <returns>Gyroscope and accelerometer bias</returns>
-        public (Vector3 gyroscopeBias, Vector3 accelerometerBias) CalibrateGyroscopeAccelerometer()
+        public (Vector3 GyroscopeBias, Vector3 AccelerometerBias) CalibrateGyroscopeAccelerometer()
         {
             // = 131 LSB/degrees/sec
             const int GyroSensitivity = 131;
@@ -692,7 +692,7 @@ namespace Iot.Device.Imu
         /// ]]>
         /// </summary>
         /// <returns>the gyroscope and accelerometer vectors</returns>
-        public (Vector3 gyroscopeAverage, Vector3 accelerometerAverage) RunGyroscopeAccelerometerSelfTest()
+        public (Vector3 GyroscopeAverage, Vector3 AccelerometerAverage) RunGyroscopeAccelerometerSelfTest()
         {
             // Used for the number of cycles to run the test
             // Value is 200 according to documentation AN-MPU-9250A-03

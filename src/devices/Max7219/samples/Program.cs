@@ -15,13 +15,13 @@ if (args is { Length: > 0 })
 
 Console.WriteLine(message);
 
-SpiConnectionSettings connectionSettings = new (0, 0)
+SpiConnectionSettings connectionSettings = new(0, 0)
 {
     ClockFrequency = Iot.Device.Max7219.Max7219.SpiClockFrequency,
     Mode = Iot.Device.Max7219.Max7219.SpiMode
 };
 using SpiDevice spi = SpiDevice.Create(connectionSettings);
-using Max7219 devices = new (spi, cascadedDevices: 4);
+using Max7219 devices = new(spi, cascadedDevices: 4);
 // initialize the devices
 devices.Init();
 
@@ -62,7 +62,7 @@ foreach (RotationType rotation in Enum.GetValues(typeof(RotationType)))
 // reinitialize device and show message using the matrix graphics
 devices.Init();
 devices.Rotation = RotationType.Right;
-MatrixGraphics graphics = new (devices, Fonts.Default);
+MatrixGraphics graphics = new(devices, Fonts.Default);
 foreach (var font in new[]
 {
     Fonts.CP437, Fonts.LCD, Fonts.Sinclair, Fonts.Tiny, Fonts.CyrillicUkrainian

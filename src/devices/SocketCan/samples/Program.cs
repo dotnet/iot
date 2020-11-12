@@ -12,7 +12,7 @@ CanId id = new CanId()
     Standard = 0x1A // arbitrary id
 };
 
-Dictionary<string, Action> samples = new ()
+Dictionary<string, Action> samples = new()
 {
     { "send", SendExample },
     { "receive", ReceiveAllExample },
@@ -69,7 +69,7 @@ void ReceiveAllExample()
 {
     Console.WriteLine("Listening for any id");
 
-    using CanRaw can = new ();
+    using CanRaw can = new();
     byte[] buffer = new byte[8];
 
     while (true)
@@ -96,7 +96,7 @@ void ReceiveOnAddressExample()
 {
     Console.WriteLine($"Listening for id = 0x{id.Value:X2}");
 
-    using CanRaw can = new ();
+    using CanRaw can = new();
     byte[] buffer = new byte[8];
     can.Filter(id);
 

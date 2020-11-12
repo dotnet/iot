@@ -69,15 +69,15 @@ namespace Iot.Device.ExplorerHat
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         internal Lights(GpioController? controller = null, bool shouldDispose = true)
         {
-            _controller = controller ?? new ();
+            _controller = controller ?? new();
             _shouldDispose = shouldDispose || controller is null;
 
             LedArray = new List<Led>()
             {
-                new (LED1_PIN, _controller),
-                new (LED2_PIN, _controller),
-                new (LED3_PIN, _controller),
-                new (LED4_PIN, _controller)
+                new(LED1_PIN, _controller),
+                new(LED2_PIN, _controller),
+                new(LED3_PIN, _controller),
+                new(LED4_PIN, _controller)
             };
         }
 

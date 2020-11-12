@@ -44,7 +44,7 @@ namespace DeviceApiTester.Commands.Gpio
             }
 
             using GpioController controller = CreateGpioController();
-            using CancellationTokenSource cancellationTokenSource = new ();
+            using CancellationTokenSource cancellationTokenSource = new();
             Console.WriteLine($"Listening for button presses on GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin {ButtonPin} . . .");
 
             // This example runs until Ctrl+C (or Ctrl+Break) is pressed, so register a local function handler.

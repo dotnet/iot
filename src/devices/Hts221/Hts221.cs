@@ -103,7 +103,7 @@ namespace Iot.Device.Hts221
             return y0 + (x - x0) * yrange / xrange;
         }
 
-        private (ushort t0x8, ushort t1x8) GetTemperatureCalibrationPointsCelsius()
+        private (ushort T0x8, ushort T1x8) GetTemperatureCalibrationPointsCelsius()
         {
             Span<byte> t0t1Lsb = stackalloc byte[2];
             Read(Register.Temperature0LsbDegCx8, t0t1Lsb);
@@ -114,7 +114,7 @@ namespace Iot.Device.Hts221
             return (t0, t1);
         }
 
-        private (short t0, short t1) GetTemperatureCalibrationPointsRaw()
+        private (short T0, short T1) GetTemperatureCalibrationPointsRaw()
         {
             Span<byte> t0t1 = stackalloc byte[4];
             Read(Register.Temperature0Raw, t0t1);
@@ -123,14 +123,14 @@ namespace Iot.Device.Hts221
             return (t0, t1);
         }
 
-        private (byte h0, byte h1) GetHumidityCalibrationPointsRH()
+        private (byte H0, byte H1) GetHumidityCalibrationPointsRH()
         {
             Span<byte> h0h1 = stackalloc byte[2];
             Read(Register.Humidity0rHx2, h0h1);
             return (h0h1[0], h0h1[1]);
         }
 
-        private (short h0, short h1) GetHumidityCalibrationPointsRaw()
+        private (short H0, short H1) GetHumidityCalibrationPointsRaw()
         {
             // space in addressing between both registers therefore do 2 reads
             short h0 = ReadInt16(Register.Humidity0Raw);

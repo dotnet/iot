@@ -44,7 +44,7 @@ namespace Iot.Device.Multiplexing
             }
 
             _shouldDispose = shouldDispose || gpioController is null;
-            _gpioController = gpioController ?? new ();
+            _gpioController = gpioController ?? new();
 
             // first two pins will be needed as Output.
             _gpioController.OpenPin(pins[0], PinMode.Output);

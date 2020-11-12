@@ -43,7 +43,7 @@ I2cDevice GetI2CDevice()
 {
     Console.WriteLine("Using I2C protocol");
 
-    I2cConnectionSettings connectionSettings = new (1, 0x3C);
+    I2cConnectionSettings connectionSettings = new(1, 0x3C);
     return I2cDevice.Create(connectionSettings);
 }
 

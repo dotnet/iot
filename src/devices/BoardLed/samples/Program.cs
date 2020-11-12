@@ -5,7 +5,7 @@ using System.Threading;
 using Iot.Device.BoardLed;
 
 // Open the green led on Raspberry Pi.
-using BoardLed led = new ("led0");
+using BoardLed led = new("led0");
 
 string defaultTrigger = led.Trigger;
 

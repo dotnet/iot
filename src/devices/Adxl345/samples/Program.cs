@@ -7,7 +7,7 @@ using System.Threading;
 using System.Device.Spi;
 using Iot.Device.Adxl345;
 
-SpiConnectionSettings settings = new (0, 0)
+SpiConnectionSettings settings = new(0, 0)
 {
     ClockFrequency = Adxl345.SpiClockFrequency,
     Mode = Adxl345.SpiMode

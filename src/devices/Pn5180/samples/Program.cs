@@ -84,7 +84,7 @@ Pn5180 HardwareSpi()
     SpiDevice spi = SpiDevice.Create(new SpiConnectionSettings(0, 1) { ClockFrequency = Pn5180.MaximumSpiClockFrequency, Mode = Pn5180.DefaultSpiMode, DataFlow = DataFlow.MsbFirst });
 
     // Reset the device
-    using GpioController gpioController = new ();
+    using GpioController gpioController = new();
     gpioController.OpenPin(4, PinMode.Output);
     gpioController.Write(4, PinValue.Low);
     Thread.Sleep(10);
@@ -115,7 +115,7 @@ Pn5180 Ft4222()
 
     Ft4222Spi ftSpi = new Ft4222Spi(new SpiConnectionSettings(0, 1) { ClockFrequency = Pn5180.MaximumSpiClockFrequency, Mode = Pn5180.DefaultSpiMode, DataFlow = DataFlow.MsbFirst });
 
-    using GpioController gpioController = new (PinNumberingScheme.Board, new Ft4222Gpio());
+    using GpioController gpioController = new(PinNumberingScheme.Board, new Ft4222Gpio());
 
     // Reset the device
     gpioController.OpenPin(0, PinMode.Output);

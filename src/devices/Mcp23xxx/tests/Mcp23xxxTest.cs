@@ -115,7 +115,6 @@ namespace Iot.Device.Mcp23xxx.Tests
             private readonly bool _isSpi;
             // OLATB address is 0x15
             private readonly byte[] _registers;
-#pragma warning disable SA1011
             private byte[]? _lastReadBuffer;
             private byte[]? _lastWriteBuffer;
 

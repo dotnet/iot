@@ -8,9 +8,9 @@ using Iot.Device.Common;
 using Iot.Device.Sht3x;
 using UnitsNet;
 
-I2cConnectionSettings settings = new (1, (byte)I2cAddress.AddrLow);
+I2cConnectionSettings settings = new(1, (byte)I2cAddress.AddrLow);
 using I2cDevice device = I2cDevice.Create(settings);
-using Sht3x sensor = new (device);
+using Sht3x sensor = new(device);
 while (true)
 {
     Temperature tempValue = sensor.Temperature;
