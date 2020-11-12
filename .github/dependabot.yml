@@ -3,7 +3,7 @@
 version: 2
 updates:
   - package-ecosystem: "nuget"
-    directory: "/tools/DevicesApiTester" #DeviceApiTester.csproj
+    directory: "/eng" #Analyzers.props
     schedule:
       interval: "weekly"
       day: "wednesday"
@@ -21,7 +21,7 @@ updates:
       day: "wednesday"
     open-pull-requests-limit: 5
   - package-ecosystem: "nuget"
-    directory: "/samples/serialport-arduino" #serialport-arduino.csproj
+    directory: "/samples/led-matrix-weather" #led-matrix-weather.csproj
     schedule:
       interval: "weekly"
       day: "wednesday"
@@ -33,7 +33,7 @@ updates:
       day: "wednesday"
     open-pull-requests-limit: 5
   - package-ecosystem: "nuget"
-    directory: "/samples/led-matrix-weather" #led-matrix-weather.csproj
+    directory: "/samples/serialport-arduino" #serialport-arduino.csproj
     schedule:
       interval: "weekly"
       day: "wednesday"
@@ -45,43 +45,25 @@ updates:
       day: "wednesday"
     open-pull-requests-limit: 5
   - package-ecosystem: "nuget"
-    directory: "/src/devices/ServoMotor/tests" #ServoMotor.Tests.csproj
+    directory: "/tools/DevicesApiTester" #DeviceApiTester.csproj
     schedule:
       interval: "weekly"
       day: "wednesday"
     open-pull-requests-limit: 5
   - package-ecosystem: "nuget"
-    directory: "/src/devices/Pcx857x/tests" #Pcx857x.Tests.csproj
+    directory: "/.dotnet/sdk/5.0.100-rc.1.20452.10" #Microsoft.NETCoreSdk.BundledVersions.props
     schedule:
       interval: "weekly"
       day: "wednesday"
     open-pull-requests-limit: 5
   - package-ecosystem: "nuget"
-    directory: "/src/devices/Mcp25xxx/tests" #Mcp25xxx.Tests.csproj
+    directory: "/.dotnet/sdk/5.0.100-rc.2.20479.15" #Microsoft.NETCoreSdk.BundledVersions.props
     schedule:
       interval: "weekly"
       day: "wednesday"
     open-pull-requests-limit: 5
   - package-ecosystem: "nuget"
-    directory: "/src/devices/Mcp23xxx/tests" #Mcp23xxx.Tests.csproj
-    schedule:
-      interval: "weekly"
-      day: "wednesday"
-    open-pull-requests-limit: 5
-  - package-ecosystem: "nuget"
-    directory: "/src/devices/Common/tests" #Common.Tests.csproj
-    schedule:
-      interval: "weekly"
-      day: "wednesday"
-    open-pull-requests-limit: 5
-  - package-ecosystem: "nuget"
-    directory: "/src/devices/Ssd13xx/tests" #Ssd13xx.Tests.csproj
-    schedule:
-      interval: "weekly"
-      day: "wednesday"
-    open-pull-requests-limit: 5
-  - package-ecosystem: "nuget"
-    directory: "/src/devices/Ssd13xx/samples" #Ssd13xx.Samples.csproj
+    directory: "/src/devices/Bmxx80/tests" #Bmxx80.Tests.csproj
     schedule:
       interval: "weekly"
       day: "wednesday"
@@ -93,7 +75,43 @@ updates:
       day: "wednesday"
     open-pull-requests-limit: 5
   - package-ecosystem: "nuget"
-    directory: "/src/devices/Bmxx80/tests" #Bmxx80.Tests.csproj
+    directory: "/src/devices/Common/tests" #Common.Tests.csproj
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "nuget"
+    directory: "/src/devices/Mcp23xxx/tests" #Mcp23xxx.Tests.csproj
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "nuget"
+    directory: "/src/devices/Mcp25xxx/tests" #Mcp25xxx.Tests.csproj
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "nuget"
+    directory: "/src/devices/Pcx857x/tests" #Pcx857x.Tests.csproj
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "nuget"
+    directory: "/src/devices/ServoMotor/tests" #ServoMotor.Tests.csproj
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "nuget"
+    directory: "/src/devices/Ssd13xx/samples" #Ssd13xx.Samples.csproj
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "nuget"
+    directory: "/src/devices/Ssd13xx/tests" #Ssd13xx.Tests.csproj
     schedule:
       interval: "weekly"
       day: "wednesday"
