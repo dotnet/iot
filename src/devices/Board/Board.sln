@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mcp3xxx", "..\Mcp3xxx\Mcp3x
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4D8428C9-F577-4427-8272-748347076B0A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Device.Gpio.Tests", "..\..\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj", "{3F191B88-5DDD-471B-B979-C143A7441E40}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{B4856CA0-4620-4EA9-ABA4-966B748331A6}.Release|x64.Build.0 = Release|Any CPU
 		{B4856CA0-4620-4EA9-ABA4-966B748331A6}.Release|x86.ActiveCfg = Release|Any CPU
 		{B4856CA0-4620-4EA9-ABA4-966B748331A6}.Release|x86.Build.0 = Release|Any CPU
+		{3F191B88-5DDD-471B-B979-C143A7441E40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F191B88-5DDD-471B-B979-C143A7441E40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F191B88-5DDD-471B-B979-C143A7441E40}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3F191B88-5DDD-471B-B979-C143A7441E40}.Debug|x64.Build.0 = Debug|Any CPU
+		{3F191B88-5DDD-471B-B979-C143A7441E40}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3F191B88-5DDD-471B-B979-C143A7441E40}.Debug|x86.Build.0 = Debug|Any CPU
+		{3F191B88-5DDD-471B-B979-C143A7441E40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F191B88-5DDD-471B-B979-C143A7441E40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F191B88-5DDD-471B-B979-C143A7441E40}.Release|x64.ActiveCfg = Release|Any CPU
+		{3F191B88-5DDD-471B-B979-C143A7441E40}.Release|x64.Build.0 = Release|Any CPU
+		{3F191B88-5DDD-471B-B979-C143A7441E40}.Release|x86.ActiveCfg = Release|Any CPU
+		{3F191B88-5DDD-471B-B979-C143A7441E40}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

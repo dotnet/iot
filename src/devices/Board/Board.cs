@@ -1,17 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
+using System.Device.Gpio.Drivers;
 using System.Device.I2c;
 using System.Device.Pwm;
 using System.Device.Spi;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Win32;
 
 namespace Iot.Device.Board
 {
     public abstract class Board : MarshalByRefObject, IDisposable
     {
+        // See comment at GetBestDriverForBoardOnWindows. This should get some specific factory pattern
+        private const string BaseBoardProductRegistryValue = @"SYSTEM\HardwareConfig\Current\BaseBoardProduct";
+        private const string RaspberryPi2Product = "Raspberry Pi 2";
+        private const string RaspberryPi3Product = "Raspberry Pi 3";
+        private const string HummingBoardProduct = "HummingBoard-Edge";
+
         private readonly PinNumberingScheme _defaultNumberingScheme;
         private readonly object _pinReservationsLock;
         private readonly Dictionary<int, List<PinReservation>> _pinReservations;
@@ -226,7 +234,112 @@ namespace Iot.Device.Board
             return CreateGpioController(DefaultPinNumberingScheme);
         }
 
-        public abstract GpioController CreateGpioController(PinNumberingScheme pinNumberingScheme);
+        public virtual GpioController CreateGpioController(PinNumberingScheme pinNumberingScheme)
+        {
+            GpioDriver? driver = TryCreateBestGpioDriver();
+            if (driver == null)
+            {
+                // Should be resolved in overloads of this class
+                throw new NotSupportedException("No Gpio Driver for this board could be found.");
+            }
+
+            return new ManagedGpioController(this, pinNumberingScheme, driver);
+        }
+
+        private static GpioDriver? TryCreateBestGpioDriver()
+        {
+            GpioDriver? driver = null;
+            try
+            {
+                driver = GetBestDriverForBoard();
+            }
+            catch (Exception x) when (x is PlatformNotSupportedException || x is NotSupportedException) // That would be serious
+            {
+            }
+
+            if (driver == null)
+            {
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                {
+                    driver = new KeyboardGpioDriver();
+                }
+                else
+                {
+                    driver = new DummyGpioDriver();
+                }
+            }
+
+            return driver;
+        }
+
+        /// <summary>
+        /// Tries to create the GPIO driver that best matches the current hardware
+        /// </summary>
+        /// <returns>An instance of a GpioDriver that best matches the current hardware</returns>
+        /// <exception cref="PlatformNotSupportedException">No matching driver could be found</exception>
+        private static GpioDriver GetBestDriverForBoard()
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return GetBestDriverForBoardOnWindows();
+            }
+            else
+            {
+                return GetBestDriverForBoardOnLinux();
+            }
+        }
+
+        /// <summary>
+        /// Attempt to get the best applicable driver for the board the program is executing on.
+        /// </summary>
+        /// <returns>A driver that works with the board the program is executing on.</returns>
+        private static GpioDriver GetBestDriverForBoardOnLinux()
+        {
+            try
+            {
+                // Because we can't construct the internal driver here (and the identification isn't public either), we'll have to go trough the exception
+                return new RaspberryPi3Driver();
+            }
+            catch (Exception x) when (x is NotSupportedException || x is PlatformNotSupportedException)
+            {
+            }
+
+            return UnixDriver.Create();
+        }
+
+        /// <summary>
+        /// Attempt to get the best applicable driver for the board the program is executing on.
+        /// </summary>
+        /// <returns>A driver that works with the board the program is executing on.</returns>
+        /// <remarks>
+        ///     This really feels like it needs a driver-based pattern, where each driver exposes a static method:
+        ///     public static bool IsSpecificToCurrentEnvironment { get; }
+        ///     The GpioController could use reflection to find all GpioDriver-derived classes and call this
+        ///     static method to determine if the driver considers itself to be the best match for the environment.
+        /// </remarks>
+        private static GpioDriver GetBestDriverForBoardOnWindows()
+        {
+            string? baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
+
+            if (baseBoardProduct is null)
+            {
+                throw new Exception("Single board computer type cannot be detected.");
+            }
+
+            if (baseBoardProduct == RaspberryPi3Product || baseBoardProduct.StartsWith($"{RaspberryPi3Product} ") ||
+                baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))
+            {
+                return new RaspberryPi3Driver();
+            }
+
+            if (baseBoardProduct == HummingBoardProduct || baseBoardProduct.StartsWith($"{HummingBoardProduct} "))
+            {
+                return new HummingBoardDriver();
+            }
+
+            // Default for Windows IoT Core on a non-specific device
+            return new Windows10Driver();
+        }
 
         /// <summary>
         /// This method shall be overriden by clients, providing just the basic interface to an I2cDevice.
@@ -357,7 +470,7 @@ namespace Iot.Device.Board
         //// Todo separately
         //// public abstract AnalogController CreateAnalogController(int chip);
 
-        public static Board DetermineOptimalBoardForHardware(PinNumberingScheme defaultNumberingScheme = PinNumberingScheme.Logical)
+        public static Board Create(PinNumberingScheme defaultNumberingScheme = PinNumberingScheme.Logical)
         {
             Board board = null;
             try

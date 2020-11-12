@@ -22,47 +22,26 @@ namespace Iot.Device.Board
             _driver = driver ?? throw new ArgumentNullException(nameof(driver));
         }
 
-        public static new GpioDriver GetBestDriverForBoard()
+        protected override int GetLogicalPinNumber(int pinNumber)
         {
-            GpioDriver driver = null;
-            try
-            {
-                driver = GpioController.GetBestDriverForBoard();
-            }
-            catch (Exception x) when (x is PlatformNotSupportedException || x is NotSupportedException) // That would be serious
-            {
-            }
-
-            if (driver == null)
-            {
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                {
-                    driver = new KeyboardGpioDriver();
-                }
-                else
-                {
-                    driver = new DummyGpioDriver();
-                }
-            }
-
-            return driver;
+            return _board.ConvertPinNumber(pinNumber, NumberingScheme, PinNumberingScheme.Logical);
         }
 
-        protected override int GetLogicalPinNumber(int pinNumber, PinNumberingScheme givenScheme)
+        private int ConvertToBoardPinNumbering(int controllerNumber)
         {
-            return _board.ConvertPinNumber(pinNumber, givenScheme, PinNumberingScheme.Logical);
+            return _board.ConvertPinNumber(controllerNumber, NumberingScheme, _board.DefaultPinNumberingScheme);
         }
 
-        public override void OpenPin(int pinNumber)
+        protected override void OpenPinCore(int pinNumber)
         {
-            _board.ReservePin(pinNumber, PinUsage.Gpio, this);
-            base.OpenPin(pinNumber);
+            _board.ReservePin(ConvertToBoardPinNumbering(pinNumber), PinUsage.Gpio, this);
+            base.OpenPinCore(pinNumber);
         }
 
-        protected override void ClosePin(int pinNumber, PinNumberingScheme numberingScheme)
+        protected override void ClosePinCore(int pinNumber)
         {
-            base.ClosePin(pinNumber, numberingScheme);
-            _board.ReleasePin(pinNumber, PinUsage.Gpio, this);
+            base.ClosePinCore(pinNumber);
+            _board.ReleasePin(ConvertToBoardPinNumbering(pinNumber), PinUsage.Gpio, this);
         }
     }
 }
