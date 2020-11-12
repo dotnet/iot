@@ -851,7 +851,6 @@ namespace Iot.Device.BrickPi3
             throw new IOException($"{nameof(GetSensor)}  error: Sensor not configured or not supported.");
         }
 
-#pragma warning disable SA1011
         /// <summary>
         /// Set the sensor type
         /// </summary>
@@ -871,7 +870,6 @@ namespace Iot.Device.BrickPi3
         /// </param>
         public void SetSensorType(byte port, SensorType type, int[]? param = null)
         {
-#pragma warning restore SA1011
             for (int p = 0; p < 4; p++)
             {
                 if ((port & (1 << p)) > 0)

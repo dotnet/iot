@@ -13,7 +13,7 @@ for (int i = 0; i < charlieSegmentLength; i++)
     Console.WriteLine($"Node {i} -- Anode: {node.Anode}; Cathode: {node.Cathode}");
 }
 
-using CharlieplexSegment charlie = new (pins, charlieSegmentLength);
+using CharlieplexSegment charlie = new(pins, charlieSegmentLength);
 var twoSeconds = TimeSpan.FromSeconds(2);
 
 Console.WriteLine("Light all LEDs");

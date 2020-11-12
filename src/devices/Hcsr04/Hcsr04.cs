@@ -38,7 +38,7 @@ namespace Iot.Device.Hcsr04
         public Hcsr04(GpioController? gpioController, int triggerPin, int echoPin, bool shouldDispose = true)
         {
             _shouldDispose = shouldDispose || gpioController is null;
-            _controller = gpioController ?? new ();
+            _controller = gpioController ?? new();
             _echo = echoPin;
             _trigger = triggerPin;
 

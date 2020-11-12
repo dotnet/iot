@@ -29,7 +29,7 @@ internal class Volume
     private void Init() =>
         _lastValue = GetVolumeValue();
 
-    public (bool update, int value) GetSleepForVolume(int sleep)
+    public (bool Update, int Value) GetSleepForVolume(int sleep)
     {
         var value = GetVolumeValue();
         if (value > _lastValue - 2 && value < _lastValue + 2)

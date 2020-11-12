@@ -8,7 +8,7 @@ using System.Threading;
 using System.Numerics;
 using Iot.Device.Magnetometer;
 
-I2cConnectionSettings mpui2CConnectionSettingmpus = new (1, Ak8963.DefaultI2cAddress);
+I2cConnectionSettings mpui2CConnectionSettingmpus = new(1, Ak8963.DefaultI2cAddress);
 using Ak8963 ak8963 = new Ak8963(I2cDevice.Create(mpui2CConnectionSettingmpus));
 Console.WriteLine(
     "Magnetometer calibration is taking couple of seconds, move your sensor in all possible directions! Make sure you don't have a magnet or phone close by.");

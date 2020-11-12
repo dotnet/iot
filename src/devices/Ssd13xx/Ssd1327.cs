@@ -89,7 +89,6 @@ namespace Iot.Device.Ssd13xx
 
         private void SendCommand(ICommand command)
         {
-#pragma warning disable SA1011
             byte[]? commandBytes = command?.GetBytes();
 
             if (commandBytes is not { Length: >0 })

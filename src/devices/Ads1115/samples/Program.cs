@@ -11,7 +11,7 @@ using UnitsNet;
 
 // set I2C bus ID: 1
 // ADS1115 Addr Pin connect to GND
-I2cConnectionSettings settings = new (1, (int)I2cAddress.GND);
+I2cConnectionSettings settings = new(1, (int)I2cAddress.GND);
 // get I2cDevice (in Linux)
 I2cDevice device = I2cDevice.Create(settings);
 

@@ -65,7 +65,6 @@ namespace Iot.Device.GrovePiDevice
         public Version GetFirmwareVerion()
         {
             WriteCommand(GrovePiCommand.Version, 0, 0, 0);
-#pragma warning disable SA1011
             byte[]? inArray = ReadCommand(GrovePiCommand.Version, 0);
             if (inArray is object)
             {

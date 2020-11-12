@@ -7,8 +7,8 @@ using System.Device.Spi;
 using System.Threading;
 using Iot.Device.Multiplexing;
 
-using Mbi5027 sr = new (Mbi5027PinMapping.Complete);
-CancellationTokenSource cancellationSource = new ();
+using Mbi5027 sr = new(Mbi5027PinMapping.Complete);
+CancellationTokenSource cancellationSource = new();
 Console.CancelKeyPress += (s, e) =>
 {
     e.Cancel = true;
