@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-#pragma warning disable SA1011
-
 namespace Iot.Device.CharacterLcd
 {
     /// <summary>

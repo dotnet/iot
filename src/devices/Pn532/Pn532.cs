@@ -17,8 +17,6 @@ using Iot.Device.Pn532.RfConfiguration;
 using Iot.Device.Rfid;
 using IoT.Device.Pn532;
 
-#pragma warning disable SA1011
-
 namespace Iot.Device.Pn532
 {
     /// <summary>

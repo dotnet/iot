@@ -42,7 +42,6 @@ namespace Iot.Device.Ssd13xx
         /// <param name="command">The command to send to the display controller.</param>
         private void SendCommand(ICommand command)
         {
-#pragma warning disable SA1011
             byte[]? commandBytes = command?.GetBytes();
 
             if (commandBytes is not { Length: >0 })

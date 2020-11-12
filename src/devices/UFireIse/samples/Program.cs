@@ -6,8 +6,6 @@ using System.Device.I2c;
 using Iot.Device.UFire;
 using UnitsNet;
 
-#pragma warning disable SA1011
-
 const int BusId = 1;
 
 PrintHelp();

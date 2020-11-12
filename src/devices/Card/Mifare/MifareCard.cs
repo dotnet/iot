@@ -23,7 +23,6 @@ namespace Iot.Device.Card.Mifare
         /// </summary>
         public MifareCardCommand Command { get; set; }
 
-#pragma warning disable SA1011
         /// <summary>
         /// Key A Used for encryption/decryption
         /// </summary>

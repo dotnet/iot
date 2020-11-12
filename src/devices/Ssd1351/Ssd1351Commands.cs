@@ -417,7 +417,6 @@ namespace Iot.Device.Ssd1351
             SendCommand(Ssd1351Command.SetGPIO, (byte)(((int)pin1Mode << 2) + pin0Mode));
         }
 
-#pragma warning disable SA1011
         /// <summary>
         /// This command sets the gray levels GS0 -> GS63.
         /// </summary>
