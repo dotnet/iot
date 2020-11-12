@@ -34,8 +34,10 @@ namespace Iot.Device.RotaryEncoder
         /// </summary>
         public float Rotations { get => (float)PulseCount / PulsesPerRotation; }
 
-        /// <summary>The DebounceMilliseconds property represents the minimum amount of delay allowed between falling edges of the A (clk) pin.</summary>
-        public TimeSpan DebounceMilliseconds
+        /// <summary>The Debounce property represents the minimum amount of delay
+        /// allowed between falling edges of the A (clk) pin. The recommended value are few milliseconds typically around 5.
+        /// This depends from your usage.</summary>
+        public TimeSpan Debounce
         {
             get => TimeSpan.FromMilliseconds(_debounceMillisec);
 
@@ -53,13 +55,13 @@ namespace Iot.Device.RotaryEncoder
         /// <summary>
         /// QuadratureRotaryEncoder constructor
         /// </summary>
-        /// <param name="controller">GpioController that hosts Pins A and B.</param>
         /// <param name="pinA">Pin A that is connected to the rotary encoder. Sometimes called clk</param>
         /// <param name="pinB">Pin B that is connected to the rotary encoder. Sometimes called data</param>
         /// <param name="edges">The pin event types to 'listen' for.</param>
         /// <param name="pulsesPerRotation">The number of pulses to be received for every full rotation of the encoder.</param>
+        /// <param name="controller">GpioController that hosts Pins A and B.</param>
         /// <param name="shouldDispose">True to dispose the controller</param>
-        public QuadratureRotaryEncoder(GpioController? controller, int pinA, int pinB, PinEventTypes edges, int pulsesPerRotation, bool shouldDispose = true)
+        public QuadratureRotaryEncoder(int pinA, int pinB, PinEventTypes edges, int pulsesPerRotation, GpioController? controller = null, bool shouldDispose = true)
         {
             _disposeController = controller == null | shouldDispose;
             _controller = controller ?? new GpioController();
@@ -76,7 +78,7 @@ namespace Iot.Device.RotaryEncoder
         /// <param name="pinB">Pin B that is connected to the rotary encoder. Sometimes called data</param>
         /// <param name="pulsesPerRotation">The number of pulses to be received for every full rotation of the encoder.</param>
         public QuadratureRotaryEncoder(int pinA, int pinB, int pulsesPerRotation)
-            : this(new GpioController(), pinA, pinB, PinEventTypes.Falling, pulsesPerRotation, false)
+            : this(pinA, pinB, PinEventTypes.Falling, pulsesPerRotation, new GpioController(), false)
         {
         }
 

@@ -34,7 +34,6 @@ namespace Iot.Device.RotaryEncoder
         /// <summary>
         /// ScaledQuadratureEncoder constructor
         /// </summary>
-        /// <param name="controller">GpioController that hosts Pins A and B.</param>
         /// <param name="pinA">Pin A that is connected to the rotary encoder. Sometimes called clk</param>
         /// <param name="pinB">Pin B that is connected to the rotary encoder. Sometimes called data</param>
         /// <param name="edges">The pin event types to 'listen' for.</param>
@@ -42,9 +41,10 @@ namespace Iot.Device.RotaryEncoder
         /// <param name="pulseIncrement">The amount that the value increases or decreases on each pulse from the rotary encoder</param>
         /// <param name="rangeMin">Minimum value permitted. The value is clamped to this.</param>
         /// <param name="rangeMax">Maximum value permitted. The value is clamped to this.</param>
+        /// <param name="controller">GpioController that hosts Pins A and B.</param>
         /// <param name="shouldDispose">Dispose the controller if true</param>
-        public ScaledQuadratureEncoder(GpioController controller, int pinA, int pinB, PinEventTypes edges, int pulsesPerRotation, double pulseIncrement, double rangeMin, double rangeMax, bool shouldDispose = true)
-            : base(controller, pinA, pinB, edges, pulsesPerRotation, shouldDispose)
+        public ScaledQuadratureEncoder(int pinA, int pinB, PinEventTypes edges, int pulsesPerRotation, double pulseIncrement, double rangeMin, double rangeMax, GpioController? controller = null, bool shouldDispose = true)
+            : base(pinA, pinB, edges, pulsesPerRotation, controller, shouldDispose)
         {
             _pulseIncrement = pulseIncrement;
             _rangeMin = rangeMin;
@@ -64,7 +64,7 @@ namespace Iot.Device.RotaryEncoder
         /// <param name="rangeMin">Minimum value permitted. The value is clamped to this.</param>
         /// <param name="rangeMax">Maximum value permitted. The value is clamped to this.</param>
         public ScaledQuadratureEncoder(int pinA, int pinB, PinEventTypes edges, int pulsesPerRotation, double pulseIncrement, double rangeMin, double rangeMax)
-            : this(new GpioController(), pinA, pinB, edges, pulsesPerRotation, pulseIncrement, rangeMin, rangeMax)
+            : this(pinA, pinB, edges, pulsesPerRotation, pulseIncrement, rangeMin, rangeMax, new GpioController(), true)
         {
         }
 
@@ -76,21 +76,21 @@ namespace Iot.Device.RotaryEncoder
         /// <param name="edges">The pin event types to 'listen' for.</param>
         /// <param name="pulsesPerRotation">The number of pulses to be received for every full rotation of the encoder.</param>
         public ScaledQuadratureEncoder(int pinA, int pinB, PinEventTypes edges, int pulsesPerRotation)
-            : this(new GpioController(), pinA, pinB, edges, pulsesPerRotation)
+            : this(pinA, pinB, edges, pulsesPerRotation, new GpioController(), true)
         {
         }
 
         /// <summary>
         /// ScaledQuadratureEncoder constructor for a 0..100 range with 100 steps
         /// </summary>
-        /// <param name="controller">GpioController that hosts Pins A and B.</param>
         /// <param name="pinA">Pin A that is connected to the rotary encoder. Sometimes called clk</param>
         /// <param name="pinB">Pin B that is connected to the rotary encoder. Sometimes called data</param>
         /// <param name="edges">The pin event types to 'listen' for.</param>
         /// <param name="pulsesPerRotation">The number of pulses to be received for every full rotation of the encoder.</param>
-        /// /// <param name="shouldDispose">Dispose the controller if true</param>
-        public ScaledQuadratureEncoder(GpioController controller, int pinA, int pinB, PinEventTypes edges, int pulsesPerRotation, bool shouldDispose = true)
-            : base(controller, pinA, pinB, edges, pulsesPerRotation, shouldDispose)
+        /// <param name="controller">GpioController that hosts Pins A and B.</param>
+        /// <param name="shouldDispose">Dispose the controller if true</param>
+        public ScaledQuadratureEncoder(int pinA, int pinB, PinEventTypes edges, int pulsesPerRotation, GpioController? controller = null, bool shouldDispose = true)
+            : base(pinA, pinB, edges, pulsesPerRotation, controller, shouldDispose)
         {
             _pulseIncrement = (dynamic)1;
             _rangeMin = (dynamic)0;
