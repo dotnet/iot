@@ -15,7 +15,7 @@ namespace Iot.Device.BrickPi3.Extensions
         {
             if (!typeof(T).IsEnum)
             {
-                throw new ArgumentException($"Argumnent {typeof(T).FullName} is not an Enum");
+                throw new ArgumentException($"Argument {typeof(T).FullName} is not an Enum");
             }
 
             T[] arr = (T[])Enum.GetValues(src.GetType());
@@ -28,7 +28,7 @@ namespace Iot.Device.BrickPi3.Extensions
         {
             if (!typeof(T).IsEnum)
             {
-                throw new ArgumentException($"Argumnent {typeof(T).FullName} is not an Enum");
+                throw new ArgumentException($"Argument {typeof(T).FullName} is not an Enum");
             }
 
             T[] arr = (T[])Enum.GetValues(src.GetType());

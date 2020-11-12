@@ -42,7 +42,6 @@ namespace Iot.Device.UFire
         public bool TemperatureCompensation
         {
             get => _temperatureCompensation;
-
             set
             {
                 _temperatureCompensation = value;
@@ -59,15 +58,8 @@ namespace Iot.Device.UFire
         /// Initializes a new instance of the <see cref="UFireIse"/> class.
         /// </summary>
         /// <param name="i2cDevice">The I2C device to be used</param>
-        public UFireIse(I2cDevice i2cDevice)
-        {
-            if (i2cDevice == null)
-            {
-                throw new ArgumentNullException("i2cDevice can not be null");
-            }
-
-            _device = i2cDevice;
-        }
+        public UFireIse(I2cDevice i2cDevice) =>
+            _device = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
 
         /// <summary>
         /// Read a value from the ISE Probe Interface, typical measure are in the millivolt range.
@@ -170,51 +162,40 @@ namespace Iot.Device.UFire
         /// Returns the firmware version of the device. The manufacturer do not provide any information about the format of the version number, see https://www.ufire.co/docs/uFire_ISE/api.html#getversion
         /// </summary>
         /// <returns>Firmware version</returns>
-        public byte GetVersion()
-        {
-            return ReadByte(Register.ISE_VERSION_REGISTER);
-        }
+        public byte GetVersion() =>
+            ReadByte(Register.ISE_VERSION_REGISTER);
 
         /// <summary>
         /// Dual point uses two measures for low and high points. It needs the measured value (reading value) and the known value (reference value). Calling SetDualPointCalibration saves both the reading and reference value.
         /// When there are high and low calibration points, the device will automatically use them to adjust readings.To disable dual-point adjustment, call ResetCalibration to remove all calibration data.
         /// </summary>
         /// <returns>The known value (reference value) for calibrate the high value</returns>
-        public ElectricPotential GetCalibrateHighReference()
-        {
-            return new ElectricPotential(ReadFloat(Register.ISE_CALIBRATE_REFHIGH_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
-        }
+        public ElectricPotential GetCalibrateHighReference() =>
+            new ElectricPotential(ReadFloat(Register.ISE_CALIBRATE_REFHIGH_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
 
         /// <summary>
         /// Dual point uses two measures for low and high points. It needs the measured value (reading value) and the known value (reference value). Calling SetDualPointCalibration saves both the reading and reference value.
         /// When there are high and low calibration points, the device will automatically use them to adjust readings.To disable dual-point adjustment, call ResetCalibration to remove all calibration data.
         /// </summary>
         /// <returns>The known value (reference value) for calibrate the low value</returns>
-        public ElectricPotential GetCalibrateLowReference()
-        {
-            return new ElectricPotential(ReadFloat(Register.ISE_CALIBRATE_REFLOW_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
-        }
+        public ElectricPotential GetCalibrateLowReference() =>
+            new ElectricPotential(ReadFloat(Register.ISE_CALIBRATE_REFLOW_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
 
         /// <summary>
         /// Dual point uses two measures for low and high points. It needs the measured value (reading value) and the known value (reference value). Calling SetDualPointCalibration saves both the reading and reference value.
         /// When there are high and low calibration points, the device will automatically use them to adjust readings.To disable dual-point adjustment, call ResetCalibration to remove all calibration data.
         /// </summary>
         /// <returns>The measured value (reading value) for calibrate the high value</returns>
-        public ElectricPotential GetCalibrateHighReading()
-        {
-            return new ElectricPotential(ReadFloat(Register.ISE_CALIBRATE_READHIGH_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
-
-        }
+        public ElectricPotential GetCalibrateHighReading() =>
+            new ElectricPotential(ReadFloat(Register.ISE_CALIBRATE_READHIGH_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
 
         /// <summary>
         /// Dual point uses two measures for low and high points. It needs the measured value (reading value) and the known value (reference value). Calling SetDualPointCalibration saves both the reading and reference value.
         /// When there are high and low calibration points, the device will automatically use them to adjust readings.To disable dual-point adjustment, call ResetCalibration to remove all calibration data.
         /// </summary>
         /// <returns>The measured value (reading value) for calibrate the low value</returns>
-        public ElectricPotential GetCalibrateLowReading()
-        {
-            return new ElectricPotential(ReadFloat(Register.ISE_CALIBRATE_READLOW_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
-        }
+        public ElectricPotential GetCalibrateLowReading() =>
+            new ElectricPotential(ReadFloat(Register.ISE_CALIBRATE_READLOW_REGISTER), UnitsNet.Units.ElectricPotentialUnit.Millivolt);
 
         /// <summary>
         ///  Resets all the stored calibration information.It is possible to run without calibration.

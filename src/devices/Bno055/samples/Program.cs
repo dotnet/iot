@@ -9,7 +9,7 @@ using Iot.Device.Bno055;
 
 Console.WriteLine("Hello BNO055!");
 using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Bno055Sensor.DefaultI2cAddress));
-using Bno055Sensor bno055Sensor = new Bno055Sensor(i2cDevice);
+using Bno055Sensor bno055Sensor = new (i2cDevice);
 Console.WriteLine(
     $"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
 Console.WriteLine(
@@ -19,12 +19,10 @@ Console.WriteLine(
 Console.WriteLine($"Powermode: {bno055Sensor.PowerMode}");
 Console.WriteLine(
     "Checking the magnetometer calibration, move the sensor up to the calibration will be complete if needed");
-var calibrationStatus = bno055Sensor.GetCalibrationStatus();
-while ((calibrationStatus & CalibrationStatus.MagnetometerSuccess) !=
+while ((bno055Sensor.GetCalibrationStatus() & CalibrationStatus.MagnetometerSuccess) !=
         (CalibrationStatus.MagnetometerSuccess))
 {
     Console.Write($".");
-    calibrationStatus = bno055Sensor.GetCalibrationStatus();
     Thread.Sleep(200);
 }
 
@@ -33,21 +31,21 @@ Console.WriteLine("Calibration completed");
 while (!Console.KeyAvailable)
 {
     Console.Clear();
-    var magneto = bno055Sensor.Magnetometer;
+    Vector3 magneto = bno055Sensor.Magnetometer;
     Console.WriteLine($"Magnetomer X: {magneto.X} Y: {magneto.Y} Z: {magneto.Z}");
-    var gyro = bno055Sensor.Gyroscope;
+    Vector3 gyro = bno055Sensor.Gyroscope;
     Console.WriteLine($"Gyroscope X: {gyro.X} Y: {gyro.Y} Z: {gyro.Z}");
-    var accele = bno055Sensor.Accelerometer;
+    Vector3 accele = bno055Sensor.Accelerometer;
     Console.WriteLine($"Acceleration X: {accele.X} Y: {accele.Y} Z: {accele.Z}");
-    var orien = bno055Sensor.Orientation;
-    Console.WriteLine($"Orientation Heading: {orien.X} Roll: {orien.Y} Pitch: {orien.Z}");
-    var line = bno055Sensor.LinearAcceleration;
+    Vector3 orientation = bno055Sensor.Orientation;
+    Console.WriteLine($"Orientation Heading: {orientation.X} Roll: {orientation.Y} Pitch: {orientation.Z}");
+    Vector3 line = bno055Sensor.LinearAcceleration;
     Console.WriteLine($"Linear acceleration X: {line.X} Y: {line.Y} Z: {line.Z}");
-    var gravity = bno055Sensor.Gravity;
+    Vector3 gravity = bno055Sensor.Gravity;
     Console.WriteLine($"Gravity X: {gravity.X} Y: {gravity.Y} Z: {gravity.Z}");
-    var qua = bno055Sensor.Quaternion;
+    Vector4 qua = bno055Sensor.Quaternion;
     Console.WriteLine($"Quaternion X: {qua.X} Y: {qua.Y} Z: {qua.Z} W: {qua.W}");
-    var temp = bno055Sensor.Temperature.DegreesCelsius;
+    double temp = bno055Sensor.Temperature.DegreesCelsius;
     Console.WriteLine($"Temperature: {temp} °C");
     Thread.Sleep(100);
 }

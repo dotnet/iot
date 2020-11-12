@@ -20,12 +20,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             if (txBufferNumber > 2)
             {
-                throw new ArgumentException($"Invalid TX Buffer Number value {txBufferNumber}.", nameof(txBufferNumber));
+                throw new ArgumentException(nameof(txBufferNumber), $"Invalid TX Buffer Number value: {txBufferNumber}.");
             }
 
             if (index > 7)
             {
-                throw new ArgumentException($"Invalid Index value {index}.", nameof(index));
+                throw new ArgumentException(nameof(index), $"Invalid Index value: {index}.");
             }
 
             TxBufferNumber = txBufferNumber;
@@ -48,18 +48,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// </summary>
         public byte TransmitBufferDataFieldBytes { get; }
 
-        private Address GetAddress()
+        private Address GetAddress() => TxBufferNumber switch
         {
-            switch (TxBufferNumber)
-            {
-                case 0:
-                    return (Address)((byte)Address.TxB0D0 + Index);
-                case 1:
-                    return (Address)((byte)Address.TxB1D0 + Index);
-                default:
-                    throw new ArgumentException($"Invalid Tx Bufferer Number value {TxBufferNumber}.", nameof(TxBufferNumber));
-            }
-        }
+            0 => (Address)((byte)Address.TxB0D0 + Index),
+            1 => (Address)((byte)Address.TxB1D0 + Index),
+            _ => throw new Exception($"Invalid value for {nameof(TxBufferNumber)}: {TxBufferNumber}."),
+        };
 
         /// <summary>
         /// Gets the Tx Buffer Number based on the register address.

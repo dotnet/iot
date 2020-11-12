@@ -6,14 +6,14 @@ using Iot.Device.Multiplexing;
 var pins = new int[] { 6, 13, 19 };
 var charlieSegmentLength = 6;
 // calling this method helps with determing the correct pin circuit to use
-var nodes = CharlieplexSegment.GetNodes(pins, charlieSegmentLength);
+CharlieplexSegmentNode[] nodes = CharlieplexSegment.GetNodes(pins, charlieSegmentLength);
 for (int i = 0; i < charlieSegmentLength; i++)
 {
-    var node = nodes[i];
+    CharlieplexSegmentNode node = nodes[i];
     Console.WriteLine($"Node {i} -- Anode: {node.Anode}; Cathode: {node.Cathode}");
 }
 
-using var charlie = new CharlieplexSegment(pins, charlieSegmentLength);
+using CharlieplexSegment charlie = new (pins, charlieSegmentLength);
 var twoSeconds = TimeSpan.FromSeconds(2);
 
 Console.WriteLine("Light all LEDs");

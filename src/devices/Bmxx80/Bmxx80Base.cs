@@ -52,11 +52,7 @@ namespace Iot.Device.Bmxx80
         /// The variable TemperatureFine carries a fine resolution temperature value over to the
         /// pressure compensation formula and could be implemented as a global variable.
         /// </summary>
-        protected double TemperatureFine
-        {
-            get;
-            set;
-        }
+        protected double TemperatureFine { get; set; }
 
         /// <summary>
         /// The temperature calibration factor.

@@ -21,7 +21,7 @@ namespace Iot.Device.Imu
     public class Mpu9250 : Mpu6500
     {
         private Ak8963 _ak8963;
-        private bool _autoDispose;
+        private bool _shouldDispose;
         // Use for the first magnetometer read when switch to continuous 100 Hz
         private bool _firstContinuousRead = true;
 
@@ -117,7 +117,7 @@ namespace Iot.Device.Imu
         /// <returns>The data from the magnetometer</returns>
         public Vector3 ReadMagnetometer(bool waitForData = true)
         {
-            var magn = _ak8963.ReadMagnetometer(waitForData, GetTimeout());
+            Vector3 magn = _ak8963.ReadMagnetometer(waitForData, GetTimeout());
             return new Vector3(magn.Y, magn.X, -magn.Z);
         }
 
@@ -155,10 +155,7 @@ namespace Iot.Device.Imu
         /// </summary>
         public MeasurementMode MagnetometerMeasurementMode
         {
-            get
-            {
-                return _ak8963.MeasurementMode;
-            }
+            get => _ak8963.MeasurementMode;
             set
             {
                 _ak8963.MeasurementMode = value;
@@ -174,8 +171,8 @@ namespace Iot.Device.Imu
         /// </summary>
         public OutputBitMode MagnetometerOutputBitMode
         {
-            get { return _ak8963.OutputBitMode; }
-            set { _ak8963.OutputBitMode = value; }
+            get => _ak8963.OutputBitMode;
+            set => _ak8963.OutputBitMode = value;
         }
 
         /// <summary>
@@ -189,9 +186,9 @@ namespace Iot.Device.Imu
         /// Initialize the MPU9250
         /// </summary>
         /// <param name="i2cDevice">The I2C device</param>
-        /// <param name="autoDispose">Will automatically dispose the I2C device if true</param>
+        /// <param name="shouldDispose">Will automatically dispose the I2C device if true</param>
         /// <param name="i2CDeviceAk8963">An I2C Device for the AK8963 when exposed and not behind the MPU9250</param>
-        public Mpu9250(I2cDevice i2cDevice, bool autoDispose = true, I2cDevice? i2CDeviceAk8963 = null)
+        public Mpu9250(I2cDevice i2cDevice, bool shouldDispose = true, I2cDevice? i2CDeviceAk8963 = null)
             : base(i2cDevice, true)
         {
             Reset();
@@ -209,7 +206,7 @@ namespace Iot.Device.Imu
             WriteRegister(Register.USER_CTRL, (byte)UserControls.I2C_MST_EN);
             // Speed of 400 kHz
             WriteRegister(Register.I2C_MST_CTRL, (byte)I2cBusFrequency.Frequency400kHz);
-            _autoDispose = autoDispose;
+            _shouldDispose = shouldDispose;
             // There are 2 options to setup the Ak8963. Either the I2C address is exposed, either not.
             // Trying both and pick one of them
             if (i2CDeviceAk8963 == null)
@@ -285,7 +282,7 @@ namespace Iot.Device.Imu
         /// </summary>
         public new void Dispose()
         {
-            if (_autoDispose)
+            if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
                 _i2cDevice = null!;

@@ -65,7 +65,7 @@ namespace Iot.Device.Mhz19b
         public VolumeConcentration GetCo2Reading()
         {
             // send read command request
-            var request = CreateRequest(Command.ReadCo2Concentration);
+            byte[] request = CreateRequest(Command.ReadCo2Concentration);
             request[(int)MessageFormat.Checksum] = Checksum(request);
             _serialPortStream.Write(request, 0, request.Length);
 
@@ -115,7 +115,7 @@ namespace Iot.Device.Mhz19b
                 throw new ArgumentException("Span value out of range (1000-5000[ppm])", nameof(span));
             }
 
-            var request = CreateRequest(Command.CalibrateSpanPoint);
+            byte[] request = CreateRequest(Command.CalibrateSpanPoint);
             // set span in request, c. f. datasheet rev. 1.0, pg. 8 for details
             request[(int)MessageFormat.DataHighRequest] = (byte)(span.PartsPerMillion / 256);
             request[(int)MessageFormat.DataLowRequest] = (byte)(span.PartsPerMillion % 256);
@@ -130,7 +130,7 @@ namespace Iot.Device.Mhz19b
         /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
         public void SetAutomaticBaselineCorrection(AbmState state)
         {
-            var request = CreateRequest(Command.AutoCalibrationSwitch);
+            byte[] request = CreateRequest(Command.AutoCalibrationSwitch);
             // set on/off state in request, c. f. datasheet rev. 1.0, pg. 8 for details
             request[(int)MessageFormat.DataHighRequest] = (byte)state;
 
@@ -144,7 +144,7 @@ namespace Iot.Device.Mhz19b
         /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
         public void SetSensorDetectionRange(DetectionRange detectionRange)
         {
-            var request = CreateRequest(Command.DetectionRangeSetting);
+            byte[] request = CreateRequest(Command.DetectionRangeSetting);
             // set detection range in request, c. f. datasheet rev. 1.0, pg. 8 for details
             request[(int)MessageFormat.DataHighRequest] = (byte)((int)detectionRange / 256);
             request[(int)MessageFormat.DataLowRequest] = (byte)((int)detectionRange % 256);

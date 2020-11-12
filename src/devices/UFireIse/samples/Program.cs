@@ -58,7 +58,7 @@ void Basic(I2cDevice device)
 
 void Orp(I2cDevice device)
 {
-    using UFireOrp uFireOrp = new UFireOrp(device);
+    using UFireOrp uFireOrp = new (device);
     if (uFireOrp.TryMeasureOxidationReductionPotential(out ElectricPotential orp))
     {
         Console.WriteLine("Eh:" + orp.Millivolts);

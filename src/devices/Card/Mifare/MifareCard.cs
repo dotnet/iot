@@ -449,7 +449,7 @@ namespace Iot.Device.Card.Mifare
         {
             if (accessTypes.Length != 3)
             {
-                throw new ArgumentException($"{nameof(accessTypes)} can only be array of 3");
+                throw new ArgumentException(nameof(accessTypes), "Array must have 3 elements.");
             }
 
             var tupleRes = EncodeSectorTailer(accessSector);
@@ -471,10 +471,7 @@ namespace Iot.Device.Card.Mifare
         /// Encode with default value the access sector and tailer blocks
         /// </summary>
         /// <returns></returns>
-        public (byte b6, byte b7, byte b8) EncodeDefaultSectorAndBlockTailer()
-        {
-            return (0xFF, 0x07, 0x80);
-        }
+        public (byte b6, byte b7, byte b8) EncodeDefaultSectorAndBlockTailer() => (0xFF, 0x07, 0x80);
 
         /// <summary>
         /// From the ATAQ ans SAK data find common card capacity

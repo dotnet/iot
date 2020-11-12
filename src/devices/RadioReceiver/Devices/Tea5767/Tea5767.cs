@@ -50,7 +50,7 @@ namespace Iot.Device.RadioReceiver
         /// <param name="frequency">FM frequency.</param>
         public Tea5767(I2cDevice i2cDevice, FrequencyRange frequencyRange, Frequency frequency)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
             FrequencyRange = frequencyRange;
             Frequency = frequency;
@@ -260,9 +260,7 @@ namespace Iot.Device.RadioReceiver
             return readBuffer.ToArray();
         }
 
-        private void SaveRegisters()
-        {
+        private void SaveRegisters() =>
             _i2cDevice.Write(_registers);
-        }
     }
 }

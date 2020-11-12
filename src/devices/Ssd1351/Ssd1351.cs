@@ -22,7 +22,7 @@ namespace Iot.Device.Ssd1351
         private readonly int _dcPinId;
         private readonly int _resetPinId;
         private readonly int _spiBufferSize;
-        private readonly bool _disposeGpioController;
+        private readonly bool _shouldDispose;
 
         private SpiDevice _spiDevice;
         private GpioController _gpioDevice;
@@ -45,13 +45,13 @@ namespace Iot.Device.Ssd1351
         {
             if (!InRange((uint)spiBufferSize, 0x1000, 0x10000))
             {
-                throw new ArgumentException($"SPI Buffer Size must be between 4096 and 65536.", nameof(spiBufferSize));
+                throw new ArgumentException(nameof(spiBufferSize), "Value must be between 4096 and 65536.");
             }
 
             _gpioDevice = gpioController ?? new GpioController();
-            _disposeGpioController = gpioController == null ? true : shouldDispose;
+            _shouldDispose = shouldDispose || gpioController is null;
 
-            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
+            _spiDevice = spiDevice ?? throw new ArgumentException(nameof(spiDevice));
 
             _dcPinId = dataCommandPin;
             _resetPinId = resetPin;
@@ -65,7 +65,7 @@ namespace Iot.Device.Ssd1351
         }
 
         /// <summary>
-        /// Convert a color structure to a byte tuple represening the colour in 565 format.
+        /// Convert a color structure to a byte tuple representing the colour in 565 format.
         /// </summary>
         /// <param name="color">The color to be converted.</param>
         /// <returns>
@@ -139,7 +139,7 @@ namespace Iot.Device.Ssd1351
                 }
             }
 
-            // specifiy a location for the rows and columns on the display where the data is to be written
+            // specify a location for the rows and columns on the display where the data is to be written
             SetColumnAddress(x, (byte)(x + w - 1));
             SetRowAddress(y, (byte)(y + h - 1));
 
@@ -278,7 +278,7 @@ namespace Iot.Device.Ssd1351
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_disposeGpioController)
+            if (_shouldDispose)
             {
                 _gpioDevice?.Dispose();
                 _gpioDevice = null!;

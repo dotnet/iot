@@ -69,12 +69,6 @@ namespace Iot.Device.Graphics
         private static readonly string s_endChar = "ENDCHAR";
         private static readonly string s_bitmap = "BITMAP";
 
-/*
-        private BdfFont()
-        {
-        }
-*/
-
         /// <summary>
         /// Loads BdfFont from a specified path
         /// </summary>
@@ -203,7 +197,6 @@ namespace Iot.Device.Graphics
 
         private void ReadGlyphsData(StreamReader sr)
         {
-            GlyphMapper = new Dictionary<int, int>();
             if (BytesPerGlyph <= 2)
             {
                 GlyphUshortData = new ushort[CharsCount * Height];
@@ -213,6 +206,7 @@ namespace Iot.Device.Graphics
                 throw new NotSupportedException("Fonts with width more than 16 pixels is not supported.");
             }
 
+            GlyphMapper = new Dictionary<int, int>();
             int index = 0;
             for (int i = 0; i < CharsCount; i++)
             {

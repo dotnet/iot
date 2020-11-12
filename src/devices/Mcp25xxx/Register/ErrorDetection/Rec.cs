@@ -32,9 +32,6 @@ namespace Iot.Device.Mcp25xxx.Register.ErrorDetection
         /// Converts register contents to a byte.
         /// </summary>
         /// <returns>The byte that represent the register contents.</returns>
-        public byte ToByte()
-        {
-            return ReceiveErrorCount;
-        }
+        public byte ToByte() => ReceiveErrorCount;
     }
 }

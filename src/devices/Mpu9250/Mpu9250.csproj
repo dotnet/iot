@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-    <PackageReference Include="System.Memory" Version="4.5.3" />
+    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
     <Compile Include="*.cs" />
     <None Include="README.md" />
     <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />

@@ -189,8 +189,7 @@ namespace Iot.Device.CharacterLcd.Samples
 
         private static void SetBacklightColorTest(Hd44780 lcd)
         {
-            var colorLcd = lcd as LcdRgb;
-            if (colorLcd == null)
+            if (lcd is not LcdRgb colorLcd)
             {
                 Console.WriteLine("Color backlight not supported");
                 return;
