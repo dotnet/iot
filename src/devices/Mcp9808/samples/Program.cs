@@ -6,7 +6,7 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Mcp9808;
 
-I2cConnectionSettings settings = new (1, Mcp9808.DefaultI2cAddress);
+I2cConnectionSettings settings = new(1, Mcp9808.DefaultI2cAddress);
 using I2cDevice device = I2cDevice.Create(settings);
 
 using Mcp9808 sensor = new Mcp9808(device);

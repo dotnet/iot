@@ -80,7 +80,7 @@ namespace Iot.Device.Ft4222
         /// Get the versions of the chipset and dll
         /// </summary>
         /// <returns>Both the chipset and dll versions</returns>
-        public static (Version? chip, Version? dll) GetVersions()
+        public static (Version? Chip, Version? Dll) GetVersions()
         {
             // First, let's find a device
             var devices = GetDevices();

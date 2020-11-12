@@ -14,7 +14,7 @@ namespace Iot.Device.SenseHat.Samples
     {
         public static void Run()
         {
-            using SenseHatAccelerometerAndGyroscope ag = new ();
+            using SenseHatAccelerometerAndGyroscope ag = new();
             while (true)
             {
                 Console.WriteLine($"Acceleration={ag.Acceleration}");

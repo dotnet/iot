@@ -34,7 +34,7 @@ ReadAllRegistersWithDetails(mcp25xxx);
 // Methods
 Mcp25xxx GetMcp25xxxDevice()
 {
-    SpiConnectionSettings spiConnectionSettings = new (0, 0);
+    SpiConnectionSettings spiConnectionSettings = new(0, 0);
     SpiDevice spiDevice = SpiDevice.Create(spiConnectionSettings);
     return new Mcp25625(spiDevice);
 }

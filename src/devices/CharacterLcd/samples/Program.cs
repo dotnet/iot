@@ -25,7 +25,7 @@ void UsingGpioPins()
 void UsingMcp()
 {
     using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, 0x21));
-    using Mcp23008 driver = new (i2cDevice);
+    using Mcp23008 driver = new(i2cDevice);
     int[] dataPins = { 3, 4, 5, 6 };
     int registerSelectPin = 1;
     int enablePin = 2;

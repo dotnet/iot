@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using Iot.Device.ExplorerHat;
 
-using ExplorerHat hat = new ();
+using ExplorerHat hat = new();
 // All lights on
 hat.Lights.On();
 Thread.Sleep(1000);

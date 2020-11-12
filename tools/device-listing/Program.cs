@@ -46,7 +46,7 @@ string[] categoriesToDisplay = new string[]
     "protocol"
 };
 
-Dictionary<string, string?> categoriesDescriptions = new ()
+Dictionary<string, string?> categoriesDescriptions = new()
 {
     { "adc", "Analog/Digital converters" },
     { "accelerometer", "Accelerometers" },
@@ -114,7 +114,7 @@ if (repoRoot is null)
 
 string devicesPath = Path.Combine(repoRoot, "src", "devices");
 
-List<DeviceInfo> devices = new ();
+List<DeviceInfo> devices = new();
 
 foreach (string directory in Directory.EnumerateDirectories(devicesPath))
 {

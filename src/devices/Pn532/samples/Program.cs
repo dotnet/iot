@@ -102,7 +102,7 @@ void ReadMiFare(Pn532 pn532)
             Console.WriteLine($", ATS: {BitConverter.ToString(decrypted.Ats)}");
         }
 
-        MifareCard mifareCard = new (pn532, decrypted.TargetNumber)
+        MifareCard mifareCard = new(pn532, decrypted.TargetNumber)
         {
             BlockNumber = 0, Command = MifareCardCommand.AuthenticationA
         };

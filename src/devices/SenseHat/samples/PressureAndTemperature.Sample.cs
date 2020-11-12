@@ -19,7 +19,7 @@ namespace Iot.Device.SenseHat.Samples
             // set this to the current sea level pressure in the area for correct altitude readings
             var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
 
-            using SenseHatPressureAndTemperature pt = new ();
+            using SenseHatPressureAndTemperature pt = new();
             while (true)
             {
                 var tempValue = pt.Temperature;

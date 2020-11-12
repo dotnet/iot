@@ -59,8 +59,8 @@ namespace Iot.Device.GoPiGo3
         /// </summary>
         public GroveSensor[] GroveSensor = new GroveSensor[2]
             {
-                new (GrovePort.Grove1),
-                new (GrovePort.Grove2)
+                new(GrovePort.Grove1),
+                new(GrovePort.Grove2)
             };
 
         /// <summary>

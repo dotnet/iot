@@ -387,13 +387,13 @@ namespace Iot.Device.CharacterLcd
             // Need to copy the static map, we must not update that
             Dictionary<char, byte> newMap = romName switch
             {
-                "A00" => new (DefaultA00Map),
-                "A02" => new (DefaultA02Map),
-                "SplC780" => new (DefaultSplC780Map),
-                _ => new (DefaultCustomMap),
+                "A00" => new(DefaultA00Map),
+                "A02" => new(DefaultA02Map),
+                "SplC780" => new(DefaultSplC780Map),
+                _ => new(DefaultCustomMap),
             };
 
-            List<byte[]> extraCharacters = new ();
+            List<byte[]> extraCharacters = new();
             bool supported = AssignLettersForCurrentCulture(newMap, culture, romName, extraCharacters, maxNumberOfCustomCharacters);
 
             if (!newMap.ContainsKey(unknownLetter))
