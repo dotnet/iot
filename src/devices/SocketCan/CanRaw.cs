@@ -4,11 +4,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace Iot.Device.SocketCan
 {
@@ -17,7 +14,7 @@ namespace Iot.Device.SocketCan
     /// </summary>
     public class CanRaw : IDisposable
     {
-        private SafeCanRawSocketHandle _handle;
+        private Socket _socket;
 
         /// <summary>
         /// Constructs CanRaw instance
@@ -25,7 +22,10 @@ namespace Iot.Device.SocketCan
         /// <param name="networkInterface">Name of the network interface</param>
         public CanRaw(string networkInterface = "can0")
         {
-            _handle = new SafeCanRawSocketHandle(networkInterface);
+            _socket = new Socket(AddressFamily.ControllerAreaNetwork, SocketType.Raw, ProtocolType.Raw);
+
+            var endpoint = new CanEndPoint(_socket, "vcan0");
+            _socket.Bind(endpoint);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Iot.Device.SocketCan
             ReadOnlySpan<byte> buff = MemoryMarshal.AsBytes(frameSpan);
             try
             {
-                Interop.Write(_handle, buff);
+                _socket.Send(buff);
             }
             catch (SocketException ex)
             {
@@ -91,13 +91,13 @@ namespace Iot.Device.SocketCan
             {
                 while (buff.Length > 0)
                 {
-                    int read = Interop.Read(_handle, buff);
+                    int read = _socket.Receive(buff);
                     buff = buff.Slice(read);
                 }
             }
             catch (SocketException ex)
             {
-                if ((ex.SocketErrorCode == SocketError.WouldBlock) && !IsBlocking)
+                if ((ex.SocketErrorCode == SocketError.WouldBlock) && !_socket.Blocking)
                 {
                     id = frame.Id;
                     frameLength = 0;
@@ -151,7 +151,7 @@ namespace Iot.Device.SocketCan
             filters[0].can_id = id.Raw;
             filters[0].can_mask = id.Value | (uint)CanFlags.ExtendedFrameFormat | (uint)CanFlags.RemoteTransmissionRequest;
 
-            Interop.SetCanRawSocketOption<Interop.CanFilter>(_handle, Interop.CanSocketOption.CAN_RAW_FILTER, filters);
+            Interop.SetCanRawSocketOption<Interop.CanFilter>(_socket, Interop.CanSocketOption.CAN_RAW_FILTER, filters);
         }
 
         private static bool IsEff(uint address)
@@ -164,16 +164,7 @@ namespace Iot.Device.SocketCan
         /// <inheritdoc/>
         public void Dispose()
         {
-            _handle.Dispose();
-        }
-
-        /// <summary>
-        /// Enables or disables blocking operation
-        /// </summary>
-        public bool IsBlocking
-        {
-            get => !Interop.GetCanRawSocketNonBlockingFlag(_handle);
-            set => Interop.SetCanRawSocketNonBlockingFlag(_handle, !value);
+            _socket.Dispose();
         }
     }
 }
