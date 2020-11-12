@@ -148,6 +148,10 @@ namespace Arduino.Samples
                 case 'x':
                 case 'X':
                     return false;
+                case 'c':
+                case 'C':
+                    TestIlInterpreter(board);
+                    break;
             }
 
             return true;
@@ -332,6 +336,21 @@ namespace Arduino.Samples
             analogController.Dispose();
         }
 
+        private static int GetAnalogPin1(ArduinoBoard board)
+        {
+            int analogPin = 15;
+            foreach (var pin in board.SupportedPinConfigurations)
+            {
+                if (pin.AnalogPinNumber == 1)
+                {
+                    analogPin = pin.Pin;
+                    break;
+                }
+            }
+
+            return analogPin;
+        }
+
         public static void TestInput(ArduinoBoard board)
         {
             const int gpio = 2;
@@ -483,10 +502,194 @@ namespace Arduino.Samples
                     Console.WriteLine("Unable to read DHT11");
                 }
 
-                Thread.Sleep(2000);
+                Thread.Sleep(2500);
             }
 
             Console.ReadKey();
+        }
+
+        public static void TestIlInterpreter(ArduinoBoard board)
+        {
+            ArduinoCsCompiler compiler = new ArduinoCsCompiler(board);
+            BasicCalculationTest(compiler);
+
+            OperatorTest(compiler);
+
+            //// AsyncExecutionTest(board, compiler);
+
+            //// ReadDht11Test(compiler);
+
+            LoadClassAndBlinkLed(compiler);
+
+            compiler.Dispose();
+        }
+
+        private static void LoadClassAndBlinkLed(ArduinoCsCompiler compiler)
+        {
+            // These operations should be combined into one, to simplify usage (just provide the main entry point,
+            // and derive everything required from there)
+            compiler.LoadLowLevelInterface();
+            compiler.LoadClass(typeof(ArduinoCompilerSampleMethods.SimpleLedBinding));
+            // This should just return a reference to the now already loaded method
+            var task = compiler.LoadCode<Action<GpioController, int, int>>(ArduinoCompilerSampleMethods.SimpleLedBinding.RunBlink);
+
+            var dependencies = compiler.CollectDependencies(task.MethodInfo.MethodBase);
+            foreach (var dep in dependencies)
+            {
+                // Type is irrelevant here (should probably split this function into loading and preparing)
+                compiler.LoadCode<Action>(dep);
+            }
+
+            task.InvokeAsync(new GpioController(PinNumberingScheme.Logical, new ArduinoNativeGpioDriver(null)), 6, 1000);
+
+            task.WaitForResult();
+
+            compiler.ClearAllData(true);
+        }
+
+        private static void ReadDht11Test(ArduinoCsCompiler compiler)
+        {
+            object[] data;
+            MethodState state;
+
+            compiler.LoadLowLevelInterface();
+            var dht = compiler.LoadCode(new Func<IArduinoHardwareLevelAccess, int, UInt32>(ArduinoCompilerSampleMethods.ReadDht11));
+            dht.InvokeAsync(0, 3);
+
+            CancellationTokenSource ts = new CancellationTokenSource(10000);
+            bool result = dht.WaitForResult(ts.Token).Result;
+
+            if (!result)
+            {
+                Console.WriteLine("Method execution timed out.");
+            }
+            else if (dht.GetMethodResults(out data, out state) && state == MethodState.Stopped)
+            {
+                UInt32 raw = (UInt32)data[0] >> 16;
+                double temperature = raw * 0.1;
+                raw = (UInt32)data[0] & 0xFFFF;
+                double humidity = raw * 0.1;
+
+                Console.WriteLine($"DHT 11 Temperature: {temperature}°C, Humidity {humidity}%");
+            }
+            else
+            {
+                Console.WriteLine($"Unable to read DHT temperature: {state}.");
+            }
+
+            dht.Terminate();
+        }
+
+        private static void AsyncExecutionTest(ArduinoBoard board, ArduinoCsCompiler compiler)
+        {
+            compiler.LoadLowLevelInterface();
+            compiler.LoadCode(new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
+            var method3 = compiler.LoadCode(new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
+            method3.InvokeAsync(0, 10, 500);
+
+            // While the above method executes (and blinks the led), we query the analog input
+            var analogController = board.CreateAnalogController(0);
+            int analogPin = 15;
+
+            analogController.OpenPin(analogPin);
+
+            while (method3.State == MethodState.Running)
+            {
+                double value = analogController.ReadVoltage(analogPin);
+                Console.WriteLine($"Read analog value as {value:F2}");
+                Thread.Sleep(100);
+            }
+
+            analogController.ClosePin(analogPin);
+            method3.WaitForResult();
+
+            compiler.ClearAllData(true);
+
+            // Start task again and terminate it immediately
+            compiler.LoadLowLevelInterface();
+            compiler.LoadCode(new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
+            method3 = compiler.LoadCode(new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
+            method3.InvokeAsync(0, 10, 500);
+            method3.Terminate();
+            if (method3.State != MethodState.Killed)
+            {
+                Console.WriteLine("Unable to terminate task");
+            }
+
+            method3.Dispose();
+            compiler.ClearAllData(true);
+        }
+
+        // Note: Input values shall be 1 and 2.
+        // It is only used to prevent the compiler from optimizing away anything
+        private static bool PerformOperatorTest(int inputValue1, int inputValue2)
+        {
+            if (inputValue2 >= 20)
+            {
+                return false;
+            }
+
+            if (inputValue1 > inputValue2)
+            {
+                return false;
+            }
+
+            if (inputValue2 != 2)
+            {
+                return false;
+            }
+
+            if (inputValue1 <= 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static void OperatorTest(ArduinoCsCompiler compiler)
+        {
+            var method1 = compiler.LoadCode<Func<int, int, bool>>(PerformOperatorTest);
+            bool result = method1.Invoke(CancellationToken.None, 0, 1, 2);
+            if (!result)
+            {
+                Console.WriteLine("Test failed");
+            }
+
+            compiler.ClearAllData(true);
+        }
+
+        private static void BasicCalculationTest(ArduinoCsCompiler compiler)
+        {
+            var method1 = compiler.LoadCode<Func<int, int, int>>(ArduinoCompilerSampleMethods.AddInts);
+            method1.InvokeAsync(2, 3);
+            int result;
+            method1.WaitForResult();
+            method1.GetMethodResults(out object[] data, out MethodState state);
+            if (state != MethodState.Stopped)
+            {
+                Console.WriteLine("Method returned result but did not end?!?");
+            }
+
+            result = (int)data[0];
+            Console.WriteLine($"2 + 3 = {result}");
+            method1.InvokeAsync(255, 5);
+            method1.WaitForResult();
+            method1.GetMethodResults(out data, out state);
+            result = (int)data[0];
+            Console.WriteLine($"255 + 5 = {result}");
+
+            var method2 = compiler.LoadCode(new Func<int, int, bool>(ArduinoCompilerSampleMethods.Equal));
+            method2.InvokeAsync(2, 3);
+            method2.WaitForResult();
+            method2.GetMethodResults(out data, out state);
+            bool trueOrFalse = (bool)data[0];
+            Console.WriteLine($"Is 2 == 3? {trueOrFalse}");
+            method2.InvokeAsync(257, 257);
+            method2.WaitForResult();
+            method2.GetMethodResults(out data, out state);
+            trueOrFalse = (bool)data[0];
+            Console.WriteLine($"Is 257 == 257? {trueOrFalse}");
         }
     }
 }

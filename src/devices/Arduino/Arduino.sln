@@ -21,6 +21,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CpuTemperature", "..\CpuTem
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{9E5A25ED-9839-4C1A-9B27-993437D1CB31}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino.Monitor", "samples\Arduino.Monitor.csproj", "{23B4B60C-9594-42BB-9D25-C54983B0F809}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CA26B999-4C0E-4E82-A46E-A68AC1B85C10}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino.Tests", "tests\Arduino.Tests.csproj", "{273C9233-8A7D-4A0B-8DB2-FB7F56FA727D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,12 +129,22 @@ Global
 		{F3950513-A564-462F-887B-E00972D20FAD}.Windows-Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3950513-A564-462F-887B-E00972D20FAD}.Windows-Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3950513-A564-462F-887B-E00972D20FAD}.Windows-Release|Any CPU.Build.0 = Release|Any CPU
+		{23B4B60C-9594-42BB-9D25-C54983B0F809}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23B4B60C-9594-42BB-9D25-C54983B0F809}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23B4B60C-9594-42BB-9D25-C54983B0F809}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23B4B60C-9594-42BB-9D25-C54983B0F809}.Release|Any CPU.Build.0 = Release|Any CPU
+		{273C9233-8A7D-4A0B-8DB2-FB7F56FA727D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{273C9233-8A7D-4A0B-8DB2-FB7F56FA727D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{273C9233-8A7D-4A0B-8DB2-FB7F56FA727D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{273C9233-8A7D-4A0B-8DB2-FB7F56FA727D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2670F7BF-A7C8-49EB-9A99-1719A90D0C67} = {9E5A25ED-9839-4C1A-9B27-993437D1CB31}
+		{23B4B60C-9594-42BB-9D25-C54983B0F809} = {9E5A25ED-9839-4C1A-9B27-993437D1CB31}
+		{273C9233-8A7D-4A0B-8DB2-FB7F56FA727D} = {CA26B999-4C0E-4E82-A46E-A68AC1B85C10}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {47BF9684-1876-4AC1-8C87-04B8C7FA6C3A}

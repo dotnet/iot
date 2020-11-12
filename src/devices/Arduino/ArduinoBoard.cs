@@ -35,6 +35,9 @@ namespace Iot.Device.Arduino
         private string _firmwareName;
         private List<SupportedPinConfiguration> _supportedPinConfigurations;
 
+        // Only a delegate, not an event, because one board can only have one compiler attached at a time
+        private Action<int, MethodState, object[]> _compilerCallback;
+
         // Counts how many spi devices are attached, to make sure we enable/disable the bus only when no devices are attached
         private int _spiEnabled;
 
@@ -47,6 +50,8 @@ namespace Iot.Device.Arduino
             _serialPortStream = serialPortStream;
             _spiEnabled = 0;
         }
+
+        public event Action<string, Exception> LogMessages;
 
         /// <summary>
         /// Creates an instance of the Arduino board connection connected to a serial port
@@ -78,6 +83,43 @@ namespace Iot.Device.Arduino
         /// </summary>
         public event Action<string, Exception> LogMessages;
 
+        public static ArduinoBoard FindBoard(List<string> comPorts, List<int> baudRates)
+        {
+            foreach (var port in comPorts)
+            {
+                foreach (var baud in baudRates)
+                {
+                    try
+                    {
+                        ArduinoBoard b = new ArduinoBoard();
+                    }
+                }
+            }
+           
+        }
+
+        public static List<string> GetSerialPortNames()
+        {
+            return SerialPort.GetPortNames().ToList();
+        }
+
+        public static List<int> CommonBaudRates()
+        {
+            return new List<int>()
+            {
+                9600,
+                19200,
+                18400,
+                57600,
+                115200,
+                230400,
+                250000,
+                500000,
+                1000000,
+                2000000,
+            };
+        }
+
         /// <summary>
         /// Initialize the board connection. This must be called before any other methods of this class.
         /// </summary>
@@ -90,7 +132,7 @@ namespace Iot.Device.Arduino
             _protocolVersion = _firmata.QueryFirmataVersion();
             if (_protocolVersion < _firmata.QuerySupportedFirmataVersion())
             {
-                throw new NotSupportedException($"Firmata version on board is {_protocolVersion}. Expected at least {_firmata.QuerySupportedFirmataVersion()}.");
+                throw new NotSupportedException($"Firmata version on board is {_protocolVersion}. Expected {_firmata.QuerySupportedFirmataVersion()}. They must be equal.");
             }
 
             Log($"Firmata version on board is {_protocolVersion}.");
@@ -110,6 +152,8 @@ namespace Iot.Device.Arduino
             }
 
             _firmata.EnableDigitalReporting();
+
+            _firmata.OnSchedulerReply += FirmataOnSchedulerReply;
         }
 
         /// <summary>
@@ -142,7 +186,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        internal List<SupportedPinConfiguration> SupportedPinConfigurations
+        public List<SupportedPinConfiguration> SupportedPinConfigurations
         {
             get
             {
@@ -158,6 +202,19 @@ namespace Iot.Device.Arduino
         private void FirmataOnError(string message, Exception innerException)
         {
             LogMessages?.Invoke(message, innerException);
+        }
+
+        private void FirmataOnSchedulerReply(byte method, MethodState schedulerMethodState, int numArgs, IList<byte> bytesOfArgs)
+        {
+            object[] data = new object[numArgs];
+
+            for (int i = 0; i < numArgs * 4; i += 4)
+            {
+                int retVal = bytesOfArgs[i] | bytesOfArgs[i + 1] << 8 | bytesOfArgs[i + 2] << 16 | bytesOfArgs[i + 3] << 24;
+                data[i / 4] = retVal;
+            }
+
+            _compilerCallback?.Invoke(method, schedulerMethodState, data);
         }
 
         /// <summary>
@@ -318,6 +375,22 @@ namespace Iot.Device.Arduino
             {
                 _firmata.DisableSpi();
             }
+        }
+
+        public void SetCompilerCallback(Action<int, MethodState, object[]> onCompilerCallback)
+        {
+            if (onCompilerCallback == null)
+            {
+                _compilerCallback = null;
+                return;
+            }
+
+            if (_compilerCallback != null)
+            {
+                throw new InvalidOperationException("Only one compiler can be active for a single board");
+            }
+
+            _compilerCallback = onCompilerCallback;
         }
     }
 }
