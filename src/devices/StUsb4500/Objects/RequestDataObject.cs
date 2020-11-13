@@ -15,7 +15,7 @@ namespace Iot.Device.Usb
         private const uint OperatingCurrentMask = 0b1111_1111_1100_0000_0000;
         private const byte ObjectPositionMask = 0b0111;
 
-        /// <summary>Gets the value which encodes all properties of this object.</summary>
+        /// <summary>Gets the raw value received from the USB-PD controller which encodes all properties of this RDO. See USB-PD specification for details.</summary>
         public uint Value { get; private set; }
 
         /// <summary>Gets or sets the maximal current.</summary>
@@ -90,7 +90,7 @@ namespace Iot.Device.Usb
         }
 
         /// <summary>Initializes a new instance of the <see cref="RequestDataObject"/> class.</summary>
-        /// <param name="value">The value.</param>
-        public RequestDataObject(uint value) => Value = value;
+        /// <param name="rawValue">The raw value received from the USB-PD controller which encodes all properties of this RDO. See USB-PD specification for details.</param>
+        public RequestDataObject(uint rawValue) => Value = rawValue;
     }
 }

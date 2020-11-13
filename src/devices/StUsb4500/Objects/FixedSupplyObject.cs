@@ -77,9 +77,11 @@ namespace Iot.Device.Usb
         public override Power Power => Power.FromWatts(Voltage.VoltsDc * OperationalCurrent.Amperes);
 
         /// <summary>Initializes a new instance of the <see cref="FixedSupplyObject"/> class.</summary>
-        /// <param name="value">The value.</param>
-        public FixedSupplyObject(uint value)
-            : base(value)
+        /// <param name="rawValue">
+        /// The raw value received from or sent to the USB-PD controller which encodes all properties of this PDO. See USB-PD specification for details.
+        /// </param>
+        public FixedSupplyObject(uint rawValue)
+            : base(rawValue)
         {
         }
 

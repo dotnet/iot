@@ -55,9 +55,11 @@ namespace Iot.Device.Usb
         public override Power Power => Power.Zero; // not clearly defined for variable source
 
         /// <summary>Initializes a new instance of the <see cref="VariableSupplyObject"/> class.</summary>
-        /// <param name="value">The value.</param>
-        public VariableSupplyObject(uint value)
-            : base(value)
+        /// <param name="rawValue">
+        /// The raw value received from or sent to the USB-PD controller which encodes all properties of this PDO. See USB-PD specification for details.
+        /// </param>
+        public VariableSupplyObject(uint rawValue)
+            : base(rawValue)
         {
         }
 

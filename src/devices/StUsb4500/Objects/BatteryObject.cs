@@ -55,9 +55,11 @@ namespace Iot.Device.Usb
         public override Power Power => OperatingPower;
 
         /// <summary>Initializes a new instance of the <see cref="BatteryObject"/> class.</summary>
-        /// <param name="value">The value.</param>
-        public BatteryObject(uint value)
-            : base(value)
+        /// <param name="rawValue">
+        /// The raw value received from or sent to the USB-PD controller which encodes all properties of this PDO. See USB-PD specification for details.
+        /// </param>
+        public BatteryObject(uint rawValue)
+            : base(rawValue)
         {
         }
 
