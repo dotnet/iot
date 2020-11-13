@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="1.1.0-prerelease.20153.1" />
-    <PackageReference Include="Iot.Device.Bindings" Version="1.1.0-prerelease.20153.1" />
+    <PackageReference Include="System.Device.Gpio" Version="1.1.0" />
+    <PackageReference Include="Iot.Device.Bindings" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
