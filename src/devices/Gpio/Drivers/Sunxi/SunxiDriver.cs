@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
+using System.Device.Gpio.Drivers;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -20,13 +21,8 @@ namespace Iot.Device.Gpio.Drivers
     /// It can even drive the internal pins that are not drawn out.
     /// Before you operate, you must be clear about what you are doing.
     /// </remarks>
-    public unsafe class SunxiDriver : GpioDriver
+    public unsafe class SunxiDriver : SysFsDriver
     {
-        /// <summary>
-        /// Internal GPIO controller <see cref="PinNumberingScheme"/>.
-        /// </summary>
-        public PinNumberingScheme InternalGpioControllerPinNumberingScheme { get; set; } = PinNumberingScheme.Board;
-
         private const string GpioMemoryFilePath = "/dev/mem";
         private readonly IDictionary<int, PinState> _pinModes = new Dictionary<int, PinState>();
 
@@ -47,14 +43,12 @@ namespace Iot.Device.Gpio.Drivers
         private readonly int _mapMask = Environment.SystemPageSize - 1;
         private static readonly object s_initializationLock = new object();
         private static readonly object s_sysFsInitializationLock = new object();
-        private GpioController? _internalController;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SunxiDriver"/> class.
         /// </summary>
         protected SunxiDriver()
         {
-            _internalController = new GpioController(InternalGpioControllerPinNumberingScheme);
         }
 
         /// <summary>
@@ -66,7 +60,6 @@ namespace Iot.Device.Gpio.Drivers
         {
             CpuxPortBaseAddress = cpuxPortBaseAddress;
             CpusPortBaseAddress = cpusPortBaseAddress;
-            _internalController = new GpioController(InternalGpioControllerPinNumberingScheme);
         }
 
         /// <summary>
@@ -101,8 +94,7 @@ namespace Iot.Device.Gpio.Drivers
             {
                 if (_pinModes[pinNumber].InUseByInterruptDriver)
                 {
-                    InternalGpioControllerCheck();
-                    _internalController!.ClosePin(pinNumber);
+                    base.ClosePin(pinNumber);
                 }
 
                 if (_pinModes[pinNumber].CurrentPinMode == PinMode.Output)
@@ -266,8 +258,8 @@ namespace Iot.Device.Gpio.Drivers
         {
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            InternalGpioControllerCheck();
-            _internalController!.RegisterCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
+            base.OpenPin(pinNumber);
+            base.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
         }
 
         /// <summary>
@@ -279,8 +271,8 @@ namespace Iot.Device.Gpio.Drivers
         {
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            InternalGpioControllerCheck();
-            _internalController!.UnregisterCallbackForPinValueChangedEvent(pinNumber, callback);
+            base.OpenPin(pinNumber);
+            base.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
         }
 
         /// <summary>
@@ -294,8 +286,8 @@ namespace Iot.Device.Gpio.Drivers
         {
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            InternalGpioControllerCheck();
-            return _internalController!.WaitForEvent(pinNumber, eventTypes, cancellationToken);
+            base.OpenPin(pinNumber);
+            return base.WaitForEvent(pinNumber, eventTypes, cancellationToken);
         }
 
         /// <summary>
@@ -309,8 +301,8 @@ namespace Iot.Device.Gpio.Drivers
         {
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
-            InternalGpioControllerCheck();
-            return _internalController!.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
+            base.OpenPin(pinNumber);
+            return base.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
         }
 
         /// <summary>
@@ -363,11 +355,7 @@ namespace Iot.Device.Gpio.Drivers
                 _gpioPointer1 = IntPtr.Zero;
             }
 
-            if (_internalController != null)
-            {
-                _internalController.Dispose();
-                _internalController = null;
-            }
+            Dispose();
         }
 
         private void Initialize()
@@ -425,14 +413,6 @@ namespace Iot.Device.Gpio.Drivers
             int alphabetPosition = MapPortController(portController);
 
             return alphabetPosition * 32 + port;
-        }
-
-        private void InternalGpioControllerCheck()
-        {
-            if (_internalController is null)
-            {
-                throw new InvalidOperationException("This instance has already been Disposed.");
-            }
         }
 
         private (int PortController, int Port) UnmapPinNumber(int pinNumber)
