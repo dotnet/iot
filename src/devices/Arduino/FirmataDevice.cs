@@ -29,7 +29,7 @@ namespace Iot.Device.Arduino
     {
         private const byte FIRMATA_PROTOCOL_MAJOR_VERSION = 2;
         private const byte FIRMATA_PROTOCOL_MINOR_VERSION = 5; // 2.5 works, but 2.6 is recommended
-        private const int FIRMATA_INIT_TIMEOUT_SECONDS = 4;
+        private const int FIRMATA_INIT_TIMEOUT_SECONDS = 2;
         private static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(500);
         private static readonly TimeSpan ProgrammingTimeout = TimeSpan.FromMilliseconds(900);
 

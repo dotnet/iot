@@ -266,6 +266,8 @@ namespace Iot.Device.Arduino
 
             short sizeOfClass = (short)GetClassSize(classType);
 
+            sizeOfClass += 4; // vtable
+
             _board.Firmata.SendClassDeclaration(classType.MetadataToken, parentToken, sizeOfClass, memberTypes);
         }
 

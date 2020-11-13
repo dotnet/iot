@@ -11,17 +11,18 @@ namespace Iot.Device.Arduino.Tests
 {
     public class FirmataIlExecutorTests : IDisposable
     {
-        private const String PortName = "COM8";
-        private SerialPort _serialPort;
         private ArduinoBoard _board;
         private ArduinoCsCompiler _compiler;
 
         public FirmataIlExecutorTests()
         {
-            _serialPort = new SerialPort(PortName, 115200);
-            _serialPort.Open();
-            _board = new ArduinoBoard(_serialPort.BaseStream);
-            _board.Initialize();
+            var b = ArduinoBoard.FindBoard(ArduinoBoard.GetSerialPortNames(), new List<int>() { 115200 });
+            if (b == null)
+            {
+                throw new NotSupportedException("No board found");
+            }
+
+            _board = b;
             _board.LogMessages += (x, y) => Console.WriteLine(x);
             _compiler = new ArduinoCsCompiler(_board, true);
         }
@@ -30,7 +31,6 @@ namespace Iot.Device.Arduino.Tests
         {
             _compiler.ClearAllData(true);
             _board.Dispose();
-            _serialPort.Dispose();
         }
 
         public static uint AddU(uint a, uint b)

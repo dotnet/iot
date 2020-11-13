@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
 using System.IO;
 using System.IO.Ports;
@@ -16,27 +17,27 @@ namespace Iot.Device.Arduino.Tests
     /// </summary>
     public sealed class BasicFirmataTests : IDisposable
     {
-        private const String PortName = "COM3";
-        private SerialPort _serialPort;
         private ArduinoBoard _board;
 
         public BasicFirmataTests()
         {
-            _serialPort = new SerialPort(PortName, 115200);
-            _serialPort.Open();
-            _board = new ArduinoBoard(_serialPort.BaseStream);
+            var b = ArduinoBoard.FindBoard(ArduinoBoard.GetSerialPortNames(), new List<int>() { 115200 });
+            if (b == null)
+            {
+                throw new NotSupportedException("No board found");
+            }
+
+            _board = b;
         }
 
         public void Dispose()
         {
             _board.Dispose();
-            _serialPort.Dispose();
         }
 
         [Fact]
         public void CheckFirmwareVersion()
         {
-            _board.Initialize();
             Assert.NotNull(_board.FirmwareName);
             Assert.NotEqual(new Version(), _board.FirmwareVersion);
             Assert.True(_board.FirmwareVersion >= Version.Parse("2.11"));
@@ -45,7 +46,6 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void CanBlink()
         {
-            _board.Initialize();
             var ctrl = _board.CreateGpioController(PinNumberingScheme.Logical);
             Assert.NotNull(ctrl);
             ctrl.OpenPin(6, PinMode.Output);
@@ -55,25 +55,6 @@ namespace Iot.Device.Arduino.Tests
             ctrl.Write(6, PinValue.Low);
             ctrl.SetPinMode(6, PinMode.Input);
             ctrl.ClosePin(6);
-        }
-
-        [Theory]
-        [InlineData(2, 2)]
-        [InlineData(1, 0)]
-        [InlineData(4, 1)]
-        [InlineData(10, -1)]
-        public void SomeSwitchTest(int input, int output)
-        {
-            int a = input;
-            int requestVal = a switch
-            {
-                4 | 8 => 1,
-                2 => 2,
-                1 => 0,
-                _ => -1,
-            };
-
-            Assert.Equal(output, requestVal);
         }
     }
 }

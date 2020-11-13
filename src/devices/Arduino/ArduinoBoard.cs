@@ -33,7 +33,7 @@ namespace Iot.Device.Arduino
         private FirmataDevice? _firmata;
         private Version? _firmwareVersion;
         private Version? _protocolVersion;
-        private string? _firmwareName;
+        private string _firmwareName;
         private List<SupportedPinConfiguration> _supportedPinConfigurations;
 
         // Only a delegate, not an event, because one board can only have one compiler attached at a time
@@ -51,6 +51,7 @@ namespace Iot.Device.Arduino
             _serialPortStream = serialPortStream;
             _spiEnabled = 0;
             _supportedPinConfigurations = new List<SupportedPinConfiguration>();
+            _firmwareName = string.Empty;
         }
 
         /// <summary>
@@ -65,6 +66,7 @@ namespace Iot.Device.Arduino
             _serialPort.Open();
             _serialPortStream = _serialPort.BaseStream;
             _supportedPinConfigurations = new List<SupportedPinConfiguration>();
+            _firmwareName = string.Empty;
         }
 
         /// <summary>
@@ -158,6 +160,11 @@ namespace Iot.Device.Arduino
         /// <exception cref="NotSupportedException">The Firmata firmware on the connected board is too old.</exception>
         public virtual void Initialize()
         {
+            if (_firmata != null)
+            {
+                throw new InvalidOperationException("Board already initialized");
+            }
+
             _firmata = new FirmataDevice();
             _firmata.Open(_serialPortStream);
             _firmata.OnError += FirmataOnError;

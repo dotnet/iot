@@ -34,7 +34,7 @@ namespace Arduino.Samples
         /// <param name="args">Unused</param>
         public static void Main(string[] args)
         {
-            string portName = "COM4";
+            string portName = "COM8";
             if (args.Length > 1)
             {
                 portName = args[1];
@@ -105,6 +105,7 @@ namespace Arduino.Samples
             Console.WriteLine(" 9 Run SPI tests with an MCP3008 (experimental)");
             Console.WriteLine(" 0 Detect all devices on the I2C bus");
             Console.WriteLine(" H Read DHT11 Humidity sensor on GPIO 3 (experimental)");
+            Console.WriteLine(" C Test C# IL execution on device (very experimental)");
             Console.WriteLine(" X Exit");
             var key = Console.ReadKey();
             Console.WriteLine();
