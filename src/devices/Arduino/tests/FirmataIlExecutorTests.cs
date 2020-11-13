@@ -11,7 +11,7 @@ namespace Iot.Device.Arduino.Tests
 {
     public class FirmataIlExecutorTests : IDisposable
     {
-        private const String PortName = "COM3";
+        private const String PortName = "COM8";
         private SerialPort _serialPort;
         private ArduinoBoard _board;
         private ArduinoCsCompiler _compiler;
@@ -357,7 +357,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("AndS", 0xF0, 0x1F, 0x10)]
         [InlineData("AndS", 0xF0, 0x00, 0x00)]
         [InlineData("OrS", 0xF0, 0x0F, 0xFF)]
-        [InlineData("NotS", 0xF0, 0, unchecked((int)0xFFFFFF0F))]
+        [InlineData("NotS", 0xF0, 0, -241)]
         [InlineData("NegS", -256, 0, 256)]
         [InlineData("XorS", 0x0F, 0x03, 12)]
         [InlineData("RshUnS", -8, 1, 2147483644)]
