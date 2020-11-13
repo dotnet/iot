@@ -177,10 +177,11 @@ namespace Iot.Device.Arduino
             return LoadCode<T>(method.Method);
         }
 
-        private MemberInfo ResolveMember(MethodBase method, int metadataToken)
+        private MemberInfo? ResolveMember(MethodBase method, int metadataToken)
         {
             Type type = method.DeclaringType;
-            Type[] typeArgs = null, methodArgs = null;
+            Type[] typeArgs = new Type[0];
+            Type[] methodArgs = new Type[0];
 
             if (type.IsGenericType || type.IsGenericTypeDefinition)
             {
@@ -515,7 +516,14 @@ namespace Iot.Device.Arduino
         public ArduinoTask<T> LoadCode<T>(MethodBase methodInfo)
             where T : Delegate
         {
-            byte[] ilBytes = GetIlCode(methodInfo);
+            var body = methodInfo.GetMethodBody();
+            if (body == null)
+            {
+                throw new MissingMethodException($"{methodInfo.DeclaringType} has no implementation");
+            }
+
+            byte[] bytes = body.GetILAsByteArray();
+            byte[] ilBytes = bytes;
             List<int> foreignMethodsRequired = new List<int>();
             List<int> ownMethodsRequired = new List<int>();
             // Maps methodDef to memberRef tokens (for methods declared outside the assembly of the executing code)
@@ -672,7 +680,7 @@ namespace Iot.Device.Arduino
 
         public void Dispose()
         {
-            _board.SetCompilerCallback(null);
+            _board.SetCompilerCallback(null!);
         }
     }
 }

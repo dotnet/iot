@@ -17,7 +17,7 @@ namespace System.Device.Analog
         /// <summary>
         /// Fires when a value is changed for which a trigger is registered
         /// </summary>
-        public event ValueChangedEventHandler ValueChanged;
+        public event ValueChangedEventHandler? ValueChanged;
 
         /// <summary>
         /// Construct an instance of an analog pin.

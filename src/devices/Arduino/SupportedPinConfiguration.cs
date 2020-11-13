@@ -8,9 +8,10 @@ using System.Device.Gpio;
 using System.Linq;
 using System.Text;
 
+#pragma warning disable CS1591
 namespace Iot.Device.Arduino
 {
-    internal class SupportedPinConfiguration
+    public class SupportedPinConfiguration
     {
         public SupportedPinConfiguration(int pin)
         {

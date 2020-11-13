@@ -31,6 +31,7 @@ namespace Iot.Device.Arduino
         private const byte FIRMATA_PROTOCOL_MINOR_VERSION = 5; // 2.5 works, but 2.6 is recommended
         private const int FIRMATA_INIT_TIMEOUT_SECONDS = 4;
         private static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(500);
+        private static readonly TimeSpan ProgrammingTimeout = TimeSpan.FromMilliseconds(900);
 
         private byte _firmwareVersionMajor;
         private byte _firmwareVersionMinor;
@@ -40,8 +41,8 @@ namespace Iot.Device.Arduino
         private int _lastRequestId;
 
         private string _firmwareName;
-        private Stream _firmataStream;
-        private Thread _inputThread;
+        private Stream? _firmataStream;
+        private Thread? _inputThread;
         private bool _inputThreadShouldExit;
         private List<SupportedPinConfiguration> _supportedPinConfigurations;
         private IList<byte> _lastResponse;
@@ -56,13 +57,13 @@ namespace Iot.Device.Arduino
 
         // Event used when waiting for answers (i.e. after requesting firmware version)
         private AutoResetEvent _dataReceived;
-        public event Action<byte, MethodState, int, IList<byte>> OnSchedulerReply;
+        public event Action<byte, MethodState, int, IList<byte>>? OnSchedulerReply;
 
-        public event DigitalPinValueChanged DigitalPortValueUpdated;
+        public event DigitalPinValueChanged? DigitalPortValueUpdated;
 
-        public event AnalogPinValueUpdated AnalogPinValueUpdated;
+        public event AnalogPinValueUpdated? AnalogPinValueUpdated;
 
-        public event Action<string, Exception> OnError;
+        public event Action<string, Exception?>? OnError;
 
         public FirmataDevice()
         {
@@ -78,8 +79,10 @@ namespace Iot.Device.Arduino
             _lastAnalogValues = new Dictionary<int, uint>();
             _lastAnalogValueLock = new object();
             _dataQueue = new Queue<byte>();
+            _lastResponse = new List<byte>();
             _lastRequestId = 1;
             _lastIlExecutionError = 0;
+            _firmwareName = string.Empty;
         }
 
         internal List<SupportedPinConfiguration> PinConfigurations
@@ -92,14 +95,22 @@ namespace Iot.Device.Arduino
 
         public void Open(Stream stream)
         {
-            _firmataStream = stream;
-            if (_firmataStream.CanRead && _firmataStream.CanWrite)
+            lock (_synchronisationLock)
             {
-                StartListening();
-            }
-            else
-            {
-                throw new NotSupportedException("Need a read-write stream to the hardware device");
+                if (_firmataStream != null)
+                {
+                    throw new InvalidOperationException("The device is already open");
+                }
+
+                _firmataStream = stream;
+                if (_firmataStream.CanRead && _firmataStream.CanWrite)
+                {
+                    StartListening();
+                }
+                else
+                {
+                    throw new NotSupportedException("Need a read-write stream to the hardware device");
+                }
             }
         }
 
@@ -119,7 +130,7 @@ namespace Iot.Device.Arduino
             if (_dataReceived != null)
             {
                 _dataReceived.Dispose();
-                _dataReceived = null;
+                _dataReceived = null!;
             }
         }
 
@@ -128,6 +139,11 @@ namespace Iot.Device.Arduino
         /// </summary>
         private void SendString(byte command, string message)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             byte[] bytes = Encoding.Unicode.GetBytes(message);
             lock (_synchronisationLock)
             {
@@ -141,6 +157,11 @@ namespace Iot.Device.Arduino
 
         private void StartListening()
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             if (_inputThread != null && _inputThread.IsAlive)
             {
                 return;
@@ -586,6 +607,11 @@ namespace Iot.Device.Arduino
 
         private bool FillQueue()
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             Span<byte> rawData = stackalloc byte[32];
             int bytesRead = _firmataStream.Read(rawData);
             for (int i = 0; i < bytesRead; i++)
@@ -613,6 +639,11 @@ namespace Iot.Device.Arduino
 
         public Version QueryFirmataVersion()
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             // Try 3 times (because we have to make sure the receiver's input queue is properly synchronized)
             for (int i = 0; i < 3; i++)
             {
@@ -643,6 +674,11 @@ namespace Iot.Device.Arduino
 
         public Version QueryFirmwareVersion(out string firmwareName)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             // Try 3 times (because we have to make sure the receiver's input queue is properly synchronized)
             for (int i = 0; i < 3; i++)
             {
@@ -668,6 +704,11 @@ namespace Iot.Device.Arduino
 
         public void QueryCapabilities()
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 _dataReceived.Reset();
@@ -704,7 +745,7 @@ namespace Iot.Device.Arduino
 
         private T PerformRetries<T>(int numberOfRetries, Func<T> operation)
         {
-            Exception lastException = null;
+            Exception? lastException = null;
             while (numberOfRetries-- > 0)
             {
                 try
@@ -724,6 +765,11 @@ namespace Iot.Device.Arduino
 
         public void SetPinMode(int pin, SupportedMode firmataMode)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             for (int i = 0; i < 3; i++)
             {
                 lock (_synchronisationLock)
@@ -745,6 +791,11 @@ namespace Iot.Device.Arduino
 
         public SupportedMode GetPinMode(int pinNumber)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             return PerformRetries(3, () =>
             {
                 lock (_synchronisationLock)
@@ -784,6 +835,11 @@ namespace Iot.Device.Arduino
         /// </summary>
         public void EnableDigitalReporting()
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             int numPorts = (int)Math.Ceiling(PinConfigurations.Count / 8.0);
             lock (_synchronisationLock)
             {
@@ -806,6 +862,11 @@ namespace Iot.Device.Arduino
 
         public void WriteDigitalPin(int pin, PinValue value)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 _firmataStream.WriteByte((byte)FirmataCommand.SET_DIGITAL_VALUE);
@@ -817,6 +878,11 @@ namespace Iot.Device.Arduino
 
         public void SendI2cConfigCommand()
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 // The command is mandatory, even if the argument is typically ignored
@@ -831,6 +897,11 @@ namespace Iot.Device.Arduino
 
         public void WriteReadI2cData(int slaveAddress,  ReadOnlySpan<byte> writeData, Span<byte> replyData)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             // See documentation at https://github.com/firmata/protocol/blob/master/i2c.md
             lock (_synchronisationLock)
             {
@@ -891,6 +962,11 @@ namespace Iot.Device.Arduino
 
         public void SetPwmChannel(int pin, double dutyCycle)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
@@ -913,6 +989,11 @@ namespace Iot.Device.Arduino
         /// </summary>
         public void EnableAnalogReporting(int pinNumber)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 _lastAnalogValues[pinNumber] = 0; // to make sure this entry exists
@@ -923,6 +1004,11 @@ namespace Iot.Device.Arduino
 
         public void DisableAnalogReporting(int pinNumber)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 _firmataStream.WriteByte((byte)((int)FirmataCommand.REPORT_ANALOG_PIN + pinNumber));
@@ -932,6 +1018,11 @@ namespace Iot.Device.Arduino
 
         public void EnableSpi()
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
@@ -944,6 +1035,11 @@ namespace Iot.Device.Arduino
 
         public void DisableSpi()
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
@@ -990,6 +1086,11 @@ namespace Iot.Device.Arduino
 
         private byte SpiWrite(int csPin, FirmataSpiCommand command, ReadOnlySpan<byte> writeBytes)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             byte requestId = (byte)(_lastRequestId++ & 0x7F);
             _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
             _firmataStream.WriteByte((byte)FirmataSysexCommand.SPI_DATA);
@@ -1005,6 +1106,11 @@ namespace Iot.Device.Arduino
 
         public void SetSamplingInterval(TimeSpan interval)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             int millis = (int)interval.TotalMilliseconds;
             lock (_synchronisationLock)
             {
@@ -1020,6 +1126,11 @@ namespace Iot.Device.Arduino
 
         public void ConfigureSpiDevice(SpiConnectionSettings connectionSettings)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             if (connectionSettings.ChipSelectLine >= 15)
             {
                 // this is currently because we derive the device id from the CS line, and that one has only 4 bits
@@ -1050,6 +1161,11 @@ namespace Iot.Device.Arduino
 
         public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out Ratio humidity)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             temperature = default;
             humidity = default;
             lock (_synchronisationLock)
@@ -1113,6 +1229,11 @@ namespace Iot.Device.Arduino
 
         public void SendMethodIlCode(byte methodIndex, byte[] byteCode)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 const int BYTES_PER_PACKET = 20;
@@ -1145,6 +1266,11 @@ namespace Iot.Device.Arduino
 
         public void ExecuteIlCode(byte codeReference, object[] parameters)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 _dataReceived.Reset();
@@ -1184,6 +1310,11 @@ namespace Iot.Device.Arduino
             if (maxLocals != localTypes.Length || argCount != argTypes.Length)
             {
                 throw new InvalidOperationException("Argument/Variable counts do not match");
+            }
+
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
             }
 
             lock (_synchronisationLock)
@@ -1259,6 +1390,11 @@ namespace Iot.Device.Arduino
 
         public void SendTokenMap(byte codeReference, int[] data)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 // Send four (two pairs) at a time, otherwise the maximum length of the message may be exceeded
@@ -1299,6 +1435,11 @@ namespace Iot.Device.Arduino
 
         public void SendClassDeclaration(Int32 classToken, Int32 parentToken, Int16 sizeOfClass, List<(VariableKind Kind, Int32 FieldToken)> members)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 ushort len = (ushort)members.Count;
@@ -1329,6 +1470,11 @@ namespace Iot.Device.Arduino
 
         public void SendIlResetCommand(bool force)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
@@ -1344,6 +1490,11 @@ namespace Iot.Device.Arduino
 
         public void SendKillTask(byte codeReference)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             lock (_synchronisationLock)
             {
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
@@ -1359,11 +1510,54 @@ namespace Iot.Device.Arduino
 
         private void SendValuesAsTwo7bitBytes(ReadOnlySpan<byte> values)
         {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
             for (int i = 0; i < values.Length; i++)
             {
                 _firmataStream.WriteByte((byte)(values[i] & (uint)sbyte.MaxValue));
                 _firmataStream.WriteByte((byte)(values[i] >> 7 & sbyte.MaxValue));
             }
+        }
+
+        /// <summary>
+        /// Send an integer as 5 bytes (rather than 8, as <see cref="SendValuesAsTwo7bitBytes"/> would do)
+        /// </summary>
+        /// <param name="value">An integer value to send</param>
+        private void Send(Int32 value)
+        {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
+            byte[] data = new byte[5];
+            data[0] = (byte)(value & 0x7F);
+            data[1] = (byte)((value >> 7) & 0x7F);
+            data[2] = (byte)((value >> 14) & 0x7F);
+            data[3] = (byte)((value >> 21) & 0x7F);
+            data[4] = (byte)((value >> 28) & 0x7F);
+            _firmataStream.Write(data);
+        }
+
+        /// <summary>
+        /// Send a short as 2 bytes.
+        /// Note: Only sends 14 bit!
+        /// </summary>
+        /// <param name="value">An integer value to send</param>
+        private void Send(Int16 value)
+        {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
+            Span<byte> data = stackalloc byte[2];
+            data[0] = (byte)(value & 0x7F);
+            data[1] = (byte)((value >> 7) & 0x7F);
+            _firmataStream.Write(data);
         }
 
         /// <summary>

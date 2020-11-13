@@ -8,7 +8,7 @@ namespace Iot.Device.Arduino
     /// Mode bits for the Firmata protocol.
     /// These are used both for capability reporting as well as to set a mode
     /// </summary>
-    internal enum SupportedMode
+    public enum SupportedMode
     {
         /// <summary>
         /// The pin supports digital input

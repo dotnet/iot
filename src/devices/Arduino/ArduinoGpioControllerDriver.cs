@@ -231,7 +231,7 @@ namespace Iot.Device.Arduino
 
         private void FirmataOnDigitalPortValueUpdated(int pin, PinValue newvalue)
         {
-            CallbackContainer cb = null;
+            CallbackContainer cb;
             PinEventTypes eventTypeToFire = PinEventTypes.None;
             lock (_callbackContainersLock)
             {
@@ -277,7 +277,7 @@ namespace Iot.Device.Arduino
                 EventTypes = eventTypes;
             }
 
-            public event PinChangeEventHandler OnPinChanged;
+            public event PinChangeEventHandler? OnPinChanged;
 
             public int PinNumber { get; }
 
