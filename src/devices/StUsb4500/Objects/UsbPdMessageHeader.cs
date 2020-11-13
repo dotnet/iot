@@ -2,10 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Iot.Device.Usb.Enumerations;
-using Iot.Device.Usb.Helper;
 
-namespace Iot.Device.Usb.Objects
+namespace Iot.Device.Usb
 {
     /// <summary>
     /// Represents the header of a USB PD message.

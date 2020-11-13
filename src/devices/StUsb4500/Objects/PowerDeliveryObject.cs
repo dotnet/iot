@@ -4,7 +4,7 @@
 using System;
 using UnitsNet;
 
-namespace Iot.Device.Usb.Objects
+namespace Iot.Device.Usb
 {
     /// <summary>
     /// Base class for all the different power delivery objects (=PDO).

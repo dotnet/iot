@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Iot.Device.Usb.Helper
+namespace Iot.Device.Usb
 {
     internal static class UsbPdObjectHelper
     {

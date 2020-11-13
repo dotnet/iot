@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Iot.Device.Usb.Helper;
 using UnitsNet;
 
-namespace Iot.Device.Usb.Objects
+namespace Iot.Device.Usb
 {
     /// <summary>
     /// Representation of a request data object (=RDO).

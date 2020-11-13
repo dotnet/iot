@@ -6,8 +6,6 @@ using System.Device.I2c;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using Iot.Device.Usb.Enumerations;
-using Iot.Device.Usb.Objects;
 using UnitsNet;
 
 namespace Iot.Device.Usb
