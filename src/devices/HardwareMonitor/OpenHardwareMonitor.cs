@@ -173,10 +173,10 @@ namespace Iot.Device.HardwareMonitor
             {
                 foreach (ManagementObject sensor in searcher.Get())
                 {
-                    string? name = Convert.ToString(sensor["Name"]);
-                    string? identifier = Convert.ToString(sensor["Identifier"]);
-                    string? parent = Convert.ToString(sensor["Parent"]);
-                    string? type = Convert.ToString(sensor["SensorType"]);
+                    string name = Convert.ToString(sensor["Name"])!;
+                    string identifier = Convert.ToString(sensor["Identifier"])!;
+                    string parent = Convert.ToString(sensor["Parent"])!;
+                    string type = Convert.ToString(sensor["SensorType"])!;
                     SensorType typeEnum;
                     if (!Enum.TryParse(type, true, out typeEnum))
                     {
@@ -621,7 +621,7 @@ namespace Iot.Device.HardwareMonitor
             /// <summary>
             /// Creates a sensor instance
             /// </summary>
-            public Sensor(ManagementObject instance, string? name, string? identifier, string? parent, SensorType typeEnum)
+            public Sensor(ManagementObject instance, string name, string identifier, string parent, SensorType typeEnum)
             {
                 _instance = instance;
                 Name = name;
@@ -633,17 +633,17 @@ namespace Iot.Device.HardwareMonitor
             /// <summary>
             /// Name of the sensor
             /// </summary>
-            public string? Name { get; }
+            public string Name { get; }
 
             /// <summary>
             /// Sensor identifier (device path)
             /// </summary>
-            public string? Identifier { get; }
+            public string Identifier { get; }
 
             /// <summary>
             /// Sensor parent
             /// </summary>
-            public string? Parent { get; }
+            public string Parent { get; }
 
             /// <summary>
             /// Kind of sensor
