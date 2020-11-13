@@ -14,6 +14,7 @@ using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Drawing.Processing;
 using Iot.Device.Ssd13xx;
 using Iot.Device.Ssd13xx.Commands;
 using Iot.Device.Ssd13xx.Samples;
@@ -188,7 +189,7 @@ void DisplayImages(Ssd1306 ssd1306)
     Console.WriteLine("Display Images");
     foreach (var image_name in Directory.GetFiles("images", "*.bmp").OrderBy(f => f))
     {
-        using Image<Gray16> image = Image.Load<Gray16>(image_name);
+        using Image<L16> image = Image.Load<L16>(image_name);
         ssd1306.DisplayImage(image);
         Thread.Sleep(1000);
     }
@@ -206,12 +207,16 @@ void DisplayClock(Ssd1306 ssd1306)
     {
         using (Image<Rgba32> image = new Image<Rgba32>(128, 32))
         {
-            image.Mutate(ctx => ctx
-                .Fill(Rgba32.Black)
-                .DrawText(DateTime.Now.ToString("HH:mm:ss"), fontsys, Rgba32.White,
-                    new SixLabors.Primitives.PointF(0, y)));
+            if (image.TryGetSinglePixelSpan(out Span<Rgba32> imageSpan))
+            {
+                imageSpan.Fill(Color.Black);
+            }
 
-            using (Image<Gray16> image_t = image.CloneAs<Gray16>())
+            image.Mutate(ctx => ctx
+                .DrawText(DateTime.Now.ToString("HH:mm:ss"), fontsys, Color.White,
+                    new SixLabors.ImageSharp.PointF(0, y)));
+
+            using (Image<L16> image_t = image.CloneAs<L16>())
             {
                 ssd1306.DisplayImage(image_t);
             }

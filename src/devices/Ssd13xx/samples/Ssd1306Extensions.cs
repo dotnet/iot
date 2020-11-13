@@ -18,7 +18,7 @@ namespace Iot.Device.Ssd13xx.Samples
         /// </summary>
         /// <param name="s">Ssd1306 object.</param>
         /// <param name="image">Image to display.</param>
-        internal static void DisplayImage(this Ssd1306 s, Image<Gray16> image)
+        internal static void DisplayImage(this Ssd1306 s, Image<L16> image)
         {
             Int16 width = 128;
             Int16 pages = 4;
