@@ -24,7 +24,7 @@ namespace Iot.Device.Arduino
             _configuration = configuration;
         }
 
-        public override void EnableAnalogValueChangedEvent(GpioController masterController, int masterPin)
+        public override void EnableAnalogValueChangedEvent(GpioController? masterController, int masterPin)
         {
             // The pin is already open, so analog reporting is enabled, we just need to forward it.
             if (_autoReportingReferenceCount == 0)

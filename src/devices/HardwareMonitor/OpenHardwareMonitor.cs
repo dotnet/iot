@@ -309,7 +309,7 @@ namespace Iot.Device.HardwareMonitor
 #if !NETCOREAPP2_1
         [NotNullWhen(true)]
 #endif
-        out T? average)
+        out T average)
             where T : IQuantity
         {
             double value = 0;
@@ -343,7 +343,7 @@ namespace Iot.Device.HardwareMonitor
 
             if (count == 0)
             {
-                average = default(T);
+                average = default(T)!;
                 return false;
             }
 
@@ -693,18 +693,18 @@ namespace Iot.Device.HardwareMonitor
 #if !NETCOREAPP2_1
             [NotNullWhen(true)]
 #endif
-            out T? value)
+            out T value)
                 where T : IQuantity
             {
                 if (!_typeMap.TryGetValue(SensorType, out var elem))
                 {
-                    value = default(T);
+                    value = default(T)!;
                     return false;
                 }
 
                 if (typeof(T) != elem.Type)
                 {
-                    value = default(T);
+                    value = default(T)!;
                     return false;
                 }
 

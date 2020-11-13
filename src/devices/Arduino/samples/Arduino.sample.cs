@@ -81,7 +81,7 @@ namespace Arduino.Samples
             Debug.Write(logFile.ToString());
         }
 
-        private static void BoardOnLogMessages(string message, Exception exception)
+        private static void BoardOnLogMessages(string message, Exception? exception)
         {
             Console.WriteLine("Log message: " + message);
             if (exception != null)
@@ -591,16 +591,16 @@ namespace Arduino.Samples
             var analogController = board.CreateAnalogController(0);
             int analogPin = 15;
 
-            analogController.OpenPin(analogPin);
+            var pin = analogController.OpenPin(analogPin);
 
             while (method3.State == MethodState.Running)
             {
-                double value = analogController.ReadVoltage(analogPin);
+                double value = pin.ReadVoltage();
                 Console.WriteLine($"Read analog value as {value:F2}");
                 Thread.Sleep(100);
             }
 
-            analogController.ClosePin(analogPin);
+            analogController.Close(pin);
             method3.WaitForResult();
 
             compiler.ClearAllData(true);

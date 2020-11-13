@@ -13,10 +13,10 @@ namespace Iot.Device.Arduino
     /// </summary>
     public class ArduinoNativeGpioDriver : GpioDriver
     {
-        private readonly IArduinoHardwareLevelAccess _hardwareLevelAccess;
+        private readonly IArduinoHardwareLevelAccess? _hardwareLevelAccess;
         private int _pinCount;
 
-        public ArduinoNativeGpioDriver(IArduinoHardwareLevelAccess hardwareLevelAccess)
+        public ArduinoNativeGpioDriver(IArduinoHardwareLevelAccess? hardwareLevelAccess)
         {
             _hardwareLevelAccess = hardwareLevelAccess;
             _pinCount = 15; // TODO...
@@ -38,12 +38,12 @@ namespace Iot.Device.Arduino
 
         protected override void ClosePin(int pinNumber)
         {
-            _hardwareLevelAccess.SetPinMode(pinNumber, PinMode.Input);
+            _hardwareLevelAccess?.SetPinMode(pinNumber, PinMode.Input);
         }
 
         protected override void SetPinMode(int pinNumber, PinMode mode)
         {
-            _hardwareLevelAccess.SetPinMode(pinNumber, mode);
+            _hardwareLevelAccess?.SetPinMode(pinNumber, mode);
         }
 
         protected override PinMode GetPinMode(int pinNumber)
@@ -58,12 +58,13 @@ namespace Iot.Device.Arduino
 
         protected override PinValue Read(int pinNumber)
         {
-            return _hardwareLevelAccess.ReadPin(pinNumber);
+            // We should not be throwing here, as this results in unnecessary dependencies
+            return _hardwareLevelAccess?.ReadPin(pinNumber) ?? PinValue.Low;
         }
 
         protected override void Write(int pinNumber, PinValue value)
         {
-            _hardwareLevelAccess.WritePin(pinNumber, value == PinValue.High ? 1 : 0);
+            _hardwareLevelAccess?.WritePin(pinNumber, value == PinValue.High ? 1 : 0);
         }
 
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)

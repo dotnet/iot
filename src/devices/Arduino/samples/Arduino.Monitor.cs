@@ -76,7 +76,7 @@ namespace Arduino.Samples
             }
         }
 
-        private static void BoardOnLogMessages(string message, Exception exception)
+        private static void BoardOnLogMessages(string message, Exception? exception)
         {
             Console.WriteLine("Log message: " + message);
             if (exception != null)

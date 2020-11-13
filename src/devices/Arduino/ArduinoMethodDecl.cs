@@ -12,6 +12,11 @@ namespace Iot.Device.Arduino
             MethodBase = methodBase;
             Flags = MethodFlags.None;
             var body = methodBase.GetMethodBody();
+            if (body == null)
+            {
+                throw new InvalidOperationException("Use this ctor only for methods that have a body");
+            }
+
             Token = methodBase.MetadataToken;
             MaxLocals = body.LocalVariables.Count;
             MaxStack = body.MaxStackSize;
@@ -63,11 +68,17 @@ namespace Iot.Device.Arduino
         public int Token { get; }
         public MethodBase MethodBase { get; }
 
-        public MethodInfo? MethodInfo
+        public MethodInfo MethodInfo
         {
             get
             {
-                return MethodBase as MethodInfo;
+                if (MethodBase is MethodInfo info)
+                {
+                    return info;
+                }
+
+                // Can't directly call ctors or fields
+                throw new InvalidOperationException("Not callable Method");
             }
         }
 

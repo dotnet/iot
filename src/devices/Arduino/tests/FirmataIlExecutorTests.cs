@@ -291,11 +291,11 @@ namespace Iot.Device.Arduino.Tests
             var method = _compiler.LoadCode<Func<T1, T2, T3>>(methods[0]);
 
             // First execute the method locally, so we don't have an error in the test
-            T3 result = (T3)methods[0].Invoke(null, new object[] { a, b });
+            T3 result = (T3)methods[0].Invoke(null, new object[] { a!, b! });
             Assert.Equal(expectedResult, result);
 
             // This assertion fails on a timeout
-            Assert.True(method.Invoke(cs.Token, a, b));
+            Assert.True(method.Invoke(cs.Token, a!, b!));
 
             // The task has terminated
             Assert.Equal(MethodState.Stopped, method.State);

@@ -137,8 +137,8 @@ namespace Iot.Device.Arduino
             {
                 object retVal;
                 int inVal = (int)args[0]; // initially, the list contains only ints
-                // The method ended, therefore we know that the only element or args is the return value and can derive its correct type
-                Type returnType = codeRef.MethodInfo.ReturnType;
+                // The method ended, therefore we know that the only element of args is the return value and can derive its correct type
+                Type returnType = codeRef.MethodInfo!.ReturnType;
                 if (returnType == typeof(void))
                 {
                     args = new object[0]; // Empty return set
@@ -164,13 +164,6 @@ namespace Iot.Device.Arduino
             task.AddData(state, args);
         }
 
-        private byte[] GetIlCode(MethodBase methodInstance)
-        {
-            var body = methodInstance.GetMethodBody();
-            byte[] bytes = body.GetILAsByteArray();
-            return bytes;
-        }
-
         public ArduinoTask<T> LoadCode<T>(T method)
             where T : Delegate
         {
@@ -179,7 +172,7 @@ namespace Iot.Device.Arduino
 
         private MemberInfo? ResolveMember(MethodBase method, int metadataToken)
         {
-            Type type = method.DeclaringType;
+            Type type = method.DeclaringType!;
             Type[] typeArgs = new Type[0];
             Type[] methodArgs = new Type[0];
 
@@ -265,7 +258,7 @@ namespace Iot.Device.Arduino
             }
 
             Int32 parentToken = 0;
-            Type parent = classType.BaseType;
+            Type parent = classType.BaseType!;
             if (parent != null)
             {
                 parentToken = parent.MetadataToken;
@@ -522,8 +515,12 @@ namespace Iot.Device.Arduino
                 throw new MissingMethodException($"{methodInfo.DeclaringType} has no implementation");
             }
 
-            byte[] bytes = body.GetILAsByteArray();
-            byte[] ilBytes = bytes;
+            var ilBytes = body.GetILAsByteArray();
+            if (ilBytes == null)
+            {
+                throw new MissingMethodException($"{methodInfo.DeclaringType} has no implementation");
+            }
+
             List<int> foreignMethodsRequired = new List<int>();
             List<int> ownMethodsRequired = new List<int>();
             // Maps methodDef to memberRef tokens (for methods declared outside the assembly of the executing code)
@@ -625,7 +622,7 @@ namespace Iot.Device.Arduino
                 throw new InvalidProgramException("No generics supported");
             }
 
-            MethodBody body = methodInstance.GetMethodBody();
+            MethodBody? body = methodInstance.GetMethodBody();
             if (body == null)
             {
                 throw new InvalidProgramException($"Method {methodInstance.Name} has no implementation.");
@@ -637,7 +634,12 @@ namespace Iot.Device.Arduino
             }
 
             // TODO: Check argument count, Check parameter types, etc., etc.
-            byte[] byteCode = body.GetILAsByteArray();
+            var byteCode = body.GetILAsByteArray();
+            if (byteCode == null)
+            {
+                throw new InvalidProgramException("Method has no implementation");
+            }
+
             if (byteCode.Length >= ushort.MaxValue - 1)
             {
                 // If you hit this limit, some refactoring should be considered...

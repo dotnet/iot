@@ -10,6 +10,7 @@ namespace Iot.Device.Arduino
     /// </summary>
     public static class ArduinoRuntimeCore
     {
+        // TODO: Think about an improved interface to this method
         public static void Sleep(IArduinoHardwareLevelAccess hardwareLevelAccess, int delayMs)
         {
             if (delayMs <= 0)

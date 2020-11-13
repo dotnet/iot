@@ -31,9 +31,9 @@ namespace Arduino.Samples
                 for (int i = 0; i < 20; i++)
                 {
                     _controller.Write(_ledPin, 1);
-                    ArduinoRuntimeCore.Sleep(null, _delay);
+                    ArduinoRuntimeCore.Sleep(null!, _delay);
                     _controller.Write(_ledPin, 0);
-                    ArduinoRuntimeCore.Sleep(null, _delay);
+                    ArduinoRuntimeCore.Sleep(null!, _delay);
                 }
             }
 
