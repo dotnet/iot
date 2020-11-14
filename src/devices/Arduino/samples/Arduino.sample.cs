@@ -12,6 +12,8 @@ using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -34,13 +36,17 @@ namespace Arduino.Samples
         /// <param name="args">Unused</param>
         public static void Main(string[] args)
         {
-            string portName = "COM8";
+            string portName = "INET";
             if (args.Length > 1)
             {
                 portName = args[1];
             }
 
-            TextWriter logFile = new StringWriter();
+            if (portName == "INET")
+            {
+                ConnectToSocket();
+                return;
+            }
 
             using (var port = new SerialPort(portName, 115200))
             {
@@ -55,30 +61,42 @@ namespace Arduino.Samples
                     return;
                 }
 
-                DebugLogStream dls = new DebugLogStream(port.BaseStream, logFile);
+                ConnectWithStream(port.BaseStream);
+            }
+        }
 
-                ArduinoBoard board = new ArduinoBoard(dls);
-                try
+        private static void ConnectWithStream(Stream stream)
+        {
+            ArduinoBoard board = new ArduinoBoard(stream);
+            try
+            {
+                board.LogMessages += BoardOnLogMessages;
+                board.Initialize();
+                Console.WriteLine(
+                    $"Connection successful. Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
+                while (Menu(board))
                 {
-                    board.LogMessages += BoardOnLogMessages;
-                    board.Initialize();
-                    Console.WriteLine($"Connection successful. Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
-                    while (Menu(board))
-                    {
-                    }
-                }
-                catch (TimeoutException x)
-                {
-                    Console.WriteLine($"No answer from board: {x.Message} ");
-                }
-                finally
-                {
-                    port.Close();
-                    board?.Dispose();
                 }
             }
+            catch (TimeoutException x)
+            {
+                Console.WriteLine($"No answer from board: {x.Message} ");
+            }
+            finally
+            {
+                stream.Close();
+                board?.Dispose();
+            }
+        }
 
-            Debug.Write(logFile.ToString());
+        private static void ConnectToSocket()
+        {
+            Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            s.Connect(IPAddress.Loopback, 27015);
+            using (NetworkStream ns = new NetworkStream(s))
+            {
+                ConnectWithStream(ns);
+            }
         }
 
         private static void BoardOnLogMessages(string message, Exception? exception)
@@ -310,7 +328,7 @@ namespace Arduino.Samples
 
         public static void TestAnalogCallback(ArduinoBoard board)
         {
-            const int analogPin = 15;
+            int analogPin = GetAnalogPin1(board);
             var analogController = board.CreateAnalogController(0);
 
             var pin = analogController.OpenPin(analogPin);

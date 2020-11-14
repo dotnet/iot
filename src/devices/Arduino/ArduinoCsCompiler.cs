@@ -268,6 +268,7 @@ namespace Iot.Device.Arduino
 
             sizeOfClass += 4; // vtable
 
+            _board.Log($"Sending class declaration for {classType} (Token 0x{classType.MetadataToken:x8}). Number of members: {memberTypes.Count}, raw size {sizeOfClass}");
             _board.Firmata.SendClassDeclaration(classType.MetadataToken, parentToken, sizeOfClass, memberTypes);
         }
 

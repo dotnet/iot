@@ -1442,8 +1442,8 @@ namespace Iot.Device.Arduino
 
             lock (_synchronisationLock)
             {
-                ushort len = (ushort)members.Count;
-                for (int member = 0; member < members.Count; member++)
+                short len = (short)members.Count;
+                for (short member = 0; member < members.Count; member++)
                 {
                     _dataReceived.Reset();
                     _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
@@ -1453,10 +1453,8 @@ namespace Iot.Device.Arduino
                     Send(classToken);
                     Send(parentToken);
                     Send(sizeOfClass);
-                    _firmataStream.WriteByte((byte)(len & 0x7f));
-                    _firmataStream.WriteByte((byte)(len >> 7));
-                    _firmataStream.WriteByte((byte)(member & 0x7f));
-                    _firmataStream.WriteByte((byte)(member >> 7));
+                    Send(len);
+                    Send(member);
 
                     // TODO: Sending one at a time has a bit much overhead, but lets make this work first
                     _firmataStream.WriteByte((byte)members[member].Kind);
