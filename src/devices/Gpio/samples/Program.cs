@@ -12,7 +12,9 @@ namespace Iot.Device.Gpio.Samples
     {
         private static void Main(string[] args)
         {
-            var pin = 7;
+            // Set debounce delay to 5ms
+            int debounceDelay = 50000;
+            int pin = 7;
 
             Console.WriteLine($"Let's blink an on-board LED!");
 
@@ -21,20 +23,49 @@ namespace Iot.Device.Gpio.Samples
 
             controller.OpenPin(pin, PinMode.InputPullUp);
             led.Trigger = "none";
-            Console.WriteLine($"GPIO pin enabled for use: {pin}");
+            Console.WriteLine($"GPIO pin enabled for use: {pin}.");
+            Console.WriteLine("Press any key to exit.");
 
-            controller.RegisterCallbackForPinValueChangedEvent(7, PinEventTypes.Falling, (sender, args) =>
+            while (!Console.KeyAvailable)
             {
-                Console.WriteLine("Button is pressed.");
-                led.Brightness = 1;
-            });
-            controller.RegisterCallbackForPinValueChangedEvent(7, PinEventTypes.Rising, (sender, args) =>
-            {
-                Console.WriteLine("Button is unpressed.");
-                led.Brightness = 0;
-            });
+                if (Debounce())
+                {
+                    // Button is pressed
+                    led.Brightness = 1;
+                }
+                else
+                {
+                    // Button is unpressed
+                    led.Brightness = 0;
+                }
+            }
 
-            Console.ReadLine();
+            bool Debounce()
+            {
+                long debounceTick = DateTime.Now.Ticks;
+                PinValue buttonState = controller.Read(pin);
+
+                do
+                {
+                    PinValue currentState = controller.Read(pin);
+
+                    if (currentState != buttonState)
+                    {
+                        debounceTick = DateTime.Now.Ticks;
+                        buttonState = currentState;
+                    }
+                }
+                while (DateTime.Now.Ticks - debounceTick < debounceDelay);
+
+                if (buttonState == PinValue.Low)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
     }
 }
