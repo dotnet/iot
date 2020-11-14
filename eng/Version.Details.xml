@@ -18,15 +18,15 @@
   <ProductDependencies>
     <Dependency Name="System.Drawing.Common" Version="5.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>7ef6d50b312217d2f7c17b9697891fa8ab98a19d</Sha>
+      <Sha>56b65e0f66bdf66ad011b94cc0e27d9f714c5721</Sha>
     </Dependency>
     <Dependency Name="System.IO.Ports" Version="5.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>7ef6d50b312217d2f7c17b9697891fa8ab98a19d</Sha>
+      <Sha>56b65e0f66bdf66ad011b94cc0e27d9f714c5721</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry" Version="5.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>7ef6d50b312217d2f7c17b9697891fa8ab98a19d</Sha>
+      <Sha>56b65e0f66bdf66ad011b94cc0e27d9f714c5721</Sha>
     </Dependency>
     <Dependency Name="System.Runtime.WindowsRuntime" Version="4.6.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -34,7 +34,7 @@
     </Dependency>
     <Dependency Name="System.Management" Version="5.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>7ef6d50b312217d2f7c17b9697891fa8ab98a19d</Sha>
+      <Sha>56b65e0f66bdf66ad011b94cc0e27d9f714c5721</Sha>
     </Dependency>
   </ProductDependencies>
 </Dependencies>
