@@ -162,7 +162,7 @@ namespace Iot.Device.DHTxx
             // wait 20 - 40 microseconds
             DelayHelper.DelayMicroseconds(30, true);
 
-            _controller.SetPinMode(_pin, PinMode.InputPullUp);
+            _controller.SetPinMode(_pin, PinMode.Input);
 
             // DHT corresponding signal - LOW - about 80 microseconds
             count = _loopCount;
