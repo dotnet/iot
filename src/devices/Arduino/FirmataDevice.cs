@@ -116,7 +116,8 @@ namespace Iot.Device.Arduino
 
         public void Close()
         {
-            StopThread();
+            _inputThreadShouldExit = true;
+
             lock (_synchronisationLock)
             {
                 if (_firmataStream != null)
@@ -125,7 +126,10 @@ namespace Iot.Device.Arduino
                 }
 
                 _firmataStream = null;
+
             }
+
+            StopThread();
 
             if (_dataReceived != null)
             {
@@ -612,7 +616,8 @@ namespace Iot.Device.Arduino
                 throw new ObjectDisposedException(nameof(FirmataDevice));
             }
 
-            Span<byte> rawData = stackalloc byte[32];
+            Span<byte> rawData = stackalloc byte[100];
+
             int bytesRead = _firmataStream.Read(rawData);
             for (int i = 0; i < bytesRead; i++)
             {

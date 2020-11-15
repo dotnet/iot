@@ -93,7 +93,8 @@ namespace Arduino.Samples
         {
             Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             s.Connect(IPAddress.Loopback, 27015);
-            using (NetworkStream ns = new NetworkStream(s))
+            s.NoDelay = true;
+            using (NetworkStream ns = new NetworkStream(s, true))
             {
                 ConnectWithStream(ns);
             }
