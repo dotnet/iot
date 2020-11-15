@@ -29,7 +29,7 @@ namespace Iot.Device.Arduino
     public class ArduinoBoard : IDisposable
     {
         private SerialPort? _serialPort;
-        private Stream _serialPortStream;
+        private Stream _dataStream;
         private FirmataDevice? _firmata;
         private Version? _firmwareVersion;
         private Version? _protocolVersion;
@@ -48,7 +48,7 @@ namespace Iot.Device.Arduino
         /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
         public ArduinoBoard(Stream serialPortStream)
         {
-            _serialPortStream = serialPortStream;
+            _dataStream = serialPortStream;
             _spiEnabled = 0;
             _supportedPinConfigurations = new List<SupportedPinConfiguration>();
             _firmwareName = string.Empty;
@@ -64,7 +64,7 @@ namespace Iot.Device.Arduino
         {
             _serialPort = new SerialPort(portName, baudRate);
             _serialPort.Open();
-            _serialPortStream = _serialPort.BaseStream;
+            _dataStream = _serialPort.BaseStream;
             _supportedPinConfigurations = new List<SupportedPinConfiguration>();
             _firmwareName = string.Empty;
         }
@@ -166,7 +166,7 @@ namespace Iot.Device.Arduino
             }
 
             _firmata = new FirmataDevice();
-            _firmata.Open(_serialPortStream);
+            _firmata.Open(_dataStream);
             _firmata.OnError += FirmataOnError;
             _protocolVersion = _firmata.QueryFirmataVersion();
             if (_protocolVersion < _firmata.QuerySupportedFirmataVersion())
@@ -369,11 +369,11 @@ namespace Iot.Device.Arduino
         protected virtual void Dispose(bool disposing)
         {
             // Do this first, to force any blocking read operations to end
-            if (_serialPortStream != null)
+            if (_dataStream != null)
             {
-                _serialPortStream.Close();
-                _serialPortStream.Dispose();
-                _serialPortStream = null!;
+                _dataStream.Close();
+                _dataStream.Dispose();
+                _dataStream = null!;
             }
 
             if (_serialPort != null)
