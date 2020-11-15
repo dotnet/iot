@@ -223,11 +223,6 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException("Only reference types supported");
             }
 
-            HashSet<Type> allTypesToLoad = new HashSet<Type>();
-
-            // The method may also collect base types (such as int or bool). We'll drop them later
-            DetermineReferencedClasses(allTypesToLoad, classType);
-
             HashSet<Type> baseTypes = new HashSet<Type>();
 
             baseTypes.Add(classType);
@@ -242,7 +237,7 @@ namespace Iot.Device.Arduino
         private void SendClassDeclaration(Type classType)
         {
             List<FieldInfo> fields = new List<FieldInfo>();
-            List<MethodInfo> methods = new List<MethodInfo>();
+            List<MemberInfo> methods = new List<MemberInfo>();
             GetFields(classType, fields, methods);
 
             List<(VariableKind, Int32)> memberTypes = new List<(VariableKind, Int32)>();
@@ -272,10 +267,10 @@ namespace Iot.Device.Arduino
             _board.Firmata.SendClassDeclaration(classType.MetadataToken, parentToken, sizeOfClass, memberTypes);
         }
 
-        private static void GetFields(Type classType, List<FieldInfo> fields, List<MethodInfo> methods)
+        private static void GetFields(Type classType, List<FieldInfo> fields, List<MemberInfo> methods)
         {
             foreach (var m in classType.GetMembers(BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static |
-                                                   BindingFlags.NonPublic))
+                                                   BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
             {
                 if (m is FieldInfo field)
                 {
@@ -286,13 +281,17 @@ namespace Iot.Device.Arduino
                     // TODO: Do we really need all, or is the ctor sufficient?
                     methods.Add(method);
                 }
+                else if (m is ConstructorInfo ctor)
+                {
+                    methods.Add(ctor);
+                }
             }
         }
 
         private int GetClassSize(Type classType)
         {
             List<FieldInfo> fields = new List<FieldInfo>();
-            List<MethodInfo> methods = new List<MethodInfo>();
+            List<MemberInfo> methods = new List<MemberInfo>();
             GetFields(classType, fields, methods);
             int size = 0;
             foreach (var f in fields)
@@ -478,6 +477,13 @@ namespace Iot.Device.Arduino
             List<int> foreignMethodsRequired = new List<int>();
             List<int> ownMethodsRequired = new List<int>();
             List<MethodBase> ret = new List<MethodBase>();
+            if (methodInfo.IsAbstract)
+            {
+                // This is a method that will never be called directly, so we can safely skip it.
+                // There won't be code for it, anyway.
+                return ret;
+            }
+
             GetMethodDependencies(methodInfo, foreignMethodsRequired, ownMethodsRequired);
             List<int> combined = foreignMethodsRequired;
             combined.AddRange(ownMethodsRequired);
@@ -495,10 +501,12 @@ namespace Iot.Device.Arduino
                 if (resolved is MethodInfo me)
                 {
                     ret.Add(me);
+                    ret.AddRange(CollectDependencies(me));
                 }
                 else if (resolved is ConstructorInfo co)
                 {
                     ret.Add(co);
+                    ret.AddRange(CollectDependencies(co));
                 }
                 else
                 {
@@ -631,10 +639,10 @@ namespace Iot.Device.Arduino
                 throw new InvalidProgramException($"Method {methodInstance.Name} has no implementation.");
             }
 
-            if (body.ExceptionHandlingClauses.Count > 0)
+            /* if (body.ExceptionHandlingClauses.Count > 0)
             {
                 throw new InvalidProgramException("Methods with exception handling are not supported");
-            }
+            } */
 
             // TODO: Check argument count, Check parameter types, etc., etc.
             var byteCode = body.GetILAsByteArray();
