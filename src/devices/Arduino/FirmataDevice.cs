@@ -1334,8 +1334,7 @@ namespace Iot.Device.Arduino
                 _firmataStream.WriteByte(maxLocals);
                 _firmataStream.WriteByte(argCount);
                 SendInt32((int)nativeMethod);
-                byte[] param = BitConverter.GetBytes(declarationToken);
-                SendValuesAsTwo7bitBytes(param);
+                SendInt32(declarationToken);
 
                 _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
                 _firmataStream.Flush();
