@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Max7219
 {
@@ -20,12 +19,12 @@ namespace Iot.Device.Max7219
         Right,
 
         /// <summary>
-        /// each device is turned 90 degree to the left
+        /// each device is turned by 180 degree
         /// </summary>
         Half,
 
         /// <summary>
-        /// each device is turned by 180 degree
+        /// each device is turned 90 degree to the left
         /// </summary>
         Left,
     }

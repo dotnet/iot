@@ -58,7 +58,6 @@ foreach (var device in devices)
 {
     Console.WriteLine($"Description: {device.Description}");
     Console.WriteLine($"Flags: {device.Flags}");
-    Console.WriteLine($"Handle: {device.FtHandle}");
     Console.WriteLine($"Id: {device.Id}");
     Console.WriteLine($"Location Id: {device.LocId}");
     Console.WriteLine($"Serial Number: {device.SerialNumber}");
@@ -119,7 +118,7 @@ The example below shows how to blink a led on GPIO2 and then read the value. It'
 
 ```csharp
     const int Gpio2 = 2;
-    var gpioController = new GpioController(PinNumberingScheme.Board, new Ft2222Gpio());
+    var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
 
     // Opening GPIO2
     gpioController.OpenPin(Gpio2);

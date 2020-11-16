@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -30,7 +29,7 @@ namespace Iot.Device.SenseHat
         /// Constructs instance of SenseHatLedMatrixI2c
         /// </summary>
         /// <param name="i2cDevice">I2C device used to communicate with the device</param>
-        public SenseHatLedMatrixI2c(I2cDevice i2cDevice = null)
+        public SenseHatLedMatrixI2c(I2cDevice? i2cDevice = null)
         {
             _i2c = i2cDevice ?? CreateDefaultI2cDevice();
             Fill(Color.Black);
@@ -41,7 +40,7 @@ namespace Iot.Device.SenseHat
         {
             if (colors.Length != NumberOfPixels)
             {
-                throw new ArgumentException($"`{nameof(colors)}` must have exactly {NumberOfPixels} elements.");
+                throw new ArgumentException(nameof(colors), $"Value must be {NumberOfPixels} elements. Length: {nameof(colors)}.");
             }
 
             Span<byte> buffer = stackalloc byte[FrameBufferLength + 1];
@@ -135,7 +134,7 @@ namespace Iot.Device.SenseHat
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static (byte r, byte g, byte b) DestructColor(Color color)
+        private static (byte R, byte G, byte B) DestructColor(Color color)
         {
             // 5-bit (shift by 3) look much closer to native driver (SysFs implementation)
             // but this driver is directly reflecting the registers so we will leave the
@@ -147,14 +146,11 @@ namespace Iot.Device.SenseHat
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int PositionToAddress(int x, int y)
-        {
-            return y * 24 + x;
-        }
+        private static int PositionToAddress(int x, int y) => y * 24 + x;
 
         private static I2cDevice CreateDefaultI2cDevice()
         {
-            var settings = new I2cConnectionSettings(1, I2cAddress);
+            I2cConnectionSettings settings = new(1, I2cAddress);
             return I2cDevice.Create(settings);
         }
 
@@ -162,7 +158,7 @@ namespace Iot.Device.SenseHat
         public override void Dispose()
         {
             _i2c?.Dispose();
-            _i2c = null;
+            _i2c = null!;
         }
     }
 }

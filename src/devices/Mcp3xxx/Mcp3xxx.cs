@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Spi;
@@ -64,8 +63,7 @@ namespace Iot.Device.Adc
             if (valueChannel / 2 != referenceChannel / 2 || valueChannel == referenceChannel)
             {
                 throw new ArgumentException(
-                    $"ADC differential channels must be different and part of the same channel pairing.",
-                    nameof(valueChannel) + " " + nameof(referenceChannel));
+                    $"ADC differential channels must be different and part of the same channel pairing. {nameof(valueChannel)} - {nameof(referenceChannel)}");
             }
         }
 
@@ -108,8 +106,7 @@ namespace Iot.Device.Adc
 
             if (valueChannel == referenceChannel)
             {
-                throw new ArgumentException($"ADC differential channels must be different.",
-                    nameof(valueChannel) + " " + nameof(referenceChannel));
+                throw new ArgumentException(nameof(valueChannel), $"ADC differential channels must be different. {nameof(valueChannel)} - {nameof(referenceChannel)}");
             }
 
             return ReadInternal(valueChannel, InputType.SingleEnded, _adcResolutionBits) -
@@ -121,10 +118,7 @@ namespace Iot.Device.Adc
         /// </summary>
         /// <param name="channel">Channel which value should be read from (valid values: 0 to channelcount - 1)</param>
         /// <returns>A value corresponding to relative voltage level on specified device channel</returns>
-        public virtual int Read(int channel)
-        {
-            return ReadInternal(channel, InputType.SingleEnded, _adcResolutionBits);
-        }
+        public virtual int Read(int channel) => ReadInternal(channel, InputType.SingleEnded, _adcResolutionBits);
 
         /// <summary>
         /// Reads a value from the device

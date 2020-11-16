@@ -1,13 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace System.Device.I2c
 {
     /// <summary>
     /// The communications channel to a device on an I2C bus.
     /// </summary>
-    public abstract class I2cDevice : IDisposable
+    public abstract partial class I2cDevice : IDisposable
     {
         /// <summary>
         /// The connection settings of a device on an I2C bus. The connection settings are immutable after the device is created
@@ -67,7 +66,7 @@ namespace System.Device.I2c
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                return new Windows10I2cDevice(settings);
+                return CreateWindows10I2cDevice(settings);
             }
             else
             {

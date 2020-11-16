@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -36,7 +35,7 @@ namespace Iot.Device.Sht3x
         {
             get
             {
-                ReadTempAndHumi();
+                ReadTempAndHumidity();
                 return Temperature.FromDegreesCelsius(_temperature);
             }
         }
@@ -46,12 +45,12 @@ namespace Iot.Device.Sht3x
         /// <summary>
         /// SHT3x Relative Humidity (%)
         /// </summary>
-        public double Humidity
+        public Ratio Humidity
         {
             get
             {
-                ReadTempAndHumi();
-                return _humidity;
+                ReadTempAndHumidity();
+                return Ratio.FromPercent(_humidity);
             }
         }
 
@@ -92,16 +91,14 @@ namespace Iot.Device.Sht3x
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
 
         /// <summary>
         /// SHT3x Soft Reset
         /// </summary>
-        public void Reset()
-        {
+        public void Reset() =>
             Write(Register.SHT_RESET);
-        }
 
         /// <summary>
         /// Set SHT3x Heater
@@ -122,7 +119,7 @@ namespace Iot.Device.Sht3x
         /// <summary>
         /// Read Temperature and Humidity
         /// </summary>
-        private void ReadTempAndHumi()
+        private void ReadTempAndHumidity()
         {
             Span<byte> writeBuff = stackalloc byte[]
             {

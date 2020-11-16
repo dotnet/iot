@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Text;
@@ -13,8 +12,9 @@ namespace System.Device.Pwm.Channels
     /// </summary>
     internal class UnixPwmChannel : PwmChannel
     {
-        private readonly int _chip;
-        private readonly int _channel;
+        protected readonly int _chip;
+        protected readonly int _channel;
+
         private readonly string _chipPath;
         private readonly string _channelPath;
 
@@ -39,7 +39,7 @@ namespace System.Device.Pwm.Channels
             _chip = chip;
             _channel = channel;
             _chipPath = $"/sys/class/pwm/pwmchip{_chip}";
-            _channelPath = $"{_chipPath}/pwm{_channel}";
+            _channelPath = $"{_chipPath}/{ChannelName}";
 
             Validate();
             Open();
@@ -52,6 +52,10 @@ namespace System.Device.Pwm.Channels
             int currentDutyCycleNs = GetCurrentDutyCycleNs(dutyCycleFile);
             SetFrequency(frequency, dutyCycle, currentDutyCycleNs);
         }
+
+        /// <summary>The sysfs name of the PWM channel</summary>
+        /// <remarks>May be overriden to allow for non-standard sysfs naming.</remarks>
+        protected virtual string ChannelName => $"pwm{_channel}";
 
         private static int GetCurrentDutyCycleNs(FileStream dutyCycleFile)
         {
@@ -230,9 +234,9 @@ namespace System.Device.Pwm.Channels
         protected override void Dispose(bool disposing)
         {
             _dutyCycleWriter?.Dispose();
-            _dutyCycleWriter = null;
+            _dutyCycleWriter = null!;
             _frequencyWriter?.Dispose();
-            _frequencyWriter = null;
+            _frequencyWriter = null!;
             Close();
             base.Dispose(disposing);
         }

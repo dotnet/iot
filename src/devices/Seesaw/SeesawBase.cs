@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -31,6 +30,7 @@ namespace Iot.Device.Seesaw
         /// will be disposed when the along with the SeeSaw device</param>
         public Seesaw(I2cDevice i2cDevice)
         {
+            I2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             Initialize(i2cDevice);
         }
 
@@ -55,10 +55,8 @@ namespace Iot.Device.Seesaw
         /// <summary>
         /// Performs a soft reset of the SeeSaw module.
         /// </summary>
-        public void SoftwareReset()
-        {
+        public void SoftwareReset() =>
             WriteByte(SeesawModule.Status, SeesawFunction.StatusSwrst, 0xFF);
-        }
 
         /// <summary>
         /// Initializes the Seesaw device.
@@ -66,10 +64,7 @@ namespace Iot.Device.Seesaw
         /// </summary>
         protected void Initialize(I2cDevice i2cDevice)
         {
-            I2cDevice = i2cDevice;
-
             SoftwareReset();
-
             DelayHelper.DelayMilliseconds(10, true);
 
             if (ReadByte(SeesawModule.Status, SeesawFunction.StatusHwId) != SessawHardwareId)
@@ -165,7 +160,7 @@ namespace Iot.Device.Seesaw
         public void Dispose()
         {
             I2cDevice?.Dispose();
-            I2cDevice = null;
+            I2cDevice = null!;
         }
     }
 }

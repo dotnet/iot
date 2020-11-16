@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio;
 
@@ -8,12 +7,11 @@ namespace force_sensitive_resistor
 {
     class FsrWithCapacitorSample
     {
-        private GpioController _controller;
+        private readonly GpioController _controller = new();
         private int _pinNumber = 18; // set the reading pin number
 
         public FsrWithCapacitorSample()
         {
-            _controller = new GpioController();
             _controller.OpenPin(_pinNumber);
         }
 

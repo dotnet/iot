@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -19,6 +18,9 @@ namespace Iot.Device.Bmxx80
     /// </summary>
     public class Bme680 : Bmxx80Base
     {
+        private static readonly Temperature DefaultAmbientTemperature = Temperature.FromDegreesCelsius(20);
+        private readonly Temperature _ambientTemperatureUserDefault;
+
         /// <summary>
         /// Default I2C bus address.
         /// </summary>
@@ -37,7 +39,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Calibration data for the <see cref="Bme680"/>.
         /// </summary>
-        private Bme680CalibrationData _bme680Calibration;
+        private Bme680CalibrationData? _bme680Calibration;
 
         /// <inheritdoc/>
         protected override int TempCalibrationFactor => 16;
@@ -59,10 +61,22 @@ namespace Iot.Device.Bmxx80
         /// Initialize a new instance of the <see cref="Bme680"/> class.
         /// </summary>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
-        public Bme680(I2cDevice i2cDevice)
+        /// <param name="ambientTemperatureDefault">Assumed ambient temperature for startup. Used for initialization of the gas measurement
+        /// if the temperature cannot be read during a reset.</param>
+        public Bme680(I2cDevice i2cDevice, Temperature ambientTemperatureDefault)
             : base(DeviceId, i2cDevice)
         {
+            _ambientTemperatureUserDefault = ambientTemperatureDefault;
             _communicationProtocol = CommunicationProtocol.I2c;
+        }
+
+        /// <summary>
+        /// Initialize a new instance of the <see cref="Bme680"/> class.
+        /// </summary>
+        /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
+        public Bme680(I2cDevice i2cDevice)
+            : this(i2cDevice, DefaultAmbientTemperature)
+        {
         }
 
         /// <summary>
@@ -257,11 +271,11 @@ namespace Iot.Device.Bmxx80
         /// Configures a heater profile, making it ready for use.
         /// </summary>
         /// <param name="profile">The <see cref="Bme680HeaterProfile"/> to configure.</param>
-        /// <param name="targetTemperature">The target temperature in °C. Ranging from 0-400.</param>
-        /// <param name="duration">The duration in ms. Ranging from 0-4032.</param>
-        /// <param name="ambientTemperature">The ambient temperature in °C.</param>
+        /// <param name="targetTemperature">The target temperature. Ranging from 0-400.</param>
+        /// <param name="duration">The measurement durations. Ranging from 0-4032ms.</param>
+        /// <param name="ambientTemperature">The ambient temperature.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the heating profile does not match a defined profile in <see cref="Bme680HeaterProfile"/>.</exception>
-        public void ConfigureHeatingProfile(Bme680HeaterProfile profile, ushort targetTemperature, ushort duration, double ambientTemperature)
+        public void ConfigureHeatingProfile(Bme680HeaterProfile profile, Temperature targetTemperature, Duration duration, Temperature ambientTemperature)
         {
             if (!Enum.IsDefined(typeof(Bme680HeaterProfile), profile))
             {
@@ -269,7 +283,7 @@ namespace Iot.Device.Bmxx80
             }
 
             // read ambient temperature for resistance calculation
-            var heaterResistance = CalculateHeaterResistance(targetTemperature, (short)ambientTemperature);
+            var heaterResistance = CalculateHeaterResistance(targetTemperature, ambientTemperature);
             var heaterDuration = CalculateHeaterDuration(duration);
 
             Span<byte> resistanceCommand = stackalloc[]
@@ -311,7 +325,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="profile">The used <see cref="Bme680HeaterProfile"/>. </param>
         /// <returns></returns>
-        public int GetMeasurementDuration(Bme680HeaterProfile profile)
+        public Duration GetMeasurementDuration(Bme680HeaterProfile profile)
         {
             var measCycles = s_osToMeasCycles[(int)TemperatureSampling];
             measCycles += s_osToMeasCycles[(int)PressureSampling];
@@ -335,10 +349,10 @@ namespace Iot.Device.Bmxx80
 
             if (GasConversionIsEnabled && _heaterConfigs.Exists(config => config.HeaterProfile == profile))
             {
-                measDuration += _heaterConfigs.Single(config => config.HeaterProfile == profile).HeaterDuration;
+                measDuration += _heaterConfigs.Single(config => config.HeaterProfile == profile).HeaterDuration.Milliseconds;
             }
 
-            return (int)Math.Ceiling(measDuration);
+            return Duration.FromMilliseconds(Math.Ceiling(measDuration));
         }
 
         /// <summary>
@@ -349,11 +363,11 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadHumidity(out double humidity)
+        public bool TryReadHumidity(out Ratio humidity)
         {
             if (HumiditySampling == Sampling.Skipped)
             {
-                humidity = double.NaN;
+                humidity = default;
                 return false;
             }
 
@@ -417,15 +431,15 @@ namespace Iot.Device.Bmxx80
         /// Reads the gas resistance. A return value indicates whether the reading succeeded.
         /// </summary>
         /// <param name="gasResistance">
-        /// Contains the measured gas resistance in Ohm if the heater module reached the target temperature and
-        /// the measurement was valid. Contains <see cref="double.NaN"/> otherwise.
+        /// Contains the measured gas resistance if the heater module reached the target temperature and
+        /// the measurement was valid. Undefined otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadGasResistance(out double gasResistance)
+        public bool TryReadGasResistance(out ElectricResistance gasResistance)
         {
             if (!ReadGasMeasurementIsValid() || !ReadHeaterIsStable())
             {
-                gasResistance = double.NaN;
+                gasResistance = default;
                 return false;
             }
 
@@ -450,8 +464,12 @@ namespace Iot.Device.Bmxx80
             FilterMode = Bme680FilteringMode.C0;
 
             _bme680Calibration = (Bme680CalibrationData)_calibrationData;
-            TryReadTemperature(out var temp);
-            ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, 320, 150, temp.DegreesCelsius);
+            if (!TryReadTemperature(out var temp))
+            {
+                temp = _ambientTemperatureUserDefault;
+            }
+
+            ConfigureHeatingProfile(Bme680HeaterProfile.Profile1, Temperature.FromDegreesCelsius(320), Duration.FromMilliseconds(150), temp);
             HeaterProfile = Bme680HeaterProfile.Profile1;
 
             HeaterIsEnabled = true;
@@ -463,8 +481,13 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="adcHumidity">The humidity value read from the device.</param>
         /// <returns>The percentage relative humidity.</returns>
-        private double CompensateHumidity(int adcHumidity)
+        private Ratio CompensateHumidity(int adcHumidity)
         {
+            if (_bme680Calibration is null)
+            {
+                throw new Exception($"{nameof(Bme680)} is incorrectly configured.");
+            }
+
             // Calculate the humidity.
             var temperature = TemperatureFine / 5120.0;
             var var1 = adcHumidity - ((_bme680Calibration.DigH1 * 16.0) + ((_bme680Calibration.DigH3 / 2.0) * temperature));
@@ -483,16 +506,21 @@ namespace Iot.Device.Bmxx80
                 calculatedHumidity = 0.0;
             }
 
-            return calculatedHumidity;
+            return Ratio.FromPercent(calculatedHumidity);
         }
 
         /// <summary>
         /// Compensates the pressure.
         /// </summary>
         /// <param name="adcPressure">The pressure value read from the device.</param>
-        /// <returns>The pressure in Pa.</returns>
+        /// <returns>The measured pressure.</returns>
         private Pressure CompensatePressure(long adcPressure)
         {
+            if (_bme680Calibration is null)
+            {
+                throw new Exception($"{nameof(Bme680)} is incorrectly configured.");
+            }
+
             // Calculate the pressure.
             var var1 = (TemperatureFine / 2.0) - 64000.0;
             var var2 = var1 * var1 * (_bme680Calibration.DigP6 / 131072.0);
@@ -528,29 +556,40 @@ namespace Iot.Device.Bmxx80
             return Convert.ToBoolean(gasMeasValid);
         }
 
-        private double CalculateGasResistance(ushort adcGasRes, byte gasRange)
+        private ElectricResistance CalculateGasResistance(ushort adcGasRes, byte gasRange)
         {
+            if (_bme680Calibration is null)
+            {
+                throw new Exception($"{nameof(Bme680)} is incorrectly configured.");
+            }
+
             var var1 = 1340.0 + 5.0 * _bme680Calibration.RangeSwErr;
             var var2 = var1 * (1.0 + s_k1Lookup[gasRange] / 100.0);
             var var3 = 1.0 + s_k2Lookup[gasRange] / 100.0;
             var gasResistance = 1.0 / (var3 * 0.000000125 * (1 << gasRange) * ((adcGasRes - 512.0) / var2 + 1.0));
 
-            return gasResistance;
+            return ElectricResistance.FromOhms(gasResistance);
         }
 
-        private byte CalculateHeaterResistance(ushort setTemp, short ambientTemp)
+        private byte CalculateHeaterResistance(Temperature setTemp, Temperature ambientTemp)
         {
-            // limit maximum temperature to 400°C
-            if (setTemp > 400)
+            if (_bme680Calibration is null)
             {
-                setTemp = 400;
+                throw new Exception($"{nameof(Bme680)} is incorrectly configured.");
+            }
+
+            // limit maximum temperature to 400°C
+            double temp = setTemp.DegreesCelsius;
+            if (temp > 400)
+            {
+                temp = 400;
             }
 
             var var1 = _bme680Calibration.DigGh1 / 16.0 + 49.0;
             var var2 = _bme680Calibration.DigGh2 / 32768.0 * 0.0005 + 0.00235;
             var var3 = _bme680Calibration.DigGh3 / 1024.0;
-            var var4 = var1 * (1.0 + var2 * setTemp);
-            var var5 = var4 + var3 * ambientTemp;
+            var var4 = var1 * (1.0 + var2 * temp);
+            var var5 = var4 + var3 * ambientTemp.DegreesCelsius;
             var heaterResistance = (byte)(3.4 * (var5 * (4.0 / (4.0 + _bme680Calibration.ResHeatRange)) * (1.0 / (1.0 + _bme680Calibration.ResHeatVal * 0.002)) - 25));
 
             return heaterResistance;
@@ -560,25 +599,26 @@ namespace Iot.Device.Bmxx80
         // Byte [7:6]: multiplication factor of 1, 4, 16 or 64
         // Byte [5:0]: 64 timer values, 1ms step size
         // Values are rounded down
-        private byte CalculateHeaterDuration(ushort duration)
+        private byte CalculateHeaterDuration(Duration duration)
         {
             byte factor = 0;
             byte durationValue;
 
+            ushort shortDuration = (ushort)duration.Milliseconds;
             // check if value exceeds maximum duration
-            if (duration > 0xFC0)
+            if (shortDuration > 0xFC0)
             {
                 durationValue = 0xFF;
             }
             else
             {
-                while (duration > 0x3F)
+                while (shortDuration > 0x3F)
                 {
-                    duration = (ushort)(duration >> 2);
+                    shortDuration = (ushort)(shortDuration >> 2);
                     factor += 1;
                 }
 
-                durationValue = (byte)(duration + factor * 64);
+                durationValue = (byte)(shortDuration + factor * 64);
             }
 
             return durationValue;

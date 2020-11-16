@@ -1,11 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Device.Gpio.Drivers;
-using System.IO;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
@@ -81,7 +78,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("The selected pin is already open.");
+                throw new InvalidOperationException($"Pin {logicalPinNumber} is already open.");
             }
 
             _driver.OpenPin(logicalPinNumber);
@@ -108,7 +105,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not close a pin that is not open.");
+                throw new InvalidOperationException($"Can not close pin {logicalPinNumber} because it is not open.");
             }
 
             _driver.ClosePin(logicalPinNumber);
@@ -125,12 +122,12 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not set a mode to a pin that is not open.");
+                throw new InvalidOperationException($"Can not set a mode to pin {logicalPinNumber} because it is not open.");
             }
 
             if (!_driver.IsPinModeSupported(logicalPinNumber, mode))
             {
-                throw new InvalidOperationException("The pin does not support the selected mode.");
+                throw new InvalidOperationException($"Pin {pinNumber} does not support mode {mode}.");
             }
 
             _driver.SetPinMode(logicalPinNumber, mode);
@@ -146,7 +143,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not get the mode of a pin that is not open.");
+                throw new InvalidOperationException($"Can not get the mode of pin {logicalPinNumber} because it is not open.");
             }
 
             return _driver.GetPinMode(logicalPinNumber);
@@ -185,7 +182,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not read from a pin that is not open.");
+                throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not open.");
             }
 
             return _driver.Read(logicalPinNumber);
@@ -201,12 +198,12 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not write to a pin that is not open.");
+                throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not open.");
             }
 
             if (_driver.GetPinMode(logicalPinNumber) != PinMode.Output)
             {
-                throw new InvalidOperationException("Can not write to a pin that is not set to Output mode.");
+                throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not set to Output mode.");
             }
 
             _driver.Write(logicalPinNumber, value);
@@ -239,7 +236,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not wait for events from a pin that is not open.");
+                throw new InvalidOperationException($"Can not wait for events from pin {logicalPinNumber} because it is not open.");
             }
 
             return _driver.WaitForEvent(logicalPinNumber, eventTypes, cancellationToken);
@@ -272,7 +269,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not wait for events from a pin that is not open.");
+                throw new InvalidOperationException($"Can not wait for events from pin {logicalPinNumber} because it is not open.");
             }
 
             return _driver.WaitForEventAsync(logicalPinNumber, eventTypes, token);
@@ -289,7 +286,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not add callback for a pin that is not open.");
+                throw new InvalidOperationException($"Can not add callback for pin {logicalPinNumber} because it is not open.");
             }
 
             _driver.AddCallbackForPinValueChangedEvent(logicalPinNumber, eventTypes, callback);
@@ -305,7 +302,7 @@ namespace System.Device.Gpio
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             if (!_openPins.Contains(logicalPinNumber))
             {
-                throw new InvalidOperationException("Can not remove callback for a pin that is not open.");
+                throw new InvalidOperationException($"Can not remove callback for pin {logicalPinNumber} because it is not open.");
             }
 
             _driver.RemoveCallbackForPinValueChangedEvent(logicalPinNumber, callback);
@@ -381,29 +378,11 @@ namespace System.Device.Gpio
         /// <returns>A driver that works with the board the program is executing on.</returns>
         private static GpioDriver GetBestDriverForBoardOnLinux()
         {
-            string[] cpuInfoLines = File.ReadAllLines(CpuInfoPath);
-            Regex regex = new Regex(@"Hardware\s*:\s*(.*)");
-            foreach (string cpuInfoLine in cpuInfoLines)
-            {
-                Match match = regex.Match(cpuInfoLine);
-                if (match.Success)
-                {
-                    if (match.Groups.Count > 1)
-                    {
-                        if (match.Groups[1].Value == RaspberryPiHardware)
-                        {
-                            return new RaspberryPi3Driver();
-                        }
+            RaspberryPi3LinuxDriver? internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
 
-                        // Commenting out as HummingBoard driver is not implemented yet, will be added back after implementation
-                        // https://github.com/dotnet/iot/issues/76
-                        // if (match.Groups[1].Value == HummingBoardHardware)
-                        // {
-                        //     return new HummingBoardDriver();
-                        // }
-                        return UnixDriver.Create();
-                    }
-                }
+            if (internalDriver is object)
+            {
+                return new RaspberryPi3Driver(internalDriver);
             }
 
             return UnixDriver.Create();
@@ -421,7 +400,14 @@ namespace System.Device.Gpio
         /// </remarks>
         private static GpioDriver GetBestDriverForBoardOnWindows()
         {
-            string baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
+#pragma warning disable CA1416 // Registry.LocalMachine is only supported on Windows, but we will only hit this method if we are on Windows.
+            string? baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty)?.ToString();
+#pragma warning restore CA1416
+
+            if (baseBoardProduct is null)
+            {
+                throw new Exception("Single board computer type cannot be detected.");
+            }
 
             if (baseBoardProduct == RaspberryPi3Product || baseBoardProduct.StartsWith($"{RaspberryPi3Product} ") ||
                 baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))

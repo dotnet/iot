@@ -32,9 +32,11 @@ There is no specific guidelines what simple and main scenario is but you should 
 
 ## Units
 
-In the most common case units should match [International System of Units (aka. SI)](https://en.wikipedia.org/wiki/International_System_of_Units) with some exceptions:
+Use [UnitsNet](https://github.com/angularsen/UnitsNet) whenever it is possible on any public functions, event or properties. This supports a lot of different types of units. 
 
-- If Iot.Units defines unit it should be used - i.e. for temperature you should use Iot.Units.Temperature
+If your sensor/binding unit is not present in UnitsNet, then most common case units should match [International System of Units (aka. SI)](https://en.wikipedia.org/wiki/International_System_of_Units).
+
+Find examples of [Do and Don't here](../src/devices/README.md#using_units).
 
 ## Lifetime management (or what should be disposed by what)
 
@@ -45,11 +47,12 @@ General rule is: If object cannot be concurrently used by multiple devices then 
 
 With **I2cDevice, SpiDevice and PwmChannel** this is rather clear - object is related with a particular device and cannot be concurrently with anything. There is 1:1 correlation that one object is related with one piece of hardware and cannot be re-used without re-plugging the device and therefore **should be disposed by the device**.
 
-For **GpioController** situation is less clear because one GpioController can be used by multiple devices: different pins on the same controller can be related to different devices. This situation is possible but in most common case new instance of GpioController should be created per device and it should be used to group pins and therefore it **should be disposed by the device**. Having said that GpioController even if designed to be one per devices is possible to use by multiple of them and **it is acceptable to add an optional constructor flag (i.e. `shouldDispose`) defaulting to disposing**.
+For **GpioController** situation is less clear because one GpioController can be used by multiple devices: different pins on the same controller can be related to different devices. This situation is possible but in most common case new instance of GpioController should be created per device and it should be used to group pins and therefore it **should be disposed by the device**. Having said that GpioController even if designed to be one per devices is possible to use by multiple of them and **it is acceptable to add an optional constructor flag (i.e. `shouldDispose`) defaulting to disposing**. Find an example [here of a good implementation](../src/devices/README.md#gpiocontroller)
 
 Example of such justified case could be imaginary `Led` class which wraps one pin. When new imaginary class `LedController` would show up which would wrap multiple `Led`s the input GpioController cannot be safely passed to `Led` class as it would be disposed when `Led` is no longer needed and therefore `Led` class would need to have an option of not disposing it.
-
 
 ## Notes
 
 If you believe for your specific device it makes sense to break any of the rules it might be acceptable - please make sure to mention that in the pull request description.
+
+Find examples of [Do and Don't here](../src/devices/README.md).

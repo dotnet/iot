@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace System.Device.Pwm
 {
@@ -61,7 +60,15 @@ namespace System.Device.Pwm
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                return new Channels.Windows10PwmChannel(
+                return CreateWindows10PwmChannel(
+                    chip,
+                    channel,
+                    frequency,
+                    dutyCyclePercentage);
+            }
+            else if (IsBeagleBoneKernel())
+            {
+                return new Channels.BeagleBonePwmChannel(
                     chip,
                     channel,
                     frequency,
@@ -74,6 +81,23 @@ namespace System.Device.Pwm
                     channel,
                     frequency,
                     dutyCyclePercentage);
+            }
+        }
+
+        private static bool IsBeagleBoneKernel()
+        {
+            try
+            {
+                string kernelVersionInfo = IO.File.ReadAllText(@"/proc/version");
+                // The String.Contains(string, StringComparison) overload wasn't introduced until .Net Standard 2.1
+                return kernelVersionInfo.IndexOf("beagle", StringComparison.InvariantCulture) > 0;
+            }
+            catch (Exception)
+            {
+                // If we can't read the file for some reason, assume it's not a beagle bone.
+                // This ensures we're not suddenly throwing exceptions the clients weren't expecting
+                // at the cost of some potentially weird errors if it is actually a beagle bone kernel.
+                return false;
             }
         }
     }

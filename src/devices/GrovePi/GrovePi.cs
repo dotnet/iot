@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -18,7 +17,7 @@ namespace Iot.Device.GrovePiDevice
     public class GrovePi : IDisposable
     {
         private const byte MaxRetries = 4;
-        private readonly bool _autoDispose;
+        private readonly bool _shouldDispose;
         private I2cDevice _i2cDevice;
 
         /// <summary>
@@ -41,21 +40,21 @@ namespace Iot.Device.GrovePiDevice
         /// GrovePi constructor
         /// </summary>
         /// <param name="i2cDevice">The I2C device. Device address is 0x04</param>
-        /// <param name="autoDispose">True to dispose the I2C device when disposing GrovePi</param>
-        public GrovePi(I2cDevice i2cDevice, bool autoDispose = true)
+        /// <param name="shouldDispose">True to dispose the I2C device when disposing GrovePi</param>
+        public GrovePi(I2cDevice i2cDevice, bool shouldDispose = true)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
-            _autoDispose = autoDispose;
-            GrovePiInfo = new Info() { SoftwareVersion = GetFirmwareVerion() };
+            _shouldDispose = shouldDispose;
+            GrovePiInfo = new Info(GetFirmwareVerion());
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_autoDispose)
+            if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                _i2cDevice = null!;
             }
         }
 
@@ -66,8 +65,13 @@ namespace Iot.Device.GrovePiDevice
         public Version GetFirmwareVerion()
         {
             WriteCommand(GrovePiCommand.Version, 0, 0, 0);
-            byte[] inArray = ReadCommand(GrovePiCommand.Version, 0);
-            return new Version(inArray[1], inArray[2], inArray[3]);
+            byte[]? inArray = ReadCommand(GrovePiCommand.Version, 0);
+            if (inArray is object)
+            {
+                return new Version(inArray[1], inArray[2], inArray[3]);
+            }
+
+            throw new Exception("Unknown firmware version");
         }
 
         /// <summary>
@@ -84,7 +88,7 @@ namespace Iot.Device.GrovePiDevice
                 (byte)command, (byte)(pin), param1, param2
             };
             byte tries = 0;
-            IOException innerEx = null;
+            IOException? innerEx = null;
             // When writing/reading to the I2C port, GrovePi doesn't respond on time in some cases
             // So we wait a little bit before retrying
             // In most cases, the I2C read/write can go thru without waiting
@@ -96,8 +100,7 @@ namespace Iot.Device.GrovePiDevice
                     return;
                 }
                 catch (IOException ex)
-                {
-                    // Give it another try
+                 {
                     innerEx = ex;
                     tries++;
                     Thread.Sleep(10);
@@ -113,7 +116,7 @@ namespace Iot.Device.GrovePiDevice
         /// <param name="command">The GrovePi command</param>
         /// <param name="pin">The pin to read</param>
         /// <returns></returns>
-        public byte[] ReadCommand(GrovePiCommand command, GrovePort pin)
+        public byte[]? ReadCommand(GrovePiCommand command, GrovePort pin)
         {
             int numberBytesToRead = 0;
             switch (command)
@@ -139,7 +142,7 @@ namespace Iot.Device.GrovePiDevice
 
             byte[] outArray = new byte[numberBytesToRead];
             byte tries = 0;
-            IOException innerEx = null;
+            IOException? innerEx = null;
             // When writing/reading the I2C port, GrovePi doesn't respond on time in some cases
             // So we wait a little bit before retrying
             // In most cases, the I2C read/write can go thru without waiting
@@ -171,7 +174,7 @@ namespace Iot.Device.GrovePiDevice
         {
             WriteCommand(GrovePiCommand.DigitalRead, pin, 0, 0);
             byte tries = 0;
-            IOException innerEx = null;
+            IOException? innerEx = null;
             // When writing/reading to the I2C port, GrovePi doesn't respond on time in some cases
             // So we wait a little bit before retrying
             // In most cases, the I2C read/write can go thru without waiting
@@ -198,20 +201,14 @@ namespace Iot.Device.GrovePiDevice
         /// </summary>
         /// <param name="pin">The GroovePi pin to read</param>
         /// <param name="pinLevel">High to put the pin high, Low to put the pin low</param>
-        public void DigitalWrite(GrovePort pin, PinValue pinLevel)
-        {
-            WriteCommand(GrovePiCommand.DigitalWrite, pin, (byte)pinLevel, 0);
-        }
+        public void DigitalWrite(GrovePort pin, PinValue pinLevel) => WriteCommand(GrovePiCommand.DigitalWrite, pin, (byte)pinLevel, 0);
 
         /// <summary>
         /// Setup the pin mode, equivalent of pinMod on Arduino
         /// </summary>
         /// <param name="pin">The GroovePi pin to setup</param>
         /// <param name="mode">THe mode to setup Intput or Output</param>
-        public void PinMode(GrovePort pin, PinMode mode)
-        {
-            WriteCommand(GrovePiCommand.PinMode, pin, (byte)mode, 0);
-        }
+        public void PinMode(GrovePort pin, PinMode mode) => WriteCommand(GrovePiCommand.PinMode, pin, (byte)mode, 0);
 
         /// <summary>
         /// Read an analog value on a pin, equivalent of analogRead on Arduino
@@ -237,9 +234,6 @@ namespace Iot.Device.GrovePiDevice
         /// </summary>
         /// <param name="pin">The GroovePi pin to write</param>
         /// <param name="value">The value to write between 0 and 255</param>
-        public void AnalogWrite(GrovePort pin, byte value)
-        {
-            WriteCommand(GrovePiCommand.AnalogWrite, pin, value, 0);
-        }
+        public void AnalogWrite(GrovePort pin, byte value) => WriteCommand(GrovePiCommand.AnalogWrite, pin, value, 0);
     }
 }

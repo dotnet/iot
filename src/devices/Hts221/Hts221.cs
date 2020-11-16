@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -22,12 +21,7 @@ namespace Iot.Device.Hts221
         /// </summary>
         public Hts221(I2cDevice i2cDevice)
         {
-            if (i2cDevice == null)
-            {
-                throw new ArgumentNullException(nameof(i2cDevice));
-            }
-
-            _i2c = i2cDevice;
+            _i2c = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
             // Highest resolution for both temperature and humidity sensor:
             // 0.007 DegreesCelsius and 0.03 percentage of relative humidity respectively
@@ -52,7 +46,7 @@ namespace Iot.Device.Hts221
         /// <summary>
         /// Humidity in %rH (percentage relative humidity)
         /// </summary>
-        public float Humidity => GetActualHumidity(ReadInt16(Register.Humidity));
+        public Ratio Humidity => GetActualHumidity(ReadInt16(Register.Humidity));
 
         private void WriteByte(Register register, byte data)
         {
@@ -93,13 +87,13 @@ namespace Iot.Device.Hts221
             return Lerp(temperatureRaw, t0raw, t1raw, t0x8C / 8.0f, t1x8C / 8.0f);
         }
 
-        private float GetActualHumidity(short humidityRaw)
+        private Ratio GetActualHumidity(short humidityRaw)
         {
             // datasheet does not specify if calibration points are not changing
             // since this is almost no-op and max output data rate is 12.5Hz let's do it every time
             (short h0raw, short h1raw) = GetHumidityCalibrationPointsRaw();
             (byte h0x2rH, byte h1x2rH) = GetHumidityCalibrationPointsRH();
-            return Lerp(humidityRaw, h0raw, h1raw, h0x2rH / 2.0f, h1x2rH / 2.0f);
+            return Ratio.FromPercent(Lerp(humidityRaw, h0raw, h1raw, h0x2rH / 2.0f, h1x2rH / 2.0f));
         }
 
         private static float Lerp(float x, float x0, float x1, float y0, float y1)
@@ -109,7 +103,7 @@ namespace Iot.Device.Hts221
             return y0 + (x - x0) * yrange / xrange;
         }
 
-        private (ushort t0x8, ushort t1x8) GetTemperatureCalibrationPointsCelsius()
+        private (ushort T0x8, ushort T1x8) GetTemperatureCalibrationPointsCelsius()
         {
             Span<byte> t0t1Lsb = stackalloc byte[2];
             Read(Register.Temperature0LsbDegCx8, t0t1Lsb);
@@ -120,7 +114,7 @@ namespace Iot.Device.Hts221
             return (t0, t1);
         }
 
-        private (short t0, short t1) GetTemperatureCalibrationPointsRaw()
+        private (short T0, short T1) GetTemperatureCalibrationPointsRaw()
         {
             Span<byte> t0t1 = stackalloc byte[4];
             Read(Register.Temperature0Raw, t0t1);
@@ -129,14 +123,14 @@ namespace Iot.Device.Hts221
             return (t0, t1);
         }
 
-        private (byte h0, byte h1) GetHumidityCalibrationPointsRH()
+        private (byte H0, byte H1) GetHumidityCalibrationPointsRH()
         {
             Span<byte> h0h1 = stackalloc byte[2];
             Read(Register.Humidity0rHx2, h0h1);
             return (h0h1[0], h0h1[1]);
         }
 
-        private (short h0, short h1) GetHumidityCalibrationPointsRaw()
+        private (short H0, short H1) GetHumidityCalibrationPointsRaw()
         {
             // space in addressing between both registers therefore do 2 reads
             short h0 = ReadInt16(Register.Humidity0Raw);
@@ -148,7 +142,7 @@ namespace Iot.Device.Hts221
         public void Dispose()
         {
             _i2c?.Dispose();
-            _i2c = null;
+            _i2c = null!;
         }
     }
 }

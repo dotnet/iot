@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -26,17 +25,17 @@ namespace Iot.Device.Display
         /// <summary>
         /// Left colon
         /// </summary>
-        LeftColon = LeftLower | LeftUpper,
-
-        /// <summary>
-        /// Left lower dot
-        /// </summary>
-        LeftLower = 0b0000_0100,
+        LeftColon = LeftUpper | LeftLower,
 
         /// <summary>
         /// Left upper dot
         /// </summary>
-        LeftUpper = 0b0000_1000,
+        LeftUpper = 0b0000_0100,
+
+        /// <summary>
+        /// Left lower dot
+        /// </summary>
+        LeftLower = 0b0000_1000,
 
         /// <summary>
         /// Decimal point (between third and fourth digits)
