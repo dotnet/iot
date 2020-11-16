@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 using System.Device.I2c;
@@ -553,8 +554,10 @@ namespace Arduino.Samples
             // This should just return a reference to the now already loaded method
             var task = compiler.LoadCode<Action<GpioController, int, int>>(ArduinoCompilerSampleMethods.SimpleLedBinding.RunBlink);
 
-            var dependencies = compiler.CollectDependencies(task.MethodInfo.MethodBase);
-            foreach (var dep in dependencies)
+            HashSet<MethodBase> methods = new HashSet<MethodBase>();
+
+            compiler.CollectDependencies(task.MethodInfo.MethodBase, methods);
+            foreach (var dep in methods)
             {
                 // Type is irrelevant here (should probably split this function into loading and preparing)
                 compiler.LoadCode<Action>(dep);

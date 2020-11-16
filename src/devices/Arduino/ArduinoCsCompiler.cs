@@ -66,7 +66,13 @@ namespace Iot.Device.Arduino
         private readonly List<Type> _rootClasses = new List<Type>()
         {
             typeof(System.Object), typeof(System.Type), typeof(System.String),
-            typeof(Array)
+            typeof(Array), typeof(Monitor), typeof(Exception)
+        };
+
+        private readonly List<Type> _replacementRootClasses = new List<Type>()
+        {
+            typeof(MiniObject), typeof(MiniArray), typeof(MiniString), typeof(MiniMonitor),
+            typeof(MiniException)
         };
 
         private readonly ArduinoBoard _board;
@@ -238,6 +244,7 @@ namespace Iot.Device.Arduino
         {
             List<FieldInfo> fields = new List<FieldInfo>();
             List<MemberInfo> methods = new List<MemberInfo>();
+
             GetFields(classType, fields, methods);
 
             List<(VariableKind, Int32)> memberTypes = new List<(VariableKind, Int32)>();
@@ -449,7 +456,7 @@ namespace Iot.Device.Arduino
                 argTypes[i] = (byte)GetVariableType(declaration.MethodBase.GetParameters()[i - startOffset].ParameterType);
             }
 
-            _board.Firmata.SendMethodDeclaration((byte)declaration.Index, declaration.Token, declaration.Flags, (byte)declaration.MaxLocals, (byte)declaration.ArgumentCount, localTypes, argTypes);
+            _board.Firmata.SendMethodDeclaration(declaration.Index, declaration.Token, declaration.Flags, (byte)declaration.MaxLocals, (byte)declaration.ArgumentCount, declaration.NativeMethod, localTypes, argTypes);
         }
 
         private VariableKind GetVariableType(Type t)
@@ -472,16 +479,15 @@ namespace Iot.Device.Arduino
             return VariableKind.Object;
         }
 
-        public List<MethodBase> CollectDependencies(MethodBase methodInfo)
+        public void CollectDependencies(MethodBase methodInfo, HashSet<MethodBase> methods)
         {
             List<int> foreignMethodsRequired = new List<int>();
             List<int> ownMethodsRequired = new List<int>();
-            List<MethodBase> ret = new List<MethodBase>();
             if (methodInfo.IsAbstract)
             {
                 // This is a method that will never be called directly, so we can safely skip it.
                 // There won't be code for it, anyway.
-                return ret;
+                return;
             }
 
             GetMethodDependencies(methodInfo, foreignMethodsRequired, ownMethodsRequired);
@@ -500,30 +506,47 @@ namespace Iot.Device.Arduino
 
                 if (resolved is MethodInfo me)
                 {
-                    ret.Add(me);
-                    ret.AddRange(CollectDependencies(me));
+                    // Ensure we're not scanning the same implementation twice, as this would result
+                    // in a stack overflow when a method is recursive (even indirect)
+                    if (methods.Add(me))
+                    {
+                        CollectDependencies(me, methods);
+                    }
                 }
                 else if (resolved is ConstructorInfo co)
                 {
-                    ret.Add(co);
-                    ret.AddRange(CollectDependencies(co));
+                    if (methods.Add(co))
+                    {
+                        CollectDependencies(co, methods);
+                    }
                 }
                 else
                 {
                     _board.Log($"Token {method} is not a MethodInfo token, but a {resolved.GetType()}.");
                 }
             }
-
-            return ret;
         }
 
         public ArduinoTask<T> LoadCode<T>(MethodBase methodInfo)
             where T : Delegate
         {
+            if (LoadInternalCode(methodInfo, false))
+            {
+                // This method is uncallable.
+                return null!;
+            }
+
+            if (methodInfo.IsAbstract)
+            {
+                return null!;
+            }
+
             var body = methodInfo.GetMethodBody();
             if (body == null)
             {
-                throw new MissingMethodException($"{methodInfo.DeclaringType} has no implementation");
+                // throw new MissingMethodException($"{methodInfo.DeclaringType}.{methodInfo} has no implementation");
+                _board.Log($"Error: {methodInfo.DeclaringType} - {methodInfo} has no implementation");
+                return null!;
             }
 
             var ilBytes = body.GetILAsByteArray();
@@ -535,7 +558,7 @@ namespace Iot.Device.Arduino
             List<int> foreignMethodsRequired = new List<int>();
             List<int> ownMethodsRequired = new List<int>();
             // Maps methodDef to memberRef tokens (for methods declared outside the assembly of the executing code)
-            Dictionary<int, int> tokenMap = new Dictionary<int, int>();
+            List<(int, int)> tokenMap = new List<(int, int)>();
             if (ilBytes.Length > Math.Pow(2, 14) - 1)
             {
                 throw new InvalidProgramException($"Max IL size of real time method is 2^14 Bytes. Actual size is {ilBytes.Length}.");
@@ -559,29 +582,94 @@ namespace Iot.Device.Arduino
                     continue;
                 }
 
-                tokenMap.Add(resolved.MetadataToken, token);
+                _board.Log($"Method {resolved.DeclaringType} - {resolved} is required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
+                // Multiple local (0x0a) tokens can be implemented by the same remote (0x06) instance, so
+                // the left entry of this tuple might not need to be unique
+                tokenMap.Add((resolved.MetadataToken, token));
             }
 
-            if (_numDeclaredMethods >= 255)
+            if (_numDeclaredMethods >= Math.Pow(2, 14) - 1)
             {
-                // In practice, the maximum will be much less on most Arduino boards
-                throw new NotSupportedException("To many methods declared. Only 255 supported.");
+                // In practice, the maximum will be much less on most Arduino boards, due to ram limits
+                throw new NotSupportedException("To many methods declared. Only 2^14 supported.");
             }
 
             var newInfo = new ArduinoMethodDeclaration(_numDeclaredMethods++, methodInfo);
             _methodInfos.Add(methodInfo, newInfo);
-
-            _board.Log($"Method Index {newInfo.Index} is named {methodInfo.Name}.");
+            String methodName = methodInfo.Name;
+            _board.Log($"Method Index {newInfo.Index} is named {methodName}.");
             LoadMethodDeclaration(newInfo);
-            LoadTokenMap((byte)newInfo.Index, tokenMap);
-            _board.Firmata.SendMethodIlCode((byte)newInfo.Index, ilBytes);
+            LoadTokenMap(newInfo.Index, tokenMap);
+            _board.Firmata.SendMethodIlCode(newInfo.Index, ilBytes);
 
             var ret = new ArduinoTask<T>(this, newInfo);
             _activeTasks.Add(ret);
             return ret;
         }
 
-        private void LoadTokenMap(byte codeReference, Dictionary<int, int> tokenMap)
+        /// <summary>
+        /// Checks whether the implementation of the given method should be replaced with an internal call.
+        /// This will for instance apply to the implementation of Object.GetType(), which has no implementation in C#
+        /// </summary>
+        /// <param name="methodInfo">A method info pointer</param>
+        /// <param name="checkOnly">Only check whether there's an internal implementation for this method</param>
+        /// <returns>True if a replacement was found and loaded, false otherwise</returns>
+        private bool LoadInternalCode(MethodBase methodInfo, bool checkOnly)
+        {
+            Type? classType = methodInfo.DeclaringType;
+            if (classType != null && _rootClasses.Contains(classType))
+            {
+                // This is a special class. Maybe we need to replace some methods
+                foreach (var replacement in _replacementRootClasses)
+                {
+                    var attribs = replacement.GetCustomAttributes(typeof(ArduinoReplacementAttribute));
+                    ArduinoReplacementAttribute ia = (ArduinoReplacementAttribute)attribs.Single();
+                    if (ia.TypeToReplace == classType)
+                    {
+                        foreach (var method in replacement.GetMethods())
+                        {
+                            // Todo: This should compare the full signature
+                            if (method.Name != methodInfo.Name)
+                            {
+                                continue;
+                            }
+
+                            // We have found a method that should replace the one in the original class
+                            var attr1 = method.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
+                            if (!attr1.Any())
+                            {
+                                // No replacement attribute -> use the original method
+                                return false;
+                            }
+
+                            if (checkOnly)
+                            {
+                                return true;
+                            }
+
+                            // Is it already loaded?
+                            if (!_methodInfos.ContainsKey(method))
+                            {
+                                var attr = (ArduinoImplementationAttribute)attr1.First();
+                                // Send the new implementation (actually a spezial method number),
+                                // but with the token that matches the original method
+                                ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(_numDeclaredMethods++,
+                                    methodInfo.MetadataToken, method,
+                                    MethodFlags.SpecialMethod, attr.MethodNumber);
+                                _methodInfos.Add(method, decl);
+                                LoadMethodDeclaration(decl);
+                            }
+
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private void LoadTokenMap(int codeReference, List<(int Foreign, int Own)> tokenMap)
         {
             if (tokenMap.Count == 0)
             {
@@ -592,8 +680,8 @@ namespace Iot.Device.Arduino
             int idx = 0;
             foreach (var entry in tokenMap)
             {
-                data[idx] = entry.Key;
-                data[idx + 1] = entry.Value;
+                data[idx] = entry.Foreign;
+                data[idx + 1] = entry.Own;
                 idx += 2;
             }
 
@@ -613,7 +701,7 @@ namespace Iot.Device.Arduino
                 throw new InvalidOperationException("Method must be loaded first.");
             }
 
-            _board.Firmata.ExecuteIlCode((byte)decl.Index, arguments);
+            _board.Firmata.ExecuteIlCode(decl.Index, arguments);
         }
 
         public void KillTask(MethodInfo methodInfo)
@@ -623,7 +711,7 @@ namespace Iot.Device.Arduino
                 throw new InvalidOperationException("No such method known.");
             }
 
-            _board.Firmata.SendKillTask((byte)decl.Index);
+            _board.Firmata.SendKillTask(decl.Index);
         }
 
         private void GetMethodDependencies(MethodBase methodInstance, List<int> foreignMethodTokens, List<int> ownMethodTokens)
@@ -633,10 +721,17 @@ namespace Iot.Device.Arduino
                 throw new InvalidProgramException("No generics supported");
             }
 
+            // Don't analyze the body of a method if we're going to replace it with something else
+            if (LoadInternalCode(methodInstance, true))
+            {
+                return;
+            }
+
             MethodBody? body = methodInstance.GetMethodBody();
             if (body == null)
             {
-                throw new InvalidProgramException($"Method {methodInstance.Name} has no implementation.");
+                // Method has no (visible) implementation, so it certainly has no code dependencies as well
+                return;
             }
 
             /* if (body.ExceptionHandlingClauses.Count > 0)
@@ -654,7 +749,7 @@ namespace Iot.Device.Arduino
             if (byteCode.Length >= ushort.MaxValue - 1)
             {
                 // If you hit this limit, some refactoring should be considered...
-                throw new InvalidProgramException("Maximum method size is 64kb");
+                throw new InvalidProgramException("Maximum method size is 32kb");
             }
 
             // TODO: This is very simplistic so we do not need another parser. But this might have false positives

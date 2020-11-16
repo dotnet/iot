@@ -246,7 +246,7 @@ namespace Iot.Device.Arduino
             LogMessages?.Invoke(message, innerException);
         }
 
-        private void FirmataOnSchedulerReply(byte method, MethodState schedulerMethodState, int numArgs, IList<byte> bytesOfArgs)
+        private void FirmataOnSchedulerReply(int method, MethodState schedulerMethodState, int numArgs, IList<byte> bytesOfArgs)
         {
             object[] data = new object[numArgs];
 

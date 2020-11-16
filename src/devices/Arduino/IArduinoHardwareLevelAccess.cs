@@ -8,25 +8,25 @@ namespace Iot.Device.Arduino
 {
     public interface IArduinoHardwareLevelAccess
     {
-        [ArduinoImplementation(4)]
+        [ArduinoImplementation(ArduinoImplementation.GetTickCount)]
         Int32 GetTickCount();
 
-        [ArduinoImplementation(1)]
+        [ArduinoImplementation(ArduinoImplementation.SetPinMode)]
         void SetPinMode(int pin, PinMode mode);
 
-        [ArduinoImplementation(2)]
+        [ArduinoImplementation(ArduinoImplementation.WritePin)]
         void WritePin(int pin, int value);
 
-        [ArduinoImplementation(3)]
+        [ArduinoImplementation(ArduinoImplementation.ReadPin)]
         int ReadPin(int pin);
 
-        [ArduinoImplementation(5)]
+        [ArduinoImplementation(ArduinoImplementation.SleepMicroseconds)]
         void SleepMicroseconds(int microseconds);
 
-        [ArduinoImplementation(6)]
+        [ArduinoImplementation(ArduinoImplementation.GetMicroseconds)]
         UInt32 GetMicroseconds();
 
-        [ArduinoImplementation(7)]
+        [ArduinoImplementation(ArduinoImplementation.Debug)]
         void DebugValue(int data);
     }
 }
