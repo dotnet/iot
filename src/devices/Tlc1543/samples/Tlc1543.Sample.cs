@@ -4,6 +4,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device.Spi;
+using Iot.Device.Spi;
 
 namespace Iot.Device.Tlc1543.Samples
 {
@@ -17,8 +19,15 @@ namespace Iot.Device.Tlc1543.Samples
         /// </summary>
         public static void Main()
         {
-            Tlc1543 adc = new Tlc1543(24, 5, 23, 25);
-            List<Channel> channelList = new List<Channel>
+            SoftwareSpi spi = new SoftwareSpi(
+                clk: 25,
+                sdi: 23,
+                sdo: 24,
+                cs: 5,
+                settings: new SpiConnectionSettings(-1) { DataBitLength = Tlc1543.SpiDataBitLength });
+
+            Tlc1543 adc = new Tlc1543(spi);
+            Channel[] channels = new Channel[]
             {
                 Channel.A0,
                 Channel.A1,
@@ -26,23 +35,32 @@ namespace Iot.Device.Tlc1543.Samples
                 Channel.A3,
                 Channel.A4
             };
-            adc.ChargeChannel = Channel.SelfTest512;
 
-            int lineAverage = 0;
-            int onLine = 0;
-            List<int> values = adc.ReadChannels(channelList);
-
-            for (int i = 0; i < values.Count; i++)
+            foreach (Channel channel in channels)
             {
-                if (values[i] < 300)
-                {
-                    lineAverage += (i - 2);
-                    onLine++;
-                }
+                Console.WriteLine($"Channel {channel}: {adc.ReadChannel(channel)}");
             }
 
-            double linePosition = ((double)lineAverage / (double)onLine);
-            Console.WriteLine($"Line position: {linePosition}");
+            // or a bit faster
+            // we ignore the first reading
+            adc.ReadPreviousAndChargeChannel(channels[0]);
+            for (int i = 0; i < channels.Length; i++)
+            {
+                // For last reading we need to pass something so let's pass test channel
+                Channel nextChannel = i < channels.Length - 1 ? channels[i + 1] : Channel.SelfTestHalf;
+                int previous = adc.ReadPreviousAndChargeChannel(nextChannel);
+                Console.WriteLine($"Channel {channels[i]}: {previous}");
+            }
+
+            // now continuously read from one channel
+            Channel ch = Channel.A0;
+            int numberOfReadings = 10;
+            adc.ReadPreviousAndChargeChannel(ch);
+
+            for (int i = 0; i < numberOfReadings; i++)
+            {
+                Console.WriteLine($"Channel {ch}: {adc.ReadPreviousAndChargeChannel(ch)}");
+            }
         }
     }
 }
