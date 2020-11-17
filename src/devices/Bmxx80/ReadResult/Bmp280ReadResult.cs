@@ -12,41 +12,15 @@ namespace Iot.Device.Bmxx80.ReadResult
     /// </summary>
     public class Bmp280ReadResult
     {
-        private readonly Temperature? _temperature;
-
         /// <summary>
         /// Collected temperature measurement.
         /// </summary>
-        public Temperature Temperature
-        {
-            get
-            {
-                if (_temperature.HasValue)
-                {
-                    return _temperature.Value;
-                }
-
-                throw new DataException("Temperature sampling was skipped.");
-            }
-        }
-
-        private Pressure? _pressure;
+        public Temperature? Temperature { get; }
 
         /// <summary>
         /// Collected pressure measurement.
         /// </summary>
-        public Pressure Pressure
-        {
-            get
-            {
-                if (_pressure.HasValue)
-                {
-                    return _pressure.Value;
-                }
-
-                throw new DataException("Pressure sampling was skipped.");
-            }
-        }
+        public Pressure? Pressure { get; }
 
         /// <summary>
         /// Initialize a new instance of the <see cref="Bmp280ReadResult"/> class.
@@ -55,8 +29,8 @@ namespace Iot.Device.Bmxx80.ReadResult
         /// <param name="pressure">The <see cref="Pressure"/> measurement.</param>
         public Bmp280ReadResult(Temperature? temperature, Pressure? pressure)
         {
-            _temperature = temperature;
-            _pressure = pressure;
+            Temperature = temperature;
+            Pressure = pressure;
         }
     }
 }

@@ -12,23 +12,10 @@ namespace Iot.Device.Bmxx80.ReadResult
     /// </summary>
     public class Bme280ReadResult : Bmp280ReadResult
     {
-        private readonly Ratio? _humidity;
-
         /// <summary>
         /// Collected humidity measurement.
         /// </summary>
-        public Ratio Humidity
-        {
-            get
-            {
-                if (_humidity.HasValue)
-                {
-                    return _humidity.Value;
-                }
-
-                throw new DataException("Humidity sampling was skipped.");
-            }
-        }
+        public Ratio? Humidity { get; }
 
         /// <summary>
         /// Initialize a new instance of the <see cref="Bme280ReadResult"/> class.
@@ -39,7 +26,7 @@ namespace Iot.Device.Bmxx80.ReadResult
         public Bme280ReadResult(Temperature? temperature, Pressure? pressure, Ratio? humidity)
             : base(temperature, pressure)
         {
-            _humidity = humidity;
+            Humidity = humidity;
         }
     }
 }

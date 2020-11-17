@@ -37,15 +37,18 @@ while (true)
     // var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
     bme80.TryReadAltitude(defaultSeaLevelPressure, out var altValue);
 
-    Console.WriteLine($"Temperature: {readResult.Temperature.DegreesCelsius:0.#}\u00B0C");
-    Console.WriteLine($"Pressure: {readResult.Pressure.Hectopascals:0.##}hPa");
+    Console.WriteLine($"Temperature: {readResult.Temperature?.DegreesCelsius:0.#}\u00B0C");
+    Console.WriteLine($"Pressure: {readResult.Pressure?.Hectopascals:0.##}hPa");
     Console.WriteLine($"Altitude: {altValue:0.##}m");
     Console.WriteLine($"Relative humidity: {readResult.Humidity:0.#}%");
 
     // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
-    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(readResult.Temperature, readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
-    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(readResult.Temperature, readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
-    Thread.Sleep(1000);
+    if (readResult.Temperature != null && readResult.Humidity != null)
+    {
+        Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex((Temperature)readResult.Temperature, (Ratio)readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
+        Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint((Temperature)readResult.Temperature, (Ratio)readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
+        Thread.Sleep(1000);
+    }
 
     // change sampling and filter
     bme80.TemperatureSampling = Sampling.UltraHighResolution;
@@ -63,14 +66,18 @@ while (true)
     // var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
     bme80.TryReadAltitude(defaultSeaLevelPressure, out altValue);
 
-    Console.WriteLine($"Temperature: {readResult.Temperature.DegreesCelsius:0.#}\u00B0C");
-    Console.WriteLine($"Pressure: {readResult.Pressure.Hectopascals:0.##}hPa");
+    Console.WriteLine($"Temperature: {readResult.Temperature?.DegreesCelsius:0.#}\u00B0C");
+    Console.WriteLine($"Pressure: {readResult.Pressure?.Hectopascals:0.##}hPa");
     Console.WriteLine($"Altitude: {altValue:0.##}m");
     Console.WriteLine($"Relative humidity: {readResult.Humidity:0.#}%");
 
     // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
-    Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(readResult.Temperature, readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
-    Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(readResult.Temperature, readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
+    if (readResult.Temperature != null && readResult.Humidity != null)
+    {
+        Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex((Temperature)readResult.Temperature, (Ratio)readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
+        Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint((Temperature)readResult.Temperature, (Ratio)readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
+        Thread.Sleep(1000);
+    }
 
     Thread.Sleep(5000);
 }

@@ -32,8 +32,8 @@ while (true)
     var readResult = i2CBmp280.Read();
 
     // Print out the measured data
-    Console.WriteLine($"Temperature: {readResult.Temperature.DegreesCelsius:0.#}\u00B0C");
-    Console.WriteLine($"Pressure: {readResult.Pressure.Hectopascals:0.##}hPa");
+    Console.WriteLine($"Temperature: {readResult.Temperature?.DegreesCelsius:0.#}\u00B0C");
+    Console.WriteLine($"Pressure: {readResult.Pressure?.Hectopascals:0.##}hPa");
 
     // Note that if you already have the pressure value and the temperature, you could also calculate altitude by using
     // double altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
@@ -51,20 +51,25 @@ while (true)
     readResult = await i2CBmp280.ReadAsync();
 
     // Print out the measured data
-    Console.WriteLine($"Temperature: {readResult.Temperature.DegreesCelsius:0.#}\u00B0C");
-    Console.WriteLine($"Pressure: {readResult.Pressure.Hectopascals:0.##}hPa");
+    Console.WriteLine($"Temperature: {readResult.Temperature?.DegreesCelsius:0.#}\u00B0C");
+    Console.WriteLine($"Pressure: {readResult.Pressure?.Hectopascals:0.##}hPa");
 
     // This time use altitude calculation
-    altValue = WeatherHelper.CalculateAltitude(readResult.Pressure, defaultSeaLevelPressure, readResult.Temperature);
-
-    Console.WriteLine($"Calculated Altitude: {altValue:0.##}m");
+    if (readResult.Temperature != null && readResult.Pressure != null)
+    {
+        altValue = WeatherHelper.CalculateAltitude((Pressure)readResult.Pressure, defaultSeaLevelPressure, (Temperature)readResult.Temperature);
+        Console.WriteLine($"Calculated Altitude: {altValue:0.##}m");
+    }
 
     // Calculate the barometric (corrected) pressure for the local position.
     // Change the stationHeight value above to get a correct reading, but do not be tempted to insert
     // the value obtained from the formula above. Since that estimates the altitude based on pressure,
     // using that altitude to correct the pressure won't work.
-    var correctedPressure = WeatherHelper.CalculateBarometricPressure(readResult.Pressure, readResult.Temperature, stationHeight);
-    Console.WriteLine($"Pressure corrected for altitude {stationHeight:F0}m (with average humidity): {correctedPressure.Hectopascals:0.##} hPa");
+    if (readResult.Temperature != null && readResult.Pressure != null)
+    {
+        var correctedPressure = WeatherHelper.CalculateBarometricPressure((Pressure)readResult.Pressure, (Temperature)readResult.Temperature, stationHeight);
+        Console.WriteLine($"Pressure corrected for altitude {stationHeight:F0}m (with average humidity): {correctedPressure.Hectopascals:0.##} hPa");
+    }
 
     Thread.Sleep(5000);
 }

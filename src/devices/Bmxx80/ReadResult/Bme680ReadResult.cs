@@ -12,23 +12,10 @@ namespace Iot.Device.Bmxx80.ReadResult
     /// </summary>
     public class Bme680ReadResult : Bme280ReadResult
     {
-        private readonly ElectricResistance? _gasResistance;
-
         /// <summary>
         /// Collected gas resistance measurement. NaN if no measurement was performed.
         /// </summary>
-        public ElectricResistance GasResistance
-        {
-            get
-            {
-                if (_gasResistance.HasValue)
-                {
-                    return _gasResistance.Value;
-                }
-
-                throw new DataException("Gas resistance sampling was skipped.");
-            }
-        }
+        public ElectricResistance? GasResistance { get; }
 
         /// <summary>
         /// Initialize a new instance of the <see cref="Bme680ReadResult"/> class.
@@ -40,7 +27,7 @@ namespace Iot.Device.Bmxx80.ReadResult
         public Bme680ReadResult(Temperature? temperature, Pressure? pressure, Ratio? humidity, ElectricResistance? gasResistance)
             : base(temperature, pressure, humidity)
         {
-            _gasResistance = gasResistance;
+            GasResistance = gasResistance;
         }
     }
 }
