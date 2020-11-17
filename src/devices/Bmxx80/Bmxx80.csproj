@@ -23,7 +23,9 @@
     <Compile Include="FilteringMode\Bmx280FilteringMode.cs" />
     <Compile Include="PowerMode\Bme680PowerMode.cs" />
     <Compile Include="PowerMode\Bmx280PowerMode.cs" />
-    <Compile Include="Bmxx80ReadResult.cs" />
+    <Compile Include="ReadResult\Bme280ReadResult.cs" />
+    <Compile Include="ReadResult\Bme680ReadResult.cs" />
+    <Compile Include="ReadResult\Bmp280ReadResult.cs" />
     <Compile Include="Register\Bme680Register.cs" />
     <Compile Include="Register\Bmx280Register.cs" />
     <Compile Include="Register\Bmxx80Register.cs" />

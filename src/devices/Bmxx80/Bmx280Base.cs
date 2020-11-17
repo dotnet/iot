@@ -97,19 +97,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public override bool TryReadTemperature(out Temperature temperature)
-        {
-            if (TemperatureSampling == Sampling.Skipped)
-            {
-                temperature = Temperature.FromDegreesCelsius(double.NaN);
-                return false;
-            }
-
-            var temp = (int)Read24BitsFromRegister((byte)Bmx280Register.TEMPDATA_MSB, Endianness.BigEndian);
-
-            temperature = CompensateTemperature(temp >> 4);
-            return true;
-        }
+        public override bool TryReadTemperature(out Temperature temperature) => TryReadTemperatureCore(out temperature);
 
         /// <summary>
         /// Read the <see cref="Bmx280PowerMode"/> state.
@@ -145,25 +133,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public override bool TryReadPressure(out Pressure pressure)
-        {
-            if (PressureSampling == Sampling.Skipped)
-            {
-                pressure = Pressure.FromPascals(double.NaN);
-                return false;
-            }
-
-            // Read the temperature first to load the t_fine value for compensation.
-            TryReadTemperature(out _);
-
-            // Read pressure data.
-            var press = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
-
-            // Convert the raw value to the pressure in Pa.
-            pressure = CompensatePressure(press >> 4);
-
-            return true;
-        }
+        public override bool TryReadPressure(out Pressure pressure) => TryReadPressureCore(out pressure);
 
         /// <summary>
         /// Calculates the altitude in meters from the specified sea-level pressure(in hPa).
@@ -177,7 +147,7 @@ namespace Iot.Device.Bmxx80
         public bool TryReadAltitude(Pressure seaLevelPressure, out Length altitude)
         {
             // Read the pressure first.
-            var success = TryReadPressure(out var pressure);
+            var success = TryReadPressureCore(out var pressure);
             if (!success)
             {
                 altitude = default;
@@ -185,7 +155,7 @@ namespace Iot.Device.Bmxx80
             }
 
             // Then read the temperature.
-            success = TryReadTemperature(out var temperature);
+            success = TryReadTemperatureCore(out var temperature);
             if (!success)
             {
                 altitude = default;
@@ -260,6 +230,50 @@ namespace Iot.Device.Bmxx80
             base.SetDefaultConfiguration();
             FilterMode = Bmx280FilteringMode.Off;
             StandbyTime = StandbyTime.Ms125;
+        }
+
+        /// <summary>
+        /// Performs a temperature reading.
+        /// </summary>
+        /// <returns><see cref="Temperature"/></returns>
+        protected bool TryReadTemperatureCore(out Temperature temperature)
+        {
+            if (TemperatureSampling == Sampling.Skipped)
+            {
+                temperature = Temperature.FromDegreesCelsius(double.NaN);
+                return false;
+            }
+
+            var temp = (int)Read24BitsFromRegister((byte)Bmx280Register.TEMPDATA_MSB, Endianness.BigEndian);
+
+            temperature = CompensateTemperature(temp >> 4);
+            return true;
+        }
+
+        /// <summary>
+        /// Performs a pressure reading.
+        /// </summary>
+        /// <returns><see cref="Pressure"/></returns>
+        protected bool TryReadPressureCore(out Pressure pressure, bool skipTempFineRead = false)
+        {
+            if (PressureSampling == Sampling.Skipped)
+            {
+                pressure = Pressure.FromPascals(double.NaN);
+                return false;
+            }
+
+            if (!skipTempFineRead)
+            {
+                TryReadTemperatureCore(out _);
+            }
+
+            // Read pressure data.
+            var press = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
+
+            // Convert the raw value to the pressure in Pa.
+            pressure = CompensatePressure(press >> 4);
+
+            return true;
         }
 
         /// <summary>
