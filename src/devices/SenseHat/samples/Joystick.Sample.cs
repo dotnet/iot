@@ -7,7 +7,6 @@ using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Iot.Device.SenseHat;
 
 namespace Iot.Device.SenseHat.Samples
 {
@@ -20,7 +19,7 @@ namespace Iot.Device.SenseHat.Samples
             {
                 char state = j.GetState() switch
                 {
-                    JoystickState.Up=> 'U',
+                    JoystickState.Up => 'U',
                     JoystickState.Down => 'D',
                     JoystickState.Left => 'L',
                     JoystickState.Right => 'R',
