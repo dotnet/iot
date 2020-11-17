@@ -26,8 +26,8 @@ namespace System.Device.Gpio
         private const string HummingBoardProduct = "HummingBoard-Edge";
         private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
 
-        private readonly GpioDriver _driver;
         private readonly HashSet<int> _openPins;
+        private GpioDriver _driver;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GpioController"/> class that will use the logical pin numbering scheme as default.
@@ -344,7 +344,8 @@ namespace System.Device.Gpio
             }
 
             _openPins.Clear();
-            _driver.Dispose();
+            _driver?.Dispose();
+            _driver = null!;
         }
 
         /// <inheritdoc/>
