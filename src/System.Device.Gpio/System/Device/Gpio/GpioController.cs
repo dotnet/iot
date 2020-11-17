@@ -351,7 +351,6 @@ namespace System.Device.Gpio
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         /// <summary>
