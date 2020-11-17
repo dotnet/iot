@@ -39,25 +39,23 @@ while (true)
 
     Console.WriteLine($"Temperature: {readResult.Temperature?.DegreesCelsius:0.#}\u00B0C");
     Console.WriteLine($"Pressure: {readResult.Pressure?.Hectopascals:0.##}hPa");
-    Console.WriteLine($"Altitude: {altValue:0.##}m");
-    Console.WriteLine($"Relative humidity: {readResult.Humidity:0.#}%");
+    Console.WriteLine($"Altitude: {altValue.Meters:0.##}m");
+    Console.WriteLine($"Relative humidity: {readResult.Humidity?.Percent:0.#}%");
 
     // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
     if (readResult.Temperature != null && readResult.Humidity != null)
     {
         Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex((Temperature)readResult.Temperature, (Ratio)readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
         Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint((Temperature)readResult.Temperature, (Ratio)readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
-        Thread.Sleep(1000);
     }
+
+    Thread.Sleep(1000);
 
     // change sampling and filter
     bme80.TemperatureSampling = Sampling.UltraHighResolution;
     bme80.PressureSampling = Sampling.UltraLowPower;
     bme80.HumiditySampling = Sampling.UltraLowPower;
     bme80.FilterMode = Bmx280FilteringMode.X2;
-
-    // set mode forced and read again
-    bme80.SetPowerMode(Bmx280PowerMode.Forced);
 
     // Perform an asynchronous measurement
     readResult = await bme80.ReadAsync();
@@ -68,15 +66,14 @@ while (true)
 
     Console.WriteLine($"Temperature: {readResult.Temperature?.DegreesCelsius:0.#}\u00B0C");
     Console.WriteLine($"Pressure: {readResult.Pressure?.Hectopascals:0.##}hPa");
-    Console.WriteLine($"Altitude: {altValue:0.##}m");
-    Console.WriteLine($"Relative humidity: {readResult.Humidity:0.#}%");
+    Console.WriteLine($"Altitude: {altValue.Meters:0.##}m");
+    Console.WriteLine($"Relative humidity: {readResult.Humidity?.Percent:0.#}%");
 
     // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
     if (readResult.Temperature != null && readResult.Humidity != null)
     {
         Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex((Temperature)readResult.Temperature, (Ratio)readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
         Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint((Temperature)readResult.Temperature, (Ratio)readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
-        Thread.Sleep(1000);
     }
 
     Thread.Sleep(5000);

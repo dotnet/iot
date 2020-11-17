@@ -15,7 +15,7 @@ const int busId = 1;
 // set this to the current sea level pressure in the area for correct altitude readings
 Pressure defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
 
-I2cConnectionSettings i2cSettings = new(busId, Bme680.SecondaryI2cAddress);
+I2cConnectionSettings i2cSettings = new(busId, Bme680.DefaultI2cAddress);
 I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
 
 using Bme680 bme680 = new Bme680(i2cDevice, Temperature.FromDegreesCelsius(20.0));
@@ -91,7 +91,4 @@ while (true)
 
         Thread.Sleep(1000);
     }
-
-    // reset will change settings back to default
-    bme680.Reset();
 }

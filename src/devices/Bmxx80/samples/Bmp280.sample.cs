@@ -39,7 +39,7 @@ while (true)
     // double altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue) which would be more performant.
     i2CBmp280.TryReadAltitude(out var altValue);
 
-    Console.WriteLine($"Calculated Altitude: {altValue:0.##}m");
+    Console.WriteLine($"Calculated Altitude: {altValue.Meters:0.##}m");
     Thread.Sleep(1000);
 
     // change sampling rate
@@ -58,7 +58,7 @@ while (true)
     if (readResult.Temperature != null && readResult.Pressure != null)
     {
         altValue = WeatherHelper.CalculateAltitude((Pressure)readResult.Pressure, defaultSeaLevelPressure, (Temperature)readResult.Temperature);
-        Console.WriteLine($"Calculated Altitude: {altValue:0.##}m");
+        Console.WriteLine($"Calculated Altitude: {altValue.Meters:0.##}m");
     }
 
     // Calculate the barometric (corrected) pressure for the local position.

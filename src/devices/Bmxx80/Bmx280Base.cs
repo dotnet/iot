@@ -240,7 +240,7 @@ namespace Iot.Device.Bmxx80
         {
             if (TemperatureSampling == Sampling.Skipped)
             {
-                temperature = Temperature.FromDegreesCelsius(double.NaN);
+                temperature = default;
                 return false;
             }
 
@@ -258,7 +258,7 @@ namespace Iot.Device.Bmxx80
         {
             if (PressureSampling == Sampling.Skipped)
             {
-                pressure = Pressure.FromPascals(double.NaN);
+                pressure = default;
                 return false;
             }
 

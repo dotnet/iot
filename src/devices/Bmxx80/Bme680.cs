@@ -455,24 +455,6 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Performs a temperature reading.
-        /// </summary>
-        /// <returns><see cref="Temperature"/></returns>
-        protected bool TryReadTemperatureCore(out Temperature temperature)
-        {
-            if (TemperatureSampling == Sampling.Skipped)
-            {
-                temperature = default;
-                return false;
-            }
-
-            var temp = (int)Read24BitsFromRegister((byte)Bme680Register.TEMPDATA, Endianness.BigEndian);
-
-            temperature = CompensateTemperature(temp >> 4);
-            return true;
-        }
-
-        /// <summary>
         /// Compensates the humidity.
         /// </summary>
         /// <param name="adcHumidity">The humidity value read from the device.</param>
@@ -618,6 +600,20 @@ namespace Iot.Device.Bmxx80
             }
 
             return durationValue;
+        }
+
+        private bool TryReadTemperatureCore(out Temperature temperature)
+        {
+            if (TemperatureSampling == Sampling.Skipped)
+            {
+                temperature = default;
+                return false;
+            }
+
+            var temp = (int)Read24BitsFromRegister((byte)Bme680Register.TEMPDATA, Endianness.BigEndian);
+
+            temperature = CompensateTemperature(temp >> 4);
+            return true;
         }
 
         private bool TryReadHumidityCore(out Ratio humidity, bool skipTempFineRead = false)

@@ -183,7 +183,7 @@ namespace Iot.Device.Bmxx80
             }
 
             // Read the temperature first to load the t_fine value for compensation.
-            var hum = Read16BitsFromRegister((byte)Bme680Register.HUMIDITYDATA, Endianness.BigEndian);
+            var hum = Read16BitsFromRegister((byte)Bme280Register.HUMIDDATA, Endianness.BigEndian);
 
             humidity = CompensateHumidity(hum);
             return true;
