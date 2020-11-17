@@ -59,7 +59,7 @@ namespace Iot.Device.SenseHat
         /// </summary>
         public void Read()
         {
-            JoystickState state = ReadState();
+            JoystickState state = GetState();
             HoldingLeft = state.HasFlag(JoystickState.Left);
             HoldingRight = state.HasFlag(JoystickState.Right);
             HoldingUp = state.HasFlag(JoystickState.Up);
@@ -80,20 +80,45 @@ namespace Iot.Device.SenseHat
             _i2c = null!;
         }
 
-        private JoystickState ReadState()
+        /// <summary>
+        /// Read joystick state
+        /// </summary>
+        public JoystickState GetState()
         {
             _i2c.WriteByte(StateRegister);
             return (JoystickState)_i2c.ReadByte();
         }
+    }
 
-        [Flags]
-        private enum JoystickState : byte
-        {
-            Down = 1,
-            Right = 1 << 1,
-            Up = 1 << 2,
-            Button = 1 << 3,
-            Left = 1 << 4,
-        }
+    /// <summary>
+    /// Joystick state
+    /// </summary>
+    [Flags]
+    public enum JoystickState : byte
+    {
+        /// <summary>
+        /// Joystick down
+        /// </summary>
+        Down = 1,
+
+        /// <summary>
+        /// Joystick right
+        /// </summary>
+        Right = 1 << 1,
+
+        /// <summary>
+        /// Joystick up
+        /// </summary>
+        Up = 1 << 2,
+
+        /// <summary>
+        /// Joystick button press
+        /// </summary>
+        Button = 1 << 3,
+
+        /// <summary>
+        /// Joystick left
+        /// </summary>
+        Left = 1 << 4,
     }
 }

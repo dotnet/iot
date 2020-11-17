@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Iot.Device.SenseHat;
 
 namespace Iot.Device.SenseHat.Samples
 {
@@ -17,33 +18,17 @@ namespace Iot.Device.SenseHat.Samples
             using SenseHatJoystick j = new();
             while (true)
             {
-                j.Read();
-
-                Console.Clear();
-                if (j.HoldingUp)
+                char state = j.GetState() switch
                 {
-                    Console.Write("U");
-                }
+                    JoystickState.Up=> 'U',
+                    JoystickState.Down => 'D',
+                    JoystickState.Left => 'L',
+                    JoystickState.Right => 'R',
+                    JoystickState.Button => '!',
+                    _ => '@',
+                };
 
-                if (j.HoldingDown)
-                {
-                    Console.Write("D");
-                }
-
-                if (j.HoldingLeft)
-                {
-                    Console.Write("L");
-                }
-
-                if (j.HoldingRight)
-                {
-                    Console.Write("R");
-                }
-
-                if (j.HoldingButton)
-                {
-                    Console.Write("!");
-                }
+                Console.Write(state);
             }
         }
     }
