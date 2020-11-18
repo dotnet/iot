@@ -32,7 +32,7 @@ namespace Iot.Device.Arduino
         Static = 1,
         Virtual = 2,
         SpecialMethod = 4, // Method will resolve to a built-in function on the arduino
-        Void = 8,
+        VoidOrCtor = 8, // The method returns void or is a ctor (which only implicitly returns "this")
     }
 
     public enum MethodState
@@ -78,6 +78,8 @@ namespace Iot.Device.Arduino
         private readonly ArduinoBoard _board;
         private readonly Dictionary<MethodBase, ArduinoMethodDeclaration> _methodInfos;
         private readonly List<IArduinoTask> _activeTasks;
+        private readonly HashSet<MemberInfo> _classDeclarationsSent;
+        private readonly List<Module> _activeModules;
 
         private int _numDeclaredMethods;
 
@@ -89,6 +91,10 @@ namespace Iot.Device.Arduino
             _board.SetCompilerCallback(BoardOnCompilerCallback);
 
             _activeTasks = new List<IArduinoTask>();
+            _classDeclarationsSent = new HashSet<MemberInfo>();
+            _activeModules = new List<Module>();
+            // The first entry is always "self"
+            _activeModules.Add(null!);
 
             if (resetExistingCode)
             {
@@ -212,7 +218,8 @@ namespace Iot.Device.Arduino
                 {
                     var attr = (ArduinoImplementationAttribute)method.GetCustomAttributes(typeof(ArduinoImplementationAttribute)).First();
 
-                    ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(_numDeclaredMethods++, method.MetadataToken, method, MethodFlags.SpecialMethod, attr.MethodNumber);
+                    int token = CombinedMethodToken(method);
+                    ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(_numDeclaredMethods++, token, method, MethodFlags.SpecialMethod, attr.MethodNumber);
                     _methodInfos.Add(method, decl);
                     LoadMethodDeclaration(decl);
                 }
@@ -220,6 +227,25 @@ namespace Iot.Device.Arduino
 
             // Also load the core methods
             LoadCode(new Action<IArduinoHardwareLevelAccess, int>(ArduinoRuntimeCore.Sleep));
+        }
+
+        private int CombinedMethodToken(MemberInfo method)
+        {
+            var module = method.Module;
+            int idx = _activeModules.IndexOf(module);
+            if (idx >= 0)
+            {
+                // Use top 4 bit for the module (at most 8 modules at a time)
+                return method.MetadataToken | idx << 28;
+            }
+
+            if (_activeModules.Count == 8)
+            {
+                throw new NotSupportedException("At most 8 modules may be involved at once");
+            }
+
+            _activeModules.Add(module);
+            return method.MetadataToken | (_activeModules.Count - 1) << 28;
         }
 
         public void LoadClass(Type classType)
@@ -236,7 +262,10 @@ namespace Iot.Device.Arduino
 
             foreach (var cls in baseTypes.Where(x => x.IsValueType == false && x.IsArray == false))
             {
-                SendClassDeclaration(cls);
+                if (_classDeclarationsSent.Add(cls))
+                {
+                    SendClassDeclaration(cls);
+                }
             }
         }
 
@@ -256,7 +285,7 @@ namespace Iot.Device.Arduino
 
             for (var index = 0; index < methods.Count; index++)
             {
-                memberTypes.Add((VariableKind.Method, methods[index].MetadataToken));
+                memberTypes.Add((VariableKind.Method, CombinedMethodToken(methods[index])));
             }
 
             Int32 parentToken = 0;
@@ -267,8 +296,6 @@ namespace Iot.Device.Arduino
             }
 
             short sizeOfClass = (short)GetClassSize(classType);
-
-            sizeOfClass += 4; // vtable
 
             _board.Log($"Sending class declaration for {classType} (Token 0x{classType.MetadataToken:x8}). Number of members: {memberTypes.Count}, raw size {sizeOfClass}");
             _board.Firmata.SendClassDeclaration(classType.MetadataToken, parentToken, sizeOfClass, memberTypes);
@@ -295,6 +322,9 @@ namespace Iot.Device.Arduino
             }
         }
 
+        /// <summary>
+        /// Calculates the size of the class instance in bytes, excluding the management information (such as the vtable)
+        /// </summary>
         private int GetClassSize(Type classType)
         {
             List<FieldInfo> fields = new List<FieldInfo>();
@@ -585,7 +615,7 @@ namespace Iot.Device.Arduino
                 _board.Log($"Method {resolved.DeclaringType} - {resolved} is required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
                 // Multiple local (0x0a) tokens can be implemented by the same remote (0x06) instance, so
                 // the left entry of this tuple might not need to be unique
-                tokenMap.Add((resolved.MetadataToken, token));
+                tokenMap.Add((CombinedMethodToken(resolved), token));
             }
 
             if (_numDeclaredMethods >= Math.Pow(2, 14) - 1)
@@ -594,10 +624,11 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException("To many methods declared. Only 2^14 supported.");
             }
 
-            var newInfo = new ArduinoMethodDeclaration(_numDeclaredMethods++, methodInfo);
+            int tk = CombinedMethodToken(methodInfo);
+            var newInfo = new ArduinoMethodDeclaration(_numDeclaredMethods++, tk, methodInfo);
             _methodInfos.Add(methodInfo, newInfo);
             String methodName = methodInfo.Name;
-            _board.Log($"Method Index {newInfo.Index} is named {methodName}.");
+            _board.Log($"Method Index {newInfo.Index} is named {methodInfo.DeclaringType} - {methodName}.");
             LoadMethodDeclaration(newInfo);
             LoadTokenMap(newInfo.Index, tokenMap);
             _board.Firmata.SendMethodIlCode(newInfo.Index, ilBytes);
@@ -784,6 +815,9 @@ namespace Iot.Device.Arduino
             _numDeclaredMethods = 0;
             _activeTasks.Clear();
             _methodInfos.Clear();
+            _classDeclarationsSent.Clear();
+            _activeModules.Clear();
+            _activeModules.Add(null!);
         }
 
         public void Dispose()

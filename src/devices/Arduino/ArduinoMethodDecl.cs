@@ -6,7 +6,7 @@ namespace Iot.Device.Arduino
 {
     public sealed class ArduinoMethodDeclaration
     {
-        public ArduinoMethodDeclaration(int index, MethodBase methodBase)
+        public ArduinoMethodDeclaration(int index, int token, MethodBase methodBase)
         {
             Index = index;
             MethodBase = methodBase;
@@ -17,7 +17,7 @@ namespace Iot.Device.Arduino
                 throw new InvalidOperationException("Use this ctor only for methods that have a body");
             }
 
-            Token = methodBase.MetadataToken;
+            Token = token;
             MaxLocals = body.LocalVariables.Count;
             MaxStack = body.MaxStackSize;
             NativeMethod = ArduinoImplementation.None;
@@ -41,8 +41,13 @@ namespace Iot.Device.Arduino
             {
                 if (methodInfo.ReturnParameter == null || methodInfo.ReturnParameter.ParameterType == typeof(void))
                 {
-                    Flags |= MethodFlags.Void;
+                    Flags |= MethodFlags.VoidOrCtor;
                 }
+            }
+
+            if (methodBase.IsConstructor)
+            {
+                Flags |= MethodFlags.VoidOrCtor;
             }
         }
 
@@ -60,9 +65,9 @@ namespace Iot.Device.Arduino
                 ArgumentCount += 1;
             }
 
-            if (methodInfo.ReturnParameter.ParameterType == typeof(void))
+            if (methodInfo.ReturnParameter.ParameterType == typeof(void) || methodInfo.IsConstructor)
             {
-                Flags |= MethodFlags.Void;
+                Flags |= MethodFlags.VoidOrCtor;
             }
         }
 

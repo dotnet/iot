@@ -552,18 +552,26 @@ namespace Arduino.Samples
             compiler.LoadLowLevelInterface();
             compiler.LoadClass(typeof(ArduinoCompilerSampleMethods.SimpleLedBinding));
             // This should just return a reference to the now already loaded method
-            var task = compiler.LoadCode<Action<GpioController, int, int>>(ArduinoCompilerSampleMethods.SimpleLedBinding.RunBlink);
+            var task = compiler.LoadCode<Action<int, int>>(ArduinoCompilerSampleMethods.SimpleLedBinding.RunBlink);
 
             HashSet<MethodBase> methods = new HashSet<MethodBase>();
 
             compiler.CollectDependencies(task.MethodInfo.MethodBase, methods);
             foreach (var dep in methods)
             {
+                // If we have a ctor in the call chain we need to ensure we have its class loaded.
+                // This happens if the created object is only used in local variables but not as a class member
+                // seen so far.
+                if (dep.IsConstructor && dep.DeclaringType != null && !dep.DeclaringType.IsValueType)
+                {
+                    compiler.LoadClass(dep.DeclaringType);
+                }
+
                 // Type is irrelevant here (should probably split this function into loading and preparing)
                 compiler.LoadCode<Action>(dep);
             }
 
-            task.InvokeAsync(new GpioController(PinNumberingScheme.Logical, new ArduinoNativeGpioDriver(null)), 6, 1000);
+            task.InvokeAsync(6, 1000);
 
             task.WaitForResult();
 

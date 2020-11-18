@@ -37,8 +37,9 @@ namespace Arduino.Samples
                 }
             }
 
-            public static void RunBlink(GpioController gpioController, int pin, int delay)
+            public static void RunBlink(int pin, int delay)
             {
+                var gpioController = new GpioController(PinNumberingScheme.Logical, new ArduinoNativeGpioDriver(null));
                 SimpleLedBinding blink = new SimpleLedBinding(gpioController, pin, delay);
                 blink.Loop();
             }
