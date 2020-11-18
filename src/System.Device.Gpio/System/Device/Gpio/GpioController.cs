@@ -182,7 +182,7 @@ namespace System.Device.Gpio
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <returns>The status if the pin is open or closed.</returns>
-        public virtual bool IsPinOpen(int pinNumber)
+        public bool IsPinOpen(int pinNumber)
         {
             return _openPins.Contains(pinNumber);
         }
