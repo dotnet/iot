@@ -1,4 +1,4 @@
-# OpenHardwareMonitor
+# OpenHardwareMonitor client library
 
 Client binding for OpenHardwareMonitor.
 
