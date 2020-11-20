@@ -1,0 +1,2 @@
+Thermophile sensor
+Heat image camera
