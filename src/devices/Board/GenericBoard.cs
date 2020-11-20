@@ -7,6 +7,7 @@ using System.Device.Pwm;
 using System.Device.Spi;
 using System.Text;
 
+#pragma warning disable CS1591
 namespace Iot.Device.Board
 {
     public class GenericBoard : Board

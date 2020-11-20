@@ -6,11 +6,7 @@
     <LangVersion>preview</LangVersion>
     <RootNamespace>Iot.Device.Board</RootNamespace>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>;CS8321;CS1591</NoWarn>
-  </PropertyGroup>
-
+  
   <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="..\Interop\Windows\WinUser.cs" Link="WinUser.cs" />

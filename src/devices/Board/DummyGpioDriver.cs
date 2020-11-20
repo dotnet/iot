@@ -4,6 +4,7 @@ using System.Device.Gpio;
 using System.Text;
 using System.Threading;
 
+#pragma warning disable CS1591
 namespace Iot.Device.Board
 {
     /// <summary>

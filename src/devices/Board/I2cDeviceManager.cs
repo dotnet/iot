@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Device.I2c;
 using System.Text;
 
+#pragma warning disable CS1591
 namespace Iot.Device.Board
 {
     internal class I2cDeviceManager : I2cDevice

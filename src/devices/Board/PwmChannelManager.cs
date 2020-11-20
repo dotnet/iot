@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Device.Pwm;
 
+#pragma warning disable CS1591
 namespace Iot.Device.Board
 {
     public class PwmChannelManager : PwmChannel
