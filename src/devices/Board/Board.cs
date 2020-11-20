@@ -40,7 +40,7 @@ namespace Iot.Device.Board
             Dispose(false);
         }
 
-        public event Action<string, Exception> LogMessages;
+        public event Action<string, Exception?>? LogMessages;
 
         protected bool Initialized => _initialized;
 
@@ -60,7 +60,7 @@ namespace Iot.Device.Board
             }
         }
 
-        protected void Log(string message, Exception exception = null)
+        protected void Log(string message, Exception? exception = null)
         {
             LogMessages?.Invoke(message, null);
         }
@@ -246,7 +246,7 @@ namespace Iot.Device.Board
             return new ManagedGpioController(this, pinNumberingScheme, driver);
         }
 
-        private static GpioDriver? TryCreateBestGpioDriver()
+        protected virtual GpioDriver? TryCreateBestGpioDriver()
         {
             GpioDriver? driver = null;
             try
@@ -319,12 +319,7 @@ namespace Iot.Device.Board
         /// </remarks>
         private static GpioDriver GetBestDriverForBoardOnWindows()
         {
-            string? baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty).ToString();
-
-            if (baseBoardProduct is null)
-            {
-                throw new Exception("Single board computer type cannot be detected.");
-            }
+            string? baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty)!.ToString();
 
             if (baseBoardProduct == RaspberryPi3Product || baseBoardProduct.StartsWith($"{RaspberryPi3Product} ") ||
                 baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))
@@ -433,7 +428,7 @@ namespace Iot.Device.Board
             return ConvertPinNumber(pin, providedScheme, PinNumberingScheme.Logical);
         }
 
-        protected int[] RemapPins(int[] pins, PinNumberingScheme providedScheme)
+        protected int[]? RemapPins(int[] pins, PinNumberingScheme providedScheme)
         {
             if (pins == null)
             {
@@ -472,7 +467,7 @@ namespace Iot.Device.Board
 
         public static Board Create(PinNumberingScheme defaultNumberingScheme = PinNumberingScheme.Logical)
         {
-            Board board = null;
+            Board? board = null;
             try
             {
                 board = new RaspberryPiBoard(defaultNumberingScheme);

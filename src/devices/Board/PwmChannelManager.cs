@@ -57,7 +57,7 @@ namespace Iot.Device.Board
                     _board.ReleasePin(_pin, PinUsage.Pwm, this);
                 }
 
-                _pwm = null;
+                _pwm = null!;
             }
 
             base.Dispose(disposing);

@@ -9,8 +9,13 @@ namespace Iot.Device.Board
         private readonly int[] _pins;
         private SpiDevice _device;
 
-        public SpiDeviceManager(Board board, SpiConnectionSettings connectionSettings, int[] pins, Func<SpiConnectionSettings, int[], SpiDevice> createOperation)
+        public SpiDeviceManager(Board board, SpiConnectionSettings connectionSettings, int[]? pins, Func<SpiConnectionSettings, int[], SpiDevice> createOperation)
         {
+            if (pins == null || pins.Length < 3)
+            {
+                throw new ArgumentException("Must provide a valid set of at least 3 pins", nameof(pins));
+            }
+
             _board = board;
             ConnectionSettings = connectionSettings;
             try
@@ -122,7 +127,7 @@ namespace Iot.Device.Board
                 }
 
                 // Do not release pins a second time
-                _device = null;
+                _device = null!;
             }
 
             base.Dispose(disposing);

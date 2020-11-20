@@ -29,16 +29,6 @@ namespace Iot.Device.Board
             throw new NotSupportedException("This board only supports logical pin numbering");
         }
 
-        protected virtual GpioDriver CreateDriver()
-        {
-            return ManagedGpioController.GetBestDriverForBoard();
-        }
-
-        public override GpioController CreateGpioController(PinNumberingScheme numberingScheme)
-        {
-            return new ManagedGpioController(this, numberingScheme, CreateDriver());
-        }
-
         protected override SpiDevice CreateSimpleSpiDevice(SpiConnectionSettings settings, int[] pins)
         {
             return SpiDevice.Create(settings);

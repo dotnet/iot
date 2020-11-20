@@ -26,7 +26,7 @@ namespace Iot.Device.Board
 
         private KeyState[] _state;
 
-        private Thread _pollThread;
+        private Thread? _pollThread;
         private bool _terminateThread;
 
         public KeyboardGpioDriver()
@@ -250,7 +250,7 @@ namespace Iot.Device.Board
             }
 
             // Can't do this within the lock - would risk a deadlock
-            if (terminate)
+            if (terminate && _pollThread != null)
             {
                 _terminateThread = true;
                 _pollThread.Join();
@@ -295,7 +295,7 @@ namespace Iot.Device.Board
                 State = PinValue.Low;
             }
 
-            public event PinChangeEventHandler Callback;
+            public event PinChangeEventHandler? Callback;
 
             public ConsoleKey Key
             {

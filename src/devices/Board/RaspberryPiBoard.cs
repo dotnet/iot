@@ -11,7 +11,7 @@ namespace Iot.Device.Board
 {
     public class RaspberryPiBoard : GenericBoard
     {
-        private ManagedGpioController _managedGpioController;
+        private ManagedGpioController? _managedGpioController;
 
         public RaspberryPiBoard(PinNumberingScheme defaultNumberingScheme)
             : base(defaultNumberingScheme)
@@ -26,7 +26,7 @@ namespace Iot.Device.Board
             protected set;
         }
 
-        protected override GpioDriver CreateDriver()
+        protected override GpioDriver? TryCreateBestGpioDriver()
         {
             return new RaspberryPi3Driver();
         }
@@ -34,7 +34,13 @@ namespace Iot.Device.Board
         public override void Initialize()
         {
             // Needs to be a raspi 3 driver here (either unix or windows)
-            _managedGpioController = new ManagedGpioController(this, DefaultPinNumberingScheme, CreateDriver());
+            GpioDriver? driver = TryCreateBestGpioDriver();
+            if (driver == null)
+            {
+                throw new NotSupportedException("Could not initialize the RaspberryPi GPIO driver");
+            }
+
+            _managedGpioController = new ManagedGpioController(this, DefaultPinNumberingScheme, driver);
             PinCount = _managedGpioController.PinCount;
             base.Initialize();
         }
@@ -118,11 +124,6 @@ namespace Iot.Device.Board
             }
 
             throw new NotSupportedException("Unsupported numbering scheme combination");
-        }
-
-        public override GpioController CreateGpioController()
-        {
-            return new ManagedGpioController(this, DefaultPinNumberingScheme, CreateDriver());
         }
 
         public override int[] GetDefaultPinAssignmentForI2c(I2cConnectionSettings connectionSettings)
@@ -467,6 +468,11 @@ namespace Iot.Device.Board
 
         protected override void ActivatePinMode(int pinNumber, PinUsage usage)
         {
+            if (_managedGpioController == null)
+            {
+                throw new InvalidOperationException("Board not initialized");
+            }
+
             AlternatePinMode modeToSet = GetHardwareModeForPinUsage(pinNumber, usage, PinNumberingScheme.Logical);
             if (modeToSet != AlternatePinMode.Unknown)
             {
@@ -478,6 +484,11 @@ namespace Iot.Device.Board
 
         public override PinUsage DetermineCurrentPinUsage(int pinNumber)
         {
+            if (_managedGpioController == null)
+            {
+                throw new InvalidOperationException("Board not initialized");
+            }
+
             PinUsage cached = base.DetermineCurrentPinUsage(pinNumber);
             if (cached != PinUsage.Unknown)
             {

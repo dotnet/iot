@@ -12,8 +12,13 @@ namespace Iot.Device.Board
         private readonly int _sclPin;
         private I2cDevice _i2cDeviceImplementation;
 
-        public I2cDeviceManager(Board board, I2cConnectionSettings settings, int[] pins, Func<I2cConnectionSettings, int[], I2cDevice> creationOperation)
+        public I2cDeviceManager(Board board, I2cConnectionSettings settings, int[]? pins, Func<I2cConnectionSettings, int[], I2cDevice> creationOperation)
         {
+            if (pins == null || pins.Length != 2)
+            {
+                throw new ArgumentException("Must provide a valid set of 2 pins", nameof(pins));
+            }
+
             _board = board;
             _sdaPin = pins[0];
             _sclPin = pins[1];
@@ -114,7 +119,7 @@ namespace Iot.Device.Board
                 }
 
                 // So we don't release pins a second time
-                _i2cDeviceImplementation = null;
+                _i2cDeviceImplementation = null!;
             }
 
             base.Dispose(disposing);
