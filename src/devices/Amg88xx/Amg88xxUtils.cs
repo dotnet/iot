@@ -43,7 +43,7 @@ namespace Iot.Device.Amg88xx
         /// </summary>
         /// <param name="temperature">Temperature </param>
         /// <returns>Two's complement representation</returns>
-        public static (byte, byte) ConvertFromTemperature(Temperature temperature)
+        public static (byte LowByte, byte HighByte) ConvertFromTemperature(Temperature temperature)
         {
             // The temperature of each pixel is encoded as a 12 bit value in two's complement form.
             // The LSB is equivalent to 0.25℃
