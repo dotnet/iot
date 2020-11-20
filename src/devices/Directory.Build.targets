@@ -5,8 +5,12 @@
   the full path of the items to be compiled for each  framework. -->
   <Target Name="GetCompileItemsForTargetFramework"
           Returns="@(_CompileItemsForFramework)">
+
     <ItemGroup>
-      <_CompileItemsForFramework Include="%(Compile.FullPath)" />
+      <_GeneratedFiles Include="$(TargetFrameworkMonikerAssemblyAttributesPath)" />
+      <_GeneratedFiles Include="$(GeneratedAssemblyInfoFile)" />
+      <_GeneratedFilesToFullPath Include="@(_GeneratedFiles -> '%(FullPath)')" />
+      <_CompileItemsForFramework Include="%(Compile.FullPath)" Exclude="@(_GeneratedFilesToFullPath)" />
     </ItemGroup>
   </Target>
 </Project>
