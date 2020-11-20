@@ -145,6 +145,7 @@ namespace Iot.Device.DHTxx
 
             byte readVal = 0;
             uint count;
+            var pinMode = _controller.IsPinModeSupported(_pin, PinMode.InputPullUp) ? PinMode.InputPullUp : PinMode.Input;
 
             // keep data line HIGH
             _controller.SetPinMode(_pin, PinMode.Output);
@@ -162,7 +163,7 @@ namespace Iot.Device.DHTxx
             // wait 20 - 40 microseconds
             DelayHelper.DelayMicroseconds(30, true);
 
-            _controller.SetPinMode(_pin, PinMode.InputPullUp);
+            _controller.SetPinMode(_pin, pinMode);
 
             // DHT corresponding signal - LOW - about 80 microseconds
             count = _loopCount;
