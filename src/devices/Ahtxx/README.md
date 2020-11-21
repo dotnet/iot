@@ -1,4 +1,4 @@
-﻿# AHT10/15/20 Temperature and Humidity Sensor Modules
+﻿# AHT10/15/20 - Temperature and humidity sensor modules
 
 ## Summary
 The AHT10/15 and AHT20 sensors are high-precision, calibrated temperature and relative humidity sensor modules with an I2C digital interface.
