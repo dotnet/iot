@@ -14,6 +14,7 @@ string[] categoriesToDisplay = new string[]
     "adc",
     "accelerometer",
     "gas",
+    "liquid",
     "light",
     "barometer",
     "altimeter",
@@ -24,7 +25,6 @@ string[] categoriesToDisplay = new string[]
     "motor",
     "imu",
     "magnetometer",
-    "lcd",
     "hygrometer",
     "clock",
     "sonar",
@@ -43,7 +43,9 @@ string[] categoriesToDisplay = new string[]
     "nfc",
     "media",
     "usb",
-    "protocol"
+    "gpio",
+    "multi",
+    "protocol",
 };
 
 Dictionary<string, string?> categoriesDescriptions = new()
@@ -52,6 +54,7 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "accelerometer", "Accelerometers" },
     { "voc", "Volatile Organic Compound sensors" },
     { "gas", "Gas sensors" },
+    { "liquid", "Liquid sensors" },
     { "light", "Light sensor" },
     { "barometer", "Barometers" },
     { "altimeter", "Altimeters" },
@@ -86,6 +89,8 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "nfc", "RFID/NFC modules" },
     { "media", "Media libraries" },
     { "usb", "USB devices" },
+    { "gpio", "GPIO or bit operating devices" },
+    { "multi", "Multi-device or robot kit" },
     // Bucket for stuff we want mentioned but there is no clear category
     // In other words: anything allowing a way to create PWM channel, SPI/I2C/... device
     { "protocol", "Protocols providers/libraries" },
@@ -95,6 +100,7 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "gopigo3", null },
     { "grovepi", null },
     { "i2c", null },
+    { "multiplexer", null },
 };
 
 HashSet<string> ignoredDeviceDirectories = new()
@@ -132,7 +138,7 @@ foreach (string directory in Directory.EnumerateDirectories(devicesPath))
 
         if (device.Title == null)
         {
-            Console.WriteLine($"Warning: Directory `{directory}` contains readme file without title on the first line.");
+            Console.WriteLine($"Warning: Device directory contains readme file without title on the first line. [{directory}]");
             continue;
         }
 
@@ -140,7 +146,7 @@ foreach (string directory in Directory.EnumerateDirectories(devicesPath))
     }
     else
     {
-        Console.WriteLine($"Warning: Directory `{directory}` does not have a README.md file.");
+        Console.WriteLine($"Warning: Device directory does not have a README.md file. [{directory}]");
     }
 }
 
@@ -150,15 +156,24 @@ var allCategories = new HashSet<string>();
 
 foreach (DeviceInfo device in devices)
 {
+    bool beingDisplayed = false;
     foreach (string category in device.Categories)
     {
         if (allCategories.Add(category))
         {
             if (!categoriesDescriptions.ContainsKey(category))
             {
-                Console.WriteLine($"Warning: Category `{category}` is missing description (`{device.Title}`).");
+                Console.WriteLine($"Warning: Category `{category}` is missing description (`{device.Title}`). [{device.ReadmePath}]");
             }
         }
+
+        beingDisplayed |= !beingDisplayed && categoriesToDisplay.Contains(category);
+    }
+
+    if (!beingDisplayed && device.CategoriesFileExists)
+    {
+        // We do not want to show the warning when file doesn't exist as you will get separate warning that category.txt is missing in that case.
+        Console.WriteLine($"Warning: Device `{device.Title}` is not being displayed under any category. [{device.CategoriesFilePath}]");
     }
 }
 
@@ -186,11 +201,18 @@ string GetCategorizedDeviceListing(string devicesPath, IEnumerable<DeviceInfo> d
     var deviceListing = new StringBuilder();
     foreach (string categoryToDisplay in categoriesToDisplay)
     {
-        deviceListing.AppendLine($"### {categoriesDescriptions[categoryToDisplay]}");
-        deviceListing.AppendLine();
+        if (categoriesDescriptions.TryGetValue(categoryToDisplay, out string? categoryDescription))
+        {
+            deviceListing.AppendLine($"### {categoryDescription}");
+            deviceListing.AppendLine();
 
-        string listingInCurrentCategory = GetDeviceListing(devicesPath, devices.Where((d) => d.Categories.Contains(categoryToDisplay)));
-        deviceListing.AppendLine(listingInCurrentCategory);
+            string listingInCurrentCategory = GetDeviceListing(devicesPath, devices.Where((d) => d.Categories.Contains(categoryToDisplay)));
+            deviceListing.AppendLine(listingInCurrentCategory);
+        }
+        else
+        {
+            Console.WriteLine($"Warning: Category `{categoryToDisplay}` should be displayed but is missing description.");
+        }
     }
 
     return deviceListing.ToString();

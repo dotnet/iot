@@ -19,18 +19,15 @@ This binding implements scaled quadrature rotary encoder as `ScaledQuadratureEnc
 The code below shows an example of using the encoder as an FM tuner control.
 
 ```csharp
-using (GpioController controller = new GpioController())
+// create a RotaryEncoder that represents an FM Radio tuning dial with a range of 88 -> 108 MHz
+ScaledQuadratureEncoder encoder = new ScaledQuadratureEncoder(pinA: 5, pinB: 6, PinEventTypes.Falling, pulsesPerRotation: 20, pulseIncrement: 0.1, rangeMin: 88.0, rangeMax: 108.0) { Value = 88 };
+// 2 milliseconds debonce time
+encoder.Debounce = TimeSpan.FromMilliseconds(2);
+// Register to Value change events
+encoder.ValueChanged += (o, e) =>
 {
-    // create a RotaryEncoder that represents an FM Radio tuning dial with a range of 88 -> 108 MHz
-    ScaledQuadratureEncoder encoder = new ScaledQuadratureEncoder(new GpioController(), pinA: 5, pinB: 6, PinEventTypes.Falling, pulsesPerRotation: 20 , pulseIncrement: 0.1, rangeMin: 88.0, rangeMax: 108.0) { Value = 88 };
-
-    encoder.ValueChanged += (o, e) =>
-    {
-        Console.WriteLine($"Value {e.Value}");
-    };
-
-    // Do Other Stuff
-}
+    Console.WriteLine($"Tuned to {e.Value}MHz");
+};
 ```
 
 This binding also features 
