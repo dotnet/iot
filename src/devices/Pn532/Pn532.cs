@@ -9,6 +9,7 @@ using System.Device.I2c;
 using System.Device.Spi;
 using System.IO;
 using System.IO.Ports;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Iot.Device.Card;
 using Iot.Device.Pn532.AsTarget;
@@ -55,6 +56,7 @@ namespace Iot.Device.Pn532
         private GpioController? _controller = null;
         private SerialPort? _serialPort = null;
         private int _pin = 18;
+        private bool _shouldDispose;
         private SecurityAccessModuleMode _securityAccessModuleMode = SecurityAccessModuleMode.Normal;
         private uint _virtualCardTimeout = 0x17;
 
@@ -152,12 +154,17 @@ namespace Iot.Device.Pn532
         /// Create a PN532 using SPI
         /// </summary>
         /// <param name="spiDevice">The SPI Device</param>
+        /// <param name="pinChipSelect">The GPIO pin number for the chip select</param>
+        /// <param name="controller">A GPIO controller</param>
         /// <param name="logLevel">The log level</param>
-        public Pn532(SpiDevice spiDevice, LogLevel logLevel = LogLevel.None)
+        /// <param name="shouldDispose">Dispose the GPIO Controller at the end</param>
+        public Pn532(SpiDevice spiDevice, int pinChipSelect, GpioController? controller = null, LogLevel logLevel = LogLevel.None, bool shouldDispose = false)
         {
             LogLevel = logLevel;
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
-            _controller = new GpioController();
+            _shouldDispose = shouldDispose | controller == null;
+            _controller = controller ?? new GpioController();
+            _pin = pinChipSelect > 0 ? pinChipSelect : throw new ArgumentException($"Pin ChipSelect can only be positive");
             _controller.OpenPin(_pin, PinMode.Output);
             _controller.Write(_pin, PinValue.High);
             Thread.Sleep(2);
@@ -426,7 +433,9 @@ namespace Iot.Device.Pn532
             // Pass the SAM, the virtual card timeout and remove IRQ
             Span<byte> toSend = stackalloc byte[3]
             {
-                (byte)_securityAccessModuleMode, (byte)(_virtualCardTimeout), 0x00
+                (byte)_securityAccessModuleMode,
+                (byte)(_virtualCardTimeout),
+                0x00
             };
             var ret = WriteCommand(CommandSet.SAMConfiguration, toSend);
             LogInfo.Log($"{nameof(SetSecurityAccessModule)} Write: {ret}", LogLevel.Debug);
@@ -564,7 +573,7 @@ namespace Iot.Device.Pn532
             try
             {
                 byte[] nfcId = new byte[toDecode[4]];
-                byte[] ats = new byte[toDecode[5 + nfcId.Length]];
+                byte[] ats = new byte[0];
 
                 for (int i = 0; i < nfcId.Length; i++)
                 {
@@ -573,6 +582,7 @@ namespace Iot.Device.Pn532
 
                 if ((5 + nfcId.Length) > toDecode.Length)
                 {
+                    ats = new byte[toDecode[5 + nfcId.Length]];
                     for (int i = 0; i < ats.Length; i++)
                     {
                         ats[i] = toDecode[6 + nfcId.Length + i];
@@ -808,7 +818,7 @@ namespace Iot.Device.Pn532
         /// <returns>A raw byte array containing the number of cards, the card type and the raw data. Null if nothing has been polled</returns>
         public byte[]? AutoPoll(byte numberPolling, ushort periodMilliSecond, PollingType[] pollingType)
         {
-            if (pollingType is null or { Length: >15 })
+            if (pollingType is null or { Length: > 15 })
             {
                 return null;
             }
@@ -1207,7 +1217,8 @@ namespace Iot.Device.Pn532
         {
             Span<byte> toWrite = stackalloc byte[2]
             {
-                (byte)p7, (byte)p3
+                (byte)p7,
+                (byte)p3
             };
             var ret = WriteCommand(CommandSet.WriteGPIO, toWrite);
             if (ret < 0)
@@ -2018,13 +2029,20 @@ namespace Iot.Device.Pn532
         {
             Span<byte> ackReceived = stackalloc byte[6]
             {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00
             };
             if (_spiDevice is object && _controller is object)
             {
                 _controller.Write(_pin, PinValue.Low);
-                _spiDevice.WriteByte(ReadData);
+                _spiDevice.WriteByte(ReverseByte(ReadData));
                 _spiDevice.Read(ackReceived);
+                ReverseByte(ackReceived);
+
                 _controller.Write(_pin, PinValue.High);
             }
             else if (_i2cDevice is object)
@@ -2058,8 +2076,8 @@ namespace Iot.Device.Pn532
             if (_spiDevice is object && _controller is object)
             {
                 _controller.Write(_pin, PinValue.Low);
-                _spiDevice.WriteByte(ReadStatus);
-                ret = _spiDevice.ReadByte();
+                _spiDevice.WriteByte(ReverseByte(ReadStatus));
+                ret = ReverseByte(_spiDevice.ReadByte());
                 _controller.Write(_pin, PinValue.High);
             }
             else if (_i2cDevice is object)
@@ -2102,10 +2120,7 @@ namespace Iot.Device.Pn532
             0xff
         };
 
-        private static byte ReverseByte(byte toReverse)
-        {
-            return BitReverseTable[toReverse];
-        }
+        private static byte ReverseByte(byte toReverse) => BitReverseTable[toReverse];
 
         private static void ReverseByte(Span<byte> span)
         {
@@ -2126,6 +2141,20 @@ namespace Iot.Device.Pn532
             _spiDevice = null!;
             _i2cDevice?.Dispose();
             _i2cDevice = null!;
+
+            if (_shouldDispose)
+            {
+                if (_controller is object)
+                {
+                    if (_controller.IsPinOpen(_pin))
+                    {
+                        _controller.ClosePin(_pin);
+                    }
+
+                    _controller.Dispose();
+                    _controller = null;
+                }
+            }
 
             if (_serialPort is { IsOpen: true })
             {
