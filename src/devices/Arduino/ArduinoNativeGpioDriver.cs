@@ -8,8 +8,8 @@ using System.Threading;
 namespace Iot.Device.Arduino
 {
     /// <summary>
-    /// This dummy implementation represents the driver that runs physically on the Arduino when
-    /// an instance of a GpioController is requested there
+    /// This represents the driver that runs physically on the Arduino when
+    /// an instance of a GpioController is requested there.
     /// </summary>
     public class ArduinoNativeGpioDriver : GpioDriver
     {

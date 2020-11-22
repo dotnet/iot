@@ -11,15 +11,25 @@ namespace Iot.Device.Arduino
             Index = index;
             MethodBase = methodBase;
             Flags = MethodFlags.None;
-            var body = methodBase.GetMethodBody();
-            if (body == null)
+            Token = token;
+
+            if (methodBase.IsAbstract)
             {
-                throw new InvalidOperationException("Use this ctor only for methods that have a body");
+                MaxLocals = 0;
+                MaxStack = 0;
+            }
+            else
+            {
+                var body = methodBase.GetMethodBody();
+                if (body == null)
+                {
+                    throw new InvalidOperationException("Use this ctor only for methods that have a body");
+                }
+
+                MaxLocals = body.LocalVariables.Count;
+                MaxStack = body.MaxStackSize;
             }
 
-            Token = token;
-            MaxLocals = body.LocalVariables.Count;
-            MaxStack = body.MaxStackSize;
             NativeMethod = ArduinoImplementation.None;
             ArgumentCount = methodBase.GetParameters().Length;
             if (methodBase.CallingConvention.HasFlag(CallingConventions.HasThis))
@@ -48,6 +58,11 @@ namespace Iot.Device.Arduino
             if (methodBase.IsConstructor)
             {
                 Flags |= MethodFlags.VoidOrCtor;
+            }
+
+            if (methodBase.IsAbstract)
+            {
+                Flags |= MethodFlags.Abstract;
             }
         }
 

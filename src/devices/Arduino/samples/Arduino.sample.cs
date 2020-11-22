@@ -557,13 +557,22 @@ namespace Arduino.Samples
             HashSet<MethodBase> methods = new HashSet<MethodBase>();
 
             compiler.CollectDependencies(task.MethodInfo.MethodBase, methods);
-            foreach (var dep in methods)
+
+            var list = methods.ToList();
+            for (var index = 0; index < list.Count; index++)
             {
+                var dep = list[index];
                 // If we have a ctor in the call chain we need to ensure we have its class loaded.
                 // This happens if the created object is only used in local variables but not as a class member
                 // seen so far.
                 if (dep.IsConstructor && dep.DeclaringType != null && !dep.DeclaringType.IsValueType)
                 {
+                    compiler.LoadClass(dep.DeclaringType);
+                }
+                else if (dep.DeclaringType != null && HasStaticFields(dep.DeclaringType))
+                {
+                    // Also load the class declaration if it contains static fields.
+                    // TODO: We currently assume that no class is accessing static fields of another class.
                     compiler.LoadClass(dep.DeclaringType);
                 }
 
@@ -576,6 +585,19 @@ namespace Arduino.Samples
             task.WaitForResult();
 
             compiler.ClearAllData(true);
+        }
+
+        private static bool HasStaticFields(Type cls)
+        {
+            foreach (var fld in cls.GetFields())
+            {
+                if (fld.IsStatic)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void ReadDht11Test(ArduinoCsCompiler compiler)

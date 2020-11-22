@@ -10,6 +10,7 @@ using System.Device.Spi;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -31,7 +32,7 @@ namespace Iot.Device.Arduino
         private const byte FIRMATA_PROTOCOL_MINOR_VERSION = 5; // 2.5 works, but 2.6 is recommended
         private const int FIRMATA_INIT_TIMEOUT_SECONDS = 2;
         private static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(500);
-        private static readonly TimeSpan ProgrammingTimeout = TimeSpan.FromMilliseconds(900);
+        private static readonly TimeSpan ProgrammingTimeout = TimeSpan.FromMinutes(2);
 
         private byte _firmwareVersionMajor;
         private byte _firmwareVersionMinor;
@@ -1438,7 +1439,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void SendClassDeclaration(Int32 classToken, Int32 parentToken, Int16 sizeOfClass, List<(VariableKind Kind, Int32 FieldToken)> members)
+        public void SendClassDeclaration(Int32 classToken, Int32 parentToken, (int Dynamic, int Statics) sizeOfClass, List<(VariableKind Kind, Int32 FieldToken, List<int> BaseDefinitionTokens)> members)
         {
             if (_firmataStream == null)
             {
@@ -1457,13 +1458,19 @@ namespace Iot.Device.Arduino
                     _firmataStream.WriteByte((byte)ExecutorCommand.ClassDeclaration);
                     SendInt32(classToken);
                     SendInt32(parentToken);
-                    SendInt14(sizeOfClass);
+                    // We don't need the last two bits, since the size is certainly a multiple of 4
+                    SendInt14((short)(sizeOfClass.Dynamic >> 2));
+                    SendInt14((short)(sizeOfClass.Statics >> 2));
                     SendInt14(len);
                     SendInt14(member);
 
-                    // TODO: Sending one at a time has a bit much overhead, but lets make this work first
                     _firmataStream.WriteByte((byte)members[member].Kind);
                     SendInt32(members[member].FieldToken);
+                    foreach (int bdt in members[member].BaseDefinitionTokens)
+                    {
+                        SendInt32(bdt);
+                    }
+
                     _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
                     _firmataStream.Flush();
                     WaitAndHandleIlCommandReply(ExecutorCommand.SetMethodTokens);

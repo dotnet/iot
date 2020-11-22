@@ -33,6 +33,7 @@ namespace Iot.Device.Arduino
         Virtual = 2,
         SpecialMethod = 4, // Method will resolve to a built-in function on the arduino
         VoidOrCtor = 8, // The method returns void or is a ctor (which only implicitly returns "this")
+        Abstract = 16, // The method is abstract (or an interface stub)
     }
 
     public enum MethodState
@@ -51,6 +52,7 @@ namespace Iot.Device.Arduino
         OutOfMemory = 3
     }
 
+    [Flags]
     internal enum VariableKind : byte
     {
         Void = 0,
@@ -59,6 +61,9 @@ namespace Iot.Device.Arduino
         Boolean = 3,
         Object = 4,
         Method = 5,
+        // Static member (only used in class member lists)
+        Static = 0x80,
+        TypeMask = 0x7F,
     }
 
     public sealed class ArduinoCsCompiler : IDisposable
@@ -248,11 +253,30 @@ namespace Iot.Device.Arduino
             return method.MetadataToken | (_activeModules.Count - 1) << 28;
         }
 
+        private int CombinedClassToken(Type cls)
+        {
+            var module = cls.Module;
+            int idx = _activeModules.IndexOf(module);
+            if (idx >= 0)
+            {
+                // Use top 4 bit for the module (at most 8 modules at a time)
+                return cls.MetadataToken | idx << 28;
+            }
+
+            if (_activeModules.Count == 8)
+            {
+                throw new NotSupportedException("At most 8 assemblies may be involved at once");
+            }
+
+            _activeModules.Add(module);
+            return cls.MetadataToken | (_activeModules.Count - 1) << 28;
+        }
+
         public void LoadClass(Type classType)
         {
-            if (classType.IsValueType)
+            if (!ValueTypeSupported(classType))
             {
-                throw new NotSupportedException("Only reference types supported");
+                throw new NotSupportedException("Value types with sizeof(Type) > sizeof(int32) not supported");
             }
 
             HashSet<Type> baseTypes = new HashSet<Type>();
@@ -260,13 +284,19 @@ namespace Iot.Device.Arduino
             baseTypes.Add(classType);
             DetermineBaseAndMembers(baseTypes, classType);
 
-            foreach (var cls in baseTypes.Where(x => x.IsValueType == false && x.IsArray == false))
+            foreach (var cls in baseTypes.Where(x => x.IsArray == false))
             {
                 if (_classDeclarationsSent.Add(cls))
                 {
                     SendClassDeclaration(cls);
                 }
             }
+        }
+
+        private bool ValueTypeSupported(Type classType)
+        {
+            // TODO: Should be sizeof(Variant)
+            return !(classType.IsValueType && GetClassSize(classType).Dynamic > sizeof(int));
         }
 
         private void SendClassDeclaration(Type classType)
@@ -276,29 +306,164 @@ namespace Iot.Device.Arduino
 
             GetFields(classType, fields, methods);
 
-            List<(VariableKind, Int32)> memberTypes = new List<(VariableKind, Int32)>();
+            List<(VariableKind, Int32, List<int>)> memberTypes = new List<(VariableKind, Int32, List<int>)>();
             for (var index = 0; index < fields.Count; index++)
             {
                 var fieldType = GetVariableType(fields[index].FieldType);
-                memberTypes.Add((fieldType, fields[index].MetadataToken));
+                if (fields[index].IsStatic)
+                {
+                    fieldType |= VariableKind.Static;
+                }
+
+                memberTypes.Add((fieldType, fields[index].MetadataToken, new List<int>()));
             }
 
             for (var index = 0; index < methods.Count; index++)
             {
-                memberTypes.Add((VariableKind.Method, CombinedMethodToken(methods[index])));
+                if (MemberLinkRequired(methods[index], out var baseMethodInfos))
+                {
+                    List<int> baseTokens = baseMethodInfos.Select(x => CombinedMethodToken(x)).ToList();
+                    memberTypes.Add((VariableKind.Method, CombinedMethodToken(methods[index]), baseTokens));
+                }
             }
 
             Int32 parentToken = 0;
             Type parent = classType.BaseType!;
             if (parent != null)
             {
-                parentToken = parent.MetadataToken;
+                parentToken = CombinedClassToken(parent);
             }
 
-            short sizeOfClass = (short)GetClassSize(classType);
+            // Extend token with assembly identifier, to make sure it is unique
+            int token = CombinedClassToken(classType);
 
-            _board.Log($"Sending class declaration for {classType} (Token 0x{classType.MetadataToken:x8}). Number of members: {memberTypes.Count}, raw size {sizeOfClass}");
-            _board.Firmata.SendClassDeclaration(classType.MetadataToken, parentToken, sizeOfClass, memberTypes);
+            // separated for debugging purposes (the debugger cannot evaluate Type.ToString() on a conditional breakpoint)
+            string className = classType.Name;
+            var sizeOfClass = GetClassSize(classType);
+
+            _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {memberTypes.Count}, raw size {sizeOfClass}");
+            _board.Firmata.SendClassDeclaration(token, parentToken, sizeOfClass, memberTypes);
+        }
+
+        /// <summary>
+        /// Detects whether the method must be known by the class declaration.
+        /// This is used a) to find the class to construct from a newobj instruction (which provides the ctor token only)
+        /// and b) to resolve virtual method calls on a concrete class.
+        /// </summary>
+        /// <param name="method">The method instance</param>
+        /// <param name="methodsBeingImplemented">Returns the list of methods (from interfaces or base classes) that this method implements</param>
+        /// <returns>True if the method shall be part of the class declaration</returns>
+        private static bool MemberLinkRequired(MemberInfo method, out List<MethodInfo> methodsBeingImplemented)
+        {
+            methodsBeingImplemented = new List<MethodInfo>();
+            // Ctors are always required, since we need to look up the class from a ctor method
+            if (method is ConstructorInfo)
+            {
+                return true;
+            }
+
+            if (method is MethodInfo m)
+            {
+                // Static methods, on the other hand, do not need a link to the class (so far)
+                if (m.IsStatic)
+                {
+                    return false;
+                }
+
+                // For ordinary methods, it gets more complicated.
+                // We need to find out whether this method overrides some other method or implements an interface method
+                if (m.IsAbstract)
+                {
+                    // An abstract method can never be called, so it is never the real call target of a callvirt instruction
+                    return false;
+                }
+
+                CollectBaseImplementations(m, methodsBeingImplemented);
+
+                return methodsBeingImplemented.Count > 0;
+            }
+
+            return false;
+        }
+
+        private static bool IsOverriddenImplementation(MethodInfo candidate, MethodInfo self)
+        {
+            if (candidate.Name != self.Name)
+            {
+                return false;
+            }
+
+            // If we're declared new, we're not overriding anything
+            if (self.Attributes.HasFlag(MethodAttributes.NewSlot))
+            {
+                return false;
+            }
+
+            // if the base is neither virtual nor abstract, we're not overriding
+            if (!candidate.IsVirtual && !candidate.IsAbstract)
+            {
+                return false;
+            }
+
+            // private methods cannot be virtual
+            // TODO: Check how explicitly interface implementations are handled in IL
+            if (self.IsPrivate || candidate.IsPrivate)
+            {
+                return false;
+            }
+
+            var candidateArgList = candidate.GetParameters();
+            var selfArgList = self.GetParameters();
+            if (candidateArgList.Length != selfArgList.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < selfArgList.Length; i++)
+            {
+                var a = selfArgList[i].ParameterType;
+                var b = candidateArgList[i].ParameterType;
+                if (a != b)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static void CollectBaseImplementations(MethodInfo method, List<MethodInfo> methodsBeingImplemented)
+        {
+            Type? cls = method.DeclaringType?.BaseType;
+            while (cls != null)
+            {
+                foreach (var candidate in cls.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
+                {
+                    if (IsOverriddenImplementation(candidate, method))
+                    {
+                        methodsBeingImplemented.Add(candidate);
+                    }
+                }
+
+                cls = cls.BaseType;
+            }
+
+            cls = method.DeclaringType;
+            if (cls == null)
+            {
+                return;
+            }
+
+            foreach (var interf in cls.GetInterfaces())
+            {
+                foreach (var candidate in interf.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
+                {
+                    if (IsOverriddenImplementation(candidate, method))
+                    {
+                        methodsBeingImplemented.Add(candidate);
+                    }
+                }
+            }
         }
 
         private static void GetFields(Type classType, List<FieldInfo> fields, List<MemberInfo> methods)
@@ -325,34 +490,47 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Calculates the size of the class instance in bytes, excluding the management information (such as the vtable)
         /// </summary>
-        private int GetClassSize(Type classType)
+        /// <param name="classType">The class type</param>
+        /// <returns>A tuple with the size of an instance and the size of the static part of the class</returns>
+        private (int Dynamic, int Statics) GetClassSize(Type classType)
         {
             List<FieldInfo> fields = new List<FieldInfo>();
             List<MemberInfo> methods = new List<MemberInfo>();
             GetFields(classType, fields, methods);
-            int size = 0;
+            int sizeDynamic = 0;
+            int sizeStatic = 0;
             foreach (var f in fields)
             {
                 var varType = GetVariableType(f.FieldType);
-                if (varType != VariableKind.Method)
+                // Currently, this is always true
+                if (varType == VariableKind.Boolean || varType == VariableKind.Int32 || varType == VariableKind.Uint32 || varType == VariableKind.Object)
                 {
                     // TODO: Need to query some properties from the board (i.e. sizeof(void*))
-                    size += 4;
+                    if (f.IsStatic)
+                    {
+                        sizeStatic += 4;
+                    }
+                    else
+                    {
+                        sizeDynamic += 4;
+                    }
                 }
             }
 
             if (classType.BaseType != null)
             {
-                size += GetClassSize(classType.BaseType);
+                var baseSizes = GetClassSize(classType.BaseType);
+                // Static sizes are not inherited (but do we need to care about accessing a static field via a derived class?)
+                sizeDynamic += baseSizes.Dynamic;
             }
 
-            return size;
+            return (sizeDynamic, sizeStatic);
         }
 
         private bool AddClassDependency(HashSet<Type> allTypes, Type newType)
         {
             // No support for structs right now. And basic value types (such as int) are always declared.
-            if (newType.IsValueType)
+            if (!ValueTypeSupported(newType))
             {
                 return false;
             }
@@ -513,6 +691,7 @@ namespace Iot.Device.Arduino
         {
             List<int> foreignMethodsRequired = new List<int>();
             List<int> ownMethodsRequired = new List<int>();
+            List<int> fieldsRequired = new List<int>();
             if (methodInfo.IsAbstract)
             {
                 // This is a method that will never be called directly, so we can safely skip it.
@@ -520,7 +699,7 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            GetMethodDependencies(methodInfo, foreignMethodsRequired, ownMethodsRequired);
+            GetMethodDependencies(methodInfo, foreignMethodsRequired, ownMethodsRequired, fieldsRequired);
             List<int> combined = foreignMethodsRequired;
             combined.AddRange(ownMethodsRequired);
             combined = combined.Distinct().ToList();
@@ -555,6 +734,23 @@ namespace Iot.Device.Arduino
                     _board.Log($"Token {method} is not a MethodInfo token, but a {resolved.GetType()}.");
                 }
             }
+
+            /*
+            // TODO: Something is very fishy about these... check later.
+            // We see in EqualityComparer<T>::get_Default the token 0x0a000a50, but ILDasm says it is 0A000858. None of them
+            // match the class field, which is 04001895. Is the mess because this is a static field of a generic type?
+            // Similarly, the field tokens we see in the HashTable`1 ctor do not match the class definitions
+            foreach (var s in fieldsRequired)
+            {
+                var resolved = ResolveMember(methodInfo, s);
+                if (resolved == null)
+                {
+                    // Warning only, since might be an incorrect match
+                    _board.Log($"Unable to resolve token {s}.");
+                    continue;
+                }
+            }
+            */
         }
 
         public ArduinoTask<T> LoadCode<T>(MethodBase methodInfo)
@@ -566,30 +762,28 @@ namespace Iot.Device.Arduino
                 return null!;
             }
 
-            if (methodInfo.IsAbstract)
-            {
-                return null!;
-            }
-
             var body = methodInfo.GetMethodBody();
-            if (body == null)
+            if (body == null && !methodInfo.IsAbstract)
             {
                 // throw new MissingMethodException($"{methodInfo.DeclaringType}.{methodInfo} has no implementation");
-                _board.Log($"Error: {methodInfo.DeclaringType} - {methodInfo} has no implementation");
+                _board.Log($"Error: {methodInfo.DeclaringType} - {methodInfo} has no visible implementation");
                 return null!;
             }
 
-            var ilBytes = body.GetILAsByteArray();
-            if (ilBytes == null)
+            bool hasBody = !methodInfo.IsAbstract;
+
+            var ilBytes = body?.GetILAsByteArray();
+            if (ilBytes == null && hasBody)
             {
-                throw new MissingMethodException($"{methodInfo.DeclaringType} has no implementation");
+                throw new MissingMethodException($"{methodInfo.DeclaringType} has no visible implementation");
             }
 
             List<int> foreignMethodsRequired = new List<int>();
             List<int> ownMethodsRequired = new List<int>();
+            List<int> fieldsRequired = new List<int>();
             // Maps methodDef to memberRef tokens (for methods declared outside the assembly of the executing code)
             List<(int, int)> tokenMap = new List<(int, int)>();
-            if (ilBytes.Length > Math.Pow(2, 14) - 1)
+            if (ilBytes != null && ilBytes.Length > Math.Pow(2, 14) - 1)
             {
                 throw new InvalidProgramException($"Max IL size of real time method is 2^14 Bytes. Actual size is {ilBytes.Length}.");
             }
@@ -602,20 +796,36 @@ namespace Iot.Device.Arduino
                 return tsk;
             }
 
-            GetMethodDependencies(methodInfo, foreignMethodsRequired, ownMethodsRequired);
-
-            foreach (int token in foreignMethodsRequired.Distinct())
+            if (hasBody)
             {
-                var resolved = ResolveMember(methodInfo, token);
-                if (resolved == null)
+                GetMethodDependencies(methodInfo, foreignMethodsRequired, ownMethodsRequired, fieldsRequired);
+
+                foreach (int token in foreignMethodsRequired.Distinct())
                 {
-                    continue;
+                    var resolved = ResolveMember(methodInfo, token);
+                    if (resolved == null)
+                    {
+                        continue;
+                    }
+
+                    _board.Log($"Method {resolved.DeclaringType} - {resolved} is required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
+                    // Multiple local (0x0a) tokens can be implemented by the same remote (0x06) instance, so
+                    // the left entry of this tuple might not need to be unique
+                    tokenMap.Add((CombinedMethodToken(resolved), token));
                 }
 
-                _board.Log($"Method {resolved.DeclaringType} - {resolved} is required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
-                // Multiple local (0x0a) tokens can be implemented by the same remote (0x06) instance, so
-                // the left entry of this tuple might not need to be unique
-                tokenMap.Add((CombinedMethodToken(resolved), token));
+                foreach (int token in fieldsRequired.Distinct())
+                {
+                    var resolved = ResolveMember(methodInfo, token);
+                    if (resolved == null)
+                    {
+                        continue;
+                    }
+
+                    // TODO: Use CombinedMethodToken here, as well, but this requires some indirections in other places
+                    tokenMap.Add((resolved.MetadataToken, token));
+                }
+
             }
 
             if (_numDeclaredMethods >= Math.Pow(2, 14) - 1)
@@ -624,14 +834,26 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException("To many methods declared. Only 2^14 supported.");
             }
 
+            // If the class containing this method contains statics, we need to send its declaration
+            // TODO: Parse code to check for LDSFLD or STSFLD instructions and skip if none found.
+            if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType).Statics > 0)
+            {
+                if (_classDeclarationsSent.Add(methodInfo.DeclaringType))
+                {
+                    SendClassDeclaration(methodInfo.DeclaringType);
+                }
+            }
+
             int tk = CombinedMethodToken(methodInfo);
             var newInfo = new ArduinoMethodDeclaration(_numDeclaredMethods++, tk, methodInfo);
             _methodInfos.Add(methodInfo, newInfo);
-            String methodName = methodInfo.Name;
-            _board.Log($"Method Index {newInfo.Index} is named {methodInfo.DeclaringType} - {methodName}.");
+            _board.Log($"Method Index {newInfo.Index} is named {methodInfo.DeclaringType} - {methodInfo.Name}.");
             LoadMethodDeclaration(newInfo);
             LoadTokenMap(newInfo.Index, tokenMap);
-            _board.Firmata.SendMethodIlCode(newInfo.Index, ilBytes);
+            if (hasBody)
+            {
+                _board.Firmata.SendMethodIlCode(newInfo.Index, ilBytes!);
+            }
 
             var ret = new ArduinoTask<T>(this, newInfo);
             _activeTasks.Add(ret);
@@ -745,7 +967,7 @@ namespace Iot.Device.Arduino
             _board.Firmata.SendKillTask(decl.Index);
         }
 
-        private void GetMethodDependencies(MethodBase methodInstance, List<int> foreignMethodTokens, List<int> ownMethodTokens)
+        private void GetMethodDependencies(MethodBase methodInstance, List<int> foreignMethodTokens, List<int> ownMethodTokens, List<int> fields)
         {
             if (methodInstance.ContainsGenericParameters)
             {
@@ -799,6 +1021,17 @@ namespace Iot.Device.Arduino
                 {
                     // Call to another method of the same assembly
                     ownMethodTokens.Add(token);
+                }
+
+                // an STSFLD or LDSFLD instruction. Don't know what's wrong with their token
+                if ((byteCode[idx] == 0x7E || byteCode[idx] == 0x80) && token >> 24 == 0x0A)
+                {
+                    fields.Add(token);
+                }
+
+                if ((byteCode[idx] == 0x7D || byteCode[idx] == 0x7B) && token >> 24 == 0x0A)
+                {
+                    fields.Add(token);
                 }
 
                 idx++;

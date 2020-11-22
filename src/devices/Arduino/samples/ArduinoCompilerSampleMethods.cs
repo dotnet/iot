@@ -21,6 +21,7 @@ namespace Arduino.Samples
             public SimpleLedBinding(GpioController controller, int pin, int delay)
             {
                 _controller = controller;
+                _controller.OpenPin(pin);
                 _controller.SetPinMode(pin, PinMode.Output);
                 _ledPin = pin;
                 _delay = delay;
