@@ -110,19 +110,11 @@ namespace Iot.Device.BrickPi3.Movement
                 var motorstatus = _brick.GetMotorStatus((byte)Port);
                 switch (polarity)
                 {
-                    case Polarity.Backward:
-                        if (motorstatus.Speed > 0)
-                        {
-                            _brick.SetMotorPower((byte)Port, -Speed);
-                        }
-
+                    case Polarity.Backward when motorstatus.Speed > 0:
+                        _brick.SetMotorPower((byte)Port, -Speed);
                         break;
-                    case Polarity.Forward:
-                        if (motorstatus.Speed < 0)
-                        {
-                            _brick.SetMotorPower((byte)Port, -Speed);
-                        }
-
+                    case Polarity.Forward when motorstatus.Speed < 0:
+                        _brick.SetMotorPower((byte)Port, -Speed);
                         break;
                     case Polarity.OppositeDirection:
                         _brick.SetMotorPower((byte)Port, -Speed);
