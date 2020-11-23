@@ -532,9 +532,9 @@ namespace Arduino.Samples
         public static void TestIlInterpreter(ArduinoBoard board)
         {
             ArduinoCsCompiler compiler = new ArduinoCsCompiler(board);
-            BasicCalculationTest(compiler);
+            //// BasicCalculationTest(compiler);
 
-            OperatorTest(compiler);
+            //// OperatorTest(compiler);
 
             //// AsyncExecutionTest(board, compiler);
 
@@ -549,36 +549,12 @@ namespace Arduino.Samples
         {
             // These operations should be combined into one, to simplify usage (just provide the main entry point,
             // and derive everything required from there)
-            compiler.LoadLowLevelInterface();
-            compiler.LoadClass(typeof(ArduinoCompilerSampleMethods.SimpleLedBinding));
+            compiler.ClearAllData(true);
+            var exec = compiler.CreateExecutionSet();
+            compiler.PrepareLowLevelInterface(exec);
+            compiler.PrepareClass(exec, typeof(ArduinoCompilerSampleMethods.SimpleLedBinding));
             // This should just return a reference to the now already loaded method
-            var task = compiler.LoadCode<Action<int, int>>(ArduinoCompilerSampleMethods.SimpleLedBinding.RunBlink);
-
-            HashSet<MethodBase> methods = new HashSet<MethodBase>();
-
-            compiler.CollectDependencies(task.MethodInfo.MethodBase, methods);
-
-            var list = methods.ToList();
-            for (var index = 0; index < list.Count; index++)
-            {
-                var dep = list[index];
-                // If we have a ctor in the call chain we need to ensure we have its class loaded.
-                // This happens if the created object is only used in local variables but not as a class member
-                // seen so far.
-                if (dep.IsConstructor && dep.DeclaringType != null && !dep.DeclaringType.IsValueType)
-                {
-                    compiler.LoadClass(dep.DeclaringType);
-                }
-                else if (dep.DeclaringType != null && HasStaticFields(dep.DeclaringType))
-                {
-                    // Also load the class declaration if it contains static fields.
-                    // TODO: We currently assume that no class is accessing static fields of another class.
-                    compiler.LoadClass(dep.DeclaringType);
-                }
-
-                // Type is irrelevant here (should probably split this function into loading and preparing)
-                compiler.LoadCode<Action>(dep);
-            }
+            var task = compiler.PrepareCode<Action<int, int>>(exec, ArduinoCompilerSampleMethods.SimpleLedBinding.RunBlink);
 
             task.InvokeAsync(6, 1000);
 
@@ -587,26 +563,13 @@ namespace Arduino.Samples
             compiler.ClearAllData(true);
         }
 
-        private static bool HasStaticFields(Type cls)
-        {
-            foreach (var fld in cls.GetFields())
-            {
-                if (fld.IsStatic)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private static void ReadDht11Test(ArduinoCsCompiler compiler)
         {
             object[] data;
             MethodState state;
-
-            compiler.LoadLowLevelInterface();
-            var dht = compiler.LoadCode(new Func<IArduinoHardwareLevelAccess, int, UInt32>(ArduinoCompilerSampleMethods.ReadDht11));
+            var set = compiler.CreateExecutionSet();
+            compiler.PrepareLowLevelInterface(set);
+            var dht = compiler.PrepareCode(set, new Func<IArduinoHardwareLevelAccess, int, UInt32>(ArduinoCompilerSampleMethods.ReadDht11));
             dht.InvokeAsync(0, 3);
 
             CancellationTokenSource ts = new CancellationTokenSource(10000);
@@ -635,9 +598,10 @@ namespace Arduino.Samples
 
         private static void AsyncExecutionTest(ArduinoBoard board, ArduinoCsCompiler compiler)
         {
-            compiler.LoadLowLevelInterface();
-            compiler.LoadCode(new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
-            var method3 = compiler.LoadCode(new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
+            var set = compiler.CreateExecutionSet();
+            compiler.PrepareLowLevelInterface(set);
+            compiler.PrepareCode(set, new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
+            var method3 = compiler.PrepareCode(set, new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
             method3.InvokeAsync(0, 10, 500);
 
             // While the above method executes (and blinks the led), we query the analog input
@@ -658,10 +622,11 @@ namespace Arduino.Samples
 
             compiler.ClearAllData(true);
 
+            set = compiler.CreateExecutionSet();
             // Start task again and terminate it immediately
-            compiler.LoadLowLevelInterface();
-            compiler.LoadCode(new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
-            method3 = compiler.LoadCode(new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
+            compiler.PrepareLowLevelInterface(set);
+            compiler.PrepareCode(set, new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
+            method3 = compiler.PrepareCode(set, new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
             method3.InvokeAsync(0, 10, 500);
             method3.Terminate();
             if (method3.State != MethodState.Killed)
@@ -702,7 +667,9 @@ namespace Arduino.Samples
 
         private static void OperatorTest(ArduinoCsCompiler compiler)
         {
-            var method1 = compiler.LoadCode<Func<int, int, bool>>(PerformOperatorTest);
+            compiler.ClearAllData(true);
+            var set = compiler.CreateExecutionSet();
+            var method1 = compiler.PrepareCode<Func<int, int, bool>>(set, PerformOperatorTest);
             bool result = method1.Invoke(CancellationToken.None, 0, 1, 2);
             if (!result)
             {
@@ -714,7 +681,9 @@ namespace Arduino.Samples
 
         private static void BasicCalculationTest(ArduinoCsCompiler compiler)
         {
-            var method1 = compiler.LoadCode<Func<int, int, int>>(ArduinoCompilerSampleMethods.AddInts);
+            compiler.ClearAllData(true);
+            var set = compiler.CreateExecutionSet();
+            var method1 = compiler.PrepareCode<Func<int, int, int>>(set, ArduinoCompilerSampleMethods.AddInts);
             method1.InvokeAsync(2, 3);
             int result;
             method1.WaitForResult();
@@ -732,7 +701,9 @@ namespace Arduino.Samples
             result = (int)data[0];
             Console.WriteLine($"255 + 5 = {result}");
 
-            var method2 = compiler.LoadCode(new Func<int, int, bool>(ArduinoCompilerSampleMethods.Equal));
+            compiler.ClearAllData(true);
+            set = compiler.CreateExecutionSet();
+            var method2 = compiler.PrepareCode(set, new Func<int, int, bool>(ArduinoCompilerSampleMethods.Equal));
             method2.InvokeAsync(2, 3);
             method2.WaitForResult();
             method2.GetMethodResults(out data, out state);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 #pragma warning disable CS1591
@@ -6,10 +7,12 @@ namespace Iot.Device.Arduino
 {
     public sealed class ArduinoMethodDeclaration
     {
-        public ArduinoMethodDeclaration(int index, int token, MethodBase methodBase)
+        public ArduinoMethodDeclaration(int token, MethodBase methodBase, List<(int First, int Second)> tokenMap, byte[]? ilBytes)
         {
-            Index = index;
+            Index = -1;
             MethodBase = methodBase;
+            TokenMap = tokenMap;
+            IlBytes = ilBytes;
             Flags = MethodFlags.None;
             Token = token;
 
@@ -17,6 +20,7 @@ namespace Iot.Device.Arduino
             {
                 MaxLocals = 0;
                 MaxStack = 0;
+                HasBody = false;
             }
             else
             {
@@ -28,6 +32,7 @@ namespace Iot.Device.Arduino
 
                 MaxLocals = body.LocalVariables.Count;
                 MaxStack = body.MaxStackSize;
+                HasBody = true;
             }
 
             NativeMethod = ArduinoImplementation.None;
@@ -64,16 +69,19 @@ namespace Iot.Device.Arduino
             {
                 Flags |= MethodFlags.Abstract;
             }
+
+            Name = $"{MethodBase.DeclaringType} - {methodBase}";
         }
 
-        public ArduinoMethodDeclaration(int index, int token, MethodInfo methodInfo, MethodFlags flags, ArduinoImplementation nativeMethod)
+        public ArduinoMethodDeclaration(int token, MethodInfo methodInfo, MethodFlags flags, ArduinoImplementation nativeMethod)
         {
-            Index = index;
+            Index = -1;
             Token = token;
             MethodBase = methodInfo;
             Flags = flags;
             NativeMethod = nativeMethod;
             MaxLocals = MaxStack = 0;
+            HasBody = false;
             ArgumentCount = methodInfo.GetParameters().Length;
             if (methodInfo.CallingConvention.HasFlag(CallingConventions.HasThis))
             {
@@ -84,11 +92,35 @@ namespace Iot.Device.Arduino
             {
                 Flags |= MethodFlags.VoidOrCtor;
             }
+
+            Name = $"{MethodBase.DeclaringType} - {MethodBase} (Special Method)";
         }
 
-        public int Index { get; }
+        public bool HasBody
+        {
+            get;
+        }
+
+        public int Index
+        {
+            get;
+            internal set;
+        }
+
+        public string Name
+        {
+            get;
+        }
+
         public int Token { get; }
         public MethodBase MethodBase { get; }
+
+        public List<(int First, int Second)>? TokenMap
+        {
+            get;
+        }
+
+        public byte[]? IlBytes { get; }
 
         public MethodInfo MethodInfo
         {
@@ -124,6 +156,11 @@ namespace Iot.Device.Arduino
         public int ArgumentCount
         {
             get;
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }

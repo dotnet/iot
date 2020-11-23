@@ -286,9 +286,10 @@ namespace Iot.Device.Arduino.Tests
         {
             var methods = type.GetMethods().Where(x => x.Name == methodName).ToList();
             Assert.Single(methods);
-            _compiler.LoadLowLevelInterface();
+            var set = _compiler.CreateExecutionSet();
+            _compiler.PrepareLowLevelInterface(set);
             CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-            var method = _compiler.LoadCode<Func<T1, T2, T3>>(methods[0]);
+            var method = _compiler.PrepareCode<Func<T1, T2, T3>>(set, methods[0]);
 
             // First execute the method locally, so we don't have an error in the test
             T3 result = (T3)methods[0].Invoke(null, new object[] { a!, b! });

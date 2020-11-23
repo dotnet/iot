@@ -1439,7 +1439,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void SendClassDeclaration(Int32 classToken, Int32 parentToken, (int Dynamic, int Statics) sizeOfClass, List<(VariableKind Kind, Int32 FieldToken, List<int> BaseDefinitionTokens)> members)
+        public void SendClassDeclaration(Int32 classToken, Int32 parentToken, (int Dynamic, int Statics) sizeOfClass, List<ExecutionSet.VariableOrMethod> members)
         {
             if (_firmataStream == null)
             {
@@ -1464,9 +1464,9 @@ namespace Iot.Device.Arduino
                     SendInt14(len);
                     SendInt14(member);
 
-                    _firmataStream.WriteByte((byte)members[member].Kind);
-                    SendInt32(members[member].FieldToken);
-                    foreach (int bdt in members[member].BaseDefinitionTokens)
+                    _firmataStream.WriteByte((byte)members[member].VariableType);
+                    SendInt32(members[member].Token);
+                    foreach (int bdt in members[member].BaseTokens)
                     {
                         SendInt32(bdt);
                     }

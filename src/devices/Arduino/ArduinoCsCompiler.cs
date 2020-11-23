@@ -53,7 +53,7 @@ namespace Iot.Device.Arduino
     }
 
     [Flags]
-    internal enum VariableKind : byte
+    public enum VariableKind : byte
     {
         Void = 0,
         Uint32 = 1,
@@ -83,20 +83,15 @@ namespace Iot.Device.Arduino
         private readonly ArduinoBoard _board;
         private readonly Dictionary<MethodBase, ArduinoMethodDeclaration> _methodInfos;
         private readonly List<IArduinoTask> _activeTasks;
-        private readonly HashSet<MemberInfo> _classDeclarationsSent;
         private readonly List<Module> _activeModules;
-
-        private int _numDeclaredMethods;
 
         public ArduinoCsCompiler(ArduinoBoard board, bool resetExistingCode = true)
         {
             _board = board;
-            _numDeclaredMethods = 0;
             _methodInfos = new Dictionary<MethodBase, ArduinoMethodDeclaration>();
             _board.SetCompilerCallback(BoardOnCompilerCallback);
 
             _activeTasks = new List<IArduinoTask>();
-            _classDeclarationsSent = new HashSet<MemberInfo>();
             _activeModules = new List<Module>();
             // The first entry is always "self"
             _activeModules.Add(null!);
@@ -181,10 +176,9 @@ namespace Iot.Device.Arduino
             task.AddData(state, args);
         }
 
-        public ArduinoTask<T> LoadCode<T>(T method)
-            where T : Delegate
+        public ExecutionSet CreateExecutionSet()
         {
-            return LoadCode<T>(method.Method);
+            return new ExecutionSet(this);
         }
 
         private MemberInfo? ResolveMember(MethodBase method, int metadataToken)
@@ -214,7 +208,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void LoadLowLevelInterface()
+        public void PrepareLowLevelInterface(ExecutionSet set)
         {
             Type lowLevelInterface = typeof(IArduinoHardwareLevelAccess);
             foreach (var method in lowLevelInterface.GetMethods())
@@ -224,14 +218,19 @@ namespace Iot.Device.Arduino
                     var attr = (ArduinoImplementationAttribute)method.GetCustomAttributes(typeof(ArduinoImplementationAttribute)).First();
 
                     int token = CombinedMethodToken(method);
-                    ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(_numDeclaredMethods++, token, method, MethodFlags.SpecialMethod, attr.MethodNumber);
+                    ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(token, method, MethodFlags.SpecialMethod, attr.MethodNumber);
+                    // Todo: Move this member to the ExecutionSet
                     _methodInfos.Add(method, decl);
-                    LoadMethodDeclaration(decl);
+                    set.AddMethod(decl);
                 }
             }
 
             // Also load the core methods
-            LoadCode(new Action<IArduinoHardwareLevelAccess, int>(ArduinoRuntimeCore.Sleep));
+            var t = typeof(ArduinoRuntimeCore);
+            foreach (var method in t.GetMethods(BindingFlags.Public))
+            {
+                PrepareCodeInternal(set, method);
+            }
         }
 
         private int CombinedMethodToken(MemberInfo method)
@@ -240,13 +239,13 @@ namespace Iot.Device.Arduino
             int idx = _activeModules.IndexOf(module);
             if (idx >= 0)
             {
-                // Use top 4 bit for the module (at most 8 modules at a time)
+                // Use top 4 bit for the module (at most 15 modules at a time)
                 return method.MetadataToken | idx << 28;
             }
 
-            if (_activeModules.Count == 8)
+            if (_activeModules.Count == 15)
             {
-                throw new NotSupportedException("At most 8 modules may be involved at once");
+                throw new NotSupportedException("At most 15 modules may be involved at once");
             }
 
             _activeModules.Add(module);
@@ -272,7 +271,7 @@ namespace Iot.Device.Arduino
             return cls.MetadataToken | (_activeModules.Count - 1) << 28;
         }
 
-        public void LoadClass(Type classType)
+        public void PrepareClass(ExecutionSet set, Type classType)
         {
             if (!ValueTypeSupported(classType))
             {
@@ -286,27 +285,30 @@ namespace Iot.Device.Arduino
 
             foreach (var cls in baseTypes.Where(x => x.IsArray == false))
             {
-                if (_classDeclarationsSent.Add(cls))
-                {
-                    SendClassDeclaration(cls);
-                }
+                PrepareClassDeclaration(set, cls);
             }
         }
 
         private bool ValueTypeSupported(Type classType)
         {
             // TODO: Should be sizeof(Variant)
-            return !(classType.IsValueType && GetClassSize(classType).Dynamic > sizeof(int));
+            // return !(classType.IsValueType && GetClassSize(classType).Dynamic > sizeof(int));
+            return true;
         }
 
-        private void SendClassDeclaration(Type classType)
+        private void PrepareClassDeclaration(ExecutionSet set, Type classType)
         {
+            if (set.HasDefinition(classType))
+            {
+                return;
+            }
+
             List<FieldInfo> fields = new List<FieldInfo>();
             List<MemberInfo> methods = new List<MemberInfo>();
 
             GetFields(classType, fields, methods);
 
-            List<(VariableKind, Int32, List<int>)> memberTypes = new List<(VariableKind, Int32, List<int>)>();
+            List<ExecutionSet.VariableOrMethod> memberTypes = new List<ExecutionSet.VariableOrMethod>();
             for (var index = 0; index < fields.Count; index++)
             {
                 var fieldType = GetVariableType(fields[index].FieldType);
@@ -315,34 +317,84 @@ namespace Iot.Device.Arduino
                     fieldType |= VariableKind.Static;
                 }
 
-                memberTypes.Add((fieldType, fields[index].MetadataToken, new List<int>()));
+                memberTypes.Add(new ExecutionSet.VariableOrMethod(fieldType, fields[index].MetadataToken, new List<int>()));
             }
 
             for (var index = 0; index < methods.Count; index++)
             {
-                if (MemberLinkRequired(methods[index], out var baseMethodInfos))
+                var m = methods[index] as ConstructorInfo;
+                if (m != null)
                 {
-                    List<int> baseTokens = baseMethodInfos.Select(x => CombinedMethodToken(x)).ToList();
-                    memberTypes.Add((VariableKind.Method, CombinedMethodToken(methods[index]), baseTokens));
+                    memberTypes.Add(new ExecutionSet.VariableOrMethod(VariableKind.Method, CombinedMethodToken(m), new List<int>()));
                 }
             }
 
-            Int32 parentToken = 0;
-            Type parent = classType.BaseType!;
-            if (parent != null)
-            {
-                parentToken = CombinedClassToken(parent);
-            }
-
-            // Extend token with assembly identifier, to make sure it is unique
-            int token = CombinedClassToken(classType);
-
-            // separated for debugging purposes (the debugger cannot evaluate Type.ToString() on a conditional breakpoint)
-            string className = classType.Name;
             var sizeOfClass = GetClassSize(classType);
 
-            _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {memberTypes.Count}, raw size {sizeOfClass}");
-            _board.Firmata.SendClassDeclaration(token, parentToken, sizeOfClass, memberTypes);
+            // Add this first, so we break the recursion to this class further down
+            var newClass = new ExecutionSet.Class(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, memberTypes);
+            set.AddClass(newClass);
+        }
+
+        /// <summary>
+        /// Complete the execution set by making sure all dependencies are resolved
+        /// </summary>
+        internal void FinalizeExecutionSet(ExecutionSet set)
+        {
+            // This list might change during iteration
+            for (var i = 0; i < set.Classes.Count; i++)
+            {
+                var cls = set.Classes[i];
+                List<FieldInfo> fields = new List<FieldInfo>();
+                List<MemberInfo> methods = new List<MemberInfo>();
+
+                GetFields(cls.Cls, fields, methods);
+                string name = cls.Cls.Name;
+                for (var index = 0; index < methods.Count; index++)
+                {
+                    var m = methods[index];
+                    if (MemberLinkRequired(set, m, out var baseMethodInfos))
+                    {
+                        // If this method is required because base implementations are called, we also need its implementation (obviously)
+                        // Unfortunately, this can recursively require further classes and methods
+                        PrepareCodeInternal(set, (MethodBase)m); // This cast must work
+
+                        List<int> baseTokens = baseMethodInfos.Select(x => CombinedMethodToken(x)).ToList();
+                        cls.Members.Add(new ExecutionSet.VariableOrMethod(VariableKind.Method, CombinedMethodToken(m), baseTokens));
+                    }
+                }
+            }
+        }
+
+        internal void SendClassDeclarations(ExecutionSet set)
+        {
+            foreach (var c in set.Classes)
+            {
+                var cls = c.Cls;
+                Int32 parentToken = 0;
+                Type parent = cls.BaseType!;
+                if (parent != null)
+                {
+                    parentToken = CombinedClassToken(parent);
+                }
+
+                // Extend token with assembly identifier, to make sure it is unique
+                int token = CombinedClassToken(cls);
+
+                // separated for debugging purposes (the debugger cannot evaluate Type.ToString() on a conditional breakpoint)
+                string className = cls.Name;
+
+                _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}");
+                _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), c.Members);
+            }
+        }
+
+        internal void SendMethods(ExecutionSet set)
+        {
+            foreach (var me in set.Methods())
+            {
+                SendMethod(set, me);
+            }
         }
 
         /// <summary>
@@ -350,21 +402,17 @@ namespace Iot.Device.Arduino
         /// This is used a) to find the class to construct from a newobj instruction (which provides the ctor token only)
         /// and b) to resolve virtual method calls on a concrete class.
         /// </summary>
+        /// <param name="set">The current execution set</param>
         /// <param name="method">The method instance</param>
         /// <param name="methodsBeingImplemented">Returns the list of methods (from interfaces or base classes) that this method implements</param>
         /// <returns>True if the method shall be part of the class declaration</returns>
-        private static bool MemberLinkRequired(MemberInfo method, out List<MethodInfo> methodsBeingImplemented)
+        private static bool MemberLinkRequired(ExecutionSet set, MemberInfo method, out List<MethodInfo> methodsBeingImplemented)
         {
             methodsBeingImplemented = new List<MethodInfo>();
-            // Ctors are always required, since we need to look up the class from a ctor method
-            if (method is ConstructorInfo)
-            {
-                return true;
-            }
 
             if (method is MethodInfo m)
             {
-                // Static methods, on the other hand, do not need a link to the class (so far)
+                // Static methods, do not need a link to the class (so far)
                 if (m.IsStatic)
                 {
                     return false;
@@ -380,7 +428,8 @@ namespace Iot.Device.Arduino
 
                 CollectBaseImplementations(m, methodsBeingImplemented);
 
-                return methodsBeingImplemented.Count > 0;
+                // We need the implementation if at least one base implementation is being called and is used
+                return methodsBeingImplemented.Count > 0 && methodsBeingImplemented.Any(x => set.HasMethod(x));
             }
 
             return false;
@@ -636,7 +685,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        private void LoadMethodDeclaration(ArduinoMethodDeclaration declaration)
+        private void SendMethodDeclaration(ArduinoMethodDeclaration declaration)
         {
             byte[] localTypes = new byte[declaration.MaxLocals];
             var body = declaration.MethodBase.GetMethodBody();
@@ -687,7 +736,7 @@ namespace Iot.Device.Arduino
             return VariableKind.Object;
         }
 
-        public void CollectDependencies(MethodBase methodInfo, HashSet<MethodBase> methods)
+        public void CollectDependencies(ExecutionSet set, MethodBase methodInfo, HashSet<MethodBase> methods)
         {
             List<int> foreignMethodsRequired = new List<int>();
             List<int> ownMethodsRequired = new List<int>();
@@ -699,7 +748,7 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            GetMethodDependencies(methodInfo, foreignMethodsRequired, ownMethodsRequired, fieldsRequired);
+            GetMethodDependencies(set, methodInfo, foreignMethodsRequired, ownMethodsRequired, fieldsRequired);
             List<int> combined = foreignMethodsRequired;
             combined.AddRange(ownMethodsRequired);
             combined = combined.Distinct().ToList();
@@ -719,14 +768,16 @@ namespace Iot.Device.Arduino
                     // in a stack overflow when a method is recursive (even indirect)
                     if (methods.Add(me))
                     {
-                        CollectDependencies(me, methods);
+                        _board.Log($"Method {resolved.DeclaringType} - {resolved} is first required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
+                        CollectDependencies(set, me, methods);
                     }
                 }
                 else if (resolved is ConstructorInfo co)
                 {
                     if (methods.Add(co))
                     {
-                        CollectDependencies(co, methods);
+                        _board.Log($"Constructor {resolved.DeclaringType} - {resolved} is first required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
+                        CollectDependencies(set, co, methods);
                     }
                 }
                 else
@@ -753,13 +804,56 @@ namespace Iot.Device.Arduino
             */
         }
 
-        public ArduinoTask<T> LoadCode<T>(MethodBase methodInfo)
+        public ArduinoTask<T> GetTask<T>(ExecutionSet set, MethodBase methodInfo)
             where T : Delegate
         {
-            if (LoadInternalCode(methodInfo, false))
+            if (_methodInfos.ContainsKey(methodInfo))
+            {
+                // Nothing to do, already loaded
+                var tsk = new ArduinoTask<T>(this, _methodInfos[methodInfo]);
+                _activeTasks.Add(tsk);
+                return tsk;
+            }
+
+            throw new InvalidOperationException($"Method {methodInfo} not loaded");
+        }
+
+        public ArduinoTask<T> PrepareCode<T>(ExecutionSet set, T method)
+            where T : Delegate
+        {
+            if (method == null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
+            PrepareCodeInternal(set, method.Method);
+            _board.Log($"Estimated program memory usage before finalization: {set.EstimateRequiredMemory()} bytes.");
+            set.FinalizeSet();
+            _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
+            set.Load();
+            // TODO: Separate somehow
+            return GetTask<T>(set, method.Method);
+        }
+
+        // Todo: Make internal only (only used for tests)
+        public ArduinoTask<T> PrepareCode<T>(ExecutionSet set, MethodBase method)
+            where T : Delegate
+        {
+            if (method == null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
+            PrepareCodeInternal(set, method);
+            return GetTask<T>(set, method);
+        }
+
+        public void PrepareCodeInternal(ExecutionSet set, MethodBase methodInfo)
+        {
+            if (LoadInternalCode(set, methodInfo, false))
             {
                 // This method is uncallable.
-                return null!;
+                return;
             }
 
             var body = methodInfo.GetMethodBody();
@@ -767,7 +861,7 @@ namespace Iot.Device.Arduino
             {
                 // throw new MissingMethodException($"{methodInfo.DeclaringType}.{methodInfo} has no implementation");
                 _board.Log($"Error: {methodInfo.DeclaringType} - {methodInfo} has no visible implementation");
-                return null!;
+                return;
             }
 
             bool hasBody = !methodInfo.IsAbstract;
@@ -788,17 +882,9 @@ namespace Iot.Device.Arduino
                 throw new InvalidProgramException($"Max IL size of real time method is 2^14 Bytes. Actual size is {ilBytes.Length}.");
             }
 
-            if (_methodInfos.ContainsKey(methodInfo))
-            {
-                // Nothing to do, already loaded
-                var tsk = new ArduinoTask<T>(this, _methodInfos[methodInfo]);
-                _activeTasks.Add(tsk);
-                return tsk;
-            }
-
             if (hasBody)
             {
-                GetMethodDependencies(methodInfo, foreignMethodsRequired, ownMethodsRequired, fieldsRequired);
+                GetMethodDependencies(set, methodInfo, foreignMethodsRequired, ownMethodsRequired, fieldsRequired);
 
                 foreach (int token in foreignMethodsRequired.Distinct())
                 {
@@ -808,7 +894,6 @@ namespace Iot.Device.Arduino
                         continue;
                     }
 
-                    _board.Log($"Method {resolved.DeclaringType} - {resolved} is required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
                     // Multiple local (0x0a) tokens can be implemented by the same remote (0x06) instance, so
                     // the left entry of this tuple might not need to be unique
                     tokenMap.Add((CombinedMethodToken(resolved), token));
@@ -828,46 +913,89 @@ namespace Iot.Device.Arduino
 
             }
 
-            if (_numDeclaredMethods >= Math.Pow(2, 14) - 1)
-            {
-                // In practice, the maximum will be much less on most Arduino boards, due to ram limits
-                throw new NotSupportedException("To many methods declared. Only 2^14 supported.");
-            }
+            int tk = CombinedMethodToken(methodInfo);
+            var newInfo = new ArduinoMethodDeclaration(tk, methodInfo, tokenMap, ilBytes);
 
-            // If the class containing this method contains statics, we need to send its declaration
-            // TODO: Parse code to check for LDSFLD or STSFLD instructions and skip if none found.
-            if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType).Statics > 0)
+            if (set.AddMethod(newInfo))
             {
-                if (_classDeclarationsSent.Add(methodInfo.DeclaringType))
+                // If the class containing this method contains statics, we need to send its declaration
+                // TODO: Parse code to check for LDSFLD or STSFLD instructions and skip if none found.
+                if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType).Statics > 0)
                 {
-                    SendClassDeclaration(methodInfo.DeclaringType);
+                    PrepareClass(set, methodInfo.DeclaringType);
+                }
+
+                PrepareDependencies(set, methodInfo);
+            }
+        }
+
+        private void PrepareDependencies(ExecutionSet set, MethodBase method)
+        {
+            HashSet<MethodBase> methods = new HashSet<MethodBase>();
+
+            CollectDependencies(set, method, methods);
+
+            var list = methods.ToList();
+            for (var index = 0; index < list.Count; index++)
+            {
+                var dep = list[index];
+                // If we have a ctor in the call chain we need to ensure we have its class loaded.
+                // This happens if the created object is only used in local variables but not as a class member
+                // seen so far.
+                if (dep.IsConstructor && dep.DeclaringType != null && !dep.DeclaringType.IsValueType)
+                {
+                    PrepareClass(set, dep.DeclaringType);
+                }
+                else if (dep.DeclaringType != null && HasStaticFields(dep.DeclaringType))
+                {
+                    // Also load the class declaration if it contains static fields.
+                    // TODO: We currently assume that no class is accessing static fields of another class.
+                    PrepareClass(set, dep.DeclaringType);
+                }
+
+                PrepareCodeInternal(set, dep);
+            }
+        }
+
+        private static bool HasStaticFields(Type cls)
+        {
+            foreach (var fld in cls.GetFields())
+            {
+                if (fld.IsStatic)
+                {
+                    return true;
                 }
             }
 
-            int tk = CombinedMethodToken(methodInfo);
-            var newInfo = new ArduinoMethodDeclaration(_numDeclaredMethods++, tk, methodInfo);
-            _methodInfos.Add(methodInfo, newInfo);
-            _board.Log($"Method Index {newInfo.Index} is named {methodInfo.DeclaringType} - {methodInfo.Name}.");
-            LoadMethodDeclaration(newInfo);
-            LoadTokenMap(newInfo.Index, tokenMap);
-            if (hasBody)
+            return false;
+        }
+
+        private void SendMethod(ExecutionSet set, ArduinoMethodDeclaration decl)
+        {
+            MethodBase methodInfo = decl.MethodBase;
+            _methodInfos.Add(methodInfo, decl);
+            _board.Log($"Method Index {decl.Index} is named {methodInfo.DeclaringType} - {methodInfo.Name}.");
+            SendMethodDeclaration(decl);
+            if (decl.TokenMap != null)
             {
-                _board.Firmata.SendMethodIlCode(newInfo.Index, ilBytes!);
+                SendTokenMap(decl.Index, decl.TokenMap);
             }
 
-            var ret = new ArduinoTask<T>(this, newInfo);
-            _activeTasks.Add(ret);
-            return ret;
+            if (decl.HasBody)
+            {
+                _board.Firmata.SendMethodIlCode(decl.Index, decl.IlBytes!);
+            }
         }
 
         /// <summary>
         /// Checks whether the implementation of the given method should be replaced with an internal call.
         /// This will for instance apply to the implementation of Object.GetType(), which has no implementation in C#
         /// </summary>
+        /// <param name="set">The current execution set</param>
         /// <param name="methodInfo">A method info pointer</param>
         /// <param name="checkOnly">Only check whether there's an internal implementation for this method</param>
         /// <returns>True if a replacement was found and loaded, false otherwise</returns>
-        private bool LoadInternalCode(MethodBase methodInfo, bool checkOnly)
+        private bool LoadInternalCode(ExecutionSet set, MethodBase methodInfo, bool checkOnly)
         {
             Type? classType = methodInfo.DeclaringType;
             if (classType != null && _rootClasses.Contains(classType))
@@ -906,11 +1034,11 @@ namespace Iot.Device.Arduino
                                 var attr = (ArduinoImplementationAttribute)attr1.First();
                                 // Send the new implementation (actually a spezial method number),
                                 // but with the token that matches the original method
-                                ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(_numDeclaredMethods++,
+                                ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(
                                     methodInfo.MetadataToken, method,
                                     MethodFlags.SpecialMethod, attr.MethodNumber);
                                 _methodInfos.Add(method, decl);
-                                LoadMethodDeclaration(decl);
+                                set.AddMethod(decl);
                             }
 
                             return true;
@@ -922,7 +1050,7 @@ namespace Iot.Device.Arduino
             return false;
         }
 
-        private void LoadTokenMap(int codeReference, List<(int Foreign, int Own)> tokenMap)
+        private void SendTokenMap(int codeReference, List<(int Foreign, int Own)> tokenMap)
         {
             if (tokenMap.Count == 0)
             {
@@ -967,7 +1095,7 @@ namespace Iot.Device.Arduino
             _board.Firmata.SendKillTask(decl.Index);
         }
 
-        private void GetMethodDependencies(MethodBase methodInstance, List<int> foreignMethodTokens, List<int> ownMethodTokens, List<int> fields)
+        private void GetMethodDependencies(ExecutionSet set, MethodBase methodInstance, List<int> foreignMethodTokens, List<int> ownMethodTokens, List<int> fields)
         {
             if (methodInstance.ContainsGenericParameters)
             {
@@ -975,7 +1103,7 @@ namespace Iot.Device.Arduino
             }
 
             // Don't analyze the body of a method if we're going to replace it with something else
-            if (LoadInternalCode(methodInstance, true))
+            if (LoadInternalCode(set, methodInstance, true))
             {
                 return;
             }
@@ -1045,10 +1173,8 @@ namespace Iot.Device.Arduino
         public void ClearAllData(bool force)
         {
             _board.Firmata.SendIlResetCommand(force);
-            _numDeclaredMethods = 0;
             _activeTasks.Clear();
             _methodInfos.Clear();
-            _classDeclarationsSent.Clear();
             _activeModules.Clear();
             _activeModules.Add(null!);
         }
