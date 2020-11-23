@@ -40,6 +40,8 @@ Unhandled exception. System.IO.IOException: Error 121 performing I2C data transf
 Aborted
 ```
 
+**Note**: In rare cases, you might see the above exception during normal operation of a device as well. Adding retries might solve the issue.
+
 See at the end if you want to write your own I2C scanner and find the correct device address.
 
 ## Enabling I2C
@@ -66,7 +68,7 @@ Then reboot:
 sudo reboot
 ```
 
-More information on dtoverlay and how to select specific elements of I2C buses are [available here](https://github.com/raspberrypi/firmware/blob/bff705fffe59ad3eea33999beb29c3f26408de40/boot/overlays/README#L1387). 2 busses are available on any Raspberry Pi. More can be available on specific models like those base out of BCM2711.
+More information on dtoverlay and how to select specific elements of I2C buses are [available here](https://github.com/raspberrypi/firmware/blob/bff705fffe59ad3eea33999beb29c3f26408de40/boot/overlays/README#L1387). 2 busses are available on any Raspberry Pi. More can be available on specific models like those base out of BCM2711 such as Raspberry Pi 4.
 
 ### Enabling I2C with advance parameters
 
@@ -127,6 +129,12 @@ SUBSYSTEM=="i2c-dev", GROUP="i2c", MODE="0660"
 If you don't have it or if you want to adjust the permissions, this is what you'll need to add/adjust, as always save through `ctrl + x` then `Y` then `enter` and then reboot.
 
 ## Bonus: write your own I2C scanner
+
+Raspberry Pi OS comes with a tool to scan the I2C bus. This tool is called `i2cdetect`. It is not the case in all systems and all OS. Usage for bus 1 (default on Raspberry Pi) is:
+
+```bash
+i2cdetect -y 1
+```
 
 I2C devices are available from the bus address 8 (0x08) to 127 (0x7F). If a device is present, it will be ok to be read. So you just need to loop and check if you can read a device. Note that this code will only work if you have previously activated I2C. The following code require C#9.0
 
