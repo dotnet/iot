@@ -162,9 +162,9 @@ namespace Iot.Device.Pn532
         {
             LogLevel = logLevel;
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
-            _shouldDispose = shouldDispose | controller == null;
+            _shouldDispose = shouldDispose || controller == null;
             _controller = controller ?? new GpioController();
-            _pin = pinChipSelect > 0 ? pinChipSelect : throw new ArgumentException($"Pin ChipSelect can only be positive");
+            _pin = pinChipSelect >= 0 ? pinChipSelect : throw new ArgumentException($"Pin ChipSelect can only be positive");
             _controller.OpenPin(_pin, PinMode.Output);
             _controller.Write(_pin, PinValue.High);
             Thread.Sleep(2);
