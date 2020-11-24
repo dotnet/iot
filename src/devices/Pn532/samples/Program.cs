@@ -3,6 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device.Gpio;
+using System.Device.I2c;
+using System.Device.Spi;
 using System.Linq;
 using System.Threading;
 using Iot.Device.Card;
@@ -11,15 +14,53 @@ using Iot.Device.Card.Mifare;
 using Iot.Device.Pn532;
 using Iot.Device.Pn532.ListPassive;
 
-string device = "/dev/ttyS0";
-using Pn532 pn532 = new Pn532(device);
-if (args.Length > 0)
+Pn532 pn532;
+
+Console.WriteLine("Welcome to Pn532 example.");
+Console.WriteLine("Which interface do you want to use with your Pn532?");
+Console.WriteLine("1. HSU: Hight Speed UART (high speed serial port)");
+Console.WriteLine("2. I2C");
+Console.WriteLine("3. SPI");
+var choiceInterface = Console.ReadKey();
+Console.WriteLine();
+if (choiceInterface is not { KeyChar: '1' or '2' or '3' })
 {
-    pn532.LogLevel = LogLevel.Debug;
+    Console.WriteLine($"You can only select 1, 2 or 3");
+    return;
+}
+
+Console.WriteLine("Do you want log level to Debug? Y/N");
+var debugLevelConsole = Console.ReadKey();
+Console.WriteLine();
+LogLevel debugLevel = debugLevelConsole is { KeyChar: 'Y' or 'y' } ? LogLevel.Debug : LogLevel.None;
+
+if (choiceInterface is { KeyChar: '3' })
+{
+    Console.WriteLine("Which pin number do you want as Chip Select?");
+    var pinSelectConsole = Console.ReadLine();
+    int pinSelect;
+    try
+    {
+        pinSelect = Convert.ToInt32(pinSelectConsole);
+    }
+    catch (Exception ex) when (ex is FormatException || ex is OverflowException)
+    {
+        Console.WriteLine("Impossible to convert the pin number.");
+        return;
+    }
+
+    pn532 = new Pn532(SpiDevice.Create(new SpiConnectionSettings(0)), pinSelect, logLevel: debugLevel);
+}
+else if (choiceInterface is { KeyChar: '2' })
+{
+    pn532 = new Pn532(I2cDevice.Create(new I2cConnectionSettings(1, Pn532.I2cDefaultAddress)), debugLevel);
 }
 else
 {
-    pn532.LogLevel = LogLevel.None;
+    Console.WriteLine("Please enter the serial port to use. ex: COM3 on Windows or /dev/ttyS0 on Linux");
+
+    var device = Console.ReadLine();
+    pn532 = new Pn532(device!, debugLevel);
 }
 
 if (pn532.FirmwareVersion is FirmwareVersion version)
@@ -34,15 +75,17 @@ if (pn532.FirmwareVersion is FirmwareVersion version)
 
     // To run tests, uncomment the next line
     // RunTests(pn532);
-    ReadMiFare(pn532);
+    // ReadMiFare(pn532);
 
     // To read Credit Cards, uncomment the next line
-    // ReadCreditCard(pn532);
+    ReadCreditCard(pn532);
 }
 else
 {
     Console.WriteLine($"Error");
 }
+
+pn532?.Dispose();
 
 void DumpAllRegisters(Pn532 pn532)
 {
@@ -90,6 +133,13 @@ void ReadMiFare(Pn532 pn532)
         return;
     }
 
+    for (int i = 0; i < retData.Length; i++)
+    {
+        Console.Write($"{retData[i]:X} ");
+    }
+
+    Console.WriteLine();
+
     var decrypted = pn532.TryDecode106kbpsTypeA(retData.AsSpan().Slice(1));
     if (decrypted is object)
     {
@@ -102,7 +152,8 @@ void ReadMiFare(Pn532 pn532)
 
         MifareCard mifareCard = new(pn532, decrypted.TargetNumber)
         {
-            BlockNumber = 0, Command = MifareCardCommand.AuthenticationA
+            BlockNumber = 0,
+            Command = MifareCardCommand.AuthenticationA
         };
 
         mifareCard.SetCapacity(decrypted.Atqa, decrypted.Sak);
