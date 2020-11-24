@@ -70,6 +70,8 @@ sudo reboot
 
 More information on dtoverlay and how to select specific elements of I2C buses are [available here](https://github.com/raspberrypi/firmware/blob/bff705fffe59ad3eea33999beb29c3f26408de40/boot/overlays/README#L1387). 2 busses are available on any Raspberry Pi. More can be available on specific models like those base out of BCM2711 such as Raspberry Pi 4.
 
+As an alternative, you can as well use the following command line: `sudo raspi-config nonint do_i2c 1`, use 0 for I2C 0 or 1 for I2C 1. Remember that 1 is the default one.
+
 ### Enabling I2C with advance parameters
 
 The general pattern looks like the following:
