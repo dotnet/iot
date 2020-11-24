@@ -9,7 +9,6 @@ using System.Device.I2c;
 using System.Device.Spi;
 using System.IO;
 using System.IO.Ports;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Iot.Device.Card;
 using Iot.Device.Pn532.AsTarget;
