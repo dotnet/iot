@@ -115,7 +115,7 @@ Pn5180 Ft4222()
 
     Ft4222Spi ftSpi = new Ft4222Spi(new SpiConnectionSettings(0, 1) { ClockFrequency = Pn5180.MaximumSpiClockFrequency, Mode = Pn5180.DefaultSpiMode, DataFlow = DataFlow.MsbFirst });
 
-    using GpioController gpioController = new(PinNumberingScheme.Board, new Ft4222Gpio());
+    GpioController gpioController = new(PinNumberingScheme.Board, new Ft4222Gpio());
 
     // Reset the device
     gpioController.OpenPin(0, PinMode.Output);
@@ -230,22 +230,22 @@ void TypeA()
                 ret = mifareCard.RunMifiCardCommand();
             }
 
-            if (ret >= 0 && mifareCard.Data is object)
+            if (ret >= 0)
             {
                 mifareCard.BlockNumber = block;
                 mifareCard.Command = MifareCardCommand.Read16Bytes;
                 ret = mifareCard.RunMifiCardCommand();
-                if (ret >= 0)
+                if (ret >= 0 && mifareCard.Data is object)
                 {
                     Console.WriteLine($"Bloc: {block}, Data: {BitConverter.ToString(mifareCard.Data)}");
                 }
                 else
                 {
-                    Console.WriteLine($"Error reading bloc: {block}, Data: {BitConverter.ToString(mifareCard.Data)}");
+                    Console.WriteLine($"Error reading bloc: {block}");
                 }
 
-                if (block % 4 == 3)
-                {
+                if (block % 4 == 3 && mifareCard.Data is object)
+                    {
                     // Check what are the permissions
                     for (byte j = 3; j > 0; j--)
                     {
