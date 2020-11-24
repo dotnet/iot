@@ -102,7 +102,8 @@ void ReadMiFare(Pn532 pn532)
 
         MifareCard mifareCard = new(pn532, decrypted.TargetNumber)
         {
-            BlockNumber = 0, Command = MifareCardCommand.AuthenticationA
+            BlockNumber = 0,
+            Command = MifareCardCommand.AuthenticationA
         };
 
         mifareCard.SetCapacity(decrypted.Atqa, decrypted.Sak);
@@ -132,8 +133,7 @@ void ReadMiFare(Pn532 pn532)
                 }
                 else
                 {
-                    Console.WriteLine(
-                        $"Error reading bloc: {block}");
+                    Console.WriteLine($"Error reading bloc: {block}");
                 }
 
                 if (block % 4 == 3 && mifareCard.Data is object)

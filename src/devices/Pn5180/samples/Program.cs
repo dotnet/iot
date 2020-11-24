@@ -245,7 +245,7 @@ void TypeA()
                 }
 
                 if (block % 4 == 3 && mifareCard.Data is object)
-                    {
+                {
                     // Check what are the permissions
                     for (byte j = 3; j > 0; j--)
                     {
