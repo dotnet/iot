@@ -101,6 +101,8 @@ There is only for SPI0 that you can use, in both cases with 1 or 2 Chip Select p
 
 **Important note**: Those overlays are only supported in the very last Raspberry Pi OS. You will get the `System.IO.IOException: Error 2. Can not open SPI device file '/dev/spidev0.0'` error message if you are using them on an older version. You can use `spi0-cs` where in the previous examples you had `spi0-2cs` or `spi0-1cs`. 
 
+As an alternative, you can as well use the following command line: `sudo raspi-config nonint do_spi 0 `
+
 So the first example will now give:
 
 ```text
