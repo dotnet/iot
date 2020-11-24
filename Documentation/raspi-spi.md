@@ -72,7 +72,7 @@ This will enable SPI0 where those are the pins which will be selected, only Soft
 
 ## Enabling any SPI with any Chip Select
 
-In order to activate  Chip Select, you'll need to add a specific dtoverlay on the `/boot/config.txt` file. If you've used the previous way of activating SPI0, you should not comment the line `dtparam=spi=on` and add what follows using the `dtoverlay`configurations.
+In order to activate  Chip Select, you'll need to add a specific dtoverlay on the `/boot/config.txt` file. If you've used the previous way of activating SPI0, you should comment the line `dtparam=spi=on` and add what follows using the `dtoverlay`configurations.
 
 Here is the table with the different options for SP0 and SP1 (please refer to the [Raspberry Pi documentation](https://www.raspberrypi.org/documentation/hardware/raspberrypi/spi/) to activate other SPI)
 
@@ -98,6 +98,18 @@ dtoverlay=spi0-1cs,cs0_pin=27,no_miso
 ```
 
 There is only for SPI0 that you can use, in both cases with 1 or 2 Chip Select pin the `no_miso`option.
+
+**Important note**: Those overlays are only supported in the very last Raspberry Pi OS. You will get the `System.IO.IOException: Error 2. Can not open SPI device file '/dev/spidev0.0'` error message if you are using them on an older version. You can use `spi0-cs` where in the previous examples you had `spi0-2cs` or `spi0-1cs`. 
+
+As an alternative, you can as well use the following command line: `sudo raspi-config nonint do_spi 0 `
+
+So the first example will now give:
+
+```text
+dtoverlay=spi0-cs,cs0_pin=27,cs1_pin=22
+```
+
+In older version, no_miso is not supported neither. And you will always get 2 chip select activated and you don't have a way to only select one.
 
 # SPI1 to SPI6
 
