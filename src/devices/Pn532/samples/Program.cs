@@ -172,22 +172,21 @@ void ReadMiFare(Pn532 pn532)
                 ret = mifareCard.RunMifiCardCommand();
             }
 
-            if (ret >= 0 && mifareCard.Data is object)
+            if (ret >= 0)
             {
                 mifareCard.BlockNumber = block;
                 mifareCard.Command = MifareCardCommand.Read16Bytes;
                 ret = mifareCard.RunMifiCardCommand();
-                if (ret >= 0)
+                if (ret >= 0 && mifareCard.Data is object)
                 {
                     Console.WriteLine($"Bloc: {block}, Data: {BitConverter.ToString(mifareCard.Data)}");
                 }
                 else
                 {
-                    Console.WriteLine(
-                        $"Error reading bloc: {block}, Data: {BitConverter.ToString(mifareCard.Data)}");
+                    Console.WriteLine($"Error reading bloc: {block}");
                 }
 
-                if (block % 4 == 3)
+                if (block % 4 == 3 && mifareCard.Data is object)
                 {
                     // Check what are the permissions
                     for (byte j = 3; j > 0; j--)
