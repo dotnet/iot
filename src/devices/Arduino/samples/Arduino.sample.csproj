@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net5.0</TargetFrameworks>
     <RootNamespace>Iot.Device.Arduino.Sample</RootNamespace>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--Cases used when running in VS, with the solution config either Windows-Debug or Linux-Debug (or -Release) -->
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\..\Bmxx80\Bmxx80.csproj" />
     <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />

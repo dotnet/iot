@@ -94,8 +94,8 @@ namespace Iot.Device.Arduino
                     int targetModule = (targetToken >> 28) & 0xF;
                     targetToken = targetToken & 0x0FFF_FFFF;
                     exceptionCode = exceptionCode & 0x0FFF_FFFF;
-                    Module module = Compiler.Modules.Count < targetModule ? Compiler.Modules[targetModule] : GetType().Module;
-                    var resolved = module.ResolveMember(targetToken);
+                    Module module = targetModule < Compiler.Modules.Count ? Compiler.Modules[targetModule] : GetType().Module;
+                    var resolved = module.ResolveMethod(targetToken);
                     if (resolved == null)
                     {
                         throw new InvalidOperationException("Internal error: Unknown exception arguments");
