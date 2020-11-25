@@ -21,6 +21,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Accelerometers
 
 * [ADXL345 - Accelerometer](Adxl345/README.md)
+* [ADXL357 - Accelerometer](Adxl357/README.md)
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
 * [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)

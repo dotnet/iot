@@ -1,7 +1,7 @@
 ﻿namespace Iot.Device.Adxl357
 {
     /// <summary>
-    /// TODO
+    /// The sensitivity of the accelerometer sensor.
     /// </summary>
     public enum AccelerometerRange
     {

@@ -9,12 +9,12 @@ using UnitsNet;
 namespace Iot.Device.Adxl357
 {
     /// <summary>
-    /// TODO
+    /// I2C Accelerometer ADXL357
     /// </summary>
     public class Adxl357 : IDisposable
     {
         /// <summary>
-        /// TODO
+        /// The default I2C address of ADXL357 device
         /// </summary>
         public const byte DefaultI2CAddress = 0x1d;
 
@@ -27,10 +27,10 @@ namespace Iot.Device.Adxl357
         private I2cDevice _i2CDevice;
 
         /// <summary>
-        /// TODO
+        /// Constructs a ADXL357 I2C device.
         /// </summary>
-        /// <param name="i2CDevice">TODO</param>
-        /// <param name="accelerometerRange">TODO</param>
+        /// <param name="i2CDevice">The I2C device used for communication.</param>
+        /// <param name="accelerometerRange">The sensitivity of the accelerometer.</param>
         public Adxl357(I2cDevice i2CDevice, AccelerometerRange accelerometerRange = AccelerometerRange.Range10G)
         {
             _i2CDevice = i2CDevice;
@@ -41,18 +41,21 @@ namespace Iot.Device.Adxl357
         }
 
         /// <summary>
-        /// TODO
+        /// Gets the current acceleration.
         /// </summary>
         public Vector3 Acceleration => GetRawAccelerometer();
 
         /// <summary>
-        /// TODO
+        /// Gets the current temperature
         /// </summary>
         public Temperature Temperature => Temperature.FromDegreesCelsius(GetTemperature());
 
         /// <summary>
-        /// TODO
+        /// Calibrates the accelerometer.
         /// </summary>
+        /// <remarks>
+        /// Make sure that the sensor is placed horizontally when executing this method.
+        ///</remarks>
         public void CalibrateAccelerationSensor()
         {
             _caliBuffer["x"] = new float[CalibrationBufferLength];

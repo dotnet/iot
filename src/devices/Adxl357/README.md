@@ -1,6 +1,11 @@
 # ADXL357 - Accelerometer
+ADXL357 is a 3-Axis digital accelerometer 40g with 20-bit resolution measurement at up to ±40g.
+Sensitivity is configurable (±10g, ±20g, ±40g).
+Has a built in temperature sensor.
 
 ## Sensor Image
+![Source: https://wiki.seeedstudio.com/Grove-3-Axis_Digital_Accelerometer_40g-ADXL357/](sensor.png)
+Source: https://wiki.seeedstudio.com/Grove-3-Axis_Digital_Accelerometer_40g-ADXL357/
 
 ## Usage
 ```C#
@@ -21,3 +26,6 @@ while (true)
     Thread.Sleep(500);
 }}
 ```
+
+## References
+https://www.analog.com/en/products/adxl357.html
