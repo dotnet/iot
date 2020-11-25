@@ -55,7 +55,7 @@ namespace Iot.Device.Adxl357
         /// </summary>
         /// <remarks>
         /// Make sure that the sensor is placed horizontally when executing this method.
-        ///</remarks>
+        /// </remarks>
         public void CalibrateAccelerationSensor()
         {
             _caliBuffer["x"] = new float[CalibrationBufferLength];
