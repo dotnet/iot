@@ -24,7 +24,7 @@ namespace Iot.Device.SocketCan
         {
             _socket = new Socket(AddressFamily.ControllerAreaNetwork, SocketType.Raw, ProtocolType.Raw);
 
-            var endpoint = new CanEndPoint(_socket, "vcan0");
+            var endpoint = new CanEndPoint(_socket, networkInterface);
             _socket.Bind(endpoint);
         }
 
