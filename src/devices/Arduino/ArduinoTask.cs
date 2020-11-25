@@ -16,8 +16,7 @@ namespace Iot.Device.Arduino
         void AddData(MethodState state, object[] args);
     }
 
-    public sealed class ArduinoTask<T> : IArduinoTask, IDisposable
-        where T : Delegate
+    public sealed class ArduinoTask : IArduinoTask, IDisposable
     {
         private ConcurrentQueue<(MethodState, object[])> _collectedValues;
         private AutoResetEvent _dataAdded;
@@ -57,7 +56,7 @@ namespace Iot.Device.Arduino
             }
 
             State = MethodState.Running;
-            Compiler.Invoke(MethodInfo.MethodInfo, arguments);
+            Compiler.Invoke(MethodInfo.MethodBase, arguments);
         }
 
         public bool Invoke(CancellationToken cancellationToken, params object[] arguments)
@@ -70,7 +69,7 @@ namespace Iot.Device.Arduino
 
         public void Terminate()
         {
-            Compiler.KillTask(MethodInfo.MethodInfo);
+            Compiler.KillTask(MethodInfo.MethodBase);
         }
 
         /// <summary>
@@ -88,6 +87,48 @@ namespace Iot.Device.Arduino
             {
                 data = d.Item2;
                 state = d.Item1;
+                if (state == MethodState.Aborted && data.Length >= 2)
+                {
+                    int exceptionCode = (int)d.Item2[0];
+                    int targetToken = (int)d.Item2[1];
+                    int targetModule = (targetToken >> 28) & 0xF;
+                    targetToken = targetToken & 0x0FFF_FFFF;
+                    exceptionCode = exceptionCode & 0x0FFF_FFFF;
+                    Module module = Compiler.Modules.Count < targetModule ? Compiler.Modules[targetModule] : GetType().Module;
+                    var resolved = module.ResolveMember(targetToken);
+                    if (resolved == null)
+                    {
+                        throw new InvalidOperationException("Internal error: Unknown exception arguments");
+                    }
+
+                    if (exceptionCode < 0xFF)
+                    {
+                        SystemException ex = (SystemException)exceptionCode;
+                        switch (ex)
+                        {
+                            case SystemException.MissingMethod:
+                                throw new MissingMethodException(resolved.DeclaringType?.Name, resolved.Name);
+                            case SystemException.NullReference:
+                                throw new NullReferenceException($"NullReferenceException in {resolved.DeclaringType} - {resolved}");
+                            case SystemException.StackOverflow:
+                                throw new StackOverflowException($"StackOverflow in {resolved.DeclaringType} - {resolved}");
+                            default:
+                                throw new InvalidOperationException("Unknown exception");
+                        }
+                    }
+
+                    module = Compiler.Modules.Count < exceptionCode ? Compiler.Modules[exceptionCode] : GetType().Module;
+                    var resolvedException = module.ResolveType(exceptionCode);
+
+                    if (resolvedException == null)
+                    {
+                        throw new InvalidOperationException("Internal error: Unknown exception type");
+                    }
+
+                    Exception x = (Exception)Activator.CreateInstance(resolvedException, BindingFlags.Public, null, $"Location: {resolved.DeclaringType} - {resolved}")!;
+                    throw x;
+                }
+
                 return true;
             }
 
@@ -112,7 +153,7 @@ namespace Iot.Device.Arduino
         {
             if (_dataAdded == null)
             {
-                throw new ObjectDisposedException(nameof(ArduinoTask<T>));
+                throw new ObjectDisposedException(nameof(ArduinoTask));
             }
 
             if (State != MethodState.Running)

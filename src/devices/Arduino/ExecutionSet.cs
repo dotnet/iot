@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 #pragma warning disable CS1591
@@ -14,6 +15,7 @@ namespace Iot.Device.Arduino
         private readonly List<ArduinoMethodDeclaration> _methods;
         private readonly List<Class> _classes;
         private int _numDeclaredMethods;
+        private ArduinoTask _entryPoint;
 
         public ExecutionSet(ArduinoCsCompiler compiler)
         {
@@ -21,21 +23,52 @@ namespace Iot.Device.Arduino
             _methods = new List<ArduinoMethodDeclaration>();
             _classes = new List<Class>();
             _numDeclaredMethods = 0;
+            _entryPoint = null!;
+            MainEntryPointInternal = null;
         }
 
         public IList<Class> Classes => _classes;
 
-        public void FinalizeSet()
+        public ArduinoTask EntryPoint
         {
-            _compiler.FinalizeExecutionSet(this);
+            get => _entryPoint;
+            internal set => _entryPoint = value;
+        }
+
+        internal MethodInfo? MainEntryPointInternal
+        {
+            get;
+            set;
         }
 
         public void Load()
         {
+            if (MainEntryPointInternal == null)
+            {
+                throw new InvalidOperationException("Main entry point not defined");
+            }
+
             // TODO: This should not be necessary later
             _compiler.ClearAllData(true);
             _compiler.SendClassDeclarations(this);
             _compiler.SendMethods(this);
+
+            EntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
+
+            // Execute all static ctors
+            foreach (var cls in Classes)
+            {
+                if (cls.Cls.TypeInitializer != null)
+                {
+                    var task = _compiler.GetTask(this, cls.Cls.TypeInitializer);
+                    task.Invoke(CancellationToken.None);
+                    task.WaitForResult();
+                    if (task.GetMethodResults(out _, out var state) == false || state != MethodState.Stopped)
+                    {
+                        throw new InvalidProgramException($"Error executing static ctor of class {cls.Cls}");
+                    }
+                }
+            }
         }
 
         public long EstimateRequiredMemory()

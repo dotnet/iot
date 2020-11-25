@@ -22,6 +22,8 @@ namespace Iot.Device.Arduino
         MonitorEnter1,
         MonitorEnter2,
         MonitorExit,
-        StringIndexer
+        StringIndexer,
+        StringFormat2,
+        StringFormat2b,
     }
 }

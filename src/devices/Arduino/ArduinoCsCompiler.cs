@@ -66,6 +66,14 @@ namespace Iot.Device.Arduino
         TypeMask = 0x7F,
     }
 
+    public enum SystemException
+    {
+        None = 0,
+        StackOverflow = 1,
+        NullReference = 2,
+        MissingMethod = 3
+    }
+
     public sealed class ArduinoCsCompiler : IDisposable
     {
         private readonly List<Type> _rootClasses = new List<Type>()
@@ -78,6 +86,14 @@ namespace Iot.Device.Arduino
         {
             typeof(MiniObject), typeof(MiniArray), typeof(MiniString), typeof(MiniMonitor),
             typeof(MiniException)
+        };
+
+        /// <summary>
+        /// Temporary: These classes (and all of its subclasses and methods) will be ignored during load
+        /// </summary>
+        private readonly List<Type> _classesToIgnore = new List<Type>()
+        {
+            typeof(Exception), typeof(System.Globalization.CultureInfo), typeof(HashSet<int>)
         };
 
         private readonly ArduinoBoard _board;
@@ -102,6 +118,14 @@ namespace Iot.Device.Arduino
             }
         }
 
+        internal IList<Module> Modules
+        {
+            get
+            {
+                return _activeModules;
+            }
+        }
+
         private string GetMethodName(ArduinoMethodDeclaration decl)
         {
             return decl.MethodBase.Name;
@@ -112,8 +136,9 @@ namespace Iot.Device.Arduino
             _activeTasks.Remove(task);
         }
 
-        private void BoardOnCompilerCallback(int codeReference, MethodState state, object[] args)
+        private void BoardOnCompilerCallback(int codeReference, MethodState state, int[] args)
         {
+            object[] outObjects = new object[args.Length];
             var codeRef = _methodInfos.Values.FirstOrDefault(x => x.Index == codeReference);
             if (codeRef == null)
             {
@@ -133,7 +158,7 @@ namespace Iot.Device.Arduino
             {
                 _board.Log($"Execution of method {GetMethodName(codeRef)} caused an exception. Check previous messages.");
                 // Still update the task state, this will prevent a deadlock if somebody is waiting for this task to end
-                task.AddData(state, new object[0]);
+                task.AddData(state, args.Cast<object>().ToArray());
                 return;
             }
 
@@ -153,8 +178,8 @@ namespace Iot.Device.Arduino
                 Type returnType = codeRef.MethodInfo!.ReturnType;
                 if (returnType == typeof(void))
                 {
-                    args = new object[0]; // Empty return set
-                    task.AddData(state, args);
+                    // Empty return set
+                    task.AddData(state, new object[0]);
                     return;
                 }
                 else if (returnType == typeof(bool))
@@ -170,10 +195,10 @@ namespace Iot.Device.Arduino
                     retVal = inVal;
                 }
 
-                args[0] = retVal;
+                outObjects[0] = retVal;
             }
 
-            task.AddData(state, args);
+            task.AddData(state, outObjects);
         }
 
         public ExecutionSet CreateExecutionSet()
@@ -278,6 +303,12 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException("Value types with sizeof(Type) > sizeof(int32) not supported");
             }
 
+            if (_classesToIgnore.Any(x => classType.IsSubclassOf(x) || x == classType))
+            {
+                // Ignore
+                return;
+            }
+
             HashSet<Type> baseTypes = new HashSet<Type>();
 
             baseTypes.Add(classType);
@@ -363,6 +394,21 @@ namespace Iot.Device.Arduino
                         cls.Members.Add(new ExecutionSet.VariableOrMethod(VariableKind.Method, CombinedMethodToken(m), baseTokens));
                     }
                 }
+            }
+
+            // Last step: Of all classes in the list, load their static cctors
+            for (var i = 0; i < set.Classes.Count; i++)
+            {
+                // Let's hope the list no more changes, but in theory we don't know (however, creating static ctors that
+                // depend on other classes might give a big problem)
+                var cls = set.Classes[i];
+                var cctor = cls.Cls.TypeInitializer;
+                if (cctor == null)
+                {
+                    continue;
+                }
+
+                PrepareCodeInternal(set, cctor);
             }
         }
 
@@ -598,63 +644,6 @@ namespace Iot.Device.Arduino
         /// Calculates the transitive hull of all types we need to instantiate this class and run its methods
         /// This can be a lengthy list!
         /// </summary>
-        private void DetermineReferencedClasses(HashSet<Type> allTypesToLoad, Type classType)
-        {
-            if (classType.BaseType != null)
-            {
-                if (AddClassDependency(allTypesToLoad, classType.BaseType))
-                {
-                    DetermineReferencedClasses(allTypesToLoad, classType.BaseType);
-                }
-            }
-
-            foreach (var t in classType.GetInterfaces())
-            {
-                if (AddClassDependency(allTypesToLoad, t))
-                {
-                    DetermineReferencedClasses(allTypesToLoad, t);
-                }
-            }
-
-            foreach (var m in classType.GetMembers(BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
-            {
-                if (m is FieldInfo field)
-                {
-                    if (AddClassDependency(allTypesToLoad, field.FieldType))
-                    {
-                        DetermineReferencedClasses(allTypesToLoad, field.FieldType);
-                    }
-                }
-                else if (m is MethodInfo method)
-                {
-                    foreach (var argument in method.GetParameters())
-                    {
-                        if (AddClassDependency(allTypesToLoad, argument.ParameterType))
-                        {
-                            DetermineReferencedClasses(allTypesToLoad, argument.ParameterType);
-                        }
-                    }
-
-                    var il = method.GetMethodBody();
-                    if (il == null)
-                    {
-                        continue;
-                    }
-
-                    foreach (var argument in il.LocalVariables)
-                    {
-                        if (AddClassDependency(allTypesToLoad, argument.LocalType))
-                        {
-                            DetermineReferencedClasses(allTypesToLoad, argument.LocalType);
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Similar to the above, but only returns parent classes/interfaces and member types.
-        /// </summary>
         private void DetermineBaseAndMembers(HashSet<Type> allTypesToLoad, Type classType)
         {
             if (classType.BaseType != null)
@@ -673,16 +662,19 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            foreach (var m in classType.GetMembers(BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
-            {
-                if (m is FieldInfo field)
-                {
-                    if (AddClassDependency(allTypesToLoad, field.FieldType))
-                    {
-                        DetermineBaseAndMembers(allTypesToLoad, field.FieldType);
-                    }
-                }
-            }
+            // This causes a lot of classes to be added, but we'll probably not need them - unless any of their ctors is in the call chain
+            // This is detected separately.
+            // Maybe we still need any value types involved, though
+            ////foreach (var m in classType.GetMembers(BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
+            ////{
+            ////    if (m is FieldInfo field)
+            ////    {
+            ////        if (AddClassDependency(allTypesToLoad, field.FieldType))
+            ////        {
+            ////            DetermineBaseAndMembers(allTypesToLoad, field.FieldType);
+            ////        }
+            ////    }
+            ////}
         }
 
         private void SendMethodDeclaration(ArduinoMethodDeclaration declaration)
@@ -804,13 +796,12 @@ namespace Iot.Device.Arduino
             */
         }
 
-        public ArduinoTask<T> GetTask<T>(ExecutionSet set, MethodBase methodInfo)
-            where T : Delegate
+        public ArduinoTask GetTask(ExecutionSet set, MethodBase methodInfo)
         {
             if (_methodInfos.ContainsKey(methodInfo))
             {
                 // Nothing to do, already loaded
-                var tsk = new ArduinoTask<T>(this, _methodInfos[methodInfo]);
+                var tsk = new ArduinoTask(this, _methodInfos[methodInfo]);
                 _activeTasks.Add(tsk);
                 return tsk;
             }
@@ -818,25 +809,58 @@ namespace Iot.Device.Arduino
             throw new InvalidOperationException($"Method {methodInfo} not loaded");
         }
 
-        public ArduinoTask<T> PrepareCode<T>(ExecutionSet set, T method)
+        public ExecutionSet PrepareProgram<T>(Type mainClass, T mainEntryPoint)
             where T : Delegate
         {
-            if (method == null)
+            var exec = CreateExecutionSet();
+            PrepareLowLevelInterface(exec);
+            PrepareClass(exec, mainClass);
+            PrepareCodeInternal(exec, mainEntryPoint.Method);
+
+            exec.MainEntryPointInternal = mainEntryPoint.Method;
+            _board.Log($"Estimated program memory usage before finalization: {exec.EstimateRequiredMemory()} bytes.");
+            FinalizeExecutionSet(exec);
+            _board.Log($"Estimated program memory usage: {exec.EstimateRequiredMemory()} bytes.");
+            return exec;
+        }
+
+        public ArduinoTask PrepareAndLoadSimpleMethod<T>(T mainEntryPoint)
+            where T : Delegate
+        {
+            if (mainEntryPoint == null)
             {
-                throw new ArgumentNullException(nameof(method));
+                throw new ArgumentNullException(nameof(mainEntryPoint));
             }
 
-            PrepareCodeInternal(set, method.Method);
+            var set = CreateExecutionSet();
+            PrepareCodeInternal(set, mainEntryPoint.Method);
             _board.Log($"Estimated program memory usage before finalization: {set.EstimateRequiredMemory()} bytes.");
-            set.FinalizeSet();
+            FinalizeExecutionSet(set);
             _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
+            set.MainEntryPointInternal = mainEntryPoint.Method;
             set.Load();
-            // TODO: Separate somehow
-            return GetTask<T>(set, method.Method);
+            return GetTask(set, mainEntryPoint.Method);
+        }
+
+        public ArduinoTask AddSimpleMethod<T>(ExecutionSet set, T mainEntryPoint)
+            where T : Delegate
+        {
+            if (mainEntryPoint == null)
+            {
+                throw new ArgumentNullException(nameof(mainEntryPoint));
+            }
+
+            PrepareCodeInternal(set, mainEntryPoint.Method);
+            _board.Log($"Estimated program memory usage before finalization: {set.EstimateRequiredMemory()} bytes.");
+            FinalizeExecutionSet(set);
+            _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
+            set.MainEntryPointInternal = mainEntryPoint.Method;
+            set.Load();
+            return GetTask(set, mainEntryPoint.Method);
         }
 
         // Todo: Make internal only (only used for tests)
-        public ArduinoTask<T> PrepareCode<T>(ExecutionSet set, MethodBase method)
+        public ArduinoTask PrepareCode<T>(ExecutionSet set, MethodBase method)
             where T : Delegate
         {
             if (method == null)
@@ -845,7 +869,7 @@ namespace Iot.Device.Arduino
             }
 
             PrepareCodeInternal(set, method);
-            return GetTask<T>(set, method);
+            return GetTask(set, method);
         }
 
         public void PrepareCodeInternal(ExecutionSet set, MethodBase methodInfo)
@@ -998,6 +1022,12 @@ namespace Iot.Device.Arduino
         private bool LoadInternalCode(ExecutionSet set, MethodBase methodInfo, bool checkOnly)
         {
             Type? classType = methodInfo.DeclaringType;
+            if (classType != null && _classesToIgnore.Any(x => classType.IsSubclassOf(x) || x == classType))
+            {
+                // Ignore
+                return true;
+            }
+
             if (classType != null && _rootClasses.Contains(classType))
             {
                 // This is a special class. Maybe we need to replace some methods
@@ -1075,17 +1105,18 @@ namespace Iot.Device.Arduino
         /// <remarks>Argument count/type not checked yet</remarks>
         /// <param name="method">Handle to method to invoke.</param>
         /// <param name="arguments">Argument list</param>
-        internal void Invoke(MethodInfo method, params object[] arguments)
+        internal void Invoke(MethodBase method, params object[] arguments)
         {
             if (!_methodInfos.TryGetValue(method, out var decl))
             {
                 throw new InvalidOperationException("Method must be loaded first.");
             }
 
+            _board.Log($"Starting execution on {decl}...");
             _board.Firmata.ExecuteIlCode(decl.Index, arguments);
         }
 
-        public void KillTask(MethodInfo methodInfo)
+        public void KillTask(MethodBase methodInfo)
         {
             if (!_methodInfos.TryGetValue(methodInfo, out var decl))
             {

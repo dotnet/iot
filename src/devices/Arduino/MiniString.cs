@@ -26,5 +26,17 @@ namespace Iot.Device.Arduino
                 return '_';
             }
         }
+
+        [ArduinoImplementation(ArduinoImplementation.StringFormat2)]
+        public string Format(string format, object arg0)
+        {
+            return string.Empty;
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.StringFormat2b)]
+        public string Format(string format, object[] args)
+        {
+            return string.Empty;
+        }
     }
 }

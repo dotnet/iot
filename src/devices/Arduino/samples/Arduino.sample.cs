@@ -550,15 +550,29 @@ namespace Arduino.Samples
             // These operations should be combined into one, to simplify usage (just provide the main entry point,
             // and derive everything required from there)
             compiler.ClearAllData(true);
-            var exec = compiler.CreateExecutionSet();
-            compiler.PrepareLowLevelInterface(exec);
-            compiler.PrepareClass(exec, typeof(ArduinoCompilerSampleMethods.SimpleLedBinding));
-            // This should just return a reference to the now already loaded method
-            var task = compiler.PrepareCode<Action<int, int>>(exec, ArduinoCompilerSampleMethods.SimpleLedBinding.RunBlink);
-
+            var exec = compiler.PrepareProgram<Action<int, int>>(typeof(ArduinoCompilerSampleMethods.SimpleLedBinding), ArduinoCompilerSampleMethods.SimpleLedBinding.RunBlink);
+            exec.Load();
+            var task = exec.EntryPoint;
             task.InvokeAsync(6, 1000);
 
             task.WaitForResult();
+
+            try
+            {
+                if (task.GetMethodResults(out _, out var state))
+                {
+                    Console.WriteLine($"Method return code was {state}");
+                }
+                else
+                {
+                    Console.WriteLine($"Method ended, but did not return a value");
+                }
+            }
+            catch (Exception x) // That's ok here - we can get almost anything
+            {
+                Console.WriteLine("Method threw exception");
+                Console.WriteLine(x.ToString());
+            }
 
             compiler.ClearAllData(true);
         }
@@ -569,7 +583,7 @@ namespace Arduino.Samples
             MethodState state;
             var set = compiler.CreateExecutionSet();
             compiler.PrepareLowLevelInterface(set);
-            var dht = compiler.PrepareCode(set, new Func<IArduinoHardwareLevelAccess, int, UInt32>(ArduinoCompilerSampleMethods.ReadDht11));
+            var dht = compiler.AddSimpleMethod(set, new Func<IArduinoHardwareLevelAccess, int, UInt32>(ArduinoCompilerSampleMethods.ReadDht11));
             dht.InvokeAsync(0, 3);
 
             CancellationTokenSource ts = new CancellationTokenSource(10000);
@@ -600,13 +614,13 @@ namespace Arduino.Samples
         {
             var set = compiler.CreateExecutionSet();
             compiler.PrepareLowLevelInterface(set);
-            compiler.PrepareCode(set, new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
-            var method3 = compiler.PrepareCode(set, new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
+            compiler.AddSimpleMethod(set, new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
+            var method3 = compiler.AddSimpleMethod(set, new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
             method3.InvokeAsync(0, 10, 500);
 
             // While the above method executes (and blinks the led), we query the analog input
             var analogController = board.CreateAnalogController(0);
-            int analogPin = 15;
+            int analogPin = GetAnalogPin1(board);
 
             var pin = analogController.OpenPin(analogPin);
 
@@ -625,8 +639,8 @@ namespace Arduino.Samples
             set = compiler.CreateExecutionSet();
             // Start task again and terminate it immediately
             compiler.PrepareLowLevelInterface(set);
-            compiler.PrepareCode(set, new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
-            method3 = compiler.PrepareCode(set, new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
+            compiler.AddSimpleMethod(set, new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
+            method3 = compiler.AddSimpleMethod(set, new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
             method3.InvokeAsync(0, 10, 500);
             method3.Terminate();
             if (method3.State != MethodState.Killed)
@@ -668,8 +682,7 @@ namespace Arduino.Samples
         private static void OperatorTest(ArduinoCsCompiler compiler)
         {
             compiler.ClearAllData(true);
-            var set = compiler.CreateExecutionSet();
-            var method1 = compiler.PrepareCode<Func<int, int, bool>>(set, PerformOperatorTest);
+            var method1 = compiler.PrepareAndLoadSimpleMethod<Func<int, int, bool>>(PerformOperatorTest);
             bool result = method1.Invoke(CancellationToken.None, 0, 1, 2);
             if (!result)
             {
@@ -683,7 +696,7 @@ namespace Arduino.Samples
         {
             compiler.ClearAllData(true);
             var set = compiler.CreateExecutionSet();
-            var method1 = compiler.PrepareCode<Func<int, int, int>>(set, ArduinoCompilerSampleMethods.AddInts);
+            var method1 = compiler.AddSimpleMethod<Func<int, int, int>>(set, ArduinoCompilerSampleMethods.AddInts);
             method1.InvokeAsync(2, 3);
             int result;
             method1.WaitForResult();
@@ -703,7 +716,7 @@ namespace Arduino.Samples
 
             compiler.ClearAllData(true);
             set = compiler.CreateExecutionSet();
-            var method2 = compiler.PrepareCode(set, new Func<int, int, bool>(ArduinoCompilerSampleMethods.Equal));
+            var method2 = compiler.AddSimpleMethod(set, new Func<int, int, bool>(ArduinoCompilerSampleMethods.Equal));
             method2.InvokeAsync(2, 3);
             method2.WaitForResult();
             method2.GetMethodResults(out data, out state);

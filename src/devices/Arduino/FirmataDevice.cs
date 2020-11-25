@@ -58,7 +58,7 @@ namespace Iot.Device.Arduino
 
         // Event used when waiting for answers (i.e. after requesting firmware version)
         private AutoResetEvent _dataReceived;
-        public event Action<int, MethodState, int, IList<byte>>? OnSchedulerReply;
+        public event Action<int, MethodState, int[]>? OnSchedulerReply;
 
         public event DigitalPinValueChanged? DigitalPortValueUpdated;
 
@@ -522,10 +522,13 @@ namespace Iot.Device.Arduino
                                 }
 
                                 int numArgs = raw_data[4];
-                                Span<byte> bytesReceived = stackalloc byte[numArgs * 4];
-                                ReassembleByteString(raw_data, 5, numArgs * 8, bytesReceived);
+                                int[] results = new int[numArgs];
+                                for (int i = 0; i < numArgs; i++)
+                                {
+                                    results[i] = DecodeInt32(raw_data, i * 5 + 5);
+                                }
 
-                                OnSchedulerReply?.Invoke(raw_data[1] | (raw_data[2] << 7), (MethodState)raw_data[2], numArgs, bytesReceived.ToArray());
+                                OnSchedulerReply?.Invoke(raw_data[1] | (raw_data[2] << 7), (MethodState)raw_data[3], results);
                                 break;
                             }
 
@@ -1550,6 +1553,19 @@ namespace Iot.Device.Arduino
             data[3] = (byte)((value >> 21) & 0x7F);
             data[4] = (byte)((value >> 28) & 0x7F);
             _firmataStream.Write(data);
+        }
+
+        /// <summary>
+        /// Inverse of the above
+        /// </summary>
+        private int DecodeInt32(byte[] data, int fromOffset)
+        {
+            int value = data[fromOffset];
+            value |= data[fromOffset + 1] << 7;
+            value |= data[fromOffset + 2] << 14;
+            value |= data[fromOffset + 3] << 21;
+            value |= data[fromOffset + 4] << 28;
+            return value;
         }
 
         /// <summary>

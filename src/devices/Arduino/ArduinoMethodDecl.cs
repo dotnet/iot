@@ -131,7 +131,8 @@ namespace Iot.Device.Arduino
                     return info;
                 }
 
-                // Can't directly call ctors or fields
+                // Can't directly call fields. Internally, we do call ctors (especially cctors) directly, because
+                // that is required for the init sequence
                 throw new InvalidOperationException("Not callable Method");
             }
         }
