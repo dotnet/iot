@@ -190,6 +190,18 @@ namespace Iot.Device.Gpio.Drivers
         /// <param name="value">The value to be written to the pin.</param>
         protected override void Write(int pinNumber, PinValue value)
         {
+            if (!_pinModes.ContainsKey(pinNumber))
+            {
+                throw new InvalidOperationException("Can not write a value to a pin that is not open.");
+            }
+            else
+            {
+                if (_pinModes[pinNumber].CurrentPinMode != PinMode.Output)
+                {
+                    throw new InvalidOperationException("Can not write a value to a pin that is not output mode.");
+                }
+            }
+
             (int PortController, int Port) unmapped = UnmapPinNumber(pinNumber);
 
             int dataAddress;
@@ -227,6 +239,18 @@ namespace Iot.Device.Gpio.Drivers
         /// <returns>The value of the pin.</returns>
         protected unsafe override PinValue Read(int pinNumber)
         {
+            if (!_pinModes.ContainsKey(pinNumber))
+            {
+                throw new InvalidOperationException("Can not read a value from a pin that is not open.");
+            }
+            else
+            {
+                if (_pinModes[pinNumber].CurrentPinMode == PinMode.Output)
+                {
+                    throw new InvalidOperationException("Can not read a value from a pin that is output mode.");
+                }
+            }
+
             (int PortController, int Port) unmapped = UnmapPinNumber(pinNumber);
 
             int dataAddress;
